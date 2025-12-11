@@ -51,6 +51,25 @@ const handler = async (req: Request): Promise<Response> => {
 
     const resend = new Resend(settingData.value);
 
+    // Get admin and HR manager emails for escalation
+    const { data: adminRoles } = await supabase
+      .from("user_roles")
+      .select("user_id")
+      .in("role", ["admin", "hr_manager"]);
+
+    const adminUserIds = adminRoles?.map((r) => r.user_id) || [];
+    let managerEmails: string[] = [];
+
+    if (adminUserIds.length > 0) {
+      const { data: adminProfiles } = await supabase
+        .from("profiles")
+        .select("email")
+        .in("id", adminUserIds);
+      managerEmails = adminProfiles?.map((p) => p.email).filter(Boolean) || [];
+    }
+
+    console.log(`Found ${managerEmails.length} managers for escalation`);
+
     // Get open tickets with priority and SLA info
     const { data: tickets, error: ticketsError } = await supabase
       .from("tickets")
@@ -80,6 +99,7 @@ const handler = async (req: Request): Promise<Response> => {
     const warningThresholdPercent = 0.8; // Warn at 80% of SLA time
     const warningsSent: string[] = [];
     const breachesSent: string[] = [];
+    const escalationsSent: string[] = [];
 
     for (const ticketData of tickets || []) {
       // Handle Supabase's array return for single joins
@@ -103,8 +123,16 @@ const handler = async (req: Request): Promise<Response> => {
         // Check for actual breach (past deadline)
         if (now >= responseDeadline && !ticket.sla_breach_response) {
           const overdueMins = Math.round((now.getTime() - responseDeadline.getTime()) / (60 * 1000));
+          
+          // Send to assignee/requester
           await sendSLABreachEmail(resend, ticket, "response", overdueMins, recipientEmail);
           breachesSent.push(`Response BREACH for ${ticket.ticket_number}`);
+          
+          // Escalate to managers
+          if (managerEmails.length > 0) {
+            await sendEscalationEmail(resend, ticket, "response", overdueMins, managerEmails);
+            escalationsSent.push(`Response ESCALATION for ${ticket.ticket_number}`);
+          }
           
           // Mark as breached to avoid duplicate notifications
           await supabase
@@ -127,8 +155,16 @@ const handler = async (req: Request): Promise<Response> => {
       // Check for actual breach (past deadline)
       if (now >= resolutionDeadline && !ticket.sla_breach_resolution) {
         const overdueMins = Math.round((now.getTime() - resolutionDeadline.getTime()) / (60 * 1000));
+        
+        // Send to assignee/requester
         await sendSLABreachEmail(resend, ticket, "resolution", overdueMins, recipientEmail);
         breachesSent.push(`Resolution BREACH for ${ticket.ticket_number}`);
+        
+        // Escalate to managers
+        if (managerEmails.length > 0) {
+          await sendEscalationEmail(resend, ticket, "resolution", overdueMins, managerEmails);
+          escalationsSent.push(`Resolution ESCALATION for ${ticket.ticket_number}`);
+        }
         
         // Mark as breached to avoid duplicate notifications
         await supabase
@@ -144,14 +180,15 @@ const handler = async (req: Request): Promise<Response> => {
       }
     }
 
-    console.log(`SLA check complete. Warnings: ${warningsSent.length}, Breaches: ${breachesSent.length}`);
+    console.log(`SLA check complete. Warnings: ${warningsSent.length}, Breaches: ${breachesSent.length}, Escalations: ${escalationsSent.length}`);
 
     return new Response(
       JSON.stringify({ 
         success: true, 
-        emailsSent: [...warningsSent, ...breachesSent],
+        emailsSent: [...warningsSent, ...breachesSent, ...escalationsSent],
         warningsCount: warningsSent.length,
-        breachesCount: breachesSent.length
+        breachesCount: breachesSent.length,
+        escalationsCount: escalationsSent.length
       }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
@@ -321,6 +358,97 @@ async function sendSLABreachEmail(
     console.log(`SLA BREACH email sent to ${recipientEmail} for ticket ${ticket.ticket_number}`);
   } catch (error) {
     console.error(`Failed to send SLA breach email for ticket ${ticket.ticket_number}:`, error);
+  }
+}
+
+async function sendEscalationEmail(
+  resend: Resend,
+  ticket: TicketWithSLA,
+  slaType: "response" | "resolution",
+  minutesOverdue: number,
+  managerEmails: string[]
+) {
+  const hoursOver = Math.floor(minutesOverdue / 60);
+  const mins = minutesOverdue % 60;
+  const timeString = hoursOver > 0 ? `${hoursOver}h ${mins}m` : `${mins} minutes`;
+
+  const subject = `🔺 ESCALATION: Ticket ${ticket.ticket_number} has breached ${slaType === "response" ? "Response" : "Resolution"} SLA`;
+
+  const html = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+      <div style="background: linear-gradient(135deg, #7c3aed 0%, #5b21b6 100%); padding: 20px; border-radius: 8px 8px 0 0;">
+        <h1 style="color: white; margin: 0; font-size: 24px;">🔺 SLA Breach Escalation</h1>
+      </div>
+      <div style="background: #ffffff; padding: 30px; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 8px 8px;">
+        <p style="color: #374151; font-size: 16px; margin-bottom: 20px;">
+          <strong>Management Alert:</strong> The following ticket has breached its <strong>${slaType === "response" ? "first response" : "resolution"}</strong> SLA and requires your attention:
+        </p>
+        
+        <div style="background: #ede9fe; border-left: 4px solid #7c3aed; padding: 15px; margin-bottom: 20px;">
+          <p style="margin: 0 0 5px 0; color: #5b21b6;"><strong>⏱️ Overdue by: ${timeString}</strong></p>
+          <p style="margin: 0; color: #6d28d9; font-size: 14px;">SLA Type: ${slaType === "response" ? "First Response" : "Resolution"}</p>
+        </div>
+
+        <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+          <tr>
+            <td style="padding: 10px; border-bottom: 1px solid #e5e7eb; color: #6b7280;">Ticket Number</td>
+            <td style="padding: 10px; border-bottom: 1px solid #e5e7eb; color: #111827; font-weight: 500;">${ticket.ticket_number}</td>
+          </tr>
+          <tr>
+            <td style="padding: 10px; border-bottom: 1px solid #e5e7eb; color: #6b7280;">Subject</td>
+            <td style="padding: 10px; border-bottom: 1px solid #e5e7eb; color: #111827;">${ticket.subject}</td>
+          </tr>
+          <tr>
+            <td style="padding: 10px; border-bottom: 1px solid #e5e7eb; color: #6b7280;">Priority</td>
+            <td style="padding: 10px; border-bottom: 1px solid #e5e7eb; color: #111827;">${ticket.priority?.name || "N/A"}</td>
+          </tr>
+          <tr>
+            <td style="padding: 10px; border-bottom: 1px solid #e5e7eb; color: #6b7280;">Status</td>
+            <td style="padding: 10px; border-bottom: 1px solid #e5e7eb; color: #111827;">${ticket.status}</td>
+          </tr>
+          <tr>
+            <td style="padding: 10px; border-bottom: 1px solid #e5e7eb; color: #6b7280;">Requester</td>
+            <td style="padding: 10px; border-bottom: 1px solid #e5e7eb; color: #111827;">${ticket.requester.full_name || ticket.requester.email}</td>
+          </tr>
+          <tr>
+            <td style="padding: 10px; border-bottom: 1px solid #e5e7eb; color: #6b7280;">Assigned To</td>
+            <td style="padding: 10px; border-bottom: 1px solid #e5e7eb; color: #111827;">${ticket.assignee ? (ticket.assignee.full_name || ticket.assignee.email) : '<span style="color: #dc2626;">Unassigned</span>'}</td>
+          </tr>
+          <tr>
+            <td style="padding: 10px; border-bottom: 1px solid #e5e7eb; color: #6b7280;">Created</td>
+            <td style="padding: 10px; border-bottom: 1px solid #e5e7eb; color: #111827;">${new Date(ticket.created_at).toLocaleString()}</td>
+          </tr>
+        </table>
+
+        <div style="background: #f3f4f6; border-radius: 6px; padding: 15px; margin-bottom: 20px;">
+          <p style="margin: 0 0 10px 0; color: #374151; font-size: 14px; font-weight: 600;">
+            Recommended Actions:
+          </p>
+          <ul style="margin: 0; padding-left: 20px; color: #4b5563; font-size: 14px;">
+            <li>Review ticket priority and reassign if necessary</li>
+            <li>Contact the assigned agent or assign to available staff</li>
+            <li>Communicate with the requester about the delay</li>
+            <li>Document reasons for the breach for process improvement</li>
+          </ul>
+        </div>
+      </div>
+      <div style="text-align: center; padding: 20px; color: #9ca3af; font-size: 12px;">
+        This escalation was sent to all administrators and HR managers.<br>
+        HRIS Help Desk System
+      </div>
+    </div>
+  `;
+
+  try {
+    await resend.emails.send({
+      from: "HRIS Help Desk <onboarding@resend.dev>",
+      to: managerEmails,
+      subject,
+      html,
+    });
+    console.log(`SLA ESCALATION email sent to ${managerEmails.length} manager(s) for ticket ${ticket.ticket_number}`);
+  } catch (error) {
+    console.error(`Failed to send escalation email for ticket ${ticket.ticket_number}:`, error);
   }
 }
 
