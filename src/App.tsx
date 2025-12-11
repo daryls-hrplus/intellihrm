@@ -25,6 +25,7 @@ import AdminAutoApprovalPage from "./pages/admin/AdminAutoApprovalPage";
 import AdminBulkImportPage from "./pages/admin/AdminBulkImportPage";
 import AdminOrgStructurePage from "./pages/admin/AdminOrgStructurePage";
 import AdminScheduledReportsPage from "./pages/admin/AdminScheduledReportsPage";
+import AdminKnowledgeBasePage from "./pages/admin/AdminKnowledgeBasePage";
 // Workforce pages
 import WorkforceDashboardPage from "./pages/workforce/WorkforceDashboardPage";
 import EmployeesPage from "./pages/workforce/EmployeesPage";
@@ -207,6 +208,14 @@ const App = () => (
               element={
                 <ProtectedRoute requiredRoles={["admin"]}>
                   <AdminScheduledReportsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/knowledge-base"
+              element={
+                <ProtectedRoute requiredRoles={["admin"]}>
+                  <AdminKnowledgeBasePage />
                 </ProtectedRoute>
               }
             />
