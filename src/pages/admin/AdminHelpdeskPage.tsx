@@ -13,6 +13,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { sendTicketNotification } from "@/hooks/useTicketNotifications";
 import TicketAnalytics from "@/components/helpdesk/TicketAnalytics";
+import { SlaMetricsDashboard } from "@/components/helpdesk/SlaMetricsDashboard";
 import {
   Ticket,
   Clock,
@@ -258,6 +259,10 @@ export default function AdminHelpdeskPage() {
             <TabsTrigger value="tickets" className="flex items-center gap-2">
               <Ticket className="h-4 w-4" />
               Tickets
+            </TabsTrigger>
+            <TabsTrigger value="sla-metrics" className="flex items-center gap-2">
+              <TrendingUp className="h-4 w-4" />
+              SLA Metrics
             </TabsTrigger>
             <TabsTrigger value="analytics" className="flex items-center gap-2">
               <PieChart className="h-4 w-4" />
@@ -697,6 +702,10 @@ export default function AdminHelpdeskPage() {
             )}
           </DialogContent>
         </Dialog>
+          </TabsContent>
+
+          <TabsContent value="sla-metrics">
+            <SlaMetricsDashboard />
           </TabsContent>
 
           <TabsContent value="analytics">
