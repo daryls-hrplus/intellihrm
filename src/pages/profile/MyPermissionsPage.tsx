@@ -151,33 +151,75 @@ export default function MyPermissionsPage() {
     setIsSubmitting(true);
 
     try {
-      const { error } = await supabase.from("access_requests").insert({
-        user_id: user?.id,
-        user_email: profile?.email || user?.email,
-        requested_modules: selectedModules,
-        reason: requestReason.trim(),
-      });
-
-      if (error) throw error;
-
-      // Notify admins of new request (non-blocking)
-      supabase.functions
-        .invoke("notify-admins-new-request", {
-          body: {
-            userEmail: profile?.email || user?.email,
-            requestedModules: selectedModules,
-            reason: requestReason.trim(),
-          },
-        })
-        .then((res) => {
-          if (res.error) {
-            console.error("Admin notification failed:", res.error);
-          } else {
-            console.log("Admin notification sent");
-          }
+      // Check for auto-approval eligibility
+      const { data: autoApprovalResult, error: autoApprovalError } = await supabase
+        .rpc("check_auto_approval", {
+          p_user_id: user?.id,
+          p_requested_modules: selectedModules,
         });
 
-      toast.success("Access request submitted successfully");
+      let autoApprovedModules: string[] = [];
+      let pendingModules: string[] = selectedModules;
+
+      if (!autoApprovalError && autoApprovalResult?.[0]?.is_auto_approved) {
+        const approvedModulesFromRule = autoApprovalResult[0].approved_modules || [];
+        autoApprovedModules = Array.isArray(approvedModulesFromRule) 
+          ? (approvedModulesFromRule as unknown as string[])
+          : [];
+        pendingModules = selectedModules.filter(m => !autoApprovedModules.includes(m));
+      }
+
+      // Create auto-approved request if any modules qualify
+      if (autoApprovedModules.length > 0) {
+        const { error: approvedError } = await supabase.from("access_requests").insert({
+          user_id: user?.id,
+          user_email: profile?.email || user?.email,
+          requested_modules: autoApprovedModules,
+          reason: requestReason.trim(),
+          status: "approved",
+          review_notes: `Auto-approved by rule: ${autoApprovalResult[0].rule_name}`,
+          reviewed_at: new Date().toISOString(),
+        });
+
+        if (approvedError) throw approvedError;
+      }
+
+      // Create pending request for remaining modules
+      if (pendingModules.length > 0) {
+        const { error } = await supabase.from("access_requests").insert({
+          user_id: user?.id,
+          user_email: profile?.email || user?.email,
+          requested_modules: pendingModules,
+          reason: requestReason.trim(),
+        });
+
+        if (error) throw error;
+
+        // Notify admins of new request (non-blocking)
+        supabase.functions
+          .invoke("notify-admins-new-request", {
+            body: {
+              userEmail: profile?.email || user?.email,
+              requestedModules: pendingModules,
+              reason: requestReason.trim(),
+            },
+          })
+          .then((res) => {
+            if (res.error) {
+              console.error("Admin notification failed:", res.error);
+            }
+          });
+      }
+
+      // Show appropriate message
+      if (autoApprovedModules.length > 0 && pendingModules.length > 0) {
+        toast.success(`${autoApprovedModules.length} module(s) auto-approved, ${pendingModules.length} pending review`);
+      } else if (autoApprovedModules.length > 0) {
+        toast.success("Access request auto-approved!");
+      } else {
+        toast.success("Access request submitted for review");
+      }
+
       setSelectedModules([]);
       setRequestReason("");
       fetchAccessRequests();
