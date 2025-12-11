@@ -1,7 +1,14 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, TrendingUp, TrendingDown, Users, BarChart3 } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Loader2, TrendingUp, TrendingDown, Users, BarChart3, Download, FileText, FileSpreadsheet } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import {
@@ -53,6 +60,166 @@ export function HeadcountAnalytics({ companyId }: HeadcountAnalyticsProps) {
     approvalRate: 0,
     avgProcessingDays: 0,
   });
+  const reportRef = useRef<HTMLDivElement>(null);
+
+  // Export to CSV
+  const exportToCSV = (type: "summary" | "monthly" | "department" | "all") => {
+    let csvContent = "";
+    const date = format(new Date(), "yyyy-MM-dd");
+
+    if (type === "summary" || type === "all") {
+      csvContent += "HEADCOUNT SUMMARY REPORT\n";
+      csvContent += `Generated: ${format(new Date(), "MMMM d, yyyy 'at' h:mm a")}\n\n`;
+      csvContent += "Metric,Value\n";
+      csvContent += `Total Authorized,${summary.totalAuthorized}\n`;
+      csvContent += `Total Filled,${summary.totalFilled}\n`;
+      csvContent += `Open Vacancies,${summary.totalVacancies}\n`;
+      csvContent += `Fill Rate,${summary.totalAuthorized > 0 ? Math.round((summary.totalFilled / summary.totalAuthorized) * 100) : 0}%\n`;
+      csvContent += `Approval Rate,${summary.approvalRate}%\n`;
+      csvContent += `Avg Processing Days,${summary.avgProcessingDays}\n`;
+      csvContent += "\n";
+    }
+
+    if (type === "monthly" || type === "all") {
+      csvContent += "MONTHLY HEADCOUNT REQUESTS\n";
+      csvContent += "Month,Approved,Rejected,Pending,Net Change\n";
+      monthlyData.forEach(m => {
+        csvContent += `${m.month},${m.approved},${m.rejected},${m.pending},${m.netChange}\n`;
+      });
+      csvContent += "\n";
+    }
+
+    if (type === "department" || type === "all") {
+      csvContent += "HEADCOUNT BY DEPARTMENT\n";
+      csvContent += "Department,Authorized,Filled,Vacancies\n";
+      departmentData.forEach(d => {
+        csvContent += `"${d.name}",${d.authorized},${d.filled},${d.vacancies}\n`;
+      });
+    }
+
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = `headcount-report-${type}-${date}.csv`;
+    link.click();
+    URL.revokeObjectURL(link.href);
+    toast.success(`CSV exported successfully`);
+  };
+
+  // Export to PDF (using print)
+  const exportToPDF = () => {
+    const printContent = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Headcount Analytics Report</title>
+        <style>
+          body { font-family: Arial, sans-serif; padding: 20px; color: #333; }
+          h1 { color: #1a1a1a; border-bottom: 2px solid #333; padding-bottom: 10px; }
+          h2 { color: #444; margin-top: 30px; }
+          table { width: 100%; border-collapse: collapse; margin: 15px 0; }
+          th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
+          th { background-color: #f5f5f5; font-weight: bold; }
+          tr:nth-child(even) { background-color: #fafafa; }
+          .summary-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin: 20px 0; }
+          .summary-card { border: 1px solid #ddd; padding: 15px; border-radius: 8px; }
+          .summary-card h3 { margin: 0 0 5px 0; font-size: 14px; color: #666; }
+          .summary-card .value { font-size: 24px; font-weight: bold; }
+          .footer { margin-top: 40px; padding-top: 20px; border-top: 1px solid #ddd; font-size: 12px; color: #666; }
+          @media print { body { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
+        </style>
+      </head>
+      <body>
+        <h1>Headcount Analytics Report</h1>
+        <p>Generated: ${format(new Date(), "MMMM d, yyyy 'at' h:mm a")}</p>
+        
+        <h2>Summary</h2>
+        <div class="summary-grid">
+          <div class="summary-card">
+            <h3>Total Authorized</h3>
+            <div class="value">${summary.totalAuthorized}</div>
+          </div>
+          <div class="summary-card">
+            <h3>Filled Positions</h3>
+            <div class="value">${summary.totalFilled} (${summary.totalAuthorized > 0 ? Math.round((summary.totalFilled / summary.totalAuthorized) * 100) : 0}%)</div>
+          </div>
+          <div class="summary-card">
+            <h3>Open Vacancies</h3>
+            <div class="value">${summary.totalVacancies}</div>
+          </div>
+          <div class="summary-card">
+            <h3>Approval Rate</h3>
+            <div class="value">${summary.approvalRate}%</div>
+          </div>
+        </div>
+        
+        <h2>Monthly Headcount Requests (Last 6 Months)</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Month</th>
+              <th>Approved</th>
+              <th>Rejected</th>
+              <th>Pending</th>
+              <th>Net Change</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${monthlyData.map(m => `
+              <tr>
+                <td>${m.month}</td>
+                <td>${m.approved}</td>
+                <td>${m.rejected}</td>
+                <td>${m.pending}</td>
+                <td>${m.netChange > 0 ? '+' : ''}${m.netChange}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+        
+        <h2>Headcount by Department</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Department</th>
+              <th>Authorized</th>
+              <th>Filled</th>
+              <th>Vacancies</th>
+              <th>Fill Rate</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${departmentData.map(d => `
+              <tr>
+                <td>${d.name}</td>
+                <td>${d.authorized}</td>
+                <td>${d.filled}</td>
+                <td>${d.vacancies}</td>
+                <td>${d.authorized > 0 ? Math.round((d.filled / d.authorized) * 100) : 0}%</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+        
+        <div class="footer">
+          <p>This report was automatically generated from the HRIS system.</p>
+        </div>
+      </body>
+      </html>
+    `;
+
+    const printWindow = window.open('', '_blank');
+    if (printWindow) {
+      printWindow.document.write(printContent);
+      printWindow.document.close();
+      printWindow.onload = () => {
+        printWindow.print();
+      };
+      toast.success("PDF export opened in new window");
+    } else {
+      toast.error("Please allow popups to export PDF");
+    }
+  };
 
   useEffect(() => {
     if (companyId) {
@@ -212,7 +379,50 @@ export function HeadcountAnalytics({ companyId }: HeadcountAnalyticsProps) {
   ].filter(d => d.value > 0);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" ref={reportRef}>
+      {/* Header with Export Options */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h3 className="text-lg font-semibold flex items-center gap-2">
+            <BarChart3 className="h-5 w-5" />
+            Headcount Analytics
+          </h3>
+          <p className="text-sm text-muted-foreground">
+            Analyze headcount trends, requests, and department distribution
+          </p>
+        </div>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline">
+              <Download className="h-4 w-4 mr-2" />
+              Export Report
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={exportToPDF}>
+              <FileText className="h-4 w-4 mr-2" />
+              Export as PDF
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => exportToCSV("all")}>
+              <FileSpreadsheet className="h-4 w-4 mr-2" />
+              Export All Data (CSV)
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => exportToCSV("summary")}>
+              <FileSpreadsheet className="h-4 w-4 mr-2" />
+              Export Summary (CSV)
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => exportToCSV("monthly")}>
+              <FileSpreadsheet className="h-4 w-4 mr-2" />
+              Export Monthly Data (CSV)
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => exportToCSV("department")}>
+              <FileSpreadsheet className="h-4 w-4 mr-2" />
+              Export Department Data (CSV)
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+
       {/* Summary Cards */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
