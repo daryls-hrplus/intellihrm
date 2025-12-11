@@ -184,9 +184,10 @@ export default function IntranetDashboardPage() {
                             </span>
                           </div>
                           <h3 className="text-lg font-semibold mb-2">{announcement.title}</h3>
-                          <p className="text-muted-foreground line-clamp-3">
-                            {announcement.content}
-                          </p>
+                          <div 
+                            className="text-muted-foreground line-clamp-3 prose prose-sm max-w-none dark:prose-invert [&_img]:max-w-full [&_img]:h-auto"
+                            dangerouslySetInnerHTML={{ __html: announcement.content }}
+                          />
                         </div>
                         <Button variant="ghost" size="sm">
                           Read More

@@ -49,6 +49,7 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
+import { RichTextEditor } from "@/components/intranet/RichTextEditor";
 
 interface Announcement {
   id: string;
@@ -497,11 +498,10 @@ export default function IntranetAdminPage() {
                     </div>
                     <div className="space-y-2">
                       <Label>Content</Label>
-                      <Textarea
+                      <RichTextEditor
                         value={announcementForm.content}
-                        onChange={(e) => setAnnouncementForm({ ...announcementForm, content: e.target.value })}
-                        placeholder="Announcement content"
-                        rows={5}
+                        onChange={(val) => setAnnouncementForm({ ...announcementForm, content: val })}
+                        placeholder="Write your announcement content here..."
                       />
                     </div>
                     <div className="flex items-center gap-6">
