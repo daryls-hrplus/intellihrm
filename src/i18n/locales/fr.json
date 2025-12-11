@@ -1,0 +1,199 @@
+{
+  "common": {
+    "loading": "Chargement...",
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "add": "Ajouter",
+    "create": "Créer",
+    "update": "Mettre à jour",
+    "search": "Rechercher",
+    "filter": "Filtrer",
+    "export": "Exporter",
+    "import": "Importer",
+    "refresh": "Actualiser",
+    "back": "Retour",
+    "next": "Suivant",
+    "previous": "Précédent",
+    "submit": "Soumettre",
+    "confirm": "Confirmer",
+    "close": "Fermer",
+    "view": "Voir",
+    "download": "Télécharger",
+    "upload": "Téléverser",
+    "select": "Sélectionner",
+    "selectAll": "Tout Sélectionner",
+    "clear": "Effacer",
+    "reset": "Réinitialiser",
+    "apply": "Appliquer",
+    "yes": "Oui",
+    "no": "Non",
+    "all": "Tout",
+    "none": "Aucun",
+    "active": "Actif",
+    "inactive": "Inactif",
+    "enabled": "Activé",
+    "disabled": "Désactivé",
+    "actions": "Actions",
+    "status": "Statut",
+    "name": "Nom",
+    "description": "Description",
+    "date": "Date",
+    "time": "Heure",
+    "from": "De",
+    "to": "À",
+    "total": "Total",
+    "noData": "Aucune donnée disponible",
+    "noResults": "Aucun résultat trouvé",
+    "error": "Erreur",
+    "success": "Succès",
+    "warning": "Avertissement",
+    "info": "Information"
+  },
+  "auth": {
+    "login": "Se Connecter",
+    "logout": "Se Déconnecter",
+    "signUp": "S'inscrire",
+    "email": "E-mail",
+    "password": "Mot de passe",
+    "confirmPassword": "Confirmer le mot de passe",
+    "forgotPassword": "Mot de passe oublié?",
+    "resetPassword": "Réinitialiser le mot de passe",
+    "rememberMe": "Se souvenir de moi",
+    "welcomeBack": "Bon Retour",
+    "createAccount": "Créer un Compte",
+    "alreadyHaveAccount": "Vous avez déjà un compte?",
+    "dontHaveAccount": "Vous n'avez pas de compte?"
+  },
+  "navigation": {
+    "dashboard": "Tableau de Bord",
+    "workforce": "Gestion du Personnel",
+    "employees": "Employés",
+    "departments": "Départements",
+    "positions": "Postes",
+    "orgStructure": "Structure Organisationnelle",
+    "orgChanges": "Changements Organisationnels",
+    "assignments": "Affectations",
+    "leave": "Gestion des Congés",
+    "compensation": "Rémunération",
+    "benefits": "Avantages",
+    "training": "Formation",
+    "succession": "Planification de la Relève",
+    "recruitment": "Recrutement",
+    "performance": "Performance",
+    "hse": "Santé et Sécurité",
+    "employeeRelations": "Relations Employés",
+    "property": "Propriété de l'Entreprise",
+    "help": "Aide et Support",
+    "admin": "Administration et Sécurité",
+    "profile": "Profil",
+    "settings": "Paramètres",
+    "notifications": "Notifications"
+  },
+  "workforce": {
+    "title": "Gestion du Personnel",
+    "description": "Gérez le personnel, les départements et les postes de votre organisation",
+    "employeeCount": "Total des Employés",
+    "departmentCount": "Départements",
+    "positionCount": "Postes",
+    "vacancies": "Postes Vacants",
+    "modules": {
+      "employees": {
+        "title": "Employés",
+        "description": "Voir et gérer les dossiers des employés"
+      },
+      "departments": {
+        "title": "Départements",
+        "description": "Gérer les départements organisationnels"
+      },
+      "positions": {
+        "title": "Postes",
+        "description": "Définir et gérer les postes de travail"
+      },
+      "orgStructure": {
+        "title": "Structure Organisationnelle",
+        "description": "Voir la hiérarchie organisationnelle"
+      },
+      "orgChanges": {
+        "title": "Changements Organisationnels",
+        "description": "Suivre les changements organisationnels"
+      },
+      "assignments": {
+        "title": "Affectations des Employés",
+        "description": "Gérer les affectations de postes"
+      }
+    }
+  },
+  "helpdesk": {
+    "title": "Aide et Support",
+    "newTicket": "Nouveau Ticket",
+    "myTickets": "Mes Tickets",
+    "knowledgeBase": "Base de Connaissances",
+    "aiChat": "Assistant IA",
+    "ticketNumber": "Ticket #",
+    "subject": "Sujet",
+    "priority": "Priorité",
+    "category": "Catégorie",
+    "assignee": "Assigné à",
+    "requester": "Demandeur",
+    "createdAt": "Créé",
+    "updatedAt": "Mis à jour",
+    "resolvedAt": "Résolu",
+    "status": {
+      "open": "Ouvert",
+      "inProgress": "En Cours",
+      "pending": "En Attente",
+      "resolved": "Résolu",
+      "closed": "Fermé"
+    },
+    "priorities": {
+      "low": "Basse",
+      "medium": "Moyenne",
+      "high": "Haute",
+      "urgent": "Urgente"
+    }
+  },
+  "admin": {
+    "title": "Administration et Sécurité",
+    "description": "Paramètres d'administration et de sécurité du système",
+    "users": "Utilisateurs",
+    "roles": "Rôles",
+    "permissions": "Permissions",
+    "auditLogs": "Journaux d'Audit",
+    "settings": "Paramètres",
+    "companies": "Entreprises",
+    "companyGroups": "Groupes d'Entreprises",
+    "accessRequests": "Demandes d'Accès"
+  },
+  "language": {
+    "title": "Langue",
+    "select": "Sélectionner la Langue",
+    "current": "Langue Actuelle"
+  },
+  "dateRange": {
+    "today": "Aujourd'hui",
+    "yesterday": "Hier",
+    "last7Days": "7 Derniers Jours",
+    "last30Days": "30 Derniers Jours",
+    "last90Days": "90 Derniers Jours",
+    "thisMonth": "Ce Mois",
+    "lastMonth": "Mois Dernier",
+    "thisYear": "Cette Année",
+    "custom": "Plage Personnalisée"
+  },
+  "validation": {
+    "required": "Ce champ est obligatoire",
+    "invalidEmail": "Veuillez entrer une adresse e-mail valide",
+    "minLength": "Doit contenir au moins {{min}} caractères",
+    "maxLength": "Ne doit pas dépasser {{max}} caractères",
+    "passwordMismatch": "Les mots de passe ne correspondent pas"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "markAsRead": "Marquer comme Lu",
+    "markAllAsRead": "Tout Marquer comme Lu",
+    "noNotifications": "Aucune notification",
+    "viewAll": "Voir Tout"
+  }
+}

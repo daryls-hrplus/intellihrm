@@ -1,0 +1,199 @@
+{
+  "common": {
+    "loading": "Cargando...",
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "delete": "Eliminar",
+    "edit": "Editar",
+    "add": "Agregar",
+    "create": "Crear",
+    "update": "Actualizar",
+    "search": "Buscar",
+    "filter": "Filtrar",
+    "export": "Exportar",
+    "import": "Importar",
+    "refresh": "Actualizar",
+    "back": "Volver",
+    "next": "Siguiente",
+    "previous": "Anterior",
+    "submit": "Enviar",
+    "confirm": "Confirmar",
+    "close": "Cerrar",
+    "view": "Ver",
+    "download": "Descargar",
+    "upload": "Subir",
+    "select": "Seleccionar",
+    "selectAll": "Seleccionar Todo",
+    "clear": "Limpiar",
+    "reset": "Restablecer",
+    "apply": "Aplicar",
+    "yes": "Sí",
+    "no": "No",
+    "all": "Todo",
+    "none": "Ninguno",
+    "active": "Activo",
+    "inactive": "Inactivo",
+    "enabled": "Habilitado",
+    "disabled": "Deshabilitado",
+    "actions": "Acciones",
+    "status": "Estado",
+    "name": "Nombre",
+    "description": "Descripción",
+    "date": "Fecha",
+    "time": "Hora",
+    "from": "Desde",
+    "to": "Hasta",
+    "total": "Total",
+    "noData": "No hay datos disponibles",
+    "noResults": "No se encontraron resultados",
+    "error": "Error",
+    "success": "Éxito",
+    "warning": "Advertencia",
+    "info": "Información"
+  },
+  "auth": {
+    "login": "Iniciar Sesión",
+    "logout": "Cerrar Sesión",
+    "signUp": "Registrarse",
+    "email": "Correo Electrónico",
+    "password": "Contraseña",
+    "confirmPassword": "Confirmar Contraseña",
+    "forgotPassword": "¿Olvidaste tu contraseña?",
+    "resetPassword": "Restablecer Contraseña",
+    "rememberMe": "Recordarme",
+    "welcomeBack": "Bienvenido de Nuevo",
+    "createAccount": "Crear Cuenta",
+    "alreadyHaveAccount": "¿Ya tienes una cuenta?",
+    "dontHaveAccount": "¿No tienes una cuenta?"
+  },
+  "navigation": {
+    "dashboard": "Panel de Control",
+    "workforce": "Gestión de Personal",
+    "employees": "Empleados",
+    "departments": "Departamentos",
+    "positions": "Posiciones",
+    "orgStructure": "Estructura Organizacional",
+    "orgChanges": "Cambios Organizacionales",
+    "assignments": "Asignaciones",
+    "leave": "Gestión de Licencias",
+    "compensation": "Compensación",
+    "benefits": "Beneficios",
+    "training": "Capacitación",
+    "succession": "Planificación de Sucesión",
+    "recruitment": "Reclutamiento",
+    "performance": "Desempeño",
+    "hse": "Salud y Seguridad",
+    "employeeRelations": "Relaciones Laborales",
+    "property": "Propiedad de la Empresa",
+    "help": "Ayuda y Soporte",
+    "admin": "Administración y Seguridad",
+    "profile": "Perfil",
+    "settings": "Configuración",
+    "notifications": "Notificaciones"
+  },
+  "workforce": {
+    "title": "Gestión de Personal",
+    "description": "Gestiona el personal, departamentos y posiciones de tu organización",
+    "employeeCount": "Total de Empleados",
+    "departmentCount": "Departamentos",
+    "positionCount": "Posiciones",
+    "vacancies": "Vacantes Abiertas",
+    "modules": {
+      "employees": {
+        "title": "Empleados",
+        "description": "Ver y gestionar registros de empleados"
+      },
+      "departments": {
+        "title": "Departamentos",
+        "description": "Gestionar departamentos organizacionales"
+      },
+      "positions": {
+        "title": "Posiciones",
+        "description": "Definir y gestionar posiciones de trabajo"
+      },
+      "orgStructure": {
+        "title": "Estructura Organizacional",
+        "description": "Ver jerarquía organizacional"
+      },
+      "orgChanges": {
+        "title": "Cambios Organizacionales",
+        "description": "Seguimiento de cambios organizacionales"
+      },
+      "assignments": {
+        "title": "Asignaciones de Empleados",
+        "description": "Gestionar asignaciones de posiciones"
+      }
+    }
+  },
+  "helpdesk": {
+    "title": "Ayuda y Soporte",
+    "newTicket": "Nuevo Ticket",
+    "myTickets": "Mis Tickets",
+    "knowledgeBase": "Base de Conocimiento",
+    "aiChat": "Asistente IA",
+    "ticketNumber": "Ticket #",
+    "subject": "Asunto",
+    "priority": "Prioridad",
+    "category": "Categoría",
+    "assignee": "Asignado a",
+    "requester": "Solicitante",
+    "createdAt": "Creado",
+    "updatedAt": "Actualizado",
+    "resolvedAt": "Resuelto",
+    "status": {
+      "open": "Abierto",
+      "inProgress": "En Progreso",
+      "pending": "Pendiente",
+      "resolved": "Resuelto",
+      "closed": "Cerrado"
+    },
+    "priorities": {
+      "low": "Baja",
+      "medium": "Media",
+      "high": "Alta",
+      "urgent": "Urgente"
+    }
+  },
+  "admin": {
+    "title": "Administración y Seguridad",
+    "description": "Configuración de administración y seguridad del sistema",
+    "users": "Usuarios",
+    "roles": "Roles",
+    "permissions": "Permisos",
+    "auditLogs": "Registros de Auditoría",
+    "settings": "Configuración",
+    "companies": "Empresas",
+    "companyGroups": "Grupos de Empresas",
+    "accessRequests": "Solicitudes de Acceso"
+  },
+  "language": {
+    "title": "Idioma",
+    "select": "Seleccionar Idioma",
+    "current": "Idioma Actual"
+  },
+  "dateRange": {
+    "today": "Hoy",
+    "yesterday": "Ayer",
+    "last7Days": "Últimos 7 Días",
+    "last30Days": "Últimos 30 Días",
+    "last90Days": "Últimos 90 Días",
+    "thisMonth": "Este Mes",
+    "lastMonth": "Mes Pasado",
+    "thisYear": "Este Año",
+    "custom": "Rango Personalizado"
+  },
+  "validation": {
+    "required": "Este campo es obligatorio",
+    "invalidEmail": "Por favor ingresa un correo electrónico válido",
+    "minLength": "Debe tener al menos {{min}} caracteres",
+    "maxLength": "No debe exceder {{max}} caracteres",
+    "passwordMismatch": "Las contraseñas no coinciden"
+  },
+  "notifications": {
+    "title": "Notificaciones",
+    "markAsRead": "Marcar como Leído",
+    "markAllAsRead": "Marcar Todo como Leído",
+    "noNotifications": "Sin notificaciones",
+    "viewAll": "Ver Todo"
+  }
+}
