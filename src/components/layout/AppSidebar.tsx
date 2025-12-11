@@ -264,15 +264,32 @@ export function AppSidebar() {
           ))}
         </nav>
 
-        {/* Footer */}
         <div className="border-t border-sidebar-border p-4">
           {!isCollapsed ? (
             <div className="space-y-3">
-              <div className="flex items-center gap-3">
-                <div className="h-9 w-9 rounded-full bg-sidebar-primary/20 flex items-center justify-center">
-                  <span className="text-sm font-medium text-sidebar-primary">
-                    {getInitials(profile?.full_name)}
-                  </span>
+              <NavLink
+                to="/profile"
+                className={({ isActive }) =>
+                  cn(
+                    "flex items-center gap-3 rounded-lg p-2 transition-colors",
+                    isActive
+                      ? "bg-sidebar-primary text-sidebar-primary-foreground"
+                      : "hover:bg-sidebar-accent"
+                  )
+                }
+              >
+                <div className="h-9 w-9 rounded-full bg-sidebar-primary/20 flex items-center justify-center overflow-hidden">
+                  {profile?.avatar_url ? (
+                    <img
+                      src={profile.avatar_url}
+                      alt="Profile"
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    <span className="text-sm font-medium text-sidebar-primary">
+                      {getInitials(profile?.full_name)}
+                    </span>
+                  )}
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="truncate text-sm font-medium text-sidebar-foreground">
@@ -280,7 +297,7 @@ export function AppSidebar() {
                   </p>
                   <p className="text-xs text-sidebar-foreground/60">{getRoleBadge()}</p>
                 </div>
-              </div>
+              </NavLink>
               <button
                 onClick={handleSignOut}
                 className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground"
