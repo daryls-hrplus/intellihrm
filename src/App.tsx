@@ -17,6 +17,7 @@ import AdminCompaniesPage from "./pages/admin/AdminCompaniesPage";
 import AdminCompanyGroupsPage from "./pages/admin/AdminCompanyGroupsPage";
 import AdminAuditLogsPage from "./pages/admin/AdminAuditLogsPage";
 import AdminRolesPage from "./pages/admin/AdminRolesPage";
+import AdminPiiAccessPage from "./pages/admin/AdminPiiAccessPage";
 
 // Workforce pages
 import WorkforceDashboardPage from "./pages/workforce/WorkforceDashboardPage";
@@ -124,6 +125,14 @@ const App = () => (
               element={
                 <ProtectedRoute requiredRoles={["admin"]}>
                   <AdminRolesPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/pii-access"
+              element={
+                <ProtectedRoute requiredRoles={["admin"]}>
+                  <AdminPiiAccessPage />
                 </ProtectedRoute>
               }
             />
