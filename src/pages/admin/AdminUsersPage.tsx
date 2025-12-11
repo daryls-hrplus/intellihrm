@@ -5,7 +5,13 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useAuditLog } from "@/hooks/useAuditLog";
+import { usePiiVisibility } from "@/hooks/usePiiVisibility";
 import { cn } from "@/lib/utils";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import {
   Search,
   Shield,
@@ -17,6 +23,7 @@ import {
   Mail,
   Calendar,
   Building2,
+  EyeOff,
 } from "lucide-react";
 
 type AppRole = "admin" | "hr_manager" | "employee";
@@ -61,6 +68,7 @@ export default function AdminUsersPage() {
   const { user: currentUser } = useAuth();
   const { toast } = useToast();
   const { logView } = useAuditLog();
+  const { canViewPii, maskPii } = usePiiVisibility();
   const hasLoggedView = useRef(false);
 
   useEffect(() => {
@@ -333,15 +341,30 @@ export default function AdminUsersPage() {
         </div>
 
         {/* Search */}
-        <div className="relative animate-slide-up" style={{ animationDelay: "100ms" }}>
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <input
-            type="text"
-            placeholder="Search users by name, email, or company..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="h-11 w-full rounded-lg border border-input bg-card pl-10 pr-4 text-card-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-          />
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center animate-slide-up" style={{ animationDelay: "100ms" }}>
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <input
+              type="text"
+              placeholder="Search users by name, email, or company..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="h-11 w-full rounded-lg border border-input bg-card pl-10 pr-4 text-card-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+            />
+          </div>
+          {!canViewPii && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className="inline-flex items-center gap-1.5 rounded-lg bg-amber-500/10 px-3 py-2 text-xs font-medium text-amber-600">
+                  <EyeOff className="h-3.5 w-3.5" />
+                  PII Hidden
+                </div>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Personal information is hidden based on your role permissions</p>
+              </TooltipContent>
+            </Tooltip>
+          )}
         </div>
 
         {/* Users Table */}
@@ -400,7 +423,9 @@ export default function AdminUsersPage() {
                                   <span className="ml-2 text-xs text-muted-foreground">(You)</span>
                                 )}
                               </p>
-                              <p className="text-sm text-muted-foreground">{user.email}</p>
+                              <p className={cn("text-sm text-muted-foreground", !canViewPii && "font-mono text-xs")}>
+                                {maskPii(user.email, "email")}
+                              </p>
                             </div>
                           </div>
                         </td>
