@@ -471,16 +471,16 @@ export default function JobFamiliesPage() {
               <div className="space-y-2">
                 <Label>Division (Optional)</Label>
                 <Select
-                  value={formData.company_division_id}
+                  value={formData.company_division_id || "__none__"}
                   onValueChange={(value) =>
-                    setFormData({ ...formData, company_division_id: value, department_id: "" })
+                    setFormData({ ...formData, company_division_id: value === "__none__" ? "" : value, department_id: "" })
                   }
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select division" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">None</SelectItem>
+                    <SelectItem value="__none__">None</SelectItem>
                     {divisions.map((div) => (
                       <SelectItem key={div.id} value={div.id}>
                         {div.name} ({div.code})
