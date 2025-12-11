@@ -14,6 +14,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
 import { 
   Plus, 
@@ -27,7 +33,10 @@ import {
   Clock,
   BarChart3,
   Copy,
-  Settings2
+  Settings2,
+  Download,
+  FileText,
+  FileSpreadsheet
 } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, LineChart, Line } from "recharts";
 
@@ -279,6 +288,184 @@ export function ScenarioPlanning({ currentHeadcount }: ScenarioPlanningProps) {
     "hsl(var(--accent))",
   ];
 
+  const exportToCSV = () => {
+    if (results.length === 0) {
+      toast.error("No results to export. Run scenarios first.");
+      return;
+    }
+
+    // Build CSV content
+    const lines: string[] = [];
+    
+    // Summary section
+    lines.push("SCENARIO PLANNING REPORT");
+    lines.push(`Generated: ${new Date().toLocaleString()}`);
+    lines.push(`Current Headcount: ${currentHeadcount}`);
+    lines.push("");
+    
+    // Summary table
+    lines.push("SCENARIO SUMMARY");
+    lines.push("Scenario,Final Headcount,Total Hires,Total Attrition,Net Change,Growth %,Feasibility");
+    results.forEach(r => {
+      const netChange = r.totalHires - r.totalAttrition;
+      const growthPercent = ((r.finalHeadcount - currentHeadcount) / currentHeadcount * 100).toFixed(1);
+      lines.push(`"${r.scenarioName}",${r.finalHeadcount},${r.totalHires},${r.totalAttrition},${netChange},${growthPercent}%,${r.feasibility}`);
+    });
+    lines.push("");
+
+    // Scenario parameters
+    lines.push("SCENARIO PARAMETERS");
+    lines.push("Scenario,Growth Rate,Attrition Rate,Budget/Quarter,Time Horizon,Seasonal Adj,Aggressive");
+    scenarios.forEach(s => {
+      lines.push(`"${s.name}",${s.growthRate}%,${s.attritionRate}%,${s.budgetConstraint},${s.timeHorizon} months,${s.seasonalAdjustment},${s.aggressiveHiring}`);
+    });
+    lines.push("");
+
+    // Detailed projections for each scenario
+    results.forEach(r => {
+      lines.push(`PROJECTIONS: ${r.scenarioName}`);
+      lines.push("Month,Headcount,Hires,Attrition,Net Change");
+      r.projections.forEach(p => {
+        lines.push(`${p.month},${p.headcount},${p.hires},${p.attrition},${p.netChange}`);
+      });
+      lines.push("");
+    });
+
+    const csvContent = lines.join("\n");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `scenario-planning-${new Date().toISOString().split("T")[0]}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+    toast.success("CSV exported successfully");
+  };
+
+  const exportToPDF = () => {
+    if (results.length === 0) {
+      toast.error("No results to export. Run scenarios first.");
+      return;
+    }
+
+    // Create printable HTML content
+    const printWindow = window.open("", "_blank");
+    if (!printWindow) {
+      toast.error("Please allow popups to export PDF");
+      return;
+    }
+
+    const summaryRows = results.map(r => {
+      const netChange = r.totalHires - r.totalAttrition;
+      const growthPercent = ((r.finalHeadcount - currentHeadcount) / currentHeadcount * 100).toFixed(1);
+      return `
+        <tr>
+          <td>${r.scenarioName}</td>
+          <td>${r.finalHeadcount}</td>
+          <td style="color: green;">+${r.totalHires}</td>
+          <td style="color: red;">-${r.totalAttrition}</td>
+          <td style="color: ${netChange >= 0 ? 'green' : 'red'};">${netChange >= 0 ? '+' : ''}${netChange}</td>
+          <td>${growthPercent}%</td>
+          <td><span style="padding: 2px 8px; border-radius: 4px; background: ${r.feasibility === 'high' ? '#22c55e' : r.feasibility === 'medium' ? '#eab308' : '#ef4444'}; color: white;">${r.feasibility}</span></td>
+        </tr>
+      `;
+    }).join("");
+
+    const paramRows = scenarios.map(s => `
+      <tr>
+        <td>${s.name}</td>
+        <td>${s.growthRate}%</td>
+        <td>${s.attritionRate}%</td>
+        <td>${s.budgetConstraint}</td>
+        <td>${s.timeHorizon} mo</td>
+        <td>${s.seasonalAdjustment ? "Yes" : "No"}</td>
+        <td>${s.aggressiveHiring ? "Yes" : "No"}</td>
+      </tr>
+    `).join("");
+
+    const html = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Scenario Planning Report</title>
+        <style>
+          body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; padding: 40px; color: #333; }
+          h1 { color: #1a1a1a; border-bottom: 2px solid #3b82f6; padding-bottom: 10px; }
+          h2 { color: #374151; margin-top: 30px; }
+          table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+          th, td { padding: 12px; text-align: left; border-bottom: 1px solid #e5e7eb; }
+          th { background: #f9fafb; font-weight: 600; }
+          .meta { color: #6b7280; margin-bottom: 20px; }
+          .print-btn { background: #3b82f6; color: white; padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; margin-bottom: 20px; }
+          .print-btn:hover { background: #2563eb; }
+          @media print { .print-btn { display: none; } }
+        </style>
+      </head>
+      <body>
+        <button class="print-btn" onclick="window.print()">Print / Save as PDF</button>
+        <h1>Scenario Planning Report</h1>
+        <p class="meta">Generated: ${new Date().toLocaleString()} | Current Headcount: ${currentHeadcount}</p>
+        
+        <h2>Scenario Summary</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Scenario</th>
+              <th>Final HC</th>
+              <th>Hires</th>
+              <th>Attrition</th>
+              <th>Net Change</th>
+              <th>Growth %</th>
+              <th>Feasibility</th>
+            </tr>
+          </thead>
+          <tbody>${summaryRows}</tbody>
+        </table>
+
+        <h2>Scenario Parameters</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Scenario</th>
+              <th>Growth</th>
+              <th>Attrition</th>
+              <th>Budget/Qtr</th>
+              <th>Horizon</th>
+              <th>Seasonal</th>
+              <th>Aggressive</th>
+            </tr>
+          </thead>
+          <tbody>${paramRows}</tbody>
+        </table>
+
+        ${results.map(r => `
+          <h2>Projections: ${r.scenarioName}</h2>
+          <table>
+            <thead>
+              <tr><th>Month</th><th>Headcount</th><th>Hires</th><th>Attrition</th><th>Net Change</th></tr>
+            </thead>
+            <tbody>
+              ${r.projections.map(p => `
+                <tr>
+                  <td>${p.month}</td>
+                  <td>${p.headcount}</td>
+                  <td style="color: green;">+${p.hires}</td>
+                  <td style="color: red;">-${p.attrition}</td>
+                  <td style="color: ${p.netChange >= 0 ? 'green' : 'red'};">${p.netChange >= 0 ? '+' : ''}${p.netChange}</td>
+                </tr>
+              `).join("")}
+            </tbody>
+          </table>
+        `).join("")}
+      </body>
+      </html>
+    `;
+
+    printWindow.document.write(html);
+    printWindow.document.close();
+    toast.success("PDF report opened in new tab");
+  };
+
   return (
     <div className="space-y-6">
       {/* Header Card */}
@@ -308,6 +495,26 @@ export function ScenarioPlanning({ currentHeadcount }: ScenarioPlanningProps) {
                 <Play className="h-4 w-4 mr-2" />
                 {isRunning ? "Running..." : "Run All Scenarios"}
               </Button>
+            )}
+            {results.length > 0 && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline">
+                    <Download className="h-4 w-4 mr-2" />
+                    Export
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={exportToCSV}>
+                    <FileSpreadsheet className="h-4 w-4 mr-2" />
+                    Export to CSV
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={exportToPDF}>
+                    <FileText className="h-4 w-4 mr-2" />
+                    Export to PDF
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             )}
           </div>
         </CardContent>
