@@ -38,3 +38,6 @@ verify_jwt = false
 
 [functions.send-ticket-notification]
 verify_jwt = false
+
+[functions.check-sla-breach]
+verify_jwt = false
