@@ -708,12 +708,12 @@ export function PositionsManagement({ companyId }: PositionsManagementProps) {
             </div>
             <div className="space-y-2">
               <Label>Reports To Position</Label>
-              <Select value={formReportsTo} onValueChange={setFormReportsTo}>
+              <Select value={formReportsTo || "none"} onValueChange={(val) => setFormReportsTo(val === "none" ? "" : val)}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select supervisor position (optional)" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">None</SelectItem>
+                  <SelectItem value="none">None</SelectItem>
                   {positions
                     .filter(p => p.id !== editingPosition?.id)
                     .map((pos) => (
