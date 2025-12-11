@@ -27,6 +27,9 @@ import AdminOrgStructurePage from "./pages/admin/AdminOrgStructurePage";
 // Workforce pages
 import WorkforceDashboardPage from "./pages/workforce/WorkforceDashboardPage";
 import EmployeesPage from "./pages/workforce/EmployeesPage";
+import PositionsPage from "./pages/workforce/PositionsPage";
+import OrgStructurePage from "./pages/workforce/OrgStructurePage";
+import DepartmentsPage from "./pages/workforce/DepartmentsPage";
 
 // Performance pages
 import PerformanceDashboardPage from "./pages/performance/PerformanceDashboardPage";
@@ -204,6 +207,30 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <EmployeesPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/workforce/positions"
+              element={
+                <ProtectedRoute>
+                  <PositionsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/workforce/org-structure"
+              element={
+                <ProtectedRoute>
+                  <OrgStructurePage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/workforce/departments"
+              element={
+                <ProtectedRoute>
+                  <DepartmentsPage />
                 </ProtectedRoute>
               }
             />
