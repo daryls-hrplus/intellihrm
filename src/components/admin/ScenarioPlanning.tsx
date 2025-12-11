@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Dialog,
   DialogContent,
@@ -21,6 +22,7 @@ import {
   DropdownMenuTrigger,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
@@ -45,7 +47,11 @@ import {
   Link,
   FolderOpen,
   Loader2,
-  Check
+  Check,
+  History,
+  GitCompare,
+  ChevronRight,
+  ArrowLeftRight
 } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
 
@@ -93,6 +99,19 @@ interface SavedScenarioSet {
   is_shared: boolean;
   share_token: string | null;
   created_at: string;
+}
+
+interface ScenarioVersion {
+  id: string;
+  scenario_id: string;
+  version_number: number;
+  name: string;
+  description: string | null;
+  parameters: ScenarioParameters[];
+  results: ScenarioResult[] | null;
+  current_headcount: number;
+  created_at: string;
+  change_notes: string | null;
 }
 
 const defaultScenario: Omit<ScenarioParameters, "id"> = {
@@ -144,6 +163,15 @@ export function ScenarioPlanning({ currentHeadcount, sharedToken }: ScenarioPlan
   const [saveDescription, setSaveDescription] = useState("");
   const [currentSavedId, setCurrentSavedId] = useState<string | null>(null);
   const [shareUrl, setShareUrl] = useState<string | null>(null);
+
+  // Versioning state
+  const [versions, setVersions] = useState<ScenarioVersion[]>([]);
+  const [showVersionsDialog, setShowVersionsDialog] = useState(false);
+  const [showSaveVersionDialog, setShowSaveVersionDialog] = useState(false);
+  const [showCompareDialog, setShowCompareDialog] = useState(false);
+  const [versionChangeNotes, setVersionChangeNotes] = useState("");
+  const [selectedVersions, setSelectedVersions] = useState<string[]>([]);
+  const [versionsToCompare, setVersionsToCompare] = useState<ScenarioVersion[]>([]);
 
   useEffect(() => {
     if (sharedToken) {
@@ -301,6 +329,183 @@ export function ScenarioPlanning({ currentHeadcount, sharedToken }: ScenarioPlan
       await navigator.clipboard.writeText(shareUrl);
       toast.success("Link copied!");
     }
+  };
+
+  // Versioning functions
+  const fetchVersions = async () => {
+    if (!currentSavedId) return;
+    setIsLoading(true);
+    const { data, error } = await supabase
+      .from("scenario_versions")
+      .select("*")
+      .eq("scenario_id", currentSavedId)
+      .order("version_number", { ascending: false });
+
+    if (error) {
+      console.error("Error fetching versions:", error);
+      toast.error("Failed to load versions");
+    } else if (data) {
+      setVersions(data.map(v => ({
+        ...v,
+        parameters: v.parameters as unknown as ScenarioParameters[],
+        results: v.results as unknown as ScenarioResult[] | null,
+      })));
+    }
+    setIsLoading(false);
+  };
+
+  const saveNewVersion = async () => {
+    if (!user || !currentSavedId || scenarios.length === 0) {
+      toast.error("Save the scenario set first before creating versions");
+      return;
+    }
+
+    setIsSaving(true);
+    
+    // Get the latest version number
+    const latestVersionNum = versions.length > 0 
+      ? Math.max(...versions.map(v => v.version_number)) 
+      : 0;
+
+    // Get scenario set name
+    const currentSet = savedSets.find(s => s.id === currentSavedId);
+    const versionName = currentSet?.name || `Version ${latestVersionNum + 1}`;
+
+    const { data, error } = await supabase
+      .from("scenario_versions")
+      .insert({
+        scenario_id: currentSavedId,
+        version_number: latestVersionNum + 1,
+        name: versionName,
+        description: currentSet?.description || null,
+        parameters: scenarios as unknown as Json,
+        results: results.length > 0 ? (results as unknown as Json) : null,
+        current_headcount: currentHeadcount,
+        created_by: user.id,
+        change_notes: versionChangeNotes || null,
+      })
+      .select()
+      .single();
+
+    if (error) {
+      toast.error("Failed to save version");
+      console.error(error);
+    } else {
+      toast.success(`Version ${latestVersionNum + 1} saved`);
+      setVersionChangeNotes("");
+      setShowSaveVersionDialog(false);
+      // Refresh versions
+      fetchVersions();
+    }
+    setIsSaving(false);
+  };
+
+  const loadVersion = (version: ScenarioVersion) => {
+    setScenarios(version.parameters);
+    if (version.results) setResults(version.results);
+    setShowVersionsDialog(false);
+    toast.success(`Loaded version ${version.version_number}`);
+  };
+
+  const deleteVersion = async (versionId: string) => {
+    const { error } = await supabase
+      .from("scenario_versions")
+      .delete()
+      .eq("id", versionId);
+
+    if (error) {
+      toast.error("Failed to delete version");
+    } else {
+      setVersions(prev => prev.filter(v => v.id !== versionId));
+      toast.success("Version deleted");
+    }
+  };
+
+  const toggleVersionSelection = (versionId: string) => {
+    setSelectedVersions(prev => {
+      if (prev.includes(versionId)) {
+        return prev.filter(id => id !== versionId);
+      }
+      if (prev.length >= 2) {
+        return [prev[1], versionId];
+      }
+      return [...prev, versionId];
+    });
+  };
+
+  const compareSelectedVersions = () => {
+    const selected = versions.filter(v => selectedVersions.includes(v.id));
+    if (selected.length < 2) {
+      toast.error("Select two versions to compare");
+      return;
+    }
+    setVersionsToCompare(selected);
+    setShowCompareDialog(true);
+  };
+
+  const getVersionComparisonData = () => {
+    if (versionsToCompare.length !== 2) return { chartData: [], paramDiffs: [] };
+    
+    const [v1, v2] = versionsToCompare;
+    
+    // Build chart data from results if available
+    const chartData: Record<string, any>[] = [];
+    if (v1.results && v2.results) {
+      const maxLength = Math.max(
+        v1.results[0]?.projections.length || 0,
+        v2.results[0]?.projections.length || 0
+      );
+      
+      for (let i = 0; i < maxLength; i++) {
+        const point: Record<string, any> = { month: v1.results[0]?.projections[i]?.month || `Month ${i + 1}` };
+        
+        v1.results.forEach(r => {
+          point[`V${v1.version_number}: ${r.scenarioName}`] = r.projections[i]?.headcount;
+        });
+        
+        v2.results.forEach(r => {
+          point[`V${v2.version_number}: ${r.scenarioName}`] = r.projections[i]?.headcount;
+        });
+        
+        chartData.push(point);
+      }
+    }
+
+    // Build parameter differences
+    const paramDiffs: { scenario: string; param: string; v1: string; v2: string; changed: boolean }[] = [];
+    const allScenarioNames = new Set([
+      ...v1.parameters.map(p => p.name),
+      ...v2.parameters.map(p => p.name)
+    ]);
+
+    allScenarioNames.forEach(name => {
+      const s1 = v1.parameters.find(p => p.name === name);
+      const s2 = v2.parameters.find(p => p.name === name);
+      
+      const params = ['growthRate', 'attritionRate', 'budgetConstraint', 'timeHorizon', 'seasonalAdjustment', 'aggressiveHiring'];
+      const paramLabels: Record<string, string> = {
+        growthRate: 'Growth Rate',
+        attritionRate: 'Attrition Rate',
+        budgetConstraint: 'Budget/Qtr',
+        timeHorizon: 'Time Horizon',
+        seasonalAdjustment: 'Seasonal Adj',
+        aggressiveHiring: 'Aggressive'
+      };
+
+      params.forEach(param => {
+        const val1 = s1 ? String((s1 as any)[param]) : 'N/A';
+        const val2 = s2 ? String((s2 as any)[param]) : 'N/A';
+        paramDiffs.push({
+          scenario: name,
+          param: paramLabels[param] || param,
+          v1: val1 + (param.includes('Rate') ? '%' : param === 'timeHorizon' ? ' mo' : ''),
+          v2: val2 + (param.includes('Rate') ? '%' : param === 'timeHorizon' ? ' mo' : ''),
+          changed: val1 !== val2
+        });
+      });
+    });
+
+    return { chartData, paramDiffs };
   };
 
   const generateId = () => Math.random().toString(36).substr(2, 9);
@@ -717,6 +922,18 @@ export function ScenarioPlanning({ currentHeadcount, sharedToken }: ScenarioPlan
                 <Button variant="outline" onClick={generateShareLink} disabled={isSaving}>
                   {isSaving ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Share2 className="h-4 w-4 mr-2" />}
                   Share
+                </Button>
+              </>
+            )}
+            {currentSavedId && user && (
+              <>
+                <Button variant="outline" onClick={() => setShowSaveVersionDialog(true)}>
+                  <History className="h-4 w-4 mr-2" />
+                  Save Version
+                </Button>
+                <Button variant="ghost" onClick={() => { fetchVersions(); setShowVersionsDialog(true); }}>
+                  <GitCompare className="h-4 w-4 mr-2" />
+                  Versions
                 </Button>
               </>
             )}
@@ -1252,6 +1469,280 @@ export function ScenarioPlanning({ currentHeadcount, sharedToken }: ScenarioPlan
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowLoadDialog(false)}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Save Version Dialog */}
+      <Dialog open={showSaveVersionDialog} onOpenChange={setShowSaveVersionDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Save New Version</DialogTitle>
+            <DialogDescription>
+              Create a new version of this scenario set to track changes over time
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div>
+              <Label htmlFor="version-notes">Change Notes (optional)</Label>
+              <Textarea
+                id="version-notes"
+                value={versionChangeNotes}
+                onChange={(e) => setVersionChangeNotes(e.target.value)}
+                placeholder="Describe what changed in this version..."
+                rows={3}
+              />
+            </div>
+            <div className="text-sm text-muted-foreground">
+              {versions.length > 0 
+                ? `This will be version ${Math.max(...versions.map(v => v.version_number)) + 1}`
+                : "This will be version 1"
+              }
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowSaveVersionDialog(false)}>Cancel</Button>
+            <Button onClick={saveNewVersion} disabled={isSaving}>
+              {isSaving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <History className="h-4 w-4 mr-2" />}
+              Save Version
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Version History Dialog */}
+      <Dialog open={showVersionsDialog} onOpenChange={(open) => {
+        setShowVersionsDialog(open);
+        if (!open) {
+          setSelectedVersions([]);
+        }
+      }}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <History className="h-5 w-5" />
+              Version History
+            </DialogTitle>
+            <DialogDescription>
+              View, restore, or compare previous versions of this scenario set
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            {selectedVersions.length >= 2 && (
+              <div className="mb-4 p-3 bg-muted rounded-lg flex items-center justify-between">
+                <span className="text-sm">
+                  {selectedVersions.length} versions selected for comparison
+                </span>
+                <Button size="sm" onClick={compareSelectedVersions}>
+                  <ArrowLeftRight className="h-4 w-4 mr-2" />
+                  Compare
+                </Button>
+              </div>
+            )}
+            <ScrollArea className="h-[400px]">
+              {isLoading ? (
+                <div className="flex justify-center py-8">
+                  <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                </div>
+              ) : versions.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  No versions saved yet. Click "Save Version" to create your first version.
+                </div>
+              ) : (
+                <div className="space-y-2 pr-4">
+                  {versions.map((version, idx) => (
+                    <div
+                      key={version.id}
+                      className={`p-3 rounded-lg border transition-colors ${
+                        selectedVersions.includes(version.id) 
+                          ? 'border-primary bg-primary/5' 
+                          : 'hover:bg-muted/50'
+                      }`}
+                    >
+                      <div className="flex items-start gap-3">
+                        <input
+                          type="checkbox"
+                          checked={selectedVersions.includes(version.id)}
+                          onChange={() => toggleVersionSelection(version.id)}
+                          className="mt-1 rounded"
+                        />
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2">
+                            <span className="font-medium">Version {version.version_number}</span>
+                            {idx === 0 && (
+                              <Badge variant="secondary" className="text-xs">Latest</Badge>
+                            )}
+                          </div>
+                          <div className="text-xs text-muted-foreground mt-1">
+                            {new Date(version.created_at).toLocaleString()}
+                          </div>
+                          {version.change_notes && (
+                            <div className="text-sm mt-2 text-muted-foreground">
+                              {version.change_notes}
+                            </div>
+                          )}
+                          <div className="text-xs text-muted-foreground mt-2">
+                            {version.parameters.length} scenarios • Headcount: {version.current_headcount}
+                            {version.results && ` • Results available`}
+                          </div>
+                        </div>
+                        <div className="flex gap-1">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => loadVersion(version)}
+                          >
+                            <ChevronRight className="h-4 w-4 mr-1" />
+                            Load
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-destructive"
+                            onClick={() => deleteVersion(version.id)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </ScrollArea>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowVersionsDialog(false)}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Version Comparison Dialog */}
+      <Dialog open={showCompareDialog} onOpenChange={setShowCompareDialog}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <ArrowLeftRight className="h-5 w-5" />
+              Compare Versions
+            </DialogTitle>
+            <DialogDescription>
+              {versionsToCompare.length === 2 && (
+                <>Comparing Version {versionsToCompare[0].version_number} vs Version {versionsToCompare[1].version_number}</>
+              )}
+            </DialogDescription>
+          </DialogHeader>
+          <ScrollArea className="h-[60vh]">
+            <div className="space-y-6 pr-4">
+              {/* Chart comparison */}
+              {(() => {
+                const { chartData, paramDiffs } = getVersionComparisonData();
+                return (
+                  <>
+                    {chartData.length > 0 && (
+                      <Card>
+                        <CardHeader className="pb-2">
+                          <CardTitle className="text-base">Headcount Projection Comparison</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="h-[250px]">
+                            <ResponsiveContainer width="100%" height="100%">
+                              <LineChart data={chartData}>
+                                <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                                <XAxis dataKey="month" className="text-xs" />
+                                <YAxis className="text-xs" />
+                                <Tooltip
+                                  contentStyle={{
+                                    backgroundColor: "hsl(var(--card))",
+                                    border: "1px solid hsl(var(--border))",
+                                    borderRadius: "8px",
+                                  }}
+                                />
+                                <Legend />
+                                {Object.keys(chartData[0] || {})
+                                  .filter(k => k !== 'month')
+                                  .map((key, i) => (
+                                    <Line
+                                      key={key}
+                                      type="monotone"
+                                      dataKey={key}
+                                      stroke={scenarioColors[i % scenarioColors.length]}
+                                      strokeWidth={2}
+                                      strokeDasharray={key.startsWith('V' + versionsToCompare[0]?.version_number) ? undefined : '5 5'}
+                                    />
+                                  ))}
+                              </LineChart>
+                            </ResponsiveContainer>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    )}
+
+                    {/* Parameter differences */}
+                    <Card>
+                      <CardHeader className="pb-2">
+                        <CardTitle className="text-base">Parameter Changes</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="overflow-x-auto">
+                          <table className="w-full text-sm">
+                            <thead>
+                              <tr className="border-b">
+                                <th className="text-left py-2 font-medium">Scenario</th>
+                                <th className="text-left py-2 font-medium">Parameter</th>
+                                <th className="text-center py-2 font-medium">V{versionsToCompare[0]?.version_number}</th>
+                                <th className="text-center py-2 font-medium">V{versionsToCompare[1]?.version_number}</th>
+                                <th className="text-center py-2 font-medium">Changed</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {paramDiffs.map((diff, i) => (
+                                <tr key={i} className={`border-b ${diff.changed ? 'bg-warning/10' : ''}`}>
+                                  <td className="py-2">{diff.scenario}</td>
+                                  <td className="py-2">{diff.param}</td>
+                                  <td className="py-2 text-center">{diff.v1}</td>
+                                  <td className="py-2 text-center">{diff.v2}</td>
+                                  <td className="py-2 text-center">
+                                    {diff.changed ? (
+                                      <Badge variant="outline" className="text-xs bg-warning/20">Changed</Badge>
+                                    ) : (
+                                      <span className="text-muted-foreground">—</span>
+                                    )}
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    {/* Version metadata */}
+                    <div className="grid grid-cols-2 gap-4">
+                      {versionsToCompare.map(v => (
+                        <Card key={v.id}>
+                          <CardHeader className="pb-2">
+                            <CardTitle className="text-sm">Version {v.version_number}</CardTitle>
+                          </CardHeader>
+                          <CardContent className="text-sm space-y-1">
+                            <div><span className="text-muted-foreground">Created:</span> {new Date(v.created_at).toLocaleString()}</div>
+                            <div><span className="text-muted-foreground">Headcount:</span> {v.current_headcount}</div>
+                            <div><span className="text-muted-foreground">Scenarios:</span> {v.parameters.length}</div>
+                            {v.change_notes && (
+                              <div className="mt-2 p-2 bg-muted rounded text-xs">
+                                <span className="text-muted-foreground">Notes:</span> {v.change_notes}
+                              </div>
+                            )}
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  </>
+                );
+              })()}
+            </div>
+          </ScrollArea>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowCompareDialog(false)}>Close</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

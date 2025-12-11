@@ -1056,6 +1056,56 @@ export type Database = {
           },
         ]
       }
+      scenario_versions: {
+        Row: {
+          change_notes: string | null
+          created_at: string
+          created_by: string
+          current_headcount: number
+          description: string | null
+          id: string
+          name: string
+          parameters: Json
+          results: Json | null
+          scenario_id: string
+          version_number: number
+        }
+        Insert: {
+          change_notes?: string | null
+          created_at?: string
+          created_by: string
+          current_headcount: number
+          description?: string | null
+          id?: string
+          name: string
+          parameters?: Json
+          results?: Json | null
+          scenario_id: string
+          version_number?: number
+        }
+        Update: {
+          change_notes?: string | null
+          created_at?: string
+          created_by?: string
+          current_headcount?: number
+          description?: string | null
+          id?: string
+          name?: string
+          parameters?: Json
+          results?: Json | null
+          scenario_id?: string
+          version_number?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "scenario_versions_scenario_id_fkey"
+            columns: ["scenario_id"]
+            isOneToOne: false
+            referencedRelation: "saved_scenarios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       sections: {
         Row: {
           code: string
