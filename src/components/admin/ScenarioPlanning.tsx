@@ -52,7 +52,12 @@ import {
   GitCompare,
   ChevronRight,
   ArrowLeftRight,
-  Lightbulb
+  Lightbulb,
+  LayoutTemplate,
+  BookTemplate,
+  Globe,
+  Building2,
+  MoreVertical
 } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, AreaChart, Area } from "recharts";
 import { WhatIfAnalysis } from "./WhatIfAnalysis";
@@ -114,6 +119,18 @@ interface ScenarioVersion {
   current_headcount: number;
   created_at: string;
   change_notes: string | null;
+}
+
+interface ScenarioTemplate {
+  id: string;
+  name: string;
+  description: string | null;
+  parameters: Omit<ScenarioParameters, "id">[];
+  company_id: string | null;
+  is_global: boolean;
+  is_active: boolean;
+  created_at: string;
+  created_by: string;
 }
 
 const defaultScenario: Omit<ScenarioParameters, "id"> = {
@@ -181,11 +198,135 @@ export function ScenarioPlanning({ currentHeadcount, sharedToken }: ScenarioPlan
   const [shareMessage, setShareMessage] = useState("");
   const [isSendingNotification, setIsSendingNotification] = useState(false);
 
+  // Template state
+  const [templates, setTemplates] = useState<ScenarioTemplate[]>([]);
+  const [showTemplatesDialog, setShowTemplatesDialog] = useState(false);
+  const [showCreateTemplateDialog, setShowCreateTemplateDialog] = useState(false);
+  const [newTemplateName, setNewTemplateName] = useState("");
+  const [newTemplateDescription, setNewTemplateDescription] = useState("");
+  const [newTemplateIsGlobal, setNewTemplateIsGlobal] = useState(true);
+  const [selectedCompanyId, setSelectedCompanyId] = useState<string | null>(null);
+  const [companies, setCompanies] = useState<{id: string; name: string}[]>([]);
+
   useEffect(() => {
     if (sharedToken) {
       loadSharedScenario(sharedToken);
     }
   }, [sharedToken]);
+
+  // Fetch templates and companies on mount
+  useEffect(() => {
+    fetchTemplates();
+    fetchCompanies();
+  }, []);
+
+  const fetchTemplates = async () => {
+    const { data, error } = await supabase
+      .from("scenario_templates")
+      .select("*")
+      .eq("is_active", true)
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      console.error("Error fetching templates:", error);
+    } else if (data) {
+      setTemplates(data.map(t => ({
+        ...t,
+        parameters: t.parameters as unknown as Omit<ScenarioParameters, "id">[],
+      })));
+    }
+  };
+
+  const fetchCompanies = async () => {
+    const { data, error } = await supabase
+      .from("companies")
+      .select("id, name")
+      .eq("is_active", true)
+      .order("name");
+
+    if (error) {
+      console.error("Error fetching companies:", error);
+    } else if (data) {
+      setCompanies(data);
+    }
+  };
+
+  const createTemplate = async () => {
+    if (!user || scenarios.length === 0) {
+      toast.error("No scenarios to save as template");
+      return;
+    }
+    if (!newTemplateName.trim()) {
+      toast.error("Please enter a template name");
+      return;
+    }
+
+    setIsSaving(true);
+    // Strip IDs from parameters for template
+    const templateParams = scenarios.map(s => ({
+      name: s.name,
+      description: s.description,
+      growthRate: s.growthRate,
+      attritionRate: s.attritionRate,
+      budgetConstraint: s.budgetConstraint,
+      timeHorizon: s.timeHorizon,
+      seasonalAdjustment: s.seasonalAdjustment,
+      aggressiveHiring: s.aggressiveHiring,
+    }));
+
+    const { data, error } = await supabase
+      .from("scenario_templates")
+      .insert({
+        name: newTemplateName,
+        description: newTemplateDescription || null,
+        parameters: templateParams as unknown as Json,
+        company_id: newTemplateIsGlobal ? null : selectedCompanyId,
+        is_global: newTemplateIsGlobal,
+        created_by: user.id,
+      })
+      .select()
+      .single();
+
+    if (error) {
+      toast.error("Failed to create template");
+      console.error(error);
+    } else {
+      toast.success("Template created successfully");
+      setShowCreateTemplateDialog(false);
+      setNewTemplateName("");
+      setNewTemplateDescription("");
+      setNewTemplateIsGlobal(true);
+      setSelectedCompanyId(null);
+      fetchTemplates();
+    }
+    setIsSaving(false);
+  };
+
+  const loadFromTemplate = (template: ScenarioTemplate) => {
+    const generateId = () => Math.random().toString(36).substr(2, 9);
+    const newScenarios: ScenarioParameters[] = template.parameters.map(p => ({
+      ...p,
+      id: generateId(),
+    }));
+    setScenarios(newScenarios);
+    setResults([]);
+    setShowTemplatesDialog(false);
+    toast.success(`Loaded template: ${template.name}`);
+  };
+
+  const deleteTemplate = async (templateId: string) => {
+    const { error } = await supabase
+      .from("scenario_templates")
+      .delete()
+      .eq("id", templateId);
+
+    if (error) {
+      toast.error("Failed to delete template");
+    } else {
+      setTemplates(prev => prev.filter(t => t.id !== templateId));
+      toast.success("Template deleted");
+    }
+  };
 
   const loadSharedScenario = async (token: string) => {
     setIsLoading(true);
@@ -1017,10 +1158,16 @@ export function ScenarioPlanning({ currentHeadcount, sharedToken }: ScenarioPlan
               </>
             )}
             {user && (
-              <Button variant="ghost" onClick={() => { fetchSavedSets(); setShowLoadDialog(true); }}>
-                <FolderOpen className="h-4 w-4 mr-2" />
-                Load
-              </Button>
+              <>
+                <Button variant="ghost" onClick={() => { fetchSavedSets(); setShowLoadDialog(true); }}>
+                  <FolderOpen className="h-4 w-4 mr-2" />
+                  Load
+                </Button>
+                <Button variant="ghost" onClick={() => setShowTemplatesDialog(true)}>
+                  <LayoutTemplate className="h-4 w-4 mr-2" />
+                  Templates
+                </Button>
+              </>
             )}
             {shareUrl && (
               <div className="flex items-center gap-2 px-3 py-1.5 bg-muted rounded-md text-sm">
@@ -1907,6 +2054,218 @@ export function ScenarioPlanning({ currentHeadcount, sharedToken }: ScenarioPlan
                 <Share2 className="h-4 w-4 mr-2" />
               )}
               {shareRecipients.trim() ? "Share & Notify" : "Copy Link"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Templates Dialog */}
+      <Dialog open={showTemplatesDialog} onOpenChange={setShowTemplatesDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <LayoutTemplate className="h-5 w-5" />
+              Scenario Templates
+            </DialogTitle>
+            <DialogDescription>
+              Use organization templates for consistent scenario planning
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            <div className="flex justify-between items-center mb-4">
+              <span className="text-sm text-muted-foreground">
+                {templates.length} template{templates.length !== 1 ? 's' : ''} available
+              </span>
+              {user && scenarios.length > 0 && (
+                <Button size="sm" onClick={() => setShowCreateTemplateDialog(true)}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Save as Template
+                </Button>
+              )}
+            </div>
+            <ScrollArea className="h-[400px]">
+              {templates.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  <LayoutTemplate className="h-12 w-12 mx-auto mb-4 opacity-30" />
+                  <p>No templates available yet.</p>
+                  <p className="text-sm mt-2">Create scenarios and save them as templates for your team.</p>
+                </div>
+              ) : (
+                <div className="space-y-3 pr-4">
+                  {templates.map(template => (
+                    <Card key={template.id} className="overflow-hidden">
+                      <CardContent className="p-4">
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2">
+                              <h4 className="font-medium">{template.name}</h4>
+                              <Badge variant={template.is_global ? "default" : "secondary"} className="text-xs">
+                                {template.is_global ? (
+                                  <><Globe className="h-3 w-3 mr-1" /> Global</>
+                                ) : (
+                                  <><Building2 className="h-3 w-3 mr-1" /> Company</>
+                                )}
+                              </Badge>
+                            </div>
+                            {template.description && (
+                              <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
+                                {template.description}
+                              </p>
+                            )}
+                            <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground">
+                              <span>{template.parameters.length} scenario{template.parameters.length !== 1 ? 's' : ''}</span>
+                              <span>•</span>
+                              <span>{new Date(template.created_at).toLocaleDateString()}</span>
+                            </div>
+                            {template.parameters.length > 0 && (
+                              <div className="flex flex-wrap gap-1 mt-2">
+                                {template.parameters.slice(0, 3).map((p, idx) => (
+                                  <Badge key={idx} variant="outline" className="text-xs">
+                                    {p.name}
+                                  </Badge>
+                                ))}
+                                {template.parameters.length > 3 && (
+                                  <Badge variant="outline" className="text-xs">
+                                    +{template.parameters.length - 3} more
+                                  </Badge>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-1 ml-4">
+                            <Button size="sm" onClick={() => loadFromTemplate(template)}>
+                              <BookTemplate className="h-4 w-4 mr-2" />
+                              Use
+                            </Button>
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="icon" className="h-8 w-8">
+                                  <MoreVertical className="h-4 w-4" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end">
+                                <DropdownMenuItem onClick={() => loadFromTemplate(template)}>
+                                  <BookTemplate className="h-4 w-4 mr-2" />
+                                  Use Template
+                                </DropdownMenuItem>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem
+                                  className="text-destructive"
+                                  onClick={() => deleteTemplate(template.id)}
+                                >
+                                  <Trash2 className="h-4 w-4 mr-2" />
+                                  Delete
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
+            </ScrollArea>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowTemplatesDialog(false)}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Create Template Dialog */}
+      <Dialog open={showCreateTemplateDialog} onOpenChange={setShowCreateTemplateDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <LayoutTemplate className="h-5 w-5" />
+              Save as Template
+            </DialogTitle>
+            <DialogDescription>
+              Create a reusable template from your current scenarios
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div>
+              <Label htmlFor="template-name">Template Name *</Label>
+              <Input
+                id="template-name"
+                value={newTemplateName}
+                onChange={(e) => setNewTemplateName(e.target.value)}
+                placeholder="e.g., Q1 2025 Planning Template"
+              />
+            </div>
+            <div>
+              <Label htmlFor="template-description">Description</Label>
+              <Textarea
+                id="template-description"
+                value={newTemplateDescription}
+                onChange={(e) => setNewTemplateDescription(e.target.value)}
+                placeholder="Describe when to use this template..."
+                rows={2}
+              />
+            </div>
+            <div className="space-y-3">
+              <Label>Availability</Label>
+              <div className="space-y-2">
+                <div
+                  className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${
+                    newTemplateIsGlobal ? 'border-primary bg-primary/5' : 'hover:bg-muted/50'
+                  }`}
+                  onClick={() => setNewTemplateIsGlobal(true)}
+                >
+                  <Globe className="h-5 w-5 text-primary" />
+                  <div className="flex-1">
+                    <div className="font-medium">Global Template</div>
+                    <div className="text-xs text-muted-foreground">Available to all users across the organization</div>
+                  </div>
+                  {newTemplateIsGlobal && <Check className="h-5 w-5 text-primary" />}
+                </div>
+                <div
+                  className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${
+                    !newTemplateIsGlobal ? 'border-primary bg-primary/5' : 'hover:bg-muted/50'
+                  }`}
+                  onClick={() => setNewTemplateIsGlobal(false)}
+                >
+                  <Building2 className="h-5 w-5 text-muted-foreground" />
+                  <div className="flex-1">
+                    <div className="font-medium">Company-Specific</div>
+                    <div className="text-xs text-muted-foreground">Available only to users in a specific company</div>
+                  </div>
+                  {!newTemplateIsGlobal && <Check className="h-5 w-5 text-primary" />}
+                </div>
+              </div>
+              {!newTemplateIsGlobal && (
+                <div className="mt-3">
+                  <Label htmlFor="template-company">Select Company</Label>
+                  <select
+                    id="template-company"
+                    value={selectedCompanyId || ""}
+                    onChange={(e) => setSelectedCompanyId(e.target.value || null)}
+                    className="w-full mt-1 h-10 rounded-md border border-input bg-background px-3 py-2 text-sm"
+                  >
+                    <option value="">Select a company...</option>
+                    {companies.map(c => (
+                      <option key={c.id} value={c.id}>{c.name}</option>
+                    ))}
+                  </select>
+                </div>
+              )}
+            </div>
+            <div className="p-3 bg-muted rounded-lg">
+              <div className="text-sm font-medium mb-2">Scenarios to include:</div>
+              <div className="flex flex-wrap gap-1">
+                {scenarios.map(s => (
+                  <Badge key={s.id} variant="secondary">{s.name}</Badge>
+                ))}
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowCreateTemplateDialog(false)}>Cancel</Button>
+            <Button onClick={createTemplate} disabled={isSaving || !newTemplateName.trim()}>
+              {isSaving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <LayoutTemplate className="h-4 w-4 mr-2" />}
+              Create Template
             </Button>
           </DialogFooter>
         </DialogContent>
