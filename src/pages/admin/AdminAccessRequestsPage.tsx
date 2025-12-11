@@ -124,6 +124,23 @@ export default function AdminAccessRequestsPage() {
 
       if (error) throw error;
 
+      // Send email notification (non-blocking)
+      supabase.functions
+        .invoke("send-access-request-notification", {
+          body: {
+            requestId: selectedRequest.id,
+            status: action,
+            reviewNotes: reviewNotes.trim() || undefined,
+          },
+        })
+        .then((res) => {
+          if (res.error) {
+            console.error("Email notification failed:", res.error);
+          } else {
+            console.log("Email notification sent");
+          }
+        });
+
       toast.success(`Request ${action} successfully`);
       setSelectedRequest(null);
       setReviewNotes("");
