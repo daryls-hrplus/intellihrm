@@ -242,17 +242,45 @@ export default function EmployeeProfilePage() {
         {/* Tabs Section */}
         <Tabs defaultValue="overview" className="w-full">
           <TabsList className="flex flex-wrap h-auto gap-1 p-1">
-            <TabsTrigger value="overview"><User className="h-4 w-4 mr-1" />Overview</TabsTrigger>
             <TabsTrigger value="addresses"><Home className="h-4 w-4 mr-1" />Addresses</TabsTrigger>
-            <TabsTrigger value="dependents"><Baby className="h-4 w-4 mr-1" />Dependents</TabsTrigger>
+            <TabsTrigger value="background"><ShieldCheck className="h-4 w-4 mr-1" />Background</TabsTrigger>
             <TabsTrigger value="bank"><CreditCard className="h-4 w-4 mr-1" />Bank</TabsTrigger>
             <TabsTrigger value="beneficiaries"><Users className="h-4 w-4 mr-1" />Beneficiaries</TabsTrigger>
+            <TabsTrigger value="dependents"><Baby className="h-4 w-4 mr-1" />Dependents</TabsTrigger>
             <TabsTrigger value="documents"><FileText className="h-4 w-4 mr-1" />Documents</TabsTrigger>
-            <TabsTrigger value="work_permits"><FileCheck className="h-4 w-4 mr-1" />Work Permits</TabsTrigger>
             <TabsTrigger value="licenses"><Award className="h-4 w-4 mr-1" />Licenses</TabsTrigger>
-            <TabsTrigger value="background"><ShieldCheck className="h-4 w-4 mr-1" />Background</TabsTrigger>
+            <TabsTrigger value="overview"><User className="h-4 w-4 mr-1" />Overview</TabsTrigger>
             <TabsTrigger value="references"><UserCheck className="h-4 w-4 mr-1" />References</TabsTrigger>
+            <TabsTrigger value="work_permits"><FileCheck className="h-4 w-4 mr-1" />Work Permits</TabsTrigger>
           </TabsList>
+
+          <TabsContent value="addresses" className="mt-6">
+            <EmployeeAddressesTab employeeId={employee.id} />
+          </TabsContent>
+
+          <TabsContent value="background" className="mt-6">
+            <EmployeeBackgroundChecksTab employeeId={employee.id} />
+          </TabsContent>
+
+          <TabsContent value="bank" className="mt-6">
+            <EmployeeBankAccountsTab employeeId={employee.id} />
+          </TabsContent>
+
+          <TabsContent value="beneficiaries" className="mt-6">
+            <EmployeeBeneficiariesTab employeeId={employee.id} />
+          </TabsContent>
+
+          <TabsContent value="dependents" className="mt-6">
+            <EmployeeDependentsTab employeeId={employee.id} />
+          </TabsContent>
+
+          <TabsContent value="documents" className="mt-6">
+            <EmployeeDocumentsTab employeeId={employee.id} />
+          </TabsContent>
+
+          <TabsContent value="licenses" className="mt-6">
+            <EmployeeLicensesTab employeeId={employee.id} />
+          </TabsContent>
 
           <TabsContent value="overview" className="mt-6">
             <div className="grid gap-6 md:grid-cols-2">
@@ -344,40 +372,12 @@ export default function EmployeeProfilePage() {
             </div>
           </TabsContent>
 
-          <TabsContent value="addresses" className="mt-6">
-            <EmployeeAddressesTab employeeId={employee.id} />
-          </TabsContent>
-
-          <TabsContent value="bank" className="mt-6">
-            <EmployeeBankAccountsTab employeeId={employee.id} />
-          </TabsContent>
-
-          <TabsContent value="beneficiaries" className="mt-6">
-            <EmployeeBeneficiariesTab employeeId={employee.id} />
-          </TabsContent>
-
-          <TabsContent value="documents" className="mt-6">
-            <EmployeeDocumentsTab employeeId={employee.id} />
-          </TabsContent>
-
-          <TabsContent value="dependents" className="mt-6">
-            <EmployeeDependentsTab employeeId={employee.id} />
+          <TabsContent value="references" className="mt-6">
+            <EmployeeReferencesTab employeeId={employee.id} />
           </TabsContent>
 
           <TabsContent value="work_permits" className="mt-6">
             <EmployeeWorkPermitsTab employeeId={employee.id} />
-          </TabsContent>
-
-          <TabsContent value="licenses" className="mt-6">
-            <EmployeeLicensesTab employeeId={employee.id} />
-          </TabsContent>
-
-          <TabsContent value="background" className="mt-6">
-            <EmployeeBackgroundChecksTab employeeId={employee.id} />
-          </TabsContent>
-
-          <TabsContent value="references" className="mt-6">
-            <EmployeeReferencesTab employeeId={employee.id} />
           </TabsContent>
         </Tabs>
       </div>
