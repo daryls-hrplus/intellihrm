@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/contexts/AuthContext";
 import {
   LayoutDashboard,
   Users,
@@ -22,6 +23,7 @@ import {
   Languages,
   Menu,
   X,
+  LogOut,
 } from "lucide-react";
 
 interface NavItem {
@@ -29,6 +31,8 @@ interface NavItem {
   href?: string;
   icon: React.ElementType;
   children?: { title: string; href: string }[];
+  adminOnly?: boolean;
+  hrOnly?: boolean;
 }
 
 const navItems: NavItem[] = [
@@ -36,6 +40,7 @@ const navItems: NavItem[] = [
   {
     title: "Admin & Security",
     icon: Settings,
+    adminOnly: true,
     children: [
       { title: "Companies", href: "/admin/companies" },
       { title: "Users", href: "/admin/users" },
@@ -55,7 +60,7 @@ const navItems: NavItem[] = [
     ],
   },
   { title: "Leave Management", href: "/leave", icon: Calendar },
-  { title: "Compensation", href: "/compensation", icon: DollarSign },
+  { title: "Compensation", href: "/compensation", icon: DollarSign, hrOnly: true },
   { title: "Benefits", href: "/benefits", icon: Gift },
   {
     title: "Performance",
@@ -67,10 +72,10 @@ const navItems: NavItem[] = [
     ],
   },
   { title: "Training", href: "/training", icon: GraduationCap },
-  { title: "Succession", href: "/succession", icon: TrendingUp },
-  { title: "Recruitment", href: "/recruitment", icon: UserPlus },
+  { title: "Succession", href: "/succession", icon: TrendingUp, hrOnly: true },
+  { title: "Recruitment", href: "/recruitment", icon: UserPlus, hrOnly: true },
   { title: "Health & Safety", href: "/hse", icon: Shield },
-  { title: "Employee Relations", href: "/employee-relations", icon: Heart },
+  { title: "Employee Relations", href: "/employee-relations", icon: Heart, hrOnly: true },
   { title: "Company Property", href: "/property", icon: Package },
 ];
 
@@ -149,6 +154,35 @@ function NavItemComponent({ item, isCollapsed }: NavItemComponentProps) {
 export function AppSidebar() {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
+  const { profile, roles, signOut, isAdmin, isHRManager } = useAuth();
+  const navigate = useNavigate();
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate("/auth");
+  };
+
+  const filteredNavItems = navItems.filter((item) => {
+    if (item.adminOnly && !isAdmin) return false;
+    if (item.hrOnly && !isHRManager) return false;
+    return true;
+  });
+
+  const getInitials = (name: string | null) => {
+    if (!name) return "U";
+    return name
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase()
+      .slice(0, 2);
+  };
+
+  const getRoleBadge = () => {
+    if (roles.includes("admin")) return "Admin";
+    if (roles.includes("hr_manager")) return "HR Manager";
+    return "Employee";
+  };
 
   return (
     <>
@@ -225,25 +259,45 @@ export function AppSidebar() {
 
         {/* Navigation */}
         <nav className="flex-1 space-y-1 overflow-y-auto p-3">
-          {navItems.map((item) => (
+          {filteredNavItems.map((item) => (
             <NavItemComponent key={item.title} item={item} isCollapsed={isCollapsed} />
           ))}
         </nav>
 
         {/* Footer */}
-        {!isCollapsed && (
-          <div className="border-t border-sidebar-border p-4">
-            <div className="flex items-center gap-3">
-              <div className="h-9 w-9 rounded-full bg-sidebar-primary/20 flex items-center justify-center">
-                <span className="text-sm font-medium text-sidebar-primary">JD</span>
+        <div className="border-t border-sidebar-border p-4">
+          {!isCollapsed ? (
+            <div className="space-y-3">
+              <div className="flex items-center gap-3">
+                <div className="h-9 w-9 rounded-full bg-sidebar-primary/20 flex items-center justify-center">
+                  <span className="text-sm font-medium text-sidebar-primary">
+                    {getInitials(profile?.full_name)}
+                  </span>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="truncate text-sm font-medium text-sidebar-foreground">
+                    {profile?.full_name || "User"}
+                  </p>
+                  <p className="text-xs text-sidebar-foreground/60">{getRoleBadge()}</p>
+                </div>
               </div>
-              <div className="flex-1">
-                <p className="text-sm font-medium text-sidebar-foreground">John Doe</p>
-                <p className="text-xs text-sidebar-foreground/60">HR Administrator</p>
-              </div>
+              <button
+                onClick={handleSignOut}
+                className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground"
+              >
+                <LogOut className="h-4 w-4" />
+                Sign Out
+              </button>
             </div>
-          </div>
-        )}
+          ) : (
+            <button
+              onClick={handleSignOut}
+              className="flex w-full items-center justify-center rounded-lg p-2 text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground"
+            >
+              <LogOut className="h-5 w-5" />
+            </button>
+          )}
+        </div>
       </aside>
     </>
   );
