@@ -1,6 +1,6 @@
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuditLog } from "@/hooks/useAuditLog";
 import { usePiiVisibility } from "@/hooks/usePiiVisibility";
@@ -15,6 +15,8 @@ import {
   Building2,
   EyeOff,
   Loader2,
+  X,
+  Check,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -23,6 +25,13 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 
 interface Employee {
   id: string;
@@ -39,6 +48,9 @@ export default function EmployeesPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [loading, setLoading] = useState(true);
+  const [filterOpen, setFilterOpen] = useState(false);
+  const [statusFilter, setStatusFilter] = useState<"all" | "active" | "unassigned">("all");
+  const [departmentFilter, setDepartmentFilter] = useState<string>("all");
   const navigate = useNavigate();
   const { logView } = useAuditLog();
   const { canViewPii, maskPii } = usePiiVisibility();
@@ -129,12 +141,44 @@ export default function EmployeesPage() {
     }
   };
 
-  const filteredEmployees = employees.filter(
-    (emp) =>
-      emp.full_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      emp.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (emp.department_name?.toLowerCase().includes(searchQuery.toLowerCase()) ?? false)
-  );
+  // Get unique departments for filter
+  const departments = useMemo(() => {
+    const deptSet = new Set<string>();
+    employees.forEach(emp => {
+      if (emp.department_name) deptSet.add(emp.department_name);
+    });
+    return Array.from(deptSet).sort();
+  }, [employees]);
+
+  const filteredEmployees = useMemo(() => {
+    return employees.filter((emp) => {
+      // Search filter
+      const matchesSearch = 
+        emp.full_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        emp.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (emp.department_name?.toLowerCase().includes(searchQuery.toLowerCase()) ?? false);
+      
+      // Status filter
+      const matchesStatus = 
+        statusFilter === "all" ||
+        (statusFilter === "active" && emp.is_active) ||
+        (statusFilter === "unassigned" && !emp.is_active);
+      
+      // Department filter
+      const matchesDepartment = 
+        departmentFilter === "all" || 
+        emp.department_name === departmentFilter;
+
+      return matchesSearch && matchesStatus && matchesDepartment;
+    });
+  }, [employees, searchQuery, statusFilter, departmentFilter]);
+
+  const activeFiltersCount = (statusFilter !== "all" ? 1 : 0) + (departmentFilter !== "all" ? 1 : 0);
+
+  const clearFilters = () => {
+    setStatusFilter("all");
+    setDepartmentFilter("all");
+  };
 
   const getInitials = (name: string) => {
     return name
@@ -181,10 +225,74 @@ export default function EmployeesPage() {
               className="h-10 w-full rounded-lg border border-input bg-card pl-10 pr-4 text-sm text-card-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
             />
           </div>
-          <button className="inline-flex items-center gap-2 rounded-lg border border-border bg-card px-4 py-2.5 text-sm font-medium text-card-foreground transition-all hover:bg-accent">
-            <Filter className="h-4 w-4" />
-            Filters
-          </button>
+          
+          <Popover open={filterOpen} onOpenChange={setFilterOpen}>
+            <PopoverTrigger asChild>
+              <button className="relative inline-flex items-center gap-2 rounded-lg border border-border bg-card px-4 py-2.5 text-sm font-medium text-card-foreground transition-all hover:bg-accent">
+                <Filter className="h-4 w-4" />
+                Filters
+                {activeFiltersCount > 0 && (
+                  <Badge variant="secondary" className="ml-1 h-5 w-5 rounded-full p-0 text-xs">
+                    {activeFiltersCount}
+                  </Badge>
+                )}
+              </button>
+            </PopoverTrigger>
+            <PopoverContent className="w-72 p-4" align="end">
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <h4 className="font-medium text-foreground">Filters</h4>
+                  {activeFiltersCount > 0 && (
+                    <Button variant="ghost" size="sm" onClick={clearFilters} className="h-auto p-1 text-xs">
+                      Clear all
+                    </Button>
+                  )}
+                </div>
+                
+                {/* Status Filter */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-foreground">Status</label>
+                  <div className="flex flex-wrap gap-2">
+                    {[
+                      { value: "all", label: "All" },
+                      { value: "active", label: "Active" },
+                      { value: "unassigned", label: "Unassigned" },
+                    ].map((option) => (
+                      <button
+                        key={option.value}
+                        onClick={() => setStatusFilter(option.value as typeof statusFilter)}
+                        className={cn(
+                          "inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-colors",
+                          statusFilter === option.value
+                            ? "bg-primary text-primary-foreground"
+                            : "bg-muted text-muted-foreground hover:bg-muted/80"
+                        )}
+                      >
+                        {statusFilter === option.value && <Check className="h-3 w-3" />}
+                        {option.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Department Filter */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-foreground">Department</label>
+                  <select
+                    value={departmentFilter}
+                    onChange={(e) => setDepartmentFilter(e.target.value)}
+                    className="w-full rounded-lg border border-input bg-card px-3 py-2 text-sm text-card-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  >
+                    <option value="all">All Departments</option>
+                    {departments.map((dept) => (
+                      <option key={dept} value={dept}>{dept}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            </PopoverContent>
+          </Popover>
+
           {!canViewPii && (
             <Tooltip>
               <TooltipTrigger asChild>
@@ -200,6 +308,29 @@ export default function EmployeesPage() {
           )}
         </div>
 
+        {/* Active Filter Badges */}
+        {activeFiltersCount > 0 && (
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-sm text-muted-foreground">Active filters:</span>
+            {statusFilter !== "all" && (
+              <Badge variant="secondary" className="gap-1">
+                Status: {statusFilter}
+                <button onClick={() => setStatusFilter("all")} className="ml-1 hover:text-destructive">
+                  <X className="h-3 w-3" />
+                </button>
+              </Badge>
+            )}
+            {departmentFilter !== "all" && (
+              <Badge variant="secondary" className="gap-1">
+                Dept: {departmentFilter}
+                <button onClick={() => setDepartmentFilter("all")} className="ml-1 hover:text-destructive">
+                  <X className="h-3 w-3" />
+                </button>
+              </Badge>
+            )}
+          </div>
+        )}
+
         {/* Loading State */}
         {loading && (
           <div className="flex items-center justify-center py-12">
@@ -213,8 +344,15 @@ export default function EmployeesPage() {
             <Building2 className="h-12 w-12 text-muted-foreground/50" />
             <h3 className="mt-4 text-lg font-medium text-foreground">No employees found</h3>
             <p className="mt-1 text-sm text-muted-foreground">
-              {searchQuery ? "Try adjusting your search query" : "Add employees to get started"}
+              {searchQuery || activeFiltersCount > 0 
+                ? "Try adjusting your search or filters" 
+                : "Add employees to get started"}
             </p>
+            {activeFiltersCount > 0 && (
+              <Button variant="outline" size="sm" onClick={clearFilters} className="mt-4">
+                Clear filters
+              </Button>
+            )}
           </div>
         )}
 
