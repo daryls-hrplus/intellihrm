@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { NavLink } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import {
   Building,
   Building2,
@@ -15,7 +17,12 @@ import {
   FileText,
   Eye,
   Cog,
+  ShieldAlert,
+  Mail,
+  MailX,
+  AlertTriangle,
 } from "lucide-react";
+import { formatDistanceToNow } from "date-fns";
 
 const adminModules = [
   {
@@ -90,8 +97,25 @@ interface Stats {
   admins: number;
 }
 
+interface PiiAlert {
+  id: string;
+  user_email: string;
+  alert_type: string;
+  access_count: number;
+  email_sent: boolean;
+  created_at: string;
+}
+
+interface PiiAlertStats {
+  total: number;
+  emailsSent: number;
+  last24Hours: number;
+  recentAlerts: PiiAlert[];
+}
+
 export default function AdminDashboardPage() {
   const [stats, setStats] = useState<Stats>({ totalUsers: 0, totalCompanies: 0, totalGroups: 0, admins: 0 });
+  const [piiAlertStats, setPiiAlertStats] = useState<PiiAlertStats>({ total: 0, emailsSent: 0, last24Hours: 0, recentAlerts: [] });
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -115,7 +139,32 @@ export default function AdminDashboardPage() {
         setIsLoading(false);
       }
     };
+
+    const fetchPiiAlerts = async () => {
+      try {
+        const now = new Date();
+        const yesterday = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+
+        const [totalRes, emailsSentRes, last24HoursRes, recentRes] = await Promise.all([
+          supabase.from("pii_access_alerts").select("id", { count: "exact", head: true }),
+          supabase.from("pii_access_alerts").select("id", { count: "exact", head: true }).eq("email_sent", true),
+          supabase.from("pii_access_alerts").select("id", { count: "exact", head: true }).gte("created_at", yesterday.toISOString()),
+          supabase.from("pii_access_alerts").select("*").order("created_at", { ascending: false }).limit(5),
+        ]);
+
+        setPiiAlertStats({
+          total: totalRes.count || 0,
+          emailsSent: emailsSentRes.count || 0,
+          last24Hours: last24HoursRes.count || 0,
+          recentAlerts: (recentRes.data || []) as PiiAlert[],
+        });
+      } catch (error) {
+        console.error("Error fetching PII alerts:", error);
+      }
+    };
+
     fetchStats();
+    fetchPiiAlerts();
   }, []);
 
   const statCards = [
@@ -169,6 +218,85 @@ export default function AdminDashboardPage() {
             );
           })}
         </div>
+
+        {/* PII Alerts Widget */}
+        <Card className="animate-slide-up" style={{ animationDelay: "200ms" }}>
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <ShieldAlert className="h-5 w-5 text-destructive" />
+                <CardTitle className="text-lg">PII Security Alerts</CardTitle>
+              </div>
+              <NavLink
+                to="/admin/pii-access"
+                className="text-sm text-primary hover:underline flex items-center gap-1"
+              >
+                View all <ChevronRight className="h-4 w-4" />
+              </NavLink>
+            </div>
+            <CardDescription>
+              Monitor suspicious PII access patterns
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {/* Alert Stats */}
+            <div className="grid grid-cols-3 gap-4 mb-4">
+              <div className="text-center p-3 rounded-lg bg-muted/50">
+                <p className="text-2xl font-bold text-card-foreground">{piiAlertStats.total}</p>
+                <p className="text-xs text-muted-foreground">Total Alerts</p>
+              </div>
+              <div className="text-center p-3 rounded-lg bg-muted/50">
+                <p className="text-2xl font-bold text-warning">{piiAlertStats.last24Hours}</p>
+                <p className="text-xs text-muted-foreground">Last 24 Hours</p>
+              </div>
+              <div className="text-center p-3 rounded-lg bg-muted/50">
+                <p className="text-2xl font-bold text-success">{piiAlertStats.emailsSent}</p>
+                <p className="text-xs text-muted-foreground">Emails Sent</p>
+              </div>
+            </div>
+
+            {/* Recent Alerts */}
+            {piiAlertStats.recentAlerts.length > 0 ? (
+              <div className="space-y-2">
+                <p className="text-sm font-medium text-muted-foreground mb-2">Recent Alerts</p>
+                {piiAlertStats.recentAlerts.map((alert) => (
+                  <div
+                    key={alert.id}
+                    className="flex items-center justify-between p-3 rounded-lg border border-border bg-background/50"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className={`p-2 rounded-full ${alert.alert_type === "TEST_ALERT" ? "bg-info/10" : "bg-destructive/10"}`}>
+                        <AlertTriangle className={`h-4 w-4 ${alert.alert_type === "TEST_ALERT" ? "text-info" : "text-destructive"}`} />
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-card-foreground">{alert.user_email}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {alert.access_count} accesses • {formatDistanceToNow(new Date(alert.created_at), { addSuffix: true })}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Badge variant={alert.alert_type === "TEST_ALERT" ? "secondary" : "destructive"} className="text-xs">
+                        {alert.alert_type === "TEST_ALERT" ? "Test" : "Alert"}
+                      </Badge>
+                      {alert.email_sent ? (
+                        <Mail className="h-4 w-4 text-success" />
+                      ) : (
+                        <MailX className="h-4 w-4 text-muted-foreground" />
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-6 text-muted-foreground">
+                <ShieldAlert className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                <p className="text-sm">No security alerts yet</p>
+                <p className="text-xs">Alerts will appear here when suspicious PII access is detected</p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
 
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {adminModules.map((module, index) => {
