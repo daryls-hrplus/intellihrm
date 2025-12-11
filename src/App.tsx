@@ -75,6 +75,7 @@ import HelpCenterPage from "./pages/help/HelpCenterPage";
 import HelpChatPage from "./pages/help/HelpChatPage";
 import TicketsPage from "./pages/help/TicketsPage";
 import NewTicketPage from "./pages/help/NewTicketPage";
+import TicketDetailPage from "./pages/help/TicketDetailPage";
 
 const queryClient = new QueryClient();
 
@@ -434,6 +435,14 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <NewTicketPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/help/tickets/:ticketId"
+              element={
+                <ProtectedRoute>
+                  <TicketDetailPage />
                 </ProtectedRoute>
               }
             />
