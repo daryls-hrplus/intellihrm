@@ -57,8 +57,10 @@ import {
   BookTemplate,
   Globe,
   Building2,
-  MoreVertical
+  MoreVertical,
+  Presentation
 } from "lucide-react";
+import pptxgen from "pptxgenjs";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, AreaChart, Area } from "recharts";
 import { WhatIfAnalysis } from "./WhatIfAnalysis";
 import { MonteCarloSimulation } from "./MonteCarloSimulation";
@@ -1158,6 +1160,251 @@ export function ScenarioPlanning({ currentHeadcount, sharedToken }: ScenarioPlan
     toast.success("PDF report opened in new tab");
   };
 
+  const exportToPPT = () => {
+    if (results.length === 0) {
+      toast.error("No results to export. Run scenarios first.");
+      return;
+    }
+
+    const pres = new pptxgen();
+    pres.author = "Scenario Planning";
+    pres.title = "Headcount Scenario Analysis";
+    pres.subject = "Executive Presentation";
+
+    // Title slide
+    const titleSlide = pres.addSlide();
+    titleSlide.addText("Headcount Scenario Analysis", {
+      x: 0.5,
+      y: 2,
+      w: 9,
+      h: 1,
+      fontSize: 36,
+      bold: true,
+      color: "363636",
+      align: "center",
+    });
+    titleSlide.addText(`Current Headcount: ${currentHeadcount}`, {
+      x: 0.5,
+      y: 3.2,
+      w: 9,
+      h: 0.5,
+      fontSize: 20,
+      color: "666666",
+      align: "center",
+    });
+    titleSlide.addText(new Date().toLocaleDateString(), {
+      x: 0.5,
+      y: 3.8,
+      w: 9,
+      h: 0.5,
+      fontSize: 14,
+      color: "999999",
+      align: "center",
+    });
+
+    // Executive Summary slide
+    const summarySlide = pres.addSlide();
+    summarySlide.addText("Executive Summary", {
+      x: 0.5,
+      y: 0.3,
+      w: 9,
+      h: 0.6,
+      fontSize: 28,
+      bold: true,
+      color: "363636",
+    });
+
+    const summaryTableData: pptxgen.TableRow[] = [
+      [
+        { text: "Scenario", options: { bold: true, fill: { color: "4472C4" }, color: "FFFFFF" } },
+        { text: "Final HC", options: { bold: true, fill: { color: "4472C4" }, color: "FFFFFF" } },
+        { text: "Hires", options: { bold: true, fill: { color: "4472C4" }, color: "FFFFFF" } },
+        { text: "Attrition", options: { bold: true, fill: { color: "4472C4" }, color: "FFFFFF" } },
+        { text: "Net Change", options: { bold: true, fill: { color: "4472C4" }, color: "FFFFFF" } },
+        { text: "Growth %", options: { bold: true, fill: { color: "4472C4" }, color: "FFFFFF" } },
+        { text: "Feasibility", options: { bold: true, fill: { color: "4472C4" }, color: "FFFFFF" } },
+      ],
+    ];
+
+    results.forEach((r, idx) => {
+      const netChange = r.totalHires - r.totalAttrition;
+      const growthPercent = ((r.finalHeadcount - currentHeadcount) / currentHeadcount * 100).toFixed(1);
+      const fillColor = idx % 2 === 0 ? "F2F2F2" : "FFFFFF";
+      const feasibilityColor = r.feasibility === "high" ? "28A745" : r.feasibility === "medium" ? "FFC107" : "DC3545";
+      
+      summaryTableData.push([
+        { text: r.scenarioName, options: { fill: { color: fillColor } } },
+        { text: r.finalHeadcount.toString(), options: { fill: { color: fillColor } } },
+        { text: `+${r.totalHires}`, options: { fill: { color: fillColor }, color: "28A745" } },
+        { text: `-${r.totalAttrition}`, options: { fill: { color: fillColor }, color: "DC3545" } },
+        { text: netChange >= 0 ? `+${netChange}` : netChange.toString(), options: { fill: { color: fillColor }, color: netChange >= 0 ? "28A745" : "DC3545" } },
+        { text: `${growthPercent}%`, options: { fill: { color: fillColor } } },
+        { text: r.feasibility.toUpperCase(), options: { fill: { color: fillColor }, color: feasibilityColor, bold: true } },
+      ]);
+    });
+
+    summarySlide.addTable(summaryTableData, {
+      x: 0.3,
+      y: 1.2,
+      w: 9.4,
+      colW: [2, 1.1, 1.1, 1.1, 1.1, 1, 1],
+      fontSize: 11,
+      border: { pt: 0.5, color: "CCCCCC" },
+      align: "center",
+      valign: "middle",
+    });
+
+    // Scenario Parameters slide
+    const paramsSlide = pres.addSlide();
+    paramsSlide.addText("Scenario Parameters", {
+      x: 0.5,
+      y: 0.3,
+      w: 9,
+      h: 0.6,
+      fontSize: 28,
+      bold: true,
+      color: "363636",
+    });
+
+    const paramsTableData: pptxgen.TableRow[] = [
+      [
+        { text: "Scenario", options: { bold: true, fill: { color: "4472C4" }, color: "FFFFFF" } },
+        { text: "Growth Rate", options: { bold: true, fill: { color: "4472C4" }, color: "FFFFFF" } },
+        { text: "Attrition", options: { bold: true, fill: { color: "4472C4" }, color: "FFFFFF" } },
+        { text: "Budget/Qtr", options: { bold: true, fill: { color: "4472C4" }, color: "FFFFFF" } },
+        { text: "Horizon", options: { bold: true, fill: { color: "4472C4" }, color: "FFFFFF" } },
+        { text: "Seasonal", options: { bold: true, fill: { color: "4472C4" }, color: "FFFFFF" } },
+      ],
+    ];
+
+    scenarios.forEach((s, idx) => {
+      const fillColor = idx % 2 === 0 ? "F2F2F2" : "FFFFFF";
+      paramsTableData.push([
+        { text: s.name, options: { fill: { color: fillColor } } },
+        { text: `${s.growthRate}%`, options: { fill: { color: fillColor } } },
+        { text: `${s.attritionRate}%`, options: { fill: { color: fillColor } } },
+        { text: s.budgetConstraint.toString(), options: { fill: { color: fillColor } } },
+        { text: `${s.timeHorizon} mo`, options: { fill: { color: fillColor } } },
+        { text: s.seasonalAdjustment ? "Yes" : "No", options: { fill: { color: fillColor } } },
+      ]);
+    });
+
+    paramsSlide.addTable(paramsTableData, {
+      x: 0.5,
+      y: 1.2,
+      w: 9,
+      colW: [2.5, 1.3, 1.3, 1.3, 1.3, 1.3],
+      fontSize: 12,
+      border: { pt: 0.5, color: "CCCCCC" },
+      align: "center",
+      valign: "middle",
+    });
+
+    // Individual scenario slides with projections
+    results.forEach((result, idx) => {
+      const scenarioSlide = pres.addSlide();
+      const scenario = scenarios.find(s => s.id === result.scenarioId);
+      
+      scenarioSlide.addText(result.scenarioName, {
+        x: 0.5,
+        y: 0.3,
+        w: 9,
+        h: 0.5,
+        fontSize: 24,
+        bold: true,
+        color: "363636",
+      });
+
+      // Key metrics
+      const netChange = result.totalHires - result.totalAttrition;
+      const growthPercent = ((result.finalHeadcount - currentHeadcount) / currentHeadcount * 100).toFixed(1);
+      
+      const metricsData = [
+        { label: "Final Headcount", value: result.finalHeadcount.toString() },
+        { label: "Total Hires", value: `+${result.totalHires}` },
+        { label: "Total Attrition", value: `-${result.totalAttrition}` },
+        { label: "Net Change", value: netChange >= 0 ? `+${netChange}` : netChange.toString() },
+        { label: "Growth", value: `${growthPercent}%` },
+      ];
+
+      metricsData.forEach((metric, i) => {
+        scenarioSlide.addText(metric.label, {
+          x: 0.5 + (i * 1.8),
+          y: 1,
+          w: 1.6,
+          h: 0.3,
+          fontSize: 10,
+          color: "666666",
+          align: "center",
+        });
+        scenarioSlide.addText(metric.value, {
+          x: 0.5 + (i * 1.8),
+          y: 1.3,
+          w: 1.6,
+          h: 0.4,
+          fontSize: 18,
+          bold: true,
+          color: "363636",
+          align: "center",
+        });
+      });
+
+      // Projection table (first and last few months)
+      const projections = result.projections;
+      const displayProjections = projections.length <= 6 
+        ? projections 
+        : [...projections.slice(0, 3), ...projections.slice(-3)];
+
+      const projTableData: pptxgen.TableRow[] = [
+        [
+          { text: "Month", options: { bold: true, fill: { color: "4472C4" }, color: "FFFFFF" } },
+          { text: "Headcount", options: { bold: true, fill: { color: "4472C4" }, color: "FFFFFF" } },
+          { text: "Hires", options: { bold: true, fill: { color: "4472C4" }, color: "FFFFFF" } },
+          { text: "Attrition", options: { bold: true, fill: { color: "4472C4" }, color: "FFFFFF" } },
+          { text: "Net Change", options: { bold: true, fill: { color: "4472C4" }, color: "FFFFFF" } },
+        ],
+      ];
+
+      displayProjections.forEach((p, i) => {
+        const fillColor = i % 2 === 0 ? "F2F2F2" : "FFFFFF";
+        projTableData.push([
+          { text: p.month, options: { fill: { color: fillColor } } },
+          { text: p.headcount.toString(), options: { fill: { color: fillColor }, bold: true } },
+          { text: `+${p.hires}`, options: { fill: { color: fillColor }, color: "28A745" } },
+          { text: `-${p.attrition}`, options: { fill: { color: fillColor }, color: "DC3545" } },
+          { text: p.netChange >= 0 ? `+${p.netChange}` : p.netChange.toString(), options: { fill: { color: fillColor }, color: p.netChange >= 0 ? "28A745" : "DC3545" } },
+        ]);
+      });
+
+      scenarioSlide.addTable(projTableData, {
+        x: 0.5,
+        y: 2,
+        w: 9,
+        colW: [2.2, 1.7, 1.7, 1.7, 1.7],
+        fontSize: 11,
+        border: { pt: 0.5, color: "CCCCCC" },
+        align: "center",
+        valign: "middle",
+      });
+
+      if (projections.length > 6) {
+        scenarioSlide.addText("* Showing first 3 and last 3 months of projections", {
+          x: 0.5,
+          y: 4.8,
+          w: 9,
+          h: 0.3,
+          fontSize: 9,
+          color: "999999",
+          italic: true,
+        });
+      }
+    });
+
+    // Save the presentation
+    pres.writeFile({ fileName: `scenario-analysis-${new Date().toISOString().split("T")[0]}.pptx` });
+    toast.success("PowerPoint exported successfully");
+  };
+
   return (
     <div className="space-y-6">
       {/* Header Card */}
@@ -1204,6 +1451,10 @@ export function ScenarioPlanning({ currentHeadcount, sharedToken }: ScenarioPlan
                   <DropdownMenuItem onClick={exportToPDF}>
                     <FileText className="h-4 w-4 mr-2" />
                     Export to PDF
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={exportToPPT}>
+                    <Presentation className="h-4 w-4 mr-2" />
+                    Export to PowerPoint
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
