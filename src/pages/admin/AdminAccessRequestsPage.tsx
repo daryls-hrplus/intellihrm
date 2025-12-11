@@ -36,7 +36,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Loader2, CheckCircle, XCircle, Clock, FileText, ArrowLeft, Download, CalendarIcon, X, Search } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Loader2, CheckCircle, XCircle, Clock, FileText, ArrowLeft, Download, CalendarIcon, X, Search, History } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -44,6 +45,7 @@ import { toast } from "sonner";
 import { NavLink } from "react-router-dom";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
+import { RequestHistoryTimeline } from "@/components/admin/RequestHistoryTimeline";
 
 const MENU_MODULES = [
   { code: "dashboard", name: "Dashboard" },
@@ -617,7 +619,7 @@ export default function AdminAccessRequestsPage() {
 
         {/* Review Dialog */}
         <Dialog open={!!selectedRequest} onOpenChange={() => setSelectedRequest(null)}>
-          <DialogContent className="max-w-lg">
+          <DialogContent className="max-w-lg max-h-[80vh] overflow-hidden flex flex-col">
             <DialogHeader>
               <DialogTitle>
                 {selectedRequest?.status === "pending"
@@ -630,57 +632,71 @@ export default function AdminAccessRequestsPage() {
             </DialogHeader>
 
             {selectedRequest && (
-              <div className="space-y-4">
-                <div>
-                  <Label className="text-sm font-medium">Requested Modules</Label>
-                  <div className="mt-2 flex flex-wrap gap-2">
-                    {selectedRequest.requested_modules.map((mod) => (
-                      <Badge key={mod} variant="secondary">
-                        {getModuleName(mod)}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
-
-                <div>
-                  <Label className="text-sm font-medium">Reason</Label>
-                  <p className="mt-1 text-sm text-muted-foreground bg-muted p-3 rounded-md">
-                    {selectedRequest.reason}
-                  </p>
-                </div>
-
-                <div>
-                  <Label className="text-sm font-medium">Submitted</Label>
-                  <p className="mt-1 text-sm text-muted-foreground">
-                    {new Date(selectedRequest.created_at).toLocaleString()}
-                  </p>
-                </div>
-
-                {selectedRequest.status === "pending" ? (
+              <Tabs defaultValue="details" className="flex-1 overflow-hidden flex flex-col">
+                <TabsList className="grid w-full grid-cols-2">
+                  <TabsTrigger value="details">Details</TabsTrigger>
+                  <TabsTrigger value="history" className="flex items-center gap-1">
+                    <History className="h-3 w-3" />
+                    History
+                  </TabsTrigger>
+                </TabsList>
+                
+                <TabsContent value="details" className="flex-1 overflow-auto space-y-4 mt-4">
                   <div>
-                    <Label htmlFor="notes" className="text-sm font-medium">
-                      Review Notes (optional)
-                    </Label>
-                    <Textarea
-                      id="notes"
-                      value={reviewNotes}
-                      onChange={(e) => setReviewNotes(e.target.value)}
-                      placeholder="Add notes for the employee..."
-                      className="mt-2"
-                      rows={3}
-                    />
-                  </div>
-                ) : (
-                  selectedRequest.review_notes && (
-                    <div>
-                      <Label className="text-sm font-medium">Review Notes</Label>
-                      <p className="mt-1 text-sm text-muted-foreground bg-muted p-3 rounded-md">
-                        {selectedRequest.review_notes}
-                      </p>
+                    <Label className="text-sm font-medium">Requested Modules</Label>
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      {selectedRequest.requested_modules.map((mod) => (
+                        <Badge key={mod} variant="secondary">
+                          {getModuleName(mod)}
+                        </Badge>
+                      ))}
                     </div>
-                  )
-                )}
-              </div>
+                  </div>
+
+                  <div>
+                    <Label className="text-sm font-medium">Reason</Label>
+                    <p className="mt-1 text-sm text-muted-foreground bg-muted p-3 rounded-md">
+                      {selectedRequest.reason}
+                    </p>
+                  </div>
+
+                  <div>
+                    <Label className="text-sm font-medium">Submitted</Label>
+                    <p className="mt-1 text-sm text-muted-foreground">
+                      {new Date(selectedRequest.created_at).toLocaleString()}
+                    </p>
+                  </div>
+
+                  {selectedRequest.status === "pending" ? (
+                    <div>
+                      <Label htmlFor="notes" className="text-sm font-medium">
+                        Review Notes (optional)
+                      </Label>
+                      <Textarea
+                        id="notes"
+                        value={reviewNotes}
+                        onChange={(e) => setReviewNotes(e.target.value)}
+                        placeholder="Add notes for the employee..."
+                        className="mt-2"
+                        rows={3}
+                      />
+                    </div>
+                  ) : (
+                    selectedRequest.review_notes && (
+                      <div>
+                        <Label className="text-sm font-medium">Review Notes</Label>
+                        <p className="mt-1 text-sm text-muted-foreground bg-muted p-3 rounded-md">
+                          {selectedRequest.review_notes}
+                        </p>
+                      </div>
+                    )
+                  )}
+                </TabsContent>
+                
+                <TabsContent value="history" className="flex-1 overflow-auto mt-4">
+                  <RequestHistoryTimeline requestId={selectedRequest.id} />
+                </TabsContent>
+              </Tabs>
             )}
 
             <DialogFooter>
