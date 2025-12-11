@@ -30,6 +30,7 @@ import AdminOrgStructurePage from "./pages/admin/AdminOrgStructurePage";
 import AdminScheduledReportsPage from "./pages/admin/AdminScheduledReportsPage";
 import AdminKnowledgeBasePage from "./pages/admin/AdminKnowledgeBasePage";
 import AdminHelpdeskPage from "./pages/admin/AdminHelpdeskPage";
+import AdminPolicyDocumentsPage from "./pages/admin/AdminPolicyDocumentsPage";
 // Workforce pages
 import WorkforceDashboardPage from "./pages/workforce/WorkforceDashboardPage";
 import EmployeesPage from "./pages/workforce/EmployeesPage";
@@ -270,6 +271,14 @@ const App = () => (
               element={
                 <ProtectedRoute requiredRoles={["admin"]}>
                   <AdminHelpdeskPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/policy-documents"
+              element={
+                <ProtectedRoute requiredRoles={["admin"]}>
+                  <AdminPolicyDocumentsPage />
                 </ProtectedRoute>
               }
             />
