@@ -68,6 +68,12 @@ import PropertyDashboardPage from "./pages/property/PropertyDashboardPage";
 import ProfilePage from "./pages/profile/ProfilePage";
 import MyPermissionsPage from "./pages/profile/MyPermissionsPage";
 
+// Help Center pages
+import HelpCenterPage from "./pages/help/HelpCenterPage";
+import HelpChatPage from "./pages/help/HelpChatPage";
+import TicketsPage from "./pages/help/TicketsPage";
+import NewTicketPage from "./pages/help/NewTicketPage";
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -380,6 +386,40 @@ const App = () => (
               }
             />
             
+            {/* Help Center Routes */}
+            <Route
+              path="/help"
+              element={
+                <ProtectedRoute>
+                  <HelpCenterPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/help/chat"
+              element={
+                <ProtectedRoute>
+                  <HelpChatPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/help/tickets"
+              element={
+                <ProtectedRoute>
+                  <TicketsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/help/tickets/new"
+              element={
+                <ProtectedRoute>
+                  <NewTicketPage />
+                </ProtectedRoute>
+              }
+            />
+
             {/* Catch-all */}
             <Route path="*" element={<NotFound />} />
           </Routes>
