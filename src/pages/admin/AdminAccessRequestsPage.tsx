@@ -30,7 +30,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Loader2, CheckCircle, XCircle, Clock, FileText, ArrowLeft } from "lucide-react";
+import { Loader2, CheckCircle, XCircle, Clock, FileText, ArrowLeft, Download } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
@@ -258,6 +258,73 @@ export default function AdminAccessRequestsPage() {
   const getModuleName = (code: string) =>
     MENU_MODULES.find((m) => m.code === code)?.name || code;
 
+  const exportToCSV = async () => {
+    try {
+      // Fetch all requests for export (not filtered)
+      const { data, error } = await supabase
+        .from("access_requests")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+
+      const exportData = (data || []).map((r) => ({
+        id: r.id,
+        user_email: r.user_email,
+        requested_modules: Array.isArray(r.requested_modules)
+          ? (r.requested_modules as string[]).map(getModuleName).join("; ")
+          : "",
+        reason: r.reason || "",
+        status: r.status,
+        review_notes: r.review_notes || "",
+        created_at: new Date(r.created_at).toLocaleString(),
+        reviewed_at: r.reviewed_at ? new Date(r.reviewed_at).toLocaleString() : "",
+      }));
+
+      const headers = [
+        "Request ID",
+        "User Email",
+        "Requested Modules",
+        "Reason",
+        "Status",
+        "Review Notes",
+        "Created At",
+        "Reviewed At",
+      ];
+
+      const csvContent = [
+        headers.join(","),
+        ...exportData.map((row) =>
+          [
+            row.id,
+            `"${row.user_email}"`,
+            `"${row.requested_modules}"`,
+            `"${row.reason.replace(/"/g, '""')}"`,
+            row.status,
+            `"${row.review_notes.replace(/"/g, '""')}"`,
+            row.created_at,
+            row.reviewed_at,
+          ].join(",")
+        ),
+      ].join("\n");
+
+      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `access-requests-${new Date().toISOString().split("T")[0]}.csv`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      toast.success("Access requests exported successfully");
+    } catch (error) {
+      console.error("Export error:", error);
+      toast.error("Failed to export access requests");
+    }
+  };
+
   const pendingCount = pendingRequests.length;
 
   return (
@@ -300,17 +367,23 @@ export default function AdminAccessRequestsPage() {
           <CardHeader>
             <div className="flex items-center justify-between">
               <CardTitle>All Requests</CardTitle>
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-[150px]">
-                  <SelectValue placeholder="Filter status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All</SelectItem>
-                  <SelectItem value="pending">Pending</SelectItem>
-                  <SelectItem value="approved">Approved</SelectItem>
-                  <SelectItem value="rejected">Rejected</SelectItem>
-                </SelectContent>
-              </Select>
+              <div className="flex items-center gap-2">
+                <Button variant="outline" size="sm" onClick={exportToCSV}>
+                  <Download className="h-4 w-4 mr-2" />
+                  Export CSV
+                </Button>
+                <Select value={statusFilter} onValueChange={setStatusFilter}>
+                  <SelectTrigger className="w-[150px]">
+                    <SelectValue placeholder="Filter status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All</SelectItem>
+                    <SelectItem value="pending">Pending</SelectItem>
+                    <SelectItem value="approved">Approved</SelectItem>
+                    <SelectItem value="rejected">Rejected</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
           </CardHeader>
           <CardContent>
