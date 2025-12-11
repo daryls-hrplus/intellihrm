@@ -8,8 +8,9 @@ const corsHeaders = {
 
 interface NotificationRequest {
   requestId: string;
-  status: "approved" | "rejected";
+  status: "approved" | "rejected" | "revoked" | "auto-approved";
   reviewNotes?: string;
+  ruleName?: string;
 }
 
 const handler = async (req: Request): Promise<Response> => {
@@ -41,7 +42,7 @@ const handler = async (req: Request): Promise<Response> => {
     const { Resend } = await import("https://esm.sh/resend@2.0.0");
     const resend = new Resend(settingData.value);
 
-    const { requestId, status, reviewNotes }: NotificationRequest = await req.json();
+    const { requestId, status, reviewNotes, ruleName }: NotificationRequest = await req.json();
 
     // Fetch the access request details
     const { data: request, error: requestError } = await supabase
@@ -63,8 +64,37 @@ const handler = async (req: Request): Promise<Response> => {
 
     const fromEmail = adminSetting?.value || "noreply@yourdomain.com";
 
-    const statusText = status === "approved" ? "Approved" : "Rejected";
-    const statusColor = status === "approved" ? "#22c55e" : "#ef4444";
+    // Determine status display
+    let statusText: string;
+    let statusColor: string;
+    let statusMessage: string;
+
+    switch (status) {
+      case "approved":
+        statusText = "Approved";
+        statusColor = "#22c55e";
+        statusMessage = "Your access has been granted. You can now access the requested modules.";
+        break;
+      case "auto-approved":
+        statusText = "Auto-Approved";
+        statusColor = "#22c55e";
+        statusMessage = `Your access has been automatically approved${ruleName ? ` based on the "${ruleName}" rule` : ""}. You can now access the requested modules.`;
+        break;
+      case "rejected":
+        statusText = "Rejected";
+        statusColor = "#ef4444";
+        statusMessage = "If you have questions about this decision, please contact your administrator.";
+        break;
+      case "revoked":
+        statusText = "Revoked";
+        statusColor = "#f97316";
+        statusMessage = "Your previously approved access has been revoked. Please contact your administrator if you have questions.";
+        break;
+      default:
+        statusText = "Updated";
+        statusColor = "#6b7280";
+        statusMessage = "Please contact your administrator for more information.";
+    }
 
     const modulesRequested = Array.isArray(request.requested_modules) 
       ? request.requested_modules.join(", ") 
@@ -128,9 +158,7 @@ const handler = async (req: Request): Promise<Response> => {
             </div>
             
             <p style="margin-top: 25px; color: #6b7280; font-size: 14px;">
-              ${status === "approved" 
-                ? "Your access has been granted. You can now access the requested modules." 
-                : "If you have questions about this decision, please contact your administrator."}
+              ${statusMessage}
             </p>
           </div>
         </div>
