@@ -11,3 +11,6 @@ verify_jwt = false
 
 [functions.notify-admins-new-request]
 verify_jwt = false
+
+[functions.send-headcount-notification]
+verify_jwt = false

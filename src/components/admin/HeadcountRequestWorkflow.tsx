@@ -44,6 +44,32 @@ import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 
+// Helper to send email notifications
+const sendHeadcountNotification = async (params: {
+  requestId: string;
+  action: "submitted" | "approved" | "rejected";
+  positionTitle: string;
+  currentHeadcount: number;
+  requestedHeadcount: number;
+  reason: string;
+  reviewNotes?: string;
+  requesterEmail: string;
+  requesterName: string;
+  reviewerName?: string;
+  governanceBodyName?: string;
+}) => {
+  try {
+    const { error } = await supabase.functions.invoke("send-headcount-notification", {
+      body: params,
+    });
+    if (error) {
+      console.error("Email notification error:", error);
+    }
+  } catch (err) {
+    console.error("Failed to send email notification:", err);
+  }
+};
+
 interface Position {
   id: string;
   title: string;
@@ -283,7 +309,14 @@ export function HeadcountRequestWorkflow({ companyId }: HeadcountRequestWorkflow
       const selectedPosition = positions.find(p => p.id === formPositionId);
       if (!selectedPosition) throw new Error("Position not found");
 
-      const { error } = await supabase
+      // Get user profile for email
+      const { data: userProfile } = await supabase
+        .from("profiles")
+        .select("full_name, email")
+        .eq("id", user.id)
+        .single();
+
+      const { data: requestData, error } = await supabase
         .from("headcount_requests")
         .insert({
           position_id: formPositionId,
@@ -293,9 +326,26 @@ export function HeadcountRequestWorkflow({ companyId }: HeadcountRequestWorkflow
           reason: formReason.trim(),
           governance_body_id: formGovernanceBodyId || null,
           status: "pending",
-        });
+        })
+        .select()
+        .single();
 
       if (error) throw error;
+
+      // Send email notification
+      const governanceBody = governanceBodies.find(gb => gb.id === formGovernanceBodyId);
+      sendHeadcountNotification({
+        requestId: requestData.id,
+        action: "submitted",
+        positionTitle: selectedPosition.title,
+        currentHeadcount: selectedPosition.authorized_headcount,
+        requestedHeadcount: parseInt(formRequestedHeadcount),
+        reason: formReason.trim(),
+        requesterEmail: userProfile?.email || user.email || "",
+        requesterName: userProfile?.full_name || userProfile?.email || "Unknown",
+        governanceBodyName: governanceBody?.name,
+      });
+
       toast.success("Headcount request submitted");
       setCreateDialogOpen(false);
       fetchData();
@@ -325,6 +375,13 @@ export function HeadcountRequestWorkflow({ companyId }: HeadcountRequestWorkflow
     try {
       const timestamp = new Date().toISOString();
       const signatureHash = await generateSignatureHash(user.id, selectedRequest.id, timestamp);
+
+      // Get reviewer profile
+      const { data: reviewerProfile } = await supabase
+        .from("profiles")
+        .select("full_name, email")
+        .eq("id", user.id)
+        .single();
 
       // Create digital signature
       const { error: sigError } = await supabase
@@ -366,6 +423,21 @@ export function HeadcountRequestWorkflow({ companyId }: HeadcountRequestWorkflow
 
         if (posError) throw posError;
       }
+
+      // Send email notification
+      sendHeadcountNotification({
+        requestId: selectedRequest.id,
+        action: reviewAction === "approve" ? "approved" : "rejected",
+        positionTitle: selectedRequest.position?.title || "Unknown Position",
+        currentHeadcount: selectedRequest.current_headcount,
+        requestedHeadcount: selectedRequest.requested_headcount,
+        reason: selectedRequest.reason,
+        reviewNotes: reviewNotes.trim() || undefined,
+        requesterEmail: selectedRequest.requester?.email || "",
+        requesterName: selectedRequest.requester?.full_name || selectedRequest.requester?.email || "Unknown",
+        reviewerName: reviewerProfile?.full_name || reviewerProfile?.email || "Reviewer",
+        governanceBodyName: selectedRequest.governance_body?.name,
+      });
 
       toast.success(`Request ${reviewAction === "approve" ? "approved" : "rejected"} with digital signature`);
       setReviewDialogOpen(false);
