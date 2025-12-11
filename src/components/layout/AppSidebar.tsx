@@ -154,7 +154,7 @@ function NavItemComponent({ item, isCollapsed }: NavItemComponentProps) {
 export function AppSidebar() {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
-  const { profile, roles, signOut, isAdmin, isHRManager } = useAuth();
+  const { profile, roles, company, signOut, isAdmin, isHRManager } = useAuth();
   const navigate = useNavigate();
 
   const handleSignOut = async () => {
@@ -242,7 +242,7 @@ export function AppSidebar() {
           <div className="space-y-2 border-b border-sidebar-border p-4">
             <div className="flex items-center gap-2 rounded-lg bg-sidebar-accent px-3 py-2 text-xs text-sidebar-foreground/80">
               <Building2 className="h-4 w-4" />
-              <span>Acme Corporation</span>
+              <span className="truncate">{company?.name || "No Company Assigned"}</span>
             </div>
             <div className="flex gap-2">
               <div className="flex flex-1 items-center gap-1.5 rounded-lg bg-sidebar-accent px-2 py-1.5 text-xs text-sidebar-foreground/60">

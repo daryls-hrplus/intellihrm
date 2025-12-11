@@ -11,6 +11,13 @@ interface Profile {
   full_name: string | null;
   avatar_url: string | null;
   created_at: string;
+  company_id: string | null;
+}
+
+interface Company {
+  id: string;
+  name: string;
+  code: string;
 }
 
 interface AuthContextType {
@@ -18,6 +25,7 @@ interface AuthContextType {
   session: Session | null;
   profile: Profile | null;
   roles: AppRole[];
+  company: Company | null;
   isLoading: boolean;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
   signUp: (email: string, password: string, fullName: string) => Promise<{ error: Error | null }>;
@@ -25,6 +33,7 @@ interface AuthContextType {
   hasRole: (role: AppRole) => boolean;
   isAdmin: boolean;
   isHRManager: boolean;
+  refreshProfile: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -34,6 +43,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [roles, setRoles] = useState<AppRole[]>([]);
+  const [company, setCompany] = useState<Company | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -51,6 +61,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         } else {
           setProfile(null);
           setRoles([]);
+          setCompany(null);
           setIsLoading(false);
         }
       }
@@ -92,6 +103,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (rolesData) {
         setRoles(rolesData.map((r) => r.role as AppRole));
       }
+
+      // Fetch company if assigned
+      if (profileData?.company_id) {
+        const { data: companyData } = await supabase
+          .from("companies")
+          .select("id, name, code")
+          .eq("id", profileData.company_id)
+          .maybeSingle();
+
+        if (companyData) {
+          setCompany(companyData);
+        }
+      } else {
+        setCompany(null);
+      }
     } catch (error) {
       console.error("Error fetching user data:", error);
     } finally {
@@ -129,6 +155,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setSession(null);
     setProfile(null);
     setRoles([]);
+    setCompany(null);
+  };
+
+  const refreshProfile = async () => {
+    if (user) {
+      await fetchUserData(user.id);
+    }
   };
 
   const hasRole = (role: AppRole) => roles.includes(role);
@@ -142,6 +175,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         session,
         profile,
         roles,
+        company,
         isLoading,
         signIn,
         signUp,
@@ -149,6 +183,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         hasRole,
         isAdmin,
         isHRManager,
+        refreshProfile,
       }}
     >
       {children}
