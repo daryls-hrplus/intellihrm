@@ -21,6 +21,7 @@ import AdminPiiAccessPage from "./pages/admin/AdminPiiAccessPage";
 import AdminSettingsPage from "./pages/admin/AdminSettingsPage";
 import AdminPermissionsSummaryPage from "./pages/admin/AdminPermissionsSummaryPage";
 import AdminAccessRequestsPage from "./pages/admin/AdminAccessRequestsPage";
+import AdminAutoApprovalPage from "./pages/admin/AdminAutoApprovalPage";
 
 // Workforce pages
 import WorkforceDashboardPage from "./pages/workforce/WorkforceDashboardPage";
@@ -161,6 +162,14 @@ const App = () => (
               element={
                 <ProtectedRoute requiredRoles={["admin"]}>
                   <AdminAccessRequestsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/auto-approval"
+              element={
+                <ProtectedRoute requiredRoles={["admin"]}>
+                  <AdminAutoApprovalPage />
                 </ProtectedRoute>
               }
             />

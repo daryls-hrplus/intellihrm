@@ -23,6 +23,7 @@ import {
   AlertTriangle,
   Grid3X3,
   ClipboardList,
+  Zap,
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 
@@ -89,6 +90,13 @@ const adminModules = [
     href: "/admin/access-requests",
     icon: ClipboardList,
     color: "bg-emerald-500/10 text-emerald-600",
+  },
+  {
+    title: "Auto-Approval Rules",
+    description: "Configure automatic request approvals",
+    href: "/admin/auto-approval",
+    icon: Zap,
+    color: "bg-orange-500/10 text-orange-600",
   },
   {
     title: "Territories",

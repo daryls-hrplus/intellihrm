@@ -101,6 +101,57 @@ export type Database = {
         }
         Relationships: []
       }
+      auto_approval_rules: {
+        Row: {
+          approved_modules: Json
+          company_id: string | null
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean
+          name: string
+          role_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          approved_modules?: Json
+          company_id?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          role_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          approved_modules?: Json
+          company_id?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          role_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "auto_approval_rules_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "auto_approval_rules_role_id_fkey"
+            columns: ["role_id"]
+            isOneToOne: false
+            referencedRelation: "roles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       companies: {
         Row: {
           address: string | null
@@ -427,6 +478,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      check_auto_approval: {
+        Args: { p_requested_modules: Json; p_user_id: string }
+        Returns: {
+          approved_modules: Json
+          is_auto_approved: boolean
+          rule_name: string
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
