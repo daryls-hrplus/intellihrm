@@ -1056,6 +1056,53 @@ export type Database = {
           },
         ]
       }
+      scenario_templates: {
+        Row: {
+          company_id: string | null
+          created_at: string
+          created_by: string
+          description: string | null
+          id: string
+          is_active: boolean
+          is_global: boolean
+          name: string
+          parameters: Json
+          updated_at: string
+        }
+        Insert: {
+          company_id?: string | null
+          created_at?: string
+          created_by: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          is_global?: boolean
+          name: string
+          parameters?: Json
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string | null
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          is_global?: boolean
+          name?: string
+          parameters?: Json
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "scenario_templates_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       scenario_versions: {
         Row: {
           change_notes: string | null
