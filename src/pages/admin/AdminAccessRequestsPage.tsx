@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Table,
   TableBody,
@@ -70,6 +71,9 @@ export default function AdminAccessRequestsPage() {
   const [selectedRequest, setSelectedRequest] = useState<AccessRequest | null>(null);
   const [reviewNotes, setReviewNotes] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [batchAction, setBatchAction] = useState<"approved" | "rejected" | null>(null);
+  const [batchNotes, setBatchNotes] = useState("");
 
   useEffect(() => {
     fetchRequests();
@@ -153,6 +157,78 @@ export default function AdminAccessRequestsPage() {
     }
   };
 
+  const handleBatchReview = async () => {
+    if (!batchAction || selectedIds.size === 0 || !user) return;
+
+    setIsProcessing(true);
+    try {
+      const ids = Array.from(selectedIds);
+      
+      const { error } = await supabase
+        .from("access_requests")
+        .update({
+          status: batchAction,
+          reviewed_by: user.id,
+          reviewed_at: new Date().toISOString(),
+          review_notes: batchNotes.trim() || null,
+        })
+        .in("id", ids);
+
+      if (error) throw error;
+
+      // Send email notifications for each request (non-blocking)
+      ids.forEach((requestId) => {
+        supabase.functions
+          .invoke("send-access-request-notification", {
+            body: {
+              requestId,
+              status: batchAction,
+              reviewNotes: batchNotes.trim() || undefined,
+            },
+          })
+          .then((res) => {
+            if (res.error) {
+              console.error("Email notification failed:", res.error);
+            }
+          });
+      });
+
+      toast.success(`${ids.length} request(s) ${batchAction} successfully`);
+      setSelectedIds(new Set());
+      setBatchAction(null);
+      setBatchNotes("");
+      fetchRequests();
+    } catch (error) {
+      console.error("Error processing batch:", error);
+      toast.error("Failed to process requests");
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const toggleSelect = (id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  };
+
+  const pendingRequests = requests.filter((r) => r.status === "pending");
+  const allPendingSelected = pendingRequests.length > 0 && pendingRequests.every((r) => selectedIds.has(r.id));
+
+  const toggleSelectAll = () => {
+    if (allPendingSelected) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(pendingRequests.map((r) => r.id)));
+    }
+  };
+
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "approved":
@@ -182,7 +258,7 @@ export default function AdminAccessRequestsPage() {
   const getModuleName = (code: string) =>
     MENU_MODULES.find((m) => m.code === code)?.name || code;
 
-  const pendingCount = requests.filter((r) => r.status === "pending").length;
+  const pendingCount = pendingRequests.length;
 
   return (
     <AppLayout>
@@ -238,6 +314,37 @@ export default function AdminAccessRequestsPage() {
             </div>
           </CardHeader>
           <CardContent>
+            {selectedIds.size > 0 && (
+              <div className="mb-4 p-3 bg-muted rounded-lg flex items-center justify-between">
+                <span className="text-sm font-medium">
+                  {selectedIds.size} request(s) selected
+                </span>
+                <div className="flex gap-2">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => setSelectedIds(new Set())}
+                  >
+                    Clear
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="destructive"
+                    onClick={() => setBatchAction("rejected")}
+                  >
+                    <XCircle className="h-4 w-4 mr-1" />
+                    Reject All
+                  </Button>
+                  <Button
+                    size="sm"
+                    onClick={() => setBatchAction("approved")}
+                  >
+                    <CheckCircle className="h-4 w-4 mr-1" />
+                    Approve All
+                  </Button>
+                </div>
+              </div>
+            )}
             {isLoading ? (
               <div className="flex items-center justify-center py-8">
                 <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -251,6 +358,15 @@ export default function AdminAccessRequestsPage() {
               <Table>
                 <TableHeader>
                   <TableRow>
+                    {statusFilter === "pending" && pendingRequests.length > 0 && (
+                      <TableHead className="w-[50px]">
+                        <Checkbox
+                          checked={allPendingSelected}
+                          onCheckedChange={toggleSelectAll}
+                          aria-label="Select all pending"
+                        />
+                      </TableHead>
+                    )}
                     <TableHead>User</TableHead>
                     <TableHead>Requested Modules</TableHead>
                     <TableHead>Reason</TableHead>
@@ -262,6 +378,17 @@ export default function AdminAccessRequestsPage() {
                 <TableBody>
                   {requests.map((request) => (
                     <TableRow key={request.id}>
+                      {statusFilter === "pending" && pendingRequests.length > 0 && (
+                        <TableCell>
+                          {request.status === "pending" && (
+                            <Checkbox
+                              checked={selectedIds.has(request.id)}
+                              onCheckedChange={() => toggleSelect(request.id)}
+                              aria-label={`Select ${request.user_email}`}
+                            />
+                          )}
+                        </TableCell>
+                      )}
                       <TableCell className="font-medium">
                         {request.user_email}
                       </TableCell>
@@ -427,6 +554,60 @@ export default function AdminAccessRequestsPage() {
               ) : (
                 <Button onClick={() => setSelectedRequest(null)}>Close</Button>
               )}
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Batch Action Dialog */}
+        <Dialog open={!!batchAction} onOpenChange={() => setBatchAction(null)}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>
+                {batchAction === "approved" ? "Approve" : "Reject"} {selectedIds.size} Request(s)
+              </DialogTitle>
+              <DialogDescription>
+                This action will {batchAction === "approved" ? "approve" : "reject"} all selected requests and notify the employees.
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="batch-notes" className="text-sm font-medium">
+                  Notes for all requests (optional)
+                </Label>
+                <Textarea
+                  id="batch-notes"
+                  value={batchNotes}
+                  onChange={(e) => setBatchNotes(e.target.value)}
+                  placeholder="Add notes that will be sent to all selected employees..."
+                  className="mt-2"
+                  rows={3}
+                />
+              </div>
+            </div>
+
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setBatchAction(null)}>
+                Cancel
+              </Button>
+              <Button
+                variant={batchAction === "rejected" ? "destructive" : "default"}
+                onClick={handleBatchReview}
+                disabled={isProcessing}
+              >
+                {isProcessing ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <>
+                    {batchAction === "approved" ? (
+                      <CheckCircle className="h-4 w-4 mr-2" />
+                    ) : (
+                      <XCircle className="h-4 w-4 mr-2" />
+                    )}
+                    Confirm {batchAction === "approved" ? "Approval" : "Rejection"}
+                  </>
+                )}
+              </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
