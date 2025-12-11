@@ -53,7 +53,9 @@ import {
   Loader2,
   ChevronDown,
   ChevronRight,
+  Briefcase,
 } from "lucide-react";
+import { PositionsManagement } from "@/components/admin/PositionsManagement";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { NavLink } from "react-router-dom";
@@ -416,8 +418,20 @@ export default function AdminOrgStructurePage() {
         </Card>
 
         {selectedCompanyId && (
-          <div className="grid gap-6 lg:grid-cols-3">
-            {/* Divisions Panel */}
+          <Tabs defaultValue="structure" className="space-y-6">
+            <TabsList>
+              <TabsTrigger value="structure" className="flex items-center gap-2">
+                <FolderTree className="h-4 w-4" />
+                Structure
+              </TabsTrigger>
+              <TabsTrigger value="positions" className="flex items-center gap-2">
+                <Briefcase className="h-4 w-4" />
+                Positions
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="structure">
+              <div className="grid gap-6 lg:grid-cols-3">
             <Card>
               <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">
@@ -656,6 +670,12 @@ export default function AdminOrgStructurePage() {
               </CardContent>
             </Card>
           </div>
+            </TabsContent>
+
+            <TabsContent value="positions">
+              <PositionsManagement companyId={selectedCompanyId} />
+            </TabsContent>
+          </Tabs>
         )}
 
         {/* Create/Edit Dialog */}
