@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { supabase } from "@/integrations/supabase/client";
-import { FolderTree, Building2, ChevronRight, ChevronDown, Users } from "lucide-react";
+import { FolderTree, Building2, ChevronRight, ChevronDown, Users, Plus, Pencil, Trash2 } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -10,8 +10,39 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { toast } from "sonner";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface Company {
+  id: string;
+  name: string;
+  code: string;
+}
+
+interface CompanyDivision {
   id: string;
   name: string;
   code: string;
@@ -23,6 +54,7 @@ interface Department {
   code: string;
   description: string | null;
   is_active: boolean;
+  company_division_id: string | null;
   sections: Section[];
 }
 
@@ -32,14 +64,36 @@ interface Section {
   code: string;
   description: string | null;
   is_active: boolean;
+  department_id: string;
 }
 
+type EntityType = "department" | "section";
+
 export default function DepartmentsPage() {
+  const { isAdmin } = useAuth();
   const [companies, setCompanies] = useState<Company[]>([]);
+  const [divisions, setDivisions] = useState<CompanyDivision[]>([]);
   const [selectedCompanyId, setSelectedCompanyId] = useState<string>("");
   const [departments, setDepartments] = useState<Department[]>([]);
   const [expandedDepts, setExpandedDepts] = useState<Set<string>>(new Set());
   const [isLoading, setIsLoading] = useState(true);
+
+  // Dialog states
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [entityType, setEntityType] = useState<EntityType>("department");
+  const [editingEntity, setEditingEntity] = useState<Department | Section | null>(null);
+  const [parentDepartmentId, setParentDepartmentId] = useState<string | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
+
+  // Form states
+  const [formData, setFormData] = useState({
+    name: "",
+    code: "",
+    description: "",
+    is_active: true,
+    company_division_id: "",
+  });
 
   useEffect(() => {
     const fetchCompanies = async () => {
@@ -61,12 +115,22 @@ export default function DepartmentsPage() {
   useEffect(() => {
     if (!selectedCompanyId) return;
     
-    const fetchDepartments = async () => {
+    const fetchData = async () => {
       setIsLoading(true);
       
+      // Fetch divisions for the company
+      const { data: divs } = await supabase
+        .from("company_divisions")
+        .select("id, name, code")
+        .eq("company_id", selectedCompanyId)
+        .eq("is_active", true)
+        .order("name");
+      
+      setDivisions(divs || []);
+
       const { data: depts } = await supabase
         .from("departments")
-        .select("id, name, code, description, is_active")
+        .select("id, name, code, description, is_active, company_division_id")
         .eq("company_id", selectedCompanyId)
         .order("name");
 
@@ -88,7 +152,7 @@ export default function DepartmentsPage() {
       setIsLoading(false);
     };
     
-    fetchDepartments();
+    fetchData();
   }, [selectedCompanyId]);
 
   const toggleDept = (deptId: string) => {
@@ -101,6 +165,185 @@ export default function DepartmentsPage() {
       }
       return next;
     });
+  };
+
+  const openCreateDialog = (type: EntityType, parentId?: string) => {
+    setEntityType(type);
+    setEditingEntity(null);
+    setParentDepartmentId(parentId || null);
+    setFormData({
+      name: "",
+      code: "",
+      description: "",
+      is_active: true,
+      company_division_id: "",
+    });
+    setDialogOpen(true);
+  };
+
+  const openEditDialog = (type: EntityType, entity: Department | Section) => {
+    setEntityType(type);
+    setEditingEntity(entity);
+    setParentDepartmentId(type === "section" ? (entity as Section).department_id : null);
+    setFormData({
+      name: entity.name,
+      code: entity.code,
+      description: entity.description || "",
+      is_active: entity.is_active,
+      company_division_id: type === "department" ? ((entity as Department).company_division_id || "") : "",
+    });
+    setDialogOpen(true);
+  };
+
+  const openDeleteDialog = (type: EntityType, entity: Department | Section) => {
+    setEntityType(type);
+    setEditingEntity(entity);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleSave = async () => {
+    if (!formData.name.trim() || !formData.code.trim()) {
+      toast.error("Name and code are required");
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      if (entityType === "department") {
+        const departmentData = {
+          name: formData.name.trim(),
+          code: formData.code.trim().toUpperCase(),
+          description: formData.description.trim() || null,
+          is_active: formData.is_active,
+          company_id: selectedCompanyId,
+          company_division_id: formData.company_division_id || null,
+        };
+
+        if (editingEntity) {
+          const { error } = await supabase
+            .from("departments")
+            .update(departmentData)
+            .eq("id", editingEntity.id);
+          if (error) throw error;
+          toast.success("Department updated successfully");
+        } else {
+          const { error } = await supabase
+            .from("departments")
+            .insert(departmentData);
+          if (error) throw error;
+          toast.success("Department created successfully");
+        }
+      } else {
+        const sectionData = {
+          name: formData.name.trim(),
+          code: formData.code.trim().toUpperCase(),
+          description: formData.description.trim() || null,
+          is_active: formData.is_active,
+          department_id: parentDepartmentId!,
+        };
+
+        if (editingEntity) {
+          const { error } = await supabase
+            .from("sections")
+            .update(sectionData)
+            .eq("id", editingEntity.id);
+          if (error) throw error;
+          toast.success("Section updated successfully");
+        } else {
+          const { error } = await supabase
+            .from("sections")
+            .insert(sectionData);
+          if (error) throw error;
+          toast.success("Section created successfully");
+        }
+      }
+
+      setDialogOpen(false);
+      // Refresh data
+      const { data: depts } = await supabase
+        .from("departments")
+        .select("id, name, code, description, is_active, company_division_id")
+        .eq("company_id", selectedCompanyId)
+        .order("name");
+
+      if (depts) {
+        const { data: sections } = await supabase
+          .from("sections")
+          .select("id, name, code, description, is_active, department_id")
+          .in("department_id", depts.map(d => d.id))
+          .order("name");
+
+        const departmentsWithSections = depts.map(dept => ({
+          ...dept,
+          sections: sections?.filter(s => s.department_id === dept.id) || []
+        }));
+
+        setDepartments(departmentsWithSections);
+      }
+    } catch (error: any) {
+      toast.error(error.message || "Failed to save");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!editingEntity) return;
+
+    setIsSaving(true);
+    try {
+      if (entityType === "department") {
+        // Check for sections
+        const dept = editingEntity as Department;
+        if (dept.sections && dept.sections.length > 0) {
+          toast.error("Cannot delete department with sections. Remove sections first.");
+          setDeleteDialogOpen(false);
+          setIsSaving(false);
+          return;
+        }
+
+        const { error } = await supabase
+          .from("departments")
+          .delete()
+          .eq("id", editingEntity.id);
+        if (error) throw error;
+        toast.success("Department deleted successfully");
+      } else {
+        const { error } = await supabase
+          .from("sections")
+          .delete()
+          .eq("id", editingEntity.id);
+        if (error) throw error;
+        toast.success("Section deleted successfully");
+      }
+
+      setDeleteDialogOpen(false);
+      // Refresh data
+      const { data: depts } = await supabase
+        .from("departments")
+        .select("id, name, code, description, is_active, company_division_id")
+        .eq("company_id", selectedCompanyId)
+        .order("name");
+
+      if (depts) {
+        const { data: sections } = await supabase
+          .from("sections")
+          .select("id, name, code, description, is_active, department_id")
+          .in("department_id", depts.map(d => d.id))
+          .order("name");
+
+        const departmentsWithSections = depts.map(dept => ({
+          ...dept,
+          sections: sections?.filter(s => s.department_id === dept.id) || []
+        }));
+
+        setDepartments(departmentsWithSections);
+      }
+    } catch (error: any) {
+      toast.error(error.message || "Failed to delete");
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
@@ -116,7 +359,7 @@ export default function DepartmentsPage() {
                 Departments
               </h1>
               <p className="text-muted-foreground">
-                View departments and sections
+                Manage departments and sections
               </p>
             </div>
           </div>
@@ -135,6 +378,12 @@ export default function DepartmentsPage() {
                 ))}
               </SelectContent>
             </Select>
+            {isAdmin && selectedCompanyId && (
+              <Button onClick={() => openCreateDialog("department")} className="gap-2">
+                <Plus className="h-4 w-4" />
+                Add Department
+              </Button>
+            )}
           </div>
         </div>
 
@@ -144,17 +393,27 @@ export default function DepartmentsPage() {
           </div>
         ) : departments.length === 0 ? (
           <div className="rounded-lg border border-border bg-card p-8 text-center">
-            <p className="text-muted-foreground">No departments found for this company.</p>
+            <FolderTree className="mx-auto h-12 w-12 text-muted-foreground/50" />
+            <h3 className="mt-4 text-lg font-medium text-foreground">No departments found</h3>
+            <p className="mt-2 text-muted-foreground">
+              {isAdmin ? "Get started by creating a department." : "No departments have been created for this company."}
+            </p>
+            {isAdmin && (
+              <Button onClick={() => openCreateDialog("department")} className="mt-4 gap-2">
+                <Plus className="h-4 w-4" />
+                Create Department
+              </Button>
+            )}
           </div>
         ) : (
           <div className="space-y-2">
             {departments.map((dept) => (
               <div key={dept.id} className="rounded-lg border border-border bg-card overflow-hidden">
-                <button
-                  onClick={() => toggleDept(dept.id)}
-                  className="w-full flex items-center justify-between p-4 hover:bg-muted/50 transition-colors"
-                >
-                  <div className="flex items-center gap-3">
+                <div className="flex items-center justify-between p-4 hover:bg-muted/50 transition-colors">
+                  <button
+                    onClick={() => toggleDept(dept.id)}
+                    className="flex items-center gap-3 flex-1"
+                  >
                     {dept.sections.length > 0 ? (
                       expandedDepts.has(dept.id) ? (
                         <ChevronDown className="h-4 w-4 text-muted-foreground" />
@@ -169,7 +428,7 @@ export default function DepartmentsPage() {
                       <p className="font-medium text-foreground">{dept.name}</p>
                       <p className="text-sm text-muted-foreground">{dept.code}</p>
                     </div>
-                  </div>
+                  </button>
                   <div className="flex items-center gap-2">
                     {dept.sections.length > 0 && (
                       <Badge variant="secondary" className="gap-1">
@@ -180,8 +439,37 @@ export default function DepartmentsPage() {
                     <Badge variant={dept.is_active ? "default" : "secondary"}>
                       {dept.is_active ? "Active" : "Inactive"}
                     </Badge>
+                    {isAdmin && (
+                      <>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => openCreateDialog("section", dept.id)}
+                          title="Add Section"
+                        >
+                          <Plus className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => openEditDialog("department", dept)}
+                          title="Edit Department"
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => openDeleteDialog("department", dept)}
+                          title="Delete Department"
+                          className="text-destructive hover:text-destructive"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </>
+                    )}
                   </div>
-                </button>
+                </div>
                 
                 {expandedDepts.has(dept.id) && dept.sections.length > 0 && (
                   <div className="border-t border-border bg-muted/30">
@@ -194,9 +482,32 @@ export default function DepartmentsPage() {
                             <p className="text-sm text-muted-foreground">{section.code}</p>
                           </div>
                         </div>
-                        <Badge variant={section.is_active ? "outline" : "secondary"}>
-                          {section.is_active ? "Active" : "Inactive"}
-                        </Badge>
+                        <div className="flex items-center gap-2">
+                          <Badge variant={section.is_active ? "outline" : "secondary"}>
+                            {section.is_active ? "Active" : "Inactive"}
+                          </Badge>
+                          {isAdmin && (
+                            <>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => openEditDialog("section", section)}
+                                title="Edit Section"
+                              >
+                                <Pencil className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => openDeleteDialog("section", section)}
+                                title="Delete Section"
+                                className="text-destructive hover:text-destructive"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </>
+                          )}
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -206,6 +517,117 @@ export default function DepartmentsPage() {
           </div>
         )}
       </div>
+
+      {/* Create/Edit Dialog */}
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>
+              {editingEntity ? "Edit" : "Create"} {entityType === "department" ? "Department" : "Section"}
+            </DialogTitle>
+            <DialogDescription>
+              {editingEntity
+                ? `Update the ${entityType} details below.`
+                : `Add a new ${entityType} to the organization.`}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="name">Name *</Label>
+              <Input
+                id="name"
+                value={formData.name}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                placeholder={`Enter ${entityType} name`}
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="code">Code *</Label>
+              <Input
+                id="code"
+                value={formData.code}
+                onChange={(e) => setFormData({ ...formData, code: e.target.value.toUpperCase() })}
+                placeholder="e.g., HR, FIN, IT"
+                maxLength={20}
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="description">Description</Label>
+              <Textarea
+                id="description"
+                value={formData.description}
+                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                placeholder={`Optional description for this ${entityType}`}
+                rows={3}
+              />
+            </div>
+            {entityType === "department" && divisions.length > 0 && (
+              <div className="grid gap-2">
+                <Label htmlFor="division">Division (Optional)</Label>
+                <Select
+                  value={formData.company_division_id}
+                  onValueChange={(value) => setFormData({ ...formData, company_division_id: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a division" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">No Division</SelectItem>
+                    {divisions.map((div) => (
+                      <SelectItem key={div.id} value={div.id}>
+                        {div.name} ({div.code})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+            <div className="flex items-center justify-between">
+              <Label htmlFor="is_active">Active</Label>
+              <Switch
+                id="is_active"
+                checked={formData.is_active}
+                onCheckedChange={(checked) => setFormData({ ...formData, is_active: checked })}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleSave} disabled={isSaving}>
+              {isSaving ? "Saving..." : editingEntity ? "Update" : "Create"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete {entityType === "department" ? "Department" : "Section"}</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete "{editingEntity?.name}"? This action cannot be undone.
+              {entityType === "department" && (
+                <span className="block mt-2 text-warning">
+                  Note: Departments with sections cannot be deleted. Remove all sections first.
+                </span>
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDelete}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              disabled={isSaving}
+            >
+              {isSaving ? "Deleting..." : "Delete"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </AppLayout>
   );
 }
