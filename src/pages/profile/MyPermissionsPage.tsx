@@ -160,6 +160,23 @@ export default function MyPermissionsPage() {
 
       if (error) throw error;
 
+      // Notify admins of new request (non-blocking)
+      supabase.functions
+        .invoke("notify-admins-new-request", {
+          body: {
+            userEmail: profile?.email || user?.email,
+            requestedModules: selectedModules,
+            reason: requestReason.trim(),
+          },
+        })
+        .then((res) => {
+          if (res.error) {
+            console.error("Admin notification failed:", res.error);
+          } else {
+            console.log("Admin notification sent");
+          }
+        });
+
       toast.success("Access request submitted successfully");
       setSelectedModules([]);
       setRequestReason("");

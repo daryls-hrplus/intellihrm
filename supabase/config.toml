@@ -2,3 +2,12 @@ project_id = "hmdewkkytchwrenqagkw"
 
 [functions.weekly-permissions-report]
 verify_jwt = false
+
+[functions.send-access-request-notification]
+verify_jwt = false
+
+[functions.send-pii-alert]
+verify_jwt = false
+
+[functions.notify-admins-new-request]
+verify_jwt = false
