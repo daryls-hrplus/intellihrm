@@ -260,10 +260,17 @@ export default function EmployeeProfilePage() {
             <TabsTrigger value="background"><ShieldCheck className="h-4 w-4 mr-1" />Background</TabsTrigger>
             <TabsTrigger value="bank"><CreditCard className="h-4 w-4 mr-1" />Bank</TabsTrigger>
             <TabsTrigger value="beneficiaries"><Users className="h-4 w-4 mr-1" />Beneficiaries</TabsTrigger>
+            <TabsTrigger value="certificates"><GraduationCap className="h-4 w-4 mr-1" />Certificates</TabsTrigger>
+            <TabsTrigger value="contacts"><Phone className="h-4 w-4 mr-1" />Contacts</TabsTrigger>
             <TabsTrigger value="dependents"><Baby className="h-4 w-4 mr-1" />Dependents</TabsTrigger>
             <TabsTrigger value="documents"><FileText className="h-4 w-4 mr-1" />Documents</TabsTrigger>
+            <TabsTrigger value="emergency"><AlertTriangle className="h-4 w-4 mr-1" />Emergency</TabsTrigger>
+            <TabsTrigger value="interests"><Sparkles className="h-4 w-4 mr-1" />Interests</TabsTrigger>
             <TabsTrigger value="licenses"><Award className="h-4 w-4 mr-1" />Licenses</TabsTrigger>
+            <TabsTrigger value="medical"><Stethoscope className="h-4 w-4 mr-1" />Medical</TabsTrigger>
+            <TabsTrigger value="memberships"><Heart className="h-4 w-4 mr-1" />Memberships</TabsTrigger>
             <TabsTrigger value="overview"><User className="h-4 w-4 mr-1" />Overview</TabsTrigger>
+            <TabsTrigger value="paygroup"><DollarSign className="h-4 w-4 mr-1" />Pay Group</TabsTrigger>
             <TabsTrigger value="references"><UserCheck className="h-4 w-4 mr-1" />References</TabsTrigger>
             <TabsTrigger value="work_permits"><FileCheck className="h-4 w-4 mr-1" />Work Permits</TabsTrigger>
           </TabsList>
@@ -284,6 +291,14 @@ export default function EmployeeProfilePage() {
             <EmployeeBeneficiariesTab employeeId={employee.id} />
           </TabsContent>
 
+          <TabsContent value="certificates" className="mt-6">
+            <EmployeeCertificatesTab employeeId={employee.id} />
+          </TabsContent>
+
+          <TabsContent value="contacts" className="mt-6">
+            <EmployeeContactsTab employeeId={employee.id} />
+          </TabsContent>
+
           <TabsContent value="dependents" className="mt-6">
             <EmployeeDependentsTab employeeId={employee.id} />
           </TabsContent>
@@ -292,8 +307,24 @@ export default function EmployeeProfilePage() {
             <EmployeeDocumentsTab employeeId={employee.id} />
           </TabsContent>
 
+          <TabsContent value="emergency" className="mt-6">
+            <EmployeeEmergencyContactsTab employeeId={employee.id} />
+          </TabsContent>
+
+          <TabsContent value="interests" className="mt-6">
+            <EmployeeInterestsTab employeeId={employee.id} />
+          </TabsContent>
+
           <TabsContent value="licenses" className="mt-6">
             <EmployeeLicensesTab employeeId={employee.id} />
+          </TabsContent>
+
+          <TabsContent value="medical" className="mt-6">
+            <EmployeeMedicalProfileTab employeeId={employee.id} />
+          </TabsContent>
+
+          <TabsContent value="memberships" className="mt-6">
+            <EmployeeMembershipsTab employeeId={employee.id} />
           </TabsContent>
 
           <TabsContent value="overview" className="mt-6">
@@ -384,6 +415,10 @@ export default function EmployeeProfilePage() {
                 </CardContent>
               </Card>
             </div>
+          </TabsContent>
+
+          <TabsContent value="paygroup" className="mt-6">
+            <EmployeePayGroupTab employeeId={employee.id} />
           </TabsContent>
 
           <TabsContent value="references" className="mt-6">
