@@ -46,6 +46,7 @@ import EmployeeAssignmentsPage from "./pages/workforce/EmployeeAssignmentsPage";
 import EmployeeTransactionsPage from "./pages/workforce/EmployeeTransactionsPage";
 import WorkforceForecastingPage from "./pages/workforce/WorkforceForecastingPage";
 import IntranetAdminPage from "./pages/workforce/IntranetAdminPage";
+import JobFamiliesPage from "./pages/workforce/JobFamiliesPage";
 
 // Intranet pages
 import IntranetDashboardPage from "./pages/intranet/IntranetDashboardPage";
@@ -460,6 +461,14 @@ const App = () => (
               element={
                 <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
                   <IntranetAdminPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/workforce/job-families"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
+                  <JobFamiliesPage />
                 </ProtectedRoute>
               }
             />

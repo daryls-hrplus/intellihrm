@@ -2594,6 +2594,53 @@ export type Database = {
           },
         ]
       }
+      job_families: {
+        Row: {
+          code: string
+          company_id: string
+          created_at: string
+          description: string | null
+          end_date: string | null
+          id: string
+          is_active: boolean
+          name: string
+          start_date: string
+          updated_at: string
+        }
+        Insert: {
+          code: string
+          company_id: string
+          created_at?: string
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          start_date?: string
+          updated_at?: string
+        }
+        Update: {
+          code?: string
+          company_id?: string
+          created_at?: string
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          start_date?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "job_families_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       kb_articles: {
         Row: {
           author_id: string | null
@@ -3842,6 +3889,7 @@ export type Database = {
           headcount_notes: string | null
           id: string
           is_active: boolean
+          job_family_id: string | null
           reports_to_position_id: string | null
           salary_grade_id: string | null
           start_date: string
@@ -3858,6 +3906,7 @@ export type Database = {
           headcount_notes?: string | null
           id?: string
           is_active?: boolean
+          job_family_id?: string | null
           reports_to_position_id?: string | null
           salary_grade_id?: string | null
           start_date?: string
@@ -3874,6 +3923,7 @@ export type Database = {
           headcount_notes?: string | null
           id?: string
           is_active?: boolean
+          job_family_id?: string | null
           reports_to_position_id?: string | null
           salary_grade_id?: string | null
           start_date?: string
@@ -3886,6 +3936,13 @@ export type Database = {
             columns: ["department_id"]
             isOneToOne: false
             referencedRelation: "departments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "positions_job_family_id_fkey"
+            columns: ["job_family_id"]
+            isOneToOne: false
+            referencedRelation: "job_families"
             referencedColumns: ["id"]
           },
           {
