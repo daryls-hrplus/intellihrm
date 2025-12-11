@@ -268,6 +268,74 @@ export type Database = {
           },
         ]
       }
+      company_branch_locations: {
+        Row: {
+          address: string | null
+          city: string | null
+          code: string
+          company_id: string
+          country: string | null
+          created_at: string
+          email: string | null
+          end_date: string | null
+          id: string
+          is_active: boolean
+          is_headquarters: boolean
+          name: string
+          phone: string | null
+          postal_code: string | null
+          start_date: string
+          state: string | null
+          updated_at: string
+        }
+        Insert: {
+          address?: string | null
+          city?: string | null
+          code: string
+          company_id: string
+          country?: string | null
+          created_at?: string
+          email?: string | null
+          end_date?: string | null
+          id?: string
+          is_active?: boolean
+          is_headquarters?: boolean
+          name: string
+          phone?: string | null
+          postal_code?: string | null
+          start_date?: string
+          state?: string | null
+          updated_at?: string
+        }
+        Update: {
+          address?: string | null
+          city?: string | null
+          code?: string
+          company_id?: string
+          country?: string | null
+          created_at?: string
+          email?: string | null
+          end_date?: string | null
+          id?: string
+          is_active?: boolean
+          is_headquarters?: boolean
+          name?: string
+          phone?: string | null
+          postal_code?: string | null
+          start_date?: string
+          state?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_branch_locations_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       company_divisions: {
         Row: {
           code: string
