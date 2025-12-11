@@ -11,6 +11,7 @@ import {
   Loader2,
   UserPlus,
   Building2,
+  TrendingUp,
 } from "lucide-react";
 
 const workforceModules = [
@@ -41,6 +42,13 @@ const workforceModules = [
     href: "/workforce/departments",
     icon: FolderTree,
     color: "bg-warning/10 text-warning",
+  },
+  {
+    title: "Org Changes Report",
+    description: "Track organizational changes over time",
+    href: "/workforce/org-changes",
+    icon: TrendingUp,
+    color: "bg-accent/10 text-accent-foreground",
   },
 ];
 
