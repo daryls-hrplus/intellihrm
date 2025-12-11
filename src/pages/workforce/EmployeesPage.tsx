@@ -1,6 +1,7 @@
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAuditLog } from "@/hooks/useAuditLog";
 import { usePiiVisibility } from "@/hooks/usePiiVisibility";
 import {
@@ -81,6 +82,7 @@ const employees = [
 
 export default function EmployeesPage() {
   const [searchQuery, setSearchQuery] = useState("");
+  const navigate = useNavigate();
   const { logView } = useAuditLog();
   const { canViewPii, maskPii } = usePiiVisibility();
   const hasLoggedView = useRef(false);
@@ -218,7 +220,10 @@ export default function EmployeesPage() {
                 >
                   {employee.status === "active" ? "Active" : "On Leave"}
                 </span>
-                <button className="text-sm font-medium text-primary hover:underline">
+                <button 
+                  onClick={() => navigate(`/workforce/employees/${employee.id}`)}
+                  className="text-sm font-medium text-primary hover:underline"
+                >
                   View Profile
                 </button>
               </div>
