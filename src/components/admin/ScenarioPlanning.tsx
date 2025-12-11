@@ -121,6 +121,16 @@ interface ScenarioVersion {
   change_notes: string | null;
 }
 
+type TemplateCategory = 'growth' | 'freeze' | 'restructuring' | 'seasonal' | 'general';
+
+const TEMPLATE_CATEGORIES: { value: TemplateCategory; label: string; icon: string; description: string }[] = [
+  { value: 'growth', label: 'Growth', icon: '📈', description: 'Expansion and hiring scenarios' },
+  { value: 'freeze', label: 'Freeze', icon: '❄️', description: 'Headcount freeze planning' },
+  { value: 'restructuring', label: 'Restructuring', icon: '🔄', description: 'Organizational changes' },
+  { value: 'seasonal', label: 'Seasonal', icon: '📅', description: 'Seasonal workforce planning' },
+  { value: 'general', label: 'General', icon: '📋', description: 'General purpose templates' },
+];
+
 interface ScenarioTemplate {
   id: string;
   name: string;
@@ -131,6 +141,7 @@ interface ScenarioTemplate {
   is_active: boolean;
   created_at: string;
   created_by: string;
+  category: TemplateCategory;
 }
 
 const defaultScenario: Omit<ScenarioParameters, "id"> = {
@@ -205,8 +216,10 @@ export function ScenarioPlanning({ currentHeadcount, sharedToken }: ScenarioPlan
   const [newTemplateName, setNewTemplateName] = useState("");
   const [newTemplateDescription, setNewTemplateDescription] = useState("");
   const [newTemplateIsGlobal, setNewTemplateIsGlobal] = useState(true);
+  const [newTemplateCategory, setNewTemplateCategory] = useState<TemplateCategory>("general");
   const [selectedCompanyId, setSelectedCompanyId] = useState<string | null>(null);
   const [companies, setCompanies] = useState<{id: string; name: string}[]>([]);
+  const [templateCategoryFilter, setTemplateCategoryFilter] = useState<TemplateCategory | "all">("all");
 
   useEffect(() => {
     if (sharedToken) {
@@ -233,6 +246,7 @@ export function ScenarioPlanning({ currentHeadcount, sharedToken }: ScenarioPlan
       setTemplates(data.map(t => ({
         ...t,
         parameters: t.parameters as unknown as Omit<ScenarioParameters, "id">[],
+        category: (t.category || 'general') as TemplateCategory,
       })));
     }
   };
@@ -283,6 +297,7 @@ export function ScenarioPlanning({ currentHeadcount, sharedToken }: ScenarioPlan
         company_id: newTemplateIsGlobal ? null : selectedCompanyId,
         is_global: newTemplateIsGlobal,
         created_by: user.id,
+        category: newTemplateCategory,
       })
       .select()
       .single();
@@ -296,6 +311,7 @@ export function ScenarioPlanning({ currentHeadcount, sharedToken }: ScenarioPlan
       setNewTemplateName("");
       setNewTemplateDescription("");
       setNewTemplateIsGlobal(true);
+      setNewTemplateCategory("general");
       setSelectedCompanyId(null);
       fetchTemplates();
     }
@@ -2072,9 +2088,31 @@ export function ScenarioPlanning({ currentHeadcount, sharedToken }: ScenarioPlan
             </DialogDescription>
           </DialogHeader>
           <div className="py-4">
+            {/* Category Filter */}
+            <div className="flex flex-wrap gap-2 mb-4">
+              <Button
+                size="sm"
+                variant={templateCategoryFilter === "all" ? "default" : "outline"}
+                onClick={() => setTemplateCategoryFilter("all")}
+              >
+                All
+              </Button>
+              {TEMPLATE_CATEGORIES.map(cat => (
+                <Button
+                  key={cat.value}
+                  size="sm"
+                  variant={templateCategoryFilter === cat.value ? "default" : "outline"}
+                  onClick={() => setTemplateCategoryFilter(cat.value)}
+                >
+                  <span className="mr-1">{cat.icon}</span>
+                  {cat.label}
+                </Button>
+              ))}
+            </div>
             <div className="flex justify-between items-center mb-4">
               <span className="text-sm text-muted-foreground">
-                {templates.length} template{templates.length !== 1 ? 's' : ''} available
+                {templates.filter(t => templateCategoryFilter === "all" || t.category === templateCategoryFilter).length} template{templates.filter(t => templateCategoryFilter === "all" || t.category === templateCategoryFilter).length !== 1 ? 's' : ''} 
+                {templateCategoryFilter !== "all" && ` in ${TEMPLATE_CATEGORIES.find(c => c.value === templateCategoryFilter)?.label}`}
               </span>
               {user && scenarios.length > 0 && (
                 <Button size="sm" onClick={() => setShowCreateTemplateDialog(true)}>
@@ -2083,22 +2121,28 @@ export function ScenarioPlanning({ currentHeadcount, sharedToken }: ScenarioPlan
                 </Button>
               )}
             </div>
-            <ScrollArea className="h-[400px]">
-              {templates.length === 0 ? (
+            <ScrollArea className="h-[350px]">
+              {templates.filter(t => templateCategoryFilter === "all" || t.category === templateCategoryFilter).length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground">
                   <LayoutTemplate className="h-12 w-12 mx-auto mb-4 opacity-30" />
-                  <p>No templates available yet.</p>
+                  <p>No templates available{templateCategoryFilter !== "all" && ` in this category`}.</p>
                   <p className="text-sm mt-2">Create scenarios and save them as templates for your team.</p>
                 </div>
               ) : (
                 <div className="space-y-3 pr-4">
-                  {templates.map(template => (
+                  {templates.filter(t => templateCategoryFilter === "all" || t.category === templateCategoryFilter).map(template => {
+                    const categoryInfo = TEMPLATE_CATEGORIES.find(c => c.value === template.category);
+                    return (
                     <Card key={template.id} className="overflow-hidden">
                       <CardContent className="p-4">
                         <div className="flex items-start justify-between">
                           <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-2 flex-wrap">
                               <h4 className="font-medium">{template.name}</h4>
+                              <Badge variant="outline" className="text-xs">
+                                <span className="mr-1">{categoryInfo?.icon}</span>
+                                {categoryInfo?.label}
+                              </Badge>
                               <Badge variant={template.is_global ? "default" : "secondary"} className="text-xs">
                                 {template.is_global ? (
                                   <><Globe className="h-3 w-3 mr-1" /> Global</>
@@ -2162,7 +2206,7 @@ export function ScenarioPlanning({ currentHeadcount, sharedToken }: ScenarioPlan
                         </div>
                       </CardContent>
                     </Card>
-                  ))}
+                  )})}
                 </div>
               )}
             </ScrollArea>
@@ -2204,6 +2248,24 @@ export function ScenarioPlanning({ currentHeadcount, sharedToken }: ScenarioPlan
                 placeholder="Describe when to use this template..."
                 rows={2}
               />
+            </div>
+            <div>
+              <Label>Category</Label>
+              <div className="grid grid-cols-5 gap-2 mt-2">
+                {TEMPLATE_CATEGORIES.map(cat => (
+                  <div
+                    key={cat.value}
+                    className={`flex flex-col items-center gap-1 p-2 rounded-lg border cursor-pointer transition-colors text-center ${
+                      newTemplateCategory === cat.value ? 'border-primary bg-primary/5' : 'hover:bg-muted/50'
+                    }`}
+                    onClick={() => setNewTemplateCategory(cat.value)}
+                    title={cat.description}
+                  >
+                    <span className="text-xl">{cat.icon}</span>
+                    <span className="text-xs font-medium">{cat.label}</span>
+                  </div>
+                ))}
+              </div>
             </div>
             <div className="space-y-3">
               <Label>Availability</Label>
