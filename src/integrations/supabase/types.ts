@@ -2597,8 +2597,10 @@ export type Database = {
       job_families: {
         Row: {
           code: string
+          company_division_id: string | null
           company_id: string
           created_at: string
+          department_id: string
           description: string | null
           end_date: string | null
           id: string
@@ -2609,8 +2611,10 @@ export type Database = {
         }
         Insert: {
           code: string
+          company_division_id?: string | null
           company_id: string
           created_at?: string
+          department_id: string
           description?: string | null
           end_date?: string | null
           id?: string
@@ -2621,8 +2625,10 @@ export type Database = {
         }
         Update: {
           code?: string
+          company_division_id?: string | null
           company_id?: string
           created_at?: string
+          department_id?: string
           description?: string | null
           end_date?: string | null
           id?: string
@@ -2633,10 +2639,24 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "job_families_company_division_id_fkey"
+            columns: ["company_division_id"]
+            isOneToOne: false
+            referencedRelation: "company_divisions"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "job_families_company_id_fkey"
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "job_families_department_id_fkey"
+            columns: ["department_id"]
+            isOneToOne: false
+            referencedRelation: "departments"
             referencedColumns: ["id"]
           },
         ]
