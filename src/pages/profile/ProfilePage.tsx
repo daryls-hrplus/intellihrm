@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -327,6 +328,13 @@ export default function ProfilePage() {
   return (
     <AppLayout>
       <div className="mx-auto max-w-4xl space-y-8">
+        <Breadcrumbs
+          items={[
+            { label: "Employee Self Service", href: "/ess" },
+            { label: "My Profile" },
+          ]}
+        />
+        
         {/* Header */}
         <div className="animate-fade-in">
           <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
