@@ -56,6 +56,7 @@ interface Position {
   description: string | null;
   reports_to_position_id: string | null;
   is_active: boolean;
+  authorized_headcount: number;
   department?: {
     name: string;
     code: string;
@@ -124,6 +125,7 @@ export function PositionsManagement({ companyId }: PositionsManagementProps) {
   const [formDepartmentId, setFormDepartmentId] = useState("");
   const [formReportsTo, setFormReportsTo] = useState("");
   const [formIsActive, setFormIsActive] = useState(true);
+  const [formAuthorizedHeadcount, setFormAuthorizedHeadcount] = useState("1");
 
   // Assignment dialog state
   const [assignDialogOpen, setAssignDialogOpen] = useState(false);
@@ -244,6 +246,7 @@ export function PositionsManagement({ companyId }: PositionsManagementProps) {
     setFormDepartmentId(deptId || "");
     setFormReportsTo("");
     setFormIsActive(true);
+    setFormAuthorizedHeadcount("1");
     setPositionDialogOpen(true);
   };
 
@@ -255,6 +258,7 @@ export function PositionsManagement({ companyId }: PositionsManagementProps) {
     setFormDepartmentId(position.department_id);
     setFormReportsTo(position.reports_to_position_id || "");
     setFormIsActive(position.is_active);
+    setFormAuthorizedHeadcount(position.authorized_headcount?.toString() || "1");
     setPositionDialogOpen(true);
   };
 
@@ -273,6 +277,7 @@ export function PositionsManagement({ companyId }: PositionsManagementProps) {
         description: formDescription.trim() || null,
         reports_to_position_id: formReportsTo || null,
         is_active: formIsActive,
+        authorized_headcount: parseInt(formAuthorizedHeadcount) || 1,
       };
 
       if (editingPosition) {
@@ -500,6 +505,25 @@ export function PositionsManagement({ companyId }: PositionsManagementProps) {
                                         <Badge variant="secondary">Inactive</Badge>
                                       )}
                                     </div>
+                                    {/* Headcount info */}
+                                    <div className="flex items-center gap-2 mt-1">
+                                      <Badge 
+                                        variant={assignments.length < position.authorized_headcount ? "outline" : "default"}
+                                        className={assignments.length < position.authorized_headcount ? "text-amber-600 border-amber-600" : ""}
+                                      >
+                                        {assignments.length} / {position.authorized_headcount} filled
+                                      </Badge>
+                                      {assignments.length < position.authorized_headcount && (
+                                        <span className="text-xs text-amber-600">
+                                          {position.authorized_headcount - assignments.length} vacant
+                                        </span>
+                                      )}
+                                      {assignments.length > position.authorized_headcount && (
+                                        <span className="text-xs text-red-600">
+                                          +{assignments.length - position.authorized_headcount} over
+                                        </span>
+                                      )}
+                                    </div>
                                     {position.description && (
                                       <p className="text-sm text-muted-foreground mt-1">{position.description}</p>
                                     )}
@@ -689,6 +713,19 @@ export function PositionsManagement({ companyId }: PositionsManagementProps) {
                     ))}
                 </SelectContent>
               </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Authorized Headcount</Label>
+              <Input
+                type="number"
+                min="1"
+                value={formAuthorizedHeadcount}
+                onChange={(e) => setFormAuthorizedHeadcount(e.target.value)}
+                placeholder="Number of positions"
+              />
+              <p className="text-xs text-muted-foreground">
+                How many employees can fill this position
+              </p>
             </div>
             <div className="flex items-center gap-2">
               <Switch checked={formIsActive} onCheckedChange={setFormIsActive} />
