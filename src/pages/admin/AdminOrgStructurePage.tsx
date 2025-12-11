@@ -60,6 +60,7 @@ import { PositionsManagement } from "@/components/admin/PositionsManagement";
 import { OrgChartVisualization } from "@/components/admin/OrgChartVisualization";
 import { GovernanceManagement } from "@/components/admin/GovernanceManagement";
 import { VacancyDashboard } from "@/components/admin/VacancyDashboard";
+import { HeadcountRequestWorkflow } from "@/components/admin/HeadcountRequestWorkflow";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { NavLink } from "react-router-dom";
@@ -442,6 +443,9 @@ export default function AdminOrgStructurePage() {
               <TabsTrigger value="vacancies" className="flex items-center gap-2">
                 Vacancies
               </TabsTrigger>
+              <TabsTrigger value="requests" className="flex items-center gap-2">
+                Requests
+              </TabsTrigger>
             </TabsList>
 
             <TabsContent value="structure">
@@ -700,6 +704,10 @@ export default function AdminOrgStructurePage() {
 
             <TabsContent value="vacancies">
               <VacancyDashboard companyId={selectedCompanyId} />
+            </TabsContent>
+
+            <TabsContent value="requests">
+              <HeadcountRequestWorkflow companyId={selectedCompanyId} />
             </TabsContent>
           </Tabs>
         )}

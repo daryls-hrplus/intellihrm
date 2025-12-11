@@ -589,6 +589,70 @@ export type Database = {
           },
         ]
       }
+      headcount_request_signatures: {
+        Row: {
+          created_at: string
+          governance_body_id: string | null
+          headcount_request_id: string
+          id: string
+          ip_address: string | null
+          notes: string | null
+          signature_hash: string
+          signature_type: string
+          signed_at: string
+          signer_id: string
+          user_agent: string | null
+        }
+        Insert: {
+          created_at?: string
+          governance_body_id?: string | null
+          headcount_request_id: string
+          id?: string
+          ip_address?: string | null
+          notes?: string | null
+          signature_hash: string
+          signature_type?: string
+          signed_at?: string
+          signer_id: string
+          user_agent?: string | null
+        }
+        Update: {
+          created_at?: string
+          governance_body_id?: string | null
+          headcount_request_id?: string
+          id?: string
+          ip_address?: string | null
+          notes?: string | null
+          signature_hash?: string
+          signature_type?: string
+          signed_at?: string
+          signer_id?: string
+          user_agent?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "headcount_request_signatures_governance_body_id_fkey"
+            columns: ["governance_body_id"]
+            isOneToOne: false
+            referencedRelation: "governance_bodies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "headcount_request_signatures_headcount_request_id_fkey"
+            columns: ["headcount_request_id"]
+            isOneToOne: false
+            referencedRelation: "headcount_requests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "headcount_request_signatures_signer_id_fkey"
+            columns: ["signer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       headcount_requests: {
         Row: {
           created_at: string
@@ -961,6 +1025,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      can_approve_headcount_request: {
+        Args: { p_request_id: string; p_user_id: string }
+        Returns: boolean
+      }
       check_auto_approval: {
         Args: { p_requested_modules: Json; p_user_id: string }
         Returns: {
