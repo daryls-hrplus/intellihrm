@@ -49,7 +49,19 @@
     "error": "Error",
     "success": "Success",
     "warning": "Warning",
-    "info": "Information"
+    "info": "Information",
+    "you": "You",
+    "joined": "Joined",
+    "user": "User",
+    "company": "Company",
+    "role": "Role",
+    "email": "Email",
+    "phone": "Phone",
+    "address": "Address",
+    "website": "Website",
+    "industry": "Industry",
+    "code": "Code",
+    "required": "Required"
   },
   "auth": {
     "login": "Log In",
@@ -125,6 +137,178 @@
       }
     }
   },
+  "admin": {
+    "title": "Admin & Security",
+    "description": "System administration and security settings",
+    "adminAccess": "Admin Access",
+    "stats": {
+      "totalUsers": "Total Users",
+      "activeCompanies": "Active Companies",
+      "companyGroups": "Company Groups",
+      "admins": "Admins",
+      "companies": "Companies",
+      "totalAlerts": "Total Alerts",
+      "last24Hours": "Last 24 Hours",
+      "emailsSent": "Emails Sent"
+    },
+    "modules": {
+      "companyGroups": {
+        "title": "Company Groups",
+        "description": "Manage company groups and divisions"
+      },
+      "companies": {
+        "title": "Companies",
+        "description": "Manage organizations in the system"
+      },
+      "users": {
+        "title": "Users",
+        "description": "Manage user accounts and access"
+      },
+      "roles": {
+        "title": "Roles & Permissions",
+        "description": "Configure role-based access control"
+      },
+      "auditLogs": {
+        "title": "Audit Logs",
+        "description": "Track all user actions and changes"
+      },
+      "piiAccess": {
+        "title": "PII Access Report",
+        "description": "Monitor GDPR compliance and PII access"
+      },
+      "settings": {
+        "title": "System Settings",
+        "description": "Configure email alerts and thresholds"
+      },
+      "permissions": {
+        "title": "Permissions Summary",
+        "description": "View user access across all modules"
+      },
+      "accessRequests": {
+        "title": "Access Requests",
+        "description": "Review employee permission requests"
+      },
+      "autoApproval": {
+        "title": "Auto-Approval Rules",
+        "description": "Configure automatic request approvals"
+      },
+      "bulkImport": {
+        "title": "Bulk Import Users",
+        "description": "Import multiple users from CSV"
+      },
+      "orgStructure": {
+        "title": "Org Structure",
+        "description": "Manage divisions, departments & sections"
+      },
+      "scheduledReports": {
+        "title": "Scheduled Reports",
+        "description": "Configure automated email reports"
+      },
+      "knowledgeBase": {
+        "title": "Knowledge Base",
+        "description": "Manage help articles and categories"
+      },
+      "helpdesk": {
+        "title": "Helpdesk",
+        "description": "Manage tickets and monitor SLAs"
+      },
+      "territories": {
+        "title": "Territories",
+        "description": "Manage geographic regions"
+      },
+      "languages": {
+        "title": "Languages",
+        "description": "Configure system languages"
+      }
+    },
+    "users": {
+      "title": "User Management",
+      "description": "Manage users, roles, and company assignments",
+      "searchPlaceholder": "Search users by name, email, or company...",
+      "noUsers": "No users found.",
+      "noUsersSearch": "No users found matching your search.",
+      "roleUpdated": "Role updated",
+      "roleUpdatedDesc": "User role has been changed to {{role}}.",
+      "companyUpdated": "Company updated",
+      "companyAssigned": "User has been assigned to company.",
+      "companyUnassigned": "User has been unassigned from company.",
+      "cannotChangeOwnRole": "Cannot change your own role",
+      "cannotChangeOwnRoleDesc": "You cannot remove your own admin privileges.",
+      "assignCompany": "Assign Company",
+      "unassigned": "Unassigned",
+      "piiHidden": "PII Hidden",
+      "piiHiddenTooltip": "Personal information is hidden based on your role permissions"
+    },
+    "roles": {
+      "title": "Role Management",
+      "description": "Manage user roles, menu access, and PII visibility permissions",
+      "addRole": "Add Role",
+      "editRole": "Edit Role",
+      "createRole": "Create New Role",
+      "updateRole": "Update Role",
+      "deleteRole": "Delete Role",
+      "roleName": "Role Name",
+      "roleCode": "Role Code",
+      "codeCannotChange": "Code cannot be changed after creation",
+      "piiAccess": "PII Access (GDPR)",
+      "piiAccessDesc": "Allow this role to view personal identifiable information (email, phone, address, etc.)",
+      "canViewPii": "Can View PII",
+      "noPiiAccess": "No PII Access",
+      "activeRole": "Active",
+      "activeRoleDesc": "Inactive roles cannot be assigned to users",
+      "menuPermissions": "Menu Access Permissions",
+      "menuPermissionsDesc": "Select which modules this role can access in the navigation",
+      "modules": "modules",
+      "systemRole": "System Role",
+      "roleCreated": "Role created successfully",
+      "roleUpdated": "Role updated successfully",
+      "roleDeleted": "Role deleted successfully",
+      "confirmDelete": "Are you sure you want to delete this role?",
+      "confirmDeleteDesc": "This action cannot be undone."
+    },
+    "companies": {
+      "title": "Companies",
+      "description": "Manage organizations in the system",
+      "addCompany": "Add Company",
+      "editCompany": "Edit Company",
+      "totalCompanies": "Total Companies",
+      "totalEmployees": "Total Employees",
+      "searchPlaceholder": "Search companies...",
+      "noCompanies": "No companies yet. Add your first company.",
+      "noCompaniesSearch": "No companies found matching your search.",
+      "companyCreated": "Company created",
+      "companyCreatedDesc": "New company has been added.",
+      "companyUpdated": "Company updated",
+      "companyUpdatedDesc": "Company details have been updated.",
+      "companyDeleted": "Company deleted",
+      "companyDeletedDesc": "Company has been removed.",
+      "companyActivated": "Company activated",
+      "companyDeactivated": "Company deactivated",
+      "cannotDelete": "Cannot delete",
+      "cannotDeleteDesc": "This company has employees assigned. Remove employees first.",
+      "confirmDelete": "Are you sure you want to delete {{name}}?",
+      "employees": "employees",
+      "group": "Group",
+      "division": "Division"
+    },
+    "pii": {
+      "title": "PII Security Alerts",
+      "description": "Monitor suspicious PII access patterns",
+      "viewAll": "View all",
+      "recentAlerts": "Recent Alerts",
+      "noAlerts": "No security alerts yet",
+      "noAlertsDesc": "Alerts will appear here when suspicious PII access is detected",
+      "accesses": "accesses",
+      "test": "Test",
+      "alert": "Alert"
+    },
+    "accessRequests": {
+      "title": "Access Requests",
+      "pendingRequests": "Pending Requests",
+      "awaitingReview": "{{count}} request(s) awaiting review",
+      "reviewRequests": "Review Requests"
+    }
+  },
   "helpdesk": {
     "title": "Help & Support",
     "newTicket": "New Ticket",
@@ -153,18 +337,6 @@
       "high": "High",
       "urgent": "Urgent"
     }
-  },
-  "admin": {
-    "title": "Admin & Security",
-    "description": "System administration and security settings",
-    "users": "Users",
-    "roles": "Roles",
-    "permissions": "Permissions",
-    "auditLogs": "Audit Logs",
-    "settings": "Settings",
-    "companies": "Companies",
-    "companyGroups": "Company Groups",
-    "accessRequests": "Access Requests"
   },
   "language": {
     "title": "Language",

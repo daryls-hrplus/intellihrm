@@ -49,7 +49,19 @@
     "error": "Error",
     "success": "Éxito",
     "warning": "Advertencia",
-    "info": "Información"
+    "info": "Información",
+    "you": "Tú",
+    "joined": "Se unió",
+    "user": "Usuario",
+    "company": "Empresa",
+    "role": "Rol",
+    "email": "Correo Electrónico",
+    "phone": "Teléfono",
+    "address": "Dirección",
+    "website": "Sitio Web",
+    "industry": "Industria",
+    "code": "Código",
+    "required": "Requerido"
   },
   "auth": {
     "login": "Iniciar Sesión",
@@ -125,6 +137,178 @@
       }
     }
   },
+  "admin": {
+    "title": "Administración y Seguridad",
+    "description": "Configuración de administración y seguridad del sistema",
+    "adminAccess": "Acceso de Administrador",
+    "stats": {
+      "totalUsers": "Usuarios Totales",
+      "activeCompanies": "Empresas Activas",
+      "companyGroups": "Grupos de Empresas",
+      "admins": "Administradores",
+      "companies": "Empresas",
+      "totalAlerts": "Alertas Totales",
+      "last24Hours": "Últimas 24 Horas",
+      "emailsSent": "Correos Enviados"
+    },
+    "modules": {
+      "companyGroups": {
+        "title": "Grupos de Empresas",
+        "description": "Gestionar grupos de empresas y divisiones"
+      },
+      "companies": {
+        "title": "Empresas",
+        "description": "Gestionar organizaciones en el sistema"
+      },
+      "users": {
+        "title": "Usuarios",
+        "description": "Gestionar cuentas de usuario y acceso"
+      },
+      "roles": {
+        "title": "Roles y Permisos",
+        "description": "Configurar control de acceso basado en roles"
+      },
+      "auditLogs": {
+        "title": "Registros de Auditoría",
+        "description": "Seguimiento de todas las acciones de usuarios y cambios"
+      },
+      "piiAccess": {
+        "title": "Informe de Acceso PII",
+        "description": "Monitorear cumplimiento GDPR y acceso PII"
+      },
+      "settings": {
+        "title": "Configuración del Sistema",
+        "description": "Configurar alertas de correo y umbrales"
+      },
+      "permissions": {
+        "title": "Resumen de Permisos",
+        "description": "Ver acceso de usuarios en todos los módulos"
+      },
+      "accessRequests": {
+        "title": "Solicitudes de Acceso",
+        "description": "Revisar solicitudes de permisos de empleados"
+      },
+      "autoApproval": {
+        "title": "Reglas de Auto-Aprobación",
+        "description": "Configurar aprobaciones automáticas de solicitudes"
+      },
+      "bulkImport": {
+        "title": "Importar Usuarios en Lote",
+        "description": "Importar múltiples usuarios desde CSV"
+      },
+      "orgStructure": {
+        "title": "Estructura Organizacional",
+        "description": "Gestionar divisiones, departamentos y secciones"
+      },
+      "scheduledReports": {
+        "title": "Informes Programados",
+        "description": "Configurar informes automáticos por correo"
+      },
+      "knowledgeBase": {
+        "title": "Base de Conocimiento",
+        "description": "Gestionar artículos de ayuda y categorías"
+      },
+      "helpdesk": {
+        "title": "Mesa de Ayuda",
+        "description": "Gestionar tickets y monitorear SLAs"
+      },
+      "territories": {
+        "title": "Territorios",
+        "description": "Gestionar regiones geográficas"
+      },
+      "languages": {
+        "title": "Idiomas",
+        "description": "Configurar idiomas del sistema"
+      }
+    },
+    "users": {
+      "title": "Gestión de Usuarios",
+      "description": "Gestionar usuarios, roles y asignaciones de empresas",
+      "searchPlaceholder": "Buscar usuarios por nombre, correo o empresa...",
+      "noUsers": "No se encontraron usuarios.",
+      "noUsersSearch": "No se encontraron usuarios que coincidan con tu búsqueda.",
+      "roleUpdated": "Rol actualizado",
+      "roleUpdatedDesc": "El rol del usuario se ha cambiado a {{role}}.",
+      "companyUpdated": "Empresa actualizada",
+      "companyAssigned": "El usuario ha sido asignado a la empresa.",
+      "companyUnassigned": "El usuario ha sido desasignado de la empresa.",
+      "cannotChangeOwnRole": "No puedes cambiar tu propio rol",
+      "cannotChangeOwnRoleDesc": "No puedes eliminar tus propios privilegios de administrador.",
+      "assignCompany": "Asignar Empresa",
+      "unassigned": "Sin asignar",
+      "piiHidden": "PII Oculto",
+      "piiHiddenTooltip": "La información personal está oculta según los permisos de tu rol"
+    },
+    "roles": {
+      "title": "Gestión de Roles",
+      "description": "Gestionar roles de usuario, acceso a menús y permisos de visibilidad PII",
+      "addRole": "Agregar Rol",
+      "editRole": "Editar Rol",
+      "createRole": "Crear Nuevo Rol",
+      "updateRole": "Actualizar Rol",
+      "deleteRole": "Eliminar Rol",
+      "roleName": "Nombre del Rol",
+      "roleCode": "Código del Rol",
+      "codeCannotChange": "El código no se puede cambiar después de la creación",
+      "piiAccess": "Acceso PII (GDPR)",
+      "piiAccessDesc": "Permitir a este rol ver información personal identificable (correo, teléfono, dirección, etc.)",
+      "canViewPii": "Puede Ver PII",
+      "noPiiAccess": "Sin Acceso PII",
+      "activeRole": "Activo",
+      "activeRoleDesc": "Los roles inactivos no se pueden asignar a usuarios",
+      "menuPermissions": "Permisos de Acceso al Menú",
+      "menuPermissionsDesc": "Selecciona qué módulos puede acceder este rol en la navegación",
+      "modules": "módulos",
+      "systemRole": "Rol del Sistema",
+      "roleCreated": "Rol creado exitosamente",
+      "roleUpdated": "Rol actualizado exitosamente",
+      "roleDeleted": "Rol eliminado exitosamente",
+      "confirmDelete": "¿Estás seguro de que quieres eliminar este rol?",
+      "confirmDeleteDesc": "Esta acción no se puede deshacer."
+    },
+    "companies": {
+      "title": "Empresas",
+      "description": "Gestionar organizaciones en el sistema",
+      "addCompany": "Agregar Empresa",
+      "editCompany": "Editar Empresa",
+      "totalCompanies": "Empresas Totales",
+      "totalEmployees": "Empleados Totales",
+      "searchPlaceholder": "Buscar empresas...",
+      "noCompanies": "Aún no hay empresas. Agrega tu primera empresa.",
+      "noCompaniesSearch": "No se encontraron empresas que coincidan con tu búsqueda.",
+      "companyCreated": "Empresa creada",
+      "companyCreatedDesc": "Se ha agregado una nueva empresa.",
+      "companyUpdated": "Empresa actualizada",
+      "companyUpdatedDesc": "Los detalles de la empresa se han actualizado.",
+      "companyDeleted": "Empresa eliminada",
+      "companyDeletedDesc": "La empresa ha sido eliminada.",
+      "companyActivated": "Empresa activada",
+      "companyDeactivated": "Empresa desactivada",
+      "cannotDelete": "No se puede eliminar",
+      "cannotDeleteDesc": "Esta empresa tiene empleados asignados. Elimina los empleados primero.",
+      "confirmDelete": "¿Estás seguro de que quieres eliminar {{name}}?",
+      "employees": "empleados",
+      "group": "Grupo",
+      "division": "División"
+    },
+    "pii": {
+      "title": "Alertas de Seguridad PII",
+      "description": "Monitorear patrones de acceso sospechoso a PII",
+      "viewAll": "Ver todo",
+      "recentAlerts": "Alertas Recientes",
+      "noAlerts": "Aún no hay alertas de seguridad",
+      "noAlertsDesc": "Las alertas aparecerán aquí cuando se detecte acceso sospechoso a PII",
+      "accesses": "accesos",
+      "test": "Prueba",
+      "alert": "Alerta"
+    },
+    "accessRequests": {
+      "title": "Solicitudes de Acceso",
+      "pendingRequests": "Solicitudes Pendientes",
+      "awaitingReview": "{{count}} solicitud(es) esperando revisión",
+      "reviewRequests": "Revisar Solicitudes"
+    }
+  },
   "helpdesk": {
     "title": "Ayuda y Soporte",
     "newTicket": "Nuevo Ticket",
@@ -153,18 +337,6 @@
       "high": "Alta",
       "urgent": "Urgente"
     }
-  },
-  "admin": {
-    "title": "Administración y Seguridad",
-    "description": "Configuración de administración y seguridad del sistema",
-    "users": "Usuarios",
-    "roles": "Roles",
-    "permissions": "Permisos",
-    "auditLogs": "Registros de Auditoría",
-    "settings": "Configuración",
-    "companies": "Empresas",
-    "companyGroups": "Grupos de Empresas",
-    "accessRequests": "Solicitudes de Acceso"
   },
   "language": {
     "title": "Idioma",
