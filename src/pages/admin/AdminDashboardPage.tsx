@@ -28,6 +28,7 @@ import {
   Upload,
   FolderTree,
   CalendarClock,
+  BookOpen,
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 
@@ -122,6 +123,13 @@ const adminModules = [
     href: "/admin/scheduled-reports",
     icon: CalendarClock,
     color: "bg-indigo-500/10 text-indigo-600",
+  },
+  {
+    title: "Knowledge Base",
+    description: "Manage help articles and categories",
+    href: "/admin/knowledge-base",
+    icon: BookOpen,
+    color: "bg-pink-500/10 text-pink-600",
   },
   {
     title: "Territories",
