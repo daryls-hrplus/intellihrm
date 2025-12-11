@@ -21,6 +21,8 @@ import {
   Loader2,
   X,
   Check,
+  Upload,
+  Image,
 } from "lucide-react";
 
 interface Company {
@@ -36,6 +38,7 @@ interface Company {
   phone: string | null;
   email: string | null;
   website: string | null;
+  logo_url: string | null;
   is_active: boolean;
   created_at: string;
   group_id: string | null;
@@ -118,6 +121,10 @@ export default function AdminCompaniesPage() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSaving, setIsSaving] = useState(false);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
+  const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [logoPreview, setLogoPreview] = useState<string | null>(null);
+  const [isUploadingLogo, setIsUploadingLogo] = useState(false);
+  const logoInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
   const { logView } = useAuditLog();
   const hasLoggedView = useRef(false);
@@ -214,10 +221,13 @@ export default function AdminCompaniesPage() {
         group_id: company.group_id || "",
         division_id: company.division_id || "",
       });
+      setLogoPreview(company.logo_url);
     } else {
       setEditingCompany(null);
       setFormData(emptyFormData);
+      setLogoPreview(null);
     }
+    setLogoFile(null);
     setErrors({});
     setIsModalOpen(true);
   };
@@ -227,6 +237,72 @@ export default function AdminCompaniesPage() {
     setEditingCompany(null);
     setFormData(emptyFormData);
     setErrors({});
+    setLogoFile(null);
+    setLogoPreview(null);
+  };
+
+  const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        toast({
+          title: "File too large",
+          description: "Logo must be less than 5MB",
+          variant: "destructive",
+        });
+        return;
+      }
+      if (!file.type.startsWith("image/")) {
+        toast({
+          title: "Invalid file type",
+          description: "Please upload an image file",
+          variant: "destructive",
+        });
+        return;
+      }
+      setLogoFile(file);
+      setLogoPreview(URL.createObjectURL(file));
+    }
+  };
+
+  const uploadLogo = async (companyId: string): Promise<string | null> => {
+    if (!logoFile) return logoPreview;
+    
+    setIsUploadingLogo(true);
+    try {
+      const fileExt = logoFile.name.split(".").pop();
+      const filePath = `${companyId}/logo.${fileExt}`;
+
+      // Delete existing logo if any
+      await supabase.storage.from("company-logos").remove([`${companyId}/logo.png`, `${companyId}/logo.jpg`, `${companyId}/logo.jpeg`, `${companyId}/logo.webp`]);
+
+      const { error: uploadError } = await supabase.storage
+        .from("company-logos")
+        .upload(filePath, logoFile, { upsert: true });
+
+      if (uploadError) throw uploadError;
+
+      const { data } = supabase.storage.from("company-logos").getPublicUrl(filePath);
+      return data.publicUrl;
+    } catch (error) {
+      console.error("Error uploading logo:", error);
+      toast({
+        title: "Upload failed",
+        description: "Failed to upload company logo",
+        variant: "destructive",
+      });
+      return null;
+    } finally {
+      setIsUploadingLogo(false);
+    }
+  };
+
+  const removeLogo = () => {
+    setLogoFile(null);
+    setLogoPreview(null);
+    if (logoInputRef.current) {
+      logoInputRef.current.value = "";
+    }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -254,23 +330,29 @@ export default function AdminCompaniesPage() {
     setIsSaving(true);
 
     try {
-      const companyData = {
-        name: formData.name,
-        code: formData.code.toUpperCase(),
-        industry: formData.industry || null,
-        address: formData.address || null,
-        city: formData.city || null,
-        state: formData.state || null,
-        country: formData.country || null,
-        postal_code: formData.postal_code || null,
-        phone: formData.phone || null,
-        email: formData.email || null,
-        website: formData.website || null,
-        group_id: formData.group_id || null,
-        division_id: formData.division_id || null,
-      };
+      let logoUrl: string | null = null;
 
       if (editingCompany) {
+        // Upload logo if there's a new file
+        logoUrl = await uploadLogo(editingCompany.id);
+        
+        const companyData = {
+          name: formData.name,
+          code: formData.code.toUpperCase(),
+          industry: formData.industry || null,
+          address: formData.address || null,
+          city: formData.city || null,
+          state: formData.state || null,
+          country: formData.country || null,
+          postal_code: formData.postal_code || null,
+          phone: formData.phone || null,
+          email: formData.email || null,
+          website: formData.website || null,
+          group_id: formData.group_id || null,
+          division_id: formData.division_id || null,
+          logo_url: logoUrl,
+        };
+
         const { error } = await supabase
           .from("companies")
           .update(companyData)
@@ -280,9 +362,28 @@ export default function AdminCompaniesPage() {
 
         toast({ title: "Company updated", description: "Company details have been updated." });
       } else {
-        const { error } = await supabase
+        // First create the company to get the ID
+        const companyData = {
+          name: formData.name,
+          code: formData.code.toUpperCase(),
+          industry: formData.industry || null,
+          address: formData.address || null,
+          city: formData.city || null,
+          state: formData.state || null,
+          country: formData.country || null,
+          postal_code: formData.postal_code || null,
+          phone: formData.phone || null,
+          email: formData.email || null,
+          website: formData.website || null,
+          group_id: formData.group_id || null,
+          division_id: formData.division_id || null,
+        };
+
+        const { data: newCompany, error } = await supabase
           .from("companies")
-          .insert(companyData);
+          .insert(companyData)
+          .select("id")
+          .single();
 
         if (error) {
           if (error.code === "23505") {
@@ -291,6 +392,17 @@ export default function AdminCompaniesPage() {
             return;
           }
           throw error;
+        }
+
+        // Upload logo if provided
+        if (logoFile && newCompany) {
+          logoUrl = await uploadLogo(newCompany.id);
+          if (logoUrl) {
+            await supabase
+              .from("companies")
+              .update({ logo_url: logoUrl })
+              .eq("id", newCompany.id);
+          }
         }
 
         toast({ title: "Company created", description: "New company has been added." });
@@ -479,9 +591,17 @@ export default function AdminCompaniesPage() {
               >
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 text-lg font-bold text-primary">
-                      {company.code.slice(0, 2)}
-                    </div>
+                    {company.logo_url ? (
+                      <img 
+                        src={company.logo_url} 
+                        alt={company.name} 
+                        className="h-12 w-12 rounded-lg object-cover"
+                      />
+                    ) : (
+                      <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 text-lg font-bold text-primary">
+                        {company.code.slice(0, 2)}
+                      </div>
+                    )}
                     <div>
                       <h3 className="font-semibold text-card-foreground">{company.name}</h3>
                       <p className="text-sm text-muted-foreground">{company.code}</p>
@@ -613,6 +733,53 @@ export default function AdminCompaniesPage() {
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-4">
+              {/* Logo Upload */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-foreground">Company Logo</label>
+                <div className="flex items-center gap-4">
+                  {logoPreview ? (
+                    <div className="relative">
+                      <img 
+                        src={logoPreview} 
+                        alt="Logo preview" 
+                        className="h-20 w-20 rounded-lg object-cover border border-border"
+                      />
+                      <button
+                        type="button"
+                        onClick={removeLogo}
+                        className="absolute -top-2 -right-2 rounded-full bg-destructive p-1 text-destructive-foreground hover:bg-destructive/90"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="flex h-20 w-20 items-center justify-center rounded-lg border-2 border-dashed border-muted-foreground/25 bg-muted/50">
+                      <Image className="h-8 w-8 text-muted-foreground/50" />
+                    </div>
+                  )}
+                  <div className="flex-1">
+                    <input
+                      ref={logoInputRef}
+                      type="file"
+                      accept="image/*"
+                      onChange={handleLogoChange}
+                      className="hidden"
+                      id="logo-upload"
+                    />
+                    <label
+                      htmlFor="logo-upload"
+                      className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-border px-4 py-2 text-sm font-medium text-foreground hover:bg-muted transition-colors"
+                    >
+                      <Upload className="h-4 w-4" />
+                      {logoPreview ? "Change Logo" : "Upload Logo"}
+                    </label>
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      PNG, JPG or WebP. Max 5MB.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-foreground">Company Name *</label>
