@@ -149,6 +149,13 @@ const getAdminModules = (t: (key: string) => string) => [
     color: "bg-purple-500/10 text-purple-600",
   },
   {
+    title: "Letter Templates",
+    description: "Manage letter templates and approve requests",
+    href: "/admin/letter-templates",
+    icon: FileText,
+    color: "bg-teal-500/10 text-teal-600",
+  },
+  {
     title: t("admin.modules.territories.title"),
     description: t("admin.modules.territories.description"),
     href: "/admin/territories",
