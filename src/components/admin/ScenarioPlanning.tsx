@@ -51,9 +51,11 @@ import {
   History,
   GitCompare,
   ChevronRight,
-  ArrowLeftRight
+  ArrowLeftRight,
+  Lightbulb
 } from "lucide-react";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, AreaChart, Area } from "recharts";
+import { WhatIfAnalysis } from "./WhatIfAnalysis";
 
 export interface ScenarioParameters {
   id: string;
@@ -1223,6 +1225,21 @@ export function ScenarioPlanning({ currentHeadcount, sharedToken }: ScenarioPlan
             </CardContent>
           </Card>
         </>
+      )}
+
+      {/* What-If Analysis */}
+      {scenarios.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Lightbulb className="h-5 w-5 text-warning" />
+              What-If Analysis
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <WhatIfAnalysis scenarios={scenarios} currentHeadcount={currentHeadcount} />
+          </CardContent>
+        </Card>
       )}
 
       {/* Empty State */}
