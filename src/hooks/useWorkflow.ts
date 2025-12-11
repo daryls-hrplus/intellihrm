@@ -103,6 +103,132 @@ export function useWorkflow() {
     error: null,
   });
 
+  // Send notification to approver
+  const notifyApprover = useCallback(async (
+    instanceId: string,
+    approverId: string,
+    stepName: string,
+    workflowName: string,
+    category: string,
+    referenceType: string,
+    referenceId: string,
+    escalationHours?: number | null,
+    deadlineAt?: string | null,
+    initiatorName?: string
+  ) => {
+    try {
+      await supabase.functions.invoke("send-workflow-notification", {
+        body: {
+          instance_id: instanceId,
+          approver_id: approverId,
+          step_name: stepName,
+          workflow_name: workflowName,
+          category,
+          reference_type: referenceType,
+          reference_id: referenceId,
+          escalation_hours: escalationHours,
+          deadline_at: deadlineAt,
+          initiator_name: initiatorName,
+        },
+      });
+    } catch (error) {
+      console.error("Failed to send workflow notification:", error);
+      // Don't throw - notification failure shouldn't block workflow
+    }
+  }, []);
+
+  // Get the approver for a step
+  const getStepApprover = useCallback(async (
+    step: WorkflowStep,
+    initiatorId: string
+  ): Promise<string | null> => {
+    try {
+      if (step.approver_type === "specific_user" && step.approver_user_id) {
+        return step.approver_user_id;
+      }
+
+      if (step.approver_type === "manager" || step.use_reporting_line) {
+        // Get initiator's position and find their manager
+        const { data: empPos } = await supabase
+          .from("employee_positions")
+          .select("position:positions(reports_to_position_id)")
+          .eq("employee_id", initiatorId)
+          .eq("is_active", true)
+          .eq("is_primary", true)
+          .single();
+
+        if (empPos?.position?.reports_to_position_id) {
+          const { data: managerPos } = await supabase
+            .from("employee_positions")
+            .select("employee_id")
+            .eq("position_id", empPos.position.reports_to_position_id)
+            .eq("is_active", true)
+            .limit(1)
+            .single();
+
+          if (managerPos?.employee_id) {
+            return managerPos.employee_id;
+          }
+        }
+      }
+
+      if (step.approver_type === "position" && step.approver_position_id) {
+        const { data: positionHolder } = await supabase
+          .from("employee_positions")
+          .select("employee_id")
+          .eq("position_id", step.approver_position_id)
+          .eq("is_active", true)
+          .limit(1)
+          .single();
+
+        if (positionHolder?.employee_id) {
+          return positionHolder.employee_id;
+        }
+      }
+
+      if (step.approver_type === "role" && step.approver_role_id) {
+        // Get any user with this role
+        const { data: roleUser } = await supabase
+          .from("user_roles")
+          .select("user_id")
+          .eq("role_id", step.approver_role_id)
+          .limit(1)
+          .single();
+
+        if (roleUser?.user_id) {
+          return roleUser.user_id;
+        }
+      }
+
+      if (step.approver_type === "hr") {
+        // Find HR manager role users
+        const { data: hrRole } = await supabase
+          .from("roles")
+          .select("id")
+          .eq("code", "hr_manager")
+          .single();
+
+        if (hrRole) {
+          const { data: hrUser } = await supabase
+            .from("user_roles")
+            .select("user_id")
+            .eq("role_id", hrRole.id)
+            .limit(1)
+            .single();
+
+          if (hrUser?.user_id) {
+            return hrUser.user_id;
+          }
+        }
+      }
+
+      return null;
+    } catch (error) {
+      console.error("Failed to get step approver:", error);
+      return null;
+    }
+  }, []);
+
   // Start a new workflow instance
   const startWorkflow = useCallback(async (
     templateCode: string,
@@ -175,6 +301,23 @@ export function useWorkflow() {
         throw instanceError;
       }
 
+      // Notify the first step approver
+      const approverId = await getStepApprover(firstStep as WorkflowStep, user.id);
+      if (approverId) {
+        await notifyApprover(
+          instance.id,
+          approverId,
+          firstStep.name,
+          template.name,
+          template.category,
+          referenceType,
+          referenceId,
+          firstStep.escalation_hours,
+          autoTerminateAt,
+          profile.full_name || profile.email
+        );
+      }
+
       setState({ isLoading: false, error: null });
       toast.success("Workflow started successfully");
       return instance as WorkflowInstance;
@@ -184,7 +327,7 @@ export function useWorkflow() {
       toast.error(message);
       return null;
     }
-  }, [user, profile]);
+  }, [user, profile, getStepApprover, notifyApprover]);
 
   // Take action on a workflow step
   const takeAction = useCallback(async (
@@ -279,6 +422,8 @@ export function useWorkflow() {
       let completedBy: string | null = null;
       let finalAction: WorkflowAction | null = null;
 
+      let nextStepForNotification: WorkflowStep | null = null;
+
       if (action === "approve") {
         // Check if there's a next step
         const { data: nextStep } = await supabase
@@ -295,6 +440,7 @@ export function useWorkflow() {
           newStatus = "in_progress";
           newStepId = nextStep.id;
           newStepOrder = nextStep.step_order;
+          nextStepForNotification = nextStep as WorkflowStep;
         } else {
           // No more steps - workflow is complete
           newStatus = "approved";
@@ -320,6 +466,7 @@ export function useWorkflow() {
           newStatus = "returned";
           newStepId = returnStep.id;
           newStepOrder = returnStep.step_order;
+          nextStepForNotification = returnStep as WorkflowStep;
         }
       } else if (action === "escalate") {
         newStatus = "escalated";
@@ -343,6 +490,33 @@ export function useWorkflow() {
         throw updateError;
       }
 
+      // Notify next approver if moving to a new step
+      if (nextStepForNotification) {
+        const template = instance.template as any;
+        const approverId = await getStepApprover(nextStepForNotification, instance.initiated_by);
+        if (approverId) {
+          // Get initiator name
+          const { data: initiator } = await supabase
+            .from("profiles")
+            .select("full_name, email")
+            .eq("id", instance.initiated_by)
+            .single();
+
+          await notifyApprover(
+            instanceId,
+            approverId,
+            nextStepForNotification.name,
+            template?.name || "Workflow",
+            instance.category,
+            instance.reference_type,
+            instance.reference_id,
+            nextStepForNotification.escalation_hours,
+            instance.auto_terminate_at,
+            initiator?.full_name || initiator?.email
+          );
+        }
+      }
+
       setState({ isLoading: false, error: null });
       
       const actionLabels: Record<WorkflowAction, string> = {
@@ -362,7 +536,7 @@ export function useWorkflow() {
       toast.error(message);
       return false;
     }
-  }, [user, profile]);
+  }, [user, profile, getStepApprover, notifyApprover]);
 
   // Get workflow instance with full details
   const getWorkflowInstance = useCallback(async (

@@ -50,3 +50,6 @@ verify_jwt = false
 
 [functions.send-sla-weekly-report]
 verify_jwt = false
+
+[functions.send-workflow-notification]
+verify_jwt = false
