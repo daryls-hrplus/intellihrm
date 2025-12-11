@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { NavLink, useNavigate } from "react-router-dom";
+import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
 import {
@@ -16,62 +16,31 @@ import {
   Heart,
   Package,
   Settings,
-  ChevronDown,
-  ChevronRight,
   Building2,
   Globe,
   Languages,
   Menu,
   X,
   LogOut,
+  ChevronRight,
 } from "lucide-react";
 
 interface NavItem {
   title: string;
-  href?: string;
+  href: string;
   icon: React.ElementType;
-  children?: { title: string; href: string }[];
   adminOnly?: boolean;
   hrOnly?: boolean;
 }
 
 const navItems: NavItem[] = [
   { title: "Dashboard", href: "/", icon: LayoutDashboard },
-  {
-    title: "Admin & Security",
-    icon: Settings,
-    adminOnly: true,
-    children: [
-      { title: "Company Groups", href: "/admin/company-groups" },
-      { title: "Companies", href: "/admin/companies" },
-      { title: "Users", href: "/admin/users" },
-      { title: "Roles & Permissions", href: "/admin/roles" },
-      { title: "Territories", href: "/admin/territories" },
-      { title: "Languages", href: "/admin/languages" },
-    ],
-  },
-  {
-    title: "Workforce",
-    icon: Users,
-    children: [
-      { title: "Employees", href: "/workforce/employees" },
-      { title: "Positions", href: "/workforce/positions" },
-      { title: "Org Structure", href: "/workforce/org-structure" },
-      { title: "Departments", href: "/workforce/departments" },
-    ],
-  },
+  { title: "Admin & Security", href: "/admin", icon: Settings, adminOnly: true },
+  { title: "Workforce", href: "/workforce", icon: Users },
   { title: "Leave Management", href: "/leave", icon: Calendar },
   { title: "Compensation", href: "/compensation", icon: DollarSign, hrOnly: true },
   { title: "Benefits", href: "/benefits", icon: Gift },
-  {
-    title: "Performance",
-    icon: Target,
-    children: [
-      { title: "Appraisals", href: "/performance/appraisals" },
-      { title: "360 Feedback", href: "/performance/360-feedback" },
-      { title: "Goals", href: "/performance/goals" },
-    ],
-  },
+  { title: "Performance", href: "/performance", icon: Target },
   { title: "Training", href: "/training", icon: GraduationCap },
   { title: "Succession", href: "/succession", icon: TrendingUp, hrOnly: true },
   { title: "Recruitment", href: "/recruitment", icon: UserPlus, hrOnly: true },
@@ -80,83 +49,12 @@ const navItems: NavItem[] = [
   { title: "Company Property", href: "/property", icon: Package },
 ];
 
-interface NavItemComponentProps {
-  item: NavItem;
-  isCollapsed: boolean;
-}
-
-function NavItemComponent({ item, isCollapsed }: NavItemComponentProps) {
-  const [isOpen, setIsOpen] = useState(false);
-  const Icon = item.icon;
-
-  if (item.children) {
-    return (
-      <div className="space-y-1">
-        <button
-          onClick={() => setIsOpen(!isOpen)}
-          className={cn(
-            "flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all",
-            "text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
-            isOpen && "bg-sidebar-accent text-sidebar-accent-foreground"
-          )}
-        >
-          <Icon className="h-5 w-5 shrink-0" />
-          {!isCollapsed && (
-            <>
-              <span className="flex-1 text-left">{item.title}</span>
-              {isOpen ? (
-                <ChevronDown className="h-4 w-4" />
-              ) : (
-                <ChevronRight className="h-4 w-4" />
-              )}
-            </>
-          )}
-        </button>
-        {!isCollapsed && isOpen && (
-          <div className="ml-8 space-y-1 animate-slide-up">
-            {item.children.map((child) => (
-              <NavLink
-                key={child.href}
-                to={child.href}
-                className={({ isActive }) =>
-                  cn(
-                    "block rounded-lg px-3 py-2 text-sm transition-all",
-                    "text-sidebar-foreground/60 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
-                    isActive && "bg-sidebar-primary text-sidebar-primary-foreground"
-                  )
-                }
-              >
-                {child.title}
-              </NavLink>
-            ))}
-          </div>
-        )}
-      </div>
-    );
-  }
-
-  return (
-    <NavLink
-      to={item.href!}
-      className={({ isActive }) =>
-        cn(
-          "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all",
-          "text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
-          isActive && "bg-sidebar-primary text-sidebar-primary-foreground shadow-glow"
-        )
-      }
-    >
-      <Icon className="h-5 w-5 shrink-0" />
-      {!isCollapsed && <span>{item.title}</span>}
-    </NavLink>
-  );
-}
-
 export function AppSidebar() {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const { profile, roles, company, signOut, isAdmin, isHRManager } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleSignOut = async () => {
     await signOut();
@@ -165,7 +63,7 @@ export function AppSidebar() {
 
   const filteredNavItems = navItems.filter((item) => {
     if (item.adminOnly && !isAdmin) return false;
-    if (item.hrOnly && !isHRManager) return false;
+    if (item.hrOnly && !isHRManager && !isAdmin) return false;
     return true;
   });
 
@@ -183,6 +81,11 @@ export function AppSidebar() {
     if (roles.includes("admin")) return "Admin";
     if (roles.includes("hr_manager")) return "HR Manager";
     return "Employee";
+  };
+
+  const isActiveRoute = (href: string) => {
+    if (href === "/") return location.pathname === "/";
+    return location.pathname.startsWith(href);
   };
 
   return (
@@ -260,9 +163,26 @@ export function AppSidebar() {
 
         {/* Navigation */}
         <nav className="flex-1 space-y-1 overflow-y-auto p-3">
-          {filteredNavItems.map((item) => (
-            <NavItemComponent key={item.title} item={item} isCollapsed={isCollapsed} />
-          ))}
+          {filteredNavItems.map((item) => {
+            const Icon = item.icon;
+            const isActive = isActiveRoute(item.href);
+            return (
+              <NavLink
+                key={item.href}
+                to={item.href}
+                onClick={() => setIsMobileOpen(false)}
+                className={cn(
+                  "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all",
+                  isActive
+                    ? "bg-sidebar-primary text-sidebar-primary-foreground shadow-glow"
+                    : "text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                )}
+              >
+                <Icon className="h-5 w-5 shrink-0" />
+                {!isCollapsed && <span>{item.title}</span>}
+              </NavLink>
+            );
+          })}
         </nav>
 
         <div className="border-t border-sidebar-border p-4">
@@ -270,6 +190,7 @@ export function AppSidebar() {
             <div className="space-y-3">
               <NavLink
                 to="/profile"
+                onClick={() => setIsMobileOpen(false)}
                 className={({ isActive }) =>
                   cn(
                     "flex items-center gap-3 rounded-lg p-2 transition-colors",
