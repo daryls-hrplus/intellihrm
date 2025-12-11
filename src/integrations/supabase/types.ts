@@ -481,6 +481,249 @@ export type Database = {
           },
         ]
       }
+      employee_addresses: {
+        Row: {
+          address_line_1: string
+          address_line_2: string | null
+          address_type: string
+          city: string
+          country: string
+          created_at: string
+          effective_date: string
+          employee_id: string
+          end_date: string | null
+          id: string
+          is_primary: boolean
+          postal_code: string | null
+          state: string | null
+          updated_at: string
+        }
+        Insert: {
+          address_line_1: string
+          address_line_2?: string | null
+          address_type?: string
+          city: string
+          country?: string
+          created_at?: string
+          effective_date?: string
+          employee_id: string
+          end_date?: string | null
+          id?: string
+          is_primary?: boolean
+          postal_code?: string | null
+          state?: string | null
+          updated_at?: string
+        }
+        Update: {
+          address_line_1?: string
+          address_line_2?: string | null
+          address_type?: string
+          city?: string
+          country?: string
+          created_at?: string
+          effective_date?: string
+          employee_id?: string
+          end_date?: string | null
+          id?: string
+          is_primary?: boolean
+          postal_code?: string | null
+          state?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "employee_addresses_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      employee_bank_accounts: {
+        Row: {
+          account_holder_name: string
+          account_number: string
+          account_type: string
+          bank_name: string
+          created_at: string
+          currency: string
+          effective_date: string
+          employee_id: string
+          end_date: string | null
+          iban: string | null
+          id: string
+          is_primary: boolean
+          routing_number: string | null
+          swift_code: string | null
+          updated_at: string
+        }
+        Insert: {
+          account_holder_name: string
+          account_number: string
+          account_type?: string
+          bank_name: string
+          created_at?: string
+          currency?: string
+          effective_date?: string
+          employee_id: string
+          end_date?: string | null
+          iban?: string | null
+          id?: string
+          is_primary?: boolean
+          routing_number?: string | null
+          swift_code?: string | null
+          updated_at?: string
+        }
+        Update: {
+          account_holder_name?: string
+          account_number?: string
+          account_type?: string
+          bank_name?: string
+          created_at?: string
+          currency?: string
+          effective_date?: string
+          employee_id?: string
+          end_date?: string | null
+          iban?: string | null
+          id?: string
+          is_primary?: boolean
+          routing_number?: string | null
+          swift_code?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "employee_bank_accounts_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      employee_beneficiaries: {
+        Row: {
+          address: string | null
+          beneficiary_type: string
+          created_at: string
+          date_of_birth: string | null
+          effective_date: string
+          email: string | null
+          employee_id: string
+          end_date: string | null
+          full_name: string
+          id: string
+          is_primary: boolean
+          percentage: number
+          phone: string | null
+          relationship: string
+          updated_at: string
+        }
+        Insert: {
+          address?: string | null
+          beneficiary_type?: string
+          created_at?: string
+          date_of_birth?: string | null
+          effective_date?: string
+          email?: string | null
+          employee_id: string
+          end_date?: string | null
+          full_name: string
+          id?: string
+          is_primary?: boolean
+          percentage?: number
+          phone?: string | null
+          relationship: string
+          updated_at?: string
+        }
+        Update: {
+          address?: string | null
+          beneficiary_type?: string
+          created_at?: string
+          date_of_birth?: string | null
+          effective_date?: string
+          email?: string | null
+          employee_id?: string
+          end_date?: string | null
+          full_name?: string
+          id?: string
+          is_primary?: boolean
+          percentage?: number
+          phone?: string | null
+          relationship?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "employee_beneficiaries_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      employee_documents: {
+        Row: {
+          created_at: string
+          document_name: string
+          document_type: string
+          employee_id: string
+          expiry_date: string | null
+          file_size: number | null
+          file_url: string
+          id: string
+          mime_type: string | null
+          notes: string | null
+          updated_at: string
+          uploaded_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          document_name: string
+          document_type: string
+          employee_id: string
+          expiry_date?: string | null
+          file_size?: number | null
+          file_url: string
+          id?: string
+          mime_type?: string | null
+          notes?: string | null
+          updated_at?: string
+          uploaded_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          document_name?: string
+          document_type?: string
+          employee_id?: string
+          expiry_date?: string | null
+          file_size?: number | null
+          file_url?: string
+          id?: string
+          mime_type?: string | null
+          notes?: string | null
+          updated_at?: string
+          uploaded_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "employee_documents_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_documents_uploaded_by_fkey"
+            columns: ["uploaded_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       employee_position_history: {
         Row: {
           action: string

@@ -9,6 +9,11 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { EmployeeAddressesTab } from "@/components/employee/EmployeeAddressesTab";
+import { EmployeeBankAccountsTab } from "@/components/employee/EmployeeBankAccountsTab";
+import { EmployeeBeneficiariesTab } from "@/components/employee/EmployeeBeneficiariesTab";
+import { EmployeeDocumentsTab } from "@/components/employee/EmployeeDocumentsTab";
 import {
   ArrowLeft,
   Mail,
@@ -20,6 +25,10 @@ import {
   Globe,
   Loader2,
   User,
+  FileText,
+  CreditCard,
+  Users,
+  Home,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
@@ -219,93 +228,137 @@ export default function EmployeeProfilePage() {
           </CardContent>
         </Card>
 
-        <div className="grid gap-6 md:grid-cols-2">
-          {/* Position History */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Briefcase className="h-5 w-5" />
-                Position History
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {employee.positions.length === 0 ? (
-                <p className="text-sm text-muted-foreground">No positions assigned</p>
-              ) : (
-                <div className="space-y-4">
-                  {employee.positions.map((position) => (
-                    <div 
-                      key={position.id} 
-                      className={cn(
-                        "rounded-lg border p-4",
-                        position.is_active ? "border-primary/20 bg-primary/5" : "border-border"
-                      )}
-                    >
-                      <div className="flex items-start justify-between">
-                        <div>
-                          <h4 className="font-medium text-foreground">{position.title}</h4>
-                          <p className="text-sm text-muted-foreground">{position.department_name}</p>
-                          <p className="text-sm text-muted-foreground">{position.company_name}</p>
-                        </div>
-                        <div className="flex gap-2">
-                          {position.is_primary && (
-                            <Badge variant="outline" className="text-xs">Primary</Badge>
-                          )}
-                          <Badge variant={position.is_active ? "default" : "secondary"} className="text-xs">
-                            {position.is_active ? "Active" : "Ended"}
-                          </Badge>
-                        </div>
-                      </div>
-                      <div className="mt-2 flex items-center gap-1 text-xs text-muted-foreground">
-                        <Calendar className="h-3 w-3" />
-                        <span>Started {format(new Date(position.start_date), 'MMM d, yyyy')}</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
+        {/* Tabs Section */}
+        <Tabs defaultValue="overview" className="w-full">
+          <TabsList className="grid w-full grid-cols-5">
+            <TabsTrigger value="overview" className="flex items-center gap-2">
+              <User className="h-4 w-4" />
+              <span className="hidden sm:inline">Overview</span>
+            </TabsTrigger>
+            <TabsTrigger value="addresses" className="flex items-center gap-2">
+              <Home className="h-4 w-4" />
+              <span className="hidden sm:inline">Addresses</span>
+            </TabsTrigger>
+            <TabsTrigger value="bank" className="flex items-center gap-2">
+              <CreditCard className="h-4 w-4" />
+              <span className="hidden sm:inline">Bank</span>
+            </TabsTrigger>
+            <TabsTrigger value="beneficiaries" className="flex items-center gap-2">
+              <Users className="h-4 w-4" />
+              <span className="hidden sm:inline">Beneficiaries</span>
+            </TabsTrigger>
+            <TabsTrigger value="documents" className="flex items-center gap-2">
+              <FileText className="h-4 w-4" />
+              <span className="hidden sm:inline">Documents</span>
+            </TabsTrigger>
+          </TabsList>
 
-          {/* Employee Details */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <User className="h-5 w-5" />
-                Details
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center gap-3">
-                <Clock className="h-4 w-4 text-muted-foreground" />
-                <div>
-                  <p className="text-sm font-medium text-foreground">Timezone</p>
-                  <p className="text-sm text-muted-foreground">
-                    {employee.timezone || 'Not set'}
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-center gap-3">
-                <Globe className="h-4 w-4 text-muted-foreground" />
-                <div>
-                  <p className="text-sm font-medium text-foreground">Preferred Language</p>
-                  <p className="text-sm text-muted-foreground">
-                    {employee.preferred_language || 'Not set'}
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-center gap-3">
-                <Calendar className="h-4 w-4 text-muted-foreground" />
-                <div>
-                  <p className="text-sm font-medium text-foreground">Joined</p>
-                  <p className="text-sm text-muted-foreground">
-                    {format(new Date(employee.created_at), 'MMMM d, yyyy')}
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+          <TabsContent value="overview" className="mt-6">
+            <div className="grid gap-6 md:grid-cols-2">
+              {/* Position History */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Briefcase className="h-5 w-5" />
+                    Position History
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {employee.positions.length === 0 ? (
+                    <p className="text-sm text-muted-foreground">No positions assigned</p>
+                  ) : (
+                    <div className="space-y-4">
+                      {employee.positions.map((position) => (
+                        <div 
+                          key={position.id} 
+                          className={cn(
+                            "rounded-lg border p-4",
+                            position.is_active ? "border-primary/20 bg-primary/5" : "border-border"
+                          )}
+                        >
+                          <div className="flex items-start justify-between">
+                            <div>
+                              <h4 className="font-medium text-foreground">{position.title}</h4>
+                              <p className="text-sm text-muted-foreground">{position.department_name}</p>
+                              <p className="text-sm text-muted-foreground">{position.company_name}</p>
+                            </div>
+                            <div className="flex gap-2">
+                              {position.is_primary && (
+                                <Badge variant="outline" className="text-xs">Primary</Badge>
+                              )}
+                              <Badge variant={position.is_active ? "default" : "secondary"} className="text-xs">
+                                {position.is_active ? "Active" : "Ended"}
+                              </Badge>
+                            </div>
+                          </div>
+                          <div className="mt-2 flex items-center gap-1 text-xs text-muted-foreground">
+                            <Calendar className="h-3 w-3" />
+                            <span>Started {format(new Date(position.start_date), 'MMM d, yyyy')}</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Employee Details */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <User className="h-5 w-5" />
+                    Details
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex items-center gap-3">
+                    <Clock className="h-4 w-4 text-muted-foreground" />
+                    <div>
+                      <p className="text-sm font-medium text-foreground">Timezone</p>
+                      <p className="text-sm text-muted-foreground">
+                        {employee.timezone || 'Not set'}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <Globe className="h-4 w-4 text-muted-foreground" />
+                    <div>
+                      <p className="text-sm font-medium text-foreground">Preferred Language</p>
+                      <p className="text-sm text-muted-foreground">
+                        {employee.preferred_language || 'Not set'}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <Calendar className="h-4 w-4 text-muted-foreground" />
+                    <div>
+                      <p className="text-sm font-medium text-foreground">Joined</p>
+                      <p className="text-sm text-muted-foreground">
+                        {format(new Date(employee.created_at), 'MMMM d, yyyy')}
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="addresses" className="mt-6">
+            <EmployeeAddressesTab employeeId={employee.id} />
+          </TabsContent>
+
+          <TabsContent value="bank" className="mt-6">
+            <EmployeeBankAccountsTab employeeId={employee.id} />
+          </TabsContent>
+
+          <TabsContent value="beneficiaries" className="mt-6">
+            <EmployeeBeneficiariesTab employeeId={employee.id} />
+          </TabsContent>
+
+          <TabsContent value="documents" className="mt-6">
+            <EmployeeDocumentsTab employeeId={employee.id} />
+          </TabsContent>
+        </Tabs>
       </div>
     </AppLayout>
   );
