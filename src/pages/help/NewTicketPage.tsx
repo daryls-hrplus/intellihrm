@@ -24,6 +24,8 @@ interface TicketCategory {
   name: string;
   code: string;
   description: string | null;
+  default_assignee_id: string | null;
+  default_priority_id: string | null;
 }
 
 interface TicketPriority {
@@ -33,11 +35,19 @@ interface TicketPriority {
   color: string;
 }
 
+interface Agent {
+  id: string;
+  full_name: string | null;
+  email: string;
+  open_tickets: number;
+}
+
 export default function NewTicketPage() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [categories, setCategories] = useState<TicketCategory[]>([]);
   const [priorities, setPriorities] = useState<TicketPriority[]>([]);
+  const [agents, setAgents] = useState<Agent[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
   const [subject, setSubject] = useState("");
@@ -50,17 +60,61 @@ export default function NewTicketPage() {
   }, []);
 
   const fetchOptions = async () => {
-    const [categoriesRes, prioritiesRes] = await Promise.all([
-      supabase.from("ticket_categories").select("*").eq("is_active", true),
+    const [categoriesRes, prioritiesRes, profilesRes, ticketCountsRes] = await Promise.all([
+      supabase.from("ticket_categories").select("id, name, code, description, default_assignee_id, default_priority_id").eq("is_active", true),
       supabase.from("ticket_priorities").select("*").eq("is_active", true).order("display_order"),
+      supabase.from("profiles").select("id, full_name, email"),
+      supabase.from("tickets").select("assignee_id").in("status", ["open", "in_progress", "pending"]),
     ]);
 
     if (categoriesRes.data) setCategories(categoriesRes.data);
     if (prioritiesRes.data) {
       setPriorities(prioritiesRes.data);
-      // Set default priority to Medium
       const medium = prioritiesRes.data.find((p) => p.code === "medium");
       if (medium) setPriorityId(medium.id);
+    }
+
+    // Calculate agent workload
+    if (profilesRes.data) {
+      const workloadMap = new Map<string, number>();
+      ticketCountsRes.data?.forEach((t) => {
+        if (t.assignee_id) {
+          workloadMap.set(t.assignee_id, (workloadMap.get(t.assignee_id) || 0) + 1);
+        }
+      });
+      setAgents(profilesRes.data.map((p) => ({
+        ...p,
+        open_tickets: workloadMap.get(p.id) || 0,
+      })));
+    }
+  };
+
+  // Auto-assign based on category default or load balancing
+  const getAutoAssignee = (selectedCategoryId: string): string | null => {
+    if (!selectedCategoryId) return null;
+
+    const category = categories.find((c) => c.id === selectedCategoryId);
+    
+    // If category has default assignee, use it
+    if (category?.default_assignee_id) {
+      return category.default_assignee_id;
+    }
+
+    // Otherwise, use load balancing - assign to agent with fewest tickets
+    if (agents.length > 0) {
+      const sortedAgents = [...agents].sort((a, b) => a.open_tickets - b.open_tickets);
+      return sortedAgents[0]?.id || null;
+    }
+
+    return null;
+  };
+
+  // Auto-set priority when category changes
+  const handleCategoryChange = (newCategoryId: string) => {
+    setCategoryId(newCategoryId);
+    const category = categories.find((c) => c.id === newCategoryId);
+    if (category?.default_priority_id) {
+      setPriorityId(category.default_priority_id);
     }
   };
 
@@ -74,6 +128,8 @@ export default function NewTicketPage() {
 
     setIsLoading(true);
     try {
+      const autoAssigneeId = getAutoAssignee(categoryId);
+
       const { data, error } = await supabase
         .from("tickets")
         .insert({
@@ -82,13 +138,18 @@ export default function NewTicketPage() {
           category_id: categoryId || null,
           priority_id: priorityId || null,
           requester_id: user?.id,
+          assignee_id: autoAssigneeId,
         } as any)
         .select()
         .single();
 
       if (error) throw error;
 
-      toast.success("Ticket created successfully");
+      toast.success(
+        autoAssigneeId 
+          ? "Ticket created and auto-assigned" 
+          : "Ticket created successfully"
+      );
       navigate(`/help/tickets/${data.id}`);
     } catch (error: any) {
       console.error("Error creating ticket:", error);
@@ -144,7 +205,7 @@ export default function NewTicketPage() {
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="category">Category</Label>
-                  <Select value={categoryId} onValueChange={setCategoryId}>
+                  <Select value={categoryId} onValueChange={handleCategoryChange}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select category" />
                     </SelectTrigger>
