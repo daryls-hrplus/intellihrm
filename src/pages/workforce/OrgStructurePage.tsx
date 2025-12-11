@@ -11,6 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useTranslation } from "react-i18next";
 
 interface Company {
   id: string;
@@ -19,6 +20,7 @@ interface Company {
 }
 
 export default function OrgStructurePage() {
+  const { t } = useTranslation();
   const [companies, setCompanies] = useState<Company[]>([]);
   const [selectedCompanyId, setSelectedCompanyId] = useState<string>("");
   const [isLoading, setIsLoading] = useState(true);
@@ -44,8 +46,8 @@ export default function OrgStructurePage() {
     <AppLayout>
       <div className="space-y-6">
         <Breadcrumbs items={[
-          { label: "Workforce", href: "/workforce" },
-          { label: "Org Structure" }
+          { label: t("navigation.workforce"), href: "/workforce" },
+          { label: t("workforce.orgStructureTitle") }
         ]} />
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-3">
@@ -54,10 +56,10 @@ export default function OrgStructurePage() {
             </div>
             <div>
               <h1 className="text-2xl font-bold tracking-tight text-foreground">
-                Org Structure
+                {t("workforce.orgStructureTitle")}
               </h1>
               <p className="text-muted-foreground">
-                View organizational hierarchy
+                {t("workforce.viewOrgHierarchy")}
               </p>
             </div>
           </div>
@@ -66,7 +68,7 @@ export default function OrgStructurePage() {
             <Building2 className="h-4 w-4 text-muted-foreground" />
             <Select value={selectedCompanyId} onValueChange={setSelectedCompanyId}>
               <SelectTrigger className="w-[250px]">
-                <SelectValue placeholder="Select company" />
+                <SelectValue placeholder={t("workforce.selectCompany")} />
               </SelectTrigger>
               <SelectContent>
                 {companies.map((company) => (
@@ -87,7 +89,7 @@ export default function OrgStructurePage() {
           <OrgChartVisualization companyId={selectedCompanyId} />
         ) : (
           <div className="rounded-lg border border-border bg-card p-8 text-center">
-            <p className="text-muted-foreground">No companies found. Please add a company first.</p>
+            <p className="text-muted-foreground">{t("workforce.noCompaniesFound")}</p>
           </div>
         )}
       </div>

@@ -59,6 +59,7 @@ import { format } from "date-fns";
 import { useAuth } from "@/contexts/AuthContext";
 import { BulkAssignmentUpload } from "@/components/workforce/BulkAssignmentUpload";
 import { AssignmentHistoryDialog } from "@/components/workforce/AssignmentHistoryDialog";
+import { useTranslation } from "react-i18next";
 
 interface Company {
   id: string;
@@ -118,6 +119,7 @@ interface EmployeeAssignment {
 }
 
 export default function EmployeeAssignmentsPage() {
+  const { t } = useTranslation();
   const { isAdmin } = useAuth();
   const [companies, setCompanies] = useState<Company[]>([]);
   const [departments, setDepartments] = useState<Department[]>([]);
@@ -380,8 +382,8 @@ export default function EmployeeAssignmentsPage() {
     <AppLayout>
       <div className="space-y-6">
         <Breadcrumbs items={[
-          { label: "Workforce", href: "/workforce" },
-          { label: "Employee Assignments" }
+          { label: t("navigation.workforce"), href: "/workforce" },
+          { label: t("workforce.employeeAssignments") }
         ]} />
 
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -391,10 +393,10 @@ export default function EmployeeAssignmentsPage() {
             </div>
             <div>
               <h1 className="text-2xl font-bold tracking-tight text-foreground">
-                Employee Assignments
+                {t("workforce.employeeAssignments")}
               </h1>
               <p className="text-muted-foreground">
-                View and manage all employee-position relationships
+                {t("workforce.viewManageAssignments")}
               </p>
             </div>
           </div>
@@ -402,21 +404,21 @@ export default function EmployeeAssignmentsPage() {
           <div className="flex items-center gap-2">
             <Button variant="outline" onClick={() => { setHistoryEmployee(null); setHistoryOpen(true); }}>
               <History className="h-4 w-4 mr-2" />
-              All History
+              {t("workforce.allHistory")}
             </Button>
             <Button variant="outline" onClick={exportCSV}>
               <Download className="h-4 w-4 mr-2" />
-              Export CSV
+              {t("common.export")}
             </Button>
             {isAdmin && (
               <>
                 <Button variant="outline" onClick={() => setBulkUploadOpen(true)}>
                   <Upload className="h-4 w-4 mr-2" />
-                  Bulk Upload
+                  {t("workforce.bulkUpload")}
                 </Button>
                 <Button onClick={openCreateDialog}>
                   <Plus className="h-4 w-4 mr-2" />
-                  New Assignment
+                  {t("workforce.newAssignment")}
                 </Button>
               </>
             )}
@@ -428,13 +430,13 @@ export default function EmployeeAssignmentsPage() {
           <CardContent className="pt-6">
             <div className="flex flex-wrap items-end gap-4">
               <div className="space-y-2">
-                <Label>Company</Label>
+                <Label>{t("workforce.company")}</Label>
                 <Select value={selectedCompanyId} onValueChange={(v) => { setSelectedCompanyId(v); setSelectedDepartmentId("all"); }}>
                   <SelectTrigger className="w-[180px]">
-                    <SelectValue placeholder="All Companies" />
+                    <SelectValue placeholder={t("workforce.allCompanies")} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All Companies</SelectItem>
+                    <SelectItem value="all">{t("workforce.allCompanies")}</SelectItem>
                     {companies.map((company) => (
                       <SelectItem key={company.id} value={company.id}>
                         {company.name}
