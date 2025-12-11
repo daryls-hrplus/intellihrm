@@ -1056,6 +1056,63 @@ export type Database = {
           },
         ]
       }
+      scenario_comments: {
+        Row: {
+          annotation_target: string | null
+          content: string
+          created_at: string
+          id: string
+          is_resolved: boolean | null
+          parent_comment_id: string | null
+          scenario_id: string
+          updated_at: string
+          user_email: string
+          user_id: string
+          user_name: string | null
+        }
+        Insert: {
+          annotation_target?: string | null
+          content: string
+          created_at?: string
+          id?: string
+          is_resolved?: boolean | null
+          parent_comment_id?: string | null
+          scenario_id: string
+          updated_at?: string
+          user_email: string
+          user_id: string
+          user_name?: string | null
+        }
+        Update: {
+          annotation_target?: string | null
+          content?: string
+          created_at?: string
+          id?: string
+          is_resolved?: boolean | null
+          parent_comment_id?: string | null
+          scenario_id?: string
+          updated_at?: string
+          user_email?: string
+          user_id?: string
+          user_name?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "scenario_comments_parent_comment_id_fkey"
+            columns: ["parent_comment_id"]
+            isOneToOne: false
+            referencedRelation: "scenario_comments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "scenario_comments_scenario_id_fkey"
+            columns: ["scenario_id"]
+            isOneToOne: false
+            referencedRelation: "saved_scenarios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       scenario_templates: {
         Row: {
           category: string | null
