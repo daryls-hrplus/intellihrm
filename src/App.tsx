@@ -69,6 +69,7 @@ import PropertyDashboardPage from "./pages/property/PropertyDashboardPage";
 // Other pages
 import ProfilePage from "./pages/profile/ProfilePage";
 import MyPermissionsPage from "./pages/profile/MyPermissionsPage";
+import NotificationPreferencesPage from "./pages/profile/NotificationPreferencesPage";
 
 // Help Center pages
 import HelpCenterPage from "./pages/help/HelpCenterPage";
@@ -401,6 +402,14 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <MyPermissionsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/profile/notifications"
+              element={
+                <ProtectedRoute>
+                  <NotificationPreferencesPage />
                 </ProtectedRoute>
               }
             />
