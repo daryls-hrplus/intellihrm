@@ -15,6 +15,7 @@ import {
   UserCog,
   LineChart,
   Layers,
+  Megaphone,
 } from "lucide-react";
 
 const workforceModules = [
@@ -87,6 +88,13 @@ const workforceModules = [
     href: "/workforce/forecasting",
     icon: LineChart,
     color: "bg-indigo-500/10 text-indigo-500",
+  },
+  {
+    title: "Intranet Admin",
+    description: "Manage announcements, gallery, and blog",
+    href: "/workforce/intranet-admin",
+    icon: Megaphone,
+    color: "bg-pink-500/10 text-pink-500",
   },
 ];
 
