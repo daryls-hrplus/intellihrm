@@ -27,6 +27,7 @@ import {
   Zap,
   Upload,
   FolderTree,
+  CalendarClock,
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 
@@ -114,6 +115,13 @@ const adminModules = [
     href: "/admin/org-structure",
     icon: FolderTree,
     color: "bg-teal-500/10 text-teal-600",
+  },
+  {
+    title: "Scheduled Reports",
+    description: "Configure automated email reports",
+    href: "/admin/scheduled-reports",
+    icon: CalendarClock,
+    color: "bg-indigo-500/10 text-indigo-600",
   },
   {
     title: "Territories",
