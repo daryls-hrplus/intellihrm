@@ -15,6 +15,8 @@ interface TicketWithSLA {
   created_at: string;
   first_response_at: string | null;
   due_date: string | null;
+  sla_breach_response: boolean | null;
+  sla_breach_resolution: boolean | null;
   requester: { id: string; email: string; full_name: string | null };
   assignee: { id: string; email: string; full_name: string | null } | null;
   priority: { name: string; response_time_hours: number; resolution_time_hours: number } | null;
@@ -30,7 +32,7 @@ const handler = async (req: Request): Promise<Response> => {
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    console.log("Checking for tickets approaching SLA breach...");
+    console.log("Checking for tickets approaching or breaching SLA...");
 
     // Get Resend API key from system settings
     const { data: settingData, error: settingError } = await supabase
@@ -60,6 +62,8 @@ const handler = async (req: Request): Promise<Response> => {
         created_at,
         first_response_at,
         due_date,
+        sla_breach_response,
+        sla_breach_resolution,
         requester:profiles!tickets_requester_id_fkey(id, email, full_name),
         assignee:profiles!tickets_assignee_id_fkey(id, email, full_name),
         priority:ticket_priorities!tickets_priority_id_fkey(name, response_time_hours, resolution_time_hours)
@@ -74,7 +78,8 @@ const handler = async (req: Request): Promise<Response> => {
 
     const now = new Date();
     const warningThresholdPercent = 0.8; // Warn at 80% of SLA time
-    const emailsSent: string[] = [];
+    const warningsSent: string[] = [];
+    const breachesSent: string[] = [];
 
     for (const ticketData of tickets || []) {
       // Handle Supabase's array return for single joins
@@ -88,34 +93,66 @@ const handler = async (req: Request): Promise<Response> => {
       if (!ticket.priority) continue;
 
       const createdAt = new Date(ticket.created_at);
+      const recipientEmail = ticket.assignee?.email || ticket.requester.email;
       
-      // Check response SLA breach
+      // === Response SLA Check ===
       if (!ticket.first_response_at) {
         const responseDeadline = new Date(createdAt.getTime() + ticket.priority.response_time_hours * 60 * 60 * 1000);
         const warningTime = new Date(createdAt.getTime() + ticket.priority.response_time_hours * warningThresholdPercent * 60 * 60 * 1000);
         
-        if (now >= warningTime && now < responseDeadline) {
+        // Check for actual breach (past deadline)
+        if (now >= responseDeadline && !ticket.sla_breach_response) {
+          const overdueMins = Math.round((now.getTime() - responseDeadline.getTime()) / (60 * 1000));
+          await sendSLABreachEmail(resend, ticket, "response", overdueMins, recipientEmail);
+          breachesSent.push(`Response BREACH for ${ticket.ticket_number}`);
+          
+          // Mark as breached to avoid duplicate notifications
+          await supabase
+            .from("tickets")
+            .update({ sla_breach_response: true })
+            .eq("id", ticket.id);
+        }
+        // Check for warning (approaching deadline)
+        else if (now >= warningTime && now < responseDeadline) {
           const timeLeft = Math.round((responseDeadline.getTime() - now.getTime()) / (60 * 1000));
-          await sendSLAWarningEmail(resend, ticket, "response", timeLeft, ticket.assignee?.email || ticket.requester.email);
-          emailsSent.push(`Response warning for ${ticket.ticket_number}`);
+          await sendSLAWarningEmail(resend, ticket, "response", timeLeft, recipientEmail);
+          warningsSent.push(`Response warning for ${ticket.ticket_number}`);
         }
       }
 
-      // Check resolution SLA breach
+      // === Resolution SLA Check ===
       const resolutionDeadline = new Date(createdAt.getTime() + ticket.priority.resolution_time_hours * 60 * 60 * 1000);
       const resolutionWarningTime = new Date(createdAt.getTime() + ticket.priority.resolution_time_hours * warningThresholdPercent * 60 * 60 * 1000);
       
-      if (now >= resolutionWarningTime && now < resolutionDeadline) {
+      // Check for actual breach (past deadline)
+      if (now >= resolutionDeadline && !ticket.sla_breach_resolution) {
+        const overdueMins = Math.round((now.getTime() - resolutionDeadline.getTime()) / (60 * 1000));
+        await sendSLABreachEmail(resend, ticket, "resolution", overdueMins, recipientEmail);
+        breachesSent.push(`Resolution BREACH for ${ticket.ticket_number}`);
+        
+        // Mark as breached to avoid duplicate notifications
+        await supabase
+          .from("tickets")
+          .update({ sla_breach_resolution: true })
+          .eq("id", ticket.id);
+      }
+      // Check for warning (approaching deadline)
+      else if (now >= resolutionWarningTime && now < resolutionDeadline) {
         const timeLeft = Math.round((resolutionDeadline.getTime() - now.getTime()) / (60 * 1000));
-        await sendSLAWarningEmail(resend, ticket, "resolution", timeLeft, ticket.assignee?.email || ticket.requester.email);
-        emailsSent.push(`Resolution warning for ${ticket.ticket_number}`);
+        await sendSLAWarningEmail(resend, ticket, "resolution", timeLeft, recipientEmail);
+        warningsSent.push(`Resolution warning for ${ticket.ticket_number}`);
       }
     }
 
-    console.log(`SLA check complete. Emails sent: ${emailsSent.length}`);
+    console.log(`SLA check complete. Warnings: ${warningsSent.length}, Breaches: ${breachesSent.length}`);
 
     return new Response(
-      JSON.stringify({ success: true, emailsSent }),
+      JSON.stringify({ 
+        success: true, 
+        emailsSent: [...warningsSent, ...breachesSent],
+        warningsCount: warningsSent.length,
+        breachesCount: breachesSent.length
+      }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (error: any) {
@@ -203,6 +240,87 @@ async function sendSLAWarningEmail(
     console.log(`SLA warning email sent to ${recipientEmail} for ticket ${ticket.ticket_number}`);
   } catch (error) {
     console.error(`Failed to send SLA warning email for ticket ${ticket.ticket_number}:`, error);
+  }
+}
+
+async function sendSLABreachEmail(
+  resend: Resend,
+  ticket: TicketWithSLA,
+  slaType: "response" | "resolution",
+  minutesOverdue: number,
+  recipientEmail: string
+) {
+  const hoursOver = Math.floor(minutesOverdue / 60);
+  const mins = minutesOverdue % 60;
+  const timeString = hoursOver > 0 ? `${hoursOver}h ${mins}m` : `${mins} minutes`;
+
+  const subject = `🚨 SLA BREACHED: Ticket ${ticket.ticket_number} - ${slaType === "response" ? "Response" : "Resolution"} deadline exceeded`;
+
+  const html = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+      <div style="background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%); padding: 20px; border-radius: 8px 8px 0 0;">
+        <h1 style="color: white; margin: 0; font-size: 24px;">🚨 SLA BREACHED</h1>
+      </div>
+      <div style="background: #ffffff; padding: 30px; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 8px 8px;">
+        <p style="color: #374151; font-size: 16px; margin-bottom: 20px;">
+          The following ticket has <strong>breached</strong> its <strong>${slaType === "response" ? "first response" : "resolution"}</strong> SLA:
+        </p>
+        
+        <div style="background: #fee2e2; border-left: 4px solid #dc2626; padding: 15px; margin-bottom: 20px;">
+          <p style="margin: 0; color: #991b1b;"><strong>⏱️ Overdue by: ${timeString}</strong></p>
+        </div>
+
+        <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+          <tr>
+            <td style="padding: 10px; border-bottom: 1px solid #e5e7eb; color: #6b7280;">Ticket Number</td>
+            <td style="padding: 10px; border-bottom: 1px solid #e5e7eb; color: #111827; font-weight: 500;">${ticket.ticket_number}</td>
+          </tr>
+          <tr>
+            <td style="padding: 10px; border-bottom: 1px solid #e5e7eb; color: #6b7280;">Subject</td>
+            <td style="padding: 10px; border-bottom: 1px solid #e5e7eb; color: #111827;">${ticket.subject}</td>
+          </tr>
+          <tr>
+            <td style="padding: 10px; border-bottom: 1px solid #e5e7eb; color: #6b7280;">Priority</td>
+            <td style="padding: 10px; border-bottom: 1px solid #e5e7eb; color: #111827;">${ticket.priority?.name || "N/A"}</td>
+          </tr>
+          <tr>
+            <td style="padding: 10px; border-bottom: 1px solid #e5e7eb; color: #6b7280;">Status</td>
+            <td style="padding: 10px; border-bottom: 1px solid #e5e7eb; color: #111827;">${ticket.status}</td>
+          </tr>
+          <tr>
+            <td style="padding: 10px; border-bottom: 1px solid #e5e7eb; color: #6b7280;">Requester</td>
+            <td style="padding: 10px; border-bottom: 1px solid #e5e7eb; color: #111827;">${ticket.requester.full_name || ticket.requester.email}</td>
+          </tr>
+          ${ticket.assignee ? `
+          <tr>
+            <td style="padding: 10px; border-bottom: 1px solid #e5e7eb; color: #6b7280;">Assignee</td>
+            <td style="padding: 10px; border-bottom: 1px solid #e5e7eb; color: #111827;">${ticket.assignee.full_name || ticket.assignee.email}</td>
+          </tr>
+          ` : ""}
+        </table>
+
+        <div style="background: #fef2f2; border-radius: 6px; padding: 15px; margin-bottom: 20px;">
+          <p style="margin: 0; color: #991b1b; font-size: 14px;">
+            <strong>Immediate action required.</strong> This ticket has exceeded its SLA commitment and requires urgent attention.
+          </p>
+        </div>
+      </div>
+      <div style="text-align: center; padding: 20px; color: #9ca3af; font-size: 12px;">
+        This is an automated message from the HRIS Help Desk system.
+      </div>
+    </div>
+  `;
+
+  try {
+    await resend.emails.send({
+      from: "HRIS Help Desk <onboarding@resend.dev>",
+      to: [recipientEmail],
+      subject,
+      html,
+    });
+    console.log(`SLA BREACH email sent to ${recipientEmail} for ticket ${ticket.ticket_number}`);
+  } catch (error) {
+    console.error(`Failed to send SLA breach email for ticket ${ticket.ticket_number}:`, error);
   }
 }
 
