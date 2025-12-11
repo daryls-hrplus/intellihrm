@@ -1,4 +1,5 @@
 import { AppLayout } from "@/components/layout/AppLayout";
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -41,6 +42,18 @@ export default function LiveSessionsPage() {
   return (
     <AppLayout>
       <div className="space-y-6">
+        <Breadcrumbs
+          items={[
+            { label: "Training", href: "/training" },
+            { label: "Live Sessions" },
+          ]}
+        />
+        <Breadcrumbs
+          items={[
+            { label: "Training", href: "/training" },
+            { label: "Live Sessions" },
+          ]}
+        />
         <div className="animate-fade-in">
           <div className="flex items-center gap-3 mb-2">
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-info/10">
