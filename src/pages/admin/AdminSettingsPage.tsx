@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
-import { Settings, Mail, Eye, EyeOff, Save, Loader2, ShieldAlert, ArrowLeft, Send, CheckCircle, XCircle, Calendar, BarChart3 } from "lucide-react";
+import { Settings, Mail, Eye, EyeOff, Save, Loader2, ShieldAlert, ArrowLeft, Send, CheckCircle, XCircle, Calendar, BarChart3, AlertTriangle } from "lucide-react";
 import { NavLink } from "react-router-dom";
 
 interface SystemSetting {
@@ -26,9 +26,11 @@ export default function AdminSettingsPage() {
   const [isTesting, setIsTesting] = useState(false);
   const [isTestingReport, setIsTestingReport] = useState(false);
   const [isTestingHeadcount, setIsTestingHeadcount] = useState(false);
+  const [isTestingSla, setIsTestingSla] = useState(false);
   const [testResult, setTestResult] = useState<{ success: boolean; message: string } | null>(null);
   const [reportResult, setReportResult] = useState<{ success: boolean; message: string } | null>(null);
   const [headcountResult, setHeadcountResult] = useState<{ success: boolean; message: string } | null>(null);
+  const [slaResult, setSlaResult] = useState<{ success: boolean; message: string } | null>(null);
   const [showSensitive, setShowSensitive] = useState<Record<string, boolean>>({});
   const [editedValues, setEditedValues] = useState<Record<string, string>>({});
 
@@ -206,6 +208,45 @@ export default function AdminSettingsPage() {
       toast.error("Failed to send headcount report");
     } finally {
       setIsTestingHeadcount(false);
+    }
+  };
+
+  const handleCheckSlaBreach = async () => {
+    setIsTestingSla(true);
+    setSlaResult(null);
+
+    try {
+      const { data, error } = await supabase.functions.invoke("check-sla-breach", {
+        body: {},
+      });
+
+      if (error) throw error;
+
+      if (data?.success) {
+        const emailCount = data.emailsSent?.length || 0;
+        setSlaResult({
+          success: true,
+          message: emailCount > 0 
+            ? `SLA check complete! ${emailCount} warning email(s) sent.`
+            : "SLA check complete. No tickets approaching breach.",
+        });
+        toast.success(emailCount > 0 ? `${emailCount} SLA warning(s) sent` : "No SLA warnings needed");
+      } else {
+        setSlaResult({
+          success: false,
+          message: data?.message || "SLA check failed - check configuration.",
+        });
+        toast.warning(data?.message || "SLA check could not complete");
+      }
+    } catch (error: any) {
+      console.error("Error checking SLA breach:", error);
+      setSlaResult({
+        success: false,
+        message: error.message || "Failed to check SLA breach",
+      });
+      toast.error("Failed to check SLA breach");
+    } finally {
+      setIsTestingSla(false);
     }
   };
 
@@ -498,6 +539,56 @@ export default function AdminSettingsPage() {
             
             <p className="text-xs text-muted-foreground">
               The report includes: headcount request summary, net headcount changes, vacancy summary by company, and recent request details.
+              Requires Resend API key to be configured above.
+            </p>
+          </CardContent>
+        </Card>
+
+        {/* SLA Breach Check */}
+        <Card className="animate-slide-up" style={{ animationDelay: "112ms" }}>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-warning" />
+              SLA Breach Check
+            </CardTitle>
+            <CardDescription>
+              Manually check for tickets approaching SLA breach and send warning emails to assignees
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-center gap-4">
+              <Button
+                onClick={handleCheckSlaBreach}
+                disabled={isTestingSla}
+                variant="outline"
+              >
+                {isTestingSla ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                    Checking...
+                  </>
+                ) : (
+                  <>
+                    <AlertTriangle className="h-4 w-4 mr-2" />
+                    Check SLA Now
+                  </>
+                )}
+              </Button>
+              
+              {slaResult && (
+                <div className={`flex items-center gap-2 text-sm ${slaResult.success ? "text-success" : "text-warning"}`}>
+                  {slaResult.success ? (
+                    <CheckCircle className="h-4 w-4" />
+                  ) : (
+                    <XCircle className="h-4 w-4" />
+                  )}
+                  {slaResult.message}
+                </div>
+              )}
+            </div>
+            
+            <p className="text-xs text-muted-foreground">
+              Checks all open tickets with priority levels. Sends warning emails when tickets reach 80% of their response or resolution SLA time.
               Requires Resend API key to be configured above.
             </p>
           </CardContent>
