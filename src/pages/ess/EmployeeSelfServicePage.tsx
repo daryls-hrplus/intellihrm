@@ -9,7 +9,7 @@ import {
   GraduationCap,
   Target,
   Bell,
-  Settings,
+  TicketPlus,
 } from "lucide-react";
 
 const essModules = [
@@ -61,6 +61,13 @@ const essModules = [
     href: "/ess/goals",
     icon: Target,
     color: "bg-pink-500/10 text-pink-600",
+  },
+  {
+    title: "Submit a Ticket",
+    description: "Request help or report an issue to IT/HR support",
+    href: "/help/tickets/new",
+    icon: TicketPlus,
+    color: "bg-red-500/10 text-red-600",
   },
   {
     title: "Notifications",
