@@ -1,5 +1,8 @@
+import { useState, useEffect } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { NavLink } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 import {
   GraduationCap,
   BookOpen,
@@ -9,6 +12,7 @@ import {
   ChevronRight,
   Clock,
   CheckCircle,
+  Loader2,
 } from "lucide-react";
 
 const trainingModules = [
@@ -49,14 +53,71 @@ const trainingModules = [
   },
 ];
 
-const statCards = [
-  { label: "Courses Available", value: 48, icon: BookOpen, color: "bg-primary/10 text-primary" },
-  { label: "In Progress", value: 3, icon: Clock, color: "bg-warning/10 text-warning" },
-  { label: "Completed", value: 12, icon: CheckCircle, color: "bg-success/10 text-success" },
-  { label: "Certifications", value: 5, icon: Award, color: "bg-info/10 text-info" },
-];
+interface Stats {
+  coursesAvailable: number;
+  inProgress: number;
+  completed: number;
+  certifications: number;
+}
 
 export default function TrainingDashboardPage() {
+  const { user } = useAuth();
+  const [stats, setStats] = useState<Stats>({
+    coursesAvailable: 0,
+    inProgress: 0,
+    completed: 0,
+    certifications: 0,
+  });
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    fetchStats();
+  }, [user]);
+
+  const fetchStats = async () => {
+    try {
+      const [coursesRes, enrollmentsRes, certificatesRes] = await Promise.all([
+        supabase
+          .from("lms_courses")
+          .select("id", { count: "exact", head: true })
+          .eq("is_published", true),
+        user
+          ? supabase
+              .from("lms_enrollments")
+              .select("status")
+              .eq("user_id", user.id)
+          : Promise.resolve({ data: [] }),
+        user
+          ? supabase
+              .from("lms_certificates")
+              .select("id", { count: "exact", head: true })
+              .eq("user_id", user.id)
+          : Promise.resolve({ count: 0 }),
+      ]);
+
+      const enrollments = enrollmentsRes.data || [];
+      setStats({
+        coursesAvailable: coursesRes.count || 0,
+        inProgress: enrollments.filter(
+          (e: { status: string }) => e.status === "enrolled" || e.status === "in_progress"
+        ).length,
+        completed: enrollments.filter((e: { status: string }) => e.status === "completed").length,
+        certifications: certificatesRes.count || 0,
+      });
+    } catch (error) {
+      console.error("Error fetching stats:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const statCards = [
+    { label: "Courses Available", value: stats.coursesAvailable, icon: BookOpen, color: "bg-primary/10 text-primary" },
+    { label: "In Progress", value: stats.inProgress, icon: Clock, color: "bg-warning/10 text-warning" },
+    { label: "Completed", value: stats.completed, icon: CheckCircle, color: "bg-success/10 text-success" },
+    { label: "Certifications", value: stats.certifications, icon: Award, color: "bg-info/10 text-info" },
+  ];
+
   return (
     <AppLayout>
       <div className="space-y-6">
@@ -89,7 +150,9 @@ export default function TrainingDashboardPage() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-muted-foreground">{stat.label}</p>
-                    <p className="mt-1 text-3xl font-bold text-card-foreground">{stat.value}</p>
+                    <p className="mt-1 text-3xl font-bold text-card-foreground">
+                      {isLoading ? <Loader2 className="h-6 w-6 animate-spin" /> : stat.value}
+                    </p>
                   </div>
                   <div className={`rounded-lg p-3 ${stat.color}`}>
                     <Icon className="h-5 w-5" />
