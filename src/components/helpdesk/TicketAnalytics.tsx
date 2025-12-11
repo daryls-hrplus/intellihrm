@@ -2,6 +2,13 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   BarChart,
   Bar,
@@ -18,8 +25,10 @@ import {
   Line,
 } from "recharts";
 import { differenceInHours, format, subDays, startOfDay } from "date-fns";
-import { Clock, TrendingUp, Users, Target, CheckCircle, AlertTriangle } from "lucide-react";
+import { Clock, TrendingUp, Users, Target, CheckCircle, Download, FileText, FileSpreadsheet } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { toast } from "sonner";
+import jsPDF from "jspdf";
 
 const COLORS = ["#3b82f6", "#22c55e", "#f59e0b", "#ef4444", "#8b5cf6", "#ec4899", "#06b6d4", "#84cc16"];
 
@@ -157,8 +166,179 @@ export default function TicketAnalytics() {
       : 100,
   };
 
+  const exportToCSV = () => {
+    const reportDate = format(new Date(), "yyyy-MM-dd");
+    
+    // Summary metrics
+    let csvContent = "Ticket Analytics Report\n";
+    csvContent += `Generated: ${format(new Date(), "PPP p")}\n\n`;
+    
+    csvContent += "KEY METRICS\n";
+    csvContent += "Metric,Value\n";
+    csvContent += `Average First Response Time,${avgFirstResponseTime.toFixed(1)} hours\n`;
+    csvContent += `Average Resolution Time,${avgResolutionTime.toFixed(1)} hours\n`;
+    csvContent += `Response SLA Compliance,${slaMetrics.responseCompliance}%\n`;
+    csvContent += `Resolution SLA Compliance,${slaMetrics.resolutionCompliance}%\n\n`;
+    
+    csvContent += "STATUS DISTRIBUTION\n";
+    csvContent += "Status,Count\n";
+    statusDistribution.forEach(s => {
+      csvContent += `${s.name},${s.value}\n`;
+    });
+    csvContent += "\n";
+    
+    csvContent += "PRIORITY DISTRIBUTION\n";
+    csvContent += "Priority,Count\n";
+    priorityDistribution.forEach(p => {
+      csvContent += `${p.name},${p.value}\n`;
+    });
+    csvContent += "\n";
+    
+    csvContent += "CATEGORY DISTRIBUTION\n";
+    csvContent += "Category,Count\n";
+    categoryDistribution.forEach(c => {
+      csvContent += `${c.name},${c.value}\n`;
+    });
+    csvContent += "\n";
+    
+    csvContent += "AGENT PERFORMANCE\n";
+    csvContent += "Agent,Total Tickets,Resolved,Resolution Rate,Avg Resolution Time (hours)\n";
+    agentPerformance.forEach(a => {
+      csvContent += `${a.name},${a.total},${a.resolved},${a.resolutionRate}%,${a.avgResolutionTime}\n`;
+    });
+    csvContent += "\n";
+    
+    csvContent += "30-DAY TREND\n";
+    csvContent += "Date,Created,Resolved\n";
+    last30Days.forEach(d => {
+      csvContent += `${d.date},${d.created},${d.resolved}\n`;
+    });
+    
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = `ticket-analytics-${reportDate}.csv`;
+    link.click();
+    
+    toast.success("CSV report downloaded successfully");
+  };
+
+  const exportToPDF = () => {
+    const doc = new jsPDF();
+    const reportDate = format(new Date(), "PPP p");
+    let yPos = 20;
+    
+    // Title
+    doc.setFontSize(18);
+    doc.text("Ticket Analytics Report", 20, yPos);
+    yPos += 10;
+    
+    doc.setFontSize(10);
+    doc.setTextColor(100);
+    doc.text(`Generated: ${reportDate}`, 20, yPos);
+    yPos += 15;
+    
+    // Key Metrics
+    doc.setFontSize(14);
+    doc.setTextColor(0);
+    doc.text("Key Metrics", 20, yPos);
+    yPos += 10;
+    
+    doc.setFontSize(10);
+    doc.text(`• Average First Response Time: ${avgFirstResponseTime.toFixed(1)} hours`, 25, yPos);
+    yPos += 6;
+    doc.text(`• Average Resolution Time: ${avgResolutionTime.toFixed(1)} hours`, 25, yPos);
+    yPos += 6;
+    doc.text(`• Response SLA Compliance: ${slaMetrics.responseCompliance}%`, 25, yPos);
+    yPos += 6;
+    doc.text(`• Resolution SLA Compliance: ${slaMetrics.resolutionCompliance}%`, 25, yPos);
+    yPos += 15;
+    
+    // Status Distribution
+    doc.setFontSize(14);
+    doc.text("Status Distribution", 20, yPos);
+    yPos += 10;
+    
+    doc.setFontSize(10);
+    statusDistribution.forEach(s => {
+      doc.text(`• ${s.name}: ${s.value} tickets`, 25, yPos);
+      yPos += 6;
+    });
+    yPos += 10;
+    
+    // Priority Distribution
+    doc.setFontSize(14);
+    doc.text("Priority Distribution", 20, yPos);
+    yPos += 10;
+    
+    doc.setFontSize(10);
+    priorityDistribution.forEach(p => {
+      doc.text(`• ${p.name}: ${p.value} tickets`, 25, yPos);
+      yPos += 6;
+    });
+    yPos += 10;
+    
+    // Category Distribution
+    if (yPos > 250) {
+      doc.addPage();
+      yPos = 20;
+    }
+    
+    doc.setFontSize(14);
+    doc.text("Category Distribution", 20, yPos);
+    yPos += 10;
+    
+    doc.setFontSize(10);
+    categoryDistribution.forEach(c => {
+      doc.text(`• ${c.name}: ${c.value} tickets`, 25, yPos);
+      yPos += 6;
+    });
+    yPos += 10;
+    
+    // Agent Performance
+    if (yPos > 220) {
+      doc.addPage();
+      yPos = 20;
+    }
+    
+    doc.setFontSize(14);
+    doc.text("Agent Performance", 20, yPos);
+    yPos += 10;
+    
+    doc.setFontSize(10);
+    agentPerformance.slice(0, 10).forEach(a => {
+      doc.text(`• ${a.name}: ${a.total} tickets, ${a.resolutionRate}% resolved, ${a.avgResolutionTime}h avg`, 25, yPos);
+      yPos += 6;
+    });
+    
+    doc.save(`ticket-analytics-${format(new Date(), "yyyy-MM-dd")}.pdf`);
+    toast.success("PDF report downloaded successfully");
+  };
+
   return (
     <div className="space-y-6">
+      {/* Export Buttons */}
+      <div className="flex justify-end">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" size="sm">
+              <Download className="mr-2 h-4 w-4" />
+              Export Report
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={exportToCSV}>
+              <FileSpreadsheet className="mr-2 h-4 w-4" />
+              Export as CSV
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={exportToPDF}>
+              <FileText className="mr-2 h-4 w-4" />
+              Export as PDF
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+
       {/* Key Metrics */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
