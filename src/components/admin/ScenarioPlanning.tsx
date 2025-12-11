@@ -69,6 +69,7 @@ import { StressTestAnalysis } from "./StressTestAnalysis";
 import { HistoricalDataImport } from "./HistoricalDataImport";
 import { ScenarioRecommendations } from "./ScenarioRecommendations";
 import { WorkforceCostProjections } from "./WorkforceCostProjections";
+import { ScenarioCollaboration } from "./ScenarioCollaboration";
 
 export interface ScenarioParameters {
   id: string;
@@ -1751,7 +1752,12 @@ export function ScenarioPlanning({ currentHeadcount, sharedToken }: ScenarioPlan
         }))}
       />
 
-      {/* Empty State */}
+      {/* Scenario Collaboration */}
+      <ScenarioCollaboration 
+        scenarioId={currentSavedId}
+        scenarioName={savedSets.find(s => s.id === currentSavedId)?.name}
+      />
+
       {scenarios.length === 0 && (
         <Card className="border-dashed">
           <CardContent className="flex flex-col items-center justify-center py-12">
