@@ -7,13 +7,13 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { NotificationBell } from "./NotificationBell";
 import { LanguageSwitcher } from "./LanguageSwitcher";
 
 export function AppHeader() {
-  const { isAdmin } = useAuth();
+  const { isAdmin, profile } = useAuth();
   const [pendingCount, setPendingCount] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
 
@@ -54,13 +54,30 @@ export function AppHeader() {
     }
   };
 
+  const getInitials = (name: string | null) => {
+    if (!name) return "U";
+    return name
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase()
+      .slice(0, 2);
+  };
+
   return (
     <div className="flex items-center justify-end gap-2 mb-4">
       {/* Language Switcher */}
       <LanguageSwitcher />
       
-      {/* User Notifications Bell */}
-      <NotificationBell />
+      {/* User Avatar */}
+      <NavLink to="/profile">
+        <Avatar className="h-9 w-9 cursor-pointer ring-2 ring-border hover:ring-primary transition-all">
+          <AvatarImage src={profile?.avatar_url || undefined} alt={profile?.full_name || "User"} />
+          <AvatarFallback className="bg-primary/10 text-primary text-sm font-medium">
+            {getInitials(profile?.full_name)}
+          </AvatarFallback>
+        </Avatar>
+      </NavLink>
       
       {/* Admin Access Requests (separate indicator) */}
       {isAdmin && pendingCount > 0 && (
