@@ -54,8 +54,10 @@ import {
   ChevronDown,
   ChevronRight,
   Briefcase,
+  Network,
 } from "lucide-react";
 import { PositionsManagement } from "@/components/admin/PositionsManagement";
+import { OrgChartVisualization } from "@/components/admin/OrgChartVisualization";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { NavLink } from "react-router-dom";
@@ -428,6 +430,10 @@ export default function AdminOrgStructurePage() {
                 <Briefcase className="h-4 w-4" />
                 Positions
               </TabsTrigger>
+              <TabsTrigger value="orgchart" className="flex items-center gap-2">
+                <Network className="h-4 w-4" />
+                Org Chart
+              </TabsTrigger>
             </TabsList>
 
             <TabsContent value="structure">
@@ -674,6 +680,10 @@ export default function AdminOrgStructurePage() {
 
             <TabsContent value="positions">
               <PositionsManagement companyId={selectedCompanyId} />
+            </TabsContent>
+
+            <TabsContent value="orgchart">
+              <OrgChartVisualization companyId={selectedCompanyId} />
             </TabsContent>
           </Tabs>
         )}
