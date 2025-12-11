@@ -19,8 +19,81 @@ import {
   Shield,
   UserCog,
   KeyRound,
+  Globe,
+  Clock,
+  Languages,
 } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Link } from "react-router-dom";
+
+// Common timezones grouped by region
+const TIMEZONES = [
+  { value: "UTC", label: "UTC (Coordinated Universal Time)" },
+  { value: "America/New_York", label: "Eastern Time (US & Canada)" },
+  { value: "America/Chicago", label: "Central Time (US & Canada)" },
+  { value: "America/Denver", label: "Mountain Time (US & Canada)" },
+  { value: "America/Los_Angeles", label: "Pacific Time (US & Canada)" },
+  { value: "America/Anchorage", label: "Alaska" },
+  { value: "Pacific/Honolulu", label: "Hawaii" },
+  { value: "America/Toronto", label: "Toronto" },
+  { value: "America/Vancouver", label: "Vancouver" },
+  { value: "America/Mexico_City", label: "Mexico City" },
+  { value: "America/Sao_Paulo", label: "São Paulo" },
+  { value: "America/Buenos_Aires", label: "Buenos Aires" },
+  { value: "Europe/London", label: "London" },
+  { value: "Europe/Paris", label: "Paris" },
+  { value: "Europe/Berlin", label: "Berlin" },
+  { value: "Europe/Madrid", label: "Madrid" },
+  { value: "Europe/Rome", label: "Rome" },
+  { value: "Europe/Amsterdam", label: "Amsterdam" },
+  { value: "Europe/Moscow", label: "Moscow" },
+  { value: "Asia/Dubai", label: "Dubai" },
+  { value: "Asia/Riyadh", label: "Riyadh" },
+  { value: "Asia/Kolkata", label: "India (Kolkata)" },
+  { value: "Asia/Singapore", label: "Singapore" },
+  { value: "Asia/Hong_Kong", label: "Hong Kong" },
+  { value: "Asia/Shanghai", label: "Shanghai" },
+  { value: "Asia/Tokyo", label: "Tokyo" },
+  { value: "Asia/Seoul", label: "Seoul" },
+  { value: "Australia/Sydney", label: "Sydney" },
+  { value: "Australia/Melbourne", label: "Melbourne" },
+  { value: "Australia/Perth", label: "Perth" },
+  { value: "Pacific/Auckland", label: "Auckland" },
+  { value: "Africa/Cairo", label: "Cairo" },
+  { value: "Africa/Johannesburg", label: "Johannesburg" },
+  { value: "Africa/Lagos", label: "Lagos" },
+];
+
+const LANGUAGES = [
+  { value: "en", label: "English" },
+  { value: "es", label: "Español (Spanish)" },
+  { value: "fr", label: "Français (French)" },
+  { value: "ar", label: "العربية (Arabic)" },
+  { value: "de", label: "Deutsch (German)" },
+  { value: "pt", label: "Português (Portuguese)" },
+  { value: "zh", label: "中文 (Chinese)" },
+  { value: "ja", label: "日本語 (Japanese)" },
+  { value: "ko", label: "한국어 (Korean)" },
+  { value: "hi", label: "हिन्दी (Hindi)" },
+];
+
+const DATE_FORMATS = [
+  { value: "MM/DD/YYYY", label: "MM/DD/YYYY (US)" },
+  { value: "DD/MM/YYYY", label: "DD/MM/YYYY (UK/EU)" },
+  { value: "YYYY-MM-DD", label: "YYYY-MM-DD (ISO)" },
+  { value: "DD.MM.YYYY", label: "DD.MM.YYYY (DE)" },
+];
+
+const TIME_FORMATS = [
+  { value: "12h", label: "12-hour (1:30 PM)" },
+  { value: "24h", label: "24-hour (13:30)" },
+];
 
 const profileSchema = z.object({
   full_name: z.string().min(2, "Name must be at least 2 characters").max(100),
@@ -30,6 +103,10 @@ const profileSchema = z.object({
   job_title: z.string().max(100).optional().or(z.literal("")),
   emergency_contact_name: z.string().max(100).optional().or(z.literal("")),
   emergency_contact_phone: z.string().max(20).optional().or(z.literal("")),
+  timezone: z.string().default("UTC"),
+  preferred_language: z.string().default("en"),
+  date_format: z.string().default("MM/DD/YYYY"),
+  time_format: z.string().default("12h"),
 });
 
 type ProfileFormData = z.infer<typeof profileSchema>;
@@ -54,10 +131,20 @@ export default function ProfilePage() {
     job_title: "",
     emergency_contact_name: "",
     emergency_contact_phone: "",
+    timezone: "UTC",
+    preferred_language: "en",
+    date_format: "MM/DD/YYYY",
+    time_format: "12h",
   });
 
+  // Detect timezone from browser on mount
   useEffect(() => {
+    const detectedTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    const detectedLanguage = navigator.language.split('-')[0];
+    
+    // Only set defaults if profile doesn't have values
     if (profile) {
+      const profileData = profile as any;
       setFormData({
         full_name: profile.full_name || "",
         phone: "",
@@ -66,6 +153,10 @@ export default function ProfilePage() {
         job_title: "",
         emergency_contact_name: "",
         emergency_contact_phone: "",
+        timezone: profileData.timezone || detectedTimezone || "UTC",
+        preferred_language: profileData.preferred_language || detectedLanguage || "en",
+        date_format: profileData.date_format || "MM/DD/YYYY",
+        time_format: profileData.time_format || "12h",
       });
       setAvatarUrl(profile.avatar_url);
       
@@ -80,6 +171,11 @@ export default function ProfilePage() {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
     setErrors({ ...errors, [e.target.name]: "" });
+  };
+
+  const handleSelectChange = (name: keyof ProfileFormData, value: string) => {
+    setFormData({ ...formData, [name]: value });
+    setErrors({ ...errors, [name]: "" });
   };
 
   const handleAvatarClick = () => {
@@ -178,7 +274,13 @@ export default function ProfilePage() {
     try {
       const { error } = await supabase
         .from("profiles")
-        .update({ full_name: formData.full_name })
+        .update({ 
+          full_name: formData.full_name,
+          timezone: formData.timezone,
+          preferred_language: formData.preferred_language,
+          date_format: formData.date_format,
+          time_format: formData.time_format,
+        })
         .eq("id", user.id);
 
       if (error) throw error;
@@ -476,6 +578,113 @@ export default function ProfilePage() {
                   placeholder="+1 (555) 987-6543"
                   className="h-11 w-full rounded-lg border border-input bg-background px-4 text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
                 />
+              </div>
+            </div>
+          </div>
+
+          {/* Regional Preferences */}
+          <div className="rounded-xl border border-border bg-card p-6 shadow-card animate-slide-up" style={{ animationDelay: "250ms" }}>
+            <h3 className="mb-4 text-lg font-semibold text-card-foreground">
+              Regional Preferences
+            </h3>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-foreground">
+                  Timezone
+                </label>
+                <div className="relative">
+                  <Clock className="absolute left-3 top-1/2 z-10 h-4 w-4 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+                  <Select
+                    value={formData.timezone}
+                    onValueChange={(value) => handleSelectChange("timezone", value)}
+                  >
+                    <SelectTrigger className="h-11 w-full pl-10">
+                      <SelectValue placeholder="Select timezone" />
+                    </SelectTrigger>
+                    <SelectContent className="max-h-[300px]">
+                      {TIMEZONES.map((tz) => (
+                        <SelectItem key={tz.value} value={tz.value}>
+                          {tz.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Auto-detected from your browser
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-foreground">
+                  Language
+                </label>
+                <div className="relative">
+                  <Languages className="absolute left-3 top-1/2 z-10 h-4 w-4 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+                  <Select
+                    value={formData.preferred_language}
+                    onValueChange={(value) => handleSelectChange("preferred_language", value)}
+                  >
+                    <SelectTrigger className="h-11 w-full pl-10">
+                      <SelectValue placeholder="Select language" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {LANGUAGES.map((lang) => (
+                        <SelectItem key={lang.value} value={lang.value}>
+                          {lang.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-foreground">
+                  Date Format
+                </label>
+                <div className="relative">
+                  <Calendar className="absolute left-3 top-1/2 z-10 h-4 w-4 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+                  <Select
+                    value={formData.date_format}
+                    onValueChange={(value) => handleSelectChange("date_format", value)}
+                  >
+                    <SelectTrigger className="h-11 w-full pl-10">
+                      <SelectValue placeholder="Select date format" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {DATE_FORMATS.map((format) => (
+                        <SelectItem key={format.value} value={format.value}>
+                          {format.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-foreground">
+                  Time Format
+                </label>
+                <div className="relative">
+                  <Globe className="absolute left-3 top-1/2 z-10 h-4 w-4 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+                  <Select
+                    value={formData.time_format}
+                    onValueChange={(value) => handleSelectChange("time_format", value)}
+                  >
+                    <SelectTrigger className="h-11 w-full pl-10">
+                      <SelectValue placeholder="Select time format" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {TIME_FORMATS.map((format) => (
+                        <SelectItem key={format.value} value={format.value}>
+                          {format.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
             </div>
           </div>
