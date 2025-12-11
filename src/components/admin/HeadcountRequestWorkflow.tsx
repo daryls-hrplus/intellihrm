@@ -37,6 +37,7 @@ import {
   PenLine,
   Shield,
   AlertTriangle,
+  History,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -134,6 +135,20 @@ interface GovernanceBody {
   can_approve_headcount: boolean;
 }
 
+interface StatusHistory {
+  id: string;
+  headcount_request_id: string;
+  old_status: string | null;
+  new_status: string;
+  changed_by: string | null;
+  notes: string | null;
+  created_at: string;
+  changer?: {
+    full_name: string | null;
+    email: string;
+  } | null;
+}
+
 interface HeadcountRequestWorkflowProps {
   companyId: string;
 }
@@ -150,6 +165,7 @@ export function HeadcountRequestWorkflow({ companyId }: HeadcountRequestWorkflow
   const [positions, setPositions] = useState<Position[]>([]);
   const [governanceBodies, setGovernanceBodies] = useState<GovernanceBody[]>([]);
   const [signatures, setSignatures] = useState<Signature[]>([]);
+  const [statusHistory, setStatusHistory] = useState<StatusHistory[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [canApprove, setCanApprove] = useState(false);
 
@@ -233,6 +249,19 @@ export function HeadcountRequestWorkflow({ companyId }: HeadcountRequestWorkflow
 
             if (sigError) throw sigError;
             setSignatures(sigData || []);
+
+            // Fetch status history for these requests
+            const { data: histData, error: histError } = await supabase
+              .from("headcount_request_history")
+              .select(`
+                *,
+                changer:profiles(full_name, email)
+              `)
+              .in("headcount_request_id", reqIds)
+              .order("created_at", { ascending: true });
+
+            if (histError) throw histError;
+            setStatusHistory(histData || []);
           }
         }
       }
@@ -453,6 +482,9 @@ export function HeadcountRequestWorkflow({ companyId }: HeadcountRequestWorkflow
   const getSignaturesForRequest = (requestId: string) =>
     signatures.filter(s => s.headcount_request_id === requestId);
 
+  const getHistoryForRequest = (requestId: string) =>
+    statusHistory.filter(h => h.headcount_request_id === requestId);
+
   const pendingRequests = requests.filter(r => r.status === "pending");
   const processedRequests = requests.filter(r => r.status !== "pending");
 
@@ -515,6 +547,7 @@ export function HeadcountRequestWorkflow({ companyId }: HeadcountRequestWorkflow
                   key={request.id}
                   request={request}
                   signatures={getSignaturesForRequest(request.id)}
+                  history={getHistoryForRequest(request.id)}
                   canApprove={canApprove}
                   onApprove={() => openReviewDialog(request, "approve")}
                   onReject={() => openReviewDialog(request, "reject")}
@@ -539,6 +572,7 @@ export function HeadcountRequestWorkflow({ companyId }: HeadcountRequestWorkflow
                   key={request.id}
                   request={request}
                   signatures={getSignaturesForRequest(request.id)}
+                  history={getHistoryForRequest(request.id)}
                   canApprove={false}
                   getInitials={getInitials}
                 />
@@ -720,13 +754,14 @@ export function HeadcountRequestWorkflow({ companyId }: HeadcountRequestWorkflow
 interface RequestCardProps {
   request: HeadcountRequest;
   signatures: Signature[];
+  history: StatusHistory[];
   canApprove: boolean;
   onApprove?: () => void;
   onReject?: () => void;
   getInitials: (name: string | null, email: string) => string;
 }
 
-function RequestCard({ request, signatures, canApprove, onApprove, onReject, getInitials }: RequestCardProps) {
+function RequestCard({ request, signatures, history, canApprove, onApprove, onReject, getInitials }: RequestCardProps) {
   const statusInfo = statusConfig[request.status] || statusConfig.pending;
   const StatusIcon = statusInfo.icon;
   const headcountChange = request.requested_headcount - request.current_headcount;
@@ -796,6 +831,66 @@ function RequestCard({ request, signatures, canApprove, onApprove, onReject, get
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <Shield className="h-4 w-4" />
             Submitted to: {request.governance_body.name}
+          </div>
+        )}
+
+        {/* Status History Timeline */}
+        {history.length > 0 && (
+          <div className="border-t pt-4">
+            <p className="text-sm font-medium mb-3 flex items-center gap-2">
+              <History className="h-4 w-4" />
+              Status History
+            </p>
+            <div className="relative pl-4 space-y-3">
+              {/* Timeline line */}
+              <div className="absolute left-[7px] top-2 bottom-2 w-0.5 bg-border" />
+              
+              {history.map((item, index) => {
+                const itemStatusInfo = statusConfig[item.new_status] || statusConfig.pending;
+                const ItemIcon = itemStatusInfo.icon;
+                return (
+                  <div key={item.id} className="relative flex gap-3">
+                    {/* Timeline dot */}
+                    <div className={cn(
+                      "absolute left-[-12px] w-4 h-4 rounded-full border-2 bg-background flex items-center justify-center",
+                      item.new_status === "approved" ? "border-green-500" : 
+                      item.new_status === "rejected" ? "border-red-500" : "border-amber-500"
+                    )}>
+                      <ItemIcon className={cn(
+                        "h-2 w-2",
+                        item.new_status === "approved" ? "text-green-500" : 
+                        item.new_status === "rejected" ? "text-red-500" : "text-amber-500"
+                      )} />
+                    </div>
+                    
+                    {/* Content */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <Badge 
+                          variant={item.new_status === "approved" ? "default" : item.new_status === "rejected" ? "destructive" : "secondary"}
+                          className="text-xs"
+                        >
+                          {item.old_status ? `${item.old_status} → ${item.new_status}` : item.new_status}
+                        </Badge>
+                        <span className="text-xs text-muted-foreground">
+                          {format(new Date(item.created_at), "MMM d, yyyy 'at' h:mm a")}
+                        </span>
+                      </div>
+                      {item.changer && (
+                        <p className="text-xs text-muted-foreground mt-1">
+                          by {item.changer.full_name || item.changer.email}
+                        </p>
+                      )}
+                      {item.notes && (
+                        <p className="text-xs text-muted-foreground mt-1 italic">
+                          "{item.notes}"
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           </div>
         )}
 
