@@ -62,6 +62,8 @@ export function useMenuPermissions() {
   }, [user, roles]);
 
   const hasMenuAccess = (moduleCode: string): boolean => {
+    // Help center is always accessible to all authenticated users
+    if (moduleCode === "help") return true;
     // If permissions are still loading, default to false for security
     if (isLoading) return false;
     // Admins always have access to all modules
