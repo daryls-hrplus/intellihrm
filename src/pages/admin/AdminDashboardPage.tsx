@@ -32,6 +32,8 @@ import {
   BookOpen,
   Headphones,
   Brain,
+  FileText as FileTextIcon,
+  GitBranch,
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 
@@ -152,8 +154,15 @@ const getAdminModules = (t: (key: string) => string) => [
     title: "Letter Templates",
     description: "Manage letter templates and approve requests",
     href: "/admin/letter-templates",
-    icon: FileText,
+    icon: FileTextIcon,
     color: "bg-teal-500/10 text-teal-600",
+  },
+  {
+    title: "Workflow Templates",
+    description: "Configure approval workflows with escalation and auto-termination",
+    href: "/admin/workflow-templates",
+    icon: GitBranch,
+    color: "bg-sky-500/10 text-sky-600",
   },
   {
     title: t("admin.modules.territories.title"),

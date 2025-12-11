@@ -12,6 +12,8 @@ import {
   Bell,
   TicketPlus,
   FileSignature,
+  CheckSquare,
+  UserCheck,
 } from "lucide-react";
 
 const essModules = [
@@ -21,6 +23,20 @@ const essModules = [
     href: "/profile",
     icon: User,
     color: "bg-blue-500/10 text-blue-600",
+  },
+  {
+    title: "My Approvals",
+    description: "View and action pending approval requests",
+    href: "/workflow/approvals",
+    icon: CheckSquare,
+    color: "bg-violet-500/10 text-violet-600",
+  },
+  {
+    title: "My Delegates",
+    description: "Manage your approval delegates",
+    href: "/workflow/delegates",
+    icon: UserCheck,
+    color: "bg-fuchsia-500/10 text-fuchsia-600",
   },
   {
     title: "Leave Requests",
