@@ -14,9 +14,24 @@ import {
   TrendingUp,
   UserCog,
   LineChart,
+  Layers,
 } from "lucide-react";
 
 const workforceModules = [
+  {
+    title: "Company Groups",
+    description: "Manage company groups and divisions",
+    href: "/workforce/company-groups",
+    icon: Layers,
+    color: "bg-cyan-500/10 text-cyan-500",
+  },
+  {
+    title: "Companies",
+    description: "Manage company entities",
+    href: "/workforce/companies",
+    icon: Building2,
+    color: "bg-orange-500/10 text-orange-500",
+  },
   {
     title: "Employees",
     description: "View and manage employee records",
@@ -39,7 +54,7 @@ const workforceModules = [
     color: "bg-purple-500/10 text-purple-500",
   },
   {
-    title: "Org Structure",
+    title: "View Orgchart",
     description: "View organizational hierarchy",
     href: "/workforce/org-structure",
     icon: Network,

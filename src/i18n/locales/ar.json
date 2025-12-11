@@ -182,6 +182,7 @@
     "employeePositionRequired": "الموظف والمنصب وتاريخ البدء مطلوبون",
     "csvExported": "تم تصدير CSV بنجاح",
     "orgStructureTitle": "الهيكل التنظيمي",
+    "viewOrgchart": "عرض الهيكل التنظيمي",
     "viewOrgHierarchy": "عرض واستكشاف التسلسل الهرمي التنظيمي",
     "noCompaniesFound": "لم يتم العثور على شركات",
     "confirmDeleteDepartment": "هل أنت متأكد من حذف هذا القسم؟",

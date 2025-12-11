@@ -47,7 +47,7 @@ export default function OrgStructurePage() {
       <div className="space-y-6">
         <Breadcrumbs items={[
           { label: t("navigation.workforce"), href: "/workforce" },
-          { label: t("workforce.orgStructureTitle") }
+          { label: t("workforce.viewOrgchart") }
         ]} />
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-3">
@@ -56,7 +56,7 @@ export default function OrgStructurePage() {
             </div>
             <div>
               <h1 className="text-2xl font-bold tracking-tight text-foreground">
-                {t("workforce.orgStructureTitle")}
+                {t("workforce.viewOrgchart")}
               </h1>
               <p className="text-muted-foreground">
                 {t("workforce.viewOrgHierarchy")}

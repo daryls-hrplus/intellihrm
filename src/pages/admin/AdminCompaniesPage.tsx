@@ -378,7 +378,7 @@ export default function AdminCompaniesPage() {
     <AppLayout>
       <div className="space-y-6">
         <Breadcrumbs items={[
-          { label: "Admin & Security", href: "/admin" },
+          { label: "Workforce", href: "/workforce" },
           { label: "Companies" }
         ]} />
         

@@ -344,6 +344,22 @@ const App = () => (
               }
             />
             <Route
+              path="/workforce/company-groups"
+              element={
+                <ProtectedRoute requiredRoles={["admin"]}>
+                  <AdminCompanyGroupsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/workforce/companies"
+              element={
+                <ProtectedRoute requiredRoles={["admin"]}>
+                  <AdminCompaniesPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
               path="/workforce/employees"
               element={
                 <ProtectedRoute>
