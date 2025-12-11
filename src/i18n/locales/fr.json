@@ -182,6 +182,7 @@
     "employeePositionRequired": "Employé, poste et date de début sont requis",
     "csvExported": "CSV exporté avec succès",
     "orgStructureTitle": "Structure Organisationnelle",
+    "viewOrgchart": "Voir l'Organigramme",
     "viewOrgHierarchy": "Voir et explorer la hiérarchie organisationnelle",
     "noCompaniesFound": "Aucune entreprise trouvée",
     "confirmDeleteDepartment": "Êtes-vous sûr de vouloir supprimer ce département?",
