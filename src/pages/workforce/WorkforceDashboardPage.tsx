@@ -13,6 +13,7 @@ import {
   Building2,
   TrendingUp,
   UserCog,
+  LineChart,
 } from "lucide-react";
 
 const workforceModules = [
@@ -64,6 +65,13 @@ const workforceModules = [
     href: "/workforce/transactions",
     icon: UserPlus,
     color: "bg-destructive/10 text-destructive",
+  },
+  {
+    title: "Workforce Forecasting",
+    description: "Headcount forecasts, scenario planning, and analytics",
+    href: "/workforce/forecasting",
+    icon: LineChart,
+    color: "bg-indigo-500/10 text-indigo-500",
   },
 ];
 

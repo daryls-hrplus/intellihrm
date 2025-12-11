@@ -42,6 +42,7 @@ import DepartmentsPage from "./pages/workforce/DepartmentsPage";
 import OrgChangesPage from "./pages/workforce/OrgChangesPage";
 import EmployeeAssignmentsPage from "./pages/workforce/EmployeeAssignmentsPage";
 import EmployeeTransactionsPage from "./pages/workforce/EmployeeTransactionsPage";
+import WorkforceForecastingPage from "./pages/workforce/WorkforceForecastingPage";
 
 // Performance pages
 import PerformanceDashboardPage from "./pages/performance/PerformanceDashboardPage";
@@ -395,6 +396,14 @@ const App = () => (
               element={
                 <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
                   <EmployeeTransactionsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/workforce/forecasting"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
+                  <WorkforceForecastingPage />
                 </ProtectedRoute>
               }
             />
