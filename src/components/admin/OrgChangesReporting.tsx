@@ -6,12 +6,29 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   Loader2,
   TrendingUp,
@@ -25,6 +42,9 @@ import {
   ArrowUpRight,
   ArrowDownRight,
   Minus,
+  UserPlus,
+  UserMinus,
+  X,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -73,10 +93,22 @@ interface EmployeePosition {
   end_date: string | null;
 }
 
+interface Employee {
+  id: string;
+  full_name: string | null;
+  email: string;
+}
+
 interface Company {
   id: string;
   name: string;
   code: string;
+}
+
+interface DrillDownData {
+  month: string;
+  monthDate: Date;
+  type: "positions" | "employees" | "positionChanges" | "employeeMovement";
 }
 
 interface OrgChangesReportingProps {
@@ -92,10 +124,12 @@ export function OrgChangesReporting({ companyId }: OrgChangesReportingProps) {
   const [positions, setPositions] = useState<Position[]>([]);
   const [departments, setDepartments] = useState<Department[]>([]);
   const [employeePositions, setEmployeePositions] = useState<EmployeePosition[]>([]);
+  const [employees, setEmployees] = useState<Employee[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [startDate, setStartDate] = useState<string>(() => format(subMonths(new Date(), 11), "yyyy-MM-dd"));
   const [endDate, setEndDate] = useState<string>(() => format(new Date(), "yyyy-MM-dd"));
   const [showYoY, setShowYoY] = useState(false);
+  const [drillDown, setDrillDown] = useState<DrillDownData | null>(null);
 
   // Filter positions by department
   const filteredPositions = useMemo(() => {
@@ -185,12 +219,28 @@ export function OrgChangesReporting({ companyId }: OrgChangesReportingProps) {
 
           if (epError) throw epError;
           setEmployeePositions(epData || []);
+
+          // Fetch employee profiles for the employees in positions
+          const employeeIds = [...new Set((epData || []).map(ep => ep.employee_id))];
+          if (employeeIds.length > 0) {
+            const { data: empData, error: empError } = await supabase
+              .from("profiles")
+              .select("id, full_name, email")
+              .in("id", employeeIds);
+
+            if (empError) throw empError;
+            setEmployees(empData || []);
+          } else {
+            setEmployees([]);
+          }
         } else {
           setEmployeePositions([]);
+          setEmployees([]);
         }
       } else {
         setPositions([]);
         setEmployeePositions([]);
+        setEmployees([]);
       }
     } catch (error) {
       console.error("Error fetching data:", error);
@@ -199,6 +249,124 @@ export function OrgChangesReporting({ companyId }: OrgChangesReportingProps) {
       setIsLoading(false);
     }
   };
+
+  // Handle chart click for drill-down
+  const handleChartClick = (data: any, type: DrillDownData["type"]) => {
+    if (!data || !data.activePayload || !data.activePayload[0]) return;
+    const payload = data.activePayload[0].payload;
+    const monthStr = payload.month;
+    // Parse the month string back to a date
+    const monthDate = parseISO(startDate);
+    const monthsInRange = eachMonthOfInterval({ start: parseISO(startDate), end: parseISO(endDate) });
+    const matchingMonth = monthsInRange.find(m => format(m, "MMM yyyy") === monthStr);
+    
+    if (matchingMonth) {
+      setDrillDown({ month: monthStr, monthDate: matchingMonth, type });
+    }
+  };
+
+  // Get drill-down details for selected month
+  const drillDownDetails = useMemo(() => {
+    if (!drillDown) return null;
+
+    const monthStart = startOfMonth(drillDown.monthDate);
+    const monthEnd = endOfMonth(drillDown.monthDate);
+    const monthEndStr = format(monthEnd, "yyyy-MM-dd");
+    const monthStartStr = format(monthStart, "yyyy-MM-dd");
+
+    const getEmployeeName = (employeeId: string) => {
+      const emp = employees.find(e => e.id === employeeId);
+      return emp?.full_name || emp?.email || "Unknown";
+    };
+
+    const getDepartmentName = (departmentId: string) => {
+      const dept = departments.find(d => d.id === departmentId);
+      return dept?.name || "Unknown";
+    };
+
+    const getPositionTitle = (positionId: string) => {
+      const pos = positions.find(p => p.id === positionId);
+      return pos?.title || "Unknown";
+    };
+
+    // Active positions at month end
+    const activePositions = filteredPositions.filter(p => {
+      const posStart = parseISO(p.start_date);
+      const posEnd = p.end_date ? parseISO(p.end_date) : null;
+      return posStart <= monthEnd && (!posEnd || posEnd >= monthStart);
+    }).map(p => ({
+      ...p,
+      departmentName: getDepartmentName(p.department_id),
+    }));
+
+    // Positions added this month
+    const positionsAdded = filteredPositions.filter(p => {
+      const posStart = parseISO(p.start_date);
+      return isWithinInterval(posStart, { start: monthStart, end: monthEnd });
+    }).map(p => ({
+      ...p,
+      departmentName: getDepartmentName(p.department_id),
+    }));
+
+    // Positions removed this month
+    const positionsRemoved = filteredPositions.filter(p => {
+      if (!p.end_date) return false;
+      const posEnd = parseISO(p.end_date);
+      return isWithinInterval(posEnd, { start: monthStart, end: monthEnd });
+    }).map(p => ({
+      ...p,
+      departmentName: getDepartmentName(p.department_id),
+    }));
+
+    // Active employees at month end
+    const activeEmployeePositions = filteredEmployeePositions.filter(ep => {
+      const epStart = parseISO(ep.start_date);
+      const epEnd = ep.end_date ? parseISO(ep.end_date) : null;
+      return epStart <= monthEnd && (!epEnd || epEnd >= monthStart);
+    });
+    const uniqueActiveEmployees = [...new Set(activeEmployeePositions.map(ep => ep.employee_id))];
+    const activeEmployees = uniqueActiveEmployees.map(empId => ({
+      id: empId,
+      name: getEmployeeName(empId),
+      positions: activeEmployeePositions
+        .filter(ep => ep.employee_id === empId)
+        .map(ep => getPositionTitle(ep.position_id)),
+    }));
+
+    // Employee joins this month
+    const employeeJoins = filteredEmployeePositions.filter(ep => {
+      const epStart = parseISO(ep.start_date);
+      return isWithinInterval(epStart, { start: monthStart, end: monthEnd });
+    }).map(ep => ({
+      id: ep.id,
+      employeeId: ep.employee_id,
+      employeeName: getEmployeeName(ep.employee_id),
+      positionTitle: getPositionTitle(ep.position_id),
+      startDate: ep.start_date,
+    }));
+
+    // Employee departures this month
+    const employeeDepartures = filteredEmployeePositions.filter(ep => {
+      if (!ep.end_date) return false;
+      const epEnd = parseISO(ep.end_date);
+      return isWithinInterval(epEnd, { start: monthStart, end: monthEnd });
+    }).map(ep => ({
+      id: ep.id,
+      employeeId: ep.employee_id,
+      employeeName: getEmployeeName(ep.employee_id),
+      positionTitle: getPositionTitle(ep.position_id),
+      endDate: ep.end_date,
+    }));
+
+    return {
+      activePositions,
+      positionsAdded,
+      positionsRemoved,
+      activeEmployees,
+      employeeJoins,
+      employeeDepartures,
+    };
+  }, [drillDown, filteredPositions, filteredEmployeePositions, employees, departments, positions]);
 
   // Generate monthly data for charts
   const monthlyData = useMemo(() => {
@@ -691,14 +859,14 @@ export function OrgChangesReporting({ companyId }: OrgChangesReportingProps) {
           {/* Charts */}
           <div className="grid gap-6 lg:grid-cols-2">
             {/* Position Trend */}
-            <Card>
+            <Card className="cursor-pointer hover:shadow-md transition-shadow">
               <CardHeader>
                 <CardTitle>Position Count Over Time</CardTitle>
-                <CardDescription>Monthly active positions trend</CardDescription>
+                <CardDescription>Click on a data point to see details</CardDescription>
               </CardHeader>
               <CardContent>
                 <ResponsiveContainer width="100%" height={300}>
-                  <LineChart data={monthlyData}>
+                  <LineChart data={monthlyData} onClick={(data) => handleChartClick(data, "positions")}>
                     <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
                     <XAxis dataKey="monthShort" className="text-xs" />
                     <YAxis className="text-xs" />
@@ -716,7 +884,8 @@ export function OrgChangesReporting({ companyId }: OrgChangesReportingProps) {
                       stroke="hsl(var(--primary))" 
                       strokeWidth={2}
                       name="Active Positions"
-                      dot={{ fill: "hsl(var(--primary))" }}
+                      dot={{ fill: "hsl(var(--primary))", cursor: "pointer" }}
+                      activeDot={{ r: 8, cursor: "pointer" }}
                     />
                   </LineChart>
                 </ResponsiveContainer>
@@ -724,14 +893,14 @@ export function OrgChangesReporting({ companyId }: OrgChangesReportingProps) {
             </Card>
 
             {/* Position Changes */}
-            <Card>
+            <Card className="cursor-pointer hover:shadow-md transition-shadow">
               <CardHeader>
                 <CardTitle>Position Changes</CardTitle>
-                <CardDescription>Monthly additions and removals</CardDescription>
+                <CardDescription>Click on a bar to see details</CardDescription>
               </CardHeader>
               <CardContent>
                 <ResponsiveContainer width="100%" height={300}>
-                  <BarChart data={monthlyData}>
+                  <BarChart data={monthlyData} onClick={(data) => handleChartClick(data, "positionChanges")}>
                     <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
                     <XAxis dataKey="monthShort" className="text-xs" />
                     <YAxis className="text-xs" />
@@ -743,22 +912,22 @@ export function OrgChangesReporting({ companyId }: OrgChangesReportingProps) {
                       }}
                     />
                     <Legend />
-                    <Bar dataKey="positionsAdded" fill="hsl(142, 76%, 36%)" name="Added" />
-                    <Bar dataKey="positionsRemoved" fill="hsl(var(--destructive))" name="Removed" />
+                    <Bar dataKey="positionsAdded" fill="hsl(142, 76%, 36%)" name="Added" cursor="pointer" />
+                    <Bar dataKey="positionsRemoved" fill="hsl(var(--destructive))" name="Removed" cursor="pointer" />
                   </BarChart>
                 </ResponsiveContainer>
               </CardContent>
             </Card>
 
             {/* Employee Movement */}
-            <Card>
+            <Card className="cursor-pointer hover:shadow-md transition-shadow">
               <CardHeader>
                 <CardTitle>Employee Movement</CardTitle>
-                <CardDescription>Monthly joins and departures</CardDescription>
+                <CardDescription>Click on a bar to see details</CardDescription>
               </CardHeader>
               <CardContent>
                 <ResponsiveContainer width="100%" height={300}>
-                  <BarChart data={monthlyData}>
+                  <BarChart data={monthlyData} onClick={(data) => handleChartClick(data, "employeeMovement")}>
                     <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
                     <XAxis dataKey="monthShort" className="text-xs" />
                     <YAxis className="text-xs" />
@@ -770,8 +939,8 @@ export function OrgChangesReporting({ companyId }: OrgChangesReportingProps) {
                       }}
                     />
                     <Legend />
-                    <Bar dataKey="employeeJoins" fill="hsl(var(--primary))" name="Joined" />
-                    <Bar dataKey="employeeDepartures" fill="hsl(var(--secondary))" name="Departed" />
+                    <Bar dataKey="employeeJoins" fill="hsl(var(--primary))" name="Joined" cursor="pointer" />
+                    <Bar dataKey="employeeDepartures" fill="hsl(var(--secondary))" name="Departed" cursor="pointer" />
                   </BarChart>
                 </ResponsiveContainer>
               </CardContent>
@@ -864,6 +1033,202 @@ export function OrgChangesReporting({ companyId }: OrgChangesReportingProps) {
           </Card>
         </>
       )}
+
+      {/* Drill-Down Dialog */}
+      <Dialog open={!!drillDown} onOpenChange={(open) => !open && setDrillDown(null)}>
+        <DialogContent className="max-w-4xl max-h-[80vh]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Calendar className="h-5 w-5" />
+              Details for {drillDown?.month}
+            </DialogTitle>
+            <DialogDescription>
+              {drillDown?.type === "positions" && "Active positions and employee assignments"}
+              {drillDown?.type === "positionChanges" && "Position additions and removals"}
+              {drillDown?.type === "employeeMovement" && "Employee joins and departures"}
+              {drillDown?.type === "employees" && "Employee details"}
+            </DialogDescription>
+          </DialogHeader>
+          
+          <ScrollArea className="max-h-[60vh]">
+            {drillDownDetails && (
+              <Tabs defaultValue={
+                drillDown?.type === "positions" ? "activePositions" :
+                drillDown?.type === "positionChanges" ? "added" :
+                drillDown?.type === "employeeMovement" ? "joins" : "activePositions"
+              }>
+                <TabsList className="grid w-full grid-cols-4">
+                  <TabsTrigger value="activePositions" className="flex items-center gap-1">
+                    <Briefcase className="h-3 w-3" />
+                    Positions ({drillDownDetails.activePositions.length})
+                  </TabsTrigger>
+                  <TabsTrigger value="added" className="flex items-center gap-1">
+                    <TrendingUp className="h-3 w-3" />
+                    Added ({drillDownDetails.positionsAdded.length})
+                  </TabsTrigger>
+                  <TabsTrigger value="joins" className="flex items-center gap-1">
+                    <UserPlus className="h-3 w-3" />
+                    Joins ({drillDownDetails.employeeJoins.length})
+                  </TabsTrigger>
+                  <TabsTrigger value="departures" className="flex items-center gap-1">
+                    <UserMinus className="h-3 w-3" />
+                    Departures ({drillDownDetails.employeeDepartures.length})
+                  </TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="activePositions" className="mt-4">
+                  {drillDownDetails.activePositions.length > 0 ? (
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Position Title</TableHead>
+                          <TableHead>Department</TableHead>
+                          <TableHead>Start Date</TableHead>
+                          <TableHead>End Date</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {drillDownDetails.activePositions.map((pos) => (
+                          <TableRow key={pos.id}>
+                            <TableCell className="font-medium">{pos.title}</TableCell>
+                            <TableCell>{pos.departmentName}</TableCell>
+                            <TableCell>{format(parseISO(pos.start_date), "MMM d, yyyy")}</TableCell>
+                            <TableCell>{pos.end_date ? format(parseISO(pos.end_date), "MMM d, yyyy") : "Active"}</TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  ) : (
+                    <div className="text-center py-8 text-muted-foreground">
+                      No active positions for this month
+                    </div>
+                  )}
+                </TabsContent>
+
+                <TabsContent value="added" className="mt-4">
+                  <div className="space-y-4">
+                    <div>
+                      <h4 className="font-medium mb-2 flex items-center gap-2">
+                        <TrendingUp className="h-4 w-4 text-green-500" />
+                        Positions Added ({drillDownDetails.positionsAdded.length})
+                      </h4>
+                      {drillDownDetails.positionsAdded.length > 0 ? (
+                        <Table>
+                          <TableHeader>
+                            <TableRow>
+                              <TableHead>Position Title</TableHead>
+                              <TableHead>Department</TableHead>
+                              <TableHead>Start Date</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {drillDownDetails.positionsAdded.map((pos) => (
+                              <TableRow key={pos.id}>
+                                <TableCell className="font-medium">{pos.title}</TableCell>
+                                <TableCell>{pos.departmentName}</TableCell>
+                                <TableCell>{format(parseISO(pos.start_date), "MMM d, yyyy")}</TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      ) : (
+                        <div className="text-center py-4 text-muted-foreground text-sm">
+                          No positions added this month
+                        </div>
+                      )}
+                    </div>
+
+                    <div>
+                      <h4 className="font-medium mb-2 flex items-center gap-2">
+                        <TrendingDown className="h-4 w-4 text-destructive" />
+                        Positions Removed ({drillDownDetails.positionsRemoved.length})
+                      </h4>
+                      {drillDownDetails.positionsRemoved.length > 0 ? (
+                        <Table>
+                          <TableHeader>
+                            <TableRow>
+                              <TableHead>Position Title</TableHead>
+                              <TableHead>Department</TableHead>
+                              <TableHead>End Date</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {drillDownDetails.positionsRemoved.map((pos) => (
+                              <TableRow key={pos.id}>
+                                <TableCell className="font-medium">{pos.title}</TableCell>
+                                <TableCell>{pos.departmentName}</TableCell>
+                                <TableCell>{pos.end_date ? format(parseISO(pos.end_date), "MMM d, yyyy") : "-"}</TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      ) : (
+                        <div className="text-center py-4 text-muted-foreground text-sm">
+                          No positions removed this month
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="joins" className="mt-4">
+                  {drillDownDetails.employeeJoins.length > 0 ? (
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Employee Name</TableHead>
+                          <TableHead>Position</TableHead>
+                          <TableHead>Join Date</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {drillDownDetails.employeeJoins.map((emp) => (
+                          <TableRow key={emp.id}>
+                            <TableCell className="font-medium">{emp.employeeName}</TableCell>
+                            <TableCell>{emp.positionTitle}</TableCell>
+                            <TableCell>{format(parseISO(emp.startDate), "MMM d, yyyy")}</TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  ) : (
+                    <div className="text-center py-8 text-muted-foreground">
+                      No employees joined this month
+                    </div>
+                  )}
+                </TabsContent>
+
+                <TabsContent value="departures" className="mt-4">
+                  {drillDownDetails.employeeDepartures.length > 0 ? (
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Employee Name</TableHead>
+                          <TableHead>Position</TableHead>
+                          <TableHead>Departure Date</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {drillDownDetails.employeeDepartures.map((emp) => (
+                          <TableRow key={emp.id}>
+                            <TableCell className="font-medium">{emp.employeeName}</TableCell>
+                            <TableCell>{emp.positionTitle}</TableCell>
+                            <TableCell>{emp.endDate ? format(parseISO(emp.endDate), "MMM d, yyyy") : "-"}</TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  ) : (
+                    <div className="text-center py-8 text-muted-foreground">
+                      No employees departed this month
+                    </div>
+                  )}
+                </TabsContent>
+              </Tabs>
+            )}
+          </ScrollArea>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
