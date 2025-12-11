@@ -1,0 +1,731 @@
+import { useState } from "react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Slider } from "@/components/ui/slider";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { toast } from "sonner";
+import { 
+  Plus, 
+  Play, 
+  Trash2, 
+  TrendingUp, 
+  TrendingDown,
+  Users,
+  DollarSign,
+  Percent,
+  Clock,
+  BarChart3,
+  Copy,
+  Settings2
+} from "lucide-react";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, LineChart, Line } from "recharts";
+
+export interface ScenarioParameters {
+  id: string;
+  name: string;
+  description: string;
+  growthRate: number; // % annual growth target
+  attritionRate: number; // % expected attrition
+  budgetConstraint: number; // max new hires per quarter
+  timeHorizon: number; // months to forecast
+  seasonalAdjustment: boolean;
+  aggressiveHiring: boolean;
+}
+
+interface ScenarioResult {
+  scenarioId: string;
+  scenarioName: string;
+  projections: {
+    month: string;
+    headcount: number;
+    hires: number;
+    attrition: number;
+    netChange: number;
+  }[];
+  totalHires: number;
+  totalAttrition: number;
+  finalHeadcount: number;
+  budgetUtilization: number;
+  feasibility: "high" | "medium" | "low";
+}
+
+interface ScenarioPlanningProps {
+  currentHeadcount: number;
+}
+
+const defaultScenario: Omit<ScenarioParameters, "id"> = {
+  name: "",
+  description: "",
+  growthRate: 10,
+  attritionRate: 12,
+  budgetConstraint: 5,
+  timeHorizon: 12,
+  seasonalAdjustment: true,
+  aggressiveHiring: false,
+};
+
+const presetScenarios: { name: string; params: Partial<ScenarioParameters> }[] = [
+  { 
+    name: "Conservative Growth", 
+    params: { growthRate: 5, attritionRate: 10, budgetConstraint: 3, aggressiveHiring: false }
+  },
+  { 
+    name: "Moderate Expansion", 
+    params: { growthRate: 15, attritionRate: 12, budgetConstraint: 8, aggressiveHiring: false }
+  },
+  { 
+    name: "Aggressive Growth", 
+    params: { growthRate: 30, attritionRate: 15, budgetConstraint: 15, aggressiveHiring: true }
+  },
+  { 
+    name: "Headcount Freeze", 
+    params: { growthRate: 0, attritionRate: 10, budgetConstraint: 0, aggressiveHiring: false }
+  },
+];
+
+export function ScenarioPlanning({ currentHeadcount }: ScenarioPlanningProps) {
+  const [scenarios, setScenarios] = useState<ScenarioParameters[]>([]);
+  const [results, setResults] = useState<ScenarioResult[]>([]);
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [editingScenario, setEditingScenario] = useState<ScenarioParameters | null>(null);
+  const [newScenario, setNewScenario] = useState<Omit<ScenarioParameters, "id">>(defaultScenario);
+  const [isRunning, setIsRunning] = useState(false);
+
+  const generateId = () => Math.random().toString(36).substr(2, 9);
+
+  const createScenario = () => {
+    if (!newScenario.name.trim()) {
+      toast.error("Please enter a scenario name");
+      return;
+    }
+
+    const scenario: ScenarioParameters = {
+      ...newScenario,
+      id: generateId(),
+    };
+
+    setScenarios(prev => [...prev, scenario]);
+    setShowCreateDialog(false);
+    setNewScenario(defaultScenario);
+    toast.success("Scenario created");
+  };
+
+  const updateScenario = () => {
+    if (!editingScenario) return;
+    
+    setScenarios(prev => prev.map(s => 
+      s.id === editingScenario.id ? editingScenario : s
+    ));
+    setEditingScenario(null);
+    toast.success("Scenario updated");
+  };
+
+  const deleteScenario = (id: string) => {
+    setScenarios(prev => prev.filter(s => s.id !== id));
+    setResults(prev => prev.filter(r => r.scenarioId !== id));
+    toast.success("Scenario deleted");
+  };
+
+  const duplicateScenario = (scenario: ScenarioParameters) => {
+    const newScen: ScenarioParameters = {
+      ...scenario,
+      id: generateId(),
+      name: `${scenario.name} (Copy)`,
+    };
+    setScenarios(prev => [...prev, newScen]);
+    toast.success("Scenario duplicated");
+  };
+
+  const applyPreset = (preset: typeof presetScenarios[0]) => {
+    setNewScenario(prev => ({
+      ...prev,
+      name: preset.name,
+      ...preset.params,
+    }));
+  };
+
+  const runScenarios = async () => {
+    if (scenarios.length === 0) {
+      toast.error("Please create at least one scenario");
+      return;
+    }
+
+    setIsRunning(true);
+    
+    // Simulate scenario calculations
+    await new Promise(resolve => setTimeout(resolve, 500));
+
+    const newResults: ScenarioResult[] = scenarios.map(scenario => {
+      const projections = [];
+      let headcount = currentHeadcount;
+      let totalHires = 0;
+      let totalAttrition = 0;
+
+      const monthlyGrowthRate = scenario.growthRate / 100 / 12;
+      const monthlyAttritionRate = scenario.attritionRate / 100 / 12;
+      const maxHiresPerMonth = Math.ceil(scenario.budgetConstraint / 3);
+
+      const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+      const currentMonth = new Date().getMonth();
+
+      for (let i = 0; i < scenario.timeHorizon; i++) {
+        const monthIndex = (currentMonth + i + 1) % 12;
+        const monthName = months[monthIndex];
+        
+        // Calculate attrition
+        let attrition = Math.round(headcount * monthlyAttritionRate);
+        
+        // Seasonal adjustment for attrition (higher in Q1 and after summer)
+        if (scenario.seasonalAdjustment) {
+          if (monthIndex >= 0 && monthIndex <= 2) attrition = Math.round(attrition * 1.3);
+          if (monthIndex === 8 || monthIndex === 9) attrition = Math.round(attrition * 1.2);
+        }
+
+        // Calculate target hires
+        let targetHires = Math.round(headcount * monthlyGrowthRate) + attrition;
+        
+        // Aggressive hiring adjustment
+        if (scenario.aggressiveHiring) {
+          targetHires = Math.round(targetHires * 1.3);
+        }
+
+        // Apply budget constraint
+        const hires = Math.min(targetHires, maxHiresPerMonth);
+        
+        headcount = headcount - attrition + hires;
+        totalHires += hires;
+        totalAttrition += attrition;
+
+        projections.push({
+          month: `${monthName} ${i < 12 ? "" : "+"}`,
+          headcount,
+          hires,
+          attrition,
+          netChange: hires - attrition,
+        });
+      }
+
+      // Calculate feasibility based on budget utilization and growth achievement
+      const targetHeadcount = currentHeadcount * (1 + scenario.growthRate / 100);
+      const achievedGrowth = (headcount - currentHeadcount) / currentHeadcount * 100;
+      const budgetUtilization = (totalHires / (scenario.budgetConstraint * (scenario.timeHorizon / 3))) * 100;
+
+      let feasibility: "high" | "medium" | "low" = "high";
+      if (budgetUtilization > 100 || achievedGrowth < scenario.growthRate * 0.5) {
+        feasibility = "low";
+      } else if (budgetUtilization > 80 || achievedGrowth < scenario.growthRate * 0.8) {
+        feasibility = "medium";
+      }
+
+      return {
+        scenarioId: scenario.id,
+        scenarioName: scenario.name,
+        projections,
+        totalHires,
+        totalAttrition,
+        finalHeadcount: headcount,
+        budgetUtilization: Math.min(budgetUtilization, 100),
+        feasibility,
+      };
+    });
+
+    setResults(newResults);
+    setIsRunning(false);
+    toast.success("Scenarios calculated");
+  };
+
+  // Prepare comparison chart data
+  const comparisonData = results.length > 0 ? 
+    results[0].projections.map((_, i) => {
+      const point: Record<string, any> = { month: results[0].projections[i].month };
+      results.forEach(r => {
+        point[r.scenarioName] = r.projections[i].headcount;
+      });
+      return point;
+    }) : [];
+
+  const getFeasibilityColor = (feasibility: string) => {
+    switch (feasibility) {
+      case "high": return "text-success";
+      case "medium": return "text-warning";
+      default: return "text-destructive";
+    }
+  };
+
+  const getFeasibilityBadge = (feasibility: string) => {
+    switch (feasibility) {
+      case "high": return "default";
+      case "medium": return "secondary";
+      default: return "destructive";
+    }
+  };
+
+  const scenarioColors = [
+    "hsl(var(--primary))",
+    "hsl(var(--success))",
+    "hsl(var(--warning))",
+    "hsl(var(--destructive))",
+    "hsl(var(--accent))",
+  ];
+
+  return (
+    <div className="space-y-6">
+      {/* Header Card */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Settings2 className="h-5 w-5 text-primary" />
+            Scenario Planning
+          </CardTitle>
+          <CardDescription>
+            Model different growth strategies with customizable parameters to forecast headcount needs
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-wrap items-center gap-4">
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <Users className="h-4 w-4" />
+              Current Headcount: <span className="font-semibold text-foreground">{currentHeadcount}</span>
+            </div>
+            <Separator orientation="vertical" className="h-6" />
+            <Button onClick={() => setShowCreateDialog(true)}>
+              <Plus className="h-4 w-4 mr-2" />
+              Create Scenario
+            </Button>
+            {scenarios.length > 0 && (
+              <Button onClick={runScenarios} disabled={isRunning} variant="secondary">
+                <Play className="h-4 w-4 mr-2" />
+                {isRunning ? "Running..." : "Run All Scenarios"}
+              </Button>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Scenarios List */}
+      {scenarios.length > 0 && (
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {scenarios.map(scenario => {
+            const result = results.find(r => r.scenarioId === scenario.id);
+            
+            return (
+              <Card key={scenario.id} className="relative">
+                <CardHeader className="pb-2">
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <CardTitle className="text-base">{scenario.name}</CardTitle>
+                      {scenario.description && (
+                        <CardDescription className="text-xs mt-1">{scenario.description}</CardDescription>
+                      )}
+                    </div>
+                    <div className="flex gap-1">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7"
+                        onClick={() => duplicateScenario(scenario)}
+                      >
+                        <Copy className="h-3 w-3" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7"
+                        onClick={() => setEditingScenario(scenario)}
+                      >
+                        <Settings2 className="h-3 w-3" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7 text-destructive"
+                        onClick={() => deleteScenario(scenario.id)}
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="grid grid-cols-2 gap-2 text-sm">
+                    <div className="flex items-center gap-1.5">
+                      <TrendingUp className="h-3 w-3 text-success" />
+                      <span className="text-muted-foreground">Growth:</span>
+                      <span className="font-medium">{scenario.growthRate}%</span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <TrendingDown className="h-3 w-3 text-destructive" />
+                      <span className="text-muted-foreground">Attrition:</span>
+                      <span className="font-medium">{scenario.attritionRate}%</span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <DollarSign className="h-3 w-3 text-primary" />
+                      <span className="text-muted-foreground">Budget:</span>
+                      <span className="font-medium">{scenario.budgetConstraint}/qtr</span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <Clock className="h-3 w-3 text-muted-foreground" />
+                      <span className="text-muted-foreground">Horizon:</span>
+                      <span className="font-medium">{scenario.timeHorizon}mo</span>
+                    </div>
+                  </div>
+
+                  {result && (
+                    <>
+                      <Separator />
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm text-muted-foreground">Final Headcount</span>
+                          <span className="font-semibold">{result.finalHeadcount}</span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm text-muted-foreground">Net Change</span>
+                          <span className={`font-semibold flex items-center gap-1 ${result.totalHires - result.totalAttrition >= 0 ? "text-success" : "text-destructive"}`}>
+                            {result.totalHires - result.totalAttrition >= 0 ? "+" : ""}
+                            {result.totalHires - result.totalAttrition}
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm text-muted-foreground">Feasibility</span>
+                          <Badge variant={getFeasibilityBadge(result.feasibility) as any}>
+                            {result.feasibility.charAt(0).toUpperCase() + result.feasibility.slice(1)}
+                          </Badge>
+                        </div>
+                      </div>
+                    </>
+                  )}
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Results Visualization */}
+      {results.length > 0 && (
+        <>
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg flex items-center gap-2">
+                <BarChart3 className="h-4 w-4 text-primary" />
+                Headcount Projections Comparison
+              </CardTitle>
+              <CardDescription>Compare how headcount evolves under different scenarios</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="h-[350px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={comparisonData}>
+                    <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                    <XAxis dataKey="month" className="text-xs" />
+                    <YAxis className="text-xs" />
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: "hsl(var(--card))",
+                        border: "1px solid hsl(var(--border))",
+                        borderRadius: "8px",
+                      }}
+                    />
+                    <Legend />
+                    {results.map((r, i) => (
+                      <Line
+                        key={r.scenarioId}
+                        type="monotone"
+                        dataKey={r.scenarioName}
+                        stroke={scenarioColors[i % scenarioColors.length]}
+                        strokeWidth={2}
+                        dot={{ fill: scenarioColors[i % scenarioColors.length], r: 3 }}
+                      />
+                    ))}
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Scenario Summary</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b">
+                      <th className="text-left py-2 font-medium">Scenario</th>
+                      <th className="text-right py-2 font-medium">Final HC</th>
+                      <th className="text-right py-2 font-medium">Total Hires</th>
+                      <th className="text-right py-2 font-medium">Attrition</th>
+                      <th className="text-right py-2 font-medium">Net Change</th>
+                      <th className="text-right py-2 font-medium">Growth %</th>
+                      <th className="text-center py-2 font-medium">Feasibility</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {results.map(r => {
+                      const netChange = r.totalHires - r.totalAttrition;
+                      const growthPercent = ((r.finalHeadcount - currentHeadcount) / currentHeadcount * 100).toFixed(1);
+                      
+                      return (
+                        <tr key={r.scenarioId} className="border-b">
+                          <td className="py-2 font-medium">{r.scenarioName}</td>
+                          <td className="py-2 text-right">{r.finalHeadcount}</td>
+                          <td className="py-2 text-right text-success">+{r.totalHires}</td>
+                          <td className="py-2 text-right text-destructive">-{r.totalAttrition}</td>
+                          <td className={`py-2 text-right font-medium ${netChange >= 0 ? "text-success" : "text-destructive"}`}>
+                            {netChange >= 0 ? "+" : ""}{netChange}
+                          </td>
+                          <td className={`py-2 text-right ${parseFloat(growthPercent) >= 0 ? "text-success" : "text-destructive"}`}>
+                            {growthPercent}%
+                          </td>
+                          <td className="py-2 text-center">
+                            <Badge variant={getFeasibilityBadge(r.feasibility) as any} className="text-xs">
+                              {r.feasibility}
+                            </Badge>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </CardContent>
+          </Card>
+        </>
+      )}
+
+      {/* Empty State */}
+      {scenarios.length === 0 && (
+        <Card className="border-dashed">
+          <CardContent className="flex flex-col items-center justify-center py-12">
+            <Settings2 className="h-12 w-12 text-muted-foreground/50 mb-4" />
+            <h3 className="text-lg font-medium mb-2">No scenarios created</h3>
+            <p className="text-muted-foreground text-sm mb-4 text-center max-w-md">
+              Create scenarios to model different growth strategies and compare their impact on headcount
+            </p>
+            <Button onClick={() => setShowCreateDialog(true)}>
+              <Plus className="h-4 w-4 mr-2" />
+              Create Your First Scenario
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Create/Edit Dialog */}
+      <Dialog open={showCreateDialog || !!editingScenario} onOpenChange={(open) => {
+        if (!open) {
+          setShowCreateDialog(false);
+          setEditingScenario(null);
+          setNewScenario(defaultScenario);
+        }
+      }}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>{editingScenario ? "Edit Scenario" : "Create Scenario"}</DialogTitle>
+            <DialogDescription>
+              Configure growth parameters to model workforce planning scenarios
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-6 py-4">
+            {/* Presets */}
+            {!editingScenario && (
+              <div>
+                <Label className="text-xs text-muted-foreground mb-2 block">Quick Presets</Label>
+                <div className="flex flex-wrap gap-2">
+                  {presetScenarios.map(preset => (
+                    <Button
+                      key={preset.name}
+                      variant="outline"
+                      size="sm"
+                      onClick={() => applyPreset(preset)}
+                    >
+                      {preset.name}
+                    </Button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Name & Description */}
+            <div className="space-y-3">
+              <div>
+                <Label htmlFor="name">Scenario Name *</Label>
+                <Input
+                  id="name"
+                  value={editingScenario?.name ?? newScenario.name}
+                  onChange={(e) => editingScenario 
+                    ? setEditingScenario({ ...editingScenario, name: e.target.value })
+                    : setNewScenario({ ...newScenario, name: e.target.value })
+                  }
+                  placeholder="e.g., Q1 Expansion Plan"
+                />
+              </div>
+              <div>
+                <Label htmlFor="description">Description (optional)</Label>
+                <Input
+                  id="description"
+                  value={editingScenario?.description ?? newScenario.description}
+                  onChange={(e) => editingScenario
+                    ? setEditingScenario({ ...editingScenario, description: e.target.value })
+                    : setNewScenario({ ...newScenario, description: e.target.value })
+                  }
+                  placeholder="Brief description of this scenario"
+                />
+              </div>
+            </div>
+
+            <Separator />
+
+            {/* Growth Rate */}
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <Label className="flex items-center gap-2">
+                  <TrendingUp className="h-4 w-4 text-success" />
+                  Annual Growth Target
+                </Label>
+                <span className="text-sm font-medium">
+                  {editingScenario?.growthRate ?? newScenario.growthRate}%
+                </span>
+              </div>
+              <Slider
+                value={[editingScenario?.growthRate ?? newScenario.growthRate]}
+                onValueChange={([v]) => editingScenario
+                  ? setEditingScenario({ ...editingScenario, growthRate: v })
+                  : setNewScenario({ ...newScenario, growthRate: v })
+                }
+                min={-20}
+                max={50}
+                step={1}
+              />
+              <p className="text-xs text-muted-foreground">Target percentage growth in headcount over the year</p>
+            </div>
+
+            {/* Attrition Rate */}
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <Label className="flex items-center gap-2">
+                  <TrendingDown className="h-4 w-4 text-destructive" />
+                  Expected Attrition Rate
+                </Label>
+                <span className="text-sm font-medium">
+                  {editingScenario?.attritionRate ?? newScenario.attritionRate}%
+                </span>
+              </div>
+              <Slider
+                value={[editingScenario?.attritionRate ?? newScenario.attritionRate]}
+                onValueChange={([v]) => editingScenario
+                  ? setEditingScenario({ ...editingScenario, attritionRate: v })
+                  : setNewScenario({ ...newScenario, attritionRate: v })
+                }
+                min={0}
+                max={30}
+                step={1}
+              />
+              <p className="text-xs text-muted-foreground">Annual voluntary and involuntary turnover rate</p>
+            </div>
+
+            {/* Budget Constraint */}
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <Label className="flex items-center gap-2">
+                  <DollarSign className="h-4 w-4 text-primary" />
+                  Hiring Budget (per quarter)
+                </Label>
+                <span className="text-sm font-medium">
+                  {editingScenario?.budgetConstraint ?? newScenario.budgetConstraint} hires
+                </span>
+              </div>
+              <Slider
+                value={[editingScenario?.budgetConstraint ?? newScenario.budgetConstraint]}
+                onValueChange={([v]) => editingScenario
+                  ? setEditingScenario({ ...editingScenario, budgetConstraint: v })
+                  : setNewScenario({ ...newScenario, budgetConstraint: v })
+                }
+                min={0}
+                max={50}
+                step={1}
+              />
+              <p className="text-xs text-muted-foreground">Maximum number of new hires allowed per quarter</p>
+            </div>
+
+            {/* Time Horizon */}
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <Label className="flex items-center gap-2">
+                  <Clock className="h-4 w-4 text-muted-foreground" />
+                  Forecast Horizon
+                </Label>
+                <span className="text-sm font-medium">
+                  {editingScenario?.timeHorizon ?? newScenario.timeHorizon} months
+                </span>
+              </div>
+              <Slider
+                value={[editingScenario?.timeHorizon ?? newScenario.timeHorizon]}
+                onValueChange={([v]) => editingScenario
+                  ? setEditingScenario({ ...editingScenario, timeHorizon: v })
+                  : setNewScenario({ ...newScenario, timeHorizon: v })
+                }
+                min={3}
+                max={24}
+                step={3}
+              />
+            </div>
+
+            {/* Toggles */}
+            <div className="flex items-center gap-6">
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={editingScenario?.seasonalAdjustment ?? newScenario.seasonalAdjustment}
+                  onChange={(e) => editingScenario
+                    ? setEditingScenario({ ...editingScenario, seasonalAdjustment: e.target.checked })
+                    : setNewScenario({ ...newScenario, seasonalAdjustment: e.target.checked })
+                  }
+                  className="rounded"
+                />
+                <span className="text-sm">Seasonal adjustments</span>
+              </label>
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={editingScenario?.aggressiveHiring ?? newScenario.aggressiveHiring}
+                  onChange={(e) => editingScenario
+                    ? setEditingScenario({ ...editingScenario, aggressiveHiring: e.target.checked })
+                    : setNewScenario({ ...newScenario, aggressiveHiring: e.target.checked })
+                  }
+                  className="rounded"
+                />
+                <span className="text-sm">Aggressive hiring</span>
+              </label>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => {
+              setShowCreateDialog(false);
+              setEditingScenario(null);
+              setNewScenario(defaultScenario);
+            }}>
+              Cancel
+            </Button>
+            <Button onClick={editingScenario ? updateScenario : createScenario}>
+              {editingScenario ? "Update" : "Create"} Scenario
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}

@@ -34,9 +34,11 @@ import {
   History,
   GitCompare,
   Trash2,
-  Calendar
+  Calendar,
+  Settings2
 } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, BarChart, Bar } from "recharts";
+import { ScenarioPlanning } from "./ScenarioPlanning";
 
 interface ForecastData {
   forecast: {
@@ -310,6 +312,10 @@ export function HeadcountForecast() {
             <Brain className="h-4 w-4" />
             Generate
           </TabsTrigger>
+          <TabsTrigger value="scenarios" className="flex items-center gap-2">
+            <Settings2 className="h-4 w-4" />
+            Scenarios
+          </TabsTrigger>
           <TabsTrigger value="saved" className="flex items-center gap-2">
             <History className="h-4 w-4" />
             Saved ({savedForecasts.length})
@@ -545,6 +551,11 @@ export function HeadcountForecast() {
               </CardContent>
             </Card>
           )}
+        </TabsContent>
+
+        {/* Scenarios Tab */}
+        <TabsContent value="scenarios" className="space-y-6">
+          <ScenarioPlanning currentHeadcount={historicalData?.totalRequests || 100} />
         </TabsContent>
 
         {/* Saved Forecasts Tab */}
