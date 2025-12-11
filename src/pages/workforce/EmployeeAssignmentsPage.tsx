@@ -136,6 +136,7 @@ export default function EmployeeAssignmentsPage() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [bulkUploadOpen, setBulkUploadOpen] = useState(false);
   const [historyOpen, setHistoryOpen] = useState(false);
+  const [historyEmployee, setHistoryEmployee] = useState<{ id: string; name: string } | null>(null);
   const [editingAssignment, setEditingAssignment] = useState<EmployeeAssignment | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
@@ -399,9 +400,9 @@ export default function EmployeeAssignmentsPage() {
           </div>
 
           <div className="flex items-center gap-2">
-            <Button variant="outline" onClick={() => setHistoryOpen(true)}>
+            <Button variant="outline" onClick={() => { setHistoryEmployee(null); setHistoryOpen(true); }}>
               <History className="h-4 w-4 mr-2" />
-              History
+              All History
             </Button>
             <Button variant="outline" onClick={exportCSV}>
               <Download className="h-4 w-4 mr-2" />
@@ -554,6 +555,20 @@ export default function EmployeeAssignmentsPage() {
                         {isAdmin && (
                           <TableCell className="text-right">
                             <div className="flex justify-end gap-1">
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                title="View history"
+                                onClick={() => {
+                                  setHistoryEmployee({
+                                    id: assignment.employee_id,
+                                    name: assignment.employee?.full_name || assignment.employee?.email || "Unknown"
+                                  });
+                                  setHistoryOpen(true);
+                                }}
+                              >
+                                <History className="h-4 w-4" />
+                              </Button>
                               <Button
                                 variant="ghost"
                                 size="icon"
@@ -749,7 +764,12 @@ export default function EmployeeAssignmentsPage() {
         {/* History Dialog */}
         <AssignmentHistoryDialog
           open={historyOpen}
-          onOpenChange={setHistoryOpen}
+          onOpenChange={(open) => {
+            setHistoryOpen(open);
+            if (!open) setHistoryEmployee(null);
+          }}
+          employeeId={historyEmployee?.id}
+          employeeName={historyEmployee?.name}
         />
       </div>
     </AppLayout>
