@@ -12,9 +12,25 @@ interface TicketPayload {
   requester_id: string;
 }
 
+// Helper to create a notification in the database
+async function createNotification(
+  userId: string,
+  title: string,
+  message: string,
+  type: string,
+  link?: string
+) {
+  await supabase.from('notifications').insert({
+    user_id: userId,
+    title,
+    message,
+    type,
+    link,
+  });
+}
+
 export function useRealtimeTicketNotifications(userId: string | undefined) {
   const queryClient = useQueryClient();
-  const previousTicketsRef = useRef<Map<string, TicketPayload>>(new Map());
 
   useEffect(() => {
     if (!userId) return;
@@ -40,6 +56,16 @@ export function useRealtimeTicketNotifications(userId: string | undefined) {
           
           // Assignment notification
           if (isAssignedToMe && !wasAssignedToMe) {
+            // Create persistent notification
+            await createNotification(
+              userId,
+              "Ticket assigned to you",
+              `#${newTicket.ticket_number}: ${newTicket.subject}`,
+              "ticket_assigned",
+              `/help/tickets/${newTicket.id}`
+            );
+            
+            // Show toast
             toast.info("Ticket assigned to you", {
               description: `#${newTicket.ticket_number}: ${newTicket.subject}`,
               action: {
@@ -58,6 +84,17 @@ export function useRealtimeTicketNotifications(userId: string | undefined) {
               resolved: "Resolved",
               closed: "Closed",
             };
+            
+            // Create persistent notification
+            await createNotification(
+              userId,
+              "Ticket status updated",
+              `#${newTicket.ticket_number} is now ${statusLabels[newTicket.status] || newTicket.status}`,
+              "ticket_status",
+              `/help/tickets/${newTicket.id}`
+            );
+            
+            // Show toast
             toast.info("Ticket status updated", {
               description: `#${newTicket.ticket_number} is now ${statusLabels[newTicket.status] || newTicket.status}`,
               action: {
@@ -84,6 +121,14 @@ export function useRealtimeTicketNotifications(userId: string | undefined) {
           
           // Notify if assigned to current user on creation
           if (newTicket.assignee_id === userId) {
+            await createNotification(
+              userId,
+              "New ticket assigned to you",
+              `#${newTicket.ticket_number}: ${newTicket.subject}`,
+              "ticket_assigned",
+              `/help/tickets/${newTicket.id}`
+            );
+            
             toast.info("New ticket assigned to you", {
               description: `#${newTicket.ticket_number}: ${newTicket.subject}`,
               action: {
@@ -131,6 +176,14 @@ export function useRealtimeTicketNotifications(userId: string | undefined) {
           const isAssignedToMe = ticket.assignee_id === userId;
           
           if (isMyTicket || isAssignedToMe) {
+            await createNotification(
+              userId,
+              "New reply on ticket",
+              `#${ticket.ticket_number}: ${ticket.subject}`,
+              "ticket_reply",
+              `/help/tickets/${ticket.id}`
+            );
+            
             toast.info("New reply on ticket", {
               description: `#${ticket.ticket_number}: ${ticket.subject}`,
               action: {
