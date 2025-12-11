@@ -2903,6 +2903,7 @@ export type Database = {
           created_at: string
           created_by: string
           description: string | null
+          end_date: string | null
           id: string
           is_active: boolean
           is_global: boolean
@@ -2910,6 +2911,7 @@ export type Database = {
           name: string
           requires_letter: boolean
           requires_signature: boolean
+          start_date: string | null
           updated_at: string
         }
         Insert: {
@@ -2921,6 +2923,7 @@ export type Database = {
           created_at?: string
           created_by: string
           description?: string | null
+          end_date?: string | null
           id?: string
           is_active?: boolean
           is_global?: boolean
@@ -2928,6 +2931,7 @@ export type Database = {
           name: string
           requires_letter?: boolean
           requires_signature?: boolean
+          start_date?: string | null
           updated_at?: string
         }
         Update: {
@@ -2939,6 +2943,7 @@ export type Database = {
           created_at?: string
           created_by?: string
           description?: string | null
+          end_date?: string | null
           id?: string
           is_active?: boolean
           is_global?: boolean
@@ -2946,6 +2951,7 @@ export type Database = {
           name?: string
           requires_letter?: boolean
           requires_signature?: boolean
+          start_date?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -2985,6 +2991,10 @@ export type Database = {
           is_auto_approved: boolean
           rule_name: string
         }[]
+      }
+      get_active_workflow_template: {
+        Args: { p_as_of_date?: string; p_template_code: string }
+        Returns: string
       }
       get_employee_supervisor: {
         Args: { p_employee_id: string; p_position_id?: string }

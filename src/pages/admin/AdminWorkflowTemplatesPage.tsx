@@ -129,6 +129,8 @@ export default function AdminWorkflowTemplatesPage() {
             requires_letter: editingTemplate.requires_letter,
             auto_terminate_hours: editingTemplate.auto_terminate_hours,
             allow_return_to_previous: editingTemplate.allow_return_to_previous,
+            start_date: editingTemplate.start_date,
+            end_date: editingTemplate.end_date,
           })
           .eq("id", editingTemplate.id);
 
@@ -332,6 +334,16 @@ export default function AdminWorkflowTemplatesPage() {
                   
                   <div className="flex flex-wrap gap-2 mt-4">
                     <Badge variant="outline">Code: {selectedTemplate.code}</Badge>
+                    {selectedTemplate.start_date && (
+                      <Badge variant="outline">
+                        From: {format(new Date(selectedTemplate.start_date), "MMM d, yyyy")}
+                      </Badge>
+                    )}
+                    {selectedTemplate.end_date && (
+                      <Badge variant="outline">
+                        Until: {format(new Date(selectedTemplate.end_date), "MMM d, yyyy")}
+                      </Badge>
+                    )}
                     {selectedTemplate.requires_signature && (
                       <Badge variant="secondary">Requires Signature</Badge>
                     )}
@@ -502,6 +514,35 @@ export default function AdminWorkflowTemplatesPage() {
                   placeholder="Describe the workflow..."
                   rows={2}
                 />
+              </div>
+
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="space-y-2">
+                  <Label>Start Date</Label>
+                  <Input
+                    type="date"
+                    value={editingTemplate?.start_date || ""}
+                    onChange={(e) =>
+                      setEditingTemplate({ ...editingTemplate, start_date: e.target.value || null })
+                    }
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    When this template becomes active
+                  </p>
+                </div>
+                <div className="space-y-2">
+                  <Label>End Date</Label>
+                  <Input
+                    type="date"
+                    value={editingTemplate?.end_date || ""}
+                    onChange={(e) =>
+                      setEditingTemplate({ ...editingTemplate, end_date: e.target.value || null })
+                    }
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Leave empty for no expiry
+                  </p>
+                </div>
               </div>
 
               <div className="space-y-2">

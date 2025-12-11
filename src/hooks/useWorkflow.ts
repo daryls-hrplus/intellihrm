@@ -21,6 +21,8 @@ export interface WorkflowTemplate {
   letter_template_id: string | null;
   auto_terminate_hours: number | null;
   allow_return_to_previous: boolean;
+  start_date: string | null;
+  end_date: string | null;
   created_by: string;
   created_at: string;
   updated_at: string;
