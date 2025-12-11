@@ -2,6 +2,7 @@ import { useState } from "react";
 import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
+import { useMenuPermissions } from "@/hooks/useMenuPermissions";
 import {
   LayoutDashboard,
   Users,
@@ -29,30 +30,32 @@ interface NavItem {
   title: string;
   href: string;
   icon: React.ElementType;
+  moduleCode: string;
   adminOnly?: boolean;
   hrOnly?: boolean;
 }
 
 const navItems: NavItem[] = [
-  { title: "Dashboard", href: "/", icon: LayoutDashboard },
-  { title: "Workforce", href: "/workforce", icon: Users },
-  { title: "Leave Management", href: "/leave", icon: Calendar },
-  { title: "Compensation", href: "/compensation", icon: DollarSign, hrOnly: true },
-  { title: "Benefits", href: "/benefits", icon: Gift },
-  { title: "Performance", href: "/performance", icon: Target },
-  { title: "Training", href: "/training", icon: GraduationCap },
-  { title: "Succession", href: "/succession", icon: TrendingUp, hrOnly: true },
-  { title: "Recruitment", href: "/recruitment", icon: UserPlus, hrOnly: true },
-  { title: "Health & Safety", href: "/hse", icon: Shield },
-  { title: "Employee Relations", href: "/employee-relations", icon: Heart, hrOnly: true },
-  { title: "Company Property", href: "/property", icon: Package },
-  { title: "Admin & Security", href: "/admin", icon: Settings, adminOnly: true },
+  { title: "Dashboard", href: "/", icon: LayoutDashboard, moduleCode: "dashboard" },
+  { title: "Workforce", href: "/workforce", icon: Users, moduleCode: "workforce" },
+  { title: "Leave Management", href: "/leave", icon: Calendar, moduleCode: "leave" },
+  { title: "Compensation", href: "/compensation", icon: DollarSign, moduleCode: "compensation", hrOnly: true },
+  { title: "Benefits", href: "/benefits", icon: Gift, moduleCode: "benefits" },
+  { title: "Performance", href: "/performance", icon: Target, moduleCode: "performance" },
+  { title: "Training", href: "/training", icon: GraduationCap, moduleCode: "training" },
+  { title: "Succession", href: "/succession", icon: TrendingUp, moduleCode: "succession", hrOnly: true },
+  { title: "Recruitment", href: "/recruitment", icon: UserPlus, moduleCode: "recruitment", hrOnly: true },
+  { title: "Health & Safety", href: "/hse", icon: Shield, moduleCode: "hse" },
+  { title: "Employee Relations", href: "/employee-relations", icon: Heart, moduleCode: "employee_relations", hrOnly: true },
+  { title: "Company Property", href: "/property", icon: Package, moduleCode: "property" },
+  { title: "Admin & Security", href: "/admin", icon: Settings, moduleCode: "admin", adminOnly: true },
 ];
 
 export function AppSidebar() {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const { profile, roles, company, signOut, isAdmin, isHRManager } = useAuth();
+  const { hasMenuAccess } = useMenuPermissions();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -62,8 +65,11 @@ export function AppSidebar() {
   };
 
   const filteredNavItems = navItems.filter((item) => {
+    // First check role-based access (legacy)
     if (item.adminOnly && !isAdmin) return false;
     if (item.hrOnly && !isHRManager && !isAdmin) return false;
+    // Then check menu permissions from roles table
+    if (!hasMenuAccess(item.moduleCode)) return false;
     return true;
   });
 

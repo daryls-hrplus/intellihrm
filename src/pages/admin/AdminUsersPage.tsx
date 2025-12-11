@@ -27,6 +27,12 @@ interface Company {
   code: string;
 }
 
+interface RoleDefinition {
+  id: string;
+  code: string;
+  name: string;
+}
+
 interface UserWithRoles {
   id: string;
   email: string;
@@ -46,6 +52,7 @@ const roleConfig: { value: AppRole; label: string; icon: React.ElementType; colo
 export default function AdminUsersPage() {
   const [users, setUsers] = useState<UserWithRoles[]>([]);
   const [companies, setCompanies] = useState<Company[]>([]);
+  const [roleDefinitions, setRoleDefinitions] = useState<RoleDefinition[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [updatingUserId, setUpdatingUserId] = useState<string | null>(null);
@@ -95,6 +102,15 @@ export default function AdminUsersPage() {
       if (companiesError) throw companiesError;
       setCompanies(companiesData || []);
 
+      // Fetch role definitions
+      const { data: roleDefs, error: roleDefsError } = await supabase
+        .from("roles")
+        .select("id, code, name")
+        .eq("is_active", true);
+
+      if (roleDefsError) throw roleDefsError;
+      setRoleDefinitions(roleDefs || []);
+
       // Create company lookup
       const companyLookup: Record<string, string> = {};
       (companiesData || []).forEach((c) => {
@@ -141,6 +157,12 @@ export default function AdminUsersPage() {
     setOpenDropdown(null);
 
     try {
+      // Find role_id for the new role
+      const roleDef = roleDefinitions.find(r => r.code === newRole);
+      if (!roleDef) {
+        throw new Error("Role definition not found");
+      }
+
       // Delete existing roles for this user
       const { error: deleteError } = await supabase
         .from("user_roles")
@@ -149,10 +171,10 @@ export default function AdminUsersPage() {
 
       if (deleteError) throw deleteError;
 
-      // Insert new role
+      // Insert new role with role_id
       const { error: insertError } = await supabase
         .from("user_roles")
-        .insert({ user_id: userId, role: newRole });
+        .insert({ user_id: userId, role: newRole, role_id: roleDef.id });
 
       if (insertError) throw insertError;
 
