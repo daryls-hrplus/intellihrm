@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { supabase } from "@/integrations/supabase/client";
 import { FolderTree, Building2, ChevronRight, ChevronDown, Users, Plus, Pencil, Trash2, Calendar } from "lucide-react";
 import {
@@ -394,6 +395,10 @@ export default function DepartmentsPage() {
   return (
     <AppLayout>
       <div className="space-y-6">
+        <Breadcrumbs items={[
+          { label: "Workforce", href: "/workforce" },
+          { label: "Departments" }
+        ]} />
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-warning/10">

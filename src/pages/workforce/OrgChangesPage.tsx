@@ -1,4 +1,5 @@
 import { AppLayout } from "@/components/layout/AppLayout";
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { OrgChangesReporting } from "@/components/admin/OrgChangesReporting";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "lucide-react";
@@ -20,6 +21,10 @@ export default function OrgChangesPage() {
   return (
     <AppLayout>
       <div className="space-y-6">
+        <Breadcrumbs items={[
+          { label: "Workforce", href: "/workforce" },
+          { label: "Org Changes Report" }
+        ]} />
         <div className="flex items-start justify-between">
           <div>
             <h1 className="text-3xl font-bold">Organizational Changes Report</h1>
