@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
+import { sendTicketNotification } from "@/hooks/useTicketNotifications";
 import {
   ArrowLeft,
   Clock,
@@ -105,6 +106,12 @@ export default function TicketDetailPage() {
 
   const addCommentMutation = useMutation({
     mutationFn: async ({ content, uploadedAttachments }: { content: string; uploadedAttachments: any[] }) => {
+      const { data: authorProfile } = await supabase
+        .from("profiles")
+        .select("full_name")
+        .eq("id", user?.id)
+        .single();
+
       const { error } = await supabase.from("ticket_comments").insert([{
         ticket_id: ticketId,
         author_id: user?.id,
@@ -113,6 +120,28 @@ export default function TicketDetailPage() {
         is_internal: false,
       }]);
       if (error) throw error;
+
+      // Send notification to assignee if ticket has one and comment is from requester
+      if (ticket?.assignee?.id && ticket.assignee.id !== user?.id) {
+        const assigneeProfile = await supabase
+          .from("profiles")
+          .select("email, full_name")
+          .eq("id", ticket.assignee.id)
+          .single();
+        
+        if (assigneeProfile.data?.email) {
+          sendTicketNotification({
+            ticketId: ticketId!,
+            notificationType: "reply",
+            recipientEmail: assigneeProfile.data.email,
+            recipientName: assigneeProfile.data.full_name || undefined,
+            ticketNumber: ticket.ticket_number,
+            ticketSubject: ticket.subject,
+            replyContent: content,
+            replyAuthor: authorProfile?.full_name || "User",
+          });
+        }
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["ticket-comments", ticketId] });

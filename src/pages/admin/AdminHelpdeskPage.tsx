@@ -11,6 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
+import { sendTicketNotification } from "@/hooks/useTicketNotifications";
 import {
   Ticket,
   Clock,
@@ -97,9 +98,25 @@ export default function AdminHelpdeskPage() {
   });
 
   const updateTicketMutation = useMutation({
-    mutationFn: async ({ id, updates }: { id: string; updates: any }) => {
+    mutationFn: async ({ id, updates, ticket }: { id: string; updates: any; ticket?: any }) => {
       const { error } = await supabase.from("tickets").update(updates).eq("id", id);
       if (error) throw error;
+      
+      // Send assignment notification if assignee changed
+      if (updates.assignee_id && ticket) {
+        const assignee = agents.find(a => a.id === updates.assignee_id);
+        if (assignee?.email) {
+          sendTicketNotification({
+            ticketId: id,
+            notificationType: "assigned",
+            recipientEmail: assignee.email,
+            recipientName: assignee.full_name || undefined,
+            ticketNumber: ticket.ticket_number,
+            ticketSubject: ticket.subject,
+            message: ticket.description,
+          });
+        }
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-tickets"] });
@@ -109,8 +126,14 @@ export default function AdminHelpdeskPage() {
   });
 
   const addCommentMutation = useMutation({
-    mutationFn: async ({ ticketId, content, isInternal }: { ticketId: string; content: string; isInternal: boolean }) => {
+    mutationFn: async ({ ticketId, content, isInternal, ticket }: { ticketId: string; content: string; isInternal: boolean; ticket?: any }) => {
       const { data: { user } } = await supabase.auth.getUser();
+      const { data: authorProfile } = await supabase
+        .from("profiles")
+        .select("full_name")
+        .eq("id", user?.id)
+        .single();
+      
       const { error } = await supabase.from("ticket_comments").insert([{
         ticket_id: ticketId,
         author_id: user?.id,
@@ -120,9 +143,23 @@ export default function AdminHelpdeskPage() {
       if (error) throw error;
       
       // Update first_response_at if this is the first response
-      const ticket = tickets.find(t => t.id === ticketId);
-      if (ticket && !ticket.first_response_at) {
+      const foundTicket = ticket || tickets.find(t => t.id === ticketId);
+      if (foundTicket && !foundTicket.first_response_at) {
         await supabase.from("tickets").update({ first_response_at: new Date().toISOString() }).eq("id", ticketId);
+      }
+      
+      // Send reply notification to requester (only for non-internal comments)
+      if (!isInternal && foundTicket?.requester?.email) {
+        sendTicketNotification({
+          ticketId,
+          notificationType: "reply",
+          recipientEmail: foundTicket.requester.email,
+          recipientName: foundTicket.requester.full_name || undefined,
+          ticketNumber: foundTicket.ticket_number,
+          ticketSubject: foundTicket.subject,
+          replyContent: content,
+          replyAuthor: authorProfile?.full_name || "Support Team",
+        });
       }
     },
     onSuccess: () => {
@@ -405,6 +442,7 @@ export default function AdminHelpdeskPage() {
                               updateTicketMutation.mutate({
                                 id: ticket.id,
                                 updates: { assignee_id: value === "unassigned" ? null : value },
+                                ticket,
                               });
                             }}
                           >
@@ -584,6 +622,7 @@ export default function AdminHelpdeskPage() {
                             ticketId: selectedTicket.id,
                             content: commentText,
                             isInternal: false,
+                            ticket: selectedTicket,
                           })}
                           disabled={!commentText.trim() || addCommentMutation.isPending}
                         >
@@ -596,6 +635,7 @@ export default function AdminHelpdeskPage() {
                             ticketId: selectedTicket.id,
                             content: commentText,
                             isInternal: true,
+                            ticket: selectedTicket,
                           })}
                           disabled={!commentText.trim() || addCommentMutation.isPending}
                         >
