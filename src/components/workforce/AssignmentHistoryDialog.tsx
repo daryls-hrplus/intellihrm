@@ -14,12 +14,28 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Input } from "@/components/ui/input";
-import { History, Search, Loader2, ArrowRight } from "lucide-react";
+import { Label } from "@/components/ui/label";
+import { Calendar } from "@/components/ui/calendar";
+import { History, Search, Loader2, CalendarIcon, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { format } from "date-fns";
+import { format, startOfDay, endOfDay } from "date-fns";
+import { cn } from "@/lib/utils";
 
 interface HistoryEntry {
   id: string;
@@ -61,12 +77,17 @@ export function AssignmentHistoryDialog({
   const [history, setHistory] = useState<HistoryEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
+  
+  // Filters
+  const [actionFilter, setActionFilter] = useState<string>("all");
+  const [fromDate, setFromDate] = useState<Date | undefined>(undefined);
+  const [toDate, setToDate] = useState<Date | undefined>(undefined);
 
   useEffect(() => {
     if (open) {
       fetchHistory();
     }
-  }, [open, employeeId]);
+  }, [open, employeeId, actionFilter, fromDate, toDate]);
 
   const fetchHistory = async () => {
     setIsLoading(true);
@@ -83,6 +104,18 @@ export function AssignmentHistoryDialog({
 
       if (employeeId) {
         query = query.eq("employee_id", employeeId);
+      }
+
+      if (actionFilter !== "all") {
+        query = query.eq("action", actionFilter);
+      }
+
+      if (fromDate) {
+        query = query.gte("created_at", startOfDay(fromDate).toISOString());
+      }
+
+      if (toDate) {
+        query = query.lte("created_at", endOfDay(toDate).toISOString());
       }
 
       const { data, error } = await query;
@@ -119,6 +152,15 @@ export function AssignmentHistoryDialog({
       setIsLoading(false);
     }
   };
+
+  const clearFilters = () => {
+    setActionFilter("all");
+    setFromDate(undefined);
+    setToDate(undefined);
+    setSearchQuery("");
+  };
+
+  const hasActiveFilters = actionFilter !== "all" || fromDate || toDate || searchQuery;
 
   const getActionBadge = (action: string) => {
     switch (action) {
@@ -187,15 +229,111 @@ export function AssignmentHistoryDialog({
         </DialogHeader>
 
         <div className="space-y-4 flex-1 overflow-hidden">
-          {/* Search */}
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Search history..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10"
-            />
+          {/* Filters */}
+          <div className="flex flex-wrap items-end gap-3">
+            {/* Search */}
+            <div className="space-y-1.5 flex-1 min-w-[200px]">
+              <Label className="text-xs">Search</Label>
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search employee, position..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10 h-9"
+                />
+              </div>
+            </div>
+
+            {/* Action Filter */}
+            <div className="space-y-1.5">
+              <Label className="text-xs">Action</Label>
+              <Select value={actionFilter} onValueChange={setActionFilter}>
+                <SelectTrigger className="w-[130px] h-9">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Actions</SelectItem>
+                  <SelectItem value="created">Created</SelectItem>
+                  <SelectItem value="updated">Updated</SelectItem>
+                  <SelectItem value="ended">Ended</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* From Date */}
+            <div className="space-y-1.5">
+              <Label className="text-xs">From Date</Label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      "w-[140px] h-9 justify-start text-left font-normal",
+                      !fromDate && "text-muted-foreground"
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {fromDate ? format(fromDate, "MMM d, yyyy") : "Start"}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={fromDate}
+                    onSelect={setFromDate}
+                    initialFocus
+                    className={cn("p-3 pointer-events-auto")}
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+
+            {/* To Date */}
+            <div className="space-y-1.5">
+              <Label className="text-xs">To Date</Label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      "w-[140px] h-9 justify-start text-left font-normal",
+                      !toDate && "text-muted-foreground"
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {toDate ? format(toDate, "MMM d, yyyy") : "End"}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={toDate}
+                    onSelect={setToDate}
+                    initialFocus
+                    className={cn("p-3 pointer-events-auto")}
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+
+            {/* Clear Filters */}
+            {hasActiveFilters && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={clearFilters}
+                className="h-9"
+              >
+                <X className="h-4 w-4 mr-1" />
+                Clear
+              </Button>
+            )}
+          </div>
+
+          {/* Results count */}
+          <div className="text-sm text-muted-foreground">
+            {filteredHistory.length} record{filteredHistory.length !== 1 ? "s" : ""} found
           </div>
 
           {/* History Table */}
@@ -208,7 +346,7 @@ export function AssignmentHistoryDialog({
               No history records found
             </div>
           ) : (
-            <ScrollArea className="h-[400px] rounded-md border">
+            <ScrollArea className="h-[350px] rounded-md border">
               <Table>
                 <TableHeader>
                   <TableRow>
