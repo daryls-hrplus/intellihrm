@@ -14,6 +14,12 @@ import { EmployeeAddressesTab } from "@/components/employee/EmployeeAddressesTab
 import { EmployeeBankAccountsTab } from "@/components/employee/EmployeeBankAccountsTab";
 import { EmployeeBeneficiariesTab } from "@/components/employee/EmployeeBeneficiariesTab";
 import { EmployeeDocumentsTab } from "@/components/employee/EmployeeDocumentsTab";
+import { EmployeeDependentsTab } from "@/components/employee/EmployeeDependentsTab";
+import { EmployeeWorkPermitsTab } from "@/components/employee/EmployeeWorkPermitsTab";
+import { EmployeeLicensesTab } from "@/components/employee/EmployeeLicensesTab";
+import { EmployeeBackgroundChecksTab } from "@/components/employee/EmployeeBackgroundChecksTab";
+import { EmployeeReferencesTab } from "@/components/employee/EmployeeReferencesTab";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import {
   ArrowLeft,
   Mail,
@@ -29,6 +35,11 @@ import {
   CreditCard,
   Users,
   Home,
+  Baby,
+  FileCheck,
+  Award,
+  ShieldCheck,
+  UserCheck,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
@@ -230,28 +241,21 @@ export default function EmployeeProfilePage() {
 
         {/* Tabs Section */}
         <Tabs defaultValue="overview" className="w-full">
-          <TabsList className="grid w-full grid-cols-5">
-            <TabsTrigger value="overview" className="flex items-center gap-2">
-              <User className="h-4 w-4" />
-              <span className="hidden sm:inline">Overview</span>
-            </TabsTrigger>
-            <TabsTrigger value="addresses" className="flex items-center gap-2">
-              <Home className="h-4 w-4" />
-              <span className="hidden sm:inline">Addresses</span>
-            </TabsTrigger>
-            <TabsTrigger value="bank" className="flex items-center gap-2">
-              <CreditCard className="h-4 w-4" />
-              <span className="hidden sm:inline">Bank</span>
-            </TabsTrigger>
-            <TabsTrigger value="beneficiaries" className="flex items-center gap-2">
-              <Users className="h-4 w-4" />
-              <span className="hidden sm:inline">Beneficiaries</span>
-            </TabsTrigger>
-            <TabsTrigger value="documents" className="flex items-center gap-2">
-              <FileText className="h-4 w-4" />
-              <span className="hidden sm:inline">Documents</span>
-            </TabsTrigger>
-          </TabsList>
+          <ScrollArea className="w-full whitespace-nowrap">
+            <TabsList className="inline-flex w-max">
+              <TabsTrigger value="overview"><User className="h-4 w-4 mr-1" />Overview</TabsTrigger>
+              <TabsTrigger value="addresses"><Home className="h-4 w-4 mr-1" />Addresses</TabsTrigger>
+              <TabsTrigger value="dependents"><Baby className="h-4 w-4 mr-1" />Dependents</TabsTrigger>
+              <TabsTrigger value="bank"><CreditCard className="h-4 w-4 mr-1" />Bank</TabsTrigger>
+              <TabsTrigger value="beneficiaries"><Users className="h-4 w-4 mr-1" />Beneficiaries</TabsTrigger>
+              <TabsTrigger value="documents"><FileText className="h-4 w-4 mr-1" />Documents</TabsTrigger>
+              <TabsTrigger value="work_permits"><FileCheck className="h-4 w-4 mr-1" />Work Permits</TabsTrigger>
+              <TabsTrigger value="licenses"><Award className="h-4 w-4 mr-1" />Licenses</TabsTrigger>
+              <TabsTrigger value="background"><ShieldCheck className="h-4 w-4 mr-1" />Background</TabsTrigger>
+              <TabsTrigger value="references"><UserCheck className="h-4 w-4 mr-1" />References</TabsTrigger>
+            </TabsList>
+            <ScrollBar orientation="horizontal" />
+          </ScrollArea>
 
           <TabsContent value="overview" className="mt-6">
             <div className="grid gap-6 md:grid-cols-2">

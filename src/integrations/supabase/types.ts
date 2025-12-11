@@ -540,6 +540,62 @@ export type Database = {
           },
         ]
       }
+      employee_background_checks: {
+        Row: {
+          check_type: string
+          completed_date: string | null
+          created_at: string
+          employee_id: string
+          expiry_date: string | null
+          id: string
+          notes: string | null
+          provider: string | null
+          reference_number: string | null
+          requested_date: string
+          result: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          check_type: string
+          completed_date?: string | null
+          created_at?: string
+          employee_id: string
+          expiry_date?: string | null
+          id?: string
+          notes?: string | null
+          provider?: string | null
+          reference_number?: string | null
+          requested_date: string
+          result?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          check_type?: string
+          completed_date?: string | null
+          created_at?: string
+          employee_id?: string
+          expiry_date?: string | null
+          id?: string
+          notes?: string | null
+          provider?: string | null
+          reference_number?: string | null
+          requested_date?: string
+          result?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "employee_background_checks_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       employee_bank_accounts: {
         Row: {
           account_holder_name: string
@@ -664,6 +720,62 @@ export type Database = {
           },
         ]
       }
+      employee_dependents: {
+        Row: {
+          created_at: string
+          date_of_birth: string | null
+          employee_id: string
+          full_name: string
+          gender: string | null
+          id: string
+          id_number: string | null
+          is_disabled: boolean | null
+          is_student: boolean | null
+          nationality: string | null
+          notes: string | null
+          relationship: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          date_of_birth?: string | null
+          employee_id: string
+          full_name: string
+          gender?: string | null
+          id?: string
+          id_number?: string | null
+          is_disabled?: boolean | null
+          is_student?: boolean | null
+          nationality?: string | null
+          notes?: string | null
+          relationship: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          date_of_birth?: string | null
+          employee_id?: string
+          full_name?: string
+          gender?: string | null
+          id?: string
+          id_number?: string | null
+          is_disabled?: boolean | null
+          is_student?: boolean | null
+          nationality?: string | null
+          notes?: string | null
+          relationship?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "employee_dependents_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       employee_documents: {
         Row: {
           created_at: string
@@ -718,6 +830,59 @@ export type Database = {
           {
             foreignKeyName: "employee_documents_uploaded_by_fkey"
             columns: ["uploaded_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      employee_licenses: {
+        Row: {
+          created_at: string
+          employee_id: string
+          expiry_date: string | null
+          id: string
+          issue_date: string
+          issuing_authority: string
+          issuing_country: string | null
+          license_number: string
+          license_type: string
+          notes: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          employee_id: string
+          expiry_date?: string | null
+          id?: string
+          issue_date: string
+          issuing_authority: string
+          issuing_country?: string | null
+          license_number: string
+          license_type: string
+          notes?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          employee_id?: string
+          expiry_date?: string | null
+          id?: string
+          issue_date?: string
+          issuing_authority?: string
+          issuing_country?: string | null
+          license_number?: string
+          license_type?: string
+          notes?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "employee_licenses_employee_id_fkey"
+            columns: ["employee_id"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
@@ -883,6 +1048,68 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      employee_references: {
+        Row: {
+          company: string | null
+          created_at: string
+          email: string | null
+          employee_id: string
+          feedback: string | null
+          full_name: string
+          id: string
+          notes: string | null
+          phone: string | null
+          position: string | null
+          reference_date: string | null
+          relationship: string
+          status: string
+          updated_at: string
+          years_known: number | null
+        }
+        Insert: {
+          company?: string | null
+          created_at?: string
+          email?: string | null
+          employee_id: string
+          feedback?: string | null
+          full_name: string
+          id?: string
+          notes?: string | null
+          phone?: string | null
+          position?: string | null
+          reference_date?: string | null
+          relationship: string
+          status?: string
+          updated_at?: string
+          years_known?: number | null
+        }
+        Update: {
+          company?: string | null
+          created_at?: string
+          email?: string | null
+          employee_id?: string
+          feedback?: string | null
+          full_name?: string
+          id?: string
+          notes?: string | null
+          phone?: string | null
+          position?: string | null
+          reference_date?: string | null
+          relationship?: string
+          status?: string
+          updated_at?: string
+          years_known?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "employee_references_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       employee_transactions: {
         Row: {
@@ -1166,6 +1393,59 @@ export type Database = {
             columns: ["workflow_instance_id"]
             isOneToOne: false
             referencedRelation: "workflow_instances"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      employee_work_permits: {
+        Row: {
+          created_at: string
+          employee_id: string
+          expiry_date: string
+          id: string
+          issue_date: string
+          issuing_country: string
+          notes: string | null
+          permit_number: string
+          permit_type: string
+          sponsoring_company: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          employee_id: string
+          expiry_date: string
+          id?: string
+          issue_date: string
+          issuing_country: string
+          notes?: string | null
+          permit_number: string
+          permit_type: string
+          sponsoring_company?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          employee_id?: string
+          expiry_date?: string
+          id?: string
+          issue_date?: string
+          issuing_country?: string
+          notes?: string | null
+          permit_number?: string
+          permit_type?: string
+          sponsoring_company?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "employee_work_permits_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
