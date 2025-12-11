@@ -2443,11 +2443,537 @@ export type Database = {
           },
         ]
       }
+      workflow_delegates: {
+        Row: {
+          category: Database["public"]["Enums"]["workflow_category"] | null
+          created_at: string
+          created_by: string
+          delegate_id: string
+          delegator_id: string
+          end_date: string | null
+          id: string
+          is_active: boolean
+          reason: string | null
+          start_date: string
+          template_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          category?: Database["public"]["Enums"]["workflow_category"] | null
+          created_at?: string
+          created_by: string
+          delegate_id: string
+          delegator_id: string
+          end_date?: string | null
+          id?: string
+          is_active?: boolean
+          reason?: string | null
+          start_date?: string
+          template_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          category?: Database["public"]["Enums"]["workflow_category"] | null
+          created_at?: string
+          created_by?: string
+          delegate_id?: string
+          delegator_id?: string
+          end_date?: string | null
+          id?: string
+          is_active?: boolean
+          reason?: string | null
+          start_date?: string
+          template_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workflow_delegates_delegate_id_fkey"
+            columns: ["delegate_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "workflow_delegates_delegator_id_fkey"
+            columns: ["delegator_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "workflow_delegates_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "workflow_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      workflow_instances: {
+        Row: {
+          auto_terminate_at: string | null
+          category: Database["public"]["Enums"]["workflow_category"]
+          company_id: string | null
+          completed_at: string | null
+          completed_by: string | null
+          created_at: string
+          current_step_id: string | null
+          current_step_order: number
+          deadline_at: string | null
+          escalated_at: string | null
+          final_action: Database["public"]["Enums"]["workflow_action"] | null
+          id: string
+          initiated_at: string
+          initiated_by: string
+          metadata: Json | null
+          reference_id: string
+          reference_type: string
+          status: Database["public"]["Enums"]["workflow_status"]
+          template_id: string
+          updated_at: string
+        }
+        Insert: {
+          auto_terminate_at?: string | null
+          category: Database["public"]["Enums"]["workflow_category"]
+          company_id?: string | null
+          completed_at?: string | null
+          completed_by?: string | null
+          created_at?: string
+          current_step_id?: string | null
+          current_step_order?: number
+          deadline_at?: string | null
+          escalated_at?: string | null
+          final_action?: Database["public"]["Enums"]["workflow_action"] | null
+          id?: string
+          initiated_at?: string
+          initiated_by: string
+          metadata?: Json | null
+          reference_id: string
+          reference_type: string
+          status?: Database["public"]["Enums"]["workflow_status"]
+          template_id: string
+          updated_at?: string
+        }
+        Update: {
+          auto_terminate_at?: string | null
+          category?: Database["public"]["Enums"]["workflow_category"]
+          company_id?: string | null
+          completed_at?: string | null
+          completed_by?: string | null
+          created_at?: string
+          current_step_id?: string | null
+          current_step_order?: number
+          deadline_at?: string | null
+          escalated_at?: string | null
+          final_action?: Database["public"]["Enums"]["workflow_action"] | null
+          id?: string
+          initiated_at?: string
+          initiated_by?: string
+          metadata?: Json | null
+          reference_id?: string
+          reference_type?: string
+          status?: Database["public"]["Enums"]["workflow_status"]
+          template_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workflow_instances_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "workflow_instances_completed_by_fkey"
+            columns: ["completed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "workflow_instances_current_step_id_fkey"
+            columns: ["current_step_id"]
+            isOneToOne: false
+            referencedRelation: "workflow_steps"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "workflow_instances_initiated_by_fkey"
+            columns: ["initiated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "workflow_instances_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "workflow_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      workflow_signatures: {
+        Row: {
+          created_at: string
+          generated_letter_id: string | null
+          id: string
+          instance_id: string
+          ip_address: string | null
+          signature_hash: string
+          signature_text: string
+          signed_at: string
+          signer_email: string
+          signer_id: string
+          signer_name: string
+          signer_position: string | null
+          step_action_id: string
+          user_agent: string | null
+        }
+        Insert: {
+          created_at?: string
+          generated_letter_id?: string | null
+          id?: string
+          instance_id: string
+          ip_address?: string | null
+          signature_hash: string
+          signature_text: string
+          signed_at?: string
+          signer_email: string
+          signer_id: string
+          signer_name: string
+          signer_position?: string | null
+          step_action_id: string
+          user_agent?: string | null
+        }
+        Update: {
+          created_at?: string
+          generated_letter_id?: string | null
+          id?: string
+          instance_id?: string
+          ip_address?: string | null
+          signature_hash?: string
+          signature_text?: string
+          signed_at?: string
+          signer_email?: string
+          signer_id?: string
+          signer_name?: string
+          signer_position?: string | null
+          step_action_id?: string
+          user_agent?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workflow_signatures_generated_letter_id_fkey"
+            columns: ["generated_letter_id"]
+            isOneToOne: false
+            referencedRelation: "generated_letters"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "workflow_signatures_instance_id_fkey"
+            columns: ["instance_id"]
+            isOneToOne: false
+            referencedRelation: "workflow_instances"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "workflow_signatures_signer_id_fkey"
+            columns: ["signer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "workflow_signatures_step_action_id_fkey"
+            columns: ["step_action_id"]
+            isOneToOne: false
+            referencedRelation: "workflow_step_actions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      workflow_step_actions: {
+        Row: {
+          acted_at: string
+          action: Database["public"]["Enums"]["workflow_action"]
+          actor_id: string
+          comment: string | null
+          created_at: string
+          delegated_to: string | null
+          delegation_reason: string | null
+          id: string
+          instance_id: string
+          internal_notes: string | null
+          ip_address: string | null
+          return_reason: string | null
+          return_to_step: number | null
+          step_id: string
+          step_order: number
+          user_agent: string | null
+        }
+        Insert: {
+          acted_at?: string
+          action: Database["public"]["Enums"]["workflow_action"]
+          actor_id: string
+          comment?: string | null
+          created_at?: string
+          delegated_to?: string | null
+          delegation_reason?: string | null
+          id?: string
+          instance_id: string
+          internal_notes?: string | null
+          ip_address?: string | null
+          return_reason?: string | null
+          return_to_step?: number | null
+          step_id: string
+          step_order: number
+          user_agent?: string | null
+        }
+        Update: {
+          acted_at?: string
+          action?: Database["public"]["Enums"]["workflow_action"]
+          actor_id?: string
+          comment?: string | null
+          created_at?: string
+          delegated_to?: string | null
+          delegation_reason?: string | null
+          id?: string
+          instance_id?: string
+          internal_notes?: string | null
+          ip_address?: string | null
+          return_reason?: string | null
+          return_to_step?: number | null
+          step_id?: string
+          step_order?: number
+          user_agent?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workflow_step_actions_actor_id_fkey"
+            columns: ["actor_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "workflow_step_actions_delegated_to_fkey"
+            columns: ["delegated_to"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "workflow_step_actions_instance_id_fkey"
+            columns: ["instance_id"]
+            isOneToOne: false
+            referencedRelation: "workflow_instances"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "workflow_step_actions_step_id_fkey"
+            columns: ["step_id"]
+            isOneToOne: false
+            referencedRelation: "workflow_steps"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      workflow_steps: {
+        Row: {
+          alternate_approver_id: string | null
+          approver_governance_body_id: string | null
+          approver_position_id: string | null
+          approver_role_id: string | null
+          approver_type: string
+          approver_user_id: string | null
+          can_delegate: boolean
+          created_at: string
+          description: string | null
+          escalation_action: string | null
+          escalation_hours: number | null
+          id: string
+          is_active: boolean
+          name: string
+          requires_comment: boolean
+          requires_signature: boolean
+          step_order: number
+          template_id: string
+          updated_at: string
+          use_reporting_line: boolean
+        }
+        Insert: {
+          alternate_approver_id?: string | null
+          approver_governance_body_id?: string | null
+          approver_position_id?: string | null
+          approver_role_id?: string | null
+          approver_type: string
+          approver_user_id?: string | null
+          can_delegate?: boolean
+          created_at?: string
+          description?: string | null
+          escalation_action?: string | null
+          escalation_hours?: number | null
+          id?: string
+          is_active?: boolean
+          name: string
+          requires_comment?: boolean
+          requires_signature?: boolean
+          step_order: number
+          template_id: string
+          updated_at?: string
+          use_reporting_line?: boolean
+        }
+        Update: {
+          alternate_approver_id?: string | null
+          approver_governance_body_id?: string | null
+          approver_position_id?: string | null
+          approver_role_id?: string | null
+          approver_type?: string
+          approver_user_id?: string | null
+          can_delegate?: boolean
+          created_at?: string
+          description?: string | null
+          escalation_action?: string | null
+          escalation_hours?: number | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          requires_comment?: boolean
+          requires_signature?: boolean
+          step_order?: number
+          template_id?: string
+          updated_at?: string
+          use_reporting_line?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workflow_steps_alternate_approver_id_fkey"
+            columns: ["alternate_approver_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "workflow_steps_approver_governance_body_id_fkey"
+            columns: ["approver_governance_body_id"]
+            isOneToOne: false
+            referencedRelation: "governance_bodies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "workflow_steps_approver_position_id_fkey"
+            columns: ["approver_position_id"]
+            isOneToOne: false
+            referencedRelation: "positions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "workflow_steps_approver_role_id_fkey"
+            columns: ["approver_role_id"]
+            isOneToOne: false
+            referencedRelation: "roles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "workflow_steps_approver_user_id_fkey"
+            columns: ["approver_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "workflow_steps_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "workflow_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      workflow_templates: {
+        Row: {
+          allow_return_to_previous: boolean
+          auto_terminate_hours: number | null
+          category: Database["public"]["Enums"]["workflow_category"]
+          code: string
+          company_id: string | null
+          created_at: string
+          created_by: string
+          description: string | null
+          id: string
+          is_active: boolean
+          is_global: boolean
+          letter_template_id: string | null
+          name: string
+          requires_letter: boolean
+          requires_signature: boolean
+          updated_at: string
+        }
+        Insert: {
+          allow_return_to_previous?: boolean
+          auto_terminate_hours?: number | null
+          category: Database["public"]["Enums"]["workflow_category"]
+          code: string
+          company_id?: string | null
+          created_at?: string
+          created_by: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          is_global?: boolean
+          letter_template_id?: string | null
+          name: string
+          requires_letter?: boolean
+          requires_signature?: boolean
+          updated_at?: string
+        }
+        Update: {
+          allow_return_to_previous?: boolean
+          auto_terminate_hours?: number | null
+          category?: Database["public"]["Enums"]["workflow_category"]
+          code?: string
+          company_id?: string | null
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          is_global?: boolean
+          letter_template_id?: string | null
+          name?: string
+          requires_letter?: boolean
+          requires_signature?: boolean
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workflow_templates_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "workflow_templates_letter_template_id_fkey"
+            columns: ["letter_template_id"]
+            isOneToOne: false
+            referencedRelation: "letter_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
+      can_act_on_workflow: {
+        Args: { p_instance_id: string; p_user_id: string }
+        Returns: boolean
+      }
       can_approve_headcount_request: {
         Args: { p_request_id: string; p_user_id: string }
         Returns: boolean
@@ -2478,6 +3004,14 @@ export type Database = {
           position_id: string
           position_title: string
           vacancy_count: number
+        }[]
+      }
+      get_workflow_approver: {
+        Args: { p_instance_id: string; p_step_id: string }
+        Returns: {
+          approver_email: string
+          approver_id: string
+          approver_name: string
         }[]
       }
       has_role: {
@@ -2534,6 +3068,35 @@ export type Database = {
         | "EXPORT"
         | "LOGIN"
         | "LOGOUT"
+      workflow_action:
+        | "approve"
+        | "reject"
+        | "return"
+        | "escalate"
+        | "delegate"
+        | "comment"
+      workflow_category:
+        | "leave_request"
+        | "probation_confirmation"
+        | "headcount_request"
+        | "training_request"
+        | "promotion"
+        | "transfer"
+        | "resignation"
+        | "termination"
+        | "expense_claim"
+        | "letter_request"
+        | "general"
+      workflow_status:
+        | "draft"
+        | "pending"
+        | "in_progress"
+        | "approved"
+        | "rejected"
+        | "cancelled"
+        | "escalated"
+        | "returned"
+        | "auto_terminated"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -2670,6 +3233,38 @@ export const Constants = {
         "EXPORT",
         "LOGIN",
         "LOGOUT",
+      ],
+      workflow_action: [
+        "approve",
+        "reject",
+        "return",
+        "escalate",
+        "delegate",
+        "comment",
+      ],
+      workflow_category: [
+        "leave_request",
+        "probation_confirmation",
+        "headcount_request",
+        "training_request",
+        "promotion",
+        "transfer",
+        "resignation",
+        "termination",
+        "expense_claim",
+        "letter_request",
+        "general",
+      ],
+      workflow_status: [
+        "draft",
+        "pending",
+        "in_progress",
+        "approved",
+        "rejected",
+        "cancelled",
+        "escalated",
+        "returned",
+        "auto_terminated",
       ],
     },
   },
