@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { OrgChartVisualization } from "@/components/admin/OrgChartVisualization";
 import { supabase } from "@/integrations/supabase/client";
 import { Network, Building2 } from "lucide-react";
@@ -42,6 +43,10 @@ export default function OrgStructurePage() {
   return (
     <AppLayout>
       <div className="space-y-6">
+        <Breadcrumbs items={[
+          { label: "Workforce", href: "/workforce" },
+          { label: "Org Structure" }
+        ]} />
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-success/10">
