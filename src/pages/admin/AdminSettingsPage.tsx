@@ -1,12 +1,13 @@
 import { useState, useEffect } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
-import { Settings, Mail, Eye, EyeOff, Save, Loader2, ShieldAlert, ArrowLeft } from "lucide-react";
+import { Settings, Mail, Eye, EyeOff, Save, Loader2, ShieldAlert, ArrowLeft, Send, CheckCircle, XCircle } from "lucide-react";
 import { NavLink } from "react-router-dom";
 
 interface SystemSetting {
@@ -18,9 +19,12 @@ interface SystemSetting {
 }
 
 export default function AdminSettingsPage() {
+  const { user } = useAuth();
   const [settings, setSettings] = useState<SystemSetting[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [isTesting, setIsTesting] = useState(false);
+  const [testResult, setTestResult] = useState<{ success: boolean; message: string } | null>(null);
   const [showSensitive, setShowSensitive] = useState<Record<string, boolean>>({});
   const [editedValues, setEditedValues] = useState<Record<string, string>>({});
 
@@ -76,6 +80,56 @@ export default function AdminSettingsPage() {
       toast.error("Failed to save setting");
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  const handleTestAlert = async () => {
+    if (!user) return;
+    
+    setIsTesting(true);
+    setTestResult(null);
+    
+    try {
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("email")
+        .eq("id", user.id)
+        .single();
+
+      const { data, error } = await supabase.functions.invoke("send-pii-alert", {
+        body: {
+          userId: user.id,
+          userEmail: profile?.email || user.email || "test@example.com",
+          accessCount: 99,
+          alertType: "TEST_ALERT",
+          alertReason: "This is a test alert to verify the email configuration is working correctly.",
+        },
+      });
+
+      if (error) throw error;
+
+      if (data?.emailSent) {
+        setTestResult({
+          success: true,
+          message: "Test alert sent successfully! Check your email inbox.",
+        });
+        toast.success("Test alert sent successfully");
+      } else {
+        setTestResult({
+          success: false,
+          message: data?.reason || "Email not sent - check if Resend API key is configured.",
+        });
+        toast.warning("Alert logged but email not sent - configure Resend API key first");
+      }
+    } catch (error: any) {
+      console.error("Error sending test alert:", error);
+      setTestResult({
+        success: false,
+        message: error.message || "Failed to send test alert",
+      });
+      toast.error("Failed to send test alert");
+    } finally {
+      setIsTesting(false);
     }
   };
 
@@ -203,6 +257,56 @@ export default function AdminSettingsPage() {
                 </div>
               );
             })}
+          </CardContent>
+        </Card>
+
+        {/* Test Alert */}
+        <Card className="animate-slide-up" style={{ animationDelay: "50ms" }}>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Send className="h-5 w-5 text-info" />
+              Test Alert System
+            </CardTitle>
+            <CardDescription>
+              Send a test alert to verify your email configuration is working correctly
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-center gap-4">
+              <Button
+                onClick={handleTestAlert}
+                disabled={isTesting}
+                variant="outline"
+              >
+                {isTesting ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                    Sending...
+                  </>
+                ) : (
+                  <>
+                    <Send className="h-4 w-4 mr-2" />
+                    Send Test Alert
+                  </>
+                )}
+              </Button>
+              
+              {testResult && (
+                <div className={`flex items-center gap-2 text-sm ${testResult.success ? "text-success" : "text-warning"}`}>
+                  {testResult.success ? (
+                    <CheckCircle className="h-4 w-4" />
+                  ) : (
+                    <XCircle className="h-4 w-4" />
+                  )}
+                  {testResult.message}
+                </div>
+              )}
+            </div>
+            
+            <p className="text-xs text-muted-foreground">
+              This will create a test entry in the PII alerts table and attempt to send an email to all admin users.
+              The alert will be marked as type "TEST_ALERT" for easy identification.
+            </p>
           </CardContent>
         </Card>
 
