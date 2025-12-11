@@ -25,6 +25,8 @@ import {
   LogOut,
   ChevronRight,
   HelpCircle,
+  UserCircle,
+  UserCog,
 } from "lucide-react";
 
 interface NavItem {
@@ -34,10 +36,13 @@ interface NavItem {
   moduleCode: string;
   adminOnly?: boolean;
   hrOnly?: boolean;
+  managerOnly?: boolean;
 }
 
 const navItems: NavItem[] = [
   { title: "Dashboard", href: "/", icon: LayoutDashboard, moduleCode: "dashboard" },
+  { title: "Employee Self Service", href: "/ess", icon: UserCircle, moduleCode: "ess" },
+  { title: "Manager Self Service", href: "/mss", icon: UserCog, moduleCode: "mss", managerOnly: true },
   { title: "Workforce", href: "/workforce", icon: Users, moduleCode: "workforce" },
   { title: "Leave Management", href: "/leave", icon: Calendar, moduleCode: "leave" },
   { title: "Compensation", href: "/compensation", icon: DollarSign, moduleCode: "compensation", hrOnly: true },
@@ -70,6 +75,7 @@ export function AppSidebar() {
     // First check role-based access (legacy)
     if (item.adminOnly && !isAdmin) return false;
     if (item.hrOnly && !isHRManager && !isAdmin) return false;
+    if (item.managerOnly && !isHRManager && !isAdmin) return false;
     // Then check menu permissions from roles table
     if (!hasMenuAccess(item.moduleCode)) return false;
     return true;

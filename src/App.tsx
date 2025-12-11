@@ -69,6 +69,10 @@ import EmployeeRelationsDashboardPage from "./pages/employee-relations/EmployeeR
 // Property pages
 import PropertyDashboardPage from "./pages/property/PropertyDashboardPage";
 
+// ESS & MSS pages
+import EmployeeSelfServicePage from "./pages/ess/EmployeeSelfServicePage";
+import ManagerSelfServicePage from "./pages/mss/ManagerSelfServicePage";
+
 // Other pages
 import ProfilePage from "./pages/profile/ProfilePage";
 import MyPermissionsPage from "./pages/profile/MyPermissionsPage";
@@ -100,6 +104,42 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <Index />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Employee Self Service Routes */}
+            <Route
+              path="/ess"
+              element={
+                <ProtectedRoute moduleCode="ess">
+                  <EmployeeSelfServicePage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/ess/*"
+              element={
+                <ProtectedRoute moduleCode="ess">
+                  <EmployeeSelfServicePage />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Manager Self Service Routes */}
+            <Route
+              path="/mss"
+              element={
+                <ProtectedRoute moduleCode="mss" requiredRoles={["admin", "hr_manager"]}>
+                  <ManagerSelfServicePage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/mss/*"
+              element={
+                <ProtectedRoute moduleCode="mss" requiredRoles={["admin", "hr_manager"]}>
+                  <ManagerSelfServicePage />
                 </ProtectedRoute>
               }
             />
