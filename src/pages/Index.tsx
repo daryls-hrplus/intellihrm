@@ -6,6 +6,7 @@ import { UpcomingEvents } from "@/components/dashboard/UpcomingEvents";
 import { EmployeeDistribution } from "@/components/dashboard/EmployeeDistribution";
 import { HeadcountTrend } from "@/components/dashboard/HeadcountTrend";
 import { PendingAccessRequests } from "@/components/dashboard/PendingAccessRequests";
+import { SlaRiskWidget } from "@/components/dashboard/SlaRiskWidget";
 import { useAuth } from "@/contexts/AuthContext";
 import {
   Users,
@@ -89,8 +90,15 @@ const Index = () => {
         <div className="grid gap-6 lg:grid-cols-3">
           <RecentActivity />
           <UpcomingEvents />
-          {isAdmin && <PendingAccessRequests />}
+          <SlaRiskWidget />
         </div>
+
+        {/* Admin Widget */}
+        {isAdmin && (
+          <div className="grid gap-6 lg:grid-cols-3">
+            <PendingAccessRequests />
+          </div>
+        )}
       </div>
     </AppLayout>
   );
