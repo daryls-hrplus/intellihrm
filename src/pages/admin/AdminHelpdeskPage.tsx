@@ -17,6 +17,7 @@ import { SlaMetricsDashboard } from "@/components/helpdesk/SlaMetricsDashboard";
 import { SlaConfigurationPanel } from "@/components/helpdesk/SlaConfigurationPanel";
 import { EscalationRulesPanel } from "@/components/helpdesk/EscalationRulesPanel";
 import { CategoryAssignmentPanel } from "@/components/helpdesk/CategoryAssignmentPanel";
+import { SatisfactionAnalytics } from "@/components/helpdesk/SatisfactionAnalytics";
 import {
   Ticket,
   Clock,
@@ -31,6 +32,7 @@ import {
   PieChart,
   Settings,
   UserCog,
+  Star,
 } from "lucide-react";
 import { format, formatDistanceToNow, differenceInHours, isPast, addHours } from "date-fns";
 
@@ -284,6 +286,10 @@ export default function AdminHelpdeskPage() {
             <TabsTrigger value="auto-assign" className="flex items-center gap-2">
               <UserCog className="h-4 w-4" />
               Auto-Assign
+            </TabsTrigger>
+            <TabsTrigger value="satisfaction" className="flex items-center gap-2">
+              <Star className="h-4 w-4" />
+              Satisfaction
             </TabsTrigger>
           </TabsList>
 
@@ -739,6 +745,10 @@ export default function AdminHelpdeskPage() {
 
           <TabsContent value="auto-assign">
             <CategoryAssignmentPanel />
+          </TabsContent>
+
+          <TabsContent value="satisfaction">
+            <SatisfactionAnalytics />
           </TabsContent>
         </Tabs>
       </div>

@@ -1872,6 +1872,53 @@ export type Database = {
         }
         Relationships: []
       }
+      ticket_satisfaction_surveys: {
+        Row: {
+          agent_rating: number | null
+          created_at: string
+          feedback: string | null
+          id: string
+          rating: number
+          resolution_rating: number | null
+          response_time_rating: number | null
+          ticket_id: string
+          user_id: string
+          would_recommend: boolean | null
+        }
+        Insert: {
+          agent_rating?: number | null
+          created_at?: string
+          feedback?: string | null
+          id?: string
+          rating: number
+          resolution_rating?: number | null
+          response_time_rating?: number | null
+          ticket_id: string
+          user_id: string
+          would_recommend?: boolean | null
+        }
+        Update: {
+          agent_rating?: number | null
+          created_at?: string
+          feedback?: string | null
+          id?: string
+          rating?: number
+          resolution_rating?: number | null
+          response_time_rating?: number | null
+          ticket_id?: string
+          user_id?: string
+          would_recommend?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ticket_satisfaction_surveys_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: true
+            referencedRelation: "tickets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tickets: {
         Row: {
           assignee_id: string | null
