@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout } from "@/components/layout/AppLayout";
@@ -59,6 +59,36 @@ export default function AdminHelpdeskPage() {
       return data;
     },
   });
+
+  // Real-time subscription for ticket updates
+  useEffect(() => {
+    const channel = supabase
+      .channel('tickets-realtime')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'tickets'
+        },
+        (payload) => {
+          console.log('Ticket change received:', payload);
+          queryClient.invalidateQueries({ queryKey: ["admin-tickets"] });
+          
+          // Show toast notification for new tickets
+          if (payload.eventType === 'INSERT') {
+            toast.info("New ticket received", {
+              description: `A new support ticket has been created`,
+            });
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [queryClient]);
 
   const { data: agents = [] } = useQuery({
     queryKey: ["helpdesk-agents"],
