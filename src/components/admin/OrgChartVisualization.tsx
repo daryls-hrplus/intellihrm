@@ -5,6 +5,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import {
   Select,
   SelectContent,
@@ -20,6 +21,10 @@ import {
   Maximize2,
   Minimize2,
   Calendar,
+  GitCompare,
+  Plus,
+  Minus,
+  Equal,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -66,6 +71,7 @@ interface PositionNode extends Position {
   employees: EmployeePosition[];
   children: PositionNode[];
   department?: Department;
+  changeStatus?: "added" | "removed" | "unchanged" | "modified";
 }
 
 interface OrgChartVisualizationProps {
@@ -86,6 +92,12 @@ export function OrgChartVisualization({ companyId }: OrgChartVisualizationProps)
   const [expandedNodes, setExpandedNodes] = useState<Set<string>>(new Set());
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [asOfDate, setAsOfDate] = useState<string>(format(new Date(), "yyyy-MM-dd"));
+  const [comparisonMode, setComparisonMode] = useState(false);
+  const [compareDate, setCompareDate] = useState<string>(() => {
+    const date = new Date();
+    date.setMonth(date.getMonth() - 1);
+    return format(date, "yyyy-MM-dd");
+  });
 
   useEffect(() => {
     if (companyId) {
@@ -145,43 +157,65 @@ export function OrgChartVisualization({ companyId }: OrgChartVisualizationProps)
     }
   };
 
-  // Filter entities by the as-of date
-  const filteredDepartments = useMemo(() => {
-    return departments.filter(d => isActiveAtDate(d.start_date, d.end_date, asOfDate));
-  }, [departments, asOfDate]);
-
-  const filteredPositions = useMemo(() => {
-    const activeDeptIds = new Set(filteredDepartments.map(d => d.id));
-    return positions.filter(p => 
+  // Filter entities by a specific date
+  const getFilteredData = (date: string) => {
+    const filteredDepts = departments.filter(d => isActiveAtDate(d.start_date, d.end_date, date));
+    const activeDeptIds = new Set(filteredDepts.map(d => d.id));
+    
+    const filteredPos = positions.filter(p => 
       activeDeptIds.has(p.department_id) && 
-      isActiveAtDate(p.start_date, p.end_date, asOfDate)
+      isActiveAtDate(p.start_date, p.end_date, date)
     );
-  }, [positions, filteredDepartments, asOfDate]);
-
-  const filteredEmployeePositions = useMemo(() => {
-    const activePosIds = new Set(filteredPositions.map(p => p.id));
-    return employeePositions.filter(ep => 
+    
+    const activePosIds = new Set(filteredPos.map(p => p.id));
+    const filteredEmp = employeePositions.filter(ep => 
       activePosIds.has(ep.position_id) && 
-      isActiveAtDate(ep.start_date, ep.end_date || null, asOfDate)
+      isActiveAtDate(ep.start_date, ep.end_date || null, date)
     );
-  }, [employeePositions, filteredPositions, asOfDate]);
+    
+    return { filteredDepts, filteredPos, filteredEmp };
+  };
 
-  // Build tree structure
-  const orgTree = useMemo(() => {
+  // Filter entities by the as-of date
+  const { filteredDepts: filteredDepartments, filteredPos: filteredPositions, filteredEmp: filteredEmployeePositions } = useMemo(() => {
+    return getFilteredData(asOfDate);
+  }, [departments, positions, employeePositions, asOfDate]);
+
+  // Filter entities by the comparison date
+  const { filteredPos: comparePositions, filteredEmp: compareEmployeePositions, filteredDepts: compareDepartments } = useMemo(() => {
+    return getFilteredData(compareDate);
+  }, [departments, positions, employeePositions, compareDate]);
+
+  // Build tree structure with optional comparison
+  const buildOrgTree = (
+    positionsData: Position[],
+    employeeData: EmployeePosition[],
+    departmentsData: Department[],
+    comparisonPositionIds?: Set<string>
+  ): PositionNode[] => {
     const departmentFiltered = selectedDepartment === "all" 
-      ? filteredPositions 
-      : filteredPositions.filter(p => p.department_id === selectedDepartment);
+      ? positionsData 
+      : positionsData.filter(p => p.department_id === selectedDepartment);
 
     const positionMap = new Map<string, PositionNode>();
     
     // Create nodes
     departmentFiltered.forEach(pos => {
-      const dept = filteredDepartments.find(d => d.id === pos.department_id);
+      const dept = departmentsData.find(d => d.id === pos.department_id);
+      let changeStatus: PositionNode["changeStatus"] = "unchanged";
+      
+      if (comparisonPositionIds) {
+        if (!comparisonPositionIds.has(pos.id)) {
+          changeStatus = "added";
+        }
+      }
+      
       positionMap.set(pos.id, {
         ...pos,
-        employees: filteredEmployeePositions.filter(ep => ep.position_id === pos.id),
+        employees: employeeData.filter(ep => ep.position_id === pos.id),
         children: [],
         department: dept,
+        changeStatus,
       });
     });
 
@@ -204,7 +238,23 @@ export function OrgChartVisualization({ companyId }: OrgChartVisualizationProps)
     roots.sort((a, b) => a.title.localeCompare(b.title));
 
     return roots;
-  }, [filteredPositions, filteredEmployeePositions, filteredDepartments, selectedDepartment]);
+  };
+
+  // Main org tree
+  const orgTree = useMemo(() => {
+    if (comparisonMode) {
+      const comparePositionIds = new Set(comparePositions.map(p => p.id));
+      return buildOrgTree(filteredPositions, filteredEmployeePositions, filteredDepartments, comparePositionIds);
+    }
+    return buildOrgTree(filteredPositions, filteredEmployeePositions, filteredDepartments);
+  }, [filteredPositions, filteredEmployeePositions, filteredDepartments, comparisonMode, comparePositions, selectedDepartment]);
+
+  // Removed positions (only in compare date, not in current date)
+  const removedPositions = useMemo(() => {
+    if (!comparisonMode) return [];
+    const currentPositionIds = new Set(filteredPositions.map(p => p.id));
+    return comparePositions.filter(p => !currentPositionIds.has(p.id));
+  }, [comparisonMode, filteredPositions, comparePositions]);
 
   const toggleNode = (id: string) => {
     setExpandedNodes(prev => {
@@ -216,7 +266,8 @@ export function OrgChartVisualization({ companyId }: OrgChartVisualizationProps)
   };
 
   const expandAll = () => {
-    setExpandedNodes(new Set(filteredPositions.map(p => p.id)));
+    const allIds = [...filteredPositions.map(p => p.id), ...removedPositions.map(p => p.id)];
+    setExpandedNodes(new Set(allIds));
   };
 
   const collapseAll = () => {
@@ -230,9 +281,24 @@ export function OrgChartVisualization({ companyId }: OrgChartVisualizationProps)
     return email[0].toUpperCase();
   };
 
-  const PositionCard = ({ node, level = 0 }: { node: PositionNode; level?: number }) => {
+  // Comparison summary
+  const comparisonSummary = useMemo(() => {
+    if (!comparisonMode) return null;
+    
+    const currentIds = new Set(filteredPositions.map(p => p.id));
+    const compareIds = new Set(comparePositions.map(p => p.id));
+    
+    const added = filteredPositions.filter(p => !compareIds.has(p.id)).length;
+    const removed = comparePositions.filter(p => !currentIds.has(p.id)).length;
+    const unchanged = filteredPositions.filter(p => compareIds.has(p.id)).length;
+    
+    return { added, removed, unchanged };
+  }, [comparisonMode, filteredPositions, comparePositions]);
+
+  const PositionCard = ({ node, level = 0, isRemoved = false }: { node: PositionNode; level?: number; isRemoved?: boolean }) => {
     const isExpanded = expandedNodes.has(node.id);
     const hasChildren = node.children.length > 0;
+    const isAdded = node.changeStatus === "added";
 
     return (
       <div className="relative">
@@ -244,7 +310,10 @@ export function OrgChartVisualization({ companyId }: OrgChartVisualizationProps)
         <div 
           className={cn(
             "relative border rounded-lg bg-card shadow-sm transition-all hover:shadow-md",
-            level === 0 ? "border-primary/30 bg-primary/5" : "border-border"
+            level === 0 && !isRemoved && !isAdded && "border-primary/30 bg-primary/5",
+            isRemoved && "border-destructive/50 bg-destructive/10 opacity-75",
+            isAdded && "border-green-500/50 bg-green-500/10",
+            !isRemoved && !isAdded && level > 0 && "border-border"
           )}
         >
           <div className="p-4">
@@ -267,7 +336,21 @@ export function OrgChartVisualization({ companyId }: OrgChartVisualizationProps)
                   )}
                   {!hasChildren && <div className="w-6" />}
                   <div className="min-w-0">
-                    <h4 className="font-semibold text-sm truncate">{node.title}</h4>
+                    <div className="flex items-center gap-2">
+                      <h4 className="font-semibold text-sm truncate">{node.title}</h4>
+                      {comparisonMode && isAdded && (
+                        <Badge variant="default" className="bg-green-500 text-xs">
+                          <Plus className="h-3 w-3 mr-1" />
+                          New
+                        </Badge>
+                      )}
+                      {comparisonMode && isRemoved && (
+                        <Badge variant="destructive" className="text-xs">
+                          <Minus className="h-3 w-3 mr-1" />
+                          Removed
+                        </Badge>
+                      )}
+                    </div>
                     <p className="text-xs text-muted-foreground">{node.code}</p>
                   </div>
                 </div>
@@ -321,7 +404,7 @@ export function OrgChartVisualization({ companyId }: OrgChartVisualizationProps)
         {hasChildren && isExpanded && (
           <div className="mt-4 ml-8 pl-4 border-l border-border space-y-4">
             {node.children.map((child) => (
-              <PositionCard key={child.id} node={child} level={level + 1} />
+              <PositionCard key={child.id} node={child} level={level + 1} isRemoved={isRemoved} />
             ))}
           </div>
         )}
@@ -347,7 +430,9 @@ export function OrgChartVisualization({ companyId }: OrgChartVisualizationProps)
           {/* As-of Date Picker */}
           <div className="flex items-center gap-2">
             <Calendar className="h-4 w-4 text-muted-foreground" />
-            <Label htmlFor="asOfDate" className="text-sm font-medium whitespace-nowrap">As of:</Label>
+            <Label htmlFor="asOfDate" className="text-sm font-medium whitespace-nowrap">
+              {comparisonMode ? "Current:" : "As of:"}
+            </Label>
             <Input
               id="asOfDate"
               type="date"
@@ -356,6 +441,33 @@ export function OrgChartVisualization({ companyId }: OrgChartVisualizationProps)
               className="w-[160px]"
             />
           </div>
+
+          {/* Comparison Mode Toggle */}
+          <div className="flex items-center gap-2">
+            <Switch
+              id="comparisonMode"
+              checked={comparisonMode}
+              onCheckedChange={setComparisonMode}
+            />
+            <Label htmlFor="comparisonMode" className="text-sm font-medium flex items-center gap-1 cursor-pointer">
+              <GitCompare className="h-4 w-4" />
+              Compare
+            </Label>
+          </div>
+
+          {/* Compare Date Picker (shown only in comparison mode) */}
+          {comparisonMode && (
+            <div className="flex items-center gap-2">
+              <Label htmlFor="compareDate" className="text-sm font-medium whitespace-nowrap">Compare to:</Label>
+              <Input
+                id="compareDate"
+                type="date"
+                value={compareDate}
+                onChange={(e) => setCompareDate(e.target.value)}
+                className="w-[160px]"
+              />
+            </div>
+          )}
 
           <Select value={selectedDepartment} onValueChange={setSelectedDepartment}>
             <SelectTrigger className="w-[200px]">
@@ -398,26 +510,77 @@ export function OrgChartVisualization({ companyId }: OrgChartVisualizationProps)
         </Button>
       </div>
 
-      {asOfDate !== format(new Date(), "yyyy-MM-dd") && (
+      {/* Comparison Summary */}
+      {comparisonMode && comparisonSummary && (
+        <div className="flex items-center gap-4 rounded-lg border bg-muted/50 px-4 py-3">
+          <span className="text-sm font-medium">Changes from {format(new Date(compareDate), "MMM d, yyyy")} to {format(new Date(asOfDate), "MMM d, yyyy")}:</span>
+          <div className="flex items-center gap-4">
+            <Badge variant="default" className="bg-green-500">
+              <Plus className="h-3 w-3 mr-1" />
+              {comparisonSummary.added} Added
+            </Badge>
+            <Badge variant="destructive">
+              <Minus className="h-3 w-3 mr-1" />
+              {comparisonSummary.removed} Removed
+            </Badge>
+            <Badge variant="secondary">
+              <Equal className="h-3 w-3 mr-1" />
+              {comparisonSummary.unchanged} Unchanged
+            </Badge>
+          </div>
+        </div>
+      )}
+
+      {!comparisonMode && asOfDate !== format(new Date(), "yyyy-MM-dd") && (
         <div className="rounded-lg border border-info/30 bg-info/10 px-4 py-2 text-sm text-info-foreground">
           Showing organization structure as of <strong>{format(new Date(asOfDate), "MMMM d, yyyy")}</strong>
         </div>
       )}
 
-      {orgTree.length === 0 ? (
+      {orgTree.length === 0 && removedPositions.length === 0 ? (
         <Card>
           <CardContent className="py-8 text-center text-muted-foreground">
             No positions found for the selected date. Create positions in the Positions tab first.
           </CardContent>
         </Card>
       ) : (
-        <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-          {orgTree.map((root) => (
-            <div key={root.id} className="space-y-4">
-              <PositionCard node={root} />
+        <>
+          {/* Current positions */}
+          <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+            {orgTree.map((root) => (
+              <div key={root.id} className="space-y-4">
+                <PositionCard node={root} />
+              </div>
+            ))}
+          </div>
+
+          {/* Removed positions section (comparison mode only) */}
+          {comparisonMode && removedPositions.length > 0 && (
+            <div className="mt-8 pt-6 border-t">
+              <h3 className="text-lg font-semibold mb-4 flex items-center gap-2 text-destructive">
+                <Minus className="h-5 w-5" />
+                Removed Positions (were active on {format(new Date(compareDate), "MMM d, yyyy")})
+              </h3>
+              <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+                {removedPositions.map((pos) => {
+                  const dept = compareDepartments.find(d => d.id === pos.department_id);
+                  const removedNode: PositionNode = {
+                    ...pos,
+                    employees: compareEmployeePositions.filter(ep => ep.position_id === pos.id),
+                    children: [],
+                    department: dept,
+                    changeStatus: "removed",
+                  };
+                  return (
+                    <div key={pos.id} className="space-y-4">
+                      <PositionCard node={removedNode} isRemoved />
+                    </div>
+                  );
+                })}
+              </div>
             </div>
-          ))}
-        </div>
+          )}
+        </>
       )}
 
       {/* Stats */}
@@ -427,6 +590,12 @@ export function OrgChartVisualization({ companyId }: OrgChartVisualizationProps)
         <span>Assigned Employees: {filteredEmployeePositions.length}</span>
         <span>•</span>
         <span>Departments: {filteredDepartments.length}</span>
+        {comparisonMode && (
+          <>
+            <span>•</span>
+            <span className="text-destructive">Removed: {removedPositions.length}</span>
+          </>
+        )}
       </div>
     </div>
   );
