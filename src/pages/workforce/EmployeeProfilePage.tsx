@@ -256,6 +256,7 @@ export default function EmployeeProfilePage() {
         {/* Tabs Section */}
         <Tabs defaultValue="overview" className="w-full">
           <TabsList className="flex flex-wrap h-auto gap-1 p-1">
+            <TabsTrigger value="overview"><User className="h-4 w-4 mr-1" />Overview</TabsTrigger>
             <TabsTrigger value="addresses"><Home className="h-4 w-4 mr-1" />Addresses</TabsTrigger>
             <TabsTrigger value="background"><ShieldCheck className="h-4 w-4 mr-1" />Background</TabsTrigger>
             <TabsTrigger value="bank"><CreditCard className="h-4 w-4 mr-1" />Bank</TabsTrigger>
@@ -269,7 +270,6 @@ export default function EmployeeProfilePage() {
             <TabsTrigger value="licenses"><Award className="h-4 w-4 mr-1" />Licenses</TabsTrigger>
             <TabsTrigger value="medical"><Stethoscope className="h-4 w-4 mr-1" />Medical</TabsTrigger>
             <TabsTrigger value="memberships"><Heart className="h-4 w-4 mr-1" />Memberships</TabsTrigger>
-            <TabsTrigger value="overview"><User className="h-4 w-4 mr-1" />Overview</TabsTrigger>
             <TabsTrigger value="paygroup"><DollarSign className="h-4 w-4 mr-1" />Pay Group</TabsTrigger>
             <TabsTrigger value="references"><UserCheck className="h-4 w-4 mr-1" />References</TabsTrigger>
             <TabsTrigger value="work_permits"><FileCheck className="h-4 w-4 mr-1" />Work Permits</TabsTrigger>
