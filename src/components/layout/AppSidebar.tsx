@@ -35,7 +35,6 @@ interface NavItem {
 
 const navItems: NavItem[] = [
   { title: "Dashboard", href: "/", icon: LayoutDashboard },
-  { title: "Admin & Security", href: "/admin", icon: Settings, adminOnly: true },
   { title: "Workforce", href: "/workforce", icon: Users },
   { title: "Leave Management", href: "/leave", icon: Calendar },
   { title: "Compensation", href: "/compensation", icon: DollarSign, hrOnly: true },
@@ -47,6 +46,7 @@ const navItems: NavItem[] = [
   { title: "Health & Safety", href: "/hse", icon: Shield },
   { title: "Employee Relations", href: "/employee-relations", icon: Heart, hrOnly: true },
   { title: "Company Property", href: "/property", icon: Package },
+  { title: "Admin & Security", href: "/admin", icon: Settings, adminOnly: true },
 ];
 
 export function AppSidebar() {
