@@ -1,6 +1,6 @@
 import { ReactNode } from "react";
 import { AppSidebar } from "./AppSidebar";
-import { cn } from "@/lib/utils";
+import { AppHeader } from "./AppHeader";
 
 interface AppLayoutProps {
   children: ReactNode;
@@ -12,6 +12,7 @@ export function AppLayout({ children }: AppLayoutProps) {
       <AppSidebar />
       <main className="lg:pl-64 transition-all duration-300">
         <div className="min-h-screen p-4 lg:p-8">
+          <AppHeader />
           {children}
         </div>
       </main>
