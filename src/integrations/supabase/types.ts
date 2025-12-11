@@ -1058,6 +1058,7 @@ export type Database = {
       }
       scenario_templates: {
         Row: {
+          category: string | null
           company_id: string | null
           created_at: string
           created_by: string
@@ -1070,6 +1071,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          category?: string | null
           company_id?: string | null
           created_at?: string
           created_by: string
@@ -1082,6 +1084,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          category?: string | null
           company_id?: string | null
           created_at?: string
           created_by?: string
