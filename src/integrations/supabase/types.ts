@@ -1487,33 +1487,45 @@ export type Database = {
           avatar_url: string | null
           company_id: string | null
           created_at: string
+          date_format: string | null
           department_id: string | null
           email: string
           full_name: string | null
           id: string
+          preferred_language: string | null
           section_id: string | null
+          time_format: string | null
+          timezone: string | null
           updated_at: string
         }
         Insert: {
           avatar_url?: string | null
           company_id?: string | null
           created_at?: string
+          date_format?: string | null
           department_id?: string | null
           email: string
           full_name?: string | null
           id: string
+          preferred_language?: string | null
           section_id?: string | null
+          time_format?: string | null
+          timezone?: string | null
           updated_at?: string
         }
         Update: {
           avatar_url?: string | null
           company_id?: string | null
           created_at?: string
+          date_format?: string | null
           department_id?: string | null
           email?: string
           full_name?: string | null
           id?: string
+          preferred_language?: string | null
           section_id?: string | null
+          time_format?: string | null
+          timezone?: string | null
           updated_at?: string
         }
         Relationships: [
