@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -5,8 +6,13 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Star, Clock, CheckCircle, TrendingUp, Users, AlertTriangle, Loader2 } from "lucide-react";
-import { differenceInHours } from "date-fns";
+import { Button } from "@/components/ui/button";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Star, Clock, CheckCircle, TrendingUp, Users, AlertTriangle, Loader2, CalendarIcon } from "lucide-react";
+import { differenceInHours, subDays, subMonths, startOfDay, endOfDay, format, isWithinInterval } from "date-fns";
+import { cn } from "@/lib/utils";
 
 interface AgentMetrics {
   id: string;
@@ -24,6 +30,36 @@ interface AgentMetrics {
 }
 
 export function AgentPerformanceDashboard() {
+  const [dateRange, setDateRange] = useState<{ from: Date; to: Date }>({
+    from: subDays(new Date(), 30),
+    to: new Date(),
+  });
+  const [preset, setPreset] = useState("30d");
+
+  const handlePresetChange = (value: string) => {
+    setPreset(value);
+    const now = new Date();
+    switch (value) {
+      case "7d":
+        setDateRange({ from: subDays(now, 7), to: now });
+        break;
+      case "30d":
+        setDateRange({ from: subDays(now, 30), to: now });
+        break;
+      case "90d":
+        setDateRange({ from: subDays(now, 90), to: now });
+        break;
+      case "6m":
+        setDateRange({ from: subMonths(now, 6), to: now });
+        break;
+      case "1y":
+        setDateRange({ from: subMonths(now, 12), to: now });
+        break;
+      case "custom":
+        break;
+    }
+  };
+
   const { data: tickets = [], isLoading: ticketsLoading } = useQuery({
     queryKey: ["agent-performance-tickets"],
     queryFn: async () => {
@@ -54,7 +90,8 @@ export function AgentPerformanceDashboard() {
         .select(`
           rating,
           agent_rating,
-          ticket:tickets(assignee_id)
+          created_at,
+          ticket:tickets(assignee_id, created_at)
         `);
       if (error) throw error;
       return data;
@@ -63,11 +100,28 @@ export function AgentPerformanceDashboard() {
 
   const isLoading = ticketsLoading || surveysLoading;
 
+  // Filter data by date range
+  const filteredTickets = tickets.filter((t: any) => {
+    const ticketDate = new Date(t.created_at);
+    return isWithinInterval(ticketDate, {
+      start: startOfDay(dateRange.from),
+      end: endOfDay(dateRange.to),
+    });
+  });
+
+  const filteredSurveys = surveys.filter((s: any) => {
+    const surveyDate = new Date(s.created_at);
+    return isWithinInterval(surveyDate, {
+      start: startOfDay(dateRange.from),
+      end: endOfDay(dateRange.to),
+    });
+  });
+
   // Calculate metrics per agent
   const agentMetrics: AgentMetrics[] = (() => {
     const agentMap = new Map<string, AgentMetrics>();
 
-    tickets.forEach((ticket: any) => {
+    filteredTickets.forEach((ticket: any) => {
       if (!ticket.assignee_id || !ticket.assignee) return;
 
       if (!agentMap.has(ticket.assignee_id)) {
@@ -99,7 +153,7 @@ export function AgentPerformanceDashboard() {
 
     // Calculate response and resolution times
     agentMap.forEach((agent, agentId) => {
-      const agentTickets = tickets.filter((t: any) => t.assignee_id === agentId);
+      const agentTickets = filteredTickets.filter((t: any) => t.assignee_id === agentId);
       
       // Response times
       const ticketsWithResponse = agentTickets.filter((t: any) => t.first_response_at);
@@ -136,7 +190,7 @@ export function AgentPerformanceDashboard() {
         : 100;
 
       // Satisfaction ratings
-      const agentSurveys = surveys.filter((s: any) => s.ticket?.assignee_id === agentId);
+      const agentSurveys = filteredSurveys.filter((s: any) => s.ticket?.assignee_id === agentId);
       if (agentSurveys.length > 0) {
         const totalRating = agentSurveys.reduce((sum: number, s: any) => {
           return sum + (s.agent_rating || s.rating);
@@ -214,6 +268,74 @@ export function AgentPerformanceDashboard() {
 
   return (
     <div className="space-y-6">
+      {/* Date Range Filter */}
+      <Card>
+        <CardContent className="p-4">
+          <div className="flex flex-wrap items-center gap-4">
+            <div className="flex items-center gap-2">
+              <CalendarIcon className="h-4 w-4 text-muted-foreground" />
+              <span className="text-sm font-medium">Time Period:</span>
+            </div>
+            
+            <Select value={preset} onValueChange={handlePresetChange}>
+              <SelectTrigger className="w-[140px]">
+                <SelectValue placeholder="Select period" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="7d">Last 7 days</SelectItem>
+                <SelectItem value="30d">Last 30 days</SelectItem>
+                <SelectItem value="90d">Last 90 days</SelectItem>
+                <SelectItem value="6m">Last 6 months</SelectItem>
+                <SelectItem value="1y">Last year</SelectItem>
+                <SelectItem value="custom">Custom range</SelectItem>
+              </SelectContent>
+            </Select>
+
+            {preset === "custom" && (
+              <div className="flex items-center gap-2">
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" size="sm" className={cn("justify-start text-left font-normal", !dateRange.from && "text-muted-foreground")}>
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {dateRange.from ? format(dateRange.from, "MMM d, yyyy") : "From"}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={dateRange.from}
+                      onSelect={(date) => date && setDateRange(prev => ({ ...prev, from: date }))}
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+                <span className="text-muted-foreground">to</span>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" size="sm" className={cn("justify-start text-left font-normal", !dateRange.to && "text-muted-foreground")}>
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {dateRange.to ? format(dateRange.to, "MMM d, yyyy") : "To"}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={dateRange.to}
+                      onSelect={(date) => date && setDateRange(prev => ({ ...prev, to: date }))}
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+            )}
+
+            <Badge variant="secondary" className="ml-auto">
+              {filteredTickets.length} tickets in range
+            </Badge>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Team Overview Cards */}
       <div className="grid gap-4 md:grid-cols-4">
         <Card>
