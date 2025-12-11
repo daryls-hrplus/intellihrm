@@ -24,6 +24,7 @@ interface Beneficiary {
   is_primary: boolean;
   beneficiary_type: string;
   effective_date: string;
+  end_date: string | null;
 }
 
 interface BeneficiaryFormData {
@@ -37,6 +38,7 @@ interface BeneficiaryFormData {
   is_primary: boolean;
   beneficiary_type: string;
   effective_date: string;
+  end_date: string;
 }
 
 interface EmployeeBeneficiariesTabProps {
@@ -61,6 +63,7 @@ export function EmployeeBeneficiariesTab({ employeeId }: EmployeeBeneficiariesTa
       is_primary: false,
       beneficiary_type: "primary",
       effective_date: new Date().toISOString().split("T")[0],
+      end_date: "",
     },
   });
 
@@ -99,6 +102,7 @@ export function EmployeeBeneficiariesTab({ employeeId }: EmployeeBeneficiariesTa
         phone: data.phone || null,
         email: data.email || null,
         address: data.address || null,
+        end_date: data.end_date || null,
       };
 
       if (editingBeneficiary) {
@@ -141,6 +145,7 @@ export function EmployeeBeneficiariesTab({ employeeId }: EmployeeBeneficiariesTa
       is_primary: beneficiary.is_primary,
       beneficiary_type: beneficiary.beneficiary_type,
       effective_date: beneficiary.effective_date,
+      end_date: beneficiary.end_date || "",
     });
     setDialogOpen(true);
   };
@@ -168,6 +173,7 @@ export function EmployeeBeneficiariesTab({ employeeId }: EmployeeBeneficiariesTa
       is_primary: beneficiaries.length === 0,
       beneficiary_type: "primary",
       effective_date: new Date().toISOString().split("T")[0],
+      end_date: "",
     });
     setDialogOpen(true);
   };
@@ -319,12 +325,27 @@ export function EmployeeBeneficiariesTab({ employeeId }: EmployeeBeneficiariesTa
                       </FormItem>
                     )}
                   />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
                   <FormField
                     control={form.control}
                     name="effective_date"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Effective Date</FormLabel>
+                        <FormLabel>Start Date</FormLabel>
+                        <FormControl>
+                          <Input type="date" {...field} />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="end_date"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>End Date</FormLabel>
                         <FormControl>
                           <Input type="date" {...field} />
                         </FormControl>

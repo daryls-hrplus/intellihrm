@@ -37,6 +37,8 @@ interface DependentFormData {
   is_disabled: boolean;
   is_student: boolean;
   notes: string;
+  start_date: string;
+  end_date: string;
 }
 
 interface EmployeeDependentsTabProps {
@@ -60,6 +62,8 @@ export function EmployeeDependentsTab({ employeeId }: EmployeeDependentsTabProps
       is_disabled: false,
       is_student: false,
       notes: "",
+      start_date: new Date().toISOString().split("T")[0],
+      end_date: "",
     },
   });
 
@@ -121,7 +125,7 @@ export function EmployeeDependentsTab({ employeeId }: EmployeeDependentsTabProps
     }
   };
 
-  const handleEdit = (dependent: Dependent) => {
+  const handleEdit = (dependent: any) => {
     setEditingDependent(dependent);
     form.reset({
       full_name: dependent.full_name,
@@ -133,6 +137,8 @@ export function EmployeeDependentsTab({ employeeId }: EmployeeDependentsTabProps
       is_disabled: dependent.is_disabled,
       is_student: dependent.is_student,
       notes: dependent.notes || "",
+      start_date: dependent.start_date || new Date().toISOString().split("T")[0],
+      end_date: dependent.end_date || "",
     });
     setDialogOpen(true);
   };
@@ -149,7 +155,19 @@ export function EmployeeDependentsTab({ employeeId }: EmployeeDependentsTabProps
 
   const openNewDialog = () => {
     setEditingDependent(null);
-    form.reset();
+    form.reset({
+      full_name: "",
+      relationship: "",
+      date_of_birth: "",
+      gender: "",
+      nationality: "",
+      id_number: "",
+      is_disabled: false,
+      is_student: false,
+      notes: "",
+      start_date: new Date().toISOString().split("T")[0],
+      end_date: "",
+    });
     setDialogOpen(true);
   };
 
@@ -301,6 +319,33 @@ export function EmployeeDependentsTab({ employeeId }: EmployeeDependentsTabProps
                           <Switch checked={field.value} onCheckedChange={field.onChange} />
                         </FormControl>
                         <FormLabel className="!mt-0">Student</FormLabel>
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="start_date"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Start Date</FormLabel>
+                        <FormControl>
+                          <Input type="date" {...field} />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="end_date"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>End Date</FormLabel>
+                        <FormControl>
+                          <Input type="date" {...field} />
+                        </FormControl>
                       </FormItem>
                     )}
                   />

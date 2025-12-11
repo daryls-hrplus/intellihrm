@@ -24,6 +24,7 @@ interface BankAccount {
   is_primary: boolean;
   currency: string;
   effective_date: string;
+  end_date: string | null;
 }
 
 interface BankFormData {
@@ -37,6 +38,7 @@ interface BankFormData {
   is_primary: boolean;
   currency: string;
   effective_date: string;
+  end_date: string;
 }
 
 interface EmployeeBankAccountsTabProps {
@@ -61,6 +63,7 @@ export function EmployeeBankAccountsTab({ employeeId }: EmployeeBankAccountsTabP
       is_primary: false,
       currency: "USD",
       effective_date: new Date().toISOString().split("T")[0],
+      end_date: "",
     },
   });
 
@@ -98,6 +101,7 @@ export function EmployeeBankAccountsTab({ employeeId }: EmployeeBankAccountsTabP
         routing_number: data.routing_number || null,
         iban: data.iban || null,
         swift_code: data.swift_code || null,
+        end_date: data.end_date || null,
       };
 
       if (editingAccount) {
@@ -140,6 +144,7 @@ export function EmployeeBankAccountsTab({ employeeId }: EmployeeBankAccountsTabP
       is_primary: account.is_primary,
       currency: account.currency,
       effective_date: account.effective_date,
+      end_date: account.end_date || "",
     });
     setDialogOpen(true);
   };
@@ -167,6 +172,7 @@ export function EmployeeBankAccountsTab({ employeeId }: EmployeeBankAccountsTabP
       is_primary: accounts.length === 0,
       currency: "USD",
       effective_date: new Date().toISOString().split("T")[0],
+      end_date: "",
     });
     setDialogOpen(true);
   };
@@ -279,7 +285,7 @@ export function EmployeeBankAccountsTab({ employeeId }: EmployeeBankAccountsTabP
                   />
                 </div>
 
-                <div className="grid grid-cols-3 gap-4">
+                <div className="grid grid-cols-2 gap-4">
                   <FormField
                     control={form.control}
                     name="account_type"
@@ -312,12 +318,27 @@ export function EmployeeBankAccountsTab({ employeeId }: EmployeeBankAccountsTabP
                       </FormItem>
                     )}
                   />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
                   <FormField
                     control={form.control}
                     name="effective_date"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Effective Date</FormLabel>
+                        <FormLabel>Start Date</FormLabel>
+                        <FormControl>
+                          <Input type="date" {...field} />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="end_date"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>End Date</FormLabel>
                         <FormControl>
                           <Input type="date" {...field} />
                         </FormControl>

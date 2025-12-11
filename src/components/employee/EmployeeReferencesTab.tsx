@@ -40,6 +40,8 @@ interface ReferenceFormData {
   status: string;
   feedback: string;
   notes: string;
+  start_date: string;
+  end_date: string;
 }
 
 interface EmployeeReferencesTabProps {
@@ -65,6 +67,8 @@ export function EmployeeReferencesTab({ employeeId }: EmployeeReferencesTabProps
       status: "pending",
       feedback: "",
       notes: "",
+      start_date: new Date().toISOString().split("T")[0],
+      end_date: "",
     },
   });
 
@@ -129,7 +133,7 @@ export function EmployeeReferencesTab({ employeeId }: EmployeeReferencesTabProps
     }
   };
 
-  const handleEdit = (reference: Reference) => {
+  const handleEdit = (reference: any) => {
     setEditingReference(reference);
     form.reset({
       full_name: reference.full_name,
@@ -143,6 +147,8 @@ export function EmployeeReferencesTab({ employeeId }: EmployeeReferencesTabProps
       status: reference.status,
       feedback: reference.feedback || "",
       notes: reference.notes || "",
+      start_date: reference.start_date || new Date().toISOString().split("T")[0],
+      end_date: reference.end_date || "",
     });
     setDialogOpen(true);
   };
@@ -159,7 +165,21 @@ export function EmployeeReferencesTab({ employeeId }: EmployeeReferencesTabProps
 
   const openNewDialog = () => {
     setEditingReference(null);
-    form.reset();
+    form.reset({
+      full_name: "",
+      relationship: "",
+      company: "",
+      position: "",
+      phone: "",
+      email: "",
+      years_known: null,
+      reference_date: "",
+      status: "pending",
+      feedback: "",
+      notes: "",
+      start_date: new Date().toISOString().split("T")[0],
+      end_date: "",
+    });
     setDialogOpen(true);
   };
 
@@ -359,6 +379,33 @@ export function EmployeeReferencesTab({ employeeId }: EmployeeReferencesTabProps
                     </FormItem>
                   )}
                 />
+
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="start_date"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Start Date</FormLabel>
+                        <FormControl>
+                          <Input type="date" {...field} />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="end_date"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>End Date</FormLabel>
+                        <FormControl>
+                          <Input type="date" {...field} />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                </div>
 
                 <FormField
                   control={form.control}

@@ -36,6 +36,7 @@ interface AddressFormData {
   postal_code: string;
   country: string;
   effective_date: string;
+  end_date: string;
 }
 
 interface EmployeeAddressesTabProps {
@@ -59,6 +60,7 @@ export function EmployeeAddressesTab({ employeeId }: EmployeeAddressesTabProps) 
       postal_code: "",
       country: "USA",
       effective_date: new Date().toISOString().split("T")[0],
+      end_date: "",
     },
   });
 
@@ -99,6 +101,7 @@ export function EmployeeAddressesTab({ employeeId }: EmployeeAddressesTabProps) 
             address_line_2: data.address_line_2 || null,
             state: data.state || null,
             postal_code: data.postal_code || null,
+            end_date: data.end_date || null,
           })
           .eq("id", editingAddress.id);
 
@@ -111,6 +114,7 @@ export function EmployeeAddressesTab({ employeeId }: EmployeeAddressesTabProps) 
           address_line_2: data.address_line_2 || null,
           state: data.state || null,
           postal_code: data.postal_code || null,
+          end_date: data.end_date || null,
         });
 
         if (error) throw error;
@@ -138,6 +142,7 @@ export function EmployeeAddressesTab({ employeeId }: EmployeeAddressesTabProps) 
       postal_code: address.postal_code || "",
       country: address.country,
       effective_date: address.effective_date,
+      end_date: address.end_date || "",
     });
     setDialogOpen(true);
   };
@@ -164,6 +169,7 @@ export function EmployeeAddressesTab({ employeeId }: EmployeeAddressesTabProps) 
       postal_code: "",
       country: "USA",
       effective_date: new Date().toISOString().split("T")[0],
+      end_date: "",
     });
     setDialogOpen(true);
   };
@@ -185,7 +191,7 @@ export function EmployeeAddressesTab({ employeeId }: EmployeeAddressesTabProps) 
             </DialogHeader>
             <Form {...form}>
               <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-3 gap-4">
                   <FormField
                     control={form.control}
                     name="address_type"
@@ -213,7 +219,19 @@ export function EmployeeAddressesTab({ employeeId }: EmployeeAddressesTabProps) 
                     name="effective_date"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Effective Date</FormLabel>
+                        <FormLabel>Start Date</FormLabel>
+                        <FormControl>
+                          <Input type="date" {...field} />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="end_date"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>End Date</FormLabel>
                         <FormControl>
                           <Input type="date" {...field} />
                         </FormControl>
