@@ -67,7 +67,7 @@ import { HeadcountAnalytics } from "@/components/admin/HeadcountAnalytics";
 import { HeadcountForecast } from "@/components/admin/HeadcountForecast";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { NavLink } from "react-router-dom";
+import { NavLink, useSearchParams } from "react-router-dom";
 
 interface Company {
   id: string;
@@ -106,6 +106,9 @@ interface Section {
 type EntityType = "division" | "department" | "section";
 
 export default function AdminOrgStructurePage() {
+  const [searchParams] = useSearchParams();
+  const sharedScenarioToken = searchParams.get("scenario");
+  
   const [companies, setCompanies] = useState<Company[]>([]);
   const [selectedCompanyId, setSelectedCompanyId] = useState<string>("");
   const [divisions, setDivisions] = useState<CompanyDivision[]>([]);
@@ -114,6 +117,7 @@ export default function AdminOrgStructurePage() {
   const [isLoading, setIsLoading] = useState(true);
   const [expandedDivisions, setExpandedDivisions] = useState<Set<string>>(new Set());
   const [expandedDepartments, setExpandedDepartments] = useState<Set<string>>(new Set());
+  const [activeTab, setActiveTab] = useState(sharedScenarioToken ? "forecast" : "structure");
 
   // Dialog state
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -427,7 +431,7 @@ export default function AdminOrgStructurePage() {
         </Card>
 
         {selectedCompanyId && (
-          <Tabs defaultValue="structure" className="space-y-6">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
             <TabsList className="flex-wrap">
               <TabsTrigger value="structure" className="flex items-center gap-2">
                 <FolderTree className="h-4 w-4" />
@@ -727,7 +731,7 @@ export default function AdminOrgStructurePage() {
             </TabsContent>
 
             <TabsContent value="forecast">
-              <HeadcountForecast />
+              <HeadcountForecast sharedScenarioToken={sharedScenarioToken} />
             </TabsContent>
           </Tabs>
         )}

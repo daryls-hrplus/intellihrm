@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,8 +19,12 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
+import { Json } from "@/integrations/supabase/types";
 import { 
   Plus, 
   Play, 
@@ -29,16 +33,21 @@ import {
   TrendingDown,
   Users,
   DollarSign,
-  Percent,
   Clock,
   BarChart3,
   Copy,
   Settings2,
   Download,
   FileText,
-  FileSpreadsheet
+  FileSpreadsheet,
+  Save,
+  Share2,
+  Link,
+  FolderOpen,
+  Loader2,
+  Check
 } from "lucide-react";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, LineChart, Line } from "recharts";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
 
 export interface ScenarioParameters {
   id: string;
@@ -71,6 +80,19 @@ interface ScenarioResult {
 
 interface ScenarioPlanningProps {
   currentHeadcount: number;
+  sharedToken?: string;
+}
+
+interface SavedScenarioSet {
+  id: string;
+  name: string;
+  description: string | null;
+  parameters: ScenarioParameters[];
+  results: ScenarioResult[] | null;
+  current_headcount: number;
+  is_shared: boolean;
+  share_token: string | null;
+  created_at: string;
 }
 
 const defaultScenario: Omit<ScenarioParameters, "id"> = {
@@ -103,13 +125,183 @@ const presetScenarios: { name: string; params: Partial<ScenarioParameters> }[] =
   },
 ];
 
-export function ScenarioPlanning({ currentHeadcount }: ScenarioPlanningProps) {
+export function ScenarioPlanning({ currentHeadcount, sharedToken }: ScenarioPlanningProps) {
+  const { user } = useAuth();
   const [scenarios, setScenarios] = useState<ScenarioParameters[]>([]);
   const [results, setResults] = useState<ScenarioResult[]>([]);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [editingScenario, setEditingScenario] = useState<ScenarioParameters | null>(null);
   const [newScenario, setNewScenario] = useState<Omit<ScenarioParameters, "id">>(defaultScenario);
   const [isRunning, setIsRunning] = useState(false);
+  
+  // Save/Load state
+  const [showSaveDialog, setShowSaveDialog] = useState(false);
+  const [showLoadDialog, setShowLoadDialog] = useState(false);
+  const [savedSets, setSavedSets] = useState<SavedScenarioSet[]>([]);
+  const [isSaving, setIsSaving] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [saveName, setSaveName] = useState("");
+  const [saveDescription, setSaveDescription] = useState("");
+  const [currentSavedId, setCurrentSavedId] = useState<string | null>(null);
+  const [shareUrl, setShareUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (sharedToken) {
+      loadSharedScenario(sharedToken);
+    }
+  }, [sharedToken]);
+
+  const loadSharedScenario = async (token: string) => {
+    setIsLoading(true);
+    const { data, error } = await supabase
+      .from("saved_scenarios")
+      .select("*")
+      .eq("share_token", token)
+      .eq("is_shared", true)
+      .maybeSingle();
+
+    if (error || !data) {
+      toast.error("Shared scenario not found or no longer available");
+      setIsLoading(false);
+      return;
+    }
+
+    const params = data.parameters as unknown as ScenarioParameters[];
+    const res = data.results as unknown as ScenarioResult[] | null;
+    
+    setScenarios(params);
+    if (res) setResults(res);
+    toast.success(`Loaded shared scenario: ${data.name}`);
+    setIsLoading(false);
+  };
+
+  const fetchSavedSets = async () => {
+    if (!user) return;
+    setIsLoading(true);
+    const { data, error } = await supabase
+      .from("saved_scenarios")
+      .select("*")
+      .eq("created_by", user.id)
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      console.error("Error fetching saved scenarios:", error);
+    } else if (data) {
+      setSavedSets(data.map(d => ({
+        ...d,
+        parameters: d.parameters as unknown as ScenarioParameters[],
+        results: d.results as unknown as ScenarioResult[] | null,
+      })));
+    }
+    setIsLoading(false);
+  };
+
+  const saveScenarioSet = async () => {
+    if (!user || scenarios.length === 0) {
+      toast.error("No scenarios to save");
+      return;
+    }
+    if (!saveName.trim()) {
+      toast.error("Please enter a name");
+      return;
+    }
+
+    setIsSaving(true);
+    const { data, error } = await supabase
+      .from("saved_scenarios")
+      .insert({
+        name: saveName,
+        description: saveDescription || null,
+        parameters: scenarios as unknown as Json,
+        results: results.length > 0 ? (results as unknown as Json) : null,
+        current_headcount: currentHeadcount,
+        created_by: user.id,
+        is_shared: false,
+      })
+      .select()
+      .single();
+
+    if (error) {
+      toast.error("Failed to save scenarios");
+      console.error(error);
+    } else {
+      toast.success("Scenarios saved successfully");
+      setCurrentSavedId(data.id);
+      setShowSaveDialog(false);
+      setSaveName("");
+      setSaveDescription("");
+    }
+    setIsSaving(false);
+  };
+
+  const loadScenarioSet = (set: SavedScenarioSet) => {
+    setScenarios(set.parameters);
+    if (set.results) setResults(set.results);
+    setCurrentSavedId(set.id);
+    setShowLoadDialog(false);
+    toast.success(`Loaded: ${set.name}`);
+  };
+
+  const deleteScenarioSet = async (id: string) => {
+    const { error } = await supabase
+      .from("saved_scenarios")
+      .delete()
+      .eq("id", id);
+
+    if (error) {
+      toast.error("Failed to delete");
+    } else {
+      setSavedSets(prev => prev.filter(s => s.id !== id));
+      if (currentSavedId === id) setCurrentSavedId(null);
+      toast.success("Deleted");
+    }
+  };
+
+  const generateShareLink = async () => {
+    if (!user || scenarios.length === 0) {
+      toast.error("No scenarios to share");
+      return;
+    }
+
+    // Generate a unique share token
+    const shareToken = Math.random().toString(36).substr(2, 12) + Date.now().toString(36);
+    
+    setIsSaving(true);
+    const { data, error } = await supabase
+      .from("saved_scenarios")
+      .insert({
+        name: `Shared ${new Date().toLocaleDateString()}`,
+        parameters: scenarios as unknown as Json,
+        results: results.length > 0 ? (results as unknown as Json) : null,
+        current_headcount: currentHeadcount,
+        created_by: user.id,
+        is_shared: true,
+        share_token: shareToken,
+      })
+      .select()
+      .single();
+
+    if (error) {
+      toast.error("Failed to create share link");
+      console.error(error);
+    } else {
+      const url = `${window.location.origin}/admin/org-structure?scenario=${shareToken}`;
+      setShareUrl(url);
+      setCurrentSavedId(data.id);
+      
+      // Copy to clipboard
+      await navigator.clipboard.writeText(url);
+      toast.success("Share link copied to clipboard!");
+    }
+    setIsSaving(false);
+  };
+
+  const copyShareLink = async () => {
+    if (shareUrl) {
+      await navigator.clipboard.writeText(shareUrl);
+      toast.success("Link copied!");
+    }
+  };
 
   const generateId = () => Math.random().toString(36).substr(2, 9);
 
@@ -515,6 +707,33 @@ export function ScenarioPlanning({ currentHeadcount }: ScenarioPlanningProps) {
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
+            )}
+            {scenarios.length > 0 && user && (
+              <>
+                <Button variant="outline" onClick={() => setShowSaveDialog(true)}>
+                  <Save className="h-4 w-4 mr-2" />
+                  Save
+                </Button>
+                <Button variant="outline" onClick={generateShareLink} disabled={isSaving}>
+                  {isSaving ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Share2 className="h-4 w-4 mr-2" />}
+                  Share
+                </Button>
+              </>
+            )}
+            {user && (
+              <Button variant="ghost" onClick={() => { fetchSavedSets(); setShowLoadDialog(true); }}>
+                <FolderOpen className="h-4 w-4 mr-2" />
+                Load
+              </Button>
+            )}
+            {shareUrl && (
+              <div className="flex items-center gap-2 px-3 py-1.5 bg-muted rounded-md text-sm">
+                <Link className="h-3 w-3 text-muted-foreground" />
+                <span className="max-w-[150px] truncate text-muted-foreground">{shareUrl}</span>
+                <Button size="sm" variant="ghost" className="h-6 px-2" onClick={copyShareLink}>
+                  <Copy className="h-3 w-3" />
+                </Button>
+              </div>
             )}
           </div>
         </CardContent>
@@ -930,6 +1149,109 @@ export function ScenarioPlanning({ currentHeadcount }: ScenarioPlanningProps) {
             <Button onClick={editingScenario ? updateScenario : createScenario}>
               {editingScenario ? "Update" : "Create"} Scenario
             </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Save Dialog */}
+      <Dialog open={showSaveDialog} onOpenChange={setShowSaveDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Save Scenarios</DialogTitle>
+            <DialogDescription>
+              Save your current scenario set for future reference
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div>
+              <Label htmlFor="save-name">Name *</Label>
+              <Input
+                id="save-name"
+                value={saveName}
+                onChange={(e) => setSaveName(e.target.value)}
+                placeholder="e.g., Q1 2025 Planning"
+              />
+            </div>
+            <div>
+              <Label htmlFor="save-desc">Description (optional)</Label>
+              <Input
+                id="save-desc"
+                value={saveDescription}
+                onChange={(e) => setSaveDescription(e.target.value)}
+                placeholder="Brief description"
+              />
+            </div>
+            <div className="text-sm text-muted-foreground">
+              {scenarios.length} scenario(s) will be saved
+              {results.length > 0 && " with their results"}
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowSaveDialog(false)}>Cancel</Button>
+            <Button onClick={saveScenarioSet} disabled={isSaving}>
+              {isSaving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Save className="h-4 w-4 mr-2" />}
+              Save
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Load Dialog */}
+      <Dialog open={showLoadDialog} onOpenChange={setShowLoadDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Load Saved Scenarios</DialogTitle>
+            <DialogDescription>
+              Select a previously saved scenario set to load
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4 max-h-[400px] overflow-y-auto">
+            {isLoading ? (
+              <div className="flex justify-center py-8">
+                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+              </div>
+            ) : savedSets.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">
+                No saved scenarios yet
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {savedSets.map((set) => (
+                  <div
+                    key={set.id}
+                    className="flex items-center justify-between p-3 rounded-lg border hover:bg-muted/50 cursor-pointer"
+                    onClick={() => loadScenarioSet(set)}
+                  >
+                    <div className="flex-1">
+                      <div className="font-medium">{set.name}</div>
+                      {set.description && (
+                        <div className="text-xs text-muted-foreground">{set.description}</div>
+                      )}
+                      <div className="text-xs text-muted-foreground mt-1">
+                        {set.parameters.length} scenarios • {new Date(set.created_at).toLocaleDateString()}
+                        {set.is_shared && (
+                          <Badge variant="outline" className="ml-2 text-xs">Shared</Badge>
+                        )}
+                      </div>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 text-destructive"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        deleteScenarioSet(set.id);
+                      }}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowLoadDialog(false)}>Close</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

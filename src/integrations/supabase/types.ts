@@ -1003,6 +1003,59 @@ export type Database = {
         }
         Relationships: []
       }
+      saved_scenarios: {
+        Row: {
+          company_id: string | null
+          created_at: string
+          created_by: string
+          current_headcount: number
+          description: string | null
+          id: string
+          is_shared: boolean
+          name: string
+          parameters: Json
+          results: Json | null
+          share_token: string | null
+          updated_at: string
+        }
+        Insert: {
+          company_id?: string | null
+          created_at?: string
+          created_by: string
+          current_headcount: number
+          description?: string | null
+          id?: string
+          is_shared?: boolean
+          name: string
+          parameters: Json
+          results?: Json | null
+          share_token?: string | null
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string | null
+          created_at?: string
+          created_by?: string
+          current_headcount?: number
+          description?: string | null
+          id?: string
+          is_shared?: boolean
+          name?: string
+          parameters?: Json
+          results?: Json | null
+          share_token?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "saved_scenarios_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       sections: {
         Row: {
           code: string
