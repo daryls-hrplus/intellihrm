@@ -41,3 +41,12 @@ verify_jwt = false
 
 [functions.check-sla-breach]
 verify_jwt = false
+
+[functions.process-policy-document]
+verify_jwt = false
+
+[functions.check-policy-rules]
+verify_jwt = false
+
+[functions.send-sla-weekly-report]
+verify_jwt = false

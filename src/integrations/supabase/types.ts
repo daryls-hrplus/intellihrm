@@ -443,6 +443,44 @@ export type Database = {
           },
         ]
       }
+      document_chunks: {
+        Row: {
+          chunk_index: number
+          content: string
+          created_at: string
+          document_id: string
+          embedding: string | null
+          id: string
+          metadata: Json | null
+        }
+        Insert: {
+          chunk_index: number
+          content: string
+          created_at?: string
+          document_id: string
+          embedding?: string | null
+          id?: string
+          metadata?: Json | null
+        }
+        Update: {
+          chunk_index?: number
+          content?: string
+          created_at?: string
+          document_id?: string
+          embedding?: string | null
+          id?: string
+          metadata?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "document_chunks_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "policy_documents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       employee_position_history: {
         Row: {
           action: string
@@ -1169,6 +1207,217 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      policy_categories: {
+        Row: {
+          code: string
+          created_at: string
+          description: string | null
+          display_order: number | null
+          icon: string | null
+          id: string
+          is_active: boolean
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          description?: string | null
+          display_order?: number | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          description?: string | null
+          display_order?: number | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      policy_documents: {
+        Row: {
+          category_id: string | null
+          chunk_count: number | null
+          company_id: string | null
+          created_at: string
+          description: string | null
+          effective_date: string | null
+          expiry_date: string | null
+          file_name: string
+          file_path: string
+          file_size: number | null
+          file_type: string
+          id: string
+          is_active: boolean
+          is_global: boolean
+          processed_at: string | null
+          processing_error: string | null
+          processing_status: string | null
+          title: string
+          updated_at: string
+          uploaded_by: string
+          version: string | null
+        }
+        Insert: {
+          category_id?: string | null
+          chunk_count?: number | null
+          company_id?: string | null
+          created_at?: string
+          description?: string | null
+          effective_date?: string | null
+          expiry_date?: string | null
+          file_name: string
+          file_path: string
+          file_size?: number | null
+          file_type: string
+          id?: string
+          is_active?: boolean
+          is_global?: boolean
+          processed_at?: string | null
+          processing_error?: string | null
+          processing_status?: string | null
+          title: string
+          updated_at?: string
+          uploaded_by: string
+          version?: string | null
+        }
+        Update: {
+          category_id?: string | null
+          chunk_count?: number | null
+          company_id?: string | null
+          created_at?: string
+          description?: string | null
+          effective_date?: string | null
+          expiry_date?: string | null
+          file_name?: string
+          file_path?: string
+          file_size?: number | null
+          file_type?: string
+          id?: string
+          is_active?: boolean
+          is_global?: boolean
+          processed_at?: string | null
+          processing_error?: string | null
+          processing_status?: string | null
+          title?: string
+          updated_at?: string
+          uploaded_by?: string
+          version?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "policy_documents_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "policy_categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "policy_documents_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      policy_enforcement_logs: {
+        Row: {
+          action_context: string
+          created_at: string
+          id: string
+          override_justification: string | null
+          rule_id: string | null
+          rule_triggered: string
+          user_id: string
+          user_response: string | null
+        }
+        Insert: {
+          action_context: string
+          created_at?: string
+          id?: string
+          override_justification?: string | null
+          rule_id?: string | null
+          rule_triggered: string
+          user_id: string
+          user_response?: string | null
+        }
+        Update: {
+          action_context?: string
+          created_at?: string
+          id?: string
+          override_justification?: string | null
+          rule_id?: string | null
+          rule_triggered?: string
+          user_id?: string
+          user_response?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "policy_enforcement_logs_rule_id_fkey"
+            columns: ["rule_id"]
+            isOneToOne: false
+            referencedRelation: "policy_rules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      policy_rules: {
+        Row: {
+          created_at: string
+          document_id: string
+          id: string
+          is_active: boolean
+          rule_condition: Json
+          rule_context: string
+          rule_description: string
+          rule_type: string
+          severity: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          document_id: string
+          id?: string
+          is_active?: boolean
+          rule_condition: Json
+          rule_context: string
+          rule_description: string
+          rule_type: string
+          severity?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          document_id?: string
+          id?: string
+          is_active?: boolean
+          rule_condition?: Json
+          rule_context?: string
+          rule_description?: string
+          rule_type?: string
+          severity?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "policy_rules_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "policy_documents"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       positions: {
         Row: {
@@ -2116,6 +2365,22 @@ export type Database = {
           p_old_values?: Json
         }
         Returns: string
+      }
+      match_policy_documents: {
+        Args: {
+          match_count?: number
+          match_threshold?: number
+          p_company_id?: string
+          query_embedding: string
+        }
+        Returns: {
+          category_name: string
+          content: string
+          document_id: string
+          document_title: string
+          id: string
+          similarity: number
+        }[]
       }
     }
     Enums: {
