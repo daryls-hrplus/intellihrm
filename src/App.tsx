@@ -37,6 +37,7 @@ import AdminLmsManagementPage from "./pages/admin/AdminLmsManagementPage";
 // Workforce pages
 import WorkforceDashboardPage from "./pages/workforce/WorkforceDashboardPage";
 import EmployeesPage from "./pages/workforce/EmployeesPage";
+import EmployeeProfilePage from "./pages/workforce/EmployeeProfilePage";
 import PositionsPage from "./pages/workforce/PositionsPage";
 import OrgStructurePage from "./pages/workforce/OrgStructurePage";
 import DepartmentsPage from "./pages/workforce/DepartmentsPage";
@@ -387,6 +388,14 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <EmployeesPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/workforce/employees/:id"
+              element={
+                <ProtectedRoute>
+                  <EmployeeProfilePage />
                 </ProtectedRoute>
               }
             />
