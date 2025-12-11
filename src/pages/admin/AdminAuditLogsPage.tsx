@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import { useAuditLog } from "@/hooks/useAuditLog";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -88,6 +89,8 @@ export default function AdminAuditLogsPage() {
   const [totalCount, setTotalCount] = useState(0);
   const [entityTypes, setEntityTypes] = useState<string[]>([]);
   const { toast } = useToast();
+  const { logView } = useAuditLog();
+  const hasLoggedView = useRef(false);
 
   const fetchLogs = async () => {
     setLoading(true);
@@ -172,6 +175,11 @@ export default function AdminAuditLogsPage() {
 
   useEffect(() => {
     fetchEntityTypes();
+    // Log view on mount
+    if (!hasLoggedView.current) {
+      hasLoggedView.current = true;
+      logView('audit_logs', undefined, 'Audit Logs');
+    }
   }, []);
 
   useEffect(() => {

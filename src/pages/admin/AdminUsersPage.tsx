@@ -1,9 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useAuditLog } from "@/hooks/useAuditLog";
 import { cn } from "@/lib/utils";
 import {
   Search,
@@ -52,10 +53,20 @@ export default function AdminUsersPage() {
   const [openCompanyDropdown, setOpenCompanyDropdown] = useState<string | null>(null);
   const { user: currentUser } = useAuth();
   const { toast } = useToast();
+  const { logView } = useAuditLog();
+  const hasLoggedView = useRef(false);
 
   useEffect(() => {
     fetchData();
   }, []);
+
+  // Log view when users are loaded
+  useEffect(() => {
+    if (users.length > 0 && !hasLoggedView.current) {
+      hasLoggedView.current = true;
+      logView('users_list', undefined, 'User Management', { user_count: users.length });
+    }
+  }, [users]);
 
   const fetchData = async () => {
     try {

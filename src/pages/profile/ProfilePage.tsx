@@ -3,6 +3,7 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useAuditLog } from "@/hooks/useAuditLog";
 import { cn } from "@/lib/utils";
 import { z } from "zod";
 import {
@@ -34,7 +35,9 @@ type ProfileFormData = z.infer<typeof profileSchema>;
 export default function ProfilePage() {
   const { user, profile, roles } = useAuth();
   const { toast } = useToast();
+  const { logView } = useAuditLog();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const hasLoggedView = useRef(false);
 
   const [isLoading, setIsLoading] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
@@ -63,6 +66,12 @@ export default function ProfilePage() {
         emergency_contact_phone: "",
       });
       setAvatarUrl(profile.avatar_url);
+      
+      // Log profile view
+      if (!hasLoggedView.current) {
+        hasLoggedView.current = true;
+        logView('profile', profile.id, profile.full_name || profile.email);
+      }
     }
   }, [profile]);
 
