@@ -1,4 +1,5 @@
 import { AppLayout } from "@/components/layout/AppLayout";
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { NavLink } from "@/components/NavLink";
 import {
   User,
@@ -82,6 +83,12 @@ export default function EmployeeSelfServicePage() {
   return (
     <AppLayout>
       <div className="space-y-6">
+        <Breadcrumbs
+          items={[
+            { label: "Employee Self Service" },
+          ]}
+        />
+        
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Employee Self Service</h1>
           <p className="text-muted-foreground">
