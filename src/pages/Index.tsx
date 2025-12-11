@@ -1,13 +1,93 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import { AppLayout } from "@/components/layout/AppLayout";
+import { StatCard } from "@/components/dashboard/StatCard";
+import { QuickActions } from "@/components/dashboard/QuickActions";
+import { RecentActivity } from "@/components/dashboard/RecentActivity";
+import { UpcomingEvents } from "@/components/dashboard/UpcomingEvents";
+import { EmployeeDistribution } from "@/components/dashboard/EmployeeDistribution";
+import { HeadcountTrend } from "@/components/dashboard/HeadcountTrend";
+import {
+  Users,
+  UserPlus,
+  Calendar,
+  TrendingUp,
+  Bell,
+} from "lucide-react";
 
 const Index = () => {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background">
-      <div className="text-center">
-        <h1 className="mb-4 text-4xl font-bold">Welcome to Your Blank App</h1>
-        <p className="text-xl text-muted-foreground">Start building your amazing project here!</p>
+    <AppLayout>
+      <div className="space-y-8">
+        {/* Header */}
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between animate-fade-in">
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+              Welcome back, John
+            </h1>
+            <p className="mt-1 text-muted-foreground">
+              Here's what's happening across your organization today.
+            </p>
+          </div>
+          <button className="relative inline-flex items-center gap-2 rounded-lg border border-border bg-card px-4 py-2.5 text-sm font-medium text-card-foreground shadow-sm transition-all hover:bg-accent">
+            <Bell className="h-4 w-4" />
+            Notifications
+            <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-destructive text-xs font-bold text-destructive-foreground">
+              3
+            </span>
+          </button>
+        </div>
+
+        {/* Stats Grid */}
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <StatCard
+            title="Total Employees"
+            value="1,284"
+            change="+12% from last month"
+            changeType="positive"
+            icon={Users}
+            delay={0}
+          />
+          <StatCard
+            title="New Hires (This Month)"
+            value="28"
+            change="+5 from last month"
+            changeType="positive"
+            icon={UserPlus}
+            delay={50}
+          />
+          <StatCard
+            title="Leave Requests"
+            value="47"
+            change="12 pending approval"
+            changeType="neutral"
+            icon={Calendar}
+            delay={100}
+          />
+          <StatCard
+            title="Open Positions"
+            value="23"
+            change="8 in final stage"
+            changeType="neutral"
+            icon={TrendingUp}
+            delay={150}
+          />
+        </div>
+
+        {/* Quick Actions */}
+        <QuickActions />
+
+        {/* Charts Row */}
+        <div className="grid gap-6 lg:grid-cols-2">
+          <HeadcountTrend />
+          <EmployeeDistribution />
+        </div>
+
+        {/* Activity & Events */}
+        <div className="grid gap-6 lg:grid-cols-2">
+          <RecentActivity />
+          <UpcomingEvents />
+        </div>
       </div>
-    </div>
+    </AppLayout>
   );
 };
 
