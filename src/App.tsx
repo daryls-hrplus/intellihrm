@@ -76,6 +76,12 @@ import EmployeeRelationsDashboardPage from "./pages/employee-relations/EmployeeR
 // Property pages
 import PropertyDashboardPage from "./pages/property/PropertyDashboardPage";
 
+// Payroll pages
+import PayrollDashboardPage from "./pages/payroll/PayrollDashboardPage";
+
+// Time & Attendance pages
+import TimeAttendanceDashboardPage from "./pages/time-attendance/TimeAttendanceDashboardPage";
+
 // ESS & MSS pages
 import EmployeeSelfServicePage from "./pages/ess/EmployeeSelfServicePage";
 import MyLettersPage from "./pages/ess/MyLettersPage";
@@ -392,12 +398,32 @@ const App = () => (
               }
             />
 
+            {/* Time & Attendance Routes */}
+            <Route
+              path="/time-attendance"
+              element={
+                <ProtectedRoute moduleCode="time_attendance">
+                  <TimeAttendanceDashboardPage />
+                </ProtectedRoute>
+              }
+            />
+
             {/* Leave Routes */}
             <Route
               path="/leave"
               element={
                 <ProtectedRoute>
                   <LeaveDashboardPage />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Payroll Routes */}
+            <Route
+              path="/payroll"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="payroll">
+                  <PayrollDashboardPage />
                 </ProtectedRoute>
               }
             />
