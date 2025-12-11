@@ -1648,6 +1648,76 @@ export type Database = {
         }
         Relationships: []
       }
+      pay_elements: {
+        Row: {
+          code: string
+          company_id: string | null
+          created_at: string
+          description: string | null
+          display_order: number
+          element_type_id: string | null
+          id: string
+          is_active: boolean
+          is_pensionable: boolean
+          is_taxable: boolean
+          name: string
+          proration_method_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          code: string
+          company_id?: string | null
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          element_type_id?: string | null
+          id?: string
+          is_active?: boolean
+          is_pensionable?: boolean
+          is_taxable?: boolean
+          name: string
+          proration_method_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          code?: string
+          company_id?: string | null
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          element_type_id?: string | null
+          id?: string
+          is_active?: boolean
+          is_pensionable?: boolean
+          is_taxable?: boolean
+          name?: string
+          proration_method_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pay_elements_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pay_elements_element_type_id_fkey"
+            columns: ["element_type_id"]
+            isOneToOne: false
+            referencedRelation: "lookup_values"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pay_elements_proration_method_id_fkey"
+            columns: ["proration_method_id"]
+            isOneToOne: false
+            referencedRelation: "lookup_values"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pii_access_alerts: {
         Row: {
           access_count: number
@@ -1892,6 +1962,73 @@ export type Database = {
           },
         ]
       }
+      position_compensation: {
+        Row: {
+          amount: number
+          created_at: string
+          currency: string
+          effective_date: string
+          end_date: string | null
+          frequency_id: string | null
+          id: string
+          is_active: boolean
+          notes: string | null
+          pay_element_id: string
+          position_id: string
+          updated_at: string
+        }
+        Insert: {
+          amount?: number
+          created_at?: string
+          currency?: string
+          effective_date?: string
+          end_date?: string | null
+          frequency_id?: string | null
+          id?: string
+          is_active?: boolean
+          notes?: string | null
+          pay_element_id: string
+          position_id: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          currency?: string
+          effective_date?: string
+          end_date?: string | null
+          frequency_id?: string | null
+          id?: string
+          is_active?: boolean
+          notes?: string | null
+          pay_element_id?: string
+          position_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "position_compensation_frequency_id_fkey"
+            columns: ["frequency_id"]
+            isOneToOne: false
+            referencedRelation: "lookup_values"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "position_compensation_pay_element_id_fkey"
+            columns: ["pay_element_id"]
+            isOneToOne: false
+            referencedRelation: "pay_elements"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "position_compensation_position_id_fkey"
+            columns: ["position_id"]
+            isOneToOne: false
+            referencedRelation: "positions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       positions: {
         Row: {
           authorized_headcount: number
@@ -1904,6 +2041,7 @@ export type Database = {
           id: string
           is_active: boolean
           reports_to_position_id: string | null
+          salary_grade_id: string | null
           start_date: string
           title: string
           updated_at: string
@@ -1919,6 +2057,7 @@ export type Database = {
           id?: string
           is_active?: boolean
           reports_to_position_id?: string | null
+          salary_grade_id?: string | null
           start_date?: string
           title: string
           updated_at?: string
@@ -1934,6 +2073,7 @@ export type Database = {
           id?: string
           is_active?: boolean
           reports_to_position_id?: string | null
+          salary_grade_id?: string | null
           start_date?: string
           title?: string
           updated_at?: string
@@ -1951,6 +2091,13 @@ export type Database = {
             columns: ["reports_to_position_id"]
             isOneToOne: false
             referencedRelation: "positions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "positions_salary_grade_id_fkey"
+            columns: ["salary_grade_id"]
+            isOneToOne: false
+            referencedRelation: "salary_grades"
             referencedColumns: ["id"]
           },
         ]
@@ -2063,6 +2210,59 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: []
+      }
+      salary_grades: {
+        Row: {
+          code: string
+          company_id: string | null
+          created_at: string
+          currency: string
+          description: string | null
+          id: string
+          is_active: boolean
+          max_salary: number | null
+          mid_salary: number | null
+          min_salary: number | null
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          code: string
+          company_id?: string | null
+          created_at?: string
+          currency?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          max_salary?: number | null
+          mid_salary?: number | null
+          min_salary?: number | null
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          code?: string
+          company_id?: string | null
+          created_at?: string
+          currency?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          max_salary?: number | null
+          mid_salary?: number | null
+          min_salary?: number | null
+          name?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "salary_grades_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       saved_scenarios: {
         Row: {
@@ -3505,6 +3705,9 @@ export type Database = {
         | "transfer_reason"
         | "acting_reason"
         | "hire_type"
+        | "pay_element_type"
+        | "proration_method"
+        | "payment_frequency"
       workflow_action:
         | "approve"
         | "reject"
@@ -3684,6 +3887,9 @@ export const Constants = {
         "transfer_reason",
         "acting_reason",
         "hire_type",
+        "pay_element_type",
+        "proration_method",
+        "payment_frequency",
       ],
       workflow_action: [
         "approve",
