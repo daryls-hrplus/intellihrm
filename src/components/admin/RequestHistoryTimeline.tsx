@@ -70,6 +70,8 @@ export function RequestHistoryTimeline({ requestId }: RequestHistoryTimelineProp
         return <CheckCircle className="h-4 w-4 text-success" />;
       case "rejected":
         return <XCircle className="h-4 w-4 text-destructive" />;
+      case "revoked":
+        return <XCircle className="h-4 w-4 text-orange-500" />;
       case "pending":
         return <Clock className="h-4 w-4 text-warning" />;
       default:
@@ -80,6 +82,9 @@ export function RequestHistoryTimeline({ requestId }: RequestHistoryTimelineProp
   const getStatusLabel = (oldStatus: string | null, newStatus: string) => {
     if (!oldStatus) {
       return "Request created";
+    }
+    if (newStatus === "revoked") {
+      return "Access revoked";
     }
     return `Status changed from ${oldStatus} to ${newStatus}`;
   };
