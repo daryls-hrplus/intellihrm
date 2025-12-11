@@ -23,7 +23,9 @@ import {
   Check,
   Upload,
   Image,
+  Building,
 } from "lucide-react";
+import { CompanyBranchLocations } from "@/components/admin/CompanyBranchLocations";
 
 interface Company {
   id: string;
@@ -121,6 +123,7 @@ export default function AdminCompaniesPage() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSaving, setIsSaving] = useState(false);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
+  const [branchDialogCompany, setBranchDialogCompany] = useState<Company | null>(null);
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const [isUploadingLogo, setIsUploadingLogo] = useState(false);
@@ -629,10 +632,27 @@ export default function AdminCompaniesPage() {
                             Edit
                           </button>
                           <button
+                            onClick={() => {
+                              setBranchDialogCompany(company);
+                              setOpenDropdown(null);
+                            }}
+                            className="flex w-full items-center gap-2 px-3 py-2 text-sm text-card-foreground hover:bg-muted"
+                          >
+                            <Building className="h-4 w-4" />
+                            Branch Locations
+                          </button>
+                          <button
                             onClick={() => toggleActive(company)}
                             className="flex w-full items-center gap-2 px-3 py-2 text-sm text-card-foreground hover:bg-muted"
                           >
                             {company.is_active ? "Deactivate" : "Activate"}
+                          </button>
+                          <button
+                            onClick={() => handleDelete(company)}
+                            className="flex w-full items-center gap-2 px-3 py-2 text-sm text-destructive hover:bg-muted"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                            Delete
                           </button>
                           <button
                             onClick={() => handleDelete(company)}
@@ -990,6 +1010,16 @@ export default function AdminCompaniesPage() {
             </form>
           </div>
         </div>
+      )}
+
+      {/* Branch Locations Dialog */}
+      {branchDialogCompany && (
+        <CompanyBranchLocations
+          companyId={branchDialogCompany.id}
+          companyName={branchDialogCompany.name}
+          isOpen={!!branchDialogCompany}
+          onClose={() => setBranchDialogCompany(null)}
+        />
       )}
     </AppLayout>
   );
