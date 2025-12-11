@@ -1656,12 +1656,14 @@ export type Database = {
           description: string | null
           display_order: number
           element_type_id: string | null
+          end_date: string | null
           id: string
           is_active: boolean
           is_pensionable: boolean
           is_taxable: boolean
           name: string
           proration_method_id: string | null
+          start_date: string
           updated_at: string
         }
         Insert: {
@@ -1671,12 +1673,14 @@ export type Database = {
           description?: string | null
           display_order?: number
           element_type_id?: string | null
+          end_date?: string | null
           id?: string
           is_active?: boolean
           is_pensionable?: boolean
           is_taxable?: boolean
           name: string
           proration_method_id?: string | null
+          start_date?: string
           updated_at?: string
         }
         Update: {
@@ -1686,12 +1690,14 @@ export type Database = {
           description?: string | null
           display_order?: number
           element_type_id?: string | null
+          end_date?: string | null
           id?: string
           is_active?: boolean
           is_pensionable?: boolean
           is_taxable?: boolean
           name?: string
           proration_method_id?: string | null
+          start_date?: string
           updated_at?: string
         }
         Relationships: [
@@ -2218,12 +2224,14 @@ export type Database = {
           created_at: string
           currency: string
           description: string | null
+          end_date: string | null
           id: string
           is_active: boolean
           max_salary: number | null
           mid_salary: number | null
           min_salary: number | null
           name: string
+          start_date: string
           updated_at: string
         }
         Insert: {
@@ -2232,12 +2240,14 @@ export type Database = {
           created_at?: string
           currency?: string
           description?: string | null
+          end_date?: string | null
           id?: string
           is_active?: boolean
           max_salary?: number | null
           mid_salary?: number | null
           min_salary?: number | null
           name: string
+          start_date?: string
           updated_at?: string
         }
         Update: {
@@ -2246,12 +2256,14 @@ export type Database = {
           created_at?: string
           currency?: string
           description?: string | null
+          end_date?: string | null
           id?: string
           is_active?: boolean
           max_salary?: number | null
           mid_salary?: number | null
           min_salary?: number | null
           name?: string
+          start_date?: string
           updated_at?: string
         }
         Relationships: [

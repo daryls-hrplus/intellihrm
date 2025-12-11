@@ -66,6 +66,8 @@ export default function SalaryGradesPage() {
   const [formMaxSalary, setFormMaxSalary] = useState("");
   const [formCurrency, setFormCurrency] = useState("USD");
   const [formIsActive, setFormIsActive] = useState(true);
+  const [formStartDate, setFormStartDate] = useState(new Date().toISOString().split("T")[0]);
+  const [formEndDate, setFormEndDate] = useState("");
 
   useEffect(() => {
     loadCompanies();
@@ -105,6 +107,8 @@ export default function SalaryGradesPage() {
     setFormMaxSalary("");
     setFormCurrency("USD");
     setFormIsActive(true);
+    setFormStartDate(new Date().toISOString().split("T")[0]);
+    setFormEndDate("");
     setDialogOpen(true);
   };
 
@@ -118,6 +122,8 @@ export default function SalaryGradesPage() {
     setFormMaxSalary(grade.max_salary?.toString() || "");
     setFormCurrency(grade.currency);
     setFormIsActive(grade.is_active);
+    setFormStartDate(grade.start_date || new Date().toISOString().split("T")[0]);
+    setFormEndDate(grade.end_date || "");
     setDialogOpen(true);
   };
 
@@ -135,6 +141,8 @@ export default function SalaryGradesPage() {
       currency: formCurrency,
       company_id: selectedCompanyId || null,
       is_active: formIsActive,
+      start_date: formStartDate,
+      end_date: formEndDate || null,
     };
 
     let success: boolean;
@@ -231,6 +239,8 @@ export default function SalaryGradesPage() {
                     <TableHead className="text-right">Min</TableHead>
                     <TableHead className="text-right">Mid</TableHead>
                     <TableHead className="text-right">Max</TableHead>
+                    <TableHead>Start Date</TableHead>
+                    <TableHead>End Date</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
@@ -251,6 +261,8 @@ export default function SalaryGradesPage() {
                       <TableCell className="text-right">
                         {formatCurrency(grade.max_salary, grade.currency)}
                       </TableCell>
+                      <TableCell>{grade.start_date}</TableCell>
+                      <TableCell>{grade.end_date || "-"}</TableCell>
                       <TableCell>
                         <Badge variant={grade.is_active ? "default" : "secondary"}>
                           {grade.is_active ? "Active" : "Inactive"}
@@ -370,6 +382,27 @@ export default function SalaryGradesPage() {
                     value={formMaxSalary}
                     onChange={(e) => setFormMaxSalary(e.target.value)}
                     placeholder="0"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="startDate">Start Date *</Label>
+                  <Input
+                    id="startDate"
+                    type="date"
+                    value={formStartDate}
+                    onChange={(e) => setFormStartDate(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="endDate">End Date</Label>
+                  <Input
+                    id="endDate"
+                    type="date"
+                    value={formEndDate}
+                    onChange={(e) => setFormEndDate(e.target.value)}
                   />
                 </div>
               </div>

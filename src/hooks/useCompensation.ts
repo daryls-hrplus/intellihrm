@@ -14,6 +14,8 @@ export interface PayElement {
   is_active: boolean;
   company_id: string | null;
   display_order: number;
+  start_date: string;
+  end_date: string | null;
   created_at: string;
   updated_at: string;
   element_type?: { code: string; name: string } | null;
@@ -31,6 +33,8 @@ export interface SalaryGrade {
   max_salary: number | null;
   currency: string;
   is_active: boolean;
+  start_date: string;
+  end_date: string | null;
   created_at: string;
   updated_at: string;
 }

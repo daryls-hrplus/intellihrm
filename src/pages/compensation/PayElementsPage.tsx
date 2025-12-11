@@ -70,6 +70,8 @@ export default function PayElementsPage() {
   const [formIsPensionable, setFormIsPensionable] = useState(false);
   const [formIsActive, setFormIsActive] = useState(true);
   const [formDisplayOrder, setFormDisplayOrder] = useState("0");
+  const [formStartDate, setFormStartDate] = useState(new Date().toISOString().split("T")[0]);
+  const [formEndDate, setFormEndDate] = useState("");
 
   useEffect(() => {
     loadInitialData();
@@ -117,6 +119,8 @@ export default function PayElementsPage() {
     setFormIsPensionable(false);
     setFormIsActive(true);
     setFormDisplayOrder("0");
+    setFormStartDate(new Date().toISOString().split("T")[0]);
+    setFormEndDate("");
     setDialogOpen(true);
   };
 
@@ -131,6 +135,8 @@ export default function PayElementsPage() {
     setFormIsPensionable(element.is_pensionable);
     setFormIsActive(element.is_active);
     setFormDisplayOrder(element.display_order.toString());
+    setFormStartDate(element.start_date || new Date().toISOString().split("T")[0]);
+    setFormEndDate(element.end_date || "");
     setDialogOpen(true);
   };
 
@@ -151,6 +157,8 @@ export default function PayElementsPage() {
       is_active: formIsActive,
       company_id: selectedCompanyId || null,
       display_order: parseInt(formDisplayOrder) || 0,
+      start_date: formStartDate,
+      end_date: formEndDate || null,
     };
 
     let success: boolean;
@@ -236,8 +244,8 @@ export default function PayElementsPage() {
                     <TableHead>Name</TableHead>
                     <TableHead>Type</TableHead>
                     <TableHead>Proration</TableHead>
-                    <TableHead>Taxable</TableHead>
-                    <TableHead>Pensionable</TableHead>
+                    <TableHead>Start Date</TableHead>
+                    <TableHead>End Date</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
@@ -255,16 +263,8 @@ export default function PayElementsPage() {
                       <TableCell>
                         {element.proration_method?.name || "None"}
                       </TableCell>
-                      <TableCell>
-                        <Badge variant={element.is_taxable ? "default" : "outline"}>
-                          {element.is_taxable ? "Yes" : "No"}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant={element.is_pensionable ? "default" : "outline"}>
-                          {element.is_pensionable ? "Yes" : "No"}
-                        </Badge>
-                      </TableCell>
+                      <TableCell>{element.start_date}</TableCell>
+                      <TableCell>{element.end_date || "-"}</TableCell>
                       <TableCell>
                         <Badge variant={element.is_active ? "default" : "secondary"}>
                           {element.is_active ? "Active" : "Inactive"}
@@ -369,6 +369,27 @@ export default function PayElementsPage() {
                       ))}
                     </SelectContent>
                   </Select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="startDate">Start Date *</Label>
+                  <Input
+                    id="startDate"
+                    type="date"
+                    value={formStartDate}
+                    onChange={(e) => setFormStartDate(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="endDate">End Date</Label>
+                  <Input
+                    id="endDate"
+                    type="date"
+                    value={formEndDate}
+                    onChange={(e) => setFormEndDate(e.target.value)}
+                  />
                 </div>
               </div>
 
