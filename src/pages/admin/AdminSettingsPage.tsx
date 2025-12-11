@@ -27,10 +27,12 @@ export default function AdminSettingsPage() {
   const [isTestingReport, setIsTestingReport] = useState(false);
   const [isTestingHeadcount, setIsTestingHeadcount] = useState(false);
   const [isTestingSla, setIsTestingSla] = useState(false);
+  const [isTestingSlaReport, setIsTestingSlaReport] = useState(false);
   const [testResult, setTestResult] = useState<{ success: boolean; message: string } | null>(null);
   const [reportResult, setReportResult] = useState<{ success: boolean; message: string } | null>(null);
   const [headcountResult, setHeadcountResult] = useState<{ success: boolean; message: string } | null>(null);
   const [slaResult, setSlaResult] = useState<{ success: boolean; message: string } | null>(null);
+  const [slaReportResult, setSlaReportResult] = useState<{ success: boolean; message: string } | null>(null);
   const [showSensitive, setShowSensitive] = useState<Record<string, boolean>>({});
   const [editedValues, setEditedValues] = useState<Record<string, string>>({});
 
@@ -247,6 +249,42 @@ export default function AdminSettingsPage() {
       toast.error("Failed to check SLA breach");
     } finally {
       setIsTestingSla(false);
+    }
+  };
+
+  const handleSendSlaWeeklyReport = async () => {
+    setIsTestingSlaReport(true);
+    setSlaReportResult(null);
+
+    try {
+      const { data, error } = await supabase.functions.invoke("send-sla-weekly-report", {
+        body: {},
+      });
+
+      if (error) throw error;
+
+      if (data?.success) {
+        setSlaReportResult({
+          success: true,
+          message: data.message || "Weekly SLA report sent successfully!",
+        });
+        toast.success("Weekly SLA report sent successfully");
+      } else {
+        setSlaReportResult({
+          success: false,
+          message: data?.message || "Report not sent - check configuration.",
+        });
+        toast.warning(data?.message || "Report could not be sent");
+      }
+    } catch (error: any) {
+      console.error("Error sending SLA weekly report:", error);
+      setSlaReportResult({
+        success: false,
+        message: error.message || "Failed to send SLA report",
+      });
+      toast.error("Failed to send SLA weekly report");
+    } finally {
+      setIsTestingSlaReport(false);
     }
   };
 
@@ -590,6 +628,56 @@ export default function AdminSettingsPage() {
             <p className="text-xs text-muted-foreground">
               Checks all open tickets with priority levels. Sends warning emails when tickets reach 80% of their response or resolution SLA time.
               Requires Resend API key to be configured above.
+            </p>
+          </CardContent>
+        </Card>
+
+        {/* Weekly SLA Performance Report */}
+        <Card className="animate-slide-up" style={{ animationDelay: "115ms" }}>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <BarChart3 className="h-5 w-5 text-primary" />
+              Weekly SLA Performance Report
+            </CardTitle>
+            <CardDescription>
+              Send automated weekly SLA performance reports to all managers with compliance metrics and breach analysis
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-center gap-4">
+              <Button
+                onClick={handleSendSlaWeeklyReport}
+                disabled={isTestingSlaReport}
+                variant="outline"
+              >
+                {isTestingSlaReport ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                    Generating...
+                  </>
+                ) : (
+                  <>
+                    <BarChart3 className="h-4 w-4 mr-2" />
+                    Send SLA Report Now
+                  </>
+                )}
+              </Button>
+              
+              {slaReportResult && (
+                <div className={`flex items-center gap-2 text-sm ${slaReportResult.success ? "text-success" : "text-warning"}`}>
+                  {slaReportResult.success ? (
+                    <CheckCircle className="h-4 w-4" />
+                  ) : (
+                    <XCircle className="h-4 w-4" />
+                  )}
+                  {slaReportResult.message}
+                </div>
+              )}
+            </div>
+            
+            <p className="text-xs text-muted-foreground">
+              The report includes: SLA compliance rates (response & resolution), breach analysis by priority and category, 
+              average response/resolution times, and improvement recommendations. Set up a cron job for automated weekly delivery.
             </p>
           </CardContent>
         </Card>
