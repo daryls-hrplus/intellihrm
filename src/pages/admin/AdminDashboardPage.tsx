@@ -13,6 +13,7 @@ import {
   ChevronRight,
   Loader2,
   FileText,
+  Eye,
 } from "lucide-react";
 
 const adminModules = [
@@ -50,6 +51,13 @@ const adminModules = [
     href: "/admin/audit-logs",
     icon: FileText,
     color: "bg-secondary/10 text-secondary-foreground",
+  },
+  {
+    title: "PII Access Report",
+    description: "Monitor GDPR compliance and PII access",
+    href: "/admin/pii-access",
+    icon: Eye,
+    color: "bg-amber-500/10 text-amber-600",
   },
   {
     title: "Territories",
