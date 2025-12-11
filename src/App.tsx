@@ -11,6 +11,7 @@ import AuthPage from "./pages/AuthPage";
 import UnauthorizedPage from "./pages/UnauthorizedPage";
 import EmployeesPage from "./pages/workforce/EmployeesPage";
 import AdminUsersPage from "./pages/admin/AdminUsersPage";
+import ProfilePage from "./pages/profile/ProfilePage";
 import LeavePage from "./pages/leave/LeavePage";
 import RecruitmentPage from "./pages/recruitment/RecruitmentPage";
 
@@ -43,6 +44,14 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <Index />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/profile"
+              element={
+                <ProtectedRoute>
+                  <ProfilePage />
                 </ProtectedRoute>
               }
             />
