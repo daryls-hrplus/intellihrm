@@ -88,8 +88,9 @@ export default function AdminAuditLogsPage() {
   const [page, setPage] = useState(0);
   const [totalCount, setTotalCount] = useState(0);
   const [entityTypes, setEntityTypes] = useState<string[]>([]);
+  const [isExporting, setIsExporting] = useState(false);
   const { toast } = useToast();
-  const { logView } = useAuditLog();
+  const { logView, logExport } = useAuditLog();
   const hasLoggedView = useRef(false);
 
   const fetchLogs = async () => {
@@ -193,6 +194,130 @@ export default function AdminAuditLogsPage() {
       .join(' ');
   };
 
+  const exportToCSV = async () => {
+    setIsExporting(true);
+    try {
+      // Fetch all logs with current filters (up to 10000 records)
+      let query = supabase
+        .from('audit_logs')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(10000);
+
+      if (actionFilter !== 'all') {
+        query = query.eq('action', actionFilter);
+      }
+
+      if (entityFilter !== 'all') {
+        query = query.eq('entity_type', entityFilter);
+      }
+
+      if (searchQuery) {
+        query = query.or(`entity_name.ilike.%${searchQuery}%,entity_type.ilike.%${searchQuery}%,entity_id.ilike.%${searchQuery}%`);
+      }
+
+      const { data, error } = await query;
+
+      if (error) throw error;
+
+      if (!data || data.length === 0) {
+        toast({
+          title: "No data to export",
+          description: "There are no audit logs matching your current filters.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Get user profiles for the export
+      const userIds = [...new Set(data.map(log => log.user_id).filter(Boolean))] as string[];
+      let profiles: Record<string, { email: string; full_name: string | null }> = {};
+      
+      if (userIds.length > 0) {
+        const { data: profileData } = await supabase
+          .from('profiles')
+          .select('id, email, full_name')
+          .in('id', userIds);
+
+        if (profileData) {
+          profiles = profileData.reduce((acc, p) => {
+            acc[p.id] = { email: p.email, full_name: p.full_name };
+            return acc;
+          }, {} as Record<string, { email: string; full_name: string | null }>);
+        }
+      }
+
+      // Build CSV content
+      const headers = [
+        'Timestamp',
+        'User Name',
+        'User Email',
+        'Action',
+        'Entity Type',
+        'Entity ID',
+        'Entity Name',
+        'Old Values',
+        'New Values',
+        'Metadata'
+      ];
+
+      const rows = data.map(log => {
+        const userName = log.user_id ? profiles[log.user_id]?.full_name || '' : '';
+        const userEmail = log.user_id ? profiles[log.user_id]?.email || '' : '';
+        
+        return [
+          format(new Date(log.created_at), 'yyyy-MM-dd HH:mm:ss'),
+          `"${userName.replace(/"/g, '""')}"`,
+          `"${userEmail.replace(/"/g, '""')}"`,
+          log.action,
+          log.entity_type,
+          log.entity_id || '',
+          `"${(log.entity_name || '').replace(/"/g, '""')}"`,
+          `"${JSON.stringify(log.old_values || {}).replace(/"/g, '""')}"`,
+          `"${JSON.stringify(log.new_values || {}).replace(/"/g, '""')}"`,
+          `"${JSON.stringify(log.metadata || {}).replace(/"/g, '""')}"`
+        ].join(',');
+      });
+
+      const csvContent = [headers.join(','), ...rows].join('\n');
+
+      // Create and download file
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      const url = URL.createObjectURL(blob);
+      link.setAttribute('href', url);
+      link.setAttribute('download', `audit_logs_${format(new Date(), 'yyyy-MM-dd_HH-mm-ss')}.csv`);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      // Log the export action
+      await logExport('audit_logs', {
+        record_count: data.length,
+        filters: {
+          action: actionFilter,
+          entity: entityFilter,
+          search: searchQuery,
+        },
+      });
+
+      toast({
+        title: "Export complete",
+        description: `Successfully exported ${data.length} audit log records.`,
+      });
+    } catch (error) {
+      console.error('Error exporting audit logs:', error);
+      toast({
+        title: "Export failed",
+        description: "Failed to export audit logs. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
   const totalPages = Math.ceil(totalCount / PAGE_SIZE);
 
   return (
@@ -212,10 +337,20 @@ export default function AdminAuditLogsPage() {
               Track all user actions across the system
             </p>
           </div>
-          <Button variant="outline" onClick={fetchLogs} disabled={loading}>
-            <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
-            Refresh
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button 
+              variant="outline" 
+              onClick={exportToCSV} 
+              disabled={isExporting || loading}
+            >
+              <Download className={`h-4 w-4 mr-2 ${isExporting ? 'animate-pulse' : ''}`} />
+              {isExporting ? 'Exporting...' : 'Export CSV'}
+            </Button>
+            <Button variant="outline" onClick={fetchLogs} disabled={loading}>
+              <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+              Refresh
+            </Button>
+          </div>
         </div>
 
         {/* Stats */}
