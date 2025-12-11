@@ -1,6 +1,7 @@
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
+import { useAuditLog } from "@/hooks/useAuditLog";
 import {
   Search,
   Filter,
@@ -73,6 +74,16 @@ const employees = [
 
 export default function EmployeesPage() {
   const [searchQuery, setSearchQuery] = useState("");
+  const { logView } = useAuditLog();
+  const hasLoggedView = useRef(false);
+
+  // Log view on mount
+  useEffect(() => {
+    if (!hasLoggedView.current) {
+      hasLoggedView.current = true;
+      logView('employees_list', undefined, 'Employee Directory', { employee_count: employees.length });
+    }
+  }, []);
 
   const filteredEmployees = employees.filter(
     (emp) =>

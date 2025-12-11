@@ -1,8 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useAuditLog } from "@/hooks/useAuditLog";
 import { cn } from "@/lib/utils";
 import { z } from "zod";
 import {
@@ -118,11 +119,21 @@ export default function AdminCompaniesPage() {
   const [isSaving, setIsSaving] = useState(false);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const { toast } = useToast();
+  const { logView } = useAuditLog();
+  const hasLoggedView = useRef(false);
 
   useEffect(() => {
     fetchCompanies();
     fetchGroupsAndDivisions();
   }, []);
+
+  // Log view when companies are loaded
+  useEffect(() => {
+    if (companies.length > 0 && !hasLoggedView.current) {
+      hasLoggedView.current = true;
+      logView('companies_list', undefined, 'Companies', { company_count: companies.length });
+    }
+  }, [companies]);
 
   const fetchGroupsAndDivisions = async () => {
     try {

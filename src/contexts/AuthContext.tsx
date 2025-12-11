@@ -126,10 +126,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({
+    const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
+    
+    // Log login event if successful
+    if (!error && data.user) {
+      try {
+        await supabase.from('audit_logs').insert([{
+          user_id: data.user.id,
+          action: 'LOGIN' as const,
+          entity_type: 'session',
+          metadata: { source: 'frontend', user_agent: navigator.userAgent },
+        }]);
+      } catch (e) {
+        console.error('Failed to log login event:', e);
+      }
+    }
+    
     return { error: error as Error | null };
   };
 
@@ -150,6 +165,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signOut = async () => {
+    // Log logout event before signing out
+    if (user) {
+      try {
+        await supabase.from('audit_logs').insert([{
+          user_id: user.id,
+          action: 'LOGOUT' as const,
+          entity_type: 'session',
+          metadata: { source: 'frontend', user_agent: navigator.userAgent },
+        }]);
+      } catch (e) {
+        console.error('Failed to log logout event:', e);
+      }
+    }
+    
     await supabase.auth.signOut();
     setUser(null);
     setSession(null);
