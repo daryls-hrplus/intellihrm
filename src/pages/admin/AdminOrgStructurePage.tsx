@@ -55,12 +55,14 @@ import {
   ChevronRight,
   Briefcase,
   Network,
+  BarChart3,
 } from "lucide-react";
 import { PositionsManagement } from "@/components/admin/PositionsManagement";
 import { OrgChartVisualization } from "@/components/admin/OrgChartVisualization";
 import { GovernanceManagement } from "@/components/admin/GovernanceManagement";
 import { VacancyDashboard } from "@/components/admin/VacancyDashboard";
 import { HeadcountRequestWorkflow } from "@/components/admin/HeadcountRequestWorkflow";
+import { HeadcountAnalytics } from "@/components/admin/HeadcountAnalytics";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { NavLink } from "react-router-dom";
@@ -446,6 +448,10 @@ export default function AdminOrgStructurePage() {
               <TabsTrigger value="requests" className="flex items-center gap-2">
                 Requests
               </TabsTrigger>
+              <TabsTrigger value="analytics" className="flex items-center gap-2">
+                <BarChart3 className="h-4 w-4" />
+                Analytics
+              </TabsTrigger>
             </TabsList>
 
             <TabsContent value="structure">
@@ -708,6 +714,10 @@ export default function AdminOrgStructurePage() {
 
             <TabsContent value="requests">
               <HeadcountRequestWorkflow companyId={selectedCompanyId} />
+            </TabsContent>
+
+            <TabsContent value="analytics">
+              <HeadcountAnalytics companyId={selectedCompanyId} />
             </TabsContent>
           </Tabs>
         )}
