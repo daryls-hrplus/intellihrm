@@ -30,6 +30,7 @@ import EmployeesPage from "./pages/workforce/EmployeesPage";
 import PositionsPage from "./pages/workforce/PositionsPage";
 import OrgStructurePage from "./pages/workforce/OrgStructurePage";
 import DepartmentsPage from "./pages/workforce/DepartmentsPage";
+import OrgChangesPage from "./pages/workforce/OrgChangesPage";
 
 // Performance pages
 import PerformanceDashboardPage from "./pages/performance/PerformanceDashboardPage";
@@ -231,6 +232,14 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <DepartmentsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/workforce/org-changes"
+              element={
+                <ProtectedRoute>
+                  <OrgChangesPage />
                 </ProtectedRoute>
               }
             />
