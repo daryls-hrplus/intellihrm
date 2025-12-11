@@ -8,6 +8,8 @@ type AppRole = "admin" | "hr_manager" | "employee";
 // Map routes to module codes for permission checking
 const ROUTE_MODULE_MAP: Record<string, string> = {
   "/": "dashboard",
+  "/ess": "ess",
+  "/mss": "mss",
   "/workforce": "workforce",
   "/leave": "leave",
   "/compensation": "compensation",

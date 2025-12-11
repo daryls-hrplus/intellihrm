@@ -62,12 +62,14 @@ export function useMenuPermissions() {
   }, [user, roles]);
 
   const hasMenuAccess = (moduleCode: string): boolean => {
-    // Help center is always accessible to all authenticated users
-    if (moduleCode === "help") return true;
+    // Help center and ESS are always accessible to all authenticated users
+    if (moduleCode === "help" || moduleCode === "ess") return true;
     // If permissions are still loading, default to false for security
     if (isLoading) return false;
     // Admins always have access to all modules
     if (roles.includes("admin")) return true;
+    // HR managers and admins have access to MSS
+    if (moduleCode === "mss" && (roles.includes("hr_manager") || roles.includes("admin"))) return true;
     // If no specific permissions set, deny access (fail-safe)
     if (menuPermissions.length === 0) return false;
     return menuPermissions.includes(moduleCode);
