@@ -33,6 +33,7 @@ import AdminHelpdeskPage from "./pages/admin/AdminHelpdeskPage";
 import AdminPolicyDocumentsPage from "./pages/admin/AdminPolicyDocumentsPage";
 import AdminLetterTemplatesPage from "./pages/admin/AdminLetterTemplatesPage";
 import AdminLookupValuesPage from "./pages/admin/AdminLookupValuesPage";
+import AdminLmsManagementPage from "./pages/admin/AdminLmsManagementPage";
 // Workforce pages
 import WorkforceDashboardPage from "./pages/workforce/WorkforceDashboardPage";
 import EmployeesPage from "./pages/workforce/EmployeesPage";
@@ -336,6 +337,14 @@ const App = () => (
               element={
                 <ProtectedRoute requiredRoles={["admin"]}>
                   <AdminLookupValuesPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/lms"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
+                  <AdminLmsManagementPage />
                 </ProtectedRoute>
               }
             />

@@ -13,6 +13,7 @@ import {
   Clock,
   CheckCircle,
   Loader2,
+  Settings,
 } from "lucide-react";
 
 const trainingModules = [
@@ -50,6 +51,14 @@ const trainingModules = [
     href: "/training/calendar",
     icon: Calendar,
     color: "bg-destructive/10 text-destructive",
+  },
+  {
+    title: "LMS Management",
+    description: "Create and manage courses (Admin)",
+    href: "/admin/lms",
+    icon: Settings,
+    color: "bg-muted text-muted-foreground",
+    adminOnly: true,
   },
 ];
 
