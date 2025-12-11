@@ -45,10 +45,13 @@ import {
   UserPlus,
   UserMinus,
   X,
+  FileText,
+  FileSpreadsheet,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { format, eachMonthOfInterval, parseISO, startOfMonth, endOfMonth, subMonths, subYears, isWithinInterval } from "date-fns";
+import jsPDF from "jspdf";
 import {
   LineChart,
   Line,
@@ -367,6 +370,189 @@ export function OrgChangesReporting({ companyId }: OrgChangesReportingProps) {
       employeeDepartures,
     };
   }, [drillDown, filteredPositions, filteredEmployeePositions, employees, departments, positions]);
+
+  // Export drill-down details as CSV
+  const exportDrillDownCSV = () => {
+    if (!drillDown || !drillDownDetails) return;
+
+    const lines: string[] = [
+      `Organizational Changes Report - ${drillDown.month}`,
+      "",
+    ];
+
+    // Active Positions
+    lines.push("ACTIVE POSITIONS");
+    lines.push("Position Title,Department,Start Date,End Date");
+    drillDownDetails.activePositions.forEach(pos => {
+      lines.push(`"${pos.title}","${pos.departmentName}","${format(parseISO(pos.start_date), "yyyy-MM-dd")}","${pos.end_date ? format(parseISO(pos.end_date), "yyyy-MM-dd") : "Active"}"`);
+    });
+    lines.push("");
+
+    // Positions Added
+    lines.push("POSITIONS ADDED");
+    lines.push("Position Title,Department,Start Date");
+    drillDownDetails.positionsAdded.forEach(pos => {
+      lines.push(`"${pos.title}","${pos.departmentName}","${format(parseISO(pos.start_date), "yyyy-MM-dd")}"`);
+    });
+    lines.push("");
+
+    // Positions Removed
+    lines.push("POSITIONS REMOVED");
+    lines.push("Position Title,Department,End Date");
+    drillDownDetails.positionsRemoved.forEach(pos => {
+      lines.push(`"${pos.title}","${pos.departmentName}","${pos.end_date ? format(parseISO(pos.end_date), "yyyy-MM-dd") : "-"}"`);
+    });
+    lines.push("");
+
+    // Employee Joins
+    lines.push("EMPLOYEE JOINS");
+    lines.push("Employee Name,Position,Join Date");
+    drillDownDetails.employeeJoins.forEach(emp => {
+      lines.push(`"${emp.employeeName}","${emp.positionTitle}","${format(parseISO(emp.startDate), "yyyy-MM-dd")}"`);
+    });
+    lines.push("");
+
+    // Employee Departures
+    lines.push("EMPLOYEE DEPARTURES");
+    lines.push("Employee Name,Position,Departure Date");
+    drillDownDetails.employeeDepartures.forEach(emp => {
+      lines.push(`"${emp.employeeName}","${emp.positionTitle}","${emp.endDate ? format(parseISO(emp.endDate), "yyyy-MM-dd") : "-"}"`);
+    });
+
+    const csvContent = lines.join("\n");
+    const blob = new Blob([csvContent], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `org-details-${drillDown.month.replace(/\s+/g, "-").toLowerCase()}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast.success("CSV exported successfully");
+  };
+
+  // Export drill-down details as PDF
+  const exportDrillDownPDF = () => {
+    if (!drillDown || !drillDownDetails) return;
+
+    const pdf = new jsPDF();
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    let y = 20;
+
+    // Title
+    pdf.setFontSize(18);
+    pdf.setFont("helvetica", "bold");
+    pdf.text(`Organizational Changes - ${drillDown.month}`, pageWidth / 2, y, { align: "center" });
+    y += 15;
+
+    const addSection = (title: string, headers: string[], data: string[][]) => {
+      // Check if we need a new page
+      if (y > 250) {
+        pdf.addPage();
+        y = 20;
+      }
+
+      pdf.setFontSize(12);
+      pdf.setFont("helvetica", "bold");
+      pdf.text(title, 14, y);
+      y += 8;
+
+      if (data.length === 0) {
+        pdf.setFontSize(10);
+        pdf.setFont("helvetica", "italic");
+        pdf.text("No data for this period", 14, y);
+        y += 10;
+        return;
+      }
+
+      // Table headers
+      pdf.setFontSize(9);
+      pdf.setFont("helvetica", "bold");
+      const colWidth = (pageWidth - 28) / headers.length;
+      headers.forEach((header, i) => {
+        pdf.text(header, 14 + i * colWidth, y);
+      });
+      y += 6;
+
+      // Table data
+      pdf.setFont("helvetica", "normal");
+      data.forEach(row => {
+        if (y > 280) {
+          pdf.addPage();
+          y = 20;
+        }
+        row.forEach((cell, i) => {
+          const text = cell.length > 25 ? cell.substring(0, 22) + "..." : cell;
+          pdf.text(text, 14 + i * colWidth, y);
+        });
+        y += 5;
+      });
+      y += 10;
+    };
+
+    // Active Positions
+    addSection(
+      `Active Positions (${drillDownDetails.activePositions.length})`,
+      ["Position", "Department", "Start", "End"],
+      drillDownDetails.activePositions.map(pos => [
+        pos.title,
+        pos.departmentName,
+        format(parseISO(pos.start_date), "MMM d, yy"),
+        pos.end_date ? format(parseISO(pos.end_date), "MMM d, yy") : "Active"
+      ])
+    );
+
+    // Positions Added
+    addSection(
+      `Positions Added (${drillDownDetails.positionsAdded.length})`,
+      ["Position", "Department", "Start Date"],
+      drillDownDetails.positionsAdded.map(pos => [
+        pos.title,
+        pos.departmentName,
+        format(parseISO(pos.start_date), "MMM d, yy")
+      ])
+    );
+
+    // Positions Removed
+    addSection(
+      `Positions Removed (${drillDownDetails.positionsRemoved.length})`,
+      ["Position", "Department", "End Date"],
+      drillDownDetails.positionsRemoved.map(pos => [
+        pos.title,
+        pos.departmentName,
+        pos.end_date ? format(parseISO(pos.end_date), "MMM d, yy") : "-"
+      ])
+    );
+
+    // Employee Joins
+    addSection(
+      `Employee Joins (${drillDownDetails.employeeJoins.length})`,
+      ["Employee", "Position", "Join Date"],
+      drillDownDetails.employeeJoins.map(emp => [
+        emp.employeeName,
+        emp.positionTitle,
+        format(parseISO(emp.startDate), "MMM d, yy")
+      ])
+    );
+
+    // Employee Departures
+    addSection(
+      `Employee Departures (${drillDownDetails.employeeDepartures.length})`,
+      ["Employee", "Position", "Departure"],
+      drillDownDetails.employeeDepartures.map(emp => [
+        emp.employeeName,
+        emp.positionTitle,
+        emp.endDate ? format(parseISO(emp.endDate), "MMM d, yy") : "-"
+      ])
+    );
+
+    // Footer
+    pdf.setFontSize(8);
+    pdf.setFont("helvetica", "italic");
+    pdf.text(`Generated on ${format(new Date(), "MMMM d, yyyy 'at' h:mm a")}`, 14, 290);
+
+    pdf.save(`org-details-${drillDown.month.replace(/\s+/g, "-").toLowerCase()}.pdf`);
+    toast.success("PDF exported successfully");
+  };
 
   // Generate monthly data for charts
   const monthlyData = useMemo(() => {
@@ -1038,10 +1224,22 @@ export function OrgChangesReporting({ companyId }: OrgChangesReportingProps) {
       <Dialog open={!!drillDown} onOpenChange={(open) => !open && setDrillDown(null)}>
         <DialogContent className="max-w-4xl max-h-[80vh]">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Calendar className="h-5 w-5" />
-              Details for {drillDown?.month}
-            </DialogTitle>
+            <div className="flex items-center justify-between">
+              <DialogTitle className="flex items-center gap-2">
+                <Calendar className="h-5 w-5" />
+                Details for {drillDown?.month}
+              </DialogTitle>
+              <div className="flex items-center gap-2">
+                <Button variant="outline" size="sm" onClick={exportDrillDownCSV}>
+                  <FileSpreadsheet className="h-4 w-4 mr-1" />
+                  CSV
+                </Button>
+                <Button variant="outline" size="sm" onClick={exportDrillDownPDF}>
+                  <FileText className="h-4 w-4 mr-1" />
+                  PDF
+                </Button>
+              </div>
+            </div>
             <DialogDescription>
               {drillDown?.type === "positions" && "Active positions and employee assignments"}
               {drillDown?.type === "positionChanges" && "Position additions and removals"}
