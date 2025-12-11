@@ -1389,6 +1389,7 @@ export type Database = {
           is_published: boolean
           published_at: string | null
           related_employee_id: string | null
+          target_departments: string[] | null
           title: string
           updated_at: string
         }
@@ -1404,6 +1405,7 @@ export type Database = {
           is_published?: boolean
           published_at?: string | null
           related_employee_id?: string | null
+          target_departments?: string[] | null
           title: string
           updated_at?: string
         }
@@ -1419,6 +1421,7 @@ export type Database = {
           is_published?: boolean
           published_at?: string | null
           related_employee_id?: string | null
+          target_departments?: string[] | null
           title?: string
           updated_at?: string
         }
