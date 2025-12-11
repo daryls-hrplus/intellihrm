@@ -61,6 +61,7 @@ import {
 } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, AreaChart, Area } from "recharts";
 import { WhatIfAnalysis } from "./WhatIfAnalysis";
+import { MonteCarloSimulation } from "./MonteCarloSimulation";
 
 export interface ScenarioParameters {
   id: string;
@@ -1403,6 +1404,11 @@ export function ScenarioPlanning({ currentHeadcount, sharedToken }: ScenarioPlan
             <WhatIfAnalysis scenarios={scenarios} currentHeadcount={currentHeadcount} />
           </CardContent>
         </Card>
+      )}
+
+      {/* Monte Carlo Simulation */}
+      {scenarios.length > 0 && (
+        <MonteCarloSimulation scenarios={scenarios} currentHeadcount={currentHeadcount} />
       )}
 
       {/* Empty State */}
