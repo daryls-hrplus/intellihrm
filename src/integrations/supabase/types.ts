@@ -274,9 +274,11 @@ export type Database = {
           company_id: string
           created_at: string
           description: string | null
+          end_date: string | null
           id: string
           is_active: boolean
           name: string
+          start_date: string
           updated_at: string
         }
         Insert: {
@@ -284,9 +286,11 @@ export type Database = {
           company_id: string
           created_at?: string
           description?: string | null
+          end_date?: string | null
           id?: string
           is_active?: boolean
           name: string
+          start_date?: string
           updated_at?: string
         }
         Update: {
@@ -294,9 +298,11 @@ export type Database = {
           company_id?: string
           created_at?: string
           description?: string | null
+          end_date?: string | null
           id?: string
           is_active?: boolean
           name?: string
+          start_date?: string
           updated_at?: string
         }
         Relationships: [
@@ -346,9 +352,11 @@ export type Database = {
           company_id: string
           created_at: string
           description: string | null
+          end_date: string | null
           id: string
           is_active: boolean
           name: string
+          start_date: string
           updated_at: string
         }
         Insert: {
@@ -357,9 +365,11 @@ export type Database = {
           company_id: string
           created_at?: string
           description?: string | null
+          end_date?: string | null
           id?: string
           is_active?: boolean
           name: string
+          start_date?: string
           updated_at?: string
         }
         Update: {
@@ -368,9 +378,11 @@ export type Database = {
           company_id?: string
           created_at?: string
           description?: string | null
+          end_date?: string | null
           id?: string
           is_active?: boolean
           name?: string
+          start_date?: string
           updated_at?: string
         }
         Relationships: [
@@ -856,10 +868,12 @@ export type Database = {
           created_at: string
           department_id: string
           description: string | null
+          end_date: string | null
           headcount_notes: string | null
           id: string
           is_active: boolean
           reports_to_position_id: string | null
+          start_date: string
           title: string
           updated_at: string
         }
@@ -869,10 +883,12 @@ export type Database = {
           created_at?: string
           department_id: string
           description?: string | null
+          end_date?: string | null
           headcount_notes?: string | null
           id?: string
           is_active?: boolean
           reports_to_position_id?: string | null
+          start_date?: string
           title: string
           updated_at?: string
         }
@@ -882,10 +898,12 @@ export type Database = {
           created_at?: string
           department_id?: string
           description?: string | null
+          end_date?: string | null
           headcount_notes?: string | null
           id?: string
           is_active?: boolean
           reports_to_position_id?: string | null
+          start_date?: string
           title?: string
           updated_at?: string
         }
@@ -1219,9 +1237,11 @@ export type Database = {
           created_at: string
           department_id: string
           description: string | null
+          end_date: string | null
           id: string
           is_active: boolean
           name: string
+          start_date: string
           updated_at: string
         }
         Insert: {
@@ -1229,9 +1249,11 @@ export type Database = {
           created_at?: string
           department_id: string
           description?: string | null
+          end_date?: string | null
           id?: string
           is_active?: boolean
           name: string
+          start_date?: string
           updated_at?: string
         }
         Update: {
@@ -1239,9 +1261,11 @@ export type Database = {
           created_at?: string
           department_id?: string
           description?: string | null
+          end_date?: string | null
           id?: string
           is_active?: boolean
           name?: string
+          start_date?: string
           updated_at?: string
         }
         Relationships: [
@@ -1357,6 +1381,14 @@ export type Database = {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
+        }
+        Returns: boolean
+      }
+      is_active_at_date: {
+        Args: {
+          p_check_date?: string
+          p_end_date: string
+          p_start_date: string
         }
         Returns: boolean
       }

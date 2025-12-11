@@ -3,6 +3,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -17,10 +19,12 @@ import {
   ChevronRight,
   Maximize2,
   Minimize2,
+  Calendar,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { format } from "date-fns";
 
 interface Position {
   id: string;
@@ -30,6 +34,8 @@ interface Position {
   description: string | null;
   reports_to_position_id: string | null;
   is_active: boolean;
+  start_date: string;
+  end_date: string | null;
 }
 
 interface EmployeePosition {
@@ -38,6 +44,8 @@ interface EmployeePosition {
   position_id: string;
   is_primary: boolean;
   is_active: boolean;
+  start_date: string;
+  end_date: string | null;
   employee?: {
     id: string;
     full_name: string | null;
@@ -50,6 +58,8 @@ interface Department {
   id: string;
   name: string;
   code: string;
+  start_date: string;
+  end_date: string | null;
 }
 
 interface PositionNode extends Position {
@@ -62,6 +72,11 @@ interface OrgChartVisualizationProps {
   companyId: string;
 }
 
+// Helper function to check if an entity is active at a given date
+const isActiveAtDate = (startDate: string, endDate: string | null, checkDate: string): boolean => {
+  return startDate <= checkDate && (endDate === null || endDate >= checkDate);
+};
+
 export function OrgChartVisualization({ companyId }: OrgChartVisualizationProps) {
   const [positions, setPositions] = useState<Position[]>([]);
   const [employeePositions, setEmployeePositions] = useState<EmployeePosition[]>([]);
@@ -70,6 +85,7 @@ export function OrgChartVisualization({ companyId }: OrgChartVisualizationProps)
   const [selectedDepartment, setSelectedDepartment] = useState<string>("all");
   const [expandedNodes, setExpandedNodes] = useState<Set<string>>(new Set());
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [asOfDate, setAsOfDate] = useState<string>(format(new Date(), "yyyy-MM-dd"));
 
   useEffect(() => {
     if (companyId) {
@@ -80,11 +96,11 @@ export function OrgChartVisualization({ companyId }: OrgChartVisualizationProps)
   const fetchData = async () => {
     setIsLoading(true);
     try {
+      // Fetch all departments (we'll filter by date client-side)
       const { data: deptData, error: deptError } = await supabase
         .from("departments")
-        .select("id, name, code")
+        .select("id, name, code, start_date, end_date")
         .eq("company_id", companyId)
-        .eq("is_active", true)
         .order("name");
 
       if (deptError) throw deptError;
@@ -93,11 +109,11 @@ export function OrgChartVisualization({ companyId }: OrgChartVisualizationProps)
       const deptIds = (deptData || []).map(d => d.id);
 
       if (deptIds.length > 0) {
+        // Fetch all positions (we'll filter by date client-side)
         const { data: posData, error: posError } = await supabase
           .from("positions")
-          .select("*")
+          .select("id, department_id, title, code, description, reports_to_position_id, is_active, start_date, end_date")
           .in("department_id", deptIds)
-          .eq("is_active", true)
           .order("title");
 
         if (posError) throw posError;
@@ -108,11 +124,10 @@ export function OrgChartVisualization({ companyId }: OrgChartVisualizationProps)
           const { data: epData, error: epError } = await supabase
             .from("employee_positions")
             .select(`
-              id, employee_id, position_id, is_primary, is_active,
+              id, employee_id, position_id, is_primary, is_active, start_date, end_date,
               employee:profiles(id, full_name, email, avatar_url)
             `)
-            .in("position_id", posIds)
-            .eq("is_active", true);
+            .in("position_id", posIds);
 
           if (epError) throw epError;
           setEmployeePositions(epData || []);
@@ -130,20 +145,41 @@ export function OrgChartVisualization({ companyId }: OrgChartVisualizationProps)
     }
   };
 
+  // Filter entities by the as-of date
+  const filteredDepartments = useMemo(() => {
+    return departments.filter(d => isActiveAtDate(d.start_date, d.end_date, asOfDate));
+  }, [departments, asOfDate]);
+
+  const filteredPositions = useMemo(() => {
+    const activeDeptIds = new Set(filteredDepartments.map(d => d.id));
+    return positions.filter(p => 
+      activeDeptIds.has(p.department_id) && 
+      isActiveAtDate(p.start_date, p.end_date, asOfDate)
+    );
+  }, [positions, filteredDepartments, asOfDate]);
+
+  const filteredEmployeePositions = useMemo(() => {
+    const activePosIds = new Set(filteredPositions.map(p => p.id));
+    return employeePositions.filter(ep => 
+      activePosIds.has(ep.position_id) && 
+      isActiveAtDate(ep.start_date, ep.end_date || null, asOfDate)
+    );
+  }, [employeePositions, filteredPositions, asOfDate]);
+
   // Build tree structure
   const orgTree = useMemo(() => {
-    const filteredPositions = selectedDepartment === "all" 
-      ? positions 
-      : positions.filter(p => p.department_id === selectedDepartment);
+    const departmentFiltered = selectedDepartment === "all" 
+      ? filteredPositions 
+      : filteredPositions.filter(p => p.department_id === selectedDepartment);
 
     const positionMap = new Map<string, PositionNode>();
     
     // Create nodes
-    filteredPositions.forEach(pos => {
-      const dept = departments.find(d => d.id === pos.department_id);
+    departmentFiltered.forEach(pos => {
+      const dept = filteredDepartments.find(d => d.id === pos.department_id);
       positionMap.set(pos.id, {
         ...pos,
-        employees: employeePositions.filter(ep => ep.position_id === pos.id),
+        employees: filteredEmployeePositions.filter(ep => ep.position_id === pos.id),
         children: [],
         department: dept,
       });
@@ -168,7 +204,7 @@ export function OrgChartVisualization({ companyId }: OrgChartVisualizationProps)
     roots.sort((a, b) => a.title.localeCompare(b.title));
 
     return roots;
-  }, [positions, employeePositions, departments, selectedDepartment]);
+  }, [filteredPositions, filteredEmployeePositions, filteredDepartments, selectedDepartment]);
 
   const toggleNode = (id: string) => {
     setExpandedNodes(prev => {
@@ -180,7 +216,7 @@ export function OrgChartVisualization({ companyId }: OrgChartVisualizationProps)
   };
 
   const expandAll = () => {
-    setExpandedNodes(new Set(positions.map(p => p.id)));
+    setExpandedNodes(new Set(filteredPositions.map(p => p.id)));
   };
 
   const collapseAll = () => {
@@ -307,14 +343,27 @@ export function OrgChartVisualization({ companyId }: OrgChartVisualizationProps)
       isFullscreen && "fixed inset-0 z-50 bg-background p-6 overflow-auto"
     )}>
       <div className="flex items-center justify-between gap-4 flex-wrap">
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-4 flex-wrap">
+          {/* As-of Date Picker */}
+          <div className="flex items-center gap-2">
+            <Calendar className="h-4 w-4 text-muted-foreground" />
+            <Label htmlFor="asOfDate" className="text-sm font-medium whitespace-nowrap">As of:</Label>
+            <Input
+              id="asOfDate"
+              type="date"
+              value={asOfDate}
+              onChange={(e) => setAsOfDate(e.target.value)}
+              className="w-[160px]"
+            />
+          </div>
+
           <Select value={selectedDepartment} onValueChange={setSelectedDepartment}>
             <SelectTrigger className="w-[200px]">
               <SelectValue placeholder="Filter by department" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Departments</SelectItem>
-              {departments.map((dept) => (
+              {filteredDepartments.map((dept) => (
                 <SelectItem key={dept.id} value={dept.id}>
                   {dept.name}
                 </SelectItem>
@@ -349,10 +398,16 @@ export function OrgChartVisualization({ companyId }: OrgChartVisualizationProps)
         </Button>
       </div>
 
+      {asOfDate !== format(new Date(), "yyyy-MM-dd") && (
+        <div className="rounded-lg border border-info/30 bg-info/10 px-4 py-2 text-sm text-info-foreground">
+          Showing organization structure as of <strong>{format(new Date(asOfDate), "MMMM d, yyyy")}</strong>
+        </div>
+      )}
+
       {orgTree.length === 0 ? (
         <Card>
           <CardContent className="py-8 text-center text-muted-foreground">
-            No positions found. Create positions in the Positions tab first.
+            No positions found for the selected date. Create positions in the Positions tab first.
           </CardContent>
         </Card>
       ) : (
@@ -367,11 +422,11 @@ export function OrgChartVisualization({ companyId }: OrgChartVisualizationProps)
 
       {/* Stats */}
       <div className="flex items-center gap-4 pt-4 border-t text-sm text-muted-foreground">
-        <span>Total Positions: {positions.length}</span>
+        <span>Total Positions: {filteredPositions.length}</span>
         <span>•</span>
-        <span>Assigned Employees: {employeePositions.length}</span>
+        <span>Assigned Employees: {filteredEmployeePositions.length}</span>
         <span>•</span>
-        <span>Departments: {departments.length}</span>
+        <span>Departments: {filteredDepartments.length}</span>
       </div>
     </div>
   );

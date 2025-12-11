@@ -57,6 +57,8 @@ interface Position {
   reports_to_position_id: string | null;
   is_active: boolean;
   authorized_headcount: number;
+  start_date: string;
+  end_date: string | null;
   department?: {
     name: string;
     code: string;
@@ -126,6 +128,8 @@ export function PositionsManagement({ companyId }: PositionsManagementProps) {
   const [formReportsTo, setFormReportsTo] = useState("");
   const [formIsActive, setFormIsActive] = useState(true);
   const [formAuthorizedHeadcount, setFormAuthorizedHeadcount] = useState("1");
+  const [formStartDate, setFormStartDate] = useState(new Date().toISOString().split("T")[0]);
+  const [formEndDate, setFormEndDate] = useState("");
 
   // Assignment dialog state
   const [assignDialogOpen, setAssignDialogOpen] = useState(false);
@@ -247,6 +251,8 @@ export function PositionsManagement({ companyId }: PositionsManagementProps) {
     setFormReportsTo("");
     setFormIsActive(true);
     setFormAuthorizedHeadcount("1");
+    setFormStartDate(new Date().toISOString().split("T")[0]);
+    setFormEndDate("");
     setPositionDialogOpen(true);
   };
 
@@ -259,6 +265,8 @@ export function PositionsManagement({ companyId }: PositionsManagementProps) {
     setFormReportsTo(position.reports_to_position_id || "");
     setFormIsActive(position.is_active);
     setFormAuthorizedHeadcount(position.authorized_headcount?.toString() || "1");
+    setFormStartDate(position.start_date);
+    setFormEndDate(position.end_date || "");
     setPositionDialogOpen(true);
   };
 
@@ -278,6 +286,8 @@ export function PositionsManagement({ companyId }: PositionsManagementProps) {
         reports_to_position_id: formReportsTo || null,
         is_active: formIsActive,
         authorized_headcount: parseInt(formAuthorizedHeadcount) || 1,
+        start_date: formStartDate,
+        end_date: formEndDate || null,
       };
 
       if (editingPosition) {
@@ -726,6 +736,25 @@ export function PositionsManagement({ companyId }: PositionsManagementProps) {
               <p className="text-xs text-muted-foreground">
                 How many employees can fill this position
               </p>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Start Date *</Label>
+                <Input
+                  type="date"
+                  value={formStartDate}
+                  onChange={(e) => setFormStartDate(e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>End Date</Label>
+                <Input
+                  type="date"
+                  value={formEndDate}
+                  onChange={(e) => setFormEndDate(e.target.value)}
+                  placeholder="Leave empty for ongoing"
+                />
+              </div>
             </div>
             <div className="flex items-center gap-2">
               <Switch checked={formIsActive} onCheckedChange={setFormIsActive} />
