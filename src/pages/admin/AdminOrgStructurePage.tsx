@@ -58,6 +58,8 @@ import {
 } from "lucide-react";
 import { PositionsManagement } from "@/components/admin/PositionsManagement";
 import { OrgChartVisualization } from "@/components/admin/OrgChartVisualization";
+import { GovernanceManagement } from "@/components/admin/GovernanceManagement";
+import { VacancyDashboard } from "@/components/admin/VacancyDashboard";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { NavLink } from "react-router-dom";
@@ -421,7 +423,7 @@ export default function AdminOrgStructurePage() {
 
         {selectedCompanyId && (
           <Tabs defaultValue="structure" className="space-y-6">
-            <TabsList>
+            <TabsList className="flex-wrap">
               <TabsTrigger value="structure" className="flex items-center gap-2">
                 <FolderTree className="h-4 w-4" />
                 Structure
@@ -433,6 +435,12 @@ export default function AdminOrgStructurePage() {
               <TabsTrigger value="orgchart" className="flex items-center gap-2">
                 <Network className="h-4 w-4" />
                 Org Chart
+              </TabsTrigger>
+              <TabsTrigger value="governance" className="flex items-center gap-2">
+                Governance
+              </TabsTrigger>
+              <TabsTrigger value="vacancies" className="flex items-center gap-2">
+                Vacancies
               </TabsTrigger>
             </TabsList>
 
@@ -684,6 +692,14 @@ export default function AdminOrgStructurePage() {
 
             <TabsContent value="orgchart">
               <OrgChartVisualization companyId={selectedCompanyId} />
+            </TabsContent>
+
+            <TabsContent value="governance">
+              <GovernanceManagement companyId={selectedCompanyId} />
+            </TabsContent>
+
+            <TabsContent value="vacancies">
+              <VacancyDashboard companyId={selectedCompanyId} />
             </TabsContent>
           </Tabs>
         )}

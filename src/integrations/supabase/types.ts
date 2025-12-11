@@ -494,6 +494,178 @@ export type Database = {
           },
         ]
       }
+      governance_bodies: {
+        Row: {
+          body_type: string
+          can_approve_headcount: boolean
+          company_id: string
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          body_type?: string
+          can_approve_headcount?: boolean
+          company_id: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          body_type?: string
+          can_approve_headcount?: boolean
+          company_id?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "governance_bodies_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      governance_members: {
+        Row: {
+          created_at: string
+          employee_id: string
+          end_date: string | null
+          governance_body_id: string
+          id: string
+          is_active: boolean
+          role_in_body: string
+          start_date: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          employee_id: string
+          end_date?: string | null
+          governance_body_id: string
+          id?: string
+          is_active?: boolean
+          role_in_body?: string
+          start_date?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          employee_id?: string
+          end_date?: string | null
+          governance_body_id?: string
+          id?: string
+          is_active?: boolean
+          role_in_body?: string
+          start_date?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "governance_members_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "governance_members_governance_body_id_fkey"
+            columns: ["governance_body_id"]
+            isOneToOne: false
+            referencedRelation: "governance_bodies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      headcount_requests: {
+        Row: {
+          created_at: string
+          current_headcount: number
+          governance_body_id: string | null
+          id: string
+          position_id: string
+          reason: string
+          requested_by: string
+          requested_headcount: number
+          review_notes: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          current_headcount: number
+          governance_body_id?: string | null
+          id?: string
+          position_id: string
+          reason: string
+          requested_by: string
+          requested_headcount: number
+          review_notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          current_headcount?: number
+          governance_body_id?: string | null
+          id?: string
+          position_id?: string
+          reason?: string
+          requested_by?: string
+          requested_headcount?: number
+          review_notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "headcount_requests_governance_body_id_fkey"
+            columns: ["governance_body_id"]
+            isOneToOne: false
+            referencedRelation: "governance_bodies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "headcount_requests_position_id_fkey"
+            columns: ["position_id"]
+            isOneToOne: false
+            referencedRelation: "positions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "headcount_requests_requested_by_fkey"
+            columns: ["requested_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "headcount_requests_reviewed_by_fkey"
+            columns: ["reviewed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pii_access_alerts: {
         Row: {
           access_count: number
@@ -529,10 +701,12 @@ export type Database = {
       }
       positions: {
         Row: {
+          authorized_headcount: number
           code: string
           created_at: string
           department_id: string
           description: string | null
+          headcount_notes: string | null
           id: string
           is_active: boolean
           reports_to_position_id: string | null
@@ -540,10 +714,12 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          authorized_headcount?: number
           code: string
           created_at?: string
           department_id: string
           description?: string | null
+          headcount_notes?: string | null
           id?: string
           is_active?: boolean
           reports_to_position_id?: string | null
@@ -551,10 +727,12 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          authorized_headcount?: number
           code?: string
           created_at?: string
           department_id?: string
           description?: string | null
+          headcount_notes?: string | null
           id?: string
           is_active?: boolean
           reports_to_position_id?: string | null
@@ -798,6 +976,17 @@ export type Database = {
           supervisor_name: string
           supervisor_position_id: string
           supervisor_position_title: string
+        }[]
+      }
+      get_position_vacancy_summary: {
+        Args: { p_company_id: string }
+        Returns: {
+          authorized_headcount: number
+          department_name: string
+          filled_count: number
+          position_id: string
+          position_title: string
+          vacancy_count: number
         }[]
       }
       has_role: {
