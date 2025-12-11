@@ -171,17 +171,38 @@ export default function MyPermissionsPage() {
 
       // Create auto-approved request if any modules qualify
       if (autoApprovedModules.length > 0) {
-        const { error: approvedError } = await supabase.from("access_requests").insert({
-          user_id: user?.id,
-          user_email: profile?.email || user?.email,
-          requested_modules: autoApprovedModules,
-          reason: requestReason.trim(),
-          status: "approved",
-          review_notes: `Auto-approved by rule: ${autoApprovalResult[0].rule_name}`,
-          reviewed_at: new Date().toISOString(),
-        });
+        const { data: approvedRequest, error: approvedError } = await supabase
+          .from("access_requests")
+          .insert({
+            user_id: user?.id,
+            user_email: profile?.email || user?.email,
+            requested_modules: autoApprovedModules,
+            reason: requestReason.trim(),
+            status: "approved",
+            review_notes: `Auto-approved by rule: ${autoApprovalResult[0].rule_name}`,
+            reviewed_at: new Date().toISOString(),
+          })
+          .select("id")
+          .single();
 
         if (approvedError) throw approvedError;
+
+        // Send auto-approval notification email (non-blocking)
+        if (approvedRequest?.id) {
+          supabase.functions
+            .invoke("send-access-request-notification", {
+              body: {
+                requestId: approvedRequest.id,
+                status: "auto-approved",
+                ruleName: autoApprovalResult[0].rule_name,
+              },
+            })
+            .then((res) => {
+              if (res.error) {
+                console.error("Auto-approval notification failed:", res.error);
+              }
+            });
+        }
       }
 
       // Create pending request for remaining modules
