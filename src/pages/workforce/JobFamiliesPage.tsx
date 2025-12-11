@@ -84,6 +84,7 @@ const emptyForm = {
   name: "",
   code: "",
   description: "",
+  company_id: "",
   company_division_id: "",
   department_id: "",
   is_active: true,
@@ -177,6 +178,7 @@ export default function JobFamiliesPage() {
         name: jobFamily.name,
         code: jobFamily.code,
         description: jobFamily.description || "",
+        company_id: jobFamily.company_id,
         company_division_id: jobFamily.company_division_id || "",
         department_id: jobFamily.department_id,
         is_active: jobFamily.is_active,
@@ -185,7 +187,7 @@ export default function JobFamiliesPage() {
       });
     } else {
       setSelectedJobFamily(null);
-      setFormData(emptyForm);
+      setFormData({ ...emptyForm, company_id: selectedCompanyId });
     }
     setDialogOpen(true);
   };
@@ -195,6 +197,10 @@ export default function JobFamiliesPage() {
       toast.error("Name and code are required");
       return;
     }
+    if (!formData.company_id) {
+      toast.error("Company is required");
+      return;
+    }
     if (!formData.department_id) {
       toast.error("Department is required");
       return;
@@ -202,7 +208,7 @@ export default function JobFamiliesPage() {
 
     setIsSaving(true);
     const payload = {
-      company_id: selectedCompanyId,
+      company_id: formData.company_id,
       company_division_id: formData.company_division_id || null,
       department_id: formData.department_id,
       name: formData.name.trim(),
@@ -283,10 +289,14 @@ export default function JobFamiliesPage() {
     setDeleteDialogOpen(false);
   };
 
+  // Get divisions and departments for form based on selected company in form
+  const formDivisions = formData.company_id === selectedCompanyId ? divisions : [];
+  const formDepartments = formData.company_id === selectedCompanyId ? departments : [];
+  
   // Filter departments by selected division
   const filteredDepartments = formData.company_division_id
-    ? departments.filter((d) => d.company_division_id === formData.company_division_id)
-    : departments;
+    ? formDepartments.filter((d) => d.company_division_id === formData.company_division_id)
+    : formDepartments;
 
   const filteredJobFamilies = jobFamilies.filter(
     (jf) =>
@@ -467,6 +477,27 @@ export default function JobFamiliesPage() {
               </div>
             </div>
 
+            <div className="space-y-2">
+              <Label>Company *</Label>
+              <Select
+                value={formData.company_id}
+                onValueChange={(value) =>
+                  setFormData({ ...formData, company_id: value, company_division_id: "", department_id: "" })
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select company" />
+                </SelectTrigger>
+                <SelectContent>
+                  {companies.map((company) => (
+                    <SelectItem key={company.id} value={company.id}>
+                      {company.name} ({company.code})
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>Division (Optional)</Label>
@@ -481,7 +512,7 @@ export default function JobFamiliesPage() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="__none__">None</SelectItem>
-                    {divisions.map((div) => (
+                    {formDivisions.map((div) => (
                       <SelectItem key={div.id} value={div.id}>
                         {div.name} ({div.code})
                       </SelectItem>
