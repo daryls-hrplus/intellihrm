@@ -258,6 +258,53 @@ export default function AdminAccessRequestsPage() {
     }
   };
 
+  const [revokeRequest, setRevokeRequest] = useState<AccessRequest | null>(null);
+  const [revokeNotes, setRevokeNotes] = useState("");
+
+  const handleRevoke = async () => {
+    if (!revokeRequest || !user) return;
+
+    setIsProcessing(true);
+    try {
+      const { error } = await supabase
+        .from("access_requests")
+        .update({
+          status: "revoked",
+          reviewed_by: user.id,
+          reviewed_at: new Date().toISOString(),
+          review_notes: revokeNotes.trim() || "Access revoked by administrator",
+        })
+        .eq("id", revokeRequest.id);
+
+      if (error) throw error;
+
+      // Send email notification (non-blocking)
+      supabase.functions
+        .invoke("send-access-request-notification", {
+          body: {
+            requestId: revokeRequest.id,
+            status: "revoked",
+            reviewNotes: revokeNotes.trim() || "Access revoked by administrator",
+          },
+        })
+        .then((res) => {
+          if (res.error) {
+            console.error("Email notification failed:", res.error);
+          }
+        });
+
+      toast.success("Access revoked successfully");
+      setRevokeRequest(null);
+      setRevokeNotes("");
+      fetchRequests();
+    } catch (error) {
+      console.error("Error revoking access:", error);
+      toast.error("Failed to revoke access");
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "approved":
@@ -272,6 +319,13 @@ export default function AdminAccessRequestsPage() {
           <Badge variant="destructive">
             <XCircle className="h-3 w-3 mr-1" />
             Rejected
+          </Badge>
+        );
+      case "revoked":
+        return (
+          <Badge variant="destructive" className="bg-orange-600">
+            <XCircle className="h-3 w-3 mr-1" />
+            Revoked
           </Badge>
         );
       default:
@@ -482,6 +536,7 @@ export default function AdminAccessRequestsPage() {
                     <SelectItem value="pending">Pending</SelectItem>
                     <SelectItem value="approved">Approved</SelectItem>
                     <SelectItem value="rejected">Rejected</SelectItem>
+                    <SelectItem value="revoked">Revoked</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -600,13 +655,28 @@ export default function AdminAccessRequestsPage() {
                             Review
                           </Button>
                         ) : (
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => setSelectedRequest(request)}
-                          >
-                            View
-                          </Button>
+                          <div className="flex gap-1">
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => setSelectedRequest(request)}
+                            >
+                              View
+                            </Button>
+                            {request.status === "approved" && (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="text-destructive hover:text-destructive"
+                                onClick={() => {
+                                  setRevokeRequest(request);
+                                  setRevokeNotes("");
+                                }}
+                              >
+                                Revoke
+                              </Button>
+                            )}
+                          </div>
                         )}
                       </TableCell>
                     </TableRow>
@@ -793,6 +863,65 @@ export default function AdminAccessRequestsPage() {
                       <XCircle className="h-4 w-4 mr-2" />
                     )}
                     Confirm {batchAction === "approved" ? "Approval" : "Rejection"}
+                  </>
+                )}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Revoke Confirmation Dialog */}
+        <Dialog open={!!revokeRequest} onOpenChange={() => setRevokeRequest(null)}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Revoke Access</DialogTitle>
+              <DialogDescription>
+                This will revoke the previously approved access for {revokeRequest?.user_email}. The user will be notified.
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="space-y-4">
+              <div>
+                <Label className="text-sm font-medium">Modules to Revoke</Label>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {revokeRequest?.requested_modules.map((mod) => (
+                    <Badge key={mod} variant="secondary">
+                      {getModuleName(mod)}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <Label htmlFor="revoke-notes" className="text-sm font-medium">
+                  Reason for Revocation
+                </Label>
+                <Textarea
+                  id="revoke-notes"
+                  value={revokeNotes}
+                  onChange={(e) => setRevokeNotes(e.target.value)}
+                  placeholder="Explain why this access is being revoked..."
+                  className="mt-2"
+                  rows={3}
+                />
+              </div>
+            </div>
+
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setRevokeRequest(null)}>
+                Cancel
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={handleRevoke}
+                disabled={isProcessing}
+              >
+                {isProcessing ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <>
+                    <XCircle className="h-4 w-4 mr-2" />
+                    Revoke Access
                   </>
                 )}
               </Button>
