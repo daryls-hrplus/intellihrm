@@ -63,6 +63,7 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { WhatIfAnalysis } from "./WhatIfAnalysis";
 import { MonteCarloSimulation } from "./MonteCarloSimulation";
 import { SensitivityAnalysis } from "./SensitivityAnalysis";
+import { StressTestAnalysis } from "./StressTestAnalysis";
 
 export interface ScenarioParameters {
   id: string;
@@ -1415,6 +1416,11 @@ export function ScenarioPlanning({ currentHeadcount, sharedToken }: ScenarioPlan
       {/* Sensitivity Analysis */}
       {scenarios.length > 0 && (
         <SensitivityAnalysis scenarios={scenarios} currentHeadcount={currentHeadcount} />
+      )}
+
+      {/* Stress Test Analysis */}
+      {scenarios.length > 0 && (
+        <StressTestAnalysis scenarios={scenarios} currentHeadcount={currentHeadcount} />
       )}
 
       {/* Empty State */}
