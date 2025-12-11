@@ -589,6 +589,47 @@ export type Database = {
           },
         ]
       }
+      headcount_forecasts: {
+        Row: {
+          company_id: string | null
+          created_at: string
+          created_by: string
+          forecast_data: Json
+          historical_data: Json
+          id: string
+          name: string | null
+          notes: string | null
+        }
+        Insert: {
+          company_id?: string | null
+          created_at?: string
+          created_by: string
+          forecast_data: Json
+          historical_data: Json
+          id?: string
+          name?: string | null
+          notes?: string | null
+        }
+        Update: {
+          company_id?: string | null
+          created_at?: string
+          created_by?: string
+          forecast_data?: Json
+          historical_data?: Json
+          id?: string
+          name?: string | null
+          notes?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "headcount_forecasts_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       headcount_request_history: {
         Row: {
           changed_by: string | null
