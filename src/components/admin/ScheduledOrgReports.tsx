@@ -98,7 +98,17 @@ const DAYS_OF_WEEK = [
   { value: 6, label: "Saturday" },
 ];
 
-export function ScheduledOrgReports() {
+interface ScheduledOrgReportsProps {
+  initialCompanyId?: string;
+  initialDepartmentId?: string;
+  autoOpenDialog?: boolean;
+}
+
+export function ScheduledOrgReports({ 
+  initialCompanyId, 
+  initialDepartmentId, 
+  autoOpenDialog 
+}: ScheduledOrgReportsProps) {
   const { user } = useAuth();
   const [reports, setReports] = useState<ScheduledReport[]>([]);
   const [companies, setCompanies] = useState<Company[]>([]);
@@ -108,6 +118,7 @@ export function ScheduledOrgReports() {
   const [isSending, setIsSending] = useState<string | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [editingReport, setEditingReport] = useState<ScheduledReport | null>(null);
+  const [hasAutoOpened, setHasAutoOpened] = useState(false);
 
   // Form state
   const [formData, setFormData] = useState({
@@ -118,8 +129,8 @@ export function ScheduledOrgReports() {
     day_of_month: 1,
     time_of_day: "09:00",
     recipient_emails: "",
-    company_id: "",
-    department_id: "",
+    company_id: initialCompanyId || "",
+    department_id: initialDepartmentId || "",
     include_positions: true,
     include_employees: true,
     include_changes: true,
@@ -129,6 +140,14 @@ export function ScheduledOrgReports() {
   useEffect(() => {
     fetchData();
   }, []);
+
+  // Auto-open dialog with pre-filled values
+  useEffect(() => {
+    if (autoOpenDialog && !isLoading && !hasAutoOpened) {
+      setHasAutoOpened(true);
+      setIsDialogOpen(true);
+    }
+  }, [autoOpenDialog, isLoading, hasAutoOpened]);
 
   const fetchData = async () => {
     setIsLoading(true);

@@ -116,11 +116,12 @@ interface DrillDownData {
 
 interface OrgChangesReportingProps {
   companyId?: string;
+  onScheduleClick?: (filters: { companyId: string; departmentId: string }) => void;
 }
 
 const COLORS = ["hsl(var(--primary))", "hsl(var(--destructive))", "hsl(var(--secondary))", "hsl(var(--accent))"];
 
-export function OrgChangesReporting({ companyId }: OrgChangesReportingProps) {
+export function OrgChangesReporting({ companyId, onScheduleClick }: OrgChangesReportingProps) {
   const [companies, setCompanies] = useState<Company[]>([]);
   const [selectedCompanyId, setSelectedCompanyId] = useState<string>(companyId || "");
   const [selectedDepartmentId, setSelectedDepartmentId] = useState<string>("all");
@@ -845,6 +846,18 @@ export function OrgChangesReporting({ companyId }: OrgChangesReportingProps) {
               <Download className="h-4 w-4 mr-2" />
               Export CSV
             </Button>
+            {onScheduleClick && (
+              <Button 
+                variant="outline" 
+                onClick={() => onScheduleClick({ 
+                  companyId: selectedCompanyId, 
+                  departmentId: selectedDepartmentId === "all" ? "" : selectedDepartmentId 
+                })}
+              >
+                <Calendar className="h-4 w-4 mr-2" />
+                Schedule with Filters
+              </Button>
+            )}
             <div className="flex items-center gap-2">
               <Switch
                 id="yoyMode"
