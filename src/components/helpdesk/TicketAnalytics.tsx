@@ -1,14 +1,24 @@
+import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   BarChart,
   Bar,
@@ -24,15 +34,27 @@ import {
   LineChart,
   Line,
 } from "recharts";
-import { differenceInHours, format, subDays, startOfDay } from "date-fns";
-import { Clock, TrendingUp, Users, Target, CheckCircle, Download, FileText, FileSpreadsheet } from "lucide-react";
+import { differenceInHours, format, subDays, startOfDay, endOfDay, isWithinInterval, differenceInDays } from "date-fns";
+import { Clock, TrendingUp, Users, Target, CheckCircle, Download, FileText, FileSpreadsheet, CalendarIcon } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import jsPDF from "jspdf";
+import { cn } from "@/lib/utils";
 
 const COLORS = ["#3b82f6", "#22c55e", "#f59e0b", "#ef4444", "#8b5cf6", "#ec4899", "#06b6d4", "#84cc16"];
 
+type DateRange = {
+  from: Date;
+  to: Date;
+};
+
 export default function TicketAnalytics() {
+  const [dateRange, setDateRange] = useState<DateRange>({
+    from: subDays(new Date(), 30),
+    to: new Date(),
+  });
+  const [presetRange, setPresetRange] = useState("30");
+
   const { data: tickets = [] } = useQuery({
     queryKey: ["analytics-tickets"],
     queryFn: async () => {
@@ -62,8 +84,30 @@ export default function TicketAnalytics() {
     },
   });
 
-  // Calculate metrics
-  const resolvedTickets = tickets.filter(t => ["resolved", "closed"].includes(t.status));
+  const handlePresetChange = (value: string) => {
+    setPresetRange(value);
+    if (value === "custom") return;
+    
+    const days = parseInt(value);
+    setDateRange({
+      from: subDays(new Date(), days),
+      to: new Date(),
+    });
+  };
+
+  // Filter tickets by date range
+  const filteredTickets = useMemo(() => {
+    return tickets.filter(t => {
+      const ticketDate = new Date(t.created_at);
+      return isWithinInterval(ticketDate, {
+        start: startOfDay(dateRange.from),
+        end: endOfDay(dateRange.to),
+      });
+    });
+  }, [tickets, dateRange]);
+
+  // Calculate metrics using filtered tickets
+  const resolvedTickets = filteredTickets.filter(t => ["resolved", "closed"].includes(t.status));
   
   const avgResolutionTime = resolvedTickets.length > 0
     ? resolvedTickets.reduce((acc, t) => {
@@ -72,37 +116,37 @@ export default function TicketAnalytics() {
       }, 0) / resolvedTickets.length
     : 0;
 
-  const avgFirstResponseTime = tickets.filter(t => t.first_response_at).length > 0
-    ? tickets.filter(t => t.first_response_at).reduce((acc, t) => {
+  const avgFirstResponseTime = filteredTickets.filter(t => t.first_response_at).length > 0
+    ? filteredTickets.filter(t => t.first_response_at).reduce((acc, t) => {
         return acc + differenceInHours(new Date(t.first_response_at), new Date(t.created_at));
-      }, 0) / tickets.filter(t => t.first_response_at).length
+      }, 0) / filteredTickets.filter(t => t.first_response_at).length
     : 0;
 
   // Category distribution
   const categoryDistribution = categories.map(cat => ({
     name: cat.name,
-    value: tickets.filter(t => t.category?.code === cat.code).length,
+    value: filteredTickets.filter(t => t.category?.code === cat.code).length,
   })).filter(c => c.value > 0);
 
   // Status distribution
   const statusDistribution = [
-    { name: "Open", value: tickets.filter(t => t.status === "open").length, color: "#3b82f6" },
-    { name: "In Progress", value: tickets.filter(t => t.status === "in_progress").length, color: "#f59e0b" },
-    { name: "Pending", value: tickets.filter(t => t.status === "pending").length, color: "#f97316" },
-    { name: "Resolved", value: tickets.filter(t => t.status === "resolved").length, color: "#22c55e" },
-    { name: "Closed", value: tickets.filter(t => t.status === "closed").length, color: "#6b7280" },
+    { name: "Open", value: filteredTickets.filter(t => t.status === "open").length, color: "#3b82f6" },
+    { name: "In Progress", value: filteredTickets.filter(t => t.status === "in_progress").length, color: "#f59e0b" },
+    { name: "Pending", value: filteredTickets.filter(t => t.status === "pending").length, color: "#f97316" },
+    { name: "Resolved", value: filteredTickets.filter(t => t.status === "resolved").length, color: "#22c55e" },
+    { name: "Closed", value: filteredTickets.filter(t => t.status === "closed").length, color: "#6b7280" },
   ].filter(s => s.value > 0);
 
   // Priority distribution
   const priorityDistribution = [
-    { name: "Low", value: tickets.filter(t => t.priority?.code === "low").length, color: "#22c55e" },
-    { name: "Medium", value: tickets.filter(t => t.priority?.code === "medium").length, color: "#f59e0b" },
-    { name: "High", value: tickets.filter(t => t.priority?.code === "high").length, color: "#f97316" },
-    { name: "Urgent", value: tickets.filter(t => t.priority?.code === "urgent").length, color: "#ef4444" },
+    { name: "Low", value: filteredTickets.filter(t => t.priority?.code === "low").length, color: "#22c55e" },
+    { name: "Medium", value: filteredTickets.filter(t => t.priority?.code === "medium").length, color: "#f59e0b" },
+    { name: "High", value: filteredTickets.filter(t => t.priority?.code === "high").length, color: "#f97316" },
+    { name: "Urgent", value: filteredTickets.filter(t => t.priority?.code === "urgent").length, color: "#ef4444" },
   ].filter(p => p.value > 0);
 
   // Agent performance
-  const agentPerformance = tickets
+  const agentPerformance = filteredTickets
     .filter(t => t.assignee)
     .reduce((acc: any[], t) => {
       const existing = acc.find(a => a.id === t.assignee.id);
@@ -133,15 +177,16 @@ export default function TicketAnalytics() {
     }))
     .sort((a, b) => b.total - a.total);
 
-  // Tickets over time (last 30 days)
-  const last30Days = Array.from({ length: 30 }, (_, i) => {
-    const date = startOfDay(subDays(new Date(), 29 - i));
+  // Tickets over time (based on date range)
+  const daysDiff = Math.min(differenceInDays(dateRange.to, dateRange.from) + 1, 90);
+  const trendData = Array.from({ length: daysDiff }, (_, i) => {
+    const date = startOfDay(subDays(dateRange.to, daysDiff - 1 - i));
     return {
-      date: format(date, "MMM d"),
-      created: tickets.filter(t => 
+      date: format(date, daysDiff > 14 ? "MMM d" : "EEE d"),
+      created: filteredTickets.filter(t => 
         format(startOfDay(new Date(t.created_at)), "yyyy-MM-dd") === format(date, "yyyy-MM-dd")
       ).length,
-      resolved: tickets.filter(t => 
+      resolved: filteredTickets.filter(t => 
         t.resolved_at && format(startOfDay(new Date(t.resolved_at)), "yyyy-MM-dd") === format(date, "yyyy-MM-dd")
       ).length,
     };
@@ -149,12 +194,12 @@ export default function TicketAnalytics() {
 
   // SLA compliance
   const slaMetrics = {
-    responseCompliance: tickets.filter(t => t.first_response_at && t.priority).length > 0
-      ? Math.round((tickets.filter(t => {
+    responseCompliance: filteredTickets.filter(t => t.first_response_at && t.priority).length > 0
+      ? Math.round((filteredTickets.filter(t => {
           if (!t.first_response_at || !t.priority) return false;
           const responseHours = differenceInHours(new Date(t.first_response_at), new Date(t.created_at));
           return responseHours <= t.priority.response_time_hours;
-        }).length / tickets.filter(t => t.first_response_at && t.priority).length) * 100)
+        }).length / filteredTickets.filter(t => t.first_response_at && t.priority).length) * 100)
       : 100,
     resolutionCompliance: resolvedTickets.filter(t => t.priority).length > 0
       ? Math.round((resolvedTickets.filter(t => {
@@ -208,9 +253,9 @@ export default function TicketAnalytics() {
     });
     csvContent += "\n";
     
-    csvContent += "30-DAY TREND\n";
+    csvContent += "TREND DATA\n";
     csvContent += "Date,Created,Resolved\n";
-    last30Days.forEach(d => {
+    trendData.forEach(d => {
       csvContent += `${d.date},${d.created},${d.resolved}\n`;
     });
     
@@ -317,8 +362,78 @@ export default function TicketAnalytics() {
 
   return (
     <div className="space-y-6">
-      {/* Export Buttons */}
-      <div className="flex justify-end">
+      {/* Header with Date Filter and Export */}
+      <div className="flex flex-col sm:flex-row justify-between gap-4">
+        <div className="flex flex-wrap items-center gap-2">
+          <Select value={presetRange} onValueChange={handlePresetChange}>
+            <SelectTrigger className="w-[140px]">
+              <SelectValue placeholder="Select range" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="7">Last 7 days</SelectItem>
+              <SelectItem value="14">Last 14 days</SelectItem>
+              <SelectItem value="30">Last 30 days</SelectItem>
+              <SelectItem value="60">Last 60 days</SelectItem>
+              <SelectItem value="90">Last 90 days</SelectItem>
+              <SelectItem value="custom">Custom range</SelectItem>
+            </SelectContent>
+          </Select>
+          
+          <div className="flex items-center gap-2">
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline" size="sm" className={cn("justify-start text-left font-normal", !dateRange.from && "text-muted-foreground")}>
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {format(dateRange.from, "MMM d, yyyy")}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={dateRange.from}
+                  onSelect={(date) => {
+                    if (date) {
+                      setPresetRange("custom");
+                      setDateRange(prev => ({ ...prev, from: date }));
+                    }
+                  }}
+                  initialFocus
+                  className={cn("p-3 pointer-events-auto")}
+                />
+              </PopoverContent>
+            </Popover>
+            
+            <span className="text-muted-foreground">to</span>
+            
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline" size="sm" className={cn("justify-start text-left font-normal", !dateRange.to && "text-muted-foreground")}>
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {format(dateRange.to, "MMM d, yyyy")}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={dateRange.to}
+                  onSelect={(date) => {
+                    if (date) {
+                      setPresetRange("custom");
+                      setDateRange(prev => ({ ...prev, to: date }));
+                    }
+                  }}
+                  initialFocus
+                  className={cn("p-3 pointer-events-auto")}
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
+          
+          <Badge variant="secondary" className="ml-2">
+            {filteredTickets.length} tickets
+          </Badge>
+        </div>
+        
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" size="sm">
@@ -548,15 +663,17 @@ export default function TicketAnalytics() {
         <TabsContent value="trends" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>Ticket Trends (Last 30 Days)</CardTitle>
-              <CardDescription>Daily ticket creation and resolution</CardDescription>
+              <CardTitle>Ticket Trends</CardTitle>
+              <CardDescription>
+                Daily ticket creation and resolution ({format(dateRange.from, "MMM d")} - {format(dateRange.to, "MMM d, yyyy")})
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="h-[300px]">
                 <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={last30Days}>
+                  <LineChart data={trendData}>
                     <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                    <XAxis dataKey="date" tick={{ fontSize: 10 }} interval={4} />
+                    <XAxis dataKey="date" tick={{ fontSize: 10 }} interval={Math.max(1, Math.floor(daysDiff / 10))} />
                     <YAxis />
                     <Tooltip />
                     <Legend />
