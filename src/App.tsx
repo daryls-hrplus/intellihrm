@@ -100,6 +100,7 @@ import NotificationPreferencesPage from "./pages/profile/NotificationPreferences
 // Help Center pages
 import HelpCenterPage from "./pages/help/HelpCenterPage";
 import HelpChatPage from "./pages/help/HelpChatPage";
+import KnowledgeBasePage from "./pages/help/KnowledgeBasePage";
 import TicketsPage from "./pages/help/TicketsPage";
 import NewTicketPage from "./pages/help/NewTicketPage";
 import TicketDetailPage from "./pages/help/TicketDetailPage";
@@ -574,6 +575,14 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <HelpCenterPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/help/knowledge-base"
+              element={
+                <ProtectedRoute>
+                  <KnowledgeBasePage />
                 </ProtectedRoute>
               }
             />
