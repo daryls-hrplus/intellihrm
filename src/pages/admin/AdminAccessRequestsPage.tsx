@@ -36,7 +36,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Loader2, CheckCircle, XCircle, Clock, FileText, ArrowLeft, Download, CalendarIcon, X } from "lucide-react";
+import { Loader2, CheckCircle, XCircle, Clock, FileText, ArrowLeft, Download, CalendarIcon, X, Search } from "lucide-react";
+import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
@@ -84,10 +85,11 @@ export default function AdminAccessRequestsPage() {
   const [batchNotes, setBatchNotes] = useState("");
   const [dateFrom, setDateFrom] = useState<Date | undefined>(undefined);
   const [dateTo, setDateTo] = useState<Date | undefined>(undefined);
+  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     fetchRequests();
-  }, [statusFilter, dateFrom, dateTo]);
+  }, [statusFilter, dateFrom, dateTo, searchQuery]);
 
   const fetchRequests = async () => {
     setIsLoading(true);
@@ -99,6 +101,10 @@ export default function AdminAccessRequestsPage() {
 
       if (statusFilter !== "all") {
         query = query.eq("status", statusFilter);
+      }
+
+      if (searchQuery.trim()) {
+        query = query.ilike("user_email", `%${searchQuery.trim()}%`);
       }
 
       if (dateFrom) {
@@ -395,6 +401,15 @@ export default function AdminAccessRequestsPage() {
                 </Button>
               </div>
               <div className="flex flex-wrap items-center gap-2">
+                <div className="relative">
+                  <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Search by email..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-8 w-[200px] h-9"
+                  />
+                </div>
                 <Popover>
                   <PopoverTrigger asChild>
                     <Button
