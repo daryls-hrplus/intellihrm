@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { supabase } from "@/integrations/supabase/client";
-import { FolderTree, Building2, ChevronRight, ChevronDown, Users, Plus, Pencil, Trash2 } from "lucide-react";
+import { FolderTree, Building2, ChevronRight, ChevronDown, Users, Plus, Pencil, Trash2, Calendar } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -35,6 +35,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
+import { format } from "date-fns";
 
 interface Company {
   id: string;
@@ -55,6 +56,8 @@ interface Department {
   description: string | null;
   is_active: boolean;
   company_division_id: string | null;
+  start_date: string;
+  end_date: string | null;
   sections: Section[];
 }
 
@@ -65,9 +68,16 @@ interface Section {
   description: string | null;
   is_active: boolean;
   department_id: string;
+  start_date: string;
+  end_date: string | null;
 }
 
 type EntityType = "department" | "section";
+
+// Helper function to check if an entity is active at a given date
+const isActiveAtDate = (startDate: string, endDate: string | null, checkDate: string): boolean => {
+  return startDate <= checkDate && (endDate === null || endDate >= checkDate);
+};
 
 export default function DepartmentsPage() {
   const { isAdmin } = useAuth();
@@ -77,6 +87,7 @@ export default function DepartmentsPage() {
   const [departments, setDepartments] = useState<Department[]>([]);
   const [expandedDepts, setExpandedDepts] = useState<Set<string>>(new Set());
   const [isLoading, setIsLoading] = useState(true);
+  const [asOfDate, setAsOfDate] = useState<string>(format(new Date(), "yyyy-MM-dd"));
 
   // Dialog states
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -93,6 +104,8 @@ export default function DepartmentsPage() {
     description: "",
     is_active: true,
     company_division_id: "",
+    start_date: format(new Date(), "yyyy-MM-dd"),
+    end_date: "",
   });
 
   useEffect(() => {
@@ -130,14 +143,14 @@ export default function DepartmentsPage() {
 
       const { data: depts } = await supabase
         .from("departments")
-        .select("id, name, code, description, is_active, company_division_id")
+        .select("id, name, code, description, is_active, company_division_id, start_date, end_date")
         .eq("company_id", selectedCompanyId)
         .order("name");
 
       if (depts) {
         const { data: sections } = await supabase
           .from("sections")
-          .select("id, name, code, description, is_active, department_id")
+          .select("id, name, code, description, is_active, department_id, start_date, end_date")
           .in("department_id", depts.map(d => d.id))
           .order("name");
 
@@ -154,6 +167,16 @@ export default function DepartmentsPage() {
     
     fetchData();
   }, [selectedCompanyId]);
+
+  // Filter departments and sections by as-of date
+  const filteredDepartments = departments.filter(dept => 
+    isActiveAtDate(dept.start_date, dept.end_date, asOfDate)
+  ).map(dept => ({
+    ...dept,
+    sections: dept.sections.filter(sec => 
+      isActiveAtDate(sec.start_date, sec.end_date, asOfDate)
+    )
+  }));
 
   const toggleDept = (deptId: string) => {
     setExpandedDepts(prev => {
@@ -177,6 +200,8 @@ export default function DepartmentsPage() {
       description: "",
       is_active: true,
       company_division_id: "",
+      start_date: format(new Date(), "yyyy-MM-dd"),
+      end_date: "",
     });
     setDialogOpen(true);
   };
@@ -191,6 +216,8 @@ export default function DepartmentsPage() {
       description: entity.description || "",
       is_active: entity.is_active,
       company_division_id: type === "department" ? ((entity as Department).company_division_id || "") : "",
+      start_date: entity.start_date,
+      end_date: entity.end_date || "",
     });
     setDialogOpen(true);
   };
@@ -207,6 +234,16 @@ export default function DepartmentsPage() {
       return;
     }
 
+    if (!formData.start_date) {
+      toast.error("Start date is required");
+      return;
+    }
+
+    if (formData.end_date && formData.end_date < formData.start_date) {
+      toast.error("End date cannot be before start date");
+      return;
+    }
+
     setIsSaving(true);
     try {
       if (entityType === "department") {
@@ -217,6 +254,8 @@ export default function DepartmentsPage() {
           is_active: formData.is_active,
           company_id: selectedCompanyId,
           company_division_id: formData.company_division_id || null,
+          start_date: formData.start_date,
+          end_date: formData.end_date || null,
         };
 
         if (editingEntity) {
@@ -240,6 +279,8 @@ export default function DepartmentsPage() {
           description: formData.description.trim() || null,
           is_active: formData.is_active,
           department_id: parentDepartmentId!,
+          start_date: formData.start_date,
+          end_date: formData.end_date || null,
         };
 
         if (editingEntity) {
@@ -262,14 +303,14 @@ export default function DepartmentsPage() {
       // Refresh data
       const { data: depts } = await supabase
         .from("departments")
-        .select("id, name, code, description, is_active, company_division_id")
+        .select("id, name, code, description, is_active, company_division_id, start_date, end_date")
         .eq("company_id", selectedCompanyId)
         .order("name");
 
       if (depts) {
         const { data: sections } = await supabase
           .from("sections")
-          .select("id, name, code, description, is_active, department_id")
+          .select("id, name, code, description, is_active, department_id, start_date, end_date")
           .in("department_id", depts.map(d => d.id))
           .order("name");
 
@@ -321,14 +362,14 @@ export default function DepartmentsPage() {
       // Refresh data
       const { data: depts } = await supabase
         .from("departments")
-        .select("id, name, code, description, is_active, company_division_id")
+        .select("id, name, code, description, is_active, company_division_id, start_date, end_date")
         .eq("company_id", selectedCompanyId)
         .order("name");
 
       if (depts) {
         const { data: sections } = await supabase
           .from("sections")
-          .select("id, name, code, description, is_active, department_id")
+          .select("id, name, code, description, is_active, department_id, start_date, end_date")
           .in("department_id", depts.map(d => d.id))
           .order("name");
 
@@ -344,6 +385,10 @@ export default function DepartmentsPage() {
     } finally {
       setIsSaving(false);
     }
+  };
+
+  const formatDateDisplay = (date: string) => {
+    return format(new Date(date), "MMM d, yyyy");
   };
 
   return (
@@ -364,10 +409,21 @@ export default function DepartmentsPage() {
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
+            <div className="flex items-center gap-2">
+              <Calendar className="h-4 w-4 text-muted-foreground" />
+              <Label htmlFor="asOfDate" className="text-sm whitespace-nowrap">As of:</Label>
+              <Input
+                id="asOfDate"
+                type="date"
+                value={asOfDate}
+                onChange={(e) => setAsOfDate(e.target.value)}
+                className="w-[150px]"
+              />
+            </div>
             <Building2 className="h-4 w-4 text-muted-foreground" />
             <Select value={selectedCompanyId} onValueChange={setSelectedCompanyId}>
-              <SelectTrigger className="w-[250px]">
+              <SelectTrigger className="w-[200px]">
                 <SelectValue placeholder="Select company" />
               </SelectTrigger>
               <SelectContent>
@@ -387,11 +443,17 @@ export default function DepartmentsPage() {
           </div>
         </div>
 
+        {asOfDate !== format(new Date(), "yyyy-MM-dd") && (
+          <div className="rounded-lg border border-info/30 bg-info/10 px-4 py-2 text-sm text-info-foreground">
+            Showing departments as of <strong>{format(new Date(asOfDate), "MMMM d, yyyy")}</strong>
+          </div>
+        )}
+
         {isLoading ? (
           <div className="flex items-center justify-center py-12">
             <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
           </div>
-        ) : departments.length === 0 ? (
+        ) : filteredDepartments.length === 0 ? (
           <div className="rounded-lg border border-border bg-card p-8 text-center">
             <FolderTree className="mx-auto h-12 w-12 text-muted-foreground/50" />
             <h3 className="mt-4 text-lg font-medium text-foreground">No departments found</h3>
@@ -407,7 +469,7 @@ export default function DepartmentsPage() {
           </div>
         ) : (
           <div className="space-y-2">
-            {departments.map((dept) => (
+            {filteredDepartments.map((dept) => (
               <div key={dept.id} className="rounded-lg border border-border bg-card overflow-hidden">
                 <div className="flex items-center justify-between p-4 hover:bg-muted/50 transition-colors">
                   <button
@@ -430,6 +492,11 @@ export default function DepartmentsPage() {
                     </div>
                   </button>
                   <div className="flex items-center gap-2">
+                    <Badge variant="outline" className="text-xs gap-1">
+                      <Calendar className="h-3 w-3" />
+                      {formatDateDisplay(dept.start_date)}
+                      {dept.end_date && ` - ${formatDateDisplay(dept.end_date)}`}
+                    </Badge>
                     {dept.sections.length > 0 && (
                       <Badge variant="secondary" className="gap-1">
                         <Users className="h-3 w-3" />
@@ -483,6 +550,11 @@ export default function DepartmentsPage() {
                           </div>
                         </div>
                         <div className="flex items-center gap-2">
+                          <Badge variant="outline" className="text-xs gap-1">
+                            <Calendar className="h-3 w-3" />
+                            {formatDateDisplay(section.start_date)}
+                            {section.end_date && ` - ${formatDateDisplay(section.end_date)}`}
+                          </Badge>
                           <Badge variant={section.is_active ? "outline" : "secondary"}>
                             {section.is_active ? "Active" : "Inactive"}
                           </Badge>
@@ -520,7 +592,7 @@ export default function DepartmentsPage() {
 
       {/* Create/Edit Dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="sm:max-w-[425px]">
+        <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>
             <DialogTitle>
               {editingEntity ? "Edit" : "Create"} {entityType === "department" ? "Department" : "Section"}
@@ -560,6 +632,27 @@ export default function DepartmentsPage() {
                 placeholder={`Optional description for this ${entityType}`}
                 rows={3}
               />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="grid gap-2">
+                <Label htmlFor="start_date">Start Date *</Label>
+                <Input
+                  id="start_date"
+                  type="date"
+                  value={formData.start_date}
+                  onChange={(e) => setFormData({ ...formData, start_date: e.target.value })}
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="end_date">End Date</Label>
+                <Input
+                  id="end_date"
+                  type="date"
+                  value={formData.end_date}
+                  onChange={(e) => setFormData({ ...formData, end_date: e.target.value })}
+                  placeholder="Leave empty for ongoing"
+                />
+              </div>
             </div>
             {entityType === "department" && divisions.length > 0 && (
               <div className="grid gap-2">
