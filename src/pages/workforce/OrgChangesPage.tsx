@@ -4,8 +4,10 @@ import { OrgChangesReporting } from "@/components/admin/OrgChangesReporting";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 export default function OrgChangesPage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   const handleScheduleClick = (filters: { companyId: string; departmentId: string }) => {
@@ -22,20 +24,20 @@ export default function OrgChangesPage() {
     <AppLayout>
       <div className="space-y-6">
         <Breadcrumbs items={[
-          { label: "Workforce", href: "/workforce" },
-          { label: "Org Changes Report" }
+          { label: t("navigation.workforce"), href: "/workforce" },
+          { label: t("workforce.orgChangesReport") }
         ]} />
         <div className="flex items-start justify-between">
           <div>
-            <h1 className="text-3xl font-bold">Organizational Changes Report</h1>
+            <h1 className="text-3xl font-bold">{t("workforce.orgChangesReport")}</h1>
             <p className="text-muted-foreground">
-              Track and analyze organizational structure changes over time
+              {t("workforce.trackOrgChanges")}
             </p>
           </div>
           <Button asChild variant="outline">
             <Link to="/admin/scheduled-reports">
               <Calendar className="mr-2 h-4 w-4" />
-              Schedule Report
+              {t("workforce.scheduleReport")}
             </Link>
           </Button>
         </div>

@@ -37,6 +37,7 @@ import {
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import { format } from "date-fns";
+import { useTranslation } from "react-i18next";
 
 interface Company {
   id: string;
@@ -81,6 +82,7 @@ const isActiveAtDate = (startDate: string, endDate: string | null, checkDate: st
 };
 
 export default function DepartmentsPage() {
+  const { t } = useTranslation();
   const { isAdmin } = useAuth();
   const [companies, setCompanies] = useState<Company[]>([]);
   const [divisions, setDivisions] = useState<CompanyDivision[]>([]);
@@ -396,8 +398,8 @@ export default function DepartmentsPage() {
     <AppLayout>
       <div className="space-y-6">
         <Breadcrumbs items={[
-          { label: "Workforce", href: "/workforce" },
-          { label: "Departments" }
+          { label: t("navigation.workforce"), href: "/workforce" },
+          { label: t("navigation.departments") }
         ]} />
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-3">
@@ -406,10 +408,10 @@ export default function DepartmentsPage() {
             </div>
             <div>
               <h1 className="text-2xl font-bold tracking-tight text-foreground">
-                Departments
+                {t("navigation.departments")}
               </h1>
               <p className="text-muted-foreground">
-                Manage departments and sections
+                {t("workforce.manageDepartments")}
               </p>
             </div>
           </div>
@@ -417,7 +419,7 @@ export default function DepartmentsPage() {
           <div className="flex items-center gap-2 flex-wrap">
             <div className="flex items-center gap-2">
               <Calendar className="h-4 w-4 text-muted-foreground" />
-              <Label htmlFor="asOfDate" className="text-sm whitespace-nowrap">As of:</Label>
+              <Label htmlFor="asOfDate" className="text-sm whitespace-nowrap">{t("workforce.asOf")}:</Label>
               <Input
                 id="asOfDate"
                 type="date"
@@ -429,7 +431,7 @@ export default function DepartmentsPage() {
             <Building2 className="h-4 w-4 text-muted-foreground" />
             <Select value={selectedCompanyId} onValueChange={setSelectedCompanyId}>
               <SelectTrigger className="w-[200px]">
-                <SelectValue placeholder="Select company" />
+                <SelectValue placeholder={t("workforce.selectCompany")} />
               </SelectTrigger>
               <SelectContent>
                 {companies.map((company) => (
@@ -442,7 +444,7 @@ export default function DepartmentsPage() {
             {isAdmin && selectedCompanyId && (
               <Button onClick={() => openCreateDialog("department")} className="gap-2">
                 <Plus className="h-4 w-4" />
-                Add Department
+                {t("workforce.addDepartment")}
               </Button>
             )}
           </div>
@@ -450,7 +452,7 @@ export default function DepartmentsPage() {
 
         {asOfDate !== format(new Date(), "yyyy-MM-dd") && (
           <div className="rounded-lg border border-info/30 bg-info/10 px-4 py-2 text-sm text-info-foreground">
-            Showing departments as of <strong>{format(new Date(asOfDate), "MMMM d, yyyy")}</strong>
+            {t("workforce.showingAsOf")} <strong>{format(new Date(asOfDate), "MMMM d, yyyy")}</strong>
           </div>
         )}
 
@@ -461,14 +463,14 @@ export default function DepartmentsPage() {
         ) : filteredDepartments.length === 0 ? (
           <div className="rounded-lg border border-border bg-card p-8 text-center">
             <FolderTree className="mx-auto h-12 w-12 text-muted-foreground/50" />
-            <h3 className="mt-4 text-lg font-medium text-foreground">No departments found</h3>
+            <h3 className="mt-4 text-lg font-medium text-foreground">{t("workforce.noDepartmentsFound")}</h3>
             <p className="mt-2 text-muted-foreground">
-              {isAdmin ? "Get started by creating a department." : "No departments have been created for this company."}
+              {isAdmin ? t("workforce.getStartedDepartment") : t("workforce.noDepartmentsCreated")}
             </p>
             {isAdmin && (
               <Button onClick={() => openCreateDialog("department")} className="mt-4 gap-2">
                 <Plus className="h-4 w-4" />
-                Create Department
+                {t("workforce.createDepartment")}
               </Button>
             )}
           </div>
@@ -505,11 +507,11 @@ export default function DepartmentsPage() {
                     {dept.sections.length > 0 && (
                       <Badge variant="secondary" className="gap-1">
                         <Users className="h-3 w-3" />
-                        {dept.sections.length} sections
+                        {dept.sections.length} {t("workforce.sections")}
                       </Badge>
                     )}
                     <Badge variant={dept.is_active ? "default" : "secondary"}>
-                      {dept.is_active ? "Active" : "Inactive"}
+                      {dept.is_active ? t("common.active") : t("common.inactive")}
                     </Badge>
                     {isAdmin && (
                       <>
@@ -517,7 +519,7 @@ export default function DepartmentsPage() {
                           variant="ghost"
                           size="icon"
                           onClick={() => openCreateDialog("section", dept.id)}
-                          title="Add Section"
+                          title={t("workforce.addSection")}
                         >
                           <Plus className="h-4 w-4" />
                         </Button>
@@ -525,7 +527,7 @@ export default function DepartmentsPage() {
                           variant="ghost"
                           size="icon"
                           onClick={() => openEditDialog("department", dept)}
-                          title="Edit Department"
+                          title={t("workforce.editDepartment")}
                         >
                           <Pencil className="h-4 w-4" />
                         </Button>
@@ -533,7 +535,7 @@ export default function DepartmentsPage() {
                           variant="ghost"
                           size="icon"
                           onClick={() => openDeleteDialog("department", dept)}
-                          title="Delete Department"
+                          title={t("workforce.deleteDepartment")}
                           className="text-destructive hover:text-destructive"
                         >
                           <Trash2 className="h-4 w-4" />
@@ -561,7 +563,7 @@ export default function DepartmentsPage() {
                             {section.end_date && ` - ${formatDateDisplay(section.end_date)}`}
                           </Badge>
                           <Badge variant={section.is_active ? "outline" : "secondary"}>
-                            {section.is_active ? "Active" : "Inactive"}
+                            {section.is_active ? t("common.active") : t("common.inactive")}
                           </Badge>
                           {isAdmin && (
                             <>
@@ -569,7 +571,7 @@ export default function DepartmentsPage() {
                                 variant="ghost"
                                 size="icon"
                                 onClick={() => openEditDialog("section", section)}
-                                title="Edit Section"
+                                title={t("workforce.editSection")}
                               >
                                 <Pencil className="h-4 w-4" />
                               </Button>
@@ -577,7 +579,7 @@ export default function DepartmentsPage() {
                                 variant="ghost"
                                 size="icon"
                                 onClick={() => openDeleteDialog("section", section)}
-                                title="Delete Section"
+                                title={t("workforce.deleteSection")}
                                 className="text-destructive hover:text-destructive"
                               >
                                 <Trash2 className="h-4 w-4" />
