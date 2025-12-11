@@ -21,7 +21,9 @@ export type Database = {
           code: string
           country: string | null
           created_at: string
+          division_id: string | null
           email: string | null
+          group_id: string | null
           id: string
           industry: string | null
           is_active: boolean
@@ -39,7 +41,9 @@ export type Database = {
           code: string
           country?: string | null
           created_at?: string
+          division_id?: string | null
           email?: string | null
+          group_id?: string | null
           id?: string
           industry?: string | null
           is_active?: boolean
@@ -57,7 +61,9 @@ export type Database = {
           code?: string
           country?: string | null
           created_at?: string
+          division_id?: string | null
           email?: string | null
+          group_id?: string | null
           id?: string
           industry?: string | null
           is_active?: boolean
@@ -69,7 +75,93 @@ export type Database = {
           updated_at?: string
           website?: string | null
         }
+        Relationships: [
+          {
+            foreignKeyName: "companies_division_id_fkey"
+            columns: ["division_id"]
+            isOneToOne: false
+            referencedRelation: "divisions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "companies_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "company_groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      company_groups: {
+        Row: {
+          code: string
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          updated_at?: string
+        }
         Relationships: []
+      }
+      divisions: {
+        Row: {
+          code: string
+          created_at: string
+          description: string | null
+          group_id: string
+          id: string
+          is_active: boolean
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          description?: string | null
+          group_id: string
+          id?: string
+          is_active?: boolean
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          description?: string | null
+          group_id?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "divisions_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "company_groups"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {

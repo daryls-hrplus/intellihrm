@@ -42,6 +42,7 @@ const navItems: NavItem[] = [
     icon: Settings,
     adminOnly: true,
     children: [
+      { title: "Company Groups", href: "/admin/company-groups" },
       { title: "Companies", href: "/admin/companies" },
       { title: "Users", href: "/admin/users" },
       { title: "Roles & Permissions", href: "/admin/roles" },
