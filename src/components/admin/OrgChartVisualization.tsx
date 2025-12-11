@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -13,6 +13,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { 
   Loader2,
   Users,
@@ -25,11 +31,16 @@ import {
   Plus,
   Minus,
   Equal,
+  FileDown,
+  MoreVertical,
+  Printer,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
+import html2canvas from "html2canvas";
+import jsPDF from "jspdf";
 
 interface Position {
   id: string;
@@ -281,6 +292,41 @@ export function OrgChartVisualization({ companyId }: OrgChartVisualizationProps)
     return email[0].toUpperCase();
   };
 
+  // PDF Export function
+  const exportToPdf = useCallback(async (elementId: string, title: string) => {
+    const element = document.getElementById(elementId);
+    if (!element) {
+      toast.error("Could not find element to export");
+      return;
+    }
+
+    toast.loading("Generating PDF...", { id: "pdf-export" });
+
+    try {
+      const canvas = await html2canvas(element, {
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: "#ffffff",
+      });
+
+      const imgData = canvas.toDataURL("image/png");
+      const pdf = new jsPDF({
+        orientation: canvas.width > canvas.height ? "landscape" : "portrait",
+        unit: "px",
+        format: [canvas.width, canvas.height],
+      });
+
+      pdf.addImage(imgData, "PNG", 0, 0, canvas.width, canvas.height);
+      pdf.save(`${title.toLowerCase().replace(/\s+/g, "-")}-${format(new Date(), "yyyy-MM-dd")}.pdf`);
+
+      toast.success("PDF exported successfully", { id: "pdf-export" });
+    } catch (error) {
+      console.error("Error exporting PDF:", error);
+      toast.error("Failed to export PDF", { id: "pdf-export" });
+    }
+  }, []);
+
   // Comparison summary
   const comparisonSummary = useMemo(() => {
     if (!comparisonMode) return null;
@@ -299,12 +345,27 @@ export function OrgChartVisualization({ companyId }: OrgChartVisualizationProps)
     const isExpanded = expandedNodes.has(node.id);
     const hasChildren = node.children.length > 0;
     const isAdded = node.changeStatus === "added";
+    const cardId = `position-card-${node.id}`;
+
+    const handleExportPdf = () => {
+      // First expand all children for complete export
+      const getAllChildIds = (n: PositionNode): string[] => {
+        return [n.id, ...n.children.flatMap(getAllChildIds)];
+      };
+      const allIds = getAllChildIds(node);
+      setExpandedNodes(prev => new Set([...prev, ...allIds]));
+      
+      // Wait for render then export
+      setTimeout(() => {
+        exportToPdf(cardId, `${node.title}-org-chart`);
+      }, 100);
+    };
 
     return (
-      <div className="relative">
+      <div id={cardId} className="relative">
         {/* Connector line from parent */}
         {level > 0 && (
-          <div className="absolute -top-4 left-6 w-px h-4 bg-border" />
+          <div className="absolute -top-4 left-6 w-px h-4 bg-border print:hidden" />
         )}
         
         <div 
@@ -324,7 +385,7 @@ export function OrgChartVisualization({ companyId }: OrgChartVisualizationProps)
                     <Button
                       size="icon"
                       variant="ghost"
-                      className="h-6 w-6 shrink-0"
+                      className="h-6 w-6 shrink-0 print:hidden"
                       onClick={() => toggleNode(node.id)}
                     >
                       {isExpanded ? (
@@ -334,7 +395,7 @@ export function OrgChartVisualization({ companyId }: OrgChartVisualizationProps)
                       )}
                     </Button>
                   )}
-                  {!hasChildren && <div className="w-6" />}
+                  {!hasChildren && <div className="w-6 print:hidden" />}
                   <div className="min-w-0">
                     <div className="flex items-center gap-2">
                       <h4 className="font-semibold text-sm truncate">{node.title}</h4>
@@ -360,12 +421,46 @@ export function OrgChartVisualization({ companyId }: OrgChartVisualizationProps)
                   </Badge>
                 )}
               </div>
-              {node.employees.length > 0 && (
-                <Badge variant="secondary" className="shrink-0">
-                  <Users className="h-3 w-3 mr-1" />
-                  {node.employees.length}
-                </Badge>
-              )}
+              <div className="flex items-center gap-1">
+                {node.employees.length > 0 && (
+                  <Badge variant="secondary" className="shrink-0">
+                    <Users className="h-3 w-3 mr-1" />
+                    {node.employees.length}
+                  </Badge>
+                )}
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button size="icon" variant="ghost" className="h-6 w-6 print:hidden">
+                      <MoreVertical className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem onClick={handleExportPdf}>
+                      <FileDown className="h-4 w-4 mr-2" />
+                      Export to PDF
+                    </DropdownMenuItem>
+                    {hasChildren && (
+                      <>
+                        <DropdownMenuItem onClick={() => {
+                          const getAllChildIds = (n: PositionNode): string[] => [n.id, ...n.children.flatMap(getAllChildIds)];
+                          setExpandedNodes(prev => new Set([...prev, ...getAllChildIds(node)]));
+                        }}>
+                          <ChevronDown className="h-4 w-4 mr-2" />
+                          Expand All Below
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => {
+                          const getAllChildIds = (n: PositionNode): string[] => n.children.flatMap(c => [c.id, ...getAllChildIds(c)]);
+                          const childIds = new Set(getAllChildIds(node));
+                          setExpandedNodes(prev => new Set([...prev].filter(id => !childIds.has(id))));
+                        }}>
+                          <ChevronRight className="h-4 w-4 mr-2" />
+                          Collapse All Below
+                        </DropdownMenuItem>
+                      </>
+                    )}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
             </div>
 
             {/* Employees */}

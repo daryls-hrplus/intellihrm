@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import { Switch } from "@/components/ui/switch";
 import {
   Select,
   SelectContent,
@@ -21,10 +22,13 @@ import {
   Calendar,
   Download,
   RefreshCw,
+  ArrowUpRight,
+  ArrowDownRight,
+  Minus,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { format, eachMonthOfInterval, parseISO, startOfMonth, endOfMonth, subMonths, isWithinInterval } from "date-fns";
+import { format, eachMonthOfInterval, parseISO, startOfMonth, endOfMonth, subMonths, subYears, isWithinInterval } from "date-fns";
 import {
   LineChart,
   Line,
@@ -39,6 +43,8 @@ import {
   PieChart,
   Pie,
   Cell,
+  ComposedChart,
+  Area,
 } from "recharts";
 
 interface Position {
@@ -88,6 +94,7 @@ export function OrgChangesReporting({ companyId }: OrgChangesReportingProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [startDate, setStartDate] = useState<string>(() => format(subMonths(new Date(), 11), "yyyy-MM-dd"));
   const [endDate, setEndDate] = useState<string>(() => format(new Date(), "yyyy-MM-dd"));
+  const [showYoY, setShowYoY] = useState(false);
 
   useEffect(() => {
     fetchCompanies();
@@ -275,6 +282,71 @@ export function OrgChangesReporting({ companyId }: OrgChangesReportingProps) {
     };
   }, [monthlyData]);
 
+  // Year-over-Year comparison
+  const yoyComparison = useMemo(() => {
+    if (!showYoY || monthlyData.length === 0) return null;
+
+    const currentEnd = parseISO(endDate);
+    const currentStart = parseISO(startDate);
+    const periodLengthMs = currentEnd.getTime() - currentStart.getTime();
+    
+    // Previous year period
+    const prevYearEnd = subYears(currentEnd, 1);
+    const prevYearStart = subYears(currentStart, 1);
+    const prevYearEndStr = format(prevYearEnd, "yyyy-MM-dd");
+    const prevYearStartStr = format(prevYearStart, "yyyy-MM-dd");
+
+    // Get counts for previous year
+    const getActiveCount = (items: { start_date: string; end_date: string | null }[], date: string) => {
+      return items.filter(item => {
+        return item.start_date <= date && (!item.end_date || item.end_date >= date);
+      }).length;
+    };
+
+    const currentPositions = summaryStats?.currentPositions || 0;
+    const currentEmployees = summaryStats?.currentEmployees || 0;
+    const currentDepartments = summaryStats?.currentDepartments || 0;
+
+    const prevYearPositions = getActiveCount(positions, prevYearEndStr);
+    const prevYearDepartments = departments.filter(d => 
+      d.start_date <= prevYearEndStr && (!d.end_date || d.end_date >= prevYearEndStr)
+    ).length;
+    
+    const prevYearEmployeeSet = new Set(
+      employeePositions
+        .filter(ep => ep.start_date <= prevYearEndStr && (!ep.end_date || ep.end_date >= prevYearEndStr))
+        .map(ep => ep.employee_id)
+    );
+    const prevYearEmployees = prevYearEmployeeSet.size;
+
+    const calcGrowth = (current: number, previous: number) => {
+      if (previous === 0) return current > 0 ? 100 : 0;
+      return ((current - previous) / previous) * 100;
+    };
+
+    return {
+      positions: {
+        current: currentPositions,
+        previous: prevYearPositions,
+        change: currentPositions - prevYearPositions,
+        percentGrowth: calcGrowth(currentPositions, prevYearPositions),
+      },
+      employees: {
+        current: currentEmployees,
+        previous: prevYearEmployees,
+        change: currentEmployees - prevYearEmployees,
+        percentGrowth: calcGrowth(currentEmployees, prevYearEmployees),
+      },
+      departments: {
+        current: currentDepartments,
+        previous: prevYearDepartments,
+        change: currentDepartments - prevYearDepartments,
+        percentGrowth: calcGrowth(currentDepartments, prevYearDepartments),
+      },
+      prevYearPeriod: `${format(prevYearStart, "MMM yyyy")} - ${format(prevYearEnd, "MMM yyyy")}`,
+    };
+  }, [showYoY, positions, departments, employeePositions, summaryStats, startDate, endDate]);
+
   // Department breakdown for pie chart
   const departmentBreakdown = useMemo(() => {
     const today = format(new Date(), "yyyy-MM-dd");
@@ -375,9 +447,114 @@ export function OrgChangesReporting({ companyId }: OrgChangesReportingProps) {
               <Download className="h-4 w-4 mr-2" />
               Export CSV
             </Button>
+            <div className="flex items-center gap-2">
+              <Switch
+                id="yoyMode"
+                checked={showYoY}
+                onCheckedChange={setShowYoY}
+              />
+              <Label htmlFor="yoyMode" className="text-sm font-medium cursor-pointer">
+                Year-over-Year
+              </Label>
+            </div>
           </div>
         </CardContent>
       </Card>
+
+      {/* YoY Comparison Section */}
+      {showYoY && yoyComparison && selectedCompanyId && (
+        <Card className="border-primary/20 bg-primary/5">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Calendar className="h-5 w-5" />
+              Year-over-Year Comparison
+            </CardTitle>
+            <CardDescription>
+              Comparing current period to {yoyComparison.prevYearPeriod}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid gap-4 md:grid-cols-3">
+              {/* Positions YoY */}
+              <div className="rounded-lg border bg-card p-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium text-muted-foreground">Positions</span>
+                  <Briefcase className="h-4 w-4 text-muted-foreground" />
+                </div>
+                <div className="mt-2 flex items-end justify-between">
+                  <div>
+                    <span className="text-2xl font-bold">{yoyComparison.positions.current}</span>
+                    <span className="text-sm text-muted-foreground ml-2">vs {yoyComparison.positions.previous}</span>
+                  </div>
+                  <div className={`flex items-center gap-1 text-sm font-medium ${yoyComparison.positions.percentGrowth >= 0 ? "text-green-600" : "text-destructive"}`}>
+                    {yoyComparison.positions.percentGrowth >= 0 ? (
+                      <ArrowUpRight className="h-4 w-4" />
+                    ) : (
+                      <ArrowDownRight className="h-4 w-4" />
+                    )}
+                    {Math.abs(yoyComparison.positions.percentGrowth).toFixed(1)}%
+                  </div>
+                </div>
+                <div className="mt-1 text-xs text-muted-foreground">
+                  {yoyComparison.positions.change >= 0 ? "+" : ""}{yoyComparison.positions.change} positions
+                </div>
+              </div>
+
+              {/* Employees YoY */}
+              <div className="rounded-lg border bg-card p-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium text-muted-foreground">Employees</span>
+                  <Users className="h-4 w-4 text-muted-foreground" />
+                </div>
+                <div className="mt-2 flex items-end justify-between">
+                  <div>
+                    <span className="text-2xl font-bold">{yoyComparison.employees.current}</span>
+                    <span className="text-sm text-muted-foreground ml-2">vs {yoyComparison.employees.previous}</span>
+                  </div>
+                  <div className={`flex items-center gap-1 text-sm font-medium ${yoyComparison.employees.percentGrowth >= 0 ? "text-green-600" : "text-destructive"}`}>
+                    {yoyComparison.employees.percentGrowth >= 0 ? (
+                      <ArrowUpRight className="h-4 w-4" />
+                    ) : (
+                      <ArrowDownRight className="h-4 w-4" />
+                    )}
+                    {Math.abs(yoyComparison.employees.percentGrowth).toFixed(1)}%
+                  </div>
+                </div>
+                <div className="mt-1 text-xs text-muted-foreground">
+                  {yoyComparison.employees.change >= 0 ? "+" : ""}{yoyComparison.employees.change} employees
+                </div>
+              </div>
+
+              {/* Departments YoY */}
+              <div className="rounded-lg border bg-card p-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium text-muted-foreground">Departments</span>
+                  <Building2 className="h-4 w-4 text-muted-foreground" />
+                </div>
+                <div className="mt-2 flex items-end justify-between">
+                  <div>
+                    <span className="text-2xl font-bold">{yoyComparison.departments.current}</span>
+                    <span className="text-sm text-muted-foreground ml-2">vs {yoyComparison.departments.previous}</span>
+                  </div>
+                  <div className={`flex items-center gap-1 text-sm font-medium ${yoyComparison.departments.percentGrowth >= 0 ? "text-green-600" : "text-destructive"}`}>
+                    {yoyComparison.departments.change === 0 ? (
+                      <Minus className="h-4 w-4 text-muted-foreground" />
+                    ) : yoyComparison.departments.percentGrowth >= 0 ? (
+                      <ArrowUpRight className="h-4 w-4" />
+                    ) : (
+                      <ArrowDownRight className="h-4 w-4" />
+                    )}
+                    {yoyComparison.departments.change === 0 ? "No change" : `${Math.abs(yoyComparison.departments.percentGrowth).toFixed(1)}%`}
+                  </div>
+                </div>
+                <div className="mt-1 text-xs text-muted-foreground">
+                  {yoyComparison.departments.change >= 0 ? "+" : ""}{yoyComparison.departments.change} departments
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {!selectedCompanyId ? (
         <Card>
