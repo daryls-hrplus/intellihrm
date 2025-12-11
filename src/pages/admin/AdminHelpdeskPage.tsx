@@ -12,6 +12,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { sendTicketNotification } from "@/hooks/useTicketNotifications";
+import TicketAnalytics from "@/components/helpdesk/TicketAnalytics";
 import {
   Ticket,
   Clock,
@@ -23,6 +24,7 @@ import {
   Timer,
   TrendingUp,
   BarChart3,
+  PieChart,
 } from "lucide-react";
 import { format, formatDistanceToNow, differenceInHours, isPast, addHours } from "date-fns";
 
@@ -214,10 +216,26 @@ export default function AdminHelpdeskPage() {
   return (
     <AppLayout>
       <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Helpdesk Dashboard</h1>
-          <p className="text-muted-foreground">Manage support tickets and monitor SLAs</p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">Helpdesk Dashboard</h1>
+            <p className="text-muted-foreground">Manage support tickets and monitor SLAs</p>
+          </div>
         </div>
+
+        <Tabs defaultValue="tickets" className="space-y-4">
+          <TabsList>
+            <TabsTrigger value="tickets" className="flex items-center gap-2">
+              <Ticket className="h-4 w-4" />
+              Tickets
+            </TabsTrigger>
+            <TabsTrigger value="analytics" className="flex items-center gap-2">
+              <PieChart className="h-4 w-4" />
+              Analytics
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="tickets" className="space-y-6">
 
         {/* Stats Cards */}
         <div className="grid gap-4 md:grid-cols-4 lg:grid-cols-8">
@@ -649,6 +667,12 @@ export default function AdminHelpdeskPage() {
             )}
           </DialogContent>
         </Dialog>
+          </TabsContent>
+
+          <TabsContent value="analytics">
+            <TicketAnalytics />
+          </TabsContent>
+        </Tabs>
       </div>
     </AppLayout>
   );
