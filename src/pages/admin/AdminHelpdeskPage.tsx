@@ -14,6 +14,7 @@ import { toast } from "sonner";
 import { sendTicketNotification } from "@/hooks/useTicketNotifications";
 import TicketAnalytics from "@/components/helpdesk/TicketAnalytics";
 import { SlaMetricsDashboard } from "@/components/helpdesk/SlaMetricsDashboard";
+import { SlaConfigurationPanel } from "@/components/helpdesk/SlaConfigurationPanel";
 import {
   Ticket,
   Clock,
@@ -26,6 +27,7 @@ import {
   TrendingUp,
   BarChart3,
   PieChart,
+  Settings,
 } from "lucide-react";
 import { format, formatDistanceToNow, differenceInHours, isPast, addHours } from "date-fns";
 
@@ -267,6 +269,10 @@ export default function AdminHelpdeskPage() {
             <TabsTrigger value="analytics" className="flex items-center gap-2">
               <PieChart className="h-4 w-4" />
               Analytics
+            </TabsTrigger>
+            <TabsTrigger value="sla-config" className="flex items-center gap-2">
+              <Settings className="h-4 w-4" />
+              SLA Config
             </TabsTrigger>
           </TabsList>
 
@@ -710,6 +716,10 @@ export default function AdminHelpdeskPage() {
 
           <TabsContent value="analytics">
             <TicketAnalytics />
+          </TabsContent>
+
+          <TabsContent value="sla-config">
+            <SlaConfigurationPanel />
           </TabsContent>
         </Tabs>
       </div>
