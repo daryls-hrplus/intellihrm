@@ -173,6 +173,12 @@ export function ScenarioPlanning({ currentHeadcount, sharedToken }: ScenarioPlan
   const [selectedVersions, setSelectedVersions] = useState<string[]>([]);
   const [versionsToCompare, setVersionsToCompare] = useState<ScenarioVersion[]>([]);
 
+  // Share dialog state
+  const [showShareDialog, setShowShareDialog] = useState(false);
+  const [shareRecipients, setShareRecipients] = useState("");
+  const [shareMessage, setShareMessage] = useState("");
+  const [isSendingNotification, setIsSendingNotification] = useState(false);
+
   useEffect(() => {
     if (sharedToken) {
       loadSharedScenario(sharedToken);
@@ -285,7 +291,7 @@ export function ScenarioPlanning({ currentHeadcount, sharedToken }: ScenarioPlan
     }
   };
 
-  const generateShareLink = async () => {
+  const generateShareLink = async (sendEmails = false) => {
     if (!user || scenarios.length === 0) {
       toast.error("No scenarios to share");
       return;
@@ -312,16 +318,87 @@ export function ScenarioPlanning({ currentHeadcount, sharedToken }: ScenarioPlan
     if (error) {
       toast.error("Failed to create share link");
       console.error(error);
-    } else {
-      const url = `${window.location.origin}/admin/org-structure?scenario=${shareToken}`;
-      setShareUrl(url);
-      setCurrentSavedId(data.id);
-      
-      // Copy to clipboard
-      await navigator.clipboard.writeText(url);
+      setIsSaving(false);
+      return null;
+    }
+    
+    const url = `${window.location.origin}/admin/org-structure?scenario=${shareToken}`;
+    setShareUrl(url);
+    setCurrentSavedId(data.id);
+    
+    // Copy to clipboard
+    await navigator.clipboard.writeText(url);
+    
+    setIsSaving(false);
+    return url;
+  };
+
+  const handleShareClick = () => {
+    setShowShareDialog(true);
+  };
+
+  const handleShareWithEmail = async () => {
+    const url = shareUrl || await generateShareLink(true);
+    if (!url) return;
+
+    const emails = shareRecipients
+      .split(/[,;\n]/)
+      .map(e => e.trim())
+      .filter(e => e);
+
+    if (emails.length === 0) {
+      toast.success("Share link copied to clipboard!");
+      setShowShareDialog(false);
+      return;
+    }
+
+    setIsSendingNotification(true);
+    try {
+      // Get current user profile
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("full_name, email")
+        .eq("id", user?.id)
+        .single();
+
+      const response = await supabase.functions.invoke("send-scenario-notification", {
+        body: {
+          recipientEmails: emails,
+          scenarioName: `Scenario Planning - ${new Date().toLocaleDateString()}`,
+          shareUrl: url,
+          senderName: profile?.full_name || "A colleague",
+          senderEmail: profile?.email || user?.email || "",
+          message: shareMessage || undefined,
+        },
+      });
+
+      if (response.error) {
+        throw new Error(response.error.message);
+      }
+
+      const result = response.data;
+      if (result.emailSent) {
+        toast.success(`Share link sent to ${result.recipientCount} recipient(s)`);
+      } else if (result.reason) {
+        toast.info(result.reason);
+        toast.success("Share link copied to clipboard!");
+      }
+
+      setShowShareDialog(false);
+      setShareRecipients("");
+      setShareMessage("");
+    } catch (error: any) {
+      console.error("Error sending notification:", error);
+      toast.error("Failed to send email notification, but link was copied");
+    }
+    setIsSendingNotification(false);
+  };
+
+  const handleQuickShare = async () => {
+    const url = await generateShareLink(false);
+    if (url) {
       toast.success("Share link copied to clipboard!");
     }
-    setIsSaving(false);
   };
 
   const copyShareLink = async () => {
@@ -919,7 +996,7 @@ export function ScenarioPlanning({ currentHeadcount, sharedToken }: ScenarioPlan
                   <Save className="h-4 w-4 mr-2" />
                   Save
                 </Button>
-                <Button variant="outline" onClick={generateShareLink} disabled={isSaving}>
+                <Button variant="outline" onClick={handleShareClick} disabled={isSaving}>
                   {isSaving ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Share2 className="h-4 w-4 mr-2" />}
                   Share
                 </Button>
@@ -1743,6 +1820,77 @@ export function ScenarioPlanning({ currentHeadcount, sharedToken }: ScenarioPlan
           </ScrollArea>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowCompareDialog(false)}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Share Dialog */}
+      <Dialog open={showShareDialog} onOpenChange={setShowShareDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Share2 className="h-5 w-5" />
+              Share Scenario Analysis
+            </DialogTitle>
+            <DialogDescription>
+              Share your scenario planning analysis with team members via email
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div>
+              <Label htmlFor="share-recipients">Recipient Email Addresses</Label>
+              <Textarea
+                id="share-recipients"
+                value={shareRecipients}
+                onChange={(e) => setShareRecipients(e.target.value)}
+                placeholder="Enter email addresses separated by commas or new lines&#10;e.g., colleague@company.com, manager@company.com"
+                rows={3}
+              />
+              <p className="text-xs text-muted-foreground mt-1">
+                Leave empty to just copy the share link
+              </p>
+            </div>
+            <div>
+              <Label htmlFor="share-message">Message (optional)</Label>
+              <Textarea
+                id="share-message"
+                value={shareMessage}
+                onChange={(e) => setShareMessage(e.target.value)}
+                placeholder="Add a personal message..."
+                rows={2}
+              />
+            </div>
+            {shareUrl && (
+              <div className="flex items-center gap-2 p-2 bg-muted rounded-md text-sm">
+                <Link className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                <span className="truncate text-muted-foreground flex-1">{shareUrl}</span>
+                <Button size="sm" variant="ghost" className="h-7 px-2" onClick={copyShareLink}>
+                  <Copy className="h-3 w-3" />
+                </Button>
+              </div>
+            )}
+          </div>
+          <DialogFooter className="flex-col sm:flex-row gap-2">
+            <Button variant="outline" onClick={() => setShowShareDialog(false)}>Cancel</Button>
+            <Button 
+              variant="secondary" 
+              onClick={handleQuickShare} 
+              disabled={isSaving}
+            >
+              {isSaving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Link className="h-4 w-4 mr-2" />}
+              Copy Link Only
+            </Button>
+            <Button 
+              onClick={handleShareWithEmail} 
+              disabled={isSaving || isSendingNotification}
+            >
+              {isSendingNotification ? (
+                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+              ) : (
+                <Share2 className="h-4 w-4 mr-2" />
+              )}
+              {shareRecipients.trim() ? "Share & Notify" : "Copy Link"}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
