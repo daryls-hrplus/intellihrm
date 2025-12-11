@@ -51,9 +51,24 @@ interface Company {
   code: string;
 }
 
+interface Division {
+  id: string;
+  name: string;
+  code: string;
+}
+
+interface Department {
+  id: string;
+  name: string;
+  code: string;
+  company_division_id: string | null;
+}
+
 interface JobFamily {
   id: string;
   company_id: string;
+  company_division_id: string | null;
+  department_id: string;
   name: string;
   code: string;
   description: string | null;
@@ -61,12 +76,16 @@ interface JobFamily {
   start_date: string;
   end_date: string | null;
   created_at: string;
+  departments?: { name: string; code: string };
+  company_divisions?: { name: string; code: string } | null;
 }
 
 const emptyForm = {
   name: "",
   code: "",
   description: "",
+  company_division_id: "",
+  department_id: "",
   is_active: true,
   start_date: format(new Date(), "yyyy-MM-dd"),
   end_date: "",
@@ -75,6 +94,8 @@ const emptyForm = {
 export default function JobFamiliesPage() {
   const [companies, setCompanies] = useState<Company[]>([]);
   const [selectedCompanyId, setSelectedCompanyId] = useState<string>("");
+  const [divisions, setDivisions] = useState<Division[]>([]);
+  const [departments, setDepartments] = useState<Department[]>([]);
   const [jobFamilies, setJobFamilies] = useState<JobFamily[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
@@ -104,15 +125,40 @@ export default function JobFamiliesPage() {
 
   useEffect(() => {
     if (selectedCompanyId) {
+      fetchDivisionsAndDepartments();
       fetchJobFamilies();
     }
   }, [selectedCompanyId]);
+
+  const fetchDivisionsAndDepartments = async () => {
+    const [divisionsRes, departmentsRes] = await Promise.all([
+      supabase
+        .from("company_divisions")
+        .select("id, name, code")
+        .eq("company_id", selectedCompanyId)
+        .eq("is_active", true)
+        .order("name"),
+      supabase
+        .from("departments")
+        .select("id, name, code, company_division_id")
+        .eq("company_id", selectedCompanyId)
+        .eq("is_active", true)
+        .order("name"),
+    ]);
+
+    setDivisions(divisionsRes.data || []);
+    setDepartments(departmentsRes.data || []);
+  };
 
   const fetchJobFamilies = async () => {
     setIsLoading(true);
     const { data, error } = await supabase
       .from("job_families")
-      .select("*")
+      .select(`
+        *,
+        departments(name, code),
+        company_divisions(name, code)
+      `)
       .eq("company_id", selectedCompanyId)
       .order("name");
 
@@ -131,6 +177,8 @@ export default function JobFamiliesPage() {
         name: jobFamily.name,
         code: jobFamily.code,
         description: jobFamily.description || "",
+        company_division_id: jobFamily.company_division_id || "",
+        department_id: jobFamily.department_id,
         is_active: jobFamily.is_active,
         start_date: jobFamily.start_date,
         end_date: jobFamily.end_date || "",
@@ -147,10 +195,16 @@ export default function JobFamiliesPage() {
       toast.error("Name and code are required");
       return;
     }
+    if (!formData.department_id) {
+      toast.error("Department is required");
+      return;
+    }
 
     setIsSaving(true);
     const payload = {
       company_id: selectedCompanyId,
+      company_division_id: formData.company_division_id || null,
+      department_id: formData.department_id,
       name: formData.name.trim(),
       code: formData.code.trim().toUpperCase(),
       description: formData.description.trim() || null,
@@ -188,7 +242,7 @@ export default function JobFamiliesPage() {
         .single();
 
       if (error) {
-        toast.error(error.message.includes("duplicate") ? "Code already exists" : "Failed to create job family");
+        toast.error(error.message.includes("duplicate") ? "Code already exists for this department" : "Failed to create job family");
       } else {
         toast.success("Job family created");
         await logAction({
@@ -228,6 +282,11 @@ export default function JobFamiliesPage() {
     }
     setDeleteDialogOpen(false);
   };
+
+  // Filter departments by selected division
+  const filteredDepartments = formData.company_division_id
+    ? departments.filter((d) => d.company_division_id === formData.company_division_id)
+    : departments;
 
   const filteredJobFamilies = jobFamilies.filter(
     (jf) =>
@@ -307,7 +366,8 @@ export default function JobFamiliesPage() {
                   <TableRow>
                     <TableHead>Code</TableHead>
                     <TableHead>Name</TableHead>
-                    <TableHead>Description</TableHead>
+                    <TableHead>Division</TableHead>
+                    <TableHead>Department</TableHead>
                     <TableHead>Start Date</TableHead>
                     <TableHead>End Date</TableHead>
                     <TableHead>Status</TableHead>
@@ -317,7 +377,7 @@ export default function JobFamiliesPage() {
                 <TableBody>
                   {filteredJobFamilies.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={7} className="text-center text-muted-foreground py-8">
+                      <TableCell colSpan={8} className="text-center text-muted-foreground py-8">
                         No job families found
                       </TableCell>
                     </TableRow>
@@ -326,9 +386,10 @@ export default function JobFamiliesPage() {
                       <TableRow key={jf.id}>
                         <TableCell className="font-mono">{jf.code}</TableCell>
                         <TableCell className="font-medium">{jf.name}</TableCell>
-                        <TableCell className="text-muted-foreground max-w-[200px] truncate">
-                          {jf.description || "-"}
+                        <TableCell className="text-muted-foreground">
+                          {jf.company_divisions?.name || "-"}
                         </TableCell>
+                        <TableCell>{jf.departments?.name || "-"}</TableCell>
                         <TableCell>{format(new Date(jf.start_date), "MMM d, yyyy")}</TableCell>
                         <TableCell>
                           {jf.end_date ? format(new Date(jf.end_date), "MMM d, yyyy") : "-"}
@@ -380,7 +441,7 @@ export default function JobFamiliesPage() {
       </div>
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent>
+        <DialogContent className="max-w-lg">
           <DialogHeader>
             <DialogTitle>
               {selectedJobFamily ? "Edit Job Family" : "Add Job Family"}
@@ -405,6 +466,49 @@ export default function JobFamiliesPage() {
                 />
               </div>
             </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Division (Optional)</Label>
+                <Select
+                  value={formData.company_division_id}
+                  onValueChange={(value) =>
+                    setFormData({ ...formData, company_division_id: value, department_id: "" })
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select division" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">None</SelectItem>
+                    {divisions.map((div) => (
+                      <SelectItem key={div.id} value={div.id}>
+                        {div.name} ({div.code})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Department *</Label>
+                <Select
+                  value={formData.department_id}
+                  onValueChange={(value) => setFormData({ ...formData, department_id: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select department" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {filteredDepartments.map((dept) => (
+                      <SelectItem key={dept.id} value={dept.id}>
+                        {dept.name} ({dept.code})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
             <div className="space-y-2">
               <Label>Description</Label>
               <Textarea
