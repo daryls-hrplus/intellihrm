@@ -61,6 +61,11 @@ import BenefitsDashboardPage from "./pages/benefits/BenefitsDashboardPage";
 
 // Training pages
 import TrainingDashboardPage from "./pages/training/TrainingDashboardPage";
+import CourseCatalogPage from "./pages/training/CourseCatalogPage";
+import MyLearningPage from "./pages/training/MyLearningPage";
+import CourseViewerPage from "./pages/training/CourseViewerPage";
+import QuizPage from "./pages/training/QuizPage";
+import CertificationsPage from "./pages/training/CertificationsPage";
 
 // Succession pages
 import SuccessionDashboardPage from "./pages/succession/SuccessionDashboardPage";
@@ -514,6 +519,46 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <TrainingDashboardPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/training/catalog"
+              element={
+                <ProtectedRoute>
+                  <CourseCatalogPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/training/my-learning"
+              element={
+                <ProtectedRoute>
+                  <MyLearningPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/training/course/:courseId"
+              element={
+                <ProtectedRoute>
+                  <CourseViewerPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/training/quiz/:quizId"
+              element={
+                <ProtectedRoute>
+                  <QuizPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/training/certifications"
+              element={
+                <ProtectedRoute>
+                  <CertificationsPage />
                 </ProtectedRoute>
               }
             />
