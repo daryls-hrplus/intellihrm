@@ -589,6 +589,51 @@ export type Database = {
           },
         ]
       }
+      headcount_request_history: {
+        Row: {
+          changed_by: string | null
+          created_at: string
+          headcount_request_id: string
+          id: string
+          new_status: string
+          notes: string | null
+          old_status: string | null
+        }
+        Insert: {
+          changed_by?: string | null
+          created_at?: string
+          headcount_request_id: string
+          id?: string
+          new_status: string
+          notes?: string | null
+          old_status?: string | null
+        }
+        Update: {
+          changed_by?: string | null
+          created_at?: string
+          headcount_request_id?: string
+          id?: string
+          new_status?: string
+          notes?: string | null
+          old_status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "headcount_request_history_changed_by_fkey"
+            columns: ["changed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "headcount_request_history_headcount_request_id_fkey"
+            columns: ["headcount_request_id"]
+            isOneToOne: false
+            referencedRelation: "headcount_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       headcount_request_signatures: {
         Row: {
           created_at: string
