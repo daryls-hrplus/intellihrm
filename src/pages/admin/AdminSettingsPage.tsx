@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
-import { Settings, Mail, Eye, EyeOff, Save, Loader2, ShieldAlert, ArrowLeft, Send, CheckCircle, XCircle, Calendar } from "lucide-react";
+import { Settings, Mail, Eye, EyeOff, Save, Loader2, ShieldAlert, ArrowLeft, Send, CheckCircle, XCircle, Calendar, BarChart3 } from "lucide-react";
 import { NavLink } from "react-router-dom";
 
 interface SystemSetting {
@@ -25,8 +25,10 @@ export default function AdminSettingsPage() {
   const [isSaving, setIsSaving] = useState(false);
   const [isTesting, setIsTesting] = useState(false);
   const [isTestingReport, setIsTestingReport] = useState(false);
+  const [isTestingHeadcount, setIsTestingHeadcount] = useState(false);
   const [testResult, setTestResult] = useState<{ success: boolean; message: string } | null>(null);
   const [reportResult, setReportResult] = useState<{ success: boolean; message: string } | null>(null);
+  const [headcountResult, setHeadcountResult] = useState<{ success: boolean; message: string } | null>(null);
   const [showSensitive, setShowSensitive] = useState<Record<string, boolean>>({});
   const [editedValues, setEditedValues] = useState<Record<string, string>>({});
 
@@ -168,6 +170,42 @@ export default function AdminSettingsPage() {
       toast.error("Failed to send weekly report");
     } finally {
       setIsTestingReport(false);
+    }
+  };
+
+  const handleSendHeadcountReport = async (reportType: "weekly" | "monthly") => {
+    setIsTestingHeadcount(true);
+    setHeadcountResult(null);
+
+    try {
+      const { data, error } = await supabase.functions.invoke("send-headcount-report", {
+        body: { reportType },
+      });
+
+      if (error) throw error;
+
+      if (data?.success) {
+        setHeadcountResult({
+          success: true,
+          message: `${reportType.charAt(0).toUpperCase() + reportType.slice(1)} report sent to ${data.emailsSent} admin(s)!`,
+        });
+        toast.success(`Headcount ${reportType} report sent successfully`);
+      } else {
+        setHeadcountResult({
+          success: false,
+          message: data?.reason || "Report not sent - check configuration.",
+        });
+        toast.warning(data?.reason || "Report could not be sent");
+      }
+    } catch (error: any) {
+      console.error("Error sending headcount report:", error);
+      setHeadcountResult({
+        success: false,
+        message: error.message || "Failed to send report",
+      });
+      toast.error("Failed to send headcount report");
+    } finally {
+      setIsTestingHeadcount(false);
     }
   };
 
@@ -398,8 +436,75 @@ export default function AdminSettingsPage() {
           </CardContent>
         </Card>
 
-        {/* Alert Thresholds */}
+        {/* Headcount Analytics Report */}
         <Card className="animate-slide-up" style={{ animationDelay: "100ms" }}>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <BarChart3 className="h-5 w-5 text-primary" />
+              Headcount Analytics Report
+            </CardTitle>
+            <CardDescription>
+              Send scheduled headcount analytics reports with vacancy summaries and request trends
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex flex-wrap items-center gap-4">
+              <Button
+                onClick={() => handleSendHeadcountReport("weekly")}
+                disabled={isTestingHeadcount}
+                variant="outline"
+              >
+                {isTestingHeadcount ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                    Generating...
+                  </>
+                ) : (
+                  <>
+                    <Calendar className="h-4 w-4 mr-2" />
+                    Send Weekly Report
+                  </>
+                )}
+              </Button>
+              <Button
+                onClick={() => handleSendHeadcountReport("monthly")}
+                disabled={isTestingHeadcount}
+                variant="outline"
+              >
+                {isTestingHeadcount ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                    Generating...
+                  </>
+                ) : (
+                  <>
+                    <BarChart3 className="h-4 w-4 mr-2" />
+                    Send Monthly Report
+                  </>
+                )}
+              </Button>
+              
+              {headcountResult && (
+                <div className={`flex items-center gap-2 text-sm ${headcountResult.success ? "text-success" : "text-warning"}`}>
+                  {headcountResult.success ? (
+                    <CheckCircle className="h-4 w-4" />
+                  ) : (
+                    <XCircle className="h-4 w-4" />
+                  )}
+                  {headcountResult.message}
+                </div>
+              )}
+            </div>
+            
+            <p className="text-xs text-muted-foreground">
+              The report includes: headcount request summary, net headcount changes, vacancy summary by company, and recent request details.
+              Requires Resend API key to be configured above.
+            </p>
+          </CardContent>
+        </Card>
+
+        {/* Alert Thresholds */}
+        <Card className="animate-slide-up" style={{ animationDelay: "125ms" }}>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <ShieldAlert className="h-5 w-5 text-warning" />
