@@ -1474,6 +1474,7 @@ export type Database = {
           name: string
           requires_approval: boolean
           subject: string
+          transaction_type_id: string | null
           updated_at: string
         }
         Insert: {
@@ -1490,6 +1491,7 @@ export type Database = {
           name: string
           requires_approval?: boolean
           subject: string
+          transaction_type_id?: string | null
           updated_at?: string
         }
         Update: {
@@ -1506,6 +1508,7 @@ export type Database = {
           name?: string
           requires_approval?: boolean
           subject?: string
+          transaction_type_id?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -1514,6 +1517,13 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "letter_templates_transaction_type_id_fkey"
+            columns: ["transaction_type_id"]
+            isOneToOne: false
+            referencedRelation: "lookup_values"
             referencedColumns: ["id"]
           },
         ]
@@ -2945,6 +2955,76 @@ export type Database = {
             columns: ["template_id"]
             isOneToOne: false
             referencedRelation: "workflow_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      workflow_letters: {
+        Row: {
+          created_at: string
+          created_by: string
+          employee_id: string
+          final_pdf_url: string | null
+          generated_content: string
+          id: string
+          signed_at: string | null
+          status: string
+          template_id: string
+          updated_at: string
+          variable_values: Json
+          verification_code: string
+          workflow_instance_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          employee_id: string
+          final_pdf_url?: string | null
+          generated_content: string
+          id?: string
+          signed_at?: string | null
+          status?: string
+          template_id: string
+          updated_at?: string
+          variable_values?: Json
+          verification_code: string
+          workflow_instance_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          employee_id?: string
+          final_pdf_url?: string | null
+          generated_content?: string
+          id?: string
+          signed_at?: string | null
+          status?: string
+          template_id?: string
+          updated_at?: string
+          variable_values?: Json
+          verification_code?: string
+          workflow_instance_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workflow_letters_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "workflow_letters_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "letter_templates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "workflow_letters_workflow_instance_id_fkey"
+            columns: ["workflow_instance_id"]
+            isOneToOne: false
+            referencedRelation: "workflow_instances"
             referencedColumns: ["id"]
           },
         ]
