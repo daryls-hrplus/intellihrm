@@ -82,9 +82,13 @@ interface Company {
   name: string;
 }
 
-export function HeadcountForecast() {
+interface HeadcountForecastProps {
+  sharedScenarioToken?: string | null;
+}
+
+export function HeadcountForecast({ sharedScenarioToken }: HeadcountForecastProps) {
   const { user } = useAuth();
-  const [activeTab, setActiveTab] = useState("generate");
+  const [activeTab, setActiveTab] = useState(sharedScenarioToken ? "scenarios" : "generate");
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [forecast, setForecast] = useState<ForecastData | null>(null);
@@ -555,7 +559,7 @@ export function HeadcountForecast() {
 
         {/* Scenarios Tab */}
         <TabsContent value="scenarios" className="space-y-6">
-          <ScenarioPlanning currentHeadcount={historicalData?.totalRequests || 100} />
+          <ScenarioPlanning currentHeadcount={historicalData?.totalRequests || 100} sharedToken={sharedScenarioToken || undefined} />
         </TabsContent>
 
         {/* Saved Forecasts Tab */}
