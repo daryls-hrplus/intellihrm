@@ -1231,6 +1231,84 @@ export type Database = {
           },
         ]
       }
+      scheduled_org_reports: {
+        Row: {
+          company_id: string | null
+          created_at: string
+          created_by: string
+          day_of_month: number | null
+          day_of_week: number | null
+          department_id: string | null
+          description: string | null
+          id: string
+          include_changes: boolean
+          include_employees: boolean
+          include_positions: boolean
+          is_active: boolean
+          last_sent_at: string | null
+          name: string
+          recipient_emails: string[]
+          schedule_type: string
+          time_of_day: string
+          updated_at: string
+        }
+        Insert: {
+          company_id?: string | null
+          created_at?: string
+          created_by: string
+          day_of_month?: number | null
+          day_of_week?: number | null
+          department_id?: string | null
+          description?: string | null
+          id?: string
+          include_changes?: boolean
+          include_employees?: boolean
+          include_positions?: boolean
+          is_active?: boolean
+          last_sent_at?: string | null
+          name: string
+          recipient_emails?: string[]
+          schedule_type?: string
+          time_of_day?: string
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string | null
+          created_at?: string
+          created_by?: string
+          day_of_month?: number | null
+          day_of_week?: number | null
+          department_id?: string | null
+          description?: string | null
+          id?: string
+          include_changes?: boolean
+          include_employees?: boolean
+          include_positions?: boolean
+          is_active?: boolean
+          last_sent_at?: string | null
+          name?: string
+          recipient_emails?: string[]
+          schedule_type?: string
+          time_of_day?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "scheduled_org_reports_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "scheduled_org_reports_department_id_fkey"
+            columns: ["department_id"]
+            isOneToOne: false
+            referencedRelation: "departments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       sections: {
         Row: {
           code: string
