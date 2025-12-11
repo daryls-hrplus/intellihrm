@@ -90,6 +90,13 @@ const workforceModules = [
     color: "bg-indigo-500/10 text-indigo-500",
   },
   {
+    title: "Job Families",
+    description: "Group similar positions together",
+    href: "/workforce/job-families",
+    icon: FolderTree,
+    color: "bg-teal-500/10 text-teal-500",
+  },
+  {
     title: "Intranet Admin",
     description: "Manage announcements, gallery, and blog",
     href: "/workforce/intranet-admin",
