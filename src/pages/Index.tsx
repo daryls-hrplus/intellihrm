@@ -5,6 +5,7 @@ import { RecentActivity } from "@/components/dashboard/RecentActivity";
 import { UpcomingEvents } from "@/components/dashboard/UpcomingEvents";
 import { EmployeeDistribution } from "@/components/dashboard/EmployeeDistribution";
 import { HeadcountTrend } from "@/components/dashboard/HeadcountTrend";
+import { useAuth } from "@/contexts/AuthContext";
 import {
   Users,
   UserPlus,
@@ -14,6 +15,8 @@ import {
 } from "lucide-react";
 
 const Index = () => {
+  const { profile } = useAuth();
+  const firstName = profile?.full_name?.split(" ")[0] || "there";
   return (
     <AppLayout>
       <div className="space-y-8">
@@ -21,7 +24,7 @@ const Index = () => {
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between animate-fade-in">
           <div>
             <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
-              Welcome back, John
+              Welcome back, {firstName}
             </h1>
             <p className="mt-1 text-muted-foreground">
               Here's what's happening across your organization today.
