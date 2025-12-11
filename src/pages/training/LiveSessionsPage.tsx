@@ -48,12 +48,6 @@ export default function LiveSessionsPage() {
             { label: "Live Sessions" },
           ]}
         />
-        <Breadcrumbs
-          items={[
-            { label: "Training", href: "/training" },
-            { label: "Live Sessions" },
-          ]}
-        />
         <div className="animate-fade-in">
           <div className="flex items-center gap-3 mb-2">
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-info/10">
