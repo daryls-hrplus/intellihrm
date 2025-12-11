@@ -1,0 +1,141 @@
+import { AppLayout } from "@/components/layout/AppLayout";
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { 
+  Clock, 
+  Calendar, 
+  Timer, 
+  UserCheck,
+  ArrowRight,
+  Users,
+  AlertCircle,
+  TrendingUp,
+  ClipboardList,
+} from "lucide-react";
+import { useNavigate } from "react-router-dom";
+
+const features = [
+  {
+    title: "Time Tracking",
+    description: "Clock in/out and track work hours",
+    icon: Timer,
+    href: "/time-attendance/tracking",
+    color: "bg-primary/10 text-primary",
+  },
+  {
+    title: "Attendance Records",
+    description: "View and manage attendance history",
+    icon: ClipboardList,
+    href: "/time-attendance/records",
+    color: "bg-success/10 text-success",
+  },
+  {
+    title: "Schedules",
+    description: "Create and manage work schedules",
+    icon: Calendar,
+    href: "/time-attendance/schedules",
+    color: "bg-warning/10 text-warning",
+  },
+  {
+    title: "Overtime Management",
+    description: "Track and approve overtime requests",
+    icon: Clock,
+    href: "/time-attendance/overtime",
+    color: "bg-secondary/10 text-secondary-foreground",
+  },
+];
+
+const stats = [
+  { label: "Present Today", value: "218", icon: UserCheck, color: "text-success" },
+  { label: "Absent", value: "12", icon: AlertCircle, color: "text-destructive" },
+  { label: "On Leave", value: "15", icon: Calendar, color: "text-warning" },
+  { label: "Total Staff", value: "245", icon: Users, color: "text-muted-foreground" },
+];
+
+export default function TimeAttendanceDashboardPage() {
+  const navigate = useNavigate();
+
+  return (
+    <AppLayout>
+      <div className="space-y-6">
+        <Breadcrumbs items={[{ label: "Time & Attendance" }]} />
+
+        <div className="flex items-center gap-3">
+          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10">
+            <Clock className="h-6 w-6 text-primary" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight text-foreground">
+              Time & Attendance
+            </h1>
+            <p className="text-muted-foreground">
+              Track work hours, manage schedules, and monitor attendance
+            </p>
+          </div>
+        </div>
+
+        {/* Stats */}
+        <div className="grid gap-4 md:grid-cols-4">
+          {stats.map((stat) => {
+            const Icon = stat.icon;
+            return (
+              <Card key={stat.label}>
+                <CardContent className="flex items-center gap-4 p-4">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-muted">
+                    <Icon className={`h-5 w-5 ${stat.color}`} />
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">{stat.label}</p>
+                    <p className="text-xl font-semibold">{stat.value}</p>
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
+
+        {/* Features */}
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          {features.map((feature) => {
+            const Icon = feature.icon;
+            return (
+              <Card
+                key={feature.title}
+                className="group cursor-pointer transition-all hover:shadow-md"
+                onClick={() => navigate(feature.href)}
+              >
+                <CardHeader className="pb-2">
+                  <div className={`mb-2 flex h-10 w-10 items-center justify-center rounded-lg ${feature.color}`}>
+                    <Icon className="h-5 w-5" />
+                  </div>
+                  <CardTitle className="flex items-center justify-between text-base">
+                    {feature.title}
+                    <ArrowRight className="h-4 w-4 opacity-0 transition-opacity group-hover:opacity-100" />
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <CardDescription>{feature.description}</CardDescription>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
+
+        {/* Today's Activity */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <TrendingUp className="h-5 w-5" />
+              Today's Attendance Overview
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-center py-8 text-muted-foreground">
+              Attendance data will appear here once time tracking is configured.
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    </AppLayout>
+  );
+}

@@ -27,6 +27,8 @@ import {
   HelpCircle,
   UserCircle,
   UserCog,
+  Clock,
+  Wallet,
 } from "lucide-react";
 
 interface NavItem {
@@ -44,7 +46,9 @@ const navItems: NavItem[] = [
   { title: "Employee Self Service", href: "/ess", icon: UserCircle, moduleCode: "ess" },
   { title: "Manager Self Service", href: "/mss", icon: UserCog, moduleCode: "mss", managerOnly: true },
   { title: "Workforce", href: "/workforce", icon: Users, moduleCode: "workforce" },
+  { title: "Time & Attendance", href: "/time-attendance", icon: Clock, moduleCode: "time_attendance" },
   { title: "Leave Management", href: "/leave", icon: Calendar, moduleCode: "leave" },
+  { title: "Payroll", href: "/payroll", icon: Wallet, moduleCode: "payroll", hrOnly: true },
   { title: "Compensation", href: "/compensation", icon: DollarSign, moduleCode: "compensation", hrOnly: true },
   { title: "Benefits", href: "/benefits", icon: Gift, moduleCode: "benefits" },
   { title: "Performance", href: "/performance", icon: Target, moduleCode: "performance" },
