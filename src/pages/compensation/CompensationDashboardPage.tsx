@@ -7,6 +7,8 @@ import {
   FileText,
   Calculator,
   ChevronRight,
+  Users,
+  Clock,
 } from "lucide-react";
 
 const compensationModules = [
@@ -40,6 +42,13 @@ const compensationModules = [
   },
 ];
 
+const statCards = [
+  { label: "Total Payroll", value: "$1.2M", icon: DollarSign, color: "bg-primary/10 text-primary" },
+  { label: "Employees Paid", value: 156, icon: Users, color: "bg-success/10 text-success" },
+  { label: "Pending Reviews", value: 12, icon: Clock, color: "bg-warning/10 text-warning" },
+  { label: "Avg. Salary", value: "$72K", icon: TrendingUp, color: "bg-info/10 text-info" },
+];
+
 export default function CompensationDashboardPage() {
   return (
     <AppLayout>
@@ -60,6 +69,30 @@ export default function CompensationDashboardPage() {
           </div>
         </div>
 
+        {/* Stats Cards */}
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 animate-slide-up">
+          {statCards.map((stat, index) => {
+            const Icon = stat.icon;
+            return (
+              <div
+                key={stat.label}
+                className="rounded-xl border border-border bg-card p-5 shadow-card"
+                style={{ animationDelay: `${index * 50}ms` }}
+              >
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">{stat.label}</p>
+                    <p className="mt-1 text-3xl font-bold text-card-foreground">{stat.value}</p>
+                  </div>
+                  <div className={`rounded-lg p-3 ${stat.color}`}>
+                    <Icon className="h-5 w-5" />
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {compensationModules.map((module, index) => {
             const Icon = module.icon;
@@ -68,7 +101,7 @@ export default function CompensationDashboardPage() {
                 key={module.href}
                 to={module.href}
                 className="group rounded-xl border border-border bg-card p-6 shadow-card transition-all hover:shadow-card-hover hover:border-primary/20 animate-slide-up"
-                style={{ animationDelay: `${index * 50}ms` }}
+                style={{ animationDelay: `${(index + 4) * 50}ms` }}
               >
                 <div className="flex items-start justify-between">
                   <div className={`rounded-lg p-3 ${module.color}`}>

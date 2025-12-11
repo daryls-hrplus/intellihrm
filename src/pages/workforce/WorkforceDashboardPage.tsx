@@ -1,11 +1,16 @@
+import { useState, useEffect } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { NavLink } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 import {
   Users,
   UserCheck,
   Network,
   FolderTree,
   ChevronRight,
+  Loader2,
+  UserPlus,
+  Building2,
 } from "lucide-react";
 
 const workforceModules = [
@@ -39,7 +44,48 @@ const workforceModules = [
   },
 ];
 
+interface Stats {
+  totalEmployees: number;
+  activeCompanies: number;
+  newThisMonth: number;
+}
+
 export default function WorkforceDashboardPage() {
+  const [stats, setStats] = useState<Stats>({ totalEmployees: 0, activeCompanies: 0, newThisMonth: 0 });
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const startOfMonth = new Date();
+        startOfMonth.setDate(1);
+        startOfMonth.setHours(0, 0, 0, 0);
+
+        const [employeesRes, companiesRes, newRes] = await Promise.all([
+          supabase.from("profiles").select("id", { count: "exact", head: true }),
+          supabase.from("companies").select("id", { count: "exact", head: true }).eq("is_active", true),
+          supabase.from("profiles").select("id", { count: "exact", head: true }).gte("created_at", startOfMonth.toISOString()),
+        ]);
+        setStats({
+          totalEmployees: employeesRes.count || 0,
+          activeCompanies: companiesRes.count || 0,
+          newThisMonth: newRes.count || 0,
+        });
+      } catch (error) {
+        console.error("Error fetching stats:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchStats();
+  }, []);
+
+  const statCards = [
+    { label: "Total Employees", value: stats.totalEmployees, icon: Users, color: "bg-primary/10 text-primary" },
+    { label: "Active Companies", value: stats.activeCompanies, icon: Building2, color: "bg-info/10 text-info" },
+    { label: "New This Month", value: stats.newThisMonth, icon: UserPlus, color: "bg-success/10 text-success" },
+  ];
+
   return (
     <AppLayout>
       <div className="space-y-6">
@@ -59,6 +105,32 @@ export default function WorkforceDashboardPage() {
           </div>
         </div>
 
+        {/* Stats Cards */}
+        <div className="grid gap-4 sm:grid-cols-3 animate-slide-up">
+          {statCards.map((stat, index) => {
+            const Icon = stat.icon;
+            return (
+              <div
+                key={stat.label}
+                className="rounded-xl border border-border bg-card p-5 shadow-card"
+                style={{ animationDelay: `${index * 50}ms` }}
+              >
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">{stat.label}</p>
+                    <p className="mt-1 text-3xl font-bold text-card-foreground">
+                      {isLoading ? <Loader2 className="h-6 w-6 animate-spin" /> : stat.value}
+                    </p>
+                  </div>
+                  <div className={`rounded-lg p-3 ${stat.color}`}>
+                    <Icon className="h-5 w-5" />
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {workforceModules.map((module, index) => {
             const Icon = module.icon;
@@ -67,7 +139,7 @@ export default function WorkforceDashboardPage() {
                 key={module.href}
                 to={module.href}
                 className="group rounded-xl border border-border bg-card p-6 shadow-card transition-all hover:shadow-card-hover hover:border-primary/20 animate-slide-up"
-                style={{ animationDelay: `${index * 50}ms` }}
+                style={{ animationDelay: `${(index + 3) * 50}ms` }}
               >
                 <div className="flex items-start justify-between">
                   <div className={`rounded-lg p-3 ${module.color}`}>
