@@ -6,6 +6,13 @@ import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Progress } from "@/components/ui/progress";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { toast } from "sonner";
 import { 
   Activity, 
   TrendingUp, 
@@ -17,7 +24,10 @@ import {
   Play,
   Info,
   Percent,
-  Users
+  Users,
+  Download,
+  FileText,
+  FileSpreadsheet
 } from "lucide-react";
 import { 
   AreaChart, 
@@ -224,6 +234,199 @@ export function MonteCarloSimulation({ scenarios, currentHeadcount }: MonteCarlo
     setIsRunning(false);
   };
 
+  const exportToCSV = () => {
+    if (results.length === 0) {
+      toast.error("No simulation results to export. Run simulation first.");
+      return;
+    }
+
+    const lines: string[] = [];
+    
+    // Header
+    lines.push("MONTE CARLO SIMULATION REPORT");
+    lines.push(`Generated: ${new Date().toLocaleString()}`);
+    lines.push(`Current Headcount: ${currentHeadcount}`);
+    lines.push(`Target Headcount: ${targetHeadcount}`);
+    lines.push(`Simulations: ${SIMULATION_RUNS.toLocaleString()}`);
+    lines.push(`Parameter Variance: ±${varianceFactor}%`);
+    lines.push("");
+    
+    // Summary for all scenarios
+    lines.push("SCENARIO SUMMARY");
+    lines.push("Scenario,P10,P25,P50 (Median),P75,P90,Mean,Std Dev,Min,Max,Target Probability,Downside Risk,Upside Opportunity,Volatility");
+    results.forEach(r => {
+      lines.push(`"${r.scenarioName}",${r.percentiles.p10},${r.percentiles.p25},${r.percentiles.p50},${r.percentiles.p75},${r.percentiles.p90},${r.mean.toFixed(1)},${r.stdDev.toFixed(1)},${r.min},${r.max},${r.probabilityOfTarget.toFixed(1)}%,${r.riskMetrics.downsideRisk.toFixed(1)}%,${r.riskMetrics.upsideOpportunity.toFixed(1)}%,${r.riskMetrics.volatility.toFixed(1)}%`);
+    });
+    lines.push("");
+
+    // Confidence intervals for each scenario
+    results.forEach(r => {
+      lines.push(`CONFIDENCE INTERVALS: ${r.scenarioName}`);
+      lines.push("Month,P10,P50 (Median),P90,Mean");
+      r.confidenceIntervals.forEach(ci => {
+        lines.push(`${ci.month},${ci.p10},${ci.p50},${ci.p90},${ci.mean.toFixed(1)}`);
+      });
+      lines.push("");
+    });
+
+    // Distribution for each scenario
+    results.forEach(r => {
+      lines.push(`PROBABILITY DISTRIBUTION: ${r.scenarioName}`);
+      lines.push("Range,Count,Percentage");
+      r.distribution.forEach(d => {
+        lines.push(`"${d.range}",${d.count},${d.percentage.toFixed(1)}%`);
+      });
+      lines.push("");
+    });
+
+    const csvContent = lines.join("\n");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `monte-carlo-simulation-${new Date().toISOString().split("T")[0]}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+    toast.success("CSV exported successfully");
+  };
+
+  const exportToPDF = () => {
+    if (results.length === 0) {
+      toast.error("No simulation results to export. Run simulation first.");
+      return;
+    }
+
+    const printWindow = window.open("", "_blank");
+    if (!printWindow) {
+      toast.error("Please allow popups to export PDF");
+      return;
+    }
+
+    const getRiskColor = (prob: number) => {
+      if (prob >= 70) return "#22c55e";
+      if (prob >= 40) return "#eab308";
+      return "#ef4444";
+    };
+
+    const summaryRows = results.map(r => `
+      <tr>
+        <td>${r.scenarioName}</td>
+        <td>${r.percentiles.p10}</td>
+        <td><strong>${r.percentiles.p50}</strong></td>
+        <td>${r.percentiles.p90}</td>
+        <td>${r.mean.toFixed(1)}</td>
+        <td>${r.stdDev.toFixed(1)}</td>
+        <td>
+          <span style="padding: 2px 8px; border-radius: 4px; background: ${getRiskColor(r.probabilityOfTarget)}; color: white;">
+            ${r.probabilityOfTarget.toFixed(1)}%
+          </span>
+        </td>
+      </tr>
+    `).join("");
+
+    const riskRows = results.map(r => `
+      <tr>
+        <td>${r.scenarioName}</td>
+        <td style="color: #ef4444;">${r.riskMetrics.downsideRisk.toFixed(1)}%</td>
+        <td style="color: #22c55e;">${r.riskMetrics.upsideOpportunity.toFixed(1)}%</td>
+        <td>${r.riskMetrics.volatility.toFixed(1)}%</td>
+        <td>${r.riskMetrics.valueAtRisk.toFixed(0)}</td>
+      </tr>
+    `).join("");
+
+    const confidenceIntervalTables = results.map(r => `
+      <h3>Confidence Intervals: ${r.scenarioName}</h3>
+      <table>
+        <thead>
+          <tr><th>Month</th><th>P10</th><th>P50 (Median)</th><th>P90</th><th>Mean</th></tr>
+        </thead>
+        <tbody>
+          ${r.confidenceIntervals.map(ci => `
+            <tr>
+              <td>${ci.month}</td>
+              <td style="color: #ef4444;">${ci.p10}</td>
+              <td><strong>${ci.p50}</strong></td>
+              <td style="color: #22c55e;">${ci.p90}</td>
+              <td>${ci.mean.toFixed(1)}</td>
+            </tr>
+          `).join("")}
+        </tbody>
+      </table>
+    `).join("");
+
+    const html = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Monte Carlo Simulation Report</title>
+        <style>
+          body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; padding: 40px; color: #333; }
+          h1 { color: #1a1a1a; border-bottom: 2px solid #3b82f6; padding-bottom: 10px; }
+          h2 { color: #374151; margin-top: 30px; }
+          h3 { color: #4b5563; margin-top: 20px; }
+          table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+          th, td { padding: 10px; text-align: left; border-bottom: 1px solid #e5e7eb; }
+          th { background: #f9fafb; font-weight: 600; }
+          .meta { color: #6b7280; margin-bottom: 20px; }
+          .config { background: #f3f4f6; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
+          .config span { margin-right: 20px; }
+          .print-btn { background: #3b82f6; color: white; padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; margin-bottom: 20px; }
+          .print-btn:hover { background: #2563eb; }
+          @media print { .print-btn { display: none; } }
+        </style>
+      </head>
+      <body>
+        <button class="print-btn" onclick="window.print()">Print / Save as PDF</button>
+        <h1>Monte Carlo Simulation Report</h1>
+        <p class="meta">Generated: ${new Date().toLocaleString()}</p>
+        
+        <div class="config">
+          <span><strong>Current Headcount:</strong> ${currentHeadcount}</span>
+          <span><strong>Target Headcount:</strong> ${targetHeadcount}</span>
+          <span><strong>Simulations:</strong> ${SIMULATION_RUNS.toLocaleString()}</span>
+          <span><strong>Variance:</strong> ±${varianceFactor}%</span>
+        </div>
+        
+        <h2>Percentile Summary</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Scenario</th>
+              <th>P10</th>
+              <th>P50 (Median)</th>
+              <th>P90</th>
+              <th>Mean</th>
+              <th>Std Dev</th>
+              <th>Target Prob.</th>
+            </tr>
+          </thead>
+          <tbody>${summaryRows}</tbody>
+        </table>
+
+        <h2>Risk Metrics</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Scenario</th>
+              <th>Downside Risk</th>
+              <th>Upside Opportunity</th>
+              <th>Volatility (CV)</th>
+              <th>Value at Risk (5%)</th>
+            </tr>
+          </thead>
+          <tbody>${riskRows}</tbody>
+        </table>
+
+        ${confidenceIntervalTables}
+      </body>
+      </html>
+    `;
+
+    printWindow.document.write(html);
+    printWindow.document.close();
+    toast.success("PDF report opened in new tab");
+  };
+
   const selectedResult = results.find(r => r.scenarioId === selectedScenario);
 
   const scenarioColors = [
@@ -314,23 +517,45 @@ export function MonteCarloSimulation({ scenarios, currentHeadcount }: MonteCarlo
             </div>
           </div>
 
-          <Button 
-            onClick={runAllSimulations} 
-            disabled={isRunning}
-            className="w-full md:w-auto"
-          >
-            {isRunning ? (
-              <>
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                Running {SIMULATION_RUNS.toLocaleString()} Simulations...
-              </>
-            ) : (
-              <>
-                <Play className="h-4 w-4 mr-2" />
-                Run Monte Carlo Simulation
-              </>
+          <div className="flex flex-wrap gap-3">
+            <Button 
+              onClick={runAllSimulations} 
+              disabled={isRunning}
+            >
+              {isRunning ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Running {SIMULATION_RUNS.toLocaleString()} Simulations...
+                </>
+              ) : (
+                <>
+                  <Play className="h-4 w-4 mr-2" />
+                  Run Monte Carlo Simulation
+                </>
+              )}
+            </Button>
+
+            {results.length > 0 && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline">
+                    <Download className="h-4 w-4 mr-2" />
+                    Export Results
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start">
+                  <DropdownMenuItem onClick={exportToCSV}>
+                    <FileSpreadsheet className="h-4 w-4 mr-2" />
+                    Export to CSV
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={exportToPDF}>
+                    <FileText className="h-4 w-4 mr-2" />
+                    Export to PDF
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             )}
-          </Button>
+          </div>
         </CardContent>
       </Card>
 
