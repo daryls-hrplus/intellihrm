@@ -40,6 +40,16 @@ interface Division {
   is_active: boolean;
   created_at: string;
   company_count?: number;
+  companies?: Company[];
+}
+
+interface Company {
+  id: string;
+  name: string;
+  code: string;
+  is_active: boolean;
+  division_id: string | null;
+  group_id: string | null;
 }
 
 const groupSchema = z.object({
@@ -65,6 +75,7 @@ export default function AdminCompanyGroupsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
+  const [expandedDivisions, setExpandedDivisions] = useState<Set<string>>(new Set());
   
   // Group Modal
   const [isGroupModalOpen, setIsGroupModalOpen] = useState(false);
@@ -115,19 +126,27 @@ export default function AdminCompanyGroupsPage() {
 
       const { data: companiesData } = await supabase
         .from("companies")
-        .select("group_id, division_id");
+        .select("id, name, code, is_active, group_id, division_id")
+        .order("name");
 
-      // Count companies per group and division
+      // Count and group companies per group and division
       const groupCounts: Record<string, number> = {};
       const divisionCounts: Record<string, number> = {};
+      const divisionCompanies: Record<string, Company[]> = {};
+      
       (companiesData || []).forEach((c) => {
         if (c.group_id) groupCounts[c.group_id] = (groupCounts[c.group_id] || 0) + 1;
-        if (c.division_id) divisionCounts[c.division_id] = (divisionCounts[c.division_id] || 0) + 1;
+        if (c.division_id) {
+          divisionCounts[c.division_id] = (divisionCounts[c.division_id] || 0) + 1;
+          if (!divisionCompanies[c.division_id]) divisionCompanies[c.division_id] = [];
+          divisionCompanies[c.division_id].push(c);
+        }
       });
 
       const divisionsWithCounts = (divisionsData || []).map((d) => ({
         ...d,
         company_count: divisionCounts[d.id] || 0,
+        companies: divisionCompanies[d.id] || [],
       }));
 
       const groupsWithDivisions = (groupsData || []).map((g) => ({
@@ -157,6 +176,16 @@ export default function AdminCompanyGroupsPage() {
       newExpanded.add(groupId);
     }
     setExpandedGroups(newExpanded);
+  };
+
+  const toggleDivisionExpand = (divisionId: string) => {
+    const newExpanded = new Set(expandedDivisions);
+    if (newExpanded.has(divisionId)) {
+      newExpanded.delete(divisionId);
+    } else {
+      newExpanded.add(divisionId);
+    }
+    setExpandedDivisions(newExpanded);
   };
 
   // Group handlers
@@ -547,62 +576,102 @@ export default function AdminCompanyGroupsPage() {
                     ) : (
                       <div className="space-y-2">
                         {group.divisions.map((division) => (
-                          <div
-                            key={division.id}
-                            className={cn(
-                              "flex items-center justify-between rounded-lg border border-border bg-card p-3",
-                              !division.is_active && "opacity-60"
-                            )}
-                          >
-                            <div className="flex items-center gap-3">
-                              <div className="flex h-8 w-8 items-center justify-center rounded bg-info/10 text-xs font-bold text-info">
-                                {division.code.slice(0, 2)}
-                              </div>
-                              <div>
-                                <p className="font-medium text-card-foreground">{division.name}</p>
-                                <p className="text-xs text-muted-foreground">
-                                  {division.code} • {division.company_count} companies
-                                </p>
-                              </div>
-                            </div>
-                            <div className="relative">
-                              <button
-                                onClick={() => setOpenDropdown(openDropdown === division.id ? null : division.id)}
-                                className="rounded-lg p-1.5 text-muted-foreground hover:bg-muted"
-                              >
-                                <MoreHorizontal className="h-4 w-4" />
-                              </button>
-                              {openDropdown === division.id && (
-                                <>
-                                  <div className="fixed inset-0 z-10" onClick={() => setOpenDropdown(null)} />
-                                  <div className="absolute right-0 top-full z-20 mt-1 w-40 rounded-lg border border-border bg-card py-1 shadow-lg">
-                                    <button
-                                      onClick={() => {
-                                        handleOpenDivisionModal(group.id, division);
-                                        setOpenDropdown(null);
-                                      }}
-                                      className="flex w-full items-center gap-2 px-3 py-2 text-sm text-card-foreground hover:bg-muted"
-                                    >
-                                      <Pencil className="h-4 w-4" />
-                                      Edit
-                                    </button>
-                                    <button
-                                      onClick={() => toggleDivisionActive(division)}
-                                      className="flex w-full items-center gap-2 px-3 py-2 text-sm text-card-foreground hover:bg-muted"
-                                    >
-                                      {division.is_active ? "Deactivate" : "Activate"}
-                                    </button>
-                                    <button
-                                      onClick={() => handleDeleteDivision(division)}
-                                      className="flex w-full items-center gap-2 px-3 py-2 text-sm text-destructive hover:bg-muted"
-                                    >
-                                      <Trash2 className="h-4 w-4" />
-                                      Delete
-                                    </button>
-                                  </div>
-                                </>
+                          <div key={division.id} className="space-y-2">
+                            <div
+                              className={cn(
+                                "flex items-center justify-between rounded-lg border border-border bg-card p-3",
+                                !division.is_active && "opacity-60"
                               )}
+                            >
+                              <div className="flex items-center gap-3">
+                                {division.company_count && division.company_count > 0 ? (
+                                  <button
+                                    onClick={() => toggleDivisionExpand(division.id)}
+                                    className="rounded p-0.5 hover:bg-muted"
+                                  >
+                                    {expandedDivisions.has(division.id) ? (
+                                      <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                                    ) : (
+                                      <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                                    )}
+                                  </button>
+                                ) : (
+                                  <div className="w-5" />
+                                )}
+                                <div className="flex h-8 w-8 items-center justify-center rounded bg-info/10 text-xs font-bold text-info">
+                                  {division.code.slice(0, 2)}
+                                </div>
+                                <div>
+                                  <p className="font-medium text-card-foreground">{division.name}</p>
+                                  <p className="text-xs text-muted-foreground">
+                                    {division.code} • {division.company_count} companies
+                                  </p>
+                                </div>
+                              </div>
+                              <div className="relative">
+                                <button
+                                  onClick={() => setOpenDropdown(openDropdown === division.id ? null : division.id)}
+                                  className="rounded-lg p-1.5 text-muted-foreground hover:bg-muted"
+                                >
+                                  <MoreHorizontal className="h-4 w-4" />
+                                </button>
+                                {openDropdown === division.id && (
+                                  <>
+                                    <div className="fixed inset-0 z-10" onClick={() => setOpenDropdown(null)} />
+                                    <div className="absolute right-0 top-full z-20 mt-1 w-40 rounded-lg border border-border bg-card py-1 shadow-lg">
+                                      <button
+                                        onClick={() => {
+                                          handleOpenDivisionModal(group.id, division);
+                                          setOpenDropdown(null);
+                                        }}
+                                        className="flex w-full items-center gap-2 px-3 py-2 text-sm text-card-foreground hover:bg-muted"
+                                      >
+                                        <Pencil className="h-4 w-4" />
+                                        Edit
+                                      </button>
+                                      <button
+                                        onClick={() => toggleDivisionActive(division)}
+                                        className="flex w-full items-center gap-2 px-3 py-2 text-sm text-card-foreground hover:bg-muted"
+                                      >
+                                        {division.is_active ? "Deactivate" : "Activate"}
+                                      </button>
+                                      <button
+                                        onClick={() => handleDeleteDivision(division)}
+                                        className="flex w-full items-center gap-2 px-3 py-2 text-sm text-destructive hover:bg-muted"
+                                      >
+                                        <Trash2 className="h-4 w-4" />
+                                        Delete
+                                      </button>
+                                    </div>
+                                  </>
+                                )}
+                              </div>
                             </div>
+                            {/* Companies within Division */}
+                            {expandedDivisions.has(division.id) && division.companies && division.companies.length > 0 && (
+                              <div className="ml-8 space-y-1.5">
+                                {division.companies.map((company) => (
+                                  <div
+                                    key={company.id}
+                                    className={cn(
+                                      "flex items-center gap-3 rounded-lg border border-border/50 bg-card/50 p-2.5",
+                                      !company.is_active && "opacity-60"
+                                    )}
+                                  >
+                                    <div className="flex h-7 w-7 items-center justify-center rounded bg-success/10 text-xs font-bold text-success">
+                                      {company.code.slice(0, 2)}
+                                    </div>
+                                    <div>
+                                      <p className="text-sm font-medium text-card-foreground">{company.name}</p>
+                                      <p className="text-xs text-muted-foreground">{company.code}</p>
+                                    </div>
+                                    {!company.is_active && (
+                                      <span className="ml-auto text-xs text-muted-foreground">Inactive</span>
+                                    )}
+                                  </div>
+                                ))}
+                              </div>
+                            )}
                           </div>
                         ))}
                       </div>
