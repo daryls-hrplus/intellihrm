@@ -67,6 +67,8 @@ import MyLearningPage from "./pages/training/MyLearningPage";
 import CourseViewerPage from "./pages/training/CourseViewerPage";
 import QuizPage from "./pages/training/QuizPage";
 import CertificationsPage from "./pages/training/CertificationsPage";
+import LiveSessionsPage from "./pages/training/LiveSessionsPage";
+import TrainingCalendarPage from "./pages/training/TrainingCalendarPage";
 
 // Succession pages
 import SuccessionDashboardPage from "./pages/succession/SuccessionDashboardPage";
@@ -568,6 +570,22 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <CertificationsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/training/sessions"
+              element={
+                <ProtectedRoute>
+                  <LiveSessionsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/training/calendar"
+              element={
+                <ProtectedRoute>
+                  <TrainingCalendarPage />
                 </ProtectedRoute>
               }
             />
