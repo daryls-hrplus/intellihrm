@@ -2,9 +2,21 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import { OrgChangesReporting } from "@/components/admin/OrgChangesReporting";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 export default function OrgChangesPage() {
+  const navigate = useNavigate();
+
+  const handleScheduleClick = (filters: { companyId: string; departmentId: string }) => {
+    navigate("/admin/scheduled-reports", { 
+      state: { 
+        prefill: true,
+        companyId: filters.companyId,
+        departmentId: filters.departmentId
+      } 
+    });
+  };
+
   return (
     <AppLayout>
       <div className="space-y-6">
@@ -22,7 +34,7 @@ export default function OrgChangesPage() {
             </Link>
           </Button>
         </div>
-        <OrgChangesReporting />
+        <OrgChangesReporting onScheduleClick={handleScheduleClick} />
       </div>
     </AppLayout>
   );
