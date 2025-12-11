@@ -17,9 +17,20 @@ interface TicketWithSLA {
   due_date: string | null;
   sla_breach_response: boolean | null;
   sla_breach_resolution: boolean | null;
+  priority_id: string | null;
   requester: { id: string; email: string; full_name: string | null };
   assignee: { id: string; email: string; full_name: string | null } | null;
   priority: { name: string; response_time_hours: number; resolution_time_hours: number } | null;
+}
+
+interface EscalationRule {
+  id: string;
+  name: string;
+  priority_id: string | null;
+  escalation_level: number;
+  escalate_after_hours: number;
+  notify_emails: string[];
+  is_active: boolean;
 }
 
 const handler = async (req: Request): Promise<Response> => {
@@ -51,24 +62,38 @@ const handler = async (req: Request): Promise<Response> => {
 
     const resend = new Resend(settingData.value);
 
-    // Get admin and HR manager emails for escalation
+    // Get admin and HR manager emails for default escalation
     const { data: adminRoles } = await supabase
       .from("user_roles")
       .select("user_id")
       .in("role", ["admin", "hr_manager"]);
 
     const adminUserIds = adminRoles?.map((r) => r.user_id) || [];
-    let managerEmails: string[] = [];
+    let defaultManagerEmails: string[] = [];
 
     if (adminUserIds.length > 0) {
       const { data: adminProfiles } = await supabase
         .from("profiles")
         .select("email")
         .in("id", adminUserIds);
-      managerEmails = adminProfiles?.map((p) => p.email).filter(Boolean) || [];
+      defaultManagerEmails = adminProfiles?.map((p) => p.email).filter(Boolean) || [];
     }
 
-    console.log(`Found ${managerEmails.length} managers for escalation`);
+    console.log(`Found ${defaultManagerEmails.length} default managers for escalation`);
+
+    // Fetch escalation rules
+    const { data: escalationRules, error: rulesError } = await supabase
+      .from("escalation_rules")
+      .select("*")
+      .eq("is_active", true)
+      .order("escalation_level")
+      .order("escalate_after_hours");
+
+    if (rulesError) {
+      console.error("Error fetching escalation rules:", rulesError);
+    }
+
+    console.log(`Found ${escalationRules?.length || 0} active escalation rules`);
 
     // Get open tickets with priority and SLA info
     const { data: tickets, error: ticketsError } = await supabase
@@ -83,6 +108,7 @@ const handler = async (req: Request): Promise<Response> => {
         due_date,
         sla_breach_response,
         sla_breach_resolution,
+        priority_id,
         requester:profiles!tickets_requester_id_fkey(id, email, full_name),
         assignee:profiles!tickets_assignee_id_fkey(id, email, full_name),
         priority:ticket_priorities!tickets_priority_id_fkey(name, response_time_hours, resolution_time_hours)
@@ -100,6 +126,19 @@ const handler = async (req: Request): Promise<Response> => {
     const warningsSent: string[] = [];
     const breachesSent: string[] = [];
     const escalationsSent: string[] = [];
+
+    // Helper function to get matching escalation rules for a ticket
+    const getMatchingEscalationRules = (priorityId: string | null, hoursOverdue: number): EscalationRule[] => {
+      if (!escalationRules) return [];
+      
+      return escalationRules.filter((rule: EscalationRule) => {
+        // Rule matches if: no priority filter OR priority matches
+        const priorityMatches = !rule.priority_id || rule.priority_id === priorityId;
+        // Rule triggers if enough time has passed since breach
+        const timeTriggered = hoursOverdue >= rule.escalate_after_hours;
+        return priorityMatches && timeTriggered;
+      });
+    };
 
     for (const ticketData of tickets || []) {
       // Handle Supabase's array return for single joins
@@ -123,15 +162,26 @@ const handler = async (req: Request): Promise<Response> => {
         // Check for actual breach (past deadline)
         if (now >= responseDeadline && !ticket.sla_breach_response) {
           const overdueMins = Math.round((now.getTime() - responseDeadline.getTime()) / (60 * 1000));
+          const overdueHours = overdueMins / 60;
           
           // Send to assignee/requester
           await sendSLABreachEmail(resend, ticket, "response", overdueMins, recipientEmail);
           breachesSent.push(`Response BREACH for ${ticket.ticket_number}`);
           
-          // Escalate to managers
-          if (managerEmails.length > 0) {
-            await sendEscalationEmail(resend, ticket, "response", overdueMins, managerEmails);
-            escalationsSent.push(`Response ESCALATION for ${ticket.ticket_number}`);
+          // Process escalation rules
+          const matchingRules = getMatchingEscalationRules(ticket.priority_id, overdueHours);
+          for (const rule of matchingRules) {
+            const escalationEmails = rule.notify_emails.length > 0 ? rule.notify_emails : defaultManagerEmails;
+            if (escalationEmails.length > 0) {
+              await sendEscalationEmail(resend, ticket, "response", overdueMins, escalationEmails, rule.escalation_level, rule.name);
+              escalationsSent.push(`Response ESCALATION (Level ${rule.escalation_level}) for ${ticket.ticket_number}`);
+            }
+          }
+          
+          // Fallback to default escalation if no rules matched but we have managers
+          if (matchingRules.length === 0 && defaultManagerEmails.length > 0) {
+            await sendEscalationEmail(resend, ticket, "response", overdueMins, defaultManagerEmails, 1, "Default Escalation");
+            escalationsSent.push(`Response DEFAULT ESCALATION for ${ticket.ticket_number}`);
           }
           
           // Mark as breached to avoid duplicate notifications
@@ -155,15 +205,26 @@ const handler = async (req: Request): Promise<Response> => {
       // Check for actual breach (past deadline)
       if (now >= resolutionDeadline && !ticket.sla_breach_resolution) {
         const overdueMins = Math.round((now.getTime() - resolutionDeadline.getTime()) / (60 * 1000));
+        const overdueHours = overdueMins / 60;
         
         // Send to assignee/requester
         await sendSLABreachEmail(resend, ticket, "resolution", overdueMins, recipientEmail);
         breachesSent.push(`Resolution BREACH for ${ticket.ticket_number}`);
         
-        // Escalate to managers
-        if (managerEmails.length > 0) {
-          await sendEscalationEmail(resend, ticket, "resolution", overdueMins, managerEmails);
-          escalationsSent.push(`Resolution ESCALATION for ${ticket.ticket_number}`);
+        // Process escalation rules
+        const matchingRules = getMatchingEscalationRules(ticket.priority_id, overdueHours);
+        for (const rule of matchingRules) {
+          const escalationEmails = rule.notify_emails.length > 0 ? rule.notify_emails : defaultManagerEmails;
+          if (escalationEmails.length > 0) {
+            await sendEscalationEmail(resend, ticket, "resolution", overdueMins, escalationEmails, rule.escalation_level, rule.name);
+            escalationsSent.push(`Resolution ESCALATION (Level ${rule.escalation_level}) for ${ticket.ticket_number}`);
+          }
+        }
+        
+        // Fallback to default escalation if no rules matched but we have managers
+        if (matchingRules.length === 0 && defaultManagerEmails.length > 0) {
+          await sendEscalationEmail(resend, ticket, "resolution", overdueMins, defaultManagerEmails, 1, "Default Escalation");
+          escalationsSent.push(`Resolution DEFAULT ESCALATION for ${ticket.ticket_number}`);
         }
         
         // Mark as breached to avoid duplicate notifications
@@ -366,27 +427,39 @@ async function sendEscalationEmail(
   ticket: TicketWithSLA,
   slaType: "response" | "resolution",
   minutesOverdue: number,
-  managerEmails: string[]
+  managerEmails: string[],
+  escalationLevel: number = 1,
+  ruleName: string = "Default Escalation"
 ) {
   const hoursOver = Math.floor(minutesOverdue / 60);
   const mins = minutesOverdue % 60;
   const timeString = hoursOver > 0 ? `${hoursOver}h ${mins}m` : `${mins} minutes`;
 
-  const subject = `🔺 ESCALATION: Ticket ${ticket.ticket_number} has breached ${slaType === "response" ? "Response" : "Resolution"} SLA`;
+  const levelColors: Record<number, { bg: string; border: string; text: string }> = {
+    1: { bg: '#ede9fe', border: '#7c3aed', text: '#5b21b6' },
+    2: { bg: '#fef3c7', border: '#f59e0b', text: '#92400e' },
+    3: { bg: '#fee2e2', border: '#dc2626', text: '#991b1b' },
+    4: { bg: '#fee2e2', border: '#991b1b', text: '#7f1d1d' },
+    5: { bg: '#fecaca', border: '#7f1d1d', text: '#450a0a' },
+  };
+  const colors = levelColors[escalationLevel] || levelColors[1];
+
+  const subject = `🔺 ESCALATION (Level ${escalationLevel}): Ticket ${ticket.ticket_number} - ${slaType === "response" ? "Response" : "Resolution"} SLA Breach`;
 
   const html = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-      <div style="background: linear-gradient(135deg, #7c3aed 0%, #5b21b6 100%); padding: 20px; border-radius: 8px 8px 0 0;">
-        <h1 style="color: white; margin: 0; font-size: 24px;">🔺 SLA Breach Escalation</h1>
+      <div style="background: linear-gradient(135deg, ${colors.border} 0%, ${colors.text} 100%); padding: 20px; border-radius: 8px 8px 0 0;">
+        <h1 style="color: white; margin: 0; font-size: 24px;">🔺 SLA Breach Escalation - Level ${escalationLevel}</h1>
+        <p style="color: rgba(255,255,255,0.9); margin: 5px 0 0 0; font-size: 14px;">${ruleName}</p>
       </div>
       <div style="background: #ffffff; padding: 30px; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 8px 8px;">
         <p style="color: #374151; font-size: 16px; margin-bottom: 20px;">
           <strong>Management Alert:</strong> The following ticket has breached its <strong>${slaType === "response" ? "first response" : "resolution"}</strong> SLA and requires your attention:
         </p>
         
-        <div style="background: #ede9fe; border-left: 4px solid #7c3aed; padding: 15px; margin-bottom: 20px;">
-          <p style="margin: 0 0 5px 0; color: #5b21b6;"><strong>⏱️ Overdue by: ${timeString}</strong></p>
-          <p style="margin: 0; color: #6d28d9; font-size: 14px;">SLA Type: ${slaType === "response" ? "First Response" : "Resolution"}</p>
+        <div style="background: ${colors.bg}; border-left: 4px solid ${colors.border}; padding: 15px; margin-bottom: 20px;">
+          <p style="margin: 0 0 5px 0; color: ${colors.text};"><strong>⏱️ Overdue by: ${timeString}</strong></p>
+          <p style="margin: 0; color: ${colors.text}; font-size: 14px;">SLA Type: ${slaType === "response" ? "First Response" : "Resolution"} | Escalation Level: ${escalationLevel}</p>
         </div>
 
         <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
@@ -433,7 +506,7 @@ async function sendEscalationEmail(
         </div>
       </div>
       <div style="text-align: center; padding: 20px; color: #9ca3af; font-size: 12px;">
-        This escalation was sent to all administrators and HR managers.<br>
+        Escalation Rule: ${ruleName}<br>
         HRIS Help Desk System
       </div>
     </div>
@@ -446,7 +519,7 @@ async function sendEscalationEmail(
       subject,
       html,
     });
-    console.log(`SLA ESCALATION email sent to ${managerEmails.length} manager(s) for ticket ${ticket.ticket_number}`);
+    console.log(`SLA ESCALATION (Level ${escalationLevel}) email sent to ${managerEmails.length} recipient(s) for ticket ${ticket.ticket_number}`);
   } catch (error) {
     console.error(`Failed to send escalation email for ticket ${ticket.ticket_number}:`, error);
   }

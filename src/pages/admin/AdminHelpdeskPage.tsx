@@ -15,6 +15,7 @@ import { sendTicketNotification } from "@/hooks/useTicketNotifications";
 import TicketAnalytics from "@/components/helpdesk/TicketAnalytics";
 import { SlaMetricsDashboard } from "@/components/helpdesk/SlaMetricsDashboard";
 import { SlaConfigurationPanel } from "@/components/helpdesk/SlaConfigurationPanel";
+import { EscalationRulesPanel } from "@/components/helpdesk/EscalationRulesPanel";
 import {
   Ticket,
   Clock,
@@ -273,6 +274,10 @@ export default function AdminHelpdeskPage() {
             <TabsTrigger value="sla-config" className="flex items-center gap-2">
               <Settings className="h-4 w-4" />
               SLA Config
+            </TabsTrigger>
+            <TabsTrigger value="escalation" className="flex items-center gap-2">
+              <AlertTriangle className="h-4 w-4" />
+              Escalation
             </TabsTrigger>
           </TabsList>
 
@@ -720,6 +725,10 @@ export default function AdminHelpdeskPage() {
 
           <TabsContent value="sla-config">
             <SlaConfigurationPanel />
+          </TabsContent>
+
+          <TabsContent value="escalation">
+            <EscalationRulesPanel />
           </TabsContent>
         </Tabs>
       </div>
