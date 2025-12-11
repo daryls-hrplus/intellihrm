@@ -14,6 +14,51 @@ export type Database = {
   }
   public: {
     Tables: {
+      audit_logs: {
+        Row: {
+          action: Database["public"]["Enums"]["audit_action"]
+          created_at: string
+          entity_id: string | null
+          entity_name: string | null
+          entity_type: string
+          id: string
+          ip_address: string | null
+          metadata: Json | null
+          new_values: Json | null
+          old_values: Json | null
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          action: Database["public"]["Enums"]["audit_action"]
+          created_at?: string
+          entity_id?: string | null
+          entity_name?: string | null
+          entity_type: string
+          id?: string
+          ip_address?: string | null
+          metadata?: Json | null
+          new_values?: Json | null
+          old_values?: Json | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          action?: Database["public"]["Enums"]["audit_action"]
+          created_at?: string
+          entity_id?: string | null
+          entity_name?: string | null
+          entity_type?: string
+          id?: string
+          ip_address?: string | null
+          metadata?: Json | null
+          new_values?: Json | null
+          old_values?: Json | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       companies: {
         Row: {
           address: string | null
@@ -234,9 +279,29 @@ export type Database = {
         }
         Returns: boolean
       }
+      log_audit_event: {
+        Args: {
+          p_action: Database["public"]["Enums"]["audit_action"]
+          p_entity_id?: string
+          p_entity_name?: string
+          p_entity_type: string
+          p_metadata?: Json
+          p_new_values?: Json
+          p_old_values?: Json
+        }
+        Returns: string
+      }
     }
     Enums: {
       app_role: "admin" | "hr_manager" | "employee"
+      audit_action:
+        | "CREATE"
+        | "UPDATE"
+        | "DELETE"
+        | "VIEW"
+        | "EXPORT"
+        | "LOGIN"
+        | "LOGOUT"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -365,6 +430,15 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "hr_manager", "employee"],
+      audit_action: [
+        "CREATE",
+        "UPDATE",
+        "DELETE",
+        "VIEW",
+        "EXPORT",
+        "LOGIN",
+        "LOGOUT",
+      ],
     },
   },
 } as const
