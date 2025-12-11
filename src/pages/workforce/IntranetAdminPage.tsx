@@ -17,8 +17,10 @@ import {
   Eye,
   EyeOff,
   Pin,
-  PinOff
+  PinOff,
+  Building2
 } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
   DialogContent,
@@ -60,6 +62,13 @@ interface Announcement {
   is_published: boolean;
   published_at: string;
   created_at: string;
+  target_departments: string[] | null;
+}
+
+interface Department {
+  id: string;
+  name: string;
+  code: string;
 }
 
 interface GalleryItem {
@@ -91,6 +100,7 @@ export default function IntranetAdminPage() {
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [gallery, setGallery] = useState<GalleryItem[]>([]);
   const [blogPosts, setBlogPosts] = useState<BlogPost[]>([]);
+  const [departments, setDepartments] = useState<Department[]>([]);
   const [loading, setLoading] = useState(true);
   
   // Announcement form state
@@ -102,6 +112,8 @@ export default function IntranetAdminPage() {
     announcement_type: "general",
     is_pinned: false,
     is_published: true,
+    target_departments: [] as string[],
+    visibility: "company" as "company" | "departments",
   });
 
   // Gallery form state
@@ -137,7 +149,7 @@ export default function IntranetAdminPage() {
 
   const fetchAllData = async () => {
     try {
-      const [announcementsRes, galleryRes, blogRes] = await Promise.all([
+      const [announcementsRes, galleryRes, blogRes, departmentsRes] = await Promise.all([
         supabase
           .from("intranet_announcements")
           .select("*")
@@ -150,11 +162,17 @@ export default function IntranetAdminPage() {
           .from("intranet_blog_posts")
           .select("*")
           .order("created_at", { ascending: false }),
+        supabase
+          .from("departments")
+          .select("id, name, code")
+          .eq("is_active", true)
+          .order("name"),
       ]);
 
       if (announcementsRes.data) setAnnouncements(announcementsRes.data);
       if (galleryRes.data) setGallery(galleryRes.data);
       if (blogRes.data) setBlogPosts(blogRes.data);
+      if (departmentsRes.data) setDepartments(departmentsRes.data);
     } catch (error) {
       console.error("Error fetching data:", error);
     } finally {
@@ -167,11 +185,22 @@ export default function IntranetAdminPage() {
     if (!user) return;
     
     try {
+      const targetDepts = announcementForm.visibility === "company" 
+        ? null 
+        : announcementForm.target_departments.length > 0 
+          ? announcementForm.target_departments 
+          : null;
+
       if (editingAnnouncement) {
         const { error } = await supabase
           .from("intranet_announcements")
           .update({
-            ...announcementForm,
+            title: announcementForm.title,
+            content: announcementForm.content,
+            announcement_type: announcementForm.announcement_type,
+            is_pinned: announcementForm.is_pinned,
+            is_published: announcementForm.is_published,
+            target_departments: targetDepts,
             updated_at: new Date().toISOString(),
           })
           .eq("id", editingAnnouncement.id);
@@ -182,7 +211,12 @@ export default function IntranetAdminPage() {
         const { error } = await supabase
           .from("intranet_announcements")
           .insert({
-            ...announcementForm,
+            title: announcementForm.title,
+            content: announcementForm.content,
+            announcement_type: announcementForm.announcement_type,
+            is_pinned: announcementForm.is_pinned,
+            is_published: announcementForm.is_published,
+            target_departments: targetDepts,
             created_by: user.id,
             published_at: announcementForm.is_published ? new Date().toISOString() : null,
           });
@@ -208,6 +242,8 @@ export default function IntranetAdminPage() {
       announcement_type: "general",
       is_pinned: false,
       is_published: true,
+      target_departments: [],
+      visibility: "company",
     });
   };
 
@@ -219,8 +255,25 @@ export default function IntranetAdminPage() {
       announcement_type: item.announcement_type,
       is_pinned: item.is_pinned,
       is_published: item.is_published,
+      target_departments: item.target_departments || [],
+      visibility: item.target_departments && item.target_departments.length > 0 ? "departments" : "company",
     });
     setAnnouncementDialogOpen(true);
+  };
+
+  const getDepartmentNames = (deptIds: string[] | null): string => {
+    if (!deptIds || deptIds.length === 0) return "Company-wide";
+    const names = deptIds.map(id => departments.find(d => d.id === id)?.name).filter(Boolean);
+    return names.length > 0 ? names.join(", ") : "Company-wide";
+  };
+
+  const toggleDepartment = (deptId: string) => {
+    setAnnouncementForm(prev => ({
+      ...prev,
+      target_departments: prev.target_departments.includes(deptId)
+        ? prev.target_departments.filter(id => id !== deptId)
+        : [...prev.target_departments, deptId]
+    }));
   };
 
   // Gallery handlers
@@ -504,6 +557,52 @@ export default function IntranetAdminPage() {
                         placeholder="Write your announcement content here..."
                       />
                     </div>
+                    <div className="space-y-2">
+                      <Label>Visibility</Label>
+                      <Select
+                        value={announcementForm.visibility}
+                        onValueChange={(val: "company" | "departments") => setAnnouncementForm({ ...announcementForm, visibility: val })}
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="company">Company-wide (Everyone)</SelectItem>
+                          <SelectItem value="departments">Specific Departments</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    {announcementForm.visibility === "departments" && (
+                      <div className="space-y-2">
+                        <Label>Select Departments</Label>
+                        <div className="border rounded-md p-3 max-h-48 overflow-y-auto space-y-2">
+                          {departments.length === 0 ? (
+                            <p className="text-sm text-muted-foreground">No departments available</p>
+                          ) : (
+                            departments.map((dept) => (
+                              <div key={dept.id} className="flex items-center space-x-2">
+                                <Checkbox
+                                  id={`dept-${dept.id}`}
+                                  checked={announcementForm.target_departments.includes(dept.id)}
+                                  onCheckedChange={() => toggleDepartment(dept.id)}
+                                />
+                                <label
+                                  htmlFor={`dept-${dept.id}`}
+                                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                                >
+                                  {dept.name} ({dept.code})
+                                </label>
+                              </div>
+                            ))
+                          )}
+                        </div>
+                        {announcementForm.target_departments.length > 0 && (
+                          <p className="text-xs text-muted-foreground">
+                            {announcementForm.target_departments.length} department(s) selected
+                          </p>
+                        )}
+                      </div>
+                    )}
                     <div className="flex items-center gap-6">
                       <div className="flex items-center gap-2">
                         <Switch
@@ -538,12 +637,16 @@ export default function IntranetAdminPage() {
                 <Card key={item.id}>
                   <CardContent className="p-4 flex items-center justify-between">
                     <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1">
+                      <div className="flex items-center gap-2 mb-1 flex-wrap">
                         {item.is_pinned && <Pin className="h-4 w-4 text-primary" />}
                         <Badge variant={item.is_published ? "default" : "secondary"}>
                           {item.is_published ? "Published" : "Draft"}
                         </Badge>
                         <Badge variant="outline">{item.announcement_type}</Badge>
+                        <Badge variant="secondary" className="flex items-center gap-1">
+                          <Building2 className="h-3 w-3" />
+                          {getDepartmentNames(item.target_departments)}
+                        </Badge>
                         <span className="text-sm text-muted-foreground">
                           {format(new Date(item.created_at), "MMM d, yyyy")}
                         </span>
