@@ -20,6 +20,7 @@ import AdminRolesPage from "./pages/admin/AdminRolesPage";
 import AdminPiiAccessPage from "./pages/admin/AdminPiiAccessPage";
 import AdminSettingsPage from "./pages/admin/AdminSettingsPage";
 import AdminPermissionsSummaryPage from "./pages/admin/AdminPermissionsSummaryPage";
+import AdminAccessRequestsPage from "./pages/admin/AdminAccessRequestsPage";
 
 // Workforce pages
 import WorkforceDashboardPage from "./pages/workforce/WorkforceDashboardPage";
@@ -57,6 +58,7 @@ import PropertyDashboardPage from "./pages/property/PropertyDashboardPage";
 
 // Other pages
 import ProfilePage from "./pages/profile/ProfilePage";
+import MyPermissionsPage from "./pages/profile/MyPermissionsPage";
 
 const queryClient = new QueryClient();
 
@@ -151,6 +153,14 @@ const App = () => (
               element={
                 <ProtectedRoute requiredRoles={["admin"]}>
                   <AdminPermissionsSummaryPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/access-requests"
+              element={
+                <ProtectedRoute requiredRoles={["admin"]}>
+                  <AdminAccessRequestsPage />
                 </ProtectedRoute>
               }
             />
@@ -278,6 +288,14 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <ProfilePage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/profile/permissions"
+              element={
+                <ProtectedRoute>
+                  <MyPermissionsPage />
                 </ProtectedRoute>
               }
             />

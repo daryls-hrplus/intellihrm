@@ -22,6 +22,7 @@ import {
   MailX,
   AlertTriangle,
   Grid3X3,
+  ClipboardList,
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 
@@ -81,6 +82,13 @@ const adminModules = [
     href: "/admin/permissions",
     icon: Grid3X3,
     color: "bg-violet-500/10 text-violet-600",
+  },
+  {
+    title: "Access Requests",
+    description: "Review employee permission requests",
+    href: "/admin/access-requests",
+    icon: ClipboardList,
+    color: "bg-emerald-500/10 text-emerald-600",
   },
   {
     title: "Territories",

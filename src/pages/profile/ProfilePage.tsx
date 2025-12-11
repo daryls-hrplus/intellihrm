@@ -18,7 +18,9 @@ import {
   Save,
   Shield,
   UserCog,
+  KeyRound,
 } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const profileSchema = z.object({
   full_name: z.string().min(2, "Name must be at least 2 characters").max(100),
@@ -294,6 +296,25 @@ export default function ProfilePage() {
               </div>
             </div>
           </div>
+        </div>
+
+        {/* Quick Actions */}
+        <div className="animate-slide-up" style={{ animationDelay: "50ms" }}>
+          <Link
+            to="/profile/permissions"
+            className="flex items-center gap-3 rounded-xl border border-border bg-card p-4 shadow-card transition-all hover:border-primary/50 hover:shadow-md"
+          >
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
+              <KeyRound className="h-5 w-5 text-primary" />
+            </div>
+            <div className="flex-1">
+              <h3 className="font-medium text-card-foreground">My Permissions</h3>
+              <p className="text-sm text-muted-foreground">
+                View your access rights and request additional permissions
+              </p>
+            </div>
+            <Shield className="h-5 w-5 text-muted-foreground" />
+          </Link>
         </div>
 
         {/* Edit Form */}
