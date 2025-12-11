@@ -36,7 +36,24 @@ interface Company {
   website: string | null;
   is_active: boolean;
   created_at: string;
+  group_id: string | null;
+  division_id: string | null;
   employee_count?: number;
+  group_name?: string;
+  division_name?: string;
+}
+
+interface CompanyGroup {
+  id: string;
+  name: string;
+  code: string;
+}
+
+interface Division {
+  id: string;
+  group_id: string;
+  name: string;
+  code: string;
 }
 
 const companySchema = z.object({
@@ -51,6 +68,8 @@ const companySchema = z.object({
   phone: z.string().max(20).optional().or(z.literal("")),
   email: z.string().email("Invalid email").optional().or(z.literal("")),
   website: z.string().url("Invalid URL").optional().or(z.literal("")),
+  group_id: z.string().optional().or(z.literal("")),
+  division_id: z.string().optional().or(z.literal("")),
 });
 
 type CompanyFormData = z.infer<typeof companySchema>;
@@ -67,6 +86,8 @@ const emptyFormData: CompanyFormData = {
   phone: "",
   email: "",
   website: "",
+  group_id: "",
+  division_id: "",
 };
 
 const industries = [
@@ -85,6 +106,8 @@ const industries = [
 
 export default function AdminCompaniesPage() {
   const [companies, setCompanies] = useState<Company[]>([]);
+  const [groups, setGroups] = useState<CompanyGroup[]>([]);
+  const [divisions, setDivisions] = useState<Division[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -97,7 +120,21 @@ export default function AdminCompaniesPage() {
 
   useEffect(() => {
     fetchCompanies();
+    fetchGroupsAndDivisions();
   }, []);
+
+  const fetchGroupsAndDivisions = async () => {
+    try {
+      const [groupsRes, divisionsRes] = await Promise.all([
+        supabase.from("company_groups").select("id, name, code").eq("is_active", true).order("name"),
+        supabase.from("divisions").select("id, group_id, name, code").eq("is_active", true).order("name"),
+      ]);
+      if (groupsRes.data) setGroups(groupsRes.data);
+      if (divisionsRes.data) setDivisions(divisionsRes.data);
+    } catch (error) {
+      console.error("Error fetching groups/divisions:", error);
+    }
+  };
 
   const fetchCompanies = async () => {
     try {
@@ -113,6 +150,13 @@ export default function AdminCompaniesPage() {
         .from("profiles")
         .select("company_id");
 
+      // Get groups and divisions for names
+      const { data: groupsData } = await supabase.from("company_groups").select("id, name");
+      const { data: divisionsData } = await supabase.from("divisions").select("id, name");
+
+      const groupMap = Object.fromEntries((groupsData || []).map((g) => [g.id, g.name]));
+      const divisionMap = Object.fromEntries((divisionsData || []).map((d) => [d.id, d.name]));
+
       const employeeCounts: Record<string, number> = {};
       (profilesData || []).forEach((p) => {
         if (p.company_id) {
@@ -123,6 +167,8 @@ export default function AdminCompaniesPage() {
       const companiesWithCounts = (companiesData || []).map((c) => ({
         ...c,
         employee_count: employeeCounts[c.id] || 0,
+        group_name: c.group_id ? groupMap[c.group_id] : undefined,
+        division_name: c.division_id ? divisionMap[c.division_id] : undefined,
       }));
 
       setCompanies(companiesWithCounts);
@@ -153,6 +199,8 @@ export default function AdminCompaniesPage() {
         phone: company.phone || "",
         email: company.email || "",
         website: company.website || "",
+        group_id: company.group_id || "",
+        division_id: company.division_id || "",
       });
     } else {
       setEditingCompany(null);
@@ -206,6 +254,8 @@ export default function AdminCompaniesPage() {
         phone: formData.phone || null,
         email: formData.email || null,
         website: formData.website || null,
+        group_id: formData.group_id || null,
+        division_id: formData.division_id || null,
       };
 
       if (editingCompany) {
@@ -461,6 +511,20 @@ export default function AdminCompaniesPage() {
                 </div>
 
                 <div className="mt-4 space-y-2">
+                  {(company.group_name || company.division_name) && (
+                    <div className="flex flex-wrap gap-1.5">
+                      {company.group_name && (
+                        <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
+                          {company.group_name}
+                        </span>
+                      )}
+                      {company.division_name && (
+                        <span className="rounded-full bg-info/10 px-2 py-0.5 text-xs font-medium text-info">
+                          {company.division_name}
+                        </span>
+                      )}
+                    </div>
+                  )}
                   {company.industry && (
                     <p className="text-sm text-muted-foreground">{company.industry}</p>
                   )}
@@ -577,6 +641,41 @@ export default function AdminCompaniesPage() {
                     {industries.map((ind) => (
                       <option key={ind} value={ind}>{ind}</option>
                     ))}
+                  </select>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-foreground">Company Group</label>
+                  <select
+                    name="group_id"
+                    value={formData.group_id}
+                    onChange={(e) => {
+                      setFormData({ ...formData, group_id: e.target.value, division_id: "" });
+                    }}
+                    className="h-10 w-full rounded-lg border border-input bg-background px-3 text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  >
+                    <option value="">No group</option>
+                    {groups.map((g) => (
+                      <option key={g.id} value={g.id}>{g.name} ({g.code})</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-foreground">Division</label>
+                  <select
+                    name="division_id"
+                    value={formData.division_id}
+                    onChange={handleChange}
+                    disabled={!formData.group_id}
+                    className="h-10 w-full rounded-lg border border-input bg-background px-3 text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 disabled:opacity-50"
+                  >
+                    <option value="">No division</option>
+                    {divisions
+                      .filter((d) => d.group_id === formData.group_id)
+                      .map((d) => (
+                        <option key={d.id} value={d.id}>{d.name} ({d.code})</option>
+                      ))}
                   </select>
                 </div>
 
