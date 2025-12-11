@@ -23,10 +23,35 @@ import EmployeesPage from "./pages/workforce/EmployeesPage";
 // Performance pages
 import PerformanceDashboardPage from "./pages/performance/PerformanceDashboardPage";
 
+// Leave pages
+import LeaveDashboardPage from "./pages/leave/LeaveDashboardPage";
+
+// Compensation pages
+import CompensationDashboardPage from "./pages/compensation/CompensationDashboardPage";
+
+// Benefits pages
+import BenefitsDashboardPage from "./pages/benefits/BenefitsDashboardPage";
+
+// Training pages
+import TrainingDashboardPage from "./pages/training/TrainingDashboardPage";
+
+// Succession pages
+import SuccessionDashboardPage from "./pages/succession/SuccessionDashboardPage";
+
+// Recruitment pages
+import RecruitmentDashboardPage from "./pages/recruitment/RecruitmentDashboardPage";
+
+// HSE pages
+import HSEDashboardPage from "./pages/hse/HSEDashboardPage";
+
+// Employee Relations pages
+import EmployeeRelationsDashboardPage from "./pages/employee-relations/EmployeeRelationsDashboardPage";
+
+// Property pages
+import PropertyDashboardPage from "./pages/property/PropertyDashboardPage";
+
 // Other pages
 import ProfilePage from "./pages/profile/ProfilePage";
-import LeavePage from "./pages/leave/LeavePage";
-import RecruitmentPage from "./pages/recruitment/RecruitmentPage";
 
 const queryClient = new QueryClient();
 
@@ -103,6 +128,36 @@ const App = () => (
               }
             />
 
+            {/* Leave Routes */}
+            <Route
+              path="/leave"
+              element={
+                <ProtectedRoute>
+                  <LeaveDashboardPage />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Compensation Routes */}
+            <Route
+              path="/compensation"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
+                  <CompensationDashboardPage />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Benefits Routes */}
+            <Route
+              path="/benefits"
+              element={
+                <ProtectedRoute>
+                  <BenefitsDashboardPage />
+                </ProtectedRoute>
+              }
+            />
+
             {/* Performance Routes */}
             <Route
               path="/performance"
@@ -113,28 +168,72 @@ const App = () => (
               }
             />
 
-            {/* Other Routes */}
+            {/* Training Routes */}
+            <Route
+              path="/training"
+              element={
+                <ProtectedRoute>
+                  <TrainingDashboardPage />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Succession Routes */}
+            <Route
+              path="/succession"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
+                  <SuccessionDashboardPage />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Recruitment Routes */}
+            <Route
+              path="/recruitment"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
+                  <RecruitmentDashboardPage />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* HSE Routes */}
+            <Route
+              path="/hse"
+              element={
+                <ProtectedRoute>
+                  <HSEDashboardPage />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Employee Relations Routes */}
+            <Route
+              path="/employee-relations"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
+                  <EmployeeRelationsDashboardPage />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Property Routes */}
+            <Route
+              path="/property"
+              element={
+                <ProtectedRoute>
+                  <PropertyDashboardPage />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Profile */}
             <Route
               path="/profile"
               element={
                 <ProtectedRoute>
                   <ProfilePage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/leave"
-              element={
-                <ProtectedRoute>
-                  <LeavePage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/recruitment"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <RecruitmentPage />
                 </ProtectedRoute>
               }
             />
