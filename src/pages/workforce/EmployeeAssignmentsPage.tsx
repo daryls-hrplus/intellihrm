@@ -50,11 +50,13 @@ import {
   Search,
   Download,
   Filter,
+  Upload,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { useAuth } from "@/contexts/AuthContext";
+import { BulkAssignmentUpload } from "@/components/workforce/BulkAssignmentUpload";
 
 interface Company {
   id: string;
@@ -130,6 +132,7 @@ export default function EmployeeAssignmentsPage() {
 
   // Dialog state
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [bulkUploadOpen, setBulkUploadOpen] = useState(false);
   const [editingAssignment, setEditingAssignment] = useState<EmployeeAssignment | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
@@ -398,10 +401,16 @@ export default function EmployeeAssignmentsPage() {
               Export CSV
             </Button>
             {isAdmin && (
-              <Button onClick={openCreateDialog}>
-                <Plus className="h-4 w-4 mr-2" />
-                New Assignment
-              </Button>
+              <>
+                <Button variant="outline" onClick={() => setBulkUploadOpen(true)}>
+                  <Upload className="h-4 w-4 mr-2" />
+                  Bulk Upload
+                </Button>
+                <Button onClick={openCreateDialog}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  New Assignment
+                </Button>
+              </>
             )}
           </div>
         </div>
@@ -720,6 +729,15 @@ export default function EmployeeAssignmentsPage() {
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
+
+        {/* Bulk Upload Dialog */}
+        <BulkAssignmentUpload
+          open={bulkUploadOpen}
+          onOpenChange={setBulkUploadOpen}
+          employees={employees}
+          positions={positions}
+          onSuccess={fetchAssignments}
+        />
       </div>
     </AppLayout>
   );
