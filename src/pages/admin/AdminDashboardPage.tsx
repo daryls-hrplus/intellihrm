@@ -12,6 +12,7 @@ import {
   Settings,
   ChevronRight,
   Loader2,
+  FileText,
 } from "lucide-react";
 
 const adminModules = [
@@ -42,6 +43,13 @@ const adminModules = [
     href: "/admin/roles",
     icon: Shield,
     color: "bg-warning/10 text-warning",
+  },
+  {
+    title: "Audit Logs",
+    description: "Track all user actions and changes",
+    href: "/admin/audit-logs",
+    icon: FileText,
+    color: "bg-secondary/10 text-secondary-foreground",
   },
   {
     title: "Territories",

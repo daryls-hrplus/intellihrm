@@ -15,6 +15,7 @@ import AdminDashboardPage from "./pages/admin/AdminDashboardPage";
 import AdminUsersPage from "./pages/admin/AdminUsersPage";
 import AdminCompaniesPage from "./pages/admin/AdminCompaniesPage";
 import AdminCompanyGroupsPage from "./pages/admin/AdminCompanyGroupsPage";
+import AdminAuditLogsPage from "./pages/admin/AdminAuditLogsPage";
 
 // Workforce pages
 import WorkforceDashboardPage from "./pages/workforce/WorkforceDashboardPage";
@@ -106,6 +107,14 @@ const App = () => (
               element={
                 <ProtectedRoute requiredRoles={["admin"]}>
                   <AdminCompanyGroupsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/audit-logs"
+              element={
+                <ProtectedRoute requiredRoles={["admin"]}>
+                  <AdminAuditLogsPage />
                 </ProtectedRoute>
               }
             />
