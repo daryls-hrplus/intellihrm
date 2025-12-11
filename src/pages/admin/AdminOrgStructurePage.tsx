@@ -56,6 +56,7 @@ import {
   Briefcase,
   Network,
   BarChart3,
+  Brain,
 } from "lucide-react";
 import { PositionsManagement } from "@/components/admin/PositionsManagement";
 import { OrgChartVisualization } from "@/components/admin/OrgChartVisualization";
@@ -63,6 +64,7 @@ import { GovernanceManagement } from "@/components/admin/GovernanceManagement";
 import { VacancyDashboard } from "@/components/admin/VacancyDashboard";
 import { HeadcountRequestWorkflow } from "@/components/admin/HeadcountRequestWorkflow";
 import { HeadcountAnalytics } from "@/components/admin/HeadcountAnalytics";
+import { HeadcountForecast } from "@/components/admin/HeadcountForecast";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { NavLink } from "react-router-dom";
@@ -452,6 +454,10 @@ export default function AdminOrgStructurePage() {
                 <BarChart3 className="h-4 w-4" />
                 Analytics
               </TabsTrigger>
+              <TabsTrigger value="forecast" className="flex items-center gap-2">
+                <Brain className="h-4 w-4" />
+                Forecast
+              </TabsTrigger>
             </TabsList>
 
             <TabsContent value="structure">
@@ -718,6 +724,10 @@ export default function AdminOrgStructurePage() {
 
             <TabsContent value="analytics">
               <HeadcountAnalytics companyId={selectedCompanyId} />
+            </TabsContent>
+
+            <TabsContent value="forecast">
+              <HeadcountForecast />
             </TabsContent>
           </Tabs>
         )}

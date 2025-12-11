@@ -17,3 +17,6 @@ verify_jwt = false
 
 [functions.send-headcount-report]
 verify_jwt = false
+
+[functions.headcount-forecast]
+verify_jwt = false
