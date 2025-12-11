@@ -24,6 +24,7 @@ import {
   Grid3X3,
   ClipboardList,
   Zap,
+  Upload,
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 
@@ -97,6 +98,13 @@ const adminModules = [
     href: "/admin/auto-approval",
     icon: Zap,
     color: "bg-orange-500/10 text-orange-600",
+  },
+  {
+    title: "Bulk Import Users",
+    description: "Import multiple users from CSV",
+    href: "/admin/bulk-import",
+    icon: Upload,
+    color: "bg-cyan-500/10 text-cyan-600",
   },
   {
     title: "Territories",
