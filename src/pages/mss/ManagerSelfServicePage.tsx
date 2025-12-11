@@ -10,6 +10,7 @@ import {
   Target,
   FileCheck,
   TrendingUp,
+  TicketPlus,
 } from "lucide-react";
 
 const mssModules = [
@@ -75,6 +76,13 @@ const mssModules = [
     href: "/mss/succession",
     icon: TrendingUp,
     color: "bg-cyan-500/10 text-cyan-600",
+  },
+  {
+    title: "Submit a Ticket",
+    description: "Request help or report an issue to IT/HR support",
+    href: "/help/tickets/new",
+    icon: TicketPlus,
+    color: "bg-red-500/10 text-red-600",
   },
 ];
 
