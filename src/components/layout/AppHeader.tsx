@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { NavLink } from "react-router-dom";
-import { Bell, UserPlus } from "lucide-react";
+import { UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Popover,
@@ -10,6 +10,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { NotificationBell } from "./NotificationBell";
+import { LanguageSwitcher } from "./LanguageSwitcher";
 
 export function AppHeader() {
   const { isAdmin } = useAuth();
@@ -55,6 +56,9 @@ export function AppHeader() {
 
   return (
     <div className="flex items-center justify-end gap-2 mb-4">
+      {/* Language Switcher */}
+      <LanguageSwitcher />
+      
       {/* User Notifications Bell */}
       <NotificationBell />
       

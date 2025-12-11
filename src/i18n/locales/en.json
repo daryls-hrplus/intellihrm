@@ -1,0 +1,199 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "add": "Add",
+    "create": "Create",
+    "update": "Update",
+    "search": "Search",
+    "filter": "Filter",
+    "export": "Export",
+    "import": "Import",
+    "refresh": "Refresh",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous",
+    "submit": "Submit",
+    "confirm": "Confirm",
+    "close": "Close",
+    "view": "View",
+    "download": "Download",
+    "upload": "Upload",
+    "select": "Select",
+    "selectAll": "Select All",
+    "clear": "Clear",
+    "reset": "Reset",
+    "apply": "Apply",
+    "yes": "Yes",
+    "no": "No",
+    "all": "All",
+    "none": "None",
+    "active": "Active",
+    "inactive": "Inactive",
+    "enabled": "Enabled",
+    "disabled": "Disabled",
+    "actions": "Actions",
+    "status": "Status",
+    "name": "Name",
+    "description": "Description",
+    "date": "Date",
+    "time": "Time",
+    "from": "From",
+    "to": "To",
+    "total": "Total",
+    "noData": "No data available",
+    "noResults": "No results found",
+    "error": "Error",
+    "success": "Success",
+    "warning": "Warning",
+    "info": "Information"
+  },
+  "auth": {
+    "login": "Log In",
+    "logout": "Log Out",
+    "signUp": "Sign Up",
+    "email": "Email",
+    "password": "Password",
+    "confirmPassword": "Confirm Password",
+    "forgotPassword": "Forgot Password?",
+    "resetPassword": "Reset Password",
+    "rememberMe": "Remember Me",
+    "welcomeBack": "Welcome Back",
+    "createAccount": "Create Account",
+    "alreadyHaveAccount": "Already have an account?",
+    "dontHaveAccount": "Don't have an account?"
+  },
+  "navigation": {
+    "dashboard": "Dashboard",
+    "workforce": "Workforce",
+    "employees": "Employees",
+    "departments": "Departments",
+    "positions": "Positions",
+    "orgStructure": "Org Structure",
+    "orgChanges": "Org Changes",
+    "assignments": "Assignments",
+    "leave": "Leave Management",
+    "compensation": "Compensation",
+    "benefits": "Benefits",
+    "training": "Training",
+    "succession": "Succession Planning",
+    "recruitment": "Recruitment",
+    "performance": "Performance",
+    "hse": "Health & Safety",
+    "employeeRelations": "Employee Relations",
+    "property": "Company Property",
+    "help": "Help & Support",
+    "admin": "Admin & Security",
+    "profile": "Profile",
+    "settings": "Settings",
+    "notifications": "Notifications"
+  },
+  "workforce": {
+    "title": "Workforce Management",
+    "description": "Manage your organization's workforce, departments, and positions",
+    "employeeCount": "Total Employees",
+    "departmentCount": "Departments",
+    "positionCount": "Positions",
+    "vacancies": "Open Vacancies",
+    "modules": {
+      "employees": {
+        "title": "Employees",
+        "description": "View and manage employee records"
+      },
+      "departments": {
+        "title": "Departments",
+        "description": "Manage organizational departments"
+      },
+      "positions": {
+        "title": "Positions",
+        "description": "Define and manage job positions"
+      },
+      "orgStructure": {
+        "title": "Org Structure",
+        "description": "View organizational hierarchy"
+      },
+      "orgChanges": {
+        "title": "Org Changes",
+        "description": "Track organizational changes"
+      },
+      "assignments": {
+        "title": "Employee Assignments",
+        "description": "Manage employee position assignments"
+      }
+    }
+  },
+  "helpdesk": {
+    "title": "Help & Support",
+    "newTicket": "New Ticket",
+    "myTickets": "My Tickets",
+    "knowledgeBase": "Knowledge Base",
+    "aiChat": "AI Assistant",
+    "ticketNumber": "Ticket #",
+    "subject": "Subject",
+    "priority": "Priority",
+    "category": "Category",
+    "assignee": "Assignee",
+    "requester": "Requester",
+    "createdAt": "Created",
+    "updatedAt": "Updated",
+    "resolvedAt": "Resolved",
+    "status": {
+      "open": "Open",
+      "inProgress": "In Progress",
+      "pending": "Pending",
+      "resolved": "Resolved",
+      "closed": "Closed"
+    },
+    "priorities": {
+      "low": "Low",
+      "medium": "Medium",
+      "high": "High",
+      "urgent": "Urgent"
+    }
+  },
+  "admin": {
+    "title": "Admin & Security",
+    "description": "System administration and security settings",
+    "users": "Users",
+    "roles": "Roles",
+    "permissions": "Permissions",
+    "auditLogs": "Audit Logs",
+    "settings": "Settings",
+    "companies": "Companies",
+    "companyGroups": "Company Groups",
+    "accessRequests": "Access Requests"
+  },
+  "language": {
+    "title": "Language",
+    "select": "Select Language",
+    "current": "Current Language"
+  },
+  "dateRange": {
+    "today": "Today",
+    "yesterday": "Yesterday",
+    "last7Days": "Last 7 Days",
+    "last30Days": "Last 30 Days",
+    "last90Days": "Last 90 Days",
+    "thisMonth": "This Month",
+    "lastMonth": "Last Month",
+    "thisYear": "This Year",
+    "custom": "Custom Range"
+  },
+  "validation": {
+    "required": "This field is required",
+    "invalidEmail": "Please enter a valid email address",
+    "minLength": "Must be at least {{min}} characters",
+    "maxLength": "Must be no more than {{max}} characters",
+    "passwordMismatch": "Passwords do not match"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "markAsRead": "Mark as Read",
+    "markAllAsRead": "Mark All as Read",
+    "noNotifications": "No notifications",
+    "viewAll": "View All"
+  }
+}

@@ -1,0 +1,199 @@
+{
+  "common": {
+    "loading": "جاري التحميل...",
+    "save": "حفظ",
+    "cancel": "إلغاء",
+    "delete": "حذف",
+    "edit": "تعديل",
+    "add": "إضافة",
+    "create": "إنشاء",
+    "update": "تحديث",
+    "search": "بحث",
+    "filter": "تصفية",
+    "export": "تصدير",
+    "import": "استيراد",
+    "refresh": "تحديث",
+    "back": "رجوع",
+    "next": "التالي",
+    "previous": "السابق",
+    "submit": "إرسال",
+    "confirm": "تأكيد",
+    "close": "إغلاق",
+    "view": "عرض",
+    "download": "تحميل",
+    "upload": "رفع",
+    "select": "اختيار",
+    "selectAll": "اختيار الكل",
+    "clear": "مسح",
+    "reset": "إعادة تعيين",
+    "apply": "تطبيق",
+    "yes": "نعم",
+    "no": "لا",
+    "all": "الكل",
+    "none": "لا شيء",
+    "active": "نشط",
+    "inactive": "غير نشط",
+    "enabled": "مفعل",
+    "disabled": "معطل",
+    "actions": "الإجراءات",
+    "status": "الحالة",
+    "name": "الاسم",
+    "description": "الوصف",
+    "date": "التاريخ",
+    "time": "الوقت",
+    "from": "من",
+    "to": "إلى",
+    "total": "المجموع",
+    "noData": "لا توجد بيانات",
+    "noResults": "لم يتم العثور على نتائج",
+    "error": "خطأ",
+    "success": "نجاح",
+    "warning": "تحذير",
+    "info": "معلومات"
+  },
+  "auth": {
+    "login": "تسجيل الدخول",
+    "logout": "تسجيل الخروج",
+    "signUp": "إنشاء حساب",
+    "email": "البريد الإلكتروني",
+    "password": "كلمة المرور",
+    "confirmPassword": "تأكيد كلمة المرور",
+    "forgotPassword": "نسيت كلمة المرور؟",
+    "resetPassword": "إعادة تعيين كلمة المرور",
+    "rememberMe": "تذكرني",
+    "welcomeBack": "مرحباً بعودتك",
+    "createAccount": "إنشاء حساب",
+    "alreadyHaveAccount": "لديك حساب بالفعل؟",
+    "dontHaveAccount": "ليس لديك حساب؟"
+  },
+  "navigation": {
+    "dashboard": "لوحة التحكم",
+    "workforce": "إدارة القوى العاملة",
+    "employees": "الموظفون",
+    "departments": "الأقسام",
+    "positions": "الوظائف",
+    "orgStructure": "الهيكل التنظيمي",
+    "orgChanges": "التغييرات التنظيمية",
+    "assignments": "التعيينات",
+    "leave": "إدارة الإجازات",
+    "compensation": "التعويضات",
+    "benefits": "المزايا",
+    "training": "التدريب",
+    "succession": "تخطيط التعاقب",
+    "recruitment": "التوظيف",
+    "performance": "الأداء",
+    "hse": "الصحة والسلامة",
+    "employeeRelations": "علاقات الموظفين",
+    "property": "ممتلكات الشركة",
+    "help": "المساعدة والدعم",
+    "admin": "الإدارة والأمان",
+    "profile": "الملف الشخصي",
+    "settings": "الإعدادات",
+    "notifications": "الإشعارات"
+  },
+  "workforce": {
+    "title": "إدارة القوى العاملة",
+    "description": "إدارة القوى العاملة والأقسام والوظائف في مؤسستك",
+    "employeeCount": "إجمالي الموظفين",
+    "departmentCount": "الأقسام",
+    "positionCount": "الوظائف",
+    "vacancies": "الشواغر المفتوحة",
+    "modules": {
+      "employees": {
+        "title": "الموظفون",
+        "description": "عرض وإدارة سجلات الموظفين"
+      },
+      "departments": {
+        "title": "الأقسام",
+        "description": "إدارة أقسام المؤسسة"
+      },
+      "positions": {
+        "title": "الوظائف",
+        "description": "تحديد وإدارة الوظائف"
+      },
+      "orgStructure": {
+        "title": "الهيكل التنظيمي",
+        "description": "عرض التسلسل الهرمي للمؤسسة"
+      },
+      "orgChanges": {
+        "title": "التغييرات التنظيمية",
+        "description": "تتبع التغييرات التنظيمية"
+      },
+      "assignments": {
+        "title": "تعيينات الموظفين",
+        "description": "إدارة تعيينات الموظفين في الوظائف"
+      }
+    }
+  },
+  "helpdesk": {
+    "title": "المساعدة والدعم",
+    "newTicket": "تذكرة جديدة",
+    "myTickets": "تذاكري",
+    "knowledgeBase": "قاعدة المعرفة",
+    "aiChat": "المساعد الذكي",
+    "ticketNumber": "رقم التذكرة",
+    "subject": "الموضوع",
+    "priority": "الأولوية",
+    "category": "الفئة",
+    "assignee": "المكلف",
+    "requester": "مقدم الطلب",
+    "createdAt": "تاريخ الإنشاء",
+    "updatedAt": "تاريخ التحديث",
+    "resolvedAt": "تاريخ الحل",
+    "status": {
+      "open": "مفتوح",
+      "inProgress": "قيد التنفيذ",
+      "pending": "معلق",
+      "resolved": "تم الحل",
+      "closed": "مغلق"
+    },
+    "priorities": {
+      "low": "منخفض",
+      "medium": "متوسط",
+      "high": "عالي",
+      "urgent": "عاجل"
+    }
+  },
+  "admin": {
+    "title": "الإدارة والأمان",
+    "description": "إعدادات إدارة النظام والأمان",
+    "users": "المستخدمون",
+    "roles": "الأدوار",
+    "permissions": "الصلاحيات",
+    "auditLogs": "سجلات التدقيق",
+    "settings": "الإعدادات",
+    "companies": "الشركات",
+    "companyGroups": "مجموعات الشركات",
+    "accessRequests": "طلبات الوصول"
+  },
+  "language": {
+    "title": "اللغة",
+    "select": "اختر اللغة",
+    "current": "اللغة الحالية"
+  },
+  "dateRange": {
+    "today": "اليوم",
+    "yesterday": "أمس",
+    "last7Days": "آخر 7 أيام",
+    "last30Days": "آخر 30 يوم",
+    "last90Days": "آخر 90 يوم",
+    "thisMonth": "هذا الشهر",
+    "lastMonth": "الشهر الماضي",
+    "thisYear": "هذه السنة",
+    "custom": "نطاق مخصص"
+  },
+  "validation": {
+    "required": "هذا الحقل مطلوب",
+    "invalidEmail": "يرجى إدخال بريد إلكتروني صالح",
+    "minLength": "يجب أن يكون {{min}} حرفاً على الأقل",
+    "maxLength": "يجب ألا يزيد عن {{max}} حرفاً",
+    "passwordMismatch": "كلمتا المرور غير متطابقتين"
+  },
+  "notifications": {
+    "title": "الإشعارات",
+    "markAsRead": "تحديد كمقروء",
+    "markAllAsRead": "تحديد الكل كمقروء",
+    "noNotifications": "لا توجد إشعارات",
+    "viewAll": "عرض الكل"
+  }
+}
