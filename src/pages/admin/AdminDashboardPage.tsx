@@ -4,6 +4,7 @@ import { NavLink } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { AccessRequestsAnalytics } from "@/components/admin/AccessRequestsAnalytics";
 import {
   Building,
   Building2,
@@ -329,6 +330,9 @@ export default function AdminDashboardPage() {
             )}
           </CardContent>
         </Card>
+
+        {/* Access Request Analytics */}
+        <AccessRequestsAnalytics />
 
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {adminModules.map((module, index) => {
