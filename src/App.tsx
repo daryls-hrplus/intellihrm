@@ -31,6 +31,7 @@ import AdminScheduledReportsPage from "./pages/admin/AdminScheduledReportsPage";
 import AdminKnowledgeBasePage from "./pages/admin/AdminKnowledgeBasePage";
 import AdminHelpdeskPage from "./pages/admin/AdminHelpdeskPage";
 import AdminPolicyDocumentsPage from "./pages/admin/AdminPolicyDocumentsPage";
+import AdminLetterTemplatesPage from "./pages/admin/AdminLetterTemplatesPage";
 // Workforce pages
 import WorkforceDashboardPage from "./pages/workforce/WorkforceDashboardPage";
 import EmployeesPage from "./pages/workforce/EmployeesPage";
@@ -72,6 +73,7 @@ import PropertyDashboardPage from "./pages/property/PropertyDashboardPage";
 
 // ESS & MSS pages
 import EmployeeSelfServicePage from "./pages/ess/EmployeeSelfServicePage";
+import MyLettersPage from "./pages/ess/MyLettersPage";
 import ManagerSelfServicePage from "./pages/mss/ManagerSelfServicePage";
 
 // Other pages
@@ -115,6 +117,14 @@ const App = () => (
               element={
                 <ProtectedRoute moduleCode="ess">
                   <EmployeeSelfServicePage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/ess/letters"
+              element={
+                <ProtectedRoute moduleCode="ess">
+                  <MyLettersPage />
                 </ProtectedRoute>
               }
             />
@@ -279,6 +289,14 @@ const App = () => (
               element={
                 <ProtectedRoute requiredRoles={["admin"]}>
                   <AdminPolicyDocumentsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/letter-templates"
+              element={
+                <ProtectedRoute requiredRoles={["admin"]}>
+                  <AdminLetterTemplatesPage />
                 </ProtectedRoute>
               }
             />

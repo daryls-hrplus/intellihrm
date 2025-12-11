@@ -11,6 +11,7 @@ import {
   Target,
   Bell,
   TicketPlus,
+  FileSignature,
 } from "lucide-react";
 
 const essModules = [
@@ -69,6 +70,13 @@ const essModules = [
     href: "/help/tickets/new",
     icon: TicketPlus,
     color: "bg-red-500/10 text-red-600",
+  },
+  {
+    title: "My Letters",
+    description: "Request and view employment letters",
+    href: "/ess/letters",
+    icon: FileSignature,
+    color: "bg-cyan-500/10 text-cyan-600",
   },
   {
     title: "Notifications",

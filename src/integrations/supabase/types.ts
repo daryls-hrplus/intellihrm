@@ -662,6 +662,76 @@ export type Database = {
           },
         ]
       }
+      generated_letters: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          created_at: string
+          employee_id: string
+          generated_content: string
+          id: string
+          letter_number: string | null
+          rejection_reason: string | null
+          requested_by: string
+          status: string
+          template_id: string
+          updated_at: string
+          variable_values: Json
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          created_at?: string
+          employee_id: string
+          generated_content: string
+          id?: string
+          letter_number?: string | null
+          rejection_reason?: string | null
+          requested_by: string
+          status?: string
+          template_id: string
+          updated_at?: string
+          variable_values?: Json
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          created_at?: string
+          employee_id?: string
+          generated_content?: string
+          id?: string
+          letter_number?: string | null
+          rejection_reason?: string | null
+          requested_by?: string
+          status?: string
+          template_id?: string
+          updated_at?: string
+          variable_values?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "generated_letters_approved_by_fkey"
+            columns: ["approved_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "generated_letters_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "generated_letters_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "letter_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       governance_bodies: {
         Row: {
           body_type: string
@@ -1099,6 +1169,65 @@ export type Database = {
             columns: ["parent_id"]
             isOneToOne: false
             referencedRelation: "kb_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      letter_templates: {
+        Row: {
+          available_variables: Json
+          body_template: string
+          category: string
+          code: string
+          company_id: string | null
+          created_at: string
+          created_by: string
+          description: string | null
+          id: string
+          is_active: boolean
+          name: string
+          requires_approval: boolean
+          subject: string
+          updated_at: string
+        }
+        Insert: {
+          available_variables?: Json
+          body_template: string
+          category?: string
+          code: string
+          company_id?: string | null
+          created_at?: string
+          created_by: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          requires_approval?: boolean
+          subject: string
+          updated_at?: string
+        }
+        Update: {
+          available_variables?: Json
+          body_template?: string
+          category?: string
+          code?: string
+          company_id?: string | null
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          requires_approval?: boolean
+          subject?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "letter_templates_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
             referencedColumns: ["id"]
           },
         ]
