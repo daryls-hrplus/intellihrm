@@ -567,6 +567,63 @@ export type Database = {
           },
         ]
       }
+      escalation_rules: {
+        Row: {
+          created_at: string
+          description: string | null
+          escalate_after_hours: number
+          escalation_level: number
+          id: string
+          is_active: boolean
+          name: string
+          notify_emails: string[]
+          notify_governance_body_id: string | null
+          priority_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          escalate_after_hours?: number
+          escalation_level?: number
+          id?: string
+          is_active?: boolean
+          name: string
+          notify_emails?: string[]
+          notify_governance_body_id?: string | null
+          priority_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          escalate_after_hours?: number
+          escalation_level?: number
+          id?: string
+          is_active?: boolean
+          name?: string
+          notify_emails?: string[]
+          notify_governance_body_id?: string | null
+          priority_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "escalation_rules_notify_governance_body_id_fkey"
+            columns: ["notify_governance_body_id"]
+            isOneToOne: false
+            referencedRelation: "governance_bodies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "escalation_rules_priority_id_fkey"
+            columns: ["priority_id"]
+            isOneToOne: false
+            referencedRelation: "ticket_priorities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       governance_bodies: {
         Row: {
           body_type: string
