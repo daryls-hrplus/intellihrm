@@ -20,3 +20,9 @@ verify_jwt = false
 
 [functions.headcount-forecast]
 verify_jwt = false
+
+[functions.bulk-import-users]
+verify_jwt = false
+
+[functions.send-scenario-notification]
+verify_jwt = false
