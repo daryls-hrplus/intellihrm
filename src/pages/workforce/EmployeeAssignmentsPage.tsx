@@ -51,12 +51,14 @@ import {
   Download,
   Filter,
   Upload,
+  History,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { useAuth } from "@/contexts/AuthContext";
 import { BulkAssignmentUpload } from "@/components/workforce/BulkAssignmentUpload";
+import { AssignmentHistoryDialog } from "@/components/workforce/AssignmentHistoryDialog";
 
 interface Company {
   id: string;
@@ -133,6 +135,7 @@ export default function EmployeeAssignmentsPage() {
   // Dialog state
   const [dialogOpen, setDialogOpen] = useState(false);
   const [bulkUploadOpen, setBulkUploadOpen] = useState(false);
+  const [historyOpen, setHistoryOpen] = useState(false);
   const [editingAssignment, setEditingAssignment] = useState<EmployeeAssignment | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
@@ -396,6 +399,10 @@ export default function EmployeeAssignmentsPage() {
           </div>
 
           <div className="flex items-center gap-2">
+            <Button variant="outline" onClick={() => setHistoryOpen(true)}>
+              <History className="h-4 w-4 mr-2" />
+              History
+            </Button>
             <Button variant="outline" onClick={exportCSV}>
               <Download className="h-4 w-4 mr-2" />
               Export CSV
@@ -737,6 +744,12 @@ export default function EmployeeAssignmentsPage() {
           employees={employees}
           positions={positions}
           onSuccess={fetchAssignments}
+        />
+
+        {/* History Dialog */}
+        <AssignmentHistoryDialog
+          open={historyOpen}
+          onOpenChange={setHistoryOpen}
         />
       </div>
     </AppLayout>
