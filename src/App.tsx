@@ -44,6 +44,13 @@ import OrgChangesPage from "./pages/workforce/OrgChangesPage";
 import EmployeeAssignmentsPage from "./pages/workforce/EmployeeAssignmentsPage";
 import EmployeeTransactionsPage from "./pages/workforce/EmployeeTransactionsPage";
 import WorkforceForecastingPage from "./pages/workforce/WorkforceForecastingPage";
+import IntranetAdminPage from "./pages/workforce/IntranetAdminPage";
+
+// Intranet pages
+import IntranetDashboardPage from "./pages/intranet/IntranetDashboardPage";
+
+// Privacy pages
+import PrivacySettingsPage from "./pages/profile/PrivacySettingsPage";
 
 // Performance pages
 import PerformanceDashboardPage from "./pages/performance/PerformanceDashboardPage";
@@ -439,6 +446,14 @@ const App = () => (
                 </ProtectedRoute>
               }
             />
+            <Route
+              path="/workforce/intranet-admin"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
+                  <IntranetAdminPage />
+                </ProtectedRoute>
+              }
+            />
 
             {/* Time & Attendance Routes */}
             <Route
@@ -662,6 +677,24 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <NotificationPreferencesPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/profile/privacy"
+              element={
+                <ProtectedRoute>
+                  <PrivacySettingsPage />
+                </ProtectedRoute>
+              }
+            />
+            
+            {/* Intranet Routes */}
+            <Route
+              path="/intranet"
+              element={
+                <ProtectedRoute>
+                  <IntranetDashboardPage />
                 </ProtectedRoute>
               }
             />

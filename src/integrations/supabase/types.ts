@@ -605,6 +605,42 @@ export type Database = {
           },
         ]
       }
+      employee_privacy_settings: {
+        Row: {
+          created_at: string
+          id: string
+          share_birthday: boolean
+          share_marriage: boolean
+          share_new_child: boolean
+          share_promotion: boolean
+          share_work_anniversary: boolean
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          share_birthday?: boolean
+          share_marriage?: boolean
+          share_new_child?: boolean
+          share_promotion?: boolean
+          share_work_anniversary?: boolean
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          share_birthday?: boolean
+          share_marriage?: boolean
+          share_new_child?: boolean
+          share_promotion?: boolean
+          share_work_anniversary?: boolean
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       employee_transactions: {
         Row: {
           acting_allowance: number | null
@@ -1336,6 +1372,175 @@ export type Database = {
             columns: ["reviewed_by"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      intranet_announcements: {
+        Row: {
+          announcement_type: string
+          company_id: string | null
+          content: string
+          created_at: string
+          created_by: string
+          expires_at: string | null
+          id: string
+          is_pinned: boolean
+          is_published: boolean
+          published_at: string | null
+          related_employee_id: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          announcement_type?: string
+          company_id?: string | null
+          content: string
+          created_at?: string
+          created_by: string
+          expires_at?: string | null
+          id?: string
+          is_pinned?: boolean
+          is_published?: boolean
+          published_at?: string | null
+          related_employee_id?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          announcement_type?: string
+          company_id?: string | null
+          content?: string
+          created_at?: string
+          created_by?: string
+          expires_at?: string | null
+          id?: string
+          is_pinned?: boolean
+          is_published?: boolean
+          published_at?: string | null
+          related_employee_id?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "intranet_announcements_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "intranet_announcements_related_employee_id_fkey"
+            columns: ["related_employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      intranet_blog_posts: {
+        Row: {
+          author_id: string
+          company_id: string | null
+          content: string
+          created_at: string
+          excerpt: string | null
+          featured_image_url: string | null
+          id: string
+          is_published: boolean
+          published_at: string | null
+          slug: string
+          tags: string[] | null
+          title: string
+          updated_at: string
+          view_count: number
+        }
+        Insert: {
+          author_id: string
+          company_id?: string | null
+          content: string
+          created_at?: string
+          excerpt?: string | null
+          featured_image_url?: string | null
+          id?: string
+          is_published?: boolean
+          published_at?: string | null
+          slug: string
+          tags?: string[] | null
+          title: string
+          updated_at?: string
+          view_count?: number
+        }
+        Update: {
+          author_id?: string
+          company_id?: string | null
+          content?: string
+          created_at?: string
+          excerpt?: string | null
+          featured_image_url?: string | null
+          id?: string
+          is_published?: boolean
+          published_at?: string | null
+          slug?: string
+          tags?: string[] | null
+          title?: string
+          updated_at?: string
+          view_count?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "intranet_blog_posts_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      intranet_gallery: {
+        Row: {
+          album_name: string | null
+          company_id: string | null
+          created_at: string
+          description: string | null
+          id: string
+          image_url: string
+          is_published: boolean
+          title: string
+          updated_at: string
+          uploaded_by: string
+        }
+        Insert: {
+          album_name?: string | null
+          company_id?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url: string
+          is_published?: boolean
+          title: string
+          updated_at?: string
+          uploaded_by: string
+        }
+        Update: {
+          album_name?: string | null
+          company_id?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string
+          is_published?: boolean
+          title?: string
+          updated_at?: string
+          uploaded_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "intranet_gallery_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
             referencedColumns: ["id"]
           },
         ]
