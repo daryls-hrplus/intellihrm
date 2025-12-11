@@ -8,13 +8,13 @@ import { HeadcountTrend } from "@/components/dashboard/HeadcountTrend";
 import { PendingAccessRequests } from "@/components/dashboard/PendingAccessRequests";
 import { SlaRiskWidget } from "@/components/dashboard/SlaRiskWidget";
 import { IntranetButton } from "@/components/layout/IntranetButton";
+import { NotificationBell } from "@/components/layout/NotificationBell";
 import { useAuth } from "@/contexts/AuthContext";
 import {
   Users,
   UserPlus,
   Calendar,
   TrendingUp,
-  Bell,
 } from "lucide-react";
 
 const Index = () => {
@@ -35,13 +35,7 @@ const Index = () => {
           </div>
           <div className="flex items-center gap-3">
             <IntranetButton />
-            <button className="relative inline-flex items-center gap-2 rounded-lg border border-border bg-card px-4 py-2.5 text-sm font-medium text-card-foreground shadow-sm transition-all hover:bg-accent">
-              <Bell className="h-4 w-4" />
-              Notifications
-              <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-destructive text-xs font-bold text-destructive-foreground">
-                3
-              </span>
-            </button>
+            <NotificationBell />
           </div>
         </div>
 
