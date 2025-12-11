@@ -5,6 +5,7 @@ import { RecentActivity } from "@/components/dashboard/RecentActivity";
 import { UpcomingEvents } from "@/components/dashboard/UpcomingEvents";
 import { EmployeeDistribution } from "@/components/dashboard/EmployeeDistribution";
 import { HeadcountTrend } from "@/components/dashboard/HeadcountTrend";
+import { PendingAccessRequests } from "@/components/dashboard/PendingAccessRequests";
 import { useAuth } from "@/contexts/AuthContext";
 import {
   Users,
@@ -15,7 +16,7 @@ import {
 } from "lucide-react";
 
 const Index = () => {
-  const { profile } = useAuth();
+  const { profile, isAdmin } = useAuth();
   const firstName = profile?.full_name?.split(" ")[0] || "there";
   return (
     <AppLayout>
@@ -84,10 +85,11 @@ const Index = () => {
           <EmployeeDistribution />
         </div>
 
-        {/* Activity & Events */}
-        <div className="grid gap-6 lg:grid-cols-2">
+        {/* Activity, Events & Admin Widgets */}
+        <div className="grid gap-6 lg:grid-cols-3">
           <RecentActivity />
           <UpcomingEvents />
+          {isAdmin && <PendingAccessRequests />}
         </div>
       </div>
     </AppLayout>
