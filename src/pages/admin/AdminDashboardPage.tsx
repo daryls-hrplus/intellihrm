@@ -14,6 +14,7 @@ import {
   Loader2,
   FileText,
   Eye,
+  Cog,
 } from "lucide-react";
 
 const adminModules = [
@@ -58,6 +59,13 @@ const adminModules = [
     href: "/admin/pii-access",
     icon: Eye,
     color: "bg-amber-500/10 text-amber-600",
+  },
+  {
+    title: "System Settings",
+    description: "Configure email alerts and thresholds",
+    href: "/admin/settings",
+    icon: Cog,
+    color: "bg-slate-500/10 text-slate-600",
   },
   {
     title: "Territories",

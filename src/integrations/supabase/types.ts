@@ -208,6 +208,39 @@ export type Database = {
           },
         ]
       }
+      pii_access_alerts: {
+        Row: {
+          access_count: number
+          alert_reason: string | null
+          alert_type: string
+          created_at: string
+          email_sent: boolean | null
+          id: string
+          user_email: string
+          user_id: string
+        }
+        Insert: {
+          access_count?: number
+          alert_reason?: string | null
+          alert_type: string
+          created_at?: string
+          email_sent?: boolean | null
+          id?: string
+          user_email: string
+          user_id: string
+        }
+        Update: {
+          access_count?: number
+          alert_reason?: string | null
+          alert_type?: string
+          created_at?: string
+          email_sent?: boolean | null
+          id?: string
+          user_email?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -282,6 +315,36 @@ export type Database = {
           menu_permissions?: Json | null
           name?: string
           updated_at?: string | null
+        }
+        Relationships: []
+      }
+      system_settings: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          is_sensitive: boolean | null
+          key: string
+          updated_at: string
+          value: string | null
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_sensitive?: boolean | null
+          key: string
+          updated_at?: string
+          value?: string | null
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_sensitive?: boolean | null
+          key?: string
+          updated_at?: string
+          value?: string | null
         }
         Relationships: []
       }
