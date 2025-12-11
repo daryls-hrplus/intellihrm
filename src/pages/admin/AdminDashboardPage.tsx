@@ -31,6 +31,7 @@ import {
   CalendarClock,
   BookOpen,
   Headphones,
+  Brain,
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 
@@ -139,6 +140,13 @@ const getAdminModules = (t: (key: string) => string) => [
     href: "/admin/helpdesk",
     icon: Headphones,
     color: "bg-rose-500/10 text-rose-600",
+  },
+  {
+    title: "Policy Documents",
+    description: "Manage company policies for AI training and enforcement",
+    href: "/admin/policy-documents",
+    icon: Brain,
+    color: "bg-purple-500/10 text-purple-600",
   },
   {
     title: t("admin.modules.territories.title"),
