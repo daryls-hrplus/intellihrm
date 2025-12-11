@@ -19,6 +19,7 @@ import AdminAuditLogsPage from "./pages/admin/AdminAuditLogsPage";
 import AdminRolesPage from "./pages/admin/AdminRolesPage";
 import AdminPiiAccessPage from "./pages/admin/AdminPiiAccessPage";
 import AdminSettingsPage from "./pages/admin/AdminSettingsPage";
+import AdminPermissionsSummaryPage from "./pages/admin/AdminPermissionsSummaryPage";
 
 // Workforce pages
 import WorkforceDashboardPage from "./pages/workforce/WorkforceDashboardPage";
@@ -145,7 +146,14 @@ const App = () => (
                 </ProtectedRoute>
               }
             />
-
+            <Route
+              path="/admin/permissions"
+              element={
+                <ProtectedRoute requiredRoles={["admin"]}>
+                  <AdminPermissionsSummaryPage />
+                </ProtectedRoute>
+              }
+            />
             {/* Workforce Routes */}
             <Route
               path="/workforce"
