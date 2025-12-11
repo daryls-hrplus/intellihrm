@@ -19,7 +19,7 @@ import { EmployeeWorkPermitsTab } from "@/components/employee/EmployeeWorkPermit
 import { EmployeeLicensesTab } from "@/components/employee/EmployeeLicensesTab";
 import { EmployeeBackgroundChecksTab } from "@/components/employee/EmployeeBackgroundChecksTab";
 import { EmployeeReferencesTab } from "@/components/employee/EmployeeReferencesTab";
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+
 import {
   ArrowLeft,
   Mail,
@@ -241,21 +241,18 @@ export default function EmployeeProfilePage() {
 
         {/* Tabs Section */}
         <Tabs defaultValue="overview" className="w-full">
-          <ScrollArea className="w-full whitespace-nowrap">
-            <TabsList className="inline-flex w-max">
-              <TabsTrigger value="overview"><User className="h-4 w-4 mr-1" />Overview</TabsTrigger>
-              <TabsTrigger value="addresses"><Home className="h-4 w-4 mr-1" />Addresses</TabsTrigger>
-              <TabsTrigger value="dependents"><Baby className="h-4 w-4 mr-1" />Dependents</TabsTrigger>
-              <TabsTrigger value="bank"><CreditCard className="h-4 w-4 mr-1" />Bank</TabsTrigger>
-              <TabsTrigger value="beneficiaries"><Users className="h-4 w-4 mr-1" />Beneficiaries</TabsTrigger>
-              <TabsTrigger value="documents"><FileText className="h-4 w-4 mr-1" />Documents</TabsTrigger>
-              <TabsTrigger value="work_permits"><FileCheck className="h-4 w-4 mr-1" />Work Permits</TabsTrigger>
-              <TabsTrigger value="licenses"><Award className="h-4 w-4 mr-1" />Licenses</TabsTrigger>
-              <TabsTrigger value="background"><ShieldCheck className="h-4 w-4 mr-1" />Background</TabsTrigger>
-              <TabsTrigger value="references"><UserCheck className="h-4 w-4 mr-1" />References</TabsTrigger>
-            </TabsList>
-            <ScrollBar orientation="horizontal" />
-          </ScrollArea>
+          <TabsList className="flex flex-wrap h-auto gap-1 p-1">
+            <TabsTrigger value="overview"><User className="h-4 w-4 mr-1" />Overview</TabsTrigger>
+            <TabsTrigger value="addresses"><Home className="h-4 w-4 mr-1" />Addresses</TabsTrigger>
+            <TabsTrigger value="dependents"><Baby className="h-4 w-4 mr-1" />Dependents</TabsTrigger>
+            <TabsTrigger value="bank"><CreditCard className="h-4 w-4 mr-1" />Bank</TabsTrigger>
+            <TabsTrigger value="beneficiaries"><Users className="h-4 w-4 mr-1" />Beneficiaries</TabsTrigger>
+            <TabsTrigger value="documents"><FileText className="h-4 w-4 mr-1" />Documents</TabsTrigger>
+            <TabsTrigger value="work_permits"><FileCheck className="h-4 w-4 mr-1" />Work Permits</TabsTrigger>
+            <TabsTrigger value="licenses"><Award className="h-4 w-4 mr-1" />Licenses</TabsTrigger>
+            <TabsTrigger value="background"><ShieldCheck className="h-4 w-4 mr-1" />Background</TabsTrigger>
+            <TabsTrigger value="references"><UserCheck className="h-4 w-4 mr-1" />References</TabsTrigger>
+          </TabsList>
 
           <TabsContent value="overview" className="mt-6">
             <div className="grid gap-6 md:grid-cols-2">
@@ -361,6 +358,26 @@ export default function EmployeeProfilePage() {
 
           <TabsContent value="documents" className="mt-6">
             <EmployeeDocumentsTab employeeId={employee.id} />
+          </TabsContent>
+
+          <TabsContent value="dependents" className="mt-6">
+            <EmployeeDependentsTab employeeId={employee.id} />
+          </TabsContent>
+
+          <TabsContent value="work_permits" className="mt-6">
+            <EmployeeWorkPermitsTab employeeId={employee.id} />
+          </TabsContent>
+
+          <TabsContent value="licenses" className="mt-6">
+            <EmployeeLicensesTab employeeId={employee.id} />
+          </TabsContent>
+
+          <TabsContent value="background" className="mt-6">
+            <EmployeeBackgroundChecksTab employeeId={employee.id} />
+          </TabsContent>
+
+          <TabsContent value="references" className="mt-6">
+            <EmployeeReferencesTab employeeId={employee.id} />
           </TabsContent>
         </Tabs>
       </div>

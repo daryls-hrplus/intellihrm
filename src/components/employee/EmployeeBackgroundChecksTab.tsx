@@ -36,6 +36,8 @@ interface BackgroundCheckFormData {
   reference_number: string;
   expiry_date: string;
   notes: string;
+  start_date: string;
+  end_date: string;
 }
 
 interface EmployeeBackgroundChecksTabProps {
@@ -59,6 +61,8 @@ export function EmployeeBackgroundChecksTab({ employeeId }: EmployeeBackgroundCh
       reference_number: "",
       expiry_date: "",
       notes: "",
+      start_date: new Date().toISOString().split("T")[0],
+      end_date: "",
     },
   });
 
@@ -121,7 +125,7 @@ export function EmployeeBackgroundChecksTab({ employeeId }: EmployeeBackgroundCh
     }
   };
 
-  const handleEdit = (check: BackgroundCheck) => {
+  const handleEdit = (check: any) => {
     setEditingCheck(check);
     form.reset({
       check_type: check.check_type,
@@ -133,6 +137,8 @@ export function EmployeeBackgroundChecksTab({ employeeId }: EmployeeBackgroundCh
       reference_number: check.reference_number || "",
       expiry_date: check.expiry_date || "",
       notes: check.notes || "",
+      start_date: check.start_date || new Date().toISOString().split("T")[0],
+      end_date: check.end_date || "",
     });
     setDialogOpen(true);
   };
@@ -159,6 +165,8 @@ export function EmployeeBackgroundChecksTab({ employeeId }: EmployeeBackgroundCh
       reference_number: "",
       expiry_date: "",
       notes: "",
+      start_date: new Date().toISOString().split("T")[0],
+      end_date: "",
     });
     setDialogOpen(true);
   };
@@ -339,6 +347,33 @@ export function EmployeeBackgroundChecksTab({ employeeId }: EmployeeBackgroundCh
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Expiry Date</FormLabel>
+                        <FormControl>
+                          <Input type="date" {...field} />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="start_date"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Start Date</FormLabel>
+                        <FormControl>
+                          <Input type="date" {...field} />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="end_date"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>End Date</FormLabel>
                         <FormControl>
                           <Input type="date" {...field} />
                         </FormControl>

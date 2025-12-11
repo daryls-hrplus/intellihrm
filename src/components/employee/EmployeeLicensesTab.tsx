@@ -34,6 +34,8 @@ interface LicenseFormData {
   expiry_date: string;
   status: string;
   notes: string;
+  start_date: string;
+  end_date: string;
 }
 
 interface EmployeeLicensesTabProps {
@@ -56,6 +58,8 @@ export function EmployeeLicensesTab({ employeeId }: EmployeeLicensesTabProps) {
       expiry_date: "",
       status: "active",
       notes: "",
+      start_date: new Date().toISOString().split("T")[0],
+      end_date: "",
     },
   });
 
@@ -115,7 +119,7 @@ export function EmployeeLicensesTab({ employeeId }: EmployeeLicensesTabProps) {
     }
   };
 
-  const handleEdit = (license: License) => {
+  const handleEdit = (license: any) => {
     setEditingLicense(license);
     form.reset({
       license_type: license.license_type,
@@ -126,6 +130,8 @@ export function EmployeeLicensesTab({ employeeId }: EmployeeLicensesTabProps) {
       expiry_date: license.expiry_date || "",
       status: license.status,
       notes: license.notes || "",
+      start_date: license.start_date || new Date().toISOString().split("T")[0],
+      end_date: license.end_date || "",
     });
     setDialogOpen(true);
   };
@@ -142,7 +148,18 @@ export function EmployeeLicensesTab({ employeeId }: EmployeeLicensesTabProps) {
 
   const openNewDialog = () => {
     setEditingLicense(null);
-    form.reset();
+    form.reset({
+      license_type: "driving",
+      license_number: "",
+      issuing_authority: "",
+      issuing_country: "",
+      issue_date: "",
+      expiry_date: "",
+      status: "active",
+      notes: "",
+      start_date: new Date().toISOString().split("T")[0],
+      end_date: "",
+    });
     setDialogOpen(true);
   };
 
@@ -287,6 +304,33 @@ export function EmployeeLicensesTab({ employeeId }: EmployeeLicensesTabProps) {
                     </FormItem>
                   )}
                 />
+
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="start_date"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Start Date</FormLabel>
+                        <FormControl>
+                          <Input type="date" {...field} />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="end_date"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>End Date</FormLabel>
+                        <FormControl>
+                          <Input type="date" {...field} />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                </div>
 
                 <FormField
                   control={form.control}
