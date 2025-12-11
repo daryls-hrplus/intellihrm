@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Checkbox } from "@/components/ui/checkbox";
+import { Button } from "@/components/ui/button";
 import {
   Table,
   TableBody,
@@ -21,8 +21,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Loader2, Search, Users, Shield, CheckCircle, XCircle } from "lucide-react";
+import { Loader2, Search, Users, Shield, CheckCircle, XCircle, Download } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { format } from "date-fns";
 
 const MENU_MODULES = [
   { code: "dashboard", label: "Dashboard", short: "Dash" },
@@ -182,6 +183,49 @@ export default function AdminPermissionsSummaryPage() {
   const usersWithPii = users.filter((u) => u.canViewPii).length;
   const adminUsers = users.filter((u) => u.isAdmin).length;
 
+  // Export to CSV
+  const exportToCSV = () => {
+    const headers = [
+      "Name",
+      "Email",
+      "Roles",
+      "Is Admin",
+      "Can View PII",
+      ...MENU_MODULES.map((m) => m.label),
+    ];
+
+    const rows = filteredUsers.map((user) => [
+      user.full_name || "Unnamed",
+      user.email,
+      user.roles.map((r) => r.name).join("; ") || "None",
+      user.isAdmin ? "Yes" : "No",
+      user.canViewPii ? "Yes" : "No",
+      ...MENU_MODULES.map((m) =>
+        user.effectivePermissions.includes(m.code) ? "Yes" : "No"
+      ),
+    ]);
+
+    const csvContent = [
+      headers.join(","),
+      ...rows.map((row) =>
+        row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(",")
+      ),
+    ].join("\n");
+
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute(
+      "download",
+      `permissions-matrix-${format(new Date(), "yyyy-MM-dd-HHmm")}.csv`
+    );
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
   if (isLoading) {
     return (
       <AppLayout>
@@ -197,11 +241,17 @@ export default function AdminPermissionsSummaryPage() {
       <div className="space-y-6">
         <Breadcrumbs items={breadcrumbItems} />
 
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Permissions Summary</h1>
-          <p className="text-muted-foreground mt-1">
-            View which users have access to which modules across the system
-          </p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">Permissions Summary</h1>
+            <p className="text-muted-foreground mt-1">
+              View which users have access to which modules across the system
+            </p>
+          </div>
+          <Button onClick={exportToCSV} variant="outline">
+            <Download className="mr-2 h-4 w-4" />
+            Export CSV
+          </Button>
         </div>
 
         {/* Stats */}
