@@ -14,9 +14,16 @@ import {
   Loader2,
   Mail,
   Calendar,
+  Building2,
 } from "lucide-react";
 
 type AppRole = "admin" | "hr_manager" | "employee";
+
+interface Company {
+  id: string;
+  name: string;
+  code: string;
+}
 
 interface UserWithRoles {
   id: string;
@@ -24,6 +31,8 @@ interface UserWithRoles {
   full_name: string | null;
   created_at: string;
   roles: AppRole[];
+  company_id: string | null;
+  company_name: string | null;
 }
 
 const roleConfig: { value: AppRole; label: string; icon: React.ElementType; color: string }[] = [
@@ -34,18 +43,20 @@ const roleConfig: { value: AppRole; label: string; icon: React.ElementType; colo
 
 export default function AdminUsersPage() {
   const [users, setUsers] = useState<UserWithRoles[]>([]);
+  const [companies, setCompanies] = useState<Company[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [updatingUserId, setUpdatingUserId] = useState<string | null>(null);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
+  const [openCompanyDropdown, setOpenCompanyDropdown] = useState<string | null>(null);
   const { user: currentUser } = useAuth();
   const { toast } = useToast();
 
   useEffect(() => {
-    fetchUsers();
+    fetchData();
   }, []);
 
-  const fetchUsers = async () => {
+  const fetchData = async () => {
     try {
       // Fetch all profiles
       const { data: profiles, error: profilesError } = await supabase
@@ -62,12 +73,30 @@ export default function AdminUsersPage() {
 
       if (rolesError) throw rolesError;
 
-      // Combine profiles with their roles
+      // Fetch all companies
+      const { data: companiesData, error: companiesError } = await supabase
+        .from("companies")
+        .select("id, name, code")
+        .eq("is_active", true)
+        .order("name");
+
+      if (companiesError) throw companiesError;
+      setCompanies(companiesData || []);
+
+      // Create company lookup
+      const companyLookup: Record<string, string> = {};
+      (companiesData || []).forEach((c) => {
+        companyLookup[c.id] = c.name;
+      });
+
+      // Combine profiles with their roles and company
       const usersWithRoles: UserWithRoles[] = (profiles || []).map((profile) => ({
         id: profile.id,
         email: profile.email,
         full_name: profile.full_name,
         created_at: profile.created_at,
+        company_id: profile.company_id,
+        company_name: profile.company_id ? companyLookup[profile.company_id] || null : null,
         roles: (roles || [])
           .filter((r) => r.user_id === profile.id)
           .map((r) => r.role as AppRole),
@@ -138,10 +167,50 @@ export default function AdminUsersPage() {
     }
   };
 
+  const updateUserCompany = async (userId: string, companyId: string | null) => {
+    setUpdatingUserId(userId);
+    setOpenCompanyDropdown(null);
+
+    try {
+      const { error } = await supabase
+        .from("profiles")
+        .update({ company_id: companyId })
+        .eq("id", userId);
+
+      if (error) throw error;
+
+      // Update local state
+      const companyName = companyId 
+        ? companies.find(c => c.id === companyId)?.name || null 
+        : null;
+      
+      setUsers((prev) =>
+        prev.map((u) =>
+          u.id === userId ? { ...u, company_id: companyId, company_name: companyName } : u
+        )
+      );
+
+      toast({
+        title: "Company updated",
+        description: companyId ? "User has been assigned to company." : "User has been unassigned from company.",
+      });
+    } catch (error) {
+      console.error("Error updating company:", error);
+      toast({
+        title: "Error",
+        description: "Failed to update company. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setUpdatingUserId(null);
+    }
+  };
+
   const filteredUsers = users.filter(
     (user) =>
       user.full_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      user.email.toLowerCase().includes(searchQuery.toLowerCase())
+      user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      user.company_name?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const getInitials = (name: string | null, email: string) => {
@@ -180,7 +249,7 @@ export default function AdminUsersPage() {
               User Management
             </h1>
             <p className="mt-1 text-muted-foreground">
-              Manage users and assign roles across your organization
+              Manage users, roles, and company assignments
             </p>
           </div>
           <div className="flex items-center gap-2 rounded-lg bg-primary/10 px-3 py-2 text-sm text-primary">
@@ -190,7 +259,7 @@ export default function AdminUsersPage() {
         </div>
 
         {/* Stats */}
-        <div className="grid gap-4 sm:grid-cols-3 animate-slide-up">
+        <div className="grid gap-4 sm:grid-cols-4 animate-slide-up">
           {roleConfig.map((role) => {
             const count = users.filter((u) => getPrimaryRole(u.roles) === role.value).length;
             const Icon = role.icon;
@@ -211,6 +280,17 @@ export default function AdminUsersPage() {
               </div>
             );
           })}
+          <div className="rounded-xl border border-border bg-card p-5 shadow-card">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Companies</p>
+                <p className="mt-1 text-3xl font-bold text-card-foreground">{companies.length}</p>
+              </div>
+              <div className="rounded-lg bg-info/10 p-3 text-info">
+                <Building2 className="h-5 w-5" />
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Search */}
@@ -218,7 +298,7 @@ export default function AdminUsersPage() {
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <input
             type="text"
-            placeholder="Search users by name or email..."
+            placeholder="Search users by name, email, or company..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="h-11 w-full rounded-lg border border-input bg-card pl-10 pr-4 text-card-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
@@ -244,7 +324,7 @@ export default function AdminUsersPage() {
                       User
                     </th>
                     <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                      Email
+                      Company
                     </th>
                     <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                       Role
@@ -281,13 +361,56 @@ export default function AdminUsersPage() {
                                   <span className="ml-2 text-xs text-muted-foreground">(You)</span>
                                 )}
                               </p>
+                              <p className="text-sm text-muted-foreground">{user.email}</p>
                             </div>
                           </div>
                         </td>
                         <td className="px-6 py-4">
-                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                            <Mail className="h-4 w-4" />
-                            {user.email}
+                          <div className="relative">
+                            <button
+                              onClick={() => setOpenCompanyDropdown(openCompanyDropdown === user.id ? null : user.id)}
+                              disabled={updatingUserId === user.id}
+                              className={cn(
+                                "inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm transition-colors hover:bg-muted",
+                                user.company_name ? "text-card-foreground" : "text-muted-foreground"
+                              )}
+                            >
+                              <Building2 className="h-4 w-4" />
+                              {user.company_name || "Unassigned"}
+                            </button>
+                            {openCompanyDropdown === user.id && (
+                              <>
+                                <div className="fixed inset-0 z-10" onClick={() => setOpenCompanyDropdown(null)} />
+                                <div className="absolute left-0 top-full z-20 mt-1 w-56 rounded-lg border border-border bg-card py-1 shadow-lg">
+                                  <p className="px-3 py-2 text-xs font-semibold uppercase text-muted-foreground">
+                                    Assign Company
+                                  </p>
+                                  <button
+                                    onClick={() => updateUserCompany(user.id, null)}
+                                    className={cn(
+                                      "flex w-full items-center gap-2 px-3 py-2 text-sm transition-colors hover:bg-muted",
+                                      !user.company_id ? "text-primary" : "text-card-foreground"
+                                    )}
+                                  >
+                                    <span className="flex-1 text-left">Unassigned</span>
+                                    {!user.company_id && <Check className="h-4 w-4" />}
+                                  </button>
+                                  {companies.map((company) => (
+                                    <button
+                                      key={company.id}
+                                      onClick={() => updateUserCompany(user.id, company.id)}
+                                      className={cn(
+                                        "flex w-full items-center gap-2 px-3 py-2 text-sm transition-colors hover:bg-muted",
+                                        user.company_id === company.id ? "text-primary" : "text-card-foreground"
+                                      )}
+                                    >
+                                      <span className="flex-1 text-left">{company.name}</span>
+                                      {user.company_id === company.id && <Check className="h-4 w-4" />}
+                                    </button>
+                                  ))}
+                                </div>
+                              </>
+                            )}
                           </div>
                         </td>
                         <td className="px-6 py-4">
