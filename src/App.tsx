@@ -22,7 +22,7 @@ import AdminSettingsPage from "./pages/admin/AdminSettingsPage";
 import AdminPermissionsSummaryPage from "./pages/admin/AdminPermissionsSummaryPage";
 import AdminAccessRequestsPage from "./pages/admin/AdminAccessRequestsPage";
 import AdminAutoApprovalPage from "./pages/admin/AdminAutoApprovalPage";
-
+import AdminBulkImportPage from "./pages/admin/AdminBulkImportPage";
 // Workforce pages
 import WorkforceDashboardPage from "./pages/workforce/WorkforceDashboardPage";
 import EmployeesPage from "./pages/workforce/EmployeesPage";
@@ -170,6 +170,14 @@ const App = () => (
               element={
                 <ProtectedRoute requiredRoles={["admin"]}>
                   <AdminAutoApprovalPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/bulk-import"
+              element={
+                <ProtectedRoute requiredRoles={["admin"]}>
+                  <AdminBulkImportPage />
                 </ProtectedRoute>
               }
             />
