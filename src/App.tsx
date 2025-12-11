@@ -76,6 +76,11 @@ import EmployeeSelfServicePage from "./pages/ess/EmployeeSelfServicePage";
 import MyLettersPage from "./pages/ess/MyLettersPage";
 import ManagerSelfServicePage from "./pages/mss/ManagerSelfServicePage";
 
+// Workflow pages
+import AdminWorkflowTemplatesPage from "./pages/admin/AdminWorkflowTemplatesPage";
+import MyApprovalsPage from "./pages/workflow/MyApprovalsPage";
+import MyDelegatesPage from "./pages/workflow/MyDelegatesPage";
+
 // Other pages
 import ProfilePage from "./pages/profile/ProfilePage";
 import MyPermissionsPage from "./pages/profile/MyPermissionsPage";
@@ -297,6 +302,14 @@ const App = () => (
               element={
                 <ProtectedRoute requiredRoles={["admin"]}>
                   <AdminLetterTemplatesPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/workflow-templates"
+              element={
+                <ProtectedRoute requiredRoles={["admin"]}>
+                  <AdminWorkflowTemplatesPage />
                 </ProtectedRoute>
               }
             />
@@ -522,6 +535,24 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <TicketDetailPage />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Workflow Routes */}
+            <Route
+              path="/workflow/approvals"
+              element={
+                <ProtectedRoute>
+                  <MyApprovalsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/workflow/delegates"
+              element={
+                <ProtectedRoute>
+                  <MyDelegatesPage />
                 </ProtectedRoute>
               }
             />
