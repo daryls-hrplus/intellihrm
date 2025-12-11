@@ -12,6 +12,7 @@ import {
   UserPlus,
   Building2,
   TrendingUp,
+  UserCog,
 } from "lucide-react";
 
 const workforceModules = [
@@ -28,6 +29,13 @@ const workforceModules = [
     href: "/workforce/positions",
     icon: UserCheck,
     color: "bg-info/10 text-info",
+  },
+  {
+    title: "Employee Assignments",
+    description: "Manage employee-position relationships",
+    href: "/workforce/assignments",
+    icon: UserCog,
+    color: "bg-purple-500/10 text-purple-500",
   },
   {
     title: "Org Structure",
