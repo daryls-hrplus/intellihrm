@@ -26,13 +26,29 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import {
+  ToggleGroup,
+  ToggleGroupItem,
+} from "@/components/ui/toggle-group";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Calendar } from "@/components/ui/calendar";
-import { History, Search, Loader2, CalendarIcon, X } from "lucide-react";
+import { 
+  History, 
+  Search, 
+  Loader2, 
+  CalendarIcon, 
+  X, 
+  TableIcon, 
+  GitBranch,
+  Plus,
+  RefreshCw,
+  XCircle,
+  User
+} from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { format, startOfDay, endOfDay } from "date-fns";
 import { cn } from "@/lib/utils";
@@ -77,6 +93,7 @@ export function AssignmentHistoryDialog({
   const [history, setHistory] = useState<HistoryEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
+  const [viewMode, setViewMode] = useState<"table" | "timeline">("timeline");
   
   // Filters
   const [actionFilter, setActionFilter] = useState<string>("all");
@@ -175,6 +192,32 @@ export function AssignmentHistoryDialog({
     }
   };
 
+  const getActionIcon = (action: string) => {
+    switch (action) {
+      case "created":
+        return <Plus className="h-4 w-4" />;
+      case "updated":
+        return <RefreshCw className="h-4 w-4" />;
+      case "ended":
+        return <XCircle className="h-4 w-4" />;
+      default:
+        return <History className="h-4 w-4" />;
+    }
+  };
+
+  const getActionColor = (action: string) => {
+    switch (action) {
+      case "created":
+        return "bg-green-500";
+      case "updated":
+        return "bg-blue-500";
+      case "ended":
+        return "bg-orange-500";
+      default:
+        return "bg-muted-foreground";
+    }
+  };
+
   const getChangeDescription = (entry: HistoryEntry) => {
     if (entry.action === "created") {
       return "Position assigned";
@@ -215,6 +258,18 @@ export function AssignmentHistoryDialog({
     );
   });
 
+  // Group history by date for timeline view
+  const groupedHistory = filteredHistory.reduce((groups, entry) => {
+    const date = format(new Date(entry.created_at), "yyyy-MM-dd");
+    if (!groups[date]) {
+      groups[date] = [];
+    }
+    groups[date].push(entry);
+    return groups;
+  }, {} as Record<string, HistoryEntry[]>);
+
+  const sortedDates = Object.keys(groupedHistory).sort((a, b) => b.localeCompare(a));
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl max-h-[90vh] flex flex-col">
@@ -232,12 +287,12 @@ export function AssignmentHistoryDialog({
           {/* Filters */}
           <div className="flex flex-wrap items-end gap-3">
             {/* Search */}
-            <div className="space-y-1.5 flex-1 min-w-[200px]">
+            <div className="space-y-1.5 flex-1 min-w-[180px]">
               <Label className="text-xs">Search</Label>
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
-                  placeholder="Search employee, position..."
+                  placeholder="Search..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="pl-10 h-9"
@@ -249,11 +304,11 @@ export function AssignmentHistoryDialog({
             <div className="space-y-1.5">
               <Label className="text-xs">Action</Label>
               <Select value={actionFilter} onValueChange={setActionFilter}>
-                <SelectTrigger className="w-[130px] h-9">
+                <SelectTrigger className="w-[120px] h-9">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Actions</SelectItem>
+                  <SelectItem value="all">All</SelectItem>
                   <SelectItem value="created">Created</SelectItem>
                   <SelectItem value="updated">Updated</SelectItem>
                   <SelectItem value="ended">Ended</SelectItem>
@@ -263,18 +318,18 @@ export function AssignmentHistoryDialog({
 
             {/* From Date */}
             <div className="space-y-1.5">
-              <Label className="text-xs">From Date</Label>
+              <Label className="text-xs">From</Label>
               <Popover>
                 <PopoverTrigger asChild>
                   <Button
                     variant="outline"
                     className={cn(
-                      "w-[140px] h-9 justify-start text-left font-normal",
+                      "w-[130px] h-9 justify-start text-left font-normal",
                       !fromDate && "text-muted-foreground"
                     )}
                   >
                     <CalendarIcon className="mr-2 h-4 w-4" />
-                    {fromDate ? format(fromDate, "MMM d, yyyy") : "Start"}
+                    {fromDate ? format(fromDate, "MMM d") : "Start"}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
@@ -291,18 +346,18 @@ export function AssignmentHistoryDialog({
 
             {/* To Date */}
             <div className="space-y-1.5">
-              <Label className="text-xs">To Date</Label>
+              <Label className="text-xs">To</Label>
               <Popover>
                 <PopoverTrigger asChild>
                   <Button
                     variant="outline"
                     className={cn(
-                      "w-[140px] h-9 justify-start text-left font-normal",
+                      "w-[130px] h-9 justify-start text-left font-normal",
                       !toDate && "text-muted-foreground"
                     )}
                   >
                     <CalendarIcon className="mr-2 h-4 w-4" />
-                    {toDate ? format(toDate, "MMM d, yyyy") : "End"}
+                    {toDate ? format(toDate, "MMM d") : "End"}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
@@ -329,6 +384,19 @@ export function AssignmentHistoryDialog({
                 Clear
               </Button>
             )}
+
+            {/* View Toggle */}
+            <div className="space-y-1.5 ml-auto">
+              <Label className="text-xs">View</Label>
+              <ToggleGroup type="single" value={viewMode} onValueChange={(v) => v && setViewMode(v as "table" | "timeline")}>
+                <ToggleGroupItem value="timeline" aria-label="Timeline view" className="h-9 px-3">
+                  <GitBranch className="h-4 w-4" />
+                </ToggleGroupItem>
+                <ToggleGroupItem value="table" aria-label="Table view" className="h-9 px-3">
+                  <TableIcon className="h-4 w-4" />
+                </ToggleGroupItem>
+              </ToggleGroup>
+            </div>
           </div>
 
           {/* Results count */}
@@ -336,7 +404,7 @@ export function AssignmentHistoryDialog({
             {filteredHistory.length} record{filteredHistory.length !== 1 ? "s" : ""} found
           </div>
 
-          {/* History Table */}
+          {/* Content */}
           {isLoading ? (
             <div className="flex justify-center py-12">
               <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -345,7 +413,96 @@ export function AssignmentHistoryDialog({
             <div className="text-center py-12 text-muted-foreground">
               No history records found
             </div>
+          ) : viewMode === "timeline" ? (
+            /* Timeline View */
+            <ScrollArea className="h-[350px] pr-4">
+              <div className="space-y-6">
+                {sortedDates.map((date) => (
+                  <div key={date}>
+                    {/* Date Header */}
+                    <div className="sticky top-0 bg-background/95 backdrop-blur z-10 pb-2">
+                      <div className="flex items-center gap-2">
+                        <div className="h-px flex-1 bg-border" />
+                        <span className="text-xs font-medium text-muted-foreground px-2">
+                          {format(new Date(date), "EEEE, MMMM d, yyyy")}
+                        </span>
+                        <div className="h-px flex-1 bg-border" />
+                      </div>
+                    </div>
+
+                    {/* Timeline Items */}
+                    <div className="relative ml-4">
+                      {/* Vertical Line */}
+                      <div className="absolute left-[7px] top-2 bottom-2 w-0.5 bg-border" />
+
+                      <div className="space-y-4">
+                        {groupedHistory[date].map((entry, idx) => (
+                          <div key={entry.id} className="relative pl-8">
+                            {/* Dot */}
+                            <div className={cn(
+                              "absolute left-0 top-1.5 h-4 w-4 rounded-full flex items-center justify-center text-white",
+                              getActionColor(entry.action)
+                            )}>
+                              {getActionIcon(entry.action)}
+                            </div>
+
+                            {/* Content Card */}
+                            <div className="rounded-lg border bg-card p-3 shadow-sm">
+                              <div className="flex items-start justify-between gap-4">
+                                <div className="flex-1 min-w-0">
+                                  {/* Header */}
+                                  <div className="flex items-center gap-2 flex-wrap">
+                                    {getActionBadge(entry.action)}
+                                    <span className="text-xs text-muted-foreground">
+                                      {format(new Date(entry.created_at), "HH:mm")}
+                                    </span>
+                                  </div>
+
+                                  {/* Position */}
+                                  <div className="mt-2">
+                                    <p className="font-medium text-sm">
+                                      {entry.position?.title || "Unknown Position"}
+                                    </p>
+                                    <p className="text-xs text-muted-foreground font-mono">
+                                      {entry.position?.code}
+                                    </p>
+                                  </div>
+
+                                  {/* Details */}
+                                  <p className="text-sm text-muted-foreground mt-1">
+                                    {getChangeDescription(entry)}
+                                  </p>
+
+                                  {/* Employee (if not filtering by employee) */}
+                                  {!employeeId && (
+                                    <div className="flex items-center gap-1.5 mt-2 text-xs text-muted-foreground">
+                                      <User className="h-3 w-3" />
+                                      <span>{entry.employee?.full_name || entry.employee?.email}</span>
+                                    </div>
+                                  )}
+                                </div>
+
+                                {/* Changed By */}
+                                <div className="text-right text-xs text-muted-foreground shrink-0">
+                                  <span className="block">by</span>
+                                  <span className="font-medium">
+                                    {entry.changed_by_profile?.full_name || 
+                                     entry.changed_by_profile?.email || 
+                                     "System"}
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </ScrollArea>
           ) : (
+            /* Table View */
             <ScrollArea className="h-[350px] rounded-md border">
               <Table>
                 <TableHeader>
