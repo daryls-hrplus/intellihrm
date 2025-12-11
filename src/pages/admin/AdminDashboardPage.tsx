@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { AccessRequestsAnalytics } from "@/components/admin/AccessRequestsAnalytics";
+import { useTranslation } from "react-i18next";
 import {
   Building,
   Building2,
@@ -33,127 +34,128 @@ import {
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 
-const adminModules = [
+const getAdminModules = (t: (key: string) => string) => [
   {
-    title: "Company Groups",
-    description: "Manage company groups and divisions",
+    title: t("admin.modules.companyGroups.title"),
+    description: t("admin.modules.companyGroups.description"),
     href: "/admin/company-groups",
     icon: Building,
     color: "bg-primary/10 text-primary",
   },
   {
-    title: "Companies",
-    description: "Manage organizations in the system",
+    title: t("admin.modules.companies.title"),
+    description: t("admin.modules.companies.description"),
     href: "/admin/companies",
     icon: Building2,
     color: "bg-info/10 text-info",
   },
   {
-    title: "Users",
-    description: "Manage user accounts and access",
+    title: t("admin.modules.users.title"),
+    description: t("admin.modules.users.description"),
     href: "/admin/users",
     icon: Users,
     color: "bg-success/10 text-success",
   },
   {
-    title: "Roles & Permissions",
-    description: "Configure role-based access control",
+    title: t("admin.modules.roles.title"),
+    description: t("admin.modules.roles.description"),
     href: "/admin/roles",
     icon: Shield,
     color: "bg-warning/10 text-warning",
   },
   {
-    title: "Audit Logs",
-    description: "Track all user actions and changes",
+    title: t("admin.modules.auditLogs.title"),
+    description: t("admin.modules.auditLogs.description"),
     href: "/admin/audit-logs",
     icon: FileText,
     color: "bg-secondary/10 text-secondary-foreground",
   },
   {
-    title: "PII Access Report",
-    description: "Monitor GDPR compliance and PII access",
+    title: t("admin.modules.piiAccess.title"),
+    description: t("admin.modules.piiAccess.description"),
     href: "/admin/pii-access",
     icon: Eye,
     color: "bg-amber-500/10 text-amber-600",
   },
   {
-    title: "System Settings",
-    description: "Configure email alerts and thresholds",
+    title: t("admin.modules.settings.title"),
+    description: t("admin.modules.settings.description"),
     href: "/admin/settings",
     icon: Cog,
     color: "bg-slate-500/10 text-slate-600",
   },
   {
-    title: "Permissions Summary",
-    description: "View user access across all modules",
+    title: t("admin.modules.permissions.title"),
+    description: t("admin.modules.permissions.description"),
     href: "/admin/permissions",
     icon: Grid3X3,
     color: "bg-violet-500/10 text-violet-600",
   },
   {
-    title: "Access Requests",
-    description: "Review employee permission requests",
+    title: t("admin.modules.accessRequests.title"),
+    description: t("admin.modules.accessRequests.description"),
     href: "/admin/access-requests",
     icon: ClipboardList,
     color: "bg-emerald-500/10 text-emerald-600",
   },
   {
-    title: "Auto-Approval Rules",
-    description: "Configure automatic request approvals",
+    title: t("admin.modules.autoApproval.title"),
+    description: t("admin.modules.autoApproval.description"),
     href: "/admin/auto-approval",
     icon: Zap,
     color: "bg-orange-500/10 text-orange-600",
   },
   {
-    title: "Bulk Import Users",
-    description: "Import multiple users from CSV",
+    title: t("admin.modules.bulkImport.title"),
+    description: t("admin.modules.bulkImport.description"),
     href: "/admin/bulk-import",
     icon: Upload,
     color: "bg-cyan-500/10 text-cyan-600",
   },
   {
-    title: "Org Structure",
-    description: "Manage divisions, departments & sections",
+    title: t("admin.modules.orgStructure.title"),
+    description: t("admin.modules.orgStructure.description"),
     href: "/admin/org-structure",
     icon: FolderTree,
     color: "bg-teal-500/10 text-teal-600",
   },
   {
-    title: "Scheduled Reports",
-    description: "Configure automated email reports",
+    title: t("admin.modules.scheduledReports.title"),
+    description: t("admin.modules.scheduledReports.description"),
     href: "/admin/scheduled-reports",
     icon: CalendarClock,
     color: "bg-indigo-500/10 text-indigo-600",
   },
   {
-    title: "Knowledge Base",
-    description: "Manage help articles and categories",
+    title: t("admin.modules.knowledgeBase.title"),
+    description: t("admin.modules.knowledgeBase.description"),
     href: "/admin/knowledge-base",
     icon: BookOpen,
     color: "bg-pink-500/10 text-pink-600",
   },
   {
-    title: "Helpdesk",
-    description: "Manage tickets and monitor SLAs",
+    title: t("admin.modules.helpdesk.title"),
+    description: t("admin.modules.helpdesk.description"),
     href: "/admin/helpdesk",
     icon: Headphones,
     color: "bg-rose-500/10 text-rose-600",
   },
   {
-    title: "Territories",
-    description: "Manage geographic regions",
+    title: t("admin.modules.territories.title"),
+    description: t("admin.modules.territories.description"),
     href: "/admin/territories",
     icon: Globe,
     color: "bg-destructive/10 text-destructive",
   },
   {
-    title: "Languages",
-    description: "Configure system languages",
+    title: t("admin.modules.languages.title"),
+    description: t("admin.modules.languages.description"),
     href: "/admin/languages",
     icon: Languages,
     color: "bg-accent/10 text-accent-foreground",
   },
 ];
+
 
 interface Stats {
   totalUsers: number;
@@ -179,9 +181,12 @@ interface PiiAlertStats {
 }
 
 export default function AdminDashboardPage() {
+  const { t } = useTranslation();
   const [stats, setStats] = useState<Stats>({ totalUsers: 0, totalCompanies: 0, totalGroups: 0, admins: 0 });
   const [piiAlertStats, setPiiAlertStats] = useState<PiiAlertStats>({ total: 0, emailsSent: 0, last24Hours: 0, recentAlerts: [] });
   const [isLoading, setIsLoading] = useState(true);
+
+  const adminModules = getAdminModules(t);
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -233,10 +238,10 @@ export default function AdminDashboardPage() {
   }, []);
 
   const statCards = [
-    { label: "Total Users", value: stats.totalUsers, icon: Users, color: "bg-primary/10 text-primary" },
-    { label: "Active Companies", value: stats.totalCompanies, icon: Building2, color: "bg-info/10 text-info" },
-    { label: "Company Groups", value: stats.totalGroups, icon: Building, color: "bg-success/10 text-success" },
-    { label: "Admins", value: stats.admins, icon: Shield, color: "bg-warning/10 text-warning" },
+    { label: t("admin.stats.totalUsers"), value: stats.totalUsers, icon: Users, color: "bg-primary/10 text-primary" },
+    { label: t("admin.stats.activeCompanies"), value: stats.totalCompanies, icon: Building2, color: "bg-info/10 text-info" },
+    { label: t("admin.stats.companyGroups"), value: stats.totalGroups, icon: Building, color: "bg-success/10 text-success" },
+    { label: t("admin.stats.admins"), value: stats.admins, icon: Shield, color: "bg-warning/10 text-warning" },
   ];
 
   return (
@@ -249,10 +254,10 @@ export default function AdminDashboardPage() {
             </div>
             <div>
               <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
-                Admin & Security
+                {t("admin.title")}
               </h1>
               <p className="text-muted-foreground">
-                System administration and security settings
+                {t("admin.description")}
               </p>
             </div>
           </div>

@@ -49,7 +49,19 @@
     "error": "خطأ",
     "success": "نجاح",
     "warning": "تحذير",
-    "info": "معلومات"
+    "info": "معلومات",
+    "you": "أنت",
+    "joined": "انضم",
+    "user": "المستخدم",
+    "company": "الشركة",
+    "role": "الدور",
+    "email": "البريد الإلكتروني",
+    "phone": "الهاتف",
+    "address": "العنوان",
+    "website": "الموقع الإلكتروني",
+    "industry": "الصناعة",
+    "code": "الرمز",
+    "required": "مطلوب"
   },
   "auth": {
     "login": "تسجيل الدخول",
@@ -125,6 +137,178 @@
       }
     }
   },
+  "admin": {
+    "title": "الإدارة والأمان",
+    "description": "إعدادات إدارة النظام والأمان",
+    "adminAccess": "صلاحية المسؤول",
+    "stats": {
+      "totalUsers": "إجمالي المستخدمين",
+      "activeCompanies": "الشركات النشطة",
+      "companyGroups": "مجموعات الشركات",
+      "admins": "المسؤولون",
+      "companies": "الشركات",
+      "totalAlerts": "إجمالي التنبيهات",
+      "last24Hours": "آخر 24 ساعة",
+      "emailsSent": "رسائل مرسلة"
+    },
+    "modules": {
+      "companyGroups": {
+        "title": "مجموعات الشركات",
+        "description": "إدارة مجموعات الشركات والأقسام"
+      },
+      "companies": {
+        "title": "الشركات",
+        "description": "إدارة المؤسسات في النظام"
+      },
+      "users": {
+        "title": "المستخدمون",
+        "description": "إدارة حسابات المستخدمين والوصول"
+      },
+      "roles": {
+        "title": "الأدوار والصلاحيات",
+        "description": "تكوين التحكم في الوصول المستند إلى الأدوار"
+      },
+      "auditLogs": {
+        "title": "سجلات التدقيق",
+        "description": "تتبع جميع إجراءات المستخدمين والتغييرات"
+      },
+      "piiAccess": {
+        "title": "تقرير الوصول للبيانات الشخصية",
+        "description": "مراقبة الامتثال للائحة حماية البيانات"
+      },
+      "settings": {
+        "title": "إعدادات النظام",
+        "description": "تكوين تنبيهات البريد الإلكتروني والحدود"
+      },
+      "permissions": {
+        "title": "ملخص الصلاحيات",
+        "description": "عرض وصول المستخدمين عبر جميع الوحدات"
+      },
+      "accessRequests": {
+        "title": "طلبات الوصول",
+        "description": "مراجعة طلبات صلاحيات الموظفين"
+      },
+      "autoApproval": {
+        "title": "قواعد الموافقة التلقائية",
+        "description": "تكوين الموافقات التلقائية للطلبات"
+      },
+      "bulkImport": {
+        "title": "استيراد المستخدمين بالجملة",
+        "description": "استيراد مستخدمين متعددين من ملف CSV"
+      },
+      "orgStructure": {
+        "title": "الهيكل التنظيمي",
+        "description": "إدارة الأقسام والإدارات"
+      },
+      "scheduledReports": {
+        "title": "التقارير المجدولة",
+        "description": "تكوين تقارير البريد الإلكتروني التلقائية"
+      },
+      "knowledgeBase": {
+        "title": "قاعدة المعرفة",
+        "description": "إدارة مقالات المساعدة والفئات"
+      },
+      "helpdesk": {
+        "title": "مكتب المساعدة",
+        "description": "إدارة التذاكر ومراقبة اتفاقيات مستوى الخدمة"
+      },
+      "territories": {
+        "title": "المناطق",
+        "description": "إدارة المناطق الجغرافية"
+      },
+      "languages": {
+        "title": "اللغات",
+        "description": "تكوين لغات النظام"
+      }
+    },
+    "users": {
+      "title": "إدارة المستخدمين",
+      "description": "إدارة المستخدمين والأدوار وتعيينات الشركات",
+      "searchPlaceholder": "البحث عن المستخدمين بالاسم أو البريد الإلكتروني أو الشركة...",
+      "noUsers": "لم يتم العثور على مستخدمين.",
+      "noUsersSearch": "لم يتم العثور على مستخدمين يطابقون بحثك.",
+      "roleUpdated": "تم تحديث الدور",
+      "roleUpdatedDesc": "تم تغيير دور المستخدم إلى {{role}}.",
+      "companyUpdated": "تم تحديث الشركة",
+      "companyAssigned": "تم تعيين المستخدم للشركة.",
+      "companyUnassigned": "تم إلغاء تعيين المستخدم من الشركة.",
+      "cannotChangeOwnRole": "لا يمكن تغيير دورك الخاص",
+      "cannotChangeOwnRoleDesc": "لا يمكنك إزالة صلاحيات المسؤول الخاصة بك.",
+      "assignCompany": "تعيين الشركة",
+      "unassigned": "غير معين",
+      "piiHidden": "البيانات الشخصية مخفية",
+      "piiHiddenTooltip": "المعلومات الشخصية مخفية بناءً على صلاحيات دورك"
+    },
+    "roles": {
+      "title": "إدارة الأدوار",
+      "description": "إدارة أدوار المستخدمين والوصول للقوائم وصلاحيات رؤية البيانات الشخصية",
+      "addRole": "إضافة دور",
+      "editRole": "تعديل الدور",
+      "createRole": "إنشاء دور جديد",
+      "updateRole": "تحديث الدور",
+      "deleteRole": "حذف الدور",
+      "roleName": "اسم الدور",
+      "roleCode": "رمز الدور",
+      "codeCannotChange": "لا يمكن تغيير الرمز بعد الإنشاء",
+      "piiAccess": "الوصول للبيانات الشخصية (GDPR)",
+      "piiAccessDesc": "السماح لهذا الدور بعرض المعلومات الشخصية (البريد الإلكتروني، الهاتف، العنوان، إلخ.)",
+      "canViewPii": "يمكنه عرض البيانات الشخصية",
+      "noPiiAccess": "لا يوجد وصول للبيانات الشخصية",
+      "activeRole": "نشط",
+      "activeRoleDesc": "الأدوار غير النشطة لا يمكن تعيينها للمستخدمين",
+      "menuPermissions": "صلاحيات الوصول للقوائم",
+      "menuPermissionsDesc": "حدد الوحدات التي يمكن لهذا الدور الوصول إليها في التنقل",
+      "modules": "وحدات",
+      "systemRole": "دور النظام",
+      "roleCreated": "تم إنشاء الدور بنجاح",
+      "roleUpdated": "تم تحديث الدور بنجاح",
+      "roleDeleted": "تم حذف الدور بنجاح",
+      "confirmDelete": "هل أنت متأكد من أنك تريد حذف هذا الدور؟",
+      "confirmDeleteDesc": "لا يمكن التراجع عن هذا الإجراء."
+    },
+    "companies": {
+      "title": "الشركات",
+      "description": "إدارة المؤسسات في النظام",
+      "addCompany": "إضافة شركة",
+      "editCompany": "تعديل الشركة",
+      "totalCompanies": "إجمالي الشركات",
+      "totalEmployees": "إجمالي الموظفين",
+      "searchPlaceholder": "البحث عن الشركات...",
+      "noCompanies": "لا توجد شركات بعد. أضف شركتك الأولى.",
+      "noCompaniesSearch": "لم يتم العثور على شركات تطابق بحثك.",
+      "companyCreated": "تم إنشاء الشركة",
+      "companyCreatedDesc": "تمت إضافة شركة جديدة.",
+      "companyUpdated": "تم تحديث الشركة",
+      "companyUpdatedDesc": "تم تحديث تفاصيل الشركة.",
+      "companyDeleted": "تم حذف الشركة",
+      "companyDeletedDesc": "تمت إزالة الشركة.",
+      "companyActivated": "تم تفعيل الشركة",
+      "companyDeactivated": "تم إلغاء تفعيل الشركة",
+      "cannotDelete": "لا يمكن الحذف",
+      "cannotDeleteDesc": "هذه الشركة لديها موظفون معينون. قم بإزالة الموظفين أولاً.",
+      "confirmDelete": "هل أنت متأكد من أنك تريد حذف {{name}}؟",
+      "employees": "موظفون",
+      "group": "المجموعة",
+      "division": "القسم"
+    },
+    "pii": {
+      "title": "تنبيهات أمان البيانات الشخصية",
+      "description": "مراقبة أنماط الوصول المشبوهة للبيانات الشخصية",
+      "viewAll": "عرض الكل",
+      "recentAlerts": "التنبيهات الأخيرة",
+      "noAlerts": "لا توجد تنبيهات أمان بعد",
+      "noAlertsDesc": "ستظهر التنبيهات هنا عند اكتشاف وصول مشبوه للبيانات الشخصية",
+      "accesses": "عمليات الوصول",
+      "test": "اختبار",
+      "alert": "تنبيه"
+    },
+    "accessRequests": {
+      "title": "طلبات الوصول",
+      "pendingRequests": "الطلبات المعلقة",
+      "awaitingReview": "{{count}} طلب(ات) في انتظار المراجعة",
+      "reviewRequests": "مراجعة الطلبات"
+    }
+  },
   "helpdesk": {
     "title": "المساعدة والدعم",
     "newTicket": "تذكرة جديدة",
@@ -153,18 +337,6 @@
       "high": "عالي",
       "urgent": "عاجل"
     }
-  },
-  "admin": {
-    "title": "الإدارة والأمان",
-    "description": "إعدادات إدارة النظام والأمان",
-    "users": "المستخدمون",
-    "roles": "الأدوار",
-    "permissions": "الصلاحيات",
-    "auditLogs": "سجلات التدقيق",
-    "settings": "الإعدادات",
-    "companies": "الشركات",
-    "companyGroups": "مجموعات الشركات",
-    "accessRequests": "طلبات الوصول"
   },
   "language": {
     "title": "اللغة",
