@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
-import { Settings, Mail, Eye, EyeOff, Save, Loader2, ShieldAlert, ArrowLeft, Send, CheckCircle, XCircle } from "lucide-react";
+import { Settings, Mail, Eye, EyeOff, Save, Loader2, ShieldAlert, ArrowLeft, Send, CheckCircle, XCircle, Calendar } from "lucide-react";
 import { NavLink } from "react-router-dom";
 
 interface SystemSetting {
@@ -24,7 +24,9 @@ export default function AdminSettingsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [isTesting, setIsTesting] = useState(false);
+  const [isTestingReport, setIsTestingReport] = useState(false);
   const [testResult, setTestResult] = useState<{ success: boolean; message: string } | null>(null);
+  const [reportResult, setReportResult] = useState<{ success: boolean; message: string } | null>(null);
   const [showSensitive, setShowSensitive] = useState<Record<string, boolean>>({});
   const [editedValues, setEditedValues] = useState<Record<string, string>>({});
 
@@ -130,6 +132,42 @@ export default function AdminSettingsPage() {
       toast.error("Failed to send test alert");
     } finally {
       setIsTesting(false);
+    }
+  };
+
+  const handleSendWeeklyReport = async () => {
+    setIsTestingReport(true);
+    setReportResult(null);
+
+    try {
+      const { data, error } = await supabase.functions.invoke("weekly-permissions-report", {
+        body: {},
+      });
+
+      if (error) throw error;
+
+      if (data?.success) {
+        setReportResult({
+          success: true,
+          message: `Report sent to ${data.emailsSent} admin(s)!`,
+        });
+        toast.success("Weekly permissions report sent successfully");
+      } else {
+        setReportResult({
+          success: false,
+          message: data?.reason || "Report not sent - check configuration.",
+        });
+        toast.warning(data?.reason || "Report could not be sent");
+      }
+    } catch (error: any) {
+      console.error("Error sending weekly report:", error);
+      setReportResult({
+        success: false,
+        message: error.message || "Failed to send report",
+      });
+      toast.error("Failed to send weekly report");
+    } finally {
+      setIsTestingReport(false);
     }
   };
 
@@ -306,6 +344,56 @@ export default function AdminSettingsPage() {
             <p className="text-xs text-muted-foreground">
               This will create a test entry in the PII alerts table and attempt to send an email to all admin users.
               The alert will be marked as type "TEST_ALERT" for easy identification.
+            </p>
+          </CardContent>
+        </Card>
+
+        {/* Weekly Permissions Report */}
+        <Card className="animate-slide-up" style={{ animationDelay: "75ms" }}>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Calendar className="h-5 w-5 text-primary" />
+              Weekly Permissions Report
+            </CardTitle>
+            <CardDescription>
+              Automated weekly report sent every Monday at 8am UTC with permission changes and user access summary
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-center gap-4">
+              <Button
+                onClick={handleSendWeeklyReport}
+                disabled={isTestingReport}
+                variant="outline"
+              >
+                {isTestingReport ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                    Generating...
+                  </>
+                ) : (
+                  <>
+                    <Calendar className="h-4 w-4 mr-2" />
+                    Send Report Now
+                  </>
+                )}
+              </Button>
+              
+              {reportResult && (
+                <div className={`flex items-center gap-2 text-sm ${reportResult.success ? "text-success" : "text-warning"}`}>
+                  {reportResult.success ? (
+                    <CheckCircle className="h-4 w-4" />
+                  ) : (
+                    <XCircle className="h-4 w-4" />
+                  )}
+                  {reportResult.message}
+                </div>
+              )}
+            </div>
+            
+            <p className="text-xs text-muted-foreground">
+              The report includes: user permissions matrix, PII access holders, recent permission changes, and role summaries.
+              Requires Resend API key to be configured above.
             </p>
           </CardContent>
         </Card>
