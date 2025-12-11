@@ -431,6 +431,69 @@ export type Database = {
           },
         ]
       }
+      employee_positions: {
+        Row: {
+          benefits_profile: Json | null
+          compensation_amount: number | null
+          compensation_currency: string | null
+          compensation_frequency: string | null
+          created_at: string
+          employee_id: string
+          end_date: string | null
+          id: string
+          is_active: boolean
+          is_primary: boolean
+          position_id: string
+          start_date: string
+          updated_at: string
+        }
+        Insert: {
+          benefits_profile?: Json | null
+          compensation_amount?: number | null
+          compensation_currency?: string | null
+          compensation_frequency?: string | null
+          created_at?: string
+          employee_id: string
+          end_date?: string | null
+          id?: string
+          is_active?: boolean
+          is_primary?: boolean
+          position_id: string
+          start_date?: string
+          updated_at?: string
+        }
+        Update: {
+          benefits_profile?: Json | null
+          compensation_amount?: number | null
+          compensation_currency?: string | null
+          compensation_frequency?: string | null
+          created_at?: string
+          employee_id?: string
+          end_date?: string | null
+          id?: string
+          is_active?: boolean
+          is_primary?: boolean
+          position_id?: string
+          start_date?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "employee_positions_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_positions_position_id_fkey"
+            columns: ["position_id"]
+            isOneToOne: false
+            referencedRelation: "positions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pii_access_alerts: {
         Row: {
           access_count: number
@@ -463,6 +526,57 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      positions: {
+        Row: {
+          code: string
+          created_at: string
+          department_id: string
+          description: string | null
+          id: string
+          is_active: boolean
+          reports_to_position_id: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          department_id: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          reports_to_position_id?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          department_id?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          reports_to_position_id?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "positions_department_id_fkey"
+            columns: ["department_id"]
+            isOneToOne: false
+            referencedRelation: "departments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "positions_reports_to_position_id_fkey"
+            columns: ["reports_to_position_id"]
+            isOneToOne: false
+            referencedRelation: "positions"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {
@@ -675,6 +789,15 @@ export type Database = {
           approved_modules: Json
           is_auto_approved: boolean
           rule_name: string
+        }[]
+      }
+      get_employee_supervisor: {
+        Args: { p_employee_id: string; p_position_id?: string }
+        Returns: {
+          supervisor_id: string
+          supervisor_name: string
+          supervisor_position_id: string
+          supervisor_position_title: string
         }[]
       }
       has_role: {
