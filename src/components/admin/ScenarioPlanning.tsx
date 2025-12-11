@@ -65,6 +65,7 @@ import { MonteCarloSimulation } from "./MonteCarloSimulation";
 import { SensitivityAnalysis } from "./SensitivityAnalysis";
 import { StressTestAnalysis } from "./StressTestAnalysis";
 import { HistoricalDataImport } from "./HistoricalDataImport";
+import { ScenarioRecommendations } from "./ScenarioRecommendations";
 
 export interface ScenarioParameters {
   id: string;
@@ -946,6 +947,31 @@ export function ScenarioPlanning({ currentHeadcount, sharedToken }: ScenarioPlan
     toast.success("Parameters calibrated from historical data");
   };
 
+  // Handle applying AI-recommended scenario
+  const handleApplyRecommendedScenario = (scenario: {
+    name: string;
+    description: string;
+    growthRate: number;
+    attritionRate: number;
+    budgetConstraint: number;
+    timeHorizon: number;
+  }) => {
+    const newId = Math.random().toString(36).substr(2, 9);
+    const newScenarioParams: ScenarioParameters = {
+      id: newId,
+      name: scenario.name,
+      description: scenario.description,
+      growthRate: scenario.growthRate,
+      attritionRate: scenario.attritionRate,
+      budgetConstraint: scenario.budgetConstraint,
+      timeHorizon: scenario.timeHorizon,
+      seasonalAdjustment: true,
+      aggressiveHiring: scenario.growthRate > 20,
+    };
+    setScenarios(prev => [...prev, newScenarioParams]);
+    setResults([]);
+  };
+
   const scenarioColors = [
     "hsl(var(--primary))",
     "hsl(var(--success))",
@@ -1440,6 +1466,12 @@ export function ScenarioPlanning({ currentHeadcount, sharedToken }: ScenarioPlan
 
       {/* Historical Data Import */}
       <HistoricalDataImport onParametersCalibrated={handleCalibratedParameters} />
+
+      {/* AI Scenario Recommendations */}
+      <ScenarioRecommendations 
+        currentHeadcount={currentHeadcount} 
+        onApplyScenario={handleApplyRecommendedScenario}
+      />
 
       {/* Monte Carlo Simulation */}
       {scenarios.length > 0 && (
