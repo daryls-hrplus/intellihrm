@@ -268,6 +268,47 @@ export type Database = {
           },
         ]
       }
+      company_divisions: {
+        Row: {
+          code: string
+          company_id: string
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          code: string
+          company_id: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          code?: string
+          company_id?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_divisions_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       company_groups: {
         Row: {
           code: string
@@ -297,6 +338,57 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      departments: {
+        Row: {
+          code: string
+          company_division_id: string | null
+          company_id: string
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          code: string
+          company_division_id?: string | null
+          company_id: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          code?: string
+          company_division_id?: string | null
+          company_id?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "departments_company_division_id_fkey"
+            columns: ["company_division_id"]
+            isOneToOne: false
+            referencedRelation: "company_divisions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "departments_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       divisions: {
         Row: {
@@ -377,27 +469,33 @@ export type Database = {
           avatar_url: string | null
           company_id: string | null
           created_at: string
+          department_id: string | null
           email: string
           full_name: string | null
           id: string
+          section_id: string | null
           updated_at: string
         }
         Insert: {
           avatar_url?: string | null
           company_id?: string | null
           created_at?: string
+          department_id?: string | null
           email: string
           full_name?: string | null
           id: string
+          section_id?: string | null
           updated_at?: string
         }
         Update: {
           avatar_url?: string | null
           company_id?: string | null
           created_at?: string
+          department_id?: string | null
           email?: string
           full_name?: string | null
           id?: string
+          section_id?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -406,6 +504,20 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profiles_department_id_fkey"
+            columns: ["department_id"]
+            isOneToOne: false
+            referencedRelation: "departments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profiles_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "sections"
             referencedColumns: ["id"]
           },
         ]
@@ -448,6 +560,47 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: []
+      }
+      sections: {
+        Row: {
+          code: string
+          created_at: string
+          department_id: string
+          description: string | null
+          id: string
+          is_active: boolean
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          department_id: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          department_id?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sections_department_id_fkey"
+            columns: ["department_id"]
+            isOneToOne: false
+            referencedRelation: "departments"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       system_settings: {
         Row: {

@@ -26,6 +26,7 @@ import {
   ClipboardList,
   Zap,
   Upload,
+  FolderTree,
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 
@@ -106,6 +107,13 @@ const adminModules = [
     href: "/admin/bulk-import",
     icon: Upload,
     color: "bg-cyan-500/10 text-cyan-600",
+  },
+  {
+    title: "Org Structure",
+    description: "Manage divisions, departments & sections",
+    href: "/admin/org-structure",
+    icon: FolderTree,
+    color: "bg-teal-500/10 text-teal-600",
   },
   {
     title: "Territories",
