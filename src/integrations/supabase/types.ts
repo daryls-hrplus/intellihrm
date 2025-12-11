@@ -443,6 +443,67 @@ export type Database = {
           },
         ]
       }
+      employee_position_history: {
+        Row: {
+          action: string
+          change_reason: string | null
+          changed_by: string | null
+          created_at: string
+          employee_id: string
+          employee_position_id: string | null
+          id: string
+          new_values: Json | null
+          old_values: Json | null
+          position_id: string
+        }
+        Insert: {
+          action: string
+          change_reason?: string | null
+          changed_by?: string | null
+          created_at?: string
+          employee_id: string
+          employee_position_id?: string | null
+          id?: string
+          new_values?: Json | null
+          old_values?: Json | null
+          position_id: string
+        }
+        Update: {
+          action?: string
+          change_reason?: string | null
+          changed_by?: string | null
+          created_at?: string
+          employee_id?: string
+          employee_position_id?: string | null
+          id?: string
+          new_values?: Json | null
+          old_values?: Json | null
+          position_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "employee_position_history_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_position_history_employee_position_id_fkey"
+            columns: ["employee_position_id"]
+            isOneToOne: false
+            referencedRelation: "employee_positions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_position_history_position_id_fkey"
+            columns: ["position_id"]
+            isOneToOne: false
+            referencedRelation: "positions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       employee_positions: {
         Row: {
           benefits_profile: Json | null
