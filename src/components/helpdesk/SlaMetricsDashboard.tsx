@@ -6,11 +6,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Button } from '@/components/ui/button';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell, Legend } from 'recharts';
-import { format, subDays, startOfDay, endOfDay, differenceInHours, parseISO } from 'date-fns';
-import { AlertTriangle, CheckCircle, Clock, TrendingUp, TrendingDown, Target, Timer, XCircle } from 'lucide-react';
+import { format, subDays, startOfDay, differenceInHours, parseISO } from 'date-fns';
+import { AlertTriangle, CheckCircle, Clock, TrendingUp, TrendingDown, Target, Timer, XCircle, Download, FileText } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
+import { toast } from 'sonner';
+import jsPDF from 'jspdf';
 
 interface TicketWithSla {
   id: string;
@@ -201,6 +204,183 @@ export function SlaMetricsDashboard() {
     return <Badge variant="destructive">Critical</Badge>;
   };
 
+  const exportToCSV = () => {
+    if (!tickets || tickets.length === 0) {
+      toast.error('No data to export');
+      return;
+    }
+
+    const headers = [
+      'Ticket Number',
+      'Status',
+      'Priority',
+      'Category',
+      'Created At',
+      'First Response At',
+      'Resolved At',
+      'Response SLA Breached',
+      'Resolution SLA Breached',
+      'Response Time (hours)',
+      'Resolution Time (hours)',
+    ];
+
+    const rows = tickets.map(t => {
+      const responseTime = t.first_response_at
+        ? differenceInHours(parseISO(t.first_response_at), parseISO(t.created_at))
+        : '';
+      const resolutionTime = t.resolved_at
+        ? differenceInHours(parseISO(t.resolved_at), parseISO(t.created_at))
+        : '';
+      
+      return [
+        t.ticket_number,
+        t.status,
+        t.priority?.name || 'N/A',
+        t.category?.name || 'N/A',
+        format(parseISO(t.created_at), 'yyyy-MM-dd HH:mm'),
+        t.first_response_at ? format(parseISO(t.first_response_at), 'yyyy-MM-dd HH:mm') : '',
+        t.resolved_at ? format(parseISO(t.resolved_at), 'yyyy-MM-dd HH:mm') : '',
+        t.sla_breach_response ? 'Yes' : 'No',
+        t.sla_breach_resolution ? 'Yes' : 'No',
+        responseTime,
+        resolutionTime,
+      ];
+    });
+
+    const csvContent = [
+      headers.join(','),
+      ...rows.map(row => row.map(cell => `"${cell}"`).join(',')),
+    ].join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `sla-report-${format(new Date(), 'yyyy-MM-dd')}.csv`;
+    link.click();
+    toast.success('CSV report downloaded');
+  };
+
+  const exportToPDF = () => {
+    if (!tickets || tickets.length === 0) {
+      toast.error('No data to export');
+      return;
+    }
+
+    const doc = new jsPDF();
+    const pageWidth = doc.internal.pageSize.getWidth();
+    let yPos = 20;
+
+    // Title
+    doc.setFontSize(20);
+    doc.setFont('helvetica', 'bold');
+    doc.text('SLA Performance Report', pageWidth / 2, yPos, { align: 'center' });
+    yPos += 10;
+
+    // Report period
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'normal');
+    doc.text(`Report Period: Last ${dateRange} days`, pageWidth / 2, yPos, { align: 'center' });
+    doc.text(`Generated: ${format(new Date(), 'yyyy-MM-dd HH:mm')}`, pageWidth / 2, yPos + 5, { align: 'center' });
+    yPos += 20;
+
+    // Summary Section
+    doc.setFontSize(14);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Executive Summary', 14, yPos);
+    yPos += 10;
+
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'normal');
+    const summaryData = [
+      `Total Tickets: ${metrics.totalTickets}`,
+      `Response SLA Compliance: ${metrics.responseCompliance.toFixed(1)}%`,
+      `Resolution SLA Compliance: ${metrics.resolutionCompliance.toFixed(1)}%`,
+      `Response SLA Breaches: ${metrics.responseBreaches}`,
+      `Resolution SLA Breaches: ${metrics.resolutionBreaches}`,
+      `Average Response Time: ${metrics.avgResponseTime.toFixed(1)} hours`,
+      `Average Resolution Time: ${metrics.avgResolutionTime.toFixed(1)} hours`,
+    ];
+    summaryData.forEach(line => {
+      doc.text(line, 14, yPos);
+      yPos += 6;
+    });
+    yPos += 10;
+
+    // Priority Breakdown
+    doc.setFontSize(14);
+    doc.setFont('helvetica', 'bold');
+    doc.text('SLA Performance by Priority', 14, yPos);
+    yPos += 10;
+
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'normal');
+    metrics.byPriority.forEach(p => {
+      const compliance = p.total > 0 ? (((p.total - p.responseBreaches - p.resolutionBreaches) / (p.total * 2)) * 100).toFixed(1) : '100';
+      doc.text(`${p.name}: ${p.total} tickets, ${p.responseBreaches} response breaches, ${p.resolutionBreaches} resolution breaches`, 14, yPos);
+      yPos += 6;
+    });
+    yPos += 10;
+
+    // Category Breakdown
+    if (yPos > 250) {
+      doc.addPage();
+      yPos = 20;
+    }
+    doc.setFontSize(14);
+    doc.setFont('helvetica', 'bold');
+    doc.text('SLA Performance by Category', 14, yPos);
+    yPos += 10;
+
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'normal');
+    metrics.byCategory.forEach(c => {
+      doc.text(`${c.name}: ${c.total} tickets, ${c.breaches} breaches`, 14, yPos);
+      yPos += 6;
+    });
+    yPos += 10;
+
+    // Ticket Details (first 20)
+    if (yPos > 200) {
+      doc.addPage();
+      yPos = 20;
+    }
+    doc.setFontSize(14);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Recent Tickets with SLA Breaches', 14, yPos);
+    yPos += 10;
+
+    const breachedTickets = tickets.filter(t => t.sla_breach_response || t.sla_breach_resolution).slice(0, 15);
+    doc.setFontSize(8);
+    doc.setFont('helvetica', 'normal');
+    
+    if (breachedTickets.length > 0) {
+      breachedTickets.forEach(t => {
+        if (yPos > 280) {
+          doc.addPage();
+          yPos = 20;
+        }
+        const breachType = [];
+        if (t.sla_breach_response) breachType.push('Response');
+        if (t.sla_breach_resolution) breachType.push('Resolution');
+        doc.text(`${t.ticket_number} | ${t.priority?.name || 'N/A'} | ${t.status} | Breach: ${breachType.join(', ')}`, 14, yPos);
+        yPos += 5;
+      });
+    } else {
+      doc.text('No SLA breaches in the selected period.', 14, yPos);
+    }
+
+    // Footer
+    const pageCount = doc.getNumberOfPages();
+    for (let i = 1; i <= pageCount; i++) {
+      doc.setPage(i);
+      doc.setFontSize(8);
+      doc.text(`Page ${i} of ${pageCount}`, pageWidth / 2, 290, { align: 'center' });
+    }
+
+    doc.save(`sla-report-${format(new Date(), 'yyyy-MM-dd')}.pdf`);
+    toast.success('PDF report downloaded');
+  };
+
   if (isLoading) {
     return (
       <div className="space-y-6">
@@ -225,18 +405,28 @@ export function SlaMetricsDashboard() {
           <h2 className="text-2xl font-bold">SLA Performance Metrics</h2>
           <p className="text-muted-foreground">Track and analyze service level agreement compliance</p>
         </div>
-        <Select value={dateRange} onValueChange={setDateRange}>
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Select range" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="7">Last 7 days</SelectItem>
-            <SelectItem value="14">Last 14 days</SelectItem>
-            <SelectItem value="30">Last 30 days</SelectItem>
-            <SelectItem value="60">Last 60 days</SelectItem>
-            <SelectItem value="90">Last 90 days</SelectItem>
-          </SelectContent>
-        </Select>
+        <div className="flex items-center gap-2">
+          <Select value={dateRange} onValueChange={setDateRange}>
+            <SelectTrigger className="w-[150px]">
+              <SelectValue placeholder="Select range" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="7">Last 7 days</SelectItem>
+              <SelectItem value="14">Last 14 days</SelectItem>
+              <SelectItem value="30">Last 30 days</SelectItem>
+              <SelectItem value="60">Last 60 days</SelectItem>
+              <SelectItem value="90">Last 90 days</SelectItem>
+            </SelectContent>
+          </Select>
+          <Button variant="outline" size="sm" onClick={exportToCSV}>
+            <Download className="h-4 w-4 mr-1" />
+            CSV
+          </Button>
+          <Button variant="outline" size="sm" onClick={exportToPDF}>
+            <FileText className="h-4 w-4 mr-1" />
+            PDF
+          </Button>
+        </div>
       </div>
 
       {/* Key Metrics */}
