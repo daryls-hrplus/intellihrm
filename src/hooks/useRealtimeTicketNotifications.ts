@@ -12,6 +12,12 @@ interface TicketPayload {
   requester_id: string;
 }
 
+interface NotificationPreferences {
+  ticket_assigned: boolean;
+  ticket_status_changed: boolean;
+  ticket_comment_added: boolean;
+}
+
 // Helper to create a notification in the database
 async function createNotification(
   userId: string,
@@ -29,8 +35,38 @@ async function createNotification(
   });
 }
 
+// Helper to fetch user preferences
+async function getUserPreferences(userId: string): Promise<NotificationPreferences> {
+  const { data } = await supabase
+    .from('notification_preferences')
+    .select('ticket_assigned, ticket_status_changed, ticket_comment_added')
+    .eq('user_id', userId)
+    .single();
+
+  // Default to all enabled if no preferences set
+  return {
+    ticket_assigned: data?.ticket_assigned ?? true,
+    ticket_status_changed: data?.ticket_status_changed ?? true,
+    ticket_comment_added: data?.ticket_comment_added ?? true,
+  };
+}
+
 export function useRealtimeTicketNotifications(userId: string | undefined) {
   const queryClient = useQueryClient();
+  const preferencesRef = useRef<NotificationPreferences>({
+    ticket_assigned: true,
+    ticket_status_changed: true,
+    ticket_comment_added: true,
+  });
+
+  // Fetch and cache preferences
+  useEffect(() => {
+    if (userId) {
+      getUserPreferences(userId).then(prefs => {
+        preferencesRef.current = prefs;
+      });
+    }
+  }, [userId]);
 
   useEffect(() => {
     if (!userId) return;
@@ -55,8 +91,7 @@ export function useRealtimeTicketNotifications(userId: string | undefined) {
           const isMyTicket = newTicket.requester_id === userId;
           
           // Assignment notification
-          if (isAssignedToMe && !wasAssignedToMe) {
-            // Create persistent notification
+          if (isAssignedToMe && !wasAssignedToMe && preferencesRef.current.ticket_assigned) {
             await createNotification(
               userId,
               "Ticket assigned to you",
@@ -65,7 +100,6 @@ export function useRealtimeTicketNotifications(userId: string | undefined) {
               `/help/tickets/${newTicket.id}`
             );
             
-            // Show toast
             toast.info("Ticket assigned to you", {
               description: `#${newTicket.ticket_number}: ${newTicket.subject}`,
               action: {
@@ -76,7 +110,7 @@ export function useRealtimeTicketNotifications(userId: string | undefined) {
           }
           
           // Status change notification for requester
-          if (isMyTicket && oldTicket.status !== newTicket.status) {
+          if (isMyTicket && oldTicket.status !== newTicket.status && preferencesRef.current.ticket_status_changed) {
             const statusLabels: Record<string, string> = {
               open: "Open",
               in_progress: "In Progress",
@@ -85,7 +119,6 @@ export function useRealtimeTicketNotifications(userId: string | undefined) {
               closed: "Closed",
             };
             
-            // Create persistent notification
             await createNotification(
               userId,
               "Ticket status updated",
@@ -94,7 +127,6 @@ export function useRealtimeTicketNotifications(userId: string | undefined) {
               `/help/tickets/${newTicket.id}`
             );
             
-            // Show toast
             toast.info("Ticket status updated", {
               description: `#${newTicket.ticket_number} is now ${statusLabels[newTicket.status] || newTicket.status}`,
               action: {
@@ -120,7 +152,7 @@ export function useRealtimeTicketNotifications(userId: string | undefined) {
           const newTicket = payload.new as TicketPayload;
           
           // Notify if assigned to current user on creation
-          if (newTicket.assignee_id === userId) {
+          if (newTicket.assignee_id === userId && preferencesRef.current.ticket_assigned) {
             await createNotification(
               userId,
               "New ticket assigned to you",
@@ -160,8 +192,8 @@ export function useRealtimeTicketNotifications(userId: string | undefined) {
             is_internal: boolean;
           };
           
-          // Don't notify for own comments or internal comments
-          if (comment.author_id === userId || comment.is_internal) return;
+          // Don't notify for own comments, internal comments, or if preference disabled
+          if (comment.author_id === userId || comment.is_internal || !preferencesRef.current.ticket_comment_added) return;
           
           // Fetch ticket details to check if user should be notified
           const { data: ticket } = await supabase

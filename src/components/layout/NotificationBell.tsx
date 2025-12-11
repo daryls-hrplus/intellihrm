@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Bell, Check, Trash2, Ticket, UserPlus, MessageSquare, AlertCircle, Info } from "lucide-react";
+import { Bell, Check, Trash2, Ticket, UserPlus, MessageSquare, AlertCircle, Info, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
@@ -145,17 +145,31 @@ export function NotificationBell() {
       <PopoverContent align="end" className="w-80 p-0 bg-popover border shadow-lg z-50">
         <div className="flex items-center justify-between p-3 border-b">
           <h4 className="font-semibold text-sm">Notifications</h4>
-          {unreadCount > 0 && (
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              className="h-auto py-1 px-2 text-xs"
-              onClick={markAllAsRead}
+          <div className="flex items-center gap-1">
+            {unreadCount > 0 && (
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="h-auto py-1 px-2 text-xs"
+                onClick={markAllAsRead}
+              >
+                <Check className="h-3 w-3 mr-1" />
+                Mark all read
+              </Button>
+            )}
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-7 w-7"
+              onClick={() => {
+                navigate('/profile/notifications');
+                setIsOpen(false);
+              }}
+              title="Notification preferences"
             >
-              <Check className="h-3 w-3 mr-1" />
-              Mark all read
+              <Settings className="h-4 w-4" />
             </Button>
-          )}
+          </div>
         </div>
         
         <ScrollArea className="h-[300px]">

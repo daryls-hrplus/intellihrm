@@ -1008,6 +1008,45 @@ export type Database = {
           },
         ]
       }
+      notification_preferences: {
+        Row: {
+          access_request_updates: boolean
+          created_at: string
+          email_notifications: boolean
+          id: string
+          system_announcements: boolean
+          ticket_assigned: boolean
+          ticket_comment_added: boolean
+          ticket_status_changed: boolean
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          access_request_updates?: boolean
+          created_at?: string
+          email_notifications?: boolean
+          id?: string
+          system_announcements?: boolean
+          ticket_assigned?: boolean
+          ticket_comment_added?: boolean
+          ticket_status_changed?: boolean
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          access_request_updates?: boolean
+          created_at?: string
+          email_notifications?: boolean
+          id?: string
+          system_announcements?: boolean
+          ticket_assigned?: boolean
+          ticket_comment_added?: boolean
+          ticket_status_changed?: boolean
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           created_at: string
