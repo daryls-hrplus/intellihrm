@@ -11,6 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import { sendTicketNotification } from "@/hooks/useTicketNotifications";
+import { SatisfactionSurvey } from "@/components/helpdesk/SatisfactionSurvey";
 import {
   ArrowLeft,
   Clock,
@@ -560,6 +561,11 @@ export default function TicketDetailPage() {
                   </div>
                 </CardContent>
               </Card>
+            )}
+
+            {/* Satisfaction Survey - Show for resolved/closed tickets owned by user */}
+            {isOwner && ["resolved", "closed"].includes(ticket.status) && (
+              <SatisfactionSurvey ticketId={ticket.id} userId={user?.id || ""} />
             )}
           </div>
         </div>
