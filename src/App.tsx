@@ -51,6 +51,9 @@ import LeaveDashboardPage from "./pages/leave/LeaveDashboardPage";
 
 // Compensation pages
 import CompensationDashboardPage from "./pages/compensation/CompensationDashboardPage";
+import PayElementsPage from "./pages/compensation/PayElementsPage";
+import SalaryGradesPage from "./pages/compensation/SalaryGradesPage";
+import PositionCompensationPage from "./pages/compensation/PositionCompensationPage";
 
 // Benefits pages
 import BenefitsDashboardPage from "./pages/benefits/BenefitsDashboardPage";
@@ -405,6 +408,30 @@ const App = () => (
               element={
                 <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
                   <CompensationDashboardPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/compensation/pay-elements"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
+                  <PayElementsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/compensation/salary-grades"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
+                  <SalaryGradesPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/compensation/position-compensation"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
+                  <PositionCompensationPage />
                 </ProtectedRoute>
               }
             />
