@@ -1,5 +1,7 @@
+import { useState, useEffect } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { NavLink } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 import {
   Building,
   Building2,
@@ -9,6 +11,7 @@ import {
   Languages,
   Settings,
   ChevronRight,
+  Loader2,
 } from "lucide-react";
 
 const adminModules = [
@@ -56,7 +59,48 @@ const adminModules = [
   },
 ];
 
+interface Stats {
+  totalUsers: number;
+  totalCompanies: number;
+  totalGroups: number;
+  admins: number;
+}
+
 export default function AdminDashboardPage() {
+  const [stats, setStats] = useState<Stats>({ totalUsers: 0, totalCompanies: 0, totalGroups: 0, admins: 0 });
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const [usersRes, companiesRes, groupsRes, adminsRes] = await Promise.all([
+          supabase.from("profiles").select("id", { count: "exact", head: true }),
+          supabase.from("companies").select("id", { count: "exact", head: true }).eq("is_active", true),
+          supabase.from("company_groups").select("id", { count: "exact", head: true }).eq("is_active", true),
+          supabase.from("user_roles").select("id", { count: "exact", head: true }).eq("role", "admin"),
+        ]);
+        setStats({
+          totalUsers: usersRes.count || 0,
+          totalCompanies: companiesRes.count || 0,
+          totalGroups: groupsRes.count || 0,
+          admins: adminsRes.count || 0,
+        });
+      } catch (error) {
+        console.error("Error fetching stats:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchStats();
+  }, []);
+
+  const statCards = [
+    { label: "Total Users", value: stats.totalUsers, icon: Users, color: "bg-primary/10 text-primary" },
+    { label: "Active Companies", value: stats.totalCompanies, icon: Building2, color: "bg-info/10 text-info" },
+    { label: "Company Groups", value: stats.totalGroups, icon: Building, color: "bg-success/10 text-success" },
+    { label: "Admins", value: stats.admins, icon: Shield, color: "bg-warning/10 text-warning" },
+  ];
+
   return (
     <AppLayout>
       <div className="space-y-6">
@@ -76,6 +120,32 @@ export default function AdminDashboardPage() {
           </div>
         </div>
 
+        {/* Stats Cards */}
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 animate-slide-up">
+          {statCards.map((stat, index) => {
+            const Icon = stat.icon;
+            return (
+              <div
+                key={stat.label}
+                className="rounded-xl border border-border bg-card p-5 shadow-card"
+                style={{ animationDelay: `${index * 50}ms` }}
+              >
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">{stat.label}</p>
+                    <p className="mt-1 text-3xl font-bold text-card-foreground">
+                      {isLoading ? <Loader2 className="h-6 w-6 animate-spin" /> : stat.value}
+                    </p>
+                  </div>
+                  <div className={`rounded-lg p-3 ${stat.color}`}>
+                    <Icon className="h-5 w-5" />
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {adminModules.map((module, index) => {
             const Icon = module.icon;
@@ -84,7 +154,7 @@ export default function AdminDashboardPage() {
                 key={module.href}
                 to={module.href}
                 className="group rounded-xl border border-border bg-card p-6 shadow-card transition-all hover:shadow-card-hover hover:border-primary/20 animate-slide-up"
-                style={{ animationDelay: `${index * 50}ms` }}
+                style={{ animationDelay: `${(index + 4) * 50}ms` }}
               >
                 <div className="flex items-start justify-between">
                   <div className={`rounded-lg p-3 ${module.color}`}>

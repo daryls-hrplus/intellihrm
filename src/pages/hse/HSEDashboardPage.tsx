@@ -7,6 +7,8 @@ import {
   ClipboardCheck,
   HardHat,
   ChevronRight,
+  CheckCircle,
+  Clock,
 } from "lucide-react";
 
 const hseModules = [
@@ -47,6 +49,13 @@ const hseModules = [
   },
 ];
 
+const statCards = [
+  { label: "Days Without Incident", value: 124, icon: CheckCircle, color: "bg-success/10 text-success" },
+  { label: "Open Incidents", value: 2, icon: AlertTriangle, color: "bg-destructive/10 text-destructive" },
+  { label: "Pending Training", value: 8, icon: Clock, color: "bg-warning/10 text-warning" },
+  { label: "Compliance Rate", value: "98%", icon: ClipboardCheck, color: "bg-info/10 text-info" },
+];
+
 export default function HSEDashboardPage() {
   return (
     <AppLayout>
@@ -67,6 +76,30 @@ export default function HSEDashboardPage() {
           </div>
         </div>
 
+        {/* Stats Cards */}
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 animate-slide-up">
+          {statCards.map((stat, index) => {
+            const Icon = stat.icon;
+            return (
+              <div
+                key={stat.label}
+                className="rounded-xl border border-border bg-card p-5 shadow-card"
+                style={{ animationDelay: `${index * 50}ms` }}
+              >
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">{stat.label}</p>
+                    <p className="mt-1 text-3xl font-bold text-card-foreground">{stat.value}</p>
+                  </div>
+                  <div className={`rounded-lg p-3 ${stat.color}`}>
+                    <Icon className="h-5 w-5" />
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {hseModules.map((module, index) => {
             const Icon = module.icon;
@@ -75,7 +108,7 @@ export default function HSEDashboardPage() {
                 key={module.href}
                 to={module.href}
                 className="group rounded-xl border border-border bg-card p-6 shadow-card transition-all hover:shadow-card-hover hover:border-primary/20 animate-slide-up"
-                style={{ animationDelay: `${index * 50}ms` }}
+                style={{ animationDelay: `${(index + 4) * 50}ms` }}
               >
                 <div className="flex items-start justify-between">
                   <div className={`rounded-lg p-3 ${module.color}`}>
