@@ -1232,6 +1232,54 @@ export type Database = {
           },
         ]
       }
+      lookup_values: {
+        Row: {
+          category: Database["public"]["Enums"]["lookup_category"]
+          code: string
+          created_at: string
+          description: string | null
+          display_order: number
+          end_date: string | null
+          id: string
+          is_active: boolean
+          is_default: boolean
+          metadata: Json | null
+          name: string
+          start_date: string
+          updated_at: string
+        }
+        Insert: {
+          category: Database["public"]["Enums"]["lookup_category"]
+          code: string
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          end_date?: string | null
+          id?: string
+          is_active?: boolean
+          is_default?: boolean
+          metadata?: Json | null
+          name: string
+          start_date?: string
+          updated_at?: string
+        }
+        Update: {
+          category?: Database["public"]["Enums"]["lookup_category"]
+          code?: string
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          end_date?: string | null
+          id?: string
+          is_active?: boolean
+          is_default?: boolean
+          metadata?: Json | null
+          name?: string
+          start_date?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       notification_preferences: {
         Row: {
           access_request_updates: boolean
@@ -3078,6 +3126,13 @@ export type Database = {
         | "EXPORT"
         | "LOGIN"
         | "LOGOUT"
+      lookup_category:
+        | "employee_status"
+        | "termination_reason"
+        | "employee_type"
+        | "employment_action"
+        | "leave_type"
+        | "contract_type"
       workflow_action:
         | "approve"
         | "reject"
@@ -3243,6 +3298,14 @@ export const Constants = {
         "EXPORT",
         "LOGIN",
         "LOGOUT",
+      ],
+      lookup_category: [
+        "employee_status",
+        "termination_reason",
+        "employee_type",
+        "employment_action",
+        "leave_type",
+        "contract_type",
       ],
       workflow_action: [
         "approve",
