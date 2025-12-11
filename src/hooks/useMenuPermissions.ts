@@ -62,10 +62,12 @@ export function useMenuPermissions() {
   }, [user, roles]);
 
   const hasMenuAccess = (moduleCode: string): boolean => {
-    // If permissions are still loading, default to false
+    // If permissions are still loading, default to false for security
     if (isLoading) return false;
-    // If no permissions set, allow all (fallback for system admins)
-    if (menuPermissions.length === 0 && roles.includes("admin")) return true;
+    // Admins always have access to all modules
+    if (roles.includes("admin")) return true;
+    // If no specific permissions set, deny access (fail-safe)
+    if (menuPermissions.length === 0) return false;
     return menuPermissions.includes(moduleCode);
   };
 
