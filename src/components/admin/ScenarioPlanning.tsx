@@ -64,6 +64,7 @@ import { WhatIfAnalysis } from "./WhatIfAnalysis";
 import { MonteCarloSimulation } from "./MonteCarloSimulation";
 import { SensitivityAnalysis } from "./SensitivityAnalysis";
 import { StressTestAnalysis } from "./StressTestAnalysis";
+import { HistoricalDataImport } from "./HistoricalDataImport";
 
 export interface ScenarioParameters {
   id: string;
@@ -916,6 +917,35 @@ export function ScenarioPlanning({ currentHeadcount, sharedToken }: ScenarioPlan
     }
   };
 
+  // Handle calibrated parameters from historical data import
+  const handleCalibratedParameters = (params: {
+    growthRate: number;
+    attritionRate: number;
+    hiringEfficiency: number;
+    seasonalityFactor: number;
+    volatility: number;
+  }) => {
+    // Update all scenarios with calibrated parameters
+    setScenarios(prev => prev.map(scenario => ({
+      ...scenario,
+      growthRate: params.growthRate,
+      attritionRate: params.attritionRate,
+      seasonalAdjustment: params.seasonalityFactor > 1.2,
+    })));
+    
+    // Also update the default scenario for new creations
+    setNewScenario(prev => ({
+      ...prev,
+      growthRate: params.growthRate,
+      attritionRate: params.attritionRate,
+      seasonalAdjustment: params.seasonalityFactor > 1.2,
+    }));
+    
+    // Clear previous results since parameters changed
+    setResults([]);
+    toast.success("Parameters calibrated from historical data");
+  };
+
   const scenarioColors = [
     "hsl(var(--primary))",
     "hsl(var(--success))",
@@ -1407,6 +1437,9 @@ export function ScenarioPlanning({ currentHeadcount, sharedToken }: ScenarioPlan
           </CardContent>
         </Card>
       )}
+
+      {/* Historical Data Import */}
+      <HistoricalDataImport onParametersCalibrated={handleCalibratedParameters} />
 
       {/* Monte Carlo Simulation */}
       {scenarios.length > 0 && (
