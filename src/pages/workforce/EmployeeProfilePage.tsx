@@ -19,6 +19,13 @@ import { EmployeeWorkPermitsTab } from "@/components/employee/EmployeeWorkPermit
 import { EmployeeLicensesTab } from "@/components/employee/EmployeeLicensesTab";
 import { EmployeeBackgroundChecksTab } from "@/components/employee/EmployeeBackgroundChecksTab";
 import { EmployeeReferencesTab } from "@/components/employee/EmployeeReferencesTab";
+import { EmployeeCertificatesTab } from "@/components/employee/EmployeeCertificatesTab";
+import { EmployeeMembershipsTab } from "@/components/employee/EmployeeMembershipsTab";
+import { EmployeeInterestsTab } from "@/components/employee/EmployeeInterestsTab";
+import { EmployeeMedicalProfileTab } from "@/components/employee/EmployeeMedicalProfileTab";
+import { EmployeeContactsTab } from "@/components/employee/EmployeeContactsTab";
+import { EmployeeEmergencyContactsTab } from "@/components/employee/EmployeeEmergencyContactsTab";
+import { EmployeePayGroupTab } from "@/components/employee/EmployeePayGroupTab";
 
 import {
   ArrowLeft,
@@ -40,6 +47,13 @@ import {
   Award,
   ShieldCheck,
   UserCheck,
+  GraduationCap,
+  Heart,
+  Stethoscope,
+  Phone,
+  AlertTriangle,
+  DollarSign,
+  Sparkles,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
