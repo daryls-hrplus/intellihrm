@@ -41,12 +41,20 @@ interface BankFormData {
   end_date: string;
 }
 
+interface Currency {
+  id: string;
+  code: string;
+  name: string;
+  symbol: string | null;
+}
+
 interface EmployeeBankAccountsTabProps {
   employeeId: string;
 }
 
 export function EmployeeBankAccountsTab({ employeeId }: EmployeeBankAccountsTabProps) {
   const [accounts, setAccounts] = useState<BankAccount[]>([]);
+  const [currencies, setCurrencies] = useState<Currency[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingAccount, setEditingAccount] = useState<BankAccount | null>(null);
@@ -67,6 +75,18 @@ export function EmployeeBankAccountsTab({ employeeId }: EmployeeBankAccountsTabP
     },
   });
 
+  const fetchCurrencies = async () => {
+    const { data, error } = await supabase
+      .from("currencies")
+      .select("*")
+      .eq("is_active", true)
+      .order("code");
+
+    if (!error && data) {
+      setCurrencies(data);
+    }
+  };
+
   const fetchAccounts = async () => {
     setIsLoading(true);
     const { data, error } = await supabase
@@ -84,6 +104,7 @@ export function EmployeeBankAccountsTab({ employeeId }: EmployeeBankAccountsTabP
   };
 
   useEffect(() => {
+    fetchCurrencies();
     fetchAccounts();
   }, [employeeId]);
 
@@ -312,9 +333,20 @@ export function EmployeeBankAccountsTab({ employeeId }: EmployeeBankAccountsTabP
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Currency</FormLabel>
-                        <FormControl>
-                          <Input {...field} />
-                        </FormControl>
+                        <Select onValueChange={field.onChange} value={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select currency" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {currencies.map((currency) => (
+                              <SelectItem key={currency.id} value={currency.code}>
+                                {currency.code} - {currency.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
                       </FormItem>
                     )}
                   />
