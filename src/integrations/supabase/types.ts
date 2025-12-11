@@ -818,6 +818,57 @@ export type Database = {
           },
         ]
       }
+      employee_branch_locations: {
+        Row: {
+          branch_location_id: string
+          created_at: string
+          employee_id: string
+          end_date: string | null
+          id: string
+          is_primary: boolean
+          notes: string | null
+          start_date: string
+          updated_at: string
+        }
+        Insert: {
+          branch_location_id: string
+          created_at?: string
+          employee_id: string
+          end_date?: string | null
+          id?: string
+          is_primary?: boolean
+          notes?: string | null
+          start_date?: string
+          updated_at?: string
+        }
+        Update: {
+          branch_location_id?: string
+          created_at?: string
+          employee_id?: string
+          end_date?: string | null
+          id?: string
+          is_primary?: boolean
+          notes?: string | null
+          start_date?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "employee_branch_locations_branch_location_id_fkey"
+            columns: ["branch_location_id"]
+            isOneToOne: false
+            referencedRelation: "company_branch_locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_branch_locations_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       employee_certificates: {
         Row: {
           certificate_name: string
