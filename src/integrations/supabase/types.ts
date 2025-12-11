@@ -605,6 +605,292 @@ export type Database = {
           },
         ]
       }
+      employee_transactions: {
+        Row: {
+          acting_allowance: number | null
+          acting_end_date: string | null
+          acting_position_id: string | null
+          acting_reason_id: string | null
+          acting_start_date: string | null
+          company_id: string | null
+          confirmation_date: string | null
+          contract_type_id: string | null
+          created_at: string
+          created_by: string
+          department_id: string | null
+          effective_date: string
+          employee_id: string | null
+          employment_type_id: string | null
+          exit_interview_completed: boolean | null
+          extension_days: number | null
+          extension_reason_id: string | null
+          from_company_id: string | null
+          from_department_id: string | null
+          from_position_id: string | null
+          hire_type_id: string | null
+          id: string
+          last_working_date: string | null
+          new_probation_end_date: string | null
+          notes: string | null
+          original_probation_end_date: string | null
+          position_id: string | null
+          probation_end_date: string | null
+          promotion_reason_id: string | null
+          requires_workflow: boolean | null
+          salary_adjustment: number | null
+          salary_adjustment_type: string | null
+          status: string
+          termination_reason_id: string | null
+          termination_type: string | null
+          to_company_id: string | null
+          to_department_id: string | null
+          to_position_id: string | null
+          transaction_number: string
+          transaction_type_id: string
+          transfer_reason_id: string | null
+          updated_at: string
+          workflow_instance_id: string | null
+        }
+        Insert: {
+          acting_allowance?: number | null
+          acting_end_date?: string | null
+          acting_position_id?: string | null
+          acting_reason_id?: string | null
+          acting_start_date?: string | null
+          company_id?: string | null
+          confirmation_date?: string | null
+          contract_type_id?: string | null
+          created_at?: string
+          created_by: string
+          department_id?: string | null
+          effective_date: string
+          employee_id?: string | null
+          employment_type_id?: string | null
+          exit_interview_completed?: boolean | null
+          extension_days?: number | null
+          extension_reason_id?: string | null
+          from_company_id?: string | null
+          from_department_id?: string | null
+          from_position_id?: string | null
+          hire_type_id?: string | null
+          id?: string
+          last_working_date?: string | null
+          new_probation_end_date?: string | null
+          notes?: string | null
+          original_probation_end_date?: string | null
+          position_id?: string | null
+          probation_end_date?: string | null
+          promotion_reason_id?: string | null
+          requires_workflow?: boolean | null
+          salary_adjustment?: number | null
+          salary_adjustment_type?: string | null
+          status?: string
+          termination_reason_id?: string | null
+          termination_type?: string | null
+          to_company_id?: string | null
+          to_department_id?: string | null
+          to_position_id?: string | null
+          transaction_number: string
+          transaction_type_id: string
+          transfer_reason_id?: string | null
+          updated_at?: string
+          workflow_instance_id?: string | null
+        }
+        Update: {
+          acting_allowance?: number | null
+          acting_end_date?: string | null
+          acting_position_id?: string | null
+          acting_reason_id?: string | null
+          acting_start_date?: string | null
+          company_id?: string | null
+          confirmation_date?: string | null
+          contract_type_id?: string | null
+          created_at?: string
+          created_by?: string
+          department_id?: string | null
+          effective_date?: string
+          employee_id?: string | null
+          employment_type_id?: string | null
+          exit_interview_completed?: boolean | null
+          extension_days?: number | null
+          extension_reason_id?: string | null
+          from_company_id?: string | null
+          from_department_id?: string | null
+          from_position_id?: string | null
+          hire_type_id?: string | null
+          id?: string
+          last_working_date?: string | null
+          new_probation_end_date?: string | null
+          notes?: string | null
+          original_probation_end_date?: string | null
+          position_id?: string | null
+          probation_end_date?: string | null
+          promotion_reason_id?: string | null
+          requires_workflow?: boolean | null
+          salary_adjustment?: number | null
+          salary_adjustment_type?: string | null
+          status?: string
+          termination_reason_id?: string | null
+          termination_type?: string | null
+          to_company_id?: string | null
+          to_department_id?: string | null
+          to_position_id?: string | null
+          transaction_number?: string
+          transaction_type_id?: string
+          transfer_reason_id?: string | null
+          updated_at?: string
+          workflow_instance_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "employee_transactions_acting_position_id_fkey"
+            columns: ["acting_position_id"]
+            isOneToOne: false
+            referencedRelation: "positions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_transactions_acting_reason_id_fkey"
+            columns: ["acting_reason_id"]
+            isOneToOne: false
+            referencedRelation: "lookup_values"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_transactions_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_transactions_contract_type_id_fkey"
+            columns: ["contract_type_id"]
+            isOneToOne: false
+            referencedRelation: "lookup_values"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_transactions_department_id_fkey"
+            columns: ["department_id"]
+            isOneToOne: false
+            referencedRelation: "departments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_transactions_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_transactions_employment_type_id_fkey"
+            columns: ["employment_type_id"]
+            isOneToOne: false
+            referencedRelation: "lookup_values"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_transactions_extension_reason_id_fkey"
+            columns: ["extension_reason_id"]
+            isOneToOne: false
+            referencedRelation: "lookup_values"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_transactions_from_company_id_fkey"
+            columns: ["from_company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_transactions_from_department_id_fkey"
+            columns: ["from_department_id"]
+            isOneToOne: false
+            referencedRelation: "departments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_transactions_from_position_id_fkey"
+            columns: ["from_position_id"]
+            isOneToOne: false
+            referencedRelation: "positions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_transactions_hire_type_id_fkey"
+            columns: ["hire_type_id"]
+            isOneToOne: false
+            referencedRelation: "lookup_values"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_transactions_position_id_fkey"
+            columns: ["position_id"]
+            isOneToOne: false
+            referencedRelation: "positions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_transactions_promotion_reason_id_fkey"
+            columns: ["promotion_reason_id"]
+            isOneToOne: false
+            referencedRelation: "lookup_values"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_transactions_termination_reason_id_fkey"
+            columns: ["termination_reason_id"]
+            isOneToOne: false
+            referencedRelation: "lookup_values"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_transactions_to_company_id_fkey"
+            columns: ["to_company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_transactions_to_department_id_fkey"
+            columns: ["to_department_id"]
+            isOneToOne: false
+            referencedRelation: "departments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_transactions_to_position_id_fkey"
+            columns: ["to_position_id"]
+            isOneToOne: false
+            referencedRelation: "positions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_transactions_transaction_type_id_fkey"
+            columns: ["transaction_type_id"]
+            isOneToOne: false
+            referencedRelation: "lookup_values"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_transactions_transfer_reason_id_fkey"
+            columns: ["transfer_reason_id"]
+            isOneToOne: false
+            referencedRelation: "lookup_values"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_transactions_workflow_instance_id_fkey"
+            columns: ["workflow_instance_id"]
+            isOneToOne: false
+            referencedRelation: "workflow_instances"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       escalation_rules: {
         Row: {
           created_at: string
@@ -3133,6 +3419,12 @@ export type Database = {
         | "employment_action"
         | "leave_type"
         | "contract_type"
+        | "transaction_type"
+        | "probation_extension_reason"
+        | "promotion_reason"
+        | "transfer_reason"
+        | "acting_reason"
+        | "hire_type"
       workflow_action:
         | "approve"
         | "reject"
@@ -3306,6 +3598,12 @@ export const Constants = {
         "employment_action",
         "leave_type",
         "contract_type",
+        "transaction_type",
+        "probation_extension_reason",
+        "promotion_reason",
+        "transfer_reason",
+        "acting_reason",
+        "hire_type",
       ],
       workflow_action: [
         "approve",

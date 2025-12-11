@@ -58,6 +58,13 @@ const workforceModules = [
     icon: TrendingUp,
     color: "bg-accent/10 text-accent-foreground",
   },
+  {
+    title: "Employee Transactions",
+    description: "Manage hires, promotions, transfers, terminations",
+    href: "/workforce/transactions",
+    icon: UserPlus,
+    color: "bg-destructive/10 text-destructive",
+  },
 ];
 
 interface Stats {
