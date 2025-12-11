@@ -88,6 +88,7 @@ const COLORS = ["hsl(var(--primary))", "hsl(var(--destructive))", "hsl(var(--sec
 export function OrgChangesReporting({ companyId }: OrgChangesReportingProps) {
   const [companies, setCompanies] = useState<Company[]>([]);
   const [selectedCompanyId, setSelectedCompanyId] = useState<string>(companyId || "");
+  const [selectedDepartmentId, setSelectedDepartmentId] = useState<string>("all");
   const [positions, setPositions] = useState<Position[]>([]);
   const [departments, setDepartments] = useState<Department[]>([]);
   const [employeePositions, setEmployeePositions] = useState<EmployeePosition[]>([]);
@@ -96,12 +97,32 @@ export function OrgChangesReporting({ companyId }: OrgChangesReportingProps) {
   const [endDate, setEndDate] = useState<string>(() => format(new Date(), "yyyy-MM-dd"));
   const [showYoY, setShowYoY] = useState(false);
 
+  // Filter positions by department
+  const filteredPositions = useMemo(() => {
+    if (selectedDepartmentId === "all") return positions;
+    return positions.filter(p => p.department_id === selectedDepartmentId);
+  }, [positions, selectedDepartmentId]);
+
+  // Filter employee positions based on filtered positions
+  const filteredEmployeePositions = useMemo(() => {
+    if (selectedDepartmentId === "all") return employeePositions;
+    const positionIds = new Set(filteredPositions.map(p => p.id));
+    return employeePositions.filter(ep => positionIds.has(ep.position_id));
+  }, [employeePositions, filteredPositions, selectedDepartmentId]);
+
+  // Filter departments for display (only selected if filtered)
+  const filteredDepartments = useMemo(() => {
+    if (selectedDepartmentId === "all") return departments;
+    return departments.filter(d => d.id === selectedDepartmentId);
+  }, [departments, selectedDepartmentId]);
+
   useEffect(() => {
     fetchCompanies();
   }, []);
 
   useEffect(() => {
     if (selectedCompanyId) {
+      setSelectedDepartmentId("all");
       fetchData();
     }
   }, [selectedCompanyId]);
@@ -191,47 +212,47 @@ export function OrgChangesReporting({ companyId }: OrgChangesReportingProps) {
       const monthStr = format(month, "yyyy-MM-dd");
 
       // Count active positions at end of month
-      const activePositions = positions.filter(p => {
+      const activePositions = filteredPositions.filter(p => {
         const posStart = parseISO(p.start_date);
         const posEnd = p.end_date ? parseISO(p.end_date) : null;
         return posStart <= monthEnd && (!posEnd || posEnd >= monthStart);
       });
 
       // Count positions added this month
-      const positionsAdded = positions.filter(p => {
+      const positionsAdded = filteredPositions.filter(p => {
         const posStart = parseISO(p.start_date);
         return isWithinInterval(posStart, { start: monthStart, end: monthEnd });
       });
 
       // Count positions removed this month
-      const positionsRemoved = positions.filter(p => {
+      const positionsRemoved = filteredPositions.filter(p => {
         if (!p.end_date) return false;
         const posEnd = parseISO(p.end_date);
         return isWithinInterval(posEnd, { start: monthStart, end: monthEnd });
       });
 
       // Count active departments
-      const activeDepts = departments.filter(d => {
+      const activeDepts = filteredDepartments.filter(d => {
         const deptStart = parseISO(d.start_date);
         const deptEnd = d.end_date ? parseISO(d.end_date) : null;
         return deptStart <= monthEnd && (!deptEnd || deptEnd >= monthStart);
       });
 
       // Count active employees
-      const activeEmployees = employeePositions.filter(ep => {
+      const activeEmployees = filteredEmployeePositions.filter(ep => {
         const epStart = parseISO(ep.start_date);
         const epEnd = ep.end_date ? parseISO(ep.end_date) : null;
         return epStart <= monthEnd && (!epEnd || epEnd >= monthStart);
       });
 
       // Employee movements (joins)
-      const employeeJoins = employeePositions.filter(ep => {
+      const employeeJoins = filteredEmployeePositions.filter(ep => {
         const epStart = parseISO(ep.start_date);
         return isWithinInterval(epStart, { start: monthStart, end: monthEnd });
       });
 
       // Employee movements (departures)
-      const employeeDepartures = employeePositions.filter(ep => {
+      const employeeDepartures = filteredEmployeePositions.filter(ep => {
         if (!ep.end_date) return false;
         const epEnd = parseISO(ep.end_date);
         return isWithinInterval(epEnd, { start: monthStart, end: monthEnd });
@@ -250,7 +271,7 @@ export function OrgChangesReporting({ companyId }: OrgChangesReportingProps) {
         netChange: positionsAdded.length - positionsRemoved.length,
       };
     });
-  }, [positions, departments, employeePositions, startDate, endDate]);
+  }, [filteredPositions, filteredDepartments, filteredEmployeePositions, startDate, endDate]);
 
   // Summary statistics
   const summaryStats = useMemo(() => {
@@ -307,13 +328,13 @@ export function OrgChangesReporting({ companyId }: OrgChangesReportingProps) {
     const currentEmployees = summaryStats?.currentEmployees || 0;
     const currentDepartments = summaryStats?.currentDepartments || 0;
 
-    const prevYearPositions = getActiveCount(positions, prevYearEndStr);
-    const prevYearDepartments = departments.filter(d => 
+    const prevYearPositions = getActiveCount(filteredPositions, prevYearEndStr);
+    const prevYearDepartments = filteredDepartments.filter(d => 
       d.start_date <= prevYearEndStr && (!d.end_date || d.end_date >= prevYearEndStr)
     ).length;
     
     const prevYearEmployeeSet = new Set(
-      employeePositions
+      filteredEmployeePositions
         .filter(ep => ep.start_date <= prevYearEndStr && (!ep.end_date || ep.end_date >= prevYearEndStr))
         .map(ep => ep.employee_id)
     );
@@ -345,14 +366,14 @@ export function OrgChangesReporting({ companyId }: OrgChangesReportingProps) {
       },
       prevYearPeriod: `${format(prevYearStart, "MMM yyyy")} - ${format(prevYearEnd, "MMM yyyy")}`,
     };
-  }, [showYoY, positions, departments, employeePositions, summaryStats, startDate, endDate]);
+  }, [showYoY, filteredPositions, filteredDepartments, filteredEmployeePositions, summaryStats, startDate, endDate]);
 
   // Department breakdown for pie chart
   const departmentBreakdown = useMemo(() => {
     const today = format(new Date(), "yyyy-MM-dd");
     const deptCounts: Record<string, number> = {};
 
-    positions
+    filteredPositions
       .filter(p => p.start_date <= today && (!p.end_date || p.end_date >= today))
       .forEach(p => {
         const dept = departments.find(d => d.id === p.department_id);
@@ -365,10 +386,16 @@ export function OrgChangesReporting({ companyId }: OrgChangesReportingProps) {
       .map(([name, value]) => ({ name, value }))
       .sort((a, b) => b.value - a.value)
       .slice(0, 6);
-  }, [positions, departments]);
+  }, [filteredPositions, departments]);
 
   const exportReport = () => {
+    const selectedDeptName = selectedDepartmentId === "all" 
+      ? "All Departments" 
+      : departments.find(d => d.id === selectedDepartmentId)?.name || "Unknown";
+    
     const csvContent = [
+      `Department Filter: ${selectedDeptName}`,
+      "",
       ["Month", "Active Positions", "Positions Added", "Positions Removed", "Net Change", "Active Employees", "Employee Joins", "Employee Departures"].join(","),
       ...monthlyData.map(row => [
         row.month,
@@ -386,7 +413,8 @@ export function OrgChangesReporting({ companyId }: OrgChangesReportingProps) {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `org-changes-report-${format(new Date(), "yyyy-MM-dd")}.csv`;
+    const deptSuffix = selectedDepartmentId === "all" ? "" : `-${selectedDeptName.replace(/\s+/g, '-').toLowerCase()}`;
+    a.download = `org-changes-report${deptSuffix}-${format(new Date(), "yyyy-MM-dd")}.csv`;
     a.click();
     URL.revokeObjectURL(url);
     toast.success("Report exported successfully");
@@ -416,6 +444,22 @@ export function OrgChangesReporting({ companyId }: OrgChangesReportingProps) {
                   {companies.map((company) => (
                     <SelectItem key={company.id} value={company.id}>
                       {company.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Department</Label>
+              <Select value={selectedDepartmentId} onValueChange={setSelectedDepartmentId}>
+                <SelectTrigger className="w-[200px]">
+                  <SelectValue placeholder="All departments" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Departments</SelectItem>
+                  {departments.map((dept) => (
+                    <SelectItem key={dept.id} value={dept.id}>
+                      {dept.name}
                     </SelectItem>
                   ))}
                 </SelectContent>
