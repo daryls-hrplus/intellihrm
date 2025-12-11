@@ -2,6 +2,7 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { useState, useEffect, useRef } from "react";
 import { useAuditLog } from "@/hooks/useAuditLog";
+import { usePiiVisibility } from "@/hooks/usePiiVisibility";
 import {
   Search,
   Filter,
@@ -11,8 +12,14 @@ import {
   Phone,
   MapPin,
   Building2,
+  EyeOff,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 const employees = [
   {
@@ -75,6 +82,7 @@ const employees = [
 export default function EmployeesPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const { logView } = useAuditLog();
+  const { canViewPii, maskPii } = usePiiVisibility();
   const hasLoggedView = useRef(false);
 
   // Log view on mount
@@ -132,6 +140,19 @@ export default function EmployeesPage() {
             <Filter className="h-4 w-4" />
             Filters
           </button>
+          {!canViewPii && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className="inline-flex items-center gap-1.5 rounded-lg bg-amber-500/10 px-3 py-2 text-xs font-medium text-amber-600">
+                  <EyeOff className="h-3.5 w-3.5" />
+                  PII Hidden
+                </div>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Personal information is hidden based on your role permissions</p>
+              </TooltipContent>
+            </Tooltip>
+          )}
         </div>
 
         {/* Employee Grid */}
@@ -163,20 +184,26 @@ export default function EmployeesPage() {
 
               <div className="mt-4 space-y-2">
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <Mail className="h-4 w-4" />
-                  <span className="truncate">{employee.email}</span>
+                  <Mail className="h-4 w-4 shrink-0" />
+                  <span className={cn("truncate", !canViewPii && "font-mono text-xs")}>
+                    {maskPii(employee.email, "email")}
+                  </span>
                 </div>
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <Phone className="h-4 w-4" />
-                  <span>{employee.phone}</span>
+                  <Phone className="h-4 w-4 shrink-0" />
+                  <span className={cn(!canViewPii && "font-mono text-xs")}>
+                    {maskPii(employee.phone, "phone")}
+                  </span>
                 </div>
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <Building2 className="h-4 w-4" />
+                  <Building2 className="h-4 w-4 shrink-0" />
                   <span>{employee.department}</span>
                 </div>
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <MapPin className="h-4 w-4" />
-                  <span>{employee.location}</span>
+                  <MapPin className="h-4 w-4 shrink-0" />
+                  <span className={cn(!canViewPii && "font-mono text-xs")}>
+                    {maskPii(employee.location, "text")}
+                  </span>
                 </div>
               </div>
 
