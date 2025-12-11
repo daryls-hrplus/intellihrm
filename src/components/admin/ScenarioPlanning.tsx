@@ -68,6 +68,7 @@ import { SensitivityAnalysis } from "./SensitivityAnalysis";
 import { StressTestAnalysis } from "./StressTestAnalysis";
 import { HistoricalDataImport } from "./HistoricalDataImport";
 import { ScenarioRecommendations } from "./ScenarioRecommendations";
+import { WorkforceCostProjections } from "./WorkforceCostProjections";
 
 export interface ScenarioParameters {
   id: string;
@@ -1738,6 +1739,17 @@ export function ScenarioPlanning({ currentHeadcount, sharedToken }: ScenarioPlan
       {scenarios.length > 0 && (
         <StressTestAnalysis scenarios={scenarios} currentHeadcount={currentHeadcount} />
       )}
+
+      {/* Workforce Cost Projections */}
+      <WorkforceCostProjections 
+        currentHeadcount={currentHeadcount} 
+        scenarios={results.map(r => ({
+          scenarioId: r.scenarioId,
+          scenarioName: r.scenarioName,
+          projections: r.projections.map(p => ({ month: p.month, headcount: p.headcount })),
+          finalHeadcount: r.finalHeadcount,
+        }))}
+      />
 
       {/* Empty State */}
       {scenarios.length === 0 && (
