@@ -32,6 +32,7 @@ import AdminKnowledgeBasePage from "./pages/admin/AdminKnowledgeBasePage";
 import AdminHelpdeskPage from "./pages/admin/AdminHelpdeskPage";
 import AdminPolicyDocumentsPage from "./pages/admin/AdminPolicyDocumentsPage";
 import AdminLetterTemplatesPage from "./pages/admin/AdminLetterTemplatesPage";
+import AdminLookupValuesPage from "./pages/admin/AdminLookupValuesPage";
 // Workforce pages
 import WorkforceDashboardPage from "./pages/workforce/WorkforceDashboardPage";
 import EmployeesPage from "./pages/workforce/EmployeesPage";
@@ -310,6 +311,14 @@ const App = () => (
               element={
                 <ProtectedRoute requiredRoles={["admin"]}>
                   <AdminWorkflowTemplatesPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/lookup-values"
+              element={
+                <ProtectedRoute requiredRoles={["admin"]}>
+                  <AdminLookupValuesPage />
                 </ProtectedRoute>
               }
             />

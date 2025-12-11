@@ -34,6 +34,7 @@ import {
   Brain,
   FileText as FileTextIcon,
   GitBranch,
+  List,
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 
@@ -163,6 +164,13 @@ const getAdminModules = (t: (key: string) => string) => [
     href: "/admin/workflow-templates",
     icon: GitBranch,
     color: "bg-sky-500/10 text-sky-600",
+  },
+  {
+    title: "Lookup Values",
+    description: "Manage employee statuses, types, termination reasons, and more",
+    href: "/admin/lookup-values",
+    icon: List,
+    color: "bg-lime-500/10 text-lime-600",
   },
   {
     title: t("admin.modules.territories.title"),
