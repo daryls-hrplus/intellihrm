@@ -359,6 +359,7 @@ export function useReportWriter() {
   ): Promise<GeneratedReport | null> => {
     setIsLoading(true);
     try {
+      // Create the report record
       const { data: report, error: insertError } = await supabase
         .from('generated_reports')
         .insert({
@@ -372,8 +373,38 @@ export function useReportWriter() {
 
       if (insertError) throw insertError;
 
-      toast.success('Report generation started');
-      return report as unknown as GeneratedReport;
+      toast.info('Generating report...');
+
+      // Call edge function to actually generate the report
+      const { data: result, error: genError } = await supabase.functions.invoke('generate-report', {
+        body: { reportId: report.id }
+      });
+
+      if (genError) {
+        console.error('Report generation error:', genError);
+        toast.error('Failed to generate report');
+        return report as unknown as GeneratedReport;
+      }
+
+      if (result?.success) {
+        toast.success(`Report generated with ${result.rowCount} rows`);
+        
+        // If CSV format and we have data, trigger download
+        if (outputFormat === 'csv' && result.data) {
+          const template = await getTemplate(templateId);
+          const fileName = `${template?.name || 'report'}_${new Date().toISOString().split('T')[0]}.csv`;
+          downloadCsvData(result.data, fileName, template);
+        }
+      }
+
+      // Fetch updated report with status
+      const { data: updatedReport } = await supabase
+        .from('generated_reports')
+        .select()
+        .eq('id', report.id)
+        .single();
+
+      return updatedReport as unknown as GeneratedReport;
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'Failed to generate report';
       toast.error(message);
@@ -381,6 +412,33 @@ export function useReportWriter() {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const downloadCsvData = (data: Record<string, unknown>[], fileName: string, template: ReportTemplate | null) => {
+    if (!data || data.length === 0) return;
+    
+    const headers = Object.keys(data[0]);
+    const csvContent = [
+      headers.join(','),
+      ...data.map(row => 
+        headers.map(h => {
+          const val = row[h];
+          if (val === null || val === undefined) return '';
+          const str = String(val);
+          return str.includes(',') ? `"${str}"` : str;
+        }).join(',')
+      )
+    ].join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = fileName;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
   };
 
   const getGeneratedReports = async (templateId?: string): Promise<GeneratedReport[]> => {
