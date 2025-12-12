@@ -120,12 +120,33 @@ export function AppraisalEvaluationDialog({
       compNames = Object.fromEntries((compData || []).map((c: any) => [c.id, c.name]));
     }
 
-    // Fetch employee goals
-    const { data: goals } = await supabase
-      .from("goals")
-      .select("id, title, weight")
-      .eq("assigned_to", employeeId)
-      .eq("status", "active");
+    // Fetch employee goals from job_goals via employee positions -> positions -> jobs
+    const { data: positions } = await supabase
+      .from("employee_positions")
+      .select("position_id, positions!inner(job_id)")
+      .eq("employee_id", employeeId)
+      .eq("is_active", true);
+
+    let goals: { id: string; title: string; weight: number }[] = [];
+    if (positions && positions.length > 0) {
+      const jobIds = positions
+        .map((p: any) => p.positions?.job_id)
+        .filter(Boolean);
+      
+      if (jobIds.length > 0) {
+        const { data: jobGoals } = await supabase
+          .from("job_goals")
+          .select("id, goal_name, weighting")
+          .in("job_id", jobIds)
+          .is("end_date", null);
+        
+        goals = (jobGoals || []).map((g: any) => ({
+          id: g.id,
+          title: g.goal_name,
+          weight: g.weighting || 0
+        }));
+      }
+    }
 
     // Build scores array
     const newScores: AppraisalScore[] = [];
