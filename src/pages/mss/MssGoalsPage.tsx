@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Button } from "@/components/ui/button";
@@ -16,13 +16,19 @@ import {
   TrendingUp,
   Calendar,
   Eye,
+  BarChart3,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { GoalDialog } from "@/components/performance/GoalDialog";
 import { GoalProgressDialog } from "@/components/performance/GoalProgressDialog";
 import { GoalCommentsDialog } from "@/components/performance/GoalCommentsDialog";
-import { format } from "date-fns";
+import { TeamGoalsAnalytics } from "@/components/mss/TeamGoalsAnalytics";
+import { TeamGoalsFilters } from "@/components/mss/TeamGoalsFilters";
+import { TeamGoalCard } from "@/components/mss/TeamGoalCard";
+import { SendReminderDialog } from "@/components/mss/SendReminderDialog";
+import { format, isPast } from "date-fns";
+import { toast } from "sonner";
 
 type GoalStatus = 'draft' | 'active' | 'in_progress' | 'completed' | 'cancelled' | 'overdue';
 type GoalType = 'okr_objective' | 'okr_key_result' | 'smart_goal';
@@ -82,6 +88,17 @@ export default function MssGoalsPage() {
   const [progressDialogOpen, setProgressDialogOpen] = useState(false);
   const [commentsDialogOpen, setCommentsDialogOpen] = useState(false);
   const [employees, setEmployees] = useState<{ id: string; full_name: string }[]>([]);
+  const [showAnalytics, setShowAnalytics] = useState(true);
+
+  // Filter states
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedEmployee, setSelectedEmployee] = useState("all");
+  const [selectedStatus, setSelectedStatus] = useState("all");
+  const [selectedPriority, setSelectedPriority] = useState("all");
+
+  // Reminder dialog
+  const [reminderDialogOpen, setReminderDialogOpen] = useState(false);
+  const [reminderType, setReminderType] = useState<"reminder" | "update_request">("reminder");
 
   useEffect(() => {
     if (user?.id) {
@@ -116,7 +133,6 @@ export default function MssGoalsPage() {
     }
 
     setDirectReports(data || []);
-    // Set employees for GoalDialog
     setEmployees((data || []).map((r: DirectReport) => ({
       id: r.employee_id,
       full_name: r.employee_name,
@@ -126,7 +142,6 @@ export default function MssGoalsPage() {
   const fetchTeamGoals = async () => {
     if (!user?.id) return;
 
-    // Get direct reports first
     const { data: reports } = await supabase
       .rpc('get_manager_direct_reports', { p_manager_id: user.id });
 
@@ -192,6 +207,81 @@ export default function MssGoalsPage() {
     setCompletedGoals(formatted);
   };
 
+  // Filtered goals
+  const filteredGoals = useMemo(() => {
+    return teamGoals.filter((goal) => {
+      // Search filter
+      if (searchQuery) {
+        const query = searchQuery.toLowerCase();
+        if (
+          !goal.title.toLowerCase().includes(query) &&
+          !goal.employee_name?.toLowerCase().includes(query) &&
+          !goal.category?.toLowerCase().includes(query)
+        ) {
+          return false;
+        }
+      }
+
+      // Employee filter
+      if (selectedEmployee !== "all" && goal.employee_id !== selectedEmployee) {
+        return false;
+      }
+
+      // Status filter
+      if (selectedStatus !== "all") {
+        const isOverdue = goal.due_date && isPast(new Date(goal.due_date)) && goal.status !== "completed";
+        const effectiveStatus = isOverdue ? "overdue" : goal.status;
+        if (effectiveStatus !== selectedStatus) {
+          return false;
+        }
+      }
+
+      // Priority/Weight filter
+      if (selectedPriority !== "all") {
+        if (selectedPriority === "high" && goal.weighting < 30) return false;
+        if (selectedPriority === "medium" && (goal.weighting < 15 || goal.weighting >= 30)) return false;
+        if (selectedPriority === "low" && goal.weighting >= 15) return false;
+      }
+
+      return true;
+    });
+  }, [teamGoals, searchQuery, selectedEmployee, selectedStatus, selectedPriority]);
+
+  const hasActiveFilters = Boolean(searchQuery) || selectedEmployee !== "all" || selectedStatus !== "all" || selectedPriority !== "all";
+
+  const clearFilters = () => {
+    setSearchQuery("");
+    setSelectedEmployee("all");
+    setSelectedStatus("all");
+    setSelectedPriority("all");
+  };
+
+  const handleExport = () => {
+    const data = filteredGoals.map(goal => ({
+      Employee: goal.employee_name,
+      Title: goal.title,
+      Type: goal.goal_type.replace(/_/g, " "),
+      Status: goal.status,
+      Progress: `${goal.progress_percentage}%`,
+      Weight: `${goal.weighting}%`,
+      "Due Date": goal.due_date ? format(new Date(goal.due_date), "yyyy-MM-dd") : "",
+      Category: goal.category || "",
+    }));
+
+    const headers = Object.keys(data[0] || {}).join(",");
+    const rows = data.map(row => Object.values(row).join(",")).join("\n");
+    const csv = `${headers}\n${rows}`;
+
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `team-goals-${format(new Date(), "yyyy-MM-dd")}.csv`;
+    a.click();
+    window.URL.revokeObjectURL(url);
+    toast.success("Goals exported successfully");
+  };
+
   const handleCreateGoal = () => {
     setSelectedGoal(null);
     setGoalDialogOpen(true);
@@ -210,6 +300,18 @@ export default function MssGoalsPage() {
   const handleViewComments = (goal: Goal) => {
     setSelectedGoal(goal);
     setCommentsDialogOpen(true);
+  };
+
+  const handleSendReminder = (goal: Goal) => {
+    setSelectedGoal(goal);
+    setReminderType("reminder");
+    setReminderDialogOpen(true);
+  };
+
+  const handleRequestUpdate = (goal: Goal) => {
+    setSelectedGoal(goal);
+    setReminderType("update_request");
+    setReminderDialogOpen(true);
   };
 
   const activeGoals = teamGoals.filter(g => g.status === "active" || g.status === "in_progress");
@@ -241,10 +343,16 @@ export default function MssGoalsPage() {
               </p>
             </div>
           </div>
-          <Button onClick={() => handleCreateGoal()}>
-            <Plus className="mr-2 h-4 w-4" />
-            Assign Goal
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={() => setShowAnalytics(!showAnalytics)}>
+              <BarChart3 className="mr-2 h-4 w-4" />
+              {showAnalytics ? "Hide" : "Show"} Analytics
+            </Button>
+            <Button onClick={handleCreateGoal}>
+              <Plus className="mr-2 h-4 w-4" />
+              Assign Goal
+            </Button>
+          </div>
         </div>
 
         {/* Stats Cards */}
@@ -271,14 +379,16 @@ export default function MssGoalsPage() {
               </div>
             </CardContent>
           </Card>
-          <Card>
+          <Card className={stats.overdueGoals > 0 ? "border-warning/50" : ""}>
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-muted-foreground">Overdue</p>
-                  <p className="text-2xl font-bold">{stats.overdueGoals}</p>
+                  <p className={`text-2xl font-bold ${stats.overdueGoals > 0 ? "text-warning" : ""}`}>
+                    {stats.overdueGoals}
+                  </p>
                 </div>
-                <AlertCircle className="h-8 w-8 text-warning" />
+                <AlertCircle className={`h-8 w-8 ${stats.overdueGoals > 0 ? "text-warning" : "text-muted-foreground"}`} />
               </div>
             </CardContent>
           </Card>
@@ -295,14 +405,23 @@ export default function MssGoalsPage() {
           </Card>
         </div>
 
+        {/* Analytics Section */}
+        {showAnalytics && (
+          <TeamGoalsAnalytics
+            teamGoals={teamGoals}
+            completedGoals={completedGoals}
+            directReports={directReports}
+          />
+        )}
+
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList>
             <TabsTrigger value="team-goals" className="gap-2">
               <Target className="h-4 w-4" />
               Active Goals
-              {teamGoals.length > 0 && (
+              {filteredGoals.length > 0 && (
                 <Badge variant="secondary" className="ml-1">
-                  {teamGoals.length}
+                  {filteredGoals.length}
                 </Badge>
               )}
             </TabsTrigger>
@@ -316,71 +435,55 @@ export default function MssGoalsPage() {
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="team-goals" className="mt-6">
+          <TabsContent value="team-goals" className="mt-6 space-y-4">
+            {/* Filters */}
+            <TeamGoalsFilters
+              searchQuery={searchQuery}
+              onSearchChange={setSearchQuery}
+              selectedEmployee={selectedEmployee}
+              onEmployeeChange={setSelectedEmployee}
+              selectedStatus={selectedStatus}
+              onStatusChange={setSelectedStatus}
+              selectedPriority={selectedPriority}
+              onPriorityChange={setSelectedPriority}
+              directReports={directReports}
+              onExport={handleExport}
+              onClearFilters={clearFilters}
+              hasActiveFilters={hasActiveFilters}
+            />
+
+            {/* Goals List */}
             <div className="space-y-4">
-              {teamGoals.length === 0 ? (
+              {filteredGoals.length === 0 ? (
                 <Card>
                   <CardContent className="flex flex-col items-center justify-center py-12">
                     <Target className="h-12 w-12 text-muted-foreground mb-4" />
-                    <p className="text-muted-foreground mb-4">No active goals for your team</p>
-                    <Button onClick={() => handleCreateGoal()}>
-                      <Plus className="mr-2 h-4 w-4" />
-                      Assign First Goal
-                    </Button>
+                    <p className="text-muted-foreground mb-4">
+                      {hasActiveFilters ? "No goals match your filters" : "No active goals for your team"}
+                    </p>
+                    {hasActiveFilters ? (
+                      <Button variant="outline" onClick={clearFilters}>
+                        Clear Filters
+                      </Button>
+                    ) : (
+                      <Button onClick={handleCreateGoal}>
+                        <Plus className="mr-2 h-4 w-4" />
+                        Assign First Goal
+                      </Button>
+                    )}
                   </CardContent>
                 </Card>
               ) : (
-                teamGoals.map((goal) => (
-                  <Card key={goal.id}>
-                    <CardHeader className="pb-3">
-                      <div className="flex items-start justify-between">
-                        <div>
-                          <CardTitle className="text-lg">{goal.title}</CardTitle>
-                          <CardDescription>
-                            {goal.employee_name} • {goal.goal_type.replace(/_/g, " ")}
-                          </CardDescription>
-                        </div>
-                        <div className="flex gap-2">
-                          <Badge className={statusColors[goal.status]}>
-                            {goal.status.replace("_", " ")}
-                          </Badge>
-                        </div>
-                      </div>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-4">
-                        <div>
-                          <div className="flex items-center justify-between text-sm mb-1">
-                            <span className="text-muted-foreground">Progress</span>
-                            <span>{goal.progress_percentage}%</span>
-                          </div>
-                          <Progress value={goal.progress_percentage} className="h-2" />
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                            {goal.due_date && (
-                              <div className="flex items-center gap-2">
-                                <Calendar className="h-4 w-4" />
-                                Due: {format(new Date(goal.due_date), "MMM d, yyyy")}
-                              </div>
-                            )}
-                            {goal.weighting > 0 && (
-                              <div className="flex items-center gap-2">
-                                <TrendingUp className="h-4 w-4" />
-                                Weight: {goal.weighting}%
-                              </div>
-                            )}
-                          </div>
-                          <div className="flex gap-2">
-                            <Button variant="outline" size="sm" onClick={() => handleViewGoal(goal)}>
-                              <Eye className="mr-2 h-4 w-4" />
-                              View
-                            </Button>
-                          </div>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
+                filteredGoals.map((goal) => (
+                  <TeamGoalCard
+                    key={goal.id}
+                    goal={goal}
+                    onView={handleViewGoal}
+                    onUpdateProgress={handleUpdateProgress}
+                    onViewComments={handleViewComments}
+                    onSendReminder={handleSendReminder}
+                    onRequestUpdate={handleRequestUpdate}
+                  />
                 ))
               )}
             </div>
@@ -401,18 +504,28 @@ export default function MssGoalsPage() {
                   const avgProgress = employeeGoals.length > 0
                     ? Math.round(employeeGoals.reduce((sum, g) => sum + g.progress_percentage, 0) / employeeGoals.length)
                     : 0;
+                  const overdueCount = employeeGoals.filter(g => 
+                    g.due_date && isPast(new Date(g.due_date)) && g.status !== "completed"
+                  ).length;
 
                   return (
-                    <Card key={report.employee_id}>
+                    <Card key={report.employee_id} className={overdueCount > 0 ? "border-warning/30" : ""}>
                       <CardHeader className="pb-3">
                         <div className="flex items-start justify-between">
                           <div>
                             <CardTitle className="text-lg">{report.employee_name}</CardTitle>
                             <CardDescription>{report.position_title}</CardDescription>
                           </div>
-                          <Badge variant="outline">
-                            {employeeGoals.length} goal{employeeGoals.length !== 1 ? "s" : ""}
-                          </Badge>
+                          <div className="flex items-center gap-2">
+                            {overdueCount > 0 && (
+                              <Badge variant="outline" className="border-warning text-warning">
+                                {overdueCount} overdue
+                              </Badge>
+                            )}
+                            <Badge variant="outline">
+                              {employeeGoals.length} goal{employeeGoals.length !== 1 ? "s" : ""}
+                            </Badge>
+                          </div>
                         </div>
                       </CardHeader>
                       <CardContent>
@@ -421,7 +534,7 @@ export default function MssGoalsPage() {
                             <div>
                               <div className="flex items-center justify-between text-sm mb-1">
                                 <span className="text-muted-foreground">Average Progress</span>
-                                <span>{avgProgress}%</span>
+                                <span className="font-medium">{avgProgress}%</span>
                               </div>
                               <Progress value={avgProgress} className="h-2" />
                             </div>
@@ -433,10 +546,13 @@ export default function MssGoalsPage() {
                             <Button
                               variant="outline"
                               size="sm"
-                              onClick={handleCreateGoal}
+                              onClick={() => {
+                                setSelectedEmployee(report.employee_id);
+                                setActiveTab("team-goals");
+                              }}
                             >
-                              <Plus className="mr-2 h-4 w-4" />
-                              Assign Goal
+                              <Eye className="mr-2 h-4 w-4" />
+                              View Goals
                             </Button>
                           </div>
                         </div>
@@ -514,7 +630,7 @@ export default function MssGoalsPage() {
             <GoalProgressDialog
               open={progressDialogOpen}
               onOpenChange={setProgressDialogOpen}
-              goal={selectedGoal}
+              goal={selectedGoal as any}
               onSuccess={fetchData}
             />
             <GoalCommentsDialog
@@ -522,6 +638,12 @@ export default function MssGoalsPage() {
               onOpenChange={setCommentsDialogOpen}
               goalId={selectedGoal.id}
               goalTitle={selectedGoal.title}
+            />
+            <SendReminderDialog
+              open={reminderDialogOpen}
+              onOpenChange={setReminderDialogOpen}
+              goal={selectedGoal}
+              type={reminderType}
             />
           </>
         )}
