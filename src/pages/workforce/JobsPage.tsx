@@ -50,6 +50,8 @@ import {
   Loader2,
   Briefcase,
   ChevronLeft,
+  ChevronDown,
+  ChevronRight,
 } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { format } from "date-fns";
@@ -125,7 +127,7 @@ export default function JobsPage() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
   const [formData, setFormData] = useState(emptyForm);
-  const [defaultTab, setDefaultTab] = useState<"details" | "competencies">("details");
+  const [expandedJobId, setExpandedJobId] = useState<string | null>(null);
 
   const { logAction } = useAuditLog();
 
@@ -194,8 +196,7 @@ export default function JobsPage() {
     }
   };
 
-  const handleOpenDialog = (job?: Job, tab: "details" | "competencies" = "details") => {
-    setDefaultTab(tab);
+  const handleOpenDialog = (job?: Job) => {
     if (job) {
       setSelectedJob(job);
       setFormData({
@@ -219,6 +220,10 @@ export default function JobsPage() {
       setFormData({ ...emptyForm, company_id: selectedCompanyId });
     }
     setDialogOpen(true);
+  };
+
+  const toggleExpand = (jobId: string) => {
+    setExpandedJobId(expandedJobId === jobId ? null : jobId);
   };
 
   const handleSave = async () => {
@@ -570,6 +575,7 @@ export default function JobsPage() {
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead className="w-[40px]"></TableHead>
                 <TableHead>Name</TableHead>
                 <TableHead>Code</TableHead>
                 <TableHead>Job Family</TableHead>
@@ -583,56 +589,85 @@ export default function JobsPage() {
             <TableBody>
               {isLoading ? (
                 <TableRow>
-                  <TableCell colSpan={8} className="text-center py-8">
+                  <TableCell colSpan={9} className="text-center py-8">
                     <Loader2 className="h-6 w-6 animate-spin mx-auto" />
                   </TableCell>
                 </TableRow>
               ) : filteredJobs.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
+                  <TableCell colSpan={9} className="text-center py-8 text-muted-foreground">
                     {searchTerm ? "No jobs found matching your search" : "No jobs found. Create one to get started."}
                   </TableCell>
                 </TableRow>
               ) : (
                 filteredJobs.map((job) => (
-                  <TableRow 
-                    key={job.id} 
-                    className="cursor-pointer hover:bg-muted/50"
-                    onClick={() => handleOpenDialog(job, "competencies")}
-                  >
-                    <TableCell className="font-medium">{job.name}</TableCell>
-                    <TableCell>{job.code}</TableCell>
-                    <TableCell>{job.job_families?.name || "-"}</TableCell>
-                    <TableCell>{job.job_grade || "-"}</TableCell>
-                    <TableCell>{job.job_level || "-"}</TableCell>
-                    <TableCell className="capitalize">{job.standard_work_period || "-"}</TableCell>
-                    <TableCell>
-                      <Badge variant={job.is_active ? "default" : "secondary"}>
-                        {job.is_active ? "Active" : "Inactive"}
-                      </Badge>
-                    </TableCell>
-                    <TableCell onClick={(e) => e.stopPropagation()}>
-                      <div className="flex items-center gap-2">
+                  <>
+                    <TableRow key={job.id}>
+                      <TableCell>
                         <Button
                           variant="ghost"
                           size="icon"
-                          onClick={() => handleOpenDialog(job, "details")}
+                          className="h-6 w-6"
+                          onClick={() => toggleExpand(job.id)}
                         >
-                          <Pencil className="h-4 w-4" />
+                          {expandedJobId === job.id ? (
+                            <ChevronDown className="h-4 w-4" />
+                          ) : (
+                            <ChevronRight className="h-4 w-4" />
+                          )}
                         </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => {
-                            setSelectedJob(job);
-                            setDeleteDialogOpen(true);
-                          }}
-                        >
-                          <Trash2 className="h-4 w-4 text-destructive" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
+                      </TableCell>
+                      <TableCell className="font-medium">{job.name}</TableCell>
+                      <TableCell>{job.code}</TableCell>
+                      <TableCell>{job.job_families?.name || "-"}</TableCell>
+                      <TableCell>{job.job_grade || "-"}</TableCell>
+                      <TableCell>{job.job_level || "-"}</TableCell>
+                      <TableCell className="capitalize">{job.standard_work_period || "-"}</TableCell>
+                      <TableCell>
+                        <Badge variant={job.is_active ? "default" : "secondary"}>
+                          {job.is_active ? "Active" : "Inactive"}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleOpenDialog(job)}
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => {
+                              setSelectedJob(job);
+                              setDeleteDialogOpen(true);
+                            }}
+                          >
+                            <Trash2 className="h-4 w-4 text-destructive" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                    {expandedJobId === job.id && (
+                      <TableRow>
+                        <TableCell colSpan={9} className="bg-muted/30 p-4">
+                          <Tabs defaultValue="competencies" className="w-full">
+                            <TabsList>
+                              <TabsTrigger value="competencies">Competencies</TabsTrigger>
+                            </TabsList>
+                            <TabsContent value="competencies" className="mt-4">
+                              <JobCompetenciesManager 
+                                jobId={job.id} 
+                                companyId={job.company_id} 
+                              />
+                            </TabsContent>
+                          </Tabs>
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </>
                 ))
               )}
             </TableBody>
@@ -649,30 +684,18 @@ export default function JobsPage() {
             </DialogHeader>
             
             {selectedJob ? (
-              <Tabs defaultValue={defaultTab} key={defaultTab} className="w-full">
-                <TabsList className="grid w-full grid-cols-2">
-                  <TabsTrigger value="details">Job Details</TabsTrigger>
-                  <TabsTrigger value="competencies">Competencies</TabsTrigger>
-                </TabsList>
-                <TabsContent value="details" className="space-y-4 py-4">
-                  {renderJobForm()}
-                  <DialogFooter>
-                    <Button variant="outline" onClick={() => setDialogOpen(false)}>
-                      Cancel
-                    </Button>
-                    <Button onClick={handleSave} disabled={isSaving}>
-                      {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                      Update
-                    </Button>
-                  </DialogFooter>
-                </TabsContent>
-                <TabsContent value="competencies" className="py-4">
-                  <JobCompetenciesManager 
-                    jobId={selectedJob.id} 
-                    companyId={selectedJob.company_id} 
-                  />
-                </TabsContent>
-              </Tabs>
+              <div className="space-y-4 py-4">
+                {renderJobForm()}
+                <DialogFooter>
+                  <Button variant="outline" onClick={() => setDialogOpen(false)}>
+                    Cancel
+                  </Button>
+                  <Button onClick={handleSave} disabled={isSaving}>
+                    {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    Update
+                  </Button>
+                </DialogFooter>
+              </div>
             ) : (
               <div className="space-y-4 py-4">
                 {renderJobForm()}
