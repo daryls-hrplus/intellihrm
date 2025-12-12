@@ -1,5 +1,6 @@
 import { AppLayout } from "@/components/layout/AppLayout";
 import { NavLink } from "react-router-dom";
+import { ModuleReportsButton } from "@/components/reports/ModuleReportsButton";
 import {
   Package,
   Laptop,
@@ -61,18 +62,21 @@ export default function PropertyDashboardPage() {
     <AppLayout>
       <div className="space-y-6">
         <div className="animate-fade-in">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-              <Package className="h-5 w-5 text-primary" />
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                <Package className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+                  Company Property
+                </h1>
+                <p className="text-muted-foreground">
+                  Asset management and tracking
+                </p>
+              </div>
             </div>
-            <div>
-              <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
-                Company Property
-              </h1>
-              <p className="text-muted-foreground">
-                Asset management and tracking
-              </p>
-            </div>
+            <ModuleReportsButton module="property" />
           </div>
         </div>
 

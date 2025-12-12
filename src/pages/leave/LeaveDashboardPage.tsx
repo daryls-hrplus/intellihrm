@@ -1,5 +1,6 @@
 import { AppLayout } from "@/components/layout/AppLayout";
 import { NavLink } from "react-router-dom";
+import { ModuleReportsButton } from "@/components/reports/ModuleReportsButton";
 import {
   Calendar,
   CalendarPlus,
@@ -61,18 +62,21 @@ export default function LeaveDashboardPage() {
     <AppLayout>
       <div className="space-y-6">
         <div className="animate-fade-in">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-              <Calendar className="h-5 w-5 text-primary" />
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                <Calendar className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+                  Leave Management
+                </h1>
+                <p className="text-muted-foreground">
+                  Manage time off and leave requests
+                </p>
+              </div>
             </div>
-            <div>
-              <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
-                Leave Management
-              </h1>
-              <p className="text-muted-foreground">
-                Manage time off and leave requests
-              </p>
-            </div>
+            <ModuleReportsButton module="leave" />
           </div>
         </div>
 

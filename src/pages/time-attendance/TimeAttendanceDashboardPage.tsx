@@ -1,6 +1,7 @@
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { ModuleReportsButton } from "@/components/reports/ModuleReportsButton";
 import { 
   Clock, 
   Calendar, 
@@ -60,18 +61,21 @@ export default function TimeAttendanceDashboardPage() {
       <div className="space-y-6">
         <Breadcrumbs items={[{ label: "Time & Attendance" }]} />
 
-        <div className="flex items-center gap-3">
-          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10">
-            <Clock className="h-6 w-6 text-primary" />
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10">
+              <Clock className="h-6 w-6 text-primary" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold tracking-tight text-foreground">
+                Time & Attendance
+              </h1>
+              <p className="text-muted-foreground">
+                Track work hours, manage schedules, and monitor attendance
+              </p>
+            </div>
           </div>
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight text-foreground">
-              Time & Attendance
-            </h1>
-            <p className="text-muted-foreground">
-              Track work hours, manage schedules, and monitor attendance
-            </p>
-          </div>
+          <ModuleReportsButton module="time_attendance" />
         </div>
 
         {/* Stats */}
