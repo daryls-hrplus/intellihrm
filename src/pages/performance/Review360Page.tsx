@@ -19,7 +19,13 @@ import {
   Eye,
   MessageSquare,
   UserPlus,
+  HelpCircle,
 } from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
@@ -71,6 +77,12 @@ const statusColors: Record<string, string> = {
   in_progress: "bg-info/10 text-info",
   completed: "bg-success/10 text-success",
   cancelled: "bg-destructive/10 text-destructive",
+};
+
+const tabHelpText: Record<string, string> = {
+  "my-reviews": "View and complete feedback reviews assigned to you. Click on a pending review to provide feedback for colleagues, managers, or direct reports.",
+  "my-feedback": "See aggregated feedback you've received from peers, managers, and direct reports. View scores and comments to understand your strengths and areas for improvement.",
+  "manage-cycles": "Create and manage 360° review cycles. Configure participants, deadlines, review types, and questions. Track completion rates and export results.",
 };
 
 export default function Review360Page() {
@@ -304,19 +316,43 @@ export default function Review360Page() {
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList>
+          <TabsList className="flex-wrap">
             <TabsTrigger value="my-reviews" className="gap-2">
               <ClipboardList className="h-4 w-4" />
               My Reviews
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <HelpCircle className="h-3.5 w-3.5 text-muted-foreground hover:text-foreground cursor-help" />
+                </TooltipTrigger>
+                <TooltipContent side="bottom" className="max-w-xs">
+                  <p>{tabHelpText["my-reviews"]}</p>
+                </TooltipContent>
+              </Tooltip>
             </TabsTrigger>
             <TabsTrigger value="my-feedback" className="gap-2">
               <BarChart3 className="h-4 w-4" />
               My Feedback
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <HelpCircle className="h-3.5 w-3.5 text-muted-foreground hover:text-foreground cursor-help" />
+                </TooltipTrigger>
+                <TooltipContent side="bottom" className="max-w-xs">
+                  <p>{tabHelpText["my-feedback"]}</p>
+                </TooltipContent>
+              </Tooltip>
             </TabsTrigger>
             {(isAdmin || isHRManager) && (
               <TabsTrigger value="manage-cycles" className="gap-2">
                 <Settings className="h-4 w-4" />
                 Manage Cycles
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <HelpCircle className="h-3.5 w-3.5 text-muted-foreground hover:text-foreground cursor-help" />
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom" className="max-w-xs">
+                    <p>{tabHelpText["manage-cycles"]}</p>
+                  </TooltipContent>
+                </Tooltip>
               </TabsTrigger>
             )}
           </TabsList>
