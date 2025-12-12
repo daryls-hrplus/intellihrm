@@ -1,6 +1,7 @@
 import { AppLayout } from "@/components/layout/AppLayout";
 import { NavLink } from "react-router-dom";
 import { ModuleReportsButton } from "@/components/reports/ModuleReportsButton";
+import { ModuleBIButton } from "@/components/bi/ModuleBIButton";
 import {
   TrendingUp,
   Users,
@@ -76,7 +77,10 @@ export default function SuccessionDashboardPage() {
                 </p>
               </div>
             </div>
-            <ModuleReportsButton module="succession" />
+            <div className="flex items-center gap-2">
+              <ModuleBIButton module="succession" />
+              <ModuleReportsButton module="succession" />
+            </div>
           </div>
         </div>
 

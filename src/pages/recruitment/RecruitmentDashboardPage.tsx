@@ -1,6 +1,7 @@
 import { AppLayout } from "@/components/layout/AppLayout";
 import { NavLink } from "react-router-dom";
 import { ModuleReportsButton } from "@/components/reports/ModuleReportsButton";
+import { ModuleBIButton } from "@/components/bi/ModuleBIButton";
 import {
   UserPlus,
   Briefcase,
@@ -76,7 +77,10 @@ export default function RecruitmentDashboardPage() {
                 </p>
               </div>
             </div>
-            <ModuleReportsButton module="recruitment" />
+            <div className="flex items-center gap-2">
+              <ModuleBIButton module="recruitment" />
+              <ModuleReportsButton module="recruitment" />
+            </div>
           </div>
         </div>
 

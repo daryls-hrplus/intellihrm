@@ -1,6 +1,7 @@
 import { AppLayout } from "@/components/layout/AppLayout";
 import { NavLink } from "react-router-dom";
 import { ModuleReportsButton } from "@/components/reports/ModuleReportsButton";
+import { ModuleBIButton } from "@/components/bi/ModuleBIButton";
 import {
   Shield,
   AlertTriangle,
@@ -76,7 +77,10 @@ export default function HSEDashboardPage() {
                 </p>
               </div>
             </div>
-            <ModuleReportsButton module="hse" />
+            <div className="flex items-center gap-2">
+              <ModuleBIButton module="hse" />
+              <ModuleReportsButton module="hse" />
+            </div>
           </div>
         </div>
 

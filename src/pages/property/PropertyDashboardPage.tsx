@@ -1,6 +1,7 @@
 import { AppLayout } from "@/components/layout/AppLayout";
 import { NavLink } from "react-router-dom";
 import { ModuleReportsButton } from "@/components/reports/ModuleReportsButton";
+import { ModuleBIButton } from "@/components/bi/ModuleBIButton";
 import {
   Package,
   Laptop,
@@ -76,7 +77,10 @@ export default function PropertyDashboardPage() {
                 </p>
               </div>
             </div>
-            <ModuleReportsButton module="property" />
+            <div className="flex items-center gap-2">
+              <ModuleBIButton module="property" />
+              <ModuleReportsButton module="property" />
+            </div>
           </div>
         </div>
 

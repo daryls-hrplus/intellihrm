@@ -1,6 +1,7 @@
 import { AppLayout } from "@/components/layout/AppLayout";
 import { NavLink } from "react-router-dom";
 import { ModuleReportsButton } from "@/components/reports/ModuleReportsButton";
+import { ModuleBIButton } from "@/components/bi/ModuleBIButton";
 import {
   Target,
   ClipboardCheck,
@@ -62,7 +63,10 @@ export default function PerformanceDashboardPage() {
                 </p>
               </div>
             </div>
-            <ModuleReportsButton module="performance" />
+            <div className="flex items-center gap-2">
+              <ModuleBIButton module="performance" />
+              <ModuleReportsButton module="performance" />
+            </div>
           </div>
         </div>
 

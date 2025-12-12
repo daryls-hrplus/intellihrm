@@ -4,6 +4,7 @@ import { NavLink } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { ModuleReportsButton } from "@/components/reports/ModuleReportsButton";
+import { ModuleBIButton } from "@/components/bi/ModuleBIButton";
 import {
   GraduationCap,
   BookOpen,
@@ -154,7 +155,10 @@ export default function TrainingDashboardPage() {
                 </p>
               </div>
             </div>
-            <ModuleReportsButton module="training" />
+            <div className="flex items-center gap-2">
+              <ModuleBIButton module="training" />
+              <ModuleReportsButton module="training" />
+            </div>
           </div>
         </div>
 

@@ -1,6 +1,7 @@
 import { AppLayout } from "@/components/layout/AppLayout";
 import { NavLink } from "react-router-dom";
 import { ModuleReportsButton } from "@/components/reports/ModuleReportsButton";
+import { ModuleBIButton } from "@/components/bi/ModuleBIButton";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -333,7 +334,10 @@ export default function BenefitsDashboardPage() {
                 </p>
               </div>
             </div>
-            <ModuleReportsButton module="benefits" />
+            <div className="flex items-center gap-2">
+              <ModuleBIButton module="benefits" />
+              <ModuleReportsButton module="benefits" />
+            </div>
           </div>
         </div>
 
