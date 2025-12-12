@@ -12,6 +12,7 @@ export interface ReportTemplate {
   is_global: boolean;
   company_id: string | null;
   data_source: string;
+  custom_sql: string | null;
   layout: Record<string, unknown>;
   bands: ReportBand[];
   parameters: ReportParameter[];
@@ -269,6 +270,7 @@ export function useReportWriter() {
         is_global: template.is_global || false,
         company_id: template.company_id,
         data_source: template.data_source!,
+        custom_sql: template.custom_sql || null,
         layout: (template.layout || {}) as Json,
         bands: (template.bands || []) as unknown as Json,
         parameters: (template.parameters || []) as unknown as Json,
@@ -306,6 +308,7 @@ export function useReportWriter() {
       const updateData = {
         name: updates.name,
         description: updates.description,
+        custom_sql: updates.custom_sql,
         layout: updates.layout as unknown as Json,
         bands: updates.bands as unknown as Json,
         parameters: updates.parameters as unknown as Json,
