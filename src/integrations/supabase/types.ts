@@ -388,6 +388,430 @@ export type Database = {
           },
         ]
       }
+      benefit_categories: {
+        Row: {
+          category_type: string
+          code: string
+          company_id: string
+          created_at: string
+          description: string | null
+          end_date: string | null
+          id: string
+          is_active: boolean
+          name: string
+          start_date: string
+          updated_at: string
+        }
+        Insert: {
+          category_type: string
+          code: string
+          company_id: string
+          created_at?: string
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          start_date?: string
+          updated_at?: string
+        }
+        Update: {
+          category_type?: string
+          code?: string
+          company_id?: string
+          created_at?: string
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          start_date?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "benefit_categories_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      benefit_claims: {
+        Row: {
+          amount_approved: number | null
+          amount_claimed: number
+          claim_date: string
+          claim_number: string | null
+          claim_type: string
+          created_at: string
+          description: string | null
+          enrollment_id: string
+          id: string
+          notes: string | null
+          processed_at: string | null
+          processed_by: string | null
+          provider_name: string | null
+          service_date: string
+          status: string
+          supporting_documents: Json | null
+          updated_at: string
+        }
+        Insert: {
+          amount_approved?: number | null
+          amount_claimed: number
+          claim_date?: string
+          claim_number?: string | null
+          claim_type: string
+          created_at?: string
+          description?: string | null
+          enrollment_id: string
+          id?: string
+          notes?: string | null
+          processed_at?: string | null
+          processed_by?: string | null
+          provider_name?: string | null
+          service_date: string
+          status?: string
+          supporting_documents?: Json | null
+          updated_at?: string
+        }
+        Update: {
+          amount_approved?: number | null
+          amount_claimed?: number
+          claim_date?: string
+          claim_number?: string | null
+          claim_type?: string
+          created_at?: string
+          description?: string | null
+          enrollment_id?: string
+          id?: string
+          notes?: string | null
+          processed_at?: string | null
+          processed_by?: string | null
+          provider_name?: string | null
+          service_date?: string
+          status?: string
+          supporting_documents?: Json | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "benefit_claims_enrollment_id_fkey"
+            columns: ["enrollment_id"]
+            isOneToOne: false
+            referencedRelation: "benefit_enrollments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "benefit_claims_processed_by_fkey"
+            columns: ["processed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      benefit_dependents: {
+        Row: {
+          created_at: string
+          date_of_birth: string | null
+          dependent_id: string | null
+          end_date: string | null
+          enrollment_id: string
+          full_name: string
+          id: string
+          is_active: boolean
+          relationship: string
+          ssn_last_four: string | null
+          start_date: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          date_of_birth?: string | null
+          dependent_id?: string | null
+          end_date?: string | null
+          enrollment_id: string
+          full_name: string
+          id?: string
+          is_active?: boolean
+          relationship: string
+          ssn_last_four?: string | null
+          start_date?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          date_of_birth?: string | null
+          dependent_id?: string | null
+          end_date?: string | null
+          enrollment_id?: string
+          full_name?: string
+          id?: string
+          is_active?: boolean
+          relationship?: string
+          ssn_last_four?: string | null
+          start_date?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "benefit_dependents_dependent_id_fkey"
+            columns: ["dependent_id"]
+            isOneToOne: false
+            referencedRelation: "employee_dependents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "benefit_dependents_enrollment_id_fkey"
+            columns: ["enrollment_id"]
+            isOneToOne: false
+            referencedRelation: "benefit_enrollments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      benefit_enrollment_periods: {
+        Row: {
+          company_id: string
+          created_at: string
+          description: string | null
+          end_date: string
+          enrollment_type: string
+          id: string
+          is_active: boolean
+          name: string
+          start_date: string
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          description?: string | null
+          end_date: string
+          enrollment_type?: string
+          id?: string
+          is_active?: boolean
+          name: string
+          start_date: string
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          description?: string | null
+          end_date?: string
+          enrollment_type?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          start_date?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "benefit_enrollment_periods_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      benefit_enrollments: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          coverage_level: string | null
+          covered_dependents: Json | null
+          created_at: string
+          created_by: string | null
+          effective_date: string
+          employee_contribution: number | null
+          employee_id: string
+          employer_contribution: number | null
+          enrollment_date: string
+          enrollment_period_id: string | null
+          enrollment_source: string
+          id: string
+          notes: string | null
+          plan_id: string
+          status: string
+          termination_date: string | null
+          updated_at: string
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          coverage_level?: string | null
+          covered_dependents?: Json | null
+          created_at?: string
+          created_by?: string | null
+          effective_date: string
+          employee_contribution?: number | null
+          employee_id: string
+          employer_contribution?: number | null
+          enrollment_date?: string
+          enrollment_period_id?: string | null
+          enrollment_source?: string
+          id?: string
+          notes?: string | null
+          plan_id: string
+          status?: string
+          termination_date?: string | null
+          updated_at?: string
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          coverage_level?: string | null
+          covered_dependents?: Json | null
+          created_at?: string
+          created_by?: string | null
+          effective_date?: string
+          employee_contribution?: number | null
+          employee_id?: string
+          employer_contribution?: number | null
+          enrollment_date?: string
+          enrollment_period_id?: string | null
+          enrollment_source?: string
+          id?: string
+          notes?: string | null
+          plan_id?: string
+          status?: string
+          termination_date?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "benefit_enrollments_approved_by_fkey"
+            columns: ["approved_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "benefit_enrollments_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "benefit_enrollments_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "benefit_enrollments_enrollment_period_id_fkey"
+            columns: ["enrollment_period_id"]
+            isOneToOne: false
+            referencedRelation: "benefit_enrollment_periods"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "benefit_enrollments_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "benefit_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      benefit_plans: {
+        Row: {
+          auto_enrollment_criteria: Json | null
+          category_id: string
+          code: string
+          company_id: string
+          contribution_frequency: string | null
+          coverage_details: Json | null
+          created_at: string
+          currency: string | null
+          description: string | null
+          employee_contribution: number | null
+          employer_contribution: number | null
+          end_date: string | null
+          enrollment_type: string
+          id: string
+          is_active: boolean
+          name: string
+          plan_type: string
+          provider_contact: string | null
+          provider_name: string | null
+          start_date: string
+          updated_at: string
+          waiting_period_days: number | null
+        }
+        Insert: {
+          auto_enrollment_criteria?: Json | null
+          category_id: string
+          code: string
+          company_id: string
+          contribution_frequency?: string | null
+          coverage_details?: Json | null
+          created_at?: string
+          currency?: string | null
+          description?: string | null
+          employee_contribution?: number | null
+          employer_contribution?: number | null
+          end_date?: string | null
+          enrollment_type?: string
+          id?: string
+          is_active?: boolean
+          name: string
+          plan_type: string
+          provider_contact?: string | null
+          provider_name?: string | null
+          start_date?: string
+          updated_at?: string
+          waiting_period_days?: number | null
+        }
+        Update: {
+          auto_enrollment_criteria?: Json | null
+          category_id?: string
+          code?: string
+          company_id?: string
+          contribution_frequency?: string | null
+          coverage_details?: Json | null
+          created_at?: string
+          currency?: string | null
+          description?: string | null
+          employee_contribution?: number | null
+          employer_contribution?: number | null
+          end_date?: string | null
+          enrollment_type?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          plan_type?: string
+          provider_contact?: string | null
+          provider_name?: string | null
+          start_date?: string
+          updated_at?: string
+          waiting_period_days?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "benefit_plans_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "benefit_categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "benefit_plans_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       companies: {
         Row: {
           address: string | null
