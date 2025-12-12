@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import type { Json } from '@/integrations/supabase/types';
 
 export interface ReportTemplate {
   id: string;
@@ -260,28 +261,30 @@ export function useReportWriter() {
   const createTemplate = async (template: Partial<ReportTemplate>): Promise<ReportTemplate | null> => {
     setIsLoading(true);
     try {
+      const insertData = {
+        name: template.name!,
+        code: template.code!,
+        description: template.description,
+        module: template.module!,
+        is_global: template.is_global || false,
+        company_id: template.company_id,
+        data_source: template.data_source!,
+        layout: (template.layout || {}) as Json,
+        bands: (template.bands || []) as unknown as Json,
+        parameters: (template.parameters || []) as unknown as Json,
+        grouping: (template.grouping || []) as unknown as Json,
+        sorting: (template.sorting || []) as unknown as Json,
+        calculations: (template.calculations || []) as unknown as Json,
+        page_settings: (template.page_settings || {
+          orientation: 'portrait',
+          size: 'A4',
+          margins: { top: 20, right: 20, bottom: 20, left: 20 }
+        }) as Json
+      };
+
       const { data, error } = await supabase
         .from('report_templates')
-        .insert({
-          name: template.name!,
-          code: template.code!,
-          description: template.description,
-          module: template.module!,
-          is_global: template.is_global || false,
-          company_id: template.company_id,
-          data_source: template.data_source!,
-          layout: (template.layout || {}) as unknown as Record<string, unknown>,
-          bands: (template.bands || []) as unknown as Record<string, unknown>[],
-          parameters: (template.parameters || []) as unknown as Record<string, unknown>[],
-          grouping: (template.grouping || []) as unknown as Record<string, unknown>[],
-          sorting: (template.sorting || []) as unknown as Record<string, unknown>[],
-          calculations: (template.calculations || []) as unknown as Record<string, unknown>[],
-          page_settings: (template.page_settings || {
-            orientation: 'portrait',
-            size: 'A4',
-            margins: { top: 20, right: 20, bottom: 20, left: 20 }
-          }) as unknown as Record<string, unknown>
-        })
+        .insert(insertData)
         .select()
         .single();
 
@@ -300,19 +303,21 @@ export function useReportWriter() {
   const updateTemplate = async (templateId: string, updates: Partial<ReportTemplate>): Promise<boolean> => {
     setIsLoading(true);
     try {
+      const updateData = {
+        name: updates.name,
+        description: updates.description,
+        layout: updates.layout as unknown as Json,
+        bands: updates.bands as unknown as Json,
+        parameters: updates.parameters as unknown as Json,
+        grouping: updates.grouping as unknown as Json,
+        sorting: updates.sorting as unknown as Json,
+        calculations: updates.calculations as unknown as Json,
+        page_settings: updates.page_settings as unknown as Json
+      };
+
       const { error } = await supabase
         .from('report_templates')
-        .update({
-          name: updates.name,
-          description: updates.description,
-          layout: updates.layout as unknown as Record<string, unknown>,
-          bands: updates.bands as unknown as Record<string, unknown>[],
-          parameters: updates.parameters as unknown as Record<string, unknown>[],
-          grouping: updates.grouping as unknown as Record<string, unknown>[],
-          sorting: updates.sorting as unknown as Record<string, unknown>[],
-          calculations: updates.calculations as unknown as Record<string, unknown>[],
-          page_settings: updates.page_settings as unknown as Record<string, unknown>
-        })
+        .update(updateData)
         .eq('id', templateId);
 
       if (error) throw error;
@@ -358,10 +363,10 @@ export function useReportWriter() {
         .from('generated_reports')
         .insert({
           template_id: templateId,
-          parameters_used: parameters as unknown as Record<string, unknown>,
+          parameters_used: parameters as unknown as Json,
           output_format: outputFormat,
           status: 'generating'
-        })
+        } as never)
         .select()
         .single();
 
@@ -395,32 +400,6 @@ export function useReportWriter() {
 
       if (error) throw error;
       return (data || []) as unknown as GeneratedReport[];
-    } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : 'Failed to fetch generated reports';
-      toast.error(message);
-      return [];
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const getGeneratedReports = async (templateId?: string): Promise<GeneratedReport[]> => {
-    setIsLoading(true);
-    try {
-      let query = supabase
-        .from('generated_reports')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(50);
-
-      if (templateId) {
-        query = query.eq('template_id', templateId);
-      }
-
-      const { data, error } = await query;
-
-      if (error) throw error;
-      return (data || []) as GeneratedReport[];
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'Failed to fetch generated reports';
       toast.error(message);
