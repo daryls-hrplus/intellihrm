@@ -29,6 +29,7 @@ import {
 import { Plus, Trash2, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { format } from "date-fns";
 
 interface JobResponsibility {
   id: string;
@@ -36,6 +37,8 @@ interface JobResponsibility {
   responsibility_id: string;
   weighting: number;
   notes: string | null;
+  start_date: string;
+  end_date: string | null;
   responsibility_name?: string;
 }
 
@@ -50,6 +53,18 @@ interface JobResponsibilitiesManagerProps {
   companyId: string;
 }
 
+// Check if two date ranges overlap (using string comparison for dates in YYYY-MM-DD format)
+function datesOverlap(
+  start1: string,
+  end1: string | null,
+  start2: string,
+  end2: string | null
+): boolean {
+  const e1 = end1 || "9999-12-31";
+  const e2 = end2 || "9999-12-31";
+  return start1 <= e2 && start2 <= e1;
+}
+
 export function JobResponsibilitiesManager({ jobId, companyId }: JobResponsibilitiesManagerProps) {
   const [jobResponsibilities, setJobResponsibilities] = useState<JobResponsibility[]>([]);
   const [responsibilities, setResponsibilities] = useState<Responsibility[]>([]);
@@ -60,10 +75,11 @@ export function JobResponsibilitiesManager({ jobId, companyId }: JobResponsibili
     responsibility_id: "",
     weighting: 0,
     notes: "",
+    start_date: format(new Date(), "yyyy-MM-dd"),
+    end_date: "",
   });
 
   const totalWeight = jobResponsibilities.reduce((sum, jr) => sum + Number(jr.weighting), 0);
-  const remainingWeight = 100 - totalWeight;
 
   useEffect(() => {
     fetchJobResponsibilities();
@@ -80,9 +96,12 @@ export function JobResponsibilitiesManager({ jobId, companyId }: JobResponsibili
         responsibility_id,
         weighting,
         notes,
+        start_date,
+        end_date,
         responsibilities (name)
       `)
-      .eq("job_id", jobId);
+      .eq("job_id", jobId)
+      .order("start_date", { ascending: false });
 
     if (error) {
       console.error("Error fetching job responsibilities:", error);
@@ -113,8 +132,44 @@ export function JobResponsibilitiesManager({ jobId, companyId }: JobResponsibili
   };
 
   const handleOpenDialog = () => {
-    setFormData({ responsibility_id: "", weighting: 0, notes: "" });
+    setFormData({
+      responsibility_id: "",
+      weighting: 0,
+      notes: "",
+      start_date: format(new Date(), "yyyy-MM-dd"),
+      end_date: "",
+    });
     setDialogOpen(true);
+  };
+
+  // Calculate total weighting for responsibilities that overlap with the new entry's date range
+  const calculateOverlappingWeight = (
+    newStartDate: string,
+    newEndDate: string | null
+  ): number => {
+    // Group responsibilities by responsibility_id
+    const responsibilityGroups = new Map<string, JobResponsibility[]>();
+    for (const jr of jobResponsibilities) {
+      const existing = responsibilityGroups.get(jr.responsibility_id) || [];
+      existing.push(jr);
+      responsibilityGroups.set(jr.responsibility_id, existing);
+    }
+
+    let totalWeight = 0;
+
+    // For each unique responsibility, only count the weight if there's an overlapping entry
+    for (const [respId, entries] of responsibilityGroups) {
+      const overlappingEntries = entries.filter((jr) =>
+        datesOverlap(newStartDate, newEndDate, jr.start_date, jr.end_date)
+      );
+
+      if (overlappingEntries.length > 0) {
+        const maxWeight = Math.max(...overlappingEntries.map((e) => Number(e.weighting)));
+        totalWeight += maxWeight;
+      }
+    }
+
+    return totalWeight;
   };
 
   const handleSave = async () => {
@@ -123,13 +178,26 @@ export function JobResponsibilitiesManager({ jobId, companyId }: JobResponsibili
       return;
     }
 
-    if (formData.weighting <= 0) {
-      toast.error("Weight must be greater than 0");
+    if (!formData.start_date) {
+      toast.error("Please enter a start date");
       return;
     }
 
-    if (formData.weighting > remainingWeight) {
-      toast.error(`Weight cannot exceed ${remainingWeight}% (remaining available)`);
+    if (formData.weighting <= 0 || formData.weighting > 100) {
+      toast.error("Weight must be between 1 and 100");
+      return;
+    }
+
+    // Validate total weight for overlapping period
+    const currentOverlappingWeight = calculateOverlappingWeight(
+      formData.start_date,
+      formData.end_date || null
+    );
+
+    if (currentOverlappingWeight + formData.weighting > 100) {
+      toast.error(
+        `Total weighting would exceed 100%. Current overlapping weight: ${currentOverlappingWeight}%, max you can add: ${100 - currentOverlappingWeight}%`
+      );
       return;
     }
 
@@ -141,11 +209,15 @@ export function JobResponsibilitiesManager({ jobId, companyId }: JobResponsibili
         responsibility_id: formData.responsibility_id,
         weighting: formData.weighting,
         notes: formData.notes || null,
+        start_date: formData.start_date,
+        end_date: formData.end_date || null,
       });
 
     if (error) {
-      if (error.code === "23505") {
-        toast.error("This responsibility is already assigned to this job");
+      if (error.message?.includes("Overlapping date ranges")) {
+        toast.error("This responsibility already has an entry for overlapping dates");
+      } else if (error.code === "23505") {
+        toast.error("This responsibility is already assigned to this job for this period");
       } else {
         console.error("Error saving job responsibility:", error);
         toast.error("Failed to add responsibility");
@@ -173,10 +245,6 @@ export function JobResponsibilitiesManager({ jobId, companyId }: JobResponsibili
     }
   };
 
-  const availableResponsibilities = responsibilities.filter(
-    (r) => !jobResponsibilities.some((jr) => jr.responsibility_id === r.id)
-  );
-
   if (loading) {
     return <div className="p-4 text-muted-foreground">Loading responsibilities...</div>;
   }
@@ -188,10 +256,9 @@ export function JobResponsibilitiesManager({ jobId, companyId }: JobResponsibili
           <h4 className="text-sm font-medium">Job Responsibilities</h4>
           <div className="flex items-center gap-4 text-sm text-muted-foreground">
             <span>Total Weight: {totalWeight}%</span>
-            <span>Remaining: {remainingWeight}%</span>
           </div>
         </div>
-        <Button size="sm" onClick={handleOpenDialog} disabled={remainingWeight <= 0}>
+        <Button size="sm" onClick={handleOpenDialog} disabled={responsibilities.length === 0}>
           <Plus className="h-4 w-4 mr-1" />
           Add Responsibility
         </Button>
@@ -216,6 +283,8 @@ export function JobResponsibilitiesManager({ jobId, companyId }: JobResponsibili
             <TableRow>
               <TableHead>Responsibility</TableHead>
               <TableHead className="w-24">Weight %</TableHead>
+              <TableHead>Start Date</TableHead>
+              <TableHead>End Date</TableHead>
               <TableHead>Notes</TableHead>
               <TableHead className="w-16"></TableHead>
             </TableRow>
@@ -225,6 +294,10 @@ export function JobResponsibilitiesManager({ jobId, companyId }: JobResponsibili
               <TableRow key={jr.id}>
                 <TableCell className="font-medium">{jr.responsibility_name}</TableCell>
                 <TableCell>{jr.weighting}%</TableCell>
+                <TableCell>{format(new Date(jr.start_date), "MMM d, yyyy")}</TableCell>
+                <TableCell>
+                  {jr.end_date ? format(new Date(jr.end_date), "MMM d, yyyy") : "—"}
+                </TableCell>
                 <TableCell className="text-muted-foreground">{jr.notes || "-"}</TableCell>
                 <TableCell>
                   <Button
@@ -259,7 +332,7 @@ export function JobResponsibilitiesManager({ jobId, companyId }: JobResponsibili
                   <SelectValue placeholder="Select responsibility" />
                 </SelectTrigger>
                 <SelectContent>
-                  {availableResponsibilities.map((r) => (
+                  {responsibilities.map((r) => (
                     <SelectItem key={r.id} value={r.id}>
                       {r.name} ({r.code})
                     </SelectItem>
@@ -268,17 +341,39 @@ export function JobResponsibilitiesManager({ jobId, companyId }: JobResponsibili
               </Select>
             </div>
 
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Start Date *</Label>
+                <Input
+                  type="date"
+                  value={formData.start_date}
+                  onChange={(e) => setFormData({ ...formData, start_date: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>End Date</Label>
+                <Input
+                  type="date"
+                  value={formData.end_date}
+                  onChange={(e) => setFormData({ ...formData, end_date: e.target.value })}
+                />
+              </div>
+            </div>
+
             <div className="space-y-2">
-              <Label>Weight % * (max {remainingWeight}%)</Label>
+              <Label>Weight % *</Label>
               <Input
                 type="number"
                 min={1}
-                max={remainingWeight}
+                max={100}
                 value={formData.weighting}
                 onChange={(e) =>
                   setFormData({ ...formData, weighting: Number(e.target.value) })
                 }
               />
+              <p className="text-xs text-muted-foreground">
+                Total weight for overlapping responsibilities cannot exceed 100%
+              </p>
             </div>
 
             <div className="space-y-2">
