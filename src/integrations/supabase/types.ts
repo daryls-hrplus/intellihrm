@@ -94,6 +94,204 @@ export type Database = {
         }
         Relationships: []
       }
+      appraisal_cycles: {
+        Row: {
+          company_id: string
+          competency_weight: number
+          created_at: string
+          created_by: string | null
+          description: string | null
+          end_date: string
+          evaluation_deadline: string | null
+          goal_weight: number
+          id: string
+          max_rating: number
+          min_rating: number
+          name: string
+          responsibility_weight: number
+          start_date: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          competency_weight?: number
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          end_date: string
+          evaluation_deadline?: string | null
+          goal_weight?: number
+          id?: string
+          max_rating?: number
+          min_rating?: number
+          name: string
+          responsibility_weight?: number
+          start_date: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          competency_weight?: number
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          end_date?: string
+          evaluation_deadline?: string | null
+          goal_weight?: number
+          id?: string
+          max_rating?: number
+          min_rating?: number
+          name?: string
+          responsibility_weight?: number
+          start_date?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "appraisal_cycles_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appraisal_cycles_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      appraisal_participants: {
+        Row: {
+          competency_score: number | null
+          created_at: string
+          cycle_id: string
+          employee_comments: string | null
+          employee_id: string
+          evaluator_id: string | null
+          final_comments: string | null
+          goal_score: number | null
+          id: string
+          overall_score: number | null
+          responsibility_score: number | null
+          reviewed_at: string | null
+          status: string
+          submitted_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          competency_score?: number | null
+          created_at?: string
+          cycle_id: string
+          employee_comments?: string | null
+          employee_id: string
+          evaluator_id?: string | null
+          final_comments?: string | null
+          goal_score?: number | null
+          id?: string
+          overall_score?: number | null
+          responsibility_score?: number | null
+          reviewed_at?: string | null
+          status?: string
+          submitted_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          competency_score?: number | null
+          created_at?: string
+          cycle_id?: string
+          employee_comments?: string | null
+          employee_id?: string
+          evaluator_id?: string | null
+          final_comments?: string | null
+          goal_score?: number | null
+          id?: string
+          overall_score?: number | null
+          responsibility_score?: number | null
+          reviewed_at?: string | null
+          status?: string
+          submitted_at?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "appraisal_participants_cycle_id_fkey"
+            columns: ["cycle_id"]
+            isOneToOne: false
+            referencedRelation: "appraisal_cycles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appraisal_participants_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appraisal_participants_evaluator_id_fkey"
+            columns: ["evaluator_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      appraisal_scores: {
+        Row: {
+          comments: string | null
+          created_at: string
+          evaluation_type: string
+          id: string
+          item_id: string
+          item_name: string
+          participant_id: string
+          rating: number | null
+          updated_at: string
+          weight: number
+          weighted_score: number | null
+        }
+        Insert: {
+          comments?: string | null
+          created_at?: string
+          evaluation_type: string
+          id?: string
+          item_id: string
+          item_name: string
+          participant_id: string
+          rating?: number | null
+          updated_at?: string
+          weight?: number
+          weighted_score?: number | null
+        }
+        Update: {
+          comments?: string | null
+          created_at?: string
+          evaluation_type?: string
+          id?: string
+          item_id?: string
+          item_name?: string
+          participant_id?: string
+          rating?: number | null
+          updated_at?: string
+          weight?: number
+          weighted_score?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "appraisal_scores_participant_id_fkey"
+            columns: ["participant_id"]
+            isOneToOne: false
+            referencedRelation: "appraisal_participants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       audit_logs: {
         Row: {
           action: Database["public"]["Enums"]["audit_action"]
