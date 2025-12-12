@@ -95,15 +95,21 @@ serve(async (req) => {
       }
     }
 
-    // Apply parameter filters if applicable
+    // Apply parameter filters if applicable (only when matching date field exists)
     if (parameters.report_year) {
       const year = Number(parameters.report_year);
-      const startOfYear = `${year}-01-01`;
-      const endOfYear = `${year}-12-31`;
-      
-      // Filter by hire_date if it exists (for employee reports)
-      if (dataSource.base_table === 'profiles') {
-        query = query.gte('hire_date', startOfYear).lte('hire_date', endOfYear);
+      if (!Number.isNaN(year)) {
+        const fields = (dataSource.available_fields || []) as Array<{ name: string }>;
+        const hasHireDate = fields.some((f) => f.name === 'hire_date');
+        const hasCreatedAt = fields.some((f) => f.name === 'created_at');
+        const startOfYear = `${year}-01-01`;
+        const endOfYear = `${year}-12-31`;
+
+        if (hasHireDate) {
+          query = query.gte('hire_date', startOfYear).lte('hire_date', endOfYear);
+        } else if (hasCreatedAt) {
+          query = query.gte('created_at', startOfYear).lte('created_at', endOfYear);
+        }
       }
     }
 
