@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import {
   Users,
   ClipboardList,
@@ -22,7 +23,10 @@ import {
   UserPlus,
   HelpCircle,
   Building2,
+  ChevronDown,
+  TrendingUp,
 } from "lucide-react";
+import { Review360AnalyticsDashboard } from "@/components/performance/Review360AnalyticsDashboard";
 import {
   Tooltip,
   TooltipContent,
@@ -111,6 +115,7 @@ export default function Review360Page() {
   // Company switcher for admin/HR
   const [companies, setCompanies] = useState<{ id: string; name: string }[]>([]);
   const [selectedCompanyId, setSelectedCompanyId] = useState<string>(company?.id || "");
+  const [showAnalytics, setShowAnalytics] = useState(false);
 
   useEffect(() => {
     if (isAdmin || isHRManager) {
@@ -415,6 +420,26 @@ export default function Review360Page() {
             </CardContent>
           </Card>
         </div>
+
+        {/* Analytics Dashboard (Collapsible) */}
+        <Collapsible open={showAnalytics} onOpenChange={setShowAnalytics}>
+          <CollapsibleTrigger asChild>
+            <Button variant="outline" className="w-full justify-between">
+              <span className="flex items-center gap-2">
+                <TrendingUp className="h-4 w-4" />
+                Analytics Dashboard
+              </span>
+              <ChevronDown className={`h-4 w-4 transition-transform ${showAnalytics ? "rotate-180" : ""}`} />
+            </Button>
+          </CollapsibleTrigger>
+          <CollapsibleContent className="pt-4">
+            <Review360AnalyticsDashboard
+              cycles={[...cycles, ...managerCycles]}
+              pendingReviews={pendingReviews}
+              participations={myParticipations}
+            />
+          </CollapsibleContent>
+        </Collapsible>
 
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="flex-wrap">
