@@ -25,6 +25,7 @@ import { Star, Users, MessageSquare, TrendingUp, AlertTriangle } from "lucide-re
 interface Review360FeedbackAnalyticsProps {
   cycleIds: string[];
   compact?: boolean;
+  reviewerTypeFilter?: string;
 }
 
 interface FeedbackStats {
@@ -54,6 +55,7 @@ const RATING_COLORS = [
 export function Review360FeedbackAnalytics({
   cycleIds,
   compact = false,
+  reviewerTypeFilter = "all",
 }: Review360FeedbackAnalyticsProps) {
   const [stats, setStats] = useState<FeedbackStats | null>(null);
   const [loading, setLoading] = useState(true);
@@ -64,7 +66,7 @@ export function Review360FeedbackAnalytics({
     } else {
       setLoading(false);
     }
-  }, [cycleIds]);
+  }, [cycleIds, reviewerTypeFilter]);
 
   const fetchFeedbackStats = async () => {
     setLoading(true);
@@ -83,8 +85,8 @@ export function Review360FeedbackAnalytics({
 
       const participantIds = participants.map(p => p.id);
 
-      // Get all feedback submissions
-      const { data: submissions } = await supabase
+      // Get all feedback submissions - apply reviewer type filter
+      let submissionsQuery = supabase
         .from("feedback_submissions")
         .select(`
           id,
@@ -94,6 +96,12 @@ export function Review360FeedbackAnalytics({
         `)
         .in("review_participant_id", participantIds)
         .eq("status", "submitted");
+      
+      if (reviewerTypeFilter !== "all") {
+        submissionsQuery = submissionsQuery.eq("reviewer_type", reviewerTypeFilter);
+      }
+
+      const { data: submissions } = await submissionsQuery;
 
       if (!submissions?.length) {
         setStats({

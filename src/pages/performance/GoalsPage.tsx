@@ -466,9 +466,9 @@ export default function GoalsPage() {
           </Card>
         </div>
 
-        {/* Analytics Dashboard */}
-        {showAnalytics && goals.length > 0 && (
-          <GoalsAnalyticsDashboard goals={goals} />
+        {/* Analytics Dashboard - uses filtered data */}
+        {showAnalytics && filteredGoals.length > 0 && (
+          <GoalsAnalyticsDashboard goals={filteredGoals} />
         )}
 
         <Tabs value={activeTab} onValueChange={setActiveTab}>
