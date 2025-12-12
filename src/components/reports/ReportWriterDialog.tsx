@@ -15,7 +15,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import { 
   Plus, Trash2, GripVertical, FileText, Table, 
   LayoutTemplate, Settings, Filter, ArrowUpDown, Calculator, Save,
-  Sparkles, ChevronDown, Code
+  Sparkles, ChevronDown, Code, Play, Loader2, AlertCircle, CheckCircle
 } from 'lucide-react';
 import { 
   useReportWriter, 
@@ -28,6 +28,8 @@ import {
   Calculation
 } from '@/hooks/useReportWriter';
 import { ReportAIAssistant } from './ReportAIAssistant';
+import { supabase } from '@/integrations/supabase/client';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 interface ReportWriterDialogProps {
   open: boolean;
@@ -81,6 +83,9 @@ export function ReportWriterDialog({
   const [subReportTemplates, setSubReportTemplates] = useState<ReportTemplate[]>([]);
   const [activeTab, setActiveTab] = useState('general');
   const [aiAssistantOpen, setAiAssistantOpen] = useState(true);
+  const [sqlPreviewData, setSqlPreviewData] = useState<Record<string, unknown>[] | null>(null);
+  const [sqlPreviewError, setSqlPreviewError] = useState<string | null>(null);
+  const [sqlPreviewLoading, setSqlPreviewLoading] = useState(false);
   
   const [template, setTemplate] = useState<Partial<ReportTemplate>>({
     name: '',
@@ -304,6 +309,39 @@ export function ReportWriterDialog({
       module,
       company_id: companyId
     }));
+    // Clear preview when SQL changes
+    setSqlPreviewData(null);
+    setSqlPreviewError(null);
+  };
+
+  const handlePreviewSql = async () => {
+    if (!template.custom_sql?.trim()) {
+      setSqlPreviewError('No SQL query to preview');
+      return;
+    }
+
+    setSqlPreviewLoading(true);
+    setSqlPreviewError(null);
+    setSqlPreviewData(null);
+
+    try {
+      // Clean the SQL - remove trailing semicolons
+      const cleanedSql = template.custom_sql.replace(/;\s*$/, '').trim();
+      
+      const { data, error } = await supabase.rpc('execute_report_sql', {
+        sql_query: cleanedSql
+      });
+
+      if (error) {
+        setSqlPreviewError(error.message);
+      } else {
+        setSqlPreviewData((data || []) as Record<string, unknown>[]);
+      }
+    } catch (err) {
+      setSqlPreviewError(err instanceof Error ? err.message : 'Failed to execute SQL');
+    } finally {
+      setSqlPreviewLoading(false);
+    }
   };
 
   const handleApplyAISuggestions = (suggestions: {
@@ -560,19 +598,85 @@ export function ReportWriterDialog({
 
             <TabsContent value="sql" className="space-y-4 px-1">
               <div className="space-y-4">
-                <div>
-                  <h4 className="font-medium">Custom SQL Query</h4>
-                  <p className="text-sm text-muted-foreground">
-                    For complex reports with aggregations or cross-tabs, use custom SQL. The AI assistant can generate this.
-                  </p>
+                <div className="flex justify-between items-start">
+                  <div>
+                    <h4 className="font-medium">Custom SQL Query</h4>
+                    <p className="text-sm text-muted-foreground">
+                      For complex reports with aggregations or cross-tabs, use custom SQL. The AI assistant can generate this.
+                    </p>
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handlePreviewSql}
+                    disabled={sqlPreviewLoading || !template.custom_sql?.trim()}
+                  >
+                    {sqlPreviewLoading ? (
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    ) : (
+                      <Play className="h-4 w-4 mr-2" />
+                    )}
+                    Preview Data
+                  </Button>
                 </div>
                 <Textarea
                   value={template.custom_sql || ''}
-                  onChange={e => setTemplate(prev => ({ ...prev, custom_sql: e.target.value || null }))}
+                  onChange={e => {
+                    setTemplate(prev => ({ ...prev, custom_sql: e.target.value || null }));
+                    setSqlPreviewData(null);
+                    setSqlPreviewError(null);
+                  }}
                   placeholder="SELECT ... FROM ... GROUP BY ..."
-                  rows={10}
+                  rows={8}
                   className="font-mono text-sm"
                 />
+                
+                {sqlPreviewError && (
+                  <Alert variant="destructive">
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertDescription>{sqlPreviewError}</AlertDescription>
+                  </Alert>
+                )}
+
+                {sqlPreviewData && (
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <CheckCircle className="h-4 w-4 text-green-500" />
+                      Query returned {sqlPreviewData.length} row(s)
+                    </div>
+                    {sqlPreviewData.length > 0 && (
+                      <div className="border rounded-md overflow-auto max-h-48">
+                        <table className="w-full text-sm">
+                          <thead className="bg-muted">
+                            <tr>
+                              {Object.keys(sqlPreviewData[0]).map(col => (
+                                <th key={col} className="px-2 py-1 text-left font-medium border-b">
+                                  {col}
+                                </th>
+                              ))}
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {sqlPreviewData.slice(0, 10).map((row, i) => (
+                              <tr key={i} className="border-b last:border-0">
+                                {Object.values(row).map((val, j) => (
+                                  <td key={j} className="px-2 py-1 border-r last:border-0">
+                                    {val === null ? <span className="text-muted-foreground italic">null</span> : String(val)}
+                                  </td>
+                                ))}
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                        {sqlPreviewData.length > 10 && (
+                          <div className="px-2 py-1 text-xs text-muted-foreground bg-muted">
+                            Showing first 10 of {sqlPreviewData.length} rows
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             </TabsContent>
 
