@@ -53,6 +53,7 @@ import {
   ChevronDown,
   ChevronRight,
   Copy,
+  Upload,
 } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { NavLink } from "react-router-dom";
@@ -60,6 +61,7 @@ import { format } from "date-fns";
 import { JobCompetenciesManager } from "@/components/workforce/JobCompetenciesManager";
 import { JobResponsibilitiesManager } from "@/components/workforce/JobResponsibilitiesManager";
 import { JobGoalsManager } from "@/components/workforce/JobGoalsManager";
+import { BulkJobDataImport } from "@/components/workforce/BulkJobDataImport";
 
 interface Job {
   id: string;
@@ -143,6 +145,9 @@ export default function JobsPage() {
     copyGoals: true,
   });
   const [isCopying, setIsCopying] = useState(false);
+  
+  // Bulk import state
+  const [bulkImportOpen, setBulkImportOpen] = useState(false);
 
   const { logAction } = useAuditLog();
 
@@ -697,10 +702,16 @@ export default function JobsPage() {
               </p>
             </div>
           </div>
-          <Button onClick={() => handleOpenDialog()}>
-            <Plus className="mr-2 h-4 w-4" />
-            Add Job
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" onClick={() => setBulkImportOpen(true)}>
+              <Upload className="mr-2 h-4 w-4" />
+              Bulk Import
+            </Button>
+            <Button onClick={() => handleOpenDialog()}>
+              <Plus className="mr-2 h-4 w-4" />
+              Add Job
+            </Button>
+          </div>
         </div>
 
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
@@ -994,6 +1005,14 @@ export default function JobsPage() {
             </DialogFooter>
           </DialogContent>
         </Dialog>
+
+        {/* Bulk Import Dialog */}
+        <BulkJobDataImport
+          open={bulkImportOpen}
+          onOpenChange={setBulkImportOpen}
+          companyId={selectedCompanyId}
+          onImportComplete={fetchJobs}
+        />
       </div>
     </AppLayout>
   );
