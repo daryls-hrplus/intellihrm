@@ -57,6 +57,9 @@ interface ReviewCycle {
   max_peer_reviewers: number;
   participants_count?: number;
   completion_rate?: number;
+  is_manager_cycle?: boolean;
+  created_by?: string;
+  creator_name?: string;
 }
 
 interface PendingReview {
@@ -84,13 +87,16 @@ const statusColors: Record<string, string> = {
 const tabHelpText: Record<string, string> = {
   "my-reviews": "View and complete feedback reviews assigned to you. Click on a pending review to provide feedback for colleagues, managers, or direct reports.",
   "my-feedback": "See aggregated feedback you've received from peers, managers, and direct reports. View scores and comments to understand your strengths and areas for improvement.",
-  "manage-cycles": "Create and manage 360° review cycles. Configure participants, deadlines, review types, and questions. Track completion rates and export results.",
+  "manage-cycles": "Create and manage 360° review cycles for your direct reports. Track completion rates and results.",
+  "central-cycles": "View and manage organization-wide 360° review cycles created by HR.",
+  "manager-cycles": "View all manager-created review cycles across the organization.",
 };
 
 export default function Review360Page() {
   const { user, company, isAdmin, isHRManager } = useAuth();
   const [activeTab, setActiveTab] = useState("my-reviews");
   const [cycles, setCycles] = useState<ReviewCycle[]>([]);
+  const [managerCycles, setManagerCycles] = useState<ReviewCycle[]>([]);
   const [pendingReviews, setPendingReviews] = useState<PendingReview[]>([]);
   const [myParticipations, setMyParticipations] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -100,6 +106,7 @@ export default function Review360Page() {
   const [questionsManagerOpen, setQuestionsManagerOpen] = useState(false);
   const [peerNominationOpen, setPeerNominationOpen] = useState(false);
   const [selectedParticipant, setSelectedParticipant] = useState<any>(null);
+  const [isCreatingManagerCycle, setIsCreatingManagerCycle] = useState(false);
   
   // Company switcher for admin/HR
   const [companies, setCompanies] = useState<{ id: string; name: string }[]>([]);
@@ -138,6 +145,7 @@ export default function Review360Page() {
     try {
       await Promise.all([
         fetchCycles(),
+        fetchManagerCycles(),
         fetchPendingReviews(),
         fetchMyParticipations(),
       ]);
@@ -147,20 +155,61 @@ export default function Review360Page() {
   };
 
   const fetchCycles = async () => {
-    const { data, error } = await supabase
+    // For admin/HR: fetch central cycles (is_manager_cycle = false)
+    // For managers: fetch only their own manager cycles
+    let query = supabase
       .from("review_cycles")
       .select("*")
       .eq("company_id", selectedCompanyId)
       .order("created_at", { ascending: false });
+
+    if (isAdmin || isHRManager) {
+      // HR/Admin sees central cycles in the main tab
+      query = query.eq("is_manager_cycle", false);
+    } else {
+      // Regular managers see only their own cycles
+      query = query.eq("created_by", user?.id).eq("is_manager_cycle", true);
+    }
+
+    const { data, error } = await query;
 
     if (error) {
       console.error("Error fetching cycles:", error);
       return;
     }
 
-    // Get participant counts
-    const cyclesWithStats = await Promise.all(
-      (data || []).map(async (cycle) => {
+    const cyclesWithStats = await addCycleStats(data || []);
+    setCycles(cyclesWithStats);
+  };
+
+  const fetchManagerCycles = async () => {
+    // Only HR/Admin can see all manager cycles
+    if (!isAdmin && !isHRManager) return;
+
+    const { data, error } = await supabase
+      .from("review_cycles")
+      .select("*, creator:profiles!review_cycles_created_by_fkey(full_name)")
+      .eq("company_id", selectedCompanyId)
+      .eq("is_manager_cycle", true)
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      console.error("Error fetching manager cycles:", error);
+      return;
+    }
+
+    const cyclesWithStats = await addCycleStats(
+      (data || []).map((c: any) => ({
+        ...c,
+        creator_name: c.creator?.full_name || "Unknown",
+      }))
+    );
+    setManagerCycles(cyclesWithStats);
+  };
+
+  const addCycleStats = async (cycleData: any[]) => {
+    return Promise.all(
+      cycleData.map(async (cycle) => {
         const { count: participantCount } = await supabase
           .from("review_participants")
           .select("*", { count: "exact", head: true })
@@ -181,8 +230,6 @@ export default function Review360Page() {
         };
       })
     );
-
-    setCycles(cyclesWithStats);
   };
 
   const fetchPendingReviews = async () => {
@@ -250,13 +297,15 @@ export default function Review360Page() {
     setMyParticipations(data || []);
   };
 
-  const handleCreateCycle = () => {
+  const handleCreateCycle = (isManagerCycle: boolean = false) => {
     setSelectedCycle(null);
+    setIsCreatingManagerCycle(isManagerCycle);
     setCycleDialogOpen(true);
   };
 
   const handleEditCycle = (cycle: ReviewCycle) => {
     setSelectedCycle(cycle);
+    setIsCreatingManagerCycle(cycle.is_manager_cycle || false);
     setCycleDialogOpen(true);
   };
 
@@ -305,9 +354,15 @@ export default function Review360Page() {
               </Select>
             )}
             {(isAdmin || isHRManager) && (
-              <Button onClick={handleCreateCycle}>
+              <Button onClick={() => handleCreateCycle(false)}>
                 <Plus className="mr-2 h-4 w-4" />
-                Create Review Cycle
+                Create Central Cycle
+              </Button>
+            )}
+            {!isAdmin && !isHRManager && (
+              <Button onClick={() => handleCreateCycle(true)}>
+                <Plus className="mr-2 h-4 w-4" />
+                Create Team Cycle
               </Button>
             )}
           </div>
@@ -388,9 +443,37 @@ export default function Review360Page() {
               </Tooltip>
             </TabsTrigger>
             {(isAdmin || isHRManager) && (
+              <>
+                <TabsTrigger value="central-cycles" className="gap-2">
+                  <Building2 className="h-4 w-4" />
+                  Central Cycles
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <HelpCircle className="h-3.5 w-3.5 text-muted-foreground hover:text-foreground cursor-help" />
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom" className="w-72 p-3 text-left whitespace-normal">
+                      <p className="text-sm leading-relaxed">{tabHelpText["central-cycles"]}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TabsTrigger>
+                <TabsTrigger value="manager-cycles" className="gap-2">
+                  <Users className="h-4 w-4" />
+                  Manager Cycles
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <HelpCircle className="h-3.5 w-3.5 text-muted-foreground hover:text-foreground cursor-help" />
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom" className="w-72 p-3 text-left whitespace-normal">
+                      <p className="text-sm leading-relaxed">{tabHelpText["manager-cycles"]}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TabsTrigger>
+              </>
+            )}
+            {!isAdmin && !isHRManager && (
               <TabsTrigger value="manage-cycles" className="gap-2">
                 <Settings className="h-4 w-4" />
-                Manage Cycles
+                My Team Cycles
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <HelpCircle className="h-3.5 w-3.5 text-muted-foreground hover:text-foreground cursor-help" />
@@ -490,20 +573,193 @@ export default function Review360Page() {
             <MyFeedbackSummary participations={myParticipations} />
           </TabsContent>
 
+          {/* Central Cycles Tab - For HR/Admin */}
           {(isAdmin || isHRManager) && (
+            <TabsContent value="central-cycles" className="mt-6">
+              <div className="space-y-4">
+                {cycles.length === 0 ? (
+                  <Card>
+                    <CardContent className="py-12 text-center">
+                      <Building2 className="mx-auto h-12 w-12 text-muted-foreground/50" />
+                      <h3 className="mt-4 font-semibold">No Central Review Cycles</h3>
+                      <p className="text-sm text-muted-foreground mb-4">
+                        Create organization-wide 360° feedback cycles
+                      </p>
+                      <Button onClick={() => handleCreateCycle(false)}>
+                        <Plus className="mr-2 h-4 w-4" />
+                        Create Central Cycle
+                      </Button>
+                    </CardContent>
+                  </Card>
+                ) : (
+                  <div className="space-y-4">
+                    {cycles.map((cycle) => (
+                      <Card key={cycle.id}>
+                        <CardContent className="p-4">
+                          <div className="flex items-center justify-between">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-3">
+                                <h3 className="font-semibold">{cycle.name}</h3>
+                                <Badge className={statusColors[cycle.status]}>
+                                  {cycle.status.replace("_", " ")}
+                                </Badge>
+                              </div>
+                              <p className="text-sm text-muted-foreground mt-1">
+                                {cycle.description}
+                              </p>
+                              <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
+                                <span className="flex items-center gap-1">
+                                  <Calendar className="h-4 w-4" />
+                                  {format(new Date(cycle.start_date), "MMM d")} - {format(new Date(cycle.end_date), "MMM d, yyyy")}
+                                </span>
+                                <span className="flex items-center gap-1">
+                                  <Users className="h-4 w-4" />
+                                  {cycle.participants_count} participants
+                                </span>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-4">
+                              <div className="text-right">
+                                <p className="text-sm text-muted-foreground">Completion</p>
+                                <div className="flex items-center gap-2">
+                                  <Progress value={cycle.completion_rate} className="w-24 h-2" />
+                                  <span className="text-sm font-medium">{cycle.completion_rate}%</span>
+                                </div>
+                              </div>
+                              <div className="flex gap-2">
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => {
+                                    setSelectedCycle(cycle);
+                                    setParticipantsManagerOpen(true);
+                                  }}
+                                  title="Manage Participants"
+                                >
+                                  <Users className="h-4 w-4" />
+                                </Button>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => {
+                                    setSelectedCycle(cycle);
+                                    setQuestionsManagerOpen(true);
+                                  }}
+                                  title="Configure Questions"
+                                >
+                                  <MessageSquare className="h-4 w-4" />
+                                </Button>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => handleEditCycle(cycle)}
+                                  title="Edit Cycle"
+                                >
+                                  <Settings className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </TabsContent>
+          )}
+
+          {/* Manager Cycles Tab - For HR/Admin to view all manager-created cycles */}
+          {(isAdmin || isHRManager) && (
+            <TabsContent value="manager-cycles" className="mt-6">
+              <div className="space-y-4">
+                {managerCycles.length === 0 ? (
+                  <Card>
+                    <CardContent className="py-12 text-center">
+                      <Users className="mx-auto h-12 w-12 text-muted-foreground/50" />
+                      <h3 className="mt-4 font-semibold">No Manager Review Cycles</h3>
+                      <p className="text-sm text-muted-foreground">
+                        Managers have not created any team-specific review cycles yet
+                      </p>
+                    </CardContent>
+                  </Card>
+                ) : (
+                  <div className="space-y-4">
+                    {managerCycles.map((cycle) => (
+                      <Card key={cycle.id}>
+                        <CardContent className="p-4">
+                          <div className="flex items-center justify-between">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-3">
+                                <h3 className="font-semibold">{cycle.name}</h3>
+                                <Badge className={statusColors[cycle.status]}>
+                                  {cycle.status.replace("_", " ")}
+                                </Badge>
+                                <Badge variant="outline" className="text-xs">
+                                  By: {cycle.creator_name}
+                                </Badge>
+                              </div>
+                              <p className="text-sm text-muted-foreground mt-1">
+                                {cycle.description}
+                              </p>
+                              <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
+                                <span className="flex items-center gap-1">
+                                  <Calendar className="h-4 w-4" />
+                                  {format(new Date(cycle.start_date), "MMM d")} - {format(new Date(cycle.end_date), "MMM d, yyyy")}
+                                </span>
+                                <span className="flex items-center gap-1">
+                                  <Users className="h-4 w-4" />
+                                  {cycle.participants_count} participants
+                                </span>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-4">
+                              <div className="text-right">
+                                <p className="text-sm text-muted-foreground">Completion</p>
+                                <div className="flex items-center gap-2">
+                                  <Progress value={cycle.completion_rate} className="w-24 h-2" />
+                                  <span className="text-sm font-medium">{cycle.completion_rate}%</span>
+                                </div>
+                              </div>
+                              <div className="flex gap-2">
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => {
+                                    setSelectedCycle(cycle);
+                                    setParticipantsManagerOpen(true);
+                                  }}
+                                  title="View Participants"
+                                >
+                                  <Eye className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </TabsContent>
+          )}
+
+          {/* My Team Cycles Tab - For regular managers */}
+          {!isAdmin && !isHRManager && (
             <TabsContent value="manage-cycles" className="mt-6">
               <div className="space-y-4">
                 {cycles.length === 0 ? (
                   <Card>
                     <CardContent className="py-12 text-center">
                       <Users className="mx-auto h-12 w-12 text-muted-foreground/50" />
-                      <h3 className="mt-4 font-semibold">No Review Cycles</h3>
+                      <h3 className="mt-4 font-semibold">No Team Review Cycles</h3>
                       <p className="text-sm text-muted-foreground mb-4">
-                        Create your first 360° feedback cycle to get started
+                        Create a 360° feedback cycle for your direct reports
                       </p>
-                      <Button onClick={handleCreateCycle}>
+                      <Button onClick={() => handleCreateCycle(true)}>
                         <Plus className="mr-2 h-4 w-4" />
-                        Create Review Cycle
+                        Create Team Cycle
                       </Button>
                     </CardContent>
                   </Card>
@@ -592,6 +848,7 @@ export default function Review360Page() {
         onOpenChange={setCycleDialogOpen}
         cycle={selectedCycle}
         companyId={selectedCompanyId}
+        isManagerCycle={isCreatingManagerCycle}
         onSuccess={() => {
           fetchData();
           setCycleDialogOpen(false);

@@ -41,6 +41,7 @@ interface ReviewCycleDialogProps {
   cycle: ReviewCycle | null;
   companyId: string | undefined;
   onSuccess: () => void;
+  isManagerCycle?: boolean;
 }
 
 export function ReviewCycleDialog({
@@ -49,6 +50,7 @@ export function ReviewCycleDialog({
   cycle,
   companyId,
   onSuccess,
+  isManagerCycle = false,
 }: ReviewCycleDialogProps) {
   const { user } = useAuth();
   const [saving, setSaving] = useState(false);
@@ -117,6 +119,7 @@ export function ReviewCycleDialog({
         peer_nomination_deadline: formData.peer_nomination_deadline || null,
         feedback_deadline: formData.feedback_deadline || null,
         created_by: user.id,
+        is_manager_cycle: isManagerCycle,
       };
 
       if (cycle) {
