@@ -12,12 +12,14 @@ import {
   Calendar,
   Search,
   MessageSquare,
+  UserCircle,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { format } from "date-fns";
 import { GoalProgressDialog } from "@/components/performance/GoalProgressDialog";
 import { GoalCommentsDialog } from "@/components/performance/GoalCommentsDialog";
+import { ContactManagerDialog } from "@/components/performance/ContactManagerDialog";
 
 type GoalStatus = "draft" | "active" | "in_progress" | "completed" | "cancelled";
 
@@ -51,6 +53,7 @@ export default function MyGoalsPage() {
   const [selectedGoal, setSelectedGoal] = useState<Goal | null>(null);
   const [progressDialogOpen, setProgressDialogOpen] = useState(false);
   const [commentsDialogOpen, setCommentsDialogOpen] = useState(false);
+  const [contactManagerOpen, setContactManagerOpen] = useState(false);
 
   const fetchGoals = async () => {
     if (!user?.id) return;
@@ -102,6 +105,11 @@ export default function MyGoalsPage() {
   const handleViewComments = (goal: Goal) => {
     setSelectedGoal(goal);
     setCommentsDialogOpen(true);
+  };
+
+  const handleContactManager = (goal: Goal) => {
+    setSelectedGoal(goal);
+    setContactManagerOpen(true);
   };
 
   return (
@@ -220,7 +228,7 @@ export default function MyGoalsPage() {
                         </div>
                       </div>
 
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 flex-wrap">
                         <Button
                           variant="ghost"
                           size="sm"
@@ -228,6 +236,14 @@ export default function MyGoalsPage() {
                         >
                           <MessageSquare className="h-4 w-4 mr-1" />
                           Comments
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleContactManager(goal)}
+                        >
+                          <UserCircle className="h-4 w-4 mr-1" />
+                          Contact Manager
                         </Button>
                         {isEditable && (
                           <Button
@@ -269,6 +285,11 @@ export default function MyGoalsPage() {
               onOpenChange={setCommentsDialogOpen}
               goalId={selectedGoal.id}
               goalTitle={selectedGoal.title}
+            />
+            <ContactManagerDialog
+              open={contactManagerOpen}
+              onOpenChange={setContactManagerOpen}
+              goal={selectedGoal}
             />
           </>
         )}
