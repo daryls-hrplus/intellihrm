@@ -14,6 +14,7 @@ import {
   FileSignature,
   CheckSquare,
   UserCheck,
+  Rocket,
 } from "lucide-react";
 
 const essModules = [
@@ -93,6 +94,13 @@ const essModules = [
     href: "/ess/letters",
     icon: FileSignature,
     color: "bg-cyan-500/10 text-cyan-600",
+  },
+  {
+    title: "My Onboarding",
+    description: "Complete your onboarding tasks and checklist",
+    href: "/ess/onboarding",
+    icon: Rocket,
+    color: "bg-teal-500/10 text-teal-600",
   },
   {
     title: "Notifications",

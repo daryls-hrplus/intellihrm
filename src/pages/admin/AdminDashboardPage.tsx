@@ -35,6 +35,7 @@ import {
   FileText as FileTextIcon,
   GitBranch,
   List,
+  Rocket,
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 
@@ -171,6 +172,13 @@ const getAdminModules = (t: (key: string) => string) => [
     href: "/admin/lookup-values",
     icon: List,
     color: "bg-lime-500/10 text-lime-600",
+  },
+  {
+    title: "Employee Onboarding",
+    description: "Manage onboarding templates and track new employee onboarding",
+    href: "/admin/onboarding",
+    icon: Rocket,
+    color: "bg-emerald-500/10 text-emerald-600",
   },
   {
     title: t("admin.modules.territories.title"),
