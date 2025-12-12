@@ -125,6 +125,7 @@ export default function JobsPage() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
   const [formData, setFormData] = useState(emptyForm);
+  const [defaultTab, setDefaultTab] = useState<"details" | "competencies">("details");
 
   const { logAction } = useAuditLog();
 
@@ -193,7 +194,8 @@ export default function JobsPage() {
     }
   };
 
-  const handleOpenDialog = (job?: Job) => {
+  const handleOpenDialog = (job?: Job, tab: "details" | "competencies" = "details") => {
+    setDefaultTab(tab);
     if (job) {
       setSelectedJob(job);
       setFormData({
@@ -593,7 +595,11 @@ export default function JobsPage() {
                 </TableRow>
               ) : (
                 filteredJobs.map((job) => (
-                  <TableRow key={job.id}>
+                  <TableRow 
+                    key={job.id} 
+                    className="cursor-pointer hover:bg-muted/50"
+                    onClick={() => handleOpenDialog(job, "competencies")}
+                  >
                     <TableCell className="font-medium">{job.name}</TableCell>
                     <TableCell>{job.code}</TableCell>
                     <TableCell>{job.job_families?.name || "-"}</TableCell>
@@ -605,12 +611,12 @@ export default function JobsPage() {
                         {job.is_active ? "Active" : "Inactive"}
                       </Badge>
                     </TableCell>
-                    <TableCell>
+                    <TableCell onClick={(e) => e.stopPropagation()}>
                       <div className="flex items-center gap-2">
                         <Button
                           variant="ghost"
                           size="icon"
-                          onClick={() => handleOpenDialog(job)}
+                          onClick={() => handleOpenDialog(job, "details")}
                         >
                           <Pencil className="h-4 w-4" />
                         </Button>
@@ -643,7 +649,7 @@ export default function JobsPage() {
             </DialogHeader>
             
             {selectedJob ? (
-              <Tabs defaultValue="details" className="w-full">
+              <Tabs defaultValue={defaultTab} key={defaultTab} className="w-full">
                 <TabsList className="grid w-full grid-cols-2">
                   <TabsTrigger value="details">Job Details</TabsTrigger>
                   <TabsTrigger value="competencies">Competencies</TabsTrigger>
