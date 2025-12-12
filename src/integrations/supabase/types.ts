@@ -2361,6 +2361,206 @@ export type Database = {
           },
         ]
       }
+      goal_alignments: {
+        Row: {
+          alignment_percentage: number | null
+          child_goal_id: string
+          created_at: string
+          id: string
+          notes: string | null
+          parent_goal_id: string
+        }
+        Insert: {
+          alignment_percentage?: number | null
+          child_goal_id: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+          parent_goal_id: string
+        }
+        Update: {
+          alignment_percentage?: number | null
+          child_goal_id?: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+          parent_goal_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "goal_alignments_child_goal_id_fkey"
+            columns: ["child_goal_id"]
+            isOneToOne: false
+            referencedRelation: "performance_goals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "goal_alignments_parent_goal_id_fkey"
+            columns: ["parent_goal_id"]
+            isOneToOne: false
+            referencedRelation: "performance_goals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      goal_comments: {
+        Row: {
+          comment: string
+          comment_type: string
+          created_at: string
+          goal_id: string
+          id: string
+          is_private: boolean | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          comment: string
+          comment_type?: string
+          created_at?: string
+          goal_id: string
+          id?: string
+          is_private?: boolean | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          comment?: string
+          comment_type?: string
+          created_at?: string
+          goal_id?: string
+          id?: string
+          is_private?: boolean | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "goal_comments_goal_id_fkey"
+            columns: ["goal_id"]
+            isOneToOne: false
+            referencedRelation: "performance_goals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "goal_comments_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      goal_reviews: {
+        Row: {
+          created_at: string
+          employee_comments: string | null
+          goal_id: string
+          id: string
+          manager_comments: string | null
+          progress_at_review: number | null
+          rating: number | null
+          review_date: string
+          review_type: string
+          reviewer_id: string
+          status_at_review: Database["public"]["Enums"]["goal_status"] | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          employee_comments?: string | null
+          goal_id: string
+          id?: string
+          manager_comments?: string | null
+          progress_at_review?: number | null
+          rating?: number | null
+          review_date?: string
+          review_type?: string
+          reviewer_id: string
+          status_at_review?: Database["public"]["Enums"]["goal_status"] | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          employee_comments?: string | null
+          goal_id?: string
+          id?: string
+          manager_comments?: string | null
+          progress_at_review?: number | null
+          rating?: number | null
+          review_date?: string
+          review_type?: string
+          reviewer_id?: string
+          status_at_review?: Database["public"]["Enums"]["goal_status"] | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "goal_reviews_goal_id_fkey"
+            columns: ["goal_id"]
+            isOneToOne: false
+            referencedRelation: "performance_goals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "goal_reviews_reviewer_id_fkey"
+            columns: ["reviewer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      goal_templates: {
+        Row: {
+          category: string | null
+          company_id: string | null
+          created_at: string
+          default_weighting: number | null
+          description: string | null
+          goal_type: Database["public"]["Enums"]["goal_type"]
+          id: string
+          is_active: boolean
+          name: string
+          suggested_metrics: Json | null
+          updated_at: string
+        }
+        Insert: {
+          category?: string | null
+          company_id?: string | null
+          created_at?: string
+          default_weighting?: number | null
+          description?: string | null
+          goal_type?: Database["public"]["Enums"]["goal_type"]
+          id?: string
+          is_active?: boolean
+          name: string
+          suggested_metrics?: Json | null
+          updated_at?: string
+        }
+        Update: {
+          category?: string | null
+          company_id?: string | null
+          created_at?: string
+          default_weighting?: number | null
+          description?: string | null
+          goal_type?: Database["public"]["Enums"]["goal_type"]
+          id?: string
+          is_active?: boolean
+          name?: string
+          suggested_metrics?: Json | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "goal_templates_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       governance_bodies: {
         Row: {
           body_type: string
@@ -4081,6 +4281,167 @@ export type Database = {
             columns: ["proration_method_id"]
             isOneToOne: false
             referencedRelation: "lookup_values"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      performance_goals: {
+        Row: {
+          achievable: string | null
+          assigned_by: string | null
+          category: string | null
+          company_id: string
+          completed_date: string | null
+          created_at: string
+          current_value: number | null
+          department_id: string | null
+          description: string | null
+          due_date: string | null
+          employee_id: string | null
+          final_score: number | null
+          goal_level: Database["public"]["Enums"]["goal_level"]
+          goal_source: Database["public"]["Enums"]["goal_source"]
+          goal_type: Database["public"]["Enums"]["goal_type"]
+          id: string
+          is_objective: boolean | null
+          manager_rating: number | null
+          measurable: string | null
+          objective_id: string | null
+          parent_goal_id: string | null
+          progress_percentage: number | null
+          relevant: string | null
+          self_rating: number | null
+          specific: string | null
+          start_date: string
+          status: Database["public"]["Enums"]["goal_status"]
+          target_value: number | null
+          template_id: string | null
+          time_bound: string | null
+          title: string
+          unit_of_measure: string | null
+          updated_at: string
+          weighting: number | null
+        }
+        Insert: {
+          achievable?: string | null
+          assigned_by?: string | null
+          category?: string | null
+          company_id: string
+          completed_date?: string | null
+          created_at?: string
+          current_value?: number | null
+          department_id?: string | null
+          description?: string | null
+          due_date?: string | null
+          employee_id?: string | null
+          final_score?: number | null
+          goal_level?: Database["public"]["Enums"]["goal_level"]
+          goal_source?: Database["public"]["Enums"]["goal_source"]
+          goal_type?: Database["public"]["Enums"]["goal_type"]
+          id?: string
+          is_objective?: boolean | null
+          manager_rating?: number | null
+          measurable?: string | null
+          objective_id?: string | null
+          parent_goal_id?: string | null
+          progress_percentage?: number | null
+          relevant?: string | null
+          self_rating?: number | null
+          specific?: string | null
+          start_date?: string
+          status?: Database["public"]["Enums"]["goal_status"]
+          target_value?: number | null
+          template_id?: string | null
+          time_bound?: string | null
+          title: string
+          unit_of_measure?: string | null
+          updated_at?: string
+          weighting?: number | null
+        }
+        Update: {
+          achievable?: string | null
+          assigned_by?: string | null
+          category?: string | null
+          company_id?: string
+          completed_date?: string | null
+          created_at?: string
+          current_value?: number | null
+          department_id?: string | null
+          description?: string | null
+          due_date?: string | null
+          employee_id?: string | null
+          final_score?: number | null
+          goal_level?: Database["public"]["Enums"]["goal_level"]
+          goal_source?: Database["public"]["Enums"]["goal_source"]
+          goal_type?: Database["public"]["Enums"]["goal_type"]
+          id?: string
+          is_objective?: boolean | null
+          manager_rating?: number | null
+          measurable?: string | null
+          objective_id?: string | null
+          parent_goal_id?: string | null
+          progress_percentage?: number | null
+          relevant?: string | null
+          self_rating?: number | null
+          specific?: string | null
+          start_date?: string
+          status?: Database["public"]["Enums"]["goal_status"]
+          target_value?: number | null
+          template_id?: string | null
+          time_bound?: string | null
+          title?: string
+          unit_of_measure?: string | null
+          updated_at?: string
+          weighting?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "performance_goals_assigned_by_fkey"
+            columns: ["assigned_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "performance_goals_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "performance_goals_department_id_fkey"
+            columns: ["department_id"]
+            isOneToOne: false
+            referencedRelation: "departments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "performance_goals_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "performance_goals_objective_id_fkey"
+            columns: ["objective_id"]
+            isOneToOne: false
+            referencedRelation: "performance_goals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "performance_goals_parent_goal_id_fkey"
+            columns: ["parent_goal_id"]
+            isOneToOne: false
+            referencedRelation: "performance_goals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "performance_goals_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "goal_templates"
             referencedColumns: ["id"]
           },
         ]
@@ -6122,6 +6483,16 @@ export type Database = {
         | "EXPORT"
         | "LOGIN"
         | "LOGOUT"
+      goal_level: "company" | "department" | "team" | "individual"
+      goal_source: "cascaded" | "manager_assigned" | "self_created"
+      goal_status:
+        | "draft"
+        | "active"
+        | "in_progress"
+        | "completed"
+        | "cancelled"
+        | "overdue"
+      goal_type: "okr_objective" | "okr_key_result" | "smart_goal"
       lookup_category:
         | "employee_status"
         | "termination_reason"
@@ -6304,6 +6675,17 @@ export const Constants = {
         "LOGIN",
         "LOGOUT",
       ],
+      goal_level: ["company", "department", "team", "individual"],
+      goal_source: ["cascaded", "manager_assigned", "self_created"],
+      goal_status: [
+        "draft",
+        "active",
+        "in_progress",
+        "completed",
+        "cancelled",
+        "overdue",
+      ],
+      goal_type: ["okr_objective", "okr_key_result", "smart_goal"],
       lookup_category: [
         "employee_status",
         "termination_reason",
