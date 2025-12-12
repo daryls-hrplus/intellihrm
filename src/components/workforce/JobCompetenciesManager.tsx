@@ -174,9 +174,20 @@ export function JobCompetenciesManager({ jobId, companyId }: JobCompetenciesMana
   // Calculate total weighting for competencies that overlap with the new entry's date range
   const calculateOverlappingWeight = (
     newStartDate: string,
-    newEndDate: string | null,
-    excludeCompetencyId?: string
+    newEndDate: string | null
   ): number => {
+    console.log("DEBUG calculateOverlappingWeight:", { 
+      newStartDate, 
+      newEndDate, 
+      jobCompetenciesCount: jobCompetencies.length,
+      jobCompetencies: jobCompetencies.map(jc => ({ 
+        id: jc.id, 
+        start_date: jc.start_date, 
+        end_date: jc.end_date, 
+        weighting: jc.weighting 
+      }))
+    });
+
     // Group competencies by competency_id
     const competencyGroups = new Map<string, JobCompetency[]>();
     for (const jc of jobCompetencies) {
@@ -190,9 +201,11 @@ export function JobCompetenciesManager({ jobId, companyId }: JobCompetenciesMana
     // For each unique competency, only count the weight if there's an overlapping entry
     for (const [compId, entries] of competencyGroups) {
       // Find entries that overlap with the new date range
-      const overlappingEntries = entries.filter((jc) =>
-        datesOverlap(newStartDate, newEndDate, jc.start_date, jc.end_date)
-      );
+      const overlappingEntries = entries.filter((jc) => {
+        const overlaps = datesOverlap(newStartDate, newEndDate, jc.start_date, jc.end_date);
+        console.log("DEBUG overlap check:", { newStartDate, newEndDate, jcStart: jc.start_date, jcEnd: jc.end_date, overlaps });
+        return overlaps;
+      });
 
       if (overlappingEntries.length > 0) {
         // Take the max weight from overlapping entries (they shouldn't overlap with each other)
@@ -201,6 +214,7 @@ export function JobCompetenciesManager({ jobId, companyId }: JobCompetenciesMana
       }
     }
 
+    console.log("DEBUG totalWeight:", totalWeight);
     return totalWeight;
   };
 
