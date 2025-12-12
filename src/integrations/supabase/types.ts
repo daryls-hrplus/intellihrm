@@ -466,6 +466,106 @@ export type Database = {
           },
         ]
       }
+      competency_gaps: {
+        Row: {
+          action_plan: string | null
+          competency_id: string
+          created_at: string
+          created_by: string | null
+          current_level_id: string | null
+          employee_id: string
+          gap_score: number | null
+          id: string
+          job_id: string | null
+          notes: string | null
+          priority: string | null
+          required_level_id: string | null
+          required_weighting: number | null
+          status: string
+          target_date: string | null
+          updated_at: string
+        }
+        Insert: {
+          action_plan?: string | null
+          competency_id: string
+          created_at?: string
+          created_by?: string | null
+          current_level_id?: string | null
+          employee_id: string
+          gap_score?: number | null
+          id?: string
+          job_id?: string | null
+          notes?: string | null
+          priority?: string | null
+          required_level_id?: string | null
+          required_weighting?: number | null
+          status?: string
+          target_date?: string | null
+          updated_at?: string
+        }
+        Update: {
+          action_plan?: string | null
+          competency_id?: string
+          created_at?: string
+          created_by?: string | null
+          current_level_id?: string | null
+          employee_id?: string
+          gap_score?: number | null
+          id?: string
+          job_id?: string | null
+          notes?: string | null
+          priority?: string | null
+          required_level_id?: string | null
+          required_weighting?: number | null
+          status?: string
+          target_date?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "competency_gaps_competency_id_fkey"
+            columns: ["competency_id"]
+            isOneToOne: false
+            referencedRelation: "competencies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "competency_gaps_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "competency_gaps_current_level_id_fkey"
+            columns: ["current_level_id"]
+            isOneToOne: false
+            referencedRelation: "competency_levels"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "competency_gaps_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "competency_gaps_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "competency_gaps_required_level_id_fkey"
+            columns: ["required_level_id"]
+            isOneToOne: false
+            referencedRelation: "competency_levels"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       competency_levels: {
         Row: {
           code: string
