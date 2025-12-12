@@ -193,7 +193,7 @@ export default function Review360Page() {
 
     const { data, error } = await supabase
       .from("review_cycles")
-      .select("*, creator:profiles!review_cycles_created_by_fkey(full_name)")
+      .select("*")
       .eq("company_id", selectedCompanyId)
       .eq("is_manager_cycle", true)
       .order("created_at", { ascending: false });
@@ -203,12 +203,23 @@ export default function Review360Page() {
       return;
     }
 
-    const cyclesWithStats = await addCycleStats(
-      (data || []).map((c: any) => ({
-        ...c,
-        creator_name: c.creator?.full_name || "Unknown",
-      }))
+    // Fetch creator names separately
+    const cyclesWithCreators = await Promise.all(
+      (data || []).map(async (cycle: any) => {
+        let creatorName = "Unknown";
+        if (cycle.created_by) {
+          const { data: profile } = await supabase
+            .from("profiles")
+            .select("full_name")
+            .eq("id", cycle.created_by)
+            .maybeSingle();
+          creatorName = profile?.full_name || "Unknown";
+        }
+        return { ...cycle, creator_name: creatorName };
+      })
     );
+
+    const cyclesWithStats = await addCycleStats(cyclesWithCreators);
     setManagerCycles(cyclesWithStats);
   };
 
