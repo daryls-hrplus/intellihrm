@@ -195,35 +195,59 @@ export default function CompetencyGapAnalysisPage() {
   const fetchEmployees = async (departmentId: string) => {
     setIsLoadingEmployees(true);
     try {
+      // First get positions in the department
+      const { data: posData, error: posError } = await supabase
+        .from("positions")
+        .select("id, title, department_id, job_family_id")
+        .eq("department_id", departmentId)
+        .eq("is_active", true);
+
+      if (posError) throw posError;
+
+      const positionIds = (posData || []).map(p => p.id);
+
+      if (positionIds.length === 0) {
+        setEmployees([]);
+        setIsLoadingEmployees(false);
+        return;
+      }
+
+      // Then get employee positions for those positions
       const { data, error } = await supabase
         .from("employee_positions")
         .select(`
           employee_id,
           position_id,
-          profiles:employee_id (id, full_name, email),
-          positions:position_id (id, title, job_id, department_id)
+          profiles:employee_id (id, full_name, email)
         `)
+        .in("position_id", positionIds)
         .eq("is_active", true);
 
       if (error) throw error;
 
+      // Build a lookup for position data
+      const posLookup = new Map((posData || []).map(p => [p.id, p]));
+
       const mapped: EmployeePosition[] = (data || [])
-        .filter((ep: any) => ep.profiles && ep.positions && ep.positions.department_id === departmentId)
-        .map((ep: any) => ({
-          employee_id: ep.employee_id,
-          position_id: ep.position_id,
-          employee: {
-            id: ep.profiles.id,
-            full_name: ep.profiles.full_name || ep.profiles.email,
-            email: ep.profiles.email,
-          },
-          position: {
-            id: ep.positions.id,
-            title: ep.positions.title,
-            job_id: ep.positions.job_id,
-            department_id: ep.positions.department_id,
-          },
-        }));
+        .filter((ep: any) => ep.profiles)
+        .map((ep: any) => {
+          const pos = posLookup.get(ep.position_id);
+          return {
+            employee_id: ep.employee_id,
+            position_id: ep.position_id,
+            employee: {
+              id: ep.profiles.id,
+              full_name: ep.profiles.full_name || ep.profiles.email,
+              email: ep.profiles.email,
+            },
+            position: {
+              id: ep.position_id,
+              title: pos?.title || "Unknown",
+              job_id: null, // Will need job linking via job_family
+              department_id: pos?.department_id || null,
+            },
+          };
+        });
 
       // Remove duplicates by employee_id
       const unique = mapped.filter(
