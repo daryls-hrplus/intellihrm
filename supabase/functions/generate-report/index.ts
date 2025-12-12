@@ -123,18 +123,8 @@ serve(async (req) => {
       selectedFields = availableFields.map(f => f.name);
     }
 
-    // Filter to only valid DB columns
-    const validFields = selectedFields.filter(f => 
-      availableFields.some(af => af.name === f)
-    );
-
-    console.log('Selected fields:', validFields);
-
-    // Build select query with only valid fields
-    const selectClause = validFields.length > 0 ? validFields.join(',') : '*';
-    
-    // Fetch data from the base table
-    let query = supabase.from(dataSource.base_table).select(selectClause);
+    // Fetch data from the base table - select all columns, we'll filter to requested ones after
+    let query = supabase.from(dataSource.base_table).select('*');
 
     // Apply parameter filters if applicable
     if (parameters.report_year) {
@@ -168,7 +158,25 @@ serve(async (req) => {
     const rowCount = reportData?.length || 0;
     console.log(`Fetched ${rowCount} rows for report`);
 
-    // Build field labels for output
+    // Determine actual fields present in data and align with requested fields
+    const actualFields = rowCount > 0
+      ? Object.keys((reportData![0] as Record<string, unknown>))
+      : [];
+
+    let validFields: string[];
+    if (selectedFields.length > 0) {
+      validFields = selectedFields.filter(f => actualFields.includes(f));
+      // Fallback to all actual fields if none of the requested ones exist
+      if (validFields.length === 0) {
+        validFields = actualFields;
+      }
+    } else {
+      validFields = actualFields;
+    }
+
+    console.log('Selected fields after validation:', validFields);
+
+    // Build field labels for output based on valid fields
     const fieldLabels: Array<{ name: string; label: string }> = [];
     for (const fieldName of validFields) {
       const fieldDef = availableFields.find(f => f.name === fieldName);
