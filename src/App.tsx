@@ -108,6 +108,7 @@ import TimeAttendanceDashboardPage from "./pages/time-attendance/TimeAttendanceD
 // ESS & MSS pages
 import EmployeeSelfServicePage from "./pages/ess/EmployeeSelfServicePage";
 import MyLettersPage from "./pages/ess/MyLettersPage";
+import MyGoalsPage from "./pages/ess/MyGoalsPage";
 import ManagerSelfServicePage from "./pages/mss/ManagerSelfServicePage";
 
 // Workflow pages
@@ -165,6 +166,14 @@ const App = () => (
               element={
                 <ProtectedRoute moduleCode="ess">
                   <MyLettersPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/ess/goals"
+              element={
+                <ProtectedRoute moduleCode="ess">
+                  <MyGoalsPage />
                 </ProtectedRoute>
               }
             />
