@@ -22,7 +22,7 @@ const performanceModules = [
   {
     title: "360° Feedback",
     description: "Multi-source feedback collection",
-    href: "/performance/360-feedback",
+    href: "/performance/360",
     icon: MessageSquare,
     color: "bg-info/10 text-info",
   },
