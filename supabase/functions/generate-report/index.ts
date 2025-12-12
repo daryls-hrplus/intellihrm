@@ -100,14 +100,12 @@ serve(async (req) => {
       const year = Number(parameters.report_year);
       if (!Number.isNaN(year)) {
         const fields = (dataSource.available_fields || []) as Array<{ name: string }>;
-        const hasHireDate = fields.some((f) => f.name === 'hire_date');
         const hasCreatedAt = fields.some((f) => f.name === 'created_at');
         const startOfYear = `${year}-01-01`;
         const endOfYear = `${year}-12-31`;
 
-        if (hasHireDate) {
-          query = query.gte('hire_date', startOfYear).lte('hire_date', endOfYear);
-        } else if (hasCreatedAt) {
+        // Only filter when we know a matching date column exists; avoid referencing non-existent columns
+        if (hasCreatedAt) {
           query = query.gte('created_at', startOfYear).lte('created_at', endOfYear);
         }
       }
