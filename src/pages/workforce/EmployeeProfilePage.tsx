@@ -69,6 +69,8 @@ interface EmployeeProfile {
   avatar_url: string | null;
   timezone: string | null;
   preferred_language: string | null;
+  date_format: string | null;
+  time_format: string | null;
   created_at: string;
   positions: {
     id: string;
@@ -101,7 +103,7 @@ export default function EmployeeProfilePage() {
       // Fetch profile
       const { data: profile, error: profileError } = await supabase
         .from('profiles')
-        .select('id, full_name, email, avatar_url, timezone, preferred_language, created_at')
+        .select('id, full_name, email, avatar_url, timezone, preferred_language, date_format, time_format, created_at')
         .eq('id', employeeId)
         .maybeSingle();
 
@@ -150,6 +152,8 @@ export default function EmployeeProfilePage() {
         avatar_url: profile.avatar_url,
         timezone: profile.timezone,
         preferred_language: profile.preferred_language,
+        date_format: profile.date_format,
+        time_format: profile.time_format,
         created_at: profile.created_at,
         positions: employeePositions,
       });
