@@ -1,6 +1,8 @@
 import { AppLayout } from "@/components/layout/AppLayout";
 import { NavLink } from "react-router-dom";
 import { ModuleReportsButton } from "@/components/reports/ModuleReportsButton";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import {
   Gift,
   Heart,
@@ -20,6 +22,7 @@ import {
   Scale,
   Calculator,
   Building2,
+  Loader2,
 } from "lucide-react";
 
 const benefitsModules = [
@@ -139,12 +142,12 @@ const complianceModules = [
   },
 ];
 
-const statCards = [
-  { label: "Active Plans", value: 4, icon: CheckCircle, color: "bg-success/10 text-success" },
-  { label: "Enrolled Users", value: 142, icon: Users, color: "bg-primary/10 text-primary" },
-  { label: "Health Plans", value: 3, icon: Stethoscope, color: "bg-info/10 text-info" },
-  { label: "Pending Claims", value: 12, icon: FileText, color: "bg-warning/10 text-warning" },
-];
+interface DashboardStats {
+  activePlans: number;
+  enrolledUsers: number;
+  healthPlans: number;
+  pendingClaims: number;
+}
 
 function ModuleSection({ title, modules, startIndex }: { title: string; modules: typeof benefitsModules; startIndex: number }) {
   return (
@@ -181,6 +184,76 @@ function ModuleSection({ title, modules, startIndex }: { title: string; modules:
 }
 
 export default function BenefitsDashboardPage() {
+  const [stats, setStats] = useState<DashboardStats>({
+    activePlans: 0,
+    enrolledUsers: 0,
+    healthPlans: 0,
+    pendingClaims: 0,
+  });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        // Fetch active plans count
+        const { count: activePlansCount } = await supabase
+          .from("benefit_plans")
+          .select("*", { count: "exact", head: true })
+          .eq("is_active", true);
+
+        // Fetch active enrollments count (unique employees)
+        const { data: enrollments } = await supabase
+          .from("benefit_enrollments")
+          .select("employee_id")
+          .eq("status", "active");
+        const uniqueEnrolledUsers = new Set(enrollments?.map(e => e.employee_id) || []).size;
+
+        // Fetch health plans count (plans with health-related categories)
+        const { data: healthCategories } = await supabase
+          .from("benefit_categories")
+          .select("id")
+          .in("category_type", ["health", "medical", "dental", "vision"]);
+        
+        const healthCategoryIds = healthCategories?.map(c => c.id) || [];
+        let healthPlansCount = 0;
+        if (healthCategoryIds.length > 0) {
+          const { count } = await supabase
+            .from("benefit_plans")
+            .select("*", { count: "exact", head: true })
+            .eq("is_active", true)
+            .in("category_id", healthCategoryIds);
+          healthPlansCount = count || 0;
+        }
+
+        // Fetch pending claims count
+        const { count: pendingClaimsCount } = await supabase
+          .from("benefit_claims")
+          .select("*", { count: "exact", head: true })
+          .eq("status", "submitted");
+
+        setStats({
+          activePlans: activePlansCount || 0,
+          enrolledUsers: uniqueEnrolledUsers,
+          healthPlans: healthPlansCount,
+          pendingClaims: pendingClaimsCount || 0,
+        });
+      } catch (error) {
+        console.error("Error fetching benefits stats:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchStats();
+  }, []);
+
+  const statCards = [
+    { label: "Active Plans", value: stats.activePlans, icon: CheckCircle, color: "bg-success/10 text-success" },
+    { label: "Enrolled Users", value: stats.enrolledUsers, icon: Users, color: "bg-primary/10 text-primary" },
+    { label: "Health Plans", value: stats.healthPlans, icon: Stethoscope, color: "bg-info/10 text-info" },
+    { label: "Pending Claims", value: stats.pendingClaims, icon: FileText, color: "bg-warning/10 text-warning" },
+  ];
+
   return (
     <AppLayout>
       <div className="space-y-6">
@@ -216,7 +289,11 @@ export default function BenefitsDashboardPage() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-muted-foreground">{stat.label}</p>
-                    <p className="mt-1 text-3xl font-bold text-card-foreground">{stat.value}</p>
+                    {loading ? (
+                      <Loader2 className="h-6 w-6 animate-spin text-muted-foreground mt-2" />
+                    ) : (
+                      <p className="mt-1 text-3xl font-bold text-card-foreground">{stat.value}</p>
+                    )}
                   </div>
                   <div className={`rounded-lg p-3 ${stat.color}`}>
                     <Icon className="h-5 w-5" />
