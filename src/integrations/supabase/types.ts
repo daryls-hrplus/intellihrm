@@ -946,6 +946,7 @@ export type Database = {
           name: string
           plan_type: string
           provider_contact: string | null
+          provider_id: string | null
           provider_name: string | null
           start_date: string
           updated_at: string
@@ -970,6 +971,7 @@ export type Database = {
           name: string
           plan_type: string
           provider_contact?: string | null
+          provider_id?: string | null
           provider_name?: string | null
           start_date?: string
           updated_at?: string
@@ -994,6 +996,7 @@ export type Database = {
           name?: string
           plan_type?: string
           provider_contact?: string | null
+          provider_id?: string | null
           provider_name?: string | null
           start_date?: string
           updated_at?: string
@@ -1009,6 +1012,90 @@ export type Database = {
           },
           {
             foreignKeyName: "benefit_plans_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "benefit_plans_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "benefit_providers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      benefit_providers: {
+        Row: {
+          address: string | null
+          city: string | null
+          code: string
+          company_id: string
+          contact_email: string | null
+          contact_name: string | null
+          contact_phone: string | null
+          country: string | null
+          created_at: string
+          end_date: string | null
+          id: string
+          is_active: boolean
+          name: string
+          notes: string | null
+          postal_code: string | null
+          provider_type: string
+          start_date: string
+          state: string | null
+          updated_at: string
+          website: string | null
+        }
+        Insert: {
+          address?: string | null
+          city?: string | null
+          code: string
+          company_id: string
+          contact_email?: string | null
+          contact_name?: string | null
+          contact_phone?: string | null
+          country?: string | null
+          created_at?: string
+          end_date?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          notes?: string | null
+          postal_code?: string | null
+          provider_type?: string
+          start_date?: string
+          state?: string | null
+          updated_at?: string
+          website?: string | null
+        }
+        Update: {
+          address?: string | null
+          city?: string | null
+          code?: string
+          company_id?: string
+          contact_email?: string | null
+          contact_name?: string | null
+          contact_phone?: string | null
+          country?: string | null
+          created_at?: string
+          end_date?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          notes?: string | null
+          postal_code?: string | null
+          provider_type?: string
+          start_date?: string
+          state?: string | null
+          updated_at?: string
+          website?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "benefit_providers_company_id_fkey"
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"

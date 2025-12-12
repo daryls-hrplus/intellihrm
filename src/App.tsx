@@ -88,6 +88,7 @@ import EligibilityAuditPage from "./pages/benefits/EligibilityAuditPage";
 import BenefitComplianceReportsPage from "./pages/benefits/BenefitComplianceReportsPage";
 import PlanComparisonPage from "./pages/benefits/PlanComparisonPage";
 import BenefitCalculatorPage from "./pages/benefits/BenefitCalculatorPage";
+import BenefitProvidersPage from "./pages/benefits/BenefitProvidersPage";
 import MyBenefitsPage from "./pages/ess/MyBenefitsPage";
 
 // Training pages
@@ -630,6 +631,14 @@ const App = () => (
               element={
                 <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
                   <BenefitClaimsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/benefits/providers"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
+                  <BenefitProvidersPage />
                 </ProtectedRoute>
               }
             />

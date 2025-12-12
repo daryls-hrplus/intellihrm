@@ -18,6 +18,7 @@ import {
   FileText,
   Scale,
   Calculator,
+  Building2,
 } from "lucide-react";
 
 const benefitsModules = [
@@ -36,11 +37,18 @@ const benefitsModules = [
     color: "bg-success/10 text-success",
   },
   {
+    title: "Benefit Providers",
+    description: "Manage insurance companies and providers",
+    href: "/benefits/providers",
+    icon: Building2,
+    color: "bg-info/10 text-info",
+  },
+  {
     title: "Enrollments",
     description: "Manage employee benefit enrollments",
     href: "/benefits/enrollments",
     icon: Heart,
-    color: "bg-info/10 text-info",
+    color: "bg-accent/10 text-accent-foreground",
   },
   {
     title: "Claims",
