@@ -1,0 +1,671 @@
+import { useState, useEffect } from "react";
+import { AppLayout } from "@/components/layout/AppLayout";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Badge } from "@/components/ui/badge";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuditLog } from "@/hooks/useAuditLog";
+import { toast } from "sonner";
+import {
+  Plus,
+  Search,
+  Pencil,
+  Trash2,
+  Loader2,
+  Briefcase,
+  ChevronLeft,
+} from "lucide-react";
+import { NavLink } from "react-router-dom";
+import { format } from "date-fns";
+
+interface Job {
+  id: string;
+  company_id: string;
+  job_family_id: string;
+  name: string;
+  code: string;
+  description: string | null;
+  job_grade: string | null;
+  job_level: string | null;
+  critical_level: string | null;
+  job_class: string | null;
+  standard_hours: number | null;
+  standard_work_period: string | null;
+  start_date: string;
+  end_date: string | null;
+  is_active: boolean;
+  created_at: string;
+  companies?: { name: string; code: string };
+  job_families?: { name: string; code: string };
+}
+
+interface Company {
+  id: string;
+  name: string;
+  code: string;
+}
+
+interface JobFamily {
+  id: string;
+  name: string;
+  code: string;
+  company_id: string;
+}
+
+const WORK_PERIODS = [
+  { value: "monthly", label: "Monthly" },
+  { value: "bi-monthly", label: "Bi-Monthly" },
+  { value: "fortnightly", label: "Fortnightly" },
+  { value: "weekly", label: "Weekly" },
+];
+
+const emptyForm = {
+  name: "",
+  code: "",
+  description: "",
+  company_id: "",
+  job_family_id: "",
+  job_grade: "",
+  job_level: "",
+  critical_level: "",
+  job_class: "",
+  standard_hours: "",
+  standard_work_period: "",
+  start_date: format(new Date(), "yyyy-MM-dd"),
+  end_date: "",
+  is_active: true,
+};
+
+export default function JobsPage() {
+  const [jobs, setJobs] = useState<Job[]>([]);
+  const [companies, setCompanies] = useState<Company[]>([]);
+  const [jobFamilies, setJobFamilies] = useState<JobFamily[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedCompanyId, setSelectedCompanyId] = useState<string>("");
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [selectedJob, setSelectedJob] = useState<Job | null>(null);
+  const [formData, setFormData] = useState(emptyForm);
+
+  const { logAction } = useAuditLog();
+
+  useEffect(() => {
+    fetchCompanies();
+  }, []);
+
+  useEffect(() => {
+    if (selectedCompanyId) {
+      fetchJobs();
+      fetchJobFamilies();
+    }
+  }, [selectedCompanyId]);
+
+  const fetchCompanies = async () => {
+    const { data, error } = await supabase
+      .from("companies")
+      .select("id, name, code")
+      .eq("is_active", true)
+      .order("name");
+
+    if (error) {
+      console.error("Error fetching companies:", error);
+      toast.error("Failed to load companies");
+    } else {
+      setCompanies(data || []);
+      if (data && data.length > 0 && !selectedCompanyId) {
+        setSelectedCompanyId(data[0].id);
+      }
+    }
+  };
+
+  const fetchJobs = async () => {
+    setIsLoading(true);
+    const { data, error } = await supabase
+      .from("jobs")
+      .select(`
+        *,
+        companies(name, code),
+        job_families(name, code)
+      `)
+      .eq("company_id", selectedCompanyId)
+      .order("name");
+
+    if (error) {
+      console.error("Error fetching jobs:", error);
+      toast.error("Failed to load jobs");
+    } else {
+      setJobs(data || []);
+    }
+    setIsLoading(false);
+  };
+
+  const fetchJobFamilies = async () => {
+    const { data, error } = await supabase
+      .from("job_families")
+      .select("id, name, code, company_id")
+      .eq("company_id", selectedCompanyId)
+      .eq("is_active", true)
+      .order("name");
+
+    if (error) {
+      console.error("Error fetching job families:", error);
+    } else {
+      setJobFamilies(data || []);
+    }
+  };
+
+  const handleOpenDialog = (job?: Job) => {
+    if (job) {
+      setSelectedJob(job);
+      setFormData({
+        name: job.name,
+        code: job.code,
+        description: job.description || "",
+        company_id: job.company_id,
+        job_family_id: job.job_family_id,
+        job_grade: job.job_grade || "",
+        job_level: job.job_level || "",
+        critical_level: job.critical_level || "",
+        job_class: job.job_class || "",
+        standard_hours: job.standard_hours?.toString() || "",
+        standard_work_period: job.standard_work_period || "",
+        start_date: job.start_date,
+        end_date: job.end_date || "",
+        is_active: job.is_active,
+      });
+    } else {
+      setSelectedJob(null);
+      setFormData({ ...emptyForm, company_id: selectedCompanyId });
+    }
+    setDialogOpen(true);
+  };
+
+  const handleSave = async () => {
+    if (!formData.name.trim() || !formData.code.trim()) {
+      toast.error("Name and code are required");
+      return;
+    }
+    if (!formData.company_id) {
+      toast.error("Company is required");
+      return;
+    }
+    if (!formData.job_family_id) {
+      toast.error("Job Family is required");
+      return;
+    }
+    if (!formData.start_date) {
+      toast.error("Start date is required");
+      return;
+    }
+
+    setIsSaving(true);
+    const payload = {
+      company_id: formData.company_id,
+      job_family_id: formData.job_family_id,
+      name: formData.name.trim(),
+      code: formData.code.trim().toUpperCase(),
+      description: formData.description.trim() || null,
+      job_grade: formData.job_grade.trim() || null,
+      job_level: formData.job_level.trim() || null,
+      critical_level: formData.critical_level.trim() || null,
+      job_class: formData.job_class.trim() || null,
+      standard_hours: formData.standard_hours ? parseFloat(formData.standard_hours) : null,
+      standard_work_period: formData.standard_work_period || null,
+      start_date: formData.start_date,
+      end_date: formData.end_date || null,
+      is_active: formData.is_active,
+    };
+
+    if (selectedJob) {
+      const { error } = await supabase
+        .from("jobs")
+        .update(payload)
+        .eq("id", selectedJob.id);
+
+      if (error) {
+        console.error("Error updating job:", error);
+        toast.error("Failed to update job");
+      } else {
+        toast.success("Job updated successfully");
+        logAction({
+          action: "UPDATE",
+          entityType: "jobs",
+          entityId: selectedJob.id,
+          entityName: formData.name,
+          oldValues: { ...selectedJob },
+          newValues: payload,
+        });
+        fetchJobs();
+        setDialogOpen(false);
+      }
+    } else {
+      const { data, error } = await supabase
+        .from("jobs")
+        .insert([payload])
+        .select("id")
+        .single();
+
+      if (error) {
+        console.error("Error creating job:", error);
+        if (error.code === "23505") {
+          toast.error("A job with this code already exists in this company");
+        } else {
+          toast.error("Failed to create job");
+        }
+      } else {
+        toast.success("Job created successfully");
+        logAction({
+          action: "CREATE",
+          entityType: "jobs",
+          entityId: data.id,
+          entityName: formData.name,
+          newValues: payload,
+        });
+        fetchJobs();
+        setDialogOpen(false);
+      }
+    }
+    setIsSaving(false);
+  };
+
+  const handleDelete = async () => {
+    if (!selectedJob) return;
+
+    const { error } = await supabase.from("jobs").delete().eq("id", selectedJob.id);
+
+    if (error) {
+      console.error("Error deleting job:", error);
+      toast.error("Failed to delete job");
+    } else {
+      toast.success("Job deleted successfully");
+      logAction({
+        action: "DELETE",
+        entityType: "jobs",
+        entityId: selectedJob.id,
+        entityName: selectedJob.name,
+        oldValues: { ...selectedJob },
+      });
+      fetchJobs();
+    }
+    setDeleteDialogOpen(false);
+  };
+
+  // Filter job families based on selected company in form
+  const formJobFamilies = formData.company_id === selectedCompanyId ? jobFamilies : [];
+
+  const filteredJobs = jobs.filter(
+    (job) =>
+      job.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      job.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      job.job_families?.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  return (
+    <AppLayout>
+      <div className="space-y-6">
+        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <NavLink to="/workforce" className="hover:text-foreground">
+            Workforce
+          </NavLink>
+          <ChevronLeft className="h-4 w-4 rotate-180" />
+          <span className="text-foreground">Jobs</span>
+        </div>
+
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+              <Briefcase className="h-5 w-5 text-primary" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold tracking-tight">Jobs</h1>
+              <p className="text-muted-foreground">
+                Define job roles within job families
+              </p>
+            </div>
+          </div>
+          <Button onClick={() => handleOpenDialog()}>
+            <Plus className="mr-2 h-4 w-4" />
+            Add Job
+          </Button>
+        </div>
+
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+          <Select value={selectedCompanyId} onValueChange={setSelectedCompanyId}>
+            <SelectTrigger className="w-full sm:w-[250px]">
+              <SelectValue placeholder="Select company" />
+            </SelectTrigger>
+            <SelectContent>
+              {companies.map((company) => (
+                <SelectItem key={company.id} value={company.id}>
+                  {company.name} ({company.code})
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              placeholder="Search jobs..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+        </div>
+
+        <div className="rounded-lg border bg-card">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Name</TableHead>
+                <TableHead>Code</TableHead>
+                <TableHead>Job Family</TableHead>
+                <TableHead>Grade</TableHead>
+                <TableHead>Level</TableHead>
+                <TableHead>Work Period</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead className="w-[100px]">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {isLoading ? (
+                <TableRow>
+                  <TableCell colSpan={8} className="text-center py-8">
+                    <Loader2 className="h-6 w-6 animate-spin mx-auto" />
+                  </TableCell>
+                </TableRow>
+              ) : filteredJobs.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
+                    {searchTerm ? "No jobs found matching your search" : "No jobs found. Create one to get started."}
+                  </TableCell>
+                </TableRow>
+              ) : (
+                filteredJobs.map((job) => (
+                  <TableRow key={job.id}>
+                    <TableCell className="font-medium">{job.name}</TableCell>
+                    <TableCell>{job.code}</TableCell>
+                    <TableCell>{job.job_families?.name || "-"}</TableCell>
+                    <TableCell>{job.job_grade || "-"}</TableCell>
+                    <TableCell>{job.job_level || "-"}</TableCell>
+                    <TableCell className="capitalize">{job.standard_work_period || "-"}</TableCell>
+                    <TableCell>
+                      <Badge variant={job.is_active ? "default" : "secondary"}>
+                        {job.is_active ? "Active" : "Inactive"}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleOpenDialog(job)}
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => {
+                            setSelectedJob(job);
+                            setDeleteDialogOpen(true);
+                          }}
+                        >
+                          <Trash2 className="h-4 w-4 text-destructive" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </div>
+
+        {/* Create/Edit Dialog */}
+        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>
+                {selectedJob ? "Edit Job" : "Create Job"}
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Name *</Label>
+                  <Input
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    placeholder="e.g., Senior Software Engineer"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Code *</Label>
+                  <Input
+                    value={formData.code}
+                    onChange={(e) => setFormData({ ...formData, code: e.target.value.toUpperCase() })}
+                    placeholder="e.g., SSE"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Description</Label>
+                <Textarea
+                  value={formData.description}
+                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  placeholder="Job description..."
+                  rows={3}
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Company *</Label>
+                  <Select
+                    value={formData.company_id}
+                    onValueChange={(value) =>
+                      setFormData({ ...formData, company_id: value, job_family_id: "" })
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select company" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {companies.map((company) => (
+                        <SelectItem key={company.id} value={company.id}>
+                          {company.name} ({company.code})
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label>Job Family *</Label>
+                  <Select
+                    value={formData.job_family_id}
+                    onValueChange={(value) => setFormData({ ...formData, job_family_id: value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select job family" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {formJobFamilies.map((jf) => (
+                        <SelectItem key={jf.id} value={jf.id}>
+                          {jf.name} ({jf.code})
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Job Grade</Label>
+                  <Input
+                    value={formData.job_grade}
+                    onChange={(e) => setFormData({ ...formData, job_grade: e.target.value })}
+                    placeholder="e.g., G5"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Job Level</Label>
+                  <Input
+                    value={formData.job_level}
+                    onChange={(e) => setFormData({ ...formData, job_level: e.target.value })}
+                    placeholder="e.g., Senior"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Critical Level</Label>
+                  <Input
+                    value={formData.critical_level}
+                    onChange={(e) => setFormData({ ...formData, critical_level: e.target.value })}
+                    placeholder="e.g., High"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Job Class (User Defined)</Label>
+                  <Input
+                    value={formData.job_class}
+                    onChange={(e) => setFormData({ ...formData, job_class: e.target.value })}
+                    placeholder="e.g., Technical"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Standard Hours</Label>
+                  <Input
+                    type="number"
+                    value={formData.standard_hours}
+                    onChange={(e) => setFormData({ ...formData, standard_hours: e.target.value })}
+                    placeholder="e.g., 40"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Standard Work Period</Label>
+                  <Select
+                    value={formData.standard_work_period}
+                    onValueChange={(value) =>
+                      setFormData({ ...formData, standard_work_period: value === "__none__" ? "" : value })
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select period" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="__none__">None</SelectItem>
+                      {WORK_PERIODS.map((period) => (
+                        <SelectItem key={period.value} value={period.value}>
+                          {period.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Start Date *</Label>
+                  <Input
+                    type="date"
+                    value={formData.start_date}
+                    onChange={(e) => setFormData({ ...formData, start_date: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>End Date</Label>
+                  <Input
+                    type="date"
+                    value={formData.end_date}
+                    onChange={(e) => setFormData({ ...formData, end_date: e.target.value })}
+                  />
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <Switch
+                  checked={formData.is_active}
+                  onCheckedChange={(checked) => setFormData({ ...formData, is_active: checked })}
+                />
+                <Label>Active</Label>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setDialogOpen(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleSave} disabled={isSaving}>
+                {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {selectedJob ? "Update" : "Create"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Delete Confirmation Dialog */}
+        <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete Job</AlertDialogTitle>
+              <AlertDialogDescription>
+                Are you sure you want to delete "{selectedJob?.name}"? This action cannot be undone.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                Delete
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      </div>
+    </AppLayout>
+  );
+}
