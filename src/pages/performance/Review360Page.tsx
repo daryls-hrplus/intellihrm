@@ -324,8 +324,8 @@ export default function Review360Page() {
                 <TooltipTrigger asChild>
                   <HelpCircle className="h-3.5 w-3.5 text-muted-foreground hover:text-foreground cursor-help" />
                 </TooltipTrigger>
-                <TooltipContent side="bottom" className="max-w-xs">
-                  <p>{tabHelpText["my-reviews"]}</p>
+                <TooltipContent side="bottom" className="w-72 p-3 text-left whitespace-normal">
+                  <p className="text-sm leading-relaxed">{tabHelpText["my-reviews"]}</p>
                 </TooltipContent>
               </Tooltip>
             </TabsTrigger>
@@ -336,8 +336,8 @@ export default function Review360Page() {
                 <TooltipTrigger asChild>
                   <HelpCircle className="h-3.5 w-3.5 text-muted-foreground hover:text-foreground cursor-help" />
                 </TooltipTrigger>
-                <TooltipContent side="bottom" className="max-w-xs">
-                  <p>{tabHelpText["my-feedback"]}</p>
+                <TooltipContent side="bottom" className="w-72 p-3 text-left whitespace-normal">
+                  <p className="text-sm leading-relaxed">{tabHelpText["my-feedback"]}</p>
                 </TooltipContent>
               </Tooltip>
             </TabsTrigger>
@@ -349,8 +349,8 @@ export default function Review360Page() {
                   <TooltipTrigger asChild>
                     <HelpCircle className="h-3.5 w-3.5 text-muted-foreground hover:text-foreground cursor-help" />
                   </TooltipTrigger>
-                  <TooltipContent side="bottom" className="max-w-xs">
-                    <p>{tabHelpText["manage-cycles"]}</p>
+                  <TooltipContent side="bottom" className="w-72 p-3 text-left whitespace-normal">
+                    <p className="text-sm leading-relaxed">{tabHelpText["manage-cycles"]}</p>
                   </TooltipContent>
                 </Tooltip>
               </TabsTrigger>
