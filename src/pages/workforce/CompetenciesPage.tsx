@@ -39,7 +39,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Switch } from "@/components/ui/switch";
-import { Plus, Pencil, Trash2, Target } from "lucide-react";
+import { Plus, Pencil, Trash2, Target, ChevronDown, ChevronRight, Layers } from "lucide-react";
 import { toast } from "sonner";
 import { useAuditLog } from "@/hooks/useAuditLog";
 
@@ -63,6 +63,16 @@ interface Competency {
   companies?: { name: string };
 }
 
+interface CompetencyLevel {
+  id: string;
+  competency_id: string;
+  name: string;
+  code: string;
+  description: string | null;
+  level_order: number;
+  is_active: boolean;
+}
+
 const categoryOptions = [
   { value: "technical", label: "Technical" },
   { value: "behavioral", label: "Behavioral" },
@@ -83,6 +93,14 @@ const emptyForm = {
   end_date: "",
 };
 
+const emptyLevelForm = {
+  name: "",
+  code: "",
+  description: "",
+  level_order: 1,
+  is_active: true,
+};
+
 export default function CompetenciesPage() {
   const [competencies, setCompetencies] = useState<Competency[]>([]);
   const [companies, setCompanies] = useState<Company[]>([]);
@@ -93,6 +111,16 @@ export default function CompetenciesPage() {
   const [formData, setFormData] = useState(emptyForm);
   const [selectedCompanyFilter, setSelectedCompanyFilter] = useState<string>("all");
   const { logAction } = useAuditLog();
+
+  // Competency Levels state
+  const [expandedCompetency, setExpandedCompetency] = useState<string | null>(null);
+  const [competencyLevels, setCompetencyLevels] = useState<Record<string, CompetencyLevel[]>>({});
+  const [levelsLoading, setLevelsLoading] = useState<string | null>(null);
+  const [isLevelDialogOpen, setIsLevelDialogOpen] = useState(false);
+  const [isLevelDeleteDialogOpen, setIsLevelDeleteDialogOpen] = useState(false);
+  const [selectedLevel, setSelectedLevel] = useState<CompetencyLevel | null>(null);
+  const [levelFormData, setLevelFormData] = useState(emptyLevelForm);
+  const [levelCompetencyId, setLevelCompetencyId] = useState<string | null>(null);
 
   useEffect(() => {
     fetchCompanies();
@@ -129,6 +157,33 @@ export default function CompetenciesPage() {
       setCompetencies(data || []);
     }
     setLoading(false);
+  };
+
+  const fetchLevels = async (competencyId: string) => {
+    setLevelsLoading(competencyId);
+    const { data, error } = await supabase
+      .from("competency_levels")
+      .select("*")
+      .eq("competency_id", competencyId)
+      .order("level_order");
+
+    if (error) {
+      toast.error("Failed to fetch competency levels");
+    } else {
+      setCompetencyLevels((prev) => ({ ...prev, [competencyId]: data || [] }));
+    }
+    setLevelsLoading(null);
+  };
+
+  const toggleExpand = async (competencyId: string) => {
+    if (expandedCompetency === competencyId) {
+      setExpandedCompetency(null);
+    } else {
+      setExpandedCompetency(competencyId);
+      if (!competencyLevels[competencyId]) {
+        await fetchLevels(competencyId);
+      }
+    }
   };
 
   const handleAdd = () => {
@@ -248,6 +303,118 @@ export default function CompetenciesPage() {
     fetchCompetencies();
   };
 
+  // Level handlers
+  const handleAddLevel = (competencyId: string) => {
+    setSelectedLevel(null);
+    setLevelCompetencyId(competencyId);
+    const existingLevels = competencyLevels[competencyId] || [];
+    const maxOrder = existingLevels.reduce((max, l) => Math.max(max, l.level_order), 0);
+    setLevelFormData({ ...emptyLevelForm, level_order: maxOrder + 1 });
+    setIsLevelDialogOpen(true);
+  };
+
+  const handleEditLevel = (level: CompetencyLevel) => {
+    setSelectedLevel(level);
+    setLevelCompetencyId(level.competency_id);
+    setLevelFormData({
+      name: level.name,
+      code: level.code,
+      description: level.description || "",
+      level_order: level.level_order,
+      is_active: level.is_active,
+    });
+    setIsLevelDialogOpen(true);
+  };
+
+  const handleDeleteLevel = (level: CompetencyLevel) => {
+    setSelectedLevel(level);
+    setIsLevelDeleteDialogOpen(true);
+  };
+
+  const handleSaveLevel = async () => {
+    if (!levelCompetencyId || !levelFormData.name || !levelFormData.code) {
+      toast.error("Please fill in all required fields");
+      return;
+    }
+
+    const payload = {
+      competency_id: levelCompetencyId,
+      name: levelFormData.name,
+      code: levelFormData.code,
+      description: levelFormData.description || null,
+      level_order: levelFormData.level_order,
+      is_active: levelFormData.is_active,
+    };
+
+    if (selectedLevel) {
+      const { error } = await supabase
+        .from("competency_levels")
+        .update(payload)
+        .eq("id", selectedLevel.id);
+
+      if (error) {
+        toast.error("Failed to update level");
+        return;
+      }
+      await logAction({
+        action: "UPDATE",
+        entityType: "competency_levels",
+        entityId: selectedLevel.id,
+        entityName: levelFormData.name,
+        oldValues: { ...selectedLevel },
+        newValues: payload,
+      });
+      toast.success("Level updated");
+    } else {
+      const { data, error } = await supabase
+        .from("competency_levels")
+        .insert([payload])
+        .select()
+        .single();
+
+      if (error) {
+        toast.error("Failed to create level");
+        return;
+      }
+      await logAction({
+        action: "CREATE",
+        entityType: "competency_levels",
+        entityId: data.id,
+        entityName: levelFormData.name,
+        newValues: payload,
+      });
+      toast.success("Level created");
+    }
+
+    setIsLevelDialogOpen(false);
+    fetchLevels(levelCompetencyId);
+  };
+
+  const confirmDeleteLevel = async () => {
+    if (!selectedLevel) return;
+
+    const { error } = await supabase
+      .from("competency_levels")
+      .delete()
+      .eq("id", selectedLevel.id);
+
+    if (error) {
+      toast.error("Failed to delete level");
+      return;
+    }
+
+    await logAction({
+      action: "DELETE",
+      entityType: "competency_levels",
+      entityId: selectedLevel.id,
+      entityName: selectedLevel.name,
+      oldValues: { ...selectedLevel },
+    });
+    toast.success("Level deleted");
+    setIsLevelDeleteDialogOpen(false);
+    fetchLevels(selectedLevel.competency_id);
+  };
+
   return (
     <AppLayout>
       <div className="space-y-6">
@@ -297,6 +464,7 @@ export default function CompetenciesPage() {
               <Table>
                 <TableHeader>
                   <TableRow>
+                    <TableHead className="w-8"></TableHead>
                     <TableHead>Name</TableHead>
                     <TableHead>Code</TableHead>
                     <TableHead>Company</TableHead>
@@ -309,41 +477,135 @@ export default function CompetenciesPage() {
                 </TableHeader>
                 <TableBody>
                   {competencies.map((competency) => (
-                    <TableRow key={competency.id}>
-                      <TableCell className="font-medium">{competency.name}</TableCell>
-                      <TableCell>{competency.code}</TableCell>
-                      <TableCell>{competency.companies?.name}</TableCell>
-                      <TableCell className="capitalize">{competency.category}</TableCell>
-                      <TableCell>
-                        <span
-                          className={`px-2 py-1 rounded-full text-xs ${
-                            competency.is_active
-                              ? "bg-green-100 text-green-800"
-                              : "bg-red-100 text-red-800"
-                          }`}
-                        >
-                          {competency.is_active ? "Active" : "Inactive"}
-                        </span>
-                      </TableCell>
-                      <TableCell>{competency.start_date}</TableCell>
-                      <TableCell>{competency.end_date || "-"}</TableCell>
-                      <TableCell className="text-right">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => handleEdit(competency)}
-                        >
-                          <Pencil className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => handleDelete(competency)}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </TableCell>
-                    </TableRow>
+                    <>
+                      <TableRow key={competency.id}>
+                        <TableCell>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-6 w-6"
+                            onClick={() => toggleExpand(competency.id)}
+                          >
+                            {expandedCompetency === competency.id ? (
+                              <ChevronDown className="h-4 w-4" />
+                            ) : (
+                              <ChevronRight className="h-4 w-4" />
+                            )}
+                          </Button>
+                        </TableCell>
+                        <TableCell className="font-medium">{competency.name}</TableCell>
+                        <TableCell>{competency.code}</TableCell>
+                        <TableCell>{competency.companies?.name}</TableCell>
+                        <TableCell className="capitalize">{competency.category}</TableCell>
+                        <TableCell>
+                          <span
+                            className={`px-2 py-1 rounded-full text-xs ${
+                              competency.is_active
+                                ? "bg-green-100 text-green-800"
+                                : "bg-red-100 text-red-800"
+                            }`}
+                          >
+                            {competency.is_active ? "Active" : "Inactive"}
+                          </span>
+                        </TableCell>
+                        <TableCell>{competency.start_date}</TableCell>
+                        <TableCell>{competency.end_date || "-"}</TableCell>
+                        <TableCell className="text-right">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleEdit(competency)}
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleDelete(competency)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                      {expandedCompetency === competency.id && (
+                        <TableRow>
+                          <TableCell colSpan={9} className="bg-muted/30 p-4">
+                            <div className="space-y-3">
+                              <div className="flex items-center justify-between">
+                                <h4 className="font-semibold flex items-center gap-2">
+                                  <Layers className="h-4 w-4" />
+                                  Proficiency Levels
+                                </h4>
+                                <Button
+                                  size="sm"
+                                  onClick={() => handleAddLevel(competency.id)}
+                                >
+                                  <Plus className="mr-1 h-3 w-3" />
+                                  Add Level
+                                </Button>
+                              </div>
+                              {levelsLoading === competency.id ? (
+                                <div className="text-sm text-muted-foreground">Loading levels...</div>
+                              ) : (competencyLevels[competency.id]?.length || 0) === 0 ? (
+                                <div className="text-sm text-muted-foreground">No levels defined</div>
+                              ) : (
+                                <Table>
+                                  <TableHeader>
+                                    <TableRow>
+                                      <TableHead>Order</TableHead>
+                                      <TableHead>Name</TableHead>
+                                      <TableHead>Code</TableHead>
+                                      <TableHead>Description</TableHead>
+                                      <TableHead>Status</TableHead>
+                                      <TableHead className="text-right">Actions</TableHead>
+                                    </TableRow>
+                                  </TableHeader>
+                                  <TableBody>
+                                    {competencyLevels[competency.id]?.map((level) => (
+                                      <TableRow key={level.id}>
+                                        <TableCell>{level.level_order}</TableCell>
+                                        <TableCell className="font-medium">{level.name}</TableCell>
+                                        <TableCell>{level.code}</TableCell>
+                                        <TableCell className="max-w-xs truncate">
+                                          {level.description || "-"}
+                                        </TableCell>
+                                        <TableCell>
+                                          <span
+                                            className={`px-2 py-1 rounded-full text-xs ${
+                                              level.is_active
+                                                ? "bg-green-100 text-green-800"
+                                                : "bg-red-100 text-red-800"
+                                            }`}
+                                          >
+                                            {level.is_active ? "Active" : "Inactive"}
+                                          </span>
+                                        </TableCell>
+                                        <TableCell className="text-right">
+                                          <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            onClick={() => handleEditLevel(level)}
+                                          >
+                                            <Pencil className="h-4 w-4" />
+                                          </Button>
+                                          <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            onClick={() => handleDeleteLevel(level)}
+                                          >
+                                            <Trash2 className="h-4 w-4" />
+                                          </Button>
+                                        </TableCell>
+                                      </TableRow>
+                                    ))}
+                                  </TableBody>
+                                </Table>
+                              )}
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    </>
                   ))}
                 </TableBody>
               </Table>
@@ -351,6 +613,7 @@ export default function CompetenciesPage() {
           </CardContent>
         </Card>
 
+        {/* Competency Dialog */}
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogContent className="max-w-lg">
             <DialogHeader>
@@ -469,18 +732,103 @@ export default function CompetenciesPage() {
           </DialogContent>
         </Dialog>
 
+        {/* Competency Level Dialog */}
+        <Dialog open={isLevelDialogOpen} onOpenChange={setIsLevelDialogOpen}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>
+                {selectedLevel ? "Edit Level" : "Add Level"}
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Name *</Label>
+                  <Input
+                    value={levelFormData.name}
+                    onChange={(e) =>
+                      setLevelFormData({ ...levelFormData, name: e.target.value })
+                    }
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Code *</Label>
+                  <Input
+                    value={levelFormData.code}
+                    onChange={(e) =>
+                      setLevelFormData({ ...levelFormData, code: e.target.value })
+                    }
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>Description</Label>
+                <Textarea
+                  value={levelFormData.description}
+                  onChange={(e) =>
+                    setLevelFormData({ ...levelFormData, description: e.target.value })
+                  }
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Level Order *</Label>
+                <Input
+                  type="number"
+                  min={1}
+                  value={levelFormData.level_order}
+                  onChange={(e) =>
+                    setLevelFormData({ ...levelFormData, level_order: parseInt(e.target.value) || 1 })
+                  }
+                />
+              </div>
+              <div className="flex items-center space-x-2">
+                <Switch
+                  checked={levelFormData.is_active}
+                  onCheckedChange={(checked) =>
+                    setLevelFormData({ ...levelFormData, is_active: checked })
+                  }
+                />
+                <Label>Active</Label>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsLevelDialogOpen(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleSaveLevel}>Save</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Delete Competency Dialog */}
         <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
           <AlertDialogContent>
             <AlertDialogHeader>
               <AlertDialogTitle>Delete Competency</AlertDialogTitle>
               <AlertDialogDescription>
                 Are you sure you want to delete "{selectedCompetency?.name}"? This
-                action cannot be undone.
+                will also delete all associated levels.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogCancel>Cancel</AlertDialogCancel>
               <AlertDialogAction onClick={confirmDelete}>Delete</AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+
+        {/* Delete Level Dialog */}
+        <AlertDialog open={isLevelDeleteDialogOpen} onOpenChange={setIsLevelDeleteDialogOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete Level</AlertDialogTitle>
+              <AlertDialogDescription>
+                Are you sure you want to delete "{selectedLevel?.name}"?
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={confirmDeleteLevel}>Delete</AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>

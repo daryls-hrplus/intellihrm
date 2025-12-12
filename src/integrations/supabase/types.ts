@@ -466,6 +466,50 @@ export type Database = {
           },
         ]
       }
+      competency_levels: {
+        Row: {
+          code: string
+          competency_id: string
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean
+          level_order: number
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          code: string
+          competency_id: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          level_order?: number
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          code?: string
+          competency_id?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          level_order?: number
+          name?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "competency_levels_competency_id_fkey"
+            columns: ["competency_id"]
+            isOneToOne: false
+            referencedRelation: "competencies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       currencies: {
         Row: {
           code: string
