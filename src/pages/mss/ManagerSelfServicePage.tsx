@@ -62,7 +62,7 @@ const mssModules = [
   {
     title: "Goal Management",
     description: "Set and track team goals and objectives",
-    href: "/performance/goals",
+    href: "/mss/goals",
     icon: Target,
     color: "bg-pink-500/10 text-pink-600",
   },
