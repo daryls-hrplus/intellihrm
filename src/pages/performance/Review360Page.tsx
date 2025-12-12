@@ -17,6 +17,8 @@ import {
   AlertCircle,
   Settings,
   Eye,
+  MessageSquare,
+  UserPlus,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -24,6 +26,9 @@ import { toast } from "sonner";
 import { ReviewCycleDialog } from "@/components/performance/ReviewCycleDialog";
 import { PendingReviewsCard } from "@/components/performance/PendingReviewsCard";
 import { MyFeedbackSummary } from "@/components/performance/MyFeedbackSummary";
+import { CycleParticipantsManager } from "@/components/performance/CycleParticipantsManager";
+import { CycleQuestionsManager } from "@/components/performance/CycleQuestionsManager";
+import { PeerNominationManager } from "@/components/performance/PeerNominationManager";
 import { format } from "date-fns";
 
 interface ReviewCycle {
@@ -77,6 +82,10 @@ export default function Review360Page() {
   const [loading, setLoading] = useState(true);
   const [cycleDialogOpen, setCycleDialogOpen] = useState(false);
   const [selectedCycle, setSelectedCycle] = useState<ReviewCycle | null>(null);
+  const [participantsManagerOpen, setParticipantsManagerOpen] = useState(false);
+  const [questionsManagerOpen, setQuestionsManagerOpen] = useState(false);
+  const [peerNominationOpen, setPeerNominationOpen] = useState(false);
+  const [selectedParticipant, setSelectedParticipant] = useState<any>(null);
 
   useEffect(() => {
     if (company?.id) {
@@ -441,12 +450,32 @@ export default function Review360Page() {
                                 <Button
                                   variant="outline"
                                   size="sm"
+                                  onClick={() => {
+                                    setSelectedCycle(cycle);
+                                    setParticipantsManagerOpen(true);
+                                  }}
+                                  title="Manage Participants"
+                                >
+                                  <Users className="h-4 w-4" />
+                                </Button>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => {
+                                    setSelectedCycle(cycle);
+                                    setQuestionsManagerOpen(true);
+                                  }}
+                                  title="Configure Questions"
+                                >
+                                  <MessageSquare className="h-4 w-4" />
+                                </Button>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
                                   onClick={() => handleEditCycle(cycle)}
+                                  title="Edit Cycle"
                                 >
                                   <Settings className="h-4 w-4" />
-                                </Button>
-                                <Button variant="outline" size="sm">
-                                  <Eye className="h-4 w-4" />
                                 </Button>
                               </div>
                             </div>
