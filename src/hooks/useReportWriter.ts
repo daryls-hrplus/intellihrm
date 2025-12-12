@@ -356,7 +356,7 @@ export function useReportWriter() {
     templateId: string,
     parameters: Record<string, unknown>,
     outputFormat: 'pdf' | 'excel' | 'csv' | 'pptx'
-  ): Promise<GeneratedReport | null> => {
+  ): Promise<{ report: GeneratedReport | null; data: Record<string, unknown>[] | null }> => {
     setIsLoading(true);
     try {
       // Create the report record
@@ -383,38 +383,46 @@ export function useReportWriter() {
       if (genError) {
         console.error('Report generation error:', genError);
         toast.error('Failed to generate report');
-        return report as unknown as GeneratedReport;
+        return { report: report as unknown as GeneratedReport, data: null };
       }
 
       if (result?.success) {
         toast.success(`Report generated with ${result.rowCount} rows`);
         
-        // If CSV format and we have data, trigger download
-        if (outputFormat === 'csv' && result.data) {
-          const template = await getTemplate(templateId);
-          const fileName = `${template?.name || 'report'}_${new Date().toISOString().split('T')[0]}.csv`;
-          downloadCsvData(result.data, fileName, template);
+        const template = await getTemplate(templateId);
+        const fileName = `${template?.name || 'report'}_${new Date().toISOString().split('T')[0]}`;
+        
+        // Download based on format
+        if (result.data && result.data.length > 0) {
+          if (outputFormat === 'csv') {
+            downloadCsvData(result.data, `${fileName}.csv`);
+          } else if (outputFormat === 'excel') {
+            downloadCsvData(result.data, `${fileName}.csv`); // CSV as Excel fallback
+            toast.info('Excel format downloaded as CSV');
+          }
         }
+        
+        // Fetch updated report with status
+        const { data: updatedReport } = await supabase
+          .from('generated_reports')
+          .select()
+          .eq('id', report.id)
+          .single();
+
+        return { report: updatedReport as unknown as GeneratedReport, data: result.data || [] };
       }
 
-      // Fetch updated report with status
-      const { data: updatedReport } = await supabase
-        .from('generated_reports')
-        .select()
-        .eq('id', report.id)
-        .single();
-
-      return updatedReport as unknown as GeneratedReport;
+      return { report: report as unknown as GeneratedReport, data: null };
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'Failed to generate report';
       toast.error(message);
-      return null;
+      return { report: null, data: null };
     } finally {
       setIsLoading(false);
     }
   };
 
-  const downloadCsvData = (data: Record<string, unknown>[], fileName: string, template: ReportTemplate | null) => {
+  const downloadCsvData = (data: Record<string, unknown>[], fileName: string) => {
     if (!data || data.length === 0) return;
     
     const headers = Object.keys(data[0]);

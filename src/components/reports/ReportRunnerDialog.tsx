@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -8,9 +8,11 @@ import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { 
   FileText, Calendar as CalendarIcon, Download, FileSpreadsheet, 
-  FileType, Presentation, Loader2 
+  FileType, Presentation, Loader2, CheckCircle, Eye
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
@@ -41,8 +43,10 @@ export function ReportRunnerDialog({
   const { generateReport, isLoading } = useReportWriter();
   
   const [parameters, setParameters] = useState<Record<string, unknown>>({});
-  const [outputFormat, setOutputFormat] = useState<'pdf' | 'excel' | 'csv' | 'pptx'>('pdf');
+  const [outputFormat, setOutputFormat] = useState<'pdf' | 'excel' | 'csv' | 'pptx'>('csv');
   const [isGenerating, setIsGenerating] = useState(false);
+  const [generatedData, setGeneratedData] = useState<Record<string, unknown>[] | null>(null);
+  const [showResults, setShowResults] = useState(false);
 
   useEffect(() => {
     if (open && template) {
@@ -54,6 +58,8 @@ export function ReportRunnerDialog({
         }
       });
       setParameters(initialParams);
+      setGeneratedData(null);
+      setShowResults(false);
     }
   }, [open, template]);
 
@@ -71,7 +77,11 @@ export function ReportRunnerDialog({
     const result = await generateReport(template.id, parameters, outputFormat);
     setIsGenerating(false);
 
-    if (result) {
+    if (result.data && result.data.length > 0) {
+      setGeneratedData(result.data);
+      setShowResults(true);
+    } else if (result.report) {
+      // Report generated but no data preview
       onOpenChange(false);
     }
   };
@@ -210,6 +220,69 @@ export function ReportRunnerDialog({
     }
   };
 
+  // Render results view
+  if (showResults && generatedData) {
+    const columns = generatedData.length > 0 ? Object.keys(generatedData[0]) : [];
+    
+    return (
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="max-w-4xl max-h-[80vh]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <CheckCircle className="h-5 w-5 text-green-500" />
+              Report Generated: {template.name}
+            </DialogTitle>
+            <DialogDescription>
+              {generatedData.length} record{generatedData.length !== 1 ? 's' : ''} found
+            </DialogDescription>
+          </DialogHeader>
+
+          <ScrollArea className="h-[400px] border rounded-md">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  {columns.slice(0, 8).map(col => (
+                    <TableHead key={col} className="whitespace-nowrap">
+                      {col.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                    </TableHead>
+                  ))}
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {generatedData.slice(0, 100).map((row, idx) => (
+                  <TableRow key={idx}>
+                    {columns.slice(0, 8).map(col => (
+                      <TableCell key={col} className="max-w-[200px] truncate">
+                        {row[col] !== null && row[col] !== undefined 
+                          ? String(row[col]).substring(0, 50) 
+                          : '-'}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </ScrollArea>
+
+          {generatedData.length > 100 && (
+            <p className="text-sm text-muted-foreground text-center">
+              Showing first 100 of {generatedData.length} records
+            </p>
+          )}
+
+          <div className="flex justify-end gap-2 pt-4 border-t">
+            <Button variant="outline" onClick={() => setShowResults(false)}>
+              Back
+            </Button>
+            <Button onClick={() => onOpenChange(false)}>
+              Close
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
+  }
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-lg">
@@ -218,6 +291,9 @@ export function ReportRunnerDialog({
             <FileText className="h-5 w-5" />
             Run Report: {template.name}
           </DialogTitle>
+          <DialogDescription>
+            Configure parameters and select output format
+          </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-6">
