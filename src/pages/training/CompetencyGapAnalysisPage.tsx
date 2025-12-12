@@ -4,6 +4,7 @@ import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -32,7 +33,22 @@ import {
   Users,
   Briefcase,
   GraduationCap,
+  Building2,
+  FolderTree,
 } from "lucide-react";
+
+interface Company {
+  id: string;
+  name: string;
+  code: string;
+}
+
+interface Department {
+  id: string;
+  name: string;
+  code: string;
+  company_id: string;
+}
 
 interface Employee {
   id: string;
@@ -44,6 +60,7 @@ interface Position {
   id: string;
   title: string;
   job_id: string | null;
+  department_id: string | null;
 }
 
 interface EmployeePosition {
@@ -102,46 +119,96 @@ interface EmployeeGapSummary {
 
 export default function CompetencyGapAnalysisPage() {
   const { user, isAdmin, hasRole } = useAuth();
+  const [companies, setCompanies] = useState<Company[]>([]);
+  const [departments, setDepartments] = useState<Department[]>([]);
   const [employees, setEmployees] = useState<EmployeePosition[]>([]);
+  const [selectedCompanyId, setSelectedCompanyId] = useState<string>("");
+  const [selectedDepartmentId, setSelectedDepartmentId] = useState<string>("");
   const [selectedEmployeeId, setSelectedEmployeeId] = useState<string>("");
   const [gapAnalysis, setGapAnalysis] = useState<EmployeeGapSummary | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [isLoadingEmployees, setIsLoadingEmployees] = useState(true);
-  const [overallStats, setOverallStats] = useState({
-    totalEmployees: 0,
-    avgScore: 0,
-    criticalGaps: 0,
-  });
+  const [isLoadingCompanies, setIsLoadingCompanies] = useState(true);
+  const [isLoadingDepartments, setIsLoadingDepartments] = useState(false);
+  const [isLoadingEmployees, setIsLoadingEmployees] = useState(false);
 
   const canViewAll = isAdmin || hasRole("hr_manager");
 
   useEffect(() => {
-    fetchEmployees();
-  }, [user, canViewAll]);
+    fetchCompanies();
+  }, []);
 
-  const fetchEmployees = async () => {
+  useEffect(() => {
+    if (selectedCompanyId) {
+      fetchDepartments(selectedCompanyId);
+      setSelectedDepartmentId("");
+      setSelectedEmployeeId("");
+      setEmployees([]);
+      setGapAnalysis(null);
+    }
+  }, [selectedCompanyId]);
+
+  useEffect(() => {
+    if (selectedDepartmentId) {
+      fetchEmployees(selectedDepartmentId);
+      setSelectedEmployeeId("");
+      setGapAnalysis(null);
+    }
+  }, [selectedDepartmentId]);
+
+  const fetchCompanies = async () => {
+    setIsLoadingCompanies(true);
+    try {
+      const { data, error } = await supabase
+        .from("companies")
+        .select("id, name, code")
+        .eq("is_active", true)
+        .order("name");
+
+      if (error) throw error;
+      setCompanies(data || []);
+    } catch (error) {
+      console.error("Error fetching companies:", error);
+    } finally {
+      setIsLoadingCompanies(false);
+    }
+  };
+
+  const fetchDepartments = async (companyId: string) => {
+    setIsLoadingDepartments(true);
+    try {
+      const { data, error } = await supabase
+        .from("departments")
+        .select("id, name, code, company_id")
+        .eq("company_id", companyId)
+        .eq("is_active", true)
+        .order("name");
+
+      if (error) throw error;
+      setDepartments(data || []);
+    } catch (error) {
+      console.error("Error fetching departments:", error);
+    } finally {
+      setIsLoadingDepartments(false);
+    }
+  };
+
+  const fetchEmployees = async (departmentId: string) => {
     setIsLoadingEmployees(true);
     try {
-      let query = supabase
+      const { data, error } = await supabase
         .from("employee_positions")
         .select(`
           employee_id,
           position_id,
           profiles:employee_id (id, full_name, email),
-          positions:position_id (id, title, job_id)
+          positions:position_id (id, title, job_id, department_id)
         `)
         .eq("is_active", true);
-
-      if (!canViewAll && user) {
-        query = query.eq("employee_id", user.id);
-      }
-
-      const { data, error } = await query;
 
       if (error) throw error;
 
       const mapped: EmployeePosition[] = (data || [])
-        .filter((ep: any) => ep.profiles && ep.positions)
+        .filter((ep: any) => ep.profiles && ep.positions && ep.positions.department_id === departmentId)
         .map((ep: any) => ({
           employee_id: ep.employee_id,
           position_id: ep.position_id,
@@ -154,6 +221,7 @@ export default function CompetencyGapAnalysisPage() {
             id: ep.positions.id,
             title: ep.positions.title,
             job_id: ep.positions.job_id,
+            department_id: ep.positions.department_id,
           },
         }));
 
@@ -164,12 +232,6 @@ export default function CompetencyGapAnalysisPage() {
       );
 
       setEmployees(unique);
-
-      // Auto-select current user if not admin
-      if (!canViewAll && unique.length > 0) {
-        setSelectedEmployeeId(unique[0].employee_id);
-        analyzeGaps(unique[0]);
-      }
     } catch (error) {
       console.error("Error fetching employees:", error);
     } finally {
@@ -317,11 +379,6 @@ export default function CompetencyGapAnalysisPage() {
       });
 
       // Update stats
-      setOverallStats({
-        totalEmployees: employees.length,
-        avgScore: weightedScore,
-        criticalGaps: gaps.filter((g) => g.is_required && g.gap_status === "missing").length,
-      });
     } catch (error) {
       console.error("Error analyzing gaps:", error);
     } finally {
@@ -365,6 +422,8 @@ export default function CompetencyGapAnalysisPage() {
     return "text-destructive";
   };
 
+  const filteredDepartments = departments.filter(d => d.company_id === selectedCompanyId);
+
   return (
     <AppLayout>
       <div className="space-y-6">
@@ -389,36 +448,81 @@ export default function CompetencyGapAnalysisPage() {
           </div>
         </div>
 
-        {/* Employee Selector */}
-        {canViewAll && (
-          <Card>
-            <CardContent className="pt-6">
-              <div className="flex items-center gap-4">
-                <div className="flex-1 max-w-md">
-                  <Select
-                    value={selectedEmployeeId}
-                    onValueChange={handleEmployeeChange}
-                    disabled={isLoadingEmployees}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select an employee to analyze" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {employees.map((ep) => (
-                        <SelectItem key={ep.employee_id} value={ep.employee_id}>
-                          {ep.employee.full_name} - {ep.position.title}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                {isLoadingEmployees && (
-                  <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-                )}
+        {/* Filters */}
+        <Card>
+          <CardContent className="pt-6">
+            <div className="grid gap-4 sm:grid-cols-3">
+              <div className="space-y-2">
+                <Label className="flex items-center gap-2">
+                  <Building2 className="h-4 w-4" />
+                  Company
+                </Label>
+                <Select
+                  value={selectedCompanyId}
+                  onValueChange={setSelectedCompanyId}
+                  disabled={isLoadingCompanies}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select company" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {companies.map((c) => (
+                      <SelectItem key={c.id} value={c.id}>
+                        {c.name} ({c.code})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
-            </CardContent>
-          </Card>
-        )}
+
+              <div className="space-y-2">
+                <Label className="flex items-center gap-2">
+                  <FolderTree className="h-4 w-4" />
+                  Department
+                </Label>
+                <Select
+                  value={selectedDepartmentId}
+                  onValueChange={setSelectedDepartmentId}
+                  disabled={!selectedCompanyId || isLoadingDepartments}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder={!selectedCompanyId ? "Select company first" : "Select department"} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {filteredDepartments.map((d) => (
+                      <SelectItem key={d.id} value={d.id}>
+                        {d.name} ({d.code})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label className="flex items-center gap-2">
+                  <Users className="h-4 w-4" />
+                  Employee
+                </Label>
+                <Select
+                  value={selectedEmployeeId}
+                  onValueChange={handleEmployeeChange}
+                  disabled={!selectedDepartmentId || isLoadingEmployees}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder={!selectedDepartmentId ? "Select department first" : employees.length === 0 ? "No employees found" : "Select employee"} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {employees.map((ep) => (
+                      <SelectItem key={ep.employee_id} value={ep.employee_id}>
+                        {ep.employee.full_name} - {ep.position.title}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
         {isLoading ? (
           <div className="flex items-center justify-center py-12">
