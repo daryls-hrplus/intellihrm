@@ -1,9 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Select,
   SelectContent,
@@ -11,13 +13,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Plus,
-  Search,
-  Filter,
   Target,
   Flag,
   CheckCircle,
@@ -30,6 +27,8 @@ import {
   LayoutGrid,
   List,
   UserCircle,
+  BarChart3,
+  AlertCircle,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -40,8 +39,13 @@ import { GoalsList } from "@/components/performance/GoalsList";
 import { GoalTemplatesManager } from "@/components/performance/GoalTemplatesManager";
 import { GoalHierarchyView } from "@/components/performance/GoalHierarchyView";
 import { ContactReportDialog } from "@/components/performance/ContactReportDialog";
+import { GoalsAnalyticsDashboard } from "@/components/performance/GoalsAnalyticsDashboard";
+import { GoalsFilters } from "@/components/performance/GoalsFilters";
+import { EnhancedGoalCard } from "@/components/performance/EnhancedGoalCard";
+import { GoalProgressDialog } from "@/components/performance/GoalProgressDialog";
+import { GoalCommentsDialog } from "@/components/performance/GoalCommentsDialog";
 import { useAuditLog } from "@/hooks/useAuditLog";
-import { Label } from "@/components/ui/label";
+import { format, isPast } from "date-fns";
 
 type GoalStatus = 'draft' | 'active' | 'in_progress' | 'completed' | 'cancelled' | 'overdue';
 type GoalType = 'okr_objective' | 'okr_key_result' | 'smart_goal';
@@ -99,11 +103,13 @@ export default function GoalsPage() {
   const [companies, setCompanies] = useState<{ id: string; name: string }[]>([]);
   const [selectedCompanyId, setSelectedCompanyId] = useState<string>(company?.id || "");
   const [employees, setEmployees] = useState<{ id: string; full_name: string }[]>([]);
-  const [selectedEmployeeId, setSelectedEmployeeId] = useState<string>("");
   const [directReports, setDirectReports] = useState<{ employee_id: string; employee_name: string; position_title: string }[]>([]);
   const [directReportGoals, setDirectReportGoals] = useState<Goal[]>([]);
   const [contactReportOpen, setContactReportOpen] = useState(false);
   const [selectedReportGoal, setSelectedReportGoal] = useState<Goal | null>(null);
+  const [showAnalytics, setShowAnalytics] = useState(true);
+  const [progressDialogOpen, setProgressDialogOpen] = useState(false);
+  const [commentsDialogOpen, setCommentsDialogOpen] = useState(false);
 
   // Fetch companies for company switcher
   useEffect(() => {
@@ -240,20 +246,70 @@ export default function GoalsPage() {
     logView("performance_goals", undefined, "Goals Page");
   }, []);
 
-  const filteredGoals = goals.filter((goal) => {
-    const matchesSearch =
-      goal.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      goal.description?.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesStatus = statusFilter === "all" || goal.status === statusFilter;
-    const matchesLevel = levelFilter === "all" || goal.goal_level === levelFilter;
-    const matchesType = typeFilter === "all" || goal.goal_type === typeFilter;
-    return matchesSearch && matchesStatus && matchesLevel && matchesType;
-  });
+  // Filtered goals with overdue check
+  const filteredGoals = useMemo(() => {
+    return goals.filter((goal) => {
+      const matchesSearch =
+        goal.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        goal.description?.toLowerCase().includes(searchQuery.toLowerCase());
+      
+      // Handle overdue status filter
+      const isOverdue = goal.due_date && isPast(new Date(goal.due_date)) && goal.status !== "completed";
+      const effectiveStatus = isOverdue ? "overdue" : goal.status;
+      const matchesStatus = statusFilter === "all" || effectiveStatus === statusFilter;
+      
+      const matchesLevel = levelFilter === "all" || goal.goal_level === levelFilter;
+      const matchesType = typeFilter === "all" || goal.goal_type === typeFilter;
+      
+      return matchesSearch && matchesStatus && matchesLevel && matchesType;
+    });
+  }, [goals, searchQuery, statusFilter, levelFilter, typeFilter]);
+
+  const hasActiveFilters = Boolean(searchQuery) || statusFilter !== "all" || levelFilter !== "all" || typeFilter !== "all";
+
+  const clearFilters = () => {
+    setSearchQuery("");
+    setStatusFilter("all");
+    setLevelFilter("all");
+    setTypeFilter("all");
+  };
+
+  const handleExport = () => {
+    const data = filteredGoals.map(goal => ({
+      Title: goal.title,
+      Type: goal.goal_type.replace(/_/g, " "),
+      Level: goal.goal_level,
+      Status: goal.status,
+      Progress: `${goal.progress_percentage}%`,
+      Weight: `${goal.weighting}%`,
+      "Due Date": goal.due_date ? format(new Date(goal.due_date), "yyyy-MM-dd") : "",
+      Owner: goal.employee?.full_name || "",
+    }));
+
+    const headers = Object.keys(data[0] || {}).join(",");
+    const rows = data.map(row => Object.values(row).join(",")).join("\n");
+    const csv = `${headers}\n${rows}`;
+
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `goals-${format(new Date(), "yyyy-MM-dd")}.csv`;
+    a.click();
+    window.URL.revokeObjectURL(url);
+    toast.success("Goals exported successfully");
+  };
+
+  // Stats with overdue calculation
+  const overdueCount = goals.filter(g => 
+    g.due_date && isPast(new Date(g.due_date)) && g.status !== "completed"
+  ).length;
 
   const stats = {
     total: goals.length,
     active: goals.filter((g) => g.status === "active" || g.status === "in_progress").length,
     completed: goals.filter((g) => g.status === "completed").length,
+    overdue: overdueCount,
     avgProgress: goals.length > 0
       ? Math.round(goals.reduce((acc, g) => acc + (g.progress_percentage || 0), 0) / goals.length)
       : 0,
@@ -274,15 +330,32 @@ export default function GoalsPage() {
     setContactReportOpen(true);
   };
 
-  const filteredDirectReportGoals = directReportGoals.filter((goal) => {
-    const matchesSearch =
-      goal.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      goal.description?.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesStatus = statusFilter === "all" || goal.status === statusFilter;
-    const matchesLevel = levelFilter === "all" || goal.goal_level === levelFilter;
-    const matchesType = typeFilter === "all" || goal.goal_type === typeFilter;
-    return matchesSearch && matchesStatus && matchesLevel && matchesType;
-  });
+  const handleUpdateProgress = (goal: Goal) => {
+    setSelectedGoal(goal);
+    setProgressDialogOpen(true);
+  };
+
+  const handleViewComments = (goal: Goal) => {
+    setSelectedGoal(goal);
+    setCommentsDialogOpen(true);
+  };
+
+  const filteredDirectReportGoals = useMemo(() => {
+    return directReportGoals.filter((goal) => {
+      const matchesSearch =
+        goal.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        goal.description?.toLowerCase().includes(searchQuery.toLowerCase());
+      
+      const isOverdue = goal.due_date && isPast(new Date(goal.due_date)) && goal.status !== "completed";
+      const effectiveStatus = isOverdue ? "overdue" : goal.status;
+      const matchesStatus = statusFilter === "all" || effectiveStatus === statusFilter;
+      
+      const matchesLevel = levelFilter === "all" || goal.goal_level === levelFilter;
+      const matchesType = typeFilter === "all" || goal.goal_type === typeFilter;
+      
+      return matchesSearch && matchesStatus && matchesLevel && matchesType;
+    });
+  }, [directReportGoals, searchQuery, statusFilter, levelFilter, typeFilter]);
 
   return (
     <AppLayout>
@@ -321,6 +394,10 @@ export default function GoalsPage() {
                 </SelectContent>
               </Select>
             )}
+            <Button variant="outline" onClick={() => setShowAnalytics(!showAnalytics)}>
+              <BarChart3 className="mr-2 h-4 w-4" />
+              {showAnalytics ? "Hide" : "Show"} Analytics
+            </Button>
             <Button onClick={handleCreateGoal}>
               <Plus className="mr-2 h-4 w-4" />
               Create Goal
@@ -329,7 +406,7 @@ export default function GoalsPage() {
         </div>
 
         {/* Stats Cards */}
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
           <Card>
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
@@ -352,6 +429,19 @@ export default function GoalsPage() {
               </div>
             </CardContent>
           </Card>
+          <Card className={stats.overdue > 0 ? "border-warning/50" : ""}>
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-muted-foreground">Overdue</p>
+                  <p className={`text-2xl font-bold ${stats.overdue > 0 ? "text-warning" : ""}`}>
+                    {stats.overdue}
+                  </p>
+                </div>
+                <AlertCircle className={`h-8 w-8 ${stats.overdue > 0 ? "text-warning" : "text-muted-foreground"}`} />
+              </div>
+            </CardContent>
+          </Card>
           <Card>
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
@@ -370,11 +460,16 @@ export default function GoalsPage() {
                   <p className="text-sm text-muted-foreground">Avg Progress</p>
                   <p className="text-2xl font-bold">{stats.avgProgress}%</p>
                 </div>
-                <TrendingUp className="h-8 w-8 text-warning" />
+                <TrendingUp className="h-8 w-8 text-primary" />
               </div>
             </CardContent>
           </Card>
         </div>
+
+        {/* Analytics Dashboard */}
+        {showAnalytics && goals.length > 0 && (
+          <GoalsAnalyticsDashboard goals={goals} />
+        )}
 
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -409,88 +504,60 @@ export default function GoalsPage() {
                 Templates
               </TabsTrigger>
             </TabsList>
-
-            <div className="flex items-center gap-2">
-              <Button
-                variant={viewMode === "grid" ? "default" : "outline"}
-                size="icon"
-                onClick={() => setViewMode("grid")}
-              >
-                <LayoutGrid className="h-4 w-4" />
-              </Button>
-              <Button
-                variant={viewMode === "list" ? "default" : "outline"}
-                size="icon"
-                onClick={() => setViewMode("list")}
-              >
-                <List className="h-4 w-4" />
-              </Button>
-            </div>
           </div>
 
           {/* Filters */}
-          <div className="mt-4 flex flex-wrap gap-4">
-            <div className="relative flex-1 min-w-[200px]">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                placeholder="Search goals..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-[150px]">
-                <SelectValue placeholder="Status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Statuses</SelectItem>
-                <SelectItem value="draft">Draft</SelectItem>
-                <SelectItem value="active">Active</SelectItem>
-                <SelectItem value="in_progress">In Progress</SelectItem>
-                <SelectItem value="completed">Completed</SelectItem>
-                <SelectItem value="cancelled">Cancelled</SelectItem>
-                <SelectItem value="overdue">Overdue</SelectItem>
-              </SelectContent>
-            </Select>
-            <Select value={typeFilter} onValueChange={setTypeFilter}>
-              <SelectTrigger className="w-[150px]">
-                <SelectValue placeholder="Type" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Types</SelectItem>
-                <SelectItem value="smart_goal">SMART Goal</SelectItem>
-                <SelectItem value="okr_objective">OKR Objective</SelectItem>
-                <SelectItem value="okr_key_result">Key Result</SelectItem>
-              </SelectContent>
-            </Select>
-            <Select value={levelFilter} onValueChange={setLevelFilter}>
-              <SelectTrigger className="w-[150px]">
-                <SelectValue placeholder="Level" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Levels</SelectItem>
-                <SelectItem value="company">Company</SelectItem>
-                <SelectItem value="department">Department</SelectItem>
-                <SelectItem value="team">Team</SelectItem>
-                <SelectItem value="individual">Individual</SelectItem>
-              </SelectContent>
-            </Select>
+          <div className="mt-4">
+            <GoalsFilters
+              searchQuery={searchQuery}
+              onSearchChange={setSearchQuery}
+              statusFilter={statusFilter}
+              onStatusChange={setStatusFilter}
+              typeFilter={typeFilter}
+              onTypeChange={setTypeFilter}
+              levelFilter={levelFilter}
+              onLevelChange={setLevelFilter}
+              onExport={handleExport}
+              onClearFilters={clearFilters}
+              hasActiveFilters={hasActiveFilters}
+              viewMode={viewMode}
+              onViewModeChange={setViewMode}
+              showViewToggle
+            />
           </div>
 
           <TabsContent value="my-goals" className="mt-6">
             {loading ? (
               <div className="text-center py-12 text-muted-foreground">Loading goals...</div>
+            ) : filteredGoals.length === 0 ? (
+              <Card>
+                <CardContent className="flex flex-col items-center justify-center py-12">
+                  <Target className="h-12 w-12 text-muted-foreground mb-4" />
+                  <p className="text-muted-foreground mb-4">
+                    {hasActiveFilters ? "No goals match your filters" : "No goals found. Create your first goal to get started."}
+                  </p>
+                  {hasActiveFilters ? (
+                    <Button variant="outline" onClick={clearFilters}>Clear Filters</Button>
+                  ) : (
+                    <Button onClick={handleCreateGoal}>
+                      <Plus className="mr-2 h-4 w-4" />
+                      Create Goal
+                    </Button>
+                  )}
+                </CardContent>
+              </Card>
             ) : viewMode === "grid" ? (
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {filteredGoals.map((goal) => (
-                  <GoalCard key={goal.id} goal={goal} onEdit={handleEditGoal} onRefresh={fetchGoals} />
+                  <EnhancedGoalCard 
+                    key={goal.id} 
+                    goal={goal} 
+                    onEdit={handleEditGoal} 
+                    onRefresh={fetchGoals}
+                    onUpdateProgress={handleUpdateProgress}
+                    onViewComments={handleViewComments}
+                  />
                 ))}
-                {filteredGoals.length === 0 && (
-                  <div className="col-span-full text-center py-12 text-muted-foreground">
-                    No goals found. Create your first goal to get started.
-                  </div>
-                )}
               </div>
             ) : (
               <GoalsList goals={filteredGoals} onEdit={handleEditGoal} onRefresh={fetchGoals} />
@@ -500,16 +567,24 @@ export default function GoalsPage() {
           <TabsContent value="team-goals" className="mt-6">
             {loading ? (
               <div className="text-center py-12 text-muted-foreground">Loading goals...</div>
+            ) : filteredGoals.length === 0 ? (
+              <Card>
+                <CardContent className="flex flex-col items-center justify-center py-12">
+                  <Users className="h-12 w-12 text-muted-foreground mb-4" />
+                  <p className="text-muted-foreground">No team goals found.</p>
+                </CardContent>
+              </Card>
             ) : viewMode === "grid" ? (
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {filteredGoals.map((goal) => (
-                  <GoalCard key={goal.id} goal={goal} onEdit={handleEditGoal} onRefresh={fetchGoals} />
+                  <EnhancedGoalCard 
+                    key={goal.id} 
+                    goal={goal} 
+                    onEdit={handleEditGoal} 
+                    onRefresh={fetchGoals}
+                    showOwner
+                  />
                 ))}
-                {filteredGoals.length === 0 && (
-                  <div className="col-span-full text-center py-12 text-muted-foreground">
-                    No team goals found.
-                  </div>
-                )}
               </div>
             ) : (
               <GoalsList goals={filteredGoals} onEdit={handleEditGoal} onRefresh={fetchGoals} />
@@ -519,16 +594,23 @@ export default function GoalsPage() {
           <TabsContent value="company-goals" className="mt-6">
             {loading ? (
               <div className="text-center py-12 text-muted-foreground">Loading goals...</div>
+            ) : filteredGoals.length === 0 ? (
+              <Card>
+                <CardContent className="flex flex-col items-center justify-center py-12">
+                  <Building2 className="h-12 w-12 text-muted-foreground mb-4" />
+                  <p className="text-muted-foreground">No company goals found.</p>
+                </CardContent>
+              </Card>
             ) : viewMode === "grid" ? (
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {filteredGoals.map((goal) => (
-                  <GoalCard key={goal.id} goal={goal} onEdit={handleEditGoal} onRefresh={fetchGoals} />
+                  <EnhancedGoalCard 
+                    key={goal.id} 
+                    goal={goal} 
+                    onEdit={handleEditGoal} 
+                    onRefresh={fetchGoals}
+                  />
                 ))}
-                {filteredGoals.length === 0 && (
-                  <div className="col-span-full text-center py-12 text-muted-foreground">
-                    No company goals found.
-                  </div>
-                )}
               </div>
             ) : (
               <GoalsList goals={filteredGoals} onEdit={handleEditGoal} onRefresh={fetchGoals} />
@@ -550,56 +632,31 @@ export default function GoalsPage() {
               <div className="text-center py-12 text-muted-foreground">
                 You don't have any direct reports.
               </div>
+            ) : filteredDirectReportGoals.length === 0 ? (
+              <Card>
+                <CardContent className="flex flex-col items-center justify-center py-12">
+                  <UserCircle className="h-12 w-12 text-muted-foreground mb-4" />
+                  <p className="text-muted-foreground">
+                    {hasActiveFilters ? "No goals match your filters" : "No goals found for your direct reports."}
+                  </p>
+                  {hasActiveFilters && (
+                    <Button variant="outline" className="mt-4" onClick={clearFilters}>Clear Filters</Button>
+                  )}
+                </CardContent>
+              </Card>
             ) : viewMode === "grid" ? (
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {filteredDirectReportGoals.map((goal) => (
-                  <Card key={goal.id} className="relative">
-                    <CardContent className="p-4 space-y-3">
-                      <div className="flex items-start justify-between">
-                        <div className="space-y-1">
-                          <h3 className="font-semibold">{goal.title}</h3>
-                          <p className="text-sm text-muted-foreground">
-                            {goal.employee?.full_name}
-                          </p>
-                        </div>
-                        <Badge className={statusColors[goal.status]}>
-                          {goal.status.replace("_", " ")}
-                        </Badge>
-                      </div>
-                      <Progress value={goal.progress_percentage} className="h-2" />
-                      <div className="flex items-center justify-between text-sm text-muted-foreground">
-                        <span>{goal.progress_percentage}% complete</span>
-                        {goal.due_date && (
-                          <span>Due: {new Date(goal.due_date).toLocaleDateString()}</span>
-                        )}
-                      </div>
-                      <div className="flex items-center gap-2 pt-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleEditGoal(goal)}
-                          className="flex-1"
-                        >
-                          View Details
-                        </Button>
-                        <Button
-                          variant="secondary"
-                          size="sm"
-                          onClick={() => handleContactReport(goal)}
-                          className="flex-1"
-                        >
-                          <UserCircle className="mr-1 h-4 w-4" />
-                          Contact
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
+                  <EnhancedGoalCard 
+                    key={goal.id} 
+                    goal={goal} 
+                    onEdit={handleEditGoal} 
+                    onRefresh={fetchGoals}
+                    onUpdateProgress={handleUpdateProgress}
+                    onViewComments={handleViewComments}
+                    showOwner
+                  />
                 ))}
-                {filteredDirectReportGoals.length === 0 && (
-                  <div className="col-span-full text-center py-12 text-muted-foreground">
-                    No goals found for your direct reports.
-                  </div>
-                )}
               </div>
             ) : (
               <div className="space-y-2">
@@ -643,11 +700,6 @@ export default function GoalsPage() {
                     </CardContent>
                   </Card>
                 ))}
-                {filteredDirectReportGoals.length === 0 && (
-                  <div className="text-center py-12 text-muted-foreground">
-                    No goals found for your direct reports.
-                  </div>
-                )}
               </div>
             )}
           </TabsContent>
@@ -669,6 +721,23 @@ export default function GoalsPage() {
           onOpenChange={setContactReportOpen}
           goal={selectedReportGoal}
         />
+      )}
+
+      {selectedGoal && (
+        <>
+          <GoalProgressDialog
+            open={progressDialogOpen}
+            onOpenChange={setProgressDialogOpen}
+            goal={selectedGoal as any}
+            onSuccess={fetchGoals}
+          />
+          <GoalCommentsDialog
+            open={commentsDialogOpen}
+            onOpenChange={setCommentsDialogOpen}
+            goalId={selectedGoal.id}
+            goalTitle={selectedGoal.title}
+          />
+        </>
       )}
     </AppLayout>
   );

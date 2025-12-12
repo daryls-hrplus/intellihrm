@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -7,6 +7,13 @@ import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   Target,
   TrendingUp,
   Calendar,
@@ -14,16 +21,23 @@ import {
   MessageSquare,
   UserCircle,
   Plus,
+  AlertCircle,
+  CheckCircle,
+  BarChart3,
+  X,
+  Download,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { format } from "date-fns";
+import { format, isPast, differenceInDays } from "date-fns";
 import { GoalProgressDialog } from "@/components/performance/GoalProgressDialog";
 import { GoalCommentsDialog } from "@/components/performance/GoalCommentsDialog";
 import { ContactManagerDialog } from "@/components/performance/ContactManagerDialog";
 import { GoalDialog } from "@/components/performance/GoalDialog";
+import { GoalsAnalyticsDashboard } from "@/components/performance/GoalsAnalyticsDashboard";
+import { toast } from "sonner";
 
-type GoalStatus = "draft" | "active" | "in_progress" | "completed" | "cancelled";
+type GoalStatus = "draft" | "active" | "in_progress" | "completed" | "cancelled" | "overdue";
 
 interface Goal {
   id: string;
@@ -37,14 +51,17 @@ interface Goal {
   unit_of_measure: string | null;
   weighting: number | null;
   goal_type: string;
+  goal_level?: string;
+  category?: string | null;
 }
 
 const statusConfig: Record<GoalStatus, { label: string; className: string }> = {
   draft: { label: "Draft", className: "bg-muted text-muted-foreground" },
-  active: { label: "Active", className: "bg-blue-500/10 text-blue-600" },
-  in_progress: { label: "In Progress", className: "bg-amber-500/10 text-amber-600" },
-  completed: { label: "Completed", className: "bg-green-500/10 text-green-600" },
+  active: { label: "Active", className: "bg-primary/10 text-primary" },
+  in_progress: { label: "In Progress", className: "bg-info/10 text-info" },
+  completed: { label: "Completed", className: "bg-success/10 text-success" },
   cancelled: { label: "Cancelled", className: "bg-destructive/10 text-destructive" },
+  overdue: { label: "Overdue", className: "bg-warning/10 text-warning" },
 };
 
 export default function MyGoalsPage() {
@@ -52,11 +69,14 @@ export default function MyGoalsPage() {
   const [goals, setGoals] = useState<Goal[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [typeFilter, setTypeFilter] = useState("all");
   const [selectedGoal, setSelectedGoal] = useState<Goal | null>(null);
   const [progressDialogOpen, setProgressDialogOpen] = useState(false);
   const [commentsDialogOpen, setCommentsDialogOpen] = useState(false);
   const [contactManagerOpen, setContactManagerOpen] = useState(false);
   const [createGoalOpen, setCreateGoalOpen] = useState(false);
+  const [showAnalytics, setShowAnalytics] = useState(true);
 
   const fetchGoals = async () => {
     if (!user?.id) return;
@@ -82,16 +102,38 @@ export default function MyGoalsPage() {
     fetchGoals();
   }, [user?.id]);
 
-  const filteredGoals = goals.filter(
-    (goal) =>
-      goal.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      goal.description?.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // Filtered goals with overdue detection
+  const filteredGoals = useMemo(() => {
+    return goals.filter((goal) => {
+      const matchesSearch = 
+        goal.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        goal.description?.toLowerCase().includes(searchQuery.toLowerCase());
+      
+      const isOverdue = goal.due_date && isPast(new Date(goal.due_date)) && goal.status !== "completed";
+      const effectiveStatus = isOverdue ? "overdue" : goal.status;
+      const matchesStatus = statusFilter === "all" || effectiveStatus === statusFilter;
+      const matchesType = typeFilter === "all" || goal.goal_type === typeFilter;
+      
+      return matchesSearch && matchesStatus && matchesType;
+    });
+  }, [goals, searchQuery, statusFilter, typeFilter]);
 
-  const activeGoals = filteredGoals.filter(
+  const hasActiveFilters = Boolean(searchQuery) || statusFilter !== "all" || typeFilter !== "all";
+
+  const clearFilters = () => {
+    setSearchQuery("");
+    setStatusFilter("all");
+    setTypeFilter("all");
+  };
+
+  // Stats
+  const activeGoals = goals.filter(
     (g) => g.status === "active" || g.status === "in_progress"
   );
-  const completedGoals = filteredGoals.filter((g) => g.status === "completed");
+  const completedGoals = goals.filter((g) => g.status === "completed");
+  const overdueGoals = goals.filter(
+    (g) => g.due_date && isPast(new Date(g.due_date)) && g.status !== "completed"
+  );
   const averageProgress =
     activeGoals.length > 0
       ? Math.round(
@@ -115,6 +157,30 @@ export default function MyGoalsPage() {
     setContactManagerOpen(true);
   };
 
+  const handleExport = () => {
+    const data = filteredGoals.map(goal => ({
+      Title: goal.title,
+      Type: goal.goal_type.replace(/_/g, " "),
+      Status: goal.status,
+      Progress: `${goal.progress_percentage}%`,
+      Weight: goal.weighting ? `${goal.weighting}%` : "",
+      "Due Date": goal.due_date ? format(new Date(goal.due_date), "yyyy-MM-dd") : "",
+    }));
+
+    const headers = Object.keys(data[0] || {}).join(",");
+    const rows = data.map(row => Object.values(row).join(",")).join("\n");
+    const csv = `${headers}\n${rows}`;
+
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `my-goals-${format(new Date(), "yyyy-MM-dd")}.csv`;
+    a.click();
+    window.URL.revokeObjectURL(url);
+    toast.success("Goals exported successfully");
+  };
+
   return (
     <AppLayout>
       <div className="space-y-6">
@@ -132,14 +198,20 @@ export default function MyGoalsPage() {
               Track and update your performance goals
             </p>
           </div>
-          <Button onClick={() => setCreateGoalOpen(true)}>
-            <Plus className="mr-2 h-4 w-4" />
-            Create Goal
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={() => setShowAnalytics(!showAnalytics)}>
+              <BarChart3 className="mr-2 h-4 w-4" />
+              {showAnalytics ? "Hide" : "Show"} Analytics
+            </Button>
+            <Button onClick={() => setCreateGoalOpen(true)}>
+              <Plus className="mr-2 h-4 w-4" />
+              Create Goal
+            </Button>
+          </div>
         </div>
 
         {/* Summary Stats */}
-        <div className="grid gap-4 md:grid-cols-3">
+        <div className="grid gap-4 md:grid-cols-4">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-sm font-medium">Active Goals</CardTitle>
@@ -158,10 +230,21 @@ export default function MyGoalsPage() {
               <div className="text-2xl font-bold">{averageProgress}%</div>
             </CardContent>
           </Card>
+          <Card className={overdueGoals.length > 0 ? "border-warning/50" : ""}>
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium">Overdue</CardTitle>
+              <AlertCircle className={`h-4 w-4 ${overdueGoals.length > 0 ? "text-warning" : "text-muted-foreground"}`} />
+            </CardHeader>
+            <CardContent>
+              <div className={`text-2xl font-bold ${overdueGoals.length > 0 ? "text-warning" : ""}`}>
+                {overdueGoals.length}
+              </div>
+            </CardContent>
+          </Card>
           <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-sm font-medium">Completed</CardTitle>
-              <Calendar className="h-4 w-4 text-muted-foreground" />
+              <CheckCircle className="h-4 w-4 text-success" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{completedGoals.length}</div>
@@ -169,15 +252,62 @@ export default function MyGoalsPage() {
           </Card>
         </div>
 
-        {/* Search */}
-        <div className="relative max-w-md">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            placeholder="Search goals..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10"
-          />
+        {/* Analytics Dashboard */}
+        {showAnalytics && goals.length > 0 && (
+          <GoalsAnalyticsDashboard goals={goals} compact />
+        )}
+
+        {/* Filters */}
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-1 flex-wrap gap-2">
+            <div className="relative flex-1 min-w-[200px] max-w-xs">
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                placeholder="Search goals..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+            
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger className="w-[140px]">
+                <SelectValue placeholder="All Status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Status</SelectItem>
+                <SelectItem value="active">Active</SelectItem>
+                <SelectItem value="in_progress">In Progress</SelectItem>
+                <SelectItem value="overdue">Overdue</SelectItem>
+                <SelectItem value="completed">Completed</SelectItem>
+                <SelectItem value="draft">Draft</SelectItem>
+              </SelectContent>
+            </Select>
+            
+            <Select value={typeFilter} onValueChange={setTypeFilter}>
+              <SelectTrigger className="w-[140px]">
+                <SelectValue placeholder="All Types" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Types</SelectItem>
+                <SelectItem value="smart_goal">SMART Goal</SelectItem>
+                <SelectItem value="okr_objective">OKR Objective</SelectItem>
+                <SelectItem value="okr_key_result">Key Result</SelectItem>
+              </SelectContent>
+            </Select>
+
+            {hasActiveFilters && (
+              <Button variant="ghost" size="sm" onClick={clearFilters}>
+                <X className="mr-1 h-4 w-4" />
+                Clear
+              </Button>
+            )}
+          </div>
+
+          <Button variant="outline" size="sm" onClick={handleExport}>
+            <Download className="mr-2 h-4 w-4" />
+            Export
+          </Button>
         </div>
 
         {/* Goals List */}
@@ -191,21 +321,37 @@ export default function MyGoalsPage() {
               <Target className="mx-auto h-12 w-12 text-muted-foreground/50" />
               <h3 className="mt-4 text-lg font-semibold">No goals found</h3>
               <p className="text-muted-foreground">
-                {searchQuery
-                  ? "Try adjusting your search"
+                {hasActiveFilters
+                  ? "Try adjusting your filters"
                   : "You don't have any goals assigned yet"}
               </p>
+              {hasActiveFilters ? (
+                <Button variant="outline" className="mt-4" onClick={clearFilters}>
+                  Clear Filters
+                </Button>
+              ) : (
+                <Button className="mt-4" onClick={() => setCreateGoalOpen(true)}>
+                  <Plus className="mr-2 h-4 w-4" />
+                  Create Goal
+                </Button>
+              )}
             </CardContent>
           </Card>
         ) : (
           <div className="space-y-4">
             {filteredGoals.map((goal) => {
-              const status = statusConfig[goal.status] || statusConfig.active;
-              const isEditable =
-                goal.status === "active" || goal.status === "in_progress";
+              const isOverdue = goal.due_date && isPast(new Date(goal.due_date)) && goal.status !== "completed";
+              const daysUntilDue = goal.due_date ? differenceInDays(new Date(goal.due_date), new Date()) : null;
+              const isAtRisk = daysUntilDue !== null && daysUntilDue > 0 && daysUntilDue <= 7 && goal.progress_percentage < 80;
+              const effectiveStatus = isOverdue ? "overdue" : goal.status;
+              const status = statusConfig[effectiveStatus] || statusConfig.active;
+              const isEditable = goal.status === "active" || goal.status === "in_progress";
 
               return (
-                <Card key={goal.id} className="overflow-hidden">
+                <Card 
+                  key={goal.id} 
+                  className={`overflow-hidden transition-all ${isOverdue ? "border-warning/50" : ""} ${isAtRisk && !isOverdue ? "border-warning/30" : ""}`}
+                >
                   <CardContent className="p-6">
                     <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
                       <div className="flex-1 space-y-2">
@@ -215,6 +361,12 @@ export default function MyGoalsPage() {
                           {goal.weighting && (
                             <Badge variant="outline">Weight: {goal.weighting}%</Badge>
                           )}
+                          {isAtRisk && !isOverdue && (
+                            <Badge variant="outline" className="border-warning text-warning">
+                              <AlertCircle className="mr-1 h-3 w-3" />
+                              At Risk
+                            </Badge>
+                          )}
                         </div>
                         {goal.description && (
                           <p className="text-sm text-muted-foreground line-clamp-2">
@@ -223,9 +375,15 @@ export default function MyGoalsPage() {
                         )}
                         <div className="flex items-center gap-4 text-sm text-muted-foreground">
                           {goal.due_date && (
-                            <span className="flex items-center gap-1">
+                            <span className={`flex items-center gap-1 ${isOverdue ? "text-warning font-medium" : ""}`}>
                               <Calendar className="h-3.5 w-3.5" />
-                              Due: {format(new Date(goal.due_date), "MMM d, yyyy")}
+                              {isOverdue ? (
+                                `Overdue by ${Math.abs(daysUntilDue!)} days`
+                              ) : daysUntilDue !== null && daysUntilDue <= 7 ? (
+                                <span className="text-warning">{daysUntilDue} days left</span>
+                              ) : (
+                                `Due: ${format(new Date(goal.due_date), "MMM d, yyyy")}`
+                              )}
                             </span>
                           )}
                           {goal.target_value && (
@@ -269,9 +427,14 @@ export default function MyGoalsPage() {
                     <div className="mt-4 space-y-1">
                       <div className="flex items-center justify-between text-sm">
                         <span className="text-muted-foreground">Progress</span>
-                        <span className="font-medium">{goal.progress_percentage}%</span>
+                        <span className={`font-medium ${goal.progress_percentage >= 100 ? "text-success" : ""}`}>
+                          {goal.progress_percentage}%
+                        </span>
                       </div>
-                      <Progress value={goal.progress_percentage} className="h-2" />
+                      <Progress 
+                        value={goal.progress_percentage} 
+                        className={`h-2 ${isOverdue ? "[&>div]:bg-warning" : ""}`}
+                      />
                     </div>
                   </CardContent>
                 </Card>
@@ -286,7 +449,7 @@ export default function MyGoalsPage() {
             <GoalProgressDialog
               open={progressDialogOpen}
               onOpenChange={setProgressDialogOpen}
-              goal={selectedGoal}
+              goal={selectedGoal as any}
               onSuccess={fetchGoals}
             />
             <GoalCommentsDialog
