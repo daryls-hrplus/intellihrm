@@ -55,7 +55,7 @@ const mssModules = [
   {
     title: "Performance Appraisals",
     description: "Conduct and manage team performance appraisals",
-    href: "/performance/appraisals",
+    href: "/performance/appraisals?view=team",
     icon: ClipboardCheck,
     color: "bg-purple-500/10 text-purple-600",
   },

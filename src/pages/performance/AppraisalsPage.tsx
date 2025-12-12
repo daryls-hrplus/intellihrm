@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Button } from "@/components/ui/button";
@@ -102,7 +103,22 @@ const tabHelpText: Record<string, string> = {
 
 export default function AppraisalsPage() {
   const { user, company, isAdmin, isHRManager } = useAuth();
-  const [activeTab, setActiveTab] = useState("my-appraisals");
+  const [searchParams] = useSearchParams();
+  const viewParam = searchParams.get("view");
+  
+  // Determine initial tab based on URL param and user role
+  const getInitialTab = () => {
+    if (viewParam === "team") {
+      // Coming from MSS - show team evaluation tab for managers, or my-team-cycles if not admin/HR
+      if (!isAdmin && !isHRManager) {
+        return "my-team-cycles";
+      }
+      return "evaluate-team";
+    }
+    return "my-appraisals";
+  };
+  
+  const [activeTab, setActiveTab] = useState(getInitialTab);
   const [cycles, setCycles] = useState<AppraisalCycle[]>([]);
   const [managerCycles, setManagerCycles] = useState<AppraisalCycle[]>([]);
   const [myTeamCycles, setMyTeamCycles] = useState<AppraisalCycle[]>([]);
