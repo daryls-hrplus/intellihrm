@@ -289,9 +289,8 @@ export function JobCompetenciesManager({ jobId, companyId }: JobCompetenciesMana
     }
   };
 
-  // Calculate current total weight (for today's date)
-  const today = format(new Date(), "yyyy-MM-dd");
-  const currentTotalWeight = calculateOverlappingWeight(today, today);
+  // Simple sum of all weights for display (active competencies currently assigned)
+  const totalWeight = jobCompetencies.reduce((sum, jc) => sum + Number(jc.weighting), 0);
 
   return (
     <div className="space-y-4">
@@ -299,7 +298,7 @@ export function JobCompetenciesManager({ jobId, companyId }: JobCompetenciesMana
         <div className="flex items-center gap-2">
           <Award className="h-5 w-5 text-primary" />
           <h3 className="font-semibold">Required Competencies</h3>
-          <Badge variant="outline">Current Weight: {currentTotalWeight}%</Badge>
+          <Badge variant="outline">Total Weight: {totalWeight}%</Badge>
         </div>
         <Button size="sm" onClick={handleOpenDialog} disabled={competencies.length === 0}>
           <Plus className="mr-2 h-4 w-4" />
