@@ -69,7 +69,7 @@ const mssModules = [
   {
     title: "360° Feedback",
     description: "Manage 360-degree feedback reviews for your team",
-    href: "/performance/360",
+    href: "/mss/360",
     icon: Users,
     color: "bg-rose-500/10 text-rose-600",
   },

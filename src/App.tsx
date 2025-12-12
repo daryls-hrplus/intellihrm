@@ -129,6 +129,7 @@ import MyLettersPage from "./pages/ess/MyLettersPage";
 import MyGoalsPage from "./pages/ess/MyGoalsPage";
 import ManagerSelfServicePage from "./pages/mss/ManagerSelfServicePage";
 import MssAppraisalsPage from "./pages/mss/MssAppraisalsPage";
+import MssReview360Page from "./pages/mss/MssReview360Page";
 
 // Workflow pages
 import AdminWorkflowTemplatesPage from "./pages/admin/AdminWorkflowTemplatesPage";
@@ -219,6 +220,14 @@ const App = () => (
               element={
                 <ProtectedRoute moduleCode="mss">
                   <MssAppraisalsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/mss/360"
+              element={
+                <ProtectedRoute moduleCode="mss">
+                  <MssReview360Page />
                 </ProtectedRoute>
               }
             />
