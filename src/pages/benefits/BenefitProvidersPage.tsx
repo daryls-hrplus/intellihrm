@@ -386,12 +386,12 @@ export default function BenefitProvidersPage() {
         </div>
 
         <div className="flex gap-4">
-          <Select value={selectedCompanyId} onValueChange={setSelectedCompanyId}>
+          <Select value={selectedCompanyId || "all"} onValueChange={(val) => setSelectedCompanyId(val === "all" ? "" : val)}>
             <SelectTrigger className="w-64">
               <SelectValue placeholder="All Companies" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All Companies</SelectItem>
+              <SelectItem value="all">All Companies</SelectItem>
               {companies.map((company) => (
                 <SelectItem key={company.id} value={company.id}>
                   {company.name}
