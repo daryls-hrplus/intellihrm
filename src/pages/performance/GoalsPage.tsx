@@ -130,9 +130,14 @@ export default function GoalsPage() {
   };
 
   useEffect(() => {
-    fetchGoals();
-    logView("performance_goals", undefined, "Goals Page");
+    if (company?.id) {
+      fetchGoals();
+    }
   }, [company?.id, activeTab]);
+
+  useEffect(() => {
+    logView("performance_goals", undefined, "Goals Page");
+  }, []);
 
   const filteredGoals = goals.filter((goal) => {
     const matchesSearch =
