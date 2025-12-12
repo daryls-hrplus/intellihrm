@@ -2822,6 +2822,53 @@ export type Database = {
           },
         ]
       }
+      job_goals: {
+        Row: {
+          created_at: string
+          end_date: string | null
+          goal_description: string | null
+          goal_name: string
+          id: string
+          job_id: string
+          notes: string | null
+          start_date: string
+          updated_at: string
+          weighting: number
+        }
+        Insert: {
+          created_at?: string
+          end_date?: string | null
+          goal_description?: string | null
+          goal_name: string
+          id?: string
+          job_id: string
+          notes?: string | null
+          start_date?: string
+          updated_at?: string
+          weighting?: number
+        }
+        Update: {
+          created_at?: string
+          end_date?: string | null
+          goal_description?: string | null
+          goal_name?: string
+          id?: string
+          job_id?: string
+          notes?: string | null
+          start_date?: string
+          updated_at?: string
+          weighting?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "job_goals_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       job_responsibilities: {
         Row: {
           created_at: string
