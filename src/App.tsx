@@ -81,6 +81,7 @@ import QuizPage from "./pages/training/QuizPage";
 import CertificationsPage from "./pages/training/CertificationsPage";
 import LiveSessionsPage from "./pages/training/LiveSessionsPage";
 import TrainingCalendarPage from "./pages/training/TrainingCalendarPage";
+import CompetencyGapAnalysisPage from "./pages/training/CompetencyGapAnalysisPage";
 
 // Succession pages
 import SuccessionDashboardPage from "./pages/succession/SuccessionDashboardPage";
@@ -646,6 +647,14 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <TrainingCalendarPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/training/gap-analysis"
+              element={
+                <ProtectedRoute>
+                  <CompetencyGapAnalysisPage />
                 </ProtectedRoute>
               }
             />
