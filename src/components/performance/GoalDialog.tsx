@@ -185,6 +185,8 @@ export function GoalDialog({
   useEffect(() => {
     if (formData.employee_id) {
       fetchJobGoalsForEmployee(formData.employee_id);
+    } else {
+      setJobGoals([]);
     }
   }, [formData.employee_id]);
 
@@ -213,6 +215,7 @@ export function GoalDialog({
         time_bound: "",
       });
     } else {
+      const initialEmployeeId = user?.id || "";
       setFormData({
         title: "",
         description: "",
@@ -228,14 +231,17 @@ export function GoalDialog({
         current_value: "0",
         unit_of_measure: "",
         parent_goal_id: "",
-        employee_id: user?.id || "",
+        employee_id: initialEmployeeId,
         specific: "",
         measurable: "",
         achievable: "",
         relevant: "",
         time_bound: "",
       });
-      setJobGoals([]);
+      // Fetch job goals immediately for the initial employee
+      if (initialEmployeeId && open) {
+        fetchJobGoalsForEmployee(initialEmployeeId);
+      }
     }
   }, [goal, open, user?.id]);
 
