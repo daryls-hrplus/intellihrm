@@ -6,6 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   Plus,
   Calendar,
@@ -18,6 +19,7 @@ import {
   Users,
   BarChart3,
   HelpCircle,
+  Building2,
 } from "lucide-react";
 import {
   Tooltip,
@@ -108,11 +110,37 @@ export default function AppraisalsPage() {
   const [evaluationDialogOpen, setEvaluationDialogOpen] = useState(false);
   const [selectedParticipant, setSelectedParticipant] = useState<PendingEvaluation | null>(null);
 
+  // Company switcher for admin/HR
+  const [companies, setCompanies] = useState<{ id: string; name: string }[]>([]);
+  const [selectedCompanyId, setSelectedCompanyId] = useState<string>(company?.id || "");
+
   useEffect(() => {
-    if (company?.id) {
-      fetchData();
+    if (isAdmin || isHRManager) {
+      fetchCompanies();
+    }
+  }, [isAdmin, isHRManager]);
+
+  useEffect(() => {
+    // Set initial company when user's company loads
+    if (company?.id && !selectedCompanyId) {
+      setSelectedCompanyId(company.id);
     }
   }, [company?.id]);
+
+  useEffect(() => {
+    if (selectedCompanyId) {
+      fetchData();
+    }
+  }, [selectedCompanyId]);
+
+  const fetchCompanies = async () => {
+    const { data } = await supabase
+      .from("companies")
+      .select("id, name")
+      .eq("is_active", true)
+      .order("name");
+    setCompanies(data || []);
+  };
 
   const fetchData = async () => {
     setLoading(true);
@@ -133,7 +161,7 @@ export default function AppraisalsPage() {
     const { data, error } = await supabase
       .from("appraisal_cycles")
       .select("*")
-      .eq("company_id", company?.id)
+      .eq("company_id", selectedCompanyId)
       .order("created_at", { ascending: false });
 
     if (error) {
@@ -295,12 +323,30 @@ export default function AppraisalsPage() {
               </p>
             </div>
           </div>
-          {(isAdmin || isHRManager) && (
-            <Button onClick={handleCreateCycle}>
-              <Plus className="mr-2 h-4 w-4" />
-              Create Appraisal Cycle
-            </Button>
-          )}
+          <div className="flex items-center gap-3">
+            {/* Company Switcher */}
+            {(isAdmin || isHRManager) && companies.length > 0 && (
+              <Select value={selectedCompanyId} onValueChange={setSelectedCompanyId}>
+                <SelectTrigger className="w-[200px]">
+                  <Building2 className="mr-2 h-4 w-4" />
+                  <SelectValue placeholder="Select company" />
+                </SelectTrigger>
+                <SelectContent>
+                  {companies.map((c) => (
+                    <SelectItem key={c.id} value={c.id}>
+                      {c.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
+            {(isAdmin || isHRManager) && (
+              <Button onClick={handleCreateCycle}>
+                <Plus className="mr-2 h-4 w-4" />
+                Create Appraisal Cycle
+              </Button>
+            )}
+          </div>
         </div>
 
         {/* Stats Cards */}
@@ -589,7 +635,7 @@ export default function AppraisalsPage() {
           open={cycleDialogOpen}
           onOpenChange={setCycleDialogOpen}
           cycle={selectedCycle}
-          companyId={company?.id}
+          companyId={selectedCompanyId}
           onSuccess={fetchData}
         />
 
