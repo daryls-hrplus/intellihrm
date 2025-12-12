@@ -2661,6 +2661,81 @@ export type Database = {
           },
         ]
       }
+      jobs: {
+        Row: {
+          code: string
+          company_id: string
+          created_at: string
+          critical_level: string | null
+          description: string | null
+          end_date: string | null
+          id: string
+          is_active: boolean
+          job_class: string | null
+          job_family_id: string
+          job_grade: string | null
+          job_level: string | null
+          name: string
+          standard_hours: number | null
+          standard_work_period: string | null
+          start_date: string
+          updated_at: string
+        }
+        Insert: {
+          code: string
+          company_id: string
+          created_at?: string
+          critical_level?: string | null
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          is_active?: boolean
+          job_class?: string | null
+          job_family_id: string
+          job_grade?: string | null
+          job_level?: string | null
+          name: string
+          standard_hours?: number | null
+          standard_work_period?: string | null
+          start_date?: string
+          updated_at?: string
+        }
+        Update: {
+          code?: string
+          company_id?: string
+          created_at?: string
+          critical_level?: string | null
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          is_active?: boolean
+          job_class?: string | null
+          job_family_id?: string
+          job_grade?: string | null
+          job_level?: string | null
+          name?: string
+          standard_hours?: number | null
+          standard_work_period?: string | null
+          start_date?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "jobs_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "jobs_job_family_id_fkey"
+            columns: ["job_family_id"]
+            isOneToOne: false
+            referencedRelation: "job_families"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       kb_articles: {
         Row: {
           author_id: string | null
