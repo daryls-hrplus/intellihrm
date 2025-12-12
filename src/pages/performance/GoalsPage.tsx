@@ -128,7 +128,7 @@ export default function GoalsPage() {
 
   // Update selectedCompanyId when company from auth changes
   useEffect(() => {
-    if (company?.id && !selectedCompanyId) {
+    if (company?.id) {
       setSelectedCompanyId(company.id);
     }
   }, [company?.id]);
