@@ -413,6 +413,59 @@ export type Database = {
         }
         Relationships: []
       }
+      competencies: {
+        Row: {
+          category: string
+          code: string
+          company_id: string
+          created_at: string
+          description: string | null
+          end_date: string | null
+          id: string
+          is_active: boolean
+          name: string
+          proficiency_levels: Json | null
+          start_date: string
+          updated_at: string
+        }
+        Insert: {
+          category?: string
+          code: string
+          company_id: string
+          created_at?: string
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          proficiency_levels?: Json | null
+          start_date?: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          code?: string
+          company_id?: string
+          created_at?: string
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          proficiency_levels?: Json | null
+          start_date?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "competencies_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       currencies: {
         Row: {
           code: string
