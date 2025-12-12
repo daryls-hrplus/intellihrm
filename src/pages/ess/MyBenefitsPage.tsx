@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout } from "@/components/layout/AppLayout";
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
@@ -96,6 +97,10 @@ export default function MyBenefitsPage() {
   return (
     <AppLayout>
       <div className="space-y-6">
+        <Breadcrumbs items={[
+          { label: "Employee Self Service", href: "/ess" },
+          { label: "My Benefits" }
+        ]} />
         <div>
           <h1 className="text-3xl font-bold">My Benefits</h1>
           <p className="text-muted-foreground">View your enrolled benefit plans and coverage</p>
