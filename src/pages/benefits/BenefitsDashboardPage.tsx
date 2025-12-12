@@ -4,6 +4,13 @@ import { ModuleReportsButton } from "@/components/reports/ModuleReportsButton";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   Gift,
   Heart,
   Shield,
@@ -24,6 +31,11 @@ import {
   Building2,
   Loader2,
 } from "lucide-react";
+
+interface Company {
+  id: string;
+  name: string;
+}
 
 const benefitsModules = [
   {
@@ -184,6 +196,8 @@ function ModuleSection({ title, modules, startIndex }: { title: string; modules:
 }
 
 export default function BenefitsDashboardPage() {
+  const [companies, setCompanies] = useState<Company[]>([]);
+  const [selectedCompanyId, setSelectedCompanyId] = useState<string>("all");
   const [stats, setStats] = useState<DashboardStats>({
     activePlans: 0,
     enrolledUsers: 0,
@@ -192,50 +206,97 @@ export default function BenefitsDashboardPage() {
   });
   const [loading, setLoading] = useState(true);
 
+  // Fetch companies on mount
+  useEffect(() => {
+    const fetchCompanies = async () => {
+      const { data } = await supabase
+        .from("companies")
+        .select("id, name")
+        .eq("is_active", true)
+        .order("name");
+      setCompanies(data || []);
+    };
+    fetchCompanies();
+  }, []);
+
+  // Fetch stats when company selection changes
   useEffect(() => {
     const fetchStats = async () => {
+      setLoading(true);
       try {
+        const companyFilter = selectedCompanyId !== "all" ? selectedCompanyId : null;
+
         // Fetch active plans count
-        const { count: activePlansCount } = await supabase
+        let plansQuery = supabase
           .from("benefit_plans")
           .select("*", { count: "exact", head: true })
           .eq("is_active", true);
+        if (companyFilter) {
+          plansQuery = plansQuery.eq("company_id", companyFilter);
+        }
+        const { count: activePlansCount } = await plansQuery;
 
         // Fetch active enrollments count (unique employees)
-        const { data: enrollments } = await supabase
+        // Need to join with plans to filter by company
+        let enrollmentsQuery = supabase
           .from("benefit_enrollments")
-          .select("employee_id")
+          .select("employee_id, plan_id, benefit_plans!inner(company_id)")
           .eq("status", "active");
-        const uniqueEnrolledUsers = new Set(enrollments?.map(e => e.employee_id) || []).size;
+        
+        const { data: enrollments } = await enrollmentsQuery;
+        
+        let filteredEnrollments = enrollments || [];
+        if (companyFilter) {
+          filteredEnrollments = filteredEnrollments.filter(
+            (e: any) => e.benefit_plans?.company_id === companyFilter
+          );
+        }
+        const uniqueEnrolledUsers = new Set(filteredEnrollments.map((e: any) => e.employee_id)).size;
 
         // Fetch health plans count (plans with health-related categories)
-        const { data: healthCategories } = await supabase
+        let categoriesQuery = supabase
           .from("benefit_categories")
           .select("id")
           .in("category_type", ["health", "medical", "dental", "vision"]);
+        if (companyFilter) {
+          categoriesQuery = categoriesQuery.eq("company_id", companyFilter);
+        }
+        const { data: healthCategories } = await categoriesQuery;
         
         const healthCategoryIds = healthCategories?.map(c => c.id) || [];
         let healthPlansCount = 0;
         if (healthCategoryIds.length > 0) {
-          const { count } = await supabase
+          let healthPlansQuery = supabase
             .from("benefit_plans")
             .select("*", { count: "exact", head: true })
             .eq("is_active", true)
             .in("category_id", healthCategoryIds);
+          if (companyFilter) {
+            healthPlansQuery = healthPlansQuery.eq("company_id", companyFilter);
+          }
+          const { count } = await healthPlansQuery;
           healthPlansCount = count || 0;
         }
 
-        // Fetch pending claims count
-        const { count: pendingClaimsCount } = await supabase
+        // Fetch pending claims count - need to filter through enrollments and plans
+        const { data: allClaims } = await supabase
           .from("benefit_claims")
-          .select("*", { count: "exact", head: true })
+          .select("id, enrollment_id, benefit_enrollments!inner(plan_id, benefit_plans!inner(company_id))")
           .eq("status", "submitted");
+        
+        let filteredClaims = allClaims || [];
+        if (companyFilter) {
+          filteredClaims = filteredClaims.filter(
+            (c: any) => c.benefit_enrollments?.benefit_plans?.company_id === companyFilter
+          );
+        }
+        const pendingClaimsCount = filteredClaims.length;
 
         setStats({
           activePlans: activePlansCount || 0,
           enrolledUsers: uniqueEnrolledUsers,
           healthPlans: healthPlansCount,
-          pendingClaims: pendingClaimsCount || 0,
+          pendingClaims: pendingClaimsCount,
         });
       } catch (error) {
         console.error("Error fetching benefits stats:", error);
@@ -245,7 +306,7 @@ export default function BenefitsDashboardPage() {
     };
 
     fetchStats();
-  }, []);
+  }, [selectedCompanyId]);
 
   const statCards = [
     { label: "Active Plans", value: stats.activePlans, icon: CheckCircle, color: "bg-success/10 text-success" },
@@ -274,6 +335,24 @@ export default function BenefitsDashboardPage() {
             </div>
             <ModuleReportsButton module="benefits" />
           </div>
+        </div>
+
+        {/* Company Filter */}
+        <div className="flex items-center gap-3">
+          <Building2 className="h-4 w-4 text-muted-foreground" />
+          <Select value={selectedCompanyId} onValueChange={setSelectedCompanyId}>
+            <SelectTrigger className="w-[280px]">
+              <SelectValue placeholder="Select Company" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Companies</SelectItem>
+              {companies.map((company) => (
+                <SelectItem key={company.id} value={company.id}>
+                  {company.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
 
         {/* Stats Cards */}
