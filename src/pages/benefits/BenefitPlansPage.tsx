@@ -22,6 +22,7 @@ interface BenefitPlan {
   code: string;
   description: string | null;
   plan_type: string;
+  provider_id: string | null;
   provider_name: string | null;
   enrollment_type: string;
   employee_contribution: number;
@@ -33,12 +34,18 @@ interface BenefitPlan {
   start_date: string;
   end_date: string | null;
   benefit_categories?: { name: string };
+  benefit_providers?: { name: string };
 }
 
 interface BenefitCategory {
   id: string;
   name: string;
   category_type: string;
+}
+
+interface BenefitProvider {
+  id: string;
+  name: string;
 }
 
 interface Company {
@@ -63,6 +70,7 @@ export default function BenefitPlansPage() {
   
   const [plans, setPlans] = useState<BenefitPlan[]>([]);
   const [categories, setCategories] = useState<BenefitCategory[]>([]);
+  const [providers, setProviders] = useState<BenefitProvider[]>([]);
   const [companies, setCompanies] = useState<Company[]>([]);
   const [selectedCompanyId, setSelectedCompanyId] = useState<string>("");
   const [loading, setLoading] = useState(true);
@@ -75,7 +83,7 @@ export default function BenefitPlansPage() {
     code: "",
     description: "",
     plan_type: "medical",
-    provider_name: "",
+    provider_id: "",
     enrollment_type: "open",
     employee_contribution: 0,
     employer_contribution: 0,
@@ -95,6 +103,7 @@ export default function BenefitPlansPage() {
     if (selectedCompanyId) {
       fetchPlans();
       fetchCategories();
+      fetchProviders();
     }
   }, [selectedCompanyId]);
 
@@ -111,11 +120,16 @@ export default function BenefitPlansPage() {
     setCategories(data || []);
   };
 
+  const fetchProviders = async () => {
+    const { data } = await supabase.from('benefit_providers').select('id, name').eq('company_id', selectedCompanyId).eq('is_active', true).order('name');
+    setProviders(data || []);
+  };
+
   const fetchPlans = async () => {
     setLoading(true);
     const { data, error } = await supabase
       .from('benefit_plans')
-      .select('*, benefit_categories(name)')
+      .select('*, benefit_categories(name), benefit_providers(name)')
       .eq('company_id', selectedCompanyId)
       .order('name');
     
@@ -136,6 +150,7 @@ export default function BenefitPlansPage() {
     const payload = {
       ...formData,
       company_id: selectedCompanyId,
+      provider_id: formData.provider_id || null,
       end_date: formData.end_date || null,
     };
 
@@ -178,7 +193,7 @@ export default function BenefitPlansPage() {
       code: "",
       description: "",
       plan_type: "medical",
-      provider_name: "",
+      provider_id: "",
       enrollment_type: "open",
       employee_contribution: 0,
       employer_contribution: 0,
@@ -200,7 +215,7 @@ export default function BenefitPlansPage() {
       code: plan.code,
       description: plan.description || "",
       plan_type: plan.plan_type,
-      provider_name: plan.provider_name || "",
+      provider_id: plan.provider_id || "",
       enrollment_type: plan.enrollment_type,
       employee_contribution: plan.employee_contribution,
       employer_contribution: plan.employer_contribution,
@@ -350,8 +365,14 @@ export default function BenefitPlansPage() {
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label>Provider Name</Label>
-                <Input value={formData.provider_name} onChange={e => setFormData({...formData, provider_name: e.target.value})} />
+                <Label>Provider</Label>
+                <Select value={formData.provider_id || "none"} onValueChange={v => setFormData({...formData, provider_id: v === "none" ? "" : v})}>
+                  <SelectTrigger><SelectValue placeholder="Select provider" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">No provider</SelectItem>
+                    {providers.map(p => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
+                  </SelectContent>
+                </Select>
               </div>
               <div className="space-y-2">
                 <Label>Enrollment Type *</Label>
