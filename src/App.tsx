@@ -34,6 +34,8 @@ import AdminPolicyDocumentsPage from "./pages/admin/AdminPolicyDocumentsPage";
 import AdminLetterTemplatesPage from "./pages/admin/AdminLetterTemplatesPage";
 import AdminLookupValuesPage from "./pages/admin/AdminLookupValuesPage";
 import AdminLmsManagementPage from "./pages/admin/AdminLmsManagementPage";
+import AdminOnboardingPage from "./pages/admin/AdminOnboardingPage";
+import AdminOnboardingDetailPage from "./pages/admin/AdminOnboardingDetailPage";
 // Workforce pages
 import WorkforceDashboardPage from "./pages/workforce/WorkforceDashboardPage";
 import EmployeesPage from "./pages/workforce/EmployeesPage";
@@ -127,6 +129,7 @@ import TimeAttendanceDashboardPage from "./pages/time-attendance/TimeAttendanceD
 import EmployeeSelfServicePage from "./pages/ess/EmployeeSelfServicePage";
 import MyLettersPage from "./pages/ess/MyLettersPage";
 import MyGoalsPage from "./pages/ess/MyGoalsPage";
+import MyOnboardingPage from "./pages/ess/MyOnboardingPage";
 import ManagerSelfServicePage from "./pages/mss/ManagerSelfServicePage";
 import MssAppraisalsPage from "./pages/mss/MssAppraisalsPage";
 import MssReview360Page from "./pages/mss/MssReview360Page";
@@ -195,6 +198,14 @@ const App = () => (
               element={
                 <ProtectedRoute moduleCode="ess">
                   <MyGoalsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/ess/onboarding"
+              element={
+                <ProtectedRoute moduleCode="ess">
+                  <MyOnboardingPage />
                 </ProtectedRoute>
               }
             />
@@ -415,6 +426,22 @@ const App = () => (
               element={
                 <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
                   <AdminLmsManagementPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/onboarding"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
+                  <AdminOnboardingPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/onboarding/:id"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
+                  <AdminOnboardingDetailPage />
                 </ProtectedRoute>
               }
             />
