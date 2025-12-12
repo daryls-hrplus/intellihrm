@@ -11,9 +11,11 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { 
   Plus, Trash2, GripVertical, FileText, Table, 
-  LayoutTemplate, Settings, Filter, ArrowUpDown, Calculator, Save
+  LayoutTemplate, Settings, Filter, ArrowUpDown, Calculator, Save,
+  Sparkles, ChevronDown
 } from 'lucide-react';
 import { 
   useReportWriter, 
@@ -25,6 +27,7 @@ import {
   SortConfig,
   Calculation
 } from '@/hooks/useReportWriter';
+import { ReportAIAssistant } from './ReportAIAssistant';
 
 interface ReportWriterDialogProps {
   open: boolean;
@@ -77,6 +80,7 @@ export function ReportWriterDialog({
   const [dataSources, setDataSources] = useState<ReportDataSource[]>([]);
   const [subReportTemplates, setSubReportTemplates] = useState<ReportTemplate[]>([]);
   const [activeTab, setActiveTab] = useState('general');
+  const [aiAssistantOpen, setAiAssistantOpen] = useState(true);
   
   const [template, setTemplate] = useState<Partial<ReportTemplate>>({
     name: '',
@@ -291,9 +295,56 @@ export function ReportWriterDialog({
 
   const selectedDataSource = dataSources.find(ds => ds.code === template.data_source);
 
+  const handleApplyAITemplate = (aiTemplate: Partial<ReportTemplate>) => {
+    setTemplate(prev => ({
+      ...prev,
+      ...aiTemplate,
+      module,
+      company_id: companyId
+    }));
+  };
+
+  const handleApplyAISuggestions = (suggestions: {
+    suggested_fields: string[];
+    suggested_grouping: { field: string; reason: string }[];
+    suggested_calculations: { type: string; field: string; reason: string }[];
+    suggested_parameters: { name: string; type: string; reason: string }[];
+  }) => {
+    setTemplate(prev => ({
+      ...prev,
+      grouping: [
+        ...(prev.grouping || []),
+        ...suggestions.suggested_grouping.map((g, i) => ({
+          field: g.field,
+          label: g.field,
+          sortOrder: 'asc' as const
+        }))
+      ],
+      calculations: [
+        ...(prev.calculations || []),
+        ...suggestions.suggested_calculations.map((c, i) => ({
+          name: `ai_calc_${i}`,
+          label: c.field,
+          type: c.type as 'sum' | 'avg' | 'count' | 'min' | 'max' | 'custom',
+          field: c.field,
+          resetOn: 'report' as const
+        }))
+      ],
+      parameters: [
+        ...(prev.parameters || []),
+        ...suggestions.suggested_parameters.map(p => ({
+          name: p.name,
+          label: p.name,
+          type: p.type as 'text' | 'number' | 'date' | 'dateRange' | 'select' | 'multiSelect',
+          required: false
+        }))
+      ]
+    }));
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-5xl max-h-[90vh]">
+      <DialogContent className="max-w-6xl max-h-[90vh]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <FileText className="h-5 w-5" />
@@ -301,36 +352,63 @@ export function ReportWriterDialog({
           </DialogTitle>
         </DialogHeader>
 
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1">
-          <TabsList className="grid grid-cols-6 w-full">
-            <TabsTrigger value="general" className="gap-1">
-              <Settings className="h-4 w-4" />
-              General
-            </TabsTrigger>
-            <TabsTrigger value="bands" className="gap-1">
-              <LayoutTemplate className="h-4 w-4" />
-              Bands
-            </TabsTrigger>
-            <TabsTrigger value="parameters" className="gap-1">
-              <Filter className="h-4 w-4" />
-              Parameters
-            </TabsTrigger>
-            <TabsTrigger value="grouping" className="gap-1">
-              <Table className="h-4 w-4" />
-              Grouping
-            </TabsTrigger>
-            <TabsTrigger value="sorting" className="gap-1">
-              <ArrowUpDown className="h-4 w-4" />
-              Sorting
-            </TabsTrigger>
-            <TabsTrigger value="calculations" className="gap-1">
-              <Calculator className="h-4 w-4" />
-              Calculations
-            </TabsTrigger>
-          </TabsList>
+        <div className="grid grid-cols-3 gap-4">
+          {/* AI Assistant Panel */}
+          <div className="col-span-1">
+            <Collapsible open={aiAssistantOpen} onOpenChange={setAiAssistantOpen}>
+              <CollapsibleTrigger asChild>
+                <Button variant="ghost" className="w-full justify-between mb-2">
+                  <span className="flex items-center gap-2">
+                    <Sparkles className="h-4 w-4 text-primary" />
+                    AI Assistant
+                  </span>
+                  <ChevronDown className={`h-4 w-4 transition-transform ${aiAssistantOpen ? 'rotate-180' : ''}`} />
+                </Button>
+              </CollapsibleTrigger>
+              <CollapsibleContent>
+                <ReportAIAssistant
+                  module={module}
+                  dataSources={dataSources}
+                  currentTemplate={template}
+                  onApplyTemplate={handleApplyAITemplate}
+                  onApplySuggestions={handleApplyAISuggestions}
+                />
+              </CollapsibleContent>
+            </Collapsible>
+          </div>
 
-          <ScrollArea className="h-[60vh] mt-4">
-            <TabsContent value="general" className="space-y-4 px-1">
+          {/* Main Template Editor */}
+          <div className="col-span-2">
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1">
+              <TabsList className="grid grid-cols-6 w-full">
+                <TabsTrigger value="general" className="gap-1 text-xs">
+                  <Settings className="h-3 w-3" />
+                  General
+                </TabsTrigger>
+                <TabsTrigger value="bands" className="gap-1 text-xs">
+                  <LayoutTemplate className="h-3 w-3" />
+                  Bands
+                </TabsTrigger>
+                <TabsTrigger value="parameters" className="gap-1 text-xs">
+                  <Filter className="h-3 w-3" />
+                  Params
+                </TabsTrigger>
+                <TabsTrigger value="grouping" className="gap-1 text-xs">
+                  <Table className="h-3 w-3" />
+                  Group
+                </TabsTrigger>
+                <TabsTrigger value="sorting" className="gap-1 text-xs">
+                  <ArrowUpDown className="h-3 w-3" />
+                  Sort
+                </TabsTrigger>
+                <TabsTrigger value="calculations" className="gap-1 text-xs">
+                  <Calculator className="h-3 w-3" />
+                  Calc
+                </TabsTrigger>
+              </TabsList>
+
+              <ScrollArea className="h-[55vh] mt-4">
+                <TabsContent value="general" className="space-y-4 px-1">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>Template Name *</Label>
@@ -864,6 +942,8 @@ export function ReportWriterDialog({
             </TabsContent>
           </ScrollArea>
         </Tabs>
+          </div>
+        </div>
 
         <div className="flex justify-end gap-2 pt-4 border-t">
           <Button variant="outline" onClick={() => onOpenChange(false)}>
