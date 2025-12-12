@@ -29,6 +29,7 @@ import { Switch } from "@/components/ui/switch";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Plus, Trash2, Loader2, Award } from "lucide-react";
+import { format } from "date-fns";
 
 interface JobCompetency {
   id: string;
@@ -38,6 +39,8 @@ interface JobCompetency {
   weighting: number;
   is_required: boolean;
   notes: string | null;
+  start_date: string;
+  end_date: string | null;
   competencies?: { name: string; code: string };
   competency_levels?: { name: string; code: string } | null;
 }
@@ -61,6 +64,20 @@ interface JobCompetenciesManagerProps {
   companyId: string;
 }
 
+// Check if two date ranges overlap
+function datesOverlap(
+  start1: string,
+  end1: string | null,
+  start2: string,
+  end2: string | null
+): boolean {
+  const s1 = new Date(start1);
+  const e1 = end1 ? new Date(end1) : new Date("9999-12-31");
+  const s2 = new Date(start2);
+  const e2 = end2 ? new Date(end2) : new Date("9999-12-31");
+  return s1 <= e2 && s2 <= e1;
+}
+
 export function JobCompetenciesManager({ jobId, companyId }: JobCompetenciesManagerProps) {
   const [jobCompetencies, setJobCompetencies] = useState<JobCompetency[]>([]);
   const [competencies, setCompetencies] = useState<Competency[]>([]);
@@ -74,6 +91,8 @@ export function JobCompetenciesManager({ jobId, companyId }: JobCompetenciesMana
     weighting: "10",
     is_required: true,
     notes: "",
+    start_date: format(new Date(), "yyyy-MM-dd"),
+    end_date: "",
   });
 
   useEffect(() => {
@@ -99,7 +118,7 @@ export function JobCompetenciesManager({ jobId, companyId }: JobCompetenciesMana
         competency_levels(name, code)
       `)
       .eq("job_id", jobId)
-      .order("weighting", { ascending: false });
+      .order("start_date", { ascending: false });
 
     if (error) {
       console.error("Error fetching job competencies:", error);
@@ -147,8 +166,43 @@ export function JobCompetenciesManager({ jobId, companyId }: JobCompetenciesMana
       weighting: "10",
       is_required: true,
       notes: "",
+      start_date: format(new Date(), "yyyy-MM-dd"),
+      end_date: "",
     });
     setDialogOpen(true);
+  };
+
+  // Calculate total weighting for competencies that overlap with the new entry's date range
+  const calculateOverlappingWeight = (
+    newStartDate: string,
+    newEndDate: string | null,
+    excludeCompetencyId?: string
+  ): number => {
+    // Group competencies by competency_id
+    const competencyGroups = new Map<string, JobCompetency[]>();
+    for (const jc of jobCompetencies) {
+      const existing = competencyGroups.get(jc.competency_id) || [];
+      existing.push(jc);
+      competencyGroups.set(jc.competency_id, existing);
+    }
+
+    let totalWeight = 0;
+
+    // For each unique competency, only count the weight if there's an overlapping entry
+    for (const [compId, entries] of competencyGroups) {
+      // Find entries that overlap with the new date range
+      const overlappingEntries = entries.filter((jc) =>
+        datesOverlap(newStartDate, newEndDate, jc.start_date, jc.end_date)
+      );
+
+      if (overlappingEntries.length > 0) {
+        // Take the max weight from overlapping entries (they shouldn't overlap with each other)
+        const maxWeight = Math.max(...overlappingEntries.map((e) => Number(e.weighting)));
+        totalWeight += maxWeight;
+      }
+    }
+
+    return totalWeight;
   };
 
   const handleSave = async () => {
@@ -157,9 +211,27 @@ export function JobCompetenciesManager({ jobId, companyId }: JobCompetenciesMana
       return;
     }
 
+    if (!formData.start_date) {
+      toast.error("Please enter a start date");
+      return;
+    }
+
     const weighting = parseFloat(formData.weighting);
     if (isNaN(weighting) || weighting < 0 || weighting > 100) {
       toast.error("Weighting must be between 0 and 100");
+      return;
+    }
+
+    // Validate total weight for overlapping period
+    const currentOverlappingWeight = calculateOverlappingWeight(
+      formData.start_date,
+      formData.end_date || null
+    );
+    
+    if (currentOverlappingWeight + weighting > 100) {
+      toast.error(
+        `Total weighting would exceed 100%. Current overlapping weight: ${currentOverlappingWeight}%, max you can add: ${100 - currentOverlappingWeight}%`
+      );
       return;
     }
 
@@ -171,14 +243,16 @@ export function JobCompetenciesManager({ jobId, companyId }: JobCompetenciesMana
       weighting: weighting,
       is_required: formData.is_required,
       notes: formData.notes.trim() || null,
+      start_date: formData.start_date,
+      end_date: formData.end_date || null,
     };
 
     const { error } = await supabase.from("job_competencies").insert([payload]);
 
     if (error) {
       console.error("Error adding job competency:", error);
-      if (error.code === "23505") {
-        toast.error("This competency is already assigned to this job");
+      if (error.message?.includes("Overlapping date ranges")) {
+        toast.error("This competency already has an entry for overlapping dates");
       } else {
         toast.error("Failed to add competency");
       }
@@ -202,12 +276,9 @@ export function JobCompetenciesManager({ jobId, companyId }: JobCompetenciesMana
     }
   };
 
-  const totalWeighting = jobCompetencies.reduce((sum, jc) => sum + Number(jc.weighting), 0);
-
-  // Filter out already assigned competencies
-  const availableCompetencies = competencies.filter(
-    (c) => !jobCompetencies.some((jc) => jc.competency_id === c.id)
-  );
+  // Calculate current total weight (for today's date)
+  const today = format(new Date(), "yyyy-MM-dd");
+  const currentTotalWeight = calculateOverlappingWeight(today, today);
 
   return (
     <div className="space-y-4">
@@ -215,9 +286,9 @@ export function JobCompetenciesManager({ jobId, companyId }: JobCompetenciesMana
         <div className="flex items-center gap-2">
           <Award className="h-5 w-5 text-primary" />
           <h3 className="font-semibold">Required Competencies</h3>
-          <Badge variant="outline">Total Weight: {totalWeighting}%</Badge>
+          <Badge variant="outline">Current Weight: {currentTotalWeight}%</Badge>
         </div>
-        <Button size="sm" onClick={handleOpenDialog} disabled={availableCompetencies.length === 0}>
+        <Button size="sm" onClick={handleOpenDialog} disabled={competencies.length === 0}>
           <Plus className="mr-2 h-4 w-4" />
           Add Competency
         </Button>
@@ -230,6 +301,8 @@ export function JobCompetenciesManager({ jobId, companyId }: JobCompetenciesMana
               <TableHead>Competency</TableHead>
               <TableHead>Required Level</TableHead>
               <TableHead className="w-[100px]">Weight %</TableHead>
+              <TableHead>Start Date</TableHead>
+              <TableHead>End Date</TableHead>
               <TableHead className="w-[80px]">Required</TableHead>
               <TableHead className="w-[60px]">Actions</TableHead>
             </TableRow>
@@ -237,13 +310,13 @@ export function JobCompetenciesManager({ jobId, companyId }: JobCompetenciesMana
           <TableBody>
             {isLoading ? (
               <TableRow>
-                <TableCell colSpan={5} className="text-center py-4">
+                <TableCell colSpan={7} className="text-center py-4">
                   <Loader2 className="h-5 w-5 animate-spin mx-auto" />
                 </TableCell>
               </TableRow>
             ) : jobCompetencies.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={5} className="text-center py-4 text-muted-foreground">
+                <TableCell colSpan={7} className="text-center py-4 text-muted-foreground">
                   No competencies assigned to this job
                 </TableCell>
               </TableRow>
@@ -262,6 +335,10 @@ export function JobCompetenciesManager({ jobId, companyId }: JobCompetenciesMana
                   </TableCell>
                   <TableCell>
                     <Badge variant="outline">{jc.weighting}%</Badge>
+                  </TableCell>
+                  <TableCell>{format(new Date(jc.start_date), "MMM d, yyyy")}</TableCell>
+                  <TableCell>
+                    {jc.end_date ? format(new Date(jc.end_date), "MMM d, yyyy") : "—"}
                   </TableCell>
                   <TableCell>
                     <Badge variant={jc.is_required ? "default" : "secondary"}>
@@ -302,7 +379,7 @@ export function JobCompetenciesManager({ jobId, companyId }: JobCompetenciesMana
                   <SelectValue placeholder="Select competency" />
                 </SelectTrigger>
                 <SelectContent>
-                  {availableCompetencies.map((c) => (
+                  {competencies.map((c) => (
                     <SelectItem key={c.id} value={c.id}>
                       {c.name} ({c.code})
                     </SelectItem>
@@ -334,6 +411,25 @@ export function JobCompetenciesManager({ jobId, companyId }: JobCompetenciesMana
               </Select>
             </div>
 
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Start Date *</Label>
+                <Input
+                  type="date"
+                  value={formData.start_date}
+                  onChange={(e) => setFormData({ ...formData, start_date: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>End Date</Label>
+                <Input
+                  type="date"
+                  value={formData.end_date}
+                  onChange={(e) => setFormData({ ...formData, end_date: e.target.value })}
+                />
+              </div>
+            </div>
+
             <div className="space-y-2">
               <Label>Weighting (0-100%) *</Label>
               <Input
@@ -345,7 +441,7 @@ export function JobCompetenciesManager({ jobId, companyId }: JobCompetenciesMana
                 placeholder="e.g., 20"
               />
               <p className="text-xs text-muted-foreground">
-                The relative importance of this competency for the job
+                Total weight for overlapping competencies cannot exceed 100%
               </p>
             </div>
 

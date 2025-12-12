@@ -2696,10 +2696,12 @@ export type Database = {
           competency_id: string
           competency_level_id: string | null
           created_at: string
+          end_date: string | null
           id: string
           is_required: boolean
           job_id: string
           notes: string | null
+          start_date: string
           updated_at: string
           weighting: number
         }
@@ -2707,10 +2709,12 @@ export type Database = {
           competency_id: string
           competency_level_id?: string | null
           created_at?: string
+          end_date?: string | null
           id?: string
           is_required?: boolean
           job_id: string
           notes?: string | null
+          start_date?: string
           updated_at?: string
           weighting?: number
         }
@@ -2718,10 +2722,12 @@ export type Database = {
           competency_id?: string
           competency_level_id?: string | null
           created_at?: string
+          end_date?: string | null
           id?: string
           is_required?: boolean
           job_id?: string
           notes?: string | null
+          start_date?: string
           updated_at?: string
           weighting?: number
         }
