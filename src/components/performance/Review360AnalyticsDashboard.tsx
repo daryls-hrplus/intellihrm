@@ -1,5 +1,7 @@
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   PieChart,
   Pie,
@@ -12,6 +14,8 @@ import {
   Tooltip,
 } from "recharts";
 import { isPast, differenceInDays } from "date-fns";
+import { BarChart3, ClipboardList } from "lucide-react";
+import { Review360FeedbackAnalytics } from "./Review360FeedbackAnalytics";
 
 interface ReviewCycle {
   id: string;
@@ -59,6 +63,7 @@ export function Review360AnalyticsDashboard({
   participations,
   compact = false,
 }: Review360AnalyticsDashboardProps) {
+  const [analyticsTab, setAnalyticsTab] = useState("overview");
   // Status distribution
   const statusCounts = cycles.reduce((acc, cycle) => {
     acc[cycle.status] = (acc[cycle.status] || 0) + 1;
@@ -120,183 +125,206 @@ export function Review360AnalyticsDashboard({
 
   const chartHeight = compact ? 100 : 120;
 
+  const cycleIds = cycles.map(c => c.id);
+
   return (
     <div className="space-y-4">
-      {/* Key Metrics */}
-      <div className={`grid gap-4 ${compact ? "md:grid-cols-2" : "md:grid-cols-4"}`}>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Avg Completion</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold text-primary">{avgCompletionRate}%</div>
-            <Progress value={avgCompletionRate} className="mt-2 h-2" />
-          </CardContent>
-        </Card>
+      <Tabs value={analyticsTab} onValueChange={setAnalyticsTab}>
+        <TabsList>
+          <TabsTrigger value="overview" className="gap-2">
+            <BarChart3 className="h-4 w-4" />
+            Cycle Overview
+          </TabsTrigger>
+          <TabsTrigger value="feedback" className="gap-2">
+            <ClipboardList className="h-4 w-4" />
+            Feedback Analysis
+          </TabsTrigger>
+        </TabsList>
 
-        <Card className={overdueReviews.length > 0 ? "border-warning/50" : ""}>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Overdue Reviews</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className={`text-3xl font-bold ${overdueReviews.length > 0 ? "text-warning" : ""}`}>
-              {overdueReviews.length}
+        <TabsContent value="overview" className="mt-4">
+          {/* Key Metrics */}
+          <div className="space-y-4">
+            <div className={`grid gap-4 ${compact ? "md:grid-cols-2" : "md:grid-cols-4"}`}>
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-medium">Avg Completion</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-3xl font-bold text-primary">{avgCompletionRate}%</div>
+                  <Progress value={avgCompletionRate} className="mt-2 h-2" />
+                </CardContent>
+              </Card>
+
+              <Card className={overdueReviews.length > 0 ? "border-warning/50" : ""}>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-medium">Overdue Reviews</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className={`text-3xl font-bold ${overdueReviews.length > 0 ? "text-warning" : ""}`}>
+                    {overdueReviews.length}
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {overdueReviews.length > 0 ? "Needs attention" : "All on time"}
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card className={dueSoonReviews.length > 0 ? "border-info/30" : ""}>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-medium">Due This Week</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className={`text-3xl font-bold ${dueSoonReviews.length > 0 ? "text-info" : ""}`}>
+                    {dueSoonReviews.length}
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Reviews due soon
+                  </p>
+                </CardContent>
+              </Card>
+
+              {!compact && (
+                <Card>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-sm font-medium">Total Participants</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-3xl font-bold">{totalParticipants}</div>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Across {activeCycles} active cycles
+                    </p>
+                  </CardContent>
+                </Card>
+              )}
             </div>
-            <p className="text-xs text-muted-foreground mt-1">
-              {overdueReviews.length > 0 ? "Needs attention" : "All on time"}
-            </p>
-          </CardContent>
-        </Card>
 
-        <Card className={dueSoonReviews.length > 0 ? "border-info/30" : ""}>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Due This Week</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className={`text-3xl font-bold ${dueSoonReviews.length > 0 ? "text-info" : ""}`}>
-              {dueSoonReviews.length}
-            </div>
-            <p className="text-xs text-muted-foreground mt-1">
-              Reviews due soon
-            </p>
-          </CardContent>
-        </Card>
-
-        {!compact && (
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium">Total Participants</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold">{totalParticipants}</div>
-              <p className="text-xs text-muted-foreground mt-1">
-                Across {activeCycles} active cycles
-              </p>
-            </CardContent>
-          </Card>
-        )}
-      </div>
-
-      {/* Charts */}
-      <div className={`grid gap-4 ${compact ? "md:grid-cols-2" : "md:grid-cols-3"}`}>
-        {/* Cycle Status Distribution */}
-        {statusData.length > 0 && (
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium">Cycle Status</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div style={{ height: chartHeight }}>
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={statusData}
-                      cx="50%"
-                      cy="50%"
-                      innerRadius={compact ? 25 : 30}
-                      outerRadius={compact ? 40 : 50}
-                      paddingAngle={2}
-                      dataKey="value"
-                    >
+            {/* Charts */}
+            <div className={`grid gap-4 ${compact ? "md:grid-cols-2" : "md:grid-cols-3"}`}>
+              {/* Cycle Status Distribution */}
+              {statusData.length > 0 && (
+                <Card>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-sm font-medium">Cycle Status</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div style={{ height: chartHeight }}>
+                      <ResponsiveContainer width="100%" height="100%">
+                        <PieChart>
+                          <Pie
+                            data={statusData}
+                            cx="50%"
+                            cy="50%"
+                            innerRadius={compact ? 25 : 30}
+                            outerRadius={compact ? 40 : 50}
+                            paddingAngle={2}
+                            dataKey="value"
+                          >
+                            {statusData.map((entry, index) => (
+                              <Cell key={`cell-${index}`} fill={entry.color} />
+                            ))}
+                          </Pie>
+                          <Tooltip
+                            formatter={(value: number) => [value, "Cycles"]}
+                            contentStyle={{
+                              backgroundColor: "hsl(var(--background))",
+                              border: "1px solid hsl(var(--border))",
+                              borderRadius: "8px",
+                            }}
+                          />
+                        </PieChart>
+                      </ResponsiveContainer>
+                    </div>
+                    <div className="flex flex-wrap gap-2 mt-2 justify-center">
                       {statusData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.color} />
+                        <div key={index} className="flex items-center gap-1 text-xs">
+                          <div className="w-2 h-2 rounded-full" style={{ backgroundColor: entry.color }} />
+                          <span>{entry.name}: {entry.value}</span>
+                        </div>
                       ))}
-                    </Pie>
-                    <Tooltip
-                      formatter={(value: number) => [value, "Cycles"]}
-                      contentStyle={{
-                        backgroundColor: "hsl(var(--background))",
-                        border: "1px solid hsl(var(--border))",
-                        borderRadius: "8px",
-                      }}
-                    />
-                  </PieChart>
-                </ResponsiveContainer>
-              </div>
-              <div className="flex flex-wrap gap-2 mt-2 justify-center">
-                {statusData.map((entry, index) => (
-                  <div key={index} className="flex items-center gap-1 text-xs">
-                    <div className="w-2 h-2 rounded-full" style={{ backgroundColor: entry.color }} />
-                    <span>{entry.name}: {entry.value}</span>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Completion Distribution */}
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-medium">Completion Distribution</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div style={{ height: chartHeight }}>
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={completionData}>
+                        <XAxis dataKey="name" tick={{ fontSize: 10 }} />
+                        <YAxis hide />
+                        <Tooltip
+                          formatter={(value: number) => [value, "Cycles"]}
+                          contentStyle={{
+                            backgroundColor: "hsl(var(--background))",
+                            border: "1px solid hsl(var(--border))",
+                            borderRadius: "8px",
+                          }}
+                        />
+                        <Bar dataKey="count" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
+                      </BarChart>
+                    </ResponsiveContainer>
                   </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        )}
+                </CardContent>
+              </Card>
 
-        {/* Completion Distribution */}
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Completion Distribution</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div style={{ height: chartHeight }}>
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={completionData}>
-                  <XAxis dataKey="name" tick={{ fontSize: 10 }} />
-                  <YAxis hide />
-                  <Tooltip
-                    formatter={(value: number) => [value, "Cycles"]}
-                    contentStyle={{
-                      backgroundColor: "hsl(var(--background))",
-                      border: "1px solid hsl(var(--border))",
-                      borderRadius: "8px",
-                    }}
-                  />
-                  <Bar dataKey="count" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Pending by Reviewer Type */}
-        {!compact && reviewerData.length > 0 && (
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium">Pending by Type</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div style={{ height: chartHeight }}>
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={reviewerData}
-                      cx="50%"
-                      cy="50%"
-                      innerRadius={30}
-                      outerRadius={50}
-                      paddingAngle={2}
-                      dataKey="value"
-                    >
+              {/* Pending by Reviewer Type */}
+              {!compact && reviewerData.length > 0 && (
+                <Card>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-sm font-medium">Pending by Type</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div style={{ height: chartHeight }}>
+                      <ResponsiveContainer width="100%" height="100%">
+                        <PieChart>
+                          <Pie
+                            data={reviewerData}
+                            cx="50%"
+                            cy="50%"
+                            innerRadius={30}
+                            outerRadius={50}
+                            paddingAngle={2}
+                            dataKey="value"
+                          >
+                            {reviewerData.map((entry, index) => (
+                              <Cell key={`cell-${index}`} fill={entry.color} />
+                            ))}
+                          </Pie>
+                          <Tooltip
+                            formatter={(value: number) => [value, "Reviews"]}
+                            contentStyle={{
+                              backgroundColor: "hsl(var(--background))",
+                              border: "1px solid hsl(var(--border))",
+                              borderRadius: "8px",
+                            }}
+                          />
+                        </PieChart>
+                      </ResponsiveContainer>
+                    </div>
+                    <div className="flex flex-wrap gap-2 mt-2 justify-center">
                       {reviewerData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.color} />
+                        <div key={index} className="flex items-center gap-1 text-xs">
+                          <div className="w-2 h-2 rounded-full" style={{ backgroundColor: entry.color }} />
+                          <span>{entry.name}: {entry.value}</span>
+                        </div>
                       ))}
-                    </Pie>
-                    <Tooltip
-                      formatter={(value: number) => [value, "Reviews"]}
-                      contentStyle={{
-                        backgroundColor: "hsl(var(--background))",
-                        border: "1px solid hsl(var(--border))",
-                        borderRadius: "8px",
-                      }}
-                    />
-                  </PieChart>
-                </ResponsiveContainer>
-              </div>
-              <div className="flex flex-wrap gap-2 mt-2 justify-center">
-                {reviewerData.map((entry, index) => (
-                  <div key={index} className="flex items-center gap-1 text-xs">
-                    <div className="w-2 h-2 rounded-full" style={{ backgroundColor: entry.color }} />
-                    <span>{entry.name}: {entry.value}</span>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        )}
-      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+            </div>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="feedback" className="mt-4">
+          <Review360FeedbackAnalytics cycleIds={cycleIds} compact={compact} />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
