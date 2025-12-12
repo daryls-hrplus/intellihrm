@@ -6410,6 +6410,15 @@ export type Database = {
           supervisor_position_title: string
         }[]
       }
+      get_manager_direct_reports: {
+        Args: { p_manager_id: string }
+        Returns: {
+          employee_email: string
+          employee_id: string
+          employee_name: string
+          position_title: string
+        }[]
+      }
       get_position_vacancy_summary: {
         Args: { p_company_id: string }
         Returns: {

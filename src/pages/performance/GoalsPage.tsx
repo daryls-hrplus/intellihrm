@@ -29,6 +29,7 @@ import {
   ChevronRight,
   LayoutGrid,
   List,
+  UserCircle,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -38,6 +39,7 @@ import { GoalCard } from "@/components/performance/GoalCard";
 import { GoalsList } from "@/components/performance/GoalsList";
 import { GoalTemplatesManager } from "@/components/performance/GoalTemplatesManager";
 import { GoalHierarchyView } from "@/components/performance/GoalHierarchyView";
+import { ContactReportDialog } from "@/components/performance/ContactReportDialog";
 import { useAuditLog } from "@/hooks/useAuditLog";
 import { Label } from "@/components/ui/label";
 
@@ -98,6 +100,10 @@ export default function GoalsPage() {
   const [selectedCompanyId, setSelectedCompanyId] = useState<string>(company?.id || "");
   const [employees, setEmployees] = useState<{ id: string; full_name: string }[]>([]);
   const [selectedEmployeeId, setSelectedEmployeeId] = useState<string>("");
+  const [directReports, setDirectReports] = useState<{ employee_id: string; employee_name: string; position_title: string }[]>([]);
+  const [directReportGoals, setDirectReportGoals] = useState<Goal[]>([]);
+  const [contactReportOpen, setContactReportOpen] = useState(false);
+  const [selectedReportGoal, setSelectedReportGoal] = useState<Goal | null>(null);
 
   // Fetch companies for company switcher
   useEffect(() => {
@@ -132,6 +138,60 @@ export default function GoalsPage() {
       setSelectedCompanyId(company.id);
     }
   }, [company?.id]);
+
+  // Fetch direct reports for manager
+  useEffect(() => {
+    const fetchDirectReports = async () => {
+      if (!user?.id) return;
+      
+      try {
+        const { data, error } = await supabase.rpc("get_manager_direct_reports", {
+          p_manager_id: user.id,
+        });
+
+        if (error) throw error;
+        setDirectReports((data as { employee_id: string; employee_name: string; position_title: string }[]) || []);
+      } catch (error) {
+        console.error("Error fetching direct reports:", error);
+      }
+    };
+
+    fetchDirectReports();
+  }, [user?.id]);
+
+  // Fetch goals of direct reports when on direct-reports tab
+  useEffect(() => {
+    const fetchDirectReportGoals = async () => {
+      if (activeTab !== "direct-reports" || directReports.length === 0) {
+        setDirectReportGoals([]);
+        return;
+      }
+
+      setLoading(true);
+      try {
+        const reportIds = directReports.map((r) => r.employee_id);
+        const { data, error } = await supabase
+          .from("performance_goals")
+          .select(`
+            *,
+            employee:profiles!performance_goals_employee_id_fkey(full_name),
+            department:departments(name)
+          `)
+          .in("employee_id", reportIds)
+          .order("created_at", { ascending: false });
+
+        if (error) throw error;
+        setDirectReportGoals((data as Goal[]) || []);
+      } catch (error) {
+        console.error("Error fetching direct report goals:", error);
+        toast.error("Failed to load team member goals");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDirectReportGoals();
+  }, [activeTab, directReports]);
 
   const fetchGoals = async () => {
     const companyIdToUse = selectedCompanyId || company?.id;
@@ -208,6 +268,21 @@ export default function GoalsPage() {
     setSelectedGoal(null);
     setDialogOpen(true);
   };
+
+  const handleContactReport = (goal: Goal) => {
+    setSelectedReportGoal(goal);
+    setContactReportOpen(true);
+  };
+
+  const filteredDirectReportGoals = directReportGoals.filter((goal) => {
+    const matchesSearch =
+      goal.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      goal.description?.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesStatus = statusFilter === "all" || goal.status === statusFilter;
+    const matchesLevel = levelFilter === "all" || goal.goal_level === levelFilter;
+    const matchesType = typeFilter === "all" || goal.goal_type === typeFilter;
+    return matchesSearch && matchesStatus && matchesLevel && matchesType;
+  });
 
   return (
     <AppLayout>
@@ -303,11 +378,20 @@ export default function GoalsPage() {
 
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <TabsList>
+            <TabsList className="flex-wrap">
               <TabsTrigger value="my-goals" className="gap-2">
                 <User className="h-4 w-4" />
                 My Goals
               </TabsTrigger>
+              {directReports.length > 0 && (
+                <TabsTrigger value="direct-reports" className="gap-2">
+                  <UserCircle className="h-4 w-4" />
+                  Direct Reports
+                  <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-xs">
+                    {directReports.length}
+                  </Badge>
+                </TabsTrigger>
+              )}
               <TabsTrigger value="team-goals" className="gap-2">
                 <Users className="h-4 w-4" />
                 Team Goals
@@ -458,6 +542,115 @@ export default function GoalsPage() {
           <TabsContent value="templates" className="mt-6">
             <GoalTemplatesManager companyId={company?.id} />
           </TabsContent>
+
+          <TabsContent value="direct-reports" className="mt-6">
+            {loading ? (
+              <div className="text-center py-12 text-muted-foreground">Loading team goals...</div>
+            ) : directReports.length === 0 ? (
+              <div className="text-center py-12 text-muted-foreground">
+                You don't have any direct reports.
+              </div>
+            ) : viewMode === "grid" ? (
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {filteredDirectReportGoals.map((goal) => (
+                  <Card key={goal.id} className="relative">
+                    <CardContent className="p-4 space-y-3">
+                      <div className="flex items-start justify-between">
+                        <div className="space-y-1">
+                          <h3 className="font-semibold">{goal.title}</h3>
+                          <p className="text-sm text-muted-foreground">
+                            {goal.employee?.full_name}
+                          </p>
+                        </div>
+                        <Badge className={statusColors[goal.status]}>
+                          {goal.status.replace("_", " ")}
+                        </Badge>
+                      </div>
+                      <Progress value={goal.progress_percentage} className="h-2" />
+                      <div className="flex items-center justify-between text-sm text-muted-foreground">
+                        <span>{goal.progress_percentage}% complete</span>
+                        {goal.due_date && (
+                          <span>Due: {new Date(goal.due_date).toLocaleDateString()}</span>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-2 pt-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleEditGoal(goal)}
+                          className="flex-1"
+                        >
+                          View Details
+                        </Button>
+                        <Button
+                          variant="secondary"
+                          size="sm"
+                          onClick={() => handleContactReport(goal)}
+                          className="flex-1"
+                        >
+                          <UserCircle className="mr-1 h-4 w-4" />
+                          Contact
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+                {filteredDirectReportGoals.length === 0 && (
+                  <div className="col-span-full text-center py-12 text-muted-foreground">
+                    No goals found for your direct reports.
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {filteredDirectReportGoals.map((goal) => (
+                  <Card key={goal.id}>
+                    <CardContent className="flex items-center justify-between p-4">
+                      <div className="flex items-center gap-4 flex-1">
+                        <div className="flex-1">
+                          <h3 className="font-semibold">{goal.title}</h3>
+                          <p className="text-sm text-muted-foreground">
+                            {goal.employee?.full_name}
+                          </p>
+                        </div>
+                        <Badge className={statusColors[goal.status]}>
+                          {goal.status.replace("_", " ")}
+                        </Badge>
+                        <div className="w-32">
+                          <Progress value={goal.progress_percentage} className="h-2" />
+                          <p className="text-xs text-muted-foreground mt-1">
+                            {goal.progress_percentage}%
+                          </p>
+                        </div>
+                        <div className="flex gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleEditGoal(goal)}
+                          >
+                            View
+                          </Button>
+                          <Button
+                            variant="secondary"
+                            size="sm"
+                            onClick={() => handleContactReport(goal)}
+                          >
+                            <UserCircle className="mr-1 h-4 w-4" />
+                            Contact
+                          </Button>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+                {filteredDirectReportGoals.length === 0 && (
+                  <div className="text-center py-12 text-muted-foreground">
+                    No goals found for your direct reports.
+                  </div>
+                )}
+              </div>
+            )}
+          </TabsContent>
         </Tabs>
       </div>
 
@@ -469,6 +662,14 @@ export default function GoalsPage() {
         employees={employees}
         onSuccess={fetchGoals}
       />
+
+      {selectedReportGoal && (
+        <ContactReportDialog
+          open={contactReportOpen}
+          onOpenChange={setContactReportOpen}
+          goal={selectedReportGoal}
+        />
+      )}
     </AppLayout>
   );
 }
