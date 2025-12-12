@@ -74,6 +74,10 @@ import PositionCompensationPage from "./pages/compensation/PositionCompensationP
 
 // Benefits pages
 import BenefitsDashboardPage from "./pages/benefits/BenefitsDashboardPage";
+import BenefitCategoriesPage from "./pages/benefits/BenefitCategoriesPage";
+import BenefitPlansPage from "./pages/benefits/BenefitPlansPage";
+import BenefitEnrollmentsPage from "./pages/benefits/BenefitEnrollmentsPage";
+import BenefitClaimsPage from "./pages/benefits/BenefitClaimsPage";
 
 // Training pages
 import TrainingDashboardPage from "./pages/training/TrainingDashboardPage";
@@ -583,6 +587,38 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <BenefitsDashboardPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/benefits/categories"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
+                  <BenefitCategoriesPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/benefits/plans"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
+                  <BenefitPlansPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/benefits/enrollments"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
+                  <BenefitEnrollmentsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/benefits/claims"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
+                  <BenefitClaimsPage />
                 </ProtectedRoute>
               }
             />
