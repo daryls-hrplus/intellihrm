@@ -358,7 +358,7 @@ export function GoalDialog({
             <TabsContent value="basic" className="space-y-4 mt-4">
               <div className="grid grid-cols-2 gap-4">
                 {/* Employee Selector - only for individual goals */}
-                {formData.goal_level === "individual" && employees.length > 0 && (
+                {formData.goal_level === "individual" && (
                   <div className="col-span-2">
                     <Label htmlFor="employee_id">Employee *</Label>
                     <Select
@@ -370,11 +370,17 @@ export function GoalDialog({
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="none">Select an employee</SelectItem>
-                        {employees.map((emp) => (
-                          <SelectItem key={emp.id} value={emp.id}>
-                            {emp.full_name}
+                        {employees.length > 0 ? (
+                          employees.map((emp) => (
+                            <SelectItem key={emp.id} value={emp.id}>
+                              {emp.full_name}
+                            </SelectItem>
+                          ))
+                        ) : (
+                          <SelectItem value="no-employees" disabled>
+                            No employees found
                           </SelectItem>
-                        ))}
+                        )}
                       </SelectContent>
                     </Select>
                   </div>
