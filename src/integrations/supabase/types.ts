@@ -2816,6 +2816,51 @@ export type Database = {
           },
         ]
       }
+      job_responsibilities: {
+        Row: {
+          created_at: string
+          id: string
+          job_id: string
+          notes: string | null
+          responsibility_id: string
+          updated_at: string
+          weighting: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          job_id: string
+          notes?: string | null
+          responsibility_id: string
+          updated_at?: string
+          weighting?: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          job_id?: string
+          notes?: string | null
+          responsibility_id?: string
+          updated_at?: string
+          weighting?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "job_responsibilities_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "job_responsibilities_responsibility_id_fkey"
+            columns: ["responsibility_id"]
+            isOneToOne: false
+            referencedRelation: "responsibilities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       jobs: {
         Row: {
           code: string
