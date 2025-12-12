@@ -57,6 +57,7 @@ import { NavLink } from "react-router-dom";
 import { format } from "date-fns";
 import { JobCompetenciesManager } from "@/components/workforce/JobCompetenciesManager";
 import { JobResponsibilitiesManager } from "@/components/workforce/JobResponsibilitiesManager";
+import { JobGoalsManager } from "@/components/workforce/JobGoalsManager";
 
 interface Job {
   id: string;
@@ -658,6 +659,7 @@ export default function JobsPage() {
                             <TabsList>
                               <TabsTrigger value="competencies">Competencies</TabsTrigger>
                               <TabsTrigger value="responsibilities">Responsibilities</TabsTrigger>
+                              <TabsTrigger value="goals">Goals</TabsTrigger>
                             </TabsList>
                             <TabsContent value="competencies" className="mt-4">
                               <JobCompetenciesManager 
@@ -667,6 +669,12 @@ export default function JobsPage() {
                             </TabsContent>
                             <TabsContent value="responsibilities" className="mt-4">
                               <JobResponsibilitiesManager 
+                                jobId={job.id} 
+                                companyId={job.company_id} 
+                              />
+                            </TabsContent>
+                            <TabsContent value="goals" className="mt-4">
+                              <JobGoalsManager 
                                 jobId={job.id} 
                                 companyId={job.company_id} 
                               />
