@@ -2,6 +2,7 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ModuleReportsButton } from "@/components/reports/ModuleReportsButton";
+import { ModuleBIButton } from "@/components/bi/ModuleBIButton";
 import { 
   Wallet, 
   Calculator, 
@@ -76,7 +77,10 @@ export default function PayrollDashboardPage() {
               </p>
             </div>
           </div>
-          <ModuleReportsButton module="payroll" />
+          <div className="flex items-center gap-2">
+            <ModuleBIButton module="payroll" />
+            <ModuleReportsButton module="payroll" />
+          </div>
         </div>
 
         {/* Stats */}

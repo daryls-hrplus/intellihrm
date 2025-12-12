@@ -3,6 +3,7 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import { NavLink } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { ModuleReportsButton } from "@/components/reports/ModuleReportsButton";
+import { ModuleBIButton } from "@/components/bi/ModuleBIButton";
 import {
   Users,
   UserCheck,
@@ -190,7 +191,10 @@ export default function WorkforceDashboardPage() {
                 </p>
               </div>
             </div>
-            <ModuleReportsButton module="workforce" />
+            <div className="flex items-center gap-2">
+              <ModuleBIButton module="workforce" />
+              <ModuleReportsButton module="workforce" />
+            </div>
           </div>
         </div>
 

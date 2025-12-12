@@ -1,6 +1,7 @@
 import { AppLayout } from "@/components/layout/AppLayout";
 import { NavLink } from "react-router-dom";
 import { ModuleReportsButton } from "@/components/reports/ModuleReportsButton";
+import { ModuleBIButton } from "@/components/bi/ModuleBIButton";
 import {
   Calendar,
   CalendarPlus,
@@ -76,7 +77,10 @@ export default function LeaveDashboardPage() {
                 </p>
               </div>
             </div>
-            <ModuleReportsButton module="leave" />
+            <div className="flex items-center gap-2">
+              <ModuleBIButton module="leave" />
+              <ModuleReportsButton module="leave" />
+            </div>
           </div>
         </div>
 

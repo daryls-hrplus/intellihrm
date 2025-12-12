@@ -1,6 +1,7 @@
 import { AppLayout } from "@/components/layout/AppLayout";
 import { NavLink } from "react-router-dom";
 import { ModuleReportsButton } from "@/components/reports/ModuleReportsButton";
+import { ModuleBIButton } from "@/components/bi/ModuleBIButton";
 import {
   DollarSign,
   Wallet,
@@ -69,7 +70,10 @@ export default function CompensationDashboardPage() {
                 </p>
               </div>
             </div>
-            <ModuleReportsButton module="compensation" />
+            <div className="flex items-center gap-2">
+              <ModuleBIButton module="compensation" />
+              <ModuleReportsButton module="compensation" />
+            </div>
           </div>
         </div>
 

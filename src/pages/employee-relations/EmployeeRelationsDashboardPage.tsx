@@ -1,6 +1,7 @@
 import { AppLayout } from "@/components/layout/AppLayout";
 import { NavLink } from "react-router-dom";
 import { ModuleReportsButton } from "@/components/reports/ModuleReportsButton";
+import { ModuleBIButton } from "@/components/bi/ModuleBIButton";
 import {
   Heart,
   MessageSquare,
@@ -76,7 +77,10 @@ export default function EmployeeRelationsDashboardPage() {
                 </p>
               </div>
             </div>
-            <ModuleReportsButton module="employee_relations" />
+            <div className="flex items-center gap-2">
+              <ModuleBIButton module="employee_relations" />
+              <ModuleReportsButton module="employee_relations" />
+            </div>
           </div>
         </div>
 

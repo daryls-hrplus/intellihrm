@@ -2,6 +2,7 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ModuleReportsButton } from "@/components/reports/ModuleReportsButton";
+import { ModuleBIButton } from "@/components/bi/ModuleBIButton";
 import { 
   Clock, 
   Calendar, 
@@ -75,7 +76,10 @@ export default function TimeAttendanceDashboardPage() {
               </p>
             </div>
           </div>
-          <ModuleReportsButton module="time_attendance" />
+          <div className="flex items-center gap-2">
+            <ModuleBIButton module="time_attendance" />
+            <ModuleReportsButton module="time_attendance" />
+          </div>
         </div>
 
         {/* Stats */}
