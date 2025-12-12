@@ -373,6 +373,20 @@ export default function Review360Page() {
                               Manager Review
                             </div>
                           </div>
+                          {participation.review_cycle?.status === "active" && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="w-full"
+                              onClick={() => {
+                                setSelectedParticipant(participation);
+                                setPeerNominationOpen(true);
+                              }}
+                            >
+                              <UserPlus className="mr-2 h-4 w-4" />
+                              Nominate Peers
+                            </Button>
+                          )}
                           {participation.overall_score && (
                             <div className="pt-2 border-t">
                               <p className="text-sm text-muted-foreground">Overall Score</p>
@@ -501,6 +515,40 @@ export default function Review360Page() {
           setCycleDialogOpen(false);
         }}
       />
+
+      {selectedCycle && (
+        <>
+          <CycleParticipantsManager
+            open={participantsManagerOpen}
+            onOpenChange={setParticipantsManagerOpen}
+            cycleId={selectedCycle.id}
+            cycleName={selectedCycle.name}
+            companyId={company?.id || ""}
+            onUpdate={fetchData}
+          />
+          <CycleQuestionsManager
+            open={questionsManagerOpen}
+            onOpenChange={setQuestionsManagerOpen}
+            cycleId={selectedCycle.id}
+            cycleName={selectedCycle.name}
+            companyId={company?.id || ""}
+          />
+        </>
+      )}
+
+      {selectedParticipant && (
+        <PeerNominationManager
+          open={peerNominationOpen}
+          onOpenChange={setPeerNominationOpen}
+          participantId={selectedParticipant.id}
+          cycleId={selectedParticipant.review_cycle_id}
+          cycleName={selectedParticipant.review_cycle?.name || ""}
+          companyId={company?.id || ""}
+          minPeers={3}
+          maxPeers={5}
+          deadline={selectedParticipant.review_cycle?.peer_nomination_deadline}
+        />
+      )}
     </AppLayout>
   );
 }
