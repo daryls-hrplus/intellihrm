@@ -40,30 +40,62 @@ serve(async (req) => {
       throw new Error("LOVABLE_API_KEY is not configured");
     }
 
-    // Get table schema info for SQL generation
-    let tableSchemaContext = "";
-    if (action === "generate_template" || action === "generate_sql") {
-      const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-      const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-      const supabase = createClient(supabaseUrl, supabaseServiceKey);
-      
-      // Get actual column info for tables used in data sources
-      const tableNames = [...new Set(dataSources.map(ds => ds.base_table).filter(Boolean))];
-      for (const tableName of tableNames) {
-        const { data: columns } = await supabase
-          .from('information_schema.columns' as never)
-          .select('column_name, data_type, is_nullable')
-          .eq('table_schema', 'public')
-          .eq('table_name', tableName);
-        
-        if (columns && columns.length > 0) {
-          tableSchemaContext += `\nTable: ${tableName}\nColumns:\n`;
-          for (const col of columns as Array<{column_name: string; data_type: string; is_nullable: string}>) {
-            tableSchemaContext += `  - ${col.column_name} (${col.data_type}${col.is_nullable === 'YES' ? ', nullable' : ''})\n`;
-          }
-        }
-      }
-    }
+    // Provide explicit schema context for key HRIS tables
+    let tableSchemaContext = `
+IMPORTANT HRIS DATABASE SCHEMA:
+The main employee table is "profiles" (NOT "employees"):
+
+Table: profiles
+  - id (uuid, primary key)
+  - email (text)
+  - full_name (text)
+  - avatar_url (text, nullable)
+  - company_id (uuid, nullable, FK to companies)
+  - department_id (uuid, nullable)
+  - position_id (uuid, nullable)
+  - hire_date (date, nullable)
+  - termination_date (date, nullable)
+  - employee_status (text, nullable)
+  - employee_number (text, nullable)
+  - created_at (timestamptz)
+  - updated_at (timestamptz)
+
+Table: companies
+  - id (uuid, primary key)
+  - name (text)
+  - code (text)
+  - is_active (boolean)
+
+Table: departments
+  - id (uuid, primary key)
+  - name (text)
+  - code (text)
+  - company_id (uuid, FK to companies)
+  - is_active (boolean)
+
+Table: positions
+  - id (uuid, primary key)
+  - title (text)
+  - code (text)
+  - department_id (uuid, FK to departments)
+  - is_active (boolean)
+
+Table: employee_positions
+  - id (uuid, primary key)
+  - employee_id (uuid, FK to profiles)
+  - position_id (uuid, FK to positions)
+  - start_date (date)
+  - end_date (date, nullable)
+  - is_active (boolean)
+  - is_primary (boolean)
+
+POSTGRESQL DATE FUNCTIONS (DO NOT USE MYSQL FUNCTIONS):
+- Use (date_column + interval '1 month' - interval '1 day') instead of LAST_DAY()
+- Use DATE_TRUNC('month', date_column) for first of month
+- Use TO_CHAR(date_column, 'YYYY-MM') for month formatting
+- Use GENERATE_SERIES(start_date, end_date, '1 month'::interval) for date sequences
+`;
+
 
     let systemPrompt = "";
     let userPrompt = "";
