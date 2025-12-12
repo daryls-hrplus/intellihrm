@@ -402,15 +402,18 @@ export function useReportWriter() {
         
         const fileName = `${template.name || 'report'}_${new Date().toISOString().split('T')[0]}`;
         
+        // Use field labels from edge function response if available
+        const reportFieldLabels = result.fieldLabels || fieldLabels;
+        
         // Download based on format
         if (result.data && result.data.length > 0) {
           if (outputFormat === 'csv' || outputFormat === 'excel') {
-            downloadCsvData(result.data, fieldLabels, `${fileName}.csv`);
+            downloadCsvData(result.data, reportFieldLabels, `${fileName}.csv`);
             if (outputFormat === 'excel') {
               toast.info('Excel format downloaded as CSV');
             }
           } else if (outputFormat === 'pdf') {
-            downloadPdfData(result.data, fieldLabels, template.name, fileName);
+            downloadPdfData(result.data, reportFieldLabels, template.name, fileName);
           }
         }
         
