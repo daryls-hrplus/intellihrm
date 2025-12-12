@@ -28,6 +28,7 @@ import { EmployeeEmergencyContactsTab } from "@/components/employee/EmployeeEmer
 import { EmployeePayGroupTab } from "@/components/employee/EmployeePayGroupTab";
 import { EmployeeBranchLocationsTab } from "@/components/employee/EmployeeBranchLocationsTab";
 import { EmployeeCompetenciesTab } from "@/components/employee/EmployeeCompetenciesTab";
+import { EmployeeEditDialog } from "@/components/employee/EmployeeEditDialog";
 
 import {
   ArrowLeft,
@@ -56,6 +57,7 @@ import {
   AlertTriangle,
   DollarSign,
   Sparkles,
+  Pencil,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
@@ -84,6 +86,7 @@ export default function EmployeeProfilePage() {
   const navigate = useNavigate();
   const [employee, setEmployee] = useState<EmployeeProfile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
   const { logView } = useAuditLog();
   const { canViewPii, maskPii } = usePiiVisibility();
 
@@ -168,6 +171,12 @@ export default function EmployeeProfilePage() {
       .slice(0, 2);
   };
 
+  const handleEditSuccess = () => {
+    if (id) {
+      fetchEmployee(id);
+    }
+  };
+
   if (loading) {
     return (
       <AppLayout>
@@ -248,9 +257,15 @@ export default function EmployeeProfilePage() {
                   )}
                 </div>
               </div>
-              <Badge variant={activePosition ? "default" : "secondary"} className="shrink-0">
-                {activePosition ? "Active" : "Unassigned"}
-              </Badge>
+              <div className="flex flex-col items-end gap-2">
+                <Badge variant={activePosition ? "default" : "secondary"} className="shrink-0">
+                  {activePosition ? "Active" : "Unassigned"}
+                </Badge>
+                <Button variant="outline" size="sm" onClick={() => setEditDialogOpen(true)}>
+                  <Pencil className="mr-2 h-4 w-4" />
+                  Edit
+                </Button>
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -443,6 +458,14 @@ export default function EmployeeProfilePage() {
             <EmployeeWorkPermitsTab employeeId={employee.id} />
           </TabsContent>
         </Tabs>
+
+        {/* Edit Employee Dialog */}
+        <EmployeeEditDialog
+          open={editDialogOpen}
+          onOpenChange={setEditDialogOpen}
+          employee={employee}
+          onSuccess={handleEditSuccess}
+        />
       </div>
     </AppLayout>
   );
