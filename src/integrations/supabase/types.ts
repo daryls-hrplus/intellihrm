@@ -1163,6 +1163,243 @@ export type Database = {
           },
         ]
       }
+      bi_dashboard_shares: {
+        Row: {
+          can_edit: boolean
+          created_at: string
+          created_by: string | null
+          dashboard_id: string
+          id: string
+          shared_with_role: string | null
+          shared_with_user_id: string | null
+        }
+        Insert: {
+          can_edit?: boolean
+          created_at?: string
+          created_by?: string | null
+          dashboard_id: string
+          id?: string
+          shared_with_role?: string | null
+          shared_with_user_id?: string | null
+        }
+        Update: {
+          can_edit?: boolean
+          created_at?: string
+          created_by?: string | null
+          dashboard_id?: string
+          id?: string
+          shared_with_role?: string | null
+          shared_with_user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bi_dashboard_shares_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bi_dashboard_shares_dashboard_id_fkey"
+            columns: ["dashboard_id"]
+            isOneToOne: false
+            referencedRelation: "bi_dashboards"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bi_dashboard_shares_shared_with_user_id_fkey"
+            columns: ["shared_with_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      bi_dashboards: {
+        Row: {
+          code: string
+          company_id: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          end_date: string | null
+          filters: Json
+          id: string
+          is_active: boolean
+          is_global: boolean
+          layout: Json
+          module: string
+          name: string
+          refresh_interval: number | null
+          start_date: string
+          theme: Json
+          updated_at: string
+        }
+        Insert: {
+          code: string
+          company_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          end_date?: string | null
+          filters?: Json
+          id?: string
+          is_active?: boolean
+          is_global?: boolean
+          layout?: Json
+          module: string
+          name: string
+          refresh_interval?: number | null
+          start_date?: string
+          theme?: Json
+          updated_at?: string
+        }
+        Update: {
+          code?: string
+          company_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          end_date?: string | null
+          filters?: Json
+          id?: string
+          is_active?: boolean
+          is_global?: boolean
+          layout?: Json
+          module?: string
+          name?: string
+          refresh_interval?: number | null
+          start_date?: string
+          theme?: Json
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bi_dashboards_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bi_dashboards_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      bi_data_sources: {
+        Row: {
+          available_fields: Json
+          base_table: string
+          code: string
+          created_at: string
+          default_filters: Json
+          description: string | null
+          id: string
+          is_active: boolean
+          joins: Json
+          module: string
+          name: string
+          supports_drill_down: boolean
+          updated_at: string
+        }
+        Insert: {
+          available_fields?: Json
+          base_table: string
+          code: string
+          created_at?: string
+          default_filters?: Json
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          joins?: Json
+          module: string
+          name: string
+          supports_drill_down?: boolean
+          updated_at?: string
+        }
+        Update: {
+          available_fields?: Json
+          base_table?: string
+          code?: string
+          created_at?: string
+          default_filters?: Json
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          joins?: Json
+          module?: string
+          name?: string
+          supports_drill_down?: boolean
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      bi_widgets: {
+        Row: {
+          chart_type: string | null
+          config: Json
+          created_at: string
+          custom_sql: string | null
+          dashboard_id: string
+          data_source: string
+          display_order: number
+          drill_down: Json | null
+          filters: Json
+          id: string
+          is_visible: boolean
+          name: string
+          position: Json
+          updated_at: string
+          widget_type: string
+        }
+        Insert: {
+          chart_type?: string | null
+          config?: Json
+          created_at?: string
+          custom_sql?: string | null
+          dashboard_id: string
+          data_source: string
+          display_order?: number
+          drill_down?: Json | null
+          filters?: Json
+          id?: string
+          is_visible?: boolean
+          name: string
+          position?: Json
+          updated_at?: string
+          widget_type: string
+        }
+        Update: {
+          chart_type?: string | null
+          config?: Json
+          created_at?: string
+          custom_sql?: string | null
+          dashboard_id?: string
+          data_source?: string
+          display_order?: number
+          drill_down?: Json | null
+          filters?: Json
+          id?: string
+          is_visible?: boolean
+          name?: string
+          position?: Json
+          updated_at?: string
+          widget_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bi_widgets_dashboard_id_fkey"
+            columns: ["dashboard_id"]
+            isOneToOne: false
+            referencedRelation: "bi_dashboards"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       companies: {
         Row: {
           address: string | null
