@@ -88,12 +88,9 @@ serve(async (req) => {
     // Fetch data from the base table
     let query = supabase.from(dataSource.base_table).select('*');
 
-    // Apply sorting if defined
-    if (template.sorting && template.sorting.length > 0) {
-      for (const sort of template.sorting) {
-        query = query.order(sort.field, { ascending: sort.order === 'asc' });
-      }
-    }
+    // Apply sorting if defined - currently ignore template-defined fields to avoid invalid column errors
+    // Sorting can be applied client-side on the returned data if needed.
+    // (Template sorting may reference logical fields that don't exist as DB columns.)
 
     // Apply parameter filters if applicable (only when matching date field exists)
     if (parameters.report_year) {
