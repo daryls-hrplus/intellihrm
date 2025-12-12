@@ -39,6 +39,7 @@ import { GoalsList } from "@/components/performance/GoalsList";
 import { GoalTemplatesManager } from "@/components/performance/GoalTemplatesManager";
 import { GoalHierarchyView } from "@/components/performance/GoalHierarchyView";
 import { useAuditLog } from "@/hooks/useAuditLog";
+import { Label } from "@/components/ui/label";
 
 type GoalStatus = 'draft' | 'active' | 'in_progress' | 'completed' | 'cancelled' | 'overdue';
 type GoalType = 'okr_objective' | 'okr_key_result' | 'smart_goal';
@@ -81,7 +82,7 @@ const breadcrumbItems = [
 ];
 
 export default function GoalsPage() {
-  const { user, company } = useAuth();
+  const { user, company, isAdmin, isHRManager } = useAuth();
   const { logView } = useAuditLog();
   const [goals, setGoals] = useState<Goal[]>([]);
   const [loading, setLoading] = useState(false);
@@ -93,9 +94,48 @@ export default function GoalsPage() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedGoal, setSelectedGoal] = useState<Goal | null>(null);
   const [activeTab, setActiveTab] = useState("my-goals");
+  const [companies, setCompanies] = useState<{ id: string; name: string }[]>([]);
+  const [selectedCompanyId, setSelectedCompanyId] = useState<string>(company?.id || "");
+  const [employees, setEmployees] = useState<{ id: string; full_name: string }[]>([]);
+  const [selectedEmployeeId, setSelectedEmployeeId] = useState<string>("");
+
+  // Fetch companies for company switcher
+  useEffect(() => {
+    const fetchCompanies = async () => {
+      const { data } = await supabase
+        .from("companies")
+        .select("id, name")
+        .eq("is_active", true)
+        .order("name");
+      setCompanies(data || []);
+    };
+    fetchCompanies();
+  }, []);
+
+  // Fetch employees when company is selected
+  useEffect(() => {
+    const fetchEmployees = async () => {
+      if (!selectedCompanyId) return;
+      const { data } = await supabase
+        .from("profiles")
+        .select("id, full_name")
+        .eq("company_id", selectedCompanyId)
+        .order("full_name");
+      setEmployees((data as { id: string; full_name: string }[]) || []);
+    };
+    fetchEmployees();
+  }, [selectedCompanyId]);
+
+  // Update selectedCompanyId when company from auth changes
+  useEffect(() => {
+    if (company?.id && !selectedCompanyId) {
+      setSelectedCompanyId(company.id);
+    }
+  }, [company?.id]);
 
   const fetchGoals = async () => {
-    if (!company?.id) return;
+    const companyIdToUse = selectedCompanyId || company?.id;
+    if (!companyIdToUse) return;
     
     setLoading(true);
     try {
@@ -106,7 +146,7 @@ export default function GoalsPage() {
           employee:profiles!performance_goals_employee_id_fkey(full_name),
           department:departments(name)
         `)
-        .eq("company_id", company.id)
+        .eq("company_id", companyIdToUse)
         .order("created_at", { ascending: false });
 
       if (activeTab === "my-goals" && user?.id) {
@@ -130,10 +170,11 @@ export default function GoalsPage() {
   };
 
   useEffect(() => {
-    if (company?.id) {
+    const companyIdToUse = selectedCompanyId || company?.id;
+    if (companyIdToUse) {
       fetchGoals();
     }
-  }, [company?.id, activeTab]);
+  }, [selectedCompanyId, company?.id, activeTab]);
 
   useEffect(() => {
     logView("performance_goals", undefined, "Goals Page");
@@ -188,10 +229,28 @@ export default function GoalsPage() {
               </div>
             </div>
           </div>
-          <Button onClick={handleCreateGoal}>
-            <Plus className="mr-2 h-4 w-4" />
-            Create Goal
-          </Button>
+          <div className="flex items-center gap-3">
+            {/* Company Switcher */}
+            {(isAdmin || isHRManager) && companies.length > 0 && (
+              <Select value={selectedCompanyId} onValueChange={setSelectedCompanyId}>
+                <SelectTrigger className="w-[200px]">
+                  <Building2 className="mr-2 h-4 w-4" />
+                  <SelectValue placeholder="Select Company" />
+                </SelectTrigger>
+                <SelectContent>
+                  {companies.map((c) => (
+                    <SelectItem key={c.id} value={c.id}>
+                      {c.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
+            <Button onClick={handleCreateGoal}>
+              <Plus className="mr-2 h-4 w-4" />
+              Create Goal
+            </Button>
+          </div>
         </div>
 
         {/* Stats Cards */}
@@ -406,7 +465,8 @@ export default function GoalsPage() {
         open={dialogOpen}
         onOpenChange={setDialogOpen}
         goal={selectedGoal}
-        companyId={company?.id}
+        companyId={selectedCompanyId || company?.id}
+        employees={employees}
         onSuccess={fetchGoals}
       />
     </AppLayout>
