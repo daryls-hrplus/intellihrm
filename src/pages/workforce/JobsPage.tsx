@@ -38,6 +38,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuditLog } from "@/hooks/useAuditLog";
 import { toast } from "sonner";
@@ -52,6 +53,7 @@ import {
 } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { format } from "date-fns";
+import { JobCompetenciesManager } from "@/components/workforce/JobCompetenciesManager";
 
 interface Job {
   id: string;
@@ -337,6 +339,178 @@ export default function JobsPage() {
       job.job_families?.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  const renderJobForm = () => (
+    <>
+      <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label>Name *</Label>
+          <Input
+            value={formData.name}
+            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+            placeholder="e.g., Senior Software Engineer"
+          />
+        </div>
+        <div className="space-y-2">
+          <Label>Code *</Label>
+          <Input
+            value={formData.code}
+            onChange={(e) => setFormData({ ...formData, code: e.target.value.toUpperCase() })}
+            placeholder="e.g., SSE"
+          />
+        </div>
+      </div>
+
+      <div className="space-y-2">
+        <Label>Description</Label>
+        <Textarea
+          value={formData.description}
+          onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+          placeholder="Job description..."
+          rows={3}
+        />
+      </div>
+
+      <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label>Company *</Label>
+          <Select
+            value={formData.company_id}
+            onValueChange={(value) =>
+              setFormData({ ...formData, company_id: value, job_family_id: "" })
+            }
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Select company" />
+            </SelectTrigger>
+            <SelectContent>
+              {companies.map((company) => (
+                <SelectItem key={company.id} value={company.id}>
+                  {company.name} ({company.code})
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="space-y-2">
+          <Label>Job Family *</Label>
+          <Select
+            value={formData.job_family_id}
+            onValueChange={(value) => setFormData({ ...formData, job_family_id: value })}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Select job family" />
+            </SelectTrigger>
+            <SelectContent>
+              {formJobFamilies.map((jf) => (
+                <SelectItem key={jf.id} value={jf.id}>
+                  {jf.name} ({jf.code})
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label>Job Grade</Label>
+          <Input
+            value={formData.job_grade}
+            onChange={(e) => setFormData({ ...formData, job_grade: e.target.value })}
+            placeholder="e.g., G5"
+          />
+        </div>
+        <div className="space-y-2">
+          <Label>Job Level</Label>
+          <Input
+            value={formData.job_level}
+            onChange={(e) => setFormData({ ...formData, job_level: e.target.value })}
+            placeholder="e.g., Senior"
+          />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label>Critical Level</Label>
+          <Input
+            value={formData.critical_level}
+            onChange={(e) => setFormData({ ...formData, critical_level: e.target.value })}
+            placeholder="e.g., High"
+          />
+        </div>
+        <div className="space-y-2">
+          <Label>Job Class (User Defined)</Label>
+          <Input
+            value={formData.job_class}
+            onChange={(e) => setFormData({ ...formData, job_class: e.target.value })}
+            placeholder="e.g., Technical"
+          />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label>Standard Hours</Label>
+          <Input
+            type="number"
+            value={formData.standard_hours}
+            onChange={(e) => setFormData({ ...formData, standard_hours: e.target.value })}
+            placeholder="e.g., 40"
+          />
+        </div>
+        <div className="space-y-2">
+          <Label>Standard Work Period</Label>
+          <Select
+            value={formData.standard_work_period}
+            onValueChange={(value) =>
+              setFormData({ ...formData, standard_work_period: value === "__none__" ? "" : value })
+            }
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Select period" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="__none__">None</SelectItem>
+              {WORK_PERIODS.map((period) => (
+                <SelectItem key={period.value} value={period.value}>
+                  {period.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label>Start Date *</Label>
+          <Input
+            type="date"
+            value={formData.start_date}
+            onChange={(e) => setFormData({ ...formData, start_date: e.target.value })}
+          />
+        </div>
+        <div className="space-y-2">
+          <Label>End Date</Label>
+          <Input
+            type="date"
+            value={formData.end_date}
+            onChange={(e) => setFormData({ ...formData, end_date: e.target.value })}
+          />
+        </div>
+      </div>
+
+      <div className="flex items-center gap-2">
+        <Switch
+          checked={formData.is_active}
+          onCheckedChange={(checked) => setFormData({ ...formData, is_active: checked })}
+        />
+        <Label>Active</Label>
+      </div>
+    </>
+  );
+
   return (
     <AppLayout>
       <div className="space-y-6">
@@ -461,190 +635,52 @@ export default function JobsPage() {
 
         {/* Create/Edit Dialog */}
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>
                 {selectedJob ? "Edit Job" : "Create Job"}
               </DialogTitle>
             </DialogHeader>
-            <div className="space-y-4 py-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Name *</Label>
-                  <Input
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    placeholder="e.g., Senior Software Engineer"
+            
+            {selectedJob ? (
+              <Tabs defaultValue="details" className="w-full">
+                <TabsList className="grid w-full grid-cols-2">
+                  <TabsTrigger value="details">Job Details</TabsTrigger>
+                  <TabsTrigger value="competencies">Competencies</TabsTrigger>
+                </TabsList>
+                <TabsContent value="details" className="space-y-4 py-4">
+                  {renderJobForm()}
+                  <DialogFooter>
+                    <Button variant="outline" onClick={() => setDialogOpen(false)}>
+                      Cancel
+                    </Button>
+                    <Button onClick={handleSave} disabled={isSaving}>
+                      {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                      Update
+                    </Button>
+                  </DialogFooter>
+                </TabsContent>
+                <TabsContent value="competencies" className="py-4">
+                  <JobCompetenciesManager 
+                    jobId={selectedJob.id} 
+                    companyId={selectedJob.company_id} 
                   />
-                </div>
-                <div className="space-y-2">
-                  <Label>Code *</Label>
-                  <Input
-                    value={formData.code}
-                    onChange={(e) => setFormData({ ...formData, code: e.target.value.toUpperCase() })}
-                    placeholder="e.g., SSE"
-                  />
-                </div>
+                </TabsContent>
+              </Tabs>
+            ) : (
+              <div className="space-y-4 py-4">
+                {renderJobForm()}
+                <DialogFooter>
+                  <Button variant="outline" onClick={() => setDialogOpen(false)}>
+                    Cancel
+                  </Button>
+                  <Button onClick={handleSave} disabled={isSaving}>
+                    {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    Create
+                  </Button>
+                </DialogFooter>
               </div>
-
-              <div className="space-y-2">
-                <Label>Description</Label>
-                <Textarea
-                  value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  placeholder="Job description..."
-                  rows={3}
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Company *</Label>
-                  <Select
-                    value={formData.company_id}
-                    onValueChange={(value) =>
-                      setFormData({ ...formData, company_id: value, job_family_id: "" })
-                    }
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select company" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {companies.map((company) => (
-                        <SelectItem key={company.id} value={company.id}>
-                          {company.name} ({company.code})
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label>Job Family *</Label>
-                  <Select
-                    value={formData.job_family_id}
-                    onValueChange={(value) => setFormData({ ...formData, job_family_id: value })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select job family" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {formJobFamilies.map((jf) => (
-                        <SelectItem key={jf.id} value={jf.id}>
-                          {jf.name} ({jf.code})
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Job Grade</Label>
-                  <Input
-                    value={formData.job_grade}
-                    onChange={(e) => setFormData({ ...formData, job_grade: e.target.value })}
-                    placeholder="e.g., G5"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Job Level</Label>
-                  <Input
-                    value={formData.job_level}
-                    onChange={(e) => setFormData({ ...formData, job_level: e.target.value })}
-                    placeholder="e.g., Senior"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Critical Level</Label>
-                  <Input
-                    value={formData.critical_level}
-                    onChange={(e) => setFormData({ ...formData, critical_level: e.target.value })}
-                    placeholder="e.g., High"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Job Class (User Defined)</Label>
-                  <Input
-                    value={formData.job_class}
-                    onChange={(e) => setFormData({ ...formData, job_class: e.target.value })}
-                    placeholder="e.g., Technical"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Standard Hours</Label>
-                  <Input
-                    type="number"
-                    value={formData.standard_hours}
-                    onChange={(e) => setFormData({ ...formData, standard_hours: e.target.value })}
-                    placeholder="e.g., 40"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Standard Work Period</Label>
-                  <Select
-                    value={formData.standard_work_period}
-                    onValueChange={(value) =>
-                      setFormData({ ...formData, standard_work_period: value === "__none__" ? "" : value })
-                    }
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select period" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="__none__">None</SelectItem>
-                      {WORK_PERIODS.map((period) => (
-                        <SelectItem key={period.value} value={period.value}>
-                          {period.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Start Date *</Label>
-                  <Input
-                    type="date"
-                    value={formData.start_date}
-                    onChange={(e) => setFormData({ ...formData, start_date: e.target.value })}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>End Date</Label>
-                  <Input
-                    type="date"
-                    value={formData.end_date}
-                    onChange={(e) => setFormData({ ...formData, end_date: e.target.value })}
-                  />
-                </div>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <Switch
-                  checked={formData.is_active}
-                  onCheckedChange={(checked) => setFormData({ ...formData, is_active: checked })}
-                />
-                <Label>Active</Label>
-              </div>
-            </div>
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setDialogOpen(false)}>
-                Cancel
-              </Button>
-              <Button onClick={handleSave} disabled={isSaving}>
-                {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                {selectedJob ? "Update" : "Create"}
-              </Button>
-            </DialogFooter>
+            )}
           </DialogContent>
         </Dialog>
 

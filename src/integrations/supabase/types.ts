@@ -2691,6 +2691,64 @@ export type Database = {
           },
         ]
       }
+      job_competencies: {
+        Row: {
+          competency_id: string
+          competency_level_id: string | null
+          created_at: string
+          id: string
+          is_required: boolean
+          job_id: string
+          notes: string | null
+          updated_at: string
+          weighting: number
+        }
+        Insert: {
+          competency_id: string
+          competency_level_id?: string | null
+          created_at?: string
+          id?: string
+          is_required?: boolean
+          job_id: string
+          notes?: string | null
+          updated_at?: string
+          weighting?: number
+        }
+        Update: {
+          competency_id?: string
+          competency_level_id?: string | null
+          created_at?: string
+          id?: string
+          is_required?: boolean
+          job_id?: string
+          notes?: string | null
+          updated_at?: string
+          weighting?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "job_competencies_competency_id_fkey"
+            columns: ["competency_id"]
+            isOneToOne: false
+            referencedRelation: "competencies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "job_competencies_competency_level_id_fkey"
+            columns: ["competency_level_id"]
+            isOneToOne: false
+            referencedRelation: "competency_levels"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "job_competencies_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       job_families: {
         Row: {
           code: string
