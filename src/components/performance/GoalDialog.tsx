@@ -382,14 +382,14 @@ export function GoalDialog({
                 <div>
                   <Label htmlFor="parent_goal_id">Align to Parent Goal</Label>
                   <Select
-                    value={formData.parent_goal_id}
-                    onValueChange={(value) => setFormData({ ...formData, parent_goal_id: value })}
+                    value={formData.parent_goal_id || "none"}
+                    onValueChange={(value) => setFormData({ ...formData, parent_goal_id: value === "none" ? "" : value })}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Select parent goal" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">None</SelectItem>
+                      <SelectItem value="none">None</SelectItem>
                       {parentGoals.map((pg) => (
                         <SelectItem key={pg.id} value={pg.id}>
                           {pg.title}
