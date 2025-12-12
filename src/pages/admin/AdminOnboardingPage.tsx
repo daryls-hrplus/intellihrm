@@ -151,7 +151,7 @@ export default function AdminOnboardingPage() {
 
   const breadcrumbItems = [
     { label: t('common.home'), path: '/' },
-    { label: t('common.admin'), path: '/admin' },
+    { label: 'Workforce', path: '/workforce' },
     { label: 'Employee Onboarding' },
   ];
 
@@ -509,7 +509,7 @@ export default function AdminOnboardingPage() {
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
-                              <DropdownMenuItem onClick={() => window.location.href = `/admin/onboarding/${instance.id}`}>
+                              <DropdownMenuItem onClick={() => window.location.href = `/workforce/onboarding/${instance.id}`}>
                                 View Details
                               </DropdownMenuItem>
                               {instance.status === 'in_progress' && (

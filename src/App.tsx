@@ -429,22 +429,6 @@ const App = () => (
                 </ProtectedRoute>
               }
             />
-            <Route
-              path="/admin/onboarding"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <AdminOnboardingPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/admin/onboarding/:id"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <AdminOnboardingDetailPage />
-                </ProtectedRoute>
-              }
-            />
             {/* Workforce Routes */}
             <Route
               path="/workforce"
@@ -579,6 +563,22 @@ const App = () => (
               element={
                 <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
                   <ResponsibilitiesPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/workforce/onboarding"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
+                  <AdminOnboardingPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/workforce/onboarding/:id"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
+                  <AdminOnboardingDetailPage />
                 </ProtectedRoute>
               }
             />
