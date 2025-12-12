@@ -14,6 +14,7 @@ import {
   CheckCircle,
   Loader2,
   Settings,
+  Target,
 } from "lucide-react";
 
 const trainingModules = [
@@ -32,11 +33,18 @@ const trainingModules = [
     color: "bg-success/10 text-success",
   },
   {
+    title: "Competency Gap Analysis",
+    description: "Compare skills with job requirements",
+    href: "/training/gap-analysis",
+    icon: Target,
+    color: "bg-info/10 text-info",
+  },
+  {
     title: "Live Sessions",
     description: "Upcoming webinars and workshops",
     href: "/training/sessions",
     icon: Video,
-    color: "bg-info/10 text-info",
+    color: "bg-secondary/10 text-secondary-foreground",
   },
   {
     title: "Certifications",
