@@ -2825,28 +2825,34 @@ export type Database = {
       job_responsibilities: {
         Row: {
           created_at: string
+          end_date: string | null
           id: string
           job_id: string
           notes: string | null
           responsibility_id: string
+          start_date: string
           updated_at: string
           weighting: number
         }
         Insert: {
           created_at?: string
+          end_date?: string | null
           id?: string
           job_id: string
           notes?: string | null
           responsibility_id: string
+          start_date?: string
           updated_at?: string
           weighting?: number
         }
         Update: {
           created_at?: string
+          end_date?: string | null
           id?: string
           job_id?: string
           notes?: string | null
           responsibility_id?: string
+          start_date?: string
           updated_at?: string
           weighting?: number
         }
