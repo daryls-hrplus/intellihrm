@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -14,8 +14,9 @@ import {
   Tooltip,
 } from "recharts";
 import { isPast, differenceInDays } from "date-fns";
-import { BarChart3, ClipboardList } from "lucide-react";
+import { BarChart3, ClipboardList, Filter } from "lucide-react";
 import { Review360FeedbackAnalytics } from "./Review360FeedbackAnalytics";
+import { Review360AnalyticsFilters } from "./Review360AnalyticsFilters";
 
 interface ReviewCycle {
   id: string;
@@ -64,8 +65,38 @@ export function Review360AnalyticsDashboard({
   compact = false,
 }: Review360AnalyticsDashboardProps) {
   const [analyticsTab, setAnalyticsTab] = useState("overview");
+  
+  // Filter states
+  const [selectedCycleId, setSelectedCycleId] = useState("all");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [reviewerTypeFilter, setReviewerTypeFilter] = useState("all");
+
+  const hasActiveFilters = selectedCycleId !== "all" || statusFilter !== "all" || reviewerTypeFilter !== "all";
+
+  const clearFilters = () => {
+    setSelectedCycleId("all");
+    setStatusFilter("all");
+    setReviewerTypeFilter("all");
+  };
+
+  // Filtered data
+  const filteredCycles = useMemo(() => {
+    return cycles.filter(cycle => {
+      const matchesCycle = selectedCycleId === "all" || cycle.id === selectedCycleId;
+      const matchesStatus = statusFilter === "all" || cycle.status === statusFilter;
+      return matchesCycle && matchesStatus;
+    });
+  }, [cycles, selectedCycleId, statusFilter]);
+
+  const filteredPendingReviews = useMemo(() => {
+    return pendingReviews.filter(review => {
+      const matchesReviewerType = reviewerTypeFilter === "all" || review.reviewer_type === reviewerTypeFilter;
+      return matchesReviewerType;
+    });
+  }, [pendingReviews, reviewerTypeFilter]);
+
   // Status distribution
-  const statusCounts = cycles.reduce((acc, cycle) => {
+  const statusCounts = filteredCycles.reduce((acc, cycle) => {
     acc[cycle.status] = (acc[cycle.status] || 0) + 1;
     return acc;
   }, {} as Record<string, number>);
@@ -77,7 +108,7 @@ export function Review360AnalyticsDashboard({
   }));
 
   // Reviewer type distribution
-  const reviewerCounts = pendingReviews.reduce((acc, review) => {
+  const reviewerCounts = filteredPendingReviews.reduce((acc, review) => {
     acc[review.reviewer_type] = (acc[review.reviewer_type] || 0) + 1;
     return acc;
   }, {} as Record<string, number>);
@@ -99,36 +130,53 @@ export function Review360AnalyticsDashboard({
 
   const completionData = completionBuckets.map(bucket => ({
     name: bucket.range,
-    count: cycles.filter(c =>
+    count: filteredCycles.filter(c =>
       (c.completion_rate || 0) >= bucket.min &&
       (c.completion_rate || 0) <= bucket.max
     ).length,
   }));
 
   // Calculate key metrics
-  const avgCompletionRate = cycles.length > 0
-    ? Math.round(cycles.reduce((sum, c) => sum + (c.completion_rate || 0), 0) / cycles.length)
+  const avgCompletionRate = filteredCycles.length > 0
+    ? Math.round(filteredCycles.reduce((sum, c) => sum + (c.completion_rate || 0), 0) / filteredCycles.length)
     : 0;
 
-  const overdueReviews = pendingReviews.filter(r =>
+  const overdueReviews = filteredPendingReviews.filter(r =>
     r.deadline && isPast(new Date(r.deadline))
   );
 
-  const dueSoonReviews = pendingReviews.filter(r => {
+  const dueSoonReviews = filteredPendingReviews.filter(r => {
     if (!r.deadline) return false;
     const days = differenceInDays(new Date(r.deadline), new Date());
     return days >= 0 && days <= 7;
   });
 
-  const totalParticipants = cycles.reduce((sum, c) => sum + (c.participants_count || 0), 0);
-  const activeCycles = cycles.filter(c => c.status === "active" || c.status === "in_progress").length;
+  const totalParticipants = filteredCycles.reduce((sum, c) => sum + (c.participants_count || 0), 0);
+  const activeCycles = filteredCycles.filter(c => c.status === "active" || c.status === "in_progress").length;
 
   const chartHeight = compact ? 100 : 120;
 
-  const cycleIds = cycles.map(c => c.id);
+  // Cycle IDs for feedback analytics - filtered
+  const cycleIds = filteredCycles.map(c => c.id);
 
   return (
     <div className="space-y-4">
+      {/* Filters */}
+      <div className="flex items-center gap-2 flex-wrap">
+        <Filter className="h-4 w-4 text-muted-foreground" />
+        <Review360AnalyticsFilters
+          cycles={cycles}
+          selectedCycleId={selectedCycleId}
+          onCycleChange={setSelectedCycleId}
+          statusFilter={statusFilter}
+          onStatusChange={setStatusFilter}
+          reviewerTypeFilter={reviewerTypeFilter}
+          onReviewerTypeChange={setReviewerTypeFilter}
+          hasActiveFilters={hasActiveFilters}
+          onClearFilters={clearFilters}
+        />
+      </div>
+
       <Tabs value={analyticsTab} onValueChange={setAnalyticsTab}>
         <TabsList>
           <TabsTrigger value="overview" className="gap-2">
@@ -322,7 +370,11 @@ export function Review360AnalyticsDashboard({
         </TabsContent>
 
         <TabsContent value="feedback" className="mt-4">
-          <Review360FeedbackAnalytics cycleIds={cycleIds} compact={compact} />
+          <Review360FeedbackAnalytics 
+            cycleIds={cycleIds} 
+            compact={compact} 
+            reviewerTypeFilter={reviewerTypeFilter}
+          />
         </TabsContent>
       </Tabs>
     </div>
