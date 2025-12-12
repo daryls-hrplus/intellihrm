@@ -30,6 +30,8 @@ interface AppraisalCycleDialogProps {
   cycle: AppraisalCycle | null;
   companyId: string | undefined;
   onSuccess: () => void;
+  isProbationReview?: boolean;
+  isManagerCycle?: boolean;
 }
 
 export function AppraisalCycleDialog({
@@ -38,6 +40,8 @@ export function AppraisalCycleDialog({
   cycle,
   companyId,
   onSuccess,
+  isProbationReview = false,
+  isManagerCycle = false,
 }: AppraisalCycleDialogProps) {
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
@@ -119,6 +123,8 @@ export function AppraisalCycleDialog({
         min_rating: formData.min_rating,
         max_rating: formData.max_rating,
         created_by: user?.id,
+        is_probation_review: isProbationReview,
+        is_manager_cycle: isManagerCycle,
       };
 
       if (cycle) {
@@ -149,7 +155,10 @@ export function AppraisalCycleDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>{cycle ? "Edit Appraisal Cycle" : "Create Appraisal Cycle"}</DialogTitle>
+          <DialogTitle>
+            {cycle ? "Edit " : "Create "}
+            {isProbationReview ? "Probation Review Cycle" : "Appraisal Cycle"}
+          </DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-6">
