@@ -359,6 +359,17 @@ export function useReportWriter() {
   ): Promise<{ report: GeneratedReport | null; data: Record<string, unknown>[] | null }> => {
     setIsLoading(true);
     try {
+      // Get template first for field mappings
+      const template = await getTemplate(templateId);
+      if (!template) {
+        throw new Error('Template not found');
+      }
+
+      // Get data source for field labels
+      const dataSources = await getDataSources(template.module);
+      const dataSource = dataSources.find(ds => ds.code === template.data_source);
+      const fieldLabels = dataSource?.available_fields || [];
+
       // Create the report record
       const { data: report, error: insertError } = await supabase
         .from('generated_reports')
@@ -389,16 +400,17 @@ export function useReportWriter() {
       if (result?.success) {
         toast.success(`Report generated with ${result.rowCount} rows`);
         
-        const template = await getTemplate(templateId);
-        const fileName = `${template?.name || 'report'}_${new Date().toISOString().split('T')[0]}`;
+        const fileName = `${template.name || 'report'}_${new Date().toISOString().split('T')[0]}`;
         
         // Download based on format
         if (result.data && result.data.length > 0) {
-          if (outputFormat === 'csv') {
-            downloadCsvData(result.data, `${fileName}.csv`);
-          } else if (outputFormat === 'excel') {
-            downloadCsvData(result.data, `${fileName}.csv`); // CSV as Excel fallback
-            toast.info('Excel format downloaded as CSV');
+          if (outputFormat === 'csv' || outputFormat === 'excel') {
+            downloadCsvData(result.data, fieldLabels, `${fileName}.csv`);
+            if (outputFormat === 'excel') {
+              toast.info('Excel format downloaded as CSV');
+            }
+          } else if (outputFormat === 'pdf') {
+            downloadPdfData(result.data, fieldLabels, template.name, fileName);
           }
         }
         
@@ -422,19 +434,38 @@ export function useReportWriter() {
     }
   };
 
-  const downloadCsvData = (data: Record<string, unknown>[], fileName: string) => {
+  const downloadCsvData = (
+    data: Record<string, unknown>[], 
+    fieldLabels: DataSourceField[], 
+    fileName: string
+  ) => {
     if (!data || data.length === 0) return;
     
-    const headers = Object.keys(data[0]);
+    // Use field labels if available, otherwise fall back to keys
+    const dbFields = Object.keys(data[0]);
+    const headers: string[] = [];
+    const fieldOrder: string[] = [];
+    
+    // Map DB fields to labels
+    for (const dbField of dbFields) {
+      const fieldDef = fieldLabels.find(f => f.name === dbField);
+      headers.push(fieldDef?.label || dbField);
+      fieldOrder.push(dbField);
+    }
+
+    const escapeCSV = (val: unknown): string => {
+      if (val === null || val === undefined) return '';
+      const str = String(val);
+      if (str.includes(',') || str.includes('"') || str.includes('\n')) {
+        return `"${str.replace(/"/g, '""')}"`;
+      }
+      return str;
+    };
+
     const csvContent = [
-      headers.join(','),
+      headers.map(escapeCSV).join(','),
       ...data.map(row => 
-        headers.map(h => {
-          const val = row[h];
-          if (val === null || val === undefined) return '';
-          const str = String(val);
-          return str.includes(',') ? `"${str}"` : str;
-        }).join(',')
+        fieldOrder.map(field => escapeCSV(row[field])).join(',')
       )
     ].join('\n');
 
@@ -447,6 +478,72 @@ export function useReportWriter() {
     link.click();
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
+  };
+
+  const downloadPdfData = (
+    data: Record<string, unknown>[], 
+    fieldLabels: DataSourceField[],
+    reportTitle: string,
+    fileName: string
+  ) => {
+    if (!data || data.length === 0) return;
+    
+    // Build HTML table for PDF
+    const dbFields = Object.keys(data[0]);
+    const headers = dbFields.map(dbField => {
+      const fieldDef = fieldLabels.find(f => f.name === dbField);
+      return fieldDef?.label || dbField;
+    });
+
+    const tableRows = data.map(row => 
+      `<tr>${dbFields.map(field => 
+        `<td style="border: 1px solid #ddd; padding: 8px;">${row[field] ?? ''}</td>`
+      ).join('')}</tr>`
+    ).join('');
+
+    const htmlContent = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>${reportTitle}</title>
+        <style>
+          body { font-family: Arial, sans-serif; padding: 20px; }
+          h1 { color: #333; margin-bottom: 20px; }
+          table { border-collapse: collapse; width: 100%; margin-top: 10px; }
+          th { background-color: #4a5568; color: white; padding: 10px; text-align: left; border: 1px solid #ddd; }
+          td { padding: 8px; border: 1px solid #ddd; }
+          tr:nth-child(even) { background-color: #f9f9f9; }
+          .meta { color: #666; font-size: 12px; margin-bottom: 15px; }
+        </style>
+      </head>
+      <body>
+        <h1>${reportTitle}</h1>
+        <p class="meta">Generated: ${new Date().toLocaleString()} | Records: ${data.length}</p>
+        <table>
+          <thead>
+            <tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr>
+          </thead>
+          <tbody>
+            ${tableRows}
+          </tbody>
+        </table>
+      </body>
+      </html>
+    `;
+
+    // Open in new window for printing as PDF
+    const printWindow = window.open('', '_blank');
+    if (printWindow) {
+      printWindow.document.write(htmlContent);
+      printWindow.document.close();
+      printWindow.focus();
+      setTimeout(() => {
+        printWindow.print();
+      }, 250);
+      toast.info('Use Print → Save as PDF to download');
+    } else {
+      toast.error('Please allow popups to generate PDF');
+    }
   };
 
   const getGeneratedReports = async (templateId?: string): Promise<GeneratedReport[]> => {
