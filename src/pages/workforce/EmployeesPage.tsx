@@ -51,6 +51,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { EmployeeEditDialog } from "@/components/employee/EmployeeEditDialog";
 
 interface Employee {
   id: string;
@@ -72,6 +73,8 @@ export default function EmployeesPage() {
   const [departmentFilter, setDepartmentFilter] = useState<string>("all");
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [employeeToDelete, setEmployeeToDelete] = useState<Employee | null>(null);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [employeeToEdit, setEmployeeToEdit] = useState<Employee | null>(null);
   const navigate = useNavigate();
   const { logView, logAction } = useAuditLog();
   const { canViewPii, maskPii } = usePiiVisibility();
@@ -211,7 +214,12 @@ export default function EmployeesPage() {
   };
 
   const handleEditEmployee = (employee: Employee) => {
-    navigate(`/workforce/employees/${employee.id}`);
+    setEmployeeToEdit(employee);
+    setEditDialogOpen(true);
+  };
+
+  const handleEditSuccess = () => {
+    fetchEmployees();
   };
 
   const handleDeleteClick = (employee: Employee) => {
@@ -526,6 +534,14 @@ export default function EmployeesPage() {
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
+
+        {/* Edit Employee Dialog */}
+        <EmployeeEditDialog
+          open={editDialogOpen}
+          onOpenChange={setEditDialogOpen}
+          employee={employeeToEdit}
+          onSuccess={handleEditSuccess}
+        />
       </div>
     </AppLayout>
   );
