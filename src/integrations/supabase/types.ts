@@ -5565,6 +5565,262 @@ export type Database = {
         }
         Relationships: []
       }
+      offboarding_instances: {
+        Row: {
+          company_id: string
+          completed_at: string | null
+          created_at: string
+          created_by: string | null
+          employee_id: string
+          id: string
+          last_working_date: string
+          manager_id: string | null
+          notes: string | null
+          status: string
+          template_id: string
+          termination_reason: string | null
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          completed_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          employee_id: string
+          id?: string
+          last_working_date: string
+          manager_id?: string | null
+          notes?: string | null
+          status?: string
+          template_id: string
+          termination_reason?: string | null
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          completed_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          employee_id?: string
+          id?: string
+          last_working_date?: string
+          manager_id?: string | null
+          notes?: string | null
+          status?: string
+          template_id?: string
+          termination_reason?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "offboarding_instances_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "offboarding_instances_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "offboarding_instances_manager_id_fkey"
+            columns: ["manager_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "offboarding_instances_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "offboarding_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      offboarding_tasks: {
+        Row: {
+          assigned_to_id: string | null
+          assigned_to_type: string
+          completed_at: string | null
+          completed_by: string | null
+          created_at: string
+          description: string | null
+          display_order: number
+          due_date: string | null
+          id: string
+          instance_id: string
+          is_required: boolean
+          name: string
+          notes: string | null
+          status: string
+          task_type: string
+          template_task_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          assigned_to_id?: string | null
+          assigned_to_type?: string
+          completed_at?: string | null
+          completed_by?: string | null
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          due_date?: string | null
+          id?: string
+          instance_id: string
+          is_required?: boolean
+          name: string
+          notes?: string | null
+          status?: string
+          task_type?: string
+          template_task_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          assigned_to_id?: string | null
+          assigned_to_type?: string
+          completed_at?: string | null
+          completed_by?: string | null
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          due_date?: string | null
+          id?: string
+          instance_id?: string
+          is_required?: boolean
+          name?: string
+          notes?: string | null
+          status?: string
+          task_type?: string
+          template_task_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "offboarding_tasks_assigned_to_id_fkey"
+            columns: ["assigned_to_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "offboarding_tasks_instance_id_fkey"
+            columns: ["instance_id"]
+            isOneToOne: false
+            referencedRelation: "offboarding_instances"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "offboarding_tasks_template_task_id_fkey"
+            columns: ["template_task_id"]
+            isOneToOne: false
+            referencedRelation: "offboarding_template_tasks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      offboarding_template_tasks: {
+        Row: {
+          assigned_to_type: string
+          created_at: string
+          description: string | null
+          display_order: number
+          due_days_before: number
+          id: string
+          is_required: boolean
+          name: string
+          task_type: string
+          template_id: string
+          updated_at: string
+        }
+        Insert: {
+          assigned_to_type?: string
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          due_days_before?: number
+          id?: string
+          is_required?: boolean
+          name: string
+          task_type?: string
+          template_id: string
+          updated_at?: string
+        }
+        Update: {
+          assigned_to_type?: string
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          due_days_before?: number
+          id?: string
+          is_required?: boolean
+          name?: string
+          task_type?: string
+          template_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "offboarding_template_tasks_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "offboarding_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      offboarding_templates: {
+        Row: {
+          company_id: string
+          created_at: string
+          created_by: string | null
+          description: string | null
+          end_date: string | null
+          id: string
+          is_active: boolean
+          name: string
+          start_date: string
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          start_date?: string
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          start_date?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "offboarding_templates_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       onboarding_instances: {
         Row: {
           actual_completion_date: string | null
