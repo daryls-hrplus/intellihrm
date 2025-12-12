@@ -61,6 +61,7 @@ import PrivacySettingsPage from "./pages/profile/PrivacySettingsPage";
 import PerformanceDashboardPage from "./pages/performance/PerformanceDashboardPage";
 import GoalsPage from "./pages/performance/GoalsPage";
 import Review360Page from "./pages/performance/Review360Page";
+import AppraisalsPage from "./pages/performance/AppraisalsPage";
 
 // Leave pages
 import LeaveDashboardPage from "./pages/leave/LeaveDashboardPage";
@@ -608,6 +609,14 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <Review360Page />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/performance/appraisals"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
+                  <AppraisalsPage />
                 </ProtectedRoute>
               }
             />
