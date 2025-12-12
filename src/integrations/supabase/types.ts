@@ -6064,6 +6064,7 @@ export type Database = {
           include_manager_review: boolean | null
           include_peer_review: boolean | null
           include_self_review: boolean | null
+          is_manager_cycle: boolean | null
           max_peer_reviewers: number | null
           min_peer_reviewers: number | null
           name: string
@@ -6085,6 +6086,7 @@ export type Database = {
           include_manager_review?: boolean | null
           include_peer_review?: boolean | null
           include_self_review?: boolean | null
+          is_manager_cycle?: boolean | null
           max_peer_reviewers?: number | null
           min_peer_reviewers?: number | null
           name: string
@@ -6106,6 +6108,7 @@ export type Database = {
           include_manager_review?: boolean | null
           include_peer_review?: boolean | null
           include_self_review?: boolean | null
+          is_manager_cycle?: boolean | null
           max_peer_reviewers?: number | null
           min_peer_reviewers?: number | null
           name?: string
