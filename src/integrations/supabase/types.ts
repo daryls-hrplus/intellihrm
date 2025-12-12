@@ -2291,6 +2291,95 @@ export type Database = {
           },
         ]
       }
+      feedback_responses: {
+        Row: {
+          created_at: string
+          feedback_submission_id: string
+          id: string
+          question_id: string
+          rating_value: number | null
+          selected_options: Json | null
+          text_value: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          feedback_submission_id: string
+          id?: string
+          question_id: string
+          rating_value?: number | null
+          selected_options?: Json | null
+          text_value?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          feedback_submission_id?: string
+          id?: string
+          question_id?: string
+          rating_value?: number | null
+          selected_options?: Json | null
+          text_value?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "feedback_responses_feedback_submission_id_fkey"
+            columns: ["feedback_submission_id"]
+            isOneToOne: false
+            referencedRelation: "feedback_submissions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feedback_responses_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "review_questions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      feedback_submissions: {
+        Row: {
+          created_at: string
+          id: string
+          review_participant_id: string
+          reviewer_id: string
+          reviewer_type: string
+          status: string
+          submitted_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          review_participant_id: string
+          reviewer_id: string
+          reviewer_type: string
+          status?: string
+          submitted_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          review_participant_id?: string
+          reviewer_id?: string
+          reviewer_type?: string
+          status?: string
+          submitted_at?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "feedback_submissions_review_participant_id_fkey"
+            columns: ["review_participant_id"]
+            isOneToOne: false
+            referencedRelation: "review_participants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       generated_letters: {
         Row: {
           approved_at: string | null
@@ -4285,6 +4374,44 @@ export type Database = {
           },
         ]
       }
+      peer_nominations: {
+        Row: {
+          created_at: string
+          id: string
+          nominated_by: string
+          nominated_peer_id: string
+          review_participant_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          nominated_by: string
+          nominated_peer_id: string
+          review_participant_id: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          nominated_by?: string
+          nominated_peer_id?: string
+          review_participant_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "peer_nominations_review_participant_id_fkey"
+            columns: ["review_participant_id"]
+            isOneToOne: false
+            referencedRelation: "review_participants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       performance_goals: {
         Row: {
           achievable: string | null
@@ -4953,6 +5080,193 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      review_cycles: {
+        Row: {
+          company_id: string
+          created_at: string
+          created_by: string | null
+          description: string | null
+          end_date: string
+          feedback_deadline: string | null
+          id: string
+          include_direct_report_review: boolean | null
+          include_manager_review: boolean | null
+          include_peer_review: boolean | null
+          include_self_review: boolean | null
+          max_peer_reviewers: number | null
+          min_peer_reviewers: number | null
+          name: string
+          peer_nomination_deadline: string | null
+          self_review_deadline: string | null
+          start_date: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          end_date: string
+          feedback_deadline?: string | null
+          id?: string
+          include_direct_report_review?: boolean | null
+          include_manager_review?: boolean | null
+          include_peer_review?: boolean | null
+          include_self_review?: boolean | null
+          max_peer_reviewers?: number | null
+          min_peer_reviewers?: number | null
+          name: string
+          peer_nomination_deadline?: string | null
+          self_review_deadline?: string | null
+          start_date: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          end_date?: string
+          feedback_deadline?: string | null
+          id?: string
+          include_direct_report_review?: boolean | null
+          include_manager_review?: boolean | null
+          include_peer_review?: boolean | null
+          include_self_review?: boolean | null
+          max_peer_reviewers?: number | null
+          min_peer_reviewers?: number | null
+          name?: string
+          peer_nomination_deadline?: string | null
+          self_review_deadline?: string | null
+          start_date?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "review_cycles_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      review_participants: {
+        Row: {
+          created_at: string
+          employee_id: string
+          id: string
+          manager_id: string | null
+          manager_review_completed: boolean | null
+          overall_score: number | null
+          review_cycle_id: string
+          self_review_completed: boolean | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          employee_id: string
+          id?: string
+          manager_id?: string | null
+          manager_review_completed?: boolean | null
+          overall_score?: number | null
+          review_cycle_id: string
+          self_review_completed?: boolean | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          employee_id?: string
+          id?: string
+          manager_id?: string | null
+          manager_review_completed?: boolean | null
+          overall_score?: number | null
+          review_cycle_id?: string
+          self_review_completed?: boolean | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "review_participants_review_cycle_id_fkey"
+            columns: ["review_cycle_id"]
+            isOneToOne: false
+            referencedRelation: "review_cycles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      review_questions: {
+        Row: {
+          applies_to: string[] | null
+          competency_id: string | null
+          created_at: string
+          display_order: number | null
+          id: string
+          is_required: boolean | null
+          options: Json | null
+          question_text: string
+          question_type: string
+          rating_labels: Json | null
+          rating_scale_max: number | null
+          rating_scale_min: number | null
+          review_cycle_id: string
+          updated_at: string
+        }
+        Insert: {
+          applies_to?: string[] | null
+          competency_id?: string | null
+          created_at?: string
+          display_order?: number | null
+          id?: string
+          is_required?: boolean | null
+          options?: Json | null
+          question_text: string
+          question_type?: string
+          rating_labels?: Json | null
+          rating_scale_max?: number | null
+          rating_scale_min?: number | null
+          review_cycle_id: string
+          updated_at?: string
+        }
+        Update: {
+          applies_to?: string[] | null
+          competency_id?: string | null
+          created_at?: string
+          display_order?: number | null
+          id?: string
+          is_required?: boolean | null
+          options?: Json | null
+          question_text?: string
+          question_type?: string
+          rating_labels?: Json | null
+          rating_scale_max?: number | null
+          rating_scale_min?: number | null
+          review_cycle_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "review_questions_competency_id_fkey"
+            columns: ["competency_id"]
+            isOneToOne: false
+            referencedRelation: "competencies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "review_questions_review_cycle_id_fkey"
+            columns: ["review_cycle_id"]
+            isOneToOne: false
+            referencedRelation: "review_cycles"
             referencedColumns: ["id"]
           },
         ]
@@ -6395,6 +6709,18 @@ export type Database = {
           approved_modules: Json
           is_auto_approved: boolean
           rule_name: string
+        }[]
+      }
+      get_360_feedback_summary: {
+        Args: { p_participant_id: string }
+        Returns: {
+          avg_rating: number
+          competency_name: string
+          question_id: string
+          question_text: string
+          response_count: number
+          reviewer_type: string
+          text_responses: string[]
         }[]
       }
       get_active_workflow_template: {

@@ -60,6 +60,7 @@ import PrivacySettingsPage from "./pages/profile/PrivacySettingsPage";
 // Performance pages
 import PerformanceDashboardPage from "./pages/performance/PerformanceDashboardPage";
 import GoalsPage from "./pages/performance/GoalsPage";
+import Review360Page from "./pages/performance/Review360Page";
 
 // Leave pages
 import LeaveDashboardPage from "./pages/leave/LeaveDashboardPage";
@@ -599,6 +600,14 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <GoalsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/performance/360"
+              element={
+                <ProtectedRoute>
+                  <Review360Page />
                 </ProtectedRoute>
               }
             />
