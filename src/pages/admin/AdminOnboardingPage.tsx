@@ -48,8 +48,10 @@ import {
   ChevronRight,
   GraduationCap,
   Package,
-  User
+  User,
+  BarChart3
 } from 'lucide-react';
+import { OnboardingAnalytics } from '@/components/admin/OnboardingAnalytics';
 import { useOnboarding, OnboardingTemplate, OnboardingTemplateTask, OnboardingInstance } from '@/hooks/useOnboarding';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -436,6 +438,10 @@ export default function AdminOnboardingPage() {
           <TabsList>
             <TabsTrigger value="instances">Active Onboarding</TabsTrigger>
             <TabsTrigger value="templates">Templates</TabsTrigger>
+            <TabsTrigger value="analytics" className="flex items-center gap-2">
+              <BarChart3 className="h-4 w-4" />
+              Analytics
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="instances" className="space-y-4">
@@ -730,6 +736,10 @@ export default function AdminOnboardingPage() {
                 ))
               )}
             </div>
+          </TabsContent>
+
+          <TabsContent value="analytics" className="space-y-4">
+            <OnboardingAnalytics companyId={selectedCompany} />
           </TabsContent>
         </Tabs>
 
