@@ -13,6 +13,7 @@ import {
   Search,
   MessageSquare,
   UserCircle,
+  Plus,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -20,6 +21,7 @@ import { format } from "date-fns";
 import { GoalProgressDialog } from "@/components/performance/GoalProgressDialog";
 import { GoalCommentsDialog } from "@/components/performance/GoalCommentsDialog";
 import { ContactManagerDialog } from "@/components/performance/ContactManagerDialog";
+import { GoalDialog } from "@/components/performance/GoalDialog";
 
 type GoalStatus = "draft" | "active" | "in_progress" | "completed" | "cancelled";
 
@@ -46,7 +48,7 @@ const statusConfig: Record<GoalStatus, { label: string; className: string }> = {
 };
 
 export default function MyGoalsPage() {
-  const { user } = useAuth();
+  const { user, company } = useAuth();
   const [goals, setGoals] = useState<Goal[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
@@ -54,6 +56,7 @@ export default function MyGoalsPage() {
   const [progressDialogOpen, setProgressDialogOpen] = useState(false);
   const [commentsDialogOpen, setCommentsDialogOpen] = useState(false);
   const [contactManagerOpen, setContactManagerOpen] = useState(false);
+  const [createGoalOpen, setCreateGoalOpen] = useState(false);
 
   const fetchGoals = async () => {
     if (!user?.id) return;
@@ -122,11 +125,17 @@ export default function MyGoalsPage() {
           ]}
         />
 
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">My Goals</h1>
-          <p className="text-muted-foreground">
-            Track and update your performance goals
-          </p>
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">My Goals</h1>
+            <p className="text-muted-foreground">
+              Track and update your performance goals
+            </p>
+          </div>
+          <Button onClick={() => setCreateGoalOpen(true)}>
+            <Plus className="mr-2 h-4 w-4" />
+            Create Goal
+          </Button>
         </div>
 
         {/* Summary Stats */}
@@ -293,6 +302,15 @@ export default function MyGoalsPage() {
             />
           </>
         )}
+
+        <GoalDialog
+          open={createGoalOpen}
+          onOpenChange={setCreateGoalOpen}
+          goal={null}
+          companyId={company?.id}
+          employees={user ? [{ id: user.id, full_name: "Me" }] : []}
+          onSuccess={fetchGoals}
+        />
       </div>
     </AppLayout>
   );
