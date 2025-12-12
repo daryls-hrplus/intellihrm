@@ -585,6 +585,14 @@ const App = () => (
                 </ProtectedRoute>
               }
             />
+            <Route
+              path="/performance/goals"
+              element={
+                <ProtectedRoute>
+                  <GoalsPage />
+                </ProtectedRoute>
+              }
+            />
 
             {/* Training Routes */}
             <Route
