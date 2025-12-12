@@ -52,7 +52,9 @@ import {
   ChevronLeft,
   ChevronDown,
   ChevronRight,
+  Copy,
 } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
 import { NavLink } from "react-router-dom";
 import { format } from "date-fns";
 import { JobCompetenciesManager } from "@/components/workforce/JobCompetenciesManager";
@@ -127,9 +129,20 @@ export default function JobsPage() {
   const [selectedCompanyId, setSelectedCompanyId] = useState<string>("");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [copyDialogOpen, setCopyDialogOpen] = useState(false);
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
   const [formData, setFormData] = useState(emptyForm);
   const [expandedJobId, setExpandedJobId] = useState<string | null>(null);
+  
+  // Copy job state
+  const [copyFormData, setCopyFormData] = useState({
+    name: "",
+    code: "",
+    copyCompetencies: true,
+    copyResponsibilities: true,
+    copyGoals: true,
+  });
+  const [isCopying, setIsCopying] = useState(false);
 
   const { logAction } = useAuditLog();
 
@@ -336,6 +349,147 @@ export default function JobsPage() {
       fetchJobs();
     }
     setDeleteDialogOpen(false);
+  };
+
+  const handleOpenCopyDialog = (job: Job) => {
+    setSelectedJob(job);
+    setCopyFormData({
+      name: `${job.name} (Copy)`,
+      code: `${job.code}_COPY`,
+      copyCompetencies: true,
+      copyResponsibilities: true,
+      copyGoals: true,
+    });
+    setCopyDialogOpen(true);
+  };
+
+  const handleCopyJob = async () => {
+    if (!selectedJob) return;
+    if (!copyFormData.name.trim() || !copyFormData.code.trim()) {
+      toast.error("Name and code are required");
+      return;
+    }
+
+    setIsCopying(true);
+    try {
+      // Create the new job
+      const { data: newJob, error: jobError } = await supabase
+        .from("jobs")
+        .insert([{
+          company_id: selectedJob.company_id,
+          job_family_id: selectedJob.job_family_id,
+          name: copyFormData.name.trim(),
+          code: copyFormData.code.trim().toUpperCase(),
+          description: selectedJob.description,
+          job_grade: selectedJob.job_grade,
+          job_level: selectedJob.job_level,
+          critical_level: selectedJob.critical_level,
+          job_class: selectedJob.job_class,
+          standard_hours: selectedJob.standard_hours,
+          standard_work_period: selectedJob.standard_work_period,
+          start_date: format(new Date(), "yyyy-MM-dd"),
+          end_date: null,
+          is_active: true,
+        }])
+        .select("id")
+        .single();
+
+      if (jobError) throw jobError;
+
+      const newJobId = newJob.id;
+
+      // Copy competencies if selected
+      if (copyFormData.copyCompetencies) {
+        const { data: competencies } = await supabase
+          .from("job_competencies")
+          .select("*")
+          .eq("job_id", selectedJob.id)
+          .is("end_date", null);
+
+        if (competencies && competencies.length > 0) {
+          const newCompetencies = competencies.map(c => ({
+            job_id: newJobId,
+            competency_id: c.competency_id,
+            competency_level_id: c.competency_level_id,
+            weighting: c.weighting,
+            is_required: c.is_required,
+            notes: c.notes,
+            start_date: format(new Date(), "yyyy-MM-dd"),
+            end_date: null,
+          }));
+          await supabase.from("job_competencies").insert(newCompetencies);
+        }
+      }
+
+      // Copy responsibilities if selected
+      if (copyFormData.copyResponsibilities) {
+        const { data: responsibilities } = await supabase
+          .from("job_responsibilities")
+          .select("*")
+          .eq("job_id", selectedJob.id)
+          .is("end_date", null);
+
+        if (responsibilities && responsibilities.length > 0) {
+          const newResponsibilities = responsibilities.map(r => ({
+            job_id: newJobId,
+            responsibility_id: r.responsibility_id,
+            weighting: r.weighting,
+            notes: r.notes,
+            start_date: format(new Date(), "yyyy-MM-dd"),
+            end_date: null,
+          }));
+          await supabase.from("job_responsibilities").insert(newResponsibilities);
+        }
+      }
+
+      // Copy goals if selected
+      if (copyFormData.copyGoals) {
+        const { data: goals } = await supabase
+          .from("job_goals")
+          .select("*")
+          .eq("job_id", selectedJob.id)
+          .is("end_date", null);
+
+        if (goals && goals.length > 0) {
+          const newGoals = goals.map(g => ({
+            job_id: newJobId,
+            goal_name: g.goal_name,
+            weighting: g.weighting,
+            notes: g.notes,
+            start_date: format(new Date(), "yyyy-MM-dd"),
+            end_date: null,
+          }));
+          await supabase.from("job_goals").insert(newGoals);
+        }
+      }
+
+      toast.success("Job copied successfully");
+      logAction({
+        action: "CREATE",
+        entityType: "jobs",
+        entityId: newJobId,
+        entityName: copyFormData.name,
+        metadata: {
+          copiedFrom: selectedJob.id,
+          copiedFromName: selectedJob.name,
+          copiedCompetencies: copyFormData.copyCompetencies,
+          copiedResponsibilities: copyFormData.copyResponsibilities,
+          copiedGoals: copyFormData.copyGoals,
+        },
+      });
+      
+      fetchJobs();
+      setCopyDialogOpen(false);
+    } catch (error: any) {
+      console.error("Error copying job:", error);
+      if (error.code === "23505") {
+        toast.error("A job with this code already exists");
+      } else {
+        toast.error("Failed to copy job");
+      }
+    } finally {
+      setIsCopying(false);
+    }
   };
 
   // Filter job families based on selected company in form
@@ -631,13 +785,22 @@ export default function JobsPage() {
                         </Badge>
                       </TableCell>
                       <TableCell>
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-1">
                           <Button
                             variant="ghost"
                             size="icon"
                             onClick={() => handleOpenDialog(job)}
+                            title="Edit"
                           >
                             <Pencil className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleOpenCopyDialog(job)}
+                            title="Copy as Template"
+                          >
+                            <Copy className="h-4 w-4" />
                           </Button>
                           <Button
                             variant="ghost"
@@ -646,6 +809,7 @@ export default function JobsPage() {
                               setSelectedJob(job);
                               setDeleteDialogOpen(true);
                             }}
+                            title="Delete"
                           >
                             <Trash2 className="h-4 w-4 text-destructive" />
                           </Button>
@@ -746,6 +910,90 @@ export default function JobsPage() {
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
+
+        {/* Copy Job Dialog */}
+        <Dialog open={copyDialogOpen} onOpenChange={setCopyDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Copy Job as Template</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <p className="text-sm text-muted-foreground">
+                Create a copy of "{selectedJob?.name}" with its associated competencies, responsibilities, and goals.
+              </p>
+              
+              <div className="space-y-2">
+                <Label>New Job Name *</Label>
+                <Input
+                  value={copyFormData.name}
+                  onChange={(e) => setCopyFormData({ ...copyFormData, name: e.target.value })}
+                  placeholder="Enter new job name"
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label>New Job Code *</Label>
+                <Input
+                  value={copyFormData.code}
+                  onChange={(e) => setCopyFormData({ ...copyFormData, code: e.target.value.toUpperCase() })}
+                  placeholder="Enter new job code"
+                />
+              </div>
+
+              <div className="space-y-3 pt-2">
+                <Label className="text-base">Include in copy:</Label>
+                <div className="space-y-2">
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="copyCompetencies"
+                      checked={copyFormData.copyCompetencies}
+                      onCheckedChange={(checked) => 
+                        setCopyFormData({ ...copyFormData, copyCompetencies: !!checked })
+                      }
+                    />
+                    <label htmlFor="copyCompetencies" className="text-sm cursor-pointer">
+                      Competencies
+                    </label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="copyResponsibilities"
+                      checked={copyFormData.copyResponsibilities}
+                      onCheckedChange={(checked) => 
+                        setCopyFormData({ ...copyFormData, copyResponsibilities: !!checked })
+                      }
+                    />
+                    <label htmlFor="copyResponsibilities" className="text-sm cursor-pointer">
+                      Responsibilities
+                    </label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="copyGoals"
+                      checked={copyFormData.copyGoals}
+                      onCheckedChange={(checked) => 
+                        setCopyFormData({ ...copyFormData, copyGoals: !!checked })
+                      }
+                    />
+                    <label htmlFor="copyGoals" className="text-sm cursor-pointer">
+                      Goals
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setCopyDialogOpen(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleCopyJob} disabled={isCopying}>
+                {isCopying && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                <Copy className="mr-2 h-4 w-4" />
+                Copy Job
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </AppLayout>
   );
