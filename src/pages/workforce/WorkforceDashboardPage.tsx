@@ -16,6 +16,7 @@ import {
   LineChart,
   Layers,
   Megaphone,
+  Briefcase,
 } from "lucide-react";
 
 const workforceModules = [
@@ -95,6 +96,13 @@ const workforceModules = [
     href: "/workforce/job-families",
     icon: FolderTree,
     color: "bg-teal-500/10 text-teal-500",
+  },
+  {
+    title: "Jobs",
+    description: "Define job roles within job families",
+    href: "/workforce/jobs",
+    icon: Briefcase,
+    color: "bg-emerald-500/10 text-emerald-500",
   },
   {
     title: "Intranet Admin",
