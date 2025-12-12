@@ -59,6 +59,7 @@ import PrivacySettingsPage from "./pages/profile/PrivacySettingsPage";
 
 // Performance pages
 import PerformanceDashboardPage from "./pages/performance/PerformanceDashboardPage";
+import GoalsPage from "./pages/performance/GoalsPage";
 
 // Leave pages
 import LeaveDashboardPage from "./pages/leave/LeaveDashboardPage";
