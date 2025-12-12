@@ -78,6 +78,17 @@ import BenefitCategoriesPage from "./pages/benefits/BenefitCategoriesPage";
 import BenefitPlansPage from "./pages/benefits/BenefitPlansPage";
 import BenefitEnrollmentsPage from "./pages/benefits/BenefitEnrollmentsPage";
 import BenefitClaimsPage from "./pages/benefits/BenefitClaimsPage";
+import BenefitAnalyticsPage from "./pages/benefits/BenefitAnalyticsPage";
+import BenefitCostProjectionsPage from "./pages/benefits/BenefitCostProjectionsPage";
+import AutoEnrollmentRulesPage from "./pages/benefits/AutoEnrollmentRulesPage";
+import LifeEventManagementPage from "./pages/benefits/LifeEventManagementPage";
+import WaitingPeriodTrackingPage from "./pages/benefits/WaitingPeriodTrackingPage";
+import OpenEnrollmentTrackerPage from "./pages/benefits/OpenEnrollmentTrackerPage";
+import EligibilityAuditPage from "./pages/benefits/EligibilityAuditPage";
+import BenefitComplianceReportsPage from "./pages/benefits/BenefitComplianceReportsPage";
+import PlanComparisonPage from "./pages/benefits/PlanComparisonPage";
+import BenefitCalculatorPage from "./pages/benefits/BenefitCalculatorPage";
+import MyBenefitsPage from "./pages/ess/MyBenefitsPage";
 
 // Training pages
 import TrainingDashboardPage from "./pages/training/TrainingDashboardPage";
@@ -619,6 +630,94 @@ const App = () => (
               element={
                 <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
                   <BenefitClaimsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/benefits/analytics"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
+                  <BenefitAnalyticsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/benefits/cost-projections"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
+                  <BenefitCostProjectionsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/benefits/auto-enrollment"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
+                  <AutoEnrollmentRulesPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/benefits/life-events"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
+                  <LifeEventManagementPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/benefits/waiting-periods"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
+                  <WaitingPeriodTrackingPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/benefits/open-enrollment"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
+                  <OpenEnrollmentTrackerPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/benefits/eligibility-audit"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
+                  <EligibilityAuditPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/benefits/compliance"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
+                  <BenefitComplianceReportsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/benefits/compare"
+              element={
+                <ProtectedRoute>
+                  <PlanComparisonPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/benefits/calculator"
+              element={
+                <ProtectedRoute>
+                  <BenefitCalculatorPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/ess/benefits"
+              element={
+                <ProtectedRoute moduleCode="ess">
+                  <MyBenefitsPage />
                 </ProtectedRoute>
               }
             />
