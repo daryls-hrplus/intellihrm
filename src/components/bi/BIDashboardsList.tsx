@@ -196,6 +196,7 @@ export function BIDashboardsList({ module, companyId }: BIDashboardsListProps) {
           open={viewerOpen}
           onOpenChange={setViewerOpen}
           dashboardId={selectedDashboard.id}
+          module={selectedDashboard.module}
         />
       )}
 
