@@ -1,0 +1,444 @@
+import { useState } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
+
+export interface ReportTemplate {
+  id: string;
+  name: string;
+  code: string;
+  description: string | null;
+  module: string;
+  is_global: boolean;
+  company_id: string | null;
+  data_source: string;
+  layout: Record<string, unknown>;
+  bands: ReportBand[];
+  parameters: ReportParameter[];
+  grouping: GroupConfig[];
+  sorting: SortConfig[];
+  calculations: Calculation[];
+  page_settings: PageSettings;
+  created_by: string | null;
+  is_active: boolean;
+  start_date: string;
+  end_date: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ReportBand {
+  id?: string;
+  band_type: 'report_header' | 'page_header' | 'group_header' | 'detail' | 'group_footer' | 'page_footer' | 'report_footer' | 'sub_report';
+  band_order: number;
+  group_field?: string;
+  content: BandContent;
+  height: number;
+  visible: boolean;
+  page_break_before: boolean;
+  page_break_after: boolean;
+  repeat_on_each_page: boolean;
+  sub_report_template_id?: string;
+  sub_report_link_field?: string;
+}
+
+export interface BandContent {
+  elements: BandElement[];
+  backgroundColor?: string;
+  borderTop?: boolean;
+  borderBottom?: boolean;
+}
+
+export interface BandElement {
+  id: string;
+  type: 'field' | 'label' | 'expression' | 'image' | 'line' | 'rectangle';
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  value?: string;
+  fieldName?: string;
+  expression?: string;
+  format?: string;
+  style?: ElementStyle;
+}
+
+export interface ElementStyle {
+  fontFamily?: string;
+  fontSize?: number;
+  fontWeight?: 'normal' | 'bold';
+  fontStyle?: 'normal' | 'italic';
+  textAlign?: 'left' | 'center' | 'right';
+  color?: string;
+  backgroundColor?: string;
+  border?: string;
+  padding?: number;
+}
+
+export interface ReportParameter {
+  name: string;
+  label: string;
+  type: 'text' | 'number' | 'date' | 'dateRange' | 'select' | 'multiSelect';
+  required: boolean;
+  defaultValue?: unknown;
+  options?: { value: string; label: string }[];
+  lookupTable?: string;
+}
+
+export interface GroupConfig {
+  field: string;
+  label: string;
+  sortOrder: 'asc' | 'desc';
+  pageBreakAfter?: boolean;
+}
+
+export interface SortConfig {
+  field: string;
+  order: 'asc' | 'desc';
+}
+
+export interface Calculation {
+  name: string;
+  label: string;
+  type: 'sum' | 'avg' | 'count' | 'min' | 'max' | 'custom';
+  field?: string;
+  expression?: string;
+  resetOn?: 'group' | 'page' | 'report';
+}
+
+export interface PageSettings {
+  orientation: 'portrait' | 'landscape';
+  size: 'A4' | 'A3' | 'Letter' | 'Legal';
+  margins: {
+    top: number;
+    right: number;
+    bottom: number;
+    left: number;
+  };
+}
+
+export interface ReportDataSource {
+  id: string;
+  name: string;
+  code: string;
+  module: string;
+  description: string | null;
+  base_table: string;
+  join_config: unknown[];
+  available_fields: DataSourceField[];
+  is_active: boolean;
+}
+
+export interface DataSourceField {
+  name: string;
+  label: string;
+  type: string;
+  lookup?: string;
+}
+
+export interface GeneratedReport {
+  id: string;
+  template_id: string;
+  report_number: string;
+  generated_by: string | null;
+  parameters_used: Record<string, unknown>;
+  output_format: 'pdf' | 'excel' | 'csv' | 'pptx';
+  file_url: string | null;
+  row_count: number | null;
+  status: 'generating' | 'completed' | 'failed';
+  error_message: string | null;
+  created_at: string;
+}
+
+export function useReportWriter() {
+  const [isLoading, setIsLoading] = useState(false);
+
+  const getDataSources = async (module?: string): Promise<ReportDataSource[]> => {
+    setIsLoading(true);
+    try {
+      let query = supabase
+        .from('report_data_sources')
+        .select('*')
+        .eq('is_active', true);
+
+      if (module) {
+        query = query.eq('module', module);
+      }
+
+      const { data, error } = await query.order('name');
+
+      if (error) throw error;
+      return (data || []).map(ds => ({
+        ...ds,
+        available_fields: Array.isArray(ds.available_fields) ? ds.available_fields : []
+      })) as unknown as ReportDataSource[];
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Failed to fetch data sources';
+      toast.error(message);
+      return [];
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const getTemplates = async (module?: string, companyId?: string): Promise<ReportTemplate[]> => {
+    setIsLoading(true);
+    try {
+      let query = supabase
+        .from('report_templates')
+        .select('*')
+        .eq('is_active', true);
+
+      if (module) {
+        query = query.eq('module', module);
+      }
+
+      const { data, error } = await query.order('name');
+
+      if (error) throw error;
+      
+      const templates = (data || []).filter(t => 
+        t.is_global || t.company_id === companyId || !companyId
+      );
+
+      return templates.map(t => ({
+        ...t,
+        bands: Array.isArray(t.bands) ? t.bands : [],
+        parameters: Array.isArray(t.parameters) ? t.parameters : [],
+        grouping: Array.isArray(t.grouping) ? t.grouping : [],
+        sorting: Array.isArray(t.sorting) ? t.sorting : [],
+        calculations: Array.isArray(t.calculations) ? t.calculations : [],
+        layout: typeof t.layout === 'object' ? t.layout : {},
+        page_settings: typeof t.page_settings === 'object' ? t.page_settings : {
+          orientation: 'portrait',
+          size: 'A4',
+          margins: { top: 20, right: 20, bottom: 20, left: 20 }
+        }
+      })) as unknown as ReportTemplate[];
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Failed to fetch templates';
+      toast.error(message);
+      return [];
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const getTemplate = async (templateId: string): Promise<ReportTemplate | null> => {
+    setIsLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('report_templates')
+        .select('*')
+        .eq('id', templateId)
+        .single();
+
+      if (error) throw error;
+      
+      return {
+        ...data,
+        bands: Array.isArray(data.bands) ? data.bands : [],
+        parameters: Array.isArray(data.parameters) ? data.parameters : [],
+        grouping: Array.isArray(data.grouping) ? data.grouping : [],
+        sorting: Array.isArray(data.sorting) ? data.sorting : [],
+        calculations: Array.isArray(data.calculations) ? data.calculations : [],
+        layout: typeof data.layout === 'object' ? data.layout : {},
+        page_settings: typeof data.page_settings === 'object' ? data.page_settings : {
+          orientation: 'portrait',
+          size: 'A4',
+          margins: { top: 20, right: 20, bottom: 20, left: 20 }
+        }
+      } as unknown as ReportTemplate;
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Failed to fetch template';
+      toast.error(message);
+      return null;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const createTemplate = async (template: Partial<ReportTemplate>): Promise<ReportTemplate | null> => {
+    setIsLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('report_templates')
+        .insert({
+          name: template.name!,
+          code: template.code!,
+          description: template.description,
+          module: template.module!,
+          is_global: template.is_global || false,
+          company_id: template.company_id,
+          data_source: template.data_source!,
+          layout: (template.layout || {}) as unknown as Record<string, unknown>,
+          bands: (template.bands || []) as unknown as Record<string, unknown>[],
+          parameters: (template.parameters || []) as unknown as Record<string, unknown>[],
+          grouping: (template.grouping || []) as unknown as Record<string, unknown>[],
+          sorting: (template.sorting || []) as unknown as Record<string, unknown>[],
+          calculations: (template.calculations || []) as unknown as Record<string, unknown>[],
+          page_settings: (template.page_settings || {
+            orientation: 'portrait',
+            size: 'A4',
+            margins: { top: 20, right: 20, bottom: 20, left: 20 }
+          }) as unknown as Record<string, unknown>
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+      toast.success('Report template created');
+      return data as unknown as ReportTemplate;
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Failed to create template';
+      toast.error(message);
+      return null;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const updateTemplate = async (templateId: string, updates: Partial<ReportTemplate>): Promise<boolean> => {
+    setIsLoading(true);
+    try {
+      const { error } = await supabase
+        .from('report_templates')
+        .update({
+          name: updates.name,
+          description: updates.description,
+          layout: updates.layout as unknown as Record<string, unknown>,
+          bands: updates.bands as unknown as Record<string, unknown>[],
+          parameters: updates.parameters as unknown as Record<string, unknown>[],
+          grouping: updates.grouping as unknown as Record<string, unknown>[],
+          sorting: updates.sorting as unknown as Record<string, unknown>[],
+          calculations: updates.calculations as unknown as Record<string, unknown>[],
+          page_settings: updates.page_settings as unknown as Record<string, unknown>
+        })
+        .eq('id', templateId);
+
+      if (error) throw error;
+      toast.success('Report template updated');
+      return true;
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Failed to update template';
+      toast.error(message);
+      return false;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const deleteTemplate = async (templateId: string): Promise<boolean> => {
+    setIsLoading(true);
+    try {
+      const { error } = await supabase
+        .from('report_templates')
+        .delete()
+        .eq('id', templateId);
+
+      if (error) throw error;
+      toast.success('Report template deleted');
+      return true;
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Failed to delete template';
+      toast.error(message);
+      return false;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const generateReport = async (
+    templateId: string,
+    parameters: Record<string, unknown>,
+    outputFormat: 'pdf' | 'excel' | 'csv' | 'pptx'
+  ): Promise<GeneratedReport | null> => {
+    setIsLoading(true);
+    try {
+      const { data: report, error: insertError } = await supabase
+        .from('generated_reports')
+        .insert({
+          template_id: templateId,
+          parameters_used: parameters as unknown as Record<string, unknown>,
+          output_format: outputFormat,
+          status: 'generating'
+        })
+        .select()
+        .single();
+
+      if (insertError) throw insertError;
+
+      toast.success('Report generation started');
+      return report as unknown as GeneratedReport;
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Failed to generate report';
+      toast.error(message);
+      return null;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const getGeneratedReports = async (templateId?: string): Promise<GeneratedReport[]> => {
+    setIsLoading(true);
+    try {
+      let query = supabase
+        .from('generated_reports')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(50);
+
+      if (templateId) {
+        query = query.eq('template_id', templateId);
+      }
+
+      const { data, error } = await query;
+
+      if (error) throw error;
+      return (data || []) as unknown as GeneratedReport[];
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Failed to fetch generated reports';
+      toast.error(message);
+      return [];
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const getGeneratedReports = async (templateId?: string): Promise<GeneratedReport[]> => {
+    setIsLoading(true);
+    try {
+      let query = supabase
+        .from('generated_reports')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(50);
+
+      if (templateId) {
+        query = query.eq('template_id', templateId);
+      }
+
+      const { data, error } = await query;
+
+      if (error) throw error;
+      return (data || []) as GeneratedReport[];
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Failed to fetch generated reports';
+      toast.error(message);
+      return [];
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return {
+    isLoading,
+    getDataSources,
+    getTemplates,
+    getTemplate,
+    createTemplate,
+    updateTemplate,
+    deleteTemplate,
+    generateReport,
+    getGeneratedReports
+  };
+}

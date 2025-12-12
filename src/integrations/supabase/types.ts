@@ -3423,6 +3423,63 @@ export type Database = {
           },
         ]
       }
+      generated_reports: {
+        Row: {
+          created_at: string
+          error_message: string | null
+          file_url: string | null
+          generated_by: string | null
+          id: string
+          output_format: string
+          parameters_used: Json
+          report_number: string
+          row_count: number | null
+          status: string
+          template_id: string
+        }
+        Insert: {
+          created_at?: string
+          error_message?: string | null
+          file_url?: string | null
+          generated_by?: string | null
+          id?: string
+          output_format: string
+          parameters_used?: Json
+          report_number: string
+          row_count?: number | null
+          status?: string
+          template_id: string
+        }
+        Update: {
+          created_at?: string
+          error_message?: string | null
+          file_url?: string | null
+          generated_by?: string | null
+          id?: string
+          output_format?: string
+          parameters_used?: Json
+          report_number?: string
+          row_count?: number | null
+          status?: string
+          template_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "generated_reports_generated_by_fkey"
+            columns: ["generated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "generated_reports_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "report_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       goal_alignments: {
         Row: {
           alignment_percentage: number | null
@@ -6010,6 +6067,204 @@ export type Database = {
           },
         ]
       }
+      report_data_sources: {
+        Row: {
+          available_fields: Json
+          base_table: string
+          code: string
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean
+          join_config: Json
+          module: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          available_fields?: Json
+          base_table: string
+          code: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          join_config?: Json
+          module: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          available_fields?: Json
+          base_table?: string
+          code?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          join_config?: Json
+          module?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      report_template_bands: {
+        Row: {
+          band_order: number
+          band_type: string
+          content: Json
+          created_at: string
+          group_field: string | null
+          height: number | null
+          id: string
+          page_break_after: boolean
+          page_break_before: boolean
+          repeat_on_each_page: boolean
+          sub_report_link_field: string | null
+          sub_report_template_id: string | null
+          template_id: string
+          updated_at: string
+          visible: boolean
+        }
+        Insert: {
+          band_order?: number
+          band_type: string
+          content?: Json
+          created_at?: string
+          group_field?: string | null
+          height?: number | null
+          id?: string
+          page_break_after?: boolean
+          page_break_before?: boolean
+          repeat_on_each_page?: boolean
+          sub_report_link_field?: string | null
+          sub_report_template_id?: string | null
+          template_id: string
+          updated_at?: string
+          visible?: boolean
+        }
+        Update: {
+          band_order?: number
+          band_type?: string
+          content?: Json
+          created_at?: string
+          group_field?: string | null
+          height?: number | null
+          id?: string
+          page_break_after?: boolean
+          page_break_before?: boolean
+          repeat_on_each_page?: boolean
+          sub_report_link_field?: string | null
+          sub_report_template_id?: string | null
+          template_id?: string
+          updated_at?: string
+          visible?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "report_template_bands_sub_report_template_id_fkey"
+            columns: ["sub_report_template_id"]
+            isOneToOne: false
+            referencedRelation: "report_templates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "report_template_bands_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "report_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      report_templates: {
+        Row: {
+          bands: Json
+          calculations: Json
+          code: string
+          company_id: string | null
+          created_at: string
+          created_by: string | null
+          data_source: string
+          description: string | null
+          end_date: string | null
+          grouping: Json
+          id: string
+          is_active: boolean
+          is_global: boolean
+          layout: Json
+          module: string
+          name: string
+          page_settings: Json
+          parameters: Json
+          sorting: Json
+          start_date: string
+          updated_at: string
+        }
+        Insert: {
+          bands?: Json
+          calculations?: Json
+          code: string
+          company_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          data_source: string
+          description?: string | null
+          end_date?: string | null
+          grouping?: Json
+          id?: string
+          is_active?: boolean
+          is_global?: boolean
+          layout?: Json
+          module: string
+          name: string
+          page_settings?: Json
+          parameters?: Json
+          sorting?: Json
+          start_date?: string
+          updated_at?: string
+        }
+        Update: {
+          bands?: Json
+          calculations?: Json
+          code?: string
+          company_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          data_source?: string
+          description?: string | null
+          end_date?: string | null
+          grouping?: Json
+          id?: string
+          is_active?: boolean
+          is_global?: boolean
+          layout?: Json
+          module?: string
+          name?: string
+          page_settings?: Json
+          parameters?: Json
+          sorting?: Json
+          start_date?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "report_templates_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "report_templates_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       responsibilities: {
         Row: {
           code: string
@@ -6341,6 +6596,54 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      saved_report_configs: {
+        Row: {
+          created_at: string
+          id: string
+          is_favorite: boolean
+          name: string
+          parameters: Json
+          template_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_favorite?: boolean
+          name: string
+          parameters?: Json
+          template_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_favorite?: boolean
+          name?: string
+          parameters?: Json
+          template_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "saved_report_configs_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "report_templates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "saved_report_configs_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
