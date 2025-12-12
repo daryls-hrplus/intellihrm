@@ -115,10 +115,10 @@ export default function AdminOnboardingPage() {
   const [taskForm, setTaskForm] = useState<{
     name: string;
     description: string;
-    task_type: string;
+    task_type: 'document' | 'equipment' | 'general' | 'training';
     is_required: boolean;
     due_days: number;
-    assigned_to_type: string;
+    assigned_to_type: 'employee' | 'manager' | 'hr' | 'buddy';
     training_course_id: string;
   }>({
     name: '',
@@ -168,13 +168,13 @@ export default function AdminOnboardingPage() {
       fetchTemplates(),
       supabase.from('companies').select('id, name').eq('is_active', true).order('name'),
       supabase.from('profiles').select('id, full_name, email').order('full_name'),
-      supabase.from('lms_courses').select('id, title').eq('is_active', true).order('title'),
+      supabase.from('lms_courses' as any).select('id, title').eq('is_active', true).order('title'),
     ]);
 
     setTemplates(templatesData);
     setCompanies(companiesData.data || []);
-    setEmployees(employeesData.data || []);
-    setCourses(coursesData.data || []);
+    setEmployees((employeesData.data || []) as any);
+    setCourses((coursesData.data || []) as any);
     
     await loadInstances();
   };
