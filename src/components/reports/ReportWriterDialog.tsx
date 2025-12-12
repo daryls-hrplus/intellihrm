@@ -15,7 +15,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import { 
   Plus, Trash2, GripVertical, FileText, Table, 
   LayoutTemplate, Settings, Filter, ArrowUpDown, Calculator, Save,
-  Sparkles, ChevronDown
+  Sparkles, ChevronDown, Code
 } from 'lucide-react';
 import { 
   useReportWriter, 
@@ -90,6 +90,7 @@ export function ReportWriterDialog({
     is_global: false,
     company_id: companyId,
     data_source: '',
+    custom_sql: null,
     bands: [
       { band_type: 'report_header', band_order: 0, content: { elements: [] }, height: 80, visible: true, page_break_before: false, page_break_after: false, repeat_on_each_page: false },
       { band_type: 'page_header', band_order: 1, content: { elements: [] }, height: 40, visible: true, page_break_before: false, page_break_after: false, repeat_on_each_page: true },
@@ -299,6 +300,7 @@ export function ReportWriterDialog({
     setTemplate(prev => ({
       ...prev,
       ...aiTemplate,
+      custom_sql: aiTemplate.custom_sql || prev.custom_sql,
       module,
       company_id: companyId
     }));
@@ -380,10 +382,14 @@ export function ReportWriterDialog({
           {/* Main Template Editor */}
           <div className="col-span-2">
             <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1">
-              <TabsList className="grid grid-cols-6 w-full">
+              <TabsList className="grid grid-cols-7 w-full">
                 <TabsTrigger value="general" className="gap-1 text-xs">
                   <Settings className="h-3 w-3" />
                   General
+                </TabsTrigger>
+                <TabsTrigger value="sql" className="gap-1 text-xs">
+                  <Code className="h-3 w-3" />
+                  SQL
                 </TabsTrigger>
                 <TabsTrigger value="bands" className="gap-1 text-xs">
                   <LayoutTemplate className="h-3 w-3" />
@@ -550,6 +556,24 @@ export function ReportWriterDialog({
                   </div>
                 </>
               )}
+            </TabsContent>
+
+            <TabsContent value="sql" className="space-y-4 px-1">
+              <div className="space-y-4">
+                <div>
+                  <h4 className="font-medium">Custom SQL Query</h4>
+                  <p className="text-sm text-muted-foreground">
+                    For complex reports with aggregations or cross-tabs, use custom SQL. The AI assistant can generate this.
+                  </p>
+                </div>
+                <Textarea
+                  value={template.custom_sql || ''}
+                  onChange={e => setTemplate(prev => ({ ...prev, custom_sql: e.target.value || null }))}
+                  placeholder="SELECT ... FROM ... GROUP BY ..."
+                  rows={10}
+                  className="font-mono text-sm"
+                />
+              </div>
             </TabsContent>
 
             <TabsContent value="bands" className="space-y-4 px-1">

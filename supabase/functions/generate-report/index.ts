@@ -18,6 +18,7 @@ interface ReportTemplate {
   id: string;
   name: string;
   data_source: string;
+  custom_sql: string | null;
   bands: ReportBand[];
   parameters: Array<{ name: string; type: string; label: string; required: boolean }>;
   sorting: Array<{ field: string; order: string }>;
@@ -71,7 +72,7 @@ serve(async (req) => {
     const parameters = report.parameters_used as Record<string, unknown>;
     const outputFormat = report.output_format;
 
-    console.log('Generating report:', { reportId, template: template.name, format: outputFormat });
+    console.log('Generating report:', { reportId, template: template.name, format: outputFormat, hasCustomSql: !!template.custom_sql });
 
     // Get data source info
     const { data: dataSource, error: dsError } = await supabase
@@ -94,97 +95,171 @@ serve(async (req) => {
 
     const availableFields = (dataSource.available_fields || []) as DataSourceField[];
     
-    // Determine which fields to select - from layout.fields or detail band elements
-    let selectedFields: string[] = [];
-    
-    // First check layout.fields
-    if (template.layout?.fields && Array.isArray(template.layout.fields)) {
-      selectedFields = template.layout.fields.map((f: { name: string }) => f.name);
-    }
-    
-    // If no layout fields, extract from detail band elements
-    if (selectedFields.length === 0 && template.bands) {
-      const detailBand = template.bands.find(b => b.band_type === 'detail');
-      if (detailBand?.content?.elements) {
-        for (const elem of detailBand.content.elements) {
-          if (elem.type === 'field' && elem.value) {
-            // Check if it's a valid DB field
-            const fieldExists = availableFields.some(f => f.name === elem.value);
-            if (fieldExists && !selectedFields.includes(elem.value)) {
-              selectedFields.push(elem.value);
+    let reportData: Record<string, unknown>[] = [];
+    let fieldLabels: Array<{ name: string; label: string }> = [];
+
+    // Check if template has custom SQL
+    if (template.custom_sql && template.custom_sql.trim()) {
+      console.log('Executing custom SQL query');
+      
+      // Replace parameter placeholders in SQL
+      let sql = template.custom_sql;
+      
+      // Replace {{param_name}} placeholders with actual values
+      for (const [key, value] of Object.entries(parameters)) {
+        const placeholder = new RegExp(`\\{\\{${key}\\}\\}`, 'g');
+        if (typeof value === 'string') {
+          // Escape single quotes for SQL safety
+          sql = sql.replace(placeholder, `'${value.replace(/'/g, "''")}'`);
+        } else if (typeof value === 'number') {
+          sql = sql.replace(placeholder, String(value));
+        } else if (value === null || value === undefined) {
+          sql = sql.replace(placeholder, 'NULL');
+        }
+      }
+      
+      // Also handle :param_name style placeholders
+      for (const [key, value] of Object.entries(parameters)) {
+        const placeholder = new RegExp(`:${key}\\b`, 'g');
+        if (typeof value === 'string') {
+          sql = sql.replace(placeholder, `'${value.replace(/'/g, "''")}'`);
+        } else if (typeof value === 'number') {
+          sql = sql.replace(placeholder, String(value));
+        } else if (value === null || value === undefined) {
+          sql = sql.replace(placeholder, 'NULL');
+        }
+      }
+      
+      console.log('Final SQL:', sql);
+      
+      // Execute custom SQL using rpc or direct query
+      const { data: sqlData, error: sqlError } = await supabase.rpc('execute_report_sql', { 
+        sql_query: sql 
+      });
+      
+      if (sqlError) {
+        console.error('Custom SQL execution failed:', sqlError);
+        
+        // Fallback: try executing via postgres function if available, otherwise fail gracefully
+        await supabase
+          .from('generated_reports')
+          .update({ status: 'failed', error_message: `SQL Error: ${sqlError.message}` })
+          .eq('id', reportId);
+        
+        return new Response(
+          JSON.stringify({ error: `SQL execution failed: ${sqlError.message}` }),
+          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+      
+      reportData = (sqlData || []) as Record<string, unknown>[];
+      
+      // Build field labels from result columns
+      if (reportData.length > 0) {
+        const resultColumns = Object.keys(reportData[0]);
+        fieldLabels = resultColumns.map(col => ({
+          name: col,
+          label: col.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
+        }));
+      }
+    } else {
+      // Standard query - fetch from base table
+      console.log('Executing standard table query');
+      
+      // Determine which fields to select
+      let selectedFields: string[] = [];
+      
+      if (template.layout?.fields && Array.isArray(template.layout.fields)) {
+        selectedFields = template.layout.fields.map((f: { name: string }) => f.name);
+      }
+      
+      if (selectedFields.length === 0 && template.bands) {
+        const detailBand = template.bands.find(b => b.band_type === 'detail');
+        if (detailBand?.content?.elements) {
+          for (const elem of detailBand.content.elements) {
+            if (elem.type === 'field' && elem.value) {
+              const fieldExists = availableFields.some(f => f.name === elem.value);
+              if (fieldExists && !selectedFields.includes(elem.value)) {
+                selectedFields.push(elem.value);
+              }
             }
           }
         }
       }
-    }
-    
-    // If still no fields, use all available fields
-    if (selectedFields.length === 0) {
-      selectedFields = availableFields.map(f => f.name);
-    }
+      
+      if (selectedFields.length === 0) {
+        selectedFields = availableFields.map(f => f.name);
+      }
 
-    // Fetch data from the base table - select all columns, we'll filter to requested ones after
-    let query = supabase.from(dataSource.base_table).select('*');
+      let query = supabase.from(dataSource.base_table).select('*');
 
-    // Apply parameter filters if applicable
-    if (parameters.report_year) {
-      const year = Number(parameters.report_year);
-      if (!Number.isNaN(year)) {
-        const hasCreatedAt = availableFields.some(f => f.name === 'created_at');
-        const startOfYear = `${year}-01-01`;
-        const endOfYear = `${year}-12-31`;
+      // Apply parameter filters
+      if (parameters.report_year) {
+        const year = Number(parameters.report_year);
+        if (!Number.isNaN(year)) {
+          const hasCreatedAt = availableFields.some(f => f.name === 'created_at');
+          const startOfYear = `${year}-01-01`;
+          const endOfYear = `${year}-12-31`;
 
-        if (hasCreatedAt) {
-          query = query.gte('created_at', startOfYear).lte('created_at', endOfYear);
+          if (hasCreatedAt) {
+            query = query.gte('created_at', startOfYear).lte('created_at', endOfYear);
+          }
         }
       }
-    }
 
-    const { data: reportData, error: dataError } = await query.limit(1000);
+      const { data: queryData, error: dataError } = await query.limit(1000);
 
-    if (dataError) {
-      console.error('Failed to fetch data:', dataError);
-      await supabase
-        .from('generated_reports')
-        .update({ status: 'failed', error_message: dataError.message })
-        .eq('id', reportId);
+      if (dataError) {
+        console.error('Failed to fetch data:', dataError);
+        await supabase
+          .from('generated_reports')
+          .update({ status: 'failed', error_message: dataError.message })
+          .eq('id', reportId);
+        
+        return new Response(
+          JSON.stringify({ error: 'Failed to fetch data' }),
+          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      reportData = (queryData || []) as Record<string, unknown>[];
       
-      return new Response(
-        JSON.stringify({ error: 'Failed to fetch data' }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
+      // Validate fields against actual data
+      const actualFields = reportData.length > 0
+        ? Object.keys(reportData[0])
+        : [];
 
-    const rowCount = reportData?.length || 0;
-    console.log(`Fetched ${rowCount} rows for report`);
-
-    // Determine actual fields present in data and align with requested fields
-    const actualFields = rowCount > 0
-      ? Object.keys((reportData![0] as Record<string, unknown>))
-      : [];
-
-    let validFields: string[];
-    if (selectedFields.length > 0) {
-      validFields = selectedFields.filter(f => actualFields.includes(f));
-      // Fallback to all actual fields if none of the requested ones exist
-      if (validFields.length === 0) {
+      let validFields: string[];
+      if (selectedFields.length > 0) {
+        validFields = selectedFields.filter(f => actualFields.includes(f));
+        if (validFields.length === 0) {
+          validFields = actualFields;
+        }
+      } else {
         validFields = actualFields;
       }
-    } else {
-      validFields = actualFields;
-    }
 
-    console.log('Selected fields after validation:', validFields);
-
-    // Build field labels for output based on valid fields
-    const fieldLabels: Array<{ name: string; label: string }> = [];
-    for (const fieldName of validFields) {
-      const fieldDef = availableFields.find(f => f.name === fieldName);
-      fieldLabels.push({
-        name: fieldName,
-        label: fieldDef?.label || fieldName
+      // Build field labels
+      for (const fieldName of validFields) {
+        const fieldDef = availableFields.find(f => f.name === fieldName);
+        fieldLabels.push({
+          name: fieldName,
+          label: fieldDef?.label || fieldName
+        });
+      }
+      
+      // Filter data to only include valid fields
+      reportData = reportData.map(row => {
+        const filteredRow: Record<string, unknown> = {};
+        for (const field of validFields) {
+          filteredRow[field] = row[field];
+        }
+        return filteredRow;
       });
     }
+
+    const rowCount = reportData.length;
+    console.log(`Report data ready: ${rowCount} rows, ${fieldLabels.length} columns`);
 
     // Generate content based on format
     let fileContent: string;
@@ -192,10 +267,8 @@ serve(async (req) => {
     let fileExtension: string;
 
     if (outputFormat === 'csv') {
-      // Generate CSV with only selected fields
       const headers = fieldLabels.map(f => f.label).join(',');
-      const dataRows = (reportData || []) as unknown as Array<Record<string, unknown>>;
-      const rows = dataRows.map((row) => 
+      const rows = reportData.map((row) => 
         fieldLabels.map(f => {
           const value = row[f.name];
           if (value === null || value === undefined) return '';
@@ -210,7 +283,6 @@ serve(async (req) => {
       mimeType = 'text/csv';
       fileExtension = 'csv';
     } else {
-      // For PDF/Excel/PPTX - generate structured JSON
       fileContent = JSON.stringify({
         template: {
           name: template.name,
@@ -230,7 +302,6 @@ serve(async (req) => {
     // Store the generated content
     const fileName = `reports/${reportId}.${fileExtension}`;
     
-    // Upload to storage bucket
     const { error: uploadError } = await supabase.storage
       .from('documents')
       .upload(fileName, fileContent, {

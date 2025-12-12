@@ -6186,6 +6186,7 @@ export type Database = {
           company_id: string | null
           created_at: string
           created_by: string | null
+          custom_sql: string | null
           data_source: string
           description: string | null
           end_date: string | null
@@ -6209,6 +6210,7 @@ export type Database = {
           company_id?: string | null
           created_at?: string
           created_by?: string | null
+          custom_sql?: string | null
           data_source: string
           description?: string | null
           end_date?: string | null
@@ -6232,6 +6234,7 @@ export type Database = {
           company_id?: string | null
           created_at?: string
           created_by?: string | null
+          custom_sql?: string | null
           data_source?: string
           description?: string | null
           end_date?: string | null
@@ -7990,6 +7993,7 @@ export type Database = {
           rule_name: string
         }[]
       }
+      execute_report_sql: { Args: { sql_query: string }; Returns: Json }
       get_360_feedback_summary: {
         Args: { p_participant_id: string }
         Returns: {
