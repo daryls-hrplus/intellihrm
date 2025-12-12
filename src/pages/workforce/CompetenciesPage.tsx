@@ -39,9 +39,10 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Switch } from "@/components/ui/switch";
-import { Plus, Pencil, Trash2, Target, ChevronDown, ChevronRight, Layers } from "lucide-react";
+import { Plus, Pencil, Trash2, Target, ChevronDown, ChevronRight, Layers, ChevronLeft } from "lucide-react";
 import { toast } from "sonner";
 import { useAuditLog } from "@/hooks/useAuditLog";
+import { NavLink } from "react-router-dom";
 
 interface Company {
   id: string;
@@ -418,12 +419,25 @@ export default function CompetenciesPage() {
   return (
     <AppLayout>
       <div className="space-y-6">
+        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <NavLink to="/workforce" className="hover:text-foreground">
+            Workforce
+          </NavLink>
+          <ChevronLeft className="h-4 w-4 rotate-180" />
+          <span className="text-foreground">Competencies</span>
+        </div>
+
         <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight">Competencies</h1>
-            <p className="text-muted-foreground">
-              Manage competency definitions for workforce planning
-            </p>
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+              <Target className="h-5 w-5 text-primary" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold tracking-tight">Competencies</h1>
+              <p className="text-muted-foreground">
+                Manage competency definitions for workforce planning
+              </p>
+            </div>
           </div>
           <Button onClick={handleAdd}>
             <Plus className="mr-2 h-4 w-4" />
