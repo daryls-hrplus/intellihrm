@@ -6,6 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import {
   Plus,
   Calendar,
@@ -17,6 +18,8 @@ import {
   ClipboardList,
   MessageSquare,
   UserPlus,
+  ChevronDown,
+  TrendingUp,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -26,6 +29,7 @@ import { CycleParticipantsManager } from "@/components/performance/CycleParticip
 import { CycleQuestionsManager } from "@/components/performance/CycleQuestionsManager";
 import { PeerNominationManager } from "@/components/performance/PeerNominationManager";
 import { FeedbackFormDialog } from "@/components/performance/FeedbackFormDialog";
+import { Review360AnalyticsDashboard } from "@/components/performance/Review360AnalyticsDashboard";
 import { format } from "date-fns";
 
 interface ReviewCycle {
@@ -101,6 +105,7 @@ export default function MssReview360Page() {
   const [selectedParticipant, setSelectedParticipant] = useState<any>(null);
   const [feedbackDialogOpen, setFeedbackDialogOpen] = useState(false);
   const [selectedFeedback, setSelectedFeedback] = useState<FeedbackItem | null>(null);
+  const [showAnalytics, setShowAnalytics] = useState(false);
 
   useEffect(() => {
     if (user?.id) {
@@ -354,6 +359,31 @@ export default function MssReview360Page() {
             </CardContent>
           </Card>
         </div>
+
+        {/* Analytics Dashboard (Collapsible) */}
+        <Collapsible open={showAnalytics} onOpenChange={setShowAnalytics}>
+          <CollapsibleTrigger asChild>
+            <Button variant="outline" className="w-full justify-between">
+              <span className="flex items-center gap-2">
+                <TrendingUp className="h-4 w-4" />
+                Analytics Dashboard
+              </span>
+              <ChevronDown className={`h-4 w-4 transition-transform ${showAnalytics ? "rotate-180" : ""}`} />
+            </Button>
+          </CollapsibleTrigger>
+          <CollapsibleContent className="pt-4">
+            <Review360AnalyticsDashboard
+              cycles={myTeamCycles}
+              pendingReviews={pendingFeedback.map(f => ({
+                id: f.id,
+                deadline: f.deadline,
+                reviewer_type: f.reviewer_type,
+              }))}
+              participations={[]}
+              compact
+            />
+          </CollapsibleContent>
+        </Collapsible>
 
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList>
