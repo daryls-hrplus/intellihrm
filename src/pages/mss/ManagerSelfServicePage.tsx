@@ -14,6 +14,7 @@ import {
   TicketPlus,
   CheckSquare,
   UserCheck,
+  Rocket,
 } from "lucide-react";
 
 const mssModules = [
@@ -37,6 +38,13 @@ const mssModules = [
     href: "/workflow/delegates",
     icon: UserCheck,
     color: "bg-fuchsia-500/10 text-fuchsia-600",
+  },
+  {
+    title: "Team Onboarding",
+    description: "Track onboarding progress of your direct reports",
+    href: "/mss/onboarding",
+    icon: Rocket,
+    color: "bg-teal-500/10 text-teal-600",
   },
   {
     title: "Leave Approvals",
