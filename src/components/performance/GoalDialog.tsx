@@ -52,6 +52,7 @@ interface GoalDialogProps {
   onOpenChange: (open: boolean) => void;
   goal: Goal | null;
   companyId: string | undefined;
+  employees?: { id: string; full_name: string }[];
   onSuccess: () => void;
 }
 
@@ -70,6 +71,7 @@ interface FormData {
   current_value: string;
   unit_of_measure: string;
   parent_goal_id: string;
+  employee_id: string;
   specific: string;
   measurable: string;
   achievable: string;
@@ -77,17 +79,26 @@ interface FormData {
   time_bound: string;
 }
 
+interface JobGoal {
+  id: string;
+  goal_name: string;
+  goal_description: string | null;
+  weighting: number;
+}
+
 export function GoalDialog({
   open,
   onOpenChange,
   goal,
   companyId,
+  employees = [],
   onSuccess,
 }: GoalDialogProps) {
   const { user } = useAuth();
   const { logAction } = useAuditLog();
   const [loading, setLoading] = useState(false);
   const [parentGoals, setParentGoals] = useState<{ id: string; title: string }[]>([]);
+  const [jobGoals, setJobGoals] = useState<JobGoal[]>([]);
   const [formData, setFormData] = useState<FormData>({
     title: "",
     description: "",
@@ -103,12 +114,79 @@ export function GoalDialog({
     current_value: "0",
     unit_of_measure: "",
     parent_goal_id: "",
+    employee_id: "",
     specific: "",
     measurable: "",
     achievable: "",
     relevant: "",
     time_bound: "",
   });
+
+  // Fetch job goals for selected employee
+  const fetchJobGoalsForEmployee = async (employeeId: string) => {
+    if (!employeeId) {
+      setJobGoals([]);
+      return;
+    }
+
+    try {
+      // Get employee's current position and its job family
+      const { data: positions } = await supabase
+        .from("employee_positions")
+        .select(`
+          position_id,
+          positions!inner(
+            job_family_id
+          )
+        `)
+        .eq("employee_id", employeeId)
+        .eq("is_active", true)
+        .limit(1);
+
+      if (!positions?.length) {
+        setJobGoals([]);
+        return;
+      }
+
+      const jobFamilyId = (positions[0] as any).positions?.job_family_id;
+      if (!jobFamilyId) {
+        setJobGoals([]);
+        return;
+      }
+
+      // Get jobs in this job family
+      const { data: jobs } = await supabase
+        .from("jobs")
+        .select("id")
+        .eq("job_family_id", jobFamilyId)
+        .eq("is_active", true);
+
+      if (!jobs?.length) {
+        setJobGoals([]);
+        return;
+      }
+
+      const jobIds = jobs.map(j => j.id);
+
+      // Get job goals for these jobs
+      const { data: goals } = await supabase
+        .from("job_goals")
+        .select("id, goal_name, goal_description, weighting")
+        .in("job_id", jobIds)
+        .order("goal_name");
+
+      setJobGoals((goals as JobGoal[]) || []);
+    } catch (error) {
+      console.error("Error fetching job goals:", error);
+      setJobGoals([]);
+    }
+  };
+
+  useEffect(() => {
+    if (formData.employee_id) {
+      fetchJobGoalsForEmployee(formData.employee_id);
+    }
+  }, [formData.employee_id]);
 
   useEffect(() => {
     if (goal) {
@@ -127,6 +205,7 @@ export function GoalDialog({
         current_value: goal.current_value ? String(goal.current_value) : "0",
         unit_of_measure: goal.unit_of_measure || "",
         parent_goal_id: goal.parent_goal_id || "",
+        employee_id: goal.employee_id || "",
         specific: "",
         measurable: "",
         achievable: "",
@@ -149,14 +228,16 @@ export function GoalDialog({
         current_value: "0",
         unit_of_measure: "",
         parent_goal_id: "",
+        employee_id: user?.id || "",
         specific: "",
         measurable: "",
         achievable: "",
         relevant: "",
         time_bound: "",
       });
+      setJobGoals([]);
     }
-  }, [goal, open]);
+  }, [goal, open, user?.id]);
 
   useEffect(() => {
     if (companyId) {
@@ -188,7 +269,7 @@ export function GoalDialog({
     try {
       const goalData = {
         company_id: companyId,
-        employee_id: formData.goal_level === "individual" ? user.id : null,
+        employee_id: formData.goal_level === "individual" ? (formData.employee_id || user.id) : null,
         title: formData.title,
         description: formData.description || null,
         goal_type: formData.goal_type,
@@ -276,6 +357,59 @@ export function GoalDialog({
 
             <TabsContent value="basic" className="space-y-4 mt-4">
               <div className="grid grid-cols-2 gap-4">
+                {/* Employee Selector - only for individual goals */}
+                {formData.goal_level === "individual" && employees.length > 0 && (
+                  <div className="col-span-2">
+                    <Label htmlFor="employee_id">Employee *</Label>
+                    <Select
+                      value={formData.employee_id || "none"}
+                      onValueChange={(value) => setFormData({ ...formData, employee_id: value === "none" ? "" : value })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select employee" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="none">Select an employee</SelectItem>
+                        {employees.map((emp) => (
+                          <SelectItem key={emp.id} value={emp.id}>
+                            {emp.full_name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+
+                {/* Job Goals Suggestions */}
+                {jobGoals.length > 0 && (
+                  <div className="col-span-2">
+                    <Label>Suggested Goals from Job</Label>
+                    <div className="mt-2 p-3 border rounded-md bg-muted/30 max-h-32 overflow-y-auto">
+                      <p className="text-xs text-muted-foreground mb-2">Click a goal to use it as a template:</p>
+                      <div className="space-y-1">
+                        {jobGoals.map((jg) => (
+                          <button
+                            type="button"
+                            key={jg.id}
+                            onClick={() => setFormData({
+                              ...formData,
+                              title: jg.goal_name,
+                              description: jg.goal_description || "",
+                              weighting: String(jg.weighting || 10),
+                            })}
+                            className="w-full text-left p-2 text-sm rounded hover:bg-accent transition-colors"
+                          >
+                            <span className="font-medium">{jg.goal_name}</span>
+                            {jg.weighting && (
+                              <span className="text-xs text-muted-foreground ml-2">({jg.weighting}%)</span>
+                            )}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 <div className="col-span-2">
                   <Label htmlFor="title">Title *</Label>
                   <Input
