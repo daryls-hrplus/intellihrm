@@ -130,6 +130,9 @@ serve(async (req) => {
         }
       }
       
+      // Strip trailing semicolons as they break the subquery wrapping in execute_report_sql
+      sql = sql.replace(/;\s*$/, '').trim();
+      
       console.log('Final SQL:', sql);
       
       // Execute custom SQL using rpc or direct query
