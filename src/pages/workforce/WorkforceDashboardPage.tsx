@@ -22,6 +22,7 @@ import {
   Target,
   ClipboardList,
   Rocket,
+  UserMinus,
 } from "lucide-react";
 
 const workforceModules = [
@@ -136,6 +137,13 @@ const workforceModules = [
     href: "/workforce/onboarding",
     icon: Rocket,
     color: "bg-emerald-500/10 text-emerald-500",
+  },
+  {
+    title: "Employee Offboarding",
+    description: "Manage offboarding templates and track departing employees",
+    href: "/workforce/offboarding",
+    icon: UserMinus,
+    color: "bg-red-500/10 text-red-500",
   },
 ];
 
