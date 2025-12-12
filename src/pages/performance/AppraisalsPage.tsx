@@ -49,6 +49,9 @@ interface AppraisalCycle {
   max_rating: number;
   participants_count?: number;
   completion_rate?: number;
+  is_probation_review?: boolean;
+  is_manager_cycle?: boolean;
+  created_by?: string;
 }
 
 interface MyAppraisal {
@@ -101,6 +104,8 @@ export default function AppraisalsPage() {
   const { user, company, isAdmin, isHRManager } = useAuth();
   const [activeTab, setActiveTab] = useState("my-appraisals");
   const [cycles, setCycles] = useState<AppraisalCycle[]>([]);
+  const [managerCycles, setManagerCycles] = useState<AppraisalCycle[]>([]);
+  const [myTeamCycles, setMyTeamCycles] = useState<AppraisalCycle[]>([]);
   const [myAppraisals, setMyAppraisals] = useState<MyAppraisal[]>([]);
   const [pendingEvaluations, setPendingEvaluations] = useState<PendingEvaluation[]>([]);
   const [loading, setLoading] = useState(true);
@@ -109,6 +114,8 @@ export default function AppraisalsPage() {
   const [participantsManagerOpen, setParticipantsManagerOpen] = useState(false);
   const [evaluationDialogOpen, setEvaluationDialogOpen] = useState(false);
   const [selectedParticipant, setSelectedParticipant] = useState<PendingEvaluation | null>(null);
+  const [isProbationReview, setIsProbationReview] = useState(false);
+  const [isManagerCycle, setIsManagerCycle] = useState(false);
 
   // Company switcher for admin/HR
   const [companies, setCompanies] = useState<{ id: string; name: string }[]>([]);
@@ -147,6 +154,8 @@ export default function AppraisalsPage() {
     try {
       await Promise.all([
         fetchCycles(),
+        fetchManagerCycles(),
+        fetchMyTeamCycles(),
         fetchMyAppraisals(),
         fetchPendingEvaluations(),
       ]);
@@ -158,10 +167,12 @@ export default function AppraisalsPage() {
   };
 
   const fetchCycles = async () => {
+    // Fetch central cycles (not manager cycles) for admin/HR
     const { data, error } = await supabase
       .from("appraisal_cycles")
       .select("*")
       .eq("company_id", selectedCompanyId)
+      .eq("is_manager_cycle", false)
       .order("created_at", { ascending: false });
 
     if (error) {
@@ -169,9 +180,55 @@ export default function AppraisalsPage() {
       return;
     }
 
-    // Get participant counts for each cycle
-    const cyclesWithCounts = await Promise.all(
-      (data || []).map(async (cycle) => {
+    const cyclesWithCounts = await addParticipantCounts(data || []);
+    setCycles(cyclesWithCounts);
+  };
+
+  const fetchManagerCycles = async () => {
+    // Fetch all manager-created probation cycles for admin/HR view
+    if (!isAdmin && !isHRManager) return;
+
+    const { data, error } = await supabase
+      .from("appraisal_cycles")
+      .select("*")
+      .eq("company_id", selectedCompanyId)
+      .eq("is_manager_cycle", true)
+      .eq("is_probation_review", true)
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      console.error("Error fetching manager cycles:", error);
+      return;
+    }
+
+    const cyclesWithCounts = await addParticipantCounts(data || []);
+    setManagerCycles(cyclesWithCounts);
+  };
+
+  const fetchMyTeamCycles = async () => {
+    // Fetch cycles created by current manager for their team
+    if (!user?.id || isAdmin || isHRManager) return;
+
+    const { data, error } = await supabase
+      .from("appraisal_cycles")
+      .select("*")
+      .eq("created_by", user.id)
+      .eq("is_manager_cycle", true)
+      .eq("is_probation_review", true)
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      console.error("Error fetching my team cycles:", error);
+      return;
+    }
+
+    const cyclesWithCounts = await addParticipantCounts(data || []);
+    setMyTeamCycles(cyclesWithCounts);
+  };
+
+  const addParticipantCounts = async (cyclesList: any[]) => {
+    return await Promise.all(
+      cyclesList.map(async (cycle) => {
         const { count: total } = await supabase
           .from("appraisal_participants")
           .select("*", { count: "exact", head: true })
@@ -190,8 +247,6 @@ export default function AppraisalsPage() {
         };
       })
     );
-
-    setCycles(cyclesWithCounts);
   };
 
   const fetchMyAppraisals = async () => {
@@ -277,13 +332,17 @@ export default function AppraisalsPage() {
     setPendingEvaluations(formatted);
   };
 
-  const handleCreateCycle = () => {
+  const handleCreateCycle = (probationReview: boolean = false, managerCycle: boolean = false) => {
     setSelectedCycle(null);
+    setIsProbationReview(probationReview);
+    setIsManagerCycle(managerCycle);
     setCycleDialogOpen(true);
   };
 
   const handleEditCycle = (cycle: AppraisalCycle) => {
     setSelectedCycle(cycle);
+    setIsProbationReview(cycle.is_probation_review || false);
+    setIsManagerCycle(cycle.is_manager_cycle || false);
     setCycleDialogOpen(true);
   };
 
@@ -341,9 +400,15 @@ export default function AppraisalsPage() {
               </Select>
             )}
             {(isAdmin || isHRManager) && (
-              <Button onClick={handleCreateCycle}>
+              <Button onClick={() => handleCreateCycle(false, false)}>
                 <Plus className="mr-2 h-4 w-4" />
                 Create Appraisal Cycle
+              </Button>
+            )}
+            {!isAdmin && !isHRManager && (
+              <Button onClick={() => handleCreateCycle(true, true)}>
+                <Plus className="mr-2 h-4 w-4" />
+                Create Probation Review
               </Button>
             )}
           </div>
@@ -424,17 +489,29 @@ export default function AppraisalsPage() {
               </Tooltip>
             </TabsTrigger>
             {(isAdmin || isHRManager) && (
-              <TabsTrigger value="manage-cycles" className="gap-2">
-                <Settings className="h-4 w-4" />
-                Manage Cycles
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <HelpCircle className="h-3.5 w-3.5 text-muted-foreground hover:text-foreground cursor-help" />
-                  </TooltipTrigger>
-                  <TooltipContent side="bottom" className="w-72 p-3 text-left whitespace-normal">
-                    <p className="text-sm leading-relaxed">{tabHelpText["manage-cycles"]}</p>
-                  </TooltipContent>
-                </Tooltip>
+              <>
+                <TabsTrigger value="manage-cycles" className="gap-2">
+                  <Settings className="h-4 w-4" />
+                  Central Cycles
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <HelpCircle className="h-3.5 w-3.5 text-muted-foreground hover:text-foreground cursor-help" />
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom" className="w-72 p-3 text-left whitespace-normal">
+                      <p className="text-sm leading-relaxed">{tabHelpText["manage-cycles"]}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TabsTrigger>
+                <TabsTrigger value="manager-cycles" className="gap-2">
+                  <ClipboardCheck className="h-4 w-4" />
+                  Manager Probation Reviews
+                </TabsTrigger>
+              </>
+            )}
+            {!isAdmin && !isHRManager && (
+              <TabsTrigger value="my-team-cycles" className="gap-2">
+                <ClipboardCheck className="h-4 w-4" />
+                My Team Probation Reviews
               </TabsTrigger>
             )}
           </TabsList>
@@ -554,8 +631,8 @@ export default function AppraisalsPage() {
                   <Card>
                     <CardContent className="flex flex-col items-center justify-center py-12">
                       <Settings className="h-12 w-12 text-muted-foreground mb-4" />
-                      <p className="text-muted-foreground mb-4">No appraisal cycles created yet</p>
-                      <Button onClick={handleCreateCycle}>
+                      <p className="text-muted-foreground mb-4">No central appraisal cycles created yet</p>
+                      <Button onClick={() => handleCreateCycle(false, false)}>
                         <Plus className="mr-2 h-4 w-4" />
                         Create First Cycle
                       </Button>
@@ -629,6 +706,141 @@ export default function AppraisalsPage() {
               </div>
             </TabsContent>
           )}
+
+          {(isAdmin || isHRManager) && (
+            <TabsContent value="manager-cycles" className="mt-6">
+              <div className="space-y-4">
+                {managerCycles.length === 0 ? (
+                  <Card>
+                    <CardContent className="flex flex-col items-center justify-center py-12">
+                      <ClipboardCheck className="h-12 w-12 text-muted-foreground mb-4" />
+                      <p className="text-muted-foreground">No manager-created probation reviews yet</p>
+                    </CardContent>
+                  </Card>
+                ) : (
+                  managerCycles.map((cycle) => (
+                    <Card key={cycle.id}>
+                      <CardHeader className="pb-3">
+                        <div className="flex items-start justify-between">
+                          <div>
+                            <CardTitle className="text-lg">{cycle.name}</CardTitle>
+                            <CardDescription>
+                              {format(new Date(cycle.start_date), "MMM d, yyyy")} -{" "}
+                              {format(new Date(cycle.end_date), "MMM d, yyyy")}
+                            </CardDescription>
+                          </div>
+                          <div className="flex gap-2">
+                            <Badge variant="outline">Probation Review</Badge>
+                            <Badge className={statusColors[cycle.status]}>{cycle.status}</Badge>
+                          </div>
+                        </div>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-4">
+                          <div className="flex items-center gap-4">
+                            <div className="flex-1">
+                              <div className="flex items-center justify-between text-sm mb-1">
+                                <span className="text-muted-foreground">
+                                  {cycle.participants_count} participants
+                                </span>
+                                <span>{cycle.completion_rate}% complete</span>
+                              </div>
+                              <Progress value={cycle.completion_rate} className="h-2" />
+                            </div>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleManageParticipants(cycle)}
+                            >
+                              <Users className="mr-2 h-4 w-4" />
+                              Participants
+                            </Button>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))
+                )}
+              </div>
+            </TabsContent>
+          )}
+
+          {!isAdmin && !isHRManager && (
+            <TabsContent value="my-team-cycles" className="mt-6">
+              <div className="space-y-4">
+                <div className="flex justify-end">
+                  <Button onClick={() => handleCreateCycle(true, true)}>
+                    <Plus className="mr-2 h-4 w-4" />
+                    Create Probation Review
+                  </Button>
+                </div>
+                {myTeamCycles.length === 0 ? (
+                  <Card>
+                    <CardContent className="flex flex-col items-center justify-center py-12">
+                      <ClipboardCheck className="h-12 w-12 text-muted-foreground mb-4" />
+                      <p className="text-muted-foreground mb-4">No probation reviews created yet</p>
+                      <p className="text-sm text-muted-foreground">
+                        Create probation reviews for your direct reports
+                      </p>
+                    </CardContent>
+                  </Card>
+                ) : (
+                  myTeamCycles.map((cycle) => (
+                    <Card key={cycle.id}>
+                      <CardHeader className="pb-3">
+                        <div className="flex items-start justify-between">
+                          <div>
+                            <CardTitle className="text-lg">{cycle.name}</CardTitle>
+                            <CardDescription>
+                              {format(new Date(cycle.start_date), "MMM d, yyyy")} -{" "}
+                              {format(new Date(cycle.end_date), "MMM d, yyyy")}
+                            </CardDescription>
+                          </div>
+                          <div className="flex gap-2">
+                            <Badge variant="outline">Probation Review</Badge>
+                            <Badge className={statusColors[cycle.status]}>{cycle.status}</Badge>
+                          </div>
+                        </div>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-4">
+                          <div className="flex items-center gap-4">
+                            <div className="flex-1">
+                              <div className="flex items-center justify-between text-sm mb-1">
+                                <span className="text-muted-foreground">
+                                  {cycle.participants_count} participants
+                                </span>
+                                <span>{cycle.completion_rate}% complete</span>
+                              </div>
+                              <Progress value={cycle.completion_rate} className="h-2" />
+                            </div>
+                            <div className="flex gap-2">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleManageParticipants(cycle)}
+                              >
+                                <Users className="mr-2 h-4 w-4" />
+                                Participants
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleEditCycle(cycle)}
+                              >
+                                <Settings className="mr-2 h-4 w-4" />
+                                Edit
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))
+                )}
+              </div>
+            </TabsContent>
+          )}
         </Tabs>
 
         <AppraisalCycleDialog
@@ -637,6 +849,8 @@ export default function AppraisalsPage() {
           cycle={selectedCycle}
           companyId={selectedCompanyId}
           onSuccess={fetchData}
+          isProbationReview={isProbationReview}
+          isManagerCycle={isManagerCycle}
         />
 
         {selectedCycle && (

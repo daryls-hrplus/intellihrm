@@ -105,6 +105,8 @@ export type Database = {
           evaluation_deadline: string | null
           goal_weight: number
           id: string
+          is_manager_cycle: boolean
+          is_probation_review: boolean
           max_rating: number
           min_rating: number
           name: string
@@ -123,6 +125,8 @@ export type Database = {
           evaluation_deadline?: string | null
           goal_weight?: number
           id?: string
+          is_manager_cycle?: boolean
+          is_probation_review?: boolean
           max_rating?: number
           min_rating?: number
           name: string
@@ -141,6 +145,8 @@ export type Database = {
           evaluation_deadline?: string | null
           goal_weight?: number
           id?: string
+          is_manager_cycle?: boolean
+          is_probation_review?: boolean
           max_rating?: number
           min_rating?: number
           name?: string
