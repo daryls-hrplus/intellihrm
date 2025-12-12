@@ -21,6 +21,7 @@ import {
   Briefcase,
   Target,
   ClipboardList,
+  Rocket,
 } from "lucide-react";
 
 const workforceModules = [
@@ -128,6 +129,13 @@ const workforceModules = [
     href: "/workforce/intranet-admin",
     icon: Megaphone,
     color: "bg-pink-500/10 text-pink-500",
+  },
+  {
+    title: "Employee Onboarding",
+    description: "Manage onboarding templates and track new employees",
+    href: "/workforce/onboarding",
+    icon: Rocket,
+    color: "bg-emerald-500/10 text-emerald-500",
   },
 ];
 

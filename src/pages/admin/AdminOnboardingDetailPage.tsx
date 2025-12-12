@@ -53,8 +53,8 @@ export default function AdminOnboardingDetailPage() {
 
   const breadcrumbItems = [
     { label: t('common.home'), path: '/' },
-    { label: t('common.admin'), path: '/admin' },
-    { label: 'Employee Onboarding', path: '/admin/onboarding' },
+    { label: 'Workforce', path: '/workforce' },
+    { label: 'Employee Onboarding', path: '/workforce/onboarding' },
     { label: instance?.profiles?.full_name || 'Details' },
   ];
 
@@ -200,7 +200,7 @@ export default function AdminOnboardingDetailPage() {
         <Breadcrumbs items={breadcrumbItems} />
 
         <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" onClick={() => navigate('/admin/onboarding')}>
+          <Button variant="ghost" size="icon" onClick={() => navigate('/workforce/onboarding')}>
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <div className="flex-1">
