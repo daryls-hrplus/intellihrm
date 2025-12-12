@@ -64,18 +64,17 @@ interface JobCompetenciesManagerProps {
   companyId: string;
 }
 
-// Check if two date ranges overlap
+// Check if two date ranges overlap (using string comparison for dates in YYYY-MM-DD format)
 function datesOverlap(
   start1: string,
   end1: string | null,
   start2: string,
   end2: string | null
 ): boolean {
-  const s1 = new Date(start1);
-  const e1 = end1 ? new Date(end1) : new Date("9999-12-31");
-  const s2 = new Date(start2);
-  const e2 = end2 ? new Date(end2) : new Date("9999-12-31");
-  return s1 <= e2 && s2 <= e1;
+  const e1 = end1 || "9999-12-31";
+  const e2 = end2 || "9999-12-31";
+  // Ranges overlap if start1 <= end2 AND start2 <= end1
+  return start1 <= e2 && start2 <= e1;
 }
 
 export function JobCompetenciesManager({ jobId, companyId }: JobCompetenciesManagerProps) {
