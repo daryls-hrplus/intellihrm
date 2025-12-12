@@ -1025,6 +1025,70 @@ export type Database = {
           },
         ]
       }
+      employee_competencies: {
+        Row: {
+          competency_id: string
+          competency_level_id: string | null
+          created_at: string
+          employee_id: string
+          end_date: string | null
+          id: string
+          notes: string | null
+          proficiency_date: string | null
+          start_date: string
+          updated_at: string
+          weighting: number
+        }
+        Insert: {
+          competency_id: string
+          competency_level_id?: string | null
+          created_at?: string
+          employee_id: string
+          end_date?: string | null
+          id?: string
+          notes?: string | null
+          proficiency_date?: string | null
+          start_date?: string
+          updated_at?: string
+          weighting?: number
+        }
+        Update: {
+          competency_id?: string
+          competency_level_id?: string | null
+          created_at?: string
+          employee_id?: string
+          end_date?: string | null
+          id?: string
+          notes?: string | null
+          proficiency_date?: string | null
+          start_date?: string
+          updated_at?: string
+          weighting?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "employee_competencies_competency_id_fkey"
+            columns: ["competency_id"]
+            isOneToOne: false
+            referencedRelation: "competencies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_competencies_competency_level_id_fkey"
+            columns: ["competency_level_id"]
+            isOneToOne: false
+            referencedRelation: "competency_levels"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_competencies_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       employee_contacts: {
         Row: {
           contact_type: string

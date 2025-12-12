@@ -27,6 +27,7 @@ import { EmployeeContactsTab } from "@/components/employee/EmployeeContactsTab";
 import { EmployeeEmergencyContactsTab } from "@/components/employee/EmployeeEmergencyContactsTab";
 import { EmployeePayGroupTab } from "@/components/employee/EmployeePayGroupTab";
 import { EmployeeBranchLocationsTab } from "@/components/employee/EmployeeBranchLocationsTab";
+import { EmployeeCompetenciesTab } from "@/components/employee/EmployeeCompetenciesTab";
 
 import {
   ArrowLeft,
@@ -266,6 +267,7 @@ export default function EmployeeProfilePage() {
             <TabsTrigger value="bank"><CreditCard className="h-4 w-4 mr-1" />Bank</TabsTrigger>
             <TabsTrigger value="beneficiaries"><Users className="h-4 w-4 mr-1" />Beneficiaries</TabsTrigger>
             <TabsTrigger value="certificates"><GraduationCap className="h-4 w-4 mr-1" />Certificates</TabsTrigger>
+            <TabsTrigger value="competencies"><Award className="h-4 w-4 mr-1" />Competencies</TabsTrigger>
             <TabsTrigger value="contacts"><Phone className="h-4 w-4 mr-1" />Contacts</TabsTrigger>
             <TabsTrigger value="dependents"><Baby className="h-4 w-4 mr-1" />Dependents</TabsTrigger>
             <TabsTrigger value="documents"><FileText className="h-4 w-4 mr-1" />Documents</TabsTrigger>
@@ -301,6 +303,10 @@ export default function EmployeeProfilePage() {
 
           <TabsContent value="branches" className="mt-6">
             <EmployeeBranchLocationsTab employeeId={employee.id} />
+          </TabsContent>
+
+          <TabsContent value="competencies" className="mt-6">
+            <EmployeeCompetenciesTab employeeId={employee.id} />
           </TabsContent>
 
           <TabsContent value="contacts" className="mt-6">
