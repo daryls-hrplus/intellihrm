@@ -5565,6 +5565,329 @@ export type Database = {
         }
         Relationships: []
       }
+      onboarding_instances: {
+        Row: {
+          actual_completion_date: string | null
+          buddy_id: string | null
+          company_id: string
+          created_at: string
+          created_by: string | null
+          employee_id: string
+          id: string
+          manager_id: string | null
+          notes: string | null
+          start_date: string
+          status: string
+          target_completion_date: string | null
+          template_id: string
+          updated_at: string
+        }
+        Insert: {
+          actual_completion_date?: string | null
+          buddy_id?: string | null
+          company_id: string
+          created_at?: string
+          created_by?: string | null
+          employee_id: string
+          id?: string
+          manager_id?: string | null
+          notes?: string | null
+          start_date?: string
+          status?: string
+          target_completion_date?: string | null
+          template_id: string
+          updated_at?: string
+        }
+        Update: {
+          actual_completion_date?: string | null
+          buddy_id?: string | null
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          employee_id?: string
+          id?: string
+          manager_id?: string | null
+          notes?: string | null
+          start_date?: string
+          status?: string
+          target_completion_date?: string | null
+          template_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "onboarding_instances_buddy_id_fkey"
+            columns: ["buddy_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "onboarding_instances_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "onboarding_instances_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "onboarding_instances_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "onboarding_instances_manager_id_fkey"
+            columns: ["manager_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "onboarding_instances_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "onboarding_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      onboarding_tasks: {
+        Row: {
+          assigned_to_id: string | null
+          assigned_to_type: string
+          completed_at: string | null
+          completed_by: string | null
+          created_at: string
+          description: string | null
+          display_order: number
+          document_url: string | null
+          due_date: string | null
+          id: string
+          instance_id: string
+          is_required: boolean
+          name: string
+          notes: string | null
+          status: string
+          task_type: string
+          template_task_id: string | null
+          training_course_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          assigned_to_id?: string | null
+          assigned_to_type?: string
+          completed_at?: string | null
+          completed_by?: string | null
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          document_url?: string | null
+          due_date?: string | null
+          id?: string
+          instance_id: string
+          is_required?: boolean
+          name: string
+          notes?: string | null
+          status?: string
+          task_type?: string
+          template_task_id?: string | null
+          training_course_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          assigned_to_id?: string | null
+          assigned_to_type?: string
+          completed_at?: string | null
+          completed_by?: string | null
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          document_url?: string | null
+          due_date?: string | null
+          id?: string
+          instance_id?: string
+          is_required?: boolean
+          name?: string
+          notes?: string | null
+          status?: string
+          task_type?: string
+          template_task_id?: string | null
+          training_course_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "onboarding_tasks_assigned_to_id_fkey"
+            columns: ["assigned_to_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "onboarding_tasks_completed_by_fkey"
+            columns: ["completed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "onboarding_tasks_instance_id_fkey"
+            columns: ["instance_id"]
+            isOneToOne: false
+            referencedRelation: "onboarding_instances"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "onboarding_tasks_template_task_id_fkey"
+            columns: ["template_task_id"]
+            isOneToOne: false
+            referencedRelation: "onboarding_template_tasks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "onboarding_tasks_training_course_id_fkey"
+            columns: ["training_course_id"]
+            isOneToOne: false
+            referencedRelation: "lms_courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      onboarding_template_tasks: {
+        Row: {
+          assigned_to_type: string
+          created_at: string
+          description: string | null
+          display_order: number
+          document_template_id: string | null
+          due_days: number
+          id: string
+          is_required: boolean
+          name: string
+          task_type: string
+          template_id: string
+          training_course_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          assigned_to_type?: string
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          document_template_id?: string | null
+          due_days?: number
+          id?: string
+          is_required?: boolean
+          name: string
+          task_type?: string
+          template_id: string
+          training_course_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          assigned_to_type?: string
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          document_template_id?: string | null
+          due_days?: number
+          id?: string
+          is_required?: boolean
+          name?: string
+          task_type?: string
+          template_id?: string
+          training_course_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "onboarding_template_tasks_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "onboarding_templates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "onboarding_template_tasks_training_course_id_fkey"
+            columns: ["training_course_id"]
+            isOneToOne: false
+            referencedRelation: "lms_courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      onboarding_templates: {
+        Row: {
+          company_id: string
+          created_at: string
+          created_by: string | null
+          description: string | null
+          end_date: string | null
+          id: string
+          is_active: boolean
+          job_id: string | null
+          name: string
+          start_date: string
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          is_active?: boolean
+          job_id?: string | null
+          name: string
+          start_date?: string
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          is_active?: boolean
+          job_id?: string | null
+          name?: string
+          start_date?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "onboarding_templates_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "onboarding_templates_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "onboarding_templates_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pay_elements: {
         Row: {
           code: string
