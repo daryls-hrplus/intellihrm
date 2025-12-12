@@ -18,6 +18,7 @@ import {
   Megaphone,
   Briefcase,
   Target,
+  ClipboardList,
 } from "lucide-react";
 
 const workforceModules = [
@@ -111,6 +112,13 @@ const workforceModules = [
     href: "/workforce/competencies",
     icon: Target,
     color: "bg-rose-500/10 text-rose-500",
+  },
+  {
+    title: "Responsibilities",
+    description: "Define job responsibilities",
+    href: "/workforce/responsibilities",
+    icon: ClipboardList,
+    color: "bg-amber-500/10 text-amber-500",
   },
   {
     title: "Intranet Admin",
