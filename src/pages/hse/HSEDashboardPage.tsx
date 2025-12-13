@@ -2,6 +2,9 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import { NavLink } from "react-router-dom";
 import { ModuleReportsButton } from "@/components/reports/ModuleReportsButton";
 import { ModuleBIButton } from "@/components/bi/ModuleBIButton";
+import { useHSE } from "@/hooks/useHSE";
+import { differenceInDays } from "date-fns";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Shield,
   AlertTriangle,
@@ -26,21 +29,21 @@ const hseModules = [
     description: "Mandatory safety courses",
     href: "/hse/safety-training",
     icon: HardHat,
-    color: "bg-warning/10 text-warning",
+    color: "bg-amber-500/10 text-amber-600",
   },
   {
     title: "Compliance",
     description: "Regulatory compliance tracking",
     href: "/hse/compliance",
     icon: ClipboardCheck,
-    color: "bg-success/10 text-success",
+    color: "bg-emerald-500/10 text-emerald-600",
   },
   {
     title: "Safety Policies",
     description: "Company safety guidelines",
     href: "/hse/safety-policies",
     icon: FileText,
-    color: "bg-info/10 text-info",
+    color: "bg-sky-500/10 text-sky-600",
   },
   {
     title: "Risk Assessment",
@@ -51,14 +54,38 @@ const hseModules = [
   },
 ];
 
-const statCards = [
-  { label: "Days Without Incident", value: 124, icon: CheckCircle, color: "bg-success/10 text-success" },
-  { label: "Open Incidents", value: 2, icon: AlertTriangle, color: "bg-destructive/10 text-destructive" },
-  { label: "Pending Training", value: 8, icon: Clock, color: "bg-warning/10 text-warning" },
-  { label: "Compliance Rate", value: "98%", icon: ClipboardCheck, color: "bg-info/10 text-info" },
-];
-
 export default function HSEDashboardPage() {
+  const { incidents, trainingRecords, complianceRequirements, incidentsLoading, recordsLoading, complianceLoading } = useHSE();
+
+  const isLoading = incidentsLoading || recordsLoading || complianceLoading;
+
+  // Calculate days without incident
+  const closedIncidents = incidents?.filter(i => i.status === 'closed') || [];
+  const lastIncidentDate = closedIncidents.length > 0 
+    ? closedIncidents.sort((a, b) => new Date(b.incident_date).getTime() - new Date(a.incident_date).getTime())[0]?.incident_date
+    : null;
+  const daysWithoutIncident = lastIncidentDate 
+    ? differenceInDays(new Date(), new Date(lastIncidentDate))
+    : incidents?.length === 0 ? 365 : 0;
+
+  // Calculate open incidents
+  const openIncidents = incidents?.filter(i => i.status === 'open' || i.status === 'investigating').length || 0;
+
+  // Calculate pending training (status is not 'passed')
+  const pendingTraining = trainingRecords?.filter(t => t.status !== 'passed').length || 0;
+
+  // Calculate compliance rate
+  const totalCompliance = complianceRequirements?.length || 0;
+  const compliantCount = complianceRequirements?.filter(c => c.status === 'compliant').length || 0;
+  const complianceRate = totalCompliance > 0 ? Math.round((compliantCount / totalCompliance) * 100) : 100;
+
+  const statCards = [
+    { label: "Days Without Incident", value: daysWithoutIncident, icon: CheckCircle, color: "bg-emerald-500/10 text-emerald-600" },
+    { label: "Open Incidents", value: openIncidents, icon: AlertTriangle, color: "bg-destructive/10 text-destructive" },
+    { label: "Pending Training", value: pendingTraining, icon: Clock, color: "bg-amber-500/10 text-amber-600" },
+    { label: "Compliance Rate", value: `${complianceRate}%`, icon: ClipboardCheck, color: "bg-sky-500/10 text-sky-600" },
+  ];
+
   return (
     <AppLayout>
       <div className="space-y-6">
@@ -97,7 +124,11 @@ export default function HSEDashboardPage() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-muted-foreground">{stat.label}</p>
-                    <p className="mt-1 text-3xl font-bold text-card-foreground">{stat.value}</p>
+                    {isLoading ? (
+                      <Skeleton className="h-9 w-16 mt-1" />
+                    ) : (
+                      <p className="mt-1 text-3xl font-bold text-card-foreground">{stat.value}</p>
+                    )}
                   </div>
                   <div className={`rounded-lg p-3 ${stat.color}`}>
                     <Icon className="h-5 w-5" />
