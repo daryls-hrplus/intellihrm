@@ -39,8 +39,12 @@ export function LeaveCompanyFilter({ selectedCompanyId, onCompanyChange }: Leave
     }
   }, [isAdminOrHR]);
 
-  if (!isAdminOrHR || companies.length <= 1) {
+  if (!isAdminOrHR) {
     return null;
+  }
+
+  if (companies.length === 0) {
+    return null; // Still loading or no companies
   }
 
   return (
