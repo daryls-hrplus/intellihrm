@@ -1,64 +1,44 @@
 import { AppLayout } from "@/components/layout/AppLayout";
-import { NavLink } from "react-router-dom";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ModuleReportsButton } from "@/components/reports/ModuleReportsButton";
 import { ModuleBIButton } from "@/components/bi/ModuleBIButton";
+import { usePropertyManagement } from "@/hooks/usePropertyManagement";
+import PropertyCategoriesTab from "@/components/property/PropertyCategoriesTab";
+import PropertyItemsTab from "@/components/property/PropertyItemsTab";
+import PropertyAssignmentsTab from "@/components/property/PropertyAssignmentsTab";
+import PropertyRequestsTab from "@/components/property/PropertyRequestsTab";
+import PropertyMaintenanceTab from "@/components/property/PropertyMaintenanceTab";
 import {
   Package,
   Laptop,
-  Car,
-  CreditCard,
+  Users,
   Clipboard,
-  ChevronRight,
+  Wrench,
+  FolderOpen,
   CheckCircle,
   Clock,
+  AlertTriangle,
 } from "lucide-react";
 
-const propertyModules = [
-  {
-    title: "IT Assets",
-    description: "Laptops, phones, and equipment",
-    href: "/property/it-assets",
-    icon: Laptop,
-    color: "bg-primary/10 text-primary",
-  },
-  {
-    title: "Company Vehicles",
-    description: "Fleet management",
-    href: "/property/vehicles",
-    icon: Car,
-    color: "bg-success/10 text-success",
-  },
-  {
-    title: "Access Cards",
-    description: "ID cards and building access",
-    href: "/property/access-cards",
-    icon: CreditCard,
-    color: "bg-info/10 text-info",
-  },
-  {
-    title: "Asset Requests",
-    description: "Request company equipment",
-    href: "/property/requests",
-    icon: Clipboard,
-    color: "bg-warning/10 text-warning",
-  },
-  {
-    title: "Inventory",
-    description: "Company asset inventory",
-    href: "/property/inventory",
-    icon: Package,
-    color: "bg-destructive/10 text-destructive",
-  },
-];
-
-const statCards = [
-  { label: "Total Assets", value: 342, icon: Package, color: "bg-primary/10 text-primary" },
-  { label: "Assigned", value: 298, icon: CheckCircle, color: "bg-success/10 text-success" },
-  { label: "Pending Requests", value: 7, icon: Clock, color: "bg-warning/10 text-warning" },
-  { label: "Vehicles", value: 24, icon: Car, color: "bg-info/10 text-info" },
-];
-
 export default function PropertyDashboardPage() {
+  const {
+    items,
+    requests,
+    maintenance,
+  } = usePropertyManagement();
+
+  const totalAssets = items?.length || 0;
+  const assignedAssets = items?.filter(item => item.status === 'assigned').length || 0;
+  const pendingRequests = requests?.filter(req => req.status === 'pending').length || 0;
+  const maintenanceDue = maintenance?.filter(m => m.status === 'scheduled').length || 0;
+
+  const statCards = [
+    { label: "Total Assets", value: totalAssets, icon: Package, color: "bg-primary/10 text-primary" },
+    { label: "Assigned", value: assignedAssets, icon: CheckCircle, color: "bg-success/10 text-success" },
+    { label: "Pending Requests", value: pendingRequests, icon: Clock, color: "bg-warning/10 text-warning" },
+    { label: "Maintenance Due", value: maintenanceDue, icon: AlertTriangle, color: "bg-destructive/10 text-destructive" },
+  ];
+
   return (
     <AppLayout>
       <div className="space-y-6">
@@ -108,32 +88,47 @@ export default function PropertyDashboardPage() {
           })}
         </div>
 
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {propertyModules.map((module, index) => {
-            const Icon = module.icon;
-            return (
-              <NavLink
-                key={module.href}
-                to={module.href}
-                className="group rounded-xl border border-border bg-card p-6 shadow-card transition-all hover:shadow-card-hover hover:border-primary/20 animate-slide-up"
-                style={{ animationDelay: `${(index + 4) * 50}ms` }}
-              >
-                <div className="flex items-start justify-between">
-                  <div className={`rounded-lg p-3 ${module.color}`}>
-                    <Icon className="h-6 w-6" />
-                  </div>
-                  <ChevronRight className="h-5 w-5 text-muted-foreground opacity-0 transition-all group-hover:opacity-100 group-hover:translate-x-1" />
-                </div>
-                <h3 className="mt-4 font-semibold text-card-foreground">
-                  {module.title}
-                </h3>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  {module.description}
-                </p>
-              </NavLink>
-            );
-          })}
-        </div>
+        {/* Tabs for Property Management */}
+        <Tabs defaultValue="items" className="space-y-4">
+          <TabsList className="grid w-full grid-cols-5">
+            <TabsTrigger value="items" className="flex items-center gap-2">
+              <Laptop className="h-4 w-4" />
+              <span className="hidden sm:inline">Assets</span>
+            </TabsTrigger>
+            <TabsTrigger value="assignments" className="flex items-center gap-2">
+              <Users className="h-4 w-4" />
+              <span className="hidden sm:inline">Assignments</span>
+            </TabsTrigger>
+            <TabsTrigger value="requests" className="flex items-center gap-2">
+              <Clipboard className="h-4 w-4" />
+              <span className="hidden sm:inline">Requests</span>
+            </TabsTrigger>
+            <TabsTrigger value="maintenance" className="flex items-center gap-2">
+              <Wrench className="h-4 w-4" />
+              <span className="hidden sm:inline">Maintenance</span>
+            </TabsTrigger>
+            <TabsTrigger value="categories" className="flex items-center gap-2">
+              <FolderOpen className="h-4 w-4" />
+              <span className="hidden sm:inline">Categories</span>
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="items">
+            <PropertyItemsTab />
+          </TabsContent>
+          <TabsContent value="assignments">
+            <PropertyAssignmentsTab />
+          </TabsContent>
+          <TabsContent value="requests">
+            <PropertyRequestsTab />
+          </TabsContent>
+          <TabsContent value="maintenance">
+            <PropertyMaintenanceTab />
+          </TabsContent>
+          <TabsContent value="categories">
+            <PropertyCategoriesTab />
+          </TabsContent>
+        </Tabs>
       </div>
     </AppLayout>
   );
