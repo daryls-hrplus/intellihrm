@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { Json } from "@/integrations/supabase/types";
 
 export interface ERCase {
   id: string;
@@ -20,8 +21,8 @@ export interface ERCase {
   actual_resolution_date: string | null;
   resolution_summary: string | null;
   is_confidential: boolean;
-  witnesses: unknown[];
-  attachments: unknown[];
+  witnesses: Json;
+  attachments: Json;
   created_at: string;
   updated_at: string;
   employee?: { id: string; full_name: string; email: string };
@@ -59,7 +60,7 @@ export interface ERDisciplinaryAction {
   appeal_status: string;
   appeal_notes: string | null;
   status: string;
-  attachments: unknown[];
+  attachments: Json;
   created_at: string;
   updated_at: string;
   employee?: { id: string; full_name: string; email: string };
@@ -79,7 +80,7 @@ export interface ERRecognition {
   monetary_value: number | null;
   currency: string;
   is_public: boolean;
-  attachments: unknown[];
+  attachments: Json;
   created_at: string;
   employee?: { id: string; full_name: string; email: string };
   awarder?: { id: string; full_name: string };
@@ -122,8 +123,8 @@ export interface ERSurvey {
   start_date: string;
   end_date: string;
   is_anonymous: boolean;
-  target_departments: unknown[];
-  questions: unknown[];
+  target_departments: Json;
+  questions: Json;
   created_by: string | null;
   created_at: string;
   updated_at: string;
@@ -340,7 +341,7 @@ export const useEmployeeRelations = (companyId?: string) => {
 
   // Update Disciplinary Action
   const updateDisciplinaryAction = useMutation({
-    mutationFn: async ({ id, ...updates }: { id: string } & Partial<ERDisciplinaryAction>) => {
+    mutationFn: async ({ id, ...updates }: { id: string } & Partial<Omit<ERDisciplinaryAction, 'attachments'>> & { attachments?: Json }) => {
       const { data, error } = await supabase
         .from("er_disciplinary_actions")
         .update(updates)
@@ -359,7 +360,7 @@ export const useEmployeeRelations = (companyId?: string) => {
 
   // Create Recognition
   const createRecognition = useMutation({
-    mutationFn: async (recognition: Partial<ERRecognition>) => {
+    mutationFn: async (recognition: { company_id: string; employee_id: string; recognition_type: string; title: string; category?: string; description?: string; awarded_by?: string; award_date: string; monetary_value?: number; currency?: string; is_public?: boolean; attachments?: Json }) => {
       const { data, error } = await supabase
         .from("er_recognition")
         .insert([recognition])
@@ -414,7 +415,7 @@ export const useEmployeeRelations = (companyId?: string) => {
 
   // Create Survey
   const createSurvey = useMutation({
-    mutationFn: async (survey: { company_id: string; title: string; description?: string; survey_type: string; start_date: string; end_date: string; is_anonymous: boolean; questions: unknown[]; created_by?: string }) => {
+    mutationFn: async (survey: { company_id: string; title: string; description?: string; survey_type: string; start_date: string; end_date: string; is_anonymous: boolean; questions: Json; target_departments?: Json; created_by?: string }) => {
       const { data, error } = await supabase
         .from("er_surveys")
         .insert([survey])
@@ -432,7 +433,7 @@ export const useEmployeeRelations = (companyId?: string) => {
 
   // Update Survey
   const updateSurvey = useMutation({
-    mutationFn: async ({ id, ...updates }: { id: string } & Partial<ERSurvey>) => {
+    mutationFn: async ({ id, ...updates }: { id: string } & Partial<Omit<ERSurvey, 'questions' | 'target_departments'>> & { questions?: Json; target_departments?: Json }) => {
       const { data, error } = await supabase
         .from("er_surveys")
         .update(updates)
