@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { useLeaveManagement } from "@/hooks/useLeaveManagement";
 import { useWorkflow } from "@/hooks/useWorkflow";
@@ -24,7 +24,7 @@ import {
   Loader2,
   Send
 } from "lucide-react";
-import { format, differenceInDays } from "date-fns";
+import { format, differenceInDays, startOfYear } from "date-fns";
 import {
   Table,
   TableBody,
@@ -54,6 +54,7 @@ import {
 } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { LeaveBalanceSummary } from "@/components/leave/LeaveBalanceSummary";
 
 export default function EssLeavePage() {
   const { profile } = useAuth();
@@ -103,6 +104,35 @@ export default function EssLeavePage() {
 
   const selectedType = leaveTypes.find((t) => t.id === formData.leave_type_id);
   const selectedBalance = leaveBalances.find((b) => b.leave_type_id === formData.leave_type_id);
+
+  // Calculate booked leave (pending or approved requests for this year)
+  const bookedLeave = useMemo(() => {
+    if (!formData.leave_type_id) return 0;
+    const currentYear = new Date().getFullYear();
+    const yearStart = startOfYear(new Date());
+    
+    return leaveRequests
+      .filter((r) => 
+        r.leave_type_id === formData.leave_type_id &&
+        (r.status === "pending" || r.status === "approved") &&
+        new Date(r.start_date) >= yearStart
+      )
+      .reduce((sum, r) => sum + (r.duration || 0), 0);
+  }, [leaveRequests, formData.leave_type_id]);
+
+  // Calculate balance summary values
+  const balanceSummary = useMemo(() => {
+    if (!selectedBalance) return null;
+    
+    return {
+      openingBalance: selectedBalance.carried_forward || 0,
+      entitlement: (selectedBalance.accrued_amount || 0) + (selectedBalance.adjustment_amount || 0),
+      earnedYTD: selectedBalance.accrued_amount || 0,
+      takenYTD: selectedBalance.used_amount || 0,
+      currentBalance: selectedBalance.current_balance || 0,
+      bookedPending: bookedLeave,
+    };
+  }, [selectedBalance, bookedLeave]);
 
   // Calculate duration
   const calculateDuration = () => {
@@ -408,12 +438,22 @@ export default function EssLeavePage() {
                   })}
                 </SelectContent>
               </Select>
-              {selectedType && selectedBalance && (
-                <p className="text-sm text-muted-foreground">
-                  Available balance: <span className="font-medium text-foreground">{selectedBalance.current_balance}</span> {selectedType.accrual_unit}
-                </p>
-              )}
             </div>
+
+            {/* Leave Balance Summary - shown when leave type is selected */}
+            {selectedType && balanceSummary && (
+              <LeaveBalanceSummary
+                leaveTypeName={selectedType.name}
+                leaveTypeColor={selectedType.color}
+                accrualUnit={selectedType.accrual_unit}
+                openingBalance={balanceSummary.openingBalance}
+                entitlement={balanceSummary.entitlement}
+                earnedYTD={balanceSummary.earnedYTD}
+                takenYTD={balanceSummary.takenYTD}
+                currentBalance={balanceSummary.currentBalance}
+                bookedPending={balanceSummary.bookedPending}
+              />
+            )}
 
             {/* Date Selection */}
             <div className="grid grid-cols-2 gap-4">
