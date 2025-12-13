@@ -1400,6 +1400,279 @@ export type Database = {
           },
         ]
       }
+      comp_time_balances: {
+        Row: {
+          company_id: string
+          created_at: string
+          current_balance: number
+          employee_id: string
+          id: string
+          last_calculated_at: string
+          total_earned: number
+          total_expired: number
+          total_used: number
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          current_balance?: number
+          employee_id: string
+          id?: string
+          last_calculated_at?: string
+          total_earned?: number
+          total_expired?: number
+          total_used?: number
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          current_balance?: number
+          employee_id?: string
+          id?: string
+          last_calculated_at?: string
+          total_earned?: number
+          total_expired?: number
+          total_used?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "comp_time_balances_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "comp_time_balances_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      comp_time_earned: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          company_id: string
+          created_at: string
+          employee_id: string
+          expires_at: string | null
+          hours_earned: number
+          id: string
+          notes: string | null
+          policy_id: string | null
+          reason: string
+          rejection_reason: string | null
+          status: string
+          updated_at: string
+          work_date: string
+          work_type: string
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          company_id: string
+          created_at?: string
+          employee_id: string
+          expires_at?: string | null
+          hours_earned: number
+          id?: string
+          notes?: string | null
+          policy_id?: string | null
+          reason: string
+          rejection_reason?: string | null
+          status?: string
+          updated_at?: string
+          work_date: string
+          work_type?: string
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          company_id?: string
+          created_at?: string
+          employee_id?: string
+          expires_at?: string | null
+          hours_earned?: number
+          id?: string
+          notes?: string | null
+          policy_id?: string | null
+          reason?: string
+          rejection_reason?: string | null
+          status?: string
+          updated_at?: string
+          work_date?: string
+          work_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "comp_time_earned_approved_by_fkey"
+            columns: ["approved_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "comp_time_earned_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "comp_time_earned_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "comp_time_earned_policy_id_fkey"
+            columns: ["policy_id"]
+            isOneToOne: false
+            referencedRelation: "comp_time_policies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      comp_time_policies: {
+        Row: {
+          company_id: string
+          created_at: string
+          description: string | null
+          end_date: string | null
+          expiry_days: number | null
+          expiry_type: string
+          id: string
+          is_active: boolean
+          max_balance_hours: number | null
+          name: string
+          requires_approval: boolean
+          start_date: string
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          description?: string | null
+          end_date?: string | null
+          expiry_days?: number | null
+          expiry_type?: string
+          id?: string
+          is_active?: boolean
+          max_balance_hours?: number | null
+          name?: string
+          requires_approval?: boolean
+          start_date?: string
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          description?: string | null
+          end_date?: string | null
+          expiry_days?: number | null
+          expiry_type?: string
+          id?: string
+          is_active?: boolean
+          max_balance_hours?: number | null
+          name?: string
+          requires_approval?: boolean
+          start_date?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "comp_time_policies_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      comp_time_used: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          company_id: string
+          created_at: string
+          employee_id: string
+          hours_used: number
+          id: string
+          leave_request_id: string | null
+          reason: string | null
+          rejection_reason: string | null
+          status: string
+          updated_at: string
+          use_date: string
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          company_id: string
+          created_at?: string
+          employee_id: string
+          hours_used: number
+          id?: string
+          leave_request_id?: string | null
+          reason?: string | null
+          rejection_reason?: string | null
+          status?: string
+          updated_at?: string
+          use_date: string
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          company_id?: string
+          created_at?: string
+          employee_id?: string
+          hours_used?: number
+          id?: string
+          leave_request_id?: string | null
+          reason?: string | null
+          rejection_reason?: string | null
+          status?: string
+          updated_at?: string
+          use_date?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "comp_time_used_approved_by_fkey"
+            columns: ["approved_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "comp_time_used_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "comp_time_used_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "comp_time_used_leave_request_id_fkey"
+            columns: ["leave_request_id"]
+            isOneToOne: false
+            referencedRelation: "leave_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       companies: {
         Row: {
           address: string | null
@@ -9579,6 +9852,10 @@ export type Database = {
           id: string
           similarity: number
         }[]
+      }
+      recalculate_comp_time_balance: {
+        Args: { p_company_id: string; p_employee_id: string }
+        Returns: undefined
       }
       recalculate_leave_balance: {
         Args: {
