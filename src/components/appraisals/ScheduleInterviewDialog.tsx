@@ -11,6 +11,7 @@ import { format } from "date-fns";
 import { CalendarIcon, Clock, MapPin, Video, Phone, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAppraisalInterviews, AppraisalInterview } from "@/hooks/useAppraisalInterviews";
+import { Switch } from "@/components/ui/switch";
 
 interface ScheduleInterviewDialogProps {
   open: boolean;
@@ -48,6 +49,9 @@ export function ScheduleInterviewDialog({
   const [location, setLocation] = useState(existingInterview?.location || "");
   const [meetingLink, setMeetingLink] = useState(existingInterview?.meeting_link || "");
   const [agenda, setAgenda] = useState(existingInterview?.agenda || "");
+  const [videoPlatform, setVideoPlatform] = useState("none");
+  const [screenSharing, setScreenSharing] = useState(false);
+  const [recordingEnabled, setRecordingEnabled] = useState(false);
 
   useEffect(() => {
     if (existingInterview) {
@@ -58,6 +62,9 @@ export function ScheduleInterviewDialog({
       setLocation(existingInterview.location || "");
       setMeetingLink(existingInterview.meeting_link || "");
       setAgenda(existingInterview.agenda || "");
+      setVideoPlatform("none");
+      setScreenSharing(false);
+      setRecordingEnabled(false);
     } else {
       setDate(undefined);
       setTime("09:00");
@@ -66,6 +73,9 @@ export function ScheduleInterviewDialog({
       setLocation("");
       setMeetingLink("");
       setAgenda("");
+      setVideoPlatform("none");
+      setScreenSharing(false);
+      setRecordingEnabled(false);
     }
   }, [existingInterview, open]);
 
@@ -124,7 +134,7 @@ export function ScheduleInterviewDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4 py-4">
+        <div className="space-y-4 py-4 max-h-[60vh] overflow-y-auto">
           {/* Date Picker */}
           <div className="space-y-2">
             <Label>Date *</Label>
@@ -227,15 +237,50 @@ export function ScheduleInterviewDialog({
               />
             </div>
           ) : meetingType === "video_call" ? (
-            <div className="space-y-2">
-              <Label htmlFor="meetingLink">Meeting Link</Label>
-              <Input
-                id="meetingLink"
-                value={meetingLink}
-                onChange={(e) => setMeetingLink(e.target.value)}
-                placeholder="https://meet.google.com/..."
-              />
-            </div>
+            <>
+              <div className="space-y-2">
+                <Label>Video Platform</Label>
+                <Select value={videoPlatform} onValueChange={setVideoPlatform}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">Custom Link</SelectItem>
+                    <SelectItem value="zoom">Zoom</SelectItem>
+                    <SelectItem value="teams">Microsoft Teams</SelectItem>
+                    <SelectItem value="daily">Daily.co (Built-in)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {videoPlatform === "none" && (
+                <div className="space-y-2">
+                  <Label htmlFor="meetingLink">Meeting Link</Label>
+                  <Input
+                    id="meetingLink"
+                    value={meetingLink}
+                    onChange={(e) => setMeetingLink(e.target.value)}
+                    placeholder="https://meet.google.com/..."
+                  />
+                </div>
+              )}
+
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label>Screen Sharing</Label>
+                  <p className="text-xs text-muted-foreground">Allow screen sharing during interview</p>
+                </div>
+                <Switch checked={screenSharing} onCheckedChange={setScreenSharing} />
+              </div>
+
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label>Recording</Label>
+                  <p className="text-xs text-muted-foreground">Record the interview session</p>
+                </div>
+                <Switch checked={recordingEnabled} onCheckedChange={setRecordingEnabled} />
+              </div>
+            </>
           ) : null}
 
           {/* Agenda */}

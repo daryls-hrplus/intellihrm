@@ -292,11 +292,16 @@ export type Database = {
           meeting_type: string
           outcome_summary: string | null
           participant_id: string
+          recording_enabled: boolean | null
           reminder_sent: boolean | null
           scheduled_at: string
           scheduled_by: string | null
+          screen_sharing_enabled: boolean | null
           status: string
+          teams_meeting_id: string | null
           updated_at: string
+          video_platform: string | null
+          zoom_meeting_id: string | null
         }
         Insert: {
           agenda?: string | null
@@ -314,11 +319,16 @@ export type Database = {
           meeting_type?: string
           outcome_summary?: string | null
           participant_id: string
+          recording_enabled?: boolean | null
           reminder_sent?: boolean | null
           scheduled_at: string
           scheduled_by?: string | null
+          screen_sharing_enabled?: boolean | null
           status?: string
+          teams_meeting_id?: string | null
           updated_at?: string
+          video_platform?: string | null
+          zoom_meeting_id?: string | null
         }
         Update: {
           agenda?: string | null
@@ -336,11 +346,16 @@ export type Database = {
           meeting_type?: string
           outcome_summary?: string | null
           participant_id?: string
+          recording_enabled?: boolean | null
           reminder_sent?: boolean | null
           scheduled_at?: string
           scheduled_by?: string | null
+          screen_sharing_enabled?: boolean | null
           status?: string
+          teams_meeting_id?: string | null
           updated_at?: string
+          video_platform?: string | null
+          zoom_meeting_id?: string | null
         }
         Relationships: [
           {
@@ -6742,11 +6757,16 @@ export type Database = {
           meeting_link: string | null
           meeting_type: string
           outcome_summary: string | null
+          recording_enabled: boolean | null
           reminder_sent: boolean | null
           scheduled_at: string
           scheduled_by: string | null
+          screen_sharing_enabled: boolean | null
           status: string
+          teams_meeting_id: string | null
           updated_at: string
+          video_platform: string | null
+          zoom_meeting_id: string | null
         }
         Insert: {
           agenda?: string | null
@@ -6765,11 +6785,16 @@ export type Database = {
           meeting_link?: string | null
           meeting_type?: string
           outcome_summary?: string | null
+          recording_enabled?: boolean | null
           reminder_sent?: boolean | null
           scheduled_at: string
           scheduled_by?: string | null
+          screen_sharing_enabled?: boolean | null
           status?: string
+          teams_meeting_id?: string | null
           updated_at?: string
+          video_platform?: string | null
+          zoom_meeting_id?: string | null
         }
         Update: {
           agenda?: string | null
@@ -6788,11 +6813,16 @@ export type Database = {
           meeting_link?: string | null
           meeting_type?: string
           outcome_summary?: string | null
+          recording_enabled?: boolean | null
           reminder_sent?: boolean | null
           scheduled_at?: string
           scheduled_by?: string | null
+          screen_sharing_enabled?: boolean | null
           status?: string
+          teams_meeting_id?: string | null
           updated_at?: string
+          video_platform?: string | null
+          zoom_meeting_id?: string | null
         }
         Relationships: [
           {
@@ -8408,6 +8438,50 @@ export type Database = {
             columns: ["scorecard_id"]
             isOneToOne: false
             referencedRelation: "interview_scorecards"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      interview_recordings: {
+        Row: {
+          created_at: string
+          duration_seconds: number | null
+          file_size_bytes: number | null
+          id: string
+          interview_id: string
+          interview_type: string
+          recorded_at: string
+          recorded_by: string | null
+          recording_url: string | null
+        }
+        Insert: {
+          created_at?: string
+          duration_seconds?: number | null
+          file_size_bytes?: number | null
+          id?: string
+          interview_id: string
+          interview_type: string
+          recorded_at?: string
+          recorded_by?: string | null
+          recording_url?: string | null
+        }
+        Update: {
+          created_at?: string
+          duration_seconds?: number | null
+          file_size_bytes?: number | null
+          id?: string
+          interview_id?: string
+          interview_type?: string
+          recorded_at?: string
+          recorded_by?: string | null
+          recording_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "interview_recordings_recorded_by_fkey"
+            columns: ["recorded_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]

@@ -8,10 +8,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { format } from "date-fns";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { CalendarIcon } from "lucide-react";
+import { CalendarIcon, Video } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { Switch } from "@/components/ui/switch";
 
 interface ScheduleGoalInterviewDialogProps {
   open: boolean;
@@ -25,6 +26,9 @@ interface ScheduleGoalInterviewDialogProps {
     meeting_link?: string;
     meeting_type: string;
     agenda?: string;
+    video_platform?: string;
+    screen_sharing_enabled?: boolean;
+    recording_enabled?: boolean;
   }) => void;
   existingInterview?: {
     id: string;
@@ -45,10 +49,6 @@ interface Goal {
   id: string;
   title: string;
   employee_id: string;
-  employee?: {
-    id: string;
-    full_name: string | null;
-  };
 }
 
 export function ScheduleGoalInterviewDialog({
@@ -74,6 +74,9 @@ export function ScheduleGoalInterviewDialog({
   const [location, setLocation] = useState(existingInterview?.location || "");
   const [meetingLink, setMeetingLink] = useState(existingInterview?.meeting_link || "");
   const [agenda, setAgenda] = useState(existingInterview?.agenda || "");
+  const [videoPlatform, setVideoPlatform] = useState("none");
+  const [screenSharing, setScreenSharing] = useState(false);
+  const [recordingEnabled, setRecordingEnabled] = useState(false);
 
   useEffect(() => {
     if (open && user) {
@@ -84,14 +87,17 @@ export function ScheduleGoalInterviewDialog({
   const fetchGoals = async () => {
     if (!user) return;
 
+    // @ts-ignore - Supabase type instantiation issue
     const { data, error } = await supabase
       .from("performance_goals")
-      .select("id, title, employee_id")
-      .eq("manager_id", user.id)
-      .in("status", ["in_progress", "draft"]);
+      .select("id, title, employee_id, status")
+      .eq("manager_id", user.id);
 
     if (!error && data) {
-      setGoals(data.map(g => ({ ...g, employee: undefined })) as Goal[]);
+      const filteredGoals = (data as any[]).filter((g) => 
+        g.status === "in_progress" || g.status === "draft"
+      );
+      setGoals(filteredGoals.map((g) => ({ id: g.id, title: g.title, employee_id: g.employee_id })));
     }
   };
 
@@ -119,6 +125,9 @@ export function ScheduleGoalInterviewDialog({
       meeting_link: meetingLink || undefined,
       meeting_type: meetingType,
       agenda: agenda || undefined,
+      video_platform: videoPlatform,
+      screen_sharing_enabled: screenSharing,
+      recording_enabled: recordingEnabled,
     });
 
     onOpenChange(false);
@@ -135,13 +144,14 @@ export function ScheduleGoalInterviewDialog({
     setLocation("");
     setMeetingLink("");
     setAgenda("");
+    setVideoPlatform("none");
+    setScreenSharing(false);
+    setRecordingEnabled(false);
   };
-
-  const selectedGoal = goals.find(g => g.id === selectedGoalId);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
             {existingInterview ? "Reschedule Goal Review" : "Schedule Goal Review Meeting"}
@@ -158,18 +168,12 @@ export function ScheduleGoalInterviewDialog({
               <SelectContent>
                 {goals.map((goal) => (
                   <SelectItem key={goal.id} value={goal.id}>
-                    {goal.title} - {goal.employee?.full_name}
+                    {goal.title}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
           </div>
-
-          {selectedGoal && (
-            <div className="text-sm text-muted-foreground">
-              Employee: {selectedGoal.employee?.full_name}
-            </div>
-          )}
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
@@ -240,6 +244,52 @@ export function ScheduleGoalInterviewDialog({
             </div>
           </div>
 
+          {meetingType === "video" && (
+            <>
+              <div className="space-y-2">
+                <Label>Video Platform</Label>
+                <Select value={videoPlatform} onValueChange={setVideoPlatform}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">Custom Link</SelectItem>
+                    <SelectItem value="zoom">Zoom</SelectItem>
+                    <SelectItem value="teams">Microsoft Teams</SelectItem>
+                    <SelectItem value="daily">Daily.co (Built-in)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {videoPlatform === "none" && (
+                <div className="space-y-2">
+                  <Label>Meeting Link</Label>
+                  <Input
+                    value={meetingLink}
+                    onChange={(e) => setMeetingLink(e.target.value)}
+                    placeholder="e.g., https://meet.google.com/..."
+                  />
+                </div>
+              )}
+
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label>Screen Sharing</Label>
+                  <p className="text-xs text-muted-foreground">Allow screen sharing during interview</p>
+                </div>
+                <Switch checked={screenSharing} onCheckedChange={setScreenSharing} />
+              </div>
+
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label>Recording</Label>
+                  <p className="text-xs text-muted-foreground">Record the interview session</p>
+                </div>
+                <Switch checked={recordingEnabled} onCheckedChange={setRecordingEnabled} />
+              </div>
+            </>
+          )}
+
           {meetingType === "in_person" && (
             <div className="space-y-2">
               <Label>Location</Label>
@@ -247,17 +297,6 @@ export function ScheduleGoalInterviewDialog({
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
                 placeholder="e.g., Conference Room A"
-              />
-            </div>
-          )}
-
-          {meetingType === "video" && (
-            <div className="space-y-2">
-              <Label>Meeting Link</Label>
-              <Input
-                value={meetingLink}
-                onChange={(e) => setMeetingLink(e.target.value)}
-                placeholder="e.g., https://meet.google.com/..."
               />
             </div>
           )}
