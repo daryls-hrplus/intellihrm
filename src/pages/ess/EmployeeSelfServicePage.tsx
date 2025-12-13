@@ -17,6 +17,7 @@ import {
   Rocket,
   UserMinus,
   Package,
+  Heart,
 } from "lucide-react";
 
 const essModules = [
@@ -117,6 +118,13 @@ const essModules = [
     href: "/ess/property",
     icon: Package,
     color: "bg-slate-500/10 text-slate-600",
+  },
+  {
+    title: "Employee Relations",
+    description: "Recognition, surveys, and workplace concerns",
+    href: "/ess/relations",
+    icon: Heart,
+    color: "bg-rose-500/10 text-rose-600",
   },
   {
     title: "Notifications",

@@ -289,7 +289,7 @@ export const useEmployeeRelations = (companyId?: string) => {
 
   // Create Case
   const createCase = useMutation({
-    mutationFn: async (caseData: { company_id: string; employee_id?: string; case_type?: string; category?: string; severity?: string; title: string; description?: string; reported_by?: string; target_resolution_date?: string }) => {
+    mutationFn: async (caseData: { company_id: string; employee_id?: string; case_type?: string; category?: string; severity?: string; title: string; description?: string; reported_by?: string; reported_date?: string; target_resolution_date?: string; is_confidential?: boolean; status?: string }) => {
       const caseNumber = `ER-${Date.now().toString(36).toUpperCase()}`;
       const { data, error } = await supabase
         .from("er_cases")

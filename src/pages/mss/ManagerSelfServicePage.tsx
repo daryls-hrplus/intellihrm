@@ -17,6 +17,7 @@ import {
   Rocket,
   UserMinus,
   Package,
+  Heart,
 } from "lucide-react";
 
 const mssModules = [
@@ -61,6 +62,13 @@ const mssModules = [
     href: "/mss/property",
     icon: Package,
     color: "bg-slate-500/10 text-slate-600",
+  },
+  {
+    title: "Team Relations",
+    description: "Recognize team members and view cases",
+    href: "/mss/relations",
+    icon: Heart,
+    color: "bg-rose-500/10 text-rose-600",
   },
   {
     title: "Team Leave Calendar",
