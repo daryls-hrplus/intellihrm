@@ -118,7 +118,7 @@ export default function MyDelegatesPage() {
       const { error } = await supabase.from("workflow_delegates").insert({
         delegator_id: user.id,
         delegate_id: formData.delegate_id,
-        category: formData.category || null,
+        category: formData.category ? formData.category : null,
         template_id: formData.template_id || null,
         start_date: formData.start_date,
         end_date: formData.end_date || null,
@@ -427,7 +427,6 @@ export default function MyDelegatesPage() {
                     <SelectValue placeholder="All categories" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All Categories</SelectItem>
                     {WORKFLOW_CATEGORIES.map((cat) => (
                       <SelectItem key={cat.value} value={cat.value}>
                         {cat.label}
