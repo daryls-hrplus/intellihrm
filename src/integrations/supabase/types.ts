@@ -9506,6 +9506,104 @@ export type Database = {
           },
         ]
       }
+      lms_badges: {
+        Row: {
+          badge_type: string
+          company_id: string | null
+          created_at: string
+          criteria: Json
+          description: string | null
+          icon_url: string | null
+          id: string
+          is_active: boolean
+          name: string
+          points: number
+          updated_at: string
+        }
+        Insert: {
+          badge_type?: string
+          company_id?: string | null
+          created_at?: string
+          criteria?: Json
+          description?: string | null
+          icon_url?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          points?: number
+          updated_at?: string
+        }
+        Update: {
+          badge_type?: string
+          company_id?: string | null
+          created_at?: string
+          criteria?: Json
+          description?: string | null
+          icon_url?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          points?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lms_badges_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lms_bookmarks: {
+        Row: {
+          created_at: string
+          id: string
+          lesson_id: string
+          notes: string | null
+          position_seconds: number | null
+          title: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          lesson_id: string
+          notes?: string | null
+          position_seconds?: number | null
+          title?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          lesson_id?: string
+          notes?: string | null
+          position_seconds?: number | null
+          title?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lms_bookmarks_lesson_id_fkey"
+            columns: ["lesson_id"]
+            isOneToOne: false
+            referencedRelation: "lms_lessons"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lms_bookmarks_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       lms_categories: {
         Row: {
           code: string
@@ -9596,6 +9694,105 @@ export type Database = {
           },
         ]
       }
+      lms_course_prerequisites: {
+        Row: {
+          course_id: string
+          created_at: string
+          id: string
+          is_mandatory: boolean
+          minimum_score: number | null
+          prerequisite_course_id: string
+        }
+        Insert: {
+          course_id: string
+          created_at?: string
+          id?: string
+          is_mandatory?: boolean
+          minimum_score?: number | null
+          prerequisite_course_id: string
+        }
+        Update: {
+          course_id?: string
+          created_at?: string
+          id?: string
+          is_mandatory?: boolean
+          minimum_score?: number | null
+          prerequisite_course_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lms_course_prerequisites_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "lms_courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lms_course_prerequisites_prerequisite_course_id_fkey"
+            columns: ["prerequisite_course_id"]
+            isOneToOne: false
+            referencedRelation: "lms_courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lms_course_reviews: {
+        Row: {
+          course_id: string
+          created_at: string
+          helpful_count: number
+          id: string
+          is_approved: boolean
+          is_verified_completion: boolean
+          rating: number
+          review_text: string | null
+          title: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          course_id: string
+          created_at?: string
+          helpful_count?: number
+          id?: string
+          is_approved?: boolean
+          is_verified_completion?: boolean
+          rating: number
+          review_text?: string | null
+          title?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          course_id?: string
+          created_at?: string
+          helpful_count?: number
+          id?: string
+          is_approved?: boolean
+          is_verified_completion?: boolean
+          rating?: number
+          review_text?: string | null
+          title?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lms_course_reviews_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "lms_courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lms_course_reviews_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       lms_courses: {
         Row: {
           category_id: string | null
@@ -9668,6 +9865,166 @@ export type Database = {
           },
         ]
       }
+      lms_discussion_forums: {
+        Row: {
+          course_id: string
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          is_active: boolean
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          course_id: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          course_id?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lms_discussion_forums_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "lms_courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lms_discussion_forums_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lms_discussion_replies: {
+        Row: {
+          content: string
+          created_at: string
+          created_by: string | null
+          id: string
+          is_solution: boolean
+          parent_reply_id: string | null
+          thread_id: string
+          updated_at: string
+          upvotes: number
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_solution?: boolean
+          parent_reply_id?: string | null
+          thread_id: string
+          updated_at?: string
+          upvotes?: number
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_solution?: boolean
+          parent_reply_id?: string | null
+          thread_id?: string
+          updated_at?: string
+          upvotes?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lms_discussion_replies_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lms_discussion_replies_parent_reply_id_fkey"
+            columns: ["parent_reply_id"]
+            isOneToOne: false
+            referencedRelation: "lms_discussion_replies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lms_discussion_replies_thread_id_fkey"
+            columns: ["thread_id"]
+            isOneToOne: false
+            referencedRelation: "lms_discussion_threads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lms_discussion_threads: {
+        Row: {
+          content: string
+          created_at: string
+          created_by: string | null
+          forum_id: string
+          id: string
+          is_locked: boolean
+          is_pinned: boolean
+          title: string
+          updated_at: string
+          view_count: number
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          created_by?: string | null
+          forum_id: string
+          id?: string
+          is_locked?: boolean
+          is_pinned?: boolean
+          title: string
+          updated_at?: string
+          view_count?: number
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          created_by?: string | null
+          forum_id?: string
+          id?: string
+          is_locked?: boolean
+          is_pinned?: boolean
+          title?: string
+          updated_at?: string
+          view_count?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lms_discussion_threads_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lms_discussion_threads_forum_id_fkey"
+            columns: ["forum_id"]
+            isOneToOne: false
+            referencedRelation: "lms_discussion_forums"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       lms_enrollments: {
         Row: {
           completed_at: string | null
@@ -9717,6 +10074,47 @@ export type Database = {
             columns: ["course_id"]
             isOneToOne: false
             referencedRelation: "lms_courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lms_leaderboards: {
+        Row: {
+          company_id: string | null
+          created_at: string
+          id: string
+          is_active: boolean
+          leaderboard_type: string
+          name: string
+          time_period: string
+          updated_at: string
+        }
+        Insert: {
+          company_id?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          leaderboard_type?: string
+          name: string
+          time_period?: string
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          leaderboard_type?: string
+          name?: string
+          time_period?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lms_leaderboards_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
             referencedColumns: ["id"]
           },
         ]
@@ -9875,6 +10273,102 @@ export type Database = {
             columns: ["course_id"]
             isOneToOne: false
             referencedRelation: "lms_courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lms_notes: {
+        Row: {
+          content: string
+          course_id: string | null
+          created_at: string
+          id: string
+          is_private: boolean
+          lesson_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          course_id?: string | null
+          created_at?: string
+          id?: string
+          is_private?: boolean
+          lesson_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          course_id?: string | null
+          created_at?: string
+          id?: string
+          is_private?: boolean
+          lesson_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lms_notes_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "lms_courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lms_notes_lesson_id_fkey"
+            columns: ["lesson_id"]
+            isOneToOne: false
+            referencedRelation: "lms_lessons"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lms_notes_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lms_point_transactions: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          points: number
+          reference_id: string | null
+          reference_type: string | null
+          transaction_type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          points: number
+          reference_id?: string | null
+          reference_type?: string | null
+          transaction_type: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          points?: number
+          reference_id?: string | null
+          reference_type?: string | null
+          transaction_type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lms_point_transactions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -10044,6 +10538,302 @@ export type Database = {
             columns: ["course_id"]
             isOneToOne: false
             referencedRelation: "lms_courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lms_review_helpful: {
+        Row: {
+          created_at: string
+          id: string
+          review_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          review_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          review_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lms_review_helpful_review_id_fkey"
+            columns: ["review_id"]
+            isOneToOne: false
+            referencedRelation: "lms_course_reviews"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lms_review_helpful_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lms_scorm_packages: {
+        Row: {
+          course_id: string
+          created_at: string
+          entry_point: string | null
+          id: string
+          is_active: boolean
+          manifest_data: Json | null
+          package_url: string
+          scorm_version: string
+          updated_at: string
+        }
+        Insert: {
+          course_id: string
+          created_at?: string
+          entry_point?: string | null
+          id?: string
+          is_active?: boolean
+          manifest_data?: Json | null
+          package_url: string
+          scorm_version?: string
+          updated_at?: string
+        }
+        Update: {
+          course_id?: string
+          created_at?: string
+          entry_point?: string | null
+          id?: string
+          is_active?: boolean
+          manifest_data?: Json | null
+          package_url?: string
+          scorm_version?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lms_scorm_packages_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "lms_courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lms_scorm_tracking: {
+        Row: {
+          cmi_data: Json | null
+          completion_status: string | null
+          created_at: string
+          id: string
+          lesson_status: string | null
+          location: string | null
+          package_id: string
+          sco_id: string | null
+          score_max: number | null
+          score_min: number | null
+          score_raw: number | null
+          score_scaled: number | null
+          session_time: string | null
+          success_status: string | null
+          suspend_data: string | null
+          total_time: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          cmi_data?: Json | null
+          completion_status?: string | null
+          created_at?: string
+          id?: string
+          lesson_status?: string | null
+          location?: string | null
+          package_id: string
+          sco_id?: string | null
+          score_max?: number | null
+          score_min?: number | null
+          score_raw?: number | null
+          score_scaled?: number | null
+          session_time?: string | null
+          success_status?: string | null
+          suspend_data?: string | null
+          total_time?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          cmi_data?: Json | null
+          completion_status?: string | null
+          created_at?: string
+          id?: string
+          lesson_status?: string | null
+          location?: string | null
+          package_id?: string
+          sco_id?: string | null
+          score_max?: number | null
+          score_min?: number | null
+          score_raw?: number | null
+          score_scaled?: number | null
+          session_time?: string | null
+          success_status?: string | null
+          suspend_data?: string | null
+          total_time?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lms_scorm_tracking_package_id_fkey"
+            columns: ["package_id"]
+            isOneToOne: false
+            referencedRelation: "lms_scorm_packages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lms_scorm_tracking_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lms_user_badges: {
+        Row: {
+          badge_id: string
+          course_id: string | null
+          earned_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          badge_id: string
+          course_id?: string | null
+          earned_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          badge_id?: string
+          course_id?: string | null
+          earned_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lms_user_badges_badge_id_fkey"
+            columns: ["badge_id"]
+            isOneToOne: false
+            referencedRelation: "lms_badges"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lms_user_badges_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "lms_courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lms_user_badges_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lms_user_points: {
+        Row: {
+          id: string
+          level: number
+          lifetime_points: number
+          points: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          level?: number
+          lifetime_points?: number
+          points?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          id?: string
+          level?: number
+          lifetime_points?: number
+          points?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lms_user_points_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lms_xapi_statements: {
+        Row: {
+          context: Json | null
+          course_id: string | null
+          id: string
+          object_id: string
+          object_type: string
+          result: Json | null
+          statement_id: string
+          stored_at: string
+          timestamp: string
+          user_id: string
+          verb: string
+        }
+        Insert: {
+          context?: Json | null
+          course_id?: string | null
+          id?: string
+          object_id: string
+          object_type: string
+          result?: Json | null
+          statement_id: string
+          stored_at?: string
+          timestamp?: string
+          user_id: string
+          verb: string
+        }
+        Update: {
+          context?: Json | null
+          course_id?: string | null
+          id?: string
+          object_id?: string
+          object_type?: string
+          result?: Json | null
+          statement_id?: string
+          stored_at?: string
+          timestamp?: string
+          user_id?: string
+          verb?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lms_xapi_statements_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "lms_courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lms_xapi_statements_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
