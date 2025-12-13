@@ -1573,6 +1573,185 @@ export type Database = {
           },
         ]
       }
+      bonus_awards: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          award_date: string
+          base_amount: number
+          bonus_type: string
+          company_id: string
+          created_at: string
+          created_by: string | null
+          currency: string
+          employee_id: string
+          final_amount: number
+          id: string
+          multiplier: number | null
+          paid_at: string | null
+          payment_date: string | null
+          performance_period_end: string | null
+          performance_period_start: string | null
+          plan_id: string | null
+          reason: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          award_date: string
+          base_amount: number
+          bonus_type: string
+          company_id: string
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          employee_id: string
+          final_amount: number
+          id?: string
+          multiplier?: number | null
+          paid_at?: string | null
+          payment_date?: string | null
+          performance_period_end?: string | null
+          performance_period_start?: string | null
+          plan_id?: string | null
+          reason?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          award_date?: string
+          base_amount?: number
+          bonus_type?: string
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          employee_id?: string
+          final_amount?: number
+          id?: string
+          multiplier?: number | null
+          paid_at?: string | null
+          payment_date?: string | null
+          performance_period_end?: string | null
+          performance_period_start?: string | null
+          plan_id?: string | null
+          reason?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bonus_awards_approved_by_fkey"
+            columns: ["approved_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bonus_awards_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bonus_awards_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bonus_awards_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bonus_awards_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "bonus_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      bonus_plans: {
+        Row: {
+          bonus_type: string
+          calculation_method: string
+          code: string
+          company_id: string
+          created_at: string
+          currency: string
+          description: string | null
+          eligibility_criteria: Json | null
+          end_date: string | null
+          fixed_amount: number | null
+          frequency: string
+          id: string
+          is_active: boolean
+          max_percentage: number | null
+          name: string
+          start_date: string
+          target_percentage: number | null
+          updated_at: string
+        }
+        Insert: {
+          bonus_type: string
+          calculation_method?: string
+          code: string
+          company_id: string
+          created_at?: string
+          currency?: string
+          description?: string | null
+          eligibility_criteria?: Json | null
+          end_date?: string | null
+          fixed_amount?: number | null
+          frequency?: string
+          id?: string
+          is_active?: boolean
+          max_percentage?: number | null
+          name: string
+          start_date?: string
+          target_percentage?: number | null
+          updated_at?: string
+        }
+        Update: {
+          bonus_type?: string
+          calculation_method?: string
+          code?: string
+          company_id?: string
+          created_at?: string
+          currency?: string
+          description?: string | null
+          eligibility_criteria?: Json | null
+          end_date?: string | null
+          fixed_amount?: number | null
+          frequency?: string
+          id?: string
+          is_active?: boolean
+          max_percentage?: number | null
+          name?: string
+          start_date?: string
+          target_percentage?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bonus_plans_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       candidate_assessments: {
         Row: {
           assessment_type: string
@@ -2180,6 +2359,76 @@ export type Database = {
           },
         ]
       }
+      compa_ratio_snapshots: {
+        Row: {
+          compa_ratio: number | null
+          company_id: string
+          created_at: string
+          current_salary: number
+          employee_id: string
+          grade_max: number | null
+          grade_midpoint: number | null
+          grade_min: number | null
+          id: string
+          market_ratio: number | null
+          range_penetration: number | null
+          salary_grade_id: string | null
+          snapshot_date: string
+        }
+        Insert: {
+          compa_ratio?: number | null
+          company_id: string
+          created_at?: string
+          current_salary: number
+          employee_id: string
+          grade_max?: number | null
+          grade_midpoint?: number | null
+          grade_min?: number | null
+          id?: string
+          market_ratio?: number | null
+          range_penetration?: number | null
+          salary_grade_id?: string | null
+          snapshot_date: string
+        }
+        Update: {
+          compa_ratio?: number | null
+          company_id?: string
+          created_at?: string
+          current_salary?: number
+          employee_id?: string
+          grade_max?: number | null
+          grade_midpoint?: number | null
+          grade_min?: number | null
+          id?: string
+          market_ratio?: number | null
+          range_penetration?: number | null
+          salary_grade_id?: string | null
+          snapshot_date?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "compa_ratio_snapshots_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "compa_ratio_snapshots_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "compa_ratio_snapshots_salary_grade_id_fkey"
+            columns: ["salary_grade_id"]
+            isOneToOne: false
+            referencedRelation: "salary_grades"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       companies: {
         Row: {
           address: string | null
@@ -2402,6 +2651,328 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      compensation_budgets: {
+        Row: {
+          allocated_amount: number | null
+          approved_at: string | null
+          approved_by: string | null
+          budget_type: string
+          company_id: string
+          created_at: string
+          currency: string
+          department_id: string | null
+          fiscal_year: number
+          id: string
+          notes: string | null
+          planned_amount: number
+          spent_amount: number | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          allocated_amount?: number | null
+          approved_at?: string | null
+          approved_by?: string | null
+          budget_type: string
+          company_id: string
+          created_at?: string
+          currency?: string
+          department_id?: string | null
+          fiscal_year: number
+          id?: string
+          notes?: string | null
+          planned_amount: number
+          spent_amount?: number | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          allocated_amount?: number | null
+          approved_at?: string | null
+          approved_by?: string | null
+          budget_type?: string
+          company_id?: string
+          created_at?: string
+          currency?: string
+          department_id?: string | null
+          fiscal_year?: number
+          id?: string
+          notes?: string | null
+          planned_amount?: number
+          spent_amount?: number | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "compensation_budgets_approved_by_fkey"
+            columns: ["approved_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "compensation_budgets_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "compensation_budgets_department_id_fkey"
+            columns: ["department_id"]
+            isOneToOne: false
+            referencedRelation: "departments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      compensation_history: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          change_amount: number | null
+          change_percentage: number | null
+          change_type: string
+          company_id: string
+          created_at: string
+          created_by: string | null
+          currency: string
+          effective_date: string
+          employee_id: string
+          id: string
+          new_salary: number
+          notes: string | null
+          previous_salary: number | null
+          reason: string | null
+          updated_at: string
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          change_amount?: number | null
+          change_percentage?: number | null
+          change_type: string
+          company_id: string
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          effective_date: string
+          employee_id: string
+          id?: string
+          new_salary: number
+          notes?: string | null
+          previous_salary?: number | null
+          reason?: string | null
+          updated_at?: string
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          change_amount?: number | null
+          change_percentage?: number | null
+          change_type?: string
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          effective_date?: string
+          employee_id?: string
+          id?: string
+          new_salary?: number
+          notes?: string | null
+          previous_salary?: number | null
+          reason?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "compensation_history_approved_by_fkey"
+            columns: ["approved_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "compensation_history_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "compensation_history_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "compensation_history_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      compensation_review_cycles: {
+        Row: {
+          company_id: string
+          created_at: string
+          created_by: string | null
+          effective_date: string
+          end_date: string
+          guidelines: string | null
+          id: string
+          includes_bonus: boolean | null
+          includes_equity: boolean | null
+          includes_merit: boolean | null
+          name: string
+          review_year: number
+          start_date: string
+          status: string
+          total_budget: number | null
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          created_by?: string | null
+          effective_date: string
+          end_date: string
+          guidelines?: string | null
+          id?: string
+          includes_bonus?: boolean | null
+          includes_equity?: boolean | null
+          includes_merit?: boolean | null
+          name: string
+          review_year: number
+          start_date: string
+          status?: string
+          total_budget?: number | null
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          effective_date?: string
+          end_date?: string
+          guidelines?: string | null
+          id?: string
+          includes_bonus?: boolean | null
+          includes_equity?: boolean | null
+          includes_merit?: boolean | null
+          name?: string
+          review_year?: number
+          start_date?: string
+          status?: string
+          total_budget?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "compensation_review_cycles_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "compensation_review_cycles_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      compensation_review_participants: {
+        Row: {
+          approved_at: string | null
+          created_at: string
+          current_base_salary: number | null
+          current_bonus_target: number | null
+          cycle_id: string
+          employee_id: string
+          equity_recommendation: Json | null
+          hr_comments: string | null
+          id: string
+          manager_comments: string | null
+          proposed_base_salary: number | null
+          proposed_bonus_target: number | null
+          reviewer_id: string | null
+          status: string
+          submitted_at: string | null
+          total_increase_amount: number | null
+          total_increase_pct: number | null
+          updated_at: string
+        }
+        Insert: {
+          approved_at?: string | null
+          created_at?: string
+          current_base_salary?: number | null
+          current_bonus_target?: number | null
+          cycle_id: string
+          employee_id: string
+          equity_recommendation?: Json | null
+          hr_comments?: string | null
+          id?: string
+          manager_comments?: string | null
+          proposed_base_salary?: number | null
+          proposed_bonus_target?: number | null
+          reviewer_id?: string | null
+          status?: string
+          submitted_at?: string | null
+          total_increase_amount?: number | null
+          total_increase_pct?: number | null
+          updated_at?: string
+        }
+        Update: {
+          approved_at?: string | null
+          created_at?: string
+          current_base_salary?: number | null
+          current_bonus_target?: number | null
+          cycle_id?: string
+          employee_id?: string
+          equity_recommendation?: Json | null
+          hr_comments?: string | null
+          id?: string
+          manager_comments?: string | null
+          proposed_base_salary?: number | null
+          proposed_bonus_target?: number | null
+          reviewer_id?: string | null
+          status?: string
+          submitted_at?: string | null
+          total_increase_amount?: number | null
+          total_increase_pct?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "compensation_review_participants_cycle_id_fkey"
+            columns: ["cycle_id"]
+            isOneToOne: false
+            referencedRelation: "compensation_review_cycles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "compensation_review_participants_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "compensation_review_participants_reviewer_id_fkey"
+            columns: ["reviewer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       competencies: {
         Row: {
@@ -4700,6 +5271,212 @@ export type Database = {
             columns: ["employee_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      equity_grants: {
+        Row: {
+          approved_by: string | null
+          created_at: string
+          current_value: number | null
+          employee_id: string
+          expiration_date: string | null
+          grant_date: string
+          grant_price: number | null
+          grant_type: string
+          id: string
+          notes: string | null
+          plan_id: string
+          shares_exercised: number | null
+          shares_forfeited: number | null
+          shares_granted: number
+          shares_vested: number | null
+          status: string
+          updated_at: string
+          vesting_end_date: string | null
+          vesting_schedule: Json | null
+          vesting_start_date: string
+        }
+        Insert: {
+          approved_by?: string | null
+          created_at?: string
+          current_value?: number | null
+          employee_id: string
+          expiration_date?: string | null
+          grant_date: string
+          grant_price?: number | null
+          grant_type: string
+          id?: string
+          notes?: string | null
+          plan_id: string
+          shares_exercised?: number | null
+          shares_forfeited?: number | null
+          shares_granted: number
+          shares_vested?: number | null
+          status?: string
+          updated_at?: string
+          vesting_end_date?: string | null
+          vesting_schedule?: Json | null
+          vesting_start_date: string
+        }
+        Update: {
+          approved_by?: string | null
+          created_at?: string
+          current_value?: number | null
+          employee_id?: string
+          expiration_date?: string | null
+          grant_date?: string
+          grant_price?: number | null
+          grant_type?: string
+          id?: string
+          notes?: string | null
+          plan_id?: string
+          shares_exercised?: number | null
+          shares_forfeited?: number | null
+          shares_granted?: number
+          shares_vested?: number | null
+          status?: string
+          updated_at?: string
+          vesting_end_date?: string | null
+          vesting_schedule?: Json | null
+          vesting_start_date?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "equity_grants_approved_by_fkey"
+            columns: ["approved_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "equity_grants_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "equity_grants_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "equity_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      equity_plans: {
+        Row: {
+          company_id: string
+          created_at: string
+          currency: string
+          current_price: number | null
+          description: string | null
+          end_date: string | null
+          grant_price: number | null
+          id: string
+          is_active: boolean
+          name: string
+          plan_type: string
+          shares_available: number | null
+          start_date: string
+          total_shares_authorized: number | null
+          updated_at: string
+          vesting_schedule: Json | null
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          currency?: string
+          current_price?: number | null
+          description?: string | null
+          end_date?: string | null
+          grant_price?: number | null
+          id?: string
+          is_active?: boolean
+          name: string
+          plan_type: string
+          shares_available?: number | null
+          start_date: string
+          total_shares_authorized?: number | null
+          updated_at?: string
+          vesting_schedule?: Json | null
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          currency?: string
+          current_price?: number | null
+          description?: string | null
+          end_date?: string | null
+          grant_price?: number | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          plan_type?: string
+          shares_available?: number | null
+          start_date?: string
+          total_shares_authorized?: number | null
+          updated_at?: string
+          vesting_schedule?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "equity_plans_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      equity_transactions: {
+        Row: {
+          created_at: string
+          grant_id: string
+          id: string
+          net_proceeds: number | null
+          notes: string | null
+          price_per_share: number | null
+          shares: number
+          tax_withheld: number | null
+          total_value: number | null
+          transaction_date: string
+          transaction_type: string
+        }
+        Insert: {
+          created_at?: string
+          grant_id: string
+          id?: string
+          net_proceeds?: number | null
+          notes?: string | null
+          price_per_share?: number | null
+          shares: number
+          tax_withheld?: number | null
+          total_value?: number | null
+          transaction_date: string
+          transaction_type: string
+        }
+        Update: {
+          created_at?: string
+          grant_id?: string
+          id?: string
+          net_proceeds?: number | null
+          notes?: string | null
+          price_per_share?: number | null
+          shares?: number
+          tax_withheld?: number | null
+          total_value?: number | null
+          transaction_date?: string
+          transaction_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "equity_transactions_grant_id_fkey"
+            columns: ["grant_id"]
+            isOneToOne: false
+            referencedRelation: "equity_grants"
             referencedColumns: ["id"]
           },
         ]
@@ -10886,6 +11663,135 @@ export type Database = {
         }
         Relationships: []
       }
+      market_data_rates: {
+        Row: {
+          average_salary: number | null
+          created_at: string
+          currency: string
+          id: string
+          job_family_id: string | null
+          job_id: string | null
+          job_title: string | null
+          location: string | null
+          percentile_10: number | null
+          percentile_25: number | null
+          percentile_50: number | null
+          percentile_75: number | null
+          percentile_90: number | null
+          sample_size: number | null
+          source_id: string
+          updated_at: string
+        }
+        Insert: {
+          average_salary?: number | null
+          created_at?: string
+          currency?: string
+          id?: string
+          job_family_id?: string | null
+          job_id?: string | null
+          job_title?: string | null
+          location?: string | null
+          percentile_10?: number | null
+          percentile_25?: number | null
+          percentile_50?: number | null
+          percentile_75?: number | null
+          percentile_90?: number | null
+          sample_size?: number | null
+          source_id: string
+          updated_at?: string
+        }
+        Update: {
+          average_salary?: number | null
+          created_at?: string
+          currency?: string
+          id?: string
+          job_family_id?: string | null
+          job_id?: string | null
+          job_title?: string | null
+          location?: string | null
+          percentile_10?: number | null
+          percentile_25?: number | null
+          percentile_50?: number | null
+          percentile_75?: number | null
+          percentile_90?: number | null
+          sample_size?: number | null
+          source_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "market_data_rates_job_family_id_fkey"
+            columns: ["job_family_id"]
+            isOneToOne: false
+            referencedRelation: "job_families"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "market_data_rates_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "market_data_rates_source_id_fkey"
+            columns: ["source_id"]
+            isOneToOne: false
+            referencedRelation: "market_data_sources"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      market_data_sources: {
+        Row: {
+          company_id: string | null
+          created_at: string
+          effective_date: string
+          expiration_date: string | null
+          id: string
+          is_active: boolean
+          name: string
+          notes: string | null
+          provider: string | null
+          survey_year: number
+          updated_at: string
+        }
+        Insert: {
+          company_id?: string | null
+          created_at?: string
+          effective_date: string
+          expiration_date?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          notes?: string | null
+          provider?: string | null
+          survey_year: number
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string | null
+          created_at?: string
+          effective_date?: string
+          expiration_date?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          notes?: string | null
+          provider?: string | null
+          survey_year?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "market_data_sources_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       mentorship_pairings: {
         Row: {
           created_at: string
@@ -11050,6 +11956,215 @@ export type Database = {
             columns: ["pairing_id"]
             isOneToOne: false
             referencedRelation: "mentorship_pairings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      merit_allocations: {
+        Row: {
+          allocated_amount: number | null
+          avg_increase_percentage: number | null
+          budget_amount: number
+          created_at: string
+          cycle_id: string
+          department_id: string | null
+          headcount: number | null
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          allocated_amount?: number | null
+          avg_increase_percentage?: number | null
+          budget_amount: number
+          created_at?: string
+          cycle_id: string
+          department_id?: string | null
+          headcount?: number | null
+          id?: string
+          updated_at?: string
+        }
+        Update: {
+          allocated_amount?: number | null
+          avg_increase_percentage?: number | null
+          budget_amount?: number
+          created_at?: string
+          cycle_id?: string
+          department_id?: string | null
+          headcount?: number | null
+          id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "merit_allocations_cycle_id_fkey"
+            columns: ["cycle_id"]
+            isOneToOne: false
+            referencedRelation: "merit_cycles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "merit_allocations_department_id_fkey"
+            columns: ["department_id"]
+            isOneToOne: false
+            referencedRelation: "departments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      merit_cycles: {
+        Row: {
+          allocated_budget: number | null
+          company_id: string
+          created_at: string
+          created_by: string | null
+          currency: string
+          description: string | null
+          effective_date: string
+          end_date: string
+          fiscal_year: number
+          guidelines: Json | null
+          id: string
+          name: string
+          start_date: string
+          status: string
+          total_budget: number | null
+          updated_at: string
+        }
+        Insert: {
+          allocated_budget?: number | null
+          company_id: string
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          description?: string | null
+          effective_date: string
+          end_date: string
+          fiscal_year: number
+          guidelines?: Json | null
+          id?: string
+          name: string
+          start_date: string
+          status?: string
+          total_budget?: number | null
+          updated_at?: string
+        }
+        Update: {
+          allocated_budget?: number | null
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          description?: string | null
+          effective_date?: string
+          end_date?: string
+          fiscal_year?: number
+          guidelines?: Json | null
+          id?: string
+          name?: string
+          start_date?: string
+          status?: string
+          total_budget?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "merit_cycles_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "merit_cycles_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      merit_recommendations: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          compa_ratio: number | null
+          created_at: string
+          current_salary: number
+          cycle_id: string
+          employee_id: string
+          id: string
+          justification: string | null
+          manager_id: string | null
+          new_salary: number | null
+          performance_rating: number | null
+          recommended_increase_amt: number | null
+          recommended_increase_pct: number | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          compa_ratio?: number | null
+          created_at?: string
+          current_salary: number
+          cycle_id: string
+          employee_id: string
+          id?: string
+          justification?: string | null
+          manager_id?: string | null
+          new_salary?: number | null
+          performance_rating?: number | null
+          recommended_increase_amt?: number | null
+          recommended_increase_pct?: number | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          compa_ratio?: number | null
+          created_at?: string
+          current_salary?: number
+          cycle_id?: string
+          employee_id?: string
+          id?: string
+          justification?: string | null
+          manager_id?: string | null
+          new_salary?: number | null
+          performance_rating?: number | null
+          recommended_increase_amt?: number | null
+          recommended_increase_pct?: number | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "merit_recommendations_approved_by_fkey"
+            columns: ["approved_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "merit_recommendations_cycle_id_fkey"
+            columns: ["cycle_id"]
+            isOneToOne: false
+            referencedRelation: "merit_cycles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "merit_recommendations_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "merit_recommendations_manager_id_fkey"
+            columns: ["manager_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -12028,6 +13143,135 @@ export type Database = {
             columns: ["proration_method_id"]
             isOneToOne: false
             referencedRelation: "lookup_values"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pay_equity_analyses: {
+        Row: {
+          analysis_date: string
+          analysis_type: string
+          company_id: string
+          created_at: string
+          created_by: string | null
+          findings: Json | null
+          id: string
+          methodology: string | null
+          name: string
+          recommendations: Json | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          analysis_date: string
+          analysis_type: string
+          company_id: string
+          created_at?: string
+          created_by?: string | null
+          findings?: Json | null
+          id?: string
+          methodology?: string | null
+          name: string
+          recommendations?: Json | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          analysis_date?: string
+          analysis_type?: string
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          findings?: Json | null
+          id?: string
+          methodology?: string | null
+          name?: string
+          recommendations?: Json | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pay_equity_analyses_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pay_equity_analyses_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pay_equity_analyses_reviewed_by_fkey"
+            columns: ["reviewed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pay_equity_results: {
+        Row: {
+          adjusted_pay_gap: number | null
+          analysis_id: string
+          avg_salary: number | null
+          comparison_group: string | null
+          created_at: string
+          employee_count: number | null
+          group_category: string
+          group_value: string
+          id: string
+          median_salary: number | null
+          pay_gap_percentage: number | null
+          risk_level: string | null
+          statistical_significance: boolean | null
+        }
+        Insert: {
+          adjusted_pay_gap?: number | null
+          analysis_id: string
+          avg_salary?: number | null
+          comparison_group?: string | null
+          created_at?: string
+          employee_count?: number | null
+          group_category: string
+          group_value: string
+          id?: string
+          median_salary?: number | null
+          pay_gap_percentage?: number | null
+          risk_level?: string | null
+          statistical_significance?: boolean | null
+        }
+        Update: {
+          adjusted_pay_gap?: number | null
+          analysis_id?: string
+          avg_salary?: number | null
+          comparison_group?: string | null
+          created_at?: string
+          employee_count?: number | null
+          group_category?: string
+          group_value?: string
+          id?: string
+          median_salary?: number | null
+          pay_gap_percentage?: number | null
+          risk_level?: string | null
+          statistical_significance?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pay_equity_results_analysis_id_fkey"
+            columns: ["analysis_id"]
+            isOneToOne: false
+            referencedRelation: "pay_equity_analyses"
             referencedColumns: ["id"]
           },
         ]
@@ -15231,6 +16475,87 @@ export type Database = {
           {
             foreignKeyName: "tickets_requester_id_fkey"
             columns: ["requester_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      total_rewards_statements: {
+        Row: {
+          base_salary: number | null
+          benefits_value: number | null
+          bonus_earned: number | null
+          breakdown: Json | null
+          company_id: string
+          created_at: string
+          currency: string
+          employee_id: string
+          equity_value: number | null
+          id: string
+          is_published: boolean
+          other_compensation: number | null
+          published_at: string | null
+          retirement_contribution: number | null
+          statement_date: string
+          statement_year: number
+          total_compensation: number | null
+          updated_at: string
+          viewed_at: string | null
+        }
+        Insert: {
+          base_salary?: number | null
+          benefits_value?: number | null
+          bonus_earned?: number | null
+          breakdown?: Json | null
+          company_id: string
+          created_at?: string
+          currency?: string
+          employee_id: string
+          equity_value?: number | null
+          id?: string
+          is_published?: boolean
+          other_compensation?: number | null
+          published_at?: string | null
+          retirement_contribution?: number | null
+          statement_date: string
+          statement_year: number
+          total_compensation?: number | null
+          updated_at?: string
+          viewed_at?: string | null
+        }
+        Update: {
+          base_salary?: number | null
+          benefits_value?: number | null
+          bonus_earned?: number | null
+          breakdown?: Json | null
+          company_id?: string
+          created_at?: string
+          currency?: string
+          employee_id?: string
+          equity_value?: number | null
+          id?: string
+          is_published?: boolean
+          other_compensation?: number | null
+          published_at?: string | null
+          retirement_contribution?: number | null
+          statement_date?: string
+          statement_year?: number
+          total_compensation?: number | null
+          updated_at?: string
+          viewed_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "total_rewards_statements_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "total_rewards_statements_employee_id_fkey"
+            columns: ["employee_id"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
