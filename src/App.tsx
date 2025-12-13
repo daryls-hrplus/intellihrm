@@ -168,6 +168,8 @@ import MssLeavePage from "./pages/mss/MssLeavePage";
 import MssBenefitsPage from "./pages/mss/MssBenefitsPage";
 import MssHSEPage from "./pages/mss/MssHSEPage";
 import MssRecruitmentPage from "./pages/mss/MssRecruitmentPage";
+import MyDevelopmentPlanPage from "./pages/ess/MyDevelopmentPlanPage";
+import MssDevelopmentPlansPage from "./pages/mss/MssDevelopmentPlansPage";
 
 // Workflow pages
 import AdminWorkflowTemplatesPage from "./pages/admin/AdminWorkflowTemplatesPage";
@@ -299,6 +301,14 @@ const App = () => (
                 </ProtectedRoute>
               }
             />
+            <Route
+              path="/ess/development"
+              element={
+                <ProtectedRoute moduleCode="ess">
+                  <MyDevelopmentPlanPage />
+                </ProtectedRoute>
+              }
+            />
             {/* Manager Self Service Routes */}
             <Route
               path="/mss"
@@ -393,6 +403,14 @@ const App = () => (
               element={
                 <ProtectedRoute moduleCode="mss">
                   <MssRecruitmentPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/mss/development"
+              element={
+                <ProtectedRoute moduleCode="mss">
+                  <MssDevelopmentPlansPage />
                 </ProtectedRoute>
               }
             />
