@@ -1,9 +1,10 @@
+import { Link } from "react-router-dom";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { BarChart3, DollarSign, TrendingUp, Users, Award, Target } from "lucide-react";
+import { BarChart3, DollarSign, TrendingUp, Users, Award, Target, ChevronRight, Building2 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useState } from "react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line } from "recharts";
@@ -12,39 +13,64 @@ const COLORS = ["hsl(var(--primary))", "hsl(var(--chart-2))", "hsl(var(--chart-3
 
 export default function CompensationAnalyticsPage() {
   const [yearFilter, setYearFilter] = useState(new Date().getFullYear().toString());
+  const [companyFilter, setCompanyFilter] = useState<string>("all");
 
-  const { data: history = [], isLoading: historyLoading } = useQuery({
-    queryKey: ["comp-analytics-history"],
+  const { data: companies = [] } = useQuery({
+    queryKey: ["companies-filter"],
     queryFn: async () => {
       const { data, error } = await supabase
+        .from("companies")
+        .select("id, name")
+        .order("name");
+      if (error) throw error;
+      return data || [];
+    },
+  });
+
+  const { data: history = [], isLoading: historyLoading } = useQuery({
+    queryKey: ["comp-analytics-history", companyFilter],
+    queryFn: async () => {
+      let query = supabase
         .from("compensation_history")
         .select("*")
         .order("effective_date", { ascending: true });
+      if (companyFilter !== "all") {
+        query = query.eq("company_id", companyFilter);
+      }
+      const { data, error } = await query;
       if (error) throw error;
       return data || [];
     },
   });
 
   const { data: bonusAwards = [], isLoading: bonusLoading } = useQuery({
-    queryKey: ["comp-analytics-bonus"],
+    queryKey: ["comp-analytics-bonus", companyFilter],
     queryFn: async () => {
-      const { data, error } = await supabase
+      let query = supabase
         .from("bonus_awards")
         .select("*")
         .eq("status", "paid");
+      if (companyFilter !== "all") {
+        query = query.eq("company_id", companyFilter);
+      }
+      const { data, error } = await query;
       if (error) throw error;
       return data || [];
     },
   });
 
   const { data: compaRatios = [], isLoading: compaLoading } = useQuery({
-    queryKey: ["comp-analytics-compa"],
+    queryKey: ["comp-analytics-compa", companyFilter],
     queryFn: async () => {
-      const { data, error } = await supabase
+      let query = supabase
         .from("compa_ratio_snapshots")
         .select("*")
         .order("snapshot_date", { ascending: false })
         .limit(100);
+      if (companyFilter !== "all") {
+        query = query.eq("company_id", companyFilter);
+      }
+      const { data, error } = await query;
       if (error) throw error;
       return data || [];
     },
@@ -91,6 +117,13 @@ export default function CompensationAnalyticsPage() {
   return (
     <AppLayout>
       <div className="space-y-6">
+        {/* Breadcrumbs */}
+        <nav className="flex items-center gap-2 text-sm text-muted-foreground">
+          <Link to="/compensation" className="hover:text-foreground transition-colors">Compensation</Link>
+          <ChevronRight className="h-4 w-4" />
+          <span className="text-foreground font-medium">Compensation Analytics</span>
+        </nav>
+
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
@@ -101,16 +134,30 @@ export default function CompensationAnalyticsPage() {
               <p className="text-muted-foreground">Insights and trends across compensation</p>
             </div>
           </div>
-          <Select value={yearFilter} onValueChange={setYearFilter}>
-            <SelectTrigger className="w-[120px]">
-              <SelectValue placeholder="Year" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="2025">2025</SelectItem>
-              <SelectItem value="2024">2024</SelectItem>
-              <SelectItem value="2023">2023</SelectItem>
-            </SelectContent>
-          </Select>
+          <div className="flex items-center gap-3">
+            <Select value={companyFilter} onValueChange={setCompanyFilter}>
+              <SelectTrigger className="w-[200px]">
+                <Building2 className="mr-2 h-4 w-4" />
+                <SelectValue placeholder="All Companies" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Companies</SelectItem>
+                {companies.map((company: any) => (
+                  <SelectItem key={company.id} value={company.id}>{company.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select value={yearFilter} onValueChange={setYearFilter}>
+              <SelectTrigger className="w-[120px]">
+                <SelectValue placeholder="Year" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="2025">2025</SelectItem>
+                <SelectItem value="2024">2024</SelectItem>
+                <SelectItem value="2023">2023</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </div>
 
         {/* KPI Cards */}

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -6,25 +7,43 @@ import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
-import { Target, RefreshCw, Search, TrendingUp, TrendingDown, Minus } from "lucide-react";
+import { Target, RefreshCw, Search, TrendingUp, TrendingDown, Minus, ChevronRight, Building2 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export default function CompaRatioPage() {
   const [searchTerm, setSearchTerm] = useState("");
+  const [companyFilter, setCompanyFilter] = useState<string>("all");
 
-  const { data: snapshots = [], isLoading } = useQuery({
-    queryKey: ["compa-ratio-snapshots"],
+  const { data: companies = [] } = useQuery({
+    queryKey: ["companies-filter"],
     queryFn: async () => {
       const { data, error } = await supabase
+        .from("companies")
+        .select("id, name")
+        .order("name");
+      if (error) throw error;
+      return data || [];
+    },
+  });
+
+  const { data: snapshots = [], isLoading } = useQuery({
+    queryKey: ["compa-ratio-snapshots", companyFilter],
+    queryFn: async () => {
+      let query = supabase
         .from("compa_ratio_snapshots")
         .select(`
           *,
           employee:profiles!compa_ratio_snapshots_employee_id_fkey(full_name)
         `)
         .order("snapshot_date", { ascending: false });
+      if (companyFilter !== "all") {
+        query = query.eq("company_id", companyFilter);
+      }
+      const { data, error } = await query;
       if (error) throw error;
       return data || [];
     },
@@ -60,6 +79,13 @@ export default function CompaRatioPage() {
   return (
     <AppLayout>
       <div className="space-y-6">
+        {/* Breadcrumbs */}
+        <nav className="flex items-center gap-2 text-sm text-muted-foreground">
+          <Link to="/compensation" className="hover:text-foreground transition-colors">Compensation</Link>
+          <ChevronRight className="h-4 w-4" />
+          <span className="text-foreground font-medium">Compa-Ratio Analysis</span>
+        </nav>
+
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
@@ -70,10 +96,24 @@ export default function CompaRatioPage() {
               <p className="text-muted-foreground">Compare employee pay to grade midpoints</p>
             </div>
           </div>
-          <Button>
-            <RefreshCw className="mr-2 h-4 w-4" />
-            Recalculate All
-          </Button>
+          <div className="flex items-center gap-3">
+            <Select value={companyFilter} onValueChange={setCompanyFilter}>
+              <SelectTrigger className="w-[200px]">
+                <Building2 className="mr-2 h-4 w-4" />
+                <SelectValue placeholder="All Companies" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Companies</SelectItem>
+                {companies.map((company: any) => (
+                  <SelectItem key={company.id} value={company.id}>{company.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Button>
+              <RefreshCw className="mr-2 h-4 w-4" />
+              Recalculate All
+            </Button>
+          </div>
         </div>
 
         {/* Summary Cards */}
