@@ -27,7 +27,22 @@ import {
   MapPin,
   DollarSign,
   Calendar,
+  ClipboardList,
+  UserPlus,
+  Award,
+  Mail,
+  FlaskConical,
+  UsersRound,
+  TrendingUp,
 } from "lucide-react";
+import { InterviewScorecardsTab } from "@/components/recruitment/InterviewScorecardsTab";
+import { CandidatePipelineTab } from "@/components/recruitment/CandidatePipelineTab";
+import { ReferralProgramTab } from "@/components/recruitment/ReferralProgramTab";
+import { OfferManagementTab } from "@/components/recruitment/OfferManagementTab";
+import { EmailTemplatesTab } from "@/components/recruitment/EmailTemplatesTab";
+import { AssessmentsTab } from "@/components/recruitment/AssessmentsTab";
+import { InterviewPanelsTab } from "@/components/recruitment/InterviewPanelsTab";
+import { SourceEffectivenessTab } from "@/components/recruitment/SourceEffectivenessTab";
 import { useRecruitment } from "@/hooks/useRecruitment";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -363,10 +378,10 @@ export default function RecruitmentFullPage() {
         </div>
 
         <Tabs defaultValue="requisitions" className="space-y-4">
-          <TabsList>
+          <TabsList className="flex-wrap h-auto gap-1">
             <TabsTrigger value="requisitions">
               <Briefcase className="mr-2 h-4 w-4" />
-              Job Requisitions
+              Requisitions
             </TabsTrigger>
             <TabsTrigger value="candidates">
               <Users className="mr-2 h-4 w-4" />
@@ -375,6 +390,38 @@ export default function RecruitmentFullPage() {
             <TabsTrigger value="applications">
               <FileText className="mr-2 h-4 w-4" />
               Applications
+            </TabsTrigger>
+            <TabsTrigger value="pipeline">
+              <TrendingUp className="mr-2 h-4 w-4" />
+              Pipeline
+            </TabsTrigger>
+            <TabsTrigger value="scorecards">
+              <ClipboardList className="mr-2 h-4 w-4" />
+              Scorecards
+            </TabsTrigger>
+            <TabsTrigger value="offers">
+              <Award className="mr-2 h-4 w-4" />
+              Offers
+            </TabsTrigger>
+            <TabsTrigger value="referrals">
+              <UserPlus className="mr-2 h-4 w-4" />
+              Referrals
+            </TabsTrigger>
+            <TabsTrigger value="assessments">
+              <FlaskConical className="mr-2 h-4 w-4" />
+              Assessments
+            </TabsTrigger>
+            <TabsTrigger value="panels">
+              <UsersRound className="mr-2 h-4 w-4" />
+              Panels
+            </TabsTrigger>
+            <TabsTrigger value="emails">
+              <Mail className="mr-2 h-4 w-4" />
+              Templates
+            </TabsTrigger>
+            <TabsTrigger value="sources">
+              <TrendingUp className="mr-2 h-4 w-4" />
+              Sources
             </TabsTrigger>
             <TabsTrigger value="job-boards">
               <Settings className="mr-2 h-4 w-4" />
@@ -911,6 +958,46 @@ export default function RecruitmentFullPage() {
                 </Table>
               </Card>
             )}
+          </TabsContent>
+
+          {/* Pipeline Tab */}
+          <TabsContent value="pipeline" className="space-y-4">
+            <CandidatePipelineTab companyId={companyId} />
+          </TabsContent>
+
+          {/* Scorecards Tab */}
+          <TabsContent value="scorecards" className="space-y-4">
+            <InterviewScorecardsTab companyId={companyId} />
+          </TabsContent>
+
+          {/* Offers Tab */}
+          <TabsContent value="offers" className="space-y-4">
+            <OfferManagementTab companyId={companyId} />
+          </TabsContent>
+
+          {/* Referrals Tab */}
+          <TabsContent value="referrals" className="space-y-4">
+            <ReferralProgramTab companyId={companyId} />
+          </TabsContent>
+
+          {/* Assessments Tab */}
+          <TabsContent value="assessments" className="space-y-4">
+            <AssessmentsTab companyId={companyId} />
+          </TabsContent>
+
+          {/* Panels Tab */}
+          <TabsContent value="panels" className="space-y-4">
+            <InterviewPanelsTab companyId={companyId} />
+          </TabsContent>
+
+          {/* Email Templates Tab */}
+          <TabsContent value="emails" className="space-y-4">
+            <EmailTemplatesTab companyId={companyId} />
+          </TabsContent>
+
+          {/* Source Effectiveness Tab */}
+          <TabsContent value="sources" className="space-y-4">
+            <SourceEffectivenessTab companyId={companyId} />
           </TabsContent>
 
           {/* Job Boards Tab */}
