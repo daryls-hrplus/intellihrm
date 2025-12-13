@@ -116,6 +116,16 @@ import CertificationsPage from "./pages/training/CertificationsPage";
 import LiveSessionsPage from "./pages/training/LiveSessionsPage";
 import TrainingCalendarPage from "./pages/training/TrainingCalendarPage";
 import CompetencyGapAnalysisPage from "./pages/training/CompetencyGapAnalysisPage";
+import TrainingRequestsPage from "./pages/training/TrainingRequestsPage";
+import ExternalTrainingPage from "./pages/training/ExternalTrainingPage";
+import TrainingBudgetsPage from "./pages/training/TrainingBudgetsPage";
+import InstructorsPage from "./pages/training/InstructorsPage";
+import TrainingEvaluationsPage from "./pages/training/TrainingEvaluationsPage";
+import LearningPathsPage from "./pages/training/LearningPathsPage";
+import ComplianceTrainingPage from "./pages/training/ComplianceTrainingPage";
+import CourseCompetenciesPage from "./pages/training/CourseCompetenciesPage";
+import RecertificationPage from "./pages/training/RecertificationPage";
+import TrainingNeedsPage from "./pages/training/TrainingNeedsPage";
 
 // Succession pages
 import SuccessionDashboardPage from "./pages/succession/SuccessionDashboardPage";
@@ -1155,6 +1165,86 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <CompetencyGapAnalysisPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/training/requests"
+              element={
+                <ProtectedRoute>
+                  <TrainingRequestsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/training/external"
+              element={
+                <ProtectedRoute>
+                  <ExternalTrainingPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/training/budgets"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
+                  <TrainingBudgetsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/training/instructors"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
+                  <InstructorsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/training/evaluations"
+              element={
+                <ProtectedRoute>
+                  <TrainingEvaluationsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/training/learning-paths"
+              element={
+                <ProtectedRoute>
+                  <LearningPathsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/training/compliance"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
+                  <ComplianceTrainingPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/training/course-competencies"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
+                  <CourseCompetenciesPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/training/recertification"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
+                  <RecertificationPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/training/needs"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
+                  <TrainingNeedsPage />
                 </ProtectedRoute>
               }
             />
