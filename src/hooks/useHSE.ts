@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
+import type { Json } from "@/integrations/supabase/types";
 
 export interface HSEIncident {
   id: string;
@@ -31,7 +32,7 @@ export interface HSEIncident {
   investigation_date: string | null;
   investigation_findings: string | null;
   workflow_instance_id: string | null;
-  attachments: unknown[];
+  attachments: Json[];
   is_recordable: boolean;
   is_osha_reportable: boolean;
   created_at: string;
@@ -60,7 +61,7 @@ export interface HSERiskAssessment {
   approved_by: string | null;
   approved_date: string | null;
   workflow_instance_id: string | null;
-  attachments: unknown[];
+  attachments: Json[];
   created_at: string;
   updated_at: string;
   assessor?: { full_name: string } | null;
@@ -120,7 +121,7 @@ export interface HSETrainingRecord {
   certificate_number: string | null;
   trainer_name: string | null;
   notes: string | null;
-  attachments: unknown;
+  attachments: Json[];
   created_at: string;
   updated_at: string;
   training?: HSESafetyTraining;
@@ -144,7 +145,7 @@ export interface HSEComplianceRequirement {
   compliance_status: string | null;
   last_audit_date: string | null;
   next_audit_date: string | null;
-  attachments: unknown[];
+  attachments: Json[];
   notes: string | null;
   is_active: boolean;
   created_at: string;
@@ -168,7 +169,7 @@ export interface HSESafetyPolicy {
   owner_id: string | null;
   status: string;
   is_active: boolean;
-  attachments: unknown[];
+  attachments: Json[];
   acknowledgment_required: boolean;
   created_at: string;
   updated_at: string;
@@ -189,7 +190,7 @@ export interface HSEInspection {
   findings: string | null;
   corrective_actions: string | null;
   follow_up_date: string | null;
-  attachments: unknown[];
+  attachments: Json[];
   created_at: string;
   updated_at: string;
   inspector?: { full_name: string };
@@ -224,7 +225,7 @@ export function useHSE(companyId?: string) {
       const { reporter, injured_employee, investigation_lead, attachments, ...rest } = incidentData;
       const { data: result, error } = await supabase
         .from("hse_incidents")
-        .insert([{ ...rest, reported_by: user?.id, attachments: attachments || [] }])
+        .insert([{ ...rest, reported_by: user?.id, attachments: (attachments || []) as Json } as never])
         .select()
         .single();
       if (error) throw error;
@@ -241,7 +242,7 @@ export function useHSE(companyId?: string) {
     mutationFn: async ({ id, reporter, injured_employee, investigation_lead, attachments, ...rest }: Partial<HSEIncident> & { id: string }) => {
       const { data: result, error } = await supabase
         .from("hse_incidents")
-        .update({ ...rest, attachments: attachments || [] })
+        .update({ ...rest, attachments: (attachments || []) as Json } as never)
         .eq("id", id)
         .select()
         .single();
@@ -280,7 +281,7 @@ export function useHSE(companyId?: string) {
       const { assessor, department, attachments, ...rest } = assessmentData;
       const { data: result, error } = await supabase
         .from("hse_risk_assessments")
-        .insert([{ ...rest, assessed_by: user?.id, attachments: attachments || [] }])
+        .insert([{ ...rest, assessed_by: user?.id, attachments: (attachments || []) as Json } as never])
         .select()
         .single();
       if (error) throw error;
@@ -297,7 +298,7 @@ export function useHSE(companyId?: string) {
     mutationFn: async ({ id, assessor, department, attachments, ...rest }: Partial<HSERiskAssessment> & { id: string }) => {
       const { data: result, error } = await supabase
         .from("hse_risk_assessments")
-        .update({ ...rest, attachments: attachments || [] })
+        .update({ ...rest, attachments: (attachments || []) as Json } as never)
         .eq("id", id)
         .select()
         .single();

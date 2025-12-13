@@ -24,7 +24,7 @@ const hseModules = [
   {
     title: "Safety Training",
     description: "Mandatory safety courses",
-    href: "/hse/training",
+    href: "/hse/safety-training",
     icon: HardHat,
     color: "bg-warning/10 text-warning",
   },
@@ -38,7 +38,7 @@ const hseModules = [
   {
     title: "Safety Policies",
     description: "Company safety guidelines",
-    href: "/hse/policies",
+    href: "/hse/safety-policies",
     icon: FileText,
     color: "bg-info/10 text-info",
   },

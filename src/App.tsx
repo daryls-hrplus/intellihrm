@@ -125,6 +125,11 @@ import RecruitmentDashboardPage from "./pages/recruitment/RecruitmentDashboardPa
 
 // HSE pages
 import HSEDashboardPage from "./pages/hse/HSEDashboardPage";
+import HSEIncidentsPage from "./pages/hse/HSEIncidentsPage";
+import HSERiskAssessmentPage from "./pages/hse/HSERiskAssessmentPage";
+import HSESafetyTrainingPage from "./pages/hse/HSESafetyTrainingPage";
+import HSECompliancePage from "./pages/hse/HSECompliancePage";
+import HSESafetyPoliciesPage from "./pages/hse/HSESafetyPoliciesPage";
 
 // Employee Relations pages
 import EmployeeRelationsDashboardPage from "./pages/employee-relations/EmployeeRelationsDashboardPage";
@@ -1124,6 +1129,46 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <HSEDashboardPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/hse/incidents"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
+                  <HSEIncidentsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/hse/risk-assessment"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
+                  <HSERiskAssessmentPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/hse/safety-training"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
+                  <HSESafetyTrainingPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/hse/compliance"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
+                  <HSECompliancePage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/hse/safety-policies"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
+                  <HSESafetyPoliciesPage />
                 </ProtectedRoute>
               }
             />

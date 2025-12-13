@@ -91,21 +91,18 @@ export default function HSECompliancePage() {
   const { data: companies = [] } = useQuery({
     queryKey: ["companies"],
     queryFn: async () => {
-      const { data } = await supabase.from("companies").select("id, name").eq("is_active", true);
-      return data || [];
+      const result = await supabase.from("companies").select("id, name").eq("is_active", true);
+      return (result.data || []) as { id: string; name: string }[];
     },
   });
 
   const { data: employees = [] } = useQuery({
     queryKey: ["employees", companyId],
-    queryFn: async () => {
+    queryFn: async (): Promise<{ id: string; full_name: string }[]> => {
       if (!companyId) return [];
-      const { data } = await supabase
-        .from("profiles")
-        .select("id, full_name")
-        .eq("company_id", companyId)
-        .eq("is_active", true);
-      return data || [];
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { data } = await (supabase as any).from("profiles").select("id, full_name").eq("company_id", companyId).eq("is_active", true);
+      return (data || []) as { id: string; full_name: string }[];
     },
     enabled: !!companyId,
   });
@@ -131,9 +128,10 @@ export default function HSECompliancePage() {
 
   const createAudit = useMutation({
     mutationFn: async (data: Record<string, unknown>) => {
+      const { requirement, ...rest } = data;
       const { data: result, error } = await supabase
         .from("hse_compliance_audits")
-        .insert([data])
+        .insert([rest as never])
         .select()
         .single();
       if (error) throw error;
