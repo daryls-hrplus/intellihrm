@@ -551,14 +551,14 @@ export default function TimeTrackingPage() {
                   <div className="space-y-2">
                     <Label>Shift (optional)</Label>
                     <Select 
-                      value={manualEntry.shift_id} 
-                      onValueChange={(v) => setManualEntry({...manualEntry, shift_id: v})}
+                      value={manualEntry.shift_id || "__none__"} 
+                      onValueChange={(v) => setManualEntry({...manualEntry, shift_id: v === "__none__" ? "" : v})}
                     >
                       <SelectTrigger>
                         <SelectValue placeholder="Select shift" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">No shift</SelectItem>
+                        <SelectItem value="__none__">No shift</SelectItem>
                         {shifts.map((s) => (
                           <SelectItem key={s.id} value={s.id}>
                             <div className="flex items-center gap-2">
