@@ -146,6 +146,7 @@ import MssReview360Page from "./pages/mss/MssReview360Page";
 import MssGoalsPage from "./pages/mss/MssGoalsPage";
 import MssOnboardingPage from "./pages/mss/MssOnboardingPage";
 import MssOffboardingPage from "./pages/mss/MssOffboardingPage";
+import MssLeavePage from "./pages/mss/MssLeavePage";
 
 // Workflow pages
 import AdminWorkflowTemplatesPage from "./pages/admin/AdminWorkflowTemplatesPage";
@@ -291,6 +292,14 @@ const App = () => (
               element={
                 <ProtectedRoute moduleCode="mss">
                   <MssOffboardingPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/mss/leave-approvals"
+              element={
+                <ProtectedRoute moduleCode="mss">
+                  <MssLeavePage />
                 </ProtectedRoute>
               }
             />
