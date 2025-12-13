@@ -1,69 +1,58 @@
+import { useState } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
-import { NavLink } from "react-router-dom";
 import { ModuleReportsButton } from "@/components/reports/ModuleReportsButton";
 import { ModuleBIButton } from "@/components/bi/ModuleBIButton";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useAuth } from "@/contexts/AuthContext";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import {
   Heart,
   MessageSquare,
-  FileText,
-  AlertCircle,
+  AlertTriangle,
   Scale,
-  ChevronRight,
-  Clock,
-  CheckCircle,
+  Award,
+  DoorOpen,
+  Activity,
+  BarChart3,
 } from "lucide-react";
-
-const employeeRelationsModules = [
-  {
-    title: "Grievances",
-    description: "File and track employee grievances",
-    href: "/employee-relations/grievances",
-    icon: AlertCircle,
-    color: "bg-destructive/10 text-destructive",
-  },
-  {
-    title: "Disciplinary Actions",
-    description: "Manage disciplinary processes",
-    href: "/employee-relations/disciplinary",
-    icon: Scale,
-    color: "bg-warning/10 text-warning",
-  },
-  {
-    title: "Feedback & Surveys",
-    description: "Employee satisfaction surveys",
-    href: "/employee-relations/surveys",
-    icon: MessageSquare,
-    color: "bg-success/10 text-success",
-  },
-  {
-    title: "Policies",
-    description: "Employee relations policies",
-    href: "/employee-relations/policies",
-    icon: FileText,
-    color: "bg-info/10 text-info",
-  },
-  {
-    title: "Wellness Programs",
-    description: "Employee wellness initiatives",
-    href: "/employee-relations/wellness",
-    icon: Heart,
-    color: "bg-primary/10 text-primary",
-  },
-];
-
-const statCards = [
-  { label: "Open Cases", value: 4, icon: AlertCircle, color: "bg-warning/10 text-warning" },
-  { label: "Resolved This Month", value: 12, icon: CheckCircle, color: "bg-success/10 text-success" },
-  { label: "Pending Surveys", value: 2, icon: Clock, color: "bg-info/10 text-info" },
-  { label: "Satisfaction Score", value: "4.3", icon: Heart, color: "bg-primary/10 text-primary" },
-];
+import { ERCasesTab } from "@/components/employee-relations/ERCasesTab";
+import { ERDisciplinaryTab } from "@/components/employee-relations/ERDisciplinaryTab";
+import { ERRecognitionTab } from "@/components/employee-relations/ERRecognitionTab";
+import { ERExitInterviewsTab } from "@/components/employee-relations/ERExitInterviewsTab";
+import { ERSurveysTab } from "@/components/employee-relations/ERSurveysTab";
+import { ERWellnessTab } from "@/components/employee-relations/ERWellnessTab";
+import { ERAnalytics } from "@/components/employee-relations/ERAnalytics";
 
 export default function EmployeeRelationsDashboardPage() {
+  const { user } = useAuth();
+  const [selectedCompanyId, setSelectedCompanyId] = useState<string>("");
+
+  // Fetch companies for filter
+  const { data: companies = [] } = useQuery({
+    queryKey: ["companies"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("companies")
+        .select("id, name, code")
+        .eq("is_active", true)
+        .order("name");
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  // Set default company
+  if (companies.length > 0 && !selectedCompanyId) {
+    setSelectedCompanyId(companies[0].id);
+  }
+
   return (
     <AppLayout>
       <div className="space-y-6">
         <div className="animate-fade-in">
-          <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
                 <Heart className="h-5 w-5 text-primary" />
@@ -73,67 +62,91 @@ export default function EmployeeRelationsDashboardPage() {
                   Employee Relations
                 </h1>
                 <p className="text-muted-foreground">
-                  Workplace relations and employee support
+                  Workplace relations, recognition, and employee support
                 </p>
               </div>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-3">
+              <Select value={selectedCompanyId} onValueChange={setSelectedCompanyId}>
+                <SelectTrigger className="w-[200px]">
+                  <SelectValue placeholder="Select company" />
+                </SelectTrigger>
+                <SelectContent>
+                  {companies.map((company) => (
+                    <SelectItem key={company.id} value={company.id}>
+                      {company.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               <ModuleBIButton module="employee_relations" />
               <ModuleReportsButton module="employee_relations" />
             </div>
           </div>
         </div>
 
-        {/* Stats Cards */}
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 animate-slide-up">
-          {statCards.map((stat, index) => {
-            const Icon = stat.icon;
-            return (
-              <div
-                key={stat.label}
-                className="rounded-xl border border-border bg-card p-5 shadow-card"
-                style={{ animationDelay: `${index * 50}ms` }}
-              >
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-muted-foreground">{stat.label}</p>
-                    <p className="mt-1 text-3xl font-bold text-card-foreground">{stat.value}</p>
-                  </div>
-                  <div className={`rounded-lg p-3 ${stat.color}`}>
-                    <Icon className="h-5 w-5" />
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
+        {selectedCompanyId && (
+          <Tabs defaultValue="analytics" className="space-y-4">
+            <TabsList className="flex-wrap h-auto gap-1">
+              <TabsTrigger value="analytics" className="gap-2">
+                <BarChart3 className="h-4 w-4" />
+                Analytics
+              </TabsTrigger>
+              <TabsTrigger value="cases" className="gap-2">
+                <AlertTriangle className="h-4 w-4" />
+                Cases
+              </TabsTrigger>
+              <TabsTrigger value="disciplinary" className="gap-2">
+                <Scale className="h-4 w-4" />
+                Disciplinary
+              </TabsTrigger>
+              <TabsTrigger value="recognition" className="gap-2">
+                <Award className="h-4 w-4" />
+                Recognition
+              </TabsTrigger>
+              <TabsTrigger value="exit-interviews" className="gap-2">
+                <DoorOpen className="h-4 w-4" />
+                Exit Interviews
+              </TabsTrigger>
+              <TabsTrigger value="surveys" className="gap-2">
+                <MessageSquare className="h-4 w-4" />
+                Surveys
+              </TabsTrigger>
+              <TabsTrigger value="wellness" className="gap-2">
+                <Activity className="h-4 w-4" />
+                Wellness
+              </TabsTrigger>
+            </TabsList>
 
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {employeeRelationsModules.map((module, index) => {
-            const Icon = module.icon;
-            return (
-              <NavLink
-                key={module.href}
-                to={module.href}
-                className="group rounded-xl border border-border bg-card p-6 shadow-card transition-all hover:shadow-card-hover hover:border-primary/20 animate-slide-up"
-                style={{ animationDelay: `${(index + 4) * 50}ms` }}
-              >
-                <div className="flex items-start justify-between">
-                  <div className={`rounded-lg p-3 ${module.color}`}>
-                    <Icon className="h-6 w-6" />
-                  </div>
-                  <ChevronRight className="h-5 w-5 text-muted-foreground opacity-0 transition-all group-hover:opacity-100 group-hover:translate-x-1" />
-                </div>
-                <h3 className="mt-4 font-semibold text-card-foreground">
-                  {module.title}
-                </h3>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  {module.description}
-                </p>
-              </NavLink>
-            );
-          })}
-        </div>
+            <TabsContent value="analytics">
+              <ERAnalytics companyId={selectedCompanyId} />
+            </TabsContent>
+
+            <TabsContent value="cases">
+              <ERCasesTab companyId={selectedCompanyId} />
+            </TabsContent>
+
+            <TabsContent value="disciplinary">
+              <ERDisciplinaryTab companyId={selectedCompanyId} />
+            </TabsContent>
+
+            <TabsContent value="recognition">
+              <ERRecognitionTab companyId={selectedCompanyId} />
+            </TabsContent>
+
+            <TabsContent value="exit-interviews">
+              <ERExitInterviewsTab companyId={selectedCompanyId} />
+            </TabsContent>
+
+            <TabsContent value="surveys">
+              <ERSurveysTab companyId={selectedCompanyId} />
+            </TabsContent>
+
+            <TabsContent value="wellness">
+              <ERWellnessTab companyId={selectedCompanyId} />
+            </TabsContent>
+          </Tabs>
+        )}
       </div>
     </AppLayout>
   );

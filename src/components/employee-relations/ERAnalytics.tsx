@@ -17,24 +17,12 @@ import {
   AreaChart,
   Area
 } from 'recharts';
-import { 
-  ERCase, 
-  ERDisciplinaryAction, 
-  ERRecognition, 
-  ERExitInterview,
-  ERSurvey,
-  ERWellnessProgram
-} from '@/hooks/useEmployeeRelations';
+import { useEmployeeRelations } from '@/hooks/useEmployeeRelations';
 import { format, subMonths, startOfMonth, endOfMonth, isWithinInterval, parseISO } from 'date-fns';
-import { AlertCircle, Scale, Award, LogOut, Heart, TrendingUp } from 'lucide-react';
+import { AlertCircle, Scale, Award, LogOut, Heart, TrendingUp, Loader2 } from 'lucide-react';
 
-interface ERAnalyticsProps {
-  cases: ERCase[];
-  disciplinaryActions: ERDisciplinaryAction[];
-  recognitions: ERRecognition[];
-  exitInterviews: ERExitInterview[];
-  surveys: ERSurvey[];
-  wellnessPrograms: ERWellnessProgram[];
+export interface ERAnalyticsProps {
+  companyId: string;
 }
 
 const COLORS = [
@@ -47,14 +35,40 @@ const COLORS = [
   'hsl(var(--secondary))',
 ];
 
-export function ERAnalytics({ 
-  cases, 
-  disciplinaryActions, 
-  recognitions, 
-  exitInterviews,
-  surveys,
-  wellnessPrograms
-}: ERAnalyticsProps) {
+export function ERAnalytics({ companyId }: ERAnalyticsProps) {
+  const { 
+    cases, 
+    disciplinaryActions, 
+    recognitions, 
+    exitInterviews,
+    surveys,
+    wellnessPrograms,
+    loadingCases,
+    loadingDisciplinary,
+    loadingRecognition,
+    loadingExitInterviews,
+    loadingSurveys,
+    loadingWellness
+  } = useEmployeeRelations(companyId);
+
+  const isLoading = loadingCases || loadingDisciplinary || loadingRecognition || 
+    loadingExitInterviews || loadingSurveys || loadingWellness;
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
   
   // Case Status Distribution
   const caseStatusDistribution = useMemo(() => {
