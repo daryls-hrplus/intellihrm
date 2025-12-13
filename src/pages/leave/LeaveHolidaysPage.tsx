@@ -2,6 +2,7 @@ import { useState, useMemo } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { useLeaveManagement } from "@/hooks/useLeaveManagement";
 import { useAuth } from "@/contexts/AuthContext";
+import { LeaveCompanyFilter, useLeaveCompanyFilter } from "@/components/leave/LeaveCompanyFilter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -68,7 +69,8 @@ const COUNTRIES = [
 
 export default function LeaveHolidaysPage() {
   const { company } = useAuth();
-  const { holidays, countryHolidays, loadingHolidays, loadingCountryHolidays, createHoliday, createCountryHoliday } = useLeaveManagement(company?.id);
+  const { selectedCompanyId, setSelectedCompanyId } = useLeaveCompanyFilter();
+  const { holidays, countryHolidays, loadingHolidays, loadingCountryHolidays, createHoliday, createCountryHoliday } = useLeaveManagement(selectedCompanyId);
   const [activeTab, setActiveTab] = useState("country");
   const [countryFilter, setCountryFilter] = useState<string>("all");
   
@@ -130,10 +132,10 @@ export default function LeaveHolidaysPage() {
   };
 
   const handleSubmitCompanyHoliday = async () => {
-    if (!company?.id || !companyFormData.name || !companyFormData.holiday_date) return;
+    if (!selectedCompanyId || !companyFormData.name || !companyFormData.holiday_date) return;
 
     await createHoliday.mutateAsync({
-      company_id: company.id,
+      company_id: selectedCompanyId,
       name: companyFormData.name,
       holiday_date: format(companyFormData.holiday_date, "yyyy-MM-dd"),
       is_recurring: companyFormData.is_recurring,
@@ -170,14 +172,20 @@ export default function LeaveHolidaysPage() {
           ]}
         />
 
-        <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-            <PartyPopper className="h-5 w-5 text-primary" />
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+              <PartyPopper className="h-5 w-5 text-primary" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold tracking-tight text-foreground">Holidays Calendar</h1>
+              <p className="text-muted-foreground">Manage country and company holidays that don't count against leave balances</p>
+            </div>
           </div>
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight text-foreground">Holidays Calendar</h1>
-            <p className="text-muted-foreground">Manage country and company holidays that don't count against leave balances</p>
-          </div>
+          <LeaveCompanyFilter 
+            selectedCompanyId={selectedCompanyId} 
+            onCompanyChange={setSelectedCompanyId} 
+          />
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">

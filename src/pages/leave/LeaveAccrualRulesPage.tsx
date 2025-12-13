@@ -2,6 +2,7 @@ import { useState } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { useLeaveManagement, LeaveAccrualRule } from "@/hooks/useLeaveManagement";
 import { useAuth } from "@/contexts/AuthContext";
+import { LeaveCompanyFilter, useLeaveCompanyFilter } from "@/components/leave/LeaveCompanyFilter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -34,7 +35,8 @@ import { Plus, TrendingUp } from "lucide-react";
 
 export default function LeaveAccrualRulesPage() {
   const { company } = useAuth();
-  const { leaveTypes, accrualRules, loadingAccrualRules, createAccrualRule } = useLeaveManagement(company?.id);
+  const { selectedCompanyId, setSelectedCompanyId } = useLeaveCompanyFilter();
+  const { leaveTypes, accrualRules, loadingAccrualRules, createAccrualRule } = useLeaveManagement(selectedCompanyId);
   const [isOpen, setIsOpen] = useState(false);
   const [formData, setFormData] = useState({
     leave_type_id: "",
@@ -65,11 +67,11 @@ export default function LeaveAccrualRulesPage() {
   };
 
   const handleSubmit = async () => {
-    if (!company?.id || !formData.leave_type_id) return;
+    if (!selectedCompanyId || !formData.leave_type_id) return;
 
     await createAccrualRule.mutateAsync({
       ...formData,
-      company_id: company.id,
+      company_id: selectedCompanyId,
       years_of_service_max: formData.years_of_service_max || undefined,
       employee_status: formData.employee_status || undefined,
       employee_type: formData.employee_type || undefined,
@@ -106,7 +108,12 @@ export default function LeaveAccrualRulesPage() {
             </div>
           </div>
 
-          <Dialog open={isOpen} onOpenChange={(open) => { setIsOpen(open); if (!open) resetForm(); }}>
+          <div className="flex items-center gap-2">
+            <LeaveCompanyFilter 
+              selectedCompanyId={selectedCompanyId} 
+              onCompanyChange={setSelectedCompanyId} 
+            />
+            <Dialog open={isOpen} onOpenChange={(open) => { setIsOpen(open); if (!open) resetForm(); }}>
             <DialogTrigger asChild>
               <Button>
                 <Plus className="mr-2 h-4 w-4" />
@@ -255,6 +262,7 @@ export default function LeaveAccrualRulesPage() {
               </div>
             </DialogContent>
           </Dialog>
+          </div>
         </div>
 
         <div className="rounded-lg border border-border bg-card">

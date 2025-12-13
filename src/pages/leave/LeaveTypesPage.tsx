@@ -2,6 +2,7 @@ import { useState } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { useLeaveManagement, LeaveType } from "@/hooks/useLeaveManagement";
 import { useAuth } from "@/contexts/AuthContext";
+import { LeaveCompanyFilter, useLeaveCompanyFilter } from "@/components/leave/LeaveCompanyFilter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -35,7 +36,8 @@ import { Plus, Pencil, Calendar } from "lucide-react";
 
 export default function LeaveTypesPage() {
   const { company } = useAuth();
-  const { leaveTypes, loadingTypes, createLeaveType, updateLeaveType } = useLeaveManagement(company?.id);
+  const { selectedCompanyId, setSelectedCompanyId } = useLeaveCompanyFilter();
+  const { leaveTypes, loadingTypes, createLeaveType, updateLeaveType } = useLeaveManagement(selectedCompanyId);
   const [isOpen, setIsOpen] = useState(false);
   const [editingType, setEditingType] = useState<LeaveType | null>(null);
   const [formData, setFormData] = useState({
@@ -100,12 +102,12 @@ export default function LeaveTypesPage() {
   };
 
   const handleSubmit = async () => {
-    if (!company?.id) return;
+    if (!selectedCompanyId) return;
 
     if (editingType) {
       await updateLeaveType.mutateAsync({ id: editingType.id, ...formData });
     } else {
-      await createLeaveType.mutateAsync({ ...formData, company_id: company.id });
+      await createLeaveType.mutateAsync({ ...formData, company_id: selectedCompanyId });
     }
     setIsOpen(false);
     resetForm();
@@ -132,17 +134,22 @@ export default function LeaveTypesPage() {
             </div>
           </div>
 
-          <Dialog open={isOpen} onOpenChange={(open) => { setIsOpen(open); if (!open) resetForm(); }}>
-            <DialogTrigger asChild>
-              <Button>
-                <Plus className="mr-2 h-4 w-4" />
-                Add Leave Type
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-              <DialogHeader>
-                <DialogTitle>{editingType ? "Edit Leave Type" : "Add Leave Type"}</DialogTitle>
-              </DialogHeader>
+          <div className="flex items-center gap-2">
+            <LeaveCompanyFilter 
+              selectedCompanyId={selectedCompanyId} 
+              onCompanyChange={setSelectedCompanyId} 
+            />
+            <Dialog open={isOpen} onOpenChange={(open) => { setIsOpen(open); if (!open) resetForm(); }}>
+              <DialogTrigger asChild>
+                <Button>
+                  <Plus className="mr-2 h-4 w-4" />
+                  Add Leave Type
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                <DialogHeader>
+                  <DialogTitle>{editingType ? "Edit Leave Type" : "Add Leave Type"}</DialogTitle>
+                </DialogHeader>
               <div className="grid gap-4 py-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
@@ -296,6 +303,7 @@ export default function LeaveTypesPage() {
               </div>
             </DialogContent>
           </Dialog>
+          </div>
         </div>
 
         <div className="rounded-lg border border-border bg-card">

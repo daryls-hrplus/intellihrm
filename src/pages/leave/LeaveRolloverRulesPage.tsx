@@ -2,6 +2,7 @@ import { useState } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { useLeaveManagement } from "@/hooks/useLeaveManagement";
 import { useAuth } from "@/contexts/AuthContext";
+import { LeaveCompanyFilter, useLeaveCompanyFilter } from "@/components/leave/LeaveCompanyFilter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -34,7 +35,8 @@ import { Plus, RotateCcw } from "lucide-react";
 
 export default function LeaveRolloverRulesPage() {
   const { company } = useAuth();
-  const { leaveTypes, rolloverRules, loadingRolloverRules, createRolloverRule } = useLeaveManagement(company?.id);
+  const { selectedCompanyId, setSelectedCompanyId } = useLeaveCompanyFilter();
+  const { leaveTypes, rolloverRules, loadingRolloverRules, createRolloverRule } = useLeaveManagement(selectedCompanyId);
   const [isOpen, setIsOpen] = useState(false);
   const [formData, setFormData] = useState({
     leave_type_id: "",
@@ -55,11 +57,11 @@ export default function LeaveRolloverRulesPage() {
   };
 
   const handleSubmit = async () => {
-    if (!company?.id || !formData.leave_type_id) return;
+    if (!selectedCompanyId || !formData.leave_type_id) return;
 
     await createRolloverRule.mutateAsync({
       ...formData,
-      company_id: company.id,
+      company_id: selectedCompanyId,
     });
     setIsOpen(false);
     resetForm();
@@ -91,7 +93,12 @@ export default function LeaveRolloverRulesPage() {
             </div>
           </div>
 
-          <Dialog open={isOpen} onOpenChange={(open) => { setIsOpen(open); if (!open) resetForm(); }}>
+          <div className="flex items-center gap-2">
+            <LeaveCompanyFilter 
+              selectedCompanyId={selectedCompanyId} 
+              onCompanyChange={setSelectedCompanyId} 
+            />
+            <Dialog open={isOpen} onOpenChange={(open) => { setIsOpen(open); if (!open) resetForm(); }}>
             <DialogTrigger asChild>
               <Button disabled={availableLeaveTypes.length === 0}>
                 <Plus className="mr-2 h-4 w-4" />
@@ -181,6 +188,7 @@ export default function LeaveRolloverRulesPage() {
               </div>
             </DialogContent>
           </Dialog>
+          </div>
         </div>
 
         <div className="rounded-lg border border-border bg-card">
