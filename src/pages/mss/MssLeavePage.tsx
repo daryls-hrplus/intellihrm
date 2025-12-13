@@ -10,7 +10,7 @@ export default function MssLeavePage() {
         <Breadcrumbs
           items={[
             { label: "Manager Self Service", href: "/mss" },
-            { label: "Team Leave" },
+            { label: "Team Leave Calendar" },
           ]}
         />
 
@@ -19,8 +19,8 @@ export default function MssLeavePage() {
             <Calendar className="h-5 w-5 text-primary" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold tracking-tight text-foreground">Team Leave</h1>
-            <p className="text-muted-foreground">View and manage your team's leave calendar</p>
+            <h1 className="text-2xl font-bold tracking-tight text-foreground">Team Leave Calendar</h1>
+            <p className="text-muted-foreground">View your team's leave schedules and availability</p>
           </div>
         </div>
 
