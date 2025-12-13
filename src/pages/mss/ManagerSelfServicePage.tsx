@@ -19,6 +19,7 @@ import {
   Package,
   Heart,
   Shield,
+  HardHat,
 } from "lucide-react";
 
 const mssModules = [
@@ -140,6 +141,13 @@ const mssModules = [
     href: "/mss/succession",
     icon: TrendingUp,
     color: "bg-cyan-500/10 text-cyan-600",
+  },
+  {
+    title: "Team Health & Safety",
+    description: "Monitor team incidents and training compliance",
+    href: "/mss/hse",
+    icon: HardHat,
+    color: "bg-yellow-500/10 text-yellow-600",
   },
   {
     title: "Submit a Ticket",

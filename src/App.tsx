@@ -152,6 +152,7 @@ import MyOffboardingPage from "./pages/ess/MyOffboardingPage";
 import MyPropertyPage from "./pages/ess/MyPropertyPage";
 import MyEmployeeRelationsPage from "./pages/ess/MyEmployeeRelationsPage";
 import EssLeavePage from "./pages/ess/EssLeavePage";
+import MyHSEPage from "./pages/ess/MyHSEPage";
 import ManagerSelfServicePage from "./pages/mss/ManagerSelfServicePage";
 import MssAppraisalsPage from "./pages/mss/MssAppraisalsPage";
 import MssReview360Page from "./pages/mss/MssReview360Page";
@@ -162,6 +163,7 @@ import MssPropertyPage from "./pages/mss/MssPropertyPage";
 import MssEmployeeRelationsPage from "./pages/mss/MssEmployeeRelationsPage";
 import MssLeavePage from "./pages/mss/MssLeavePage";
 import MssBenefitsPage from "./pages/mss/MssBenefitsPage";
+import MssHSEPage from "./pages/mss/MssHSEPage";
 
 // Workflow pages
 import AdminWorkflowTemplatesPage from "./pages/admin/AdminWorkflowTemplatesPage";
@@ -277,6 +279,14 @@ const App = () => (
                 </ProtectedRoute>
               }
             />
+            <Route
+              path="/ess/hse"
+              element={
+                <ProtectedRoute moduleCode="ess">
+                  <MyHSEPage />
+                </ProtectedRoute>
+              }
+            />
             {/* Manager Self Service Routes */}
             <Route
               path="/mss"
@@ -355,6 +365,14 @@ const App = () => (
               element={
                 <ProtectedRoute moduleCode="mss">
                   <MssBenefitsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/mss/hse"
+              element={
+                <ProtectedRoute moduleCode="mss">
+                  <MssHSEPage />
                 </ProtectedRoute>
               }
             />
