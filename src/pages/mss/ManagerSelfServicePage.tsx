@@ -15,6 +15,7 @@ import {
   CheckSquare,
   UserCheck,
   Rocket,
+  UserMinus,
 } from "lucide-react";
 
 const mssModules = [
@@ -45,6 +46,13 @@ const mssModules = [
     href: "/mss/onboarding",
     icon: Rocket,
     color: "bg-teal-500/10 text-teal-600",
+  },
+  {
+    title: "Team Departures",
+    description: "Track offboarding progress of departing team members",
+    href: "/mss/offboarding",
+    icon: UserMinus,
+    color: "bg-red-500/10 text-red-600",
   },
   {
     title: "Leave Approvals",

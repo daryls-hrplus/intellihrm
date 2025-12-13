@@ -15,6 +15,7 @@ import {
   CheckSquare,
   UserCheck,
   Rocket,
+  UserMinus,
 } from "lucide-react";
 
 const essModules = [
@@ -101,6 +102,13 @@ const essModules = [
     href: "/ess/onboarding",
     icon: Rocket,
     color: "bg-teal-500/10 text-teal-600",
+  },
+  {
+    title: "My Offboarding",
+    description: "Complete your exit tasks before leaving",
+    href: "/ess/offboarding",
+    icon: UserMinus,
+    color: "bg-red-500/10 text-red-600",
   },
   {
     title: "Notifications",
