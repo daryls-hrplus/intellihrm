@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Calendar, RefreshCw, AlertCircle, Check } from "lucide-react";
-import { format, addDays, addWeeks, startOfYear, endOfYear, isMonday, eachDayOfInterval, getDay, setDate, lastDayOfMonth, isAfter, isBefore, parseISO } from "date-fns";
+import { format, addDays, startOfYear, endOfYear, isMonday, eachDayOfInterval, lastDayOfMonth, isBefore, parseISO } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -36,28 +36,61 @@ interface PayrollCalendarGeneratorProps {
 export function PayrollCalendarGenerator({ companyId, payGroup, onGenerated }: PayrollCalendarGeneratorProps) {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [previewPeriods, setPreviewPeriods] = useState<GeneratedPeriod[]>([]);
-  const [isGenerating, setIsGenerating] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   
   const currentYear = new Date().getFullYear();
   const [selectedYear, setSelectedYear] = useState(currentYear);
   const [startDate, setStartDate] = useState<string>("");
-  const [payDayOffset, setPayDayOffset] = useState(0); // Days after period end
+  const [startingCycleNumber, setStartingCycleNumber] = useState(1);
+  const [payDayOffset, setPayDayOffset] = useState(0);
+
+  // Calculate default start date and cycle number based on current date
+  useEffect(() => {
+    const now = new Date();
+    const currentMonth = now.getMonth();
+    const currentDay = now.getDate();
+    
+    switch (payGroup.pay_frequency) {
+      case "monthly":
+        // Default to current month
+        setStartingCycleNumber(currentMonth + 1);
+        setStartDate(format(new Date(selectedYear, currentMonth, 1), "yyyy-MM-dd"));
+        break;
+      case "semimonthly":
+        // Calculate which bi-monthly period we're in
+        const semiMonthlyPeriod = currentMonth * 2 + (currentDay > 15 ? 2 : 1);
+        setStartingCycleNumber(semiMonthlyPeriod);
+        if (currentDay > 15) {
+          setStartDate(format(new Date(selectedYear, currentMonth, 16), "yyyy-MM-dd"));
+        } else {
+          setStartDate(format(new Date(selectedYear, currentMonth, 1), "yyyy-MM-dd"));
+        }
+        break;
+      case "weekly":
+      case "biweekly":
+        // For weekly/biweekly, default to start of year
+        setStartingCycleNumber(1);
+        setStartDate("");
+        break;
+    }
+  }, [payGroup.pay_frequency, selectedYear]);
 
   const countMondaysInPeriod = (start: Date, end: Date): number => {
     const days = eachDayOfInterval({ start, end });
     return days.filter(day => isMonday(day)).length;
   };
 
-  const generateMonthlyPeriods = (year: number): GeneratedPeriod[] => {
+  const generateMonthlyPeriods = (year: number, startCycle: number, cycleStartDate: Date): GeneratedPeriod[] => {
     const periods: GeneratedPeriod[] = [];
-    for (let month = 0; month < 12; month++) {
+    const startMonth = cycleStartDate.getMonth();
+    
+    for (let month = startMonth; month < 12; month++) {
       const periodStart = new Date(year, month, 1);
       const periodEnd = lastDayOfMonth(periodStart);
       const payDate = addDays(periodEnd, payDayOffset);
       
       periods.push({
-        period_number: month + 1,
+        period_number: startCycle + (month - startMonth),
         period_start: periodStart,
         period_end: periodEnd,
         pay_date: payDate,
@@ -67,23 +100,31 @@ export function PayrollCalendarGenerator({ companyId, payGroup, onGenerated }: P
     return periods;
   };
 
-  const generateSemiMonthlyPeriods = (year: number): GeneratedPeriod[] => {
+  const generateSemiMonthlyPeriods = (year: number, startCycle: number, cycleStartDate: Date): GeneratedPeriod[] => {
     const periods: GeneratedPeriod[] = [];
-    let periodNum = 1;
+    const startMonth = cycleStartDate.getMonth();
+    const startDay = cycleStartDate.getDate();
+    const startInSecondHalf = startDay > 15;
     
-    for (let month = 0; month < 12; month++) {
-      // First half: 1st to 15th
-      const firstStart = new Date(year, month, 1);
-      const firstEnd = new Date(year, month, 15);
-      const firstPayDate = addDays(firstEnd, payDayOffset);
+    let periodNum = startCycle;
+    
+    for (let month = startMonth; month < 12; month++) {
+      const isFirstMonth = month === startMonth;
       
-      periods.push({
-        period_number: periodNum++,
-        period_start: firstStart,
-        period_end: firstEnd,
-        pay_date: firstPayDate,
-        monday_count: countMondaysInPeriod(firstStart, firstEnd),
-      });
+      // First half: 1st to 15th (skip if starting in second half of first month)
+      if (!isFirstMonth || !startInSecondHalf) {
+        const firstStart = new Date(year, month, 1);
+        const firstEnd = new Date(year, month, 15);
+        const firstPayDate = addDays(firstEnd, payDayOffset);
+        
+        periods.push({
+          period_number: periodNum++,
+          period_start: firstStart,
+          period_end: firstEnd,
+          pay_date: firstPayDate,
+          monday_count: countMondaysInPeriod(firstStart, firstEnd),
+        });
+      }
       
       // Second half: 16th to end of month
       const secondStart = new Date(year, month, 16);
@@ -101,21 +142,17 @@ export function PayrollCalendarGenerator({ companyId, payGroup, onGenerated }: P
     return periods;
   };
 
-  const generateWeeklyPeriods = (year: number, cycleStartDate: Date): GeneratedPeriod[] => {
+  const generateWeeklyPeriods = (year: number, startCycle: number, cycleStartDate: Date): GeneratedPeriod[] => {
     const periods: GeneratedPeriod[] = [];
-    const yearStart = startOfYear(new Date(year, 0, 1));
     const yearEnd = endOfYear(new Date(year, 0, 1));
     
-    // Start from the provided start date
     let currentStart = cycleStartDate;
-    let periodNum = 1;
+    let periodNum = startCycle;
     
-    // Generate periods that fall within or overlap the year
     while (isBefore(currentStart, yearEnd) || currentStart.getFullYear() === year) {
       const periodEnd = addDays(currentStart, 6);
       const payDate = addDays(periodEnd, payDayOffset);
       
-      // Include if period end is in target year or period overlaps the year
       if (periodEnd.getFullYear() === year || 
           (currentStart.getFullYear() < year && periodEnd.getFullYear() >= year)) {
         periods.push({
@@ -129,20 +166,19 @@ export function PayrollCalendarGenerator({ companyId, payGroup, onGenerated }: P
       
       currentStart = addDays(currentStart, 7);
       
-      // Stop if we've gone past the year
-      if (currentStart.getFullYear() > year && periodNum > 1) break;
-      if (periodNum > 54) break; // Safety limit
+      if (currentStart.getFullYear() > year && periodNum > startCycle) break;
+      if (periodNum > startCycle + 54) break;
     }
     
     return periods;
   };
 
-  const generateBiweeklyPeriods = (year: number, cycleStartDate: Date): GeneratedPeriod[] => {
+  const generateBiweeklyPeriods = (year: number, startCycle: number, cycleStartDate: Date): GeneratedPeriod[] => {
     const periods: GeneratedPeriod[] = [];
     const yearEnd = endOfYear(new Date(year, 0, 1));
     
     let currentStart = cycleStartDate;
-    let periodNum = 1;
+    let periodNum = startCycle;
     
     while (isBefore(currentStart, yearEnd) || currentStart.getFullYear() === year) {
       const periodEnd = addDays(currentStart, 13);
@@ -161,41 +197,40 @@ export function PayrollCalendarGenerator({ companyId, payGroup, onGenerated }: P
       
       currentStart = addDays(currentStart, 14);
       
-      if (currentStart.getFullYear() > year && periodNum > 1) break;
-      if (periodNum > 28) break; // Safety limit
+      if (currentStart.getFullYear() > year && periodNum > startCycle) break;
+      if (periodNum > startCycle + 28) break;
     }
     
     return periods;
   };
 
   const handleGeneratePreview = () => {
+    if (!startDate) {
+      toast.error("Please enter a cycle start date");
+      return;
+    }
+    
+    if (startingCycleNumber < 1) {
+      toast.error("Starting cycle number must be at least 1");
+      return;
+    }
+
+    const cycleStart = parseISO(startDate);
     let periods: GeneratedPeriod[] = [];
     
     switch (payGroup.pay_frequency) {
       case "monthly":
-        periods = generateMonthlyPeriods(selectedYear);
+        periods = generateMonthlyPeriods(selectedYear, startingCycleNumber, cycleStart);
         break;
       case "semimonthly":
-        periods = generateSemiMonthlyPeriods(selectedYear);
+        periods = generateSemiMonthlyPeriods(selectedYear, startingCycleNumber, cycleStart);
         break;
-      case "weekly": {
-        if (!startDate) {
-          toast.error("Please enter a start date for weekly pay periods");
-          return;
-        }
-        const cycleStart = parseISO(startDate);
-        periods = generateWeeklyPeriods(selectedYear, cycleStart);
+      case "weekly":
+        periods = generateWeeklyPeriods(selectedYear, startingCycleNumber, cycleStart);
         break;
-      }
-      case "biweekly": {
-        if (!startDate) {
-          toast.error("Please enter a start date for bi-weekly pay periods");
-          return;
-        }
-        const cycleStart = parseISO(startDate);
-        periods = generateBiweeklyPeriods(selectedYear, cycleStart);
+      case "biweekly":
+        periods = generateBiweeklyPeriods(selectedYear, startingCycleNumber, cycleStart);
         break;
-      }
     }
     
     setPreviewPeriods(periods);
@@ -209,29 +244,33 @@ export function PayrollCalendarGenerator({ companyId, payGroup, onGenerated }: P
 
     setIsSaving(true);
     try {
-      // Check for existing periods for this pay group and year
+      // Check for existing periods for this pay group and year with overlapping period numbers
+      const periodNumbers = previewPeriods.map(p => `${selectedYear}-${String(p.period_number).padStart(2, "0")}`);
+      
       const { data: existing } = await supabase
         .from("pay_periods")
-        .select("id")
+        .select("id, period_number")
         .eq("pay_group_id", payGroup.id)
-        .eq("year", selectedYear);
+        .eq("year", selectedYear)
+        .in("period_number", periodNumbers);
       
       if (existing && existing.length > 0) {
-        const confirmed = confirm(`There are ${existing.length} existing periods for ${selectedYear}. Delete and regenerate?`);
+        const confirmed = confirm(`There are ${existing.length} existing periods that will be replaced. Continue?`);
         if (!confirmed) {
           setIsSaving(false);
           return;
         }
         
-        // Delete existing periods
+        // Delete overlapping periods
         await supabase
           .from("pay_periods")
           .delete()
           .eq("pay_group_id", payGroup.id)
-          .eq("year", selectedYear);
+          .eq("year", selectedYear)
+          .in("period_number", periodNumbers);
       }
 
-      // Get or create a schedule (for backward compatibility)
+      // Get or create a schedule
       let scheduleId: string;
       const { data: schedules } = await supabase
         .from("pay_period_schedules")
@@ -280,7 +319,7 @@ export function PayrollCalendarGenerator({ companyId, payGroup, onGenerated }: P
 
       if (error) throw error;
 
-      toast.success(`Generated ${previewPeriods.length} pay periods for ${selectedYear}`);
+      toast.success(`Generated ${previewPeriods.length} pay periods starting from cycle ${startingCycleNumber}`);
       setDialogOpen(false);
       setPreviewPeriods([]);
       onGenerated();
@@ -292,17 +331,15 @@ export function PayrollCalendarGenerator({ companyId, payGroup, onGenerated }: P
     }
   };
 
-  const getExpectedPeriodCount = () => {
+  const getMaxCycles = () => {
     switch (payGroup.pay_frequency) {
       case "monthly": return 12;
       case "semimonthly": return 24;
-      case "weekly": return "52-53";
-      case "biweekly": return 26;
-      default: return "?";
+      case "weekly": return 53;
+      case "biweekly": return 27;
+      default: return 12;
     }
   };
-
-  const needsStartDate = payGroup.pay_frequency === "weekly" || payGroup.pay_frequency === "biweekly";
 
   return (
     <>
@@ -345,7 +382,7 @@ export function PayrollCalendarGenerator({ companyId, payGroup, onGenerated }: P
                   )}
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                   <div className="space-y-2">
                     <Label>Year</Label>
                     <Input
@@ -357,26 +394,40 @@ export function PayrollCalendarGenerator({ companyId, payGroup, onGenerated }: P
                     />
                   </div>
 
-                  {needsStartDate && (
-                    <div className="space-y-2">
-                      <Label>
-                        Cycle Start Date
-                        <span className="text-destructive ml-1">*</span>
-                      </Label>
-                      <Input
-                        type="date"
-                        value={startDate}
-                        onChange={(e) => setStartDate(e.target.value)}
-                        placeholder="e.g., late December of previous year"
-                      />
-                      <p className="text-xs text-muted-foreground">
-                        Can be in late December of previous year
-                      </p>
-                    </div>
-                  )}
+                  <div className="space-y-2">
+                    <Label>
+                      Cycle Start Date
+                      <span className="text-destructive ml-1">*</span>
+                    </Label>
+                    <Input
+                      type="date"
+                      value={startDate}
+                      onChange={(e) => setStartDate(e.target.value)}
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      First day of the first cycle to generate
+                    </p>
+                  </div>
 
                   <div className="space-y-2">
-                    <Label>Pay Day Offset (days after period end)</Label>
+                    <Label>
+                      Starting Cycle Number
+                      <span className="text-destructive ml-1">*</span>
+                    </Label>
+                    <Input
+                      type="number"
+                      value={startingCycleNumber}
+                      onChange={(e) => setStartingCycleNumber(parseInt(e.target.value) || 1)}
+                      min={1}
+                      max={getMaxCycles()}
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Cycle number for the start date (1-{getMaxCycles()})
+                    </p>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>Pay Day Offset</Label>
                     <Input
                       type="number"
                       value={payDayOffset}
@@ -384,6 +435,9 @@ export function PayrollCalendarGenerator({ companyId, payGroup, onGenerated }: P
                       min={0}
                       max={14}
                     />
+                    <p className="text-xs text-muted-foreground">
+                      Days after period end
+                    </p>
                   </div>
                 </div>
 
@@ -399,14 +453,7 @@ export function PayrollCalendarGenerator({ companyId, payGroup, onGenerated }: P
               <Card>
                 <CardHeader className="pb-3">
                   <CardTitle className="text-sm font-medium flex items-center justify-between">
-                    <span>Preview ({previewPeriods.length} periods)</span>
-                    {previewPeriods.length !== parseInt(String(getExpectedPeriodCount())) && 
-                     typeof getExpectedPeriodCount() === "number" && (
-                      <Badge variant="outline" className="text-warning">
-                        <AlertCircle className="h-3 w-3 mr-1" />
-                        Expected {getExpectedPeriodCount()} periods
-                      </Badge>
-                    )}
+                    <span>Preview ({previewPeriods.length} periods, starting from cycle {startingCycleNumber})</span>
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="p-0">
@@ -414,7 +461,7 @@ export function PayrollCalendarGenerator({ companyId, payGroup, onGenerated }: P
                     <Table>
                       <TableHeader>
                         <TableRow>
-                          <TableHead className="w-16">#</TableHead>
+                          <TableHead className="w-20">Cycle #</TableHead>
                           <TableHead>Period Start</TableHead>
                           <TableHead>Period End</TableHead>
                           <TableHead>Pay Date</TableHead>
