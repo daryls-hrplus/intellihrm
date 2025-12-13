@@ -4834,6 +4834,487 @@ export type Database = {
           },
         ]
       }
+      leave_accrual_rules: {
+        Row: {
+          accrual_amount: number
+          accrual_frequency: string
+          company_id: string
+          created_at: string
+          description: string | null
+          employee_status: string | null
+          employee_type: string | null
+          end_date: string | null
+          id: string
+          is_active: boolean
+          leave_type_id: string
+          name: string
+          priority: number
+          salary_grade_id: string | null
+          start_date: string
+          updated_at: string
+          years_of_service_max: number | null
+          years_of_service_min: number | null
+        }
+        Insert: {
+          accrual_amount?: number
+          accrual_frequency?: string
+          company_id: string
+          created_at?: string
+          description?: string | null
+          employee_status?: string | null
+          employee_type?: string | null
+          end_date?: string | null
+          id?: string
+          is_active?: boolean
+          leave_type_id: string
+          name: string
+          priority?: number
+          salary_grade_id?: string | null
+          start_date?: string
+          updated_at?: string
+          years_of_service_max?: number | null
+          years_of_service_min?: number | null
+        }
+        Update: {
+          accrual_amount?: number
+          accrual_frequency?: string
+          company_id?: string
+          created_at?: string
+          description?: string | null
+          employee_status?: string | null
+          employee_type?: string | null
+          end_date?: string | null
+          id?: string
+          is_active?: boolean
+          leave_type_id?: string
+          name?: string
+          priority?: number
+          salary_grade_id?: string | null
+          start_date?: string
+          updated_at?: string
+          years_of_service_max?: number | null
+          years_of_service_min?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "leave_accrual_rules_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leave_accrual_rules_leave_type_id_fkey"
+            columns: ["leave_type_id"]
+            isOneToOne: false
+            referencedRelation: "leave_types"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leave_accrual_rules_salary_grade_id_fkey"
+            columns: ["salary_grade_id"]
+            isOneToOne: false
+            referencedRelation: "salary_grades"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      leave_balance_adjustments: {
+        Row: {
+          adjusted_by: string
+          adjustment_type: string
+          amount: number
+          balance_id: string
+          created_at: string
+          effective_date: string
+          id: string
+          reason: string
+        }
+        Insert: {
+          adjusted_by: string
+          adjustment_type: string
+          amount: number
+          balance_id: string
+          created_at?: string
+          effective_date?: string
+          id?: string
+          reason: string
+        }
+        Update: {
+          adjusted_by?: string
+          adjustment_type?: string
+          amount?: number
+          balance_id?: string
+          created_at?: string
+          effective_date?: string
+          id?: string
+          reason?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "leave_balance_adjustments_adjusted_by_fkey"
+            columns: ["adjusted_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leave_balance_adjustments_balance_id_fkey"
+            columns: ["balance_id"]
+            isOneToOne: false
+            referencedRelation: "leave_balances"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      leave_balances: {
+        Row: {
+          accrued_amount: number
+          adjustment_amount: number
+          carried_forward: number
+          created_at: string
+          current_balance: number | null
+          employee_id: string
+          id: string
+          last_accrual_date: string | null
+          leave_type_id: string
+          opening_balance: number
+          updated_at: string
+          used_amount: number
+          year: number
+        }
+        Insert: {
+          accrued_amount?: number
+          adjustment_amount?: number
+          carried_forward?: number
+          created_at?: string
+          current_balance?: number | null
+          employee_id: string
+          id?: string
+          last_accrual_date?: string | null
+          leave_type_id: string
+          opening_balance?: number
+          updated_at?: string
+          used_amount?: number
+          year: number
+        }
+        Update: {
+          accrued_amount?: number
+          adjustment_amount?: number
+          carried_forward?: number
+          created_at?: string
+          current_balance?: number | null
+          employee_id?: string
+          id?: string
+          last_accrual_date?: string | null
+          leave_type_id?: string
+          opening_balance?: number
+          updated_at?: string
+          used_amount?: number
+          year?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "leave_balances_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leave_balances_leave_type_id_fkey"
+            columns: ["leave_type_id"]
+            isOneToOne: false
+            referencedRelation: "leave_types"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      leave_holidays: {
+        Row: {
+          applies_to_all: boolean
+          company_id: string
+          created_at: string
+          department_ids: string[] | null
+          holiday_date: string
+          id: string
+          is_active: boolean
+          is_half_day: boolean
+          is_recurring: boolean
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          applies_to_all?: boolean
+          company_id: string
+          created_at?: string
+          department_ids?: string[] | null
+          holiday_date: string
+          id?: string
+          is_active?: boolean
+          is_half_day?: boolean
+          is_recurring?: boolean
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          applies_to_all?: boolean
+          company_id?: string
+          created_at?: string
+          department_ids?: string[] | null
+          holiday_date?: string
+          id?: string
+          is_active?: boolean
+          is_half_day?: boolean
+          is_recurring?: boolean
+          name?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "leave_holidays_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      leave_requests: {
+        Row: {
+          contact_during_leave: string | null
+          created_at: string
+          duration: number
+          employee_id: string
+          end_date: string
+          end_half: string | null
+          handover_notes: string | null
+          id: string
+          leave_type_id: string
+          reason: string | null
+          request_number: string
+          review_notes: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          start_date: string
+          start_half: string | null
+          status: string
+          submitted_at: string | null
+          updated_at: string
+          workflow_instance_id: string | null
+        }
+        Insert: {
+          contact_during_leave?: string | null
+          created_at?: string
+          duration: number
+          employee_id: string
+          end_date: string
+          end_half?: string | null
+          handover_notes?: string | null
+          id?: string
+          leave_type_id: string
+          reason?: string | null
+          request_number: string
+          review_notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          start_date: string
+          start_half?: string | null
+          status?: string
+          submitted_at?: string | null
+          updated_at?: string
+          workflow_instance_id?: string | null
+        }
+        Update: {
+          contact_during_leave?: string | null
+          created_at?: string
+          duration?: number
+          employee_id?: string
+          end_date?: string
+          end_half?: string | null
+          handover_notes?: string | null
+          id?: string
+          leave_type_id?: string
+          reason?: string | null
+          request_number?: string
+          review_notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          start_date?: string
+          start_half?: string | null
+          status?: string
+          submitted_at?: string | null
+          updated_at?: string
+          workflow_instance_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "leave_requests_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leave_requests_leave_type_id_fkey"
+            columns: ["leave_type_id"]
+            isOneToOne: false
+            referencedRelation: "leave_types"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leave_requests_reviewed_by_fkey"
+            columns: ["reviewed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leave_requests_workflow_instance_id_fkey"
+            columns: ["workflow_instance_id"]
+            isOneToOne: false
+            referencedRelation: "workflow_instances"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      leave_rollover_rules: {
+        Row: {
+          company_id: string
+          created_at: string
+          forfeit_unused: boolean
+          id: string
+          is_active: boolean
+          leave_type_id: string
+          max_balance_cap: number | null
+          max_rollover_amount: number | null
+          rollover_expiry_months: number | null
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          forfeit_unused?: boolean
+          id?: string
+          is_active?: boolean
+          leave_type_id: string
+          max_balance_cap?: number | null
+          max_rollover_amount?: number | null
+          rollover_expiry_months?: number | null
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          forfeit_unused?: boolean
+          id?: string
+          is_active?: boolean
+          leave_type_id?: string
+          max_balance_cap?: number | null
+          max_rollover_amount?: number | null
+          rollover_expiry_months?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "leave_rollover_rules_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leave_rollover_rules_leave_type_id_fkey"
+            columns: ["leave_type_id"]
+            isOneToOne: false
+            referencedRelation: "leave_types"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      leave_types: {
+        Row: {
+          accrual_unit: string
+          advance_notice_days: number | null
+          allows_negative_balance: boolean
+          can_be_encashed: boolean
+          code: string
+          color: string | null
+          company_id: string
+          created_at: string
+          default_annual_entitlement: number | null
+          description: string | null
+          encashment_rate: number | null
+          end_date: string | null
+          id: string
+          is_accrual_based: boolean
+          is_active: boolean
+          max_consecutive_days: number | null
+          max_negative_balance: number | null
+          min_request_amount: number | null
+          name: string
+          requires_approval: boolean
+          start_date: string
+          updated_at: string
+        }
+        Insert: {
+          accrual_unit?: string
+          advance_notice_days?: number | null
+          allows_negative_balance?: boolean
+          can_be_encashed?: boolean
+          code: string
+          color?: string | null
+          company_id: string
+          created_at?: string
+          default_annual_entitlement?: number | null
+          description?: string | null
+          encashment_rate?: number | null
+          end_date?: string | null
+          id?: string
+          is_accrual_based?: boolean
+          is_active?: boolean
+          max_consecutive_days?: number | null
+          max_negative_balance?: number | null
+          min_request_amount?: number | null
+          name: string
+          requires_approval?: boolean
+          start_date?: string
+          updated_at?: string
+        }
+        Update: {
+          accrual_unit?: string
+          advance_notice_days?: number | null
+          allows_negative_balance?: boolean
+          can_be_encashed?: boolean
+          code?: string
+          color?: string | null
+          company_id?: string
+          created_at?: string
+          default_annual_entitlement?: number | null
+          description?: string | null
+          encashment_rate?: number | null
+          end_date?: string | null
+          id?: string
+          is_accrual_based?: boolean
+          is_active?: boolean
+          max_consecutive_days?: number | null
+          max_negative_balance?: number | null
+          min_request_amount?: number | null
+          name?: string
+          requires_approval?: boolean
+          start_date?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "leave_types_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       letter_templates: {
         Row: {
           available_variables: Json
