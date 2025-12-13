@@ -57,7 +57,24 @@ export interface LeaveRolloverRule {
   rollover_expiry_months: number | null;
   forfeit_unused: boolean;
   is_active: boolean;
+  start_date: string;
+  end_date: string | null;
   leave_type?: LeaveType;
+}
+
+export interface LeaveBalanceRecalculation {
+  id: string;
+  employee_id: string;
+  company_id: string;
+  calculation_type: 'current_year' | 'from_hire_date' | 'custom_range';
+  period_start: string;
+  period_end: string;
+  old_balance: any;
+  new_balance: any;
+  triggered_by: 'manual' | 'rule_change';
+  initiated_by: string | null;
+  created_at: string;
+  notes: string | null;
 }
 
 export interface LeaveBalance {
@@ -464,6 +481,42 @@ export function useLeaveManagement(companyId?: string) {
     },
   });
 
+  // Recalculate leave balance
+  const recalculateLeaveBalance = useMutation({
+    mutationFn: async ({
+      employeeId,
+      companyId,
+      calculationType = 'current_year',
+      periodStart,
+      periodEnd,
+    }: {
+      employeeId: string;
+      companyId: string;
+      calculationType?: 'current_year' | 'from_hire_date' | 'custom_range';
+      periodStart?: string;
+      periodEnd?: string;
+    }) => {
+      const { data, error } = await supabase.rpc('recalculate_leave_balance', {
+        p_employee_id: employeeId,
+        p_company_id: companyId,
+        p_calculation_type: calculationType,
+        p_period_start: periodStart || null,
+        p_period_end: periodEnd || null,
+        p_triggered_by: 'manual',
+        p_initiated_by: user?.id || null,
+      });
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["leave-balances"] });
+      toast.success("Leave balance recalculated successfully");
+    },
+    onError: (error: Error) => {
+      toast.error(`Failed to recalculate balance: ${error.message}`);
+    },
+  });
+
   return {
     // Data
     leaveTypes,
@@ -493,6 +546,7 @@ export function useLeaveManagement(companyId?: string) {
     updateLeaveRequestStatus,
     createHoliday,
     createCountryHoliday,
+    recalculateLeaveBalance,
     // Refetch
     refetchBalances,
     refetchRequests,

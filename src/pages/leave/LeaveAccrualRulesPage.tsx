@@ -49,6 +49,8 @@ export default function LeaveAccrualRulesPage() {
     employee_status: "",
     employee_type: "",
     priority: 0,
+    start_date: new Date().toISOString().split('T')[0],
+    end_date: "" as string,
   });
 
   const resetForm = () => {
@@ -63,6 +65,8 @@ export default function LeaveAccrualRulesPage() {
       employee_status: "",
       employee_type: "",
       priority: 0,
+      start_date: new Date().toISOString().split('T')[0],
+      end_date: "",
     });
   };
 
@@ -75,6 +79,7 @@ export default function LeaveAccrualRulesPage() {
       years_of_service_max: formData.years_of_service_max || undefined,
       employee_status: formData.employee_status || undefined,
       employee_type: formData.employee_type || undefined,
+      end_date: formData.end_date || undefined,
     });
     setIsOpen(false);
     resetForm();
@@ -241,6 +246,28 @@ export default function LeaveAccrualRulesPage() {
                   </div>
                 </div>
 
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="start_date">Start Date *</Label>
+                    <Input
+                      id="start_date"
+                      type="date"
+                      value={formData.start_date}
+                      onChange={(e) => setFormData({ ...formData, start_date: e.target.value })}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="end_date">End Date (Optional)</Label>
+                    <Input
+                      id="end_date"
+                      type="date"
+                      value={formData.end_date}
+                      onChange={(e) => setFormData({ ...formData, end_date: e.target.value })}
+                      placeholder="No end date"
+                    />
+                  </div>
+                </div>
+
                 <div className="space-y-2">
                   <Label htmlFor="priority">Priority (Higher = Applied First)</Label>
                   <Input
@@ -274,7 +301,7 @@ export default function LeaveAccrualRulesPage() {
                 <TableHead>Frequency</TableHead>
                 <TableHead>Amount</TableHead>
                 <TableHead>Years of Service</TableHead>
-                <TableHead>Employee Status</TableHead>
+                <TableHead>Validity Period</TableHead>
                 <TableHead>Priority</TableHead>
                 <TableHead>Status</TableHead>
               </TableRow>
@@ -310,7 +337,11 @@ export default function LeaveAccrualRulesPage() {
                     <TableCell>
                       {rule.years_of_service_min} - {rule.years_of_service_max || "∞"} years
                     </TableCell>
-                    <TableCell>{rule.employee_status || "All"}</TableCell>
+                    <TableCell>
+                      <span className="text-sm">
+                        {new Date(rule.start_date).toLocaleDateString()} - {rule.end_date ? new Date(rule.end_date).toLocaleDateString() : "No end"}
+                      </span>
+                    </TableCell>
                     <TableCell>{rule.priority}</TableCell>
                     <TableCell>
                       <Badge variant={rule.is_active ? "default" : "secondary"}>
