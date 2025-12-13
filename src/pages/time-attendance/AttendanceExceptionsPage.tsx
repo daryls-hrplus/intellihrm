@@ -1,0 +1,215 @@
+import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
+import { useToast } from "@/hooks/use-toast";
+import { AppLayout } from "@/components/layout/AppLayout";
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { format, parseISO } from "date-fns";
+import { AlertTriangle, CheckCircle, XCircle, Loader2 } from "lucide-react";
+
+interface AttendanceException {
+  id: string;
+  employee_id: string;
+  exception_date: string;
+  exception_type: string;
+  original_time: string | null;
+  corrected_time: string | null;
+  reason: string | null;
+  status: string;
+  review_notes: string | null;
+  employee?: { full_name: string };
+}
+
+const exceptionTypes: Record<string, string> = {
+  missing_clock_in: "Missing Clock In",
+  missing_clock_out: "Missing Clock Out",
+  late_arrival: "Late Arrival",
+  early_departure: "Early Departure",
+  long_break: "Extended Break",
+  short_hours: "Short Hours",
+  overtime_unapproved: "Unapproved Overtime",
+  manual_correction: "Manual Correction",
+};
+
+const statusColors: Record<string, string> = {
+  pending: "bg-yellow-500/20 text-yellow-700",
+  approved: "bg-green-500/20 text-green-700",
+  rejected: "bg-red-500/20 text-red-700",
+  auto_resolved: "bg-blue-500/20 text-blue-700",
+};
+
+export default function AttendanceExceptionsPage() {
+  const { user, profile } = useAuth();
+  const { toast } = useToast();
+  const [exceptions, setExceptions] = useState<AttendanceException[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [reviewDialogOpen, setReviewDialogOpen] = useState(false);
+  const [selectedException, setSelectedException] = useState<AttendanceException | null>(null);
+  const [reviewNotes, setReviewNotes] = useState("");
+
+  useEffect(() => {
+    if (profile?.company_id) loadExceptions();
+  }, [profile?.company_id]);
+
+  const loadExceptions = async () => {
+    setIsLoading(true);
+    const { data } = await supabase
+      .from("attendance_exceptions")
+      .select("*, employee:profiles!attendance_exceptions_employee_id_fkey(full_name)")
+      .eq("company_id", profile?.company_id)
+      .order("exception_date", { ascending: false });
+    if (data) setExceptions(data as AttendanceException[]);
+    setIsLoading(false);
+  };
+
+  const handleReview = async (action: "approved" | "rejected") => {
+    if (!selectedException) return;
+    await supabase.from("attendance_exceptions").update({
+      status: action,
+      reviewed_by: user?.id,
+      reviewed_at: new Date().toISOString(),
+      review_notes: reviewNotes,
+    }).eq("id", selectedException.id);
+    toast({ title: `Exception ${action}` });
+    setReviewDialogOpen(false);
+    setReviewNotes("");
+    loadExceptions();
+  };
+
+  const openReview = (exception: AttendanceException) => {
+    setSelectedException(exception);
+    setReviewNotes("");
+    setReviewDialogOpen(true);
+  };
+
+  const pendingExceptions = exceptions.filter(e => e.status === "pending");
+  const resolvedExceptions = exceptions.filter(e => e.status !== "pending");
+
+  if (isLoading) {
+    return <AppLayout><div className="flex items-center justify-center h-64"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div></AppLayout>;
+  }
+
+  return (
+    <AppLayout>
+      <div className="space-y-6">
+        <Breadcrumbs items={[{ label: "Time & Attendance", href: "/time-attendance" }, { label: "Attendance Exceptions" }]} />
+
+        <div className="flex items-center gap-3">
+          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-warning/10"><AlertTriangle className="h-6 w-6 text-warning" /></div>
+          <div>
+            <h1 className="text-2xl font-bold">Attendance Exceptions</h1>
+            <p className="text-muted-foreground">Review missing punches and attendance issues</p>
+          </div>
+        </div>
+
+        <div className="grid gap-4 md:grid-cols-4">
+          <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Pending Review</CardTitle></CardHeader><CardContent><div className="text-2xl font-bold text-yellow-600">{pendingExceptions.length}</div></CardContent></Card>
+          <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Approved</CardTitle></CardHeader><CardContent><div className="text-2xl font-bold text-green-600">{exceptions.filter(e => e.status === "approved").length}</div></CardContent></Card>
+          <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Rejected</CardTitle></CardHeader><CardContent><div className="text-2xl font-bold text-red-600">{exceptions.filter(e => e.status === "rejected").length}</div></CardContent></Card>
+          <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Auto Resolved</CardTitle></CardHeader><CardContent><div className="text-2xl font-bold text-blue-600">{exceptions.filter(e => e.status === "auto_resolved").length}</div></CardContent></Card>
+        </div>
+
+        <Tabs defaultValue="pending">
+          <TabsList>
+            <TabsTrigger value="pending">Pending ({pendingExceptions.length})</TabsTrigger>
+            <TabsTrigger value="resolved">Resolved ({resolvedExceptions.length})</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="pending">
+            <Card>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Employee</TableHead>
+                    <TableHead>Date</TableHead>
+                    <TableHead>Type</TableHead>
+                    <TableHead>Original Time</TableHead>
+                    <TableHead>Corrected Time</TableHead>
+                    <TableHead>Reason</TableHead>
+                    <TableHead>Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {pendingExceptions.length === 0 ? (
+                    <TableRow><TableCell colSpan={7} className="text-center text-muted-foreground">No pending exceptions</TableCell></TableRow>
+                  ) : pendingExceptions.map((exception) => (
+                    <TableRow key={exception.id}>
+                      <TableCell className="font-medium">{exception.employee?.full_name}</TableCell>
+                      <TableCell>{format(parseISO(exception.exception_date), "MMM d, yyyy")}</TableCell>
+                      <TableCell><Badge variant="outline">{exceptionTypes[exception.exception_type]}</Badge></TableCell>
+                      <TableCell>{exception.original_time ? format(parseISO(exception.original_time), "HH:mm") : "-"}</TableCell>
+                      <TableCell>{exception.corrected_time ? format(parseISO(exception.corrected_time), "HH:mm") : "-"}</TableCell>
+                      <TableCell className="max-w-xs truncate">{exception.reason || "-"}</TableCell>
+                      <TableCell><Button size="sm" onClick={() => openReview(exception)}>Review</Button></TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="resolved">
+            <Card>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Employee</TableHead>
+                    <TableHead>Date</TableHead>
+                    <TableHead>Type</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Reason</TableHead>
+                    <TableHead>Review Notes</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {resolvedExceptions.length === 0 ? (
+                    <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground">No resolved exceptions</TableCell></TableRow>
+                  ) : resolvedExceptions.map((exception) => (
+                    <TableRow key={exception.id}>
+                      <TableCell className="font-medium">{exception.employee?.full_name}</TableCell>
+                      <TableCell>{format(parseISO(exception.exception_date), "MMM d, yyyy")}</TableCell>
+                      <TableCell><Badge variant="outline">{exceptionTypes[exception.exception_type]}</Badge></TableCell>
+                      <TableCell><Badge className={statusColors[exception.status]}>{exception.status}</Badge></TableCell>
+                      <TableCell className="max-w-xs truncate">{exception.reason || "-"}</TableCell>
+                      <TableCell className="max-w-xs truncate">{exception.review_notes || "-"}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </Card>
+          </TabsContent>
+        </Tabs>
+      </div>
+
+      <Dialog open={reviewDialogOpen} onOpenChange={setReviewDialogOpen}>
+        <DialogContent>
+          <DialogHeader><DialogTitle>Review Exception</DialogTitle></DialogHeader>
+          {selectedException && (
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4 p-4 bg-muted rounded-lg">
+                <div><span className="text-sm text-muted-foreground">Employee:</span><p className="font-medium">{selectedException.employee?.full_name}</p></div>
+                <div><span className="text-sm text-muted-foreground">Date:</span><p className="font-medium">{format(parseISO(selectedException.exception_date), "MMM d, yyyy")}</p></div>
+                <div><span className="text-sm text-muted-foreground">Type:</span><p className="font-medium">{exceptionTypes[selectedException.exception_type]}</p></div>
+                <div><span className="text-sm text-muted-foreground">Reason:</span><p className="font-medium">{selectedException.reason || "Not provided"}</p></div>
+              </div>
+              <div className="space-y-2"><Label>Review Notes</Label><Textarea value={reviewNotes} onChange={(e) => setReviewNotes(e.target.value)} placeholder="Add notes about your decision..." /></div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setReviewDialogOpen(false)}>Cancel</Button>
+            <Button variant="destructive" onClick={() => handleReview("rejected")}><XCircle className="h-4 w-4 mr-2" />Reject</Button>
+            <Button onClick={() => handleReview("approved")}><CheckCircle className="h-4 w-4 mr-2" />Approve</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </AppLayout>
+  );
+}

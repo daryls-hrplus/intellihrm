@@ -77,6 +77,48 @@ const features = [
     href: "/time-attendance/timesheet-approvals",
     color: "bg-indigo-500/10 text-indigo-600",
   },
+  {
+    title: "Timeclock Devices",
+    description: "Manage physical timeclock terminals",
+    icon: Settings,
+    href: "/time-attendance/devices",
+    color: "bg-slate-500/10 text-slate-600",
+  },
+  {
+    title: "Attendance Policies",
+    description: "Configure late rules and rounding",
+    icon: Settings,
+    href: "/time-attendance/policies",
+    color: "bg-amber-500/10 text-amber-600",
+  },
+  {
+    title: "Exceptions",
+    description: "Review missing punches and corrections",
+    icon: AlertCircle,
+    href: "/time-attendance/exceptions",
+    color: "bg-red-500/10 text-red-600",
+  },
+  {
+    title: "Live Dashboard",
+    description: "Real-time attendance feed",
+    icon: UserCheck,
+    href: "/time-attendance/live",
+    color: "bg-green-500/10 text-green-600",
+  },
+  {
+    title: "Punch Import",
+    description: "Import punches from external systems",
+    icon: ClipboardList,
+    href: "/time-attendance/import",
+    color: "bg-cyan-500/10 text-cyan-600",
+  },
+  {
+    title: "Analytics",
+    description: "Attendance trends and insights",
+    icon: TrendingUp,
+    href: "/time-attendance/analytics",
+    color: "bg-purple-500/10 text-purple-600",
+  },
 ];
 
 const stats = [
