@@ -84,6 +84,8 @@ import LeaveBalanceRecalculationPage from "./pages/leave/LeaveBalanceRecalculati
 import LeaveAnalyticsPage from "./pages/leave/LeaveAnalyticsPage";
 import CompensatoryTimePage from "./pages/leave/CompensatoryTimePage";
 import CompTimePoliciesPage from "./pages/leave/CompTimePoliciesPage";
+import LeaveCalendarPage from "./pages/leave/LeaveCalendarPage";
+import LeaveBalanceAdjustmentsPage from "./pages/leave/LeaveBalanceAdjustmentsPage";
 
 // Compensation pages
 import CompensationDashboardPage from "./pages/compensation/CompensationDashboardPage";
