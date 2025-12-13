@@ -5702,6 +5702,70 @@ export type Database = {
           },
         ]
       }
+      employee_shift_assignments: {
+        Row: {
+          company_id: string
+          created_at: string
+          effective_date: string
+          employee_id: string
+          end_date: string | null
+          id: string
+          is_primary: boolean | null
+          notes: string | null
+          rotation_pattern: string | null
+          shift_id: string
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          effective_date: string
+          employee_id: string
+          end_date?: string | null
+          id?: string
+          is_primary?: boolean | null
+          notes?: string | null
+          rotation_pattern?: string | null
+          shift_id: string
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          effective_date?: string
+          employee_id?: string
+          end_date?: string | null
+          id?: string
+          is_primary?: boolean | null
+          notes?: string | null
+          rotation_pattern?: string | null
+          shift_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "employee_shift_assignments_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_shift_assignments_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_shift_assignments_shift_id_fkey"
+            columns: ["shift_id"]
+            isOneToOne: false
+            referencedRelation: "shifts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       employee_tax_elections: {
         Row: {
           additional_withholding: number | null
@@ -18360,6 +18424,230 @@ export type Database = {
           },
         ]
       }
+      shift_payment_rules: {
+        Row: {
+          amount: number
+          applies_to: string
+          code: string
+          company_id: string
+          created_at: string
+          day_of_week: number[] | null
+          description: string | null
+          end_date: string | null
+          end_time: string | null
+          id: string
+          is_active: boolean | null
+          is_taxable: boolean | null
+          minimum_hours_threshold: number | null
+          name: string
+          payment_type: string
+          priority: number | null
+          shift_id: string | null
+          start_date: string
+          start_time: string | null
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          applies_to: string
+          code: string
+          company_id: string
+          created_at?: string
+          day_of_week?: number[] | null
+          description?: string | null
+          end_date?: string | null
+          end_time?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_taxable?: boolean | null
+          minimum_hours_threshold?: number | null
+          name: string
+          payment_type: string
+          priority?: number | null
+          shift_id?: string | null
+          start_date?: string
+          start_time?: string | null
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          applies_to?: string
+          code?: string
+          company_id?: string
+          created_at?: string
+          day_of_week?: number[] | null
+          description?: string | null
+          end_date?: string | null
+          end_time?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_taxable?: boolean | null
+          minimum_hours_threshold?: number | null
+          name?: string
+          payment_type?: string
+          priority?: number | null
+          shift_id?: string | null
+          start_date?: string
+          start_time?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shift_payment_rules_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shift_payment_rules_shift_id_fkey"
+            columns: ["shift_id"]
+            isOneToOne: false
+            referencedRelation: "shifts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      shift_rounding_rules: {
+        Row: {
+          apply_to_overtime: boolean | null
+          company_id: string
+          created_at: string
+          description: string | null
+          end_date: string | null
+          grace_period_direction: string | null
+          grace_period_minutes: number | null
+          id: string
+          is_active: boolean | null
+          name: string
+          rounding_direction: string
+          rounding_interval: number
+          rule_type: string
+          shift_id: string | null
+          start_date: string
+          updated_at: string
+        }
+        Insert: {
+          apply_to_overtime?: boolean | null
+          company_id: string
+          created_at?: string
+          description?: string | null
+          end_date?: string | null
+          grace_period_direction?: string | null
+          grace_period_minutes?: number | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          rounding_direction: string
+          rounding_interval?: number
+          rule_type: string
+          shift_id?: string | null
+          start_date?: string
+          updated_at?: string
+        }
+        Update: {
+          apply_to_overtime?: boolean | null
+          company_id?: string
+          created_at?: string
+          description?: string | null
+          end_date?: string | null
+          grace_period_direction?: string | null
+          grace_period_minutes?: number | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          rounding_direction?: string
+          rounding_interval?: number
+          rule_type?: string
+          shift_id?: string | null
+          start_date?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shift_rounding_rules_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shift_rounding_rules_shift_id_fkey"
+            columns: ["shift_id"]
+            isOneToOne: false
+            referencedRelation: "shifts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      shifts: {
+        Row: {
+          break_duration_minutes: number | null
+          code: string
+          color: string | null
+          company_id: string
+          created_at: string
+          crosses_midnight: boolean | null
+          description: string | null
+          end_date: string | null
+          end_time: string
+          id: string
+          is_active: boolean | null
+          is_overnight: boolean | null
+          minimum_hours: number | null
+          name: string
+          start_date: string
+          start_time: string
+          updated_at: string
+        }
+        Insert: {
+          break_duration_minutes?: number | null
+          code: string
+          color?: string | null
+          company_id: string
+          created_at?: string
+          crosses_midnight?: boolean | null
+          description?: string | null
+          end_date?: string | null
+          end_time: string
+          id?: string
+          is_active?: boolean | null
+          is_overnight?: boolean | null
+          minimum_hours?: number | null
+          name: string
+          start_date?: string
+          start_time: string
+          updated_at?: string
+        }
+        Update: {
+          break_duration_minutes?: number | null
+          code?: string
+          color?: string | null
+          company_id?: string
+          created_at?: string
+          crosses_midnight?: boolean | null
+          description?: string | null
+          end_date?: string | null
+          end_time?: string
+          id?: string
+          is_active?: boolean | null
+          is_overnight?: boolean | null
+          minimum_hours?: number | null
+          name?: string
+          start_date?: string
+          start_time?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shifts_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       succession_candidates: {
         Row: {
           created_at: string
@@ -19073,7 +19361,12 @@ export type Database = {
           notes: string | null
           overtime_hours: number | null
           regular_hours: number | null
+          rounded_clock_in: string | null
+          rounded_clock_out: string | null
+          rounding_rule_applied: string | null
           schedule_id: string | null
+          shift_differential: number | null
+          shift_id: string | null
           status: string | null
           total_hours: number | null
           updated_at: string
@@ -19098,7 +19391,12 @@ export type Database = {
           notes?: string | null
           overtime_hours?: number | null
           regular_hours?: number | null
+          rounded_clock_in?: string | null
+          rounded_clock_out?: string | null
+          rounding_rule_applied?: string | null
           schedule_id?: string | null
+          shift_differential?: number | null
+          shift_id?: string | null
           status?: string | null
           total_hours?: number | null
           updated_at?: string
@@ -19123,7 +19421,12 @@ export type Database = {
           notes?: string | null
           overtime_hours?: number | null
           regular_hours?: number | null
+          rounded_clock_in?: string | null
+          rounded_clock_out?: string | null
+          rounding_rule_applied?: string | null
           schedule_id?: string | null
+          shift_differential?: number | null
+          shift_id?: string | null
           status?: string | null
           total_hours?: number | null
           updated_at?: string
@@ -19151,10 +19454,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "time_clock_entries_rounding_rule_applied_fkey"
+            columns: ["rounding_rule_applied"]
+            isOneToOne: false
+            referencedRelation: "shift_rounding_rules"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "time_clock_entries_schedule_id_fkey"
             columns: ["schedule_id"]
             isOneToOne: false
             referencedRelation: "work_schedules"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "time_clock_entries_shift_id_fkey"
+            columns: ["shift_id"]
+            isOneToOne: false
+            referencedRelation: "shifts"
             referencedColumns: ["id"]
           },
         ]
@@ -20578,6 +20895,24 @@ export type Database = {
           p_year: number
         }
         Returns: undefined
+      }
+      apply_time_rounding: {
+        Args: {
+          p_direction: string
+          p_grace_minutes?: number
+          p_interval: number
+          p_time: string
+        }
+        Returns: string
+      }
+      calculate_shift_differential: {
+        Args: {
+          p_clock_in: string
+          p_overtime_hours: number
+          p_regular_hours: number
+          p_shift_id: string
+        }
+        Returns: number
       }
       can_act_on_workflow: {
         Args: { p_instance_id: string; p_user_id: string }
