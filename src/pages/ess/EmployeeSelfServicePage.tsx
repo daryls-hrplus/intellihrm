@@ -23,6 +23,7 @@ import {
   Briefcase,
   MessageCircle,
   Award,
+  DollarSign,
 } from "lucide-react";
 
 const essModules = [
@@ -151,6 +152,13 @@ const essModules = [
     href: "/ess/jobs",
     icon: Briefcase,
     color: "bg-blue-500/10 text-blue-600",
+  },
+  {
+    title: "My Compensation",
+    description: "View your salary, allowances, and total rewards",
+    href: "/ess/compensation",
+    icon: DollarSign,
+    color: "bg-emerald-500/10 text-emerald-600",
   },
   {
     title: "My Feedback",
