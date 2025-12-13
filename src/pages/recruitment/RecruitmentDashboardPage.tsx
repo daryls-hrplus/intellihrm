@@ -42,13 +42,6 @@ const recruitmentModules = [
     icon: Calendar,
     color: "bg-warning/10 text-warning",
   },
-  {
-    title: "Onboarding",
-    description: "New hire onboarding process",
-    href: "/workforce/onboarding",
-    icon: UserPlus,
-    color: "bg-destructive/10 text-destructive",
-  },
 ];
 
 const statCards = [
@@ -73,7 +66,7 @@ export default function RecruitmentDashboardPage() {
                   Recruitment
                 </h1>
                 <p className="text-muted-foreground">
-                  Hiring and onboarding
+                  Manage job requisitions, candidates, and hiring
                 </p>
               </div>
             </div>
