@@ -36,6 +36,7 @@ import AdminLookupValuesPage from "./pages/admin/AdminLookupValuesPage";
 import AdminLmsManagementPage from "./pages/admin/AdminLmsManagementPage";
 import AdminOnboardingPage from "./pages/admin/AdminOnboardingPage";
 import AdminOnboardingDetailPage from "./pages/admin/AdminOnboardingDetailPage";
+import AdminColorSchemePage from "./pages/admin/AdminColorSchemePage";
 // Workforce pages
 import WorkforceDashboardPage from "./pages/workforce/WorkforceDashboardPage";
 import EmployeesPage from "./pages/workforce/EmployeesPage";
@@ -377,6 +378,14 @@ const App = () => (
               element={
                 <ProtectedRoute requiredRoles={["admin"]}>
                   <AdminSettingsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/color-scheme"
+              element={
+                <ProtectedRoute requiredRoles={["admin"]}>
+                  <AdminColorSchemePage />
                 </ProtectedRoute>
               }
             />
