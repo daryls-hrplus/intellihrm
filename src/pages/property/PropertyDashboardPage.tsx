@@ -3,6 +3,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ModuleReportsButton } from "@/components/reports/ModuleReportsButton";
 import { ModuleBIButton } from "@/components/bi/ModuleBIButton";
 import { usePropertyManagement } from "@/hooks/usePropertyManagement";
+import { LeaveCompanyFilter, useLeaveCompanyFilter } from "@/components/leave/LeaveCompanyFilter";
 import PropertyCategoriesTab from "@/components/property/PropertyCategoriesTab";
 import PropertyItemsTab from "@/components/property/PropertyItemsTab";
 import PropertyAssignmentsTab from "@/components/property/PropertyAssignmentsTab";
@@ -21,11 +22,12 @@ import {
 } from "lucide-react";
 
 export default function PropertyDashboardPage() {
+  const { selectedCompanyId, setSelectedCompanyId } = useLeaveCompanyFilter();
   const {
     items,
     requests,
     maintenance,
-  } = usePropertyManagement();
+  } = usePropertyManagement(selectedCompanyId);
 
   const totalAssets = items?.length || 0;
   const assignedAssets = items?.filter(item => item.status === 'assigned').length || 0;
@@ -58,6 +60,10 @@ export default function PropertyDashboardPage() {
               </div>
             </div>
             <div className="flex items-center gap-2">
+              <LeaveCompanyFilter 
+                selectedCompanyId={selectedCompanyId} 
+                onCompanyChange={setSelectedCompanyId} 
+              />
               <ModuleBIButton module="property" />
               <ModuleReportsButton module="property" />
             </div>
@@ -114,19 +120,19 @@ export default function PropertyDashboardPage() {
           </TabsList>
 
           <TabsContent value="items">
-            <PropertyItemsTab />
+            <PropertyItemsTab companyId={selectedCompanyId} />
           </TabsContent>
           <TabsContent value="assignments">
-            <PropertyAssignmentsTab />
+            <PropertyAssignmentsTab companyId={selectedCompanyId} />
           </TabsContent>
           <TabsContent value="requests">
-            <PropertyRequestsTab />
+            <PropertyRequestsTab companyId={selectedCompanyId} />
           </TabsContent>
           <TabsContent value="maintenance">
-            <PropertyMaintenanceTab />
+            <PropertyMaintenanceTab companyId={selectedCompanyId} />
           </TabsContent>
           <TabsContent value="categories">
-            <PropertyCategoriesTab />
+            <PropertyCategoriesTab companyId={selectedCompanyId} />
           </TabsContent>
         </Tabs>
       </div>
