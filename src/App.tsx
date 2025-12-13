@@ -165,6 +165,7 @@ import MssEmployeeRelationsPage from "./pages/mss/MssEmployeeRelationsPage";
 import MssLeavePage from "./pages/mss/MssLeavePage";
 import MssBenefitsPage from "./pages/mss/MssBenefitsPage";
 import MssHSEPage from "./pages/mss/MssHSEPage";
+import MssRecruitmentPage from "./pages/mss/MssRecruitmentPage";
 
 // Workflow pages
 import AdminWorkflowTemplatesPage from "./pages/admin/AdminWorkflowTemplatesPage";
@@ -374,6 +375,14 @@ const App = () => (
               element={
                 <ProtectedRoute moduleCode="mss">
                   <MssHSEPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/mss/recruitment"
+              element={
+                <ProtectedRoute moduleCode="mss">
+                  <MssRecruitmentPage />
                 </ProtectedRoute>
               }
             />

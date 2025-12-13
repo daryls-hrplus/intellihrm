@@ -5365,6 +5365,7 @@ export type Database = {
           reviewed_by: string | null
           status: string
           updated_at: string
+          workflow_instance_id: string | null
         }
         Insert: {
           created_at?: string
@@ -5380,6 +5381,7 @@ export type Database = {
           reviewed_by?: string | null
           status?: string
           updated_at?: string
+          workflow_instance_id?: string | null
         }
         Update: {
           created_at?: string
@@ -5395,6 +5397,7 @@ export type Database = {
           reviewed_by?: string | null
           status?: string
           updated_at?: string
+          workflow_instance_id?: string | null
         }
         Relationships: [
           {
@@ -5423,6 +5426,13 @@ export type Database = {
             columns: ["reviewed_by"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "headcount_requests_workflow_instance_id_fkey"
+            columns: ["workflow_instance_id"]
+            isOneToOne: false
+            referencedRelation: "workflow_instances"
             referencedColumns: ["id"]
           },
         ]
@@ -6814,6 +6824,7 @@ export type Database = {
           employment_type: string
           experience_level: string | null
           filled_count: number | null
+          headcount_request_id: string | null
           hiring_manager_id: string | null
           id: string
           is_internal_only: boolean | null
@@ -6847,6 +6858,7 @@ export type Database = {
           employment_type?: string
           experience_level?: string | null
           filled_count?: number | null
+          headcount_request_id?: string | null
           hiring_manager_id?: string | null
           id?: string
           is_internal_only?: boolean | null
@@ -6880,6 +6892,7 @@ export type Database = {
           employment_type?: string
           experience_level?: string | null
           filled_count?: number | null
+          headcount_request_id?: string | null
           hiring_manager_id?: string | null
           id?: string
           is_internal_only?: boolean | null
@@ -6922,6 +6935,13 @@ export type Database = {
             columns: ["department_id"]
             isOneToOne: false
             referencedRelation: "departments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "job_requisitions_headcount_request_id_fkey"
+            columns: ["headcount_request_id"]
+            isOneToOne: false
+            referencedRelation: "headcount_requests"
             referencedColumns: ["id"]
           },
           {
