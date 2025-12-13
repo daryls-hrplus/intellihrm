@@ -192,7 +192,7 @@ export function useSuccession(companyId?: string) {
           company_id: companyId,
           assessed_by: user?.id,
           is_current: true,
-        })
+        }] as any)
         .select()
         .single();
 

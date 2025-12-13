@@ -68,8 +68,8 @@ export function KeyPositionsTab({ companyId }: KeyPositionsTabProps) {
   };
 
   const loadPositions = async () => {
-    const { data } = await supabase
-      .from('positions')
+    const { data } = await (supabase
+      .from('positions') as any)
       .select('id, title, code')
       .eq('company_id', companyId)
       .order('title');
