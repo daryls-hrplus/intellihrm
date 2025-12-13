@@ -14350,6 +14350,7 @@ export type Database = {
           pay_frequency: string
           start_date: string
           updated_at: string
+          uses_national_insurance: boolean | null
         }
         Insert: {
           code: string
@@ -14363,6 +14364,7 @@ export type Database = {
           pay_frequency: string
           start_date?: string
           updated_at?: string
+          uses_national_insurance?: boolean | null
         }
         Update: {
           code?: string
@@ -14376,6 +14378,7 @@ export type Database = {
           pay_frequency?: string
           start_date?: string
           updated_at?: string
+          uses_national_insurance?: boolean | null
         }
         Relationships: [
           {
@@ -14467,10 +14470,12 @@ export type Database = {
           created_at: string
           cutoff_date: string | null
           id: string
+          monday_count: number | null
           notes: string | null
           paid_at: string | null
           paid_by: string | null
           pay_date: string
+          pay_group_id: string | null
           period_end: string
           period_number: string
           period_start: string
@@ -14479,6 +14484,7 @@ export type Database = {
           schedule_id: string
           status: string
           updated_at: string
+          year: number | null
         }
         Insert: {
           approved_at?: string | null
@@ -14487,10 +14493,12 @@ export type Database = {
           created_at?: string
           cutoff_date?: string | null
           id?: string
+          monday_count?: number | null
           notes?: string | null
           paid_at?: string | null
           paid_by?: string | null
           pay_date: string
+          pay_group_id?: string | null
           period_end: string
           period_number: string
           period_start: string
@@ -14499,6 +14507,7 @@ export type Database = {
           schedule_id: string
           status?: string
           updated_at?: string
+          year?: number | null
         }
         Update: {
           approved_at?: string | null
@@ -14507,10 +14516,12 @@ export type Database = {
           created_at?: string
           cutoff_date?: string | null
           id?: string
+          monday_count?: number | null
           notes?: string | null
           paid_at?: string | null
           paid_by?: string | null
           pay_date?: string
+          pay_group_id?: string | null
           period_end?: string
           period_number?: string
           period_start?: string
@@ -14519,6 +14530,7 @@ export type Database = {
           schedule_id?: string
           status?: string
           updated_at?: string
+          year?: number | null
         }
         Relationships: [
           {
@@ -14540,6 +14552,13 @@ export type Database = {
             columns: ["paid_by"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pay_periods_pay_group_id_fkey"
+            columns: ["pay_group_id"]
+            isOneToOne: false
+            referencedRelation: "pay_groups"
             referencedColumns: ["id"]
           },
           {
