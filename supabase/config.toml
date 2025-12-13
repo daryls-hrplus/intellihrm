@@ -62,3 +62,9 @@ verify_jwt = false
 
 [functions.report-ai-assistant]
 verify_jwt = false
+
+[functions.post-job-to-board]
+verify_jwt = false
+
+[functions.job-board-webhook]
+verify_jwt = false
