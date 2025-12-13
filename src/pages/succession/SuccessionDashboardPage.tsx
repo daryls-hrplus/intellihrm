@@ -10,9 +10,11 @@ import { TalentPoolsTab } from "@/components/succession/TalentPoolsTab";
 import { SuccessionPlansTab } from "@/components/succession/SuccessionPlansTab";
 import { KeyPositionsTab } from "@/components/succession/KeyPositionsTab";
 import { SuccessionAnalytics } from "@/components/succession/SuccessionAnalytics";
+import { CareerDevelopmentTab } from "@/components/succession/CareerDevelopmentTab";
+import { CareerPathsTab } from "@/components/succession/CareerPathsTab";
 import { useSuccession, NineBoxAssessment } from "@/hooks/useSuccession";
 import { supabase } from "@/integrations/supabase/client";
-import { TrendingUp, Grid3X3, Users, Target, AlertTriangle, BarChart3, Plus } from "lucide-react";
+import { TrendingUp, Grid3X3, Users, Target, AlertTriangle, BarChart3, Plus, BookOpen, Route } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 
@@ -185,7 +187,7 @@ export default function SuccessionDashboardPage() {
         {/* Main Content Tabs */}
         {selectedCompanyId && (
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-            <TabsList className="grid w-full grid-cols-5">
+            <TabsList className="flex flex-wrap h-auto gap-1 p-1">
               <TabsTrigger value="nine-box" className="flex items-center gap-2">
                 <Grid3X3 className="h-4 w-4" />
                 Nine-Box Grid
@@ -201,6 +203,14 @@ export default function SuccessionDashboardPage() {
               <TabsTrigger value="key-positions" className="flex items-center gap-2">
                 <AlertTriangle className="h-4 w-4" />
                 Key Positions
+              </TabsTrigger>
+              <TabsTrigger value="career-development" className="flex items-center gap-2">
+                <BookOpen className="h-4 w-4" />
+                Career Development
+              </TabsTrigger>
+              <TabsTrigger value="career-paths" className="flex items-center gap-2">
+                <Route className="h-4 w-4" />
+                Career Paths
               </TabsTrigger>
               <TabsTrigger value="analytics" className="flex items-center gap-2">
                 <BarChart3 className="h-4 w-4" />
@@ -231,6 +241,14 @@ export default function SuccessionDashboardPage() {
 
             <TabsContent value="key-positions">
               <KeyPositionsTab companyId={selectedCompanyId} />
+            </TabsContent>
+
+            <TabsContent value="career-development">
+              <CareerDevelopmentTab companyId={selectedCompanyId} />
+            </TabsContent>
+
+            <TabsContent value="career-paths">
+              <CareerPathsTab companyId={selectedCompanyId} />
             </TabsContent>
 
             <TabsContent value="analytics">

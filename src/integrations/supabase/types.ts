@@ -1589,6 +1589,102 @@ export type Database = {
           },
         ]
       }
+      career_path_steps: {
+        Row: {
+          career_path_id: string
+          created_at: string
+          id: string
+          job_id: string
+          requirements: string | null
+          step_order: number
+          typical_duration_months: number | null
+          updated_at: string
+        }
+        Insert: {
+          career_path_id: string
+          created_at?: string
+          id?: string
+          job_id: string
+          requirements?: string | null
+          step_order: number
+          typical_duration_months?: number | null
+          updated_at?: string
+        }
+        Update: {
+          career_path_id?: string
+          created_at?: string
+          id?: string
+          job_id?: string
+          requirements?: string | null
+          step_order?: number
+          typical_duration_months?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "career_path_steps_career_path_id_fkey"
+            columns: ["career_path_id"]
+            isOneToOne: false
+            referencedRelation: "career_paths"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "career_path_steps_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      career_paths: {
+        Row: {
+          company_id: string
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          is_active: boolean
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "career_paths_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "career_paths_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       color_schemes: {
         Row: {
           colors: Json
@@ -6233,6 +6329,189 @@ export type Database = {
             columns: ["training_id"]
             isOneToOne: false
             referencedRelation: "hse_safety_training"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      idp_activities: {
+        Row: {
+          activity_type: string
+          completion_date: string | null
+          created_at: string
+          description: string | null
+          due_date: string | null
+          goal_id: string
+          id: string
+          notes: string | null
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          activity_type?: string
+          completion_date?: string | null
+          created_at?: string
+          description?: string | null
+          due_date?: string | null
+          goal_id: string
+          id?: string
+          notes?: string | null
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          activity_type?: string
+          completion_date?: string | null
+          created_at?: string
+          description?: string | null
+          due_date?: string | null
+          goal_id?: string
+          id?: string
+          notes?: string | null
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "idp_activities_goal_id_fkey"
+            columns: ["goal_id"]
+            isOneToOne: false
+            referencedRelation: "idp_goals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      idp_goals: {
+        Row: {
+          category: string
+          completion_date: string | null
+          created_at: string
+          description: string | null
+          id: string
+          idp_id: string
+          notes: string | null
+          priority: string
+          progress_percentage: number | null
+          status: string
+          target_date: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          category?: string
+          completion_date?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          idp_id: string
+          notes?: string | null
+          priority?: string
+          progress_percentage?: number | null
+          status?: string
+          target_date?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          completion_date?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          idp_id?: string
+          notes?: string | null
+          priority?: string
+          progress_percentage?: number | null
+          status?: string
+          target_date?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "idp_goals_idp_id_fkey"
+            columns: ["idp_id"]
+            isOneToOne: false
+            referencedRelation: "individual_development_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      individual_development_plans: {
+        Row: {
+          actual_completion_date: string | null
+          company_id: string
+          created_at: string
+          created_by: string | null
+          description: string | null
+          employee_id: string
+          id: string
+          manager_id: string | null
+          start_date: string
+          status: string
+          target_completion_date: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          actual_completion_date?: string | null
+          company_id: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          employee_id: string
+          id?: string
+          manager_id?: string | null
+          start_date: string
+          status?: string
+          target_completion_date?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          actual_completion_date?: string | null
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          employee_id?: string
+          id?: string
+          manager_id?: string | null
+          start_date?: string
+          status?: string
+          target_completion_date?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "individual_development_plans_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "individual_development_plans_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "individual_development_plans_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "individual_development_plans_manager_id_fkey"
+            columns: ["manager_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
