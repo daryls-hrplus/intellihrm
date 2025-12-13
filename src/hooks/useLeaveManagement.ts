@@ -34,7 +34,7 @@ export interface LeaveAccrualRule {
   leave_type_id: string;
   name: string;
   description: string | null;
-  accrual_frequency: "monthly" | "annually" | "bi_weekly" | "weekly";
+  accrual_frequency: "daily" | "monthly" | "annually" | "bi_weekly" | "weekly";
   accrual_amount: number;
   years_of_service_min: number;
   years_of_service_max: number | null;

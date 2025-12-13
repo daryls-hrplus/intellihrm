@@ -3,6 +3,7 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import { useLeaveManagement, LeaveAccrualRule } from "@/hooks/useLeaveManagement";
 import { useAuth } from "@/contexts/AuthContext";
 import { LeaveCompanyFilter, useLeaveCompanyFilter } from "@/components/leave/LeaveCompanyFilter";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -29,20 +30,28 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
-import { Plus, TrendingUp } from "lucide-react";
+import { Plus, TrendingUp, Play, RefreshCw } from "lucide-react";
+import { toast } from "sonner";
 
 export default function LeaveAccrualRulesPage() {
   const { company } = useAuth();
   const { selectedCompanyId, setSelectedCompanyId } = useLeaveCompanyFilter();
   const { leaveTypes, accrualRules, loadingAccrualRules, createAccrualRule } = useLeaveManagement(selectedCompanyId);
   const [isOpen, setIsOpen] = useState(false);
+  const [isRunningAccrual, setIsRunningAccrual] = useState(false);
   const [formData, setFormData] = useState({
     leave_type_id: "",
     name: "",
     description: "",
-    accrual_frequency: "monthly" as "monthly" | "annually" | "bi_weekly" | "weekly",
+    accrual_frequency: "monthly" as "daily" | "monthly" | "annually" | "bi_weekly" | "weekly",
     accrual_amount: 0,
     years_of_service_min: 0,
     years_of_service_max: null as number | null,
@@ -85,7 +94,26 @@ export default function LeaveAccrualRulesPage() {
     resetForm();
   };
 
+  const handleRunAccrual = async (accrualType: "daily" | "monthly") => {
+    setIsRunningAccrual(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("scheduled-leave-accrual", {
+        body: { accrual_type: accrualType },
+      });
+      
+      if (error) throw error;
+      
+      toast.success(`${accrualType === "daily" ? "Daily" : "Monthly"} accrual completed: ${data.processed} employees processed`);
+    } catch (error) {
+      console.error("Accrual error:", error);
+      toast.error("Failed to run leave accrual");
+    } finally {
+      setIsRunningAccrual(false);
+    }
+  };
+
   const frequencyLabels: Record<string, string> = {
+    daily: "Daily",
     monthly: "Monthly",
     annually: "Annually",
     bi_weekly: "Bi-Weekly",
@@ -118,6 +146,26 @@ export default function LeaveAccrualRulesPage() {
               selectedCompanyId={selectedCompanyId} 
               onCompanyChange={setSelectedCompanyId} 
             />
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" disabled={isRunningAccrual}>
+                  {isRunningAccrual ? (
+                    <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
+                  ) : (
+                    <Play className="mr-2 h-4 w-4" />
+                  )}
+                  Run Accrual
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                <DropdownMenuItem onClick={() => handleRunAccrual("daily")}>
+                  Run Daily Accrual Now
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => handleRunAccrual("monthly")}>
+                  Run Monthly Accrual Now
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
             <Dialog open={isOpen} onOpenChange={(open) => { setIsOpen(open); if (!open) resetForm(); }}>
             <DialogTrigger asChild>
               <Button>
@@ -175,7 +223,7 @@ export default function LeaveAccrualRulesPage() {
                     <Label htmlFor="frequency">Accrual Frequency *</Label>
                     <Select
                       value={formData.accrual_frequency}
-                      onValueChange={(value: "monthly" | "annually" | "bi_weekly" | "weekly") => 
+                      onValueChange={(value: "daily" | "monthly" | "annually" | "bi_weekly" | "weekly") => 
                         setFormData({ ...formData, accrual_frequency: value })
                       }
                     >
@@ -183,6 +231,7 @@ export default function LeaveAccrualRulesPage() {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
+                        <SelectItem value="daily">Daily</SelectItem>
                         <SelectItem value="weekly">Weekly</SelectItem>
                         <SelectItem value="bi_weekly">Bi-Weekly</SelectItem>
                         <SelectItem value="monthly">Monthly</SelectItem>
