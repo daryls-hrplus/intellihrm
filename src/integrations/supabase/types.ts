@@ -4874,6 +4874,76 @@ export type Database = {
           },
         ]
       }
+      flight_risk_assessments: {
+        Row: {
+          assessed_by: string | null
+          assessment_date: string
+          company_id: string
+          created_at: string
+          employee_id: string
+          id: string
+          is_current: boolean
+          next_review_date: string | null
+          notes: string | null
+          retention_actions: string | null
+          risk_factors: Json | null
+          risk_level: string
+          updated_at: string
+        }
+        Insert: {
+          assessed_by?: string | null
+          assessment_date?: string
+          company_id: string
+          created_at?: string
+          employee_id: string
+          id?: string
+          is_current?: boolean
+          next_review_date?: string | null
+          notes?: string | null
+          retention_actions?: string | null
+          risk_factors?: Json | null
+          risk_level: string
+          updated_at?: string
+        }
+        Update: {
+          assessed_by?: string | null
+          assessment_date?: string
+          company_id?: string
+          created_at?: string
+          employee_id?: string
+          id?: string
+          is_current?: boolean
+          next_review_date?: string | null
+          notes?: string | null
+          retention_actions?: string | null
+          risk_factors?: Json | null
+          risk_level?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "flight_risk_assessments_assessed_by_fkey"
+            columns: ["assessed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "flight_risk_assessments_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "flight_risk_assessments_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       generated_letters: {
         Row: {
           approved_at: string | null
@@ -8857,6 +8927,174 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      mentorship_pairings: {
+        Row: {
+          created_at: string
+          end_date: string | null
+          goals: string | null
+          id: string
+          mentee_id: string
+          mentor_id: string
+          notes: string | null
+          program_id: string
+          start_date: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          end_date?: string | null
+          goals?: string | null
+          id?: string
+          mentee_id: string
+          mentor_id: string
+          notes?: string | null
+          program_id: string
+          start_date: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          end_date?: string | null
+          goals?: string | null
+          id?: string
+          mentee_id?: string
+          mentor_id?: string
+          notes?: string | null
+          program_id?: string
+          start_date?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mentorship_pairings_mentee_id_fkey"
+            columns: ["mentee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mentorship_pairings_mentor_id_fkey"
+            columns: ["mentor_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mentorship_pairings_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "mentorship_programs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mentorship_programs: {
+        Row: {
+          company_id: string
+          created_at: string
+          created_by: string | null
+          description: string | null
+          end_date: string | null
+          id: string
+          is_active: boolean
+          name: string
+          program_type: string
+          start_date: string
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          program_type?: string
+          start_date: string
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          program_type?: string
+          start_date?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mentorship_programs_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mentorship_programs_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mentorship_sessions: {
+        Row: {
+          action_items: string | null
+          created_at: string
+          duration_minutes: number | null
+          id: string
+          notes: string | null
+          pairing_id: string
+          session_date: string
+          status: string
+          topics: string | null
+          updated_at: string
+        }
+        Insert: {
+          action_items?: string | null
+          created_at?: string
+          duration_minutes?: number | null
+          id?: string
+          notes?: string | null
+          pairing_id: string
+          session_date: string
+          status?: string
+          topics?: string | null
+          updated_at?: string
+        }
+        Update: {
+          action_items?: string | null
+          created_at?: string
+          duration_minutes?: number | null
+          id?: string
+          notes?: string | null
+          pairing_id?: string
+          session_date?: string
+          status?: string
+          topics?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mentorship_sessions_pairing_id_fkey"
+            columns: ["pairing_id"]
+            isOneToOne: false
+            referencedRelation: "mentorship_pairings"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       nine_box_assessments: {
         Row: {
