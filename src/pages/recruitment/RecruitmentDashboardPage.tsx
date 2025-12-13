@@ -13,6 +13,7 @@ import {
   Calendar,
   ChevronRight,
   CheckCircle,
+  BarChart3,
 } from "lucide-react";
 
 const recruitmentModules = [
@@ -43,6 +44,13 @@ const recruitmentModules = [
     href: "/recruitment/manage?tab=interviews",
     icon: Calendar,
     color: "bg-warning/10 text-warning",
+  },
+  {
+    title: "Recruitment Analytics",
+    description: "Pipeline metrics, hiring trends & source analysis",
+    href: "/recruitment/analytics",
+    icon: BarChart3,
+    color: "bg-chart-3/10 text-chart-3",
   },
 ];
 

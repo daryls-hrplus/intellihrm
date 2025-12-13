@@ -123,6 +123,7 @@ import SuccessionDashboardPage from "./pages/succession/SuccessionDashboardPage"
 // Recruitment pages
 import RecruitmentDashboardPage from "./pages/recruitment/RecruitmentDashboardPage";
 import RecruitmentFullPage from "./pages/recruitment/RecruitmentFullPage";
+import RecruitmentAnalyticsPage from "./pages/recruitment/RecruitmentAnalyticsPage";
 
 // HSE pages
 import HSEDashboardPage from "./pages/hse/HSEDashboardPage";
@@ -1164,6 +1165,14 @@ const App = () => (
               element={
                 <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
                   <RecruitmentFullPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/recruitment/analytics"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
+                  <RecruitmentAnalyticsPage />
                 </ProtectedRoute>
               }
             />
