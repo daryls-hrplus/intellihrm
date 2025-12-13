@@ -563,6 +563,188 @@ export type Database = {
           },
         ]
       }
+      attendance_exceptions: {
+        Row: {
+          company_id: string
+          corrected_time: string | null
+          created_at: string
+          employee_id: string
+          exception_date: string
+          exception_type: string
+          id: string
+          original_time: string | null
+          reason: string | null
+          review_notes: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          time_clock_entry_id: string | null
+          updated_at: string
+          workflow_instance_id: string | null
+        }
+        Insert: {
+          company_id: string
+          corrected_time?: string | null
+          created_at?: string
+          employee_id: string
+          exception_date: string
+          exception_type: string
+          id?: string
+          original_time?: string | null
+          reason?: string | null
+          review_notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          time_clock_entry_id?: string | null
+          updated_at?: string
+          workflow_instance_id?: string | null
+        }
+        Update: {
+          company_id?: string
+          corrected_time?: string | null
+          created_at?: string
+          employee_id?: string
+          exception_date?: string
+          exception_type?: string
+          id?: string
+          original_time?: string | null
+          reason?: string | null
+          review_notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          time_clock_entry_id?: string | null
+          updated_at?: string
+          workflow_instance_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "attendance_exceptions_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attendance_exceptions_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attendance_exceptions_reviewed_by_fkey"
+            columns: ["reviewed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attendance_exceptions_time_clock_entry_id_fkey"
+            columns: ["time_clock_entry_id"]
+            isOneToOne: false
+            referencedRelation: "time_clock_entries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attendance_exceptions_workflow_instance_id_fkey"
+            columns: ["workflow_instance_id"]
+            isOneToOne: false
+            referencedRelation: "workflow_instances"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      attendance_policies: {
+        Row: {
+          auto_clock_out_hours: number | null
+          auto_deduct_late: boolean | null
+          code: string
+          company_id: string
+          created_at: string
+          description: string | null
+          early_departure_threshold_minutes: number | null
+          end_date: string | null
+          grace_period_minutes: number | null
+          id: string
+          is_active: boolean
+          is_default: boolean | null
+          late_deduction_minutes: number | null
+          late_threshold_minutes: number | null
+          max_daily_hours: number | null
+          min_break_duration_minutes: number | null
+          name: string
+          require_geolocation: boolean | null
+          require_photo_clock_in: boolean | null
+          require_photo_clock_out: boolean | null
+          round_clock_in: string | null
+          round_clock_out: string | null
+          start_date: string
+          updated_at: string
+        }
+        Insert: {
+          auto_clock_out_hours?: number | null
+          auto_deduct_late?: boolean | null
+          code: string
+          company_id: string
+          created_at?: string
+          description?: string | null
+          early_departure_threshold_minutes?: number | null
+          end_date?: string | null
+          grace_period_minutes?: number | null
+          id?: string
+          is_active?: boolean
+          is_default?: boolean | null
+          late_deduction_minutes?: number | null
+          late_threshold_minutes?: number | null
+          max_daily_hours?: number | null
+          min_break_duration_minutes?: number | null
+          name: string
+          require_geolocation?: boolean | null
+          require_photo_clock_in?: boolean | null
+          require_photo_clock_out?: boolean | null
+          round_clock_in?: string | null
+          round_clock_out?: string | null
+          start_date?: string
+          updated_at?: string
+        }
+        Update: {
+          auto_clock_out_hours?: number | null
+          auto_deduct_late?: boolean | null
+          code?: string
+          company_id?: string
+          created_at?: string
+          description?: string | null
+          early_departure_threshold_minutes?: number | null
+          end_date?: string | null
+          grace_period_minutes?: number | null
+          id?: string
+          is_active?: boolean
+          is_default?: boolean | null
+          late_deduction_minutes?: number | null
+          late_threshold_minutes?: number | null
+          max_daily_hours?: number | null
+          min_break_duration_minutes?: number | null
+          name?: string
+          require_geolocation?: boolean | null
+          require_photo_clock_in?: boolean | null
+          require_photo_clock_out?: boolean | null
+          round_clock_in?: string | null
+          round_clock_out?: string | null
+          start_date?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "attendance_policies_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       attendance_summary: {
         Row: {
           actual_clock_in: string | null
@@ -4058,6 +4240,51 @@ export type Database = {
           },
         ]
       }
+      employee_attendance_policies: {
+        Row: {
+          created_at: string
+          employee_id: string
+          end_date: string | null
+          id: string
+          policy_id: string
+          start_date: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          employee_id: string
+          end_date?: string | null
+          id?: string
+          policy_id: string
+          start_date: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          employee_id?: string
+          end_date?: string | null
+          id?: string
+          policy_id?: string
+          start_date?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "employee_attendance_policies_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_attendance_policies_policy_id_fkey"
+            columns: ["policy_id"]
+            isOneToOne: false
+            referencedRelation: "attendance_policies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       employee_background_checks: {
         Row: {
           check_type: string
@@ -4232,6 +4459,86 @@ export type Database = {
           {
             foreignKeyName: "employee_beneficiaries_employee_id_fkey"
             columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      employee_biometric_templates: {
+        Row: {
+          company_id: string
+          created_at: string
+          device_id: string | null
+          employee_id: string
+          enrolled_at: string
+          enrolled_by: string | null
+          finger_position: string | null
+          id: string
+          is_active: boolean
+          is_primary: boolean | null
+          template_data: string
+          template_quality: number | null
+          template_type: string
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          device_id?: string | null
+          employee_id: string
+          enrolled_at?: string
+          enrolled_by?: string | null
+          finger_position?: string | null
+          id?: string
+          is_active?: boolean
+          is_primary?: boolean | null
+          template_data: string
+          template_quality?: number | null
+          template_type: string
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          device_id?: string | null
+          employee_id?: string
+          enrolled_at?: string
+          enrolled_by?: string | null
+          finger_position?: string | null
+          id?: string
+          is_active?: boolean
+          is_primary?: boolean | null
+          template_data?: string
+          template_quality?: number | null
+          template_type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "employee_biometric_templates_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_biometric_templates_device_id_fkey"
+            columns: ["device_id"]
+            isOneToOne: false
+            referencedRelation: "timeclock_devices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_biometric_templates_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_biometric_templates_enrolled_by_fkey"
+            columns: ["enrolled_by"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
@@ -17710,6 +18017,72 @@ export type Database = {
           },
         ]
       }
+      punch_import_batches: {
+        Row: {
+          company_id: string
+          completed_at: string | null
+          created_at: string
+          error_log: Json | null
+          error_records: number | null
+          file_name: string
+          id: string
+          imported_by: string | null
+          processed_records: number | null
+          source_system: string | null
+          started_at: string | null
+          status: string
+          success_records: number | null
+          total_records: number | null
+        }
+        Insert: {
+          company_id: string
+          completed_at?: string | null
+          created_at?: string
+          error_log?: Json | null
+          error_records?: number | null
+          file_name: string
+          id?: string
+          imported_by?: string | null
+          processed_records?: number | null
+          source_system?: string | null
+          started_at?: string | null
+          status?: string
+          success_records?: number | null
+          total_records?: number | null
+        }
+        Update: {
+          company_id?: string
+          completed_at?: string | null
+          created_at?: string
+          error_log?: Json | null
+          error_records?: number | null
+          file_name?: string
+          id?: string
+          imported_by?: string | null
+          processed_records?: number | null
+          source_system?: string | null
+          started_at?: string | null
+          status?: string
+          success_records?: number | null
+          total_records?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "punch_import_batches_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "punch_import_batches_imported_by_fkey"
+            columns: ["imported_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       recertification_requirements: {
         Row: {
           certification_name: string
@@ -20148,6 +20521,160 @@ export type Database = {
             columns: ["task_id"]
             isOneToOne: false
             referencedRelation: "project_tasks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      timeclock_devices: {
+        Row: {
+          api_key: string | null
+          company_id: string
+          created_at: string
+          device_code: string
+          device_name: string
+          device_type: string
+          firmware_version: string | null
+          id: string
+          ip_address: string | null
+          is_active: boolean
+          last_heartbeat_at: string | null
+          last_sync_at: string | null
+          location_id: string | null
+          manufacturer: string | null
+          model: string | null
+          pending_punches: number | null
+          serial_number: string | null
+          settings: Json | null
+          sync_status: string | null
+          updated_at: string
+        }
+        Insert: {
+          api_key?: string | null
+          company_id: string
+          created_at?: string
+          device_code: string
+          device_name: string
+          device_type: string
+          firmware_version?: string | null
+          id?: string
+          ip_address?: string | null
+          is_active?: boolean
+          last_heartbeat_at?: string | null
+          last_sync_at?: string | null
+          location_id?: string | null
+          manufacturer?: string | null
+          model?: string | null
+          pending_punches?: number | null
+          serial_number?: string | null
+          settings?: Json | null
+          sync_status?: string | null
+          updated_at?: string
+        }
+        Update: {
+          api_key?: string | null
+          company_id?: string
+          created_at?: string
+          device_code?: string
+          device_name?: string
+          device_type?: string
+          firmware_version?: string | null
+          id?: string
+          ip_address?: string | null
+          is_active?: boolean
+          last_heartbeat_at?: string | null
+          last_sync_at?: string | null
+          location_id?: string | null
+          manufacturer?: string | null
+          model?: string | null
+          pending_punches?: number | null
+          serial_number?: string | null
+          settings?: Json | null
+          sync_status?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "timeclock_devices_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "timeclock_devices_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "geofence_locations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      timeclock_punch_queue: {
+        Row: {
+          created_at: string
+          device_id: string
+          employee_badge: string | null
+          employee_id: string | null
+          error_message: string | null
+          id: string
+          processed: boolean | null
+          processed_at: string | null
+          punch_time: string
+          punch_type: string
+          raw_data: Json | null
+          time_clock_entry_id: string | null
+          verification_method: string | null
+        }
+        Insert: {
+          created_at?: string
+          device_id: string
+          employee_badge?: string | null
+          employee_id?: string | null
+          error_message?: string | null
+          id?: string
+          processed?: boolean | null
+          processed_at?: string | null
+          punch_time: string
+          punch_type: string
+          raw_data?: Json | null
+          time_clock_entry_id?: string | null
+          verification_method?: string | null
+        }
+        Update: {
+          created_at?: string
+          device_id?: string
+          employee_badge?: string | null
+          employee_id?: string | null
+          error_message?: string | null
+          id?: string
+          processed?: boolean | null
+          processed_at?: string | null
+          punch_time?: string
+          punch_type?: string
+          raw_data?: Json | null
+          time_clock_entry_id?: string | null
+          verification_method?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "timeclock_punch_queue_device_id_fkey"
+            columns: ["device_id"]
+            isOneToOne: false
+            referencedRelation: "timeclock_devices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "timeclock_punch_queue_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "timeclock_punch_queue_time_clock_entry_id_fkey"
+            columns: ["time_clock_entry_id"]
+            isOneToOne: false
+            referencedRelation: "time_clock_entries"
             referencedColumns: ["id"]
           },
         ]
