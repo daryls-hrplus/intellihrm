@@ -7212,6 +7212,89 @@ export type Database = {
           },
         ]
       }
+      key_position_risks: {
+        Row: {
+          assessed_at: string | null
+          assessed_by: string | null
+          company_id: string
+          created_at: string
+          criticality_level: string
+          current_incumbent_id: string | null
+          flight_risk: boolean | null
+          id: string
+          impact_if_vacant: string | null
+          is_key_position: boolean
+          position_id: string
+          retirement_risk: boolean | null
+          risk_notes: string | null
+          updated_at: string
+          vacancy_risk: string
+        }
+        Insert: {
+          assessed_at?: string | null
+          assessed_by?: string | null
+          company_id: string
+          created_at?: string
+          criticality_level?: string
+          current_incumbent_id?: string | null
+          flight_risk?: boolean | null
+          id?: string
+          impact_if_vacant?: string | null
+          is_key_position?: boolean
+          position_id: string
+          retirement_risk?: boolean | null
+          risk_notes?: string | null
+          updated_at?: string
+          vacancy_risk?: string
+        }
+        Update: {
+          assessed_at?: string | null
+          assessed_by?: string | null
+          company_id?: string
+          created_at?: string
+          criticality_level?: string
+          current_incumbent_id?: string | null
+          flight_risk?: boolean | null
+          id?: string
+          impact_if_vacant?: string | null
+          is_key_position?: boolean
+          position_id?: string
+          retirement_risk?: boolean | null
+          risk_notes?: string | null
+          updated_at?: string
+          vacancy_risk?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "key_position_risks_assessed_by_fkey"
+            columns: ["assessed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "key_position_risks_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "key_position_risks_current_incumbent_id_fkey"
+            columns: ["current_incumbent_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "key_position_risks_position_id_fkey"
+            columns: ["position_id"]
+            isOneToOne: false
+            referencedRelation: "positions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       leave_accrual_logs: {
         Row: {
           accrual_amount: number
@@ -8495,6 +8578,79 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      nine_box_assessments: {
+        Row: {
+          assessed_by: string | null
+          assessment_date: string
+          assessment_period: string | null
+          company_id: string
+          created_at: string
+          employee_id: string
+          id: string
+          is_current: boolean
+          overall_notes: string | null
+          performance_notes: string | null
+          performance_rating: number
+          potential_notes: string | null
+          potential_rating: number
+          updated_at: string
+        }
+        Insert: {
+          assessed_by?: string | null
+          assessment_date?: string
+          assessment_period?: string | null
+          company_id: string
+          created_at?: string
+          employee_id: string
+          id?: string
+          is_current?: boolean
+          overall_notes?: string | null
+          performance_notes?: string | null
+          performance_rating: number
+          potential_notes?: string | null
+          potential_rating: number
+          updated_at?: string
+        }
+        Update: {
+          assessed_by?: string | null
+          assessment_date?: string
+          assessment_period?: string | null
+          company_id?: string
+          created_at?: string
+          employee_id?: string
+          id?: string
+          is_current?: boolean
+          overall_notes?: string | null
+          performance_notes?: string | null
+          performance_rating?: number
+          potential_notes?: string | null
+          potential_rating?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "nine_box_assessments_assessed_by_fkey"
+            columns: ["assessed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "nine_box_assessments_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "nine_box_assessments_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       notification_preferences: {
         Row: {
@@ -11279,6 +11435,218 @@ export type Database = {
           },
         ]
       }
+      succession_candidates: {
+        Row: {
+          created_at: string
+          development_areas: string | null
+          employee_id: string
+          id: string
+          nominated_by: string | null
+          notes: string | null
+          plan_id: string
+          ranking: number | null
+          readiness_level: string
+          readiness_timeline: string | null
+          status: string
+          strengths: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          development_areas?: string | null
+          employee_id: string
+          id?: string
+          nominated_by?: string | null
+          notes?: string | null
+          plan_id: string
+          ranking?: number | null
+          readiness_level?: string
+          readiness_timeline?: string | null
+          status?: string
+          strengths?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          development_areas?: string | null
+          employee_id?: string
+          id?: string
+          nominated_by?: string | null
+          notes?: string | null
+          plan_id?: string
+          ranking?: number | null
+          readiness_level?: string
+          readiness_timeline?: string | null
+          status?: string
+          strengths?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "succession_candidates_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "succession_candidates_nominated_by_fkey"
+            columns: ["nominated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "succession_candidates_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "succession_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      succession_development_plans: {
+        Row: {
+          candidate_id: string
+          completion_date: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          development_type: string
+          id: string
+          notes: string | null
+          progress: number | null
+          status: string
+          target_date: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          candidate_id: string
+          completion_date?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          development_type?: string
+          id?: string
+          notes?: string | null
+          progress?: number | null
+          status?: string
+          target_date?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          candidate_id?: string
+          completion_date?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          development_type?: string
+          id?: string
+          notes?: string | null
+          progress?: number | null
+          status?: string
+          target_date?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "succession_development_plans_candidate_id_fkey"
+            columns: ["candidate_id"]
+            isOneToOne: false
+            referencedRelation: "succession_candidates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "succession_development_plans_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      succession_plans: {
+        Row: {
+          company_id: string
+          created_at: string
+          created_by: string | null
+          description: string | null
+          end_date: string | null
+          id: string
+          is_active: boolean
+          notes: string | null
+          plan_name: string
+          position_id: string
+          priority: string
+          risk_level: string
+          start_date: string
+          status: string
+          target_date: string | null
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          is_active?: boolean
+          notes?: string | null
+          plan_name: string
+          position_id: string
+          priority?: string
+          risk_level?: string
+          start_date?: string
+          status?: string
+          target_date?: string | null
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          is_active?: boolean
+          notes?: string | null
+          plan_name?: string
+          position_id?: string
+          priority?: string
+          risk_level?: string
+          start_date?: string
+          status?: string
+          target_date?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "succession_plans_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "succession_plans_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "succession_plans_position_id_fkey"
+            columns: ["position_id"]
+            isOneToOne: false
+            referencedRelation: "positions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       system_settings: {
         Row: {
           created_at: string
@@ -11308,6 +11676,130 @@ export type Database = {
           value?: string | null
         }
         Relationships: []
+      }
+      talent_pool_members: {
+        Row: {
+          added_by: string | null
+          created_at: string
+          employee_id: string
+          end_date: string | null
+          id: string
+          pool_id: string
+          reason: string | null
+          start_date: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          added_by?: string | null
+          created_at?: string
+          employee_id: string
+          end_date?: string | null
+          id?: string
+          pool_id: string
+          reason?: string | null
+          start_date?: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          added_by?: string | null
+          created_at?: string
+          employee_id?: string
+          end_date?: string | null
+          id?: string
+          pool_id?: string
+          reason?: string | null
+          start_date?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "talent_pool_members_added_by_fkey"
+            columns: ["added_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "talent_pool_members_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "talent_pool_members_pool_id_fkey"
+            columns: ["pool_id"]
+            isOneToOne: false
+            referencedRelation: "talent_pools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      talent_pools: {
+        Row: {
+          code: string
+          company_id: string
+          created_at: string
+          created_by: string | null
+          criteria: Json | null
+          description: string | null
+          end_date: string | null
+          id: string
+          is_active: boolean
+          name: string
+          pool_type: string
+          start_date: string
+          updated_at: string
+        }
+        Insert: {
+          code: string
+          company_id: string
+          created_at?: string
+          created_by?: string | null
+          criteria?: Json | null
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          pool_type?: string
+          start_date?: string
+          updated_at?: string
+        }
+        Update: {
+          code?: string
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          criteria?: Json | null
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          pool_type?: string
+          start_date?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "talent_pools_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "talent_pools_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       ticket_categories: {
         Row: {
