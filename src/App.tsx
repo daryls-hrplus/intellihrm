@@ -66,6 +66,10 @@ import PerformanceDashboardPage from "./pages/performance/PerformanceDashboardPa
 import GoalsPage from "./pages/performance/GoalsPage";
 import Review360Page from "./pages/performance/Review360Page";
 import AppraisalsPage from "./pages/performance/AppraisalsPage";
+import PerformanceImprovementPlansPage from "./pages/performance/PerformanceImprovementPlansPage";
+import ContinuousFeedbackPage from "./pages/performance/ContinuousFeedbackPage";
+import RecognitionAwardsPage from "./pages/performance/RecognitionAwardsPage";
+import PerformanceAnalyticsPage from "./pages/performance/PerformanceAnalyticsPage";
 
 // Leave pages
 import LeaveDashboardPage from "./pages/leave/LeaveDashboardPage";
@@ -1110,6 +1114,38 @@ const App = () => (
               element={
                 <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
                   <AppraisalsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/performance/pips"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
+                  <PerformanceImprovementPlansPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/performance/feedback"
+              element={
+                <ProtectedRoute>
+                  <ContinuousFeedbackPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/performance/recognition"
+              element={
+                <ProtectedRoute>
+                  <RecognitionAwardsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/performance/analytics"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
+                  <PerformanceAnalyticsPage />
                 </ProtectedRoute>
               }
             />
