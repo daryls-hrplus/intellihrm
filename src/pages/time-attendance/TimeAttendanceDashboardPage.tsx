@@ -139,7 +139,7 @@ export default function TimeAttendanceDashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="text-center py-8 text-muted-foreground">
-              Attendance data will appear here once time tracking is configured.
+              Click on a feature above to get started with time tracking.
             </div>
           </CardContent>
         </Card>

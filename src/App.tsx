@@ -984,6 +984,38 @@ const App = () => (
                 </ProtectedRoute>
               }
             />
+            <Route
+              path="/time-attendance/tracking"
+              element={
+                <ProtectedRoute moduleCode="time_attendance">
+                  <TimeTrackingPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/time-attendance/records"
+              element={
+                <ProtectedRoute moduleCode="time_attendance">
+                  <AttendanceRecordsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/time-attendance/schedules"
+              element={
+                <ProtectedRoute moduleCode="time_attendance">
+                  <SchedulesPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/time-attendance/overtime"
+              element={
+                <ProtectedRoute moduleCode="time_attendance">
+                  <OvertimeManagementPage />
+                </ProtectedRoute>
+              }
+            />
 
             {/* Leave Routes */}
             <Route
