@@ -367,6 +367,14 @@ const App = () => (
               }
             />
             <Route
+              path="/ess/goal-interviews"
+              element={
+                <ProtectedRoute moduleCode="ess">
+                  <EssGoalInterviewsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
               path="/ess/development"
               element={
                 <ProtectedRoute moduleCode="ess">
@@ -468,6 +476,14 @@ const App = () => (
               element={
                 <ProtectedRoute moduleCode="mss">
                   <MssGoalsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/mss/goal-interviews"
+              element={
+                <ProtectedRoute moduleCode="mss">
+                  <MssGoalInterviewsPage />
                 </ProtectedRoute>
               }
             />
