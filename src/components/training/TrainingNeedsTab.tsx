@@ -75,22 +75,29 @@ export function TrainingNeedsTab({ companyId }: TrainingNeedsTabProps) {
 
   const loadData = async () => {
     setLoading(true);
-    const [needsRes, analysesRes, deptsRes, empsRes, compsRes, coursesRes] = await Promise.all([
-      supabase
-        .from("training_needs")
-        .select("*, employee:profiles(full_name), department:departments(name), competency:competencies(name), course:lms_courses(title)")
-        .eq("company_id", companyId)
-        .order("priority") as any,
-      supabase
-        .from("training_needs_analysis")
-        .select("*, department:departments(name)")
-        .eq("company_id", companyId)
-        .order("analysis_date", { ascending: false }) as any,
-      supabase.from("departments").select("id, name").eq("company_id", companyId).eq("is_active", true),
-      supabase.from("profiles").select("id, full_name").eq("company_id", companyId).eq("is_active", true),
-      supabase.from("competencies").select("id, name").eq("company_id", companyId).eq("is_active", true),
-      supabase.from("lms_courses").select("id, title").eq("company_id", companyId).eq("is_active", true),
-    ]);
+    
+    // @ts-ignore - Supabase type instantiation issue
+    const needsRes = await supabase
+      .from("training_needs")
+      .select("*, employee:profiles(full_name), department:departments(name), competency:competencies(name), course:lms_courses(title)")
+      .eq("company_id", companyId)
+      .order("priority");
+    
+    // @ts-ignore - Supabase type instantiation issue
+    const analysesRes = await supabase
+      .from("training_needs_analysis")
+      .select("*, department:departments(name)")
+      .eq("company_id", companyId)
+      .order("analysis_date", { ascending: false });
+    
+    // @ts-ignore - Supabase type instantiation issue
+    const deptsRes = await supabase.from("departments").select("id, name").eq("company_id", companyId).eq("is_active", true);
+    // @ts-ignore - Supabase type instantiation issue
+    const empsRes = await supabase.from("profiles").select("id, full_name").eq("company_id", companyId).eq("is_active", true);
+    // @ts-ignore - Supabase type instantiation issue
+    const compsRes = await supabase.from("competencies").select("id, name").eq("company_id", companyId).eq("is_active", true);
+    // @ts-ignore - Supabase type instantiation issue
+    const coursesRes = await supabase.from("lms_courses").select("id, title").eq("company_id", companyId).eq("is_active", true);
 
     if (needsRes.data) setNeeds(needsRes.data);
     if (analysesRes.data) setAnalyses(analysesRes.data);

@@ -68,27 +68,33 @@ export function RecertificationTab({ companyId }: RecertificationTabProps) {
 
   const loadData = async () => {
     setLoading(true);
-    const [reqRes, certRes, coursesRes, empRes] = await Promise.all([
-      supabase
-        .from("recertification_requirements")
-        .select("*, course:lms_courses(title)")
-        .eq("company_id", companyId)
-        .order("certification_name") as any,
-      supabase
-        .from("employee_recertifications")
-        .select("*, requirement:recertification_requirements(certification_name), employee:profiles(full_name)")
-        .order("expiry_date") as any,
-      supabase
-        .from("lms_courses")
-        .select("id, title")
-        .eq("company_id", companyId)
-        .eq("is_active", true),
-      supabase
-        .from("profiles")
-        .select("id, full_name")
-        .eq("company_id", companyId)
-        .eq("is_active", true),
-    ]);
+    
+    // @ts-ignore - Supabase type instantiation issue
+    const reqRes = await supabase
+      .from("recertification_requirements")
+      .select("*, course:lms_courses(title)")
+      .eq("company_id", companyId)
+      .order("certification_name");
+    
+    // @ts-ignore - Supabase type instantiation issue
+    const certRes = await supabase
+      .from("employee_recertifications")
+      .select("*, requirement:recertification_requirements(certification_name), employee:profiles(full_name)")
+      .order("expiry_date");
+    
+    // @ts-ignore - Supabase type instantiation issue
+    const coursesRes = await supabase
+      .from("lms_courses")
+      .select("id, title")
+      .eq("company_id", companyId)
+      .eq("is_active", true);
+    
+    // @ts-ignore - Supabase type instantiation issue
+    const empRes = await supabase
+      .from("profiles")
+      .select("id, full_name")
+      .eq("company_id", companyId)
+      .eq("is_active", true);
 
     if (reqRes.data) setRequirements(reqRes.data);
     if (certRes.data) setCertifications(certRes.data);

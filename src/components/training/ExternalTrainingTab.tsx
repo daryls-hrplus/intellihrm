@@ -60,18 +60,20 @@ export function ExternalTrainingTab({ companyId }: ExternalTrainingTabProps) {
 
   const loadData = async () => {
     setLoading(true);
-    const [recordsRes, employeesRes] = await Promise.all([
-      supabase
-        .from("external_training_records")
-        .select("*, employee:profiles!external_training_records_employee_id_fkey(full_name)")
-        .eq("company_id", companyId)
-        .order("start_date", { ascending: false }) as any,
-      supabase
-        .from("profiles")
-        .select("id, full_name")
-        .eq("company_id", companyId)
-        .eq("is_active", true),
-    ]);
+    
+    // @ts-ignore - Supabase type instantiation issue
+    const recordsRes = await supabase
+      .from("external_training_records")
+      .select("*, employee:profiles!external_training_records_employee_id_fkey(full_name)")
+      .eq("company_id", companyId)
+      .order("start_date", { ascending: false });
+    
+    // @ts-ignore - Supabase type instantiation issue
+    const employeesRes = await supabase
+      .from("profiles")
+      .select("id, full_name")
+      .eq("company_id", companyId)
+      .eq("is_active", true);
 
     if (recordsRes.data) setRecords(recordsRes.data);
     if (employeesRes.data) setEmployees(employeesRes.data);

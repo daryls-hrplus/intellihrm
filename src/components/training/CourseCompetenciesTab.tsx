@@ -52,28 +52,32 @@ export function CourseCompetenciesTab({ companyId }: CourseCompetenciesTabProps)
 
   const loadData = async () => {
     setLoading(true);
-    const [mappingsRes, coursesRes, competenciesRes] = await Promise.all([
-      supabase
-        .from("course_competencies")
-        .select("*, course:lms_courses(id, title), competency:competencies(id, name), level:competency_levels(id, name)")
-        .order("created_at") as any,
-      supabase
-        .from("lms_courses")
-        .select("id, title")
-        .eq("company_id", companyId)
-        .eq("is_active", true),
-      supabase
-        .from("competencies")
-        .select("id, name, levels:competency_levels(id, name, level_order)") as any
-        .eq("company_id", companyId)
-        .eq("is_active", true),
-    ]);
+    
+    // @ts-ignore - Supabase type instantiation issue
+    const mappingsRes = await supabase
+      .from("course_competencies")
+      .select("*, course:lms_courses(id, title), competency:competencies(id, name), level:competency_levels(id, name)")
+      .order("created_at");
+    
+    // @ts-ignore - Supabase type instantiation issue
+    const coursesRes = await supabase
+      .from("lms_courses")
+      .select("id, title")
+      .eq("company_id", companyId)
+      .eq("is_active", true);
+    
+    // @ts-ignore - Supabase type instantiation issue
+    const competenciesRes = await supabase
+      .from("competencies")
+      .select("id, name, levels:competency_levels(id, name, level_order)")
+      .eq("company_id", companyId)
+      .eq("is_active", true);
 
     if (mappingsRes.data) setMappings(mappingsRes.data);
     if (coursesRes.data) setCourses(coursesRes.data);
     if (competenciesRes.data) {
       // Sort levels within each competency
-      const sorted = competenciesRes.data.map((c: any) => ({
+      const sorted = (competenciesRes.data as any[]).map((c: any) => ({
         ...c,
         levels: c.levels?.sort((a: any, b: any) => a.level_order - b.level_order) || [],
       }));
