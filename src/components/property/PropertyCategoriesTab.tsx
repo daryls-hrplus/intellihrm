@@ -21,7 +21,7 @@ interface Props {
 const PropertyCategoriesTab = ({ companyId }: Props) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [formData, setFormData] = useState({
-    company_id: companyId || "",
+    company_id: companyId || "__global__",
     name: "",
     code: "",
     description: "",
@@ -46,7 +46,7 @@ const PropertyCategoriesTab = ({ companyId }: Props) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     await createCategory.mutateAsync({
-      company_id: formData.company_id || null,
+      company_id: formData.company_id === "__global__" ? null : formData.company_id || null,
       name: formData.name,
       code: formData.code,
       description: formData.description || null,
@@ -54,7 +54,7 @@ const PropertyCategoriesTab = ({ companyId }: Props) => {
       is_active: true,
     });
     setIsDialogOpen(false);
-    setFormData({ company_id: companyId || "", name: "", code: "", description: "", depreciation_years: "" });
+    setFormData({ company_id: companyId || "__global__", name: "", code: "", description: "", depreciation_years: "" });
   };
 
   if (loadingCategories) {
@@ -91,7 +91,7 @@ const PropertyCategoriesTab = ({ companyId }: Props) => {
                     <SelectValue placeholder="Select company (optional)" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Global (All Companies)</SelectItem>
+                    <SelectItem value="__global__">Global (All Companies)</SelectItem>
                     {companies.map((c) => (
                       <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
                     ))}

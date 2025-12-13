@@ -24,7 +24,7 @@ const STATUSES = ["available", "assigned", "maintenance", "retired", "lost"];
 const PropertyItemsTab = ({ companyId }: Props) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState<string>("");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
   const [formData, setFormData] = useState({
     company_id: companyId || "",
     category_id: "",
@@ -63,7 +63,7 @@ const PropertyItemsTab = ({ companyId }: Props) => {
       item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       item.asset_tag.toLowerCase().includes(searchQuery.toLowerCase()) ||
       item.serial_number?.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesStatus = !statusFilter || item.status === statusFilter;
+    const matchesStatus = statusFilter === "all" || item.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
 
@@ -159,7 +159,7 @@ const PropertyItemsTab = ({ companyId }: Props) => {
               <SelectValue placeholder="All Status" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All Status</SelectItem>
+              <SelectItem value="all">All Status</SelectItem>
               {STATUSES.map((s) => (
                 <SelectItem key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</SelectItem>
               ))}

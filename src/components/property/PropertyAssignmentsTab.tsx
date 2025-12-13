@@ -28,7 +28,7 @@ const PropertyAssignmentsTab = ({ companyId }: Props) => {
   const [selectedAssignment, setSelectedAssignment] = useState<string | null>(null);
   const [returnCondition, setReturnCondition] = useState("good");
   const [returnNotes, setReturnNotes] = useState("");
-  const [statusFilter, setStatusFilter] = useState<string>("active");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
   const [formData, setFormData] = useState({
     property_id: "",
     employee_id: "",
@@ -55,7 +55,7 @@ const PropertyAssignmentsTab = ({ companyId }: Props) => {
   const availableItems = items.filter(i => i.status === "available");
 
   const filteredAssignments = assignments.filter((a) => {
-    if (!statusFilter) return true;
+    if (statusFilter === "all") return true;
     return a.status === statusFilter;
   });
 
@@ -126,7 +126,7 @@ const PropertyAssignmentsTab = ({ companyId }: Props) => {
                 <SelectValue placeholder="All Status" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Status</SelectItem>
+                <SelectItem value="all">All Status</SelectItem>
                 <SelectItem value="active">Active</SelectItem>
                 <SelectItem value="returned">Returned</SelectItem>
               </SelectContent>
