@@ -97,6 +97,7 @@ export default function MyRecognitionPage() {
         .order("created_at", { ascending: false });
 
       // Fetch employees for recognition
+      // @ts-ignore - Supabase type instantiation issue
       const { data: emps } = await supabase
         .from("profiles")
         .select("id, full_name")
