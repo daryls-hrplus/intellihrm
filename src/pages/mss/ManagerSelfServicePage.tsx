@@ -129,9 +129,9 @@ const mssModules = [
     color: "bg-emerald-500/10 text-emerald-600",
   },
   {
-    title: "Training Approvals",
-    description: "Approve team training requests",
-    href: "/mss/training-approvals",
+    title: "Team Training",
+    description: "Monitor team training progress",
+    href: "/mss/training",
     icon: FileCheck,
     color: "bg-amber-500/10 text-amber-600",
   },
