@@ -38,6 +38,13 @@ interface Employee {
   id: string;
   full_name: string;
   email: string;
+  department_id?: string;
+}
+
+interface Department {
+  id: string;
+  name: string;
+  code: string;
 }
 
 interface RecalculationHistory {
@@ -60,7 +67,10 @@ export default function LeaveBalanceRecalculationPage() {
   const { recalculateLeaveBalance } = useLeaveManagement(selectedCompanyId);
   
   const [employees, setEmployees] = useState<Employee[]>([]);
+  const [departments, setDepartments] = useState<Department[]>([]);
   const [selectedEmployeeId, setSelectedEmployeeId] = useState("");
+  const [selectedDepartmentId, setSelectedDepartmentId] = useState("");
+  const [scope, setScope] = useState<'single' | 'department' | 'all'>('single');
   const [calculationType, setCalculationType] = useState<'current_year' | 'from_hire_date' | 'custom_range'>('current_year');
   const [periodStart, setPeriodStart] = useState("");
   const [periodEnd, setPeriodEnd] = useState(new Date().toISOString().split('T')[0]);
@@ -69,11 +79,26 @@ export default function LeaveBalanceRecalculationPage() {
   const [loadingHistory, setLoadingHistory] = useState(false);
   const [lastResult, setLastResult] = useState<any>(null);
 
+  // Fetch departments for selected company
+  useEffect(() => {
+    const fetchDepartments = async () => {
+      if (!selectedCompanyId) return;
+      const { data } = await supabase
+        .from("departments")
+        .select("id, name, code")
+        .eq("company_id", selectedCompanyId)
+        .eq("is_active", true)
+        .order("name");
+      if (data) setDepartments(data);
+    };
+    fetchDepartments();
+  }, [selectedCompanyId]);
+
   // Fetch employees for selected company
   useEffect(() => {
     const fetchEmployees = async () => {
       if (!selectedCompanyId) return;
-      const query = supabase.from("profiles").select("id, full_name, email");
+      const query = supabase.from("profiles").select("id, full_name, email, department_id");
       const { data, error } = await (query as any)
         .eq("company_id", selectedCompanyId)
         .eq("is_active", true);
@@ -81,7 +106,8 @@ export default function LeaveBalanceRecalculationPage() {
         setEmployees(data.map((e: any) => ({
           id: e.id,
           full_name: e.full_name || '',
-          email: e.email || ''
+          email: e.email || '',
+          department_id: e.department_id
         })));
       }
     };
@@ -105,9 +131,28 @@ export default function LeaveBalanceRecalculationPage() {
     }
   }, [selectedCompanyId, lastResult]);
 
+  const getTargetEmployees = () => {
+    if (scope === 'single') {
+      return employees.filter(e => e.id === selectedEmployeeId);
+    } else if (scope === 'department') {
+      return employees.filter(e => e.department_id === selectedDepartmentId);
+    }
+    return employees;
+  };
+
   const handleRecalculate = async () => {
-    if (!selectedEmployeeId || !selectedCompanyId) {
+    if (!selectedCompanyId) {
+      toast.error("Please select a company");
+      return;
+    }
+
+    if (scope === 'single' && !selectedEmployeeId) {
       toast.error("Please select an employee");
+      return;
+    }
+
+    if (scope === 'department' && !selectedDepartmentId) {
+      toast.error("Please select a department");
       return;
     }
 
@@ -116,39 +161,28 @@ export default function LeaveBalanceRecalculationPage() {
       return;
     }
 
-    setIsRecalculating(true);
-    try {
-      const result = await recalculateLeaveBalance.mutateAsync({
-        employeeId: selectedEmployeeId,
-        companyId: selectedCompanyId,
-        calculationType,
-        periodStart: calculationType === 'custom_range' ? periodStart : undefined,
-        periodEnd: calculationType === 'custom_range' ? periodEnd : undefined,
-      });
-      setLastResult(result);
-    } catch (error) {
-      console.error("Recalculation error:", error);
-    } finally {
-      setIsRecalculating(false);
+    const targetEmployees = getTargetEmployees();
+    
+    if (targetEmployees.length === 0) {
+      toast.error("No employees found for the selected criteria");
+      return;
     }
-  };
 
-  const handleRecalculateAll = async () => {
-    if (!selectedCompanyId) return;
-    
-    const confirmed = window.confirm(
-      `This will recalculate leave balances for all ${employees.length} employees. This may take a while. Continue?`
-    );
-    
-    if (!confirmed) return;
+    if (targetEmployees.length > 1) {
+      const confirmed = window.confirm(
+        `This will recalculate leave balances for ${targetEmployees.length} employees. Continue?`
+      );
+      if (!confirmed) return;
+    }
 
     setIsRecalculating(true);
     let successCount = 0;
     let errorCount = 0;
+    let singleResult = null;
 
-    for (const employee of employees) {
+    for (const employee of targetEmployees) {
       try {
-        await recalculateLeaveBalance.mutateAsync({
+        const result = await recalculateLeaveBalance.mutateAsync({
           employeeId: employee.id,
           companyId: selectedCompanyId,
           calculationType,
@@ -156,6 +190,9 @@ export default function LeaveBalanceRecalculationPage() {
           periodEnd: calculationType === 'custom_range' ? periodEnd : undefined,
         });
         successCount++;
+        if (targetEmployees.length === 1) {
+          singleResult = result;
+        }
       } catch (error) {
         errorCount++;
         console.error(`Failed to recalculate for ${employee.full_name}:`, error);
@@ -163,8 +200,14 @@ export default function LeaveBalanceRecalculationPage() {
     }
 
     setIsRecalculating(false);
-    toast.success(`Recalculation complete: ${successCount} succeeded, ${errorCount} failed`);
-    setLastResult({ bulk: true, successCount, errorCount });
+    
+    if (targetEmployees.length === 1 && singleResult) {
+      setLastResult(singleResult);
+      toast.success("Recalculation completed successfully");
+    } else {
+      toast.success(`Recalculation complete: ${successCount} succeeded, ${errorCount} failed`);
+      setLastResult({ bulk: true, successCount, errorCount });
+    }
   };
 
   const calculationTypeLabels: Record<string, string> = {
@@ -223,20 +266,67 @@ export default function LeaveBalanceRecalculationPage() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="employee">Employee</Label>
-                <Select value={selectedEmployeeId} onValueChange={setSelectedEmployeeId}>
+                <Label>Recalculation Scope</Label>
+                <Select value={scope} onValueChange={(v) => setScope(v as typeof scope)}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select employee" />
+                    <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    {employees.map((emp) => (
-                      <SelectItem key={emp.id} value={emp.id}>
-                        {emp.full_name} ({emp.email})
-                      </SelectItem>
-                    ))}
+                    <SelectItem value="single">Single Employee</SelectItem>
+                    <SelectItem value="department">Department</SelectItem>
+                    <SelectItem value="all">All Employees</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
+
+              {scope === 'single' && (
+                <div className="space-y-2">
+                  <Label htmlFor="employee">Employee</Label>
+                  <Select value={selectedEmployeeId} onValueChange={setSelectedEmployeeId}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select employee" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {employees.map((emp) => (
+                        <SelectItem key={emp.id} value={emp.id}>
+                          {emp.full_name} ({emp.email})
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+
+              {scope === 'department' && (
+                <div className="space-y-2">
+                  <Label htmlFor="department">Department</Label>
+                  <Select value={selectedDepartmentId} onValueChange={setSelectedDepartmentId}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select department" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {departments.map((dept) => (
+                        <SelectItem key={dept.id} value={dept.id}>
+                          {dept.name} ({dept.code})
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {selectedDepartmentId && (
+                    <p className="text-sm text-muted-foreground">
+                      {employees.filter(e => e.department_id === selectedDepartmentId).length} employees in this department
+                    </p>
+                  )}
+                </div>
+              )}
+
+              {scope === 'all' && (
+                <div className="p-3 bg-muted rounded-lg">
+                  <p className="text-sm text-muted-foreground">
+                    This will recalculate leave balances for all <strong>{employees.length}</strong> employees in the selected company.
+                  </p>
+                </div>
+              )}
 
               <div className="space-y-2">
                 <Label htmlFor="calculation_type">Calculation Period</Label>
@@ -278,10 +368,11 @@ export default function LeaveBalanceRecalculationPage() {
                 </div>
               )}
 
-              <div className="flex gap-2 pt-4">
+              <div className="pt-4">
                 <Button 
                   onClick={handleRecalculate} 
-                  disabled={isRecalculating || !selectedEmployeeId}
+                  disabled={isRecalculating || (scope === 'single' && !selectedEmployeeId) || (scope === 'department' && !selectedDepartmentId)}
+                  className="w-full"
                 >
                   {isRecalculating ? (
                     <>
@@ -291,16 +382,9 @@ export default function LeaveBalanceRecalculationPage() {
                   ) : (
                     <>
                       <Calculator className="mr-2 h-4 w-4" />
-                      Recalculate
+                      Recalculate {scope === 'single' ? 'Employee' : scope === 'department' ? 'Department' : `All (${employees.length})`}
                     </>
                   )}
-                </Button>
-                <Button 
-                  variant="outline"
-                  onClick={handleRecalculateAll} 
-                  disabled={isRecalculating || employees.length === 0}
-                >
-                  Recalculate All ({employees.length})
                 </Button>
               </div>
             </CardContent>
