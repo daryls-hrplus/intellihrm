@@ -35,6 +35,7 @@ import {
   FileText as FileTextIcon,
   GitBranch,
   List,
+  Palette,
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 
@@ -171,6 +172,13 @@ const getAdminModules = (t: (key: string) => string) => [
     href: "/admin/lookup-values",
     icon: List,
     color: "bg-lime-500/10 text-lime-600",
+  },
+  {
+    title: "Color Scheme",
+    description: "Customize the application's color theme with live preview",
+    href: "/admin/color-scheme",
+    icon: Palette,
+    color: "bg-gradient-to-r from-pink-500/10 to-violet-500/10 text-violet-600",
   },
   {
     title: t("admin.modules.territories.title"),
