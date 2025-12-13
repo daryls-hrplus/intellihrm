@@ -446,6 +446,14 @@ const App = () => (
               }
             />
             <Route
+              path="/mss/appraisal-interviews"
+              element={
+                <ProtectedRoute moduleCode="mss">
+                  <MssAppraisalInterviewsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
               path="/mss/360"
               element={
                 <ProtectedRoute moduleCode="mss">
