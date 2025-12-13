@@ -2,21 +2,25 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import { NavLink } from "react-router-dom";
 import { ModuleReportsButton } from "@/components/reports/ModuleReportsButton";
 import { ModuleBIButton } from "@/components/bi/ModuleBIButton";
+import { useLeaveManagement } from "@/hooks/useLeaveManagement";
+import { useAuth } from "@/contexts/AuthContext";
 import {
   Calendar,
   CalendarPlus,
   CalendarCheck,
-  ClipboardList,
-  BarChart3,
   ChevronRight,
   Clock,
   CheckCircle,
+  Settings,
+  TrendingUp,
+  RotateCcw,
+  PartyPopper,
 } from "lucide-react";
 
 const leaveModules = [
   {
     title: "My Leave",
-    description: "View and manage your leave requests",
+    description: "View balances and request history",
     href: "/leave/my-leave",
     icon: Calendar,
     color: "bg-primary/10 text-primary",
@@ -30,35 +34,65 @@ const leaveModules = [
   },
   {
     title: "Leave Approvals",
-    description: "Review and approve team leave requests",
+    description: "Review and approve team requests",
     href: "/leave/approvals",
     icon: CalendarCheck,
     color: "bg-warning/10 text-warning",
+    adminOnly: true,
   },
   {
-    title: "Leave Policies",
-    description: "View company leave policies",
-    href: "/leave/policies",
-    icon: ClipboardList,
+    title: "Leave Types",
+    description: "Configure leave categories",
+    href: "/leave/types",
+    icon: Settings,
     color: "bg-info/10 text-info",
+    adminOnly: true,
   },
   {
-    title: "Leave Reports",
-    description: "Analytics and reporting",
-    href: "/leave/reports",
-    icon: BarChart3,
-    color: "bg-destructive/10 text-destructive",
+    title: "Accrual Rules",
+    description: "Set up leave accrual policies",
+    href: "/leave/accrual-rules",
+    icon: TrendingUp,
+    color: "bg-primary/10 text-primary",
+    adminOnly: true,
   },
-];
-
-const statCards = [
-  { label: "Available Days", value: 18, icon: Calendar, color: "bg-primary/10 text-primary" },
-  { label: "Pending Requests", value: 2, icon: Clock, color: "bg-warning/10 text-warning" },
-  { label: "Approved This Year", value: 7, icon: CheckCircle, color: "bg-success/10 text-success" },
-  { label: "Team on Leave", value: 3, icon: CalendarCheck, color: "bg-info/10 text-info" },
+  {
+    title: "Rollover Rules",
+    description: "Configure year-end balance handling",
+    href: "/leave/rollover-rules",
+    icon: RotateCcw,
+    color: "bg-secondary/10 text-secondary-foreground",
+    adminOnly: true,
+  },
+  {
+    title: "Company Holidays",
+    description: "Manage public holidays",
+    href: "/leave/holidays",
+    icon: PartyPopper,
+    color: "bg-destructive/10 text-destructive",
+    adminOnly: true,
+  },
 ];
 
 export default function LeaveDashboardPage() {
+  const { company } = useAuth();
+  const { leaveBalances, allLeaveRequests, loadingBalances, loadingAllRequests } = useLeaveManagement(company?.id);
+  const { isAdmin, hasRole } = useAuth();
+  
+  const isAdminOrHR = isAdmin || hasRole("hr_manager");
+  const pendingCount = allLeaveRequests.filter(r => r.status === "pending").length;
+  const approvedThisYear = allLeaveRequests.filter(r => r.status === "approved").length;
+  const totalBalance = leaveBalances.reduce((sum, b) => sum + (b.current_balance || 0), 0);
+
+  const statCards = [
+    { label: "Available Days", value: totalBalance.toFixed(1), icon: Calendar, color: "bg-primary/10 text-primary" },
+    { label: "Pending Requests", value: pendingCount, icon: Clock, color: "bg-warning/10 text-warning" },
+    { label: "Approved This Year", value: approvedThisYear, icon: CheckCircle, color: "bg-success/10 text-success" },
+    { label: "Leave Types", value: leaveBalances.length, icon: CalendarCheck, color: "bg-info/10 text-info" },
+  ];
+
+  const filteredModules = leaveModules.filter(m => !m.adminOnly || isAdminOrHR);
+
   return (
     <AppLayout>
       <div className="space-y-6">
@@ -109,7 +143,7 @@ export default function LeaveDashboardPage() {
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {leaveModules.map((module, index) => {
+          {filteredModules.map((module, index) => {
             const Icon = module.icon;
             return (
               <NavLink
