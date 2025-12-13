@@ -76,6 +76,8 @@ import ApplyLeavePage from "./pages/leave/ApplyLeavePage";
 import LeaveApprovalsPage from "./pages/leave/LeaveApprovalsPage";
 import LeaveHolidaysPage from "./pages/leave/LeaveHolidaysPage";
 import LeaveBalanceRecalculationPage from "./pages/leave/LeaveBalanceRecalculationPage";
+import CompensatoryTimePage from "./pages/leave/CompensatoryTimePage";
+import CompTimePoliciesPage from "./pages/leave/CompTimePoliciesPage";
 
 // Compensation pages
 import CompensationDashboardPage from "./pages/compensation/CompensationDashboardPage";
@@ -727,8 +729,23 @@ const App = () => (
                 </ProtectedRoute>
               }
             />
+            <Route
+              path="/leave/compensatory-time"
+              element={
+                <ProtectedRoute moduleCode="leave">
+                  <CompensatoryTimePage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/leave/comp-time-policies"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
+                  <CompTimePoliciesPage />
+                </ProtectedRoute>
+              }
+            />
 
-            {/* Payroll Routes */}
             <Route
               path="/payroll"
               element={

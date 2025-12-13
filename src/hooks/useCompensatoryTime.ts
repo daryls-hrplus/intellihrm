@@ -187,7 +187,16 @@ export function useCompensatoryTime(companyId?: string) {
 
   // Create policy
   const createPolicy = useMutation({
-    mutationFn: async (policy: Partial<CompTimePolicy>) => {
+    mutationFn: async (policy: {
+      company_id: string;
+      name: string;
+      description?: string | null;
+      expiry_type: string;
+      expiry_days?: number | null;
+      max_balance_hours?: number | null;
+      requires_approval: boolean;
+      is_active: boolean;
+    }) => {
       const { data, error } = await supabase
         .from("comp_time_policies")
         .insert([policy])
@@ -228,7 +237,14 @@ export function useCompensatoryTime(companyId?: string) {
 
   // Submit comp time earned request
   const submitEarnedRequest = useMutation({
-    mutationFn: async (request: Partial<CompTimeEarned>) => {
+    mutationFn: async (request: {
+      work_date: string;
+      work_type: string;
+      hours_earned: number;
+      reason: string;
+      notes?: string | null;
+      policy_id?: string | null;
+    }) => {
       const { data, error } = await supabase
         .from("comp_time_earned")
         .insert([{
@@ -284,7 +300,11 @@ export function useCompensatoryTime(companyId?: string) {
 
   // Submit comp time usage request
   const submitUsedRequest = useMutation({
-    mutationFn: async (request: Partial<CompTimeUsed>) => {
+    mutationFn: async (request: {
+      use_date: string;
+      hours_used: number;
+      reason?: string | null;
+    }) => {
       const { data, error } = await supabase
         .from("comp_time_used")
         .insert([{
