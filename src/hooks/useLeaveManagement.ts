@@ -111,6 +111,21 @@ export interface LeaveHoliday {
   applies_to_all: boolean;
   department_ids: string[] | null;
   is_active: boolean;
+  country: string | null;
+  holiday_type: 'country' | 'company';
+}
+
+export interface CountryHoliday {
+  id: string;
+  country: string;
+  name: string;
+  holiday_date: string;
+  is_recurring: boolean;
+  is_half_day: boolean;
+  description: string | null;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
 }
 
 export function useLeaveManagement(companyId?: string) {
@@ -233,7 +248,7 @@ export function useLeaveManagement(companyId?: string) {
     },
   });
 
-  // Fetch holidays
+  // Fetch company holidays
   const { data: holidays = [], isLoading: loadingHolidays } = useQuery({
     queryKey: ["leave-holidays", companyId],
     queryFn: async () => {
@@ -250,6 +265,21 @@ export function useLeaveManagement(companyId?: string) {
       const { data, error } = await query;
       if (error) throw error;
       return data as LeaveHoliday[];
+    },
+  });
+
+  // Fetch country holidays
+  const { data: countryHolidays = [], isLoading: loadingCountryHolidays } = useQuery({
+    queryKey: ["country-holidays"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("country_holidays")
+        .select("*")
+        .eq("is_active", true)
+        .order("holiday_date");
+
+      if (error) throw error;
+      return data as CountryHoliday[];
     },
   });
 
@@ -394,7 +424,7 @@ export function useLeaveManagement(companyId?: string) {
     },
   });
 
-  // Create holiday
+  // Create company holiday
   const createHoliday = useMutation({
     mutationFn: async (holiday: Partial<LeaveHoliday>) => {
       const { data, error } = await supabase
@@ -407,10 +437,30 @@ export function useLeaveManagement(companyId?: string) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["leave-holidays"] });
-      toast.success("Holiday added successfully");
+      toast.success("Company holiday added successfully");
     },
     onError: (error: Error) => {
       toast.error(`Failed to add holiday: ${error.message}`);
+    },
+  });
+
+  // Create country holiday
+  const createCountryHoliday = useMutation({
+    mutationFn: async (holiday: Partial<CountryHoliday>) => {
+      const { data, error } = await supabase
+        .from("country_holidays")
+        .insert([holiday as any])
+        .select()
+        .single();
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["country-holidays"] });
+      toast.success("Country holiday added successfully");
+    },
+    onError: (error: Error) => {
+      toast.error(`Failed to add country holiday: ${error.message}`);
     },
   });
 
@@ -423,8 +473,9 @@ export function useLeaveManagement(companyId?: string) {
     leaveRequests,
     allLeaveRequests,
     holidays,
+    countryHolidays,
     // Loading states
-    isLoading: loadingTypes || loadingAccrualRules || loadingRolloverRules || loadingBalances || loadingRequests || loadingHolidays || loadingAllRequests,
+    isLoading: loadingTypes || loadingAccrualRules || loadingRolloverRules || loadingBalances || loadingRequests || loadingHolidays || loadingAllRequests || loadingCountryHolidays,
     loadingTypes,
     loadingAccrualRules,
     loadingRolloverRules,
@@ -432,6 +483,7 @@ export function useLeaveManagement(companyId?: string) {
     loadingRequests,
     loadingAllRequests,
     loadingHolidays,
+    loadingCountryHolidays,
     // Mutations
     createLeaveType,
     updateLeaveType,
@@ -440,6 +492,7 @@ export function useLeaveManagement(companyId?: string) {
     createLeaveRequest,
     updateLeaveRequestStatus,
     createHoliday,
+    createCountryHoliday,
     // Refetch
     refetchBalances,
     refetchRequests,
