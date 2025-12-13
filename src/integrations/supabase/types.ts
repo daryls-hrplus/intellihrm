@@ -4697,6 +4697,53 @@ export type Database = {
           },
         ]
       }
+      employee_face_enrollments: {
+        Row: {
+          company_id: string
+          created_at: string
+          employee_id: string
+          enrolled_at: string
+          enrolled_by: string | null
+          id: string
+          is_active: boolean
+          notes: string | null
+          photo_url: string
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          employee_id: string
+          enrolled_at?: string
+          enrolled_by?: string | null
+          id?: string
+          is_active?: boolean
+          notes?: string | null
+          photo_url: string
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          employee_id?: string
+          enrolled_at?: string
+          enrolled_by?: string | null
+          id?: string
+          is_active?: boolean
+          notes?: string | null
+          photo_url?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "employee_face_enrollments_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       employee_geofence_assignments: {
         Row: {
           company_id: string
@@ -7753,6 +7800,7 @@ export type Database = {
           longitude: number
           name: string
           radius_meters: number
+          requires_face_capture: boolean
           requires_geofence: boolean | null
           start_date: string
           updated_at: string
@@ -7772,6 +7820,7 @@ export type Database = {
           longitude: number
           name: string
           radius_meters?: number
+          requires_face_capture?: boolean
           requires_geofence?: boolean | null
           start_date?: string
           updated_at?: string
@@ -7791,6 +7840,7 @@ export type Database = {
           longitude?: number
           name?: string
           radius_meters?: number
+          requires_face_capture?: boolean
           requires_geofence?: boolean | null
           start_date?: string
           updated_at?: string
@@ -19570,6 +19620,7 @@ export type Database = {
           clock_in_location: string | null
           clock_in_longitude: number | null
           clock_in_method: string | null
+          clock_in_photo_url: string | null
           clock_in_within_geofence: boolean | null
           clock_out: string | null
           clock_out_geofence_id: string | null
@@ -19577,10 +19628,12 @@ export type Database = {
           clock_out_location: string | null
           clock_out_longitude: number | null
           clock_out_method: string | null
+          clock_out_photo_url: string | null
           clock_out_within_geofence: boolean | null
           company_id: string
           created_at: string
           employee_id: string
+          face_verified: boolean | null
           geofence_violation_notes: string | null
           id: string
           notes: string | null
@@ -19609,6 +19662,7 @@ export type Database = {
           clock_in_location?: string | null
           clock_in_longitude?: number | null
           clock_in_method?: string | null
+          clock_in_photo_url?: string | null
           clock_in_within_geofence?: boolean | null
           clock_out?: string | null
           clock_out_geofence_id?: string | null
@@ -19616,10 +19670,12 @@ export type Database = {
           clock_out_location?: string | null
           clock_out_longitude?: number | null
           clock_out_method?: string | null
+          clock_out_photo_url?: string | null
           clock_out_within_geofence?: boolean | null
           company_id: string
           created_at?: string
           employee_id: string
+          face_verified?: boolean | null
           geofence_violation_notes?: string | null
           id?: string
           notes?: string | null
@@ -19648,6 +19704,7 @@ export type Database = {
           clock_in_location?: string | null
           clock_in_longitude?: number | null
           clock_in_method?: string | null
+          clock_in_photo_url?: string | null
           clock_in_within_geofence?: boolean | null
           clock_out?: string | null
           clock_out_geofence_id?: string | null
@@ -19655,10 +19712,12 @@ export type Database = {
           clock_out_location?: string | null
           clock_out_longitude?: number | null
           clock_out_method?: string | null
+          clock_out_photo_url?: string | null
           clock_out_within_geofence?: boolean | null
           company_id?: string
           created_at?: string
           employee_id?: string
+          face_verified?: boolean | null
           geofence_violation_notes?: string | null
           id?: string
           notes?: string | null
