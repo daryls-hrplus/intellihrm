@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { NavLink } from "react-router-dom";
-import { UserPlus } from "lucide-react";
+import { UserPlus, MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Popover,
@@ -8,14 +8,75 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { LanguageSwitcher } from "./LanguageSwitcher";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 export function AppHeader() {
-  const { isAdmin, profile } = useAuth();
+  const { isAdmin, profile, user } = useAuth();
   const [pendingCount, setPendingCount] = useState(0);
+  const [unreadMessages, setUnreadMessages] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
+
+  // Fetch unread message count
+  useEffect(() => {
+    if (!user) return;
+
+    const fetchUnreadCount = async () => {
+      try {
+        // Get channels user is member of
+        const { data: memberships } = await supabase
+          .from("messaging_channel_members")
+          .select("channel_id, last_read_at")
+          .eq("user_id", user.id);
+
+        if (!memberships || memberships.length === 0) {
+          setUnreadMessages(0);
+          return;
+        }
+
+        let totalUnread = 0;
+        for (const membership of memberships) {
+          if (membership.last_read_at) {
+            const { count } = await supabase
+              .from("messages")
+              .select("*", { count: "exact", head: true })
+              .eq("channel_id", membership.channel_id)
+              .eq("is_deleted", false)
+              .neq("sender_id", user.id)
+              .gt("created_at", membership.last_read_at);
+            
+            totalUnread += count || 0;
+          }
+        }
+        setUnreadMessages(totalUnread);
+      } catch (error) {
+        console.error("Error fetching unread count:", error);
+      }
+    };
+
+    fetchUnreadCount();
+
+    // Subscribe to new messages
+    const channel = supabase
+      .channel("header-messages")
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "messages" },
+        () => fetchUnreadCount()
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user]);
 
   useEffect(() => {
     if (isAdmin) {
@@ -68,6 +129,26 @@ export function AppHeader() {
     <div className="flex items-center justify-end gap-2 mb-4">
       {/* Language Switcher */}
       <LanguageSwitcher />
+      
+      {/* Messages Button */}
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <NavLink to="/messages">
+            <Button variant="ghost" size="icon" className="relative">
+              <MessageSquare className="h-5 w-5" />
+              {unreadMessages > 0 && (
+                <Badge
+                  variant="destructive"
+                  className="absolute -top-1 -right-1 h-5 min-w-[20px] px-1 text-[10px] font-bold"
+                >
+                  {unreadMessages > 99 ? "99+" : unreadMessages}
+                </Badge>
+              )}
+            </Button>
+          </NavLink>
+        </TooltipTrigger>
+        <TooltipContent>Messages</TooltipContent>
+      </Tooltip>
       
       {/* User Avatar */}
       <NavLink to="/profile">
