@@ -269,7 +269,7 @@ export default function RecruitmentFullPage() {
         <Breadcrumbs
           items={[
             { label: "Recruitment", href: "/recruitment" },
-            { label: "Full Recruitment" },
+            { label: "Recruitment Management" },
           ]}
         />
 
