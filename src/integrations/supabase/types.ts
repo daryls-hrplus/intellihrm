@@ -275,6 +275,83 @@ export type Database = {
           },
         ]
       }
+      appraisal_interviews: {
+        Row: {
+          agenda: string | null
+          cancellation_reason: string | null
+          cancelled_at: string | null
+          completed_at: string | null
+          confirmed_at: string | null
+          created_at: string
+          duration_minutes: number
+          employee_notes: string | null
+          id: string
+          location: string | null
+          manager_notes: string | null
+          meeting_link: string | null
+          meeting_type: string
+          outcome_summary: string | null
+          participant_id: string
+          reminder_sent: boolean | null
+          scheduled_at: string
+          scheduled_by: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          agenda?: string | null
+          cancellation_reason?: string | null
+          cancelled_at?: string | null
+          completed_at?: string | null
+          confirmed_at?: string | null
+          created_at?: string
+          duration_minutes?: number
+          employee_notes?: string | null
+          id?: string
+          location?: string | null
+          manager_notes?: string | null
+          meeting_link?: string | null
+          meeting_type?: string
+          outcome_summary?: string | null
+          participant_id: string
+          reminder_sent?: boolean | null
+          scheduled_at: string
+          scheduled_by?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          agenda?: string | null
+          cancellation_reason?: string | null
+          cancelled_at?: string | null
+          completed_at?: string | null
+          confirmed_at?: string | null
+          created_at?: string
+          duration_minutes?: number
+          employee_notes?: string | null
+          id?: string
+          location?: string | null
+          manager_notes?: string | null
+          meeting_link?: string | null
+          meeting_type?: string
+          outcome_summary?: string | null
+          participant_id?: string
+          reminder_sent?: boolean | null
+          scheduled_at?: string
+          scheduled_by?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "appraisal_interviews_participant_id_fkey"
+            columns: ["participant_id"]
+            isOneToOne: false
+            referencedRelation: "appraisal_participants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       appraisal_participants: {
         Row: {
           competency_score: number | null
