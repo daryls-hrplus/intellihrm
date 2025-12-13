@@ -16,6 +16,7 @@ import {
   UserCheck,
   Rocket,
   UserMinus,
+  Package,
 } from "lucide-react";
 
 const essModules = [
@@ -109,6 +110,13 @@ const essModules = [
     href: "/ess/offboarding",
     icon: UserMinus,
     color: "bg-red-500/10 text-red-600",
+  },
+  {
+    title: "My Property",
+    description: "View assigned equipment and submit requests",
+    href: "/ess/property",
+    icon: Package,
+    color: "bg-slate-500/10 text-slate-600",
   },
   {
     title: "Notifications",

@@ -374,6 +374,30 @@ export function useOffboarding() {
         status: 'pending',
       }));
 
+      // Auto-generate property return tasks from active assignments
+      const { data: propertyAssignments } = await supabase
+        .from('property_assignments')
+        .select('id, property_id, property_items!inner(name, asset_tag)')
+        .eq('employee_id', instance.employee_id!)
+        .eq('status', 'active');
+
+      if (propertyAssignments && propertyAssignments.length > 0) {
+        const propertyTasks = propertyAssignments.map((assignment: any, index: number) => ({
+          instance_id: data.id,
+          template_task_id: null,
+          name: `Return property: ${assignment.property_items?.name} (${assignment.property_items?.asset_tag})`,
+          description: `Return this equipment before your last working day`,
+          task_type: 'equipment' as const,
+          is_required: true,
+          due_date: new Date(lastDate.getTime() - 2 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+          assigned_to_type: 'employee' as const,
+          assigned_to_id: instance.employee_id!,
+          display_order: 1000 + index,
+          status: 'pending',
+        }));
+        tasks.push(...propertyTasks);
+      }
+
       if (tasks.length > 0) {
         const { error: tasksError } = await supabase
           .from('offboarding_tasks')

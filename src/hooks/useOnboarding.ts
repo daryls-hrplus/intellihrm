@@ -383,6 +383,26 @@ export function useOnboarding() {
         status: 'pending',
       }));
 
+      // Check if any template tasks are equipment type and add property setup task
+      const hasEquipmentTask = templateTasks.some(t => t.task_type === 'equipment');
+      if (hasEquipmentTask) {
+        // Add a general equipment setup task for HR to provision
+        tasks.push({
+          instance_id: data.id,
+          template_task_id: null,
+          name: 'Provision and assign required equipment',
+          description: 'Set up and assign all necessary equipment for the new employee',
+          task_type: 'equipment',
+          is_required: true,
+          due_date: new Date(startDate.getTime() - 1 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // Day before start
+          assigned_to_type: 'hr',
+          assigned_to_id: null,
+          training_course_id: null,
+          display_order: 0,
+          status: 'pending',
+        });
+      }
+
       if (tasks.length > 0) {
         const { error: tasksError } = await supabase
           .from('onboarding_tasks')

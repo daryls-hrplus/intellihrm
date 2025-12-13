@@ -273,7 +273,7 @@ export const usePropertyManagement = (companyId?: string) => {
 
   // Update Item
   const updateItem = useMutation({
-    mutationFn: async ({ id, ...updates }: { id: string; status?: string; condition?: string; location?: string }) => {
+    mutationFn: async ({ id, ...updates }: { id: string; status?: string; condition?: string; location?: string; notes?: string }) => {
       const { data, error } = await supabase
         .from("property_items")
         .update(updates)
