@@ -27,6 +27,7 @@ import {
   Link,
   RefreshCw,
   TrendingUp,
+  BarChart3,
 } from "lucide-react";
 
 const trainingModules = [
@@ -147,6 +148,14 @@ const trainingModules = [
     href: "/training/calendar",
     icon: Calendar,
     color: "bg-destructive/10 text-destructive",
+  },
+  {
+    title: "Training Analytics",
+    description: "Insights and metrics",
+    href: "/training/analytics",
+    icon: BarChart3,
+    color: "bg-primary/10 text-primary",
+    adminOnly: true,
   },
   {
     title: "LMS Management",
