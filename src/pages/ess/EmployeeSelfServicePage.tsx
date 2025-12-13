@@ -20,6 +20,7 @@ import {
   Heart,
   Shield,
   HardHat,
+  Briefcase,
 } from "lucide-react";
 
 const essModules = [
@@ -141,6 +142,13 @@ const essModules = [
     href: "/ess/hse",
     icon: HardHat,
     color: "bg-yellow-500/10 text-yellow-600",
+  },
+  {
+    title: "Job Openings",
+    description: "Browse and apply for internal job openings",
+    href: "/ess/jobs",
+    icon: Briefcase,
+    color: "bg-blue-500/10 text-blue-600",
   },
   {
     title: "Notifications",
