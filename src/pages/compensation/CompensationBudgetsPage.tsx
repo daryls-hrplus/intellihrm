@@ -1,0 +1,219 @@
+import { useState } from "react";
+import { AppLayout } from "@/components/layout/AppLayout";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { PiggyBank, Plus, DollarSign, TrendingUp, Wallet } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
+
+export default function CompensationBudgetsPage() {
+  const [yearFilter, setYearFilter] = useState<string>(new Date().getFullYear().toString());
+
+  const { data: budgets = [], isLoading } = useQuery({
+    queryKey: ["compensation-budgets", yearFilter],
+    queryFn: async () => {
+      let query = supabase
+        .from("compensation_budgets")
+        .select(`
+          *,
+          department:departments(name)
+        `)
+        .order("fiscal_year", { ascending: false });
+
+      if (yearFilter !== "all") {
+        query = query.eq("fiscal_year", parseInt(yearFilter));
+      }
+
+      const { data, error } = await query;
+      if (error) throw error;
+      return data || [];
+    },
+  });
+
+  const getStatusBadge = (status: string) => {
+    const colors: Record<string, string> = {
+      draft: "bg-muted text-muted-foreground",
+      approved: "bg-sky-500/10 text-sky-600",
+      active: "bg-emerald-500/10 text-emerald-600",
+      closed: "bg-slate-500/10 text-slate-600",
+    };
+    return <Badge className={colors[status] || "bg-muted"}>{status}</Badge>;
+  };
+
+  const getBudgetTypeBadge = (type: string) => {
+    const colors: Record<string, string> = {
+      salary: "bg-primary/10 text-primary",
+      merit: "bg-violet-500/10 text-violet-600",
+      bonus: "bg-amber-500/10 text-amber-600",
+      equity: "bg-emerald-500/10 text-emerald-600",
+      total: "bg-indigo-500/10 text-indigo-600",
+    };
+    return <Badge className={colors[type] || "bg-muted"}>{type}</Badge>;
+  };
+
+  const getSpentPercentage = (spent: number | null, planned: number | null) => {
+    if (!planned || planned === 0) return 0;
+    return Math.min(((spent || 0) / planned) * 100, 100);
+  };
+
+  const totalPlanned = budgets.reduce((sum: number, b: any) => sum + (b.planned_amount || 0), 0);
+  const totalSpent = budgets.reduce((sum: number, b: any) => sum + (b.spent_amount || 0), 0);
+
+  return (
+    <AppLayout>
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+              <PiggyBank className="h-5 w-5 text-primary" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold tracking-tight">Compensation Budgets</h1>
+              <p className="text-muted-foreground">Track and manage compensation budgets</p>
+            </div>
+          </div>
+          <Button>
+            <Plus className="mr-2 h-4 w-4" />
+            New Budget
+          </Button>
+        </div>
+
+        {/* Summary Cards */}
+        <div className="grid gap-4 sm:grid-cols-4">
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center gap-4">
+                <div className="rounded-lg bg-primary/10 p-3">
+                  <DollarSign className="h-5 w-5 text-primary" />
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Total Planned</p>
+                  <p className="text-2xl font-bold">${totalPlanned.toLocaleString()}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center gap-4">
+                <div className="rounded-lg bg-emerald-500/10 p-3">
+                  <Wallet className="h-5 w-5 text-emerald-600" />
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Total Spent</p>
+                  <p className="text-2xl font-bold">${totalSpent.toLocaleString()}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center gap-4">
+                <div className="rounded-lg bg-sky-500/10 p-3">
+                  <TrendingUp className="h-5 w-5 text-sky-600" />
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Remaining</p>
+                  <p className="text-2xl font-bold">${(totalPlanned - totalSpent).toLocaleString()}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center gap-4">
+                <div className="rounded-lg bg-amber-500/10 p-3">
+                  <PiggyBank className="h-5 w-5 text-amber-600" />
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Utilization</p>
+                  <p className="text-2xl font-bold">
+                    {totalPlanned > 0 ? Math.round((totalSpent / totalPlanned) * 100) : 0}%
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <CardTitle>Budgets</CardTitle>
+              <Select value={yearFilter} onValueChange={setYearFilter}>
+                <SelectTrigger className="w-[120px]">
+                  <SelectValue placeholder="Year" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Years</SelectItem>
+                  <SelectItem value="2025">2025</SelectItem>
+                  <SelectItem value="2024">2024</SelectItem>
+                  <SelectItem value="2023">2023</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </CardHeader>
+          <CardContent>
+            {isLoading ? (
+              <div className="space-y-2">
+                {[...Array(5)].map((_, i) => (
+                  <Skeleton key={i} className="h-12 w-full" />
+                ))}
+              </div>
+            ) : (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Department</TableHead>
+                    <TableHead>Type</TableHead>
+                    <TableHead>Year</TableHead>
+                    <TableHead className="text-right">Planned</TableHead>
+                    <TableHead className="text-right">Spent</TableHead>
+                    <TableHead>Utilization</TableHead>
+                    <TableHead>Status</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {budgets.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={7} className="text-center text-muted-foreground">
+                        No budgets found
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    budgets.map((budget: any) => (
+                      <TableRow key={budget.id}>
+                        <TableCell className="font-medium">{budget.department?.name || "Company-wide"}</TableCell>
+                        <TableCell>{getBudgetTypeBadge(budget.budget_type)}</TableCell>
+                        <TableCell>{budget.fiscal_year}</TableCell>
+                        <TableCell className="text-right">${budget.planned_amount?.toLocaleString()}</TableCell>
+                        <TableCell className="text-right">${(budget.spent_amount || 0).toLocaleString()}</TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            <Progress 
+                              value={getSpentPercentage(budget.spent_amount, budget.planned_amount)} 
+                              className="w-16 h-2"
+                            />
+                            <span className="text-sm text-muted-foreground">
+                              {Math.round(getSpentPercentage(budget.spent_amount, budget.planned_amount))}%
+                            </span>
+                          </div>
+                        </TableCell>
+                        <TableCell>{getStatusBadge(budget.status)}</TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+    </AppLayout>
+  );
+}

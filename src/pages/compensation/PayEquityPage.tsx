@@ -1,0 +1,157 @@
+import { useState } from "react";
+import { AppLayout } from "@/components/layout/AppLayout";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { format } from "date-fns";
+import { Scale, Plus, AlertTriangle, CheckCircle, Info } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
+
+export default function PayEquityPage() {
+  const { data: analyses = [], isLoading } = useQuery({
+    queryKey: ["pay-equity-analyses"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("pay_equity_analyses")
+        .select("*")
+        .order("analysis_date", { ascending: false });
+      if (error) throw error;
+      return data || [];
+    },
+  });
+
+  const getStatusBadge = (status: string) => {
+    const colors: Record<string, string> = {
+      draft: "bg-muted text-muted-foreground",
+      in_progress: "bg-amber-500/10 text-amber-600",
+      completed: "bg-emerald-500/10 text-emerald-600",
+      archived: "bg-slate-500/10 text-slate-600",
+    };
+    return <Badge className={colors[status] || "bg-muted"}>{status.replace("_", " ")}</Badge>;
+  };
+
+  const getAnalysisTypeBadge = (type: string) => {
+    const colors: Record<string, string> = {
+      gender: "bg-pink-500/10 text-pink-600",
+      ethnicity: "bg-violet-500/10 text-violet-600",
+      age: "bg-amber-500/10 text-amber-600",
+      disability: "bg-sky-500/10 text-sky-600",
+      comprehensive: "bg-indigo-500/10 text-indigo-600",
+    };
+    return <Badge className={colors[type] || "bg-muted"}>{type}</Badge>;
+  };
+
+  return (
+    <AppLayout>
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+              <Scale className="h-5 w-5 text-primary" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold tracking-tight">Pay Equity Analysis</h1>
+              <p className="text-muted-foreground">Analyze and address compensation gaps</p>
+            </div>
+          </div>
+          <Button>
+            <Plus className="mr-2 h-4 w-4" />
+            New Analysis
+          </Button>
+        </div>
+
+        {/* Summary Cards */}
+        <div className="grid gap-4 sm:grid-cols-3">
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center gap-4">
+                <div className="rounded-lg bg-primary/10 p-3">
+                  <Scale className="h-5 w-5 text-primary" />
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Total Analyses</p>
+                  <p className="text-2xl font-bold">{analyses.length}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center gap-4">
+                <div className="rounded-lg bg-emerald-500/10 p-3">
+                  <CheckCircle className="h-5 w-5 text-emerald-600" />
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Completed</p>
+                  <p className="text-2xl font-bold">{analyses.filter((a: any) => a.status === "completed").length}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center gap-4">
+                <div className="rounded-lg bg-amber-500/10 p-3">
+                  <AlertTriangle className="h-5 w-5 text-amber-600" />
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">In Progress</p>
+                  <p className="text-2xl font-bold">{analyses.filter((a: any) => a.status === "in_progress").length}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Pay Equity Analyses</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {isLoading ? (
+              <div className="space-y-2">
+                {[...Array(3)].map((_, i) => (
+                  <Skeleton key={i} className="h-12 w-full" />
+                ))}
+              </div>
+            ) : (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Analysis Name</TableHead>
+                    <TableHead>Type</TableHead>
+                    <TableHead>Date</TableHead>
+                    <TableHead>Methodology</TableHead>
+                    <TableHead>Status</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {analyses.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={5} className="text-center text-muted-foreground">
+                        No pay equity analyses found
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    analyses.map((analysis: any) => (
+                      <TableRow key={analysis.id} className="cursor-pointer hover:bg-muted/50">
+                        <TableCell className="font-medium">{analysis.name}</TableCell>
+                        <TableCell>{getAnalysisTypeBadge(analysis.analysis_type)}</TableCell>
+                        <TableCell>{format(new Date(analysis.analysis_date), "MMM d, yyyy")}</TableCell>
+                        <TableCell>{analysis.methodology || "-"}</TableCell>
+                        <TableCell>{getStatusBadge(analysis.status)}</TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+    </AppLayout>
+  );
+}
