@@ -45,10 +45,10 @@ const recruitmentModules = [
 ];
 
 const statCards = [
-  { label: "Open Positions", value: 12, icon: Briefcase, color: "bg-primary/10 text-primary" },
-  { label: "Total Candidates", value: 87, icon: Users, color: "bg-info/10 text-info" },
-  { label: "Interviews Today", value: 5, icon: Calendar, color: "bg-warning/10 text-warning" },
-  { label: "Hired This Month", value: 8, icon: CheckCircle, color: "bg-success/10 text-success" },
+  { label: "Open Positions", value: 12, icon: Briefcase, color: "bg-primary/10 text-primary", href: "/recruitment/manage?tab=requisitions" },
+  { label: "Total Candidates", value: 87, icon: Users, color: "bg-info/10 text-info", href: "/recruitment/manage?tab=candidates" },
+  { label: "Interviews Today", value: 5, icon: Calendar, color: "bg-warning/10 text-warning", href: "/recruitment/manage?tab=applications" },
+  { label: "Hired This Month", value: 8, icon: CheckCircle, color: "bg-success/10 text-success", href: "/recruitment/manage?tab=applications" },
 ];
 
 export default function RecruitmentDashboardPage() {
@@ -82,9 +82,10 @@ export default function RecruitmentDashboardPage() {
           {statCards.map((stat, index) => {
             const Icon = stat.icon;
             return (
-              <div
+              <NavLink
                 key={stat.label}
-                className="rounded-xl border border-border bg-card p-5 shadow-card"
+                to={stat.href}
+                className="rounded-xl border border-border bg-card p-5 shadow-card transition-all hover:shadow-card-hover hover:border-primary/20"
                 style={{ animationDelay: `${index * 50}ms` }}
               >
                 <div className="flex items-center justify-between">
@@ -96,7 +97,7 @@ export default function RecruitmentDashboardPage() {
                     <Icon className="h-5 w-5" />
                   </div>
                 </div>
-              </div>
+              </NavLink>
             );
           })}
         </div>
