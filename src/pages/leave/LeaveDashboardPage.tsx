@@ -92,6 +92,22 @@ const leaveModules = [
     adminOnly: true,
   },
   {
+    title: "Team Calendar",
+    description: "View team leave availability",
+    href: "/leave/calendar",
+    icon: Calendar,
+    color: "bg-cyan-500/10 text-cyan-600",
+    adminOnly: true,
+  },
+  {
+    title: "Balance Adjustments",
+    description: "Manually adjust leave balances",
+    href: "/leave/balance-adjustments",
+    icon: Settings,
+    color: "bg-slate-500/10 text-slate-600",
+    adminOnly: true,
+  },
+  {
     title: "Balance Recalculation",
     description: "Recalculate employee leave balances",
     href: "/leave/balance-recalculation",
