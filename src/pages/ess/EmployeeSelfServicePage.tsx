@@ -19,6 +19,7 @@ import {
   Package,
   Heart,
   Shield,
+  HardHat,
 } from "lucide-react";
 
 const essModules = [
@@ -133,6 +134,13 @@ const essModules = [
     href: "/ess/benefits",
     icon: Shield,
     color: "bg-emerald-500/10 text-emerald-600",
+  },
+  {
+    title: "Health & Safety",
+    description: "Report incidents, view policies, and training",
+    href: "/ess/hse",
+    icon: HardHat,
+    color: "bg-yellow-500/10 text-yellow-600",
   },
   {
     title: "Notifications",

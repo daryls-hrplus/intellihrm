@@ -1,0 +1,305 @@
+import { AppLayout } from "@/components/layout/AppLayout";
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { AlertTriangle, GraduationCap, Users, Shield, CheckCircle, Clock, XCircle } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { useHSE } from "@/hooks/useHSE";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { format } from "date-fns";
+
+export default function MssHSEPage() {
+  const { user } = useAuth();
+  const { incidents, trainingRecords } = useHSE();
+
+  // Get direct reports
+  const { data: directReports } = useQuery({
+    queryKey: ["direct-reports", user?.id],
+    queryFn: async () => {
+      if (!user?.id) return [];
+      const { data, error } = await supabase.rpc("get_manager_direct_reports", {
+        p_manager_id: user.id,
+      });
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!user?.id,
+  });
+
+  const directReportIds = directReports?.map((r: any) => r.employee_id) || [];
+
+  // Filter incidents involving direct reports
+  const teamIncidents = incidents?.filter(
+    (inc) =>
+      directReportIds.includes(inc.reported_by) ||
+      directReportIds.includes(inc.injured_employee_id)
+  ) || [];
+
+  // Filter training records for direct reports
+  const teamTrainingRecords = trainingRecords?.filter((rec) =>
+    directReportIds.includes(rec.employee_id)
+  ) || [];
+
+  // Calculate stats
+  const openIncidents = teamIncidents.filter(
+    (i) => i.status === "reported" || i.status === "investigating"
+  ).length;
+  const completedTraining = teamTrainingRecords.filter((r) => r.status === "completed" || r.status === "passed").length;
+  const pendingTraining = teamTrainingRecords.filter((r) => r.status !== "completed" && r.status !== "passed").length;
+  const expiringTraining = teamTrainingRecords.filter((r) => {
+    if (!r.expiry_date) return false;
+    const expiryDate = new Date(r.expiry_date);
+    const thirtyDaysFromNow = new Date();
+    thirtyDaysFromNow.setDate(thirtyDaysFromNow.getDate() + 30);
+    return expiryDate <= thirtyDaysFromNow && expiryDate > new Date();
+  }).length;
+
+  const getSeverityBadge = (severity: string) => {
+    const variants: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
+      low: "secondary",
+      medium: "default",
+      high: "destructive",
+      critical: "destructive",
+    };
+    return <Badge variant={variants[severity] || "secondary"}>{severity}</Badge>;
+  };
+
+  const getStatusBadge = (status: string) => {
+    const variants: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
+      reported: "outline",
+      investigating: "default",
+      resolved: "secondary",
+      closed: "secondary",
+    };
+    return <Badge variant={variants[status] || "outline"}>{status}</Badge>;
+  };
+
+  return (
+    <AppLayout>
+      <div className="space-y-6">
+        <Breadcrumbs
+          items={[
+            { label: "Manager Self Service", href: "/mss" },
+            { label: "Team Health & Safety" },
+          ]}
+        />
+
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Team Health & Safety</h1>
+          <p className="text-muted-foreground">
+            Monitor your team's safety incidents and training compliance
+          </p>
+        </div>
+
+        {/* Stats Cards */}
+        <div className="grid gap-4 md:grid-cols-4">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Team Members</CardTitle>
+              <Users className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{directReportIds.length}</div>
+              <p className="text-xs text-muted-foreground">Direct reports</p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Open Incidents</CardTitle>
+              <AlertTriangle className="h-4 w-4 text-destructive" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{openIncidents}</div>
+              <p className="text-xs text-muted-foreground">Requiring attention</p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Training Completed</CardTitle>
+              <CheckCircle className="h-4 w-4 text-green-600" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{completedTraining}</div>
+              <p className="text-xs text-muted-foreground">Certifications earned</p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Expiring Soon</CardTitle>
+              <Clock className="h-4 w-4 text-amber-600" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{expiringTraining}</div>
+              <p className="text-xs text-muted-foreground">Within 30 days</p>
+            </CardContent>
+          </Card>
+        </div>
+
+        <Tabs defaultValue="incidents" className="space-y-4">
+          <TabsList>
+            <TabsTrigger value="incidents">
+              <AlertTriangle className="mr-2 h-4 w-4" />
+              Team Incidents
+            </TabsTrigger>
+            <TabsTrigger value="training">
+              <GraduationCap className="mr-2 h-4 w-4" />
+              Training Compliance
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="incidents" className="space-y-4">
+            {teamIncidents.length === 0 ? (
+              <Card>
+                <CardContent className="flex flex-col items-center justify-center py-12">
+                  <Shield className="h-12 w-12 text-muted-foreground mb-4" />
+                  <h3 className="text-lg font-medium">No team incidents</h3>
+                  <p className="text-sm text-muted-foreground">
+                    No safety incidents involving your direct reports
+                  </p>
+                </CardContent>
+              </Card>
+            ) : (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Team Incidents</CardTitle>
+                  <CardDescription>
+                    Safety incidents reported by or involving your direct reports
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Incident #</TableHead>
+                        <TableHead>Title</TableHead>
+                        <TableHead>Date</TableHead>
+                        <TableHead>Reporter</TableHead>
+                        <TableHead>Severity</TableHead>
+                        <TableHead>Status</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {teamIncidents.map((incident) => (
+                        <TableRow key={incident.id}>
+                          <TableCell className="font-medium">
+                            {incident.incident_number}
+                          </TableCell>
+                          <TableCell>{incident.title}</TableCell>
+                          <TableCell>
+                            {format(new Date(incident.incident_date), "PP")}
+                          </TableCell>
+                          <TableCell>
+                            {(incident.reporter as any)?.full_name || "Unknown"}
+                          </TableCell>
+                          <TableCell>{getSeverityBadge(incident.severity)}</TableCell>
+                          <TableCell>{getStatusBadge(incident.status)}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </CardContent>
+              </Card>
+            )}
+          </TabsContent>
+
+          <TabsContent value="training" className="space-y-4">
+            {teamTrainingRecords.length === 0 ? (
+              <Card>
+                <CardContent className="flex flex-col items-center justify-center py-12">
+                  <GraduationCap className="h-12 w-12 text-muted-foreground mb-4" />
+                  <h3 className="text-lg font-medium">No training records</h3>
+                  <p className="text-sm text-muted-foreground">
+                    No safety training records for your direct reports
+                  </p>
+                </CardContent>
+              </Card>
+            ) : (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Training Compliance</CardTitle>
+                  <CardDescription>
+                    Safety training status for your direct reports
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Employee</TableHead>
+                        <TableHead>Training</TableHead>
+                        <TableHead>Completed</TableHead>
+                        <TableHead>Score</TableHead>
+                        <TableHead>Expiry</TableHead>
+                        <TableHead>Status</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {teamTrainingRecords.map((record) => {
+                        const isPassed = record.status === "completed" || record.status === "passed";
+                        const isExpired = record.expiry_date && new Date(record.expiry_date) < new Date();
+                        const isExpiringSoon = record.expiry_date && !isExpired && (() => {
+                          const expiryDate = new Date(record.expiry_date);
+                          const thirtyDaysFromNow = new Date();
+                          thirtyDaysFromNow.setDate(thirtyDaysFromNow.getDate() + 30);
+                          return expiryDate <= thirtyDaysFromNow;
+                        })();
+
+                        return (
+                          <TableRow key={record.id}>
+                            <TableCell className="font-medium">
+                              {(record.employee as any)?.full_name || "Unknown"}
+                            </TableCell>
+                            <TableCell>
+                              {(record.training as any)?.title || "Training"}
+                            </TableCell>
+                            <TableCell>
+                              {format(new Date(record.training_date), "PP")}
+                            </TableCell>
+                            <TableCell>
+                              {record.score ? `${record.score}%` : "-"}
+                            </TableCell>
+                            <TableCell>
+                              {record.expiry_date
+                                ? format(new Date(record.expiry_date), "PP")
+                                : "No expiry"}
+                            </TableCell>
+                            <TableCell>
+                              {isExpired ? (
+                                <Badge variant="destructive" className="gap-1">
+                                  <XCircle className="h-3 w-3" />
+                                  Expired
+                                </Badge>
+                              ) : isExpiringSoon ? (
+                                <Badge variant="outline" className="border-amber-500 text-amber-600 gap-1">
+                                  <Clock className="h-3 w-3" />
+                                  Expiring Soon
+                                </Badge>
+                              ) : isPassed ? (
+                                <Badge variant="secondary" className="bg-green-100 text-green-800 gap-1">
+                                  <CheckCircle className="h-3 w-3" />
+                                  Valid
+                                </Badge>
+                              ) : (
+                                <Badge variant="outline">Incomplete</Badge>
+                              )}
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
+                    </TableBody>
+                  </Table>
+                </CardContent>
+              </Card>
+            )}
+          </TabsContent>
+        </Tabs>
+      </div>
+    </AppLayout>
+  );
+}
