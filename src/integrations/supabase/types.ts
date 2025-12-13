@@ -563,6 +563,91 @@ export type Database = {
           },
         ]
       }
+      attendance_summary: {
+        Row: {
+          actual_clock_in: string | null
+          actual_clock_out: string | null
+          break_duration_minutes: number | null
+          company_id: string
+          created_at: string
+          early_departure_minutes: number | null
+          employee_id: string
+          id: string
+          late_minutes: number | null
+          notes: string | null
+          overtime_hours: number | null
+          schedule_id: string | null
+          scheduled_end: string | null
+          scheduled_start: string | null
+          status: string | null
+          total_work_hours: number | null
+          updated_at: string
+          work_date: string
+        }
+        Insert: {
+          actual_clock_in?: string | null
+          actual_clock_out?: string | null
+          break_duration_minutes?: number | null
+          company_id: string
+          created_at?: string
+          early_departure_minutes?: number | null
+          employee_id: string
+          id?: string
+          late_minutes?: number | null
+          notes?: string | null
+          overtime_hours?: number | null
+          schedule_id?: string | null
+          scheduled_end?: string | null
+          scheduled_start?: string | null
+          status?: string | null
+          total_work_hours?: number | null
+          updated_at?: string
+          work_date: string
+        }
+        Update: {
+          actual_clock_in?: string | null
+          actual_clock_out?: string | null
+          break_duration_minutes?: number | null
+          company_id?: string
+          created_at?: string
+          early_departure_minutes?: number | null
+          employee_id?: string
+          id?: string
+          late_minutes?: number | null
+          notes?: string | null
+          overtime_hours?: number | null
+          schedule_id?: string | null
+          scheduled_end?: string | null
+          scheduled_start?: string | null
+          status?: string | null
+          total_work_hours?: number | null
+          updated_at?: string
+          work_date?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "attendance_summary_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attendance_summary_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attendance_summary_schedule_id_fkey"
+            columns: ["schedule_id"]
+            isOneToOne: false
+            referencedRelation: "work_schedules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       audit_logs: {
         Row: {
           action: Database["public"]["Enums"]["audit_action"]
@@ -5562,6 +5647,57 @@ export type Database = {
             columns: ["referrer_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      employee_schedules: {
+        Row: {
+          created_at: string
+          employee_id: string
+          end_date: string | null
+          id: string
+          is_primary: boolean | null
+          notes: string | null
+          schedule_id: string
+          start_date: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          employee_id: string
+          end_date?: string | null
+          id?: string
+          is_primary?: boolean | null
+          notes?: string | null
+          schedule_id: string
+          start_date: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          employee_id?: string
+          end_date?: string | null
+          id?: string
+          is_primary?: boolean | null
+          notes?: string | null
+          schedule_id?: string
+          start_date?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "employee_schedules_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_schedules_schedule_id_fkey"
+            columns: ["schedule_id"]
+            isOneToOne: false
+            referencedRelation: "work_schedules"
             referencedColumns: ["id"]
           },
         ]
@@ -14422,6 +14558,88 @@ export type Database = {
           },
         ]
       }
+      overtime_requests: {
+        Row: {
+          actual_hours: number | null
+          approved_at: string | null
+          approved_by: string | null
+          company_id: string
+          created_at: string
+          employee_id: string
+          id: string
+          notes: string | null
+          overtime_type: string | null
+          planned_end: string
+          planned_hours: number
+          planned_start: string
+          reason: string
+          rejection_reason: string | null
+          request_date: string
+          status: string | null
+          updated_at: string
+        }
+        Insert: {
+          actual_hours?: number | null
+          approved_at?: string | null
+          approved_by?: string | null
+          company_id: string
+          created_at?: string
+          employee_id: string
+          id?: string
+          notes?: string | null
+          overtime_type?: string | null
+          planned_end: string
+          planned_hours: number
+          planned_start: string
+          reason: string
+          rejection_reason?: string | null
+          request_date: string
+          status?: string | null
+          updated_at?: string
+        }
+        Update: {
+          actual_hours?: number | null
+          approved_at?: string | null
+          approved_by?: string | null
+          company_id?: string
+          created_at?: string
+          employee_id?: string
+          id?: string
+          notes?: string | null
+          overtime_type?: string | null
+          planned_end?: string
+          planned_hours?: number
+          planned_start?: string
+          reason?: string
+          rejection_reason?: string | null
+          request_date?: string
+          status?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "overtime_requests_approved_by_fkey"
+            columns: ["approved_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "overtime_requests_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "overtime_requests_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pay_elements: {
         Row: {
           code: string
@@ -18834,6 +19052,113 @@ export type Database = {
           },
         ]
       }
+      time_clock_entries: {
+        Row: {
+          adjusted_at: string | null
+          adjusted_by: string | null
+          adjustment_reason: string | null
+          break_duration_minutes: number | null
+          break_end: string | null
+          break_start: string | null
+          clock_in: string
+          clock_in_location: string | null
+          clock_in_method: string | null
+          clock_out: string | null
+          clock_out_location: string | null
+          clock_out_method: string | null
+          company_id: string
+          created_at: string
+          employee_id: string
+          id: string
+          notes: string | null
+          overtime_hours: number | null
+          regular_hours: number | null
+          schedule_id: string | null
+          status: string | null
+          total_hours: number | null
+          updated_at: string
+        }
+        Insert: {
+          adjusted_at?: string | null
+          adjusted_by?: string | null
+          adjustment_reason?: string | null
+          break_duration_minutes?: number | null
+          break_end?: string | null
+          break_start?: string | null
+          clock_in: string
+          clock_in_location?: string | null
+          clock_in_method?: string | null
+          clock_out?: string | null
+          clock_out_location?: string | null
+          clock_out_method?: string | null
+          company_id: string
+          created_at?: string
+          employee_id: string
+          id?: string
+          notes?: string | null
+          overtime_hours?: number | null
+          regular_hours?: number | null
+          schedule_id?: string | null
+          status?: string | null
+          total_hours?: number | null
+          updated_at?: string
+        }
+        Update: {
+          adjusted_at?: string | null
+          adjusted_by?: string | null
+          adjustment_reason?: string | null
+          break_duration_minutes?: number | null
+          break_end?: string | null
+          break_start?: string | null
+          clock_in?: string
+          clock_in_location?: string | null
+          clock_in_method?: string | null
+          clock_out?: string | null
+          clock_out_location?: string | null
+          clock_out_method?: string | null
+          company_id?: string
+          created_at?: string
+          employee_id?: string
+          id?: string
+          notes?: string | null
+          overtime_hours?: number | null
+          regular_hours?: number | null
+          schedule_id?: string | null
+          status?: string | null
+          total_hours?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "time_clock_entries_adjusted_by_fkey"
+            columns: ["adjusted_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "time_clock_entries_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "time_clock_entries_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "time_clock_entries_schedule_id_fkey"
+            columns: ["schedule_id"]
+            isOneToOne: false
+            referencedRelation: "work_schedules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       total_rewards_statements: {
         Row: {
           base_salary: number | null
@@ -19572,6 +19897,71 @@ export type Database = {
             columns: ["initiated_by"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      work_schedules: {
+        Row: {
+          break_duration_minutes: number | null
+          code: string
+          company_id: string
+          created_at: string
+          description: string | null
+          end_date: string | null
+          end_time: string
+          id: string
+          is_active: boolean | null
+          is_overnight: boolean | null
+          name: string
+          schedule_type: string
+          start_date: string
+          start_time: string
+          updated_at: string
+          work_days: Json | null
+        }
+        Insert: {
+          break_duration_minutes?: number | null
+          code: string
+          company_id: string
+          created_at?: string
+          description?: string | null
+          end_date?: string | null
+          end_time: string
+          id?: string
+          is_active?: boolean | null
+          is_overnight?: boolean | null
+          name: string
+          schedule_type?: string
+          start_date?: string
+          start_time: string
+          updated_at?: string
+          work_days?: Json | null
+        }
+        Update: {
+          break_duration_minutes?: number | null
+          code?: string
+          company_id?: string
+          created_at?: string
+          description?: string | null
+          end_date?: string | null
+          end_time?: string
+          id?: string
+          is_active?: boolean | null
+          is_overnight?: boolean | null
+          name?: string
+          schedule_type?: string
+          start_date?: string
+          start_time?: string
+          updated_at?: string
+          work_days?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "work_schedules_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
             referencedColumns: ["id"]
           },
         ]

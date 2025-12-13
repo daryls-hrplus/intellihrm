@@ -179,6 +179,10 @@ import SalaryOvertimePage from "./pages/payroll/SalaryOvertimePage";
 
 // Time & Attendance pages
 import TimeAttendanceDashboardPage from "./pages/time-attendance/TimeAttendanceDashboardPage";
+import TimeTrackingPage from "./pages/time-attendance/TimeTrackingPage";
+import AttendanceRecordsPage from "./pages/time-attendance/AttendanceRecordsPage";
+import SchedulesPage from "./pages/time-attendance/SchedulesPage";
+import OvertimeManagementPage from "./pages/time-attendance/OvertimeManagementPage";
 
 // ESS & MSS pages
 import EmployeeSelfServicePage from "./pages/ess/EmployeeSelfServicePage";
