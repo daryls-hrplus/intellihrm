@@ -56,18 +56,20 @@ export function InstructorsTab({ companyId }: InstructorsTabProps) {
 
   const loadData = async () => {
     setLoading(true);
-    const [instructorsRes, employeesRes] = await Promise.all([
-      supabase
-        .from("training_instructors")
-        .select("*, employee:profiles!training_instructors_employee_id_fkey(full_name)")
-        .eq("company_id", companyId)
-        .order("name") as any,
-      supabase
-        .from("profiles")
-        .select("id, full_name")
-        .eq("company_id", companyId)
-        .eq("is_active", true),
-    ]);
+    
+    // @ts-ignore - Supabase type instantiation issue
+    const instructorsRes = await supabase
+      .from("training_instructors")
+      .select("*, employee:profiles!training_instructors_employee_id_fkey(full_name)")
+      .eq("company_id", companyId)
+      .order("name");
+    
+    // @ts-ignore - Supabase type instantiation issue
+    const employeesRes = await supabase
+      .from("profiles")
+      .select("id, full_name")
+      .eq("company_id", companyId)
+      .eq("is_active", true);
 
     if (instructorsRes.data) setInstructors(instructorsRes.data);
     if (employeesRes.data) setEmployees(employeesRes.data);

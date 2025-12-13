@@ -65,22 +65,26 @@ export function ComplianceTrainingTab({ companyId }: ComplianceTrainingTabProps)
 
   const loadData = async () => {
     setLoading(true);
-    const [trainingsRes, assignmentsRes, coursesRes] = await Promise.all([
-      supabase
-        .from("compliance_training")
-        .select("*, course:lms_courses(title)")
-        .eq("company_id", companyId)
-        .order("name") as any,
-      supabase
-        .from("compliance_training_assignments")
-        .select("*, compliance:compliance_training(name), employee:profiles(full_name)") as any
-        .order("due_date"),
-      supabase
-        .from("lms_courses")
-        .select("id, title")
-        .eq("company_id", companyId)
-        .eq("is_active", true),
-    ]);
+    
+    // @ts-ignore - Supabase type instantiation issue
+    const trainingsRes = await supabase
+      .from("compliance_training")
+      .select("*, course:lms_courses(title)")
+      .eq("company_id", companyId)
+      .order("name");
+    
+    // @ts-ignore - Supabase type instantiation issue
+    const assignmentsRes = await supabase
+      .from("compliance_training_assignments")
+      .select("*, compliance:compliance_training(name), employee:profiles(full_name)")
+      .order("due_date");
+    
+    // @ts-ignore - Supabase type instantiation issue
+    const coursesRes = await supabase
+      .from("lms_courses")
+      .select("id, title")
+      .eq("company_id", companyId)
+      .eq("is_active", true);
 
     if (trainingsRes.data) setTrainings(trainingsRes.data);
     if (assignmentsRes.data) setAssignments(assignmentsRes.data);
