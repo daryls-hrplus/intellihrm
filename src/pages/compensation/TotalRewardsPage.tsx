@@ -1,29 +1,48 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
-import { Receipt, Plus, Search, Eye, Download, DollarSign, FileText } from "lucide-react";
+import { Receipt, Plus, Search, Eye, Download, DollarSign, FileText, ChevronRight, Building2 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export default function TotalRewardsPage() {
   const [searchTerm, setSearchTerm] = useState("");
+  const [companyFilter, setCompanyFilter] = useState<string>("all");
 
-  const { data: statements = [], isLoading } = useQuery({
-    queryKey: ["total-rewards-statements"],
+  const { data: companies = [] } = useQuery({
+    queryKey: ["companies-filter"],
     queryFn: async () => {
       const { data, error } = await supabase
+        .from("companies")
+        .select("id, name")
+        .order("name");
+      if (error) throw error;
+      return data || [];
+    },
+  });
+
+  const { data: statements = [], isLoading } = useQuery({
+    queryKey: ["total-rewards-statements", companyFilter],
+    queryFn: async () => {
+      let query = supabase
         .from("total_rewards_statements")
         .select(`
           *,
           employee:profiles!total_rewards_statements_employee_id_fkey(full_name, email)
         `)
         .order("statement_year", { ascending: false });
+      if (companyFilter !== "all") {
+        query = query.eq("company_id", companyFilter);
+      }
+      const { data, error } = await query;
       if (error) throw error;
       return data || [];
     },
@@ -36,6 +55,13 @@ export default function TotalRewardsPage() {
   return (
     <AppLayout>
       <div className="space-y-6">
+        {/* Breadcrumbs */}
+        <nav className="flex items-center gap-2 text-sm text-muted-foreground">
+          <Link to="/compensation" className="hover:text-foreground transition-colors">Compensation</Link>
+          <ChevronRight className="h-4 w-4" />
+          <span className="text-foreground font-medium">Total Rewards Statements</span>
+        </nav>
+
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
@@ -46,10 +72,24 @@ export default function TotalRewardsPage() {
               <p className="text-muted-foreground">Employee total compensation summaries</p>
             </div>
           </div>
-          <Button>
-            <Plus className="mr-2 h-4 w-4" />
-            Generate Statements
-          </Button>
+          <div className="flex items-center gap-3">
+            <Select value={companyFilter} onValueChange={setCompanyFilter}>
+              <SelectTrigger className="w-[200px]">
+                <Building2 className="mr-2 h-4 w-4" />
+                <SelectValue placeholder="All Companies" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Companies</SelectItem>
+                {companies.map((company: any) => (
+                  <SelectItem key={company.id} value={company.id}>{company.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Button>
+              <Plus className="mr-2 h-4 w-4" />
+              Generate Statements
+            </Button>
+          </div>
         </div>
 
         {/* Summary Cards */}
