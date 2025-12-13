@@ -5045,6 +5045,149 @@ export type Database = {
           },
         ]
       }
+      employee_period_allowances: {
+        Row: {
+          allowance_code: string | null
+          allowance_name: string
+          amount: number
+          company_id: string
+          created_at: string
+          currency: string | null
+          employee_id: string
+          id: string
+          is_benefit_in_kind: boolean | null
+          is_taxable: boolean | null
+          notes: string | null
+          pay_period_id: string | null
+          tax_rate: number | null
+          updated_at: string
+        }
+        Insert: {
+          allowance_code?: string | null
+          allowance_name: string
+          amount: number
+          company_id: string
+          created_at?: string
+          currency?: string | null
+          employee_id: string
+          id?: string
+          is_benefit_in_kind?: boolean | null
+          is_taxable?: boolean | null
+          notes?: string | null
+          pay_period_id?: string | null
+          tax_rate?: number | null
+          updated_at?: string
+        }
+        Update: {
+          allowance_code?: string | null
+          allowance_name?: string
+          amount?: number
+          company_id?: string
+          created_at?: string
+          currency?: string | null
+          employee_id?: string
+          id?: string
+          is_benefit_in_kind?: boolean | null
+          is_taxable?: boolean | null
+          notes?: string | null
+          pay_period_id?: string | null
+          tax_rate?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "employee_period_allowances_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_period_allowances_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_period_allowances_pay_period_id_fkey"
+            columns: ["pay_period_id"]
+            isOneToOne: false
+            referencedRelation: "pay_periods"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      employee_period_deductions: {
+        Row: {
+          amount: number
+          company_id: string
+          created_at: string
+          currency: string | null
+          deduction_code: string | null
+          deduction_name: string
+          deduction_type: string | null
+          employee_id: string
+          id: string
+          is_pretax: boolean | null
+          notes: string | null
+          pay_period_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          company_id: string
+          created_at?: string
+          currency?: string | null
+          deduction_code?: string | null
+          deduction_name: string
+          deduction_type?: string | null
+          employee_id: string
+          id?: string
+          is_pretax?: boolean | null
+          notes?: string | null
+          pay_period_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          company_id?: string
+          created_at?: string
+          currency?: string | null
+          deduction_code?: string | null
+          deduction_name?: string
+          deduction_type?: string | null
+          employee_id?: string
+          id?: string
+          is_pretax?: boolean | null
+          notes?: string | null
+          pay_period_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "employee_period_deductions_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_period_deductions_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_period_deductions_pay_period_id_fkey"
+            columns: ["pay_period_id"]
+            isOneToOne: false
+            referencedRelation: "pay_periods"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       employee_position_history: {
         Row: {
           action: string
@@ -5851,6 +5994,63 @@ export type Database = {
           },
         ]
       }
+      employee_work_periods: {
+        Row: {
+          clock_in: string
+          clock_out: string | null
+          created_at: string
+          hours_worked: number | null
+          id: string
+          is_paid: boolean | null
+          notes: string | null
+          payroll_rule_id: string | null
+          period_type: string
+          updated_at: string
+          work_record_id: string
+        }
+        Insert: {
+          clock_in: string
+          clock_out?: string | null
+          created_at?: string
+          hours_worked?: number | null
+          id?: string
+          is_paid?: boolean | null
+          notes?: string | null
+          payroll_rule_id?: string | null
+          period_type: string
+          updated_at?: string
+          work_record_id: string
+        }
+        Update: {
+          clock_in?: string
+          clock_out?: string | null
+          created_at?: string
+          hours_worked?: number | null
+          id?: string
+          is_paid?: boolean | null
+          notes?: string | null
+          payroll_rule_id?: string | null
+          period_type?: string
+          updated_at?: string
+          work_record_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "employee_work_periods_payroll_rule_id_fkey"
+            columns: ["payroll_rule_id"]
+            isOneToOne: false
+            referencedRelation: "payroll_rules"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_work_periods_work_record_id_fkey"
+            columns: ["work_record_id"]
+            isOneToOne: false
+            referencedRelation: "employee_work_records"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       employee_work_permits: {
         Row: {
           created_at: string
@@ -5900,6 +6100,96 @@ export type Database = {
             columns: ["employee_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      employee_work_records: {
+        Row: {
+          company_id: string
+          created_at: string
+          day_type: string
+          employee_id: string
+          id: string
+          is_scheduled_day: boolean | null
+          notes: string | null
+          overtime_hours: number | null
+          pay_period_id: string | null
+          payroll_rule_id: string | null
+          position_id: string | null
+          regular_hours: number | null
+          total_hours_worked: number | null
+          updated_at: string
+          work_date: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          day_type: string
+          employee_id: string
+          id?: string
+          is_scheduled_day?: boolean | null
+          notes?: string | null
+          overtime_hours?: number | null
+          pay_period_id?: string | null
+          payroll_rule_id?: string | null
+          position_id?: string | null
+          regular_hours?: number | null
+          total_hours_worked?: number | null
+          updated_at?: string
+          work_date: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          day_type?: string
+          employee_id?: string
+          id?: string
+          is_scheduled_day?: boolean | null
+          notes?: string | null
+          overtime_hours?: number | null
+          pay_period_id?: string | null
+          payroll_rule_id?: string | null
+          position_id?: string | null
+          regular_hours?: number | null
+          total_hours_worked?: number | null
+          updated_at?: string
+          work_date?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "employee_work_records_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_work_records_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_work_records_pay_period_id_fkey"
+            columns: ["pay_period_id"]
+            isOneToOne: false
+            referencedRelation: "pay_periods"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_work_records_payroll_rule_id_fkey"
+            columns: ["payroll_rule_id"]
+            isOneToOne: false
+            referencedRelation: "payroll_rules"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_work_records_position_id_fkey"
+            columns: ["position_id"]
+            isOneToOne: false
+            referencedRelation: "positions"
             referencedColumns: ["id"]
           },
         ]
@@ -14852,6 +15142,71 @@ export type Database = {
             columns: ["pay_element_id"]
             isOneToOne: false
             referencedRelation: "pay_elements"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      payroll_rules: {
+        Row: {
+          break_deduction_minutes: number | null
+          code: string
+          company_id: string
+          created_at: string
+          description: string | null
+          end_date: string | null
+          holiday_multiplier: number | null
+          id: string
+          is_active: boolean | null
+          name: string
+          night_shift_multiplier: number | null
+          overtime_multiplier: number | null
+          rule_type: string
+          start_date: string
+          updated_at: string
+          weekend_multiplier: number | null
+        }
+        Insert: {
+          break_deduction_minutes?: number | null
+          code: string
+          company_id: string
+          created_at?: string
+          description?: string | null
+          end_date?: string | null
+          holiday_multiplier?: number | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          night_shift_multiplier?: number | null
+          overtime_multiplier?: number | null
+          rule_type: string
+          start_date?: string
+          updated_at?: string
+          weekend_multiplier?: number | null
+        }
+        Update: {
+          break_deduction_minutes?: number | null
+          code?: string
+          company_id?: string
+          created_at?: string
+          description?: string | null
+          end_date?: string | null
+          holiday_multiplier?: number | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          night_shift_multiplier?: number | null
+          overtime_multiplier?: number | null
+          rule_type?: string
+          start_date?: string
+          updated_at?: string
+          weekend_multiplier?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payroll_rules_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
             referencedColumns: ["id"]
           },
         ]
