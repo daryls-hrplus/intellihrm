@@ -11,6 +11,10 @@ import {
   Clock,
   TrendingUp,
   CheckCircle,
+  AlertTriangle,
+  MessageCircle,
+  BarChart3,
+  Award,
 } from "lucide-react";
 
 const performanceModules = [
@@ -34,6 +38,34 @@ const performanceModules = [
     href: "/performance/goals",
     icon: Flag,
     color: "bg-success/10 text-success",
+  },
+  {
+    title: "Improvement Plans",
+    description: "Track performance improvement plans",
+    href: "/performance/pips",
+    icon: AlertTriangle,
+    color: "bg-warning/10 text-warning",
+  },
+  {
+    title: "Continuous Feedback",
+    description: "Quick feedback and check-ins",
+    href: "/performance/feedback",
+    icon: MessageCircle,
+    color: "bg-secondary/10 text-secondary",
+  },
+  {
+    title: "Recognition & Awards",
+    description: "Celebrate achievements",
+    href: "/performance/recognition",
+    icon: Award,
+    color: "bg-accent/10 text-accent",
+  },
+  {
+    title: "Analytics",
+    description: "Performance insights and trends",
+    href: "/performance/analytics",
+    icon: BarChart3,
+    color: "bg-muted text-muted-foreground",
   },
 ];
 
