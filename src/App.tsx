@@ -231,6 +231,9 @@ import TicketsPage from "./pages/help/TicketsPage";
 import NewTicketPage from "./pages/help/NewTicketPage";
 import TicketDetailPage from "./pages/help/TicketDetailPage";
 
+// Messaging pages
+import MessagingPage from "./pages/messaging/MessagingPage";
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -1751,6 +1754,16 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <MyDelegatesPage />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Messaging Routes */}
+            <Route
+              path="/messages"
+              element={
+                <ProtectedRoute>
+                  <MessagingPage />
                 </ProtectedRoute>
               }
             />

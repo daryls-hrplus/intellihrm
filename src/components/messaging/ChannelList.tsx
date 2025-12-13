@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Channel, ChannelMember } from "@/hooks/useMessaging";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/contexts/AuthContext";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";

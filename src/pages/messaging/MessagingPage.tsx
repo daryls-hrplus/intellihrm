@@ -4,7 +4,7 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import { useMessaging, Channel, Message } from "@/hooks/useMessaging";
 import { useChannelMessages } from "@/hooks/useChannelMessages";
 import { useVideoCall } from "@/hooks/useVideoCall";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { ChannelList } from "@/components/messaging/ChannelList";
 import { ChatHeader } from "@/components/messaging/ChatHeader";
