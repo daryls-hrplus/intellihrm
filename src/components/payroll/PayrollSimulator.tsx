@@ -49,7 +49,7 @@ export function PayrollSimulator({ companyId, employeeId, payPeriodId }: Payroll
       // Fetch employee info
       const { data: employee } = await supabase
         .from('profiles')
-        .select('full_name, employee_id')
+        .select('full_name')
         .eq('id', employeeId)
         .single();
 
@@ -140,7 +140,7 @@ export function PayrollSimulator({ companyId, employeeId, payPeriodId }: Payroll
       setResult({
         employee: {
           name: employee?.full_name || 'N/A',
-          employee_id: employee?.employee_id || 'N/A',
+          employee_id: employeeId.slice(0, 8).toUpperCase(),
           position: (positions?.[0]?.position as { title: string } | null)?.title || 'N/A'
         },
         earnings: {

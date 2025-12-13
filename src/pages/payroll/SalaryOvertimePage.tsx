@@ -30,17 +30,15 @@ interface PayGroup {
 
 interface PayPeriod {
   id: string;
-  cycle_number: number;
-  start_date: string;
-  end_date: string;
+  period_number: string;
+  period_start: string;
+  period_end: string;
   pay_date: string;
 }
 
 interface Employee {
   id: string;
-  first_name: string;
-  last_name: string;
-  employee_id: string;
+  full_name: string;
 }
 
 export default function SalaryOvertimePage() {
@@ -105,21 +103,21 @@ export default function SalaryOvertimePage() {
   const loadPayPeriods = async () => {
     const { data, error } = await supabase
       .from('pay_periods')
-      .select('id, cycle_number, start_date, end_date, pay_date')
+      .select('id, period_number, period_start, period_end, pay_date')
       .eq('pay_group_id', selectedPayGroup)
-      .order('cycle_number', { ascending: false });
+      .order('period_number', { ascending: false });
     
     if (error) {
       toast.error("Failed to load pay periods");
       return;
     }
-    setPayPeriods((data || []) as PayPeriod[]);
+    setPayPeriods(data || []);
   };
 
   const loadEmployees = async () => {
     const { data, error } = await supabase
       .from('profiles')
-      .select('id, full_name, employee_id')
+      .select('id, full_name')
       .eq('company_id', selectedCompany)
       .order('full_name');
     
@@ -127,12 +125,7 @@ export default function SalaryOvertimePage() {
       toast.error("Failed to load employees");
       return;
     }
-    setEmployees((data || []).map(e => ({
-      id: e.id,
-      first_name: e.full_name?.split(' ')[0] || '',
-      last_name: e.full_name?.split(' ').slice(1).join(' ') || '',
-      employee_id: e.employee_id || ''
-    })));
+    setEmployees(data || []);
   };
 
   return (
@@ -205,7 +198,7 @@ export default function SalaryOvertimePage() {
                 <SelectContent>
                   {payPeriods.map((pp) => (
                     <SelectItem key={pp.id} value={pp.id}>
-                      Cycle {pp.cycle_number}: {format(new Date(pp.start_date), 'MMM d')} - {format(new Date(pp.end_date), 'MMM d, yyyy')}
+                      Cycle {pp.period_number}: {format(new Date(pp.period_start), 'MMM d')} - {format(new Date(pp.period_end), 'MMM d, yyyy')}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -225,7 +218,7 @@ export default function SalaryOvertimePage() {
                 <SelectContent>
                   {employees.map((emp) => (
                     <SelectItem key={emp.id} value={emp.id}>
-                      {emp.first_name} {emp.last_name} ({emp.employee_id || 'N/A'})
+                      {emp.full_name || 'N/A'}
                     </SelectItem>
                   ))}
                 </SelectContent>

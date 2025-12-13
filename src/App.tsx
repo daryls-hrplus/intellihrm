@@ -175,6 +175,7 @@ import TaxConfigPage from "./pages/payroll/TaxConfigPage";
 import PayrollReportsPage from "./pages/payroll/PayrollReportsPage";
 import YearEndProcessingPage from "./pages/payroll/YearEndProcessingPage";
 import PayslipsPage from "./pages/payroll/PayslipsPage";
+import SalaryOvertimePage from "./pages/payroll/SalaryOvertimePage";
 
 // Time & Attendance pages
 import TimeAttendanceDashboardPage from "./pages/time-attendance/TimeAttendanceDashboardPage";
@@ -1147,6 +1148,14 @@ const App = () => (
               element={
                 <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="payroll">
                   <YearEndProcessingPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/payroll/salary-overtime"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="payroll">
+                  <SalaryOvertimePage />
                 </ProtectedRoute>
               }
             />

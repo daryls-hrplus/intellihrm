@@ -60,6 +60,13 @@ const features = [
     href: "/payroll/year-end",
     color: "bg-destructive/10 text-destructive",
   },
+  {
+    title: "Salary & Overtime",
+    description: "Track work records, allowances, deductions and simulate pay",
+    icon: Clock,
+    href: "/payroll/salary-overtime",
+    color: "bg-accent/10 text-accent-foreground",
+  },
 ];
 
 const stats = [
