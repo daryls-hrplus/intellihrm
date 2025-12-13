@@ -100,9 +100,10 @@ export default function HSESafetyTrainingPage() {
 
   const createTrainingRecord = useMutation({
     mutationFn: async (data: Partial<HSETrainingRecord>) => {
+      const { training, employee, attachments, ...rest } = data;
       const { data: result, error } = await supabase
         .from("hse_training_records")
-        .insert([data])
+        .insert([{ ...rest, attachments: attachments || [] } as never])
         .select()
         .single();
       if (error) throw error;
