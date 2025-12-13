@@ -18,6 +18,7 @@ import {
   UserMinus,
   Package,
   Heart,
+  Shield,
 } from "lucide-react";
 
 const mssModules = [
@@ -69,6 +70,13 @@ const mssModules = [
     href: "/mss/relations",
     icon: Heart,
     color: "bg-rose-500/10 text-rose-600",
+  },
+  {
+    title: "Team Benefits",
+    description: "View team benefit enrollments",
+    href: "/mss/benefits",
+    icon: Shield,
+    color: "bg-emerald-500/10 text-emerald-600",
   },
   {
     title: "Team Leave Calendar",

@@ -18,6 +18,7 @@ import {
   UserMinus,
   Package,
   Heart,
+  Shield,
 } from "lucide-react";
 
 const essModules = [
@@ -125,6 +126,13 @@ const essModules = [
     href: "/ess/relations",
     icon: Heart,
     color: "bg-rose-500/10 text-rose-600",
+  },
+  {
+    title: "My Benefits",
+    description: "View your benefit plans and coverage",
+    href: "/ess/benefits",
+    icon: Shield,
+    color: "bg-emerald-500/10 text-emerald-600",
   },
   {
     title: "Notifications",
