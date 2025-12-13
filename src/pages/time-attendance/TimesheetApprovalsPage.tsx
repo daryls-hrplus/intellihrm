@@ -5,6 +5,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useWorkflow } from "@/hooks/useWorkflow";
 import { useToast } from "@/hooks/use-toast";
 import { AppLayout } from "@/components/layout/AppLayout";
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -47,11 +48,6 @@ const statusColors: Record<string, string> = {
   rejected: "bg-red-500/20 text-red-700",
   returned: "bg-orange-500/20 text-orange-700",
 };
-
-const breadcrumbs = [
-  { label: "Time & Attendance", href: "/time-attendance" },
-  { label: "Timesheet Approvals" },
-];
 
 export default function TimesheetApprovalsPage() {
   const { user, profile } = useAuth();
@@ -156,7 +152,7 @@ export default function TimesheetApprovalsPage() {
       await supabase.from("project_time_entries").update({ submission_id: submission.id }).in("id", entries.map((e) => e.id));
 
       try {
-        await startWorkflow("timesheet_approval", submission.id);
+        await startWorkflow("timesheet_approval", "timesheet_submission", submission.id);
         await supabase.from("timesheet_submissions").update({ status: "pending_approval" }).eq("id", submission.id);
       } catch { /* workflow template may not exist */ }
 
@@ -189,15 +185,18 @@ export default function TimesheetApprovalsPage() {
 
   if (isLoading) {
     return (
-      <AppLayout breadcrumbs={breadcrumbs}>
+      <AppLayout>
+        <Breadcrumbs items={[{ label: "Time & Attendance", href: "/time-attendance" }, { label: "Timesheet Approvals" }]} />
         <div className="flex items-center justify-center h-64"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>
       </AppLayout>
     );
   }
 
   return (
-    <AppLayout breadcrumbs={breadcrumbs}>
+    <AppLayout>
       <div className="space-y-6">
+        <Breadcrumbs items={[{ label: "Time & Attendance", href: "/time-attendance" }, { label: "Timesheet Approvals" }]} />
+        
         <div className="grid gap-4 md:grid-cols-4">
           <Card><CardHeader className="flex flex-row items-center justify-between pb-2"><CardTitle className="text-sm font-medium">Unsubmitted</CardTitle><Clock className="h-4 w-4 text-muted-foreground" /></CardHeader><CardContent><div className="text-2xl font-bold">{unsubmittedEntries.length}</div></CardContent></Card>
           <Card><CardHeader className="flex flex-row items-center justify-between pb-2"><CardTitle className="text-sm font-medium">Pending</CardTitle><Send className="h-4 w-4 text-muted-foreground" /></CardHeader><CardContent><div className="text-2xl font-bold">{mySubmissions.filter((s) => s.status === "pending_approval").length}</div></CardContent></Card>

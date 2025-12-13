@@ -1044,6 +1044,14 @@ const App = () => (
                 </ProtectedRoute>
               }
             />
+            <Route
+              path="/time-attendance/timesheet-approvals"
+              element={
+                <ProtectedRoute moduleCode="time_attendance">
+                  <TimesheetApprovalsPage />
+                </ProtectedRoute>
+              }
+            />
 
             <Route
               path="/leave"
