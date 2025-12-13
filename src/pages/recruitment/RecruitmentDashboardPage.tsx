@@ -2,6 +2,9 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import { NavLink } from "react-router-dom";
 import { ModuleReportsButton } from "@/components/reports/ModuleReportsButton";
 import { ModuleBIButton } from "@/components/bi/ModuleBIButton";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { startOfMonth, startOfDay, endOfDay } from "date-fns";
 import {
   UserPlus,
   Briefcase,
@@ -9,7 +12,6 @@ import {
   Users,
   Calendar,
   ChevronRight,
-  Clock,
   CheckCircle,
 } from "lucide-react";
 
@@ -44,14 +46,66 @@ const recruitmentModules = [
   },
 ];
 
-const statCards = [
-  { label: "Open Positions", value: 12, icon: Briefcase, color: "bg-primary/10 text-primary", href: "/recruitment/manage?tab=requisitions" },
-  { label: "Total Candidates", value: 87, icon: Users, color: "bg-info/10 text-info", href: "/recruitment/manage?tab=candidates" },
-  { label: "Interviews Today", value: 5, icon: Calendar, color: "bg-warning/10 text-warning", href: "/recruitment/manage?tab=applications" },
-  { label: "Hired This Month", value: 8, icon: CheckCircle, color: "bg-success/10 text-success", href: "/recruitment/manage?tab=applications" },
-];
-
 export default function RecruitmentDashboardPage() {
+  // Fetch open positions count
+  const { data: openPositions = 0 } = useQuery({
+    queryKey: ["recruitment-stats-open-positions"],
+    queryFn: async () => {
+      const { count } = await supabase
+        .from("job_requisitions")
+        .select("*", { count: "exact", head: true })
+        .eq("status", "open");
+      return count || 0;
+    },
+  });
+
+  // Fetch total candidates count
+  const { data: totalCandidates = 0 } = useQuery({
+    queryKey: ["recruitment-stats-candidates"],
+    queryFn: async () => {
+      const { count } = await supabase
+        .from("candidates")
+        .select("*", { count: "exact", head: true });
+      return count || 0;
+    },
+  });
+
+  // Fetch interviews scheduled for today
+  const { data: interviewsToday = 0 } = useQuery({
+    queryKey: ["recruitment-stats-interviews-today"],
+    queryFn: async () => {
+      const today = new Date();
+      const { count } = await supabase
+        .from("interview_schedules")
+        .select("*", { count: "exact", head: true })
+        .gte("scheduled_at", startOfDay(today).toISOString())
+        .lte("scheduled_at", endOfDay(today).toISOString())
+        .eq("status", "scheduled");
+      return count || 0;
+    },
+  });
+
+  // Fetch hired this month count
+  const { data: hiredThisMonth = 0 } = useQuery({
+    queryKey: ["recruitment-stats-hired-month"],
+    queryFn: async () => {
+      const monthStart = startOfMonth(new Date());
+      const { count } = await supabase
+        .from("applications")
+        .select("*", { count: "exact", head: true })
+        .eq("stage", "hired")
+        .gte("hired_at", monthStart.toISOString());
+      return count || 0;
+    },
+  });
+
+  const statCards = [
+    { label: "Open Positions", value: openPositions, icon: Briefcase, color: "bg-primary/10 text-primary", href: "/recruitment/manage?tab=requisitions" },
+    { label: "Total Candidates", value: totalCandidates, icon: Users, color: "bg-info/10 text-info", href: "/recruitment/manage?tab=candidates" },
+    { label: "Interviews Today", value: interviewsToday, icon: Calendar, color: "bg-warning/10 text-warning", href: "/recruitment/manage?tab=applications" },
+    { label: "Hired This Month", value: hiredThisMonth, icon: CheckCircle, color: "bg-success/10 text-success", href: "/recruitment/manage?tab=applications" },
+  ];
+
   return (
     <AppLayout>
       <div className="space-y-6">
