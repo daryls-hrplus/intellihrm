@@ -185,6 +185,7 @@ import SchedulesPage from "./pages/time-attendance/SchedulesPage";
 import OvertimeManagementPage from "./pages/time-attendance/OvertimeManagementPage";
 import ShiftManagementPage from "./pages/time-attendance/ShiftManagementPage";
 import GeofenceManagementPage from "./pages/time-attendance/GeofenceManagementPage";
+import ProjectTimeTrackingPage from "./pages/time-attendance/ProjectTimeTrackingPage";
 
 // ESS & MSS pages
 import EmployeeSelfServicePage from "./pages/ess/EmployeeSelfServicePage";
@@ -1031,6 +1032,14 @@ const App = () => (
               element={
                 <ProtectedRoute moduleCode="time_attendance">
                   <GeofenceManagementPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/time-attendance/projects"
+              element={
+                <ProtectedRoute moduleCode="time_attendance">
+                  <ProjectTimeTrackingPage />
                 </ProtectedRoute>
               }
             />

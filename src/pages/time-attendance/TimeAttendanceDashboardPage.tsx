@@ -16,6 +16,7 @@ import {
   Settings,
   Sun,
   MapPin,
+  Briefcase,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
@@ -55,12 +56,19 @@ const features = [
     href: "/time-attendance/shifts",
     color: "bg-orange-500/10 text-orange-600",
   },
-  {
+{
     title: "Geofencing",
     description: "Location-based clock in/out restrictions",
     icon: MapPin,
     href: "/time-attendance/geofencing",
     color: "bg-teal-500/10 text-teal-600",
+  },
+  {
+    title: "Project Time Tracking",
+    description: "Track time against clients, projects and tasks",
+    icon: Briefcase,
+    href: "/time-attendance/projects",
+    color: "bg-violet-500/10 text-violet-600",
   },
 ];
 

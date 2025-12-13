@@ -16998,6 +16998,336 @@ export type Database = {
           },
         ]
       }
+      project_assignments: {
+        Row: {
+          created_at: string
+          employee_id: string
+          end_date: string | null
+          hourly_rate: number | null
+          id: string
+          is_active: boolean
+          project_id: string
+          role: string | null
+          start_date: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          employee_id: string
+          end_date?: string | null
+          hourly_rate?: number | null
+          id?: string
+          is_active?: boolean
+          project_id: string
+          role?: string | null
+          start_date?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          employee_id?: string
+          end_date?: string | null
+          hourly_rate?: number | null
+          id?: string
+          is_active?: boolean
+          project_id?: string
+          role?: string | null
+          start_date?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_assignments_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      project_clients: {
+        Row: {
+          code: string
+          company_id: string
+          contact_email: string | null
+          contact_name: string | null
+          contact_phone: string | null
+          created_at: string
+          description: string | null
+          end_date: string | null
+          id: string
+          is_active: boolean
+          name: string
+          start_date: string
+          updated_at: string
+        }
+        Insert: {
+          code: string
+          company_id: string
+          contact_email?: string | null
+          contact_name?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          start_date?: string
+          updated_at?: string
+        }
+        Update: {
+          code?: string
+          company_id?: string
+          contact_email?: string | null
+          contact_name?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          start_date?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_clients_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      project_tasks: {
+        Row: {
+          billable: boolean
+          code: string | null
+          created_at: string
+          description: string | null
+          display_order: number
+          estimated_hours: number | null
+          id: string
+          is_active: boolean
+          name: string
+          parent_task_id: string | null
+          project_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          billable?: boolean
+          code?: string | null
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          estimated_hours?: number | null
+          id?: string
+          is_active?: boolean
+          name: string
+          parent_task_id?: string | null
+          project_id: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          billable?: boolean
+          code?: string | null
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          estimated_hours?: number | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          parent_task_id?: string | null
+          project_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_tasks_parent_task_id_fkey"
+            columns: ["parent_task_id"]
+            isOneToOne: false
+            referencedRelation: "project_tasks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_tasks_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      project_time_entries: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          billable: boolean
+          company_id: string
+          created_at: string
+          description: string | null
+          employee_id: string
+          entry_date: string
+          hours: number
+          id: string
+          project_id: string
+          rejection_reason: string | null
+          status: string
+          submitted_at: string | null
+          task_id: string | null
+          time_clock_entry_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          billable?: boolean
+          company_id: string
+          created_at?: string
+          description?: string | null
+          employee_id: string
+          entry_date: string
+          hours: number
+          id?: string
+          project_id: string
+          rejection_reason?: string | null
+          status?: string
+          submitted_at?: string | null
+          task_id?: string | null
+          time_clock_entry_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          billable?: boolean
+          company_id?: string
+          created_at?: string
+          description?: string | null
+          employee_id?: string
+          entry_date?: string
+          hours?: number
+          id?: string
+          project_id?: string
+          rejection_reason?: string | null
+          status?: string
+          submitted_at?: string | null
+          task_id?: string | null
+          time_clock_entry_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_time_entries_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_time_entries_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_time_entries_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "project_tasks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_time_entries_time_clock_entry_id_fkey"
+            columns: ["time_clock_entry_id"]
+            isOneToOne: false
+            referencedRelation: "time_clock_entries"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      projects: {
+        Row: {
+          billable: boolean
+          budget_hours: number | null
+          client_id: string | null
+          code: string
+          company_id: string
+          created_at: string
+          currency: string | null
+          description: string | null
+          end_date: string | null
+          hourly_rate: number | null
+          id: string
+          is_active: boolean
+          name: string
+          project_manager_id: string | null
+          start_date: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          billable?: boolean
+          budget_hours?: number | null
+          client_id?: string | null
+          code: string
+          company_id: string
+          created_at?: string
+          currency?: string | null
+          description?: string | null
+          end_date?: string | null
+          hourly_rate?: number | null
+          id?: string
+          is_active?: boolean
+          name: string
+          project_manager_id?: string | null
+          start_date?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          billable?: boolean
+          budget_hours?: number | null
+          client_id?: string | null
+          code?: string
+          company_id?: string
+          created_at?: string
+          currency?: string | null
+          description?: string | null
+          end_date?: string | null
+          hourly_rate?: number | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          project_manager_id?: string | null
+          start_date?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "projects_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "project_clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "projects_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       property_assignments: {
         Row: {
           actual_return_date: string | null
@@ -19638,6 +19968,7 @@ export type Database = {
           id: string
           notes: string | null
           overtime_hours: number | null
+          project_id: string | null
           regular_hours: number | null
           rounded_clock_in: string | null
           rounded_clock_out: string | null
@@ -19646,6 +19977,7 @@ export type Database = {
           shift_differential: number | null
           shift_id: string | null
           status: string | null
+          task_id: string | null
           total_hours: number | null
           updated_at: string
         }
@@ -19680,6 +20012,7 @@ export type Database = {
           id?: string
           notes?: string | null
           overtime_hours?: number | null
+          project_id?: string | null
           regular_hours?: number | null
           rounded_clock_in?: string | null
           rounded_clock_out?: string | null
@@ -19688,6 +20021,7 @@ export type Database = {
           shift_differential?: number | null
           shift_id?: string | null
           status?: string | null
+          task_id?: string | null
           total_hours?: number | null
           updated_at?: string
         }
@@ -19722,6 +20056,7 @@ export type Database = {
           id?: string
           notes?: string | null
           overtime_hours?: number | null
+          project_id?: string | null
           regular_hours?: number | null
           rounded_clock_in?: string | null
           rounded_clock_out?: string | null
@@ -19730,6 +20065,7 @@ export type Database = {
           shift_differential?: number | null
           shift_id?: string | null
           status?: string | null
+          task_id?: string | null
           total_hours?: number | null
           updated_at?: string
         }
@@ -19770,6 +20106,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "time_clock_entries_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "time_clock_entries_rounding_rule_applied_fkey"
             columns: ["rounding_rule_applied"]
             isOneToOne: false
@@ -19788,6 +20131,13 @@ export type Database = {
             columns: ["shift_id"]
             isOneToOne: false
             referencedRelation: "shifts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "time_clock_entries_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "project_tasks"
             referencedColumns: ["id"]
           },
         ]
