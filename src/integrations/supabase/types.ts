@@ -1820,6 +1820,45 @@ export type Database = {
           },
         ]
       }
+      country_holidays: {
+        Row: {
+          country: string
+          created_at: string
+          description: string | null
+          holiday_date: string
+          id: string
+          is_active: boolean | null
+          is_half_day: boolean | null
+          is_recurring: boolean | null
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          country: string
+          created_at?: string
+          description?: string | null
+          holiday_date: string
+          id?: string
+          is_active?: boolean | null
+          is_half_day?: boolean | null
+          is_recurring?: boolean | null
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          country?: string
+          created_at?: string
+          description?: string | null
+          holiday_date?: string
+          id?: string
+          is_active?: boolean | null
+          is_half_day?: boolean | null
+          is_recurring?: boolean | null
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       currencies: {
         Row: {
           code: string
@@ -5034,9 +5073,11 @@ export type Database = {
         Row: {
           applies_to_all: boolean
           company_id: string
+          country: string | null
           created_at: string
           department_ids: string[] | null
           holiday_date: string
+          holiday_type: string | null
           id: string
           is_active: boolean
           is_half_day: boolean
@@ -5047,9 +5088,11 @@ export type Database = {
         Insert: {
           applies_to_all?: boolean
           company_id: string
+          country?: string | null
           created_at?: string
           department_ids?: string[] | null
           holiday_date: string
+          holiday_type?: string | null
           id?: string
           is_active?: boolean
           is_half_day?: boolean
@@ -5060,9 +5103,11 @@ export type Database = {
         Update: {
           applies_to_all?: boolean
           company_id?: string
+          country?: string | null
           created_at?: string
           department_ids?: string[] | null
           holiday_date?: string
+          holiday_type?: string | null
           id?: string
           is_active?: boolean
           is_half_day?: boolean
