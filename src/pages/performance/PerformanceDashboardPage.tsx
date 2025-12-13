@@ -2,6 +2,10 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import { NavLink } from "react-router-dom";
 import { ModuleReportsButton } from "@/components/reports/ModuleReportsButton";
 import { ModuleBIButton } from "@/components/bi/ModuleBIButton";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Target,
   ClipboardCheck,
@@ -30,21 +34,21 @@ const performanceModules = [
     description: "Multi-source feedback collection",
     href: "/performance/360",
     icon: MessageSquare,
-    color: "bg-info/10 text-info",
+    color: "bg-sky-500/10 text-sky-600",
   },
   {
     title: "Goals",
     description: "Goal setting and tracking",
     href: "/performance/goals",
     icon: Flag,
-    color: "bg-success/10 text-success",
+    color: "bg-emerald-500/10 text-emerald-600",
   },
   {
     title: "Improvement Plans",
     description: "Track performance improvement plans",
     href: "/performance/pips",
     icon: AlertTriangle,
-    color: "bg-warning/10 text-warning",
+    color: "bg-amber-500/10 text-amber-600",
   },
   {
     title: "Continuous Feedback",
@@ -58,7 +62,7 @@ const performanceModules = [
     description: "Celebrate achievements",
     href: "/performance/recognition",
     icon: Award,
-    color: "bg-amber-500/10 text-amber-600",
+    color: "bg-rose-500/10 text-rose-600",
   },
   {
     title: "Analytics",
@@ -69,14 +73,55 @@ const performanceModules = [
   },
 ];
 
-const statCards = [
-  { label: "Active Goals", value: 8, icon: Target, color: "bg-primary/10 text-primary" },
-  { label: "Pending Reviews", value: 3, icon: Clock, color: "bg-warning/10 text-warning" },
-  { label: "Goals Completed", value: 12, icon: CheckCircle, color: "bg-success/10 text-success" },
-  { label: "Avg. Rating", value: "4.2", icon: TrendingUp, color: "bg-info/10 text-info" },
-];
-
 export default function PerformanceDashboardPage() {
+  const { user } = useAuth();
+
+  // Fetch goals data
+  const { data: goals = [], isLoading: goalsLoading } = useQuery({
+    queryKey: ["performance-goals-stats"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("performance_goals")
+        .select("id, status, final_score");
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!user,
+  });
+
+  // Fetch pending appraisal reviews
+  const { data: appraisals = [], isLoading: appraisalsLoading } = useQuery({
+    queryKey: ["appraisal-participants-stats"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("appraisal_participants")
+        .select("id, status, overall_score");
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!user,
+  });
+
+  const isLoading = goalsLoading || appraisalsLoading;
+
+  // Calculate stats
+  const activeGoals = goals.filter(g => g.status === 'active' || g.status === 'draft').length;
+  const completedGoals = goals.filter(g => g.status === 'completed').length;
+  const pendingReviews = appraisals.filter(a => a.status === 'pending' || a.status === 'in_progress').length;
+  
+  // Calculate average rating from completed appraisals
+  const completedAppraisals = appraisals.filter(a => a.status === 'completed' && a.overall_score != null);
+  const avgRating = completedAppraisals.length > 0 
+    ? (completedAppraisals.reduce((sum, a) => sum + (a.overall_score || 0), 0) / completedAppraisals.length).toFixed(1)
+    : "N/A";
+
+  const statCards = [
+    { label: "Active Goals", value: activeGoals, icon: Target, color: "bg-primary/10 text-primary" },
+    { label: "Pending Reviews", value: pendingReviews, icon: Clock, color: "bg-amber-500/10 text-amber-600" },
+    { label: "Goals Completed", value: completedGoals, icon: CheckCircle, color: "bg-emerald-500/10 text-emerald-600" },
+    { label: "Avg. Rating", value: avgRating, icon: TrendingUp, color: "bg-sky-500/10 text-sky-600" },
+  ];
+
   return (
     <AppLayout>
       <div className="space-y-6">
@@ -115,7 +160,11 @@ export default function PerformanceDashboardPage() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-muted-foreground">{stat.label}</p>
-                    <p className="mt-1 text-3xl font-bold text-card-foreground">{stat.value}</p>
+                    {isLoading ? (
+                      <Skeleton className="h-9 w-16 mt-1" />
+                    ) : (
+                      <p className="mt-1 text-3xl font-bold text-card-foreground">{stat.value}</p>
+                    )}
                   </div>
                   <div className={`rounded-lg p-3 ${stat.color}`}>
                     <Icon className="h-5 w-5" />
