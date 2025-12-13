@@ -139,6 +139,7 @@ import MyLettersPage from "./pages/ess/MyLettersPage";
 import MyGoalsPage from "./pages/ess/MyGoalsPage";
 import MyOnboardingPage from "./pages/ess/MyOnboardingPage";
 import MyOffboardingPage from "./pages/ess/MyOffboardingPage";
+import EssLeavePage from "./pages/ess/EssLeavePage";
 import ManagerSelfServicePage from "./pages/mss/ManagerSelfServicePage";
 import MssAppraisalsPage from "./pages/mss/MssAppraisalsPage";
 import MssReview360Page from "./pages/mss/MssReview360Page";
@@ -236,7 +237,14 @@ const App = () => (
                 </ProtectedRoute>
               }
             />
-
+            <Route
+              path="/ess/leave"
+              element={
+                <ProtectedRoute moduleCode="ess">
+                  <EssLeavePage />
+                </ProtectedRoute>
+              }
+            />
             {/* Manager Self Service Routes */}
             <Route
               path="/mss"
