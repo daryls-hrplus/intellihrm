@@ -1,7 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
@@ -11,17 +13,39 @@ import { format } from "date-fns";
 import { Award, Plus, Calendar, DollarSign, Users } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 
+interface Company {
+  id: string;
+  name: string;
+}
+
 export default function MeritCyclesPage() {
+  const [companies, setCompanies] = useState<Company[]>([]);
+  const [selectedCompanyId, setSelectedCompanyId] = useState<string>("");
+
+  useEffect(() => {
+    const fetchCompanies = async () => {
+      const { data } = await supabase.from("companies").select("id, name").eq("is_active", true).order("name");
+      if (data && data.length > 0) {
+        setCompanies(data);
+        setSelectedCompanyId(data[0].id);
+      }
+    };
+    fetchCompanies();
+  }, []);
+
   const { data: cycles = [], isLoading } = useQuery({
-    queryKey: ["merit-cycles"],
+    queryKey: ["merit-cycles", selectedCompanyId],
     queryFn: async () => {
+      if (!selectedCompanyId) return [];
       const { data, error } = await supabase
         .from("merit_cycles")
         .select("*")
+        .eq("company_id", selectedCompanyId)
         .order("fiscal_year", { ascending: false });
       if (error) throw error;
       return data || [];
     },
+    enabled: !!selectedCompanyId,
   });
 
   const getStatusBadge = (status: string) => {
@@ -43,6 +67,13 @@ export default function MeritCyclesPage() {
   return (
     <AppLayout>
       <div className="space-y-6">
+        <Breadcrumbs
+          items={[
+            { label: "Compensation", href: "/compensation" },
+            { label: "Merit Cycles" },
+          ]}
+        />
+
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
@@ -53,13 +84,26 @@ export default function MeritCyclesPage() {
               <p className="text-muted-foreground">Manage annual merit increase programs</p>
             </div>
           </div>
-          <Button>
-            <Plus className="mr-2 h-4 w-4" />
-            New Cycle
-          </Button>
+          <div className="flex items-center gap-3">
+            <Select value={selectedCompanyId} onValueChange={setSelectedCompanyId}>
+              <SelectTrigger className="w-[200px]">
+                <SelectValue placeholder="Select Company" />
+              </SelectTrigger>
+              <SelectContent>
+                {companies.map((company) => (
+                  <SelectItem key={company.id} value={company.id}>
+                    {company.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Button>
+              <Plus className="mr-2 h-4 w-4" />
+              New Cycle
+            </Button>
+          </div>
         </div>
 
-        {/* Summary Cards */}
         <div className="grid gap-4 sm:grid-cols-3">
           <Card>
             <CardContent className="pt-6">
