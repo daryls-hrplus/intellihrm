@@ -11,12 +11,12 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { usePayroll, PayPeriodSchedule, PayPeriod } from "@/hooks/usePayroll";
-import { useCompanyFilter } from "@/components/layout/CompanyFilter";
+import { useLeaveCompanyFilter, LeaveCompanyFilter } from "@/components/leave/LeaveCompanyFilter";
 import { Plus, Edit, Trash2, Calendar, RefreshCw, Clock } from "lucide-react";
 import { format } from "date-fns";
 
 export default function PayPeriodsPage() {
-  const { selectedCompanyId } = useCompanyFilter();
+  const { selectedCompanyId, setSelectedCompanyId } = useLeaveCompanyFilter();
   const {
     isLoading,
     fetchPayPeriodSchedules,

@@ -13,11 +13,11 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
 import { usePayroll, PayrollTaxConfig, PayrollDeductionConfig } from "@/hooks/usePayroll";
-import { useCompanyFilter } from "@/components/layout/CompanyFilter";
+import { useLeaveCompanyFilter, LeaveCompanyFilter } from "@/components/leave/LeaveCompanyFilter";
 import { Plus, Edit, Trash2, Receipt, Percent, DollarSign } from "lucide-react";
 
 export default function TaxConfigPage() {
-  const { selectedCompanyId } = useCompanyFilter();
+  const { selectedCompanyId, setSelectedCompanyId } = useLeaveCompanyFilter();
   const {
     isLoading,
     fetchTaxConfig,
