@@ -6,12 +6,12 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { usePayroll } from "@/hooks/usePayroll";
-import { useLeaveCompanyFilter, LeaveCompanyFilter } from "@/components/leave/LeaveCompanyFilter";
+import { PayrollFilters, usePayrollFilters } from "@/components/payroll/PayrollFilters";
 import { FileSpreadsheet, TrendingUp, DollarSign, Users, Calendar, Download } from "lucide-react";
 import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from "recharts";
 
 export default function PayrollReportsPage() {
-  const { selectedCompanyId, setSelectedCompanyId } = useLeaveCompanyFilter();
+  const { selectedCompanyId, setSelectedCompanyId } = usePayrollFilters();
   const { fetchPayrollAnalytics, isLoading } = usePayroll();
   
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());

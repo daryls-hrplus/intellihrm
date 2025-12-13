@@ -11,7 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { usePayroll, PayrollRun, PayPeriod, EmployeePayroll } from "@/hooks/usePayroll";
-import { useLeaveCompanyFilter, LeaveCompanyFilter } from "@/components/leave/LeaveCompanyFilter";
+import { PayrollFilters, usePayrollFilters } from "@/components/payroll/PayrollFilters";
 import { 
   Plus, 
   Play, 
@@ -28,7 +28,7 @@ import {
 import { format } from "date-fns";
 
 export default function PayrollProcessingPage() {
-  const { selectedCompanyId, setSelectedCompanyId } = useLeaveCompanyFilter();
+  const { selectedCompanyId, setSelectedCompanyId, selectedPayGroupId, setSelectedPayGroupId } = usePayrollFilters();
   const {
     isLoading,
     fetchPayPeriods,

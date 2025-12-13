@@ -168,6 +168,7 @@ import PropertyDashboardPage from "./pages/property/PropertyDashboardPage";
 
 // Payroll pages
 import PayrollDashboardPage from "./pages/payroll/PayrollDashboardPage";
+import PayGroupsPage from "./pages/payroll/PayGroupsPage";
 import PayPeriodsPage from "./pages/payroll/PayPeriodsPage";
 import PayrollProcessingPage from "./pages/payroll/PayrollProcessingPage";
 import TaxConfigPage from "./pages/payroll/TaxConfigPage";
@@ -1098,6 +1099,14 @@ const App = () => (
               element={
                 <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="payroll">
                   <PayrollDashboardPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/payroll/pay-groups"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="payroll">
+                  <PayGroupsPage />
                 </ProtectedRoute>
               }
             />
