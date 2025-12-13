@@ -55,6 +55,7 @@ import {
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { LeaveBalanceSummary } from "@/components/leave/LeaveBalanceSummary";
+import { LeaveCalendar } from "@/components/leave/LeaveCalendar";
 
 export default function EssLeavePage() {
   const { profile } = useAuth();
@@ -267,8 +268,13 @@ export default function EssLeavePage() {
         <Tabs defaultValue="balances" className="space-y-4">
           <TabsList>
             <TabsTrigger value="balances">My Balances</TabsTrigger>
+            <TabsTrigger value="calendar">Leave Calendar</TabsTrigger>
             <TabsTrigger value="requests">My Requests</TabsTrigger>
           </TabsList>
+
+          <TabsContent value="calendar">
+            <LeaveCalendar leaveRequests={leaveRequests} />
+          </TabsContent>
 
           <TabsContent value="balances">
             {loadingBalances ? (
