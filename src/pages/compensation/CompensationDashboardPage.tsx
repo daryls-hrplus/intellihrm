@@ -1,7 +1,16 @@
+import { useState } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { NavLink } from "react-router-dom";
 import { ModuleReportsButton } from "@/components/reports/ModuleReportsButton";
 import { ModuleBIButton } from "@/components/bi/ModuleBIButton";
+import { CompensationCompanyFilter, useCompensationCompanyFilter } from "@/components/compensation/CompensationCompanyFilter";
+import { useCompensationStats } from "@/hooks/useCompensationStats";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { format } from "date-fns";
+import { cn } from "@/lib/utils";
 import {
   DollarSign,
   Wallet,
@@ -20,6 +29,7 @@ import {
   PiggyBank,
   Gem,
   Target,
+  CalendarIcon,
 } from "lucide-react";
 
 const compensationModules = [
@@ -38,14 +48,28 @@ const compensationModules = [
   { title: "Analytics", description: "Compensation insights and trends", href: "/compensation/analytics", icon: TrendingUp, color: "bg-lime-500/10 text-lime-600" },
 ];
 
-const statCards = [
-  { label: "Total Payroll", value: "$1.2M", icon: DollarSign, color: "bg-primary/10 text-primary" },
-  { label: "Employees Paid", value: 156, icon: Users, color: "bg-success/10 text-success" },
-  { label: "Pending Reviews", value: 12, icon: Clock, color: "bg-warning/10 text-warning" },
-  { label: "Avg. Salary", value: "$72K", icon: TrendingUp, color: "bg-info/10 text-info" },
-];
+function formatCurrency(value: number): string {
+  if (value >= 1000000) {
+    return `$${(value / 1000000).toFixed(1)}M`;
+  }
+  if (value >= 1000) {
+    return `$${(value / 1000).toFixed(0)}K`;
+  }
+  return `$${value.toFixed(0)}`;
+}
 
 export default function CompensationDashboardPage() {
+  const { selectedCompanyId, setSelectedCompanyId } = useCompensationCompanyFilter();
+  const [asOfDate, setAsOfDate] = useState<Date>(new Date());
+  const stats = useCompensationStats(selectedCompanyId, asOfDate);
+
+  const statCards = [
+    { label: "Total Compensation", value: formatCurrency(stats.totalPayroll), icon: DollarSign, color: "bg-primary/10 text-primary" },
+    { label: "Employees", value: stats.employeesPaid, icon: Users, color: "bg-success/10 text-success" },
+    { label: "Pending Reviews", value: stats.pendingReviews, icon: Clock, color: "bg-warning/10 text-warning" },
+    { label: "Avg. Salary", value: formatCurrency(stats.avgSalary), icon: TrendingUp, color: "bg-info/10 text-info" },
+  ];
+
   return (
     <AppLayout>
       <div className="space-y-6">
@@ -71,6 +95,37 @@ export default function CompensationDashboardPage() {
           </div>
         </div>
 
+        {/* Filters */}
+        <div className="flex flex-wrap items-center gap-3 p-4 rounded-lg border border-border bg-card">
+          <CompensationCompanyFilter
+            selectedCompanyId={selectedCompanyId}
+            onCompanyChange={setSelectedCompanyId}
+            showAllOption={true}
+          />
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                className={cn(
+                  "w-[200px] justify-start text-left font-normal",
+                  !asOfDate && "text-muted-foreground"
+                )}
+              >
+                <CalendarIcon className="mr-2 h-4 w-4" />
+                {asOfDate ? format(asOfDate, "PPP") : <span>As of date</span>}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="start">
+              <Calendar
+                mode="single"
+                selected={asOfDate}
+                onSelect={(date) => date && setAsOfDate(date)}
+                initialFocus
+              />
+            </PopoverContent>
+          </Popover>
+        </div>
+
         {/* Stats Cards */}
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 animate-slide-up">
           {statCards.map((stat, index) => {
@@ -84,7 +139,11 @@ export default function CompensationDashboardPage() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-muted-foreground">{stat.label}</p>
-                    <p className="mt-1 text-3xl font-bold text-card-foreground">{stat.value}</p>
+                    {stats.isLoading ? (
+                      <Skeleton className="h-9 w-20 mt-1" />
+                    ) : (
+                      <p className="mt-1 text-3xl font-bold text-card-foreground">{stat.value}</p>
+                    )}
                   </div>
                   <div className={`rounded-lg p-3 ${stat.color}`}>
                     <Icon className="h-5 w-5" />
