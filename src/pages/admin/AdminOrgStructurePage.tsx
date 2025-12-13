@@ -262,7 +262,7 @@ export default function AdminOrgStructurePage() {
       } else if (dialogType === "department") {
         const data = {
           company_id: selectedCompanyId,
-          company_division_id: formDivisionId || parentId || null,
+          company_division_id: (formDivisionId && formDivisionId !== 'none') ? formDivisionId : (parentId || null),
           name: formName.trim(),
           code: formCode.trim(),
           description: formDescription.trim() || null,
@@ -778,7 +778,7 @@ export default function AdminOrgStructurePage() {
                       <SelectValue placeholder="No division (direct to company)" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">No division</SelectItem>
+                      <SelectItem value="none">No division</SelectItem>
                       {divisions.filter(d => d.is_active).map((div) => (
                         <SelectItem key={div.id} value={div.id}>
                           {div.name}

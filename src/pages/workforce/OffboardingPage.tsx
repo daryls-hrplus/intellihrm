@@ -260,7 +260,7 @@ export default function OffboardingPage() {
 
     const data = {
       ...instanceForm,
-      manager_id: instanceForm.manager_id || null,
+      manager_id: instanceForm.manager_id && instanceForm.manager_id !== 'none' ? instanceForm.manager_id : null,
       termination_reason: instanceForm.termination_reason || null,
       notes: instanceForm.notes || null,
     };
@@ -921,7 +921,7 @@ export default function OffboardingPage() {
                     <SelectValue placeholder="Select manager (optional)" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">No manager assigned</SelectItem>
+                    <SelectItem value="none">No manager assigned</SelectItem>
                     {employees.map(e => (
                       <SelectItem key={e.id} value={e.id}>{e.full_name}</SelectItem>
                     ))}

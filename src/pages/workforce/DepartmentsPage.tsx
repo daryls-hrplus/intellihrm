@@ -256,7 +256,7 @@ export default function DepartmentsPage() {
           description: formData.description.trim() || null,
           is_active: formData.is_active,
           company_id: selectedCompanyId,
-          company_division_id: formData.company_division_id || null,
+          company_division_id: formData.company_division_id && formData.company_division_id !== 'none' ? formData.company_division_id : null,
           start_date: formData.start_date,
           end_date: formData.end_date || null,
         };
@@ -672,7 +672,7 @@ export default function DepartmentsPage() {
                     <SelectValue placeholder="Select a division" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">No Division</SelectItem>
+                    <SelectItem value="none">No Division</SelectItem>
                     {divisions.map((div) => (
                       <SelectItem key={div.id} value={div.id}>
                         {div.name} ({div.code})
