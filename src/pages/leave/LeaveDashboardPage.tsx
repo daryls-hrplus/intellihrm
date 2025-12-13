@@ -26,6 +26,7 @@ import {
   PartyPopper,
   Building2,
   Calculator,
+  Timer,
 } from "lucide-react";
 
 interface Company {
@@ -95,6 +96,21 @@ const leaveModules = [
     href: "/leave/balance-recalculation",
     icon: Calculator,
     color: "bg-accent text-accent-foreground",
+    adminOnly: true,
+  },
+  {
+    title: "Compensatory Time",
+    description: "Track earned and used comp time",
+    href: "/leave/compensatory-time",
+    icon: Timer,
+    color: "bg-info/10 text-info",
+  },
+  {
+    title: "Comp Time Policies",
+    description: "Configure compensatory time rules",
+    href: "/leave/comp-time-policies",
+    icon: Settings,
+    color: "bg-muted text-muted-foreground",
     adminOnly: true,
   },
 ];
