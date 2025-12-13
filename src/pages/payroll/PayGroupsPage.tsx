@@ -11,7 +11,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
-import { Plus, Pencil, Trash2, Users, ArrowLeft } from "lucide-react";
+import { Plus, Pencil, Trash2, Users, ArrowLeft, Calendar, ShieldCheck } from "lucide-react";
+import { PayrollCalendarGenerator } from "@/components/payroll/PayrollCalendarGenerator";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { useNavigate } from "react-router-dom";
@@ -23,6 +24,7 @@ interface PayGroupFormData {
   description: string;
   pay_frequency: string;
   is_active: boolean;
+  uses_national_insurance: boolean;
   start_date: string;
   end_date: string;
 }
@@ -39,6 +41,7 @@ export default function PayGroupsPage() {
     description: "",
     pay_frequency: "monthly",
     is_active: true,
+    uses_national_insurance: false,
     start_date: new Date().toISOString().split("T")[0],
     end_date: "",
   });
@@ -67,6 +70,7 @@ export default function PayGroupsPage() {
         description: data.description || null,
         pay_frequency: data.pay_frequency,
         is_active: data.is_active,
+        uses_national_insurance: data.uses_national_insurance,
         start_date: data.start_date,
         end_date: data.end_date || null,
       };
@@ -114,6 +118,7 @@ export default function PayGroupsPage() {
       description: "",
       pay_frequency: "monthly",
       is_active: true,
+      uses_national_insurance: false,
       start_date: new Date().toISOString().split("T")[0],
       end_date: "",
     });
@@ -127,6 +132,7 @@ export default function PayGroupsPage() {
       description: item.description || "",
       pay_frequency: item.pay_frequency,
       is_active: item.is_active,
+      uses_national_insurance: item.uses_national_insurance || false,
       start_date: item.start_date,
       end_date: item.end_date || "",
     });
@@ -198,9 +204,9 @@ export default function PayGroupsPage() {
                   <TableHead>Name</TableHead>
                   <TableHead>Code</TableHead>
                   <TableHead>Frequency</TableHead>
+                  <TableHead>NI</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Start Date</TableHead>
-                  <TableHead>End Date</TableHead>
                   <TableHead>Actions</TableHead>
                 </TableRow>
               </TableHeader>
@@ -213,14 +219,23 @@ export default function PayGroupsPage() {
                       <Badge variant="secondary">{formatFrequency(pg.pay_frequency)}</Badge>
                     </TableCell>
                     <TableCell>
+                      {pg.uses_national_insurance && (
+                        <ShieldCheck className="h-4 w-4 text-success" />
+                      )}
+                    </TableCell>
+                    <TableCell>
                       <Badge variant={pg.is_active ? "default" : "outline"}>
                         {pg.is_active ? "Active" : "Inactive"}
                       </Badge>
                     </TableCell>
                     <TableCell>{format(new Date(pg.start_date), "PP")}</TableCell>
-                    <TableCell>{pg.end_date ? format(new Date(pg.end_date), "PP") : "-"}</TableCell>
                     <TableCell>
                       <div className="flex gap-1">
+                        <PayrollCalendarGenerator
+                          companyId={selectedCompanyId}
+                          payGroup={pg}
+                          onGenerated={() => queryClient.invalidateQueries({ queryKey: ["pay-groups"] })}
+                        />
                         <Button variant="ghost" size="sm" onClick={() => handleEdit(pg)}>
                           <Pencil className="h-4 w-4" />
                         </Button>
@@ -302,12 +317,21 @@ export default function PayGroupsPage() {
                 />
               </div>
             </div>
-            <div className="flex items-center gap-2">
-              <Switch
-                checked={formData.is_active}
-                onCheckedChange={(checked) => setFormData((prev) => ({ ...prev, is_active: checked }))}
-              />
-              <Label>Active</Label>
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2">
+                <Switch
+                  checked={formData.is_active}
+                  onCheckedChange={(checked) => setFormData((prev) => ({ ...prev, is_active: checked }))}
+                />
+                <Label>Active</Label>
+              </div>
+              <div className="flex items-center gap-2">
+                <Switch
+                  checked={formData.uses_national_insurance}
+                  onCheckedChange={(checked) => setFormData((prev) => ({ ...prev, uses_national_insurance: checked }))}
+                />
+                <Label>Uses National Insurance</Label>
+              </div>
             </div>
           </div>
           <DialogFooter>
