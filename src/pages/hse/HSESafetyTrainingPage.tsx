@@ -81,16 +81,13 @@ export default function HSESafetyTrainingPage() {
     },
   });
 
-  const { data: employees = [] } = useQuery({
+  const { data: employees = [] } = useQuery<{ id: string; full_name: string }[]>({
     queryKey: ["employees", companyId],
-    queryFn: async () => {
+    queryFn: async (): Promise<{ id: string; full_name: string }[]> => {
       if (!companyId) return [];
-      const { data } = await supabase
-        .from("profiles")
-        .select("id, full_name")
-        .eq("company_id", companyId)
-        .eq("is_active", true);
-      return data || [];
+      const query = supabase.from("profiles").select("id, full_name") as any;
+      const result = await query.eq("company_id", companyId).eq("is_active", true);
+      return result.data || [];
     },
     enabled: !!companyId,
   });
