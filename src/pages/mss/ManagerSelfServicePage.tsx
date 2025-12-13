@@ -28,7 +28,7 @@ const mssModules = [
   },
   {
     title: "Team Approvals",
-    description: "View and action pending approval requests",
+    description: "Approve leave, expense, training, and other workflow requests",
     href: "/workflow/approvals",
     icon: CheckSquare,
     color: "bg-violet-500/10 text-violet-600",
@@ -55,8 +55,8 @@ const mssModules = [
     color: "bg-red-500/10 text-red-600",
   },
   {
-    title: "Leave Approvals",
-    description: "Review and approve team leave requests",
+    title: "Team Leave Calendar",
+    description: "View team leave schedules and availability",
     href: "/mss/leave-approvals",
     icon: Calendar,
     color: "bg-green-500/10 text-green-600",
