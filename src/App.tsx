@@ -184,8 +184,10 @@ import EssLeavePage from "./pages/ess/EssLeavePage";
 import EssJobOpeningsPage from "./pages/ess/EssJobOpeningsPage";
 import MyHSEPage from "./pages/ess/MyHSEPage";
 import MyTrainingPage from "./pages/ess/MyTrainingPage";
+import EssAppraisalInterviewsPage from "./pages/ess/EssAppraisalInterviewsPage";
 import ManagerSelfServicePage from "./pages/mss/ManagerSelfServicePage";
 import MssAppraisalsPage from "./pages/mss/MssAppraisalsPage";
+import MssAppraisalInterviewsPage from "./pages/mss/MssAppraisalInterviewsPage";
 import MssReview360Page from "./pages/mss/MssReview360Page";
 import MssGoalsPage from "./pages/mss/MssGoalsPage";
 import MssOnboardingPage from "./pages/mss/MssOnboardingPage";
@@ -351,6 +353,14 @@ const App = () => (
               element={
                 <ProtectedRoute moduleCode="ess">
                   <MyTrainingPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/ess/appraisal-interviews"
+              element={
+                <ProtectedRoute moduleCode="ess">
+                  <EssAppraisalInterviewsPage />
                 </ProtectedRoute>
               }
             />
