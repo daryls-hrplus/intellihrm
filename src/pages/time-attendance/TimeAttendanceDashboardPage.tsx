@@ -13,6 +13,8 @@ import {
   AlertCircle,
   TrendingUp,
   ClipboardList,
+  Settings,
+  Sun,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
@@ -44,6 +46,13 @@ const features = [
     icon: Clock,
     href: "/time-attendance/overtime",
     color: "bg-secondary/10 text-secondary-foreground",
+  },
+  {
+    title: "Shift Management",
+    description: "Configure shifts, rounding rules, and pay differentials",
+    icon: Sun,
+    href: "/time-attendance/shifts",
+    color: "bg-orange-500/10 text-orange-600",
   },
 ];
 

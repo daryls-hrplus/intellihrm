@@ -122,9 +122,52 @@ export default function TimeTrackingPage() {
     if (selectedCompany) {
       loadTimeEntries();
       loadEmployees();
+      loadShifts();
+      loadRoundingRules();
+      loadEmployeeShift();
       checkActiveSession();
     }
   }, [selectedCompany]);
+
+  const loadShifts = async () => {
+    const { data } = await supabase
+      .from('shifts')
+      .select('id, name, code, start_time, end_time, color, is_overnight, break_duration_minutes')
+      .eq('company_id', selectedCompany)
+      .eq('is_active', true)
+      .order('name');
+    setShifts(data || []);
+  };
+
+  const loadRoundingRules = async () => {
+    const { data } = await supabase
+      .from('shift_rounding_rules')
+      .select('id, name, rule_type, rounding_interval, rounding_direction, grace_period_minutes')
+      .eq('company_id', selectedCompany)
+      .eq('is_active', true);
+    setRoundingRules(data || []);
+  };
+
+  const loadEmployeeShift = async () => {
+    const { data: user } = await supabase.auth.getUser();
+    if (!user.user) return;
+    
+    const { data } = await supabase
+      .from('employee_shift_assignments')
+      .select('shift_id, shift:shifts(*)')
+      .eq('employee_id', user.user.id)
+      .eq('company_id', selectedCompany)
+      .eq('is_primary', true)
+      .lte('effective_date', format(new Date(), 'yyyy-MM-dd'))
+      .or('end_date.is.null,end_date.gte.' + format(new Date(), 'yyyy-MM-dd'))
+      .single();
+    
+    if (data?.shift) {
+      setEmployeeShift(data.shift as unknown as Shift);
+    } else {
+      setEmployeeShift(null);
+    }
+  };
 
   const loadCompanies = async () => {
     const { data, error } = await supabase
@@ -159,7 +202,8 @@ export default function TimeTrackingPage() {
       .from('time_clock_entries')
       .select(`
         *,
-        profile:profiles!time_clock_entries_employee_id_fkey(full_name)
+        profile:profiles!time_clock_entries_employee_id_fkey(full_name),
+        shift:shifts(name, code, color)
       `)
       .eq('company_id', selectedCompany)
       .gte('clock_in', `${today}T00:00:00`)
@@ -172,20 +216,66 @@ export default function TimeTrackingPage() {
     setTimeEntries(data || []);
   };
 
+  // Apply rounding to a time based on rules
+  const applyRounding = (time: Date, ruleType: 'clock_in' | 'clock_out'): Date => {
+    const rule = roundingRules.find(r => r.rule_type === ruleType || r.rule_type === 'both');
+    if (!rule) return time;
+    
+    const minutes = time.getHours() * 60 + time.getMinutes();
+    const interval = rule.rounding_interval;
+    const remainder = minutes % interval;
+    
+    let roundedMinutes = minutes;
+    
+    // Apply grace period
+    if (remainder <= rule.grace_period_minutes) {
+      roundedMinutes = minutes - remainder;
+    } else if (remainder >= (interval - rule.grace_period_minutes)) {
+      roundedMinutes = minutes + (interval - remainder);
+    } else {
+      // Apply rounding direction
+      switch (rule.rounding_direction) {
+        case 'nearest':
+          roundedMinutes = remainder < interval / 2 
+            ? minutes - remainder 
+            : minutes + (interval - remainder);
+          break;
+        case 'up':
+          roundedMinutes = remainder > 0 ? minutes + (interval - remainder) : minutes;
+          break;
+        case 'down':
+          roundedMinutes = minutes - remainder;
+          break;
+        case 'employer_favor':
+          // Clock in rounds up, clock out rounds down
+          if (ruleType === 'clock_in') {
+            roundedMinutes = remainder > 0 ? minutes + (interval - remainder) : minutes;
+          } else {
+            roundedMinutes = minutes - remainder;
+          }
+          break;
+      }
+    }
+    
+    const result = new Date(time);
+    result.setHours(Math.floor(roundedMinutes / 60), roundedMinutes % 60, 0, 0);
+    return result;
+  };
+
   const checkActiveSession = async () => {
     const { data: user } = await supabase.auth.getUser();
     if (!user.user) return;
 
     const { data } = await supabase
       .from('time_clock_entries')
-      .select('id, clock_in, break_start, status')
+      .select('id, clock_in, break_start, status, shift_id')
       .eq('employee_id', user.user.id)
       .eq('company_id', selectedCompany)
       .eq('status', 'active')
       .is('clock_out', null)
       .single();
     
-    setActiveSession(data);
+    setActiveSession(data as ActiveSession | null);
   };
 
   const handleClockIn = async () => {
@@ -197,14 +287,19 @@ export default function TimeTrackingPage() {
       return;
     }
 
+    const clockInTime = new Date();
+    const roundedClockIn = applyRounding(clockInTime, 'clock_in');
+
     const { error } = await supabase
       .from('time_clock_entries')
       .insert({
         company_id: selectedCompany,
         employee_id: user.user.id,
-        clock_in: new Date().toISOString(),
+        clock_in: clockInTime.toISOString(),
+        rounded_clock_in: roundedClockIn.toISOString(),
         clock_in_method: 'web',
         clock_in_location: 'Office',
+        shift_id: employeeShift?.id || null,
         status: 'active'
       });
 
@@ -231,15 +326,27 @@ export default function TimeTrackingPage() {
     const regularHours = Math.min(totalHours, 8);
     const overtimeHours = Math.max(0, totalHours - 8);
 
+    // Apply rounding to clock out
+    const roundedClockOut = applyRounding(clockOut, 'clock_out');
+    const roundedClockIn = applyRounding(clockIn, 'clock_in');
+    
+    const roundedTotalMinutes = differenceInMinutes(roundedClockOut, roundedClockIn);
+    const roundedWorkMinutes = roundedTotalMinutes - breakMinutes;
+    const roundedTotalHours = roundedWorkMinutes / 60;
+    const roundedRegularHours = Math.min(roundedTotalHours, 8);
+    const roundedOvertimeHours = Math.max(0, roundedTotalHours - 8);
+
     const { error } = await supabase
       .from('time_clock_entries')
       .update({
         clock_out: clockOut.toISOString(),
+        rounded_clock_in: roundedClockIn.toISOString(),
+        rounded_clock_out: roundedClockOut.toISOString(),
         clock_out_method: 'web',
         clock_out_location: 'Office',
-        total_hours: Number(totalHours.toFixed(2)),
-        regular_hours: Number(regularHours.toFixed(2)),
-        overtime_hours: Number(overtimeHours.toFixed(2)),
+        total_hours: Number(roundedTotalHours.toFixed(2)),
+        regular_hours: Number(roundedRegularHours.toFixed(2)),
+        overtime_hours: Number(roundedOvertimeHours.toFixed(2)),
         status: 'completed'
       })
       .eq('id', activeSession.id);
@@ -311,13 +418,20 @@ export default function TimeTrackingPage() {
       overtimeHours = Math.max(0, totalHours - 8);
     }
 
+    // Apply rounding to manual entries
+    const roundedClockIn = applyRounding(clockIn, 'clock_in');
+    const roundedClockOut = clockOut ? applyRounding(clockOut, 'clock_out') : null;
+
     const { error } = await supabase
       .from('time_clock_entries')
       .insert({
         company_id: selectedCompany,
         employee_id: manualEntry.employee_id,
+        shift_id: manualEntry.shift_id || null,
         clock_in: clockIn.toISOString(),
+        rounded_clock_in: roundedClockIn.toISOString(),
         clock_out: clockOut?.toISOString() || null,
+        rounded_clock_out: roundedClockOut?.toISOString() || null,
         clock_in_method: 'manual',
         clock_out_method: clockOut ? 'manual' : null,
         total_hours: totalHours,
@@ -333,7 +447,7 @@ export default function TimeTrackingPage() {
     } else {
       toast.success("Entry added successfully");
       setManualEntryOpen(false);
-      setManualEntry({ employee_id: "", clock_in: "", clock_out: "", notes: "" });
+      setManualEntry({ employee_id: "", shift_id: "", clock_in: "", clock_out: "", notes: "" });
       loadTimeEntries();
     }
   };
@@ -435,6 +549,31 @@ export default function TimeTrackingPage() {
                     </Select>
                   </div>
                   <div className="space-y-2">
+                    <Label>Shift (optional)</Label>
+                    <Select 
+                      value={manualEntry.shift_id} 
+                      onValueChange={(v) => setManualEntry({...manualEntry, shift_id: v})}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select shift" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="">No shift</SelectItem>
+                        {shifts.map((s) => (
+                          <SelectItem key={s.id} value={s.id}>
+                            <div className="flex items-center gap-2">
+                              <div 
+                                className="w-2 h-2 rounded-full" 
+                                style={{ backgroundColor: s.color }}
+                              />
+                              {s.name} ({s.start_time} - {s.end_time})
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
                     <Label>Clock In</Label>
                     <Input 
                       type="datetime-local" 
@@ -485,10 +624,28 @@ export default function TimeTrackingPage() {
                   <p className="text-4xl font-bold font-mono">
                     {format(currentTime, 'HH:mm:ss')}
                   </p>
+                  {employeeShift && (
+                    <div className="mt-2 flex items-center gap-2">
+                      <div 
+                        className="w-3 h-3 rounded-full" 
+                        style={{ backgroundColor: employeeShift.color }}
+                      />
+                      <span className="text-sm font-medium">{employeeShift.name}</span>
+                      <span className="text-xs text-muted-foreground">
+                        ({employeeShift.start_time} - {employeeShift.end_time})
+                      </span>
+                      {employeeShift.is_overnight && <Moon className="h-4 w-4 text-muted-foreground" />}
+                    </div>
+                  )}
                   {activeSession && (
                     <div className="mt-2 flex items-center gap-2 text-muted-foreground">
                       <Timer className="h-4 w-4" />
                       <span>Elapsed: {getElapsedTime()}</span>
+                    </div>
+                  )}
+                  {roundingRules.length > 0 && (
+                    <div className="mt-1 text-xs text-muted-foreground">
+                      Rounding: {roundingRules[0].rounding_interval} min ({roundingRules[0].rounding_direction})
                     </div>
                   )}
                 </div>
@@ -591,11 +748,11 @@ export default function TimeTrackingPage() {
               <TableHeader>
                 <TableRow>
                   <TableHead>Employee</TableHead>
+                  <TableHead>Shift</TableHead>
                   <TableHead>Clock In</TableHead>
+                  <TableHead>Rounded</TableHead>
                   <TableHead>Clock Out</TableHead>
-                  <TableHead>Break</TableHead>
                   <TableHead>Total Hours</TableHead>
-                  <TableHead>Method</TableHead>
                   <TableHead>Status</TableHead>
                 </TableRow>
               </TableHeader>
@@ -616,39 +773,65 @@ export default function TimeTrackingPage() {
                         </div>
                       </TableCell>
                       <TableCell>
-                        <div className="flex items-center gap-1">
-                          <Play className="h-3 w-3 text-success" />
-                          {format(new Date(entry.clock_in), 'HH:mm')}
+                        {entry.shift ? (
+                          <div className="flex items-center gap-1">
+                            <div 
+                              className="w-2 h-2 rounded-full" 
+                              style={{ backgroundColor: entry.shift.color }}
+                            />
+                            <span className="text-sm">{entry.shift.name}</span>
+                          </div>
+                        ) : (
+                          <span className="text-muted-foreground text-sm">No shift</span>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex flex-col">
+                          <div className="flex items-center gap-1">
+                            <Play className="h-3 w-3 text-success" />
+                            {format(new Date(entry.clock_in), 'HH:mm')}
+                          </div>
                         </div>
                       </TableCell>
                       <TableCell>
+                        {entry.rounded_clock_in ? (
+                          <span className="text-sm text-muted-foreground">
+                            {format(new Date(entry.rounded_clock_in), 'HH:mm')}
+                          </span>
+                        ) : (
+                          <span className="text-muted-foreground">-</span>
+                        )}
+                      </TableCell>
+                      <TableCell>
                         {entry.clock_out ? (
-                          <div className="flex items-center gap-1">
-                            <Square className="h-3 w-3 text-destructive" />
-                            {format(new Date(entry.clock_out), 'HH:mm')}
+                          <div className="flex flex-col">
+                            <div className="flex items-center gap-1">
+                              <Square className="h-3 w-3 text-destructive" />
+                              {format(new Date(entry.clock_out), 'HH:mm')}
+                            </div>
+                            {entry.rounded_clock_out && (
+                              <span className="text-xs text-muted-foreground">
+                                → {format(new Date(entry.rounded_clock_out), 'HH:mm')}
+                              </span>
+                            )}
                           </div>
                         ) : (
                           <span className="text-muted-foreground">-</span>
                         )}
                       </TableCell>
                       <TableCell>
-                        {entry.break_duration_minutes > 0 ? (
-                          <span>{entry.break_duration_minutes} min</span>
-                        ) : (
-                          <span className="text-muted-foreground">-</span>
-                        )}
-                      </TableCell>
-                      <TableCell>
                         {entry.total_hours ? (
-                          <span className="font-mono">{entry.total_hours.toFixed(2)}h</span>
+                          <div className="flex flex-col">
+                            <span className="font-mono">{entry.total_hours.toFixed(2)}h</span>
+                            {entry.shift_differential && entry.shift_differential > 0 && (
+                              <span className="text-xs text-success">
+                                +${entry.shift_differential.toFixed(2)} diff
+                              </span>
+                            )}
+                          </div>
                         ) : (
                           <span className="text-muted-foreground">-</span>
                         )}
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant="outline" className="capitalize">
-                          {entry.clock_in_method}
-                        </Badge>
                       </TableCell>
                       <TableCell>{getStatusBadge(entry.status)}</TableCell>
                     </TableRow>

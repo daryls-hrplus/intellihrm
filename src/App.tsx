@@ -183,6 +183,7 @@ import TimeTrackingPage from "./pages/time-attendance/TimeTrackingPage";
 import AttendanceRecordsPage from "./pages/time-attendance/AttendanceRecordsPage";
 import SchedulesPage from "./pages/time-attendance/SchedulesPage";
 import OvertimeManagementPage from "./pages/time-attendance/OvertimeManagementPage";
+import ShiftManagementPage from "./pages/time-attendance/ShiftManagementPage";
 
 // ESS & MSS pages
 import EmployeeSelfServicePage from "./pages/ess/EmployeeSelfServicePage";
@@ -1013,6 +1014,14 @@ const App = () => (
               element={
                 <ProtectedRoute moduleCode="time_attendance">
                   <OvertimeManagementPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/time-attendance/shifts"
+              element={
+                <ProtectedRoute moduleCode="time_attendance">
+                  <ShiftManagementPage />
                 </ProtectedRoute>
               }
             />
