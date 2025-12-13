@@ -12,7 +12,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { format, differenceInMinutes, differenceInHours } from "date-fns";
+import { format, differenceInMinutes } from "date-fns";
 import { 
   Clock, 
   Play, 
@@ -23,7 +23,10 @@ import {
   Calendar,
   User,
   Plus,
-  History
+  History,
+  Sun,
+  Moon,
+  DollarSign
 } from "lucide-react";
 
 interface Company {
@@ -31,11 +34,33 @@ interface Company {
   name: string;
 }
 
+interface Shift {
+  id: string;
+  name: string;
+  code: string;
+  start_time: string;
+  end_time: string;
+  color: string;
+  is_overnight: boolean;
+  break_duration_minutes: number;
+}
+
+interface RoundingRule {
+  id: string;
+  name: string;
+  rule_type: string;
+  rounding_interval: number;
+  rounding_direction: string;
+  grace_period_minutes: number;
+}
+
 interface TimeEntry {
   id: string;
   employee_id: string;
   clock_in: string;
   clock_out: string | null;
+  rounded_clock_in: string | null;
+  rounded_clock_out: string | null;
   clock_in_location: string | null;
   clock_out_location: string | null;
   clock_in_method: string;
@@ -44,9 +69,12 @@ interface TimeEntry {
   break_end: string | null;
   break_duration_minutes: number;
   total_hours: number | null;
+  shift_differential: number | null;
   status: string;
   notes: string | null;
+  shift_id: string | null;
   profile?: { full_name: string } | null;
+  shift?: { name: string; code: string; color: string } | null;
 }
 
 interface ActiveSession {
@@ -54,6 +82,13 @@ interface ActiveSession {
   clock_in: string;
   break_start: string | null;
   status: string;
+  shift_id: string | null;
+}
+
+interface EmployeeShiftAssignment {
+  id: string;
+  shift_id: string;
+  shift: Shift;
 }
 
 export default function TimeTrackingPage() {
@@ -67,11 +102,15 @@ export default function TimeTrackingPage() {
   const [manualEntryOpen, setManualEntryOpen] = useState(false);
   const [manualEntry, setManualEntry] = useState({
     employee_id: "",
+    shift_id: "",
     clock_in: "",
     clock_out: "",
     notes: ""
   });
   const [employees, setEmployees] = useState<{ id: string; full_name: string }[]>([]);
+  const [shifts, setShifts] = useState<Shift[]>([]);
+  const [employeeShift, setEmployeeShift] = useState<Shift | null>(null);
+  const [roundingRules, setRoundingRules] = useState<RoundingRule[]>([]);
 
   useEffect(() => {
     loadCompanies();
