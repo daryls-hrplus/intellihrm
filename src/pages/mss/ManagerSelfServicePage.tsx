@@ -23,6 +23,7 @@ import {
   MessageCircle,
   Award,
   AlertTriangle,
+  DollarSign,
 } from "lucide-react";
 
 const mssModules = [
@@ -172,6 +173,13 @@ const mssModules = [
     href: "/mss/pips",
     icon: AlertTriangle,
     color: "bg-orange-500/10 text-orange-600",
+  },
+  {
+    title: "Team Compensation",
+    description: "View team compensation and compa-ratios",
+    href: "/mss/compensation",
+    icon: DollarSign,
+    color: "bg-emerald-500/10 text-emerald-600",
   },
   {
     title: "Submit a Ticket",

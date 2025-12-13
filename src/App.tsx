@@ -202,6 +202,14 @@ import MyRecognitionPage from "./pages/ess/MyRecognitionPage";
 import MssFeedbackPage from "./pages/mss/MssFeedbackPage";
 import MssRecognitionPage from "./pages/mss/MssRecognitionPage";
 import MssPipsPage from "./pages/mss/MssPipsPage";
+import EssCompensationPage from "./pages/ess/EssCompensationPage";
+import EssCompensationHistoryPage from "./pages/ess/EssCompensationHistoryPage";
+import EssTotalRewardsPage from "./pages/ess/EssTotalRewardsPage";
+import EssEquityPage from "./pages/ess/EssEquityPage";
+import EssCompaRatioPage from "./pages/ess/EssCompaRatioPage";
+import MssCompensationPage from "./pages/mss/MssCompensationPage";
+import MssCompaRatioPage from "./pages/mss/MssCompaRatioPage";
+import MssEquityPage from "./pages/mss/MssEquityPage";
 
 // Workflow pages
 import AdminWorkflowTemplatesPage from "./pages/admin/AdminWorkflowTemplatesPage";
@@ -365,6 +373,46 @@ const App = () => (
                 </ProtectedRoute>
               }
             />
+            <Route
+              path="/ess/compensation"
+              element={
+                <ProtectedRoute moduleCode="ess">
+                  <EssCompensationPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/ess/compensation/history"
+              element={
+                <ProtectedRoute moduleCode="ess">
+                  <EssCompensationHistoryPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/ess/compensation/total-rewards"
+              element={
+                <ProtectedRoute moduleCode="ess">
+                  <EssTotalRewardsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/ess/compensation/equity"
+              element={
+                <ProtectedRoute moduleCode="ess">
+                  <EssEquityPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/ess/compensation/compa-ratio"
+              element={
+                <ProtectedRoute moduleCode="ess">
+                  <EssCompaRatioPage />
+                </ProtectedRoute>
+              }
+            />
             {/* Manager Self Service Routes */}
             <Route
               path="/mss"
@@ -499,6 +547,30 @@ const App = () => (
               element={
                 <ProtectedRoute moduleCode="mss">
                   <MssPipsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/mss/compensation"
+              element={
+                <ProtectedRoute moduleCode="mss">
+                  <MssCompensationPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/mss/compensation/compa-ratio"
+              element={
+                <ProtectedRoute moduleCode="mss">
+                  <MssCompaRatioPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/mss/compensation/equity"
+              element={
+                <ProtectedRoute moduleCode="mss">
+                  <MssEquityPage />
                 </ProtectedRoute>
               }
             />
