@@ -4697,6 +4697,67 @@ export type Database = {
           },
         ]
       }
+      employee_geofence_assignments: {
+        Row: {
+          company_id: string
+          created_at: string
+          effective_date: string
+          employee_id: string
+          end_date: string | null
+          geofence_id: string
+          id: string
+          is_primary: boolean | null
+          notes: string | null
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          effective_date?: string
+          employee_id: string
+          end_date?: string | null
+          geofence_id: string
+          id?: string
+          is_primary?: boolean | null
+          notes?: string | null
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          effective_date?: string
+          employee_id?: string
+          end_date?: string | null
+          geofence_id?: string
+          id?: string
+          is_primary?: boolean | null
+          notes?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "employee_geofence_assignments_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_geofence_assignments_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_geofence_assignments_geofence_id_fkey"
+            columns: ["geofence_id"]
+            isOneToOne: false
+            referencedRelation: "geofence_locations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       employee_interests: {
         Row: {
           category: string | null
@@ -7672,6 +7733,161 @@ export type Database = {
             columns: ["template_id"]
             isOneToOne: false
             referencedRelation: "report_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      geofence_locations: {
+        Row: {
+          address: string | null
+          allow_clock_outside: boolean | null
+          code: string
+          company_id: string
+          created_at: string
+          description: string | null
+          end_date: string | null
+          id: string
+          is_active: boolean | null
+          is_headquarters: boolean | null
+          latitude: number
+          longitude: number
+          name: string
+          radius_meters: number
+          requires_geofence: boolean | null
+          start_date: string
+          updated_at: string
+        }
+        Insert: {
+          address?: string | null
+          allow_clock_outside?: boolean | null
+          code: string
+          company_id: string
+          created_at?: string
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_headquarters?: boolean | null
+          latitude: number
+          longitude: number
+          name: string
+          radius_meters?: number
+          requires_geofence?: boolean | null
+          start_date?: string
+          updated_at?: string
+        }
+        Update: {
+          address?: string | null
+          allow_clock_outside?: boolean | null
+          code?: string
+          company_id?: string
+          created_at?: string
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_headquarters?: boolean | null
+          latitude?: number
+          longitude?: number
+          name?: string
+          radius_meters?: number
+          requires_geofence?: boolean | null
+          start_date?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "geofence_locations_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      geofence_violations: {
+        Row: {
+          action_taken: string | null
+          company_id: string
+          created_at: string
+          distance_meters: number | null
+          employee_id: string
+          id: string
+          latitude: number | null
+          longitude: number | null
+          nearest_geofence_id: string | null
+          notes: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          time_entry_id: string | null
+          violation_type: string
+        }
+        Insert: {
+          action_taken?: string | null
+          company_id: string
+          created_at?: string
+          distance_meters?: number | null
+          employee_id: string
+          id?: string
+          latitude?: number | null
+          longitude?: number | null
+          nearest_geofence_id?: string | null
+          notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          time_entry_id?: string | null
+          violation_type: string
+        }
+        Update: {
+          action_taken?: string | null
+          company_id?: string
+          created_at?: string
+          distance_meters?: number | null
+          employee_id?: string
+          id?: string
+          latitude?: number | null
+          longitude?: number | null
+          nearest_geofence_id?: string | null
+          notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          time_entry_id?: string | null
+          violation_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "geofence_violations_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "geofence_violations_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "geofence_violations_nearest_geofence_id_fkey"
+            columns: ["nearest_geofence_id"]
+            isOneToOne: false
+            referencedRelation: "geofence_locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "geofence_violations_reviewed_by_fkey"
+            columns: ["reviewed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "geofence_violations_time_entry_id_fkey"
+            columns: ["time_entry_id"]
+            isOneToOne: false
+            referencedRelation: "time_clock_entries"
             referencedColumns: ["id"]
           },
         ]
@@ -19349,14 +19565,23 @@ export type Database = {
           break_end: string | null
           break_start: string | null
           clock_in: string
+          clock_in_geofence_id: string | null
+          clock_in_latitude: number | null
           clock_in_location: string | null
+          clock_in_longitude: number | null
           clock_in_method: string | null
+          clock_in_within_geofence: boolean | null
           clock_out: string | null
+          clock_out_geofence_id: string | null
+          clock_out_latitude: number | null
           clock_out_location: string | null
+          clock_out_longitude: number | null
           clock_out_method: string | null
+          clock_out_within_geofence: boolean | null
           company_id: string
           created_at: string
           employee_id: string
+          geofence_violation_notes: string | null
           id: string
           notes: string | null
           overtime_hours: number | null
@@ -19379,14 +19604,23 @@ export type Database = {
           break_end?: string | null
           break_start?: string | null
           clock_in: string
+          clock_in_geofence_id?: string | null
+          clock_in_latitude?: number | null
           clock_in_location?: string | null
+          clock_in_longitude?: number | null
           clock_in_method?: string | null
+          clock_in_within_geofence?: boolean | null
           clock_out?: string | null
+          clock_out_geofence_id?: string | null
+          clock_out_latitude?: number | null
           clock_out_location?: string | null
+          clock_out_longitude?: number | null
           clock_out_method?: string | null
+          clock_out_within_geofence?: boolean | null
           company_id: string
           created_at?: string
           employee_id: string
+          geofence_violation_notes?: string | null
           id?: string
           notes?: string | null
           overtime_hours?: number | null
@@ -19409,14 +19643,23 @@ export type Database = {
           break_end?: string | null
           break_start?: string | null
           clock_in?: string
+          clock_in_geofence_id?: string | null
+          clock_in_latitude?: number | null
           clock_in_location?: string | null
+          clock_in_longitude?: number | null
           clock_in_method?: string | null
+          clock_in_within_geofence?: boolean | null
           clock_out?: string | null
+          clock_out_geofence_id?: string | null
+          clock_out_latitude?: number | null
           clock_out_location?: string | null
+          clock_out_longitude?: number | null
           clock_out_method?: string | null
+          clock_out_within_geofence?: boolean | null
           company_id?: string
           created_at?: string
           employee_id?: string
+          geofence_violation_notes?: string | null
           id?: string
           notes?: string | null
           overtime_hours?: number | null
@@ -19437,6 +19680,20 @@ export type Database = {
             columns: ["adjusted_by"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "time_clock_entries_clock_in_geofence_id_fkey"
+            columns: ["clock_in_geofence_id"]
+            isOneToOne: false
+            referencedRelation: "geofence_locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "time_clock_entries_clock_out_geofence_id_fkey"
+            columns: ["clock_out_geofence_id"]
+            isOneToOne: false
+            referencedRelation: "geofence_locations"
             referencedColumns: ["id"]
           },
           {
@@ -20905,6 +21162,10 @@ export type Database = {
         }
         Returns: string
       }
+      calculate_distance_meters: {
+        Args: { lat1: number; lat2: number; lon1: number; lon2: number }
+        Returns: number
+      }
       calculate_shift_differential: {
         Args: {
           p_clock_in: string
@@ -20928,6 +21189,15 @@ export type Database = {
           approved_modules: Json
           is_auto_approved: boolean
           rule_name: string
+        }[]
+      }
+      check_geofence: {
+        Args: { p_employee_id: string; p_latitude: number; p_longitude: number }
+        Returns: {
+          distance_meters: number
+          geofence_id: string
+          geofence_name: string
+          within_geofence: boolean
         }[]
       }
       execute_report_sql: { Args: { sql_query: string }; Returns: Json }

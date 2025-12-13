@@ -15,6 +15,7 @@ import {
   ClipboardList,
   Settings,
   Sun,
+  MapPin,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
@@ -53,6 +54,13 @@ const features = [
     icon: Sun,
     href: "/time-attendance/shifts",
     color: "bg-orange-500/10 text-orange-600",
+  },
+  {
+    title: "Geofencing",
+    description: "Location-based clock in/out restrictions",
+    icon: MapPin,
+    href: "/time-attendance/geofencing",
+    color: "bg-teal-500/10 text-teal-600",
   },
 ];
 
