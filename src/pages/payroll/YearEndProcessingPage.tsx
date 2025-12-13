@@ -10,11 +10,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { usePayroll, PayrollYearEnd } from "@/hooks/usePayroll";
-import { useCompanyFilter } from "@/components/layout/CompanyFilter";
+import { useLeaveCompanyFilter, LeaveCompanyFilter } from "@/components/leave/LeaveCompanyFilter";
 import { Plus, FileCheck, Calendar, DollarSign, Users, AlertCircle, CheckCircle } from "lucide-react";
 
 export default function YearEndProcessingPage() {
-  const { selectedCompanyId } = useCompanyFilter();
+  const { selectedCompanyId, setSelectedCompanyId } = useLeaveCompanyFilter();
   const {
     isLoading,
     fetchYearEndProcessing,

@@ -622,16 +622,19 @@ export function usePayroll() {
         .from("employee_payroll")
         .select(`
           *,
-          employee:profiles!employee_payroll_employee_id_fkey(id, full_name, email),
-          position:employee_positions!employee_payroll_employee_position_id_fkey(
-            position:positions(title)
-          )
+          employee:profiles!employee_payroll_employee_id_fkey(id, full_name, email)
         `)
         .eq("payroll_run_id", payrollRunId)
         .order("created_at");
       
       if (error) throw error;
-      return data as EmployeePayroll[];
+      
+      // Map the data to match EmployeePayroll interface
+      return (data || []).map((item: any) => ({
+        ...item,
+        employee: item.employee,
+        position: undefined // Position will be fetched separately if needed
+      })) as EmployeePayroll[];
     } catch (err: any) {
       toast.error("Failed to fetch employee payroll");
       return [];

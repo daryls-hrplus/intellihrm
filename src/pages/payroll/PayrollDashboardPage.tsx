@@ -29,7 +29,7 @@ const features = [
     title: "Pay Periods",
     description: "Configure pay periods and schedules",
     icon: CalendarCheck,
-    href: "/payroll/periods",
+    href: "/payroll/pay-periods",
     color: "bg-success/10 text-success",
   },
   {
@@ -43,8 +43,15 @@ const features = [
     title: "Tax Configuration",
     description: "Manage tax brackets and deductions",
     icon: Receipt,
-    href: "/payroll/tax",
+    href: "/payroll/tax-config",
     color: "bg-secondary/10 text-secondary-foreground",
+  },
+  {
+    title: "Year-End Processing",
+    description: "Generate W-2s and annual tax forms",
+    icon: FileSpreadsheet,
+    href: "/payroll/year-end",
+    color: "bg-destructive/10 text-destructive",
   },
 ];
 

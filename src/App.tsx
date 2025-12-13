@@ -168,6 +168,12 @@ import PropertyDashboardPage from "./pages/property/PropertyDashboardPage";
 
 // Payroll pages
 import PayrollDashboardPage from "./pages/payroll/PayrollDashboardPage";
+import PayPeriodsPage from "./pages/payroll/PayPeriodsPage";
+import PayrollProcessingPage from "./pages/payroll/PayrollProcessingPage";
+import TaxConfigPage from "./pages/payroll/TaxConfigPage";
+import PayrollReportsPage from "./pages/payroll/PayrollReportsPage";
+import YearEndProcessingPage from "./pages/payroll/YearEndProcessingPage";
+import PayslipsPage from "./pages/payroll/PayslipsPage";
 
 // Time & Attendance pages
 import TimeAttendanceDashboardPage from "./pages/time-attendance/TimeAttendanceDashboardPage";
@@ -1092,6 +1098,54 @@ const App = () => (
               element={
                 <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="payroll">
                   <PayrollDashboardPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/payroll/pay-periods"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="payroll">
+                  <PayPeriodsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/payroll/processing"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="payroll">
+                  <PayrollProcessingPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/payroll/tax-config"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="payroll">
+                  <TaxConfigPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/payroll/reports"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="payroll">
+                  <PayrollReportsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/payroll/year-end"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="payroll">
+                  <YearEndProcessingPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/ess/payslips"
+              element={
+                <ProtectedRoute moduleCode="ess">
+                  <PayslipsPage />
                 </ProtectedRoute>
               }
             />
