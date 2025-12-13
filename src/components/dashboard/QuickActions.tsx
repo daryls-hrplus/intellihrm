@@ -12,14 +12,14 @@ const actions = [
   {
     title: "Add Employee",
     description: "Onboard a new team member",
-    href: "/workforce/employees/new",
+    href: "/workforce/employees",
     icon: UserPlus,
     color: "bg-primary/10 text-primary",
   },
   {
     title: "Submit Leave Request",
     description: "Request time off",
-    href: "/leave/request",
+    href: "/ess/leave",
     icon: Calendar,
     color: "bg-info/10 text-info",
   },
