@@ -23,7 +23,7 @@ const STATUSES = ["scheduled", "in_progress", "completed", "cancelled"];
 const PropertyMaintenanceTab = ({ companyId }: Props) => {
   const { user } = useAuth();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [statusFilter, setStatusFilter] = useState<string>("");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
   const [formData, setFormData] = useState({
     property_id: "",
     maintenance_type: "repair",
@@ -40,7 +40,7 @@ const PropertyMaintenanceTab = ({ companyId }: Props) => {
   const { items, maintenance, loadingMaintenance, createMaintenance, updateMaintenance } = usePropertyManagement(companyId);
 
   const filteredMaintenance = maintenance.filter((m) => {
-    if (!statusFilter) return true;
+    if (statusFilter === "all") return true;
     return m.status === statusFilter;
   });
 
@@ -114,7 +114,7 @@ const PropertyMaintenanceTab = ({ companyId }: Props) => {
               <SelectValue placeholder="All Status" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All Status</SelectItem>
+              <SelectItem value="all">All Status</SelectItem>
               {STATUSES.map((s) => (
                 <SelectItem key={s} value={s}>{s.replace("_", " ").charAt(0).toUpperCase() + s.slice(1).replace("_", " ")}</SelectItem>
               ))}

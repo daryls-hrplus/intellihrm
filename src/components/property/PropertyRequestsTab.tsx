@@ -26,12 +26,12 @@ const PropertyRequestsTab = ({ companyId }: Props) => {
   const [selectedRequest, setSelectedRequest] = useState<string | null>(null);
   const [reviewAction, setReviewAction] = useState<"approved" | "rejected">("approved");
   const [reviewNotes, setReviewNotes] = useState("");
-  const [statusFilter, setStatusFilter] = useState<string>("pending");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
 
   const { requests, loadingRequests, updateRequest } = usePropertyManagement(companyId);
 
   const filteredRequests = requests.filter((r) => {
-    if (!statusFilter) return true;
+    if (statusFilter === "all") return true;
     return r.status === statusFilter;
   });
 
@@ -91,7 +91,7 @@ const PropertyRequestsTab = ({ companyId }: Props) => {
                 <SelectValue placeholder="All Status" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Status</SelectItem>
+                <SelectItem value="all">All Status</SelectItem>
                 <SelectItem value="pending">Pending</SelectItem>
                 <SelectItem value="approved">Approved</SelectItem>
                 <SelectItem value="rejected">Rejected</SelectItem>
