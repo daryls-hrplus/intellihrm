@@ -51,14 +51,14 @@ const performanceModules = [
     description: "Quick feedback and check-ins",
     href: "/performance/feedback",
     icon: MessageCircle,
-    color: "bg-secondary/10 text-secondary",
+    color: "bg-violet-500/10 text-violet-600",
   },
   {
     title: "Recognition & Awards",
     description: "Celebrate achievements",
     href: "/performance/recognition",
     icon: Award,
-    color: "bg-accent/10 text-accent",
+    color: "bg-amber-500/10 text-amber-600",
   },
   {
     title: "Analytics",
