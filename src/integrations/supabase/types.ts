@@ -10134,6 +10134,7 @@ export type Database = {
       leave_types: {
         Row: {
           accrual_unit: string
+          accrues_leave_while_on: boolean
           advance_notice_days: number | null
           allows_negative_balance: boolean
           can_be_encashed: boolean
@@ -10158,6 +10159,7 @@ export type Database = {
         }
         Insert: {
           accrual_unit?: string
+          accrues_leave_while_on?: boolean
           advance_notice_days?: number | null
           allows_negative_balance?: boolean
           can_be_encashed?: boolean
@@ -10182,6 +10184,7 @@ export type Database = {
         }
         Update: {
           accrual_unit?: string
+          accrues_leave_while_on?: boolean
           advance_notice_days?: number | null
           allows_negative_balance?: boolean
           can_be_encashed?: boolean
@@ -17827,18 +17830,29 @@ export type Database = {
         Args: { p_company_id: string; p_employee_id: string }
         Returns: undefined
       }
-      recalculate_leave_balance: {
-        Args: {
-          p_calculation_type?: string
-          p_company_id: string
-          p_employee_id: string
-          p_initiated_by?: string
-          p_period_end?: string
-          p_period_start?: string
-          p_triggered_by?: string
-        }
-        Returns: Json
-      }
+      recalculate_leave_balance:
+        | {
+            Args: {
+              p_calculation_type?: string
+              p_company_id: string
+              p_employee_id: string
+              p_period_end?: string
+              p_period_start?: string
+            }
+            Returns: Json
+          }
+        | {
+            Args: {
+              p_calculation_type?: string
+              p_company_id: string
+              p_employee_id: string
+              p_initiated_by?: string
+              p_period_end?: string
+              p_period_start?: string
+              p_triggered_by?: string
+            }
+            Returns: Json
+          }
     }
     Enums: {
       app_role: "admin" | "hr_manager" | "employee"

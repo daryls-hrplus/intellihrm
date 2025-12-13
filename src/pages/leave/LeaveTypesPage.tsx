@@ -56,6 +56,7 @@ export default function LeaveTypesPage() {
     can_be_encashed: false,
     encashment_rate: 1,
     color: "#3B82F6",
+    accrues_leave_while_on: true,
   });
 
   const resetForm = () => {
@@ -75,6 +76,7 @@ export default function LeaveTypesPage() {
       can_be_encashed: false,
       encashment_rate: 1,
       color: "#3B82F6",
+      accrues_leave_while_on: true,
     });
     setEditingType(null);
   };
@@ -97,6 +99,7 @@ export default function LeaveTypesPage() {
       can_be_encashed: type.can_be_encashed,
       encashment_rate: type.encashment_rate,
       color: type.color,
+      accrues_leave_while_on: type.accrues_leave_while_on,
     });
     setIsOpen(true);
   };
@@ -292,6 +295,20 @@ export default function LeaveTypesPage() {
                   </div>
                 </div>
 
+                <div className="flex items-center justify-between rounded-lg border p-3 bg-amber-50 dark:bg-amber-950/20">
+                  <div>
+                    <Label htmlFor="accrues_leave_while_on">Employees Accrue Leave While On This Type</Label>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      When disabled, employees do not earn leave balances while on this leave type (e.g., unpaid leave)
+                    </p>
+                  </div>
+                  <Switch
+                    id="accrues_leave_while_on"
+                    checked={formData.accrues_leave_while_on}
+                    onCheckedChange={(checked) => setFormData({ ...formData, accrues_leave_while_on: checked })}
+                  />
+                </div>
+
                 <div className="flex justify-end gap-2 pt-4">
                   <Button variant="outline" onClick={() => { setIsOpen(false); resetForm(); }}>
                     Cancel
@@ -315,6 +332,7 @@ export default function LeaveTypesPage() {
                 <TableHead>Unit</TableHead>
                 <TableHead>Entitlement</TableHead>
                 <TableHead>Accrual Based</TableHead>
+                <TableHead>Accrues Leave</TableHead>
                 <TableHead>Approval Required</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead className="w-[80px]">Actions</TableHead>
@@ -323,13 +341,13 @@ export default function LeaveTypesPage() {
             <TableBody>
               {loadingTypes ? (
                 <TableRow>
-                  <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
+                  <TableCell colSpan={9} className="text-center py-8 text-muted-foreground">
                     Loading...
                   </TableCell>
                 </TableRow>
               ) : leaveTypes.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
+                  <TableCell colSpan={9} className="text-center py-8 text-muted-foreground">
                     No leave types configured. Add your first leave type to get started.
                   </TableCell>
                 </TableRow>
@@ -348,6 +366,11 @@ export default function LeaveTypesPage() {
                     <TableCell>
                       <Badge variant={type.is_accrual_based ? "default" : "secondary"}>
                         {type.is_accrual_based ? "Yes" : "No"}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant={type.accrues_leave_while_on ? "default" : "destructive"}>
+                        {type.accrues_leave_while_on ? "Yes" : "No"}
                       </Badge>
                     </TableCell>
                     <TableCell>

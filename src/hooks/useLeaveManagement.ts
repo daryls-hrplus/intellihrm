@@ -22,6 +22,7 @@ export interface LeaveType {
   encashment_rate: number;
   color: string;
   is_active: boolean;
+  accrues_leave_while_on: boolean;
   start_date: string;
   end_date: string | null;
   created_at: string;
