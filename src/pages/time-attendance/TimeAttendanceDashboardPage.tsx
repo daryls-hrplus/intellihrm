@@ -70,6 +70,13 @@ const features = [
     href: "/time-attendance/projects",
     color: "bg-violet-500/10 text-violet-600",
   },
+  {
+    title: "Timesheet Approvals",
+    description: "Submit timesheets for workflow approval",
+    icon: ClipboardList,
+    href: "/time-attendance/timesheet-approvals",
+    color: "bg-indigo-500/10 text-indigo-600",
+  },
 ];
 
 const stats = [

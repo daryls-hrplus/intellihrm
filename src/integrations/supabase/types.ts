@@ -17179,6 +17179,7 @@ export type Database = {
           project_id: string
           rejection_reason: string | null
           status: string
+          submission_id: string | null
           submitted_at: string | null
           task_id: string | null
           time_clock_entry_id: string | null
@@ -17198,6 +17199,7 @@ export type Database = {
           project_id: string
           rejection_reason?: string | null
           status?: string
+          submission_id?: string | null
           submitted_at?: string | null
           task_id?: string | null
           time_clock_entry_id?: string | null
@@ -17217,6 +17219,7 @@ export type Database = {
           project_id?: string
           rejection_reason?: string | null
           status?: string
+          submission_id?: string | null
           submitted_at?: string | null
           task_id?: string | null
           time_clock_entry_id?: string | null
@@ -17235,6 +17238,13 @@ export type Database = {
             columns: ["project_id"]
             isOneToOne: false
             referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_time_entries_submission_id_fkey"
+            columns: ["submission_id"]
+            isOneToOne: false
+            referencedRelation: "timesheet_submissions"
             referencedColumns: ["id"]
           },
           {
@@ -20138,6 +20148,135 @@ export type Database = {
             columns: ["task_id"]
             isOneToOne: false
             referencedRelation: "project_tasks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      timesheet_submission_entries: {
+        Row: {
+          created_at: string
+          id: string
+          submission_id: string
+          time_entry_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          submission_id: string
+          time_entry_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          submission_id?: string
+          time_entry_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "timesheet_submission_entries_submission_id_fkey"
+            columns: ["submission_id"]
+            isOneToOne: false
+            referencedRelation: "timesheet_submissions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "timesheet_submission_entries_time_entry_id_fkey"
+            columns: ["time_entry_id"]
+            isOneToOne: false
+            referencedRelation: "project_time_entries"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      timesheet_submissions: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          company_id: string
+          created_at: string
+          employee_id: string
+          id: string
+          notes: string | null
+          period_end: string
+          period_start: string
+          rejection_reason: string | null
+          status: string
+          submitted_at: string | null
+          submitted_by: string | null
+          total_hours: number
+          updated_at: string
+          workflow_instance_id: string | null
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          company_id: string
+          created_at?: string
+          employee_id: string
+          id?: string
+          notes?: string | null
+          period_end: string
+          period_start: string
+          rejection_reason?: string | null
+          status?: string
+          submitted_at?: string | null
+          submitted_by?: string | null
+          total_hours?: number
+          updated_at?: string
+          workflow_instance_id?: string | null
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          company_id?: string
+          created_at?: string
+          employee_id?: string
+          id?: string
+          notes?: string | null
+          period_end?: string
+          period_start?: string
+          rejection_reason?: string | null
+          status?: string
+          submitted_at?: string | null
+          submitted_by?: string | null
+          total_hours?: number
+          updated_at?: string
+          workflow_instance_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "timesheet_submissions_approved_by_fkey"
+            columns: ["approved_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "timesheet_submissions_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "timesheet_submissions_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "timesheet_submissions_submitted_by_fkey"
+            columns: ["submitted_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "timesheet_submissions_workflow_instance_id_fkey"
+            columns: ["workflow_instance_id"]
+            isOneToOne: false
+            referencedRelation: "workflow_instances"
             referencedColumns: ["id"]
           },
         ]
