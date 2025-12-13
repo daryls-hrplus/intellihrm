@@ -6724,6 +6724,100 @@ export type Database = {
           },
         ]
       }
+      goal_interviews: {
+        Row: {
+          agenda: string | null
+          cancellation_reason: string | null
+          cancelled_at: string | null
+          completed_at: string | null
+          confirmed_at: string | null
+          created_at: string
+          duration_minutes: number
+          employee_id: string
+          employee_notes: string | null
+          goal_id: string
+          id: string
+          location: string | null
+          manager_notes: string | null
+          meeting_link: string | null
+          meeting_type: string
+          outcome_summary: string | null
+          reminder_sent: boolean | null
+          scheduled_at: string
+          scheduled_by: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          agenda?: string | null
+          cancellation_reason?: string | null
+          cancelled_at?: string | null
+          completed_at?: string | null
+          confirmed_at?: string | null
+          created_at?: string
+          duration_minutes?: number
+          employee_id: string
+          employee_notes?: string | null
+          goal_id: string
+          id?: string
+          location?: string | null
+          manager_notes?: string | null
+          meeting_link?: string | null
+          meeting_type?: string
+          outcome_summary?: string | null
+          reminder_sent?: boolean | null
+          scheduled_at: string
+          scheduled_by?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          agenda?: string | null
+          cancellation_reason?: string | null
+          cancelled_at?: string | null
+          completed_at?: string | null
+          confirmed_at?: string | null
+          created_at?: string
+          duration_minutes?: number
+          employee_id?: string
+          employee_notes?: string | null
+          goal_id?: string
+          id?: string
+          location?: string | null
+          manager_notes?: string | null
+          meeting_link?: string | null
+          meeting_type?: string
+          outcome_summary?: string | null
+          reminder_sent?: boolean | null
+          scheduled_at?: string
+          scheduled_by?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "goal_interviews_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "goal_interviews_goal_id_fkey"
+            columns: ["goal_id"]
+            isOneToOne: false
+            referencedRelation: "performance_goals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "goal_interviews_scheduled_by_fkey"
+            columns: ["scheduled_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       goal_reviews: {
         Row: {
           created_at: string
