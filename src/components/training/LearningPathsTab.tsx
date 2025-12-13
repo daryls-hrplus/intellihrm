@@ -65,6 +65,7 @@ export function LearningPathsTab({ companyId }: LearningPathsTabProps) {
         .select("*, courses:learning_path_courses(id, course:lms_courses(title))")
         .eq("company_id", companyId)
         .order("name"),
+      // @ts-ignore - Supabase type instantiation issue
       supabase
         .from("lms_courses")
         .select("id, title")

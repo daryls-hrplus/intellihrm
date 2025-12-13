@@ -65,6 +65,7 @@ export function TrainingRequestsTab({ companyId }: TrainingRequestsTabProps) {
         .select("*, employee:profiles!training_requests_employee_id_fkey(full_name)")
         .eq("company_id", companyId)
         .order("created_at", { ascending: false }),
+      // @ts-ignore - Supabase type instantiation issue
       supabase
         .from("profiles")
         .select("id, full_name")
