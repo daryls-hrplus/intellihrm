@@ -1,7 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
@@ -11,35 +13,59 @@ import { format } from "date-fns";
 import { Gift, Plus, DollarSign, Award, Users, Calendar } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 
+interface Company {
+  id: string;
+  name: string;
+}
+
 export default function BonusManagementPage() {
   const [activeTab, setActiveTab] = useState("plans");
+  const [companies, setCompanies] = useState<Company[]>([]);
+  const [selectedCompanyId, setSelectedCompanyId] = useState<string>("");
+
+  useEffect(() => {
+    const fetchCompanies = async () => {
+      const { data } = await supabase.from("companies").select("id, name").eq("is_active", true).order("name");
+      if (data && data.length > 0) {
+        setCompanies(data);
+        setSelectedCompanyId(data[0].id);
+      }
+    };
+    fetchCompanies();
+  }, []);
 
   const { data: plans = [], isLoading: plansLoading } = useQuery({
-    queryKey: ["bonus-plans"],
+    queryKey: ["bonus-plans", selectedCompanyId],
     queryFn: async () => {
+      if (!selectedCompanyId) return [];
       const { data, error } = await supabase
         .from("bonus_plans")
         .select("*")
+        .eq("company_id", selectedCompanyId)
         .order("created_at", { ascending: false });
       if (error) throw error;
       return data || [];
     },
+    enabled: !!selectedCompanyId,
   });
 
   const { data: awards = [], isLoading: awardsLoading } = useQuery({
-    queryKey: ["bonus-awards"],
+    queryKey: ["bonus-awards", selectedCompanyId],
     queryFn: async () => {
+      if (!selectedCompanyId) return [];
       const { data, error } = await supabase
         .from("bonus_awards")
         .select(`
           *,
           employee:profiles!bonus_awards_employee_id_fkey(full_name)
         `)
+        .eq("company_id", selectedCompanyId)
         .order("award_date", { ascending: false })
         .limit(50);
       if (error) throw error;
       return data || [];
     },
+    enabled: !!selectedCompanyId,
   });
 
   const getStatusBadge = (status: string) => {
@@ -68,6 +94,13 @@ export default function BonusManagementPage() {
   return (
     <AppLayout>
       <div className="space-y-6">
+        <Breadcrumbs
+          items={[
+            { label: "Compensation", href: "/compensation" },
+            { label: "Bonus Management" },
+          ]}
+        />
+
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
@@ -78,13 +111,26 @@ export default function BonusManagementPage() {
               <p className="text-muted-foreground">Manage bonus plans and awards</p>
             </div>
           </div>
-          <Button>
-            <Plus className="mr-2 h-4 w-4" />
-            {activeTab === "plans" ? "New Plan" : "New Award"}
-          </Button>
+          <div className="flex items-center gap-3">
+            <Select value={selectedCompanyId} onValueChange={setSelectedCompanyId}>
+              <SelectTrigger className="w-[200px]">
+                <SelectValue placeholder="Select Company" />
+              </SelectTrigger>
+              <SelectContent>
+                {companies.map((company) => (
+                  <SelectItem key={company.id} value={company.id}>
+                    {company.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Button>
+              <Plus className="mr-2 h-4 w-4" />
+              {activeTab === "plans" ? "New Plan" : "New Award"}
+            </Button>
+          </div>
         </div>
 
-        {/* Summary Cards */}
         <div className="grid gap-4 sm:grid-cols-4">
           <Card>
             <CardContent className="pt-6">

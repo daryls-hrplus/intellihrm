@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -12,13 +13,32 @@ import { format } from "date-fns";
 import { History, Search, Plus, TrendingUp, TrendingDown, Minus } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 
+interface Company {
+  id: string;
+  name: string;
+}
+
 export default function CompensationHistoryPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [changeTypeFilter, setChangeTypeFilter] = useState<string>("all");
+  const [companies, setCompanies] = useState<Company[]>([]);
+  const [selectedCompanyId, setSelectedCompanyId] = useState<string>("");
+
+  useEffect(() => {
+    const fetchCompanies = async () => {
+      const { data } = await supabase.from("companies").select("id, name").eq("is_active", true).order("name");
+      if (data && data.length > 0) {
+        setCompanies(data);
+        setSelectedCompanyId(data[0].id);
+      }
+    };
+    fetchCompanies();
+  }, []);
 
   const { data: history = [], isLoading } = useQuery({
-    queryKey: ["compensation-history", changeTypeFilter],
+    queryKey: ["compensation-history", changeTypeFilter, selectedCompanyId],
     queryFn: async () => {
+      if (!selectedCompanyId) return [];
       let query = supabase
         .from("compensation_history")
         .select(`
@@ -26,6 +46,7 @@ export default function CompensationHistoryPage() {
           employee:profiles!compensation_history_employee_id_fkey(full_name, email),
           approver:profiles!compensation_history_approved_by_fkey(full_name)
         `)
+        .eq("company_id", selectedCompanyId)
         .order("effective_date", { ascending: false });
 
       if (changeTypeFilter !== "all") {
@@ -36,6 +57,7 @@ export default function CompensationHistoryPage() {
       if (error) throw error;
       return data || [];
     },
+    enabled: !!selectedCompanyId,
   });
 
   const filteredHistory = history.filter((h: any) =>
@@ -64,6 +86,13 @@ export default function CompensationHistoryPage() {
   return (
     <AppLayout>
       <div className="space-y-6">
+        <Breadcrumbs
+          items={[
+            { label: "Compensation", href: "/compensation" },
+            { label: "Compensation History" },
+          ]}
+        />
+
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
@@ -74,10 +103,24 @@ export default function CompensationHistoryPage() {
               <p className="text-muted-foreground">Track salary changes over time</p>
             </div>
           </div>
-          <Button>
-            <Plus className="mr-2 h-4 w-4" />
-            Add Record
-          </Button>
+          <div className="flex items-center gap-3">
+            <Select value={selectedCompanyId} onValueChange={setSelectedCompanyId}>
+              <SelectTrigger className="w-[200px]">
+                <SelectValue placeholder="Select Company" />
+              </SelectTrigger>
+              <SelectContent>
+                {companies.map((company) => (
+                  <SelectItem key={company.id} value={company.id}>
+                    {company.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Button>
+              <Plus className="mr-2 h-4 w-4" />
+              Add Record
+            </Button>
+          </div>
         </div>
 
         <Card>
