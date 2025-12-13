@@ -25,6 +25,7 @@ import {
   RotateCcw,
   PartyPopper,
   Building2,
+  Calculator,
 } from "lucide-react";
 
 interface Company {
@@ -86,6 +87,14 @@ const leaveModules = [
     href: "/leave/holidays",
     icon: PartyPopper,
     color: "bg-destructive/10 text-destructive",
+    adminOnly: true,
+  },
+  {
+    title: "Balance Recalculation",
+    description: "Recalculate employee leave balances",
+    href: "/leave/balance-recalculation",
+    icon: Calculator,
+    color: "bg-accent text-accent-foreground",
     adminOnly: true,
   },
 ];
