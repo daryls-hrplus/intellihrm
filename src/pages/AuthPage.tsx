@@ -131,7 +131,7 @@ export default function AuthPage() {
         } else {
           toast({
             title: "Account created!",
-            description: "Welcome to HRIS Pro. You're now logged in.",
+            description: "Welcome to HRplus Cerebra. You're now logged in.",
           });
           navigate("/", { replace: true });
         }
@@ -155,7 +155,7 @@ export default function AuthPage() {
           <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-sidebar-primary">
             <Users className="h-6 w-6 text-sidebar-primary-foreground" />
           </div>
-          <span className="text-xl font-bold text-sidebar-foreground">HRIS Pro</span>
+          <span className="text-xl font-bold text-sidebar-foreground">HRplus Cerebra</span>
         </div>
 
         <div className="space-y-6">
@@ -171,7 +171,7 @@ export default function AuthPage() {
         </div>
 
         <div className="flex items-center gap-4 text-sm text-sidebar-foreground/60">
-          <span>© 2024 HRIS Pro</span>
+          <span>© 2025 HRplus Cerebra</span>
           <span>•</span>
           <span>Enterprise Edition</span>
         </div>
@@ -185,7 +185,7 @@ export default function AuthPage() {
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary">
               <Users className="h-6 w-6 text-primary-foreground" />
             </div>
-            <span className="text-xl font-bold text-foreground">HRIS Pro</span>
+            <span className="text-xl font-bold text-foreground">HRplus Cerebra</span>
           </div>
 
           <div className="space-y-2">

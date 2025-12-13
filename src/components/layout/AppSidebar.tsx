@@ -139,7 +139,7 @@ export function AppSidebar() {
               <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-sidebar-primary">
                 <Users className="h-5 w-5 text-sidebar-primary-foreground" />
               </div>
-              <span className="text-lg font-semibold text-sidebar-foreground">HRIS Pro</span>
+              <span className="text-lg font-semibold text-sidebar-foreground">HRplus Cerebra</span>
             </div>
           )}
           <button
