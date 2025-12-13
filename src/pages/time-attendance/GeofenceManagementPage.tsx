@@ -15,6 +15,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { format } from "date-fns";
+import { FaceCaptureDialog } from "@/components/time-attendance/FaceCaptureDialog";
 import { 
   MapPin, 
   Plus, 
@@ -24,7 +25,9 @@ import {
   Users,
   AlertTriangle,
   Navigation,
-  Target
+  Target,
+  Camera,
+  UserCheck
 } from "lucide-react";
 
 interface Company {
@@ -46,8 +49,20 @@ interface GeofenceLocation {
   is_active: boolean;
   requires_geofence: boolean;
   allow_clock_outside: boolean;
+  requires_face_capture: boolean;
   start_date: string;
   end_date: string | null;
+}
+
+interface FaceEnrollment {
+  id: string;
+  company_id: string;
+  employee_id: string;
+  photo_url: string;
+  enrolled_at: string;
+  is_active: boolean;
+  notes: string | null;
+  profile?: { full_name: string } | null;
 }
 
 interface GeofenceAssignment {
@@ -87,7 +102,7 @@ export default function GeofenceManagementPage() {
   const [locations, setLocations] = useState<GeofenceLocation[]>([]);
   const [locationDialogOpen, setLocationDialogOpen] = useState(false);
   const [editingLocation, setEditingLocation] = useState<GeofenceLocation | null>(null);
-  const [locationForm, setLocationForm] = useState({
+const [locationForm, setLocationForm] = useState({
     name: "",
     code: "",
     description: "",
@@ -99,9 +114,15 @@ export default function GeofenceManagementPage() {
     is_active: true,
     requires_geofence: true,
     allow_clock_outside: false,
+    requires_face_capture: false,
     start_date: format(new Date(), 'yyyy-MM-dd'),
     end_date: ""
   });
+  
+  // Face Enrollments
+  const [faceEnrollments, setFaceEnrollments] = useState<FaceEnrollment[]>([]);
+  const [faceDialogOpen, setFaceDialogOpen] = useState(false);
+  const [selectedEmployeeForFace, setSelectedEmployeeForFace] = useState<string>("");
   
   // Assignments
   const [assignments, setAssignments] = useState<GeofenceAssignment[]>([]);
@@ -147,12 +168,13 @@ export default function GeofenceManagementPage() {
     setLoading(false);
   };
 
-  const loadAllData = async () => {
+const loadAllData = async () => {
     await Promise.all([
       loadLocations(),
       loadAssignments(),
       loadViolations(),
-      loadEmployees()
+      loadEmployees(),
+      loadFaceEnrollments()
     ]);
   };
 
@@ -237,7 +259,7 @@ export default function GeofenceManagementPage() {
       return;
     }
 
-    const payload = {
+const payload = {
       company_id: selectedCompany,
       name: locationForm.name,
       code: locationForm.code,
@@ -250,6 +272,7 @@ export default function GeofenceManagementPage() {
       is_active: locationForm.is_active,
       requires_geofence: locationForm.requires_geofence,
       allow_clock_outside: locationForm.allow_clock_outside,
+      requires_face_capture: locationForm.requires_face_capture,
       start_date: locationForm.start_date,
       end_date: locationForm.end_date || null
     };
@@ -283,7 +306,7 @@ export default function GeofenceManagementPage() {
     loadLocations();
   };
 
-  const resetLocationForm = () => {
+const resetLocationForm = () => {
     setEditingLocation(null);
     setLocationForm({
       name: "",
@@ -297,12 +320,13 @@ export default function GeofenceManagementPage() {
       is_active: true,
       requires_geofence: true,
       allow_clock_outside: false,
+      requires_face_capture: false,
       start_date: format(new Date(), 'yyyy-MM-dd'),
       end_date: ""
     });
   };
 
-  const openEditLocation = (location: GeofenceLocation) => {
+const openEditLocation = (location: GeofenceLocation) => {
     setEditingLocation(location);
     setLocationForm({
       name: location.name,
@@ -316,10 +340,102 @@ export default function GeofenceManagementPage() {
       is_active: location.is_active,
       requires_geofence: location.requires_geofence,
       allow_clock_outside: location.allow_clock_outside,
+      requires_face_capture: location.requires_face_capture,
       start_date: location.start_date,
       end_date: location.end_date || ""
     });
     setLocationDialogOpen(true);
+  };
+
+// Face Enrollment Functions
+  const loadFaceEnrollments = async () => {
+    const { data, error } = await supabase
+      .from('employee_face_enrollments')
+      .select('*')
+      .eq('company_id', selectedCompany)
+      .order('enrolled_at', { ascending: false });
+    
+    if (error) {
+      console.error("Failed to load face enrollments:", error);
+      return;
+    }
+
+    // Get employee names separately
+    if (data && data.length > 0) {
+      const employeeIds = data.map(d => d.employee_id);
+      const { data: profiles } = await supabase
+        .from('profiles')
+        .select('id, full_name')
+        .in('id', employeeIds);
+      
+      const enrichedData = data.map(enrollment => ({
+        ...enrollment,
+        profile: profiles?.find(p => p.id === enrollment.employee_id) || null
+      }));
+      setFaceEnrollments(enrichedData as FaceEnrollment[]);
+    } else {
+      setFaceEnrollments([]);
+    }
+  };
+
+  const handleFaceCapture = async (photoDataUrl: string) => {
+    if (!selectedEmployeeForFace) {
+      toast.error("Please select an employee");
+      return;
+    }
+
+    // Check if employee already has enrollment
+    const existingEnrollment = faceEnrollments.find(e => e.employee_id === selectedEmployeeForFace);
+    
+    if (existingEnrollment) {
+      // Update existing
+      const { error } = await supabase
+        .from('employee_face_enrollments')
+        .update({
+          photo_url: photoDataUrl,
+          enrolled_at: new Date().toISOString(),
+          is_active: true
+        })
+        .eq('id', existingEnrollment.id);
+
+      if (error) {
+        toast.error("Failed to update face enrollment");
+        console.error(error);
+        return;
+      }
+    } else {
+      // Create new
+      const { data: user } = await supabase.auth.getUser();
+      const { error } = await supabase
+        .from('employee_face_enrollments')
+        .insert({
+          company_id: selectedCompany,
+          employee_id: selectedEmployeeForFace,
+          photo_url: photoDataUrl,
+          enrolled_by: user.user?.id || null
+        });
+
+      if (error) {
+        toast.error("Failed to save face enrollment");
+        console.error(error);
+        return;
+      }
+    }
+
+    toast.success("Face enrolled successfully");
+    setFaceDialogOpen(false);
+    setSelectedEmployeeForFace("");
+    loadFaceEnrollments();
+  };
+
+  const handleDeleteFaceEnrollment = async (id: string) => {
+    const { error } = await supabase.from('employee_face_enrollments').delete().eq('id', id);
+    if (error) {
+      toast.error("Failed to delete enrollment");
+      return;
+    }
+    toast.success("Face enrollment deleted");
+    loadFaceEnrollments();
   };
 
   // Assignment CRUD
@@ -477,7 +593,7 @@ export default function GeofenceManagementPage() {
           </Card>
         </div>
 
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
+<Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList>
             <TabsTrigger value="locations" className="gap-2">
               <MapPin className="h-4 w-4" />
@@ -486,6 +602,10 @@ export default function GeofenceManagementPage() {
             <TabsTrigger value="assignments" className="gap-2">
               <Users className="h-4 w-4" />
               Assignments
+            </TabsTrigger>
+            <TabsTrigger value="face-enrollment" className="gap-2">
+              <Camera className="h-4 w-4" />
+              Face Enrollment
             </TabsTrigger>
             <TabsTrigger value="violations" className="gap-2">
               <AlertTriangle className="h-4 w-4" />
@@ -611,7 +731,7 @@ export default function GeofenceManagementPage() {
                           <Switch 
                             checked={locationForm.requires_geofence}
                             onCheckedChange={(c) => setLocationForm({...locationForm, requires_geofence: c})}
-                          />
+/>
                           <Label>Require Geofence</Label>
                         </div>
                         <div className="flex items-center gap-2">
@@ -621,6 +741,17 @@ export default function GeofenceManagementPage() {
                           />
                           <Label>Allow Outside</Label>
                         </div>
+                      </div>
+                      <div className="flex items-center gap-2 p-3 rounded-lg bg-primary/5 border border-primary/20">
+                        <Camera className="h-5 w-5 text-primary" />
+                        <div className="flex-1">
+                          <Label className="cursor-pointer">Require Face Capture</Label>
+                          <p className="text-xs text-muted-foreground">Employees must capture photo when clocking in/out</p>
+                        </div>
+                        <Switch 
+                          checked={locationForm.requires_face_capture}
+                          onCheckedChange={(c) => setLocationForm({...locationForm, requires_face_capture: c})}
+                        />
                       </div>
                       <Button onClick={handleSaveLocation} className="w-full">
                         {editingLocation ? "Update Location" : "Create Location"}
@@ -666,13 +797,19 @@ export default function GeofenceManagementPage() {
                             {location.latitude.toFixed(6)}, {location.longitude.toFixed(6)}
                           </TableCell>
                           <TableCell>{location.radius_meters}m</TableCell>
-                          <TableCell>
-                            <div className="flex gap-1">
+<TableCell>
+                            <div className="flex flex-wrap gap-1">
                               {location.requires_geofence && (
                                 <Badge variant="outline" className="text-xs">Required</Badge>
                               )}
                               {location.allow_clock_outside && (
                                 <Badge variant="outline" className="text-xs bg-warning/10">Allow Outside</Badge>
+                              )}
+                              {location.requires_face_capture && (
+                                <Badge variant="outline" className="text-xs bg-primary/10 text-primary">
+                                  <Camera className="h-3 w-3 mr-1" />
+                                  Face
+                                </Badge>
                               )}
                             </div>
                           </TableCell>
@@ -840,6 +977,90 @@ export default function GeofenceManagementPage() {
             </Card>
           </TabsContent>
 
+{/* Face Enrollment Tab */}
+          <TabsContent value="face-enrollment">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <div>
+                  <CardTitle className="flex items-center gap-2">
+                    <UserCheck className="h-5 w-5" />
+                    Face Enrollment
+                  </CardTitle>
+                  <CardDescription>
+                    Register employee faces for identity verification during clock in/out
+                  </CardDescription>
+                </div>
+                <div className="flex gap-2">
+                  <Select 
+                    value={selectedEmployeeForFace} 
+                    onValueChange={setSelectedEmployeeForFace}
+                  >
+                    <SelectTrigger className="w-[200px]">
+                      <SelectValue placeholder="Select employee" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {employees.map((e) => (
+                        <SelectItem key={e.id} value={e.id}>{e.full_name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <Button 
+                    onClick={() => setFaceDialogOpen(true)}
+                    disabled={!selectedEmployeeForFace}
+                  >
+                    <Camera className="h-4 w-4 mr-2" />
+                    Enroll Face
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                  {faceEnrollments.length === 0 ? (
+                    <div className="col-span-full text-center py-12 text-muted-foreground">
+                      <Camera className="h-12 w-12 mx-auto mb-3 opacity-50" />
+                      <p>No face enrollments yet</p>
+                      <p className="text-sm">Select an employee and click "Enroll Face" to register</p>
+                    </div>
+                  ) : (
+                    faceEnrollments.map((enrollment) => (
+                      <Card key={enrollment.id} className="overflow-hidden">
+                        <div className="aspect-square relative bg-muted">
+                          <img 
+                            src={enrollment.photo_url} 
+                            alt={enrollment.profile?.full_name || "Employee"}
+                            className="w-full h-full object-cover"
+                          />
+                          {enrollment.is_active && (
+                            <Badge className="absolute top-2 right-2 bg-success/90 text-success-foreground">
+                              Active
+                            </Badge>
+                          )}
+                        </div>
+                        <CardContent className="p-3">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <p className="font-medium text-sm">{enrollment.profile?.full_name || 'Unknown'}</p>
+                              <p className="text-xs text-muted-foreground">
+                                Enrolled {format(new Date(enrollment.enrolled_at), 'MMM d, yyyy')}
+                              </p>
+                            </div>
+                            <Button 
+                              variant="ghost" 
+                              size="icon"
+                              onClick={() => handleDeleteFaceEnrollment(enrollment.id)}
+                            >
+                              <Trash2 className="h-4 w-4 text-destructive" />
+                            </Button>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
           {/* Violations Tab */}
           <TabsContent value="violations">
             <Card>
@@ -894,6 +1115,15 @@ export default function GeofenceManagementPage() {
             </Card>
           </TabsContent>
         </Tabs>
+
+        {/* Face Capture Dialog */}
+        <FaceCaptureDialog
+          open={faceDialogOpen}
+          onOpenChange={setFaceDialogOpen}
+          onCapture={handleFaceCapture}
+          title="Enroll Employee Face"
+          description="Position the employee's face within the frame for enrollment"
+        />
       </div>
     </AppLayout>
   );
