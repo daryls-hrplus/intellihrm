@@ -5006,6 +5006,73 @@ export type Database = {
           },
         ]
       }
+      leave_balance_recalculations: {
+        Row: {
+          calculation_type: string
+          company_id: string
+          created_at: string
+          employee_id: string
+          id: string
+          initiated_by: string | null
+          new_balance: Json | null
+          notes: string | null
+          old_balance: Json | null
+          period_end: string
+          period_start: string
+          triggered_by: string
+        }
+        Insert: {
+          calculation_type: string
+          company_id: string
+          created_at?: string
+          employee_id: string
+          id?: string
+          initiated_by?: string | null
+          new_balance?: Json | null
+          notes?: string | null
+          old_balance?: Json | null
+          period_end: string
+          period_start: string
+          triggered_by: string
+        }
+        Update: {
+          calculation_type?: string
+          company_id?: string
+          created_at?: string
+          employee_id?: string
+          id?: string
+          initiated_by?: string | null
+          new_balance?: Json | null
+          notes?: string | null
+          old_balance?: Json | null
+          period_end?: string
+          period_start?: string
+          triggered_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "leave_balance_recalculations_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leave_balance_recalculations_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leave_balance_recalculations_initiated_by_fkey"
+            columns: ["initiated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       leave_balances: {
         Row: {
           accrued_amount: number
@@ -5227,6 +5294,7 @@ export type Database = {
         Row: {
           company_id: string
           created_at: string
+          end_date: string | null
           forfeit_unused: boolean
           id: string
           is_active: boolean
@@ -5234,11 +5302,13 @@ export type Database = {
           max_balance_cap: number | null
           max_rollover_amount: number | null
           rollover_expiry_months: number | null
+          start_date: string
           updated_at: string
         }
         Insert: {
           company_id: string
           created_at?: string
+          end_date?: string | null
           forfeit_unused?: boolean
           id?: string
           is_active?: boolean
@@ -5246,11 +5316,13 @@ export type Database = {
           max_balance_cap?: number | null
           max_rollover_amount?: number | null
           rollover_expiry_months?: number | null
+          start_date?: string
           updated_at?: string
         }
         Update: {
           company_id?: string
           created_at?: string
+          end_date?: string | null
           forfeit_unused?: boolean
           id?: string
           is_active?: boolean
@@ -5258,6 +5330,7 @@ export type Database = {
           max_balance_cap?: number | null
           max_rollover_amount?: number | null
           rollover_expiry_months?: number | null
+          start_date?: string
           updated_at?: string
         }
         Relationships: [
@@ -9431,6 +9504,18 @@ export type Database = {
           id: string
           similarity: number
         }[]
+      }
+      recalculate_leave_balance: {
+        Args: {
+          p_calculation_type?: string
+          p_company_id: string
+          p_employee_id: string
+          p_initiated_by?: string
+          p_period_end?: string
+          p_period_start?: string
+          p_triggered_by?: string
+        }
+        Returns: Json
       }
     }
     Enums: {

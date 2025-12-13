@@ -75,6 +75,7 @@ import MyLeavePage from "./pages/leave/MyLeavePage";
 import ApplyLeavePage from "./pages/leave/ApplyLeavePage";
 import LeaveApprovalsPage from "./pages/leave/LeaveApprovalsPage";
 import LeaveHolidaysPage from "./pages/leave/LeaveHolidaysPage";
+import LeaveBalanceRecalculationPage from "./pages/leave/LeaveBalanceRecalculationPage";
 
 // Compensation pages
 import CompensationDashboardPage from "./pages/compensation/CompensationDashboardPage";
@@ -715,6 +716,14 @@ const App = () => (
               element={
                 <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
                   <LeaveHolidaysPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/leave/balance-recalculation"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
+                  <LeaveBalanceRecalculationPage />
                 </ProtectedRoute>
               }
             />
