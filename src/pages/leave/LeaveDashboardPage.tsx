@@ -26,6 +26,7 @@ import {
   PartyPopper,
   Building2,
   Calculator,
+  BarChart3,
   Timer,
 } from "lucide-react";
 
@@ -96,6 +97,14 @@ const leaveModules = [
     href: "/leave/balance-recalculation",
     icon: Calculator,
     color: "bg-accent text-accent-foreground",
+    adminOnly: true,
+  },
+  {
+    title: "Leave Analytics",
+    description: "Utilization trends and insights",
+    href: "/leave/analytics",
+    icon: BarChart3,
+    color: "bg-violet-500/10 text-violet-600",
     adminOnly: true,
   },
   {
