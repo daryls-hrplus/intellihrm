@@ -401,6 +401,76 @@ export type Database = {
           },
         ]
       }
+      assessment_results: {
+        Row: {
+          answers: Json | null
+          application_id: string
+          assessment_id: string
+          candidate_id: string
+          completed_at: string | null
+          created_at: string
+          detailed_results: Json | null
+          id: string
+          max_score: number | null
+          notes: string | null
+          passed: boolean | null
+          score: number | null
+          started_at: string | null
+        }
+        Insert: {
+          answers?: Json | null
+          application_id: string
+          assessment_id: string
+          candidate_id: string
+          completed_at?: string | null
+          created_at?: string
+          detailed_results?: Json | null
+          id?: string
+          max_score?: number | null
+          notes?: string | null
+          passed?: boolean | null
+          score?: number | null
+          started_at?: string | null
+        }
+        Update: {
+          answers?: Json | null
+          application_id?: string
+          assessment_id?: string
+          candidate_id?: string
+          completed_at?: string | null
+          created_at?: string
+          detailed_results?: Json | null
+          id?: string
+          max_score?: number | null
+          notes?: string | null
+          passed?: boolean | null
+          score?: number | null
+          started_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "assessment_results_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "applications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assessment_results_assessment_id_fkey"
+            columns: ["assessment_id"]
+            isOneToOne: false
+            referencedRelation: "candidate_assessments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assessment_results_candidate_id_fkey"
+            columns: ["candidate_id"]
+            isOneToOne: false
+            referencedRelation: "candidates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       audit_logs: {
         Row: {
           action: Database["public"]["Enums"]["audit_action"]
@@ -1499,6 +1569,110 @@ export type Database = {
             columns: ["dashboard_id"]
             isOneToOne: false
             referencedRelation: "bi_dashboards"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      candidate_assessments: {
+        Row: {
+          assessment_type: string
+          company_id: string
+          created_at: string
+          description: string | null
+          duration_minutes: number | null
+          id: string
+          instructions: string | null
+          is_active: boolean | null
+          name: string
+          passing_score: number | null
+          questions: Json | null
+          updated_at: string
+        }
+        Insert: {
+          assessment_type: string
+          company_id: string
+          created_at?: string
+          description?: string | null
+          duration_minutes?: number | null
+          id?: string
+          instructions?: string | null
+          is_active?: boolean | null
+          name: string
+          passing_score?: number | null
+          questions?: Json | null
+          updated_at?: string
+        }
+        Update: {
+          assessment_type?: string
+          company_id?: string
+          created_at?: string
+          description?: string | null
+          duration_minutes?: number | null
+          id?: string
+          instructions?: string | null
+          is_active?: boolean | null
+          name?: string
+          passing_score?: number | null
+          questions?: Json | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "candidate_assessments_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      candidate_pipeline_activities: {
+        Row: {
+          activity_type: string
+          candidate_id: string
+          content: string | null
+          created_at: string
+          created_by: string | null
+          follow_up_date: string | null
+          id: string
+          outcome: string | null
+          subject: string | null
+        }
+        Insert: {
+          activity_type: string
+          candidate_id: string
+          content?: string | null
+          created_at?: string
+          created_by?: string | null
+          follow_up_date?: string | null
+          id?: string
+          outcome?: string | null
+          subject?: string | null
+        }
+        Update: {
+          activity_type?: string
+          candidate_id?: string
+          content?: string | null
+          created_at?: string
+          created_by?: string | null
+          follow_up_date?: string | null
+          id?: string
+          outcome?: string | null
+          subject?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "candidate_pipeline_activities_candidate_id_fkey"
+            columns: ["candidate_id"]
+            isOneToOne: false
+            referencedRelation: "candidates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "candidate_pipeline_activities_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -3744,6 +3918,102 @@ export type Database = {
           {
             foreignKeyName: "employee_references_employee_id_fkey"
             columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      employee_referrals: {
+        Row: {
+          application_id: string | null
+          candidate_email: string
+          candidate_id: string | null
+          candidate_name: string
+          candidate_phone: string | null
+          company_id: string
+          created_at: string
+          hired_date: string | null
+          id: string
+          notes: string | null
+          program_id: string | null
+          referrer_id: string
+          relationship: string | null
+          reward_amount: number | null
+          reward_paid_date: string | null
+          status: string | null
+          updated_at: string
+        }
+        Insert: {
+          application_id?: string | null
+          candidate_email: string
+          candidate_id?: string | null
+          candidate_name: string
+          candidate_phone?: string | null
+          company_id: string
+          created_at?: string
+          hired_date?: string | null
+          id?: string
+          notes?: string | null
+          program_id?: string | null
+          referrer_id: string
+          relationship?: string | null
+          reward_amount?: number | null
+          reward_paid_date?: string | null
+          status?: string | null
+          updated_at?: string
+        }
+        Update: {
+          application_id?: string | null
+          candidate_email?: string
+          candidate_id?: string | null
+          candidate_name?: string
+          candidate_phone?: string | null
+          company_id?: string
+          created_at?: string
+          hired_date?: string | null
+          id?: string
+          notes?: string | null
+          program_id?: string | null
+          referrer_id?: string
+          relationship?: string | null
+          reward_amount?: number | null
+          reward_paid_date?: string | null
+          status?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "employee_referrals_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "applications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_referrals_candidate_id_fkey"
+            columns: ["candidate_id"]
+            isOneToOne: false
+            referencedRelation: "candidates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_referrals_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_referrals_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "referral_programs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_referrals_referrer_id_fkey"
+            columns: ["referrer_id"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
@@ -6586,6 +6856,175 @@ export type Database = {
           },
         ]
       }
+      interview_feedback: {
+        Row: {
+          created_at: string
+          id: string
+          interviewer_id: string
+          notes: string | null
+          overall_rating: number | null
+          panel_id: string
+          recommendation: string | null
+          strengths: string | null
+          submitted_at: string | null
+          updated_at: string
+          weaknesses: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          interviewer_id: string
+          notes?: string | null
+          overall_rating?: number | null
+          panel_id: string
+          recommendation?: string | null
+          strengths?: string | null
+          submitted_at?: string | null
+          updated_at?: string
+          weaknesses?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          interviewer_id?: string
+          notes?: string | null
+          overall_rating?: number | null
+          panel_id?: string
+          recommendation?: string | null
+          strengths?: string | null
+          submitted_at?: string | null
+          updated_at?: string
+          weaknesses?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "interview_feedback_interviewer_id_fkey"
+            columns: ["interviewer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "interview_feedback_panel_id_fkey"
+            columns: ["panel_id"]
+            isOneToOne: false
+            referencedRelation: "interview_panels"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      interview_panel_members: {
+        Row: {
+          confirmed: boolean | null
+          created_at: string
+          id: string
+          interviewer_id: string
+          panel_id: string
+          role: string | null
+        }
+        Insert: {
+          confirmed?: boolean | null
+          created_at?: string
+          id?: string
+          interviewer_id: string
+          panel_id: string
+          role?: string | null
+        }
+        Update: {
+          confirmed?: boolean | null
+          created_at?: string
+          id?: string
+          interviewer_id?: string
+          panel_id?: string
+          role?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "interview_panel_members_interviewer_id_fkey"
+            columns: ["interviewer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "interview_panel_members_panel_id_fkey"
+            columns: ["panel_id"]
+            isOneToOne: false
+            referencedRelation: "interview_panels"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      interview_panels: {
+        Row: {
+          application_id: string
+          created_at: string
+          created_by: string | null
+          duration_minutes: number | null
+          id: string
+          interview_type: string
+          location: string | null
+          meeting_link: string | null
+          notes: string | null
+          scheduled_at: string | null
+          scorecard_id: string | null
+          status: string | null
+          updated_at: string
+        }
+        Insert: {
+          application_id: string
+          created_at?: string
+          created_by?: string | null
+          duration_minutes?: number | null
+          id?: string
+          interview_type: string
+          location?: string | null
+          meeting_link?: string | null
+          notes?: string | null
+          scheduled_at?: string | null
+          scorecard_id?: string | null
+          status?: string | null
+          updated_at?: string
+        }
+        Update: {
+          application_id?: string
+          created_at?: string
+          created_by?: string | null
+          duration_minutes?: number | null
+          id?: string
+          interview_type?: string
+          location?: string | null
+          meeting_link?: string | null
+          notes?: string | null
+          scheduled_at?: string | null
+          scorecard_id?: string | null
+          status?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "interview_panels_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "applications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "interview_panels_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "interview_panels_scorecard_id_fkey"
+            columns: ["scorecard_id"]
+            isOneToOne: false
+            referencedRelation: "interview_scorecards"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       interview_schedules: {
         Row: {
           application_id: string
@@ -6653,6 +7092,150 @@ export type Database = {
             columns: ["application_id"]
             isOneToOne: false
             referencedRelation: "applications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      interview_scorecard_criteria: {
+        Row: {
+          created_at: string
+          description: string | null
+          display_order: number | null
+          id: string
+          max_score: number | null
+          name: string
+          scorecard_id: string
+          weight: number | null
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          display_order?: number | null
+          id?: string
+          max_score?: number | null
+          name: string
+          scorecard_id: string
+          weight?: number | null
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          display_order?: number | null
+          id?: string
+          max_score?: number | null
+          name?: string
+          scorecard_id?: string
+          weight?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "interview_scorecard_criteria_scorecard_id_fkey"
+            columns: ["scorecard_id"]
+            isOneToOne: false
+            referencedRelation: "interview_scorecards"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      interview_scorecard_ratings: {
+        Row: {
+          application_id: string
+          created_at: string
+          criteria_id: string
+          id: string
+          interviewer_id: string | null
+          notes: string | null
+          score: number | null
+          scorecard_id: string
+          updated_at: string
+        }
+        Insert: {
+          application_id: string
+          created_at?: string
+          criteria_id: string
+          id?: string
+          interviewer_id?: string | null
+          notes?: string | null
+          score?: number | null
+          scorecard_id: string
+          updated_at?: string
+        }
+        Update: {
+          application_id?: string
+          created_at?: string
+          criteria_id?: string
+          id?: string
+          interviewer_id?: string | null
+          notes?: string | null
+          score?: number | null
+          scorecard_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "interview_scorecard_ratings_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "applications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "interview_scorecard_ratings_criteria_id_fkey"
+            columns: ["criteria_id"]
+            isOneToOne: false
+            referencedRelation: "interview_scorecard_criteria"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "interview_scorecard_ratings_interviewer_id_fkey"
+            columns: ["interviewer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "interview_scorecard_ratings_scorecard_id_fkey"
+            columns: ["scorecard_id"]
+            isOneToOne: false
+            referencedRelation: "interview_scorecards"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      interview_scorecards: {
+        Row: {
+          company_id: string
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "interview_scorecards_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
             referencedColumns: ["id"]
           },
         ]
@@ -11029,6 +11612,219 @@ export type Database = {
             columns: ["reviewed_by"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      recruitment_email_templates: {
+        Row: {
+          body: string
+          company_id: string
+          created_at: string
+          created_by: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          subject: string
+          template_type: string
+          updated_at: string
+          variables: Json | null
+        }
+        Insert: {
+          body: string
+          company_id: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          subject: string
+          template_type: string
+          updated_at?: string
+          variables?: Json | null
+        }
+        Update: {
+          body?: string
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          subject?: string
+          template_type?: string
+          updated_at?: string
+          variables?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "recruitment_email_templates_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "recruitment_email_templates_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      recruitment_offers: {
+        Row: {
+          application_id: string
+          approved_at: string | null
+          approved_by: string | null
+          base_salary: number | null
+          benefits_summary: string | null
+          bonus_amount: number | null
+          bonus_type: string | null
+          counter_offer_details: Json | null
+          created_at: string
+          created_by: string | null
+          currency: string | null
+          department: string | null
+          equity_details: Json | null
+          expiry_date: string | null
+          id: string
+          negotiation_notes: string | null
+          offer_number: string | null
+          position_title: string
+          responded_at: string | null
+          sent_at: string | null
+          start_date: string | null
+          status: string | null
+          updated_at: string
+        }
+        Insert: {
+          application_id: string
+          approved_at?: string | null
+          approved_by?: string | null
+          base_salary?: number | null
+          benefits_summary?: string | null
+          bonus_amount?: number | null
+          bonus_type?: string | null
+          counter_offer_details?: Json | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string | null
+          department?: string | null
+          equity_details?: Json | null
+          expiry_date?: string | null
+          id?: string
+          negotiation_notes?: string | null
+          offer_number?: string | null
+          position_title: string
+          responded_at?: string | null
+          sent_at?: string | null
+          start_date?: string | null
+          status?: string | null
+          updated_at?: string
+        }
+        Update: {
+          application_id?: string
+          approved_at?: string | null
+          approved_by?: string | null
+          base_salary?: number | null
+          benefits_summary?: string | null
+          bonus_amount?: number | null
+          bonus_type?: string | null
+          counter_offer_details?: Json | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string | null
+          department?: string | null
+          equity_details?: Json | null
+          expiry_date?: string | null
+          id?: string
+          negotiation_notes?: string | null
+          offer_number?: string | null
+          position_title?: string
+          responded_at?: string | null
+          sent_at?: string | null
+          start_date?: string | null
+          status?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "recruitment_offers_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "applications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "recruitment_offers_approved_by_fkey"
+            columns: ["approved_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "recruitment_offers_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      referral_programs: {
+        Row: {
+          company_id: string
+          created_at: string
+          description: string | null
+          end_date: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          payout_timing: string | null
+          reward_amount: number | null
+          reward_currency: string | null
+          reward_type: string | null
+          start_date: string
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          payout_timing?: string | null
+          reward_amount?: number | null
+          reward_currency?: string | null
+          reward_type?: string | null
+          start_date?: string
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          payout_timing?: string | null
+          reward_amount?: number | null
+          reward_currency?: string | null
+          reward_type?: string | null
+          start_date?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "referral_programs_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
             referencedColumns: ["id"]
           },
         ]
