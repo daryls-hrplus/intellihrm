@@ -1031,6 +1031,22 @@ const App = () => (
                 </ProtectedRoute>
               }
             />
+            <Route
+              path="/leave/calendar"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="leave">
+                  <LeaveCalendarPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/leave/balance-adjustments"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="leave">
+                  <LeaveBalanceAdjustmentsPage />
+                </ProtectedRoute>
+              }
+            />
 
             <Route
               path="/payroll"
