@@ -490,6 +490,32 @@ export function useWorkflow() {
         throw updateError;
       }
 
+      // Update the reference record if workflow is completed
+      if (newStatus === "approved" || newStatus === "rejected") {
+        // Update the source record based on reference_type
+        if (instance.reference_type === "headcount_requests") {
+          await supabase
+            .from("headcount_requests")
+            .update({
+              status: newStatus,
+              reviewed_by: user.id,
+              reviewed_at: completedAt,
+              review_notes: options?.comment || null,
+            })
+            .eq("id", instance.reference_id);
+        } else if (instance.reference_type === "leave_requests") {
+          await supabase
+            .from("leave_requests")
+            .update({
+              status: newStatus,
+              actioned_by: user.id,
+              actioned_at: completedAt,
+              rejection_reason: newStatus === "rejected" ? options?.comment : null,
+            })
+            .eq("id", instance.reference_id);
+        }
+      }
+
       // Notify next approver if moving to a new step
       if (nextStepForNotification) {
         const template = instance.template as any;
