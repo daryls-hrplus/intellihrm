@@ -9,6 +9,7 @@ import PropertyItemsTab from "@/components/property/PropertyItemsTab";
 import PropertyAssignmentsTab from "@/components/property/PropertyAssignmentsTab";
 import PropertyRequestsTab from "@/components/property/PropertyRequestsTab";
 import PropertyMaintenanceTab from "@/components/property/PropertyMaintenanceTab";
+import { PropertyAnalytics } from "@/components/property/PropertyAnalytics";
 import {
   Package,
   Laptop,
@@ -19,14 +20,17 @@ import {
   CheckCircle,
   Clock,
   AlertTriangle,
+  BarChart3,
 } from "lucide-react";
 
 export default function PropertyDashboardPage() {
   const { selectedCompanyId, setSelectedCompanyId } = useLeaveCompanyFilter();
   const {
     items,
+    assignments,
     requests,
     maintenance,
+    categories,
   } = usePropertyManagement(selectedCompanyId);
 
   const totalAssets = items?.length || 0;
@@ -95,8 +99,12 @@ export default function PropertyDashboardPage() {
         </div>
 
         {/* Tabs for Property Management */}
-        <Tabs defaultValue="items" className="space-y-4">
-          <TabsList className="grid w-full grid-cols-5">
+        <Tabs defaultValue="analytics" className="space-y-4">
+          <TabsList className="grid w-full grid-cols-6">
+            <TabsTrigger value="analytics" className="flex items-center gap-2">
+              <BarChart3 className="h-4 w-4" />
+              <span className="hidden sm:inline">Analytics</span>
+            </TabsTrigger>
             <TabsTrigger value="items" className="flex items-center gap-2">
               <Laptop className="h-4 w-4" />
               <span className="hidden sm:inline">Assets</span>
@@ -119,6 +127,15 @@ export default function PropertyDashboardPage() {
             </TabsTrigger>
           </TabsList>
 
+          <TabsContent value="analytics">
+            <PropertyAnalytics 
+              items={items}
+              assignments={assignments}
+              requests={requests}
+              maintenance={maintenance}
+              categories={categories}
+            />
+          </TabsContent>
           <TabsContent value="items">
             <PropertyItemsTab companyId={selectedCompanyId} />
           </TabsContent>
