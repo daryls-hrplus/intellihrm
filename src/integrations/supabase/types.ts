@@ -7868,6 +7868,378 @@ export type Database = {
           },
         ]
       }
+      property_assignments: {
+        Row: {
+          actual_return_date: string | null
+          assigned_by: string | null
+          assigned_date: string
+          condition_at_assignment: string | null
+          condition_at_return: string | null
+          created_at: string
+          employee_id: string
+          expected_return_date: string | null
+          id: string
+          notes: string | null
+          property_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          actual_return_date?: string | null
+          assigned_by?: string | null
+          assigned_date?: string
+          condition_at_assignment?: string | null
+          condition_at_return?: string | null
+          created_at?: string
+          employee_id: string
+          expected_return_date?: string | null
+          id?: string
+          notes?: string | null
+          property_id: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          actual_return_date?: string | null
+          assigned_by?: string | null
+          assigned_date?: string
+          condition_at_assignment?: string | null
+          condition_at_return?: string | null
+          created_at?: string
+          employee_id?: string
+          expected_return_date?: string | null
+          id?: string
+          notes?: string | null
+          property_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "property_assignments_assigned_by_fkey"
+            columns: ["assigned_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_assignments_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_assignments_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "property_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      property_categories: {
+        Row: {
+          code: string
+          company_id: string | null
+          created_at: string
+          depreciation_years: number | null
+          description: string | null
+          end_date: string | null
+          id: string
+          is_active: boolean
+          name: string
+          start_date: string
+          updated_at: string
+        }
+        Insert: {
+          code: string
+          company_id?: string | null
+          created_at?: string
+          depreciation_years?: number | null
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          start_date?: string
+          updated_at?: string
+        }
+        Update: {
+          code?: string
+          company_id?: string | null
+          created_at?: string
+          depreciation_years?: number | null
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          start_date?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "property_categories_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      property_items: {
+        Row: {
+          asset_tag: string
+          category_id: string
+          company_id: string
+          condition: string
+          created_at: string
+          currency: string | null
+          description: string | null
+          id: string
+          is_active: boolean
+          location: string | null
+          manufacturer: string | null
+          model: string | null
+          name: string
+          notes: string | null
+          purchase_cost: number | null
+          purchase_date: string | null
+          serial_number: string | null
+          specifications: Json | null
+          status: string
+          updated_at: string
+          warranty_expiry: string | null
+        }
+        Insert: {
+          asset_tag: string
+          category_id: string
+          company_id: string
+          condition?: string
+          created_at?: string
+          currency?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          location?: string | null
+          manufacturer?: string | null
+          model?: string | null
+          name: string
+          notes?: string | null
+          purchase_cost?: number | null
+          purchase_date?: string | null
+          serial_number?: string | null
+          specifications?: Json | null
+          status?: string
+          updated_at?: string
+          warranty_expiry?: string | null
+        }
+        Update: {
+          asset_tag?: string
+          category_id?: string
+          company_id?: string
+          condition?: string
+          created_at?: string
+          currency?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          location?: string | null
+          manufacturer?: string | null
+          model?: string | null
+          name?: string
+          notes?: string | null
+          purchase_cost?: number | null
+          purchase_date?: string | null
+          serial_number?: string | null
+          specifications?: Json | null
+          status?: string
+          updated_at?: string
+          warranty_expiry?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "property_items_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "property_categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_items_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      property_maintenance: {
+        Row: {
+          completed_date: string | null
+          cost: number | null
+          created_at: string
+          created_by: string | null
+          currency: string | null
+          description: string | null
+          id: string
+          maintenance_type: string
+          notes: string | null
+          performed_by: string | null
+          property_id: string
+          scheduled_date: string | null
+          status: string
+          title: string
+          updated_at: string
+          vendor: string | null
+        }
+        Insert: {
+          completed_date?: string | null
+          cost?: number | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string | null
+          description?: string | null
+          id?: string
+          maintenance_type?: string
+          notes?: string | null
+          performed_by?: string | null
+          property_id: string
+          scheduled_date?: string | null
+          status?: string
+          title: string
+          updated_at?: string
+          vendor?: string | null
+        }
+        Update: {
+          completed_date?: string | null
+          cost?: number | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string | null
+          description?: string | null
+          id?: string
+          maintenance_type?: string
+          notes?: string | null
+          performed_by?: string | null
+          property_id?: string
+          scheduled_date?: string | null
+          status?: string
+          title?: string
+          updated_at?: string
+          vendor?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "property_maintenance_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_maintenance_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "property_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      property_requests: {
+        Row: {
+          category_id: string | null
+          company_id: string
+          created_at: string
+          description: string | null
+          employee_id: string
+          fulfilled_property_id: string | null
+          id: string
+          justification: string | null
+          priority: string
+          request_type: string
+          review_notes: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          category_id?: string | null
+          company_id: string
+          created_at?: string
+          description?: string | null
+          employee_id: string
+          fulfilled_property_id?: string | null
+          id?: string
+          justification?: string | null
+          priority?: string
+          request_type?: string
+          review_notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          category_id?: string | null
+          company_id?: string
+          created_at?: string
+          description?: string | null
+          employee_id?: string
+          fulfilled_property_id?: string | null
+          id?: string
+          justification?: string | null
+          priority?: string
+          request_type?: string
+          review_notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "property_requests_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "property_categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_requests_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_requests_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_requests_fulfilled_property_id_fkey"
+            columns: ["fulfilled_property_id"]
+            isOneToOne: false
+            referencedRelation: "property_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_requests_reviewed_by_fkey"
+            columns: ["reviewed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       report_data_sources: {
         Row: {
           available_fields: Json
