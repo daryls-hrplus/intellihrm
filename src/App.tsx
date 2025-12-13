@@ -186,6 +186,7 @@ import OvertimeManagementPage from "./pages/time-attendance/OvertimeManagementPa
 import ShiftManagementPage from "./pages/time-attendance/ShiftManagementPage";
 import GeofenceManagementPage from "./pages/time-attendance/GeofenceManagementPage";
 import ProjectTimeTrackingPage from "./pages/time-attendance/ProjectTimeTrackingPage";
+import TimesheetApprovalsPage from "./pages/time-attendance/TimesheetApprovalsPage";
 
 // ESS & MSS pages
 import EmployeeSelfServicePage from "./pages/ess/EmployeeSelfServicePage";
