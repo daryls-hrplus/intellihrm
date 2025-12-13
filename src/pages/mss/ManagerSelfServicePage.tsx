@@ -16,6 +16,7 @@ import {
   UserCheck,
   Rocket,
   UserMinus,
+  Package,
 } from "lucide-react";
 
 const mssModules = [
@@ -53,6 +54,13 @@ const mssModules = [
     href: "/mss/offboarding",
     icon: UserMinus,
     color: "bg-red-500/10 text-red-600",
+  },
+  {
+    title: "Team Property",
+    description: "Manage property assignments for your team",
+    href: "/mss/property",
+    icon: Package,
+    color: "bg-slate-500/10 text-slate-600",
   },
   {
     title: "Team Leave Calendar",
