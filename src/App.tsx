@@ -126,6 +126,7 @@ import ComplianceTrainingPage from "./pages/training/ComplianceTrainingPage";
 import CourseCompetenciesPage from "./pages/training/CourseCompetenciesPage";
 import RecertificationPage from "./pages/training/RecertificationPage";
 import TrainingNeedsPage from "./pages/training/TrainingNeedsPage";
+import TrainingAnalyticsPage from "./pages/training/TrainingAnalyticsPage";
 
 // Succession pages
 import SuccessionDashboardPage from "./pages/succession/SuccessionDashboardPage";
@@ -1245,6 +1246,14 @@ const App = () => (
               element={
                 <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
                   <TrainingNeedsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/training/analytics"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
+                  <TrainingAnalyticsPage />
                 </ProtectedRoute>
               }
             />
