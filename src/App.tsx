@@ -153,6 +153,7 @@ import MyOffboardingPage from "./pages/ess/MyOffboardingPage";
 import MyPropertyPage from "./pages/ess/MyPropertyPage";
 import MyEmployeeRelationsPage from "./pages/ess/MyEmployeeRelationsPage";
 import EssLeavePage from "./pages/ess/EssLeavePage";
+import EssJobOpeningsPage from "./pages/ess/EssJobOpeningsPage";
 import MyHSEPage from "./pages/ess/MyHSEPage";
 import ManagerSelfServicePage from "./pages/mss/ManagerSelfServicePage";
 import MssAppraisalsPage from "./pages/mss/MssAppraisalsPage";
@@ -262,6 +263,14 @@ const App = () => (
               element={
                 <ProtectedRoute moduleCode="ess">
                   <MyEmployeeRelationsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/ess/jobs"
+              element={
+                <ProtectedRoute moduleCode="ess">
+                  <EssJobOpeningsPage />
                 </ProtectedRoute>
               }
             />
