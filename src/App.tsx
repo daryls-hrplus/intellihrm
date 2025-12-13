@@ -187,6 +187,11 @@ import MssRecruitmentPage from "./pages/mss/MssRecruitmentPage";
 import MssTrainingPage from "./pages/mss/MssTrainingPage";
 import MyDevelopmentPlanPage from "./pages/ess/MyDevelopmentPlanPage";
 import MssDevelopmentPlansPage from "./pages/mss/MssDevelopmentPlansPage";
+import MyFeedbackPage from "./pages/ess/MyFeedbackPage";
+import MyRecognitionPage from "./pages/ess/MyRecognitionPage";
+import MssFeedbackPage from "./pages/mss/MssFeedbackPage";
+import MssRecognitionPage from "./pages/mss/MssRecognitionPage";
+import MssPipsPage from "./pages/mss/MssPipsPage";
 
 // Workflow pages
 import AdminWorkflowTemplatesPage from "./pages/admin/AdminWorkflowTemplatesPage";
@@ -334,6 +339,22 @@ const App = () => (
                 </ProtectedRoute>
               }
             />
+            <Route
+              path="/ess/feedback"
+              element={
+                <ProtectedRoute moduleCode="ess">
+                  <MyFeedbackPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/ess/recognition"
+              element={
+                <ProtectedRoute moduleCode="ess">
+                  <MyRecognitionPage />
+                </ProtectedRoute>
+              }
+            />
             {/* Manager Self Service Routes */}
             <Route
               path="/mss"
@@ -444,6 +465,30 @@ const App = () => (
               element={
                 <ProtectedRoute moduleCode="mss">
                   <MssDevelopmentPlansPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/mss/feedback"
+              element={
+                <ProtectedRoute moduleCode="mss">
+                  <MssFeedbackPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/mss/recognition"
+              element={
+                <ProtectedRoute moduleCode="mss">
+                  <MssRecognitionPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/mss/pips"
+              element={
+                <ProtectedRoute moduleCode="mss">
+                  <MssPipsPage />
                 </ProtectedRoute>
               }
             />

@@ -21,6 +21,8 @@ import {
   Shield,
   HardHat,
   Briefcase,
+  MessageCircle,
+  Award,
 } from "lucide-react";
 
 const essModules = [
@@ -149,6 +151,20 @@ const essModules = [
     href: "/ess/jobs",
     icon: Briefcase,
     color: "bg-blue-500/10 text-blue-600",
+  },
+  {
+    title: "My Feedback",
+    description: "Give and receive continuous feedback",
+    href: "/ess/feedback",
+    icon: MessageCircle,
+    color: "bg-violet-500/10 text-violet-600",
+  },
+  {
+    title: "My Recognition",
+    description: "View your recognitions and recognize colleagues",
+    href: "/ess/recognition",
+    icon: Award,
+    color: "bg-amber-500/10 text-amber-600",
   },
   {
     title: "Notifications",

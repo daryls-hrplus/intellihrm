@@ -20,6 +20,9 @@ import {
   Heart,
   Shield,
   HardHat,
+  MessageCircle,
+  Award,
+  AlertTriangle,
 } from "lucide-react";
 
 const mssModules = [
@@ -148,6 +151,27 @@ const mssModules = [
     href: "/mss/hse",
     icon: HardHat,
     color: "bg-yellow-500/10 text-yellow-600",
+  },
+  {
+    title: "Team Feedback",
+    description: "View and manage continuous feedback for your team",
+    href: "/mss/feedback",
+    icon: MessageCircle,
+    color: "bg-violet-500/10 text-violet-600",
+  },
+  {
+    title: "Team Recognition",
+    description: "Recognize and view recognitions for your team",
+    href: "/mss/recognition",
+    icon: Award,
+    color: "bg-amber-500/10 text-amber-600",
+  },
+  {
+    title: "Performance Improvement",
+    description: "Manage PIPs for your direct reports",
+    href: "/mss/pips",
+    icon: AlertTriangle,
+    color: "bg-orange-500/10 text-orange-600",
   },
   {
     title: "Submit a Ticket",
