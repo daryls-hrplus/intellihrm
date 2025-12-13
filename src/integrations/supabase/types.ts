@@ -2600,6 +2600,129 @@ export type Database = {
           },
         ]
       }
+      compliance_training: {
+        Row: {
+          applies_to_all: boolean | null
+          company_id: string
+          course_id: string
+          created_at: string
+          description: string | null
+          frequency_months: number | null
+          grace_period_days: number | null
+          id: string
+          is_active: boolean
+          is_mandatory: boolean
+          name: string
+          target_departments: string[] | null
+          target_positions: string[] | null
+          updated_at: string
+        }
+        Insert: {
+          applies_to_all?: boolean | null
+          company_id: string
+          course_id: string
+          created_at?: string
+          description?: string | null
+          frequency_months?: number | null
+          grace_period_days?: number | null
+          id?: string
+          is_active?: boolean
+          is_mandatory?: boolean
+          name: string
+          target_departments?: string[] | null
+          target_positions?: string[] | null
+          updated_at?: string
+        }
+        Update: {
+          applies_to_all?: boolean | null
+          company_id?: string
+          course_id?: string
+          created_at?: string
+          description?: string | null
+          frequency_months?: number | null
+          grace_period_days?: number | null
+          id?: string
+          is_active?: boolean
+          is_mandatory?: boolean
+          name?: string
+          target_departments?: string[] | null
+          target_positions?: string[] | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "compliance_training_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "compliance_training_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "lms_courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      compliance_training_assignments: {
+        Row: {
+          completed_at: string | null
+          compliance_training_id: string
+          created_at: string
+          due_date: string
+          employee_id: string
+          escalated_at: string | null
+          exemption_reason: string | null
+          id: string
+          reminder_sent_at: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          completed_at?: string | null
+          compliance_training_id: string
+          created_at?: string
+          due_date: string
+          employee_id: string
+          escalated_at?: string | null
+          exemption_reason?: string | null
+          id?: string
+          reminder_sent_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          completed_at?: string | null
+          compliance_training_id?: string
+          created_at?: string
+          due_date?: string
+          employee_id?: string
+          escalated_at?: string | null
+          exemption_reason?: string | null
+          id?: string
+          reminder_sent_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "compliance_training_assignments_compliance_training_id_fkey"
+            columns: ["compliance_training_id"]
+            isOneToOne: false
+            referencedRelation: "compliance_training"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "compliance_training_assignments_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       country_holidays: {
         Row: {
           country: string
@@ -2638,6 +2761,91 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      course_competencies: {
+        Row: {
+          competency_id: string
+          course_id: string
+          created_at: string
+          id: string
+          proficiency_level_achieved: string | null
+        }
+        Insert: {
+          competency_id: string
+          course_id: string
+          created_at?: string
+          id?: string
+          proficiency_level_achieved?: string | null
+        }
+        Update: {
+          competency_id?: string
+          course_id?: string
+          created_at?: string
+          id?: string
+          proficiency_level_achieved?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "course_competencies_competency_id_fkey"
+            columns: ["competency_id"]
+            isOneToOne: false
+            referencedRelation: "competencies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_competencies_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "lms_courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_competencies_proficiency_level_achieved_fkey"
+            columns: ["proficiency_level_achieved"]
+            isOneToOne: false
+            referencedRelation: "competency_levels"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      course_instructors: {
+        Row: {
+          course_id: string
+          created_at: string
+          id: string
+          instructor_id: string
+          is_primary: boolean | null
+        }
+        Insert: {
+          course_id: string
+          created_at?: string
+          id?: string
+          instructor_id: string
+          is_primary?: boolean | null
+        }
+        Update: {
+          course_id?: string
+          created_at?: string
+          id?: string
+          instructor_id?: string
+          is_primary?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "course_instructors_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "lms_courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_instructors_instructor_id_fkey"
+            columns: ["instructor_id"]
+            isOneToOne: false
+            referencedRelation: "training_instructors"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       currencies: {
         Row: {
@@ -3862,6 +4070,66 @@ export type Database = {
         }
         Relationships: []
       }
+      employee_recertifications: {
+        Row: {
+          certificate_number: string | null
+          certificate_url: string | null
+          certification_date: string
+          created_at: string
+          employee_id: string
+          expiry_date: string
+          id: string
+          reminder_sent_at: string | null
+          renewed_at: string | null
+          requirement_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          certificate_number?: string | null
+          certificate_url?: string | null
+          certification_date: string
+          created_at?: string
+          employee_id: string
+          expiry_date: string
+          id?: string
+          reminder_sent_at?: string | null
+          renewed_at?: string | null
+          requirement_id: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          certificate_number?: string | null
+          certificate_url?: string | null
+          certification_date?: string
+          created_at?: string
+          employee_id?: string
+          expiry_date?: string
+          id?: string
+          reminder_sent_at?: string | null
+          renewed_at?: string | null
+          requirement_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "employee_recertifications_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_recertifications_requirement_id_fkey"
+            columns: ["requirement_id"]
+            isOneToOne: false
+            referencedRelation: "recertification_requirements"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       employee_references: {
         Row: {
           company: string | null
@@ -5051,6 +5319,100 @@ export type Database = {
             columns: ["priority_id"]
             isOneToOne: false
             referencedRelation: "ticket_priorities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      external_training_records: {
+        Row: {
+          actual_cost: number | null
+          certificate_expiry_date: string | null
+          certificate_received: boolean | null
+          certificate_url: string | null
+          company_id: string
+          created_at: string
+          currency: string | null
+          description: string | null
+          duration_hours: number | null
+          employee_id: string
+          end_date: string | null
+          id: string
+          location: string | null
+          notes: string | null
+          provider_name: string | null
+          skills_acquired: string[] | null
+          start_date: string
+          training_name: string
+          training_request_id: string | null
+          training_type: string | null
+          updated_at: string
+        }
+        Insert: {
+          actual_cost?: number | null
+          certificate_expiry_date?: string | null
+          certificate_received?: boolean | null
+          certificate_url?: string | null
+          company_id: string
+          created_at?: string
+          currency?: string | null
+          description?: string | null
+          duration_hours?: number | null
+          employee_id: string
+          end_date?: string | null
+          id?: string
+          location?: string | null
+          notes?: string | null
+          provider_name?: string | null
+          skills_acquired?: string[] | null
+          start_date: string
+          training_name: string
+          training_request_id?: string | null
+          training_type?: string | null
+          updated_at?: string
+        }
+        Update: {
+          actual_cost?: number | null
+          certificate_expiry_date?: string | null
+          certificate_received?: boolean | null
+          certificate_url?: string | null
+          company_id?: string
+          created_at?: string
+          currency?: string | null
+          description?: string | null
+          duration_hours?: number | null
+          employee_id?: string
+          end_date?: string | null
+          id?: string
+          location?: string | null
+          notes?: string | null
+          provider_name?: string | null
+          skills_acquired?: string[] | null
+          start_date?: string
+          training_name?: string
+          training_request_id?: string | null
+          training_type?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "external_training_records_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "external_training_records_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "external_training_records_training_request_id_fkey"
+            columns: ["training_request_id"]
+            isOneToOne: false
+            referencedRelation: "training_requests"
             referencedColumns: ["id"]
           },
         ]
@@ -8223,6 +8585,152 @@ export type Database = {
             columns: ["position_id"]
             isOneToOne: false
             referencedRelation: "positions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      learning_path_courses: {
+        Row: {
+          course_id: string
+          created_at: string
+          id: string
+          is_required: boolean | null
+          learning_path_id: string
+          sequence_order: number
+        }
+        Insert: {
+          course_id: string
+          created_at?: string
+          id?: string
+          is_required?: boolean | null
+          learning_path_id: string
+          sequence_order?: number
+        }
+        Update: {
+          course_id?: string
+          created_at?: string
+          id?: string
+          is_required?: boolean | null
+          learning_path_id?: string
+          sequence_order?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "learning_path_courses_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "lms_courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "learning_path_courses_learning_path_id_fkey"
+            columns: ["learning_path_id"]
+            isOneToOne: false
+            referencedRelation: "learning_paths"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      learning_path_enrollments: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          employee_id: string
+          enrolled_at: string
+          id: string
+          learning_path_id: string
+          progress_percentage: number | null
+          status: string
+          target_completion_date: string | null
+          updated_at: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          employee_id: string
+          enrolled_at?: string
+          id?: string
+          learning_path_id: string
+          progress_percentage?: number | null
+          status?: string
+          target_completion_date?: string | null
+          updated_at?: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          employee_id?: string
+          enrolled_at?: string
+          id?: string
+          learning_path_id?: string
+          progress_percentage?: number | null
+          status?: string
+          target_completion_date?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "learning_path_enrollments_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "learning_path_enrollments_learning_path_id_fkey"
+            columns: ["learning_path_id"]
+            isOneToOne: false
+            referencedRelation: "learning_paths"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      learning_paths: {
+        Row: {
+          code: string
+          company_id: string
+          created_at: string
+          description: string | null
+          estimated_duration_hours: number | null
+          id: string
+          is_active: boolean
+          is_mandatory: boolean | null
+          name: string
+          target_audience: string | null
+          updated_at: string
+        }
+        Insert: {
+          code: string
+          company_id: string
+          created_at?: string
+          description?: string | null
+          estimated_duration_hours?: number | null
+          id?: string
+          is_active?: boolean
+          is_mandatory?: boolean | null
+          name: string
+          target_audience?: string | null
+          updated_at?: string
+        }
+        Update: {
+          code?: string
+          company_id?: string
+          created_at?: string
+          description?: string | null
+          estimated_duration_hours?: number | null
+          id?: string
+          is_active?: boolean
+          is_mandatory?: boolean | null
+          name?: string
+          target_audience?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "learning_paths_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
             referencedColumns: ["id"]
           },
         ]
@@ -11616,6 +12124,60 @@ export type Database = {
           },
         ]
       }
+      recertification_requirements: {
+        Row: {
+          certification_name: string
+          company_id: string
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean
+          reminder_days_before: number | null
+          renewal_course_id: string | null
+          updated_at: string
+          validity_months: number
+        }
+        Insert: {
+          certification_name: string
+          company_id: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          reminder_days_before?: number | null
+          renewal_course_id?: string | null
+          updated_at?: string
+          validity_months?: number
+        }
+        Update: {
+          certification_name?: string
+          company_id?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          reminder_days_before?: number | null
+          renewal_course_id?: string | null
+          updated_at?: string
+          validity_months?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "recertification_requirements_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "recertification_requirements_renewal_course_id_fkey"
+            columns: ["renewal_course_id"]
+            isOneToOne: false
+            referencedRelation: "lms_courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       recruitment_email_templates: {
         Row: {
           body: string
@@ -13436,6 +13998,509 @@ export type Database = {
             columns: ["requester_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      training_budgets: {
+        Row: {
+          allocated_amount: number
+          company_id: string
+          created_at: string
+          currency: string | null
+          department_id: string | null
+          fiscal_year: number
+          id: string
+          notes: string | null
+          spent_amount: number
+          updated_at: string
+        }
+        Insert: {
+          allocated_amount?: number
+          company_id: string
+          created_at?: string
+          currency?: string | null
+          department_id?: string | null
+          fiscal_year: number
+          id?: string
+          notes?: string | null
+          spent_amount?: number
+          updated_at?: string
+        }
+        Update: {
+          allocated_amount?: number
+          company_id?: string
+          created_at?: string
+          currency?: string | null
+          department_id?: string | null
+          fiscal_year?: number
+          id?: string
+          notes?: string | null
+          spent_amount?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "training_budgets_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "training_budgets_department_id_fkey"
+            columns: ["department_id"]
+            isOneToOne: false
+            referencedRelation: "departments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      training_evaluation_responses: {
+        Row: {
+          comments: string | null
+          course_id: string | null
+          created_at: string
+          employee_id: string
+          evaluation_id: string
+          external_training_id: string | null
+          id: string
+          overall_rating: number | null
+          responses: Json
+          submitted_at: string
+        }
+        Insert: {
+          comments?: string | null
+          course_id?: string | null
+          created_at?: string
+          employee_id: string
+          evaluation_id: string
+          external_training_id?: string | null
+          id?: string
+          overall_rating?: number | null
+          responses?: Json
+          submitted_at?: string
+        }
+        Update: {
+          comments?: string | null
+          course_id?: string | null
+          created_at?: string
+          employee_id?: string
+          evaluation_id?: string
+          external_training_id?: string | null
+          id?: string
+          overall_rating?: number | null
+          responses?: Json
+          submitted_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "training_evaluation_responses_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "lms_courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "training_evaluation_responses_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "training_evaluation_responses_evaluation_id_fkey"
+            columns: ["evaluation_id"]
+            isOneToOne: false
+            referencedRelation: "training_evaluations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "training_evaluation_responses_external_training_id_fkey"
+            columns: ["external_training_id"]
+            isOneToOne: false
+            referencedRelation: "external_training_records"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      training_evaluations: {
+        Row: {
+          company_id: string
+          created_at: string
+          description: string | null
+          evaluation_level: number
+          id: string
+          is_active: boolean
+          name: string
+          questions: Json
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          description?: string | null
+          evaluation_level?: number
+          id?: string
+          is_active?: boolean
+          name: string
+          questions?: Json
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          description?: string | null
+          evaluation_level?: number
+          id?: string
+          is_active?: boolean
+          name?: string
+          questions?: Json
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "training_evaluations_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      training_instructors: {
+        Row: {
+          bio: string | null
+          company_id: string
+          created_at: string
+          currency: string | null
+          email: string | null
+          employee_id: string | null
+          hourly_rate: number | null
+          id: string
+          instructor_type: string
+          is_active: boolean
+          name: string
+          phone: string | null
+          specializations: string[] | null
+          updated_at: string
+        }
+        Insert: {
+          bio?: string | null
+          company_id: string
+          created_at?: string
+          currency?: string | null
+          email?: string | null
+          employee_id?: string | null
+          hourly_rate?: number | null
+          id?: string
+          instructor_type?: string
+          is_active?: boolean
+          name: string
+          phone?: string | null
+          specializations?: string[] | null
+          updated_at?: string
+        }
+        Update: {
+          bio?: string | null
+          company_id?: string
+          created_at?: string
+          currency?: string | null
+          email?: string | null
+          employee_id?: string | null
+          hourly_rate?: number | null
+          id?: string
+          instructor_type?: string
+          is_active?: boolean
+          name?: string
+          phone?: string | null
+          specializations?: string[] | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "training_instructors_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "training_instructors_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      training_needs: {
+        Row: {
+          addressed_at: string | null
+          analysis_id: string | null
+          company_id: string
+          competency_id: string | null
+          created_at: string
+          department_id: string | null
+          employee_id: string | null
+          id: string
+          notes: string | null
+          priority: string
+          recommended_course_id: string | null
+          recommended_training: string | null
+          skill_gap_description: string
+          status: string
+          target_date: string | null
+          updated_at: string
+        }
+        Insert: {
+          addressed_at?: string | null
+          analysis_id?: string | null
+          company_id: string
+          competency_id?: string | null
+          created_at?: string
+          department_id?: string | null
+          employee_id?: string | null
+          id?: string
+          notes?: string | null
+          priority?: string
+          recommended_course_id?: string | null
+          recommended_training?: string | null
+          skill_gap_description: string
+          status?: string
+          target_date?: string | null
+          updated_at?: string
+        }
+        Update: {
+          addressed_at?: string | null
+          analysis_id?: string | null
+          company_id?: string
+          competency_id?: string | null
+          created_at?: string
+          department_id?: string | null
+          employee_id?: string | null
+          id?: string
+          notes?: string | null
+          priority?: string
+          recommended_course_id?: string | null
+          recommended_training?: string | null
+          skill_gap_description?: string
+          status?: string
+          target_date?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "training_needs_analysis_id_fkey"
+            columns: ["analysis_id"]
+            isOneToOne: false
+            referencedRelation: "training_needs_analysis"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "training_needs_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "training_needs_competency_id_fkey"
+            columns: ["competency_id"]
+            isOneToOne: false
+            referencedRelation: "competencies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "training_needs_department_id_fkey"
+            columns: ["department_id"]
+            isOneToOne: false
+            referencedRelation: "departments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "training_needs_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "training_needs_recommended_course_id_fkey"
+            columns: ["recommended_course_id"]
+            isOneToOne: false
+            referencedRelation: "lms_courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      training_needs_analysis: {
+        Row: {
+          analysis_date: string
+          analysis_type: string
+          company_id: string
+          created_at: string
+          created_by: string | null
+          department_id: string | null
+          description: string | null
+          findings: Json | null
+          id: string
+          name: string
+          recommendations: Json | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          analysis_date?: string
+          analysis_type?: string
+          company_id: string
+          created_at?: string
+          created_by?: string | null
+          department_id?: string | null
+          description?: string | null
+          findings?: Json | null
+          id?: string
+          name: string
+          recommendations?: Json | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          analysis_date?: string
+          analysis_type?: string
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          department_id?: string | null
+          description?: string | null
+          findings?: Json | null
+          id?: string
+          name?: string
+          recommendations?: Json | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "training_needs_analysis_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "training_needs_analysis_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "training_needs_analysis_department_id_fkey"
+            columns: ["department_id"]
+            isOneToOne: false
+            referencedRelation: "departments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      training_requests: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          business_justification: string | null
+          company_id: string
+          created_at: string
+          currency: string | null
+          description: string | null
+          employee_id: string
+          end_date: string | null
+          estimated_cost: number | null
+          id: string
+          location: string | null
+          provider_name: string | null
+          rejection_reason: string | null
+          request_number: string | null
+          request_type: string
+          start_date: string | null
+          status: string
+          training_name: string
+          updated_at: string
+          workflow_instance_id: string | null
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          business_justification?: string | null
+          company_id: string
+          created_at?: string
+          currency?: string | null
+          description?: string | null
+          employee_id: string
+          end_date?: string | null
+          estimated_cost?: number | null
+          id?: string
+          location?: string | null
+          provider_name?: string | null
+          rejection_reason?: string | null
+          request_number?: string | null
+          request_type?: string
+          start_date?: string | null
+          status?: string
+          training_name: string
+          updated_at?: string
+          workflow_instance_id?: string | null
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          business_justification?: string | null
+          company_id?: string
+          created_at?: string
+          currency?: string | null
+          description?: string | null
+          employee_id?: string
+          end_date?: string | null
+          estimated_cost?: number | null
+          id?: string
+          location?: string | null
+          provider_name?: string | null
+          rejection_reason?: string | null
+          request_number?: string | null
+          request_type?: string
+          start_date?: string | null
+          status?: string
+          training_name?: string
+          updated_at?: string
+          workflow_instance_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "training_requests_approved_by_fkey"
+            columns: ["approved_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "training_requests_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "training_requests_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "training_requests_workflow_instance_id_fkey"
+            columns: ["workflow_instance_id"]
+            isOneToOne: false
+            referencedRelation: "workflow_instances"
             referencedColumns: ["id"]
           },
         ]
