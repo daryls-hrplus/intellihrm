@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
-import { Settings, Mail, Eye, EyeOff, Save, Loader2, ShieldAlert, ArrowLeft, Send, CheckCircle, XCircle, Calendar, BarChart3, AlertTriangle } from "lucide-react";
+import { Settings, Mail, Eye, EyeOff, Save, Loader2, ShieldAlert, ArrowLeft, Send, CheckCircle, XCircle, Calendar, BarChart3, AlertTriangle, Video } from "lucide-react";
 import { NavLink } from "react-router-dom";
 
 interface SystemSetting {
@@ -298,6 +298,7 @@ export default function AdminSettingsPage() {
   const getSettingIcon = (key: string) => {
     if (key.includes("resend") || key.includes("email")) return Mail;
     if (key.includes("pii") || key.includes("alert")) return ShieldAlert;
+    if (key.includes("daily") || key.includes("video")) return Video;
     return Settings;
   };
 
@@ -313,6 +314,7 @@ export default function AdminSettingsPage() {
 
   const emailSettings = settings.filter((s) => s.key.includes("resend"));
   const alertSettings = settings.filter((s) => s.key.includes("pii") || s.key.includes("alert"));
+  const videoSettings = settings.filter((s) => s.key.includes("daily") || s.key.includes("video"));
 
   return (
     <AppLayout>
@@ -414,6 +416,83 @@ export default function AdminSettingsPage() {
             })}
           </CardContent>
         </Card>
+
+        {/* Video Chat Configuration */}
+        {videoSettings.length > 0 && (
+          <Card className="animate-slide-up" style={{ animationDelay: "25ms" }}>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Video className="h-5 w-5 text-primary" />
+                Video Chat Configuration
+              </CardTitle>
+              <CardDescription>
+                Configure Daily.co API for video chat functionality. Get your API key from{" "}
+                <a
+                  href="https://dashboard.daily.co/developers"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-primary hover:underline"
+                >
+                  dashboard.daily.co/developers
+                </a>
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {videoSettings.map((setting) => {
+                const Icon = getSettingIcon(setting.key);
+                return (
+                  <div key={setting.id} className="space-y-2">
+                    <Label htmlFor={setting.key} className="flex items-center gap-2">
+                      <Icon className="h-4 w-4 text-muted-foreground" />
+                      {formatSettingName(setting.key)}
+                    </Label>
+                    {setting.description && (
+                      <p className="text-xs text-muted-foreground">{setting.description}</p>
+                    )}
+                    <div className="flex gap-2">
+                      <div className="relative flex-1">
+                        <Input
+                          id={setting.key}
+                          type={setting.is_sensitive && !showSensitive[setting.key] ? "password" : "text"}
+                          value={editedValues[setting.key] || ""}
+                          onChange={(e) =>
+                            setEditedValues((prev) => ({ ...prev, [setting.key]: e.target.value }))
+                          }
+                          placeholder={setting.is_sensitive ? "Enter API key..." : "Enter value..."}
+                          className="pr-10"
+                        />
+                        {setting.is_sensitive && (
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 p-0"
+                            onClick={() =>
+                              setShowSensitive((prev) => ({ ...prev, [setting.key]: !prev[setting.key] }))
+                            }
+                          >
+                            {showSensitive[setting.key] ? (
+                              <EyeOff className="h-4 w-4" />
+                            ) : (
+                              <Eye className="h-4 w-4" />
+                            )}
+                          </Button>
+                        )}
+                      </div>
+                      <Button
+                        onClick={() => handleSave(setting.key)}
+                        disabled={isSaving}
+                        size="sm"
+                      >
+                        {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+                      </Button>
+                    </div>
+                  </div>
+                );
+              })}
+            </CardContent>
+          </Card>
+        )}
 
         {/* Test Alert */}
         <Card className="animate-slide-up" style={{ animationDelay: "50ms" }}>
