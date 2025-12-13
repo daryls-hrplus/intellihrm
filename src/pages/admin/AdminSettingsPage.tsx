@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
-import { Settings, Mail, Eye, EyeOff, Save, Loader2, ShieldAlert, ArrowLeft, Send, CheckCircle, XCircle, Calendar, BarChart3, AlertTriangle, Video } from "lucide-react";
+import { Settings, Mail, Eye, EyeOff, Save, Loader2, ShieldAlert, ArrowLeft, Send, CheckCircle, XCircle, Calendar, BarChart3, AlertTriangle, Video, FileText } from "lucide-react";
 import { NavLink } from "react-router-dom";
 
 interface SystemSetting {
@@ -299,6 +299,7 @@ export default function AdminSettingsPage() {
     if (key.includes("resend") || key.includes("email")) return Mail;
     if (key.includes("pii") || key.includes("alert")) return ShieldAlert;
     if (key.includes("daily") || key.includes("video")) return Video;
+    if (key.includes("copyright")) return FileText;
     return Settings;
   };
 
@@ -315,6 +316,7 @@ export default function AdminSettingsPage() {
   const emailSettings = settings.filter((s) => s.key.includes("resend"));
   const alertSettings = settings.filter((s) => s.key.includes("pii") || s.key.includes("alert"));
   const videoSettings = settings.filter((s) => s.key.includes("daily") || s.key.includes("video"));
+  const brandingSettings = settings.filter((s) => s.key.includes("copyright"));
 
   return (
     <AppLayout>
@@ -416,6 +418,57 @@ export default function AdminSettingsPage() {
             })}
           </CardContent>
         </Card>
+
+        {/* Branding Configuration */}
+        {brandingSettings.length > 0 && (
+          <Card className="animate-slide-up" style={{ animationDelay: "15ms" }}>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <FileText className="h-5 w-5 text-primary" />
+                Branding Configuration
+              </CardTitle>
+              <CardDescription>
+                Configure copyright notice and other branding elements displayed throughout the application
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {brandingSettings.map((setting) => {
+                const Icon = getSettingIcon(setting.key);
+                return (
+                  <div key={setting.id} className="space-y-2">
+                    <Label htmlFor={setting.key} className="flex items-center gap-2">
+                      <Icon className="h-4 w-4 text-muted-foreground" />
+                      {formatSettingName(setting.key)}
+                    </Label>
+                    {setting.description && (
+                      <p className="text-xs text-muted-foreground">{setting.description}</p>
+                    )}
+                    <div className="flex gap-2">
+                      <div className="relative flex-1">
+                        <Input
+                          id={setting.key}
+                          type="text"
+                          value={editedValues[setting.key] || ""}
+                          onChange={(e) =>
+                            setEditedValues((prev) => ({ ...prev, [setting.key]: e.target.value }))
+                          }
+                          placeholder="Enter copyright notice..."
+                        />
+                      </div>
+                      <Button
+                        onClick={() => handleSave(setting.key)}
+                        disabled={isSaving}
+                        size="sm"
+                      >
+                        {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+                      </Button>
+                    </div>
+                  </div>
+                );
+              })}
+            </CardContent>
+          </Card>
+        )}
 
         {/* Video Chat Configuration */}
         {videoSettings.length > 0 && (
