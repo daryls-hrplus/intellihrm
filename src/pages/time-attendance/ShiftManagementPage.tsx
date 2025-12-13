@@ -905,14 +905,14 @@ export default function ShiftManagementPage() {
                       <div className="space-y-2">
                         <Label>Apply to Shift (optional)</Label>
                         <Select 
-                          value={roundingForm.shift_id} 
-                          onValueChange={(v) => setRoundingForm({...roundingForm, shift_id: v})}
+                          value={roundingForm.shift_id || "__all__"} 
+                          onValueChange={(v) => setRoundingForm({...roundingForm, shift_id: v === "__all__" ? "" : v})}
                         >
                           <SelectTrigger>
                             <SelectValue placeholder="All shifts" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="">All shifts</SelectItem>
+                            <SelectItem value="__all__">All shifts</SelectItem>
                             {shifts.map((s) => (
                               <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
                             ))}
@@ -1111,14 +1111,14 @@ export default function ShiftManagementPage() {
                       <div className="space-y-2">
                         <Label>Apply to Shift (optional)</Label>
                         <Select 
-                          value={paymentForm.shift_id} 
-                          onValueChange={(v) => setPaymentForm({...paymentForm, shift_id: v})}
+                          value={paymentForm.shift_id || "__all__"} 
+                          onValueChange={(v) => setPaymentForm({...paymentForm, shift_id: v === "__all__" ? "" : v})}
                         >
                           <SelectTrigger>
                             <SelectValue placeholder="All shifts" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="">All shifts</SelectItem>
+                            <SelectItem value="__all__">All shifts</SelectItem>
                             {shifts.map((s) => (
                               <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
                             ))}
@@ -1372,14 +1372,14 @@ export default function ShiftManagementPage() {
                       <div className="space-y-2">
                         <Label>Rotation Pattern</Label>
                         <Select 
-                          value={assignmentForm.rotation_pattern} 
-                          onValueChange={(v) => setAssignmentForm({...assignmentForm, rotation_pattern: v})}
+                          value={assignmentForm.rotation_pattern || "__none__"} 
+                          onValueChange={(v) => setAssignmentForm({...assignmentForm, rotation_pattern: v === "__none__" ? "" : v})}
                         >
                           <SelectTrigger>
                             <SelectValue placeholder="No rotation" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="">No rotation</SelectItem>
+                            <SelectItem value="__none__">No rotation</SelectItem>
                             <SelectItem value="4on-3off">4 on / 3 off</SelectItem>
                             <SelectItem value="5on-2off">5 on / 2 off</SelectItem>
                             <SelectItem value="weekly-rotate">Weekly Rotation</SelectItem>
