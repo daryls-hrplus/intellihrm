@@ -2723,6 +2723,83 @@ export type Database = {
           },
         ]
       }
+      continuous_feedback: {
+        Row: {
+          acknowledged_at: string | null
+          company_id: string
+          content: string
+          created_at: string
+          feedback_type: string
+          from_user_id: string
+          id: string
+          is_anonymous: boolean | null
+          is_private: boolean | null
+          related_goal_id: string | null
+          subject: string | null
+          tags: Json | null
+          to_user_id: string
+        }
+        Insert: {
+          acknowledged_at?: string | null
+          company_id: string
+          content: string
+          created_at?: string
+          feedback_type: string
+          from_user_id: string
+          id?: string
+          is_anonymous?: boolean | null
+          is_private?: boolean | null
+          related_goal_id?: string | null
+          subject?: string | null
+          tags?: Json | null
+          to_user_id: string
+        }
+        Update: {
+          acknowledged_at?: string | null
+          company_id?: string
+          content?: string
+          created_at?: string
+          feedback_type?: string
+          from_user_id?: string
+          id?: string
+          is_anonymous?: boolean | null
+          is_private?: boolean | null
+          related_goal_id?: string | null
+          subject?: string | null
+          tags?: Json | null
+          to_user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "continuous_feedback_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "continuous_feedback_from_user_id_fkey"
+            columns: ["from_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "continuous_feedback_related_goal_id_fkey"
+            columns: ["related_goal_id"]
+            isOneToOne: false
+            referencedRelation: "performance_goals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "continuous_feedback_to_user_id_fkey"
+            columns: ["to_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       country_holidays: {
         Row: {
           country: string
@@ -11013,6 +11090,82 @@ export type Database = {
           },
         ]
       }
+      one_on_one_meetings: {
+        Row: {
+          action_items: Json | null
+          agenda: string | null
+          company_id: string
+          created_at: string
+          discussion_notes: string | null
+          duration_minutes: number | null
+          employee_id: string
+          employee_mood: string | null
+          id: string
+          is_completed: boolean | null
+          manager_id: string
+          meeting_date: string
+          next_meeting_date: string | null
+          topics_discussed: Json | null
+          updated_at: string
+        }
+        Insert: {
+          action_items?: Json | null
+          agenda?: string | null
+          company_id: string
+          created_at?: string
+          discussion_notes?: string | null
+          duration_minutes?: number | null
+          employee_id: string
+          employee_mood?: string | null
+          id?: string
+          is_completed?: boolean | null
+          manager_id: string
+          meeting_date: string
+          next_meeting_date?: string | null
+          topics_discussed?: Json | null
+          updated_at?: string
+        }
+        Update: {
+          action_items?: Json | null
+          agenda?: string | null
+          company_id?: string
+          created_at?: string
+          discussion_notes?: string | null
+          duration_minutes?: number | null
+          employee_id?: string
+          employee_mood?: string | null
+          id?: string
+          is_completed?: boolean | null
+          manager_id?: string
+          meeting_date?: string
+          next_meeting_date?: string | null
+          topics_discussed?: Json | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "one_on_one_meetings_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "one_on_one_meetings_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "one_on_one_meetings_manager_id_fkey"
+            columns: ["manager_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pay_elements: {
         Row: {
           code: string
@@ -11288,6 +11441,111 @@ export type Database = {
           },
         ]
       }
+      performance_improvement_plans: {
+        Row: {
+          company_id: string
+          consequences: string | null
+          created_at: string
+          created_by: string | null
+          employee_id: string
+          end_date: string
+          final_outcome: string | null
+          hr_representative_id: string | null
+          id: string
+          improvement_areas: Json | null
+          manager_id: string | null
+          notes: string | null
+          outcome_date: string | null
+          reason: string
+          start_date: string
+          status: string
+          success_criteria: string | null
+          support_provided: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          consequences?: string | null
+          created_at?: string
+          created_by?: string | null
+          employee_id: string
+          end_date: string
+          final_outcome?: string | null
+          hr_representative_id?: string | null
+          id?: string
+          improvement_areas?: Json | null
+          manager_id?: string | null
+          notes?: string | null
+          outcome_date?: string | null
+          reason: string
+          start_date: string
+          status?: string
+          success_criteria?: string | null
+          support_provided?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          consequences?: string | null
+          created_at?: string
+          created_by?: string | null
+          employee_id?: string
+          end_date?: string
+          final_outcome?: string | null
+          hr_representative_id?: string | null
+          id?: string
+          improvement_areas?: Json | null
+          manager_id?: string | null
+          notes?: string | null
+          outcome_date?: string | null
+          reason?: string
+          start_date?: string
+          status?: string
+          success_criteria?: string | null
+          support_provided?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "performance_improvement_plans_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "performance_improvement_plans_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "performance_improvement_plans_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "performance_improvement_plans_hr_representative_id_fkey"
+            columns: ["hr_representative_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "performance_improvement_plans_manager_id_fkey"
+            columns: ["manager_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pii_access_alerts: {
         Row: {
           access_count: number
@@ -11320,6 +11578,59 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      pip_milestones: {
+        Row: {
+          completion_date: string | null
+          created_at: string
+          description: string | null
+          employee_notes: string | null
+          id: string
+          manager_notes: string | null
+          pip_id: string
+          rating: number | null
+          status: string
+          target_date: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          completion_date?: string | null
+          created_at?: string
+          description?: string | null
+          employee_notes?: string | null
+          id?: string
+          manager_notes?: string | null
+          pip_id: string
+          rating?: number | null
+          status?: string
+          target_date: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          completion_date?: string | null
+          created_at?: string
+          description?: string | null
+          employee_notes?: string | null
+          id?: string
+          manager_notes?: string | null
+          pip_id?: string
+          rating?: number | null
+          status?: string
+          target_date?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pip_milestones_pip_id_fkey"
+            columns: ["pip_id"]
+            isOneToOne: false
+            referencedRelation: "performance_improvement_plans"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       policy_categories: {
         Row: {
@@ -12174,6 +12485,140 @@ export type Database = {
             columns: ["renewal_course_id"]
             isOneToOne: false
             referencedRelation: "lms_courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      recognition_awards: {
+        Row: {
+          approved_by: string | null
+          award_type: string
+          celebrated_at: string | null
+          company_id: string
+          company_value: string | null
+          created_at: string
+          currency: string | null
+          description: string
+          id: string
+          is_public: boolean | null
+          monetary_value: number | null
+          nominator_id: string
+          points_awarded: number | null
+          recipient_id: string
+          rejection_reason: string | null
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          approved_by?: string | null
+          award_type: string
+          celebrated_at?: string | null
+          company_id: string
+          company_value?: string | null
+          created_at?: string
+          currency?: string | null
+          description: string
+          id?: string
+          is_public?: boolean | null
+          monetary_value?: number | null
+          nominator_id: string
+          points_awarded?: number | null
+          recipient_id: string
+          rejection_reason?: string | null
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          approved_by?: string | null
+          award_type?: string
+          celebrated_at?: string | null
+          company_id?: string
+          company_value?: string | null
+          created_at?: string
+          currency?: string | null
+          description?: string
+          id?: string
+          is_public?: boolean | null
+          monetary_value?: number | null
+          nominator_id?: string
+          points_awarded?: number | null
+          recipient_id?: string
+          rejection_reason?: string | null
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "recognition_awards_approved_by_fkey"
+            columns: ["approved_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "recognition_awards_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "recognition_awards_nominator_id_fkey"
+            columns: ["nominator_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "recognition_awards_recipient_id_fkey"
+            columns: ["recipient_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      recognition_reactions: {
+        Row: {
+          comment: string | null
+          created_at: string
+          id: string
+          reaction_type: string
+          recognition_id: string
+          user_id: string
+        }
+        Insert: {
+          comment?: string | null
+          created_at?: string
+          id?: string
+          reaction_type: string
+          recognition_id: string
+          user_id: string
+        }
+        Update: {
+          comment?: string | null
+          created_at?: string
+          id?: string
+          reaction_type?: string
+          recognition_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "recognition_reactions_recognition_id_fkey"
+            columns: ["recognition_id"]
+            isOneToOne: false
+            referencedRelation: "recognition_awards"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "recognition_reactions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
