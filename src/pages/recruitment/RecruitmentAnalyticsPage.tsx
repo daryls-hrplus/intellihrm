@@ -1,0 +1,147 @@
+import { useState, useEffect } from "react";
+import { AppLayout } from "@/components/layout/AppLayout";
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
+import { Building2, Loader2 } from "lucide-react";
+import { RecruitmentAnalytics } from "@/components/recruitment/RecruitmentAnalytics";
+
+interface Company {
+  id: string;
+  name: string;
+  code: string;
+}
+
+export default function RecruitmentAnalyticsPage() {
+  const { company, isAdmin, hasRole } = useAuth();
+  const isAdminOrHR = isAdmin || hasRole("hr_manager");
+
+  const [companies, setCompanies] = useState<Company[]>([]);
+  const [selectedCompanyId, setSelectedCompanyId] = useState<string>(company?.id || "");
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Data states
+  const [requisitions, setRequisitions] = useState<any[]>([]);
+  const [candidates, setCandidates] = useState<any[]>([]);
+  const [applications, setApplications] = useState<any[]>([]);
+
+  // Fetch companies
+  useEffect(() => {
+    if (isAdminOrHR) {
+      supabase
+        .from("companies")
+        .select("id, name, code")
+        .eq("is_active", true)
+        .order("name")
+        .then(({ data }) => {
+          if (data) setCompanies(data);
+        });
+    }
+  }, [isAdminOrHR]);
+
+  // Set default company
+  useEffect(() => {
+    if (company?.id && !selectedCompanyId) {
+      setSelectedCompanyId(company.id);
+    }
+  }, [company?.id, selectedCompanyId]);
+
+  // Fetch analytics data
+  useEffect(() => {
+    if (selectedCompanyId) {
+      fetchAnalyticsData();
+    }
+  }, [selectedCompanyId]);
+
+  const fetchAnalyticsData = async () => {
+    setIsLoading(true);
+    
+    try {
+      // Fetch requisitions
+      const { data: reqData } = await supabase
+        .from("job_requisitions")
+        .select("*")
+        .eq("company_id", selectedCompanyId);
+      
+      setRequisitions(reqData || []);
+
+      // Fetch candidates
+      const { data: candData } = await supabase
+        .from("candidates")
+        .select("*")
+        .eq("company_id", selectedCompanyId);
+      
+      setCandidates(candData || []);
+
+      // Fetch applications with requisition info
+      const requisitionIds = (reqData || []).map(r => r.id);
+      
+      if (requisitionIds.length > 0) {
+        const { data: appData } = await supabase
+          .from("applications")
+          .select("*")
+          .in("requisition_id", requisitionIds);
+        
+        setApplications(appData || []);
+      } else {
+        setApplications([]);
+      }
+
+    } catch (error) {
+      console.error("Error fetching analytics:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <AppLayout>
+      <div className="space-y-6">
+        <Breadcrumbs items={[
+          { label: "Recruitment", href: "/recruitment" },
+          { label: "Analytics" }
+        ]} />
+
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold">Recruitment Analytics</h1>
+            <p className="text-muted-foreground">Comprehensive hiring pipeline and trends analysis</p>
+          </div>
+          <div className="flex items-center gap-2">
+            {isAdminOrHR && companies.length > 1 && (
+              <Select value={selectedCompanyId} onValueChange={setSelectedCompanyId}>
+                <SelectTrigger className="w-[180px]">
+                  <Building2 className="mr-2 h-4 w-4" />
+                  <SelectValue placeholder="Company" />
+                </SelectTrigger>
+                <SelectContent>
+                  {companies.map((c) => (
+                    <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
+          </div>
+        </div>
+
+        {!selectedCompanyId ? (
+          <div className="flex items-center justify-center py-20 text-muted-foreground">
+            Please select a company to view analytics
+          </div>
+        ) : isLoading ? (
+          <div className="flex items-center justify-center py-20">
+            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+          </div>
+        ) : (
+          <RecruitmentAnalytics
+            requisitions={requisitions}
+            candidates={candidates}
+            applications={applications}
+            isLoading={isLoading}
+          />
+        )}
+      </div>
+    </AppLayout>
+  );
+}
