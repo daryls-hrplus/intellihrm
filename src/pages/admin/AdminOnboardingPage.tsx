@@ -215,7 +215,7 @@ export default function AdminOnboardingPage() {
 
     const data = {
       ...templateForm,
-      job_id: templateForm.job_id || null,
+      job_id: templateForm.job_id && templateForm.job_id !== 'none' ? templateForm.job_id : null,
       end_date: templateForm.end_date || null,
     };
 
@@ -286,8 +286,8 @@ export default function AdminOnboardingPage() {
 
     const data = {
       ...instanceForm,
-      buddy_id: instanceForm.buddy_id || null,
-      manager_id: instanceForm.manager_id || null,
+      buddy_id: instanceForm.buddy_id && instanceForm.buddy_id !== 'none' ? instanceForm.buddy_id : null,
+      manager_id: instanceForm.manager_id && instanceForm.manager_id !== 'none' ? instanceForm.manager_id : null,
       target_completion_date: instanceForm.target_completion_date || null,
       notes: instanceForm.notes || null,
     };
@@ -799,7 +799,7 @@ export default function AdminOnboardingPage() {
                     <SelectValue placeholder="Select job (optional)" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">No specific job</SelectItem>
+                    <SelectItem value="none">No specific job</SelectItem>
                     {jobs.map(j => (
                       <SelectItem key={j.id} value={j.id}>{j.title}</SelectItem>
                     ))}
@@ -1017,7 +1017,7 @@ export default function AdminOnboardingPage() {
                     <SelectValue placeholder="Select manager (optional)" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">No manager assigned</SelectItem>
+                    <SelectItem value="none">No manager assigned</SelectItem>
                     {employees.map(e => (
                       <SelectItem key={e.id} value={e.id}>{e.full_name}</SelectItem>
                     ))}
@@ -1034,7 +1034,7 @@ export default function AdminOnboardingPage() {
                     <SelectValue placeholder="Select buddy (optional)" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">No buddy assigned</SelectItem>
+                    <SelectItem value="none">No buddy assigned</SelectItem>
                     {employees.map(e => (
                       <SelectItem key={e.id} value={e.id}>{e.full_name}</SelectItem>
                     ))}
