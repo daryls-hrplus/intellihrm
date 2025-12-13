@@ -1,9 +1,18 @@
+import { useState, useEffect } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { NavLink } from "react-router-dom";
 import { ModuleReportsButton } from "@/components/reports/ModuleReportsButton";
 import { ModuleBIButton } from "@/components/bi/ModuleBIButton";
 import { useLeaveManagement } from "@/hooks/useLeaveManagement";
 import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Calendar,
   CalendarPlus,
@@ -15,7 +24,14 @@ import {
   TrendingUp,
   RotateCcw,
   PartyPopper,
+  Building2,
 } from "lucide-react";
+
+interface Company {
+  id: string;
+  name: string;
+  code: string;
+}
 
 const leaveModules = [
   {
@@ -65,8 +81,8 @@ const leaveModules = [
     adminOnly: true,
   },
   {
-    title: "Company Holidays",
-    description: "Manage public holidays",
+    title: "Holidays Calendar",
+    description: "Manage country and company holidays",
     href: "/leave/holidays",
     icon: PartyPopper,
     color: "bg-destructive/10 text-destructive",
@@ -75,11 +91,36 @@ const leaveModules = [
 ];
 
 export default function LeaveDashboardPage() {
-  const { company } = useAuth();
-  const { leaveBalances, allLeaveRequests, loadingBalances, loadingAllRequests } = useLeaveManagement(company?.id);
-  const { isAdmin, hasRole } = useAuth();
-  
+  const { company, isAdmin, hasRole } = useAuth();
   const isAdminOrHR = isAdmin || hasRole("hr_manager");
+  
+  // Company filter state
+  const [companies, setCompanies] = useState<Company[]>([]);
+  const [selectedCompanyId, setSelectedCompanyId] = useState<string>(company?.id || "");
+  
+  // Fetch companies for filter
+  useEffect(() => {
+    if (isAdminOrHR) {
+      supabase
+        .from("companies")
+        .select("id, name, code")
+        .eq("is_active", true)
+        .order("name")
+        .then(({ data }) => {
+          if (data) setCompanies(data);
+        });
+    }
+  }, [isAdminOrHR]);
+
+  // Set default company when loaded
+  useEffect(() => {
+    if (company?.id && !selectedCompanyId) {
+      setSelectedCompanyId(company.id);
+    }
+  }, [company?.id, selectedCompanyId]);
+
+  const { leaveBalances, allLeaveRequests, loadingBalances, loadingAllRequests } = useLeaveManagement(selectedCompanyId || company?.id);
+  
   const pendingCount = allLeaveRequests.filter(r => r.status === "pending").length;
   const approvedThisYear = allLeaveRequests.filter(r => r.status === "approved").length;
   const totalBalance = leaveBalances.reduce((sum, b) => sum + (b.current_balance || 0), 0);
@@ -112,6 +153,21 @@ export default function LeaveDashboardPage() {
               </div>
             </div>
             <div className="flex items-center gap-2">
+              {isAdminOrHR && companies.length > 1 && (
+                <Select value={selectedCompanyId} onValueChange={setSelectedCompanyId}>
+                  <SelectTrigger className="w-[200px]">
+                    <Building2 className="mr-2 h-4 w-4" />
+                    <SelectValue placeholder="Select company" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {companies.map((c) => (
+                      <SelectItem key={c.id} value={c.id}>
+                        {c.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
               <ModuleBIButton module="leave" />
               <ModuleReportsButton module="leave" />
             </div>
