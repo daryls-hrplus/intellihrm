@@ -12,9 +12,12 @@ import { KeyPositionsTab } from "@/components/succession/KeyPositionsTab";
 import { SuccessionAnalytics } from "@/components/succession/SuccessionAnalytics";
 import { CareerDevelopmentTab } from "@/components/succession/CareerDevelopmentTab";
 import { CareerPathsTab } from "@/components/succession/CareerPathsTab";
+import { MentorshipTab } from "@/components/succession/MentorshipTab";
+import { FlightRiskTab } from "@/components/succession/FlightRiskTab";
+import { BenchStrengthTab } from "@/components/succession/BenchStrengthTab";
 import { useSuccession, NineBoxAssessment } from "@/hooks/useSuccession";
 import { supabase } from "@/integrations/supabase/client";
-import { TrendingUp, Grid3X3, Users, Target, AlertTriangle, BarChart3, Plus, BookOpen, Route } from "lucide-react";
+import { TrendingUp, Grid3X3, Users, Target, AlertTriangle, BarChart3, Plus, BookOpen, Route, UserCheck, TrendingDown, Layers } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 
@@ -212,6 +215,18 @@ export default function SuccessionDashboardPage() {
                 <Route className="h-4 w-4" />
                 Career Paths
               </TabsTrigger>
+              <TabsTrigger value="mentorship" className="flex items-center gap-2">
+                <UserCheck className="h-4 w-4" />
+                Mentorship
+              </TabsTrigger>
+              <TabsTrigger value="flight-risk" className="flex items-center gap-2">
+                <TrendingDown className="h-4 w-4" />
+                Flight Risk
+              </TabsTrigger>
+              <TabsTrigger value="bench-strength" className="flex items-center gap-2">
+                <Layers className="h-4 w-4" />
+                Bench Strength
+              </TabsTrigger>
               <TabsTrigger value="analytics" className="flex items-center gap-2">
                 <BarChart3 className="h-4 w-4" />
                 Analytics
@@ -249,6 +264,18 @@ export default function SuccessionDashboardPage() {
 
             <TabsContent value="career-paths">
               <CareerPathsTab companyId={selectedCompanyId} />
+            </TabsContent>
+
+            <TabsContent value="mentorship">
+              <MentorshipTab companyId={selectedCompanyId} />
+            </TabsContent>
+
+            <TabsContent value="flight-risk">
+              <FlightRiskTab companyId={selectedCompanyId} />
+            </TabsContent>
+
+            <TabsContent value="bench-strength">
+              <BenchStrengthTab companyId={selectedCompanyId} />
             </TabsContent>
 
             <TabsContent value="analytics">
