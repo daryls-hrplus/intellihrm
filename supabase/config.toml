@@ -53,3 +53,12 @@ verify_jwt = false
 
 [functions.send-workflow-notification]
 verify_jwt = false
+
+[functions.scheduled-leave-accrual]
+verify_jwt = false
+
+[functions.generate-report]
+verify_jwt = false
+
+[functions.report-ai-assistant]
+verify_jwt = false

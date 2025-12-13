@@ -4873,6 +4873,71 @@ export type Database = {
           },
         ]
       }
+      leave_accrual_logs: {
+        Row: {
+          accrual_amount: number
+          accrual_date: string
+          accrual_frequency: string
+          company_id: string
+          created_at: string
+          employee_id: string
+          id: string
+          leave_type_id: string
+          rule_id: string | null
+        }
+        Insert: {
+          accrual_amount: number
+          accrual_date?: string
+          accrual_frequency: string
+          company_id: string
+          created_at?: string
+          employee_id: string
+          id?: string
+          leave_type_id: string
+          rule_id?: string | null
+        }
+        Update: {
+          accrual_amount?: number
+          accrual_date?: string
+          accrual_frequency?: string
+          company_id?: string
+          created_at?: string
+          employee_id?: string
+          id?: string
+          leave_type_id?: string
+          rule_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "leave_accrual_logs_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leave_accrual_logs_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leave_accrual_logs_leave_type_id_fkey"
+            columns: ["leave_type_id"]
+            isOneToOne: false
+            referencedRelation: "leave_types"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leave_accrual_logs_rule_id_fkey"
+            columns: ["rule_id"]
+            isOneToOne: false
+            referencedRelation: "leave_accrual_rules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       leave_accrual_rules: {
         Row: {
           accrual_amount: number
@@ -9392,6 +9457,16 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      accrue_leave_balance: {
+        Args: {
+          p_accrual_amount: number
+          p_company_id: string
+          p_employee_id: string
+          p_leave_type_id: string
+          p_year: number
+        }
+        Returns: undefined
+      }
       can_act_on_workflow: {
         Args: { p_instance_id: string; p_user_id: string }
         Returns: boolean
