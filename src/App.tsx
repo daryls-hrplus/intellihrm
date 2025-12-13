@@ -90,6 +90,16 @@ import CompensationDashboardPage from "./pages/compensation/CompensationDashboar
 import PayElementsPage from "./pages/compensation/PayElementsPage";
 import SalaryGradesPage from "./pages/compensation/SalaryGradesPage";
 import PositionCompensationPage from "./pages/compensation/PositionCompensationPage";
+import CompensationHistoryPage from "./pages/compensation/CompensationHistoryPage";
+import MeritCyclesPage from "./pages/compensation/MeritCyclesPage";
+import BonusManagementPage from "./pages/compensation/BonusManagementPage";
+import MarketBenchmarkingPage from "./pages/compensation/MarketBenchmarkingPage";
+import PayEquityPage from "./pages/compensation/PayEquityPage";
+import TotalRewardsPage from "./pages/compensation/TotalRewardsPage";
+import CompensationBudgetsPage from "./pages/compensation/CompensationBudgetsPage";
+import EquityManagementPage from "./pages/compensation/EquityManagementPage";
+import CompaRatioPage from "./pages/compensation/CompaRatioPage";
+import CompensationAnalyticsPage from "./pages/compensation/CompensationAnalyticsPage";
 
 // Benefits pages
 import BenefitsDashboardPage from "./pages/benefits/BenefitsDashboardPage";
@@ -987,6 +997,86 @@ const App = () => (
               element={
                 <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
                   <PositionCompensationPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/compensation/history"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
+                  <CompensationHistoryPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/compensation/merit-cycles"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
+                  <MeritCyclesPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/compensation/bonus"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
+                  <BonusManagementPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/compensation/market-benchmarking"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
+                  <MarketBenchmarkingPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/compensation/pay-equity"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
+                  <PayEquityPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/compensation/total-rewards"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
+                  <TotalRewardsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/compensation/budgets"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
+                  <CompensationBudgetsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/compensation/equity"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
+                  <EquityManagementPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/compensation/compa-ratio"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
+                  <CompaRatioPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/compensation/analytics"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
+                  <CompensationAnalyticsPage />
                 </ProtectedRoute>
               }
             />
