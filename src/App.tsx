@@ -68,6 +68,13 @@ import AppraisalsPage from "./pages/performance/AppraisalsPage";
 
 // Leave pages
 import LeaveDashboardPage from "./pages/leave/LeaveDashboardPage";
+import LeaveTypesPage from "./pages/leave/LeaveTypesPage";
+import LeaveAccrualRulesPage from "./pages/leave/LeaveAccrualRulesPage";
+import LeaveRolloverRulesPage from "./pages/leave/LeaveRolloverRulesPage";
+import MyLeavePage from "./pages/leave/MyLeavePage";
+import ApplyLeavePage from "./pages/leave/ApplyLeavePage";
+import LeaveApprovalsPage from "./pages/leave/LeaveApprovalsPage";
+import LeaveHolidaysPage from "./pages/leave/LeaveHolidaysPage";
 
 // Compensation pages
 import CompensationDashboardPage from "./pages/compensation/CompensationDashboardPage";
@@ -635,6 +642,62 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <LeaveDashboardPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/leave/my-leave"
+              element={
+                <ProtectedRoute>
+                  <MyLeavePage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/leave/apply"
+              element={
+                <ProtectedRoute>
+                  <ApplyLeavePage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/leave/approvals"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
+                  <LeaveApprovalsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/leave/types"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
+                  <LeaveTypesPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/leave/accrual-rules"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
+                  <LeaveAccrualRulesPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/leave/rollover-rules"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
+                  <LeaveRolloverRulesPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/leave/holidays"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
+                  <LeaveHolidaysPage />
                 </ProtectedRoute>
               }
             />
