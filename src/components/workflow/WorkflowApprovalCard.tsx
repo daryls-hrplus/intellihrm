@@ -9,6 +9,7 @@ import { WorkflowInstance, WorkflowStep, useWorkflow } from "@/hooks/useWorkflow
 import { WorkflowStatusBadge } from "./WorkflowStatusBadge";
 import { WorkflowActionDialog } from "./WorkflowActionDialog";
 import { WorkflowTimeline } from "./WorkflowTimeline";
+import { LeaveApprovalContext } from "@/components/leave/LeaveApprovalContext";
 import type { WorkflowAction, WorkflowStepAction } from "@/hooks/useWorkflow";
 
 interface WorkflowApprovalCardProps {
@@ -72,6 +73,10 @@ export function WorkflowApprovalCard({
   };
 
   const isActionable = ["pending", "in_progress", "escalated", "returned"].includes(instance.status);
+  
+  // Check if this is a leave request workflow
+  const isLeaveRequest = instance.category === "leave_request";
+  const leaveMetadata = instance.metadata as Record<string, unknown> | null;
 
   return (
     <>
@@ -144,6 +149,19 @@ export function WorkflowApprovalCard({
                 ))}
               </div>
             </div>
+          )}
+
+          {/* Leave Request Context */}
+          {isLeaveRequest && canAct && leaveMetadata && showDetails && (
+            <LeaveApprovalContext
+              employeeId={leaveMetadata.employee_id as string}
+              leaveTypeId={leaveMetadata.leave_type_id as string}
+              startDate={leaveMetadata.start_date as string}
+              endDate={leaveMetadata.end_date as string}
+              duration={leaveMetadata.duration as number}
+              departmentId={leaveMetadata.department_id as string | undefined}
+              companyId={leaveMetadata.company_id as string | undefined}
+            />
           )}
 
           {/* Action Buttons */}
