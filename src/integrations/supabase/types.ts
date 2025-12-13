@@ -4835,6 +4835,7 @@ export type Database = {
           id: string
           notes: string | null
           pay_frequency: string
+          pay_group_id: string | null
           pay_group_name: string
           payment_method: string
           start_date: string
@@ -4847,6 +4848,7 @@ export type Database = {
           id?: string
           notes?: string | null
           pay_frequency: string
+          pay_group_id?: string | null
           pay_group_name: string
           payment_method?: string
           start_date?: string
@@ -4859,6 +4861,7 @@ export type Database = {
           id?: string
           notes?: string | null
           pay_frequency?: string
+          pay_group_id?: string | null
           pay_group_name?: string
           payment_method?: string
           start_date?: string
@@ -4870,6 +4873,13 @@ export type Database = {
             columns: ["employee_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_pay_groups_pay_group_id_fkey"
+            columns: ["pay_group_id"]
+            isOneToOne: false
+            referencedRelation: "pay_groups"
             referencedColumns: ["id"]
           },
         ]
@@ -14327,6 +14337,56 @@ export type Database = {
           },
         ]
       }
+      pay_groups: {
+        Row: {
+          code: string
+          company_id: string
+          created_at: string
+          description: string | null
+          end_date: string | null
+          id: string
+          is_active: boolean
+          name: string
+          pay_frequency: string
+          start_date: string
+          updated_at: string
+        }
+        Insert: {
+          code: string
+          company_id: string
+          created_at?: string
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          pay_frequency: string
+          start_date?: string
+          updated_at?: string
+        }
+        Update: {
+          code?: string
+          company_id?: string
+          created_at?: string
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          pay_frequency?: string
+          start_date?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pay_groups_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pay_period_schedules: {
         Row: {
           code: string
@@ -14341,6 +14401,7 @@ export type Database = {
           name: string
           pay_day_of_month: number | null
           pay_day_of_week: number | null
+          pay_group_id: string | null
           second_pay_day_of_month: number | null
           start_date: string
           updated_at: string
@@ -14358,6 +14419,7 @@ export type Database = {
           name: string
           pay_day_of_month?: number | null
           pay_day_of_week?: number | null
+          pay_group_id?: string | null
           second_pay_day_of_month?: number | null
           start_date?: string
           updated_at?: string
@@ -14375,6 +14437,7 @@ export type Database = {
           name?: string
           pay_day_of_month?: number | null
           pay_day_of_week?: number | null
+          pay_group_id?: string | null
           second_pay_day_of_month?: number | null
           start_date?: string
           updated_at?: string
@@ -14385,6 +14448,13 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pay_period_schedules_pay_group_id_fkey"
+            columns: ["pay_group_id"]
+            isOneToOne: false
+            referencedRelation: "pay_groups"
             referencedColumns: ["id"]
           },
         ]
@@ -14782,6 +14852,7 @@ export type Database = {
           notes: string | null
           paid_at: string | null
           paid_by: string | null
+          pay_group_id: string | null
           pay_period_id: string
           run_number: string
           run_type: string
@@ -14809,6 +14880,7 @@ export type Database = {
           notes?: string | null
           paid_at?: string | null
           paid_by?: string | null
+          pay_group_id?: string | null
           pay_period_id: string
           run_number: string
           run_type?: string
@@ -14836,6 +14908,7 @@ export type Database = {
           notes?: string | null
           paid_at?: string | null
           paid_by?: string | null
+          pay_group_id?: string | null
           pay_period_id?: string
           run_number?: string
           run_type?: string
@@ -14883,6 +14956,13 @@ export type Database = {
             columns: ["paid_by"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payroll_runs_pay_group_id_fkey"
+            columns: ["pay_group_id"]
+            isOneToOne: false
+            referencedRelation: "pay_groups"
             referencedColumns: ["id"]
           },
           {

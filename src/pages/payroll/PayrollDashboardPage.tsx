@@ -19,32 +19,39 @@ import { useNavigate } from "react-router-dom";
 
 const features = [
   {
+    title: "Pay Groups",
+    description: "Manage pay groups and payment frequencies",
+    icon: Users,
+    href: "/payroll/pay-groups",
+    color: "bg-primary/10 text-primary",
+  },
+  {
     title: "Payroll Processing",
     description: "Run payroll calculations and generate pay slips",
     icon: Calculator,
     href: "/payroll/processing",
-    color: "bg-primary/10 text-primary",
+    color: "bg-success/10 text-success",
   },
   {
     title: "Pay Periods",
     description: "Configure pay periods and schedules",
     icon: CalendarCheck,
     href: "/payroll/pay-periods",
-    color: "bg-success/10 text-success",
+    color: "bg-warning/10 text-warning",
   },
   {
     title: "Payroll Reports",
     description: "Generate payroll summaries and reports",
     icon: FileSpreadsheet,
     href: "/payroll/reports",
-    color: "bg-warning/10 text-warning",
+    color: "bg-secondary/10 text-secondary-foreground",
   },
   {
     title: "Tax Configuration",
     description: "Manage tax brackets and deductions",
     icon: Receipt,
     href: "/payroll/tax-config",
-    color: "bg-secondary/10 text-secondary-foreground",
+    color: "bg-muted text-muted-foreground",
   },
   {
     title: "Year-End Processing",
