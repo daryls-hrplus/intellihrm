@@ -13947,6 +13947,238 @@ export type Database = {
           },
         ]
       }
+      invoice_email_logs: {
+        Row: {
+          email_type: string
+          error_message: string | null
+          id: string
+          invoice_id: string
+          recipient_email: string
+          resend_message_id: string | null
+          sent_at: string
+          status: string
+        }
+        Insert: {
+          email_type: string
+          error_message?: string | null
+          id?: string
+          invoice_id: string
+          recipient_email: string
+          resend_message_id?: string | null
+          sent_at?: string
+          status?: string
+        }
+        Update: {
+          email_type?: string
+          error_message?: string | null
+          id?: string
+          invoice_id?: string
+          recipient_email?: string
+          resend_message_id?: string | null
+          sent_at?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoice_email_logs_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      invoice_settings: {
+        Row: {
+          additional_email_recipients: string[] | null
+          cc_system_admin: boolean | null
+          company_address: string | null
+          company_email: string | null
+          company_id: string | null
+          company_logo_url: string | null
+          company_name: string | null
+          company_phone: string | null
+          company_tax_id: string | null
+          created_at: string
+          default_currency: string | null
+          default_payment_terms: number | null
+          default_tax_rate: number | null
+          id: string
+          invoice_footer: string | null
+          invoice_prefix: string | null
+          invoice_terms: string | null
+          next_invoice_number: number | null
+          renewal_reminder_days: number | null
+          send_renewal_reminder: boolean | null
+          send_to_company_admin: boolean | null
+          system_admin_email: string | null
+          updated_at: string
+        }
+        Insert: {
+          additional_email_recipients?: string[] | null
+          cc_system_admin?: boolean | null
+          company_address?: string | null
+          company_email?: string | null
+          company_id?: string | null
+          company_logo_url?: string | null
+          company_name?: string | null
+          company_phone?: string | null
+          company_tax_id?: string | null
+          created_at?: string
+          default_currency?: string | null
+          default_payment_terms?: number | null
+          default_tax_rate?: number | null
+          id?: string
+          invoice_footer?: string | null
+          invoice_prefix?: string | null
+          invoice_terms?: string | null
+          next_invoice_number?: number | null
+          renewal_reminder_days?: number | null
+          send_renewal_reminder?: boolean | null
+          send_to_company_admin?: boolean | null
+          system_admin_email?: string | null
+          updated_at?: string
+        }
+        Update: {
+          additional_email_recipients?: string[] | null
+          cc_system_admin?: boolean | null
+          company_address?: string | null
+          company_email?: string | null
+          company_id?: string | null
+          company_logo_url?: string | null
+          company_name?: string | null
+          company_phone?: string | null
+          company_tax_id?: string | null
+          created_at?: string
+          default_currency?: string | null
+          default_payment_terms?: number | null
+          default_tax_rate?: number | null
+          id?: string
+          invoice_footer?: string | null
+          invoice_prefix?: string | null
+          invoice_terms?: string | null
+          next_invoice_number?: number | null
+          renewal_reminder_days?: number | null
+          send_renewal_reminder?: boolean | null
+          send_to_company_admin?: boolean | null
+          system_admin_email?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoice_settings_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: true
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      invoices: {
+        Row: {
+          billing_period_end: string
+          billing_period_start: string
+          company_id: string
+          created_at: string
+          currency: string
+          discount_amount: number | null
+          discount_description: string | null
+          due_date: string
+          footer_text: string | null
+          id: string
+          invoice_number: string
+          invoice_type: string
+          issue_date: string
+          line_items: Json
+          notes: string | null
+          paid_at: string | null
+          payment_method: string | null
+          payment_reference: string | null
+          sent_at: string | null
+          status: string
+          subscription_id: string
+          subtotal: number
+          tax_amount: number | null
+          tax_rate: number | null
+          terms: string | null
+          total_amount: number
+          updated_at: string
+        }
+        Insert: {
+          billing_period_end: string
+          billing_period_start: string
+          company_id: string
+          created_at?: string
+          currency?: string
+          discount_amount?: number | null
+          discount_description?: string | null
+          due_date: string
+          footer_text?: string | null
+          id?: string
+          invoice_number: string
+          invoice_type?: string
+          issue_date?: string
+          line_items?: Json
+          notes?: string | null
+          paid_at?: string | null
+          payment_method?: string | null
+          payment_reference?: string | null
+          sent_at?: string | null
+          status?: string
+          subscription_id: string
+          subtotal?: number
+          tax_amount?: number | null
+          tax_rate?: number | null
+          terms?: string | null
+          total_amount?: number
+          updated_at?: string
+        }
+        Update: {
+          billing_period_end?: string
+          billing_period_start?: string
+          company_id?: string
+          created_at?: string
+          currency?: string
+          discount_amount?: number | null
+          discount_description?: string | null
+          due_date?: string
+          footer_text?: string | null
+          id?: string
+          invoice_number?: string
+          invoice_type?: string
+          issue_date?: string
+          line_items?: Json
+          notes?: string | null
+          paid_at?: string | null
+          payment_method?: string | null
+          payment_reference?: string | null
+          sent_at?: string | null
+          status?: string
+          subscription_id?: string
+          subtotal?: number
+          tax_amount?: number | null
+          tax_rate?: number | null
+          terms?: string | null
+          total_amount?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoices_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoices_subscription_id_fkey"
+            columns: ["subscription_id"]
+            isOneToOne: false
+            referencedRelation: "company_subscriptions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       job_board_configs: {
         Row: {
           api_endpoint: string
