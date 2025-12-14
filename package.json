@@ -53,6 +53,7 @@
     "input-otp": "^1.4.2",
     "jspdf": "^3.0.4",
     "lucide-react": "^0.462.0",
+    "marked": "^17.0.1",
     "next-themes": "^0.3.0",
     "pptxgenjs": "^4.0.1",
     "react": "^18.3.1",
@@ -72,7 +73,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.32.0",
-    "@tailwindcss/typography": "^0.5.16",
+    "@tailwindcss/typography": "^0.5.19",
     "@types/node": "^22.16.5",
     "@types/react": "^18.3.23",
     "@types/react-dom": "^18.3.7",
