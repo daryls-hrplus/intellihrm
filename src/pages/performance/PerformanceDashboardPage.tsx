@@ -6,6 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useLanguage } from "@/hooks/useLanguage";
 import {
   Target,
   ClipboardCheck,
@@ -21,60 +22,61 @@ import {
   Award,
 } from "lucide-react";
 
-const performanceModules = [
-  {
-    title: "Appraisals",
-    description: "Performance reviews and evaluations",
-    href: "/performance/appraisals",
-    icon: ClipboardCheck,
-    color: "bg-primary/10 text-primary",
-  },
-  {
-    title: "360° Feedback",
-    description: "Multi-source feedback collection",
-    href: "/performance/360",
-    icon: MessageSquare,
-    color: "bg-sky-500/10 text-sky-600",
-  },
-  {
-    title: "Goals",
-    description: "Goal setting and tracking",
-    href: "/performance/goals",
-    icon: Flag,
-    color: "bg-emerald-500/10 text-emerald-600",
-  },
-  {
-    title: "Improvement Plans",
-    description: "Track performance improvement plans",
-    href: "/performance/pips",
-    icon: AlertTriangle,
-    color: "bg-amber-500/10 text-amber-600",
-  },
-  {
-    title: "Continuous Feedback",
-    description: "Quick feedback and check-ins",
-    href: "/performance/feedback",
-    icon: MessageCircle,
-    color: "bg-violet-500/10 text-violet-600",
-  },
-  {
-    title: "Recognition & Awards",
-    description: "Celebrate achievements",
-    href: "/performance/recognition",
-    icon: Award,
-    color: "bg-rose-500/10 text-rose-600",
-  },
-  {
-    title: "Analytics",
-    description: "Performance insights and trends",
-    href: "/performance/analytics",
-    icon: BarChart3,
-    color: "bg-muted text-muted-foreground",
-  },
-];
-
 export default function PerformanceDashboardPage() {
+  const { t } = useLanguage();
   const { user } = useAuth();
+
+  const performanceModules = [
+    {
+      title: t('performance.modules.appraisals'),
+      description: t('performance.modules.appraisalsDesc'),
+      href: "/performance/appraisals",
+      icon: ClipboardCheck,
+      color: "bg-primary/10 text-primary",
+    },
+    {
+      title: t('performance.modules.feedback360'),
+      description: t('performance.modules.feedback360Desc'),
+      href: "/performance/360",
+      icon: MessageSquare,
+      color: "bg-sky-500/10 text-sky-600",
+    },
+    {
+      title: t('performance.modules.goals'),
+      description: t('performance.modules.goalsDesc'),
+      href: "/performance/goals",
+      icon: Flag,
+      color: "bg-emerald-500/10 text-emerald-600",
+    },
+    {
+      title: t('performance.modules.improvementPlans'),
+      description: t('performance.modules.improvementPlansDesc'),
+      href: "/performance/pips",
+      icon: AlertTriangle,
+      color: "bg-amber-500/10 text-amber-600",
+    },
+    {
+      title: t('performance.modules.continuousFeedback'),
+      description: t('performance.modules.continuousFeedbackDesc'),
+      href: "/performance/feedback",
+      icon: MessageCircle,
+      color: "bg-violet-500/10 text-violet-600",
+    },
+    {
+      title: t('performance.modules.recognitionAwards'),
+      description: t('performance.modules.recognitionAwardsDesc'),
+      href: "/performance/recognition",
+      icon: Award,
+      color: "bg-rose-500/10 text-rose-600",
+    },
+    {
+      title: t('performance.modules.analytics'),
+      description: t('performance.modules.analyticsDesc'),
+      href: "/performance/analytics",
+      icon: BarChart3,
+      color: "bg-muted text-muted-foreground",
+    },
+  ];
 
   // Fetch goals data
   const { data: goals = [], isLoading: goalsLoading } = useQuery({
@@ -116,10 +118,10 @@ export default function PerformanceDashboardPage() {
     : "N/A";
 
   const statCards = [
-    { label: "Active Goals", value: activeGoals, icon: Target, color: "bg-primary/10 text-primary" },
-    { label: "Pending Reviews", value: pendingReviews, icon: Clock, color: "bg-amber-500/10 text-amber-600" },
-    { label: "Goals Completed", value: completedGoals, icon: CheckCircle, color: "bg-emerald-500/10 text-emerald-600" },
-    { label: "Avg. Rating", value: avgRating, icon: TrendingUp, color: "bg-sky-500/10 text-sky-600" },
+    { label: t('performance.stats.activeGoals'), value: activeGoals, icon: Target, color: "bg-primary/10 text-primary" },
+    { label: t('performance.stats.pendingReviews'), value: pendingReviews, icon: Clock, color: "bg-amber-500/10 text-amber-600" },
+    { label: t('performance.stats.goalsCompleted'), value: completedGoals, icon: CheckCircle, color: "bg-emerald-500/10 text-emerald-600" },
+    { label: t('performance.stats.avgRating'), value: avgRating, icon: TrendingUp, color: "bg-sky-500/10 text-sky-600" },
   ];
 
   return (
@@ -133,10 +135,10 @@ export default function PerformanceDashboardPage() {
               </div>
               <div>
                 <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
-                  Performance
+                  {t('performance.dashboard.title')}
                 </h1>
                 <p className="text-muted-foreground">
-                  Performance management and feedback
+                  {t('performance.dashboard.subtitle')}
                 </p>
               </div>
             </div>

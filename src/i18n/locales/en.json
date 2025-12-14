@@ -4450,5 +4450,153 @@
       "costProjectionOverTime": "Cost Projection Over Time",
       "currentMonthlyCostsByCategory": "Current Monthly Costs by Category"
     }
+  },
+  "performance": {
+    "title": "Performance",
+    "subtitle": "Performance management and feedback",
+    "dashboard": {
+      "title": "Performance",
+      "subtitle": "Performance management and feedback"
+    },
+    "modules": {
+      "appraisals": "Appraisals",
+      "appraisalsDesc": "Performance reviews and evaluations",
+      "feedback360": "360° Feedback",
+      "feedback360Desc": "Multi-source feedback collection",
+      "goals": "Goals",
+      "goalsDesc": "Goal setting and tracking",
+      "improvementPlans": "Improvement Plans",
+      "improvementPlansDesc": "Track performance improvement plans",
+      "continuousFeedback": "Continuous Feedback",
+      "continuousFeedbackDesc": "Quick feedback and check-ins",
+      "recognitionAwards": "Recognition & Awards",
+      "recognitionAwardsDesc": "Celebrate achievements",
+      "analytics": "Analytics",
+      "analyticsDesc": "Performance insights and trends"
+    },
+    "stats": {
+      "activeGoals": "Active Goals",
+      "pendingReviews": "Pending Reviews",
+      "goalsCompleted": "Goals Completed",
+      "avgRating": "Avg. Rating",
+      "totalGoals": "Total Goals",
+      "active": "Active",
+      "overdue": "Overdue",
+      "completed": "Completed",
+      "avgProgress": "Avg Progress",
+      "activeCycles": "Active Cycles",
+      "pendingEvaluations": "Pending Evaluations",
+      "myAppraisals": "My Appraisals",
+      "myParticipations": "My Participations",
+      "completedCycles": "Completed Cycles"
+    },
+    "goals": {
+      "title": "Goals Management",
+      "subtitle": "Set, track, and achieve your performance goals",
+      "createGoal": "Create Goal",
+      "editGoal": "Edit Goal",
+      "myGoals": "My Goals",
+      "teamGoals": "Team Goals",
+      "companyGoals": "Company Goals",
+      "directReports": "Direct Reports",
+      "templates": "Templates",
+      "hierarchy": "Hierarchy",
+      "showAnalytics": "Show Analytics",
+      "hideAnalytics": "Hide Analytics",
+      "selectCompany": "Select Company",
+      "gridView": "Grid View",
+      "listView": "List View",
+      "exportGoals": "Export Goals",
+      "goalsExported": "Goals exported successfully",
+      "noGoalsFound": "No goals found",
+      "createFirst": "Create your first goal to get started",
+      "filters": {
+        "allStatuses": "All Statuses",
+        "allLevels": "All Levels",
+        "allTypes": "All Types",
+        "clearFilters": "Clear Filters"
+      },
+      "status": {
+        "draft": "Draft",
+        "active": "Active",
+        "inProgress": "In Progress",
+        "completed": "Completed",
+        "cancelled": "Cancelled",
+        "overdue": "Overdue"
+      },
+      "level": {
+        "company": "Company",
+        "department": "Department",
+        "team": "Team",
+        "individual": "Individual"
+      },
+      "type": {
+        "okrObjective": "OKR Objective",
+        "okrKeyResult": "OKR Key Result",
+        "smartGoal": "SMART Goal"
+      }
+    },
+    "appraisals": {
+      "title": "Performance Appraisals",
+      "subtitle": "Evaluate employees on competencies, responsibilities, and goals",
+      "createCycle": "Create Appraisal Cycle",
+      "createProbationReview": "Create Probation Review",
+      "myAppraisals": "My Appraisals",
+      "evaluateTeam": "Evaluate Team",
+      "centralCycles": "Central Cycles",
+      "managerCycles": "Manager Probation Reviews",
+      "selectCompany": "Select company",
+      "tabs": {
+        "myAppraisalsHelp": "View your performance appraisals across cycles. See your scores for competencies, responsibilities, and goals. Click on an appraisal to view detailed feedback.",
+        "evaluateTeamHelp": "Evaluate team members assigned to you. Rate their competencies, responsibilities, and goals. Each category's item weights must total 100%.",
+        "manageCyclesHelp": "Create and manage appraisal cycles. Set category weights (competency, responsibility, goal) that total 100%. Add participants and track completion rates."
+      },
+      "status": {
+        "draft": "Draft",
+        "active": "Active",
+        "inProgress": "In Progress",
+        "submitted": "Submitted",
+        "reviewed": "Reviewed",
+        "completed": "Completed",
+        "finalized": "Finalized",
+        "cancelled": "Cancelled",
+        "pending": "Pending"
+      }
+    },
+    "review360": {
+      "title": "360° Feedback",
+      "subtitle": "Comprehensive feedback from all perspectives",
+      "createCentralCycle": "Create Central Cycle",
+      "createTeamCycle": "Create Team Cycle",
+      "myReviews": "My Reviews",
+      "myFeedback": "My Feedback",
+      "centralCycles": "Central Cycles",
+      "managerCycles": "Manager Cycles",
+      "manageCycles": "Manage Cycles",
+      "analyticsDashboard": "Analytics Dashboard",
+      "tabs": {
+        "myReviewsHelp": "View and complete feedback reviews assigned to you. Click on a pending review to provide feedback for colleagues, managers, or direct reports.",
+        "myFeedbackHelp": "See aggregated feedback you've received from peers, managers, and direct reports. View scores and comments to understand your strengths and areas for improvement.",
+        "manageCyclesHelp": "Create and manage 360° review cycles for your direct reports. Track completion rates and results.",
+        "centralCyclesHelp": "View and manage organization-wide 360° review cycles created by HR.",
+        "managerCyclesHelp": "View all manager-created review cycles across the organization."
+      }
+    },
+    "pips": {
+      "title": "Performance Improvement Plans",
+      "subtitle": "Track and manage employee performance improvement plans"
+    },
+    "feedback": {
+      "title": "Continuous Feedback",
+      "subtitle": "Quick feedback and check-ins between formal reviews"
+    },
+    "recognition": {
+      "title": "Recognition & Awards",
+      "subtitle": "Celebrate achievements and recognize team members"
+    },
+    "analytics": {
+      "title": "Performance Analytics",
+      "subtitle": "Comprehensive analytics and insights across performance data"
+    }
   }
 }

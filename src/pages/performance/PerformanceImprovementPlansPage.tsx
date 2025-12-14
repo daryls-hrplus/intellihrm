@@ -6,8 +6,10 @@ import { LeaveCompanyFilter, useLeaveCompanyFilter } from "@/components/leave/Le
 import { DepartmentFilter, useDepartmentFilter } from "@/components/filters/DepartmentFilter";
 import { AlertTriangle, ChevronLeft } from "lucide-react";
 import { NavLink } from "react-router-dom";
+import { useLanguage } from "@/hooks/useLanguage";
 
 export default function PerformanceImprovementPlansPage() {
+  const { t } = useLanguage();
   const { selectedCompanyId, setSelectedCompanyId } = useLeaveCompanyFilter();
   const { selectedDepartmentId, setSelectedDepartmentId } = useDepartmentFilter();
 
@@ -17,10 +19,10 @@ export default function PerformanceImprovementPlansPage() {
         <div className="animate-fade-in">
           <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4">
             <NavLink to="/performance" className="hover:text-foreground transition-colors">
-              Performance
+              {t('performance.title')}
             </NavLink>
             <ChevronLeft className="h-4 w-4 rotate-180" />
-            <span className="text-foreground">Improvement Plans</span>
+            <span className="text-foreground">{t('performance.modules.improvementPlans')}</span>
           </div>
           
           <div className="flex items-center justify-between mb-2">
@@ -30,10 +32,10 @@ export default function PerformanceImprovementPlansPage() {
               </div>
               <div>
                 <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
-                  Performance Improvement Plans
+                  {t('performance.pips.title')}
                 </h1>
                 <p className="text-muted-foreground">
-                  Track and manage employee performance improvement plans
+                  {t('performance.pips.subtitle')}
                 </p>
               </div>
             </div>
