@@ -4239,6 +4239,22 @@
       "photoGallery": "Photo Gallery",
       "blogPosts": "Blog Posts"
     },
+    "sopManagement": {
+      "title": "SOP Management",
+      "description": "Manage Standard Operating Procedures for AI Assistant",
+      "documents": "SOPs",
+      "categories": "Categories",
+      "addSOP": "Add SOP",
+      "editSOP": "Edit SOP",
+      "addCategory": "Add Category",
+      "editCategory": "Edit Category",
+      "taskType": "Task Type",
+      "category": "Category",
+      "content": "Content",
+      "steps": "Steps",
+      "effectiveDate": "Effective Date",
+      "globalSOP": "Global SOP (applies to all companies)"
+    },
     "addTask": "Add Task",
     "activeTasks": "Active Tasks",
     "urgent": "Urgent",

@@ -286,6 +286,7 @@ import HRTasksPage from "./pages/hr-hub/HRTasksPage";
 import HRMilestonesPage from "./pages/hr-hub/HRMilestonesPage";
 import ComplianceTrackerPage from "./pages/hr-hub/ComplianceTrackerPage";
 import HRRemindersPage from "./pages/hr-hub/HRRemindersPage";
+import SOPManagementPage from "./pages/hr-hub/SOPManagementPage";
 
 // Admin Reminders
 import AdminRemindersPage from "./pages/admin/AdminRemindersPage";
@@ -2449,6 +2450,14 @@ const App = () => (
               element={
                 <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
                   <HRRemindersPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/hr-hub/sop-management"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
+                  <SOPManagementPage />
                 </ProtectedRoute>
               }
             />
