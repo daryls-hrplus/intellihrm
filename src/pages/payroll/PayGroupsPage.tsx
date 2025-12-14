@@ -11,12 +11,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
-import { Plus, Pencil, Trash2, Users, ArrowLeft, Calendar, ShieldCheck } from "lucide-react";
+import { Plus, Pencil, Trash2, Users, ArrowLeft, ShieldCheck } from "lucide-react";
 import { PayrollCalendarGenerator } from "@/components/payroll/PayrollCalendarGenerator";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { useNavigate } from "react-router-dom";
 import { PayrollFilters, usePayrollFilters } from "@/components/payroll/PayrollFilters";
+import { useTranslation } from "react-i18next";
 
 interface PayGroupFormData {
   name: string;
@@ -30,6 +31,7 @@ interface PayGroupFormData {
 }
 
 export default function PayGroupsPage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { selectedCompanyId, setSelectedCompanyId } = usePayrollFilters();
@@ -85,14 +87,14 @@ export default function PayGroupsPage() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["pay-groups"] });
-      toast.success(editingId ? "Pay group updated" : "Pay group created");
+      toast.success(editingId ? t("payroll.payGroups.payGroupUpdated") : t("payroll.payGroups.payGroupCreated"));
       closeDialog();
     },
     onError: (error: any) => {
       if (error.message?.includes("unique")) {
-        toast.error("A pay group with this code already exists");
+        toast.error(t("payroll.payGroups.codeExists"));
       } else {
-        toast.error("Failed to save pay group");
+        toast.error(t("common.error"));
       }
     },
   });
@@ -104,9 +106,9 @@ export default function PayGroupsPage() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["pay-groups"] });
-      toast.success("Pay group deleted");
+      toast.success(t("payroll.payGroups.payGroupDeleted"));
     },
-    onError: () => toast.error("Failed to delete pay group"),
+    onError: () => toast.error(t("common.error")),
   });
 
   const closeDialog = () => {
@@ -141,10 +143,10 @@ export default function PayGroupsPage() {
 
   const formatFrequency = (freq: string) => {
     const labels: Record<string, string> = {
-      weekly: "Weekly",
-      biweekly: "Bi-weekly",
-      semimonthly: "Semi-monthly",
-      monthly: "Monthly",
+      weekly: t("payroll.payGroups.weekly"),
+      biweekly: t("payroll.payGroups.biweekly"),
+      semimonthly: t("payroll.payGroups.semimonthly"),
+      monthly: t("payroll.payGroups.monthly"),
     };
     return labels[freq] || freq;
   };
@@ -156,8 +158,8 @@ export default function PayGroupsPage() {
           <ArrowLeft className="h-5 w-5" />
         </Button>
         <div>
-          <h1 className="text-3xl font-bold">Pay Groups</h1>
-          <p className="text-muted-foreground">Manage pay groups for payroll processing</p>
+          <h1 className="text-3xl font-bold">{t("payroll.payGroups.title")}</h1>
+          <p className="text-muted-foreground">{t("payroll.payGroups.subtitle")}</p>
         </div>
       </div>
 
@@ -169,45 +171,45 @@ export default function PayGroupsPage() {
         />
         <Button onClick={() => setIsDialogOpen(true)} disabled={!selectedCompanyId}>
           <Plus className="h-4 w-4 mr-2" />
-          Add Pay Group
+          {t("payroll.payGroups.addPayGroup")}
         </Button>
       </div>
 
       {!selectedCompanyId ? (
         <Card>
           <CardContent className="py-10 text-center text-muted-foreground">
-            Please select a company to manage pay groups
+            {t("payroll.payGroups.selectCompanyPrompt")}
           </CardContent>
         </Card>
       ) : isLoading ? (
         <Card>
-          <CardContent className="py-10 text-center">Loading...</CardContent>
+          <CardContent className="py-10 text-center">{t("common.loading")}</CardContent>
         </Card>
       ) : payGroups?.length === 0 ? (
         <Card>
           <CardContent className="py-10 text-center text-muted-foreground">
             <Users className="h-12 w-12 mx-auto mb-4 opacity-50" />
-            <p>No pay groups defined yet</p>
-            <p className="text-sm">Create pay groups to organize employees by pay frequency</p>
+            <p>{t("payroll.payGroups.noPayGroups")}</p>
+            <p className="text-sm">{t("payroll.payGroups.noPayGroupsHint")}</p>
           </CardContent>
         </Card>
       ) : (
         <Card>
           <CardHeader>
-            <CardTitle>Pay Groups</CardTitle>
-            <CardDescription>Groups determine payroll processing frequency</CardDescription>
+            <CardTitle>{t("payroll.payGroups.title")}</CardTitle>
+            <CardDescription>{t("payroll.payGroups.subtitle")}</CardDescription>
           </CardHeader>
           <CardContent>
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Code</TableHead>
-                  <TableHead>Frequency</TableHead>
+                  <TableHead>{t("common.name")}</TableHead>
+                  <TableHead>{t("common.code")}</TableHead>
+                  <TableHead>{t("payroll.payGroups.payFrequency")}</TableHead>
                   <TableHead>NI</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Start Date</TableHead>
-                  <TableHead>Actions</TableHead>
+                  <TableHead>{t("common.status")}</TableHead>
+                  <TableHead>{t("common.startDate")}</TableHead>
+                  <TableHead>{t("common.actions")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -225,7 +227,7 @@ export default function PayGroupsPage() {
                     </TableCell>
                     <TableCell>
                       <Badge variant={pg.is_active ? "default" : "outline"}>
-                        {pg.is_active ? "Active" : "Inactive"}
+                        {pg.is_active ? t("common.active") : t("common.inactive")}
                       </Badge>
                     </TableCell>
                     <TableCell>{format(new Date(pg.start_date), "PP")}</TableCell>
@@ -255,11 +257,11 @@ export default function PayGroupsPage() {
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>{editingId ? "Edit Pay Group" : "Add Pay Group"}</DialogTitle>
+            <DialogTitle>{editingId ? t("payroll.payGroups.editPayGroup") : t("payroll.payGroups.addPayGroup")}</DialogTitle>
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
-              <Label>Name *</Label>
+              <Label>{t("common.name")} *</Label>
               <Input
                 value={formData.name}
                 onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
@@ -267,7 +269,7 @@ export default function PayGroupsPage() {
               />
             </div>
             <div className="grid gap-2">
-              <Label>Code *</Label>
+              <Label>{t("common.code")} *</Label>
               <Input
                 value={formData.code}
                 onChange={(e) => setFormData((prev) => ({ ...prev, code: e.target.value.toUpperCase() }))}
@@ -275,7 +277,7 @@ export default function PayGroupsPage() {
               />
             </div>
             <div className="grid gap-2">
-              <Label>Pay Frequency *</Label>
+              <Label>{t("payroll.payGroups.payFrequency")} *</Label>
               <Select
                 value={formData.pay_frequency}
                 onValueChange={(value) => setFormData((prev) => ({ ...prev, pay_frequency: value }))}
@@ -284,24 +286,24 @@ export default function PayGroupsPage() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="weekly">Weekly</SelectItem>
-                  <SelectItem value="biweekly">Bi-weekly (Fortnightly)</SelectItem>
-                  <SelectItem value="semimonthly">Semi-monthly (Twice a month)</SelectItem>
-                  <SelectItem value="monthly">Monthly</SelectItem>
+                  <SelectItem value="weekly">{t("payroll.payGroups.weekly")}</SelectItem>
+                  <SelectItem value="biweekly">{t("payroll.payGroups.biweekly")}</SelectItem>
+                  <SelectItem value="semimonthly">{t("payroll.payGroups.semimonthly")}</SelectItem>
+                  <SelectItem value="monthly">{t("payroll.payGroups.monthly")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             <div className="grid gap-2">
-              <Label>Description</Label>
+              <Label>{t("common.description")}</Label>
               <Textarea
                 value={formData.description}
                 onChange={(e) => setFormData((prev) => ({ ...prev, description: e.target.value }))}
-                placeholder="Optional description"
+                placeholder={t("common.optional")}
               />
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="grid gap-2">
-                <Label>Start Date *</Label>
+                <Label>{t("common.startDate")} *</Label>
                 <Input
                   type="date"
                   value={formData.start_date}
@@ -309,7 +311,7 @@ export default function PayGroupsPage() {
                 />
               </div>
               <div className="grid gap-2">
-                <Label>End Date</Label>
+                <Label>{t("common.endDate")}</Label>
                 <Input
                   type="date"
                   value={formData.end_date}
@@ -323,26 +325,26 @@ export default function PayGroupsPage() {
                   checked={formData.is_active}
                   onCheckedChange={(checked) => setFormData((prev) => ({ ...prev, is_active: checked }))}
                 />
-                <Label>Active</Label>
+                <Label>{t("common.active")}</Label>
               </div>
               <div className="flex items-center gap-2">
                 <Switch
                   checked={formData.uses_national_insurance}
                   onCheckedChange={(checked) => setFormData((prev) => ({ ...prev, uses_national_insurance: checked }))}
                 />
-                <Label>Uses National Insurance</Label>
+                <Label>{t("payroll.payGroups.usesNationalInsurance")}</Label>
               </div>
             </div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={closeDialog}>
-              Cancel
+              {t("common.cancel")}
             </Button>
             <Button
               onClick={() => saveMutation.mutate(formData)}
               disabled={!formData.name || !formData.code || !formData.pay_frequency || !formData.start_date}
             >
-              {editingId ? "Update" : "Create"}
+              {editingId ? t("common.update") : t("common.create")}
             </Button>
           </DialogFooter>
         </DialogContent>

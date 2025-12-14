@@ -1,18 +1,17 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { PayrollFilters, usePayrollFilters } from "@/components/payroll/PayrollFilters";
-import { Calendar, Filter } from "lucide-react";
+import { Calendar } from "lucide-react";
 import { format } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 
 interface PayPeriod {
   id: string;
@@ -34,11 +33,12 @@ interface PayPeriod {
 }
 
 export default function PayPeriodsPage() {
+  const { t } = useTranslation();
   const { selectedCompanyId, setSelectedCompanyId, selectedPayGroupId, setSelectedPayGroupId } = usePayrollFilters();
   const currentYear = new Date().getFullYear();
   const [selectedYear, setSelectedYear] = useState(currentYear);
 
-  const { data: periods = [], isLoading, refetch } = useQuery({
+  const { data: periods = [], isLoading } = useQuery({
     queryKey: ["pay-periods", selectedCompanyId, selectedPayGroupId, selectedYear],
     queryFn: async () => {
       if (!selectedCompanyId) return [];
@@ -93,22 +93,21 @@ export default function PayPeriodsPage() {
 
   const formatFrequency = (freq: string) => {
     const labels: Record<string, string> = {
-      weekly: "Weekly",
-      biweekly: "Fortnightly",
-      semimonthly: "Bi-Monthly",
-      monthly: "Monthly",
+      weekly: t("payroll.payGroups.weekly"),
+      biweekly: t("payroll.payGroups.biweekly"),
+      semimonthly: t("payroll.payGroups.semimonthly"),
+      monthly: t("payroll.payGroups.monthly"),
     };
     return labels[freq] || freq;
   };
 
-  // Check if any period has NI tracking
   const hasNITracking = periods.some(p => p.pay_group?.uses_national_insurance);
 
   if (!selectedCompanyId) {
     return (
       <AppLayout>
         <div className="flex items-center justify-center h-64">
-          <p className="text-muted-foreground">Please select a company to view pay periods.</p>
+          <p className="text-muted-foreground">{t("payroll.payPeriods.selectCompanyPrompt")}</p>
         </div>
       </AppLayout>
     );
@@ -119,8 +118,8 @@ export default function PayPeriodsPage() {
       <div className="space-y-6">
         <Breadcrumbs
           items={[
-            { label: "Payroll", href: "/payroll" },
-            { label: "Pay Periods" },
+            { label: t("navigation.payroll"), href: "/payroll" },
+            { label: t("payroll.payPeriods.title") },
           ]}
         />
 
@@ -130,8 +129,8 @@ export default function PayPeriodsPage() {
               <Calendar className="h-6 w-6 text-success" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold tracking-tight">Pay Periods</h1>
-              <p className="text-muted-foreground">View payroll calendar by pay group and year</p>
+              <h1 className="text-2xl font-bold tracking-tight">{t("payroll.payPeriods.title")}</h1>
+              <p className="text-muted-foreground">{t("payroll.payPeriods.subtitle")}</p>
             </div>
           </div>
         </div>
@@ -148,7 +147,7 @@ export default function PayPeriodsPage() {
                 showPayGroupFilter={true}
               />
               <div className="space-y-2">
-                <Label className="text-sm">Year</Label>
+                <Label className="text-sm">{t("common.year")}</Label>
                 <Select value={String(selectedYear)} onValueChange={(v) => setSelectedYear(parseInt(v))}>
                   <SelectTrigger className="w-[120px]">
                     <SelectValue />
@@ -170,29 +169,29 @@ export default function PayPeriodsPage() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center justify-between">
-              <span>Pay Periods for {selectedYear}</span>
-              <Badge variant="outline">{periods.length} periods</Badge>
+              <span>{t("payroll.payPeriods.periodsFor", { year: selectedYear })}</span>
+              <Badge variant="outline">{periods.length} {t("payroll.payPeriods.periods")}</Badge>
             </CardTitle>
           </CardHeader>
           <CardContent className="p-0">
             {isLoading ? (
-              <div className="py-8 text-center text-muted-foreground">Loading...</div>
+              <div className="py-8 text-center text-muted-foreground">{t("common.loading")}</div>
             ) : periods.length === 0 ? (
               <div className="py-8 text-center text-muted-foreground">
-                <p>No pay periods found for {selectedYear}.</p>
-                <p className="text-sm mt-2">Go to Pay Groups to generate payroll calendar.</p>
+                <p>{t("payroll.payPeriods.noPeriodsFound", { year: selectedYear })}</p>
+                <p className="text-sm mt-2">{t("payroll.payPeriods.goToPayGroups")}</p>
               </div>
             ) : (
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="w-24">#</TableHead>
-                    <TableHead>Pay Group</TableHead>
-                    <TableHead>Period Start</TableHead>
-                    <TableHead>Period End</TableHead>
-                    <TableHead>Pay Date</TableHead>
-                    {hasNITracking && <TableHead className="text-center">Mondays</TableHead>}
-                    <TableHead>Status</TableHead>
+                    <TableHead className="w-24">{t("payroll.payPeriods.periodNumber")}</TableHead>
+                    <TableHead>{t("payroll.payPeriods.payGroup")}</TableHead>
+                    <TableHead>{t("payroll.payPeriods.periodStart")}</TableHead>
+                    <TableHead>{t("payroll.payPeriods.periodEnd")}</TableHead>
+                    <TableHead>{t("payroll.payPeriods.payDate")}</TableHead>
+                    {hasNITracking && <TableHead className="text-center">{t("payroll.payPeriods.mondays")}</TableHead>}
+                    <TableHead>{t("common.status")}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -236,7 +235,7 @@ export default function PayPeriodsPage() {
         {payGroups.length > 0 && (
           <Card>
             <CardHeader>
-              <CardTitle>Pay Groups Summary</CardTitle>
+              <CardTitle>{t("payroll.payPeriods.summary")}</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -251,10 +250,10 @@ export default function PayPeriodsPage() {
                           <span className="font-medium">{pg.name}</span>
                           <Badge variant="secondary">{formatFrequency(pg.pay_frequency)}</Badge>
                         </div>
-                        <div className="text-2xl font-bold">{groupPeriods.length} periods</div>
+                        <div className="text-2xl font-bold">{groupPeriods.length} {t("payroll.payPeriods.periods")}</div>
                         {pg.uses_national_insurance && (
                           <div className="text-sm text-muted-foreground mt-1">
-                            {totalMondays} total Mondays
+                            {totalMondays} {t("payroll.payPeriods.totalMondays")}
                           </div>
                         )}
                       </CardContent>

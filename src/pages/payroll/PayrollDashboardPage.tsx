@@ -16,73 +16,75 @@ import {
   TrendingUp,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-
-const features = [
-  {
-    title: "Pay Groups",
-    description: "Manage pay groups and payment frequencies",
-    icon: Users,
-    href: "/payroll/pay-groups",
-    color: "bg-primary/10 text-primary",
-  },
-  {
-    title: "Payroll Processing",
-    description: "Run payroll calculations and generate pay slips",
-    icon: Calculator,
-    href: "/payroll/processing",
-    color: "bg-success/10 text-success",
-  },
-  {
-    title: "Pay Periods",
-    description: "Configure pay periods and schedules",
-    icon: CalendarCheck,
-    href: "/payroll/pay-periods",
-    color: "bg-warning/10 text-warning",
-  },
-  {
-    title: "Payroll Reports",
-    description: "Generate payroll summaries and reports",
-    icon: FileSpreadsheet,
-    href: "/payroll/reports",
-    color: "bg-secondary/10 text-secondary-foreground",
-  },
-  {
-    title: "Tax Configuration",
-    description: "Manage tax brackets and deductions",
-    icon: Receipt,
-    href: "/payroll/tax-config",
-    color: "bg-muted text-muted-foreground",
-  },
-  {
-    title: "Year-End Processing",
-    description: "Generate W-2s and annual tax forms",
-    icon: FileSpreadsheet,
-    href: "/payroll/year-end",
-    color: "bg-destructive/10 text-destructive",
-  },
-  {
-    title: "Salary & Overtime",
-    description: "Track work records, allowances, deductions and simulate pay",
-    icon: Clock,
-    href: "/payroll/salary-overtime",
-    color: "bg-accent/10 text-accent-foreground",
-  },
-];
-
-const stats = [
-  { label: "Current Period", value: "Dec 2024", icon: CalendarCheck },
-  { label: "Total Payroll", value: "$1.2M", icon: DollarSign },
-  { label: "Employees Paid", value: "245", icon: Users },
-  { label: "Pending Approvals", value: "12", icon: Clock },
-];
+import { useTranslation } from "react-i18next";
 
 export default function PayrollDashboardPage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
+
+  const features = [
+    {
+      title: t("payroll.modules.payGroups.title"),
+      description: t("payroll.modules.payGroups.description"),
+      icon: Users,
+      href: "/payroll/pay-groups",
+      color: "bg-primary/10 text-primary",
+    },
+    {
+      title: t("payroll.modules.processing.title"),
+      description: t("payroll.modules.processing.description"),
+      icon: Calculator,
+      href: "/payroll/processing",
+      color: "bg-success/10 text-success",
+    },
+    {
+      title: t("payroll.modules.payPeriods.title"),
+      description: t("payroll.modules.payPeriods.description"),
+      icon: CalendarCheck,
+      href: "/payroll/pay-periods",
+      color: "bg-warning/10 text-warning",
+    },
+    {
+      title: t("payroll.modules.reports.title"),
+      description: t("payroll.modules.reports.description"),
+      icon: FileSpreadsheet,
+      href: "/payroll/reports",
+      color: "bg-secondary/10 text-secondary-foreground",
+    },
+    {
+      title: t("payroll.modules.taxConfig.title"),
+      description: t("payroll.modules.taxConfig.description"),
+      icon: Receipt,
+      href: "/payroll/tax-config",
+      color: "bg-muted text-muted-foreground",
+    },
+    {
+      title: t("payroll.modules.yearEnd.title"),
+      description: t("payroll.modules.yearEnd.description"),
+      icon: FileSpreadsheet,
+      href: "/payroll/year-end",
+      color: "bg-destructive/10 text-destructive",
+    },
+    {
+      title: t("payroll.modules.salaryOvertime.title"),
+      description: t("payroll.modules.salaryOvertime.description"),
+      icon: Clock,
+      href: "/payroll/salary-overtime",
+      color: "bg-accent/10 text-accent-foreground",
+    },
+  ];
+
+  const stats = [
+    { label: t("payroll.stats.currentPeriod"), value: "Dec 2024", icon: CalendarCheck },
+    { label: t("payroll.stats.totalPayroll"), value: "$1.2M", icon: DollarSign },
+    { label: t("payroll.stats.employeesPaid"), value: "245", icon: Users },
+    { label: t("payroll.stats.pendingApprovals"), value: "12", icon: Clock },
+  ];
 
   return (
     <AppLayout>
       <div className="space-y-6">
-        <Breadcrumbs items={[{ label: "Payroll" }]} />
+        <Breadcrumbs items={[{ label: t("navigation.payroll") }]} />
 
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -91,10 +93,10 @@ export default function PayrollDashboardPage() {
             </div>
             <div>
               <h1 className="text-2xl font-bold tracking-tight text-foreground">
-                Payroll Management
+                {t("payroll.management")}
               </h1>
               <p className="text-muted-foreground">
-                Process payroll, manage deductions, and generate reports
+                {t("payroll.managementSubtitle")}
               </p>
             </div>
           </div>
@@ -156,12 +158,12 @@ export default function PayrollDashboardPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <TrendingUp className="h-5 w-5" />
-              Recent Payroll Activity
+              {t("payroll.recentActivity")}
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-center py-8 text-muted-foreground">
-              No recent payroll activity. Start by configuring pay periods.
+              {t("payroll.noRecentActivity")}
             </div>
           </CardContent>
         </Card>
