@@ -5,6 +5,7 @@ import { ModuleReportsButton } from "@/components/reports/ModuleReportsButton";
 import { ModuleBIButton } from "@/components/bi/ModuleBIButton";
 import { useLeaveManagement } from "@/hooks/useLeaveManagement";
 import { useAuth } from "@/contexts/AuthContext";
+import { useLanguage } from "@/hooks/useLanguage";
 import { supabase } from "@/integrations/supabase/client";
 import {
   Select,
@@ -36,103 +37,103 @@ interface Company {
   code: string;
 }
 
-const leaveModules = [
+const getLeaveModules = (t: (key: string) => string) => [
   {
-    title: "My Leave",
-    description: "View balances and request history",
+    title: t("leave.modules.myLeave"),
+    description: t("leave.modules.myLeaveDesc"),
     href: "/leave/my-leave",
     icon: Calendar,
     color: "bg-primary/10 text-primary",
   },
   {
-    title: "Apply for Leave",
-    description: "Submit new leave applications",
+    title: t("leave.modules.applyLeave"),
+    description: t("leave.modules.applyLeaveDesc"),
     href: "/leave/apply",
     icon: CalendarPlus,
     color: "bg-success/10 text-success",
   },
   {
-    title: "Leave Approvals",
-    description: "Review and approve team requests",
+    title: t("leave.modules.approvals"),
+    description: t("leave.modules.approvalsDesc"),
     href: "/leave/approvals",
     icon: CalendarCheck,
     color: "bg-warning/10 text-warning",
     adminOnly: true,
   },
   {
-    title: "Leave Types",
-    description: "Configure leave categories",
+    title: t("leave.modules.types"),
+    description: t("leave.modules.typesDesc"),
     href: "/leave/types",
     icon: Settings,
     color: "bg-info/10 text-info",
     adminOnly: true,
   },
   {
-    title: "Accrual Rules",
-    description: "Set up leave accrual policies",
+    title: t("leave.modules.accrualRules"),
+    description: t("leave.modules.accrualRulesDesc"),
     href: "/leave/accrual-rules",
     icon: TrendingUp,
     color: "bg-primary/10 text-primary",
     adminOnly: true,
   },
   {
-    title: "Rollover Rules",
-    description: "Configure year-end balance handling",
+    title: t("leave.modules.rolloverRules"),
+    description: t("leave.modules.rolloverRulesDesc"),
     href: "/leave/rollover-rules",
     icon: RotateCcw,
     color: "bg-secondary/10 text-secondary-foreground",
     adminOnly: true,
   },
   {
-    title: "Holidays Calendar",
-    description: "Manage country and company holidays",
+    title: t("leave.modules.holidays"),
+    description: t("leave.modules.holidaysDesc"),
     href: "/leave/holidays",
     icon: PartyPopper,
     color: "bg-destructive/10 text-destructive",
     adminOnly: true,
   },
   {
-    title: "Team Calendar",
-    description: "View team leave availability",
+    title: t("leave.modules.teamCalendar"),
+    description: t("leave.modules.teamCalendarDesc"),
     href: "/leave/calendar",
     icon: Calendar,
     color: "bg-cyan-500/10 text-cyan-600",
     adminOnly: true,
   },
   {
-    title: "Balance Adjustments",
-    description: "Manually adjust leave balances",
+    title: t("leave.modules.balanceAdjustments"),
+    description: t("leave.modules.balanceAdjustmentsDesc"),
     href: "/leave/balance-adjustments",
     icon: Settings,
     color: "bg-slate-500/10 text-slate-600",
     adminOnly: true,
   },
   {
-    title: "Balance Recalculation",
-    description: "Recalculate employee leave balances",
+    title: t("leave.modules.balanceRecalculation"),
+    description: t("leave.modules.balanceRecalculationDesc"),
     href: "/leave/balance-recalculation",
     icon: Calculator,
     color: "bg-accent text-accent-foreground",
     adminOnly: true,
   },
   {
-    title: "Leave Analytics",
-    description: "Utilization trends and insights",
+    title: t("leave.modules.analytics"),
+    description: t("leave.modules.analyticsDesc"),
     href: "/leave/analytics",
     icon: BarChart3,
     color: "bg-violet-500/10 text-violet-600",
     adminOnly: true,
   },
   {
-    title: "Compensatory Time",
-    description: "Track earned and used comp time",
+    title: t("leave.modules.compensatoryTime"),
+    description: t("leave.modules.compensatoryTimeDesc"),
     href: "/leave/compensatory-time",
     icon: Timer,
     color: "bg-info/10 text-info",
   },
   {
-    title: "Comp Time Policies",
-    description: "Configure compensatory time rules",
+    title: t("leave.modules.compTimePolicies"),
+    description: t("leave.modules.compTimePoliciesDesc"),
     href: "/leave/comp-time-policies",
     icon: Settings,
     color: "bg-muted text-muted-foreground",
@@ -141,8 +142,10 @@ const leaveModules = [
 ];
 
 export default function LeaveDashboardPage() {
+  const { t } = useLanguage();
   const { company, isAdmin, hasRole } = useAuth();
   const isAdminOrHR = isAdmin || hasRole("hr_manager");
+  const leaveModules = getLeaveModules(t);
   
   // Company filter state
   const [companies, setCompanies] = useState<Company[]>([]);
@@ -176,10 +179,10 @@ export default function LeaveDashboardPage() {
   const totalBalance = leaveBalances.reduce((sum, b) => sum + (b.current_balance || 0), 0);
 
   const statCards = [
-    { label: "Available Days", value: totalBalance.toFixed(1), icon: Calendar, color: "bg-primary/10 text-primary" },
-    { label: "Pending Requests", value: pendingCount, icon: Clock, color: "bg-warning/10 text-warning" },
-    { label: "Approved This Year", value: approvedThisYear, icon: CheckCircle, color: "bg-success/10 text-success" },
-    { label: "Leave Types", value: leaveBalances.length, icon: CalendarCheck, color: "bg-info/10 text-info" },
+    { label: t("leave.stats.availableDays"), value: totalBalance.toFixed(1), icon: Calendar, color: "bg-primary/10 text-primary" },
+    { label: t("leave.stats.pendingRequests"), value: pendingCount, icon: Clock, color: "bg-warning/10 text-warning" },
+    { label: t("leave.stats.approvedThisYear"), value: approvedThisYear, icon: CheckCircle, color: "bg-success/10 text-success" },
+    { label: t("leave.stats.leaveTypes"), value: leaveBalances.length, icon: CalendarCheck, color: "bg-info/10 text-info" },
   ];
 
   const filteredModules = leaveModules.filter(m => !m.adminOnly || isAdminOrHR);
@@ -195,10 +198,10 @@ export default function LeaveDashboardPage() {
               </div>
               <div>
                 <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
-                  Leave Management
+                  {t("leave.title")}
                 </h1>
                 <p className="text-muted-foreground">
-                  Manage time off and leave requests
+                  {t("leave.subtitle")}
                 </p>
               </div>
             </div>
@@ -207,7 +210,7 @@ export default function LeaveDashboardPage() {
                 <Select value={selectedCompanyId} onValueChange={setSelectedCompanyId}>
                   <SelectTrigger className="w-[200px]">
                     <Building2 className="mr-2 h-4 w-4" />
-                    <SelectValue placeholder="Select company" />
+                    <SelectValue placeholder={t("leave.selectCompany")} />
                   </SelectTrigger>
                   <SelectContent>
                     {companies.map((c) => (

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { useLeaveManagement, LeaveAccrualRule } from "@/hooks/useLeaveManagement";
 import { useAuth } from "@/contexts/AuthContext";
+import { useLanguage } from "@/hooks/useLanguage";
 import { LeaveCompanyFilter, useLeaveCompanyFilter } from "@/components/leave/LeaveCompanyFilter";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -42,6 +43,7 @@ import { Plus, TrendingUp, Play, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 
 export default function LeaveAccrualRulesPage() {
+  const { t } = useLanguage();
   const { company } = useAuth();
   const { selectedCompanyId, setSelectedCompanyId } = useLeaveCompanyFilter();
   const { leaveTypes, accrualRules, loadingAccrualRules, createAccrualRule } = useLeaveManagement(selectedCompanyId);
@@ -103,21 +105,22 @@ export default function LeaveAccrualRulesPage() {
       
       if (error) throw error;
       
-      toast.success(`${accrualType === "daily" ? "Daily" : "Monthly"} accrual completed: ${data.processed} employees processed`);
+      const accrualLabel = accrualType === "daily" ? t("leave.accrualRules.daily") : t("leave.accrualRules.monthly");
+      toast.success(t("leave.accrualRules.accrualCompleted", { type: accrualLabel, count: data.processed }));
     } catch (error) {
       console.error("Accrual error:", error);
-      toast.error("Failed to run leave accrual");
+      toast.error(t("leave.accrualRules.accrualFailed"));
     } finally {
       setIsRunningAccrual(false);
     }
   };
 
   const frequencyLabels: Record<string, string> = {
-    daily: "Daily",
-    monthly: "Monthly",
-    annually: "Annually",
-    bi_weekly: "Bi-Weekly",
-    weekly: "Weekly",
+    daily: t("leave.accrualRules.daily"),
+    monthly: t("leave.accrualRules.monthly"),
+    annually: t("leave.accrualRules.annually"),
+    bi_weekly: t("leave.accrualRules.biWeekly"),
+    weekly: t("leave.accrualRules.weekly"),
   };
 
   return (
@@ -125,8 +128,8 @@ export default function LeaveAccrualRulesPage() {
       <div className="space-y-6">
         <Breadcrumbs
           items={[
-            { label: "Leave Management", href: "/leave" },
-            { label: "Accrual Rules" },
+            { label: t("leave.title"), href: "/leave" },
+            { label: t("leave.accrualRules.title") },
           ]}
         />
 
@@ -136,8 +139,8 @@ export default function LeaveAccrualRulesPage() {
               <TrendingUp className="h-5 w-5 text-primary" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold tracking-tight text-foreground">Leave Accrual Rules</h1>
-              <p className="text-muted-foreground">Configure how leave is earned based on tenure and other factors</p>
+              <h1 className="text-2xl font-bold tracking-tight text-foreground">{t("leave.accrualRules.title")}</h1>
+              <p className="text-muted-foreground">{t("leave.accrualRules.subtitle")}</p>
             </div>
           </div>
 
@@ -154,15 +157,15 @@ export default function LeaveAccrualRulesPage() {
                   ) : (
                     <Play className="mr-2 h-4 w-4" />
                   )}
-                  Run Accrual
+                  {t("leave.accrualRules.runAccrual")}
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent>
                 <DropdownMenuItem onClick={() => handleRunAccrual("daily")}>
-                  Run Daily Accrual Now
+                  {t("leave.accrualRules.runDailyNow")}
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => handleRunAccrual("monthly")}>
-                  Run Monthly Accrual Now
+                  {t("leave.accrualRules.runMonthlyNow")}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -170,23 +173,23 @@ export default function LeaveAccrualRulesPage() {
             <DialogTrigger asChild>
               <Button>
                 <Plus className="mr-2 h-4 w-4" />
-                Add Accrual Rule
+                {t("leave.accrualRules.addRule")}
               </Button>
             </DialogTrigger>
             <DialogContent className="max-w-2xl">
               <DialogHeader>
-                <DialogTitle>Add Accrual Rule</DialogTitle>
+                <DialogTitle>{t("leave.accrualRules.addRule")}</DialogTitle>
               </DialogHeader>
               <div className="grid gap-4 py-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="leave_type">Leave Type *</Label>
+                    <Label htmlFor="leave_type">{t("leave.accrualRules.leaveType")} *</Label>
                     <Select
                       value={formData.leave_type_id}
                       onValueChange={(value) => setFormData({ ...formData, leave_type_id: value })}
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Select leave type" />
+                        <SelectValue placeholder={t("leave.accrualRules.selectLeaveType")} />
                       </SelectTrigger>
                       <SelectContent>
                         {leaveTypes.map((type) => (
@@ -198,29 +201,29 @@ export default function LeaveAccrualRulesPage() {
                     </Select>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="name">Rule Name *</Label>
+                    <Label htmlFor="name">{t("leave.accrualRules.ruleName")} *</Label>
                     <Input
                       id="name"
                       value={formData.name}
                       onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                      placeholder="e.g., Standard Accrual"
+                      placeholder={t("leave.accrualRules.ruleNamePlaceholder")}
                     />
                   </div>
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="description">Description</Label>
+                  <Label htmlFor="description">{t("leave.accrualRules.description")}</Label>
                   <Textarea
                     id="description"
                     value={formData.description}
                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                    placeholder="Description of the accrual rule"
+                    placeholder={t("leave.accrualRules.descriptionPlaceholder")}
                   />
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="frequency">Accrual Frequency *</Label>
+                    <Label htmlFor="frequency">{t("leave.accrualRules.frequency")} *</Label>
                     <Select
                       value={formData.accrual_frequency}
                       onValueChange={(value: "daily" | "monthly" | "annually" | "bi_weekly" | "weekly") => 
@@ -231,30 +234,30 @@ export default function LeaveAccrualRulesPage() {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="daily">Daily</SelectItem>
-                        <SelectItem value="weekly">Weekly</SelectItem>
-                        <SelectItem value="bi_weekly">Bi-Weekly</SelectItem>
-                        <SelectItem value="monthly">Monthly</SelectItem>
-                        <SelectItem value="annually">Annually</SelectItem>
+                        <SelectItem value="daily">{t("leave.accrualRules.daily")}</SelectItem>
+                        <SelectItem value="weekly">{t("leave.accrualRules.weekly")}</SelectItem>
+                        <SelectItem value="bi_weekly">{t("leave.accrualRules.biWeekly")}</SelectItem>
+                        <SelectItem value="monthly">{t("leave.accrualRules.monthly")}</SelectItem>
+                        <SelectItem value="annually">{t("leave.accrualRules.annually")}</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="accrual_amount">Accrual Amount *</Label>
+                    <Label htmlFor="accrual_amount">{t("leave.accrualRules.amount")} *</Label>
                     <Input
                       id="accrual_amount"
                       type="number"
                       step="0.25"
                       value={formData.accrual_amount}
                       onChange={(e) => setFormData({ ...formData, accrual_amount: parseFloat(e.target.value) || 0 })}
-                      placeholder="Amount per period"
+                      placeholder={t("leave.accrualRules.amountPlaceholder")}
                     />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="yos_min">Min Years of Service</Label>
+                    <Label htmlFor="yos_min">{t("leave.accrualRules.minYearsOfService")}</Label>
                     <Input
                       id="yos_min"
                       type="number"
@@ -263,41 +266,41 @@ export default function LeaveAccrualRulesPage() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="yos_max">Max Years of Service</Label>
+                    <Label htmlFor="yos_max">{t("leave.accrualRules.maxYearsOfService")}</Label>
                     <Input
                       id="yos_max"
                       type="number"
                       value={formData.years_of_service_max || ""}
                       onChange={(e) => setFormData({ ...formData, years_of_service_max: e.target.value ? parseInt(e.target.value) : null })}
-                      placeholder="No limit"
+                      placeholder={t("leave.rolloverRules.noLimit")}
                     />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="employee_status">Employee Status (Optional)</Label>
+                    <Label htmlFor="employee_status">{t("leave.accrualRules.employeeStatus")}</Label>
                     <Input
                       id="employee_status"
                       value={formData.employee_status}
                       onChange={(e) => setFormData({ ...formData, employee_status: e.target.value })}
-                      placeholder="e.g., Full-Time"
+                      placeholder={t("leave.accrualRules.employeeStatusPlaceholder")}
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="employee_type">Employee Type (Optional)</Label>
+                    <Label htmlFor="employee_type">{t("leave.accrualRules.employeeType")}</Label>
                     <Input
                       id="employee_type"
                       value={formData.employee_type}
                       onChange={(e) => setFormData({ ...formData, employee_type: e.target.value })}
-                      placeholder="e.g., Permanent"
+                      placeholder={t("leave.accrualRules.employeeTypePlaceholder")}
                     />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="start_date">Start Date *</Label>
+                    <Label htmlFor="start_date">{t("leave.accrualRules.startDate")} *</Label>
                     <Input
                       id="start_date"
                       type="date"
@@ -306,19 +309,19 @@ export default function LeaveAccrualRulesPage() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="end_date">End Date (Optional)</Label>
+                    <Label htmlFor="end_date">{t("leave.accrualRules.endDate")}</Label>
                     <Input
                       id="end_date"
                       type="date"
                       value={formData.end_date}
                       onChange={(e) => setFormData({ ...formData, end_date: e.target.value })}
-                      placeholder="No end date"
+                      placeholder={t("leave.accrualRules.noEnd")}
                     />
                   </div>
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="priority">Priority (Higher = Applied First)</Label>
+                  <Label htmlFor="priority">{t("leave.accrualRules.priority")}</Label>
                   <Input
                     id="priority"
                     type="number"
@@ -329,10 +332,10 @@ export default function LeaveAccrualRulesPage() {
 
                 <div className="flex justify-end gap-2 pt-4">
                   <Button variant="outline" onClick={() => { setIsOpen(false); resetForm(); }}>
-                    Cancel
+                    {t("leave.common.cancel")}
                   </Button>
                   <Button onClick={handleSubmit} disabled={!formData.name || !formData.leave_type_id}>
-                    Create
+                    {t("leave.common.create")}
                   </Button>
                 </div>
               </div>
@@ -345,27 +348,27 @@ export default function LeaveAccrualRulesPage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Rule Name</TableHead>
-                <TableHead>Leave Type</TableHead>
-                <TableHead>Frequency</TableHead>
-                <TableHead>Amount</TableHead>
-                <TableHead>Years of Service</TableHead>
-                <TableHead>Validity Period</TableHead>
-                <TableHead>Priority</TableHead>
-                <TableHead>Status</TableHead>
+                <TableHead>{t("leave.accrualRules.ruleName")}</TableHead>
+                <TableHead>{t("leave.accrualRules.leaveType")}</TableHead>
+                <TableHead>{t("leave.accrualRules.frequency")}</TableHead>
+                <TableHead>{t("leave.accrualRules.amount")}</TableHead>
+                <TableHead>{t("leave.accrualRules.yearsOfService")}</TableHead>
+                <TableHead>{t("leave.accrualRules.validityPeriod")}</TableHead>
+                <TableHead>{t("leave.accrualRules.priority")}</TableHead>
+                <TableHead>{t("leave.common.status")}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {loadingAccrualRules ? (
                 <TableRow>
                   <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
-                    Loading...
+                    {t("leave.accrualRules.loading")}
                   </TableCell>
                 </TableRow>
               ) : accrualRules.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
-                    No accrual rules configured. Add rules to define how leave is earned.
+                    {t("leave.accrualRules.noRules")}
                   </TableCell>
                 </TableRow>
               ) : (
@@ -388,13 +391,13 @@ export default function LeaveAccrualRulesPage() {
                     </TableCell>
                     <TableCell>
                       <span className="text-sm">
-                        {new Date(rule.start_date).toLocaleDateString()} - {rule.end_date ? new Date(rule.end_date).toLocaleDateString() : "No end"}
+                        {new Date(rule.start_date).toLocaleDateString()} - {rule.end_date ? new Date(rule.end_date).toLocaleDateString() : t("leave.accrualRules.noEnd")}
                       </span>
                     </TableCell>
                     <TableCell>{rule.priority}</TableCell>
                     <TableCell>
                       <Badge variant={rule.is_active ? "default" : "secondary"}>
-                        {rule.is_active ? "Active" : "Inactive"}
+                        {rule.is_active ? t("leave.common.active") : t("leave.common.inactive")}
                       </Badge>
                     </TableCell>
                   </TableRow>

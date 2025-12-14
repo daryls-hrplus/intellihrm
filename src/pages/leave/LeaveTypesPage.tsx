@@ -2,6 +2,7 @@ import { useState } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { useLeaveManagement, LeaveType } from "@/hooks/useLeaveManagement";
 import { useAuth } from "@/contexts/AuthContext";
+import { useLanguage } from "@/hooks/useLanguage";
 import { LeaveCompanyFilter, useLeaveCompanyFilter } from "@/components/leave/LeaveCompanyFilter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -35,6 +36,7 @@ import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Plus, Pencil, Calendar } from "lucide-react";
 
 export default function LeaveTypesPage() {
+  const { t } = useLanguage();
   const { company } = useAuth();
   const { selectedCompanyId, setSelectedCompanyId } = useLeaveCompanyFilter();
   const { leaveTypes, loadingTypes, createLeaveType, updateLeaveType } = useLeaveManagement(selectedCompanyId);
@@ -121,8 +123,8 @@ export default function LeaveTypesPage() {
       <div className="space-y-6">
         <Breadcrumbs
           items={[
-            { label: "Leave Management", href: "/leave" },
-            { label: "Leave Types" },
+            { label: t("leave.title"), href: "/leave" },
+            { label: t("leave.leaveTypes.title") },
           ]}
         />
 
@@ -132,8 +134,8 @@ export default function LeaveTypesPage() {
               <Calendar className="h-5 w-5 text-primary" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold tracking-tight text-foreground">Leave Types</h1>
-              <p className="text-muted-foreground">Configure leave categories and settings</p>
+              <h1 className="text-2xl font-bold tracking-tight text-foreground">{t("leave.leaveTypes.title")}</h1>
+              <p className="text-muted-foreground">{t("leave.leaveTypes.subtitle")}</p>
             </div>
           </div>
 
@@ -146,17 +148,17 @@ export default function LeaveTypesPage() {
               <DialogTrigger asChild>
                 <Button>
                   <Plus className="mr-2 h-4 w-4" />
-                  Add Leave Type
+                  {t("leave.leaveTypes.addType")}
                 </Button>
               </DialogTrigger>
               <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
-                  <DialogTitle>{editingType ? "Edit Leave Type" : "Add Leave Type"}</DialogTitle>
+                  <DialogTitle>{editingType ? t("leave.leaveTypes.editType") : t("leave.leaveTypes.addType")}</DialogTitle>
                 </DialogHeader>
               <div className="grid gap-4 py-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="name">Name *</Label>
+                    <Label htmlFor="name">{t("leave.leaveTypes.name")} *</Label>
                     <Input
                       id="name"
                       value={formData.name}
@@ -165,7 +167,7 @@ export default function LeaveTypesPage() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="code">Code *</Label>
+                    <Label htmlFor="code">{t("leave.leaveTypes.code")} *</Label>
                     <Input
                       id="code"
                       value={formData.code}
@@ -176,18 +178,18 @@ export default function LeaveTypesPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="description">Description</Label>
+                  <Label htmlFor="description">{t("leave.leaveTypes.description")}</Label>
                   <Textarea
                     id="description"
                     value={formData.description}
                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                    placeholder="Description of the leave type"
+                    placeholder={t("leave.leaveTypes.description")}
                   />
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="accrual_unit">Accrual Unit</Label>
+                    <Label htmlFor="accrual_unit">{t("leave.leaveTypes.accrualUnit")}</Label>
                     <Select
                       value={formData.accrual_unit}
                       onValueChange={(value: "days" | "hours") => setFormData({ ...formData, accrual_unit: value })}
@@ -196,13 +198,13 @@ export default function LeaveTypesPage() {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="days">Days</SelectItem>
-                        <SelectItem value="hours">Hours</SelectItem>
+                        <SelectItem value="days">{t("leave.leaveTypes.days")}</SelectItem>
+                        <SelectItem value="hours">{t("leave.leaveTypes.hours")}</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="default_entitlement">Default Annual Entitlement</Label>
+                    <Label htmlFor="default_entitlement">{t("leave.leaveTypes.defaultEntitlement")}</Label>
                     <Input
                       id="default_entitlement"
                       type="number"
@@ -214,7 +216,7 @@ export default function LeaveTypesPage() {
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="min_request">Min Request Amount</Label>
+                    <Label htmlFor="min_request">{t("leave.leaveTypes.minRequest")}</Label>
                     <Input
                       id="min_request"
                       type="number"
@@ -224,20 +226,20 @@ export default function LeaveTypesPage() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="max_consecutive">Max Consecutive Days</Label>
+                    <Label htmlFor="max_consecutive">{t("leave.leaveTypes.maxConsecutive")}</Label>
                     <Input
                       id="max_consecutive"
                       type="number"
                       value={formData.max_consecutive_days || ""}
                       onChange={(e) => setFormData({ ...formData, max_consecutive_days: e.target.value ? parseInt(e.target.value) : null })}
-                      placeholder="No limit"
+                      placeholder={t("leave.leaveTypes.noLimit")}
                     />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="advance_notice">Advance Notice Days</Label>
+                    <Label htmlFor="advance_notice">{t("leave.leaveTypes.advanceNotice")}</Label>
                     <Input
                       id="advance_notice"
                       type="number"
@@ -246,7 +248,7 @@ export default function LeaveTypesPage() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="color">Color</Label>
+                    <Label htmlFor="color">{t("leave.leaveTypes.color")}</Label>
                     <Input
                       id="color"
                       type="color"
@@ -259,7 +261,7 @@ export default function LeaveTypesPage() {
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="flex items-center justify-between rounded-lg border p-3">
-                    <Label htmlFor="is_accrual_based">Accrual Based</Label>
+                    <Label htmlFor="is_accrual_based">{t("leave.leaveTypes.accrualBased")}</Label>
                     <Switch
                       id="is_accrual_based"
                       checked={formData.is_accrual_based}
@@ -267,7 +269,7 @@ export default function LeaveTypesPage() {
                     />
                   </div>
                   <div className="flex items-center justify-between rounded-lg border p-3">
-                    <Label htmlFor="requires_approval">Requires Approval</Label>
+                    <Label htmlFor="requires_approval">{t("leave.leaveTypes.requiresApproval")}</Label>
                     <Switch
                       id="requires_approval"
                       checked={formData.requires_approval}
@@ -278,7 +280,7 @@ export default function LeaveTypesPage() {
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="flex items-center justify-between rounded-lg border p-3">
-                    <Label htmlFor="allows_negative">Allow Negative Balance</Label>
+                    <Label htmlFor="allows_negative">{t("leave.leaveTypes.allowNegative")}</Label>
                     <Switch
                       id="allows_negative"
                       checked={formData.allows_negative_balance}
@@ -286,7 +288,7 @@ export default function LeaveTypesPage() {
                     />
                   </div>
                   <div className="flex items-center justify-between rounded-lg border p-3">
-                    <Label htmlFor="can_be_encashed">Can Be Encashed</Label>
+                    <Label htmlFor="can_be_encashed">{t("leave.leaveTypes.canBeEncashed")}</Label>
                     <Switch
                       id="can_be_encashed"
                       checked={formData.can_be_encashed}
@@ -297,9 +299,9 @@ export default function LeaveTypesPage() {
 
                 <div className="flex items-center justify-between rounded-lg border p-3 bg-amber-50 dark:bg-amber-950/20">
                   <div>
-                    <Label htmlFor="accrues_leave_while_on">Employees Accrue Leave While On This Type</Label>
+                    <Label htmlFor="accrues_leave_while_on">{t("leave.leaveTypes.accruesLeaveWhileOn")}</Label>
                     <p className="text-xs text-muted-foreground mt-1">
-                      When disabled, employees do not earn leave balances while on this leave type (e.g., unpaid leave)
+                      {t("leave.leaveTypes.accruesLeaveWhileOnDesc")}
                     </p>
                   </div>
                   <Switch
@@ -311,10 +313,10 @@ export default function LeaveTypesPage() {
 
                 <div className="flex justify-end gap-2 pt-4">
                   <Button variant="outline" onClick={() => { setIsOpen(false); resetForm(); }}>
-                    Cancel
+                    {t("leave.common.cancel")}
                   </Button>
                   <Button onClick={handleSubmit} disabled={!formData.name || !formData.code}>
-                    {editingType ? "Update" : "Create"}
+                    {editingType ? t("leave.common.update") : t("leave.common.create")}
                   </Button>
                 </div>
               </div>
@@ -327,28 +329,28 @@ export default function LeaveTypesPage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Code</TableHead>
-                <TableHead>Unit</TableHead>
-                <TableHead>Entitlement</TableHead>
-                <TableHead>Accrual Based</TableHead>
-                <TableHead>Accrues Leave</TableHead>
-                <TableHead>Approval Required</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="w-[80px]">Actions</TableHead>
+                <TableHead>{t("leave.leaveTypes.name")}</TableHead>
+                <TableHead>{t("leave.leaveTypes.code")}</TableHead>
+                <TableHead>{t("leave.leaveTypes.accrualUnit")}</TableHead>
+                <TableHead>{t("leave.leaveTypes.entitlement")}</TableHead>
+                <TableHead>{t("leave.leaveTypes.accrualBased")}</TableHead>
+                <TableHead>{t("leave.leaveTypes.accruesLeave")}</TableHead>
+                <TableHead>{t("leave.leaveTypes.approvalRequired")}</TableHead>
+                <TableHead>{t("leave.leaveTypes.status")}</TableHead>
+                <TableHead className="w-[80px]">{t("leave.leaveTypes.actions")}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {loadingTypes ? (
                 <TableRow>
                   <TableCell colSpan={9} className="text-center py-8 text-muted-foreground">
-                    Loading...
+                    {t("leave.leaveTypes.loading")}
                   </TableCell>
                 </TableRow>
               ) : leaveTypes.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={9} className="text-center py-8 text-muted-foreground">
-                    No leave types configured. Add your first leave type to get started.
+                    {t("leave.leaveTypes.noTypes")}
                   </TableCell>
                 </TableRow>
               ) : (
@@ -365,22 +367,22 @@ export default function LeaveTypesPage() {
                     <TableCell>{type.default_annual_entitlement} {type.accrual_unit}</TableCell>
                     <TableCell>
                       <Badge variant={type.is_accrual_based ? "default" : "secondary"}>
-                        {type.is_accrual_based ? "Yes" : "No"}
+                        {type.is_accrual_based ? t("leave.leaveTypes.yes") : t("leave.leaveTypes.no")}
                       </Badge>
                     </TableCell>
                     <TableCell>
                       <Badge variant={type.accrues_leave_while_on ? "default" : "destructive"}>
-                        {type.accrues_leave_while_on ? "Yes" : "No"}
+                        {type.accrues_leave_while_on ? t("leave.leaveTypes.yes") : t("leave.leaveTypes.no")}
                       </Badge>
                     </TableCell>
                     <TableCell>
                       <Badge variant={type.requires_approval ? "default" : "secondary"}>
-                        {type.requires_approval ? "Yes" : "No"}
+                        {type.requires_approval ? t("leave.leaveTypes.yes") : t("leave.leaveTypes.no")}
                       </Badge>
                     </TableCell>
                     <TableCell>
                       <Badge variant={type.is_active ? "default" : "secondary"}>
-                        {type.is_active ? "Active" : "Inactive"}
+                        {type.is_active ? t("leave.leaveTypes.active") : t("leave.leaveTypes.inactive")}
                       </Badge>
                     </TableCell>
                     <TableCell>

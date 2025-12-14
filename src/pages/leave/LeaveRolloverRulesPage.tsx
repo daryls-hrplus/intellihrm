@@ -2,6 +2,7 @@ import { useState } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { useLeaveManagement } from "@/hooks/useLeaveManagement";
 import { useAuth } from "@/contexts/AuthContext";
+import { useLanguage } from "@/hooks/useLanguage";
 import { LeaveCompanyFilter, useLeaveCompanyFilter } from "@/components/leave/LeaveCompanyFilter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -34,6 +35,7 @@ import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Plus, RotateCcw } from "lucide-react";
 
 export default function LeaveRolloverRulesPage() {
+  const { t } = useLanguage();
   const { company } = useAuth();
   const { selectedCompanyId, setSelectedCompanyId } = useLeaveCompanyFilter();
   const { leaveTypes, rolloverRules, loadingRolloverRules, createRolloverRule } = useLeaveManagement(selectedCompanyId);
@@ -77,8 +79,8 @@ export default function LeaveRolloverRulesPage() {
       <div className="space-y-6">
         <Breadcrumbs
           items={[
-            { label: "Leave Management", href: "/leave" },
-            { label: "Rollover Rules" },
+            { label: t("leave.title"), href: "/leave" },
+            { label: t("leave.rolloverRules.title") },
           ]}
         />
 
@@ -88,8 +90,8 @@ export default function LeaveRolloverRulesPage() {
               <RotateCcw className="h-5 w-5 text-primary" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold tracking-tight text-foreground">Leave Rollover Rules</h1>
-              <p className="text-muted-foreground">Configure year-end leave balance rollover policies</p>
+              <h1 className="text-2xl font-bold tracking-tight text-foreground">{t("leave.rolloverRules.title")}</h1>
+              <p className="text-muted-foreground">{t("leave.rolloverRules.subtitle")}</p>
             </div>
           </div>
 
@@ -102,22 +104,22 @@ export default function LeaveRolloverRulesPage() {
             <DialogTrigger asChild>
               <Button disabled={availableLeaveTypes.length === 0}>
                 <Plus className="mr-2 h-4 w-4" />
-                Add Rollover Rule
+                {t("leave.rolloverRules.addRule")}
               </Button>
             </DialogTrigger>
             <DialogContent className="max-w-lg">
               <DialogHeader>
-                <DialogTitle>Add Rollover Rule</DialogTitle>
+                <DialogTitle>{t("leave.rolloverRules.addRule")}</DialogTitle>
               </DialogHeader>
               <div className="grid gap-4 py-4">
                 <div className="space-y-2">
-                  <Label htmlFor="leave_type">Leave Type *</Label>
+                  <Label htmlFor="leave_type">{t("leave.rolloverRules.leaveType")} *</Label>
                   <Select
                     value={formData.leave_type_id}
                     onValueChange={(value) => setFormData({ ...formData, leave_type_id: value })}
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Select leave type" />
+                      <SelectValue placeholder={t("leave.rolloverRules.selectLeaveType")} />
                     </SelectTrigger>
                     <SelectContent>
                       {availableLeaveTypes.map((type) => (
@@ -130,45 +132,45 @@ export default function LeaveRolloverRulesPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="max_rollover">Max Rollover Amount</Label>
+                  <Label htmlFor="max_rollover">{t("leave.rolloverRules.maxRollover")}</Label>
                   <Input
                     id="max_rollover"
                     type="number"
                     value={formData.max_rollover_amount || ""}
                     onChange={(e) => setFormData({ ...formData, max_rollover_amount: e.target.value ? parseFloat(e.target.value) : null })}
-                    placeholder="No limit"
+                    placeholder={t("leave.rolloverRules.noLimit")}
                   />
-                  <p className="text-xs text-muted-foreground">Maximum amount that can roll over to next year</p>
+                  <p className="text-xs text-muted-foreground">{t("leave.rolloverRules.maxRolloverDesc")}</p>
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="max_balance">Max Balance Cap</Label>
+                  <Label htmlFor="max_balance">{t("leave.rolloverRules.maxBalanceCap")}</Label>
                   <Input
                     id="max_balance"
                     type="number"
                     value={formData.max_balance_cap || ""}
                     onChange={(e) => setFormData({ ...formData, max_balance_cap: e.target.value ? parseFloat(e.target.value) : null })}
-                    placeholder="No limit"
+                    placeholder={t("leave.rolloverRules.noLimit")}
                   />
-                  <p className="text-xs text-muted-foreground">Absolute maximum balance limit</p>
+                  <p className="text-xs text-muted-foreground">{t("leave.rolloverRules.maxBalanceCapDesc")}</p>
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="expiry_months">Rollover Expiry (Months)</Label>
+                  <Label htmlFor="expiry_months">{t("leave.rolloverRules.expiryMonths")}</Label>
                   <Input
                     id="expiry_months"
                     type="number"
                     value={formData.rollover_expiry_months || ""}
                     onChange={(e) => setFormData({ ...formData, rollover_expiry_months: e.target.value ? parseInt(e.target.value) : null })}
-                    placeholder="Never expires"
+                    placeholder={t("leave.rolloverRules.neverExpires")}
                   />
-                  <p className="text-xs text-muted-foreground">Months before rolled-over balance expires</p>
+                  <p className="text-xs text-muted-foreground">{t("leave.rolloverRules.expiryMonthsDesc")}</p>
                 </div>
 
                 <div className="flex items-center justify-between rounded-lg border p-3">
                   <div>
-                    <Label htmlFor="forfeit_unused">Forfeit Unused Balance</Label>
-                    <p className="text-xs text-muted-foreground">Any balance exceeding limits is lost</p>
+                    <Label htmlFor="forfeit_unused">{t("leave.rolloverRules.forfeitUnused")}</Label>
+                    <p className="text-xs text-muted-foreground">{t("leave.rolloverRules.forfeitUnusedDesc")}</p>
                   </div>
                   <Switch
                     id="forfeit_unused"
@@ -179,10 +181,10 @@ export default function LeaveRolloverRulesPage() {
 
                 <div className="flex justify-end gap-2 pt-4">
                   <Button variant="outline" onClick={() => { setIsOpen(false); resetForm(); }}>
-                    Cancel
+                    {t("leave.common.cancel")}
                   </Button>
                   <Button onClick={handleSubmit} disabled={!formData.leave_type_id}>
-                    Create
+                    {t("leave.common.create")}
                   </Button>
                 </div>
               </div>
@@ -195,25 +197,25 @@ export default function LeaveRolloverRulesPage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Leave Type</TableHead>
-                <TableHead>Max Rollover</TableHead>
-                <TableHead>Max Balance Cap</TableHead>
-                <TableHead>Expiry (Months)</TableHead>
-                <TableHead>Forfeit Unused</TableHead>
-                <TableHead>Status</TableHead>
+                <TableHead>{t("leave.rolloverRules.leaveType")}</TableHead>
+                <TableHead>{t("leave.rolloverRules.maxRollover")}</TableHead>
+                <TableHead>{t("leave.rolloverRules.maxBalanceCap")}</TableHead>
+                <TableHead>{t("leave.rolloverRules.expiryMonths")}</TableHead>
+                <TableHead>{t("leave.rolloverRules.forfeitUnused")}</TableHead>
+                <TableHead>{t("leave.common.status")}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {loadingRolloverRules ? (
                 <TableRow>
                   <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
-                    Loading...
+                    {t("leave.rolloverRules.loading")}
                   </TableCell>
                 </TableRow>
               ) : rolloverRules.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
-                    No rollover rules configured. Add rules to define year-end balance handling.
+                    {t("leave.rolloverRules.noRules")}
                   </TableCell>
                 </TableRow>
               ) : (
@@ -229,22 +231,22 @@ export default function LeaveRolloverRulesPage() {
                       </div>
                     </TableCell>
                     <TableCell>
-                      {rule.max_rollover_amount !== null ? `${rule.max_rollover_amount}` : "No limit"}
+                      {rule.max_rollover_amount !== null ? `${rule.max_rollover_amount}` : t("leave.rolloverRules.noLimit")}
                     </TableCell>
                     <TableCell>
-                      {rule.max_balance_cap !== null ? `${rule.max_balance_cap}` : "No limit"}
+                      {rule.max_balance_cap !== null ? `${rule.max_balance_cap}` : t("leave.rolloverRules.noLimit")}
                     </TableCell>
                     <TableCell>
-                      {rule.rollover_expiry_months !== null ? `${rule.rollover_expiry_months} months` : "Never"}
+                      {rule.rollover_expiry_months !== null ? `${rule.rollover_expiry_months} ${t("leave.rolloverRules.months")}` : t("leave.rolloverRules.never")}
                     </TableCell>
                     <TableCell>
                       <Badge variant={rule.forfeit_unused ? "destructive" : "secondary"}>
-                        {rule.forfeit_unused ? "Yes" : "No"}
+                        {rule.forfeit_unused ? t("leave.leaveTypes.yes") : t("leave.leaveTypes.no")}
                       </Badge>
                     </TableCell>
                     <TableCell>
                       <Badge variant={rule.is_active ? "default" : "secondary"}>
-                        {rule.is_active ? "Active" : "Inactive"}
+                        {rule.is_active ? t("leave.common.active") : t("leave.common.inactive")}
                       </Badge>
                     </TableCell>
                   </TableRow>
