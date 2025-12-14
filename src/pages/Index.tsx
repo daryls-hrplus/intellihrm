@@ -15,13 +15,15 @@ import {
   Calendar,
   TrendingUp,
 } from "lucide-react";
+import defaultGroupLogo from "@/assets/default-group-logo.png";
+import defaultCompanyLogo from "@/assets/default-company-logo.png";
 
 const Index = () => {
   const { profile, isAdmin, company } = useAuth();
   const firstName = profile?.full_name?.split(" ")[0] || "there";
   
-  const hasGroupLogo = company?.company_group?.logo_url;
-  const hasCompanyLogo = company?.logo_url;
+  const groupLogoUrl = company?.company_group?.logo_url || (company?.company_group ? defaultGroupLogo : null);
+  const companyLogoUrl = company?.logo_url || defaultCompanyLogo;
 
   return (
     <AppLayout>
@@ -38,32 +40,30 @@ const Index = () => {
           </div>
           
           {/* Company Logos */}
-          {(hasGroupLogo || hasCompanyLogo) && (
+          {company && (
             <div className="flex items-center gap-3">
-              {hasGroupLogo && (
+              {groupLogoUrl && (
                 <Avatar className="h-12 w-12 rounded-lg border bg-background shadow-sm">
                   <AvatarImage 
-                    src={company.company_group!.logo_url!} 
-                    alt={company.company_group!.name}
+                    src={groupLogoUrl} 
+                    alt={company.company_group?.name || "Group"}
                     className="object-contain p-1"
                   />
                   <AvatarFallback className="rounded-lg text-xs font-medium">
-                    {company.company_group!.name.substring(0, 2).toUpperCase()}
+                    {(company.company_group?.name || "GR").substring(0, 2).toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
               )}
-              {hasCompanyLogo && (
-                <Avatar className="h-12 w-12 rounded-lg border bg-background shadow-sm">
-                  <AvatarImage 
-                    src={company.logo_url!} 
-                    alt={company.name}
-                    className="object-contain p-1"
-                  />
-                  <AvatarFallback className="rounded-lg text-xs font-medium">
-                    {company.name.substring(0, 2).toUpperCase()}
-                  </AvatarFallback>
-                </Avatar>
-              )}
+              <Avatar className="h-12 w-12 rounded-lg border bg-background shadow-sm">
+                <AvatarImage 
+                  src={companyLogoUrl} 
+                  alt={company.name}
+                  className="object-contain p-1"
+                />
+                <AvatarFallback className="rounded-lg text-xs font-medium">
+                  {company.name.substring(0, 2).toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
             </div>
           )}
         </div>
