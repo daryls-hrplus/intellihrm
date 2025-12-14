@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useSearchParams, Link } from "react-router-dom";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -16,6 +16,7 @@ import {
   ThumbsUp,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { markdownToHtml } from "@/lib/utils/markdown";
 
 interface KBCategory {
   id: string;
@@ -133,6 +134,12 @@ export default function KnowledgeBasePage() {
     }
   };
 
+  // Memoize the HTML content conversion
+  const articleHtml = useMemo(() => {
+    if (!selectedArticle) return '';
+    return markdownToHtml(selectedArticle.content);
+  }, [selectedArticle]);
+
   // Article Detail View
   if (selectedArticle) {
     return (
@@ -172,8 +179,8 @@ export default function KnowledgeBasePage() {
             </CardHeader>
             <CardContent>
               <div 
-                className="prose prose-sm max-w-none dark:prose-invert"
-                dangerouslySetInnerHTML={{ __html: selectedArticle.content.replace(/\n/g, '<br />') }}
+                className="prose prose-sm max-w-none dark:prose-invert prose-headings:text-foreground prose-p:text-foreground prose-li:text-foreground prose-strong:text-foreground"
+                dangerouslySetInnerHTML={{ __html: articleHtml }}
               />
 
               <div className="mt-8 pt-6 border-t">
