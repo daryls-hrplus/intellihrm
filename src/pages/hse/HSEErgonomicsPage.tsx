@@ -61,7 +61,7 @@ export default function HSEErgonomicsPage() {
 
   const stats = [
     { label: t("hseModule.ergonomics.stats.totalAssessments"), value: assessments?.length || 0, icon: Monitor, color: "bg-primary/10 text-primary" },
-    { label: t("hseModule.ergonomics.stats.highRisk"), value: assessments?.filter(a => a.overall_score && a.overall_score >= 7).length || 0, icon: AlertTriangle, color: "bg-destructive/10 text-destructive" },
+    { label: t("hseModule.ergonomics.stats.highRisk"), value: assessments?.filter(a => a.overall_risk_level === "high" || a.overall_risk_level === "critical").length || 0, icon: AlertTriangle, color: "bg-destructive/10 text-destructive" },
     { label: t("hseModule.ergonomics.stats.completed"), value: assessments?.filter(a => a.status === "completed").length || 0, icon: CheckCircle, color: "bg-emerald-500/10 text-emerald-600" },
     { label: t("hseModule.ergonomics.stats.pendingFollowUp"), value: assessments?.filter(a => a.status === "follow_up").length || 0, icon: Clock, color: "bg-amber-500/10 text-amber-600" },
   ];
@@ -133,7 +133,7 @@ export default function HSEErgonomicsPage() {
                       <TableCell className="font-medium">{assessment.assessment_number}</TableCell>
                       <TableCell>{assessment.assessment_date ? format(new Date(assessment.assessment_date), "MMM dd, yyyy") : "-"}</TableCell>
                       <TableCell>{assessment.workstation_type || "-"}</TableCell>
-                      <TableCell>{assessment.overall_score ? (assessment.overall_score >= 7 ? "High" : assessment.overall_score >= 4 ? "Medium" : "Low") : "-"}</TableCell>
+                      <TableCell>{getRiskBadge(assessment.overall_risk_level)}</TableCell>
                       <TableCell>{getStatusBadge(assessment.status)}</TableCell>
                       <TableCell><Button variant="ghost" size="sm">{t("common.view")}</Button></TableCell>
                     </TableRow>

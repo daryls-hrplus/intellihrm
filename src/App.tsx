@@ -171,6 +171,11 @@ import HSEChemicalsPage from "./pages/hse/HSEChemicalsPage";
 import HSEOshaReportingPage from "./pages/hse/HSEOshaReportingPage";
 import HSEPermitToWorkPage from "./pages/hse/HSEPermitToWorkPage";
 import HSELotoPage from "./pages/hse/HSELotoPage";
+import HSENearMissPage from "./pages/hse/HSENearMissPage";
+import HSESafetyObservationsPage from "./pages/hse/HSESafetyObservationsPage";
+import HSEToolboxTalksPage from "./pages/hse/HSEToolboxTalksPage";
+import HSEFirstAidPage from "./pages/hse/HSEFirstAidPage";
+import HSEErgonomicsPage from "./pages/hse/HSEErgonomicsPage";
 
 // Employee Relations pages
 import EmployeeRelationsDashboardPage from "./pages/employee-relations/EmployeeRelationsDashboardPage";
@@ -2031,8 +2036,48 @@ const App = () => (
                 </ProtectedRoute>
               }
             />
+            <Route
+              path="/hse/near-miss"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
+                  <HSENearMissPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/hse/safety-observations"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
+                  <HSESafetyObservationsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/hse/toolbox-talks"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
+                  <HSEToolboxTalksPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/hse/first-aid"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
+                  <HSEFirstAidPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/hse/ergonomics"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
+                  <HSEErgonomicsPage />
+                </ProtectedRoute>
+              }
+            />
 
-            {/* Employee Relations Routes */}
+
             <Route
               path="/employee-relations"
               element={

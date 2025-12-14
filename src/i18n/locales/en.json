@@ -2894,6 +2894,26 @@
       "loto": {
         "title": "Lock-out/Tag-out",
         "description": "Energy isolation procedures"
+      },
+      "nearMiss": {
+        "title": "Near-Miss Reports",
+        "description": "Near-miss incident tracking"
+      },
+      "safetyObservations": {
+        "title": "Safety Observations",
+        "description": "Behavioral safety observations"
+      },
+      "toolboxTalks": {
+        "title": "Toolbox Talks",
+        "description": "Safety meeting records"
+      },
+      "firstAid": {
+        "title": "First Aid",
+        "description": "First aid logs and kits"
+      },
+      "ergonomics": {
+        "title": "Ergonomics",
+        "description": "Workstation assessments"
       }
     },
     "incidents": {
@@ -3358,6 +3378,126 @@
         "locked": "Locked",
         "verified": "Verified",
         "released": "Released"
+      }
+    },
+    "nearMiss": {
+      "title": "Near-Miss Reports",
+      "subtitle": "Track and analyze near-miss incidents",
+      "newReport": "New Report",
+      "searchReports": "Search reports...",
+      "noReports": "No near-miss reports found",
+      "reportsList": "Near-Miss Reports",
+      "stats": {
+        "totalReports": "Total Reports",
+        "pending": "Pending Review",
+        "highPotential": "High Potential",
+        "resolved": "Resolved"
+      },
+      "reportNumber": "Report #",
+      "reportDate": "Report Date",
+      "hazardType": "Hazard Type",
+      "potentialSeverity": "Potential Severity",
+      "statusOptions": {
+        "reported": "Reported",
+        "investigating": "Investigating",
+        "resolved": "Resolved",
+        "closed": "Closed"
+      }
+    },
+    "safetyObservations": {
+      "title": "Safety Observations",
+      "subtitle": "Behavioral safety observation program",
+      "newObservation": "New Observation",
+      "searchObservations": "Search observations...",
+      "noObservations": "No safety observations found",
+      "observationsList": "Safety Observations",
+      "stats": {
+        "totalObservations": "Total Observations",
+        "safe": "Safe Behaviors",
+        "atRisk": "At-Risk Behaviors",
+        "requiresAction": "Requires Action"
+      },
+      "observationType": "Observation Type",
+      "observationDate": "Observation Date",
+      "behavior": "Behavior Type",
+      "correctiveAction": "Corrective Action"
+    },
+    "toolboxTalks": {
+      "title": "Toolbox Talks",
+      "subtitle": "Safety meeting management and records",
+      "newTalk": "New Toolbox Talk",
+      "searchTalks": "Search talks...",
+      "noTalks": "No toolbox talks found",
+      "talksList": "Toolbox Talks",
+      "stats": {
+        "totalTalks": "Total Talks",
+        "thisMonth": "This Month",
+        "avgAttendance": "Avg Attendance",
+        "scheduled": "Scheduled"
+      },
+      "talkTitle": "Topic",
+      "scheduledDate": "Scheduled Date",
+      "duration": "Duration",
+      "attendeeCount": "Attendees",
+      "statusOptions": {
+        "scheduled": "Scheduled",
+        "in_progress": "In Progress",
+        "completed": "Completed",
+        "cancelled": "Cancelled"
+      }
+    },
+    "firstAid": {
+      "title": "First Aid Management",
+      "subtitle": "First aid logs and kit management",
+      "addKit": "Add Kit",
+      "logTreatment": "Log Treatment",
+      "searchKits": "Search kits...",
+      "noKits": "No first aid kits found",
+      "noTreatments": "No treatments found",
+      "tabs": {
+        "kits": "First Aid Kits",
+        "treatments": "Treatment Log"
+      },
+      "stats": {
+        "totalKits": "Total Kits",
+        "wellStocked": "Well Stocked",
+        "lowStock": "Low Stock",
+        "treatmentsToday": "Treatments Today"
+      },
+      "kitLocation": "Kit Location",
+      "kitStatus": "Kit Status",
+      "lastInspection": "Last Inspection",
+      "treatmentDate": "Treatment Date",
+      "treatmentType": "Treatment Type",
+      "statusOptions": {
+        "good": "Well Stocked",
+        "low_stock": "Low Stock",
+        "needs_restock": "Needs Restocking",
+        "expired": "Expired Items"
+      }
+    },
+    "ergonomics": {
+      "title": "Ergonomic Assessments",
+      "subtitle": "Workstation and ergonomic evaluations",
+      "newAssessment": "New Assessment",
+      "searchAssessments": "Search assessments...",
+      "noAssessments": "No assessments found",
+      "assessmentsList": "Ergonomic Assessments",
+      "stats": {
+        "totalAssessments": "Total Assessments",
+        "highRisk": "High Risk",
+        "completed": "Completed",
+        "pendingFollowUp": "Pending Follow-up"
+      },
+      "assessmentNumber": "Assessment #",
+      "assessmentDate": "Assessment Date",
+      "workstationType": "Workstation Type",
+      "riskLevel": "Risk Level",
+      "statusOptions": {
+        "scheduled": "Scheduled",
+        "in_progress": "In Progress",
+        "completed": "Completed",
+        "follow_up": "Follow-up Required"
       }
     }
   },
