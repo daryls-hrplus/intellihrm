@@ -37,8 +37,8 @@ export default function MyOnboardingPage() {
 
   const breadcrumbItems = [
     { label: t('common.home'), path: '/' },
-    { label: 'Employee Self Service', path: '/ess' },
-    { label: 'My Onboarding' },
+    { label: t('navigation.ess'), path: '/ess' },
+    { label: t('ess.myOnboarding.breadcrumb') },
   ];
 
   useEffect(() => {
@@ -70,13 +70,13 @@ export default function MyOnboardingPage() {
 
   const handleTaskComplete = async (task: OnboardingTask) => {
     if (task.assigned_to_type !== 'employee') {
-      toast.error('This task is assigned to someone else');
+      toast.error(t('common.error'));
       return;
     }
 
     await updateTask(task.id, { status: 'completed' });
     loadData();
-    toast.success('Task marked as complete!');
+    toast.success(t('common.success'));
   };
 
   const getTaskIcon = (type: string) => {
@@ -90,23 +90,23 @@ export default function MyOnboardingPage() {
 
   const getTaskStatus = (task: OnboardingTask) => {
     if (task.status === 'completed') {
-      return { color: 'bg-green-500/20 text-green-700', label: 'Completed' };
+      return { color: 'bg-green-500/20 text-green-700', label: t('ess.myOnboarding.completed') };
     }
     if (task.due_date && isPast(new Date(task.due_date))) {
-      return { color: 'bg-destructive/20 text-destructive', label: 'Overdue' };
+      return { color: 'bg-destructive/20 text-destructive', label: t('ess.myOnboarding.overdue') };
     }
     if (task.status === 'in_progress') {
-      return { color: 'bg-blue-500/20 text-blue-700', label: 'In Progress' };
+      return { color: 'bg-blue-500/20 text-blue-700', label: t('ess.myOnboarding.inProgress') };
     }
-    return { color: 'bg-muted text-muted-foreground', label: 'Pending' };
+    return { color: 'bg-muted text-muted-foreground', label: t('ess.myOnboarding.pending') };
   };
 
   const getDaysRemaining = (dueDate: string | null) => {
     if (!dueDate) return null;
     const days = differenceInDays(new Date(dueDate), new Date());
-    if (days < 0) return `${Math.abs(days)} days overdue`;
-    if (days === 0) return 'Due today';
-    return `${days} days left`;
+    if (days < 0) return t('ess.myOnboarding.daysOverdue', { days: Math.abs(days) });
+    if (days === 0) return t('ess.myOnboarding.dueToday');
+    return t('ess.myOnboarding.daysLeft', { days });
   };
 
   if (isLoading) {
@@ -130,9 +130,9 @@ export default function MyOnboardingPage() {
           <Card>
             <CardContent className="py-16 text-center">
               <PartyPopper className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
-              <h2 className="text-2xl font-semibold mb-2">No Active Onboarding</h2>
+              <h2 className="text-2xl font-semibold mb-2">{t('ess.myOnboarding.noActiveOnboarding')}</h2>
               <p className="text-muted-foreground">
-                You don't have any onboarding tasks at the moment.
+                {t('ess.myOnboarding.noOnboardingTasks')}
               </p>
             </CardContent>
           </Card>
@@ -151,8 +151,8 @@ export default function MyOnboardingPage() {
         <Breadcrumbs items={breadcrumbItems} />
 
         <div>
-          <h1 className="text-3xl font-bold">Welcome to Your Onboarding</h1>
-          <p className="text-muted-foreground">Complete these tasks to get started at {instance.companies?.name}</p>
+          <h1 className="text-3xl font-bold">{t('ess.myOnboarding.welcomeTitle')}</h1>
+          <p className="text-muted-foreground">{t('ess.myOnboarding.welcomeSubtitle', { company: instance.companies?.name })}</p>
         </div>
 
         {/* Progress Card */}
@@ -164,10 +164,10 @@ export default function MyOnboardingPage() {
                   <div className="text-4xl font-bold text-primary">{progress.percentage}%</div>
                   <div>
                     <p className="font-medium">
-                      {isComplete ? 'Onboarding Complete!' : 'Keep going!'}
+                      {isComplete ? t('ess.myOnboarding.onboardingComplete') : t('ess.myOnboarding.keepGoing')}
                     </p>
                     <p className="text-sm text-muted-foreground">
-                      {progress.completed} of {progress.total} tasks completed
+                      {t('ess.myOnboarding.tasksCompleted', { completed: progress.completed, total: progress.total })}
                     </p>
                   </div>
                 </div>
@@ -176,7 +176,7 @@ export default function MyOnboardingPage() {
               {isComplete && (
                 <div className="flex items-center gap-2 text-green-600">
                   <PartyPopper className="h-8 w-8" />
-                  <span className="text-lg font-semibold">Congratulations!</span>
+                  <span className="text-lg font-semibold">{t('ess.myOnboarding.congratulations')}</span>
                 </div>
               )}
             </div>
@@ -194,7 +194,7 @@ export default function MyOnboardingPage() {
                       <Users className="h-6 w-6 text-primary" />
                     </div>
                     <div>
-                      <p className="text-sm text-muted-foreground">Your Manager</p>
+                      <p className="text-sm text-muted-foreground">{t('ess.myOnboarding.yourManager')}</p>
                       <p className="font-semibold">{(instance.manager as any)?.full_name}</p>
                     </div>
                   </div>
@@ -209,7 +209,7 @@ export default function MyOnboardingPage() {
                       <User className="h-6 w-6 text-secondary-foreground" />
                     </div>
                     <div>
-                      <p className="text-sm text-muted-foreground">Your Buddy</p>
+                      <p className="text-sm text-muted-foreground">{t('ess.myOnboarding.yourBuddy')}</p>
                       <p className="font-semibold">{(instance.buddy as any)?.full_name}</p>
                     </div>
                   </div>
@@ -224,14 +224,14 @@ export default function MyOnboardingPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <CheckCircle2 className="h-5 w-5" />
-              Your Tasks
+              {t('ess.myOnboarding.yourTasks')}
             </CardTitle>
-            <CardDescription>Tasks you need to complete</CardDescription>
+            <CardDescription>{t('ess.myOnboarding.tasksYouNeedToComplete')}</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
               {myTasks.length === 0 ? (
-                <p className="text-center text-muted-foreground py-8">No tasks assigned to you</p>
+                <p className="text-center text-muted-foreground py-8">{t('ess.myOnboarding.noTasksAssigned')}</p>
               ) : (
                 myTasks.map(task => {
                   const status = getTaskStatus(task);
@@ -258,7 +258,7 @@ export default function MyOnboardingPage() {
                               {task.name}
                             </span>
                             {task.is_required && (
-                              <Badge variant="outline" className="text-xs">Required</Badge>
+                              <Badge variant="outline" className="text-xs">{t('ess.myOnboarding.required')}</Badge>
                             )}
                           </div>
                           <Badge className={status.color}>{status.label}</Badge>
@@ -279,13 +279,13 @@ export default function MyOnboardingPage() {
                         {task.task_type === 'training' && task.training_course_id && (
                           <Button variant="outline" size="sm">
                             <ExternalLink className="h-4 w-4 mr-1" />
-                            Start Course
+                            {t('ess.myOnboarding.startCourse')}
                           </Button>
                         )}
                         {task.task_type === 'document' && !isCompleted && (
                           <Button variant="outline" size="sm">
                             <Upload className="h-4 w-4 mr-1" />
-                            Upload
+                            {t('ess.myOnboarding.upload')}
                           </Button>
                         )}
                       </div>
@@ -303,9 +303,9 @@ export default function MyOnboardingPage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Users className="h-5 w-5" />
-                Other Tasks
+                {t('ess.myOnboarding.otherTasks')}
               </CardTitle>
-              <CardDescription>Tasks being handled by your team</CardDescription>
+              <CardDescription>{t('ess.myOnboarding.tasksBeingHandled')}</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
@@ -335,7 +335,7 @@ export default function MyOnboardingPage() {
                               </span>
                             </div>
                             <p className="text-sm text-muted-foreground mt-1 ml-7">
-                              Assigned to: <span className="capitalize">{task.assigned_to?.full_name || task.assigned_to_type}</span>
+                              {t('ess.myOnboarding.assignedTo')}: <span className="capitalize">{task.assigned_to?.full_name || task.assigned_to_type}</span>
                             </p>
                           </div>
                           <Badge className={status.color}>{status.label}</Badge>

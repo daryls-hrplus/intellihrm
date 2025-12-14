@@ -37,8 +37,8 @@ export default function MyOffboardingPage() {
 
   const breadcrumbItems = [
     { label: t('common.home'), path: '/' },
-    { label: 'Employee Self Service', path: '/ess' },
-    { label: 'My Offboarding' },
+    { label: t('navigation.ess'), path: '/ess' },
+    { label: t('ess.myOffboarding.breadcrumb') },
   ];
 
   useEffect(() => {
@@ -69,13 +69,13 @@ export default function MyOffboardingPage() {
 
   const handleTaskComplete = async (task: OffboardingTask) => {
     if (task.assigned_to_type !== 'employee') {
-      toast.error('This task is assigned to someone else');
+      toast.error(t('common.error'));
       return;
     }
 
     await updateTask(task.id, { status: 'completed' });
     loadData();
-    toast.success('Task marked as complete!');
+    toast.success(t('common.success'));
   };
 
   const getTaskIcon = (type: string) => {
@@ -91,23 +91,23 @@ export default function MyOffboardingPage() {
 
   const getTaskStatus = (task: OffboardingTask) => {
     if (task.status === 'completed') {
-      return { color: 'bg-green-500/20 text-green-700', label: 'Completed' };
+      return { color: 'bg-green-500/20 text-green-700', label: t('ess.myOnboarding.completed') };
     }
     if (task.due_date && isPast(new Date(task.due_date))) {
-      return { color: 'bg-destructive/20 text-destructive', label: 'Overdue' };
+      return { color: 'bg-destructive/20 text-destructive', label: t('ess.myOnboarding.overdue') };
     }
     if (task.status === 'in_progress') {
-      return { color: 'bg-blue-500/20 text-blue-700', label: 'In Progress' };
+      return { color: 'bg-blue-500/20 text-blue-700', label: t('ess.myOnboarding.inProgress') };
     }
-    return { color: 'bg-muted text-muted-foreground', label: 'Pending' };
+    return { color: 'bg-muted text-muted-foreground', label: t('ess.myOnboarding.pending') };
   };
 
   const getDaysRemaining = (dueDate: string | null) => {
     if (!dueDate) return null;
     const days = differenceInDays(new Date(dueDate), new Date());
-    if (days < 0) return `${Math.abs(days)} days overdue`;
-    if (days === 0) return 'Due today';
-    return `${days} days left`;
+    if (days < 0) return t('ess.myOnboarding.daysOverdue', { days: Math.abs(days) });
+    if (days === 0) return t('ess.myOnboarding.dueToday');
+    return t('ess.myOnboarding.daysLeft', { days });
   };
 
   if (isLoading) {
@@ -131,9 +131,9 @@ export default function MyOffboardingPage() {
           <Card>
             <CardContent className="py-16 text-center">
               <UserMinus className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
-              <h2 className="text-2xl font-semibold mb-2">No Active Offboarding</h2>
+              <h2 className="text-2xl font-semibold mb-2">{t('ess.myOffboarding.noActiveOffboarding')}</h2>
               <p className="text-muted-foreground">
-                You don't have any offboarding tasks at the moment.
+                {t('ess.myOffboarding.noOffboardingTasks')}
               </p>
             </CardContent>
           </Card>
@@ -154,9 +154,9 @@ export default function MyOffboardingPage() {
         <div>
           <h1 className="text-3xl font-bold flex items-center gap-2">
             <UserMinus className="h-8 w-8" />
-            Offboarding Checklist
+            {t('ess.myOffboarding.offboardingChecklist')}
           </h1>
-          <p className="text-muted-foreground">Complete these tasks before your last working day</p>
+          <p className="text-muted-foreground">{t('ess.myOffboarding.completeBeforeLastDay')}</p>
         </div>
 
         {/* Last Working Date Card */}
@@ -168,12 +168,12 @@ export default function MyOffboardingPage() {
                   <Calendar className="h-6 w-6 text-orange-600" />
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Last Working Date</p>
+                  <p className="text-sm text-muted-foreground">{t('ess.myOffboarding.lastWorkingDate')}</p>
                   <p className="text-2xl font-bold">{format(new Date(instance.last_working_date), 'MMMM d, yyyy')}</p>
                 </div>
               </div>
               <div className="text-center md:text-right">
-                <p className="text-sm text-muted-foreground">Days Remaining</p>
+                <p className="text-sm text-muted-foreground">{t('ess.myOffboarding.daysRemaining')}</p>
                 <p className="text-2xl font-bold">
                   {Math.max(0, differenceInDays(new Date(instance.last_working_date), new Date()))}
                 </p>
@@ -191,10 +191,10 @@ export default function MyOffboardingPage() {
                   <div className="text-4xl font-bold text-primary">{progress.percentage}%</div>
                   <div>
                     <p className="font-medium">
-                      {isComplete ? 'Offboarding Complete' : 'Tasks Progress'}
+                      {isComplete ? t('ess.myOffboarding.offboardingComplete') : t('ess.myOffboarding.tasksProgress')}
                     </p>
                     <p className="text-sm text-muted-foreground">
-                      {progress.completed} of {progress.total} tasks completed
+                      {t('ess.myOnboarding.tasksCompleted', { completed: progress.completed, total: progress.total })}
                     </p>
                   </div>
                 </div>
@@ -203,7 +203,7 @@ export default function MyOffboardingPage() {
               {isComplete && (
                 <div className="flex items-center gap-2 text-green-600">
                   <CheckCircle2 className="h-8 w-8" />
-                  <span className="text-lg font-semibold">All Done!</span>
+                  <span className="text-lg font-semibold">{t('ess.myOffboarding.allDone')}</span>
                 </div>
               )}
             </div>
@@ -215,13 +215,13 @@ export default function MyOffboardingPage() {
           <Card>
             <CardContent className="pt-6">
               <div className="flex items-center gap-4">
-                <div className="p-3 rounded-full bg-primary/10">
-                  <Users className="h-6 w-6 text-primary" />
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Your Manager</p>
-                  <p className="font-semibold">{(instance.manager as any)?.full_name}</p>
-                </div>
+                  <div className="p-3 rounded-full bg-primary/10">
+                    <Users className="h-6 w-6 text-primary" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">{t('ess.myOffboarding.yourManager')}</p>
+                    <p className="font-semibold">{(instance.manager as any)?.full_name}</p>
+                  </div>
               </div>
             </CardContent>
           </Card>
@@ -232,14 +232,14 @@ export default function MyOffboardingPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <CheckCircle2 className="h-5 w-5" />
-              Your Tasks
+              {t('ess.myOffboarding.yourTasks')}
             </CardTitle>
-            <CardDescription>Tasks you need to complete before leaving</CardDescription>
+            <CardDescription>{t('ess.myOffboarding.tasksToCompleteBeforeLeaving')}</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
               {myTasks.length === 0 ? (
-                <p className="text-center text-muted-foreground py-8">No tasks assigned to you</p>
+                <p className="text-center text-muted-foreground py-8">{t('ess.myOffboarding.noTasksAssigned')}</p>
               ) : (
                 myTasks.map(task => {
                   const status = getTaskStatus(task);
@@ -266,7 +266,7 @@ export default function MyOffboardingPage() {
                               {task.name}
                             </span>
                             {task.is_required && (
-                              <Badge variant="outline" className="text-xs">Required</Badge>
+                              <Badge variant="outline" className="text-xs">{t('ess.myOnboarding.required')}</Badge>
                             )}
                           </div>
                           <Badge className={status.color}>{status.label}</Badge>
@@ -283,10 +283,10 @@ export default function MyOffboardingPage() {
                           </p>
                         )}
                       </div>
-                      {task.task_type === 'document' && !isCompleted && (
-                        <Button variant="outline" size="sm">
-                          <Upload className="h-4 w-4 mr-1" />
-                          Upload
+                        {task.task_type === 'document' && !isCompleted && (
+                          <Button variant="outline" size="sm">
+                            <Upload className="h-4 w-4 mr-1" />
+                            {t('ess.myOffboarding.upload')}
                         </Button>
                       )}
                     </div>
@@ -303,9 +303,9 @@ export default function MyOffboardingPage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Users className="h-5 w-5" />
-                Tasks for Others
+                {t('ess.myOffboarding.tasksForOthers')}
               </CardTitle>
-              <CardDescription>Tasks being handled by HR, IT, or your manager</CardDescription>
+              <CardDescription>{t('ess.myOffboarding.tasksHandledByOthers')}</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
@@ -335,7 +335,7 @@ export default function MyOffboardingPage() {
                               </span>
                             </div>
                             <p className="text-sm text-muted-foreground mt-1 ml-7">
-                              Assigned to: <span className="capitalize">{task.assigned_to?.full_name || task.assigned_to_type}</span>
+                              {t('ess.myOnboarding.assignedTo')}: <span className="capitalize">{task.assigned_to?.full_name || task.assigned_to_type}</span>
                             </p>
                           </div>
                           <Badge className={status.color}>{status.label}</Badge>
