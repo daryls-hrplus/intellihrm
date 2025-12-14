@@ -30,6 +30,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { useLanguage } from "@/hooks/useLanguage";
 import {
   AlertTriangle,
   Plus,
@@ -74,6 +75,7 @@ const treatmentOptions = [
 ];
 
 export default function HSEIncidentsPage() {
+  const { t } = useLanguage();
   const [companyId, setCompanyId] = useState<string>("");
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
@@ -157,8 +159,8 @@ export default function HSEIncidentsPage() {
             <AlertTriangle className="h-5 w-5 text-destructive" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold tracking-tight">Incident Reports</h1>
-            <p className="text-muted-foreground">Report and track safety incidents</p>
+            <h1 className="text-2xl font-bold tracking-tight">{t("hseModule.incidents.title")}</h1>
+            <p className="text-muted-foreground">{t("hseModule.incidents.subtitle")}</p>
           </div>
         </div>
 
@@ -168,7 +170,7 @@ export default function HSEIncidentsPage() {
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground">Open Incidents</p>
+                  <p className="text-sm text-muted-foreground">{t("hseModule.stats.openIncidents")}</p>
                   <p className="text-2xl font-bold">{openIncidents}</p>
                 </div>
                 <FileText className="h-8 w-8 text-muted-foreground" />
@@ -179,7 +181,7 @@ export default function HSEIncidentsPage() {
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground">Critical</p>
+                  <p className="text-sm text-muted-foreground">{t("hseModule.stats.critical")}</p>
                   <p className="text-2xl font-bold text-destructive">{criticalIncidents}</p>
                 </div>
                 <AlertTriangle className="h-8 w-8 text-destructive" />
@@ -190,7 +192,7 @@ export default function HSEIncidentsPage() {
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground">This Month</p>
+                  <p className="text-sm text-muted-foreground">{t("hseModule.stats.thisMonth")}</p>
                   <p className="text-2xl font-bold">{thisMonthIncidents}</p>
                 </div>
                 <Calendar className="h-8 w-8 text-muted-foreground" />
@@ -201,7 +203,7 @@ export default function HSEIncidentsPage() {
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground">Total Incidents</p>
+                  <p className="text-sm text-muted-foreground">{t("hseModule.stats.totalIncidents")}</p>
                   <p className="text-2xl font-bold">{incidents.length}</p>
                 </div>
                 <Activity className="h-8 w-8 text-muted-foreground" />
@@ -216,7 +218,7 @@ export default function HSEIncidentsPage() {
             <div className="flex flex-wrap gap-4">
               <Select value={companyId} onValueChange={setCompanyId}>
                 <SelectTrigger className="w-[200px]">
-                  <SelectValue placeholder="Select company" />
+                  <SelectValue placeholder={t("hseModule.common.selectCompany")} />
                 </SelectTrigger>
                 <SelectContent>
                   {companies.map((c) => (
@@ -230,7 +232,7 @@ export default function HSEIncidentsPage() {
               <div className="relative flex-1 min-w-[200px]">
                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
-                  placeholder="Search incidents..."
+                  placeholder={t("hseModule.incidents.searchIncidents")}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-9"
@@ -239,10 +241,10 @@ export default function HSEIncidentsPage() {
 
               <Select value={statusFilter} onValueChange={setStatusFilter}>
                 <SelectTrigger className="w-[150px]">
-                  <SelectValue placeholder="Status" />
+                  <SelectValue placeholder={t("common.status")} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Status</SelectItem>
+                  <SelectItem value="all">{t("hseModule.common.allStatus")}</SelectItem>
                   {statusOptions.map((s) => (
                     <SelectItem key={s.value} value={s.value}>
                       {s.label}
@@ -253,10 +255,10 @@ export default function HSEIncidentsPage() {
 
               <Select value={typeFilter} onValueChange={setTypeFilter}>
                 <SelectTrigger className="w-[150px]">
-                  <SelectValue placeholder="Type" />
+                  <SelectValue placeholder={t("common.type")} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Types</SelectItem>
+                  <SelectItem value="all">{t("hseModule.common.allTypes")}</SelectItem>
                   {incidentTypes.map((t) => (
                     <SelectItem key={t.value} value={t.value}>
                       {t.label}
@@ -267,7 +269,7 @@ export default function HSEIncidentsPage() {
 
               <Button onClick={() => handleOpenDialog()} disabled={!companyId}>
                 <Plus className="mr-2 h-4 w-4" />
-                Report Incident
+                {t("hseModule.incidents.reportIncident")}
               </Button>
             </div>
           </CardContent>
@@ -279,27 +281,27 @@ export default function HSEIncidentsPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Incident #</TableHead>
-                  <TableHead>Title</TableHead>
-                  <TableHead>Type</TableHead>
-                  <TableHead>Severity</TableHead>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Location</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Reported By</TableHead>
+                  <TableHead>{t("hseModule.incidents.incidentNumber")}</TableHead>
+                  <TableHead>{t("hseModule.common.title")}</TableHead>
+                  <TableHead>{t("common.type")}</TableHead>
+                  <TableHead>{t("hseModule.incidents.severity")}</TableHead>
+                  <TableHead>{t("common.date")}</TableHead>
+                  <TableHead>{t("hseModule.common.location")}</TableHead>
+                  <TableHead>{t("common.status")}</TableHead>
+                  <TableHead>{t("hseModule.incidents.reportedBy")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {incidentsLoading ? (
                   <TableRow>
                     <TableCell colSpan={8} className="text-center py-8">
-                      Loading...
+                      {t("hseModule.common.loading")}
                     </TableCell>
                   </TableRow>
                 ) : filteredIncidents.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
-                      No incidents found
+                      {t("hseModule.incidents.noIncidents")}
                     </TableCell>
                   </TableRow>
                 ) : (
@@ -334,7 +336,7 @@ export default function HSEIncidentsPage() {
           <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>
-                {selectedIncident ? "Edit Incident" : "Report New Incident"}
+                {selectedIncident ? t("hseModule.incidents.editIncident") : t("hseModule.incidents.newIncident")}
               </DialogTitle>
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4">

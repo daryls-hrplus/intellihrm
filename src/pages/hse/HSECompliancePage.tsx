@@ -31,6 +31,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useLanguage } from "@/hooks/useLanguage";
 import {
   ClipboardCheck,
   Plus,
@@ -74,6 +75,7 @@ const auditTypes = [
 ];
 
 export default function HSECompliancePage() {
+  const { t } = useLanguage();
   const [companyId, setCompanyId] = useState<string>("");
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
@@ -231,8 +233,8 @@ export default function HSECompliancePage() {
             <ClipboardCheck className="h-5 w-5 text-success" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold tracking-tight">Compliance</h1>
-            <p className="text-muted-foreground">Regulatory compliance tracking</p>
+            <h1 className="text-2xl font-bold tracking-tight">{t("hseModule.compliance.title")}</h1>
+            <p className="text-muted-foreground">{t("hseModule.compliance.subtitle")}</p>
           </div>
         </div>
 
