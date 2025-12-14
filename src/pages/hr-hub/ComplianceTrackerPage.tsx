@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useLanguage } from "@/hooks/useLanguage";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Button } from "@/components/ui/button";
@@ -48,6 +49,7 @@ const mockItems: ComplianceItem[] = [
 ];
 
 export default function ComplianceTrackerPage() {
+  const { t } = useLanguage();
   const [items, setItems] = useState<ComplianceItem[]>(mockItems);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("all");
@@ -83,9 +85,16 @@ export default function ComplianceTrackerPage() {
 
   const getDaysRemaining = (deadline: string) => {
     const days = differenceInDays(new Date(deadline), new Date());
-    if (days < 0) return `${Math.abs(days)} days overdue`;
-    if (days === 0) return "Due today";
-    return `${days} days remaining`;
+    if (days < 0) return t("hrHub.daysOverdue", { days: Math.abs(days) });
+    if (days === 0) return t("hrHub.dueToday");
+    return t("hrHub.daysRemaining", { days });
+  };
+
+  const statusLabels: Record<string, string> = {
+    compliant: t("hrHub.compliant"),
+    pending: t("hrHub.pending"),
+    in_progress: t("hrHub.inProgress"),
+    overdue: t("hrHub.overdue"),
   };
 
   const filteredItems = items.filter(item => {
@@ -106,8 +115,8 @@ export default function ComplianceTrackerPage() {
   const overallCompliance = Math.round((stats.compliant / stats.total) * 100);
 
   const breadcrumbItems = [
-    { label: "HR Hub", href: "/hr-hub" },
-    { label: "Compliance Tracker" },
+    { label: t("hrHub.title"), href: "/hr-hub" },
+    { label: t("hrHub.compliance") },
   ];
 
   return (
@@ -117,12 +126,12 @@ export default function ComplianceTrackerPage() {
 
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold">Compliance Tracker</h1>
-            <p className="text-muted-foreground">Monitor compliance deadlines and requirements</p>
+            <h1 className="text-3xl font-bold">{t("hrHub.compliance")}</h1>
+            <p className="text-muted-foreground">{t("hrHub.complianceSubtitle")}</p>
           </div>
           <Button onClick={() => setDialogOpen(true)}>
             <Plus className="h-4 w-4 mr-2" />
-            Add Requirement
+            {t("hrHub.addRequirement")}
           </Button>
         </div>
 
@@ -135,8 +144,8 @@ export default function ComplianceTrackerPage() {
                   <ShieldCheck className="h-6 w-6 text-primary" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold">Overall Compliance Rate</h3>
-                  <p className="text-sm text-muted-foreground">Based on {stats.total} tracked requirements</p>
+                  <h3 className="text-lg font-semibold">{t("hrHub.overallComplianceRate")}</h3>
+                  <p className="text-sm text-muted-foreground">{t("hrHub.basedOnRequirements", { count: stats.total })}</p>
                 </div>
               </div>
               <div className="text-right">
@@ -157,7 +166,7 @@ export default function ComplianceTrackerPage() {
                 </div>
                 <div>
                   <p className="text-2xl font-bold">{stats.total}</p>
-                  <p className="text-sm text-muted-foreground">Total</p>
+                  <p className="text-sm text-muted-foreground">{t("common.total")}</p>
                 </div>
               </div>
             </CardContent>
@@ -170,7 +179,7 @@ export default function ComplianceTrackerPage() {
                 </div>
                 <div>
                   <p className="text-2xl font-bold">{stats.compliant}</p>
-                  <p className="text-sm text-muted-foreground">Compliant</p>
+                  <p className="text-sm text-muted-foreground">{t("hrHub.compliant")}</p>
                 </div>
               </div>
             </CardContent>
@@ -183,7 +192,7 @@ export default function ComplianceTrackerPage() {
                 </div>
                 <div>
                   <p className="text-2xl font-bold">{stats.pending}</p>
-                  <p className="text-sm text-muted-foreground">In Progress</p>
+                  <p className="text-sm text-muted-foreground">{t("hrHub.inProgress")}</p>
                 </div>
               </div>
             </CardContent>
@@ -196,7 +205,7 @@ export default function ComplianceTrackerPage() {
                 </div>
                 <div>
                   <p className="text-2xl font-bold">{stats.overdue}</p>
-                  <p className="text-sm text-muted-foreground">Overdue</p>
+                  <p className="text-sm text-muted-foreground">{t("hrHub.overdue")}</p>
                 </div>
               </div>
             </CardContent>
@@ -207,10 +216,10 @@ export default function ComplianceTrackerPage() {
           <CardHeader>
             <Tabs value={activeTab} onValueChange={setActiveTab}>
               <TabsList>
-                <TabsTrigger value="all">All ({stats.total})</TabsTrigger>
-                <TabsTrigger value="overdue">Overdue ({stats.overdue})</TabsTrigger>
-                <TabsTrigger value="upcoming">In Progress ({stats.pending})</TabsTrigger>
-                <TabsTrigger value="compliant">Compliant ({stats.compliant})</TabsTrigger>
+                <TabsTrigger value="all">{t("common.all")} ({stats.total})</TabsTrigger>
+                <TabsTrigger value="overdue">{t("hrHub.overdue")} ({stats.overdue})</TabsTrigger>
+                <TabsTrigger value="upcoming">{t("hrHub.inProgress")} ({stats.pending})</TabsTrigger>
+                <TabsTrigger value="compliant">{t("hrHub.compliant")} ({stats.compliant})</TabsTrigger>
               </TabsList>
             </Tabs>
           </CardHeader>
@@ -218,7 +227,7 @@ export default function ComplianceTrackerPage() {
             {filteredItems.length === 0 ? (
               <div className="text-center py-12 text-muted-foreground">
                 <ShieldCheck className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                <p>No compliance items found</p>
+                <p>{t("hrHub.noComplianceItems")}</p>
               </div>
             ) : (
               <div className="space-y-4">
@@ -232,13 +241,13 @@ export default function ComplianceTrackerPage() {
                           <Badge className={`${getStatusColor(item.status)} text-white`}>
                             <span className="flex items-center gap-1">
                               {getStatusIcon(item.status)}
-                              {item.status.replace("_", " ")}
+                              {statusLabels[item.status]}
                             </span>
                           </Badge>
                         </div>
                         <p className="text-sm text-muted-foreground mb-3">{item.description}</p>
                         <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                          <span>Responsible: {item.responsible}</span>
+                          <span>{t("hrHub.responsible")}: {item.responsible}</span>
                           <span>•</span>
                           <span className={item.status === "overdue" ? "text-red-500 font-medium" : ""}>
                             {getDaysRemaining(item.deadline)}
@@ -246,7 +255,7 @@ export default function ComplianceTrackerPage() {
                         </div>
                       </div>
                       <div className="text-right min-w-[100px]">
-                        <p className="text-sm text-muted-foreground mb-1">Progress</p>
+                        <p className="text-sm text-muted-foreground mb-1">{t("hrHub.progress")}</p>
                         <p className="text-2xl font-bold">{item.progress}%</p>
                         <Progress value={item.progress} className="h-2 mt-2" />
                       </div>
@@ -261,23 +270,23 @@ export default function ComplianceTrackerPage() {
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Add Compliance Requirement</DialogTitle>
+              <DialogTitle>{t("hrHub.addComplianceRequirement")}</DialogTitle>
             </DialogHeader>
             <div className="space-y-4">
               <div>
-                <Label>Title *</Label>
+                <Label>{t("common.name")} *</Label>
                 <Input
                   value={formData.title}
                   onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                  placeholder="Requirement title"
+                  placeholder={t("hrHub.requirementTitle")}
                 />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label>Category</Label>
+                  <Label>{t("hrHub.category")}</Label>
                   <Select value={formData.category} onValueChange={(v) => setFormData({ ...formData, category: v })}>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select category" />
+                      <SelectValue placeholder={t("common.select")} />
                     </SelectTrigger>
                     <SelectContent>
                       {categories.map((cat) => (
@@ -287,7 +296,7 @@ export default function ComplianceTrackerPage() {
                   </Select>
                 </div>
                 <div>
-                  <Label>Deadline *</Label>
+                  <Label>{t("hrHub.deadline")} *</Label>
                   <Input
                     type="date"
                     value={formData.deadline}
@@ -297,40 +306,40 @@ export default function ComplianceTrackerPage() {
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label>Responsible</Label>
+                  <Label>{t("hrHub.responsible")}</Label>
                   <Input
                     value={formData.responsible}
                     onChange={(e) => setFormData({ ...formData, responsible: e.target.value })}
-                    placeholder="Person/Team responsible"
+                    placeholder={t("hrHub.responsiblePlaceholder")}
                   />
                 </div>
                 <div>
-                  <Label>Priority</Label>
+                  <Label>{t("helpdesk.priorities.medium")}</Label>
                   <Select value={formData.priority} onValueChange={(v) => setFormData({ ...formData, priority: v })}>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="low">Low</SelectItem>
-                      <SelectItem value="medium">Medium</SelectItem>
-                      <SelectItem value="high">High</SelectItem>
-                      <SelectItem value="urgent">Urgent</SelectItem>
+                      <SelectItem value="low">{t("helpdesk.priorities.low")}</SelectItem>
+                      <SelectItem value="medium">{t("helpdesk.priorities.medium")}</SelectItem>
+                      <SelectItem value="high">{t("helpdesk.priorities.high")}</SelectItem>
+                      <SelectItem value="urgent">{t("helpdesk.priorities.urgent")}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
               </div>
               <div>
-                <Label>Description</Label>
+                <Label>{t("common.description")}</Label>
                 <Textarea
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  placeholder="Describe the compliance requirement"
+                  placeholder={t("hrHub.requirementDescription")}
                 />
               </div>
             </div>
             <DialogFooter>
-              <Button variant="outline" onClick={() => setDialogOpen(false)}>Cancel</Button>
-              <Button onClick={() => setDialogOpen(false)}>Add Requirement</Button>
+              <Button variant="outline" onClick={() => setDialogOpen(false)}>{t("common.cancel")}</Button>
+              <Button onClick={() => setDialogOpen(false)}>{t("hrHub.addRequirement")}</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>

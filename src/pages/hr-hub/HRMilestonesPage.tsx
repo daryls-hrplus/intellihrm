@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { useLanguage } from "@/hooks/useLanguage";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -25,6 +26,7 @@ interface Milestone {
 
 export default function HRMilestonesPage() {
   const { profile } = useAuth();
+  const { t } = useLanguage();
   const [milestones, setMilestones] = useState<Milestone[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("upcoming");
@@ -128,16 +130,16 @@ export default function HRMilestonesPage() {
 
   const getMilestoneLabel = (milestone: Milestone) => {
     switch (milestone.type) {
-      case "birthday": return "Birthday";
-      case "anniversary": return `${milestone.years} Year Anniversary`;
-      case "probation": return "Probation Ends";
-      default: return "Milestone";
+      case "birthday": return t("hrHub.birthday");
+      case "anniversary": return t("hrHub.yearAnniversary", { years: milestone.years });
+      case "probation": return t("hrHub.probationEnds");
+      default: return t("hrHub.milestone");
     }
   };
 
   const breadcrumbItems = [
-    { label: "HR Hub", href: "/hr-hub" },
-    { label: "Milestones Dashboard" },
+    { label: t("hrHub.title"), href: "/hr-hub" },
+    { label: t("hrHub.milestones") },
   ];
 
   return (
@@ -147,8 +149,8 @@ export default function HRMilestonesPage() {
 
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold">Milestones Dashboard</h1>
-            <p className="text-muted-foreground">Track birthdays, anniversaries, and important dates</p>
+            <h1 className="text-3xl font-bold">{t("hrHub.milestones")}</h1>
+            <p className="text-muted-foreground">{t("hrHub.milestonesSubtitle")}</p>
           </div>
         </div>
 
@@ -164,7 +166,7 @@ export default function HRMilestonesPage() {
                   <p className="text-2xl font-bold">
                     {milestones.filter(m => m.type === "birthday").length}
                   </p>
-                  <p className="text-sm text-muted-foreground">Birthdays This Month</p>
+                  <p className="text-sm text-muted-foreground">{t("hrHub.birthdaysThisMonth")}</p>
                 </div>
               </div>
             </CardContent>
@@ -179,7 +181,7 @@ export default function HRMilestonesPage() {
                   <p className="text-2xl font-bold">
                     {milestones.filter(m => m.type === "anniversary").length}
                   </p>
-                  <p className="text-sm text-muted-foreground">Work Anniversaries</p>
+                  <p className="text-sm text-muted-foreground">{t("hrHub.workAnniversaries")}</p>
                 </div>
               </div>
             </CardContent>
@@ -194,7 +196,7 @@ export default function HRMilestonesPage() {
                   <p className="text-2xl font-bold">
                     {milestones.filter(m => m.type === "probation").length}
                   </p>
-                  <p className="text-sm text-muted-foreground">Probations Ending</p>
+                  <p className="text-sm text-muted-foreground">{t("hrHub.probationsEnding")}</p>
                 </div>
               </div>
             </CardContent>
@@ -207,7 +209,7 @@ export default function HRMilestonesPage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Gift className="h-5 w-5 text-primary" />
-                Today's Celebrations
+                {t("hrHub.todaysCelebrations")}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -238,15 +240,15 @@ export default function HRMilestonesPage() {
           <CardHeader>
             <Tabs value={activeTab} onValueChange={setActiveTab}>
               <TabsList>
-                <TabsTrigger value="upcoming">Upcoming</TabsTrigger>
-                <TabsTrigger value="birthdays">Birthdays</TabsTrigger>
-                <TabsTrigger value="anniversaries">Anniversaries</TabsTrigger>
+                <TabsTrigger value="upcoming">{t("hrHub.upcoming")}</TabsTrigger>
+                <TabsTrigger value="birthdays">{t("hrHub.birthdays")}</TabsTrigger>
+                <TabsTrigger value="anniversaries">{t("hrHub.anniversaries")}</TabsTrigger>
               </TabsList>
             </Tabs>
           </CardHeader>
           <CardContent>
             {isLoading ? (
-              <div className="text-center py-12 text-muted-foreground">Loading...</div>
+              <div className="text-center py-12 text-muted-foreground">{t("common.loading")}</div>
             ) : (
               <div className="space-y-3">
                 {(activeTab === "upcoming" ? upcomingMilestones :
@@ -255,7 +257,7 @@ export default function HRMilestonesPage() {
                 ).length === 0 ? (
                   <div className="text-center py-12 text-muted-foreground">
                     <Calendar className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                    <p>No milestones found</p>
+                    <p>{t("hrHub.noMilestonesFound")}</p>
                   </div>
                 ) : (
                   (activeTab === "upcoming" ? upcomingMilestones :
