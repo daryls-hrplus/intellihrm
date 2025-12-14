@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuditLog } from "@/hooks/useAuditLog";
 import { usePiiVisibility } from "@/hooks/usePiiVisibility";
+import { useLanguage } from "@/hooks/useLanguage";
 import { supabase } from "@/integrations/supabase/client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -86,6 +87,7 @@ interface EmployeeProfile {
 export default function EmployeeProfilePage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { t } = useLanguage();
   const [employee, setEmployee] = useState<EmployeeProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
@@ -263,11 +265,11 @@ export default function EmployeeProfilePage() {
               </div>
               <div className="flex flex-col items-end gap-2">
                 <Badge variant={activePosition ? "default" : "secondary"} className="shrink-0">
-                  {activePosition ? "Active" : "Unassigned"}
+                  {activePosition ? t("common.active") : t("workforce.unassigned")}
                 </Badge>
                 <Button variant="outline" size="sm" onClick={() => setEditDialogOpen(true)}>
                   <Pencil className="mr-2 h-4 w-4" />
-                  Edit
+                  {t("common.edit")}
                 </Button>
               </div>
             </div>
@@ -277,27 +279,25 @@ export default function EmployeeProfilePage() {
         {/* Tabs Section */}
         <Tabs defaultValue="overview" className="w-full">
           <TabsList className="flex flex-wrap h-auto gap-1 p-1">
-            <TabsTrigger value="overview"><User className="h-4 w-4 mr-1" />Overview</TabsTrigger>
-            <TabsTrigger value="addresses"><Home className="h-4 w-4 mr-1" />Addresses</TabsTrigger>
-            <TabsTrigger value="background"><ShieldCheck className="h-4 w-4 mr-1" />Background</TabsTrigger>
-            <TabsTrigger value="bank"><CreditCard className="h-4 w-4 mr-1" />Bank</TabsTrigger>
-            <TabsTrigger value="beneficiaries"><Users className="h-4 w-4 mr-1" />Beneficiaries</TabsTrigger>
-            <TabsTrigger value="branches"><Building2 className="h-4 w-4 mr-1" />Branches</TabsTrigger>
-            <TabsTrigger value="bank"><CreditCard className="h-4 w-4 mr-1" />Bank</TabsTrigger>
-            <TabsTrigger value="beneficiaries"><Users className="h-4 w-4 mr-1" />Beneficiaries</TabsTrigger>
-            <TabsTrigger value="certificates"><GraduationCap className="h-4 w-4 mr-1" />Certificates</TabsTrigger>
-            <TabsTrigger value="competencies"><Award className="h-4 w-4 mr-1" />Competencies</TabsTrigger>
-            <TabsTrigger value="contacts"><Phone className="h-4 w-4 mr-1" />Contacts</TabsTrigger>
-            <TabsTrigger value="dependents"><Baby className="h-4 w-4 mr-1" />Dependents</TabsTrigger>
-            <TabsTrigger value="documents"><FileText className="h-4 w-4 mr-1" />Documents</TabsTrigger>
-            <TabsTrigger value="emergency"><AlertTriangle className="h-4 w-4 mr-1" />Emergency</TabsTrigger>
-            <TabsTrigger value="interests"><Sparkles className="h-4 w-4 mr-1" />Interests</TabsTrigger>
-            <TabsTrigger value="licenses"><Award className="h-4 w-4 mr-1" />Licenses</TabsTrigger>
-            <TabsTrigger value="medical"><Stethoscope className="h-4 w-4 mr-1" />Medical</TabsTrigger>
-            <TabsTrigger value="memberships"><Heart className="h-4 w-4 mr-1" />Memberships</TabsTrigger>
-            <TabsTrigger value="paygroup"><DollarSign className="h-4 w-4 mr-1" />Pay Group</TabsTrigger>
-            <TabsTrigger value="references"><UserCheck className="h-4 w-4 mr-1" />References</TabsTrigger>
-            <TabsTrigger value="work_permits"><FileCheck className="h-4 w-4 mr-1" />Work Permits</TabsTrigger>
+            <TabsTrigger value="overview"><User className="h-4 w-4 mr-1" />{t("workforce.profile.tabs.overview")}</TabsTrigger>
+            <TabsTrigger value="addresses"><Home className="h-4 w-4 mr-1" />{t("workforce.profile.tabs.addresses")}</TabsTrigger>
+            <TabsTrigger value="background"><ShieldCheck className="h-4 w-4 mr-1" />{t("workforce.profile.tabs.background")}</TabsTrigger>
+            <TabsTrigger value="bank"><CreditCard className="h-4 w-4 mr-1" />{t("workforce.profile.tabs.bank")}</TabsTrigger>
+            <TabsTrigger value="beneficiaries"><Users className="h-4 w-4 mr-1" />{t("workforce.profile.tabs.beneficiaries")}</TabsTrigger>
+            <TabsTrigger value="branches"><Building2 className="h-4 w-4 mr-1" />{t("workforce.profile.tabs.branches")}</TabsTrigger>
+            <TabsTrigger value="certificates"><GraduationCap className="h-4 w-4 mr-1" />{t("workforce.profile.tabs.certificates")}</TabsTrigger>
+            <TabsTrigger value="competencies"><Award className="h-4 w-4 mr-1" />{t("workforce.profile.tabs.competencies")}</TabsTrigger>
+            <TabsTrigger value="contacts"><Phone className="h-4 w-4 mr-1" />{t("workforce.profile.tabs.contacts")}</TabsTrigger>
+            <TabsTrigger value="dependents"><Baby className="h-4 w-4 mr-1" />{t("workforce.profile.tabs.dependents")}</TabsTrigger>
+            <TabsTrigger value="documents"><FileText className="h-4 w-4 mr-1" />{t("workforce.profile.tabs.documents")}</TabsTrigger>
+            <TabsTrigger value="emergency"><AlertTriangle className="h-4 w-4 mr-1" />{t("workforce.profile.tabs.emergency")}</TabsTrigger>
+            <TabsTrigger value="interests"><Sparkles className="h-4 w-4 mr-1" />{t("workforce.profile.tabs.interests")}</TabsTrigger>
+            <TabsTrigger value="licenses"><Award className="h-4 w-4 mr-1" />{t("workforce.profile.tabs.licenses")}</TabsTrigger>
+            <TabsTrigger value="medical"><Stethoscope className="h-4 w-4 mr-1" />{t("workforce.profile.tabs.medical")}</TabsTrigger>
+            <TabsTrigger value="memberships"><Heart className="h-4 w-4 mr-1" />{t("workforce.profile.tabs.memberships")}</TabsTrigger>
+            <TabsTrigger value="paygroup"><DollarSign className="h-4 w-4 mr-1" />{t("workforce.profile.tabs.payGroup")}</TabsTrigger>
+            <TabsTrigger value="references"><UserCheck className="h-4 w-4 mr-1" />{t("workforce.profile.tabs.references")}</TabsTrigger>
+            <TabsTrigger value="work_permits"><FileCheck className="h-4 w-4 mr-1" />{t("workforce.profile.tabs.workPermits")}</TabsTrigger>
           </TabsList>
 
           <TabsContent value="addresses" className="mt-6">
@@ -367,12 +367,12 @@ export default function EmployeeProfilePage() {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Briefcase className="h-5 w-5" />
-                    Position History
+                    {t("workforce.profile.positionHistory")}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   {employee.positions.length === 0 ? (
-                    <p className="text-sm text-muted-foreground">No positions assigned</p>
+                    <p className="text-sm text-muted-foreground">{t("workforce.profile.noPositions")}</p>
                   ) : (
                     <div className="space-y-4">
                       {employee.positions.map((position) => (
@@ -391,16 +391,16 @@ export default function EmployeeProfilePage() {
                             </div>
                             <div className="flex gap-2">
                               {position.is_primary && (
-                                <Badge variant="outline" className="text-xs">Primary</Badge>
+                                <Badge variant="outline" className="text-xs">{t("workforce.profile.primary")}</Badge>
                               )}
                               <Badge variant={position.is_active ? "default" : "secondary"} className="text-xs">
-                                {position.is_active ? "Active" : "Ended"}
+                                {position.is_active ? t("common.active") : t("workforce.profile.ended")}
                               </Badge>
                             </div>
                           </div>
                           <div className="mt-2 flex items-center gap-1 text-xs text-muted-foreground">
                             <Calendar className="h-3 w-3" />
-                            <span>Started {format(new Date(position.start_date), 'MMM d, yyyy')}</span>
+                            <span>{t("workforce.profile.started")} {format(new Date(position.start_date), 'MMM d, yyyy')}</span>
                           </div>
                         </div>
                       ))}
@@ -414,32 +414,32 @@ export default function EmployeeProfilePage() {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <User className="h-5 w-5" />
-                    Details
+                    {t("common.details")}
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="flex items-center gap-3">
                     <Clock className="h-4 w-4 text-muted-foreground" />
                     <div>
-                      <p className="text-sm font-medium text-foreground">Timezone</p>
+                      <p className="text-sm font-medium text-foreground">{t("workforce.profile.timezone")}</p>
                       <p className="text-sm text-muted-foreground">
-                        {employee.timezone || 'Not set'}
+                        {employee.timezone || t("workforce.profile.notSet")}
                       </p>
                     </div>
                   </div>
                   <div className="flex items-center gap-3">
                     <Globe className="h-4 w-4 text-muted-foreground" />
                     <div>
-                      <p className="text-sm font-medium text-foreground">Preferred Language</p>
+                      <p className="text-sm font-medium text-foreground">{t("workforce.profile.preferredLanguage")}</p>
                       <p className="text-sm text-muted-foreground">
-                        {employee.preferred_language || 'Not set'}
+                        {employee.preferred_language || t("workforce.profile.notSet")}
                       </p>
                     </div>
                   </div>
                   <div className="flex items-center gap-3">
                     <Calendar className="h-4 w-4 text-muted-foreground" />
                     <div>
-                      <p className="text-sm font-medium text-foreground">Joined</p>
+                      <p className="text-sm font-medium text-foreground">{t("common.joined")}</p>
                       <p className="text-sm text-muted-foreground">
                         {format(new Date(employee.created_at), 'MMMM d, yyyy')}
                       </p>
