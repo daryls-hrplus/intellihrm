@@ -118,6 +118,14 @@
     "estimatedCost": "Estimated Cost",
     "basedOnUsage": "Based on usage"
   },
+  "ai": {
+    "assistantTitle": "AI Assistant",
+    "welcomeMessage": "Hello! I'm your HR assistant. How can I help you today?",
+    "inputPlaceholder": "Type your message...",
+    "budgetExceeded": "Your monthly AI budget has been exceeded",
+    "accessDisabled": "AI access has been disabled for your account",
+    "rateLimitExceeded": "Too many requests, please try again later"
+  },
   "auth": {
     "login": "Log In",
     "logout": "Log Out",
@@ -1643,6 +1651,8 @@
         "accessRevoked": "Access revoked",
         "userManagement": "User Management",
         "usageLogs": "Usage Logs",
+        "budgetTiers": "Budget Tiers",
+        "monthlyUsage": "Monthly Usage",
         "userSettings": "User Settings",
         "monthlyTokens": "Monthly Tokens",
         "monthlyLimit": "Monthly Limit",
@@ -1661,7 +1671,26 @@
         "estimatedCost": "Estimated Cost",
         "basedOnUsage": "Based on token usage",
         "disableAccess": "Disable",
-        "enableAccess": "Enable"
+        "enableAccess": "Enable",
+        "budgetTiersTitle": "Budget Tiers Configuration",
+        "budgetTiersDescription": "Configure monthly spending limits by user type",
+        "tierName": "Tier Name",
+        "tierCode": "Tier Code",
+        "monthlyBudget": "Monthly Budget (USD)",
+        "unlimitedBudget": "Unlimited",
+        "editTier": "Edit Tier",
+        "saveTier": "Save Tier",
+        "tierUpdated": "Budget tier updated successfully",
+        "assignTier": "Assign Tier",
+        "customBudget": "Custom Budget",
+        "year": "Year",
+        "month": "Month",
+        "actualUsage": "Actual Usage",
+        "budgetRemaining": "Budget Remaining",
+        "overBudget": "Over Budget",
+        "monthlyBreakdown": "Monthly Breakdown",
+        "selectYear": "Select Year",
+        "selectMonth": "Select Month"
       },
       "piiAccess": {
         "title": "PII Access Report",
