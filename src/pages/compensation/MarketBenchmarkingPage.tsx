@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -14,6 +15,7 @@ import { BarChart3, Plus, Database, TrendingUp, Globe, ChevronRight, Building2 }
 import { Skeleton } from "@/components/ui/skeleton";
 
 export default function MarketBenchmarkingPage() {
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState("sources");
   const [companyFilter, setCompanyFilter] = useState<string>("all");
 
@@ -66,9 +68,9 @@ export default function MarketBenchmarkingPage() {
       <div className="space-y-6">
         {/* Breadcrumbs */}
         <nav className="flex items-center gap-2 text-sm text-muted-foreground">
-          <Link to="/compensation" className="hover:text-foreground transition-colors">Compensation</Link>
+          <Link to="/compensation" className="hover:text-foreground transition-colors">{t("compensation.title")}</Link>
           <ChevronRight className="h-4 w-4" />
-          <span className="text-foreground font-medium">Market Benchmarking</span>
+          <span className="text-foreground font-medium">{t("compensation.marketBenchmarking.title")}</span>
         </nav>
 
         <div className="flex items-center justify-between">
@@ -77,18 +79,18 @@ export default function MarketBenchmarkingPage() {
               <BarChart3 className="h-5 w-5 text-primary" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold tracking-tight">Market Benchmarking</h1>
-              <p className="text-muted-foreground">Compare compensation to market data</p>
+              <h1 className="text-2xl font-bold tracking-tight">{t("compensation.marketBenchmarking.title")}</h1>
+              <p className="text-muted-foreground">{t("compensation.marketBenchmarking.subtitle")}</p>
             </div>
           </div>
           <div className="flex items-center gap-3">
             <Select value={companyFilter} onValueChange={setCompanyFilter}>
               <SelectTrigger className="w-[200px]">
                 <Building2 className="mr-2 h-4 w-4" />
-                <SelectValue placeholder="All Companies" />
+                <SelectValue placeholder={t("common.all")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Companies</SelectItem>
+                <SelectItem value="all">{t("common.all")}</SelectItem>
                 {companies.map((company: any) => (
                   <SelectItem key={company.id} value={company.id}>{company.name}</SelectItem>
                 ))}
@@ -96,7 +98,7 @@ export default function MarketBenchmarkingPage() {
             </Select>
             <Button>
               <Plus className="mr-2 h-4 w-4" />
-              {activeTab === "sources" ? "Add Source" : "Add Market Data"}
+              {activeTab === "sources" ? t("compensation.marketBenchmarking.addSource") : t("compensation.marketBenchmarking.addMarketData")}
             </Button>
           </div>
         </div>
@@ -110,7 +112,7 @@ export default function MarketBenchmarkingPage() {
                   <Database className="h-5 w-5 text-primary" />
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Data Sources</p>
+                  <p className="text-sm text-muted-foreground">{t("compensation.marketBenchmarking.dataSources")}</p>
                   <p className="text-2xl font-bold">{sources.length}</p>
                 </div>
               </div>
@@ -123,7 +125,7 @@ export default function MarketBenchmarkingPage() {
                   <TrendingUp className="h-5 w-5 text-emerald-600" />
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Market Rates</p>
+                  <p className="text-sm text-muted-foreground">{t("compensation.marketBenchmarking.marketRates")}</p>
                   <p className="text-2xl font-bold">{rates.length}</p>
                 </div>
               </div>
@@ -136,7 +138,7 @@ export default function MarketBenchmarkingPage() {
                   <Globe className="h-5 w-5 text-sky-600" />
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Active Sources</p>
+                  <p className="text-sm text-muted-foreground">{t("compensation.marketBenchmarking.activeSources")}</p>
                   <p className="text-2xl font-bold">{sources.filter((s: any) => s.is_active).length}</p>
                 </div>
               </div>
@@ -146,8 +148,8 @@ export default function MarketBenchmarkingPage() {
 
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList>
-            <TabsTrigger value="sources">Data Sources</TabsTrigger>
-            <TabsTrigger value="rates">Market Rates</TabsTrigger>
+            <TabsTrigger value="sources">{t("compensation.marketBenchmarking.dataSources")}</TabsTrigger>
+            <TabsTrigger value="rates">{t("compensation.marketBenchmarking.marketRates")}</TabsTrigger>
           </TabsList>
 
           <TabsContent value="sources">
@@ -163,18 +165,18 @@ export default function MarketBenchmarkingPage() {
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead>Source Name</TableHead>
-                        <TableHead>Provider</TableHead>
-                        <TableHead>Survey Year</TableHead>
-                        <TableHead>Effective Date</TableHead>
-                        <TableHead>Status</TableHead>
+                        <TableHead>{t("compensation.marketBenchmarking.sourceName")}</TableHead>
+                        <TableHead>{t("compensation.marketBenchmarking.provider")}</TableHead>
+                        <TableHead>{t("compensation.marketBenchmarking.surveyYear")}</TableHead>
+                        <TableHead>{t("compensation.marketBenchmarking.effectiveDate")}</TableHead>
+                        <TableHead>{t("compensation.marketBenchmarking.status")}</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {sources.length === 0 ? (
                         <TableRow>
                           <TableCell colSpan={5} className="text-center text-muted-foreground">
-                            No data sources found
+                            {t("compensation.marketBenchmarking.noSources")}
                           </TableCell>
                         </TableRow>
                       ) : (
@@ -186,7 +188,7 @@ export default function MarketBenchmarkingPage() {
                             <TableCell>{format(new Date(source.effective_date), "MMM d, yyyy")}</TableCell>
                             <TableCell>
                               <Badge className={source.is_active ? "bg-emerald-500/10 text-emerald-600" : "bg-muted"}>
-                                {source.is_active ? "Active" : "Inactive"}
+                                {source.is_active ? t("compensation.statuses.active") : t("compensation.statuses.inactive")}
                               </Badge>
                             </TableCell>
                           </TableRow>
@@ -212,26 +214,26 @@ export default function MarketBenchmarkingPage() {
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead>Job Title</TableHead>
-                        <TableHead>Location</TableHead>
-                        <TableHead className="text-right">P25</TableHead>
-                        <TableHead className="text-right">P50</TableHead>
-                        <TableHead className="text-right">P75</TableHead>
-                        <TableHead>Source</TableHead>
+                        <TableHead>{t("compensation.marketBenchmarking.jobTitle")}</TableHead>
+                        <TableHead>{t("compensation.marketBenchmarking.location")}</TableHead>
+                        <TableHead className="text-right">{t("compensation.marketBenchmarking.p25")}</TableHead>
+                        <TableHead className="text-right">{t("compensation.marketBenchmarking.p50")}</TableHead>
+                        <TableHead className="text-right">{t("compensation.marketBenchmarking.p75")}</TableHead>
+                        <TableHead>{t("compensation.marketBenchmarking.source")}</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {rates.length === 0 ? (
                         <TableRow>
                           <TableCell colSpan={6} className="text-center text-muted-foreground">
-                            No market rates found
+                            {t("compensation.marketBenchmarking.noRates")}
                           </TableCell>
                         </TableRow>
                       ) : (
                         rates.map((rate: any) => (
                           <TableRow key={rate.id}>
                             <TableCell className="font-medium">{rate.job_title || "-"}</TableCell>
-                            <TableCell>{rate.location || "All Locations"}</TableCell>
+                            <TableCell>{rate.location || t("common.all")}</TableCell>
                             <TableCell className="text-right">
                               {rate.percentile_25 ? `$${rate.percentile_25.toLocaleString()}` : "-"}
                             </TableCell>

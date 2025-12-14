@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -13,6 +14,7 @@ import { PiggyBank, Plus, DollarSign, TrendingUp, Wallet, ChevronRight, Building
 import { Skeleton } from "@/components/ui/skeleton";
 
 export default function CompensationBudgetsPage() {
+  const { t } = useTranslation();
   const [yearFilter, setYearFilter] = useState<string>(new Date().getFullYear().toString());
   const [companyFilter, setCompanyFilter] = useState<string>("all");
 
@@ -84,11 +86,10 @@ export default function CompensationBudgetsPage() {
   return (
     <AppLayout>
       <div className="space-y-6">
-        {/* Breadcrumbs */}
         <nav className="flex items-center gap-2 text-sm text-muted-foreground">
-          <Link to="/compensation" className="hover:text-foreground transition-colors">Compensation</Link>
+          <Link to="/compensation" className="hover:text-foreground transition-colors">{t("compensation.title")}</Link>
           <ChevronRight className="h-4 w-4" />
-          <span className="text-foreground font-medium">Compensation Budgets</span>
+          <span className="text-foreground font-medium">{t("compensation.budgets.title")}</span>
         </nav>
 
         <div className="flex items-center justify-between">
@@ -97,18 +98,18 @@ export default function CompensationBudgetsPage() {
               <PiggyBank className="h-5 w-5 text-primary" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold tracking-tight">Compensation Budgets</h1>
-              <p className="text-muted-foreground">Track and manage compensation budgets</p>
+              <h1 className="text-2xl font-bold tracking-tight">{t("compensation.budgets.title")}</h1>
+              <p className="text-muted-foreground">{t("compensation.budgets.subtitle")}</p>
             </div>
           </div>
           <div className="flex items-center gap-3">
             <Select value={companyFilter} onValueChange={setCompanyFilter}>
               <SelectTrigger className="w-[200px]">
                 <Building2 className="mr-2 h-4 w-4" />
-                <SelectValue placeholder="All Companies" />
+                <SelectValue placeholder={t("common.all")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Companies</SelectItem>
+                <SelectItem value="all">{t("common.all")}</SelectItem>
                 {companies.map((company: any) => (
                   <SelectItem key={company.id} value={company.id}>{company.name}</SelectItem>
                 ))}
@@ -116,12 +117,11 @@ export default function CompensationBudgetsPage() {
             </Select>
             <Button>
               <Plus className="mr-2 h-4 w-4" />
-              New Budget
+              {t("compensation.budgets.newBudget")}
             </Button>
           </div>
         </div>
 
-        {/* Summary Cards */}
         <div className="grid gap-4 sm:grid-cols-4">
           <Card>
             <CardContent className="pt-6">
@@ -130,7 +130,7 @@ export default function CompensationBudgetsPage() {
                   <DollarSign className="h-5 w-5 text-primary" />
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Total Planned</p>
+                  <p className="text-sm text-muted-foreground">{t("compensation.budgets.totalPlanned")}</p>
                   <p className="text-2xl font-bold">${totalPlanned.toLocaleString()}</p>
                 </div>
               </div>
@@ -143,7 +143,7 @@ export default function CompensationBudgetsPage() {
                   <Wallet className="h-5 w-5 text-emerald-600" />
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Total Spent</p>
+                  <p className="text-sm text-muted-foreground">{t("compensation.budgets.totalSpent")}</p>
                   <p className="text-2xl font-bold">${totalSpent.toLocaleString()}</p>
                 </div>
               </div>
@@ -156,7 +156,7 @@ export default function CompensationBudgetsPage() {
                   <TrendingUp className="h-5 w-5 text-sky-600" />
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Remaining</p>
+                  <p className="text-sm text-muted-foreground">{t("compensation.budgets.remaining")}</p>
                   <p className="text-2xl font-bold">${(totalPlanned - totalSpent).toLocaleString()}</p>
                 </div>
               </div>
@@ -169,7 +169,7 @@ export default function CompensationBudgetsPage() {
                   <PiggyBank className="h-5 w-5 text-amber-600" />
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Utilization</p>
+                  <p className="text-sm text-muted-foreground">{t("compensation.budgets.utilization")}</p>
                   <p className="text-2xl font-bold">
                     {totalPlanned > 0 ? Math.round((totalSpent / totalPlanned) * 100) : 0}%
                   </p>
@@ -182,13 +182,13 @@ export default function CompensationBudgetsPage() {
         <Card>
           <CardHeader>
             <div className="flex items-center justify-between">
-              <CardTitle>Budgets</CardTitle>
+              <CardTitle>{t("compensation.budgets.title")}</CardTitle>
               <Select value={yearFilter} onValueChange={setYearFilter}>
                 <SelectTrigger className="w-[120px]">
-                  <SelectValue placeholder="Year" />
+                  <SelectValue placeholder={t("compensation.budgets.year")} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Years</SelectItem>
+                  <SelectItem value="all">{t("compensation.budgets.allYears")}</SelectItem>
                   <SelectItem value="2025">2025</SelectItem>
                   <SelectItem value="2024">2024</SelectItem>
                   <SelectItem value="2023">2023</SelectItem>
@@ -207,26 +207,26 @@ export default function CompensationBudgetsPage() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Department</TableHead>
-                    <TableHead>Type</TableHead>
-                    <TableHead>Year</TableHead>
-                    <TableHead className="text-right">Planned</TableHead>
-                    <TableHead className="text-right">Spent</TableHead>
-                    <TableHead>Utilization</TableHead>
-                    <TableHead>Status</TableHead>
+                    <TableHead>{t("compensation.budgets.department")}</TableHead>
+                    <TableHead>{t("compensation.budgets.type")}</TableHead>
+                    <TableHead>{t("compensation.budgets.year")}</TableHead>
+                    <TableHead className="text-right">{t("compensation.budgets.planned")}</TableHead>
+                    <TableHead className="text-right">{t("compensation.budgets.spent")}</TableHead>
+                    <TableHead>{t("compensation.budgets.utilization")}</TableHead>
+                    <TableHead>{t("compensation.budgets.status")}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {budgets.length === 0 ? (
                     <TableRow>
                       <TableCell colSpan={7} className="text-center text-muted-foreground">
-                        No budgets found
+                        {t("compensation.budgets.noBudgets")}
                       </TableCell>
                     </TableRow>
                   ) : (
                     budgets.map((budget: any) => (
                       <TableRow key={budget.id}>
-                        <TableCell className="font-medium">{budget.department?.name || "Company-wide"}</TableCell>
+                        <TableCell className="font-medium">{budget.department?.name || t("compensation.budgets.companyWide")}</TableCell>
                         <TableCell>{getBudgetTypeBadge(budget.budget_type)}</TableCell>
                         <TableCell>{budget.fiscal_year}</TableCell>
                         <TableCell className="text-right">${budget.planned_amount?.toLocaleString()}</TableCell>

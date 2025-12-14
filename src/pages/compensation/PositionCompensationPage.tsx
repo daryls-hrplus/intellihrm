@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -47,6 +48,7 @@ interface Position {
 }
 
 export default function PositionCompensationPage() {
+  const { t } = useTranslation();
   const {
     isLoading,
     fetchPayElements,
@@ -225,8 +227,8 @@ export default function PositionCompensationPage() {
       <div className="space-y-6">
         <Breadcrumbs
           items={[
-            { label: "Compensation", href: "/compensation" },
-            { label: "Position Compensation" },
+            { label: t("compensation.title"), href: "/compensation" },
+            { label: t("compensation.positionCompensation.title") },
           ]}
         />
 
@@ -237,10 +239,10 @@ export default function PositionCompensationPage() {
             </div>
             <div>
               <h1 className="text-2xl font-bold tracking-tight text-foreground">
-                Position Compensation
+                {t("compensation.positionCompensation.title")}
               </h1>
               <p className="text-muted-foreground">
-                Define compensation structure for job positions
+                {t("compensation.positionCompensation.subtitle")}
               </p>
             </div>
           </div>
@@ -248,10 +250,10 @@ export default function PositionCompensationPage() {
 
         <div className="grid gap-4 md:grid-cols-2">
           <div className="space-y-2">
-            <Label>Company</Label>
+            <Label>{t("compensation.positionCompensation.company")}</Label>
             <Select value={selectedCompanyId} onValueChange={setSelectedCompanyId}>
               <SelectTrigger>
-                <SelectValue placeholder="Select company" />
+                <SelectValue placeholder={t("compensation.positionCompensation.selectCompany")} />
               </SelectTrigger>
               <SelectContent>
                 {companies.map((c) => (
@@ -263,10 +265,10 @@ export default function PositionCompensationPage() {
             </Select>
           </div>
           <div className="space-y-2">
-            <Label>Position</Label>
+            <Label>{t("compensation.positionCompensation.position")}</Label>
             <Select value={selectedPositionId} onValueChange={setSelectedPositionId}>
               <SelectTrigger>
-                <SelectValue placeholder="Select position" />
+                <SelectValue placeholder={t("compensation.positionCompensation.selectPosition")} />
               </SelectTrigger>
               <SelectContent>
                 {positions.map((p) => (
@@ -288,21 +290,21 @@ export default function PositionCompensationPage() {
                     <Briefcase className="h-5 w-5 text-primary" />
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">Total Package</p>
+                    <p className="text-sm text-muted-foreground">{t("compensation.positionCompensation.totalPackage")}</p>
                     <p className="text-2xl font-bold">{formatCurrency(totalCompensation, "USD")}</p>
                   </div>
                 </CardContent>
               </Card>
               <Button onClick={openCreate}>
                 <Plus className="h-4 w-4 mr-2" />
-                Add Pay Element
+                {t("compensation.positionCompensation.addPayElement")}
               </Button>
             </div>
 
             <Card>
               <CardHeader>
                 <CardTitle className="text-base">
-                  Compensation for: {selectedPosition?.title}
+                  {t("compensation.positionCompensation.compensationFor")}: {selectedPosition?.title}
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-0">
@@ -312,19 +314,19 @@ export default function PositionCompensationPage() {
                   </div>
                 ) : compensation.length === 0 ? (
                   <div className="text-center py-12 text-muted-foreground">
-                    No compensation elements defined for this position.
+                    {t("compensation.positionCompensation.noElements")}
                   </div>
                 ) : (
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead>Pay Element</TableHead>
-                        <TableHead>Type</TableHead>
-                        <TableHead className="text-right">Amount</TableHead>
-                        <TableHead>Frequency</TableHead>
-                        <TableHead>Effective</TableHead>
-                        <TableHead>Status</TableHead>
-                        <TableHead className="text-right">Actions</TableHead>
+                        <TableHead>{t("compensation.positionCompensation.payElement")}</TableHead>
+                        <TableHead>{t("compensation.positionCompensation.type")}</TableHead>
+                        <TableHead className="text-right">{t("compensation.positionCompensation.amount")}</TableHead>
+                        <TableHead>{t("compensation.positionCompensation.frequency")}</TableHead>
+                        <TableHead>{t("compensation.positionCompensation.effective")}</TableHead>
+                        <TableHead>{t("compensation.positionCompensation.status")}</TableHead>
+                        <TableHead className="text-right">{t("common.actions")}</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -345,7 +347,7 @@ export default function PositionCompensationPage() {
                           <TableCell>{comp.effective_date}</TableCell>
                           <TableCell>
                             <Badge variant={comp.is_active && !comp.end_date ? "default" : "secondary"}>
-                              {comp.is_active && !comp.end_date ? "Active" : "Ended"}
+                              {comp.is_active && !comp.end_date ? t("compensation.statuses.active") : t("compensation.statuses.inactive")}
                             </Badge>
                           </TableCell>
                           <TableCell className="text-right">
@@ -380,19 +382,19 @@ export default function PositionCompensationPage() {
           <DialogContent className="max-w-lg">
             <DialogHeader>
               <DialogTitle>
-                {editing ? "Edit Compensation" : "Add Compensation"}
+                {editing ? t("compensation.positionCompensation.dialog.editTitle") : t("compensation.positionCompensation.dialog.createTitle")}
               </DialogTitle>
               <DialogDescription>
-                Configure compensation element for this position
+                {t("compensation.positionCompensation.dialog.description")}
               </DialogDescription>
             </DialogHeader>
 
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label>Pay Element *</Label>
+                <Label>{t("compensation.positionCompensation.payElement")} *</Label>
                 <Select value={formPayElementId} onValueChange={setFormPayElementId}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select pay element" />
+                    <SelectValue placeholder={t("compensation.positionCompensation.dialog.selectPayElement")} />
                   </SelectTrigger>
                   <SelectContent>
                     {payElements.map((pe) => (
@@ -406,7 +408,7 @@ export default function PositionCompensationPage() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="amount">Amount *</Label>
+                  <Label htmlFor="amount">{t("compensation.positionCompensation.amount")} *</Label>
                   <Input
                     id="amount"
                     type="number"
@@ -416,7 +418,7 @@ export default function PositionCompensationPage() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>Currency</Label>
+                  <Label>{t("common.currency")}</Label>
                   <Select value={formCurrency} onValueChange={setFormCurrency}>
                     <SelectTrigger>
                       <SelectValue />
@@ -433,10 +435,10 @@ export default function PositionCompensationPage() {
               </div>
 
               <div className="space-y-2">
-                <Label>Payment Frequency</Label>
+                <Label>{t("compensation.positionCompensation.dialog.paymentFrequency")}</Label>
                 <Select value={formFrequencyId} onValueChange={setFormFrequencyId}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select frequency" />
+                    <SelectValue placeholder={t("compensation.positionCompensation.dialog.selectFrequency")} />
                   </SelectTrigger>
                   <SelectContent>
                     {frequencies.map((f) => (
@@ -450,7 +452,7 @@ export default function PositionCompensationPage() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="effectiveDate">Effective Date *</Label>
+                  <Label htmlFor="effectiveDate">{t("compensation.positionCompensation.dialog.effectiveDate")} *</Label>
                   <Input
                     id="effectiveDate"
                     type="date"
@@ -459,7 +461,7 @@ export default function PositionCompensationPage() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="endDate">End Date</Label>
+                  <Label htmlFor="endDate">{t("common.endDate")}</Label>
                   <Input
                     id="endDate"
                     type="date"
@@ -470,23 +472,23 @@ export default function PositionCompensationPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="notes">Notes</Label>
+                <Label htmlFor="notes">{t("compensation.positionCompensation.dialog.notes")}</Label>
                 <Input
                   id="notes"
                   value={formNotes}
                   onChange={(e) => setFormNotes(e.target.value)}
-                  placeholder="Optional notes"
+                  placeholder={t("compensation.positionCompensation.dialog.notesPlaceholder")}
                 />
               </div>
             </div>
 
             <DialogFooter>
               <Button variant="outline" onClick={() => setDialogOpen(false)}>
-                Cancel
+                {t("common.cancel")}
               </Button>
               <Button onClick={handleSave} disabled={isProcessing}>
                 {isProcessing && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-                {editing ? "Update" : "Add"}
+                {editing ? t("common.update") : t("common.add")}
               </Button>
             </DialogFooter>
           </DialogContent>
