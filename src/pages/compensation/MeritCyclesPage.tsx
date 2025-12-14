@@ -12,6 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 import { Award, Plus, Calendar, DollarSign, Users } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useTranslation } from "react-i18next";
 
 interface Company {
   id: string;
@@ -19,6 +20,7 @@ interface Company {
 }
 
 export default function MeritCyclesPage() {
+  const { t } = useTranslation();
   const [companies, setCompanies] = useState<Company[]>([]);
   const [selectedCompanyId, setSelectedCompanyId] = useState<string>("");
 
@@ -69,8 +71,8 @@ export default function MeritCyclesPage() {
       <div className="space-y-6">
         <Breadcrumbs
           items={[
-            { label: "Compensation", href: "/compensation" },
-            { label: "Merit Cycles" },
+            { label: t("compensation.title"), href: "/compensation" },
+            { label: t("compensation.meritCycles.title") },
           ]}
         />
 
@@ -80,14 +82,14 @@ export default function MeritCyclesPage() {
               <Award className="h-5 w-5 text-primary" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold tracking-tight">Merit Cycles</h1>
-              <p className="text-muted-foreground">Manage annual merit increase programs</p>
+              <h1 className="text-2xl font-bold tracking-tight">{t("compensation.meritCycles.title")}</h1>
+              <p className="text-muted-foreground">{t("compensation.meritCycles.subtitle")}</p>
             </div>
           </div>
           <div className="flex items-center gap-3">
             <Select value={selectedCompanyId} onValueChange={setSelectedCompanyId}>
               <SelectTrigger className="w-[200px]">
-                <SelectValue placeholder="Select Company" />
+                <SelectValue placeholder={t("common.selectCompany")} />
               </SelectTrigger>
               <SelectContent>
                 {companies.map((company) => (
@@ -99,7 +101,7 @@ export default function MeritCyclesPage() {
             </Select>
             <Button>
               <Plus className="mr-2 h-4 w-4" />
-              New Cycle
+              {t("compensation.meritCycles.newCycle")}
             </Button>
           </div>
         </div>
@@ -112,7 +114,7 @@ export default function MeritCyclesPage() {
                   <Calendar className="h-5 w-5 text-primary" />
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Active Cycles</p>
+                  <p className="text-sm text-muted-foreground">{t("compensation.meritCycles.activeCycles")}</p>
                   <p className="text-2xl font-bold">
                     {cycles.filter((c: any) => c.status === "in_progress").length}
                   </p>
@@ -127,7 +129,7 @@ export default function MeritCyclesPage() {
                   <DollarSign className="h-5 w-5 text-emerald-600" />
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Total Budget</p>
+                  <p className="text-sm text-muted-foreground">{t("compensation.meritCycles.totalBudget")}</p>
                   <p className="text-2xl font-bold">
                     ${cycles.reduce((sum: number, c: any) => sum + (c.total_budget || 0), 0).toLocaleString()}
                   </p>
@@ -142,7 +144,7 @@ export default function MeritCyclesPage() {
                   <Users className="h-5 w-5 text-sky-600" />
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Completed</p>
+                  <p className="text-sm text-muted-foreground">{t("compensation.meritCycles.completed")}</p>
                   <p className="text-2xl font-bold">
                     {cycles.filter((c: any) => c.status === "completed").length}
                   </p>
@@ -154,7 +156,7 @@ export default function MeritCyclesPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Merit Cycles</CardTitle>
+            <CardTitle>{t("compensation.meritCycles.title")}</CardTitle>
           </CardHeader>
           <CardContent>
             {isLoading ? (
@@ -167,19 +169,19 @@ export default function MeritCyclesPage() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Cycle Name</TableHead>
-                    <TableHead>Year</TableHead>
-                    <TableHead>Period</TableHead>
-                    <TableHead>Budget</TableHead>
-                    <TableHead>Allocation</TableHead>
-                    <TableHead>Status</TableHead>
+                    <TableHead>{t("compensation.meritCycles.cycleName")}</TableHead>
+                    <TableHead>{t("compensation.meritCycles.year")}</TableHead>
+                    <TableHead>{t("compensation.meritCycles.period")}</TableHead>
+                    <TableHead>{t("compensation.meritCycles.budget")}</TableHead>
+                    <TableHead>{t("compensation.meritCycles.allocation")}</TableHead>
+                    <TableHead>{t("compensation.meritCycles.status")}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {cycles.length === 0 ? (
                     <TableRow>
                       <TableCell colSpan={6} className="text-center text-muted-foreground">
-                        No merit cycles found
+                        {t("compensation.meritCycles.noCycles")}
                       </TableCell>
                     </TableRow>
                   ) : (

@@ -11,6 +11,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "react-i18next";
 import {
   DollarSign,
   Wallet,
@@ -32,42 +33,43 @@ import {
   CalendarIcon,
 } from "lucide-react";
 
-const compensationModules = [
-  { title: "Pay Elements", description: "Manage salary, wages, allowances", href: "/compensation/pay-elements", icon: Coins, color: "bg-primary/10 text-primary" },
-  { title: "Salary Grades", description: "Define salary bands and ranges", href: "/compensation/salary-grades", icon: Layers, color: "bg-emerald-500/10 text-emerald-600" },
-  { title: "Position Compensation", description: "Configure compensation for positions", href: "/compensation/position-compensation", icon: Wallet, color: "bg-sky-500/10 text-sky-600" },
-  { title: "Compensation History", description: "Track salary changes over time", href: "/compensation/history", icon: History, color: "bg-violet-500/10 text-violet-600" },
-  { title: "Merit Cycles", description: "Annual merit increase programs", href: "/compensation/merit-cycles", icon: Award, color: "bg-amber-500/10 text-amber-600" },
-  { title: "Bonus Management", description: "Manage bonus plans and awards", href: "/compensation/bonus", icon: Gift, color: "bg-rose-500/10 text-rose-600" },
-  { title: "Market Benchmarking", description: "Compare to market data", href: "/compensation/market-benchmarking", icon: BarChart3, color: "bg-indigo-500/10 text-indigo-600" },
-  { title: "Compa-Ratio Analysis", description: "Pay vs grade midpoint analysis", href: "/compensation/compa-ratio", icon: Target, color: "bg-teal-500/10 text-teal-600" },
-  { title: "Pay Equity", description: "Analyze compensation gaps", href: "/compensation/pay-equity", icon: Scale, color: "bg-pink-500/10 text-pink-600" },
-  { title: "Total Rewards", description: "Employee compensation statements", href: "/compensation/total-rewards", icon: Receipt, color: "bg-cyan-500/10 text-cyan-600" },
-  { title: "Budgets", description: "Track compensation budgets", href: "/compensation/budgets", icon: PiggyBank, color: "bg-orange-500/10 text-orange-600" },
-  { title: "Equity Management", description: "Stock options and RSUs", href: "/compensation/equity", icon: Gem, color: "bg-fuchsia-500/10 text-fuchsia-600" },
-  { title: "Analytics", description: "Compensation insights and trends", href: "/compensation/analytics", icon: TrendingUp, color: "bg-lime-500/10 text-lime-600" },
-];
-
-function formatCurrency(value: number): string {
-  if (value >= 1000000) {
-    return `$${(value / 1000000).toFixed(1)}M`;
-  }
-  if (value >= 1000) {
-    return `$${(value / 1000).toFixed(0)}K`;
-  }
-  return `$${value.toFixed(0)}`;
-}
-
 export default function CompensationDashboardPage() {
+  const { t } = useTranslation();
   const { selectedCompanyId, setSelectedCompanyId } = useCompensationCompanyFilter();
   const [asOfDate, setAsOfDate] = useState<Date>(new Date());
   const stats = useCompensationStats(selectedCompanyId, asOfDate);
 
+  const compensationModules = [
+    { title: t("compensation.modules.payElements.title"), description: t("compensation.modules.payElements.description"), href: "/compensation/pay-elements", icon: Coins, color: "bg-primary/10 text-primary" },
+    { title: t("compensation.modules.salaryGrades.title"), description: t("compensation.modules.salaryGrades.description"), href: "/compensation/salary-grades", icon: Layers, color: "bg-emerald-500/10 text-emerald-600" },
+    { title: t("compensation.modules.positionCompensation.title"), description: t("compensation.modules.positionCompensation.description"), href: "/compensation/position-compensation", icon: Wallet, color: "bg-sky-500/10 text-sky-600" },
+    { title: t("compensation.modules.history.title"), description: t("compensation.modules.history.description"), href: "/compensation/history", icon: History, color: "bg-violet-500/10 text-violet-600" },
+    { title: t("compensation.modules.meritCycles.title"), description: t("compensation.modules.meritCycles.description"), href: "/compensation/merit-cycles", icon: Award, color: "bg-amber-500/10 text-amber-600" },
+    { title: t("compensation.modules.bonus.title"), description: t("compensation.modules.bonus.description"), href: "/compensation/bonus", icon: Gift, color: "bg-rose-500/10 text-rose-600" },
+    { title: t("compensation.modules.marketBenchmarking.title"), description: t("compensation.modules.marketBenchmarking.description"), href: "/compensation/market-benchmarking", icon: BarChart3, color: "bg-indigo-500/10 text-indigo-600" },
+    { title: t("compensation.modules.compaRatio.title"), description: t("compensation.modules.compaRatio.description"), href: "/compensation/compa-ratio", icon: Target, color: "bg-teal-500/10 text-teal-600" },
+    { title: t("compensation.modules.payEquity.title"), description: t("compensation.modules.payEquity.description"), href: "/compensation/pay-equity", icon: Scale, color: "bg-pink-500/10 text-pink-600" },
+    { title: t("compensation.modules.totalRewards.title"), description: t("compensation.modules.totalRewards.description"), href: "/compensation/total-rewards", icon: Receipt, color: "bg-cyan-500/10 text-cyan-600" },
+    { title: t("compensation.modules.budgets.title"), description: t("compensation.modules.budgets.description"), href: "/compensation/budgets", icon: PiggyBank, color: "bg-orange-500/10 text-orange-600" },
+    { title: t("compensation.modules.equity.title"), description: t("compensation.modules.equity.description"), href: "/compensation/equity", icon: Gem, color: "bg-fuchsia-500/10 text-fuchsia-600" },
+    { title: t("compensation.modules.analytics.title"), description: t("compensation.modules.analytics.description"), href: "/compensation/analytics", icon: TrendingUp, color: "bg-lime-500/10 text-lime-600" },
+  ];
+
+  function formatCurrency(value: number): string {
+    if (value >= 1000000) {
+      return `$${(value / 1000000).toFixed(1)}M`;
+    }
+    if (value >= 1000) {
+      return `$${(value / 1000).toFixed(0)}K`;
+    }
+    return `$${value.toFixed(0)}`;
+  }
+
   const statCards = [
-    { label: "Total Compensation", value: formatCurrency(stats.totalPayroll), icon: DollarSign, color: "bg-primary/10 text-primary" },
-    { label: "Employees", value: stats.employeesPaid, icon: Users, color: "bg-success/10 text-success" },
-    { label: "Pending Reviews", value: stats.pendingReviews, icon: Clock, color: "bg-warning/10 text-warning" },
-    { label: "Avg. Salary", value: formatCurrency(stats.avgSalary), icon: TrendingUp, color: "bg-info/10 text-info" },
+    { label: t("compensation.totalCompensation"), value: formatCurrency(stats.totalPayroll), icon: DollarSign, color: "bg-primary/10 text-primary" },
+    { label: t("compensation.employees"), value: stats.employeesPaid, icon: Users, color: "bg-success/10 text-success" },
+    { label: t("compensation.pendingReviews"), value: stats.pendingReviews, icon: Clock, color: "bg-warning/10 text-warning" },
+    { label: t("compensation.avgSalary"), value: formatCurrency(stats.avgSalary), icon: TrendingUp, color: "bg-info/10 text-info" },
   ];
 
   return (
@@ -81,10 +83,10 @@ export default function CompensationDashboardPage() {
               </div>
               <div>
                 <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
-                  Compensation
+                  {t("compensation.title")}
                 </h1>
                 <p className="text-muted-foreground">
-                  Salary management and payroll
+                  {t("compensation.subtitle")}
                 </p>
               </div>
             </div>
@@ -112,7 +114,7 @@ export default function CompensationDashboardPage() {
                 )}
               >
                 <CalendarIcon className="mr-2 h-4 w-4" />
-                {asOfDate ? format(asOfDate, "PPP") : <span>As of date</span>}
+                {asOfDate ? format(asOfDate, "PPP") : <span>{t("compensation.asOfDate")}</span>}
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0" align="start">

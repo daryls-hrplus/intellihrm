@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { AppLayout } from "@/components/layout/AppLayout";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -13,18 +13,17 @@ import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 import { Target, RefreshCw, Search, TrendingUp, TrendingDown, Minus, ChevronRight, Building2 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useTranslation } from "react-i18next";
 
 export default function CompaRatioPage() {
+  const { t } = useTranslation();
   const [searchTerm, setSearchTerm] = useState("");
   const [companyFilter, setCompanyFilter] = useState<string>("all");
 
   const { data: companies = [] } = useQuery({
     queryKey: ["companies-filter"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("companies")
-        .select("id, name")
-        .order("name");
+      const { data, error } = await supabase.from("companies").select("id, name").order("name");
       if (error) throw error;
       return data || [];
     },
@@ -35,10 +34,7 @@ export default function CompaRatioPage() {
     queryFn: async () => {
       let query = supabase
         .from("compa_ratio_snapshots")
-        .select(`
-          *,
-          employee:profiles!compa_ratio_snapshots_employee_id_fkey(full_name)
-        `)
+        .select(`*, employee:profiles!compa_ratio_snapshots_employee_id_fkey(full_name)`)
         .order("snapshot_date", { ascending: false });
       if (companyFilter !== "all") {
         query = query.eq("company_id", companyFilter);
@@ -55,11 +51,11 @@ export default function CompaRatioPage() {
 
   const getCompaRatioBadge = (ratio: number | null) => {
     if (!ratio) return <Badge className="bg-muted text-muted-foreground">N/A</Badge>;
-    if (ratio < 0.8) return <Badge className="bg-red-500/10 text-red-600">Below Range</Badge>;
-    if (ratio < 0.95) return <Badge className="bg-amber-500/10 text-amber-600">Below Midpoint</Badge>;
-    if (ratio <= 1.05) return <Badge className="bg-emerald-500/10 text-emerald-600">At Midpoint</Badge>;
-    if (ratio <= 1.2) return <Badge className="bg-sky-500/10 text-sky-600">Above Midpoint</Badge>;
-    return <Badge className="bg-violet-500/10 text-violet-600">Above Range</Badge>;
+    if (ratio < 0.8) return <Badge className="bg-red-500/10 text-red-600">{t("compensation.compaRatio.statuses.belowRange")}</Badge>;
+    if (ratio < 0.95) return <Badge className="bg-amber-500/10 text-amber-600">{t("compensation.compaRatio.statuses.belowMidpoint")}</Badge>;
+    if (ratio <= 1.05) return <Badge className="bg-emerald-500/10 text-emerald-600">{t("compensation.compaRatio.statuses.atMidpoint")}</Badge>;
+    if (ratio <= 1.2) return <Badge className="bg-sky-500/10 text-sky-600">{t("compensation.compaRatio.statuses.aboveMidpoint")}</Badge>;
+    return <Badge className="bg-violet-500/10 text-violet-600">{t("compensation.compaRatio.statuses.aboveRange")}</Badge>;
   };
 
   const getCompaRatioIcon = (ratio: number | null) => {
@@ -79,11 +75,10 @@ export default function CompaRatioPage() {
   return (
     <AppLayout>
       <div className="space-y-6">
-        {/* Breadcrumbs */}
         <nav className="flex items-center gap-2 text-sm text-muted-foreground">
-          <Link to="/compensation" className="hover:text-foreground transition-colors">Compensation</Link>
+          <Link to="/compensation" className="hover:text-foreground transition-colors">{t("compensation.title")}</Link>
           <ChevronRight className="h-4 w-4" />
-          <span className="text-foreground font-medium">Compa-Ratio Analysis</span>
+          <span className="text-foreground font-medium">{t("compensation.compaRatio.title")}</span>
         </nav>
 
         <div className="flex items-center justify-between">
@@ -92,18 +87,18 @@ export default function CompaRatioPage() {
               <Target className="h-5 w-5 text-primary" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold tracking-tight">Compa-Ratio Analysis</h1>
-              <p className="text-muted-foreground">Compare employee pay to grade midpoints</p>
+              <h1 className="text-2xl font-bold tracking-tight">{t("compensation.compaRatio.title")}</h1>
+              <p className="text-muted-foreground">{t("compensation.compaRatio.subtitle")}</p>
             </div>
           </div>
           <div className="flex items-center gap-3">
             <Select value={companyFilter} onValueChange={setCompanyFilter}>
               <SelectTrigger className="w-[200px]">
                 <Building2 className="mr-2 h-4 w-4" />
-                <SelectValue placeholder="All Companies" />
+                <SelectValue placeholder={t("common.all")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Companies</SelectItem>
+                <SelectItem value="all">{t("common.all")}</SelectItem>
                 {companies.map((company: any) => (
                   <SelectItem key={company.id} value={company.id}>{company.name}</SelectItem>
                 ))}
@@ -111,21 +106,18 @@ export default function CompaRatioPage() {
             </Select>
             <Button>
               <RefreshCw className="mr-2 h-4 w-4" />
-              Recalculate All
+              {t("compensation.compaRatio.recalculateAll")}
             </Button>
           </div>
         </div>
 
-        {/* Summary Cards */}
         <div className="grid gap-4 sm:grid-cols-4">
           <Card>
             <CardContent className="pt-6">
               <div className="flex items-center gap-4">
-                <div className="rounded-lg bg-primary/10 p-3">
-                  <Target className="h-5 w-5 text-primary" />
-                </div>
+                <div className="rounded-lg bg-primary/10 p-3"><Target className="h-5 w-5 text-primary" /></div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Avg Compa-Ratio</p>
+                  <p className="text-sm text-muted-foreground">{t("compensation.compaRatio.avgCompaRatio")}</p>
                   <p className="text-2xl font-bold">{avgCompaRatio.toFixed(2)}</p>
                 </div>
               </div>
@@ -134,11 +126,9 @@ export default function CompaRatioPage() {
           <Card>
             <CardContent className="pt-6">
               <div className="flex items-center gap-4">
-                <div className="rounded-lg bg-amber-500/10 p-3">
-                  <TrendingDown className="h-5 w-5 text-amber-600" />
-                </div>
+                <div className="rounded-lg bg-amber-500/10 p-3"><TrendingDown className="h-5 w-5 text-amber-600" /></div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Below Midpoint</p>
+                  <p className="text-sm text-muted-foreground">{t("compensation.compaRatio.belowMidpoint")}</p>
                   <p className="text-2xl font-bold">{belowMidpoint}</p>
                 </div>
               </div>
@@ -147,11 +137,9 @@ export default function CompaRatioPage() {
           <Card>
             <CardContent className="pt-6">
               <div className="flex items-center gap-4">
-                <div className="rounded-lg bg-emerald-500/10 p-3">
-                  <Minus className="h-5 w-5 text-emerald-600" />
-                </div>
+                <div className="rounded-lg bg-emerald-500/10 p-3"><Minus className="h-5 w-5 text-emerald-600" /></div>
                 <div>
-                  <p className="text-sm text-muted-foreground">At Midpoint</p>
+                  <p className="text-sm text-muted-foreground">{t("compensation.compaRatio.atMidpoint")}</p>
                   <p className="text-2xl font-bold">{atMidpoint}</p>
                 </div>
               </div>
@@ -160,11 +148,9 @@ export default function CompaRatioPage() {
           <Card>
             <CardContent className="pt-6">
               <div className="flex items-center gap-4">
-                <div className="rounded-lg bg-sky-500/10 p-3">
-                  <TrendingUp className="h-5 w-5 text-sky-600" />
-                </div>
+                <div className="rounded-lg bg-sky-500/10 p-3"><TrendingUp className="h-5 w-5 text-sky-600" /></div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Above Midpoint</p>
+                  <p className="text-sm text-muted-foreground">{t("compensation.compaRatio.aboveMidpoint")}</p>
                   <p className="text-2xl font-bold">{snapshots.filter((s: any) => s.compa_ratio && s.compa_ratio > 1.05).length}</p>
                 </div>
               </div>
@@ -177,42 +163,29 @@ export default function CompaRatioPage() {
             <div className="flex items-center gap-4">
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <Input
-                  placeholder="Search by employee..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
-                />
+                <Input placeholder={t("compensation.compaRatio.searchEmployee")} value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pl-10" />
               </div>
             </div>
           </CardHeader>
           <CardContent>
             {isLoading ? (
-              <div className="space-y-2">
-                {[...Array(5)].map((_, i) => (
-                  <Skeleton key={i} className="h-12 w-full" />
-                ))}
-              </div>
+              <div className="space-y-2">{[...Array(5)].map((_, i) => <Skeleton key={i} className="h-12 w-full" />)}</div>
             ) : (
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Employee</TableHead>
-                    <TableHead>Snapshot Date</TableHead>
-                    <TableHead className="text-right">Current Salary</TableHead>
-                    <TableHead className="text-right">Grade Midpoint</TableHead>
-                    <TableHead className="text-right">Compa-Ratio</TableHead>
-                    <TableHead>Range Position</TableHead>
-                    <TableHead>Status</TableHead>
+                    <TableHead>{t("compensation.compaRatio.employee")}</TableHead>
+                    <TableHead>{t("compensation.compaRatio.snapshotDate")}</TableHead>
+                    <TableHead className="text-right">{t("compensation.compaRatio.currentSalary")}</TableHead>
+                    <TableHead className="text-right">{t("compensation.compaRatio.gradeMidpoint")}</TableHead>
+                    <TableHead className="text-right">{t("compensation.compaRatio.compaRatio")}</TableHead>
+                    <TableHead>{t("compensation.compaRatio.rangePosition")}</TableHead>
+                    <TableHead>{t("compensation.compaRatio.status")}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {filteredSnapshots.length === 0 ? (
-                    <TableRow>
-                      <TableCell colSpan={7} className="text-center text-muted-foreground">
-                        No compa-ratio data found
-                      </TableCell>
-                    </TableRow>
+                    <TableRow><TableCell colSpan={7} className="text-center text-muted-foreground">{t("compensation.compaRatio.noData")}</TableCell></TableRow>
                   ) : (
                     filteredSnapshots.map((snapshot: any) => (
                       <TableRow key={snapshot.id}>
@@ -221,17 +194,11 @@ export default function CompaRatioPage() {
                         <TableCell className="text-right">${snapshot.current_salary?.toLocaleString()}</TableCell>
                         <TableCell className="text-right">${snapshot.grade_midpoint?.toLocaleString() || "-"}</TableCell>
                         <TableCell className="text-right">
-                          <div className="flex items-center justify-end gap-1">
-                            {getCompaRatioIcon(snapshot.compa_ratio)}
-                            {snapshot.compa_ratio?.toFixed(2) || "-"}
-                          </div>
+                          <div className="flex items-center justify-end gap-1">{getCompaRatioIcon(snapshot.compa_ratio)}{snapshot.compa_ratio?.toFixed(2) || "-"}</div>
                         </TableCell>
                         <TableCell>
                           {snapshot.range_penetration ? (
-                            <div className="flex items-center gap-2">
-                              <Progress value={Math.min(snapshot.range_penetration, 100)} className="w-16 h-2" />
-                              <span className="text-sm text-muted-foreground">{snapshot.range_penetration}%</span>
-                            </div>
+                            <div className="flex items-center gap-2"><Progress value={Math.min(snapshot.range_penetration, 100)} className="w-16 h-2" /><span className="text-sm text-muted-foreground">{snapshot.range_penetration}%</span></div>
                           ) : "-"}
                         </TableCell>
                         <TableCell>{getCompaRatioBadge(snapshot.compa_ratio)}</TableCell>

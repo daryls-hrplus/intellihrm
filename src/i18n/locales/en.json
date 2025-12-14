@@ -3642,5 +3642,365 @@
         "paid": "Paid"
       }
     }
+  },
+  "compensation": {
+    "title": "Compensation",
+    "subtitle": "Salary management and payroll",
+    "totalCompensation": "Total Compensation",
+    "employees": "Employees",
+    "pendingReviews": "Pending Reviews",
+    "avgSalary": "Avg. Salary",
+    "asOfDate": "As of date",
+    "modules": {
+      "payElements": {
+        "title": "Pay Elements",
+        "description": "Manage salary, wages, allowances"
+      },
+      "salaryGrades": {
+        "title": "Salary Grades",
+        "description": "Define salary bands and ranges"
+      },
+      "positionCompensation": {
+        "title": "Position Compensation",
+        "description": "Configure compensation for positions"
+      },
+      "history": {
+        "title": "Compensation History",
+        "description": "Track salary changes over time"
+      },
+      "meritCycles": {
+        "title": "Merit Cycles",
+        "description": "Annual merit increase programs"
+      },
+      "bonus": {
+        "title": "Bonus Management",
+        "description": "Manage bonus plans and awards"
+      },
+      "marketBenchmarking": {
+        "title": "Market Benchmarking",
+        "description": "Compare to market data"
+      },
+      "compaRatio": {
+        "title": "Compa-Ratio Analysis",
+        "description": "Pay vs grade midpoint analysis"
+      },
+      "payEquity": {
+        "title": "Pay Equity",
+        "description": "Analyze compensation gaps"
+      },
+      "totalRewards": {
+        "title": "Total Rewards",
+        "description": "Employee compensation statements"
+      },
+      "budgets": {
+        "title": "Budgets",
+        "description": "Track compensation budgets"
+      },
+      "equity": {
+        "title": "Equity Management",
+        "description": "Stock options and RSUs"
+      },
+      "analytics": {
+        "title": "Analytics",
+        "description": "Compensation insights and trends"
+      }
+    },
+    "payElements": {
+      "title": "Pay Elements",
+      "subtitle": "Manage salary, wages, allowances, and benefits",
+      "addPayElement": "Add Pay Element",
+      "noPayElements": "No pay elements found. Create one to get started.",
+      "deleteConfirm": "Are you sure you want to delete this pay element?",
+      "code": "Code",
+      "name": "Name",
+      "type": "Type",
+      "proration": "Proration",
+      "startDate": "Start Date",
+      "endDate": "End Date",
+      "status": "Status",
+      "actions": "Actions",
+      "dialog": {
+        "createTitle": "Create Pay Element",
+        "editTitle": "Edit Pay Element",
+        "description": "Configure the pay element details and properties",
+        "codePlaceholder": "e.g., BASE_SALARY",
+        "namePlaceholder": "e.g., Basic Salary",
+        "elementType": "Element Type",
+        "selectType": "Select type",
+        "prorationMethod": "Proration Method",
+        "selectMethod": "Select method",
+        "displayOrder": "Display Order",
+        "taxable": "Taxable",
+        "pensionable": "Pensionable",
+        "active": "Active"
+      }
+    },
+    "salaryGrades": {
+      "title": "Salary Grades",
+      "subtitle": "Define salary bands and compensation ranges",
+      "addGrade": "Add Grade",
+      "noGrades": "No salary grades found. Create one to get started.",
+      "deleteConfirm": "Are you sure you want to delete this salary grade?",
+      "code": "Code",
+      "name": "Name",
+      "min": "Min",
+      "mid": "Mid",
+      "max": "Max",
+      "status": "Status",
+      "dialog": {
+        "createTitle": "Create Salary Grade",
+        "editTitle": "Edit Salary Grade",
+        "description": "Define the salary range for this grade",
+        "codePlaceholder": "e.g., G1, L5",
+        "namePlaceholder": "e.g., Grade 1, Level 5",
+        "currency": "Currency",
+        "minimum": "Minimum",
+        "midpoint": "Midpoint",
+        "maximum": "Maximum"
+      }
+    },
+    "positionCompensation": {
+      "title": "Position Compensation",
+      "subtitle": "Define compensation structure for job positions",
+      "company": "Company",
+      "position": "Position",
+      "selectCompany": "Select company",
+      "selectPosition": "Select position",
+      "totalPackage": "Total Package",
+      "addPayElement": "Add Pay Element",
+      "compensationFor": "Compensation for",
+      "noElements": "No compensation elements defined for this position.",
+      "deleteConfirm": "Are you sure you want to delete this compensation element?",
+      "payElement": "Pay Element",
+      "type": "Type",
+      "amount": "Amount",
+      "frequency": "Frequency",
+      "effective": "Effective",
+      "status": "Status",
+      "dialog": {
+        "createTitle": "Add Compensation",
+        "editTitle": "Edit Compensation",
+        "description": "Configure compensation element for this position",
+        "selectPayElement": "Select pay element",
+        "paymentFrequency": "Payment Frequency",
+        "selectFrequency": "Select frequency",
+        "effectiveDate": "Effective Date",
+        "notes": "Notes",
+        "notesPlaceholder": "Optional notes"
+      }
+    },
+    "meritCycles": {
+      "title": "Merit Cycles",
+      "subtitle": "Manage annual merit increase programs",
+      "newCycle": "New Cycle",
+      "activeCycles": "Active Cycles",
+      "totalBudget": "Total Budget",
+      "completed": "Completed",
+      "cycleName": "Cycle Name",
+      "year": "Year",
+      "period": "Period",
+      "budget": "Budget",
+      "allocation": "Allocation",
+      "status": "Status",
+      "noCycles": "No merit cycles found"
+    },
+    "bonus": {
+      "title": "Bonus Management",
+      "subtitle": "Manage bonus plans and awards",
+      "newPlan": "New Plan",
+      "newAward": "New Award",
+      "activePlans": "Active Plans",
+      "pendingAwards": "Pending Awards",
+      "totalPaid": "Total Paid",
+      "recipients": "Recipients",
+      "bonusPlans": "Bonus Plans",
+      "bonusAwards": "Bonus Awards",
+      "planName": "Plan Name",
+      "type": "Type",
+      "frequency": "Frequency",
+      "targetPercent": "Target %",
+      "status": "Status",
+      "noPlans": "No bonus plans found",
+      "employee": "Employee",
+      "awardDate": "Award Date",
+      "amount": "Amount",
+      "noAwards": "No bonus awards found"
+    },
+    "history": {
+      "title": "Compensation History",
+      "subtitle": "Track salary changes over time",
+      "addRecord": "Add Record",
+      "searchEmployee": "Search by employee...",
+      "allTypes": "All Types",
+      "changeType": "Change Type",
+      "noHistory": "No compensation history found",
+      "employee": "Employee",
+      "effectiveDate": "Effective Date",
+      "type": "Type",
+      "previous": "Previous",
+      "new": "New",
+      "change": "Change",
+      "approvedBy": "Approved By",
+      "changeTypes": {
+        "hire": "Hire",
+        "promotion": "Promotion",
+        "merit": "Merit",
+        "adjustment": "Adjustment",
+        "market": "Market",
+        "demotion": "Demotion"
+      }
+    },
+    "compaRatio": {
+      "title": "Compa-Ratio Analysis",
+      "subtitle": "Compare employee pay to grade midpoints",
+      "recalculateAll": "Recalculate All",
+      "avgCompaRatio": "Avg Compa-Ratio",
+      "belowMidpoint": "Below Midpoint",
+      "atMidpoint": "At Midpoint",
+      "aboveMidpoint": "Above Midpoint",
+      "searchEmployee": "Search by employee...",
+      "noData": "No compa-ratio data found",
+      "employee": "Employee",
+      "snapshotDate": "Snapshot Date",
+      "currentSalary": "Current Salary",
+      "gradeMidpoint": "Grade Midpoint",
+      "compaRatio": "Compa-Ratio",
+      "rangePosition": "Range Position",
+      "status": "Status",
+      "statuses": {
+        "belowRange": "Below Range",
+        "belowMidpoint": "Below Midpoint",
+        "atMidpoint": "At Midpoint",
+        "aboveMidpoint": "Above Midpoint",
+        "aboveRange": "Above Range"
+      }
+    },
+    "marketBenchmarking": {
+      "title": "Market Benchmarking",
+      "subtitle": "Compare compensation to market data",
+      "addSource": "Add Source",
+      "addMarketData": "Add Market Data",
+      "dataSources": "Data Sources",
+      "marketRates": "Market Rates",
+      "activeSources": "Active Sources",
+      "noSources": "No data sources found",
+      "noRates": "No market rates found",
+      "sourceName": "Source Name",
+      "provider": "Provider",
+      "surveyYear": "Survey Year",
+      "effectiveDate": "Effective Date",
+      "status": "Status",
+      "jobTitle": "Job Title",
+      "location": "Location",
+      "p25": "P25",
+      "p50": "P50",
+      "p75": "P75",
+      "source": "Source"
+    },
+    "equity": {
+      "title": "Equity Management",
+      "subtitle": "Manage stock options, RSUs, and equity grants",
+      "newPlan": "New Plan",
+      "newGrant": "New Grant",
+      "activePlans": "Active Plans",
+      "sharesGranted": "Shares Granted",
+      "sharesVested": "Shares Vested",
+      "grantRecipients": "Grant Recipients",
+      "equityPlans": "Equity Plans",
+      "grants": "Grants",
+      "noPlans": "No equity plans found",
+      "noGrants": "No equity grants found",
+      "planName": "Plan Name",
+      "type": "Type",
+      "authorized": "Authorized",
+      "available": "Available",
+      "currentPrice": "Current Price",
+      "status": "Status",
+      "employee": "Employee",
+      "plan": "Plan",
+      "grantDate": "Grant Date",
+      "granted": "Granted",
+      "vested": "Vested"
+    },
+    "payEquity": {
+      "title": "Pay Equity Analysis",
+      "subtitle": "Analyze and address compensation gaps",
+      "newAnalysis": "New Analysis",
+      "totalAnalyses": "Total Analyses",
+      "completed": "Completed",
+      "inProgress": "In Progress",
+      "noAnalyses": "No pay equity analyses found",
+      "analysisName": "Analysis Name",
+      "type": "Type",
+      "date": "Date",
+      "methodology": "Methodology",
+      "status": "Status"
+    },
+    "totalRewards": {
+      "title": "Total Rewards Statements",
+      "subtitle": "Employee total compensation summaries",
+      "generateStatements": "Generate Statements",
+      "totalStatements": "Total Statements",
+      "published": "Published",
+      "avgTotalComp": "Avg. Total Comp",
+      "viewed": "Viewed",
+      "searchEmployee": "Search by employee...",
+      "noStatements": "No statements found",
+      "employee": "Employee",
+      "year": "Year",
+      "baseSalary": "Base Salary",
+      "bonus": "Bonus",
+      "benefits": "Benefits",
+      "total": "Total",
+      "status": "Status",
+      "draft": "Draft"
+    },
+    "budgets": {
+      "title": "Compensation Budgets",
+      "subtitle": "Track and manage compensation budgets",
+      "newBudget": "New Budget",
+      "totalPlanned": "Total Planned",
+      "totalSpent": "Total Spent",
+      "remaining": "Remaining",
+      "utilization": "Utilization",
+      "allYears": "All Years",
+      "noBudgets": "No budgets found",
+      "department": "Department",
+      "companyWide": "Company-wide",
+      "type": "Type",
+      "year": "Year",
+      "planned": "Planned",
+      "spent": "Spent",
+      "status": "Status"
+    },
+    "analytics": {
+      "title": "Compensation Analytics",
+      "subtitle": "Insights and trends across compensation",
+      "totalSalaryChanges": "Total Salary Changes",
+      "bonusesPaid": "Bonuses Paid",
+      "avgCompaRatio": "Avg Compa-Ratio",
+      "salaryChanges": "Salary Changes",
+      "salaryChangesByType": "Salary Changes by Type",
+      "bonusDistribution": "Bonus Distribution by Type",
+      "compaRatioDistribution": "Compa-Ratio Distribution"
+    },
+    "statuses": {
+      "active": "Active",
+      "inactive": "Inactive",
+      "draft": "Draft",
+      "planning": "Planning",
+      "inProgress": "In Progress",
+      "completed": "Completed",
+      "cancelled": "Cancelled",
+      "pending": "Pending",
+      "approved": "Approved",
+      "paid": "Paid",
+      "closed": "Closed",
+      "archived": "Archived",
+      "fullyVested": "Fully Vested",
+      "exercised": "Exercised",
+      "forfeited": "Forfeited",
+      "expired": "Expired"
+    }
   }
 }

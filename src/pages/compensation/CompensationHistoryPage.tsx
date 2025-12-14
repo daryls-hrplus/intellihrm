@@ -12,6 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 import { History, Search, Plus, TrendingUp, TrendingDown, Minus } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useTranslation } from "react-i18next";
 
 interface Company {
   id: string;
@@ -19,6 +20,7 @@ interface Company {
 }
 
 export default function CompensationHistoryPage() {
+  const { t } = useTranslation();
   const [searchTerm, setSearchTerm] = useState("");
   const [changeTypeFilter, setChangeTypeFilter] = useState<string>("all");
   const [companies, setCompanies] = useState<Company[]>([]);
@@ -88,8 +90,8 @@ export default function CompensationHistoryPage() {
       <div className="space-y-6">
         <Breadcrumbs
           items={[
-            { label: "Compensation", href: "/compensation" },
-            { label: "Compensation History" },
+            { label: t("compensation.title"), href: "/compensation" },
+            { label: t("compensation.history.title") },
           ]}
         />
 
@@ -99,14 +101,14 @@ export default function CompensationHistoryPage() {
               <History className="h-5 w-5 text-primary" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold tracking-tight">Compensation History</h1>
-              <p className="text-muted-foreground">Track salary changes over time</p>
+              <h1 className="text-2xl font-bold tracking-tight">{t("compensation.history.title")}</h1>
+              <p className="text-muted-foreground">{t("compensation.history.subtitle")}</p>
             </div>
           </div>
           <div className="flex items-center gap-3">
             <Select value={selectedCompanyId} onValueChange={setSelectedCompanyId}>
               <SelectTrigger className="w-[200px]">
-                <SelectValue placeholder="Select Company" />
+                <SelectValue placeholder={t("common.selectCompany")} />
               </SelectTrigger>
               <SelectContent>
                 {companies.map((company) => (
@@ -118,7 +120,7 @@ export default function CompensationHistoryPage() {
             </Select>
             <Button>
               <Plus className="mr-2 h-4 w-4" />
-              Add Record
+              {t("compensation.history.addRecord")}
             </Button>
           </div>
         </div>
@@ -129,7 +131,7 @@ export default function CompensationHistoryPage() {
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
-                  placeholder="Search by employee..."
+                  placeholder={t("compensation.history.searchEmployee")}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-10"
@@ -137,15 +139,15 @@ export default function CompensationHistoryPage() {
               </div>
               <Select value={changeTypeFilter} onValueChange={setChangeTypeFilter}>
                 <SelectTrigger className="w-[180px]">
-                  <SelectValue placeholder="Change Type" />
+                  <SelectValue placeholder={t("compensation.history.changeType")} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Types</SelectItem>
-                  <SelectItem value="hire">Hire</SelectItem>
-                  <SelectItem value="promotion">Promotion</SelectItem>
-                  <SelectItem value="merit">Merit</SelectItem>
-                  <SelectItem value="adjustment">Adjustment</SelectItem>
-                  <SelectItem value="market">Market</SelectItem>
+                  <SelectItem value="all">{t("compensation.history.allTypes")}</SelectItem>
+                  <SelectItem value="hire">{t("compensation.history.changeTypes.hire")}</SelectItem>
+                  <SelectItem value="promotion">{t("compensation.history.changeTypes.promotion")}</SelectItem>
+                  <SelectItem value="merit">{t("compensation.history.changeTypes.merit")}</SelectItem>
+                  <SelectItem value="adjustment">{t("compensation.history.changeTypes.adjustment")}</SelectItem>
+                  <SelectItem value="market">{t("compensation.history.changeTypes.market")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -161,20 +163,20 @@ export default function CompensationHistoryPage() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Employee</TableHead>
-                    <TableHead>Effective Date</TableHead>
-                    <TableHead>Type</TableHead>
-                    <TableHead className="text-right">Previous</TableHead>
-                    <TableHead className="text-right">New</TableHead>
-                    <TableHead className="text-right">Change</TableHead>
-                    <TableHead>Approved By</TableHead>
+                    <TableHead>{t("compensation.history.employee")}</TableHead>
+                    <TableHead>{t("compensation.history.effectiveDate")}</TableHead>
+                    <TableHead>{t("compensation.history.type")}</TableHead>
+                    <TableHead className="text-right">{t("compensation.history.previous")}</TableHead>
+                    <TableHead className="text-right">{t("compensation.history.new")}</TableHead>
+                    <TableHead className="text-right">{t("compensation.history.change")}</TableHead>
+                    <TableHead>{t("compensation.history.approvedBy")}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {filteredHistory.length === 0 ? (
                     <TableRow>
                       <TableCell colSpan={7} className="text-center text-muted-foreground">
-                        No compensation history found
+                        {t("compensation.history.noHistory")}
                       </TableCell>
                     </TableRow>
                   ) : (
