@@ -13,6 +13,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Plus, Package, Loader2, Search } from "lucide-react";
 import { format } from "date-fns";
+import { useLanguage } from "@/hooks/useLanguage";
 
 interface Props {
   companyId?: string;
@@ -22,6 +23,7 @@ const CONDITIONS = ["excellent", "good", "fair", "poor"];
 const STATUSES = ["available", "assigned", "maintenance", "retired", "lost"];
 
 const PropertyItemsTab = ({ companyId }: Props) => {
+  const { t } = useLanguage();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
@@ -129,6 +131,14 @@ const PropertyItemsTab = ({ companyId }: Props) => {
     }
   };
 
+  const getConditionLabel = (condition: string) => {
+    return t(`companyProperty.assets.conditions.${condition}`) || condition;
+  };
+
+  const getStatusLabel = (status: string) => {
+    return t(`companyProperty.assets.statuses.${status}`) || status;
+  };
+
   if (loadingItems) {
     return (
       <div className="flex items-center justify-center py-12">
@@ -142,13 +152,13 @@ const PropertyItemsTab = ({ companyId }: Props) => {
       <CardHeader className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <CardTitle className="flex items-center gap-2">
           <Package className="h-5 w-5" />
-          Property Assets
+          {t("companyProperty.assets.title")}
         </CardTitle>
         <div className="flex items-center gap-2">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Search assets..."
+              placeholder={t("companyProperty.assets.searchAssets")}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-9 w-[200px]"
@@ -156,12 +166,12 @@ const PropertyItemsTab = ({ companyId }: Props) => {
           </div>
           <Select value={statusFilter} onValueChange={setStatusFilter}>
             <SelectTrigger className="w-[140px]">
-              <SelectValue placeholder="All Status" />
+              <SelectValue placeholder={t("common.allStatus")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Status</SelectItem>
+              <SelectItem value="all">{t("common.allStatus")}</SelectItem>
               {STATUSES.map((s) => (
-                <SelectItem key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</SelectItem>
+                <SelectItem key={s} value={s}>{getStatusLabel(s)}</SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -169,20 +179,20 @@ const PropertyItemsTab = ({ companyId }: Props) => {
             <DialogTrigger asChild>
               <Button className="gap-2">
                 <Plus className="h-4 w-4" />
-                Add Asset
+                {t("companyProperty.assets.addAsset")}
               </Button>
             </DialogTrigger>
             <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
               <DialogHeader>
-                <DialogTitle>Add Property Asset</DialogTitle>
+                <DialogTitle>{t("companyProperty.assets.addAssetTitle")}</DialogTitle>
               </DialogHeader>
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label>Company *</Label>
+                    <Label>{t("common.company")} *</Label>
                     <Select value={formData.company_id} onValueChange={(v) => setFormData({ ...formData, company_id: v })} required>
                       <SelectTrigger>
-                        <SelectValue placeholder="Select company" />
+                        <SelectValue placeholder={t("common.selectCompany")} />
                       </SelectTrigger>
                       <SelectContent>
                         {companies.map((c) => (
@@ -192,10 +202,10 @@ const PropertyItemsTab = ({ companyId }: Props) => {
                     </Select>
                   </div>
                   <div className="space-y-2">
-                    <Label>Category *</Label>
+                    <Label>{t("common.category")} *</Label>
                     <Select value={formData.category_id} onValueChange={(v) => setFormData({ ...formData, category_id: v })} required>
                       <SelectTrigger>
-                        <SelectValue placeholder="Select category" />
+                        <SelectValue placeholder={t("common.category")} />
                       </SelectTrigger>
                       <SelectContent>
                         {categories.map((c) => (
@@ -207,7 +217,7 @@ const PropertyItemsTab = ({ companyId }: Props) => {
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label>Asset Tag *</Label>
+                    <Label>{t("companyProperty.assets.assetTag")} *</Label>
                     <Input
                       value={formData.asset_tag}
                       onChange={(e) => setFormData({ ...formData, asset_tag: e.target.value.toUpperCase() })}
@@ -215,7 +225,7 @@ const PropertyItemsTab = ({ companyId }: Props) => {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>Name *</Label>
+                    <Label>{t("common.name")} *</Label>
                     <Input
                       value={formData.name}
                       onChange={(e) => setFormData({ ...formData, name: e.target.value })}
@@ -225,21 +235,21 @@ const PropertyItemsTab = ({ companyId }: Props) => {
                 </div>
                 <div className="grid grid-cols-3 gap-4">
                   <div className="space-y-2">
-                    <Label>Serial Number</Label>
+                    <Label>{t("companyProperty.assets.serialNumberFull")}</Label>
                     <Input
                       value={formData.serial_number}
                       onChange={(e) => setFormData({ ...formData, serial_number: e.target.value })}
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>Model</Label>
+                    <Label>{t("companyProperty.assets.model")}</Label>
                     <Input
                       value={formData.model}
                       onChange={(e) => setFormData({ ...formData, model: e.target.value })}
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>Manufacturer</Label>
+                    <Label>{t("companyProperty.assets.manufacturer")}</Label>
                     <Input
                       value={formData.manufacturer}
                       onChange={(e) => setFormData({ ...formData, manufacturer: e.target.value })}
@@ -248,7 +258,7 @@ const PropertyItemsTab = ({ companyId }: Props) => {
                 </div>
                 <div className="grid grid-cols-3 gap-4">
                   <div className="space-y-2">
-                    <Label>Purchase Date</Label>
+                    <Label>{t("companyProperty.assets.purchaseDate")}</Label>
                     <Input
                       type="date"
                       value={formData.purchase_date}
@@ -256,7 +266,7 @@ const PropertyItemsTab = ({ companyId }: Props) => {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>Purchase Cost</Label>
+                    <Label>{t("companyProperty.assets.purchaseCost")}</Label>
                     <Input
                       type="number"
                       step="0.01"
@@ -265,7 +275,7 @@ const PropertyItemsTab = ({ companyId }: Props) => {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>Warranty Expiry</Label>
+                    <Label>{t("companyProperty.assets.warrantyExpiry")}</Label>
                     <Input
                       type="date"
                       value={formData.warranty_expiry}
@@ -275,20 +285,20 @@ const PropertyItemsTab = ({ companyId }: Props) => {
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label>Condition</Label>
+                    <Label>{t("companyProperty.assets.condition")}</Label>
                     <Select value={formData.condition} onValueChange={(v) => setFormData({ ...formData, condition: v })}>
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
                         {CONDITIONS.map((c) => (
-                          <SelectItem key={c} value={c}>{c.charAt(0).toUpperCase() + c.slice(1)}</SelectItem>
+                          <SelectItem key={c} value={c}>{getConditionLabel(c)}</SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
                   </div>
                   <div className="space-y-2">
-                    <Label>Location</Label>
+                    <Label>{t("companyProperty.assets.location")}</Label>
                     <Input
                       value={formData.location}
                       onChange={(e) => setFormData({ ...formData, location: e.target.value })}
@@ -296,14 +306,14 @@ const PropertyItemsTab = ({ companyId }: Props) => {
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label>Description</Label>
+                  <Label>{t("common.description")}</Label>
                   <Textarea
                     value={formData.description}
                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>Notes</Label>
+                  <Label>{t("common.notes")}</Label>
                   <Textarea
                     value={formData.notes}
                     onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
@@ -311,11 +321,11 @@ const PropertyItemsTab = ({ companyId }: Props) => {
                 </div>
                 <div className="flex justify-end gap-2">
                   <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
-                    Cancel
+                    {t("common.cancel")}
                   </Button>
                   <Button type="submit" disabled={createItem.isPending}>
                     {createItem.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    Create
+                    {t("common.create")}
                   </Button>
                 </div>
               </form>
@@ -327,21 +337,21 @@ const PropertyItemsTab = ({ companyId }: Props) => {
         {filteredItems.length === 0 ? (
           <div className="text-center py-12 text-muted-foreground">
             <Package className="h-12 w-12 mx-auto mb-4 opacity-50" />
-            <p>No assets found</p>
-            <p className="text-sm">Add your first asset to get started</p>
+            <p>{t("companyProperty.assets.noAssets")}</p>
+            <p className="text-sm">{t("companyProperty.assets.noAssetsHint")}</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Asset Tag</TableHead>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Category</TableHead>
-                  <TableHead>Serial #</TableHead>
-                  <TableHead>Condition</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Location</TableHead>
+                  <TableHead>{t("companyProperty.assets.assetTag")}</TableHead>
+                  <TableHead>{t("common.name")}</TableHead>
+                  <TableHead>{t("common.category")}</TableHead>
+                  <TableHead>{t("companyProperty.assets.serialNumber")}</TableHead>
+                  <TableHead>{t("companyProperty.assets.condition")}</TableHead>
+                  <TableHead>{t("common.status")}</TableHead>
+                  <TableHead>{t("companyProperty.assets.location")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -360,12 +370,12 @@ const PropertyItemsTab = ({ companyId }: Props) => {
                     <TableCell className="font-mono text-xs">{item.serial_number || "-"}</TableCell>
                     <TableCell>
                       <Badge variant="outline" className={getConditionColor(item.condition)}>
-                        {item.condition}
+                        {getConditionLabel(item.condition)}
                       </Badge>
                     </TableCell>
                     <TableCell>
                       <Badge variant="outline" className={getStatusColor(item.status)}>
-                        {item.status}
+                        {getStatusLabel(item.status)}
                       </Badge>
                     </TableCell>
                     <TableCell className="text-muted-foreground">{item.location || "-"}</TableCell>

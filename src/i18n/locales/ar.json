@@ -497,5 +497,173 @@
     "markAllAsRead": "تحديد الكل كمقروء",
     "noNotifications": "لا توجد إشعارات",
     "viewAll": "عرض الكل"
+  },
+  "companyProperty": {
+    "title": "ممتلكات الشركة",
+    "subtitle": "إدارة وتتبع الأصول",
+    "dashboard": {
+      "title": "ممتلكات الشركة",
+      "subtitle": "إدارة وتتبع الأصول"
+    },
+    "stats": {
+      "totalAssets": "إجمالي الأصول",
+      "assigned": "مُعيّن",
+      "pendingRequests": "الطلبات المعلقة",
+      "maintenanceDue": "الصيانة المستحقة",
+      "totalAssetValue": "إجمالي قيمة الأصول",
+      "utilizationRate": "معدل الاستخدام",
+      "assetsNeedingAttention": "الأصول التي تحتاج اهتمام"
+    },
+    "tabs": {
+      "analytics": "التحليلات",
+      "assets": "الأصول",
+      "assignments": "التعيينات",
+      "requests": "الطلبات",
+      "maintenance": "الصيانة",
+      "categories": "الفئات"
+    },
+    "categories": {
+      "title": "فئات الممتلكات",
+      "addCategory": "إضافة فئة",
+      "addCategoryTitle": "إضافة فئة ممتلكات",
+      "noCategories": "لم يتم العثور على فئات",
+      "noCategoriesHint": "أنشئ أول فئة للبدء",
+      "company": "الشركة",
+      "selectCompany": "اختر الشركة (اختياري)",
+      "globalAllCompanies": "عام (جميع الشركات)",
+      "depreciation": "الإهلاك",
+      "depreciationYears": "سنوات الإهلاك",
+      "years": "سنوات"
+    },
+    "assets": {
+      "title": "أصول الممتلكات",
+      "addAsset": "إضافة أصل",
+      "addAssetTitle": "إضافة أصل ممتلكات",
+      "searchAssets": "البحث في الأصول...",
+      "noAssets": "لم يتم العثور على أصول",
+      "noAssetsHint": "أضف أول أصل للبدء",
+      "assetTag": "رمز الأصل",
+      "serialNumber": "الرقم التسلسلي",
+      "serialNumberFull": "الرقم التسلسلي",
+      "model": "الموديل",
+      "manufacturer": "الشركة المصنعة",
+      "purchaseDate": "تاريخ الشراء",
+      "purchaseCost": "تكلفة الشراء",
+      "warrantyExpiry": "انتهاء الضمان",
+      "condition": "الحالة",
+      "location": "الموقع",
+      "conditions": {
+        "excellent": "ممتاز",
+        "good": "جيد",
+        "fair": "مقبول",
+        "poor": "ضعيف",
+        "damaged": "تالف"
+      },
+      "statuses": {
+        "available": "متاح",
+        "assigned": "مُعيّن",
+        "maintenance": "صيانة",
+        "retired": "متقاعد",
+        "lost": "مفقود"
+      }
+    },
+    "assignments": {
+      "title": "تعيينات الممتلكات",
+      "assignAsset": "تعيين أصل",
+      "assignAssetTitle": "تعيين ممتلكات لموظف",
+      "noAssignments": "لم يتم العثور على تعيينات",
+      "noAssignmentsHint": "عيّن الأصول للموظفين لتتبع الاستخدام",
+      "asset": "الأصل",
+      "selectAsset": "اختر أصل متاح",
+      "assignedDate": "تاريخ التعيين",
+      "expectedReturn": "الإرجاع المتوقع",
+      "expectedReturnDate": "تاريخ الإرجاع المتوقع",
+      "conditionAtAssignment": "الحالة عند التعيين",
+      "conditionAtReturn": "الحالة عند الإرجاع",
+      "assign": "تعيين",
+      "return": "إرجاع",
+      "returnProperty": "إرجاع الممتلكات",
+      "confirmReturn": "تأكيد الإرجاع",
+      "returnNotes": "أي ملاحظات حول الإرجاع...",
+      "returned": "مُرجع"
+    },
+    "requests": {
+      "title": "طلبات الممتلكات",
+      "noRequests": "لم يتم العثور على طلبات",
+      "noRequestsHint": "ستظهر طلبات الممتلكات من الموظفين هنا",
+      "requestType": "النوع",
+      "submitted": "مُقدم",
+      "approveRequest": "الموافقة على الطلب",
+      "rejectRequest": "رفض الطلب",
+      "confirmApprove": "هل أنت متأكد من الموافقة على هذا الطلب؟",
+      "confirmReject": "هل أنت متأكد من رفض هذا الطلب؟",
+      "reviewNotes": "ملاحظات المراجعة",
+      "rejectionReason": "سبب الرفض...",
+      "optionalNotes": "ملاحظات اختيارية...",
+      "types": {
+        "new": "جديد",
+        "replacement": "استبدال",
+        "upgrade": "ترقية",
+        "repair": "إصلاح"
+      },
+      "priorities": {
+        "low": "منخفض",
+        "medium": "متوسط",
+        "high": "عالي",
+        "urgent": "عاجل"
+      },
+      "statuses": {
+        "pending": "معلق",
+        "approved": "موافق عليه",
+        "rejected": "مرفوض",
+        "fulfilled": "مُنفذ"
+      }
+    },
+    "maintenance": {
+      "title": "سجلات الصيانة",
+      "scheduleMaintenance": "جدولة الصيانة",
+      "scheduleMaintenanceTitle": "جدولة الصيانة",
+      "noMaintenance": "لم يتم العثور على سجلات صيانة",
+      "noMaintenanceHint": "جدولة صيانة لأصولك",
+      "maintenanceType": "النوع",
+      "vendor": "المورد",
+      "scheduledDate": "التاريخ المجدول",
+      "scheduled": "مجدول",
+      "performedBy": "نُفذ بواسطة",
+      "cost": "التكلفة",
+      "complete": "إكمال",
+      "schedule": "جدولة",
+      "types": {
+        "repair": "إصلاح",
+        "inspection": "فحص",
+        "upgrade": "ترقية",
+        "cleaning": "تنظيف",
+        "calibration": "معايرة"
+      },
+      "statuses": {
+        "scheduled": "مجدول",
+        "in_progress": "قيد التنفيذ",
+        "completed": "مكتمل",
+        "cancelled": "ملغي"
+      }
+    },
+    "analytics": {
+      "assetStatus": "حالة الأصول",
+      "assetStatusDesc": "التوزيع حسب الحالة الحالية",
+      "assetCondition": "حالة الأصل",
+      "assetConditionDesc": "الحالة المادية للأصول",
+      "requestStatus": "حالة الطلب",
+      "requestStatusDesc": "طلبات الممتلكات حسب الحالة",
+      "assetsByCategory": "الأصول حسب الفئة",
+      "assetsByCategoryDesc": "التوزيع عبر فئات الأصول",
+      "assignmentTrends": "اتجاهات التعيين",
+      "assignmentTrendsDesc": "المُعيّن مقابل المُرجع خلال 6 أشهر",
+      "requestsByPriority": "الطلبات حسب الأولوية",
+      "requestsByPriorityDesc": "توزيع أولوية طلبات الممتلكات",
+      "maintenanceCosts": "تكاليف الصيانة",
+      "maintenanceCostsDesc": "إنفاق الصيانة الشهري",
+      "maintenanceByType": "الصيانة حسب النوع",
+      "maintenanceByTypeDesc": "التوزيع حسب فئة الصيانة"
+    }
   }
 }
