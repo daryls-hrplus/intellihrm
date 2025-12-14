@@ -1,5 +1,8 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+
+// Helper to avoid deep type instantiation
+const query = (table: string) => supabase.from(table as any);
 import { useAuth } from "@/contexts/AuthContext";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
@@ -41,45 +44,57 @@ export default function EmployeeDirectoryPage() {
   const loadData = async () => {
     setIsLoading(true);
     try {
-      const [empRes, deptRes] = await Promise.all([
-        supabase
-          .from("profiles")
-          .select(`
-            id,
-            full_name,
-            email,
-            avatar_url,
-            department:departments(name),
-            company:companies(name)
-          `)
-          .eq("is_active", true)
-          .order("full_name"),
-        supabase
-          .from("departments")
-          .select("id, name")
-          .order("name"),
-      ]);
+      const empRes: any = await query("profiles")
+        .select("id, full_name, email, avatar_url, department_id, company_id")
+        .eq("is_active", true)
+        .order("full_name");
+
+      const deptRes: any = await query("departments")
+        .select("id, name")
+        .order("name");
+
+      const companyRes: any = await query("companies")
+        .select("id, name");
+
+      const empData = empRes.data || [];
+      const deptData = deptRes.data || [];
+      const companyData = companyRes.data || [];
+
+      const deptMap = new Map(deptData.map((d: any) => [d.id, d.name]));
+      const companyMap = new Map(companyData.map((c: any) => [c.id, c.name]));
 
       // Get position titles for employees
-      const employeesWithPositions = await Promise.all(
-        (empRes.data || []).map(async (emp: any) => {
-          const { data: posData } = await supabase
-            .from("employee_positions")
-            .select("position:positions(title)")
-            .eq("employee_id", emp.id)
-            .eq("is_active", true)
-            .eq("is_primary", true)
-            .limit(1);
-          
-          return {
-            ...emp,
-            position_title: posData?.[0]?.position?.title || null,
-          };
-        })
-      );
+      const employeesWithDetails: Employee[] = [];
+      for (const emp of empData) {
+        const posRes: any = await query("employee_positions")
+          .select("position_id")
+          .eq("employee_id", emp.id)
+          .eq("is_active", true)
+          .eq("is_primary", true)
+          .limit(1);
 
-      setEmployees(employeesWithPositions as Employee[]);
-      setDepartments((deptRes.data || []) as Department[]);
+        let positionTitle: string | undefined;
+        if (posRes.data?.[0]?.position_id) {
+          const positionRes: any = await query("positions")
+            .select("title")
+            .eq("id", posRes.data[0].position_id)
+            .single();
+          positionTitle = positionRes.data?.title || undefined;
+        }
+
+        employeesWithDetails.push({
+          id: emp.id,
+          full_name: emp.full_name || "",
+          email: emp.email || "",
+          avatar_url: emp.avatar_url,
+          department: emp.department_id ? { name: String(deptMap.get(emp.department_id) || "") } : null,
+          company: emp.company_id ? { name: String(companyMap.get(emp.company_id) || "") } : null,
+          position_title: positionTitle,
+        });
+      }
+
+      setEmployees(employeesWithDetails);
+      setDepartments(deptData as Department[]);
     } catch (error) {
       console.error("Error loading data:", error);
     } finally {

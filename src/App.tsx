@@ -240,6 +240,15 @@ import MssCompaRatioPage from "./pages/mss/MssCompaRatioPage";
 import MssEquityPage from "./pages/mss/MssEquityPage";
 import MyTimeAttendancePage from "./pages/ess/MyTimeAttendancePage";
 import MssTimeAttendancePage from "./pages/mss/MssTimeAttendancePage";
+import MyTimesheetsPage from "./pages/ess/MyTimesheetsPage";
+import MyExpenseClaimsPage from "./pages/ess/MyExpenseClaimsPage";
+import AnnouncementsPage from "./pages/ess/AnnouncementsPage";
+import TeamCalendarPage from "./pages/ess/TeamCalendarPage";
+import MilestonesPage from "./pages/ess/MilestonesPage";
+import EmployeeDirectoryPage from "./pages/admin/EmployeeDirectoryPage";
+import CompanyAnnouncementsPage from "./pages/admin/CompanyAnnouncementsPage";
+import ApprovalDelegationsPage from "./pages/admin/ApprovalDelegationsPage";
+import CompanyDocumentsPage from "./pages/admin/CompanyDocumentsPage";
 
 // Workflow pages
 import AdminWorkflowTemplatesPage from "./pages/admin/AdminWorkflowTemplatesPage";
@@ -2015,6 +2024,82 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <MessagingPage />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* ESS New Routes */}
+            <Route
+              path="/ess/timesheets"
+              element={
+                <ProtectedRoute moduleCode="ess">
+                  <MyTimesheetsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/ess/expenses"
+              element={
+                <ProtectedRoute moduleCode="ess">
+                  <MyExpenseClaimsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/ess/announcements"
+              element={
+                <ProtectedRoute moduleCode="ess">
+                  <AnnouncementsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/ess/calendar"
+              element={
+                <ProtectedRoute moduleCode="ess">
+                  <TeamCalendarPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/ess/milestones"
+              element={
+                <ProtectedRoute moduleCode="ess">
+                  <MilestonesPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/ess/directory"
+              element={
+                <ProtectedRoute moduleCode="ess">
+                  <EmployeeDirectoryPage />
+                </ProtectedRoute>
+              }
+            />
+            
+            {/* Admin New Routes */}
+            <Route
+              path="/admin/announcements"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
+                  <CompanyAnnouncementsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/delegations"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
+                  <ApprovalDelegationsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/documents"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
+                  <CompanyDocumentsPage />
                 </ProtectedRoute>
               }
             />
