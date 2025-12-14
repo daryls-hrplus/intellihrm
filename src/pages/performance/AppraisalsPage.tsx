@@ -32,6 +32,7 @@ import { toast } from "sonner";
 import { AppraisalCycleDialog } from "@/components/performance/AppraisalCycleDialog";
 import { AppraisalParticipantsManager } from "@/components/performance/AppraisalParticipantsManager";
 import { AppraisalEvaluationDialog } from "@/components/performance/AppraisalEvaluationDialog";
+import { useLanguage } from "@/hooks/useLanguage";
 import { format } from "date-fns";
 
 interface AppraisalCycle {
@@ -101,6 +102,7 @@ const tabHelpText: Record<string, string> = {
 };
 
 export default function AppraisalsPage() {
+  const { t } = useLanguage();
   const { user, company, isAdmin, isHRManager } = useAuth();
   const [activeTab, setActiveTab] = useState("my-appraisals");
   const [cycles, setCycles] = useState<AppraisalCycle[]>([]);
@@ -375,10 +377,10 @@ export default function AppraisalsPage() {
             </div>
             <div>
               <h1 className="text-2xl font-bold tracking-tight text-foreground">
-                Performance Appraisals
+                {t('performance.appraisals.title')}
               </h1>
               <p className="text-muted-foreground">
-                Evaluate employees on competencies, responsibilities, and goals
+                {t('performance.appraisals.subtitle')}
               </p>
             </div>
           </div>
@@ -388,7 +390,7 @@ export default function AppraisalsPage() {
               <Select value={selectedCompanyId} onValueChange={setSelectedCompanyId}>
                 <SelectTrigger className="w-[200px]">
                   <Building2 className="mr-2 h-4 w-4" />
-                  <SelectValue placeholder="Select company" />
+                  <SelectValue placeholder={t('performance.appraisals.selectCompany')} />
                 </SelectTrigger>
                 <SelectContent>
                   {companies.map((c) => (
@@ -402,13 +404,13 @@ export default function AppraisalsPage() {
             {(isAdmin || isHRManager) && (
               <Button onClick={() => handleCreateCycle(false, false)}>
                 <Plus className="mr-2 h-4 w-4" />
-                Create Appraisal Cycle
+                {t('performance.appraisals.createCycle')}
               </Button>
             )}
             {!isAdmin && !isHRManager && (
               <Button onClick={() => handleCreateCycle(true, true)}>
                 <Plus className="mr-2 h-4 w-4" />
-                Create Probation Review
+                {t('performance.appraisals.createProbationReview')}
               </Button>
             )}
           </div>
@@ -420,7 +422,7 @@ export default function AppraisalsPage() {
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground">Active Cycles</p>
+                  <p className="text-sm text-muted-foreground">{t('performance.stats.activeCycles')}</p>
                   <p className="text-2xl font-bold">{stats.activeCycles}</p>
                 </div>
                 <Clock className="h-8 w-8 text-info" />
@@ -431,7 +433,7 @@ export default function AppraisalsPage() {
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground">Pending Evaluations</p>
+                  <p className="text-sm text-muted-foreground">{t('performance.stats.pendingEvaluations')}</p>
                   <p className="text-2xl font-bold">{stats.pendingEvaluations}</p>
                 </div>
                 <AlertCircle className="h-8 w-8 text-warning" />
@@ -442,7 +444,7 @@ export default function AppraisalsPage() {
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground">Completed</p>
+                  <p className="text-sm text-muted-foreground">{t('performance.stats.completed')}</p>
                   <p className="text-2xl font-bold">{stats.completedAppraisals}</p>
                 </div>
                 <CheckCircle className="h-8 w-8 text-success" />
@@ -453,7 +455,7 @@ export default function AppraisalsPage() {
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground">My Appraisals</p>
+                  <p className="text-sm text-muted-foreground">{t('performance.stats.myAppraisals')}</p>
                   <p className="text-2xl font-bold">{stats.myAppraisals}</p>
                 </div>
                 <Target className="h-8 w-8 text-primary" />
@@ -466,25 +468,25 @@ export default function AppraisalsPage() {
           <TabsList className="flex-wrap">
             <TabsTrigger value="my-appraisals" className="gap-2">
               <Target className="h-4 w-4" />
-              My Appraisals
+              {t('performance.appraisals.myAppraisals')}
               <Tooltip>
                 <TooltipTrigger asChild>
                   <HelpCircle className="h-3.5 w-3.5 text-muted-foreground hover:text-foreground cursor-help" />
                 </TooltipTrigger>
                 <TooltipContent side="bottom" className="w-72 p-3 text-left whitespace-normal">
-                  <p className="text-sm leading-relaxed">{tabHelpText["my-appraisals"]}</p>
+                  <p className="text-sm leading-relaxed">{t('performance.appraisals.tabs.myAppraisalsHelp')}</p>
                 </TooltipContent>
               </Tooltip>
             </TabsTrigger>
             <TabsTrigger value="evaluate-team" className="gap-2">
               <Users className="h-4 w-4" />
-              Evaluate Team
+              {t('performance.appraisals.evaluateTeam')}
               <Tooltip>
                 <TooltipTrigger asChild>
                   <HelpCircle className="h-3.5 w-3.5 text-muted-foreground hover:text-foreground cursor-help" />
                 </TooltipTrigger>
                 <TooltipContent side="bottom" className="w-72 p-3 text-left whitespace-normal">
-                  <p className="text-sm leading-relaxed">{tabHelpText["evaluate-team"]}</p>
+                  <p className="text-sm leading-relaxed">{t('performance.appraisals.tabs.evaluateTeamHelp')}</p>
                 </TooltipContent>
               </Tooltip>
             </TabsTrigger>
@@ -492,26 +494,26 @@ export default function AppraisalsPage() {
               <>
                 <TabsTrigger value="manage-cycles" className="gap-2">
                   <Settings className="h-4 w-4" />
-                  Central Cycles
+                  {t('performance.appraisals.centralCycles')}
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <HelpCircle className="h-3.5 w-3.5 text-muted-foreground hover:text-foreground cursor-help" />
                     </TooltipTrigger>
                     <TooltipContent side="bottom" className="w-72 p-3 text-left whitespace-normal">
-                      <p className="text-sm leading-relaxed">{tabHelpText["manage-cycles"]}</p>
+                      <p className="text-sm leading-relaxed">{t('performance.appraisals.tabs.manageCyclesHelp')}</p>
                     </TooltipContent>
                   </Tooltip>
                 </TabsTrigger>
                 <TabsTrigger value="manager-cycles" className="gap-2">
                   <ClipboardCheck className="h-4 w-4" />
-                  Manager Probation Reviews
+                  {t('performance.appraisals.managerCycles')}
                 </TabsTrigger>
               </>
             )}
             {!isAdmin && !isHRManager && (
               <TabsTrigger value="my-team-cycles" className="gap-2">
                 <ClipboardCheck className="h-4 w-4" />
-                My Team Probation Reviews
+                {t('performance.appraisals.managerCycles')}
               </TabsTrigger>
             )}
           </TabsList>
