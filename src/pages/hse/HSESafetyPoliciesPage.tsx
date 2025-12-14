@@ -203,7 +203,7 @@ export default function HSESafetyPoliciesPage() {
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground">Total Policies</p>
+                  <p className="text-sm text-muted-foreground">{t("hseModule.stats.totalPolicies")}</p>
                   <p className="text-2xl font-bold">{safetyPolicies.length}</p>
                 </div>
                 <FileText className="h-8 w-8 text-muted-foreground" />
@@ -214,7 +214,7 @@ export default function HSESafetyPoliciesPage() {
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground">Active</p>
+                  <p className="text-sm text-muted-foreground">{t("hseModule.stats.active")}</p>
                   <p className="text-2xl font-bold text-success">{activePolicies}</p>
                 </div>
                 <CheckCircle className="h-8 w-8 text-success" />
@@ -225,7 +225,7 @@ export default function HSESafetyPoliciesPage() {
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground">Require Acknowledgment</p>
+                  <p className="text-sm text-muted-foreground">{t("hseModule.stats.requireAcknowledgment")}</p>
                   <p className="text-2xl font-bold">{requireAcknowledgment}</p>
                 </div>
                 <Users className="h-8 w-8 text-muted-foreground" />
@@ -240,7 +240,7 @@ export default function HSESafetyPoliciesPage() {
             <div className="flex flex-wrap gap-4">
               <Select value={companyId} onValueChange={setCompanyId}>
                 <SelectTrigger className="w-[200px]">
-                  <SelectValue placeholder="Select company" />
+                  <SelectValue placeholder={t("hseModule.common.selectCompany")} />
                 </SelectTrigger>
                 <SelectContent>
                   {companies.map((c) => (
@@ -254,7 +254,7 @@ export default function HSESafetyPoliciesPage() {
               <div className="relative flex-1 min-w-[200px]">
                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
-                  placeholder="Search policies..."
+                  placeholder={t("hseModule.policies.searchPolicies")}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-9"
@@ -263,13 +263,13 @@ export default function HSESafetyPoliciesPage() {
 
               <Select value={statusFilter} onValueChange={setStatusFilter}>
                 <SelectTrigger className="w-[150px]">
-                  <SelectValue placeholder="Status" />
+                  <SelectValue placeholder={t("common.status")} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Status</SelectItem>
+                  <SelectItem value="all">{t("hseModule.common.allStatus")}</SelectItem>
                   {statusOptions.map((s) => (
                     <SelectItem key={s.value} value={s.value}>
-                      {s.label}
+                      {t(`hseModule.policies.statusOptions.${s.value}`)}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -277,7 +277,7 @@ export default function HSESafetyPoliciesPage() {
 
               <Button onClick={() => handleOpenDialog()} disabled={!companyId}>
                 <Plus className="mr-2 h-4 w-4" />
-                Add Policy
+                {t("hseModule.policies.addPolicy")}
               </Button>
             </div>
           </CardContent>
@@ -289,27 +289,27 @@ export default function HSESafetyPoliciesPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Code</TableHead>
-                  <TableHead>Title</TableHead>
-                  <TableHead>Type</TableHead>
-                  <TableHead>Version</TableHead>
-                  <TableHead>Effective Date</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Acknowledgment</TableHead>
-                  <TableHead>Actions</TableHead>
+                  <TableHead>{t("hseModule.common.code")}</TableHead>
+                  <TableHead>{t("hseModule.common.title")}</TableHead>
+                  <TableHead>{t("common.type")}</TableHead>
+                  <TableHead>{t("hseModule.policies.version")}</TableHead>
+                  <TableHead>{t("hseModule.policies.effectiveDate")}</TableHead>
+                  <TableHead>{t("common.status")}</TableHead>
+                  <TableHead>{t("hseModule.policies.acknowledgment")}</TableHead>
+                  <TableHead>{t("common.actions")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {policiesLoading ? (
                   <TableRow>
                     <TableCell colSpan={8} className="text-center py-8">
-                      Loading...
+                      {t("hseModule.common.loading")}
                     </TableCell>
                   </TableRow>
                 ) : filteredPolicies.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
-                      No safety policies found
+                      {t("hseModule.policies.noPolicies")}
                     </TableCell>
                   </TableRow>
                 ) : (
@@ -327,9 +327,9 @@ export default function HSESafetyPoliciesPage() {
                       <TableCell>{getStatusBadge(policy.status)}</TableCell>
                       <TableCell>
                         {policy.acknowledgment_required ? (
-                          <Badge className="bg-warning/10 text-warning">Required</Badge>
+                          <Badge className="bg-warning/10 text-warning">{t("common.required")}</Badge>
                         ) : (
-                          <Badge variant="outline">Optional</Badge>
+                          <Badge variant="outline">{t("common.optional")}</Badge>
                         )}
                       </TableCell>
                       <TableCell>
@@ -346,7 +346,7 @@ export default function HSESafetyPoliciesPage() {
                             variant="outline"
                             onClick={() => handleOpenDialog(policy)}
                           >
-                            Edit
+                            {t("common.edit")}
                           </Button>
                         </div>
                       </TableCell>
@@ -363,7 +363,7 @@ export default function HSESafetyPoliciesPage() {
           <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>
-                {selectedPolicy ? "Edit Policy" : "Add Safety Policy"}
+                {selectedPolicy ? t("hseModule.policies.editPolicy") : t("hseModule.policies.addPolicy")}
               </DialogTitle>
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4">
