@@ -3800,6 +3800,96 @@ export type Database = {
           },
         ]
       }
+      company_subscriptions: {
+        Row: {
+          active_employee_count: number
+          annual_amount: number | null
+          billing_address: string | null
+          billing_cycle: string
+          company_id: string | null
+          contact_email: string | null
+          contact_name: string | null
+          contact_phone: string | null
+          created_at: string
+          grace_period_ends_at: string | null
+          id: string
+          monthly_amount: number | null
+          next_billing_date: string | null
+          payment_method: string | null
+          selected_modules: Json
+          status: string
+          subscription_ends_at: string | null
+          subscription_started_at: string | null
+          tier_id: string | null
+          trial_ends_at: string
+          trial_started_at: string
+          updated_at: string
+        }
+        Insert: {
+          active_employee_count?: number
+          annual_amount?: number | null
+          billing_address?: string | null
+          billing_cycle?: string
+          company_id?: string | null
+          contact_email?: string | null
+          contact_name?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          grace_period_ends_at?: string | null
+          id?: string
+          monthly_amount?: number | null
+          next_billing_date?: string | null
+          payment_method?: string | null
+          selected_modules?: Json
+          status?: string
+          subscription_ends_at?: string | null
+          subscription_started_at?: string | null
+          tier_id?: string | null
+          trial_ends_at?: string
+          trial_started_at?: string
+          updated_at?: string
+        }
+        Update: {
+          active_employee_count?: number
+          annual_amount?: number | null
+          billing_address?: string | null
+          billing_cycle?: string
+          company_id?: string | null
+          contact_email?: string | null
+          contact_name?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          grace_period_ends_at?: string | null
+          id?: string
+          monthly_amount?: number | null
+          next_billing_date?: string | null
+          payment_method?: string | null
+          selected_modules?: Json
+          status?: string
+          subscription_ends_at?: string | null
+          subscription_started_at?: string | null
+          tier_id?: string | null
+          trial_ends_at?: string
+          trial_started_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_subscriptions_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "company_subscriptions_tier_id_fkey"
+            columns: ["tier_id"]
+            isOneToOne: false
+            referencedRelation: "subscription_tiers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       company_tag_assignments: {
         Row: {
           company_id: string
@@ -24056,6 +24146,225 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      subscription_changes: {
+        Row: {
+          change_type: string
+          created_at: string
+          effective_date: string | null
+          id: string
+          new_amount: number | null
+          new_employee_count: number | null
+          new_modules: Json | null
+          new_tier_id: string | null
+          notes: string | null
+          old_amount: number | null
+          old_employee_count: number | null
+          old_modules: Json | null
+          old_tier_id: string | null
+          processed_at: string | null
+          processed_by: string | null
+          requested_by: string | null
+          status: string
+          subscription_id: string
+        }
+        Insert: {
+          change_type: string
+          created_at?: string
+          effective_date?: string | null
+          id?: string
+          new_amount?: number | null
+          new_employee_count?: number | null
+          new_modules?: Json | null
+          new_tier_id?: string | null
+          notes?: string | null
+          old_amount?: number | null
+          old_employee_count?: number | null
+          old_modules?: Json | null
+          old_tier_id?: string | null
+          processed_at?: string | null
+          processed_by?: string | null
+          requested_by?: string | null
+          status?: string
+          subscription_id: string
+        }
+        Update: {
+          change_type?: string
+          created_at?: string
+          effective_date?: string | null
+          id?: string
+          new_amount?: number | null
+          new_employee_count?: number | null
+          new_modules?: Json | null
+          new_tier_id?: string | null
+          notes?: string | null
+          old_amount?: number | null
+          old_employee_count?: number | null
+          old_modules?: Json | null
+          old_tier_id?: string | null
+          processed_at?: string | null
+          processed_by?: string | null
+          requested_by?: string | null
+          status?: string
+          subscription_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subscription_changes_new_tier_id_fkey"
+            columns: ["new_tier_id"]
+            isOneToOne: false
+            referencedRelation: "subscription_tiers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subscription_changes_old_tier_id_fkey"
+            columns: ["old_tier_id"]
+            isOneToOne: false
+            referencedRelation: "subscription_tiers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subscription_changes_processed_by_fkey"
+            columns: ["processed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subscription_changes_requested_by_fkey"
+            columns: ["requested_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subscription_changes_subscription_id_fkey"
+            columns: ["subscription_id"]
+            isOneToOne: false
+            referencedRelation: "company_subscriptions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      subscription_invoices: {
+        Row: {
+          amount: number
+          billing_period_end: string
+          billing_period_start: string
+          created_at: string
+          currency: string
+          due_date: string
+          id: string
+          invoice_number: string
+          marked_paid_by: string | null
+          notes: string | null
+          paid_at: string | null
+          payment_method: string | null
+          payment_reference: string | null
+          status: string
+          subscription_id: string
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          billing_period_end: string
+          billing_period_start: string
+          created_at?: string
+          currency?: string
+          due_date: string
+          id?: string
+          invoice_number: string
+          marked_paid_by?: string | null
+          notes?: string | null
+          paid_at?: string | null
+          payment_method?: string | null
+          payment_reference?: string | null
+          status?: string
+          subscription_id: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          billing_period_end?: string
+          billing_period_start?: string
+          created_at?: string
+          currency?: string
+          due_date?: string
+          id?: string
+          invoice_number?: string
+          marked_paid_by?: string | null
+          notes?: string | null
+          paid_at?: string | null
+          payment_method?: string | null
+          payment_reference?: string | null
+          status?: string
+          subscription_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subscription_invoices_marked_paid_by_fkey"
+            columns: ["marked_paid_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subscription_invoices_subscription_id_fkey"
+            columns: ["subscription_id"]
+            isOneToOne: false
+            referencedRelation: "company_subscriptions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      subscription_tiers: {
+        Row: {
+          base_price_monthly: number
+          code: string
+          created_at: string
+          description: string | null
+          display_order: number | null
+          id: string
+          is_active: boolean
+          max_employees: number | null
+          min_employees: number | null
+          modules: Json
+          name: string
+          price_per_employee: number
+          updated_at: string
+        }
+        Insert: {
+          base_price_monthly: number
+          code: string
+          created_at?: string
+          description?: string | null
+          display_order?: number | null
+          id?: string
+          is_active?: boolean
+          max_employees?: number | null
+          min_employees?: number | null
+          modules?: Json
+          name: string
+          price_per_employee?: number
+          updated_at?: string
+        }
+        Update: {
+          base_price_monthly?: number
+          code?: string
+          created_at?: string
+          description?: string | null
+          display_order?: number | null
+          id?: string
+          is_active?: boolean
+          max_employees?: number | null
+          min_employees?: number | null
+          modules?: Json
+          name?: string
+          price_per_employee?: number
+          updated_at?: string
+        }
+        Relationships: []
       }
       succession_candidates: {
         Row: {
