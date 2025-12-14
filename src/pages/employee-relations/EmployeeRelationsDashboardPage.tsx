@@ -193,7 +193,7 @@ export default function EmployeeRelationsDashboardPage() {
   ];
 
   const breadcrumbItems = [
-    { label: t("common.home"), path: "/" },
+    { label: t("common.home"), href: "/" },
     { label: t("employeeRelationsModule.title") },
   ];
 
