@@ -16,6 +16,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { FaceCaptureDialog } from "@/components/time-attendance/FaceCaptureDialog";
+import { useTranslation } from "react-i18next";
 import { 
   MapPin, 
   Plus, 
@@ -93,6 +94,7 @@ interface GeofenceViolation {
 }
 
 export default function GeofenceManagementPage() {
+  const { t } = useTranslation();
   const [companies, setCompanies] = useState<Company[]>([]);
   const [selectedCompany, setSelectedCompany] = useState<string>("");
   const [loading, setLoading] = useState(true);
@@ -512,8 +514,8 @@ const openEditLocation = (location: GeofenceLocation) => {
       <div className="space-y-6">
         <Breadcrumbs 
           items={[
-            { label: "Time & Attendance", href: "/time-attendance" },
-            { label: "Geofencing" }
+            { label: t("navigation.timeAttendance"), href: "/time-attendance" },
+            { label: t("timeAttendance.geofencing.title") }
           ]} 
         />
 
@@ -524,16 +526,16 @@ const openEditLocation = (location: GeofenceLocation) => {
             </div>
             <div>
               <h1 className="text-2xl font-bold tracking-tight text-foreground">
-                Geofence Management
+                {t("timeAttendance.geofencing.title")}
               </h1>
               <p className="text-muted-foreground">
-                Configure location-based clock in/out restrictions
+                {t("timeAttendance.geofencing.subtitle")}
               </p>
             </div>
           </div>
           <Select value={selectedCompany} onValueChange={setSelectedCompany}>
             <SelectTrigger className="w-[200px]">
-              <SelectValue placeholder="Select company" />
+              <SelectValue placeholder={t("common.selectCompany")} />
             </SelectTrigger>
             <SelectContent>
               {companies.map((c) => (
@@ -543,33 +545,32 @@ const openEditLocation = (location: GeofenceLocation) => {
           </Select>
         </div>
 
-        {/* Stats */}
         <div className="grid gap-4 md:grid-cols-4">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium">Locations</CardTitle>
+              <CardTitle className="text-sm font-medium">{t("timeAttendance.geofencing.locations")}</CardTitle>
               <Building2 className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{locations.length}</div>
               <p className="text-xs text-muted-foreground">
-                {locations.filter(l => l.is_active).length} active
+                {locations.filter(l => l.is_active).length} {t("common.active").toLowerCase()}
               </p>
             </CardContent>
           </Card>
           <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium">Assignments</CardTitle>
+              <CardTitle className="text-sm font-medium">{t("timeAttendance.geofencing.assignments")}</CardTitle>
               <Users className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{assignments.length}</div>
-              <p className="text-xs text-muted-foreground">Employee assignments</p>
+              <p className="text-xs text-muted-foreground">{t("timeAttendance.geofencing.employeeAssignments")}</p>
             </CardContent>
           </Card>
           <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium">Avg Radius</CardTitle>
+              <CardTitle className="text-sm font-medium">{t("timeAttendance.geofencing.avgRadius")}</CardTitle>
               <Target className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
@@ -578,17 +579,17 @@ const openEditLocation = (location: GeofenceLocation) => {
                   ? Math.round(locations.reduce((a, l) => a + l.radius_meters, 0) / locations.length)
                   : 0}m
               </div>
-              <p className="text-xs text-muted-foreground">Average geofence radius</p>
+              <p className="text-xs text-muted-foreground">{t("timeAttendance.geofencing.averageRadius")}</p>
             </CardContent>
           </Card>
           <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium">Violations</CardTitle>
+              <CardTitle className="text-sm font-medium">{t("timeAttendance.geofencing.violations")}</CardTitle>
               <AlertTriangle className="h-4 w-4 text-warning" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-warning">{violations.length}</div>
-              <p className="text-xs text-muted-foreground">Recent violations</p>
+              <p className="text-xs text-muted-foreground">{t("timeAttendance.geofencing.recentViolations")}</p>
             </CardContent>
           </Card>
         </div>
@@ -597,19 +598,19 @@ const openEditLocation = (location: GeofenceLocation) => {
           <TabsList>
             <TabsTrigger value="locations" className="gap-2">
               <MapPin className="h-4 w-4" />
-              Locations
+              {t("timeAttendance.geofencing.locations")}
             </TabsTrigger>
             <TabsTrigger value="assignments" className="gap-2">
               <Users className="h-4 w-4" />
-              Assignments
+              {t("timeAttendance.geofencing.assignments")}
             </TabsTrigger>
             <TabsTrigger value="face-enrollment" className="gap-2">
               <Camera className="h-4 w-4" />
-              Face Enrollment
+              {t("timeAttendance.geofencing.faceEnrollment")}
             </TabsTrigger>
             <TabsTrigger value="violations" className="gap-2">
               <AlertTriangle className="h-4 w-4" />
-              Violations
+              {t("timeAttendance.geofencing.violations")}
             </TabsTrigger>
           </TabsList>
 

@@ -10,6 +10,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { format, parseISO, differenceInMinutes } from "date-fns";
 import { Activity, UserCheck, UserX, Clock, Loader2, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useTranslation } from "react-i18next";
 
 interface LiveEntry {
   id: string;
@@ -21,6 +22,7 @@ interface LiveEntry {
 }
 
 export default function LiveAttendancePage() {
+  const { t } = useTranslation();
   const { profile } = useAuth();
   const [entries, setEntries] = useState<LiveEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -29,7 +31,6 @@ export default function LiveAttendancePage() {
   useEffect(() => {
     if (profile?.company_id) {
       loadEntries();
-      // Set up realtime subscription
       const channel = supabase
         .channel("live-attendance")
         .on("postgres_changes", { event: "*", schema: "public", table: "time_clock_entries" }, () => {
@@ -72,41 +73,40 @@ export default function LiveAttendancePage() {
   return (
     <AppLayout>
       <div className="space-y-6">
-        <Breadcrumbs items={[{ label: "Time & Attendance", href: "/time-attendance" }, { label: "Live Dashboard" }]} />
+        <Breadcrumbs items={[{ label: t("navigation.timeAttendance"), href: "/time-attendance" }, { label: t("timeAttendance.live.title") }]} />
 
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-green-500/10"><Activity className="h-6 w-6 text-green-600" /></div>
             <div>
-              <h1 className="text-2xl font-bold">Live Attendance</h1>
-              <p className="text-muted-foreground">Real-time punch feed - Last updated: {format(lastRefresh, "HH:mm:ss")}</p>
+              <h1 className="text-2xl font-bold">{t("timeAttendance.live.title")}</h1>
+              <p className="text-muted-foreground">{t("timeAttendance.live.subtitle")} - {t("timeAttendance.live.lastRefresh")}: {format(lastRefresh, "HH:mm:ss")}</p>
             </div>
           </div>
-          <Button variant="outline" onClick={loadEntries}><RefreshCw className="h-4 w-4 mr-2" />Refresh</Button>
+          <Button variant="outline" onClick={loadEntries}><RefreshCw className="h-4 w-4 mr-2" />{t("common.refresh")}</Button>
         </div>
 
         <div className="grid gap-4 md:grid-cols-3">
           <Card className="border-green-500/50">
-            <CardHeader className="pb-2"><CardTitle className="text-sm font-medium flex items-center gap-2"><UserCheck className="h-4 w-4 text-green-600" />Currently Clocked In</CardTitle></CardHeader>
+            <CardHeader className="pb-2"><CardTitle className="text-sm font-medium flex items-center gap-2"><UserCheck className="h-4 w-4 text-green-600" />{t("timeAttendance.live.currentlyClockedIn")}</CardTitle></CardHeader>
             <CardContent><div className="text-3xl font-bold text-green-600">{clockedIn.length}</div></CardContent>
           </Card>
           <Card className="border-muted">
-            <CardHeader className="pb-2"><CardTitle className="text-sm font-medium flex items-center gap-2"><UserX className="h-4 w-4 text-muted-foreground" />Clocked Out Today</CardTitle></CardHeader>
+            <CardHeader className="pb-2"><CardTitle className="text-sm font-medium flex items-center gap-2"><UserX className="h-4 w-4 text-muted-foreground" />{t("timeAttendance.live.clockedOutToday")}</CardTitle></CardHeader>
             <CardContent><div className="text-3xl font-bold">{clockedOut.length}</div></CardContent>
           </Card>
           <Card>
-            <CardHeader className="pb-2"><CardTitle className="text-sm font-medium flex items-center gap-2"><Clock className="h-4 w-4 text-muted-foreground" />Total Punches Today</CardTitle></CardHeader>
+            <CardHeader className="pb-2"><CardTitle className="text-sm font-medium flex items-center gap-2"><Clock className="h-4 w-4 text-muted-foreground" />{t("timeAttendance.live.totalPunchesToday")}</CardTitle></CardHeader>
             <CardContent><div className="text-3xl font-bold">{entries.length}</div></CardContent>
           </Card>
         </div>
 
         <div className="grid gap-6 lg:grid-cols-2">
-          {/* Currently Working */}
           <Card>
-            <CardHeader><CardTitle className="flex items-center gap-2"><UserCheck className="h-5 w-5 text-green-600" />Currently Working ({clockedIn.length})</CardTitle></CardHeader>
+            <CardHeader><CardTitle className="flex items-center gap-2"><UserCheck className="h-5 w-5 text-green-600" />{t("timeAttendance.live.currentlyWorking")} ({clockedIn.length})</CardTitle></CardHeader>
             <CardContent>
               {clockedIn.length === 0 ? (
-                <p className="text-center text-muted-foreground py-8">No employees currently clocked in</p>
+                <p className="text-center text-muted-foreground py-8">{t("timeAttendance.live.noEmployeesWorking")}</p>
               ) : (
                 <div className="space-y-3">
                   {clockedIn.map((entry) => (
@@ -115,11 +115,11 @@ export default function LiveAttendancePage() {
                         <Avatar><AvatarFallback>{entry.employee?.full_name?.charAt(0) || "?"}</AvatarFallback></Avatar>
                         <div>
                           <p className="font-medium">{entry.employee?.full_name}</p>
-                          <p className="text-sm text-muted-foreground">In: {format(parseISO(entry.clock_in), "HH:mm")}</p>
+                          <p className="text-sm text-muted-foreground">{t("timeAttendance.live.clockIn")}: {format(parseISO(entry.clock_in), "HH:mm")}</p>
                         </div>
                       </div>
                       <div className="text-right">
-                        <Badge className="bg-green-500/20 text-green-700">Working</Badge>
+                        <Badge className="bg-green-500/20 text-green-700">{t("timeAttendance.timeTracking.active")}</Badge>
                         <p className="text-sm text-muted-foreground mt-1">{getWorkingDuration(entry.clock_in)}</p>
                       </div>
                     </div>
@@ -129,17 +129,16 @@ export default function LiveAttendancePage() {
             </CardContent>
           </Card>
 
-          {/* Recent Activity */}
           <Card>
-            <CardHeader><CardTitle className="flex items-center gap-2"><Activity className="h-5 w-5" />Recent Activity</CardTitle></CardHeader>
+            <CardHeader><CardTitle className="flex items-center gap-2"><Activity className="h-5 w-5" />{t("timeAttendance.live.recentActivity")}</CardTitle></CardHeader>
             <CardContent>
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Employee</TableHead>
-                    <TableHead>In</TableHead>
-                    <TableHead>Out</TableHead>
-                    <TableHead>Status</TableHead>
+                    <TableHead>{t("timeAttendance.live.employee")}</TableHead>
+                    <TableHead>{t("timeAttendance.live.clockIn")}</TableHead>
+                    <TableHead>{t("timeAttendance.live.clockOut")}</TableHead>
+                    <TableHead>{t("timeAttendance.live.status")}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -150,7 +149,7 @@ export default function LiveAttendancePage() {
                       <TableCell>{entry.clock_out ? format(parseISO(entry.clock_out), "HH:mm") : "-"}</TableCell>
                       <TableCell>
                         <Badge className={entry.clock_out ? "bg-muted text-muted-foreground" : "bg-green-500/20 text-green-700"}>
-                          {entry.clock_out ? "Completed" : "Working"}
+                          {entry.clock_out ? t("timeAttendance.timeTracking.completed") : t("timeAttendance.timeTracking.active")}
                         </Badge>
                       </TableCell>
                     </TableRow>
