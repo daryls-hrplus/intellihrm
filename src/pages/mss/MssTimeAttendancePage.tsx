@@ -98,8 +98,14 @@ export default function MssTimeAttendancePage() {
       }));
 
       setDirectReports(reports);
+      
+      // If no direct reports, stop loading immediately
+      if (reports.length === 0) {
+        setIsLoading(false);
+      }
     } catch (error) {
       console.error("Error loading direct reports:", error);
+      setIsLoading(false);
     }
   };
 
