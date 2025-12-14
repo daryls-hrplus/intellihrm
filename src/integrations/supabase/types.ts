@@ -493,6 +493,70 @@ export type Database = {
           },
         ]
       }
+      approval_delegations: {
+        Row: {
+          company_id: string
+          created_at: string
+          delegate_id: string
+          delegator_id: string
+          end_date: string
+          id: string
+          is_active: boolean | null
+          reason: string | null
+          start_date: string
+          updated_at: string
+          workflow_types: string[] | null
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          delegate_id: string
+          delegator_id: string
+          end_date: string
+          id?: string
+          is_active?: boolean | null
+          reason?: string | null
+          start_date: string
+          updated_at?: string
+          workflow_types?: string[] | null
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          delegate_id?: string
+          delegator_id?: string
+          end_date?: string
+          id?: string
+          is_active?: boolean | null
+          reason?: string | null
+          start_date?: string
+          updated_at?: string
+          workflow_types?: string[] | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "approval_delegations_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "approval_delegations_delegate_id_fkey"
+            columns: ["delegate_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "approval_delegations_delegator_id_fkey"
+            columns: ["delegator_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       assessment_results: {
         Row: {
           answers: Json | null
@@ -3027,6 +3091,75 @@ export type Database = {
           },
         ]
       }
+      company_announcements: {
+        Row: {
+          company_id: string | null
+          content: string
+          created_at: string
+          created_by: string | null
+          expire_at: string | null
+          id: string
+          is_active: boolean | null
+          is_pinned: boolean | null
+          priority: string | null
+          publish_at: string | null
+          target_audience: string | null
+          target_departments: string[] | null
+          target_roles: string[] | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          company_id?: string | null
+          content: string
+          created_at?: string
+          created_by?: string | null
+          expire_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_pinned?: boolean | null
+          priority?: string | null
+          publish_at?: string | null
+          target_audience?: string | null
+          target_departments?: string[] | null
+          target_roles?: string[] | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string | null
+          content?: string
+          created_at?: string
+          created_by?: string | null
+          expire_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_pinned?: boolean | null
+          priority?: string | null
+          publish_at?: string | null
+          target_audience?: string | null
+          target_departments?: string[] | null
+          target_roles?: string[] | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_announcements_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "company_announcements_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       company_branch_locations: {
         Row: {
           address: string | null
@@ -3138,6 +3271,75 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      company_documents: {
+        Row: {
+          category: string
+          company_id: string | null
+          created_at: string
+          description: string | null
+          file_size: number | null
+          file_type: string | null
+          file_url: string
+          id: string
+          is_active: boolean | null
+          is_public: boolean | null
+          tags: string[] | null
+          title: string
+          updated_at: string
+          uploaded_by: string | null
+          version: string | null
+        }
+        Insert: {
+          category: string
+          company_id?: string | null
+          created_at?: string
+          description?: string | null
+          file_size?: number | null
+          file_type?: string | null
+          file_url: string
+          id?: string
+          is_active?: boolean | null
+          is_public?: boolean | null
+          tags?: string[] | null
+          title: string
+          updated_at?: string
+          uploaded_by?: string | null
+          version?: string | null
+        }
+        Update: {
+          category?: string
+          company_id?: string | null
+          created_at?: string
+          description?: string | null
+          file_size?: number | null
+          file_type?: string | null
+          file_url?: string
+          id?: string
+          is_active?: boolean | null
+          is_public?: boolean | null
+          tags?: string[] | null
+          title?: string
+          updated_at?: string
+          uploaded_by?: string | null
+          version?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_documents_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "company_documents_uploaded_by_fkey"
+            columns: ["uploaded_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -5320,6 +5522,66 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "employee_memberships_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      employee_milestones: {
+        Row: {
+          celebrated_at: string | null
+          company_id: string
+          created_at: string
+          description: string | null
+          employee_id: string
+          id: string
+          is_celebrated: boolean | null
+          milestone_date: string
+          milestone_type: string
+          title: string | null
+          updated_at: string
+          years_of_service: number | null
+        }
+        Insert: {
+          celebrated_at?: string | null
+          company_id: string
+          created_at?: string
+          description?: string | null
+          employee_id: string
+          id?: string
+          is_celebrated?: boolean | null
+          milestone_date: string
+          milestone_type: string
+          title?: string | null
+          updated_at?: string
+          years_of_service?: number | null
+        }
+        Update: {
+          celebrated_at?: string | null
+          company_id?: string
+          created_at?: string
+          description?: string | null
+          employee_id?: string
+          id?: string
+          is_celebrated?: boolean | null
+          milestone_date?: string
+          milestone_type?: string
+          title?: string | null
+          updated_at?: string
+          years_of_service?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "employee_milestones_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_milestones_employee_id_fkey"
             columns: ["employee_id"]
             isOneToOne: false
             referencedRelation: "profiles"
@@ -7707,6 +7969,152 @@ export type Database = {
             columns: ["priority_id"]
             isOneToOne: false
             referencedRelation: "ticket_priorities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      expense_claim_items: {
+        Row: {
+          amount: number
+          category: string
+          claim_id: string
+          created_at: string
+          description: string | null
+          expense_date: string
+          id: string
+          is_billable: boolean | null
+          project_id: string | null
+          receipt_url: string | null
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          category: string
+          claim_id: string
+          created_at?: string
+          description?: string | null
+          expense_date: string
+          id?: string
+          is_billable?: boolean | null
+          project_id?: string | null
+          receipt_url?: string | null
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          category?: string
+          claim_id?: string
+          created_at?: string
+          description?: string | null
+          expense_date?: string
+          id?: string
+          is_billable?: boolean | null
+          project_id?: string | null
+          receipt_url?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "expense_claim_items_claim_id_fkey"
+            columns: ["claim_id"]
+            isOneToOne: false
+            referencedRelation: "expense_claims"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "expense_claim_items_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      expense_claims: {
+        Row: {
+          claim_date: string
+          claim_number: string | null
+          company_id: string
+          created_at: string
+          currency: string | null
+          description: string | null
+          employee_id: string
+          id: string
+          paid_at: string | null
+          review_notes: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string | null
+          submitted_at: string | null
+          total_amount: number
+          updated_at: string
+          workflow_instance_id: string | null
+        }
+        Insert: {
+          claim_date?: string
+          claim_number?: string | null
+          company_id: string
+          created_at?: string
+          currency?: string | null
+          description?: string | null
+          employee_id: string
+          id?: string
+          paid_at?: string | null
+          review_notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string | null
+          submitted_at?: string | null
+          total_amount?: number
+          updated_at?: string
+          workflow_instance_id?: string | null
+        }
+        Update: {
+          claim_date?: string
+          claim_number?: string | null
+          company_id?: string
+          created_at?: string
+          currency?: string | null
+          description?: string | null
+          employee_id?: string
+          id?: string
+          paid_at?: string | null
+          review_notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string | null
+          submitted_at?: string | null
+          total_amount?: number
+          updated_at?: string
+          workflow_instance_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "expense_claims_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "expense_claims_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "expense_claims_reviewed_by_fkey"
+            columns: ["reviewed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "expense_claims_workflow_instance_id_fkey"
+            columns: ["workflow_instance_id"]
+            isOneToOne: false
+            referencedRelation: "workflow_instances"
             referencedColumns: ["id"]
           },
         ]
@@ -19993,6 +20401,98 @@ export type Database = {
           },
         ]
       }
+      team_calendar_events: {
+        Row: {
+          all_day: boolean | null
+          company_id: string
+          created_at: string
+          created_by: string | null
+          department_id: string | null
+          description: string | null
+          employee_id: string | null
+          end_date: string
+          end_time: string | null
+          event_type: string
+          id: string
+          is_private: boolean | null
+          source_id: string | null
+          source_type: string | null
+          start_date: string
+          start_time: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          all_day?: boolean | null
+          company_id: string
+          created_at?: string
+          created_by?: string | null
+          department_id?: string | null
+          description?: string | null
+          employee_id?: string | null
+          end_date: string
+          end_time?: string | null
+          event_type: string
+          id?: string
+          is_private?: boolean | null
+          source_id?: string | null
+          source_type?: string | null
+          start_date: string
+          start_time?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          all_day?: boolean | null
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          department_id?: string | null
+          description?: string | null
+          employee_id?: string | null
+          end_date?: string
+          end_time?: string | null
+          event_type?: string
+          id?: string
+          is_private?: boolean | null
+          source_id?: string | null
+          source_type?: string | null
+          start_date?: string
+          start_time?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "team_calendar_events_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "team_calendar_events_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "team_calendar_events_department_id_fkey"
+            columns: ["department_id"]
+            isOneToOne: false
+            referencedRelation: "departments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "team_calendar_events_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ticket_categories: {
         Row: {
           code: string
@@ -20675,6 +21175,96 @@ export type Database = {
             columns: ["time_clock_entry_id"]
             isOneToOne: false
             referencedRelation: "time_clock_entries"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      timesheet_entries: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          billable: boolean | null
+          company_id: string
+          created_at: string
+          description: string | null
+          employee_id: string
+          entry_date: string
+          hours_worked: number
+          id: string
+          project_id: string | null
+          status: string | null
+          submitted_at: string | null
+          task_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          billable?: boolean | null
+          company_id: string
+          created_at?: string
+          description?: string | null
+          employee_id: string
+          entry_date: string
+          hours_worked: number
+          id?: string
+          project_id?: string | null
+          status?: string | null
+          submitted_at?: string | null
+          task_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          billable?: boolean | null
+          company_id?: string
+          created_at?: string
+          description?: string | null
+          employee_id?: string
+          entry_date?: string
+          hours_worked?: number
+          id?: string
+          project_id?: string | null
+          status?: string | null
+          submitted_at?: string | null
+          task_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "timesheet_entries_approved_by_fkey"
+            columns: ["approved_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "timesheet_entries_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "timesheet_entries_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "timesheet_entries_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "timesheet_entries_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "project_tasks"
             referencedColumns: ["id"]
           },
         ]
