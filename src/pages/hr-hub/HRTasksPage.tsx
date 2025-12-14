@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
+import { useLanguage } from "@/hooks/useLanguage";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Button } from "@/components/ui/button";
@@ -54,6 +55,7 @@ const mockTasks: HRTask[] = [
 export default function HRTasksPage() {
   const { profile } = useAuth();
   const { toast } = useToast();
+  const { t } = useLanguage();
 
   const [tasks, setTasks] = useState<HRTask[]>(mockTasks);
   const [isLoading, setIsLoading] = useState(false);
@@ -70,7 +72,7 @@ export default function HRTasksPage() {
 
   const handleSubmit = () => {
     if (!formData.title) {
-      toast({ title: "Error", description: "Please enter a title", variant: "destructive" });
+      toast({ title: t("common.error"), description: t("validation.required"), variant: "destructive" });
       return;
     }
 
@@ -87,7 +89,7 @@ export default function HRTasksPage() {
     };
 
     setTasks([newTask, ...tasks]);
-    toast({ title: "Success", description: "Task created successfully" });
+    toast({ title: t("common.success"), description: t("common.created") });
     setDialogOpen(false);
     setFormData({ title: "", description: "", priority: "medium", due_date: "" });
   };
@@ -125,9 +127,16 @@ export default function HRTasksPage() {
     completed: tasks.filter(t => t.status === "completed").length,
   };
 
+  const priorityLabels: Record<string, string> = {
+    low: t("helpdesk.priorities.low"),
+    medium: t("helpdesk.priorities.medium"),
+    high: t("helpdesk.priorities.high"),
+    urgent: t("helpdesk.priorities.urgent"),
+  };
+
   const breadcrumbItems = [
-    { label: "HR Hub", href: "/hr-hub" },
-    { label: "HR Tasks" },
+    { label: t("hrHub.title"), href: "/hr-hub" },
+    { label: t("hrHub.tasks") },
   ];
 
   return (
@@ -137,12 +146,12 @@ export default function HRTasksPage() {
 
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold">HR Tasks</h1>
-            <p className="text-muted-foreground">Track and manage HR department tasks</p>
+            <h1 className="text-3xl font-bold">{t("hrHub.tasks")}</h1>
+            <p className="text-muted-foreground">{t("hrHub.tasksSubtitle")}</p>
           </div>
           <Button onClick={() => setDialogOpen(true)}>
             <Plus className="h-4 w-4 mr-2" />
-            Add Task
+            {t("hrHub.addTask")}
           </Button>
         </div>
 
@@ -156,7 +165,7 @@ export default function HRTasksPage() {
                 </div>
                 <div>
                   <p className="text-2xl font-bold">{stats.total}</p>
-                  <p className="text-sm text-muted-foreground">Active Tasks</p>
+                  <p className="text-sm text-muted-foreground">{t("hrHub.activeTasks")}</p>
                 </div>
               </div>
             </CardContent>
@@ -169,7 +178,7 @@ export default function HRTasksPage() {
                 </div>
                 <div>
                   <p className="text-2xl font-bold">{stats.urgent}</p>
-                  <p className="text-sm text-muted-foreground">Urgent</p>
+                  <p className="text-sm text-muted-foreground">{t("hrHub.urgent")}</p>
                 </div>
               </div>
             </CardContent>
@@ -182,7 +191,7 @@ export default function HRTasksPage() {
                 </div>
                 <div>
                   <p className="text-2xl font-bold">{stats.overdue}</p>
-                  <p className="text-sm text-muted-foreground">Overdue</p>
+                  <p className="text-sm text-muted-foreground">{t("hrHub.overdue")}</p>
                 </div>
               </div>
             </CardContent>
@@ -195,7 +204,7 @@ export default function HRTasksPage() {
                 </div>
                 <div>
                   <p className="text-2xl font-bold">{stats.completed}</p>
-                  <p className="text-sm text-muted-foreground">Completed</p>
+                  <p className="text-sm text-muted-foreground">{t("hrHub.completed")}</p>
                 </div>
               </div>
             </CardContent>
@@ -206,9 +215,9 @@ export default function HRTasksPage() {
           <CardHeader>
             <Tabs value={activeTab} onValueChange={setActiveTab}>
               <TabsList>
-                <TabsTrigger value="all">Active ({stats.total})</TabsTrigger>
-                <TabsTrigger value="overdue">Overdue ({stats.overdue})</TabsTrigger>
-                <TabsTrigger value="completed">Completed ({stats.completed})</TabsTrigger>
+                <TabsTrigger value="all">{t("common.active")} ({stats.total})</TabsTrigger>
+                <TabsTrigger value="overdue">{t("hrHub.overdue")} ({stats.overdue})</TabsTrigger>
+                <TabsTrigger value="completed">{t("hrHub.completed")} ({stats.completed})</TabsTrigger>
               </TabsList>
             </Tabs>
           </CardHeader>
@@ -216,7 +225,7 @@ export default function HRTasksPage() {
             {filteredTasks.length === 0 ? (
               <div className="text-center py-12 text-muted-foreground">
                 <CheckSquare className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                <p>No tasks found</p>
+                <p>{t("hrHub.noTasksFound")}</p>
               </div>
             ) : (
               <div className="space-y-3">
@@ -238,7 +247,7 @@ export default function HRTasksPage() {
                           {task.title}
                         </h3>
                         <Badge className={`${getPriorityColor(task.priority)} text-white`}>
-                          {task.priority}
+                          {priorityLabels[task.priority]}
                         </Badge>
                       </div>
                       {task.description && (
@@ -247,7 +256,7 @@ export default function HRTasksPage() {
                       {task.due_date && (
                         <div className="flex items-center gap-1 text-sm text-muted-foreground mt-2">
                           <Clock className="h-3 w-3" />
-                          Due: {format(new Date(task.due_date), "MMM d, yyyy")}
+                          {t("hrHub.due")}: {format(new Date(task.due_date), "MMM d, yyyy")}
                         </div>
                       )}
                     </div>
@@ -261,33 +270,33 @@ export default function HRTasksPage() {
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Add Task</DialogTitle>
+              <DialogTitle>{t("hrHub.addTask")}</DialogTitle>
             </DialogHeader>
             <div className="space-y-4">
               <div>
-                <Label>Title *</Label>
+                <Label>{t("common.name")} *</Label>
                 <Input
                   value={formData.title}
                   onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                  placeholder="Task title"
+                  placeholder={t("hrHub.taskTitle")}
                 />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label>Priority</Label>
+                  <Label>{t("helpdesk.priorities.medium")}</Label>
                   <Select value={formData.priority} onValueChange={(v) => setFormData({ ...formData, priority: v })}>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
                       {priorities.map((p) => (
-                        <SelectItem key={p.value} value={p.value}>{p.label}</SelectItem>
+                        <SelectItem key={p.value} value={p.value}>{priorityLabels[p.value]}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                 </div>
                 <div>
-                  <Label>Due Date</Label>
+                  <Label>{t("hrHub.dueDate")}</Label>
                   <Input
                     type="date"
                     value={formData.due_date}
@@ -296,17 +305,17 @@ export default function HRTasksPage() {
                 </div>
               </div>
               <div>
-                <Label>Description</Label>
+                <Label>{t("common.description")}</Label>
                 <Textarea
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  placeholder="Task description"
+                  placeholder={t("hrHub.taskDescription")}
                 />
               </div>
             </div>
             <DialogFooter>
-              <Button variant="outline" onClick={() => setDialogOpen(false)}>Cancel</Button>
-              <Button onClick={handleSubmit}>Create Task</Button>
+              <Button variant="outline" onClick={() => setDialogOpen(false)}>{t("common.cancel")}</Button>
+              <Button onClick={handleSubmit}>{t("hrHub.createTask")}</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>

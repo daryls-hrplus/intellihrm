@@ -3,6 +3,7 @@ import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useNavigate } from "react-router-dom";
+import { useLanguage } from "@/hooks/useLanguage";
 import {
   Headset,
   FileText,
@@ -23,62 +24,65 @@ import {
   GitBranch,
 } from "lucide-react";
 
-const hubSections = [
-  {
-    title: "Communication & Support",
-    items: [
-      { title: "Help Desk", description: "Manage employee tickets and support requests", icon: Headset, href: "/admin/helpdesk", badge: null },
-      { title: "Announcements", description: "Create and manage company-wide announcements", icon: Megaphone, href: "/admin/announcements", badge: null },
-      { title: "Knowledge Base", description: "Manage help articles and documentation", icon: BookOpen, href: "/admin/knowledge-base", badge: null },
-    ],
-  },
-  {
-    title: "Documents & Templates",
-    items: [
-      { title: "Letter Templates", description: "Manage form letters and document templates", icon: FileText, href: "/admin/letter-templates", badge: null },
-      { title: "Company Documents", description: "Manage shared company documents", icon: FolderOpen, href: "/admin/documents", badge: null },
-      { title: "Policy Documents", description: "Manage policy and procedure documents", icon: FileStack, href: "/admin/policy-documents", badge: null },
-      { title: "Forms Library", description: "HR forms and request templates", icon: ClipboardList, href: "/hr-hub/forms", badge: "Coming Soon" },
-    ],
-  },
-  {
-    title: "Tasks & Events",
-    items: [
-      { title: "HR Calendar", description: "View and manage HR events and deadlines", icon: Calendar, href: "/hr-hub/calendar", badge: null },
-      { title: "HR Tasks", description: "Track and manage HR department tasks", icon: CheckSquare, href: "/hr-hub/tasks", badge: null },
-      { title: "Milestones Dashboard", description: "Track birthdays, anniversaries, and milestones", icon: Gift, href: "/hr-hub/milestones", badge: null },
-      { title: "Reminders", description: "Manage employee notification reminders", icon: Megaphone, href: "/hr-hub/reminders", badge: null },
-    ],
-  },
-  {
-    title: "Compliance & Workflows",
-    items: [
-      { title: "Compliance Tracker", description: "Track compliance deadlines and requirements", icon: ShieldCheck, href: "/hr-hub/compliance", badge: null },
-      { title: "Workflow Templates", description: "Configure approval workflow templates", icon: GitBranch, href: "/admin/workflow-templates", badge: null },
-      { title: "Approval Delegations", description: "Manage approval delegation settings", icon: UserCheck, href: "/admin/delegations", badge: null },
-      { title: "Scheduled Reports", description: "Configure automated report delivery", icon: BarChart3, href: "/admin/scheduled-reports", badge: null },
-    ],
-  },
-  {
-    title: "Organization & Configuration",
-    items: [
-      { title: "Organisational Structure", description: "Manage company org structure and hierarchy", icon: FolderTree, href: "/admin/org-structure", badge: null },
-      { title: "Lookup Values", description: "Manage system lookup values and codes", icon: List, href: "/admin/lookup-values", badge: null },
-    ],
-  },
-];
-
-const quickActions = [
-  { title: "New Announcement", icon: Megaphone, href: "/admin/announcements" },
-  { title: "Create Letter", icon: FileText, href: "/admin/letter-templates" },
-  { title: "View Tickets", icon: Headset, href: "/admin/helpdesk" },
-  { title: "Add Event", icon: Calendar, href: "/hr-hub/calendar" },
-];
+// Hub sections and quick actions are now defined inside the component for i18n
 
 export default function HRHubDashboardPage() {
   const navigate = useNavigate();
+  const { t } = useLanguage();
 
-  const breadcrumbItems = [{ label: "HR Hub" }];
+  const hubSections = [
+    {
+      titleKey: "hrHub.communicationSupport",
+      items: [
+        { titleKey: "hrHub.helpDesk", descKey: "hrHub.helpDeskDesc", icon: Headset, href: "/admin/helpdesk", badge: null },
+        { titleKey: "hrHub.announcements", descKey: "hrHub.announcementsDesc", icon: Megaphone, href: "/admin/announcements", badge: null },
+        { titleKey: "hrHub.knowledgeBase", descKey: "hrHub.knowledgeBaseDesc", icon: BookOpen, href: "/admin/knowledge-base", badge: null },
+      ],
+    },
+    {
+      titleKey: "hrHub.documentsTemplates",
+      items: [
+        { titleKey: "hrHub.letterTemplates", descKey: "hrHub.letterTemplatesDesc", icon: FileText, href: "/admin/letter-templates", badge: null },
+        { titleKey: "hrHub.companyDocuments", descKey: "hrHub.companyDocumentsDesc", icon: FolderOpen, href: "/admin/documents", badge: null },
+        { titleKey: "hrHub.policyDocuments", descKey: "hrHub.policyDocumentsDesc", icon: FileStack, href: "/admin/policy-documents", badge: null },
+        { titleKey: "hrHub.formsLibrary", descKey: "hrHub.formsLibraryDesc", icon: ClipboardList, href: "/hr-hub/forms", badge: "hrHub.comingSoon" },
+      ],
+    },
+    {
+      titleKey: "hrHub.tasksEvents",
+      items: [
+        { titleKey: "hrHub.calendar", descKey: "hrHub.calendarDesc", icon: Calendar, href: "/hr-hub/calendar", badge: null },
+        { titleKey: "hrHub.tasks", descKey: "hrHub.tasksDesc", icon: CheckSquare, href: "/hr-hub/tasks", badge: null },
+        { titleKey: "hrHub.milestones", descKey: "hrHub.milestonesDesc", icon: Gift, href: "/hr-hub/milestones", badge: null },
+        { titleKey: "hrHub.reminders", descKey: "hrHub.remindersDesc", icon: Megaphone, href: "/hr-hub/reminders", badge: null },
+      ],
+    },
+    {
+      titleKey: "hrHub.complianceWorkflows",
+      items: [
+        { titleKey: "hrHub.compliance", descKey: "hrHub.complianceDesc", icon: ShieldCheck, href: "/hr-hub/compliance", badge: null },
+        { titleKey: "hrHub.workflowTemplates", descKey: "hrHub.workflowTemplatesDesc", icon: GitBranch, href: "/admin/workflow-templates", badge: null },
+        { titleKey: "hrHub.approvalDelegations", descKey: "hrHub.approvalDelegationsDesc", icon: UserCheck, href: "/admin/delegations", badge: null },
+        { titleKey: "hrHub.scheduledReports", descKey: "hrHub.scheduledReportsDesc", icon: BarChart3, href: "/admin/scheduled-reports", badge: null },
+      ],
+    },
+    {
+      titleKey: "hrHub.organizationConfiguration",
+      items: [
+        { titleKey: "hrHub.orgStructure", descKey: "hrHub.orgStructureDesc", icon: FolderTree, href: "/admin/org-structure", badge: null },
+        { titleKey: "hrHub.lookupValues", descKey: "hrHub.lookupValuesDesc", icon: List, href: "/admin/lookup-values", badge: null },
+      ],
+    },
+  ];
+
+  const quickActions = [
+    { titleKey: "hrHub.newAnnouncement", icon: Megaphone, href: "/admin/announcements" },
+    { titleKey: "hrHub.createLetter", icon: FileText, href: "/admin/letter-templates" },
+    { titleKey: "hrHub.viewTickets", icon: Headset, href: "/admin/helpdesk" },
+    { titleKey: "hrHub.addEvent", icon: Calendar, href: "/hr-hub/calendar" },
+  ];
+
+  const breadcrumbItems = [{ label: t("hrHub.title") }];
 
   return (
     <AppLayout>
@@ -87,8 +91,8 @@ export default function HRHubDashboardPage() {
 
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold">HR Command Center</h1>
-            <p className="text-muted-foreground">Central hub for all HR utilities and tasks</p>
+            <h1 className="text-3xl font-bold">{t("hrHub.commandCenter")}</h1>
+            <p className="text-muted-foreground">{t("hrHub.commandCenterSubtitle")}</p>
           </div>
         </div>
 
@@ -97,19 +101,19 @@ export default function HRHubDashboardPage() {
           <CardHeader className="pb-2">
             <CardTitle className="text-lg flex items-center gap-2">
               <Zap className="h-5 w-5 text-primary" />
-              Quick Actions
+              {t("hrHub.quickActions")}
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex flex-wrap gap-3">
               {quickActions.map((action) => (
                 <button
-                  key={action.title}
+                  key={action.titleKey}
                   onClick={() => navigate(action.href)}
                   className="flex items-center gap-2 px-4 py-2 rounded-lg bg-background border hover:bg-muted transition-colors"
                 >
                   <action.icon className="h-4 w-4 text-primary" />
-                  <span className="text-sm font-medium">{action.title}</span>
+                  <span className="text-sm font-medium">{t(action.titleKey)}</span>
                 </button>
               ))}
             </div>
@@ -119,14 +123,14 @@ export default function HRHubDashboardPage() {
         {/* Hub Sections */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {hubSections.map((section) => (
-            <Card key={section.title}>
+            <Card key={section.titleKey}>
               <CardHeader>
-                <CardTitle className="text-lg">{section.title}</CardTitle>
+                <CardTitle className="text-lg">{t(section.titleKey)}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-2">
                 {section.items.map((item) => (
                   <div
-                    key={item.title}
+                    key={item.titleKey}
                     onClick={() => !item.badge && navigate(item.href)}
                     className={`flex items-start gap-3 p-3 rounded-lg border transition-colors ${
                       item.badge
@@ -139,14 +143,14 @@ export default function HRHubDashboardPage() {
                     </div>
                     <div className="flex-1">
                       <div className="flex items-center gap-2">
-                        <h3 className="font-medium">{item.title}</h3>
+                        <h3 className="font-medium">{t(item.titleKey)}</h3>
                         {item.badge && (
                           <Badge variant="secondary" className="text-xs">
-                            {item.badge}
+                            {t(item.badge)}
                           </Badge>
                         )}
                       </div>
-                      <p className="text-sm text-muted-foreground">{item.description}</p>
+                      <p className="text-sm text-muted-foreground">{t(item.descKey)}</p>
                     </div>
                   </div>
                 ))}

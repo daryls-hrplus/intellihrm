@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
+import { useLanguage } from "@/hooks/useLanguage";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Button } from "@/components/ui/button";
@@ -40,6 +41,7 @@ const eventTypes = [
 export default function HRCalendarPage() {
   const { profile } = useAuth();
   const { toast } = useToast();
+  const { t } = useLanguage();
 
   const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -93,7 +95,7 @@ export default function HRCalendarPage() {
 
   const handleSubmit = async () => {
     if (!formData.title || !formData.event_date) {
-      toast({ title: "Error", description: "Please fill in required fields", variant: "destructive" });
+      toast({ title: t("common.error"), description: t("validation.required"), variant: "destructive" });
       return;
     }
 
@@ -107,7 +109,7 @@ export default function HRCalendarPage() {
 
       if (res.error) throw res.error;
 
-      toast({ title: "Success", description: "Event created successfully" });
+      toast({ title: t("common.success"), description: t("common.created") });
       setDialogOpen(false);
       setFormData({
         title: "",
@@ -120,7 +122,7 @@ export default function HRCalendarPage() {
       });
       loadEvents();
     } catch (error) {
-      toast({ title: "Error", description: "Failed to create event", variant: "destructive" });
+      toast({ title: t("common.error"), description: t("common.error"), variant: "destructive" });
     } finally {
       setIsSubmitting(false);
     }
@@ -137,9 +139,22 @@ export default function HRCalendarPage() {
   const getEventColor = (type: string) =>
     eventTypes.find((t) => t.value === type)?.color || "bg-gray-500";
 
+  const eventTypeLabels: Record<string, string> = {
+    meeting: t("hrHub.meeting"),
+    deadline: t("hrHub.deadline"),
+    training: t("hrHub.training"),
+    holiday: t("hrHub.holiday"),
+    other: t("hrHub.other"),
+  };
+
+  const dayNames = [
+    t("hrHub.sun"), t("hrHub.mon"), t("hrHub.tue"), t("hrHub.wed"),
+    t("hrHub.thu"), t("hrHub.fri"), t("hrHub.sat")
+  ];
+
   const breadcrumbItems = [
-    { label: "HR Hub", href: "/hr-hub" },
-    { label: "HR Calendar" },
+    { label: t("hrHub.title"), href: "/hr-hub" },
+    { label: t("hrHub.calendar") },
   ];
 
   return (
@@ -149,12 +164,12 @@ export default function HRCalendarPage() {
 
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold">HR Calendar</h1>
-            <p className="text-muted-foreground">Manage HR events and deadlines</p>
+            <h1 className="text-3xl font-bold">{t("hrHub.calendar")}</h1>
+            <p className="text-muted-foreground">{t("hrHub.calendarSubtitle")}</p>
           </div>
           <Button onClick={() => setDialogOpen(true)}>
             <Plus className="h-4 w-4 mr-2" />
-            Add Event
+            {t("hrHub.addEvent")}
           </Button>
         </div>
 
@@ -175,11 +190,11 @@ export default function HRCalendarPage() {
           </CardHeader>
           <CardContent>
             {isLoading ? (
-              <div className="text-center py-12 text-muted-foreground">Loading...</div>
+              <div className="text-center py-12 text-muted-foreground">{t("common.loading")}</div>
             ) : (
               <>
                 <div className="grid grid-cols-7 gap-px mb-2">
-                  {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (
+                  {dayNames.map((day) => (
                     <div key={day} className="text-center text-sm font-medium text-muted-foreground py-2">
                       {day}
                     </div>
@@ -213,7 +228,7 @@ export default function HRCalendarPage() {
                             </div>
                           ))}
                           {dayEvents.length > 3 && (
-                            <div className="text-xs text-muted-foreground">+{dayEvents.length - 3} more</div>
+                            <div className="text-xs text-muted-foreground">+{dayEvents.length - 3} {t("hrHub.more")}</div>
                           )}
                         </div>
                       </div>
@@ -228,20 +243,20 @@ export default function HRCalendarPage() {
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Add Event</DialogTitle>
+              <DialogTitle>{t("hrHub.addEventTitle")}</DialogTitle>
             </DialogHeader>
             <div className="space-y-4">
               <div>
-                <Label>Title *</Label>
+                <Label>{t("common.name")} *</Label>
                 <Input
                   value={formData.title}
                   onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                  placeholder="Event title"
+                  placeholder={t("hrHub.eventTitle")}
                 />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label>Date *</Label>
+                  <Label>{t("hrHub.date")} *</Label>
                   <Input
                     type="date"
                     value={formData.event_date}
@@ -249,7 +264,7 @@ export default function HRCalendarPage() {
                   />
                 </div>
                 <div>
-                  <Label>Time</Label>
+                  <Label>{t("hrHub.time")}</Label>
                   <Input
                     type="time"
                     value={formData.event_time}
@@ -258,7 +273,7 @@ export default function HRCalendarPage() {
                 </div>
               </div>
               <div>
-                <Label>Event Type</Label>
+                <Label>{t("hrHub.eventType")}</Label>
                 <Select value={formData.event_type} onValueChange={(v) => setFormData({ ...formData, event_type: v })}>
                   <SelectTrigger>
                     <SelectValue />
@@ -266,33 +281,33 @@ export default function HRCalendarPage() {
                   <SelectContent>
                     {eventTypes.map((type) => (
                       <SelectItem key={type.value} value={type.value}>
-                        {type.label}
+                        {eventTypeLabels[type.value]}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
               <div>
-                <Label>Location</Label>
+                <Label>{t("hrHub.eventLocation")}</Label>
                 <Input
                   value={formData.location}
                   onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                  placeholder="Optional location"
+                  placeholder={t("hrHub.optionalLocation")}
                 />
               </div>
               <div>
-                <Label>Description</Label>
+                <Label>{t("common.description")}</Label>
                 <Textarea
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  placeholder="Event description"
+                  placeholder={t("hrHub.eventDescription")}
                 />
               </div>
             </div>
             <DialogFooter>
-              <Button variant="outline" onClick={() => setDialogOpen(false)}>Cancel</Button>
+              <Button variant="outline" onClick={() => setDialogOpen(false)}>{t("common.cancel")}</Button>
               <Button onClick={handleSubmit} disabled={isSubmitting}>
-                {isSubmitting ? "Creating..." : "Create Event"}
+                {isSubmitting ? t("hrHub.creating") : t("hrHub.createEvent")}
               </Button>
             </DialogFooter>
           </DialogContent>
