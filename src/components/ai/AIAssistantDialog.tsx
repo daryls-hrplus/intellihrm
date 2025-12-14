@@ -7,7 +7,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Send, Brain, User, Loader2, Info, Mic, MicOff, Volume2, VolumeX } from "lucide-react";
+import { Send, Brain, User, Loader2, Info, Mic, MicOff } from "lucide-react";
 import { AIGuidelinesDialog } from "./AIGuidelinesDialog";
 
 // Extend Window interface for Speech Recognition
@@ -48,47 +48,8 @@ export function AIAssistantDialog({ open, onOpenChange }: AIAssistantDialogProps
   const [isLoading, setIsLoading] = useState(false);
   const [showGuidelines, setShowGuidelines] = useState(false);
   const [isListening, setIsListening] = useState(false);
-  const [voiceEnabled, setVoiceEnabled] = useState(false);
-  const [isSpeaking, setIsSpeaking] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const recognitionRef = useRef<SpeechRecognitionInstance | null>(null);
-
-  // Text-to-speech function
-  const speakText = useCallback((text: string) => {
-    if (!voiceEnabled || typeof window === 'undefined' || !window.speechSynthesis) return;
-    
-    // Cancel any ongoing speech
-    window.speechSynthesis.cancel();
-    
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.rate = 1.0;
-    utterance.pitch = 1.0;
-    utterance.volume = 1.0;
-    
-    // Try to use a natural-sounding voice
-    const voices = window.speechSynthesis.getVoices();
-    const preferredVoice = voices.find(v => 
-      v.name.includes('Google') || v.name.includes('Natural') || v.name.includes('Samantha')
-    ) || voices.find(v => v.lang.startsWith('en'));
-    
-    if (preferredVoice) {
-      utterance.voice = preferredVoice;
-    }
-    
-    utterance.onstart = () => setIsSpeaking(true);
-    utterance.onend = () => setIsSpeaking(false);
-    utterance.onerror = () => setIsSpeaking(false);
-    
-    window.speechSynthesis.speak(utterance);
-  }, [voiceEnabled]);
-
-  // Stop speaking when voice is disabled or dialog closes
-  useEffect(() => {
-    if (!voiceEnabled || !open) {
-      window.speechSynthesis?.cancel();
-      setIsSpeaking(false);
-    }
-  }, [voiceEnabled, open]);
 
   // Initialize speech recognition
   useEffect(() => {
@@ -202,9 +163,6 @@ export function AIAssistantDialog({ open, onOpenChange }: AIAssistantDialogProps
       const data = await response.json();
       const assistantMessage: Message = { role: "assistant", content: data.message };
       setMessages(prev => [...prev, assistantMessage]);
-      
-      // Speak the response if voice is enabled
-      speakText(data.message);
     } catch (error) {
       console.error("AI chat error:", error);
       toast.error(t("common.error"));
@@ -227,34 +185,18 @@ export function AIAssistantDialog({ open, onOpenChange }: AIAssistantDialogProps
           <DialogHeader className="px-6 py-4 border-b">
             <div className="flex items-center justify-between w-full">
               <DialogTitle className="flex items-center gap-2">
-                <Brain className={`h-5 w-5 text-sky-400 ${isSpeaking ? 'animate-pulse' : 'animate-heartbeat'}`} />
+                <Brain className="h-5 w-5 text-sky-400 animate-heartbeat" />
                 {t("ai.assistantTitle")}
               </DialogTitle>
-              <div className="flex items-center gap-1">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => {
-                    if (voiceEnabled) {
-                      window.speechSynthesis?.cancel();
-                    }
-                    setVoiceEnabled(!voiceEnabled);
-                  }}
-                  className={voiceEnabled ? "text-primary" : "text-muted-foreground hover:text-foreground"}
-                  title={voiceEnabled ? t("ai.disableVoice", "Disable voice responses") : t("ai.enableVoice", "Enable voice responses")}
-                >
-                  {voiceEnabled ? <Volume2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />}
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setShowGuidelines(true)}
-                  className="text-muted-foreground hover:text-foreground"
-                >
-                  <Info className="h-4 w-4 mr-1" />
-                  {t("ai.viewGuidelines", "Guidelines")}
-                </Button>
-              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowGuidelines(true)}
+                className="text-muted-foreground hover:text-foreground"
+              >
+                <Info className="h-4 w-4 mr-1" />
+                {t("ai.viewGuidelines", "Guidelines")}
+              </Button>
             </div>
           </DialogHeader>
 
