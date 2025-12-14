@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -22,6 +23,7 @@ interface ERExitInterviewsTabProps {
 }
 
 export function ERExitInterviewsTab({ companyId }: ERExitInterviewsTabProps) {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const { exitInterviews, loadingExitInterviews, createExitInterview, updateExitInterview } = useEmployeeRelations(companyId);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -123,25 +125,25 @@ export function ERExitInterviewsTab({ companyId }: ERExitInterviewsTabProps) {
           <div>
             <CardTitle className="flex items-center gap-2">
               <LogOut className="h-5 w-5" />
-              Exit Interviews
+              {t('employeeRelationsModule.exitInterviews.title')}
             </CardTitle>
-            <CardDescription>Conduct and track employee exit interviews</CardDescription>
+            <CardDescription>{t('employeeRelationsModule.exitInterviews.description')}</CardDescription>
           </div>
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
               <Button className="gap-2">
                 <Plus className="h-4 w-4" />
-                Schedule Interview
+                {t('employeeRelationsModule.exitInterviews.scheduleInterview')}
               </Button>
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>Schedule Exit Interview</DialogTitle>
+                <DialogTitle>{t('employeeRelationsModule.exitInterviews.scheduleExitInterview')}</DialogTitle>
               </DialogHeader>
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label>Interview Date *</Label>
+                    <Label>{t('employeeRelationsModule.exitInterviews.interviewDate')} *</Label>
                     <Input
                       type="date"
                       value={formData.interview_date}
@@ -150,7 +152,7 @@ export function ERExitInterviewsTab({ companyId }: ERExitInterviewsTabProps) {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>Last Working Date</Label>
+                    <Label>{t('employeeRelationsModule.exitInterviews.lastWorkingDate')}</Label>
                     <Input
                       type="date"
                       value={formData.last_working_date}
@@ -159,21 +161,23 @@ export function ERExitInterviewsTab({ companyId }: ERExitInterviewsTabProps) {
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label>Departure Reason</Label>
+                  <Label>{t('employeeRelationsModule.exitInterviews.departureReason')}</Label>
                   <Select value={formData.departure_reason} onValueChange={(v) => setFormData({ ...formData, departure_reason: v })}>
-                    <SelectTrigger><SelectValue placeholder="Select reason" /></SelectTrigger>
+                    <SelectTrigger><SelectValue placeholder={t('common.select')} /></SelectTrigger>
                     <SelectContent>
-                      {DEPARTURE_REASONS.map(r => (
-                        <SelectItem key={r} value={r}>{r.charAt(0).toUpperCase() + r.slice(1)}</SelectItem>
+                      {DEPARTURE_REASONS.map(reason => (
+                        <SelectItem key={reason} value={reason}>
+                          {t(`employeeRelationsModule.exitInterviews.reasons.${reason}`, { defaultValue: reason.charAt(0).toUpperCase() + reason.slice(1) })}
+                        </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                 </div>
                 <div className="flex justify-end gap-2">
-                  <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>Cancel</Button>
+                  <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>{t('common.cancel')}</Button>
                   <Button type="submit" disabled={createExitInterview.isPending}>
                     {createExitInterview.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    Schedule
+                    {t('common.create')}
                   </Button>
                 </div>
               </form>
@@ -186,7 +190,7 @@ export function ERExitInterviewsTab({ companyId }: ERExitInterviewsTabProps) {
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Search interviews..."
+              placeholder={t('employeeRelationsModule.exitInterviews.searchInterviews')}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10"
@@ -197,19 +201,19 @@ export function ERExitInterviewsTab({ companyId }: ERExitInterviewsTabProps) {
         {filteredInterviews.length === 0 ? (
           <div className="text-center py-12 text-muted-foreground">
             <LogOut className="h-12 w-12 mx-auto mb-4 opacity-50" />
-            <p>No exit interviews found</p>
+            <p>{t('employeeRelationsModule.exitInterviews.noInterviews')}</p>
           </div>
         ) : (
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Employee</TableHead>
-                <TableHead>Interview Date</TableHead>
-                <TableHead>Last Working Date</TableHead>
-                <TableHead>Reason</TableHead>
-                <TableHead>Overall Score</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Actions</TableHead>
+                <TableHead>{t('common.employee')}</TableHead>
+                <TableHead>{t('employeeRelationsModule.exitInterviews.interviewDate')}</TableHead>
+                <TableHead>{t('employeeRelationsModule.exitInterviews.lastWorkingDate')}</TableHead>
+                <TableHead>{t('employeeRelationsModule.exitInterviews.departureReason')}</TableHead>
+                <TableHead>{t('employeeRelationsModule.exitInterviews.overallScore')}</TableHead>
+                <TableHead>{t('common.status')}</TableHead>
+                <TableHead>{t('common.actions')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -223,10 +227,14 @@ export function ERExitInterviewsTab({ companyId }: ERExitInterviewsTabProps) {
                   </TableCell>
                   <TableCell>{format(new Date(interview.interview_date), 'PP')}</TableCell>
                   <TableCell>{interview.last_working_date ? format(new Date(interview.last_working_date), 'PP') : '-'}</TableCell>
-                  <TableCell className="capitalize">{interview.departure_reason || '-'}</TableCell>
+                  <TableCell className="capitalize">
+                    {interview.departure_reason ? t(`employeeRelationsModule.exitInterviews.reasons.${interview.departure_reason}`, { defaultValue: interview.departure_reason }) : '-'}
+                  </TableCell>
                   <TableCell>{renderStars(interview.overall_satisfaction)}</TableCell>
                   <TableCell>
-                    <Badge variant="outline" className={getStatusColor(interview.status)}>{interview.status}</Badge>
+                    <Badge variant="outline" className={getStatusColor(interview.status)}>
+                      {t(`employeeRelationsModule.exitInterviews.statuses.${interview.status}`, { defaultValue: interview.status })}
+                    </Badge>
                   </TableCell>
                   <TableCell>
                     <Button
@@ -234,7 +242,7 @@ export function ERExitInterviewsTab({ companyId }: ERExitInterviewsTabProps) {
                       size="sm"
                       onClick={() => { setSelectedInterview(interview); setIsViewDialogOpen(true); }}
                     >
-                      {interview.status === 'scheduled' ? 'Conduct' : <Eye className="h-4 w-4" />}
+                      {interview.status === 'scheduled' ? t('employeeRelationsModule.exitInterviews.conductInterview') : <Eye className="h-4 w-4" />}
                     </Button>
                   </TableCell>
                 </TableRow>
@@ -248,7 +256,9 @@ export function ERExitInterviewsTab({ companyId }: ERExitInterviewsTabProps) {
           <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>
-                {selectedInterview?.status === 'scheduled' ? 'Conduct Exit Interview' : 'Exit Interview Details'}
+                {selectedInterview?.status === 'scheduled' 
+                  ? t('employeeRelationsModule.exitInterviews.conductInterview') 
+                  : t('employeeRelationsModule.exitInterviews.interviewDetails')}
               </DialogTitle>
             </DialogHeader>
             {selectedInterview && (
@@ -258,7 +268,9 @@ export function ERExitInterviewsTab({ companyId }: ERExitInterviewsTabProps) {
                     <div className="grid grid-cols-2 gap-4">
                       {['overall', 'management', 'culture', 'compensation', 'growth', 'worklife_balance'].map(area => (
                         <div key={area} className="space-y-2">
-                          <Label className="capitalize">{area.replace('_', ' ')} Satisfaction (1-5)</Label>
+                          <Label className="capitalize">
+                            {t(`employeeRelationsModule.exitInterviews.satisfaction.${area}`, { defaultValue: area.replace('_', ' ') })} (1-5)
+                          </Label>
                           <div className="flex items-center gap-4">
                             <Slider
                               value={[(conductFormData as any)[`${area}_satisfaction`]]}
@@ -274,69 +286,69 @@ export function ERExitInterviewsTab({ companyId }: ERExitInterviewsTabProps) {
                       ))}
                     </div>
                     <div className="space-y-2">
-                      <Label>Would rejoin the company?</Label>
+                      <Label>{t('employeeRelationsModule.exitInterviews.wouldRejoin')}</Label>
                       <Select 
                         value={conductFormData.would_rejoin ? 'yes' : 'no'} 
                         onValueChange={(v) => setConductFormData({ ...conductFormData, would_rejoin: v === 'yes' })}
                       >
                         <SelectTrigger><SelectValue /></SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="yes">Yes</SelectItem>
-                          <SelectItem value="no">No</SelectItem>
+                          <SelectItem value="yes">{t('common.yes')}</SelectItem>
+                          <SelectItem value="no">{t('common.no')}</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
                     <div className="space-y-2">
-                      <Label>Positive Aspects</Label>
+                      <Label>{t('employeeRelationsModule.exitInterviews.positiveAspects')}</Label>
                       <Textarea
                         value={conductFormData.positive_aspects}
                         onChange={(e) => setConductFormData({ ...conductFormData, positive_aspects: e.target.value })}
-                        placeholder="What did the employee enjoy about working here?"
+                        placeholder={t('employeeRelationsModule.exitInterviews.positiveAspectsPlaceholder')}
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label>Negative Aspects</Label>
+                      <Label>{t('employeeRelationsModule.exitInterviews.negativeAspects')}</Label>
                       <Textarea
                         value={conductFormData.negative_aspects}
                         onChange={(e) => setConductFormData({ ...conductFormData, negative_aspects: e.target.value })}
-                        placeholder="What issues did the employee face?"
+                        placeholder={t('employeeRelationsModule.exitInterviews.negativeAspectsPlaceholder')}
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label>Improvement Suggestions</Label>
+                      <Label>{t('employeeRelationsModule.exitInterviews.improvementSuggestions')}</Label>
                       <Textarea
                         value={conductFormData.improvement_suggestions}
                         onChange={(e) => setConductFormData({ ...conductFormData, improvement_suggestions: e.target.value })}
-                        placeholder="What could be improved?"
+                        placeholder={t('employeeRelationsModule.exitInterviews.improvementSuggestionsPlaceholder')}
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label>Summary</Label>
+                      <Label>{t('employeeRelationsModule.exitInterviews.summary')}</Label>
                       <Textarea
                         value={conductFormData.feedback_summary}
                         onChange={(e) => setConductFormData({ ...conductFormData, feedback_summary: e.target.value })}
-                        placeholder="Overall interview summary..."
+                        placeholder={t('employeeRelationsModule.exitInterviews.summaryPlaceholder')}
                       />
                     </div>
                     <div className="flex justify-end gap-2">
-                      <Button variant="outline" onClick={() => setIsViewDialogOpen(false)}>Cancel</Button>
+                      <Button variant="outline" onClick={() => setIsViewDialogOpen(false)}>{t('common.cancel')}</Button>
                       <Button onClick={handleConductInterview} disabled={updateExitInterview.isPending}>
                         {updateExitInterview.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                        Complete Interview
+                        {t('employeeRelationsModule.exitInterviews.completeInterview')}
                       </Button>
                     </div>
                   </>
                 ) : (
                   <div className="grid grid-cols-2 gap-4">
-                    <div><Label className="text-muted-foreground">Overall</Label>{renderStars(selectedInterview.overall_satisfaction)}</div>
-                    <div><Label className="text-muted-foreground">Management</Label>{renderStars(selectedInterview.management_satisfaction)}</div>
-                    <div><Label className="text-muted-foreground">Culture</Label>{renderStars(selectedInterview.culture_satisfaction)}</div>
-                    <div><Label className="text-muted-foreground">Compensation</Label>{renderStars(selectedInterview.compensation_satisfaction)}</div>
-                    <div><Label className="text-muted-foreground">Growth</Label>{renderStars(selectedInterview.growth_satisfaction)}</div>
-                    <div><Label className="text-muted-foreground">Work-Life Balance</Label>{renderStars(selectedInterview.worklife_balance_satisfaction)}</div>
-                    <div className="col-span-2"><Label className="text-muted-foreground">Would Rejoin</Label><p>{selectedInterview.would_rejoin ? 'Yes' : 'No'}</p></div>
+                    <div><Label className="text-muted-foreground">{t('employeeRelationsModule.exitInterviews.satisfaction.overall')}</Label>{renderStars(selectedInterview.overall_satisfaction)}</div>
+                    <div><Label className="text-muted-foreground">{t('employeeRelationsModule.exitInterviews.satisfaction.management')}</Label>{renderStars(selectedInterview.management_satisfaction)}</div>
+                    <div><Label className="text-muted-foreground">{t('employeeRelationsModule.exitInterviews.satisfaction.culture')}</Label>{renderStars(selectedInterview.culture_satisfaction)}</div>
+                    <div><Label className="text-muted-foreground">{t('employeeRelationsModule.exitInterviews.satisfaction.compensation')}</Label>{renderStars(selectedInterview.compensation_satisfaction)}</div>
+                    <div><Label className="text-muted-foreground">{t('employeeRelationsModule.exitInterviews.satisfaction.growth')}</Label>{renderStars(selectedInterview.growth_satisfaction)}</div>
+                    <div><Label className="text-muted-foreground">{t('employeeRelationsModule.exitInterviews.satisfaction.worklife_balance')}</Label>{renderStars(selectedInterview.worklife_balance_satisfaction)}</div>
+                    <div className="col-span-2"><Label className="text-muted-foreground">{t('employeeRelationsModule.exitInterviews.wouldRejoin')}</Label><p>{selectedInterview.would_rejoin ? t('common.yes') : t('common.no')}</p></div>
                     {selectedInterview.feedback_summary && (
-                      <div className="col-span-2"><Label className="text-muted-foreground">Summary</Label><p className="text-sm">{selectedInterview.feedback_summary}</p></div>
+                      <div className="col-span-2"><Label className="text-muted-foreground">{t('employeeRelationsModule.exitInterviews.summary')}</Label><p className="text-sm">{selectedInterview.feedback_summary}</p></div>
                     )}
                   </div>
                 )}

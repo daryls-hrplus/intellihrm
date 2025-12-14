@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -9,10 +10,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Switch } from "@/components/ui/switch";
-import { Plus, Search, Loader2, MessageSquare, Play, Square, Users } from 'lucide-react';
+import { Plus, Search, Loader2, MessageSquare, Play, Square } from 'lucide-react';
 import { useEmployeeRelations } from '@/hooks/useEmployeeRelations';
 import { useAuth } from '@/contexts/AuthContext';
-import { format, isAfter, isBefore } from 'date-fns';
+import { format } from 'date-fns';
 
 const SURVEY_TYPES = ['engagement', 'satisfaction', 'pulse', 'feedback', 'climate'];
 
@@ -21,6 +22,7 @@ interface ERSurveysTabProps {
 }
 
 export function ERSurveysTab({ companyId }: ERSurveysTabProps) {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const { surveys, loadingSurveys, createSurvey, updateSurvey } = useEmployeeRelations(companyId);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -101,45 +103,47 @@ export function ERSurveysTab({ companyId }: ERSurveysTabProps) {
           <div>
             <CardTitle className="flex items-center gap-2">
               <MessageSquare className="h-5 w-5" />
-              Employee Surveys
+              {t('employeeRelationsModule.surveys.title')}
             </CardTitle>
-            <CardDescription>Create and manage employee feedback surveys</CardDescription>
+            <CardDescription>{t('employeeRelationsModule.surveys.description')}</CardDescription>
           </div>
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
               <Button className="gap-2">
                 <Plus className="h-4 w-4" />
-                New Survey
+                {t('employeeRelationsModule.surveys.newSurvey')}
               </Button>
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>Create Survey</DialogTitle>
+                <DialogTitle>{t('employeeRelationsModule.surveys.createSurvey')}</DialogTitle>
               </DialogHeader>
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="space-y-2">
-                  <Label>Title *</Label>
+                  <Label>{t('employeeRelationsModule.cases.caseTitle')} *</Label>
                   <Input
                     value={formData.title}
                     onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                    placeholder="Survey title"
+                    placeholder={t('employeeRelationsModule.surveys.surveyTitle')}
                     required
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>Survey Type *</Label>
+                  <Label>{t('employeeRelationsModule.surveys.surveyType')} *</Label>
                   <Select value={formData.survey_type} onValueChange={(v) => setFormData({ ...formData, survey_type: v })}>
                     <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>
-                      {SURVEY_TYPES.map(t => (
-                        <SelectItem key={t} value={t}>{t.charAt(0).toUpperCase() + t.slice(1)}</SelectItem>
+                      {SURVEY_TYPES.map(type => (
+                        <SelectItem key={type} value={type}>
+                          {t(`employeeRelationsModule.surveys.types.${type}`, { defaultValue: type.charAt(0).toUpperCase() + type.slice(1) })}
+                        </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label>Start Date *</Label>
+                    <Label>{t('common.startDate')} *</Label>
                     <Input
                       type="date"
                       value={formData.start_date}
@@ -148,7 +152,7 @@ export function ERSurveysTab({ companyId }: ERSurveysTabProps) {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>End Date *</Label>
+                    <Label>{t('common.endDate')} *</Label>
                     <Input
                       type="date"
                       value={formData.end_date}
@@ -158,11 +162,11 @@ export function ERSurveysTab({ companyId }: ERSurveysTabProps) {
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label>Description</Label>
+                  <Label>{t('common.description')}</Label>
                   <Textarea
                     value={formData.description}
                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                    placeholder="Survey description..."
+                    placeholder={t('common.description')}
                   />
                 </div>
                 <div className="flex items-center gap-2">
@@ -170,13 +174,13 @@ export function ERSurveysTab({ companyId }: ERSurveysTabProps) {
                     checked={formData.is_anonymous}
                     onCheckedChange={(checked) => setFormData({ ...formData, is_anonymous: checked })}
                   />
-                  <Label>Anonymous responses</Label>
+                  <Label>{t('employeeRelationsModule.surveys.anonymousResponses')}</Label>
                 </div>
                 <div className="flex justify-end gap-2">
-                  <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>Cancel</Button>
+                  <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>{t('common.cancel')}</Button>
                   <Button type="submit" disabled={createSurvey.isPending}>
                     {createSurvey.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    Create Survey
+                    {t('common.create')}
                   </Button>
                 </div>
               </form>
@@ -189,7 +193,7 @@ export function ERSurveysTab({ companyId }: ERSurveysTabProps) {
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Search surveys..."
+              placeholder={t('employeeRelationsModule.surveys.searchSurveys')}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10"
@@ -200,18 +204,18 @@ export function ERSurveysTab({ companyId }: ERSurveysTabProps) {
         {filteredSurveys.length === 0 ? (
           <div className="text-center py-12 text-muted-foreground">
             <MessageSquare className="h-12 w-12 mx-auto mb-4 opacity-50" />
-            <p>No surveys found</p>
+            <p>{t('employeeRelationsModule.surveys.noSurveys')}</p>
           </div>
         ) : (
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Title</TableHead>
-                <TableHead>Type</TableHead>
-                <TableHead>Period</TableHead>
-                <TableHead>Anonymous</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Actions</TableHead>
+                <TableHead>{t('employeeRelationsModule.cases.caseTitle')}</TableHead>
+                <TableHead>{t('common.type')}</TableHead>
+                <TableHead>{t('employeeRelationsModule.surveys.period')}</TableHead>
+                <TableHead>{t('employeeRelationsModule.surveys.anonymous')}</TableHead>
+                <TableHead>{t('common.status')}</TableHead>
+                <TableHead>{t('common.actions')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -225,23 +229,23 @@ export function ERSurveysTab({ companyId }: ERSurveysTabProps) {
                   </TableCell>
                   <TableCell>
                     <Badge variant="outline" className={getTypeColor(survey.survey_type)}>
-                      {survey.survey_type}
+                      {t(`employeeRelationsModule.surveys.types.${survey.survey_type}`, { defaultValue: survey.survey_type })}
                     </Badge>
                   </TableCell>
                   <TableCell>
                     <div className="text-sm">
                       <p>{format(new Date(survey.start_date), 'PP')}</p>
-                      <p className="text-muted-foreground">to {format(new Date(survey.end_date), 'PP')}</p>
+                      <p className="text-muted-foreground">{t('common.to')} {format(new Date(survey.end_date), 'PP')}</p>
                     </div>
                   </TableCell>
                   <TableCell>
                     <Badge variant={survey.is_anonymous ? 'secondary' : 'outline'}>
-                      {survey.is_anonymous ? 'Yes' : 'No'}
+                      {survey.is_anonymous ? t('common.yes') : t('common.no')}
                     </Badge>
                   </TableCell>
                   <TableCell>
                     <Badge variant="outline" className={getStatusColor(survey.status)}>
-                      {survey.status}
+                      {t(`employeeRelationsModule.surveys.statuses.${survey.status}`, { defaultValue: survey.status })}
                     </Badge>
                   </TableCell>
                   <TableCell>
@@ -251,7 +255,7 @@ export function ERSurveysTab({ companyId }: ERSurveysTabProps) {
                           variant="ghost"
                           size="sm"
                           onClick={() => handleStatusChange(survey.id, 'active')}
-                          title="Activate Survey"
+                          title={t('employeeRelationsModule.surveys.activateSurvey')}
                         >
                           <Play className="h-4 w-4 text-success" />
                         </Button>
@@ -261,7 +265,7 @@ export function ERSurveysTab({ companyId }: ERSurveysTabProps) {
                           variant="ghost"
                           size="sm"
                           onClick={() => handleStatusChange(survey.id, 'closed')}
-                          title="Close Survey"
+                          title={t('employeeRelationsModule.surveys.closeSurvey')}
                         >
                           <Square className="h-4 w-4 text-warning" />
                         </Button>

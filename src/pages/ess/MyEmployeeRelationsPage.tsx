@@ -62,8 +62,8 @@ export default function MyEmployeeRelationsPage() {
 
   const breadcrumbItems = [
     { label: t('common.home'), path: '/' },
-    { label: 'Employee Self Service', path: '/ess' },
-    { label: 'Employee Relations' },
+    { label: t('ess.title'), path: '/ess' },
+    { label: t('employeeRelationsModule.ess.title') },
   ];
 
   // Filter to current user's data
@@ -131,28 +131,28 @@ export default function MyEmployeeRelationsPage() {
           <div>
             <h1 className="text-3xl font-bold flex items-center gap-2">
               <Heart className="h-8 w-8" />
-              Employee Relations
+              {t('employeeRelationsModule.ess.title')}
             </h1>
-            <p className="text-muted-foreground">View recognition, submit concerns, and participate in surveys</p>
+            <p className="text-muted-foreground">{t('employeeRelationsModule.ess.subtitle')}</p>
           </div>
           <Dialog open={isGrievanceDialogOpen} onOpenChange={setIsGrievanceDialogOpen}>
             <DialogTrigger asChild>
               <Button variant="outline" className="gap-2">
                 <AlertTriangle className="h-4 w-4" />
-                Report a Concern
+                {t('employeeRelationsModule.ess.reportConcern')}
               </Button>
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>Report a Workplace Concern</DialogTitle>
+                <DialogTitle>{t('employeeRelationsModule.ess.reportWorkplaceConcern')}</DialogTitle>
               </DialogHeader>
               <form onSubmit={handleGrievanceSubmit} className="space-y-4">
                 <div className="space-y-2">
-                  <Label>Title *</Label>
+                  <Label>{t('employeeRelationsModule.cases.caseTitle')} *</Label>
                   <Input
                     value={grievanceForm.title}
                     onChange={(e) => setGrievanceForm({ ...grievanceForm, title: e.target.value })}
-                    placeholder="Brief description of the concern"
+                    placeholder={t('employeeRelationsModule.ess.concernTitle')}
                     required
                   />
                 </div>

@@ -3536,32 +3536,289 @@
   },
   "employeeRelationsModule": {
     "title": "Employee Relations",
-    "subtitle": "Manage employee engagement and relations",
-    "modules": {
-      "cases": {
-        "title": "Case Management",
-        "description": "Track employee cases"
+    "subtitle": "Workplace relations, recognition, and employee support",
+    "selectCompany": "Select company",
+    "analytics": {
+      "title": "Analytics",
+      "openCases": "Open Cases",
+      "activeDisciplinary": "Active Disciplinary",
+      "recognitionsThisMonth": "Recognitions This Month",
+      "pendingExitInterviews": "Pending Exit Interviews",
+      "activeSurveys": "Active Surveys",
+      "activeWellnessPrograms": "Active Wellness Programs",
+      "caseStatus": "Case Status",
+      "caseStatusDesc": "Distribution by current status",
+      "caseTypes": "Case Types",
+      "caseTypesDesc": "Distribution by type",
+      "caseSeverity": "Case Severity",
+      "caseSeverityDesc": "Distribution by severity level",
+      "caseTrends": "Case Trends",
+      "caseTrendsDesc": "Opened vs resolved over last 6 months",
+      "exitInterviewSatisfaction": "Exit Interview Satisfaction",
+      "exitInterviewSatisfactionDesc": "Average scores across areas (1-5 scale)",
+      "disciplinaryActions": "Disciplinary Actions",
+      "disciplinaryActionsDesc": "By action type",
+      "recognitionTypes": "Recognition Types",
+      "recognitionTypesDesc": "Distribution by type",
+      "wellnessPrograms": "Wellness Programs",
+      "wellnessProgramsDesc": "By program type",
+      "opened": "Opened",
+      "resolved": "Resolved"
+    },
+    "cases": {
+      "title": "Cases & Grievances",
+      "description": "Manage employee grievances, complaints, and investigations",
+      "newCase": "New Case",
+      "createNewCase": "Create New Case",
+      "caseDetails": "Case Details",
+      "caseNumber": "Case #",
+      "caseTitle": "Title",
+      "caseType": "Case Type",
+      "severity": "Severity",
+      "targetResolutionDate": "Target Resolution Date",
+      "actualResolutionDate": "Actual Resolution Date",
+      "resolutionSummary": "Resolution Summary",
+      "reportedDate": "Reported",
+      "searchCases": "Search cases...",
+      "filterByStatus": "Filter by status",
+      "allStatuses": "All Statuses",
+      "noCases": "No cases found",
+      "briefTitle": "Brief case title",
+      "detailedDescription": "Detailed description of the case...",
+      "types": {
+        "grievance": "Grievance",
+        "complaint": "Complaint",
+        "investigation": "Investigation",
+        "harassment": "Harassment",
+        "discrimination": "Discrimination",
+        "conflict": "Conflict",
+        "workplace_safety": "Workplace Safety",
+        "other": "Other"
       },
-      "disciplinary": {
-        "title": "Disciplinary Actions",
-        "description": "Manage disciplinary records"
+      "categories": {
+        "workplace_safety": "Workplace Safety",
+        "harassment": "Harassment",
+        "discrimination": "Discrimination",
+        "policy_violation": "Policy Violation",
+        "manager_conflict": "Manager Conflict",
+        "peer_conflict": "Peer Conflict",
+        "compensation": "Compensation",
+        "other": "Other"
       },
-      "recognition": {
-        "title": "Recognition Programs",
-        "description": "Employee recognition"
+      "severities": {
+        "low": "Low",
+        "medium": "Medium",
+        "high": "High",
+        "critical": "Critical"
       },
-      "exitInterviews": {
-        "title": "Exit Interviews",
-        "description": "Conduct exit interviews"
-      },
-      "surveys": {
-        "title": "Employee Surveys",
-        "description": "Create and analyze surveys"
-      },
-      "wellness": {
-        "title": "Wellness Programs",
-        "description": "Employee wellness initiatives"
+      "statuses": {
+        "open": "Open",
+        "investigating": "Investigating",
+        "pending_resolution": "Pending Resolution",
+        "resolved": "Resolved",
+        "closed": "Closed",
+        "escalated": "Escalated",
+        "appealed": "Appealed"
       }
+    },
+    "disciplinary": {
+      "title": "Disciplinary Actions",
+      "description": "Track and manage employee disciplinary records",
+      "newAction": "New Action",
+      "recordAction": "Record Disciplinary Action",
+      "actionType": "Action Type",
+      "reason": "Reason",
+      "reasonPlaceholder": "Reason for disciplinary action",
+      "effectiveDate": "Effective Date",
+      "expiryDate": "Expiry Date",
+      "additionalDetails": "Additional details...",
+      "acknowledged": "Acknowledged",
+      "acknowledge": "Acknowledge",
+      "searchActions": "Search actions...",
+      "noActions": "No disciplinary actions found",
+      "types": {
+        "verbal_warning": "Verbal Warning",
+        "written_warning": "Written Warning",
+        "final_warning": "Final Warning",
+        "suspension": "Suspension",
+        "demotion": "Demotion",
+        "termination": "Termination"
+      },
+      "severities": {
+        "minor": "Minor",
+        "moderate": "Moderate",
+        "major": "Major",
+        "severe": "Severe"
+      }
+    },
+    "recognition": {
+      "title": "Recognition & Awards",
+      "description": "Celebrate employee achievements and milestones",
+      "giveRecognition": "Give Recognition",
+      "createRecognition": "Create Recognition",
+      "recognitionTitle": "Recognition title",
+      "awardDate": "Award Date",
+      "monetaryValue": "Monetary Value",
+      "makePublic": "Make public (visible to all employees)",
+      "whyRecognized": "Why is this employee being recognized...",
+      "searchRecognitions": "Search recognitions...",
+      "noRecognitions": "No recognitions found",
+      "types": {
+        "award": "Award",
+        "appreciation": "Appreciation",
+        "milestone": "Milestone",
+        "peer_recognition": "Peer Recognition",
+        "spot_bonus": "Spot Bonus",
+        "spot_award": "Spot Award",
+        "team_achievement": "Team Achievement",
+        "service_milestone": "Service Milestone",
+        "innovation": "Innovation",
+        "customer_service": "Customer Service",
+        "leadership": "Leadership",
+        "other": "Other"
+      },
+      "categories": {
+        "performance": "Performance",
+        "innovation": "Innovation",
+        "teamwork": "Teamwork",
+        "customer_service": "Customer Service",
+        "safety": "Safety",
+        "leadership": "Leadership",
+        "excellence": "Excellence",
+        "customer_focus": "Customer Focus",
+        "integrity": "Integrity",
+        "other": "Other"
+      }
+    },
+    "exitInterviews": {
+      "title": "Exit Interviews",
+      "description": "Conduct and track employee exit interviews",
+      "scheduleInterview": "Schedule Interview",
+      "scheduleExitInterview": "Schedule Exit Interview",
+      "conductInterview": "Conduct Exit Interview",
+      "interviewDetails": "Exit Interview Details",
+      "interviewDate": "Interview Date",
+      "lastWorkingDate": "Last Working Date",
+      "departureReason": "Departure Reason",
+      "overallScore": "Overall Score",
+      "wouldRejoin": "Would rejoin the company?",
+      "positiveAspects": "Positive Aspects",
+      "positiveAspectsPlaceholder": "What did the employee enjoy about working here?",
+      "negativeAspects": "Negative Aspects",
+      "negativeAspectsPlaceholder": "What issues did the employee face?",
+      "improvementSuggestions": "Improvement Suggestions",
+      "improvementSuggestionsPlaceholder": "What could be improved?",
+      "summary": "Summary",
+      "summaryPlaceholder": "Overall interview summary...",
+      "completeInterview": "Complete Interview",
+      "searchInterviews": "Search interviews...",
+      "noInterviews": "No exit interviews found",
+      "satisfaction": {
+        "overall": "Overall Satisfaction",
+        "management": "Management Satisfaction",
+        "culture": "Culture Satisfaction",
+        "compensation": "Compensation Satisfaction",
+        "growth": "Growth Satisfaction",
+        "worklife_balance": "Work-Life Balance Satisfaction"
+      },
+      "reasons": {
+        "resignation": "Resignation",
+        "retirement": "Retirement",
+        "termination": "Termination",
+        "layoff": "Layoff",
+        "other": "Other"
+      },
+      "statuses": {
+        "scheduled": "Scheduled",
+        "completed": "Completed",
+        "cancelled": "Cancelled"
+      }
+    },
+    "surveys": {
+      "title": "Employee Surveys",
+      "description": "Create and manage employee feedback surveys",
+      "newSurvey": "New Survey",
+      "createSurvey": "Create Survey",
+      "surveyTitle": "Survey title",
+      "surveyType": "Survey Type",
+      "period": "Period",
+      "anonymous": "Anonymous",
+      "anonymousResponses": "Anonymous responses",
+      "activateSurvey": "Activate Survey",
+      "closeSurvey": "Close Survey",
+      "searchSurveys": "Search surveys...",
+      "noSurveys": "No surveys found",
+      "types": {
+        "engagement": "Engagement",
+        "satisfaction": "Satisfaction",
+        "pulse": "Pulse",
+        "feedback": "Feedback",
+        "climate": "Climate"
+      },
+      "statuses": {
+        "draft": "Draft",
+        "active": "Active",
+        "closed": "Closed",
+        "archived": "Archived"
+      }
+    },
+    "wellness": {
+      "title": "Wellness Programs",
+      "description": "Manage employee wellness initiatives",
+      "newProgram": "New Program",
+      "createProgram": "Create Wellness Program",
+      "programName": "Program Name",
+      "programNamePlaceholder": "Program name",
+      "programType": "Program Type",
+      "maxParticipants": "Max Participants",
+      "unlimited": "Unlimited",
+      "budget": "Budget",
+      "programDescription": "Program description...",
+      "searchPrograms": "Search programs...",
+      "noPrograms": "No wellness programs found",
+      "types": {
+        "mental_health": "Mental Health",
+        "physical_fitness": "Physical Fitness",
+        "nutrition": "Nutrition",
+        "stress_management": "Stress Management",
+        "work_life_balance": "Work-Life Balance",
+        "financial_wellness": "Financial Wellness"
+      },
+      "statuses": {
+        "active": "Active",
+        "inactive": "Inactive",
+        "upcoming": "Upcoming"
+      }
+    },
+    "ess": {
+      "title": "Employee Relations",
+      "subtitle": "View recognition, submit concerns, and participate in surveys",
+      "reportConcern": "Report a Concern",
+      "reportWorkplaceConcern": "Report a Workplace Concern",
+      "concernTitle": "Brief description of the concern",
+      "concernDescription": "Please describe your concern in detail...",
+      "keepConfidential": "Keep my identity confidential",
+      "caseSubmitted": "Your case has been submitted and will be reviewed by HR",
+      "openCases": "Open Cases",
+      "recognitionReceived": "Recognition Received",
+      "activeSurveys": "Active Surveys",
+      "wellnessPrograms": "Wellness Programs",
+      "myRecognition": "My Recognition",
+      "myCases": "My Cases",
+      "noRecognitionYet": "No recognition received yet",
+      "keepUpGreatWork": "Keep up the great work!",
+      "noCasesSubmitted": "No cases submitted",
+      "useConcernButton": "Use \"Report a Concern\" if you need to raise an issue",
+      "noActiveSurveys": "No active surveys at this time",
+      "takeSurvey": "Take Survey",
+      "endsOn": "Ends on",
+      "noWellnessPrograms": "No wellness programs available",
+      "enrollNow": "Enroll Now",
+      "starts": "Starts"
+    },
+    "mss": {
+      "title": "Team Relations",
+      "subtitle": "Manage team recognition and view team cases"
     }
   },
   "propertyModule": {

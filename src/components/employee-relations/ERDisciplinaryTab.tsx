@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -8,8 +9,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Search, Loader2, Scale, CheckCircle, XCircle } from 'lucide-react';
-import { useEmployeeRelations, ERDisciplinaryAction } from '@/hooks/useEmployeeRelations';
+import { Plus, Search, Loader2, Scale, CheckCircle } from 'lucide-react';
+import { useEmployeeRelations } from '@/hooks/useEmployeeRelations';
 import { useAuth } from '@/contexts/AuthContext';
 import { format } from 'date-fns';
 
@@ -21,6 +22,7 @@ interface ERDisciplinaryTabProps {
 }
 
 export function ERDisciplinaryTab({ companyId }: ERDisciplinaryTabProps) {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const { disciplinaryActions, loadingDisciplinary, createDisciplinaryAction, updateDisciplinaryAction } = useEmployeeRelations(companyId);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -109,58 +111,62 @@ export function ERDisciplinaryTab({ companyId }: ERDisciplinaryTabProps) {
           <div>
             <CardTitle className="flex items-center gap-2">
               <Scale className="h-5 w-5" />
-              Disciplinary Actions
+              {t('employeeRelationsModule.disciplinary.title')}
             </CardTitle>
-            <CardDescription>Track and manage employee disciplinary records</CardDescription>
+            <CardDescription>{t('employeeRelationsModule.disciplinary.description')}</CardDescription>
           </div>
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
               <Button className="gap-2">
                 <Plus className="h-4 w-4" />
-                New Action
+                {t('employeeRelationsModule.disciplinary.newAction')}
               </Button>
             </DialogTrigger>
             <DialogContent className="max-w-2xl">
               <DialogHeader>
-                <DialogTitle>Record Disciplinary Action</DialogTitle>
+                <DialogTitle>{t('employeeRelationsModule.disciplinary.recordAction')}</DialogTitle>
               </DialogHeader>
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label>Action Type *</Label>
+                    <Label>{t('employeeRelationsModule.disciplinary.actionType')} *</Label>
                     <Select value={formData.action_type} onValueChange={(v) => setFormData({ ...formData, action_type: v })}>
                       <SelectTrigger><SelectValue /></SelectTrigger>
                       <SelectContent>
-                        {ACTION_TYPES.map(t => (
-                          <SelectItem key={t} value={t}>{t.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}</SelectItem>
+                        {ACTION_TYPES.map(type => (
+                          <SelectItem key={type} value={type}>
+                            {t(`employeeRelationsModule.disciplinary.types.${type}`, { defaultValue: type.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) })}
+                          </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
                   </div>
                   <div className="space-y-2">
-                    <Label>Severity *</Label>
+                    <Label>{t('employeeRelationsModule.cases.severity')} *</Label>
                     <Select value={formData.severity} onValueChange={(v) => setFormData({ ...formData, severity: v })}>
                       <SelectTrigger><SelectValue /></SelectTrigger>
                       <SelectContent>
-                        {SEVERITIES.map(s => (
-                          <SelectItem key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</SelectItem>
+                        {SEVERITIES.map(sev => (
+                          <SelectItem key={sev} value={sev}>
+                            {t(`employeeRelationsModule.disciplinary.severities.${sev}`, { defaultValue: sev.charAt(0).toUpperCase() + sev.slice(1) })}
+                          </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label>Reason *</Label>
+                  <Label>{t('employeeRelationsModule.disciplinary.reason')} *</Label>
                   <Input
                     value={formData.reason}
                     onChange={(e) => setFormData({ ...formData, reason: e.target.value })}
-                    placeholder="Reason for disciplinary action"
+                    placeholder={t('employeeRelationsModule.disciplinary.reasonPlaceholder')}
                     required
                   />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label>Effective Date *</Label>
+                    <Label>{t('employeeRelationsModule.disciplinary.effectiveDate')} *</Label>
                     <Input
                       type="date"
                       value={formData.effective_date}
@@ -169,7 +175,7 @@ export function ERDisciplinaryTab({ companyId }: ERDisciplinaryTabProps) {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>Expiry Date</Label>
+                    <Label>{t('employeeRelationsModule.disciplinary.expiryDate')}</Label>
                     <Input
                       type="date"
                       value={formData.expiry_date}
@@ -178,19 +184,19 @@ export function ERDisciplinaryTab({ companyId }: ERDisciplinaryTabProps) {
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label>Description</Label>
+                  <Label>{t('common.description')}</Label>
                   <Textarea
                     value={formData.description}
                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                    placeholder="Additional details..."
+                    placeholder={t('employeeRelationsModule.disciplinary.additionalDetails')}
                     rows={4}
                   />
                 </div>
                 <div className="flex justify-end gap-2">
-                  <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>Cancel</Button>
+                  <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>{t('common.cancel')}</Button>
                   <Button type="submit" disabled={createDisciplinaryAction.isPending}>
                     {createDisciplinaryAction.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    Record Action
+                    {t('common.create')}
                   </Button>
                 </div>
               </form>
@@ -203,7 +209,7 @@ export function ERDisciplinaryTab({ companyId }: ERDisciplinaryTabProps) {
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Search actions..."
+              placeholder={t('employeeRelationsModule.disciplinary.searchActions')}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10"
@@ -214,19 +220,19 @@ export function ERDisciplinaryTab({ companyId }: ERDisciplinaryTabProps) {
         {filteredActions.length === 0 ? (
           <div className="text-center py-12 text-muted-foreground">
             <Scale className="h-12 w-12 mx-auto mb-4 opacity-50" />
-            <p>No disciplinary actions found</p>
+            <p>{t('employeeRelationsModule.disciplinary.noActions')}</p>
           </div>
         ) : (
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Employee</TableHead>
-                <TableHead>Action Type</TableHead>
-                <TableHead>Severity</TableHead>
-                <TableHead>Reason</TableHead>
-                <TableHead>Effective Date</TableHead>
-                <TableHead>Acknowledged</TableHead>
-                <TableHead>Status</TableHead>
+                <TableHead>{t('common.employee')}</TableHead>
+                <TableHead>{t('employeeRelationsModule.disciplinary.actionType')}</TableHead>
+                <TableHead>{t('employeeRelationsModule.cases.severity')}</TableHead>
+                <TableHead>{t('employeeRelationsModule.disciplinary.reason')}</TableHead>
+                <TableHead>{t('employeeRelationsModule.disciplinary.effectiveDate')}</TableHead>
+                <TableHead>{t('employeeRelationsModule.disciplinary.acknowledged')}</TableHead>
+                <TableHead>{t('common.status')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -240,12 +246,12 @@ export function ERDisciplinaryTab({ companyId }: ERDisciplinaryTabProps) {
                   </TableCell>
                   <TableCell>
                     <Badge variant="outline" className={getActionTypeColor(action.action_type)}>
-                      {action.action_type.replace(/_/g, ' ')}
+                      {t(`employeeRelationsModule.disciplinary.types.${action.action_type}`, { defaultValue: action.action_type.replace(/_/g, ' ') })}
                     </Badge>
                   </TableCell>
                   <TableCell>
                     <Badge variant="outline" className={getSeverityColor(action.severity)}>
-                      {action.severity}
+                      {t(`employeeRelationsModule.disciplinary.severities.${action.severity}`, { defaultValue: action.severity })}
                     </Badge>
                   </TableCell>
                   <TableCell className="max-w-[200px] truncate">{action.reason}</TableCell>
@@ -254,11 +260,11 @@ export function ERDisciplinaryTab({ companyId }: ERDisciplinaryTabProps) {
                     {action.acknowledged_by_employee ? (
                       <div className="flex items-center gap-1 text-success">
                         <CheckCircle className="h-4 w-4" />
-                        <span className="text-xs">{action.acknowledged_at ? format(new Date(action.acknowledged_at), 'PP') : 'Yes'}</span>
+                        <span className="text-xs">{action.acknowledged_at ? format(new Date(action.acknowledged_at), 'PP') : t('common.yes')}</span>
                       </div>
                     ) : (
                       <Button variant="outline" size="sm" onClick={() => handleAcknowledge(action.id)}>
-                        Acknowledge
+                        {t('employeeRelationsModule.disciplinary.acknowledge')}
                       </Button>
                     )}
                   </TableCell>

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -21,6 +22,7 @@ interface ERRecognitionTabProps {
 }
 
 export function ERRecognitionTab({ companyId }: ERRecognitionTabProps) {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const { recognitions, loadingRecognition, createRecognition } = useEmployeeRelations(companyId);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -101,50 +103,54 @@ export function ERRecognitionTab({ companyId }: ERRecognitionTabProps) {
           <div>
             <CardTitle className="flex items-center gap-2">
               <Award className="h-5 w-5" />
-              Recognition & Awards
+              {t('employeeRelationsModule.recognition.title')}
             </CardTitle>
-            <CardDescription>Celebrate employee achievements and milestones</CardDescription>
+            <CardDescription>{t('employeeRelationsModule.recognition.description')}</CardDescription>
           </div>
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
               <Button className="gap-2">
                 <Plus className="h-4 w-4" />
-                Give Recognition
+                {t('employeeRelationsModule.recognition.giveRecognition')}
               </Button>
             </DialogTrigger>
             <DialogContent className="max-w-2xl">
               <DialogHeader>
-                <DialogTitle>Create Recognition</DialogTitle>
+                <DialogTitle>{t('employeeRelationsModule.recognition.createRecognition')}</DialogTitle>
               </DialogHeader>
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="space-y-2">
-                  <Label>Title *</Label>
+                  <Label>{t('employeeRelationsModule.cases.caseTitle')} *</Label>
                   <Input
                     value={formData.title}
                     onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                    placeholder="Recognition title"
+                    placeholder={t('employeeRelationsModule.recognition.recognitionTitle')}
                     required
                   />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label>Type *</Label>
+                    <Label>{t('common.type')} *</Label>
                     <Select value={formData.recognition_type} onValueChange={(v) => setFormData({ ...formData, recognition_type: v })}>
                       <SelectTrigger><SelectValue /></SelectTrigger>
                       <SelectContent>
-                        {RECOGNITION_TYPES.map(t => (
-                          <SelectItem key={t} value={t}>{t.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}</SelectItem>
+                        {RECOGNITION_TYPES.map(type => (
+                          <SelectItem key={type} value={type}>
+                            {t(`employeeRelationsModule.recognition.types.${type}`, { defaultValue: type.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) })}
+                          </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
                   </div>
                   <div className="space-y-2">
-                    <Label>Category</Label>
+                    <Label>{t('common.category')}</Label>
                     <Select value={formData.category} onValueChange={(v) => setFormData({ ...formData, category: v })}>
-                      <SelectTrigger><SelectValue placeholder="Select category" /></SelectTrigger>
+                      <SelectTrigger><SelectValue placeholder={t('common.select')} /></SelectTrigger>
                       <SelectContent>
-                        {CATEGORIES.map(c => (
-                          <SelectItem key={c} value={c}>{c.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}</SelectItem>
+                        {CATEGORIES.map(cat => (
+                          <SelectItem key={cat} value={cat}>
+                            {t(`employeeRelationsModule.recognition.categories.${cat}`, { defaultValue: cat.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) })}
+                          </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
@@ -152,7 +158,7 @@ export function ERRecognitionTab({ companyId }: ERRecognitionTabProps) {
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label>Award Date *</Label>
+                    <Label>{t('employeeRelationsModule.recognition.awardDate')} *</Label>
                     <Input
                       type="date"
                       value={formData.award_date}
@@ -161,7 +167,7 @@ export function ERRecognitionTab({ companyId }: ERRecognitionTabProps) {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>Monetary Value</Label>
+                    <Label>{t('employeeRelationsModule.recognition.monetaryValue')}</Label>
                     <Input
                       type="number"
                       value={formData.monetary_value}
@@ -171,11 +177,11 @@ export function ERRecognitionTab({ companyId }: ERRecognitionTabProps) {
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label>Description</Label>
+                  <Label>{t('common.description')}</Label>
                   <Textarea
                     value={formData.description}
                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                    placeholder="Why is this employee being recognized..."
+                    placeholder={t('employeeRelationsModule.recognition.whyRecognized')}
                     rows={3}
                   />
                 </div>
@@ -184,13 +190,13 @@ export function ERRecognitionTab({ companyId }: ERRecognitionTabProps) {
                     checked={formData.is_public}
                     onCheckedChange={(checked) => setFormData({ ...formData, is_public: checked })}
                   />
-                  <Label>Make public (visible to all employees)</Label>
+                  <Label>{t('employeeRelationsModule.recognition.makePublic')}</Label>
                 </div>
                 <div className="flex justify-end gap-2">
-                  <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>Cancel</Button>
+                  <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>{t('common.cancel')}</Button>
                   <Button type="submit" disabled={createRecognition.isPending}>
                     {createRecognition.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    Create Recognition
+                    {t('common.create')}
                   </Button>
                 </div>
               </form>
@@ -203,7 +209,7 @@ export function ERRecognitionTab({ companyId }: ERRecognitionTabProps) {
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Search recognitions..."
+              placeholder={t('employeeRelationsModule.recognition.searchRecognitions')}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10"
@@ -214,7 +220,7 @@ export function ERRecognitionTab({ companyId }: ERRecognitionTabProps) {
         {filteredRecognitions.length === 0 ? (
           <div className="text-center py-12 text-muted-foreground">
             <Award className="h-12 w-12 mx-auto mb-4 opacity-50" />
-            <p>No recognitions found</p>
+            <p>{t('employeeRelationsModule.recognition.noRecognitions')}</p>
           </div>
         ) : (
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -225,7 +231,7 @@ export function ERRecognitionTab({ companyId }: ERRecognitionTabProps) {
                     <Badge variant="outline" className={getTypeColor(recognition.recognition_type)}>
                       <span className="flex items-center gap-1">
                         {getTypeIcon(recognition.recognition_type)}
-                        {recognition.recognition_type.replace(/_/g, ' ')}
+                        {t(`employeeRelationsModule.recognition.types.${recognition.recognition_type}`, { defaultValue: recognition.recognition_type.replace(/_/g, ' ') })}
                       </span>
                     </Badge>
                     {recognition.monetary_value && (
@@ -246,7 +252,7 @@ export function ERRecognitionTab({ companyId }: ERRecognitionTabProps) {
                     <span>{format(new Date(recognition.award_date), 'PP')}</span>
                     {recognition.category && (
                       <Badge variant="secondary" className="text-xs">
-                        {recognition.category.replace(/_/g, ' ')}
+                        {t(`employeeRelationsModule.recognition.categories.${recognition.category}`, { defaultValue: recognition.category.replace(/_/g, ' ') })}
                       </Badge>
                     )}
                   </div>

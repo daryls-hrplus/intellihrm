@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { 
   PieChart, 
@@ -11,8 +12,6 @@ import {
   CartesianGrid, 
   Tooltip, 
   ResponsiveContainer,
-  LineChart,
-  Line,
   Legend,
   AreaChart,
   Area
@@ -36,6 +35,7 @@ const COLORS = [
 ];
 
 export function ERAnalytics({ companyId }: ERAnalyticsProps) {
+  const { t } = useTranslation();
   const { 
     cases, 
     disciplinaryActions, 
@@ -61,10 +61,10 @@ export function ERAnalytics({ companyId }: ERAnalyticsProps) {
       statusCounts[c.status] = (statusCounts[c.status] || 0) + 1;
     });
     return Object.entries(statusCounts).map(([name, value]) => ({
-      name: name.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+      name: t(`employeeRelationsModule.cases.statuses.${name}`, { defaultValue: name.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) }),
       value,
     }));
-  }, [cases]);
+  }, [cases, t]);
 
   // Case Type Distribution
   const caseTypeDistribution = useMemo(() => {
@@ -73,10 +73,10 @@ export function ERAnalytics({ companyId }: ERAnalyticsProps) {
       typeCounts[c.case_type] = (typeCounts[c.case_type] || 0) + 1;
     });
     return Object.entries(typeCounts).map(([name, value]) => ({
-      name: name.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+      name: t(`employeeRelationsModule.cases.types.${name}`, { defaultValue: name.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) }),
       value,
     }));
-  }, [cases]);
+  }, [cases, t]);
 
   // Case Severity Distribution
   const caseSeverityDistribution = useMemo(() => {
@@ -85,10 +85,10 @@ export function ERAnalytics({ companyId }: ERAnalyticsProps) {
       severityCounts[c.severity] = (severityCounts[c.severity] || 0) + 1;
     });
     return Object.entries(severityCounts).map(([name, value]) => ({
-      name: name.charAt(0).toUpperCase() + name.slice(1),
+      name: t(`employeeRelationsModule.cases.severities.${name}`, { defaultValue: name.charAt(0).toUpperCase() + name.slice(1) }),
       value,
     }));
-  }, [cases]);
+  }, [cases, t]);
 
   // Disciplinary Action Types
   const disciplinaryTypeDistribution = useMemo(() => {
@@ -97,10 +97,10 @@ export function ERAnalytics({ companyId }: ERAnalyticsProps) {
       typeCounts[a.action_type] = (typeCounts[a.action_type] || 0) + 1;
     });
     return Object.entries(typeCounts).map(([name, value]) => ({
-      name: name.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+      name: t(`employeeRelationsModule.disciplinary.types.${name}`, { defaultValue: name.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) }),
       value,
     }));
-  }, [disciplinaryActions]);
+  }, [disciplinaryActions, t]);
 
   // Recognition Types
   const recognitionTypeDistribution = useMemo(() => {
@@ -109,10 +109,10 @@ export function ERAnalytics({ companyId }: ERAnalyticsProps) {
       typeCounts[r.recognition_type] = (typeCounts[r.recognition_type] || 0) + 1;
     });
     return Object.entries(typeCounts).map(([name, value]) => ({
-      name: name.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+      name: t(`employeeRelationsModule.recognition.types.${name}`, { defaultValue: name.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) }),
       value,
     }));
-  }, [recognitions]);
+  }, [recognitions, t]);
 
   // Monthly Case Trends (last 6 months)
   const caseTrends = useMemo(() => {
@@ -143,12 +143,12 @@ export function ERAnalytics({ companyId }: ERAnalyticsProps) {
 
       months.push({
         month: format(date, 'MMM'),
-        opened,
-        resolved,
+        [t('employeeRelationsModule.analytics.opened')]: opened,
+        [t('employeeRelationsModule.analytics.resolved')]: resolved,
       });
     }
     return months;
-  }, [cases]);
+  }, [cases, t]);
 
   // Exit Interview Satisfaction Averages
   const exitInterviewSatisfaction = useMemo(() => {
@@ -156,12 +156,12 @@ export function ERAnalytics({ companyId }: ERAnalyticsProps) {
     if (completedInterviews.length === 0) return [];
 
     const areas = [
-      { key: 'overall_satisfaction', label: 'Overall' },
-      { key: 'management_satisfaction', label: 'Management' },
-      { key: 'culture_satisfaction', label: 'Culture' },
-      { key: 'compensation_satisfaction', label: 'Compensation' },
-      { key: 'growth_satisfaction', label: 'Growth' },
-      { key: 'worklife_balance_satisfaction', label: 'Work-Life' },
+      { key: 'overall_satisfaction', label: t('employeeRelationsModule.exitInterviews.satisfaction.overall') },
+      { key: 'management_satisfaction', label: t('employeeRelationsModule.exitInterviews.satisfaction.management') },
+      { key: 'culture_satisfaction', label: t('employeeRelationsModule.exitInterviews.satisfaction.culture') },
+      { key: 'compensation_satisfaction', label: t('employeeRelationsModule.exitInterviews.satisfaction.compensation') },
+      { key: 'growth_satisfaction', label: t('employeeRelationsModule.exitInterviews.satisfaction.growth') },
+      { key: 'worklife_balance_satisfaction', label: t('employeeRelationsModule.exitInterviews.satisfaction.worklife_balance') },
     ];
 
     return areas.map(({ key, label }) => {
@@ -171,7 +171,7 @@ export function ERAnalytics({ companyId }: ERAnalyticsProps) {
       const avg = values.length > 0 ? values.reduce((a, b) => a + b, 0) / values.length : 0;
       return { name: label, score: Math.round(avg * 10) / 10 };
     });
-  }, [exitInterviews]);
+  }, [exitInterviews, t]);
 
   // Wellness Program Types
   const wellnessTypeDistribution = useMemo(() => {
@@ -180,29 +180,29 @@ export function ERAnalytics({ companyId }: ERAnalyticsProps) {
       typeCounts[p.program_type] = (typeCounts[p.program_type] || 0) + 1;
     });
     return Object.entries(typeCounts).map(([name, value]) => ({
-      name: name.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+      name: t(`employeeRelationsModule.wellness.types.${name}`, { defaultValue: name.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) }),
       value,
     }));
-  }, [wellnessPrograms]);
+  }, [wellnessPrograms, t]);
 
   // KPI Cards Data
   const kpiData = [
     {
-      title: "Open Cases",
+      title: t('employeeRelationsModule.analytics.openCases'),
       value: cases.filter(c => !['resolved', 'closed'].includes(c.status)).length,
       icon: AlertCircle,
       color: "text-warning",
       bgColor: "bg-warning/10",
     },
     {
-      title: "Active Disciplinary",
+      title: t('employeeRelationsModule.analytics.activeDisciplinary'),
       value: disciplinaryActions.filter(a => a.status === 'active').length,
       icon: Scale,
       color: "text-destructive",
       bgColor: "bg-destructive/10",
     },
     {
-      title: "Recognitions This Month",
+      title: t('employeeRelationsModule.analytics.recognitionsThisMonth'),
       value: recognitions.filter(r => {
         const date = parseISO(r.award_date);
         return isWithinInterval(date, { start: startOfMonth(new Date()), end: new Date() });
@@ -212,21 +212,21 @@ export function ERAnalytics({ companyId }: ERAnalyticsProps) {
       bgColor: "bg-success/10",
     },
     {
-      title: "Pending Exit Interviews",
+      title: t('employeeRelationsModule.analytics.pendingExitInterviews'),
       value: exitInterviews.filter(i => i.status === 'scheduled').length,
       icon: LogOut,
       color: "text-info",
       bgColor: "bg-info/10",
     },
     {
-      title: "Active Surveys",
+      title: t('employeeRelationsModule.analytics.activeSurveys'),
       value: surveys.filter(s => s.status === 'active').length,
       icon: TrendingUp,
       color: "text-primary",
       bgColor: "bg-primary/10",
     },
     {
-      title: "Active Wellness Programs",
+      title: t('employeeRelationsModule.analytics.activeWellnessPrograms'),
       value: wellnessPrograms.filter(p => p.status === 'active').length,
       icon: Heart,
       color: "text-pink-600",
@@ -271,8 +271,8 @@ export function ERAnalytics({ companyId }: ERAnalyticsProps) {
         {/* Case Status */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg">Case Status</CardTitle>
-            <CardDescription>Distribution by current status</CardDescription>
+            <CardTitle className="text-lg">{t('employeeRelationsModule.analytics.caseStatus')}</CardTitle>
+            <CardDescription>{t('employeeRelationsModule.analytics.caseStatusDesc')}</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="h-[200px]">
@@ -303,8 +303,8 @@ export function ERAnalytics({ companyId }: ERAnalyticsProps) {
         {/* Case Types */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg">Case Types</CardTitle>
-            <CardDescription>Distribution by type</CardDescription>
+            <CardTitle className="text-lg">{t('employeeRelationsModule.analytics.caseTypes')}</CardTitle>
+            <CardDescription>{t('employeeRelationsModule.analytics.caseTypesDesc')}</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="h-[200px]">
@@ -335,8 +335,8 @@ export function ERAnalytics({ companyId }: ERAnalyticsProps) {
         {/* Case Severity */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg">Case Severity</CardTitle>
-            <CardDescription>Distribution by severity level</CardDescription>
+            <CardTitle className="text-lg">{t('employeeRelationsModule.analytics.caseSeverity')}</CardTitle>
+            <CardDescription>{t('employeeRelationsModule.analytics.caseSeverityDesc')}</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="h-[200px]">
@@ -365,8 +365,8 @@ export function ERAnalytics({ companyId }: ERAnalyticsProps) {
         {/* Case Trends */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg">Case Trends</CardTitle>
-            <CardDescription>Opened vs resolved over last 6 months</CardDescription>
+            <CardTitle className="text-lg">{t('employeeRelationsModule.analytics.caseTrends')}</CardTitle>
+            <CardDescription>{t('employeeRelationsModule.analytics.caseTrendsDesc')}</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="h-[280px]">
@@ -385,21 +385,19 @@ export function ERAnalytics({ companyId }: ERAnalyticsProps) {
                   <Legend />
                   <Area 
                     type="monotone" 
-                    dataKey="opened" 
+                    dataKey={t('employeeRelationsModule.analytics.opened')}
                     stackId="1"
                     stroke="hsl(var(--destructive))" 
                     fill="hsl(var(--destructive))" 
                     fillOpacity={0.6}
-                    name="Opened"
                   />
                   <Area 
                     type="monotone" 
-                    dataKey="resolved" 
+                    dataKey={t('employeeRelationsModule.analytics.resolved')}
                     stackId="2"
                     stroke="hsl(var(--chart-2))" 
                     fill="hsl(var(--chart-2))" 
                     fillOpacity={0.6}
-                    name="Resolved"
                   />
                 </AreaChart>
               </ResponsiveContainer>
@@ -410,8 +408,8 @@ export function ERAnalytics({ companyId }: ERAnalyticsProps) {
         {/* Exit Interview Satisfaction */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg">Exit Interview Satisfaction</CardTitle>
-            <CardDescription>Average scores across areas (1-5 scale)</CardDescription>
+            <CardTitle className="text-lg">{t('employeeRelationsModule.analytics.exitInterviewSatisfaction')}</CardTitle>
+            <CardDescription>{t('employeeRelationsModule.analytics.exitInterviewSatisfactionDesc')}</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="h-[280px]">
@@ -445,8 +443,8 @@ export function ERAnalytics({ companyId }: ERAnalyticsProps) {
         {/* Disciplinary Actions */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg">Disciplinary Actions</CardTitle>
-            <CardDescription>By action type</CardDescription>
+            <CardTitle className="text-lg">{t('employeeRelationsModule.analytics.disciplinaryActions')}</CardTitle>
+            <CardDescription>{t('employeeRelationsModule.analytics.disciplinaryActionsDesc')}</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="h-[200px]">
@@ -472,8 +470,8 @@ export function ERAnalytics({ companyId }: ERAnalyticsProps) {
         {/* Recognition Types */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg">Recognition Types</CardTitle>
-            <CardDescription>Distribution by type</CardDescription>
+            <CardTitle className="text-lg">{t('employeeRelationsModule.analytics.recognitionTypes')}</CardTitle>
+            <CardDescription>{t('employeeRelationsModule.analytics.recognitionTypesDesc')}</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="h-[200px]">
@@ -500,11 +498,11 @@ export function ERAnalytics({ companyId }: ERAnalyticsProps) {
           </CardContent>
         </Card>
 
-        {/* Wellness Programs */}
+        {/* Wellness Program Types */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg">Wellness Programs</CardTitle>
-            <CardDescription>By program type</CardDescription>
+            <CardTitle className="text-lg">{t('employeeRelationsModule.analytics.wellnessPrograms')}</CardTitle>
+            <CardDescription>{t('employeeRelationsModule.analytics.wellnessProgramsDesc')}</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="h-[200px]">

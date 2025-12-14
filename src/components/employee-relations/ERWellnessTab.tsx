@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -20,8 +21,9 @@ interface ERWellnessTabProps {
 }
 
 export function ERWellnessTab({ companyId }: ERWellnessTabProps) {
+  const { t } = useTranslation();
   const { user } = useAuth();
-  const { wellnessPrograms, loadingWellness, createWellnessProgram, updateWellnessProgram } = useEmployeeRelations(companyId);
+  const { wellnessPrograms, loadingWellness, createWellnessProgram } = useEmployeeRelations(companyId);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   
@@ -100,45 +102,47 @@ export function ERWellnessTab({ companyId }: ERWellnessTabProps) {
           <div>
             <CardTitle className="flex items-center gap-2">
               <Heart className="h-5 w-5" />
-              Wellness Programs
+              {t('employeeRelationsModule.wellness.title')}
             </CardTitle>
-            <CardDescription>Manage employee wellness initiatives</CardDescription>
+            <CardDescription>{t('employeeRelationsModule.wellness.description')}</CardDescription>
           </div>
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
               <Button className="gap-2">
                 <Plus className="h-4 w-4" />
-                New Program
+                {t('employeeRelationsModule.wellness.newProgram')}
               </Button>
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>Create Wellness Program</DialogTitle>
+                <DialogTitle>{t('employeeRelationsModule.wellness.createProgram')}</DialogTitle>
               </DialogHeader>
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="space-y-2">
-                  <Label>Program Name *</Label>
+                  <Label>{t('employeeRelationsModule.wellness.programName')} *</Label>
                   <Input
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    placeholder="Program name"
+                    placeholder={t('employeeRelationsModule.wellness.programNamePlaceholder')}
                     required
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>Program Type *</Label>
+                  <Label>{t('employeeRelationsModule.wellness.programType')} *</Label>
                   <Select value={formData.program_type} onValueChange={(v) => setFormData({ ...formData, program_type: v })}>
                     <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>
-                      {PROGRAM_TYPES.map(t => (
-                        <SelectItem key={t} value={t}>{t.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}</SelectItem>
+                      {PROGRAM_TYPES.map(type => (
+                        <SelectItem key={type} value={type}>
+                          {t(`employeeRelationsModule.wellness.types.${type}`, { defaultValue: type.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) })}
+                        </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label>Start Date *</Label>
+                    <Label>{t('common.startDate')} *</Label>
                     <Input
                       type="date"
                       value={formData.start_date}
@@ -147,7 +151,7 @@ export function ERWellnessTab({ companyId }: ERWellnessTabProps) {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>End Date</Label>
+                    <Label>{t('common.endDate')}</Label>
                     <Input
                       type="date"
                       value={formData.end_date}
@@ -157,16 +161,16 @@ export function ERWellnessTab({ companyId }: ERWellnessTabProps) {
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label>Max Participants</Label>
+                    <Label>{t('employeeRelationsModule.wellness.maxParticipants')}</Label>
                     <Input
                       type="number"
                       value={formData.max_participants}
                       onChange={(e) => setFormData({ ...formData, max_participants: e.target.value })}
-                      placeholder="Unlimited"
+                      placeholder={t('employeeRelationsModule.wellness.unlimited')}
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>Budget</Label>
+                    <Label>{t('employeeRelationsModule.wellness.budget')}</Label>
                     <Input
                       type="number"
                       value={formData.budget}
@@ -176,18 +180,18 @@ export function ERWellnessTab({ companyId }: ERWellnessTabProps) {
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label>Description</Label>
+                  <Label>{t('common.description')}</Label>
                   <Textarea
                     value={formData.description}
                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                    placeholder="Program description..."
+                    placeholder={t('employeeRelationsModule.wellness.programDescription')}
                   />
                 </div>
                 <div className="flex justify-end gap-2">
-                  <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>Cancel</Button>
+                  <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>{t('common.cancel')}</Button>
                   <Button type="submit" disabled={createWellnessProgram.isPending}>
                     {createWellnessProgram.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    Create Program
+                    {t('common.create')}
                   </Button>
                 </div>
               </form>
@@ -200,7 +204,7 @@ export function ERWellnessTab({ companyId }: ERWellnessTabProps) {
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Search programs..."
+              placeholder={t('employeeRelationsModule.wellness.searchPrograms')}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10"
@@ -211,7 +215,7 @@ export function ERWellnessTab({ companyId }: ERWellnessTabProps) {
         {filteredPrograms.length === 0 ? (
           <div className="text-center py-12 text-muted-foreground">
             <Heart className="h-12 w-12 mx-auto mb-4 opacity-50" />
-            <p>No wellness programs found</p>
+            <p>{t('employeeRelationsModule.wellness.noPrograms')}</p>
           </div>
         ) : (
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -220,10 +224,10 @@ export function ERWellnessTab({ companyId }: ERWellnessTabProps) {
                 <CardContent className="pt-6">
                   <div className="flex items-start justify-between mb-3">
                     <Badge variant="outline" className={getTypeColor(program.program_type)}>
-                      {program.program_type.replace(/_/g, ' ')}
+                      {t(`employeeRelationsModule.wellness.types.${program.program_type}`, { defaultValue: program.program_type.replace(/_/g, ' ') })}
                     </Badge>
                     <Badge variant="outline" className={getStatusColor(program.status)}>
-                      {program.status}
+                      {t(`employeeRelationsModule.wellness.statuses.${program.status}`, { defaultValue: program.status })}
                     </Badge>
                   </div>
                   <h4 className="font-semibold mb-2">{program.name}</h4>
@@ -239,13 +243,13 @@ export function ERWellnessTab({ companyId }: ERWellnessTabProps) {
                     {program.max_participants && (
                       <div className="flex items-center gap-2 text-muted-foreground">
                         <Users className="h-4 w-4" />
-                        <span>Max {program.max_participants} participants</span>
+                        <span>{t('employeeRelationsModule.wellness.maxParticipants')}: {program.max_participants}</span>
                       </div>
                     )}
                     {program.budget && (
                       <div className="flex items-center gap-2 text-muted-foreground">
                         <DollarSign className="h-4 w-4" />
-                        <span>Budget: ${program.budget.toLocaleString()}</span>
+                        <span>{t('employeeRelationsModule.wellness.budget')}: ${program.budget.toLocaleString()}</span>
                       </div>
                     )}
                   </div>
