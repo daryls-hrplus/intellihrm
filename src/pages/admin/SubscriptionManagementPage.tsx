@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
+import { InvoiceList } from '@/components/admin/subscriptions/InvoiceList';
+import { InvoiceSettingsForm } from '@/components/admin/subscriptions/InvoiceSettingsForm';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -386,6 +388,8 @@ export default function SubscriptionManagementPage() {
         <TabsList>
           <TabsTrigger value="subscriptions">Subscriptions</TabsTrigger>
           <TabsTrigger value="invoices">Invoices</TabsTrigger>
+          <TabsTrigger value="invoice-management">Invoice Management</TabsTrigger>
+          <TabsTrigger value="invoice-settings">Invoice Settings</TabsTrigger>
           <TabsTrigger value="tiers">Pricing Tiers</TabsTrigger>
         </TabsList>
 
@@ -554,6 +558,14 @@ export default function SubscriptionManagementPage() {
               </Card>
             ))}
           </div>
+        </TabsContent>
+
+        <TabsContent value="invoice-management" className="mt-4">
+          <InvoiceList />
+        </TabsContent>
+
+        <TabsContent value="invoice-settings" className="mt-4">
+          <InvoiceSettingsForm />
         </TabsContent>
       </Tabs>
 
