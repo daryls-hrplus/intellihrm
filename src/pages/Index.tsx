@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { StatCard } from "@/components/dashboard/StatCard";
 import { QuickActions } from "@/components/dashboard/QuickActions";
@@ -16,6 +17,7 @@ import {
 } from "lucide-react";
 
 const Index = () => {
+  const { t } = useTranslation();
   const { profile, isAdmin } = useAuth();
   const firstName = profile?.full_name?.split(" ")[0] || "there";
 
@@ -25,43 +27,43 @@ const Index = () => {
         {/* Header */}
         <div className="animate-fade-in">
           <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
-            Welcome back, {firstName}
+            {t("dashboard.welcomeBack", { name: firstName })}
           </h1>
           <p className="mt-1 text-muted-foreground">
-            Here's what's happening across your organization today.
+            {t("dashboard.overview")}
           </p>
         </div>
 
         {/* Stats Grid */}
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <StatCard
-            title="Total Employees"
+            title={t("dashboard.totalEmployees")}
             value="1,284"
-            change="+12% from last month"
+            change={`+12% ${t("dashboard.fromLastMonth")}`}
             changeType="positive"
             icon={Users}
             delay={0}
           />
           <StatCard
-            title="New Hires (This Month)"
+            title={t("dashboard.newHires")}
             value="28"
-            change="+5 from last month"
+            change={`+5 ${t("dashboard.fromLastMonth")}`}
             changeType="positive"
             icon={UserPlus}
             delay={50}
           />
           <StatCard
-            title="Leave Requests"
+            title={t("dashboard.leaveRequests")}
             value="47"
-            change="12 pending approval"
+            change={`12 ${t("dashboard.pendingApproval")}`}
             changeType="neutral"
             icon={Calendar}
             delay={100}
           />
           <StatCard
-            title="Open Positions"
+            title={t("dashboard.openPositions")}
             value="23"
-            change="8 in final stage"
+            change={`8 ${t("dashboard.inFinalStage")}`}
             changeType="neutral"
             icon={TrendingUp}
             delay={150}

@@ -61,7 +61,19 @@
     "website": "Website",
     "industry": "Industry",
     "code": "Code",
-    "required": "Required"
+    "required": "Required",
+    "startDate": "Start Date",
+    "endDate": "End Date",
+    "createdAt": "Created At",
+    "updatedAt": "Updated At",
+    "details": "Details",
+    "notes": "Notes",
+    "type": "Type",
+    "category": "Category",
+    "priority": "Priority",
+    "amount": "Amount",
+    "currency": "Currency",
+    "percentage": "Percentage"
   },
   "auth": {
     "login": "Log In",
@@ -118,8 +130,25 @@
     "reviewRequests": "Review Requests",
     "requestsAwaiting": "{{count}} request(s) awaiting review"
   },
+  "dashboard": {
+    "welcomeBack": "Welcome back, {{name}}",
+    "overview": "Here's what's happening across your organization today.",
+    "totalEmployees": "Total Employees",
+    "newHires": "New Hires (This Month)",
+    "leaveRequests": "Leave Requests",
+    "openPositions": "Open Positions",
+    "pendingApproval": "pending approval",
+    "inFinalStage": "in final stage",
+    "fromLastMonth": "from last month",
+    "quickActions": "Quick Actions",
+    "recentActivity": "Recent Activity",
+    "upcomingEvents": "Upcoming Events",
+    "headcountTrend": "Headcount Trend",
+    "employeeDistribution": "Employee Distribution"
+  },
   "workforce": {
-    "title": "Workforce Management",
+    "title": "Workforce",
+    "subtitle": "Employee and organizational management",
     "description": "Manage your organization's workforce, departments, and positions",
     "employeeCount": "Total Employees",
     "departmentCount": "Departments",
@@ -130,103 +159,226 @@
     "selectCompany": "Select company",
     "asOf": "As of",
     "showingAsOf": "Showing departments as of",
-    "manageDepartments": "Manage departments and sections",
-    "noDepartmentsFound": "No departments found",
-    "getStartedDepartment": "Get started by creating a department.",
-    "noDepartmentsCreated": "No departments have been created for this company.",
-    "createDepartment": "Create Department",
-    "addDepartment": "Add Department",
-    "addSection": "Add Section",
-    "editDepartment": "Edit Department",
-    "editSection": "Edit Section",
-    "deleteDepartment": "Delete Department",
-    "deleteSection": "Delete Section",
-    "departmentDetails": "Department details",
-    "sectionDetails": "Section details",
-    "sections": "sections",
-    "noSections": "No sections",
-    "division": "Division",
-    "noDivision": "No Division",
-    "selectDivision": "Select division (optional)",
-    "cannotDeleteWithSections": "Cannot delete department with sections. Remove sections first.",
-    "departmentCreated": "Department created successfully",
-    "departmentUpdated": "Department updated successfully",
-    "departmentDeleted": "Department deleted successfully",
-    "sectionCreated": "Section created successfully",
-    "sectionUpdated": "Section updated successfully",
-    "sectionDeleted": "Section deleted successfully",
-    "orgChangesReport": "Organizational Changes Report",
-    "trackOrgChanges": "Track and analyze organizational structure changes over time",
-    "scheduleReport": "Schedule Report",
-    "employeeAssignments": "Employee Assignments",
-    "viewManageAssignments": "View and manage all employee-position relationships",
-    "allHistory": "All History",
-    "bulkUpload": "Bulk Upload",
-    "newAssignment": "New Assignment",
-    "allCompanies": "All Companies",
-    "allDepartments": "All Departments",
-    "searchAssignments": "Search employee, position, department...",
-    "assignmentsCount": "Assignments",
-    "allAssignmentsDescription": "All employee-position assignments across the organization",
-    "noAssignmentsFound": "No assignments found",
-    "noAssignmentsDescription": "No employee assignments match your current filters.",
-    "employee": "Employee",
-    "position": "Position",
-    "department": "Department",
-    "company": "Company",
-    "startDate": "Start Date",
-    "endDate": "End Date",
-    "primaryAssignment": "Primary",
-    "compensation": "Compensation",
-    "viewHistory": "View History",
-    "assignmentHistory": "Assignment History",
-    "createAssignment": "Create Assignment",
-    "editAssignment": "Edit Assignment",
-    "assignmentCreated": "Assignment created successfully",
-    "assignmentUpdated": "Assignment updated successfully",
-    "assignmentDeleted": "Assignment deleted successfully",
-    "selectEmployee": "Select employee",
-    "selectPosition": "Select position",
-    "compensationAmount": "Compensation Amount",
-    "currency": "Currency",
-    "frequency": "Frequency",
-    "monthly": "Monthly",
-    "annually": "Annually",
-    "hourly": "Hourly",
-    "weekly": "Weekly",
-    "employeePositionRequired": "Employee, position, and start date are required",
-    "csvExported": "CSV exported successfully",
-    "orgStructureTitle": "Organizational Structure",
-    "viewOrgchart": "View Orgchart",
-    "viewOrgHierarchy": "View and explore the organizational hierarchy",
-    "noCompaniesFound": "No companies found",
-    "confirmDeleteDepartment": "Are you sure you want to delete this department?",
-    "confirmDeleteSection": "Are you sure you want to delete this section?",
-    "deleteWarning": "This action cannot be undone.",
     "modules": {
+      "companyGroups": {
+        "title": "Company Groups",
+        "description": "Manage company groups and divisions"
+      },
+      "companies": {
+        "title": "Companies",
+        "description": "Manage company entities"
+      },
       "employees": {
         "title": "Employees",
         "description": "View and manage employee records"
       },
-      "departments": {
-        "title": "Departments",
-        "description": "Manage organizational departments"
-      },
       "positions": {
         "title": "Positions",
-        "description": "Define and manage job positions"
-      },
-      "orgStructure": {
-        "title": "Org Structure",
-        "description": "View organizational hierarchy"
-      },
-      "orgChanges": {
-        "title": "Org Changes",
-        "description": "Track organizational changes"
+        "description": "Manage job positions and titles"
       },
       "assignments": {
         "title": "Employee Assignments",
-        "description": "Manage employee position assignments"
+        "description": "Manage employee-position relationships"
+      },
+      "orgStructure": {
+        "title": "View Orgchart",
+        "description": "View organizational hierarchy"
+      },
+      "departments": {
+        "title": "Departments",
+        "description": "Manage departments and teams"
+      },
+      "orgChanges": {
+        "title": "Org Changes Report",
+        "description": "Track organizational changes over time"
+      },
+      "transactions": {
+        "title": "Employee Transactions",
+        "description": "Manage hires, promotions, transfers, terminations"
+      },
+      "forecasting": {
+        "title": "Workforce Forecasting",
+        "description": "Headcount forecasts, scenario planning, and analytics"
+      },
+      "jobFamilies": {
+        "title": "Job Families",
+        "description": "Group similar positions together"
+      },
+      "jobs": {
+        "title": "Jobs",
+        "description": "Define job roles within job families"
+      },
+      "competencies": {
+        "title": "Competencies",
+        "description": "Define competency requirements"
+      },
+      "responsibilities": {
+        "title": "Responsibilities",
+        "description": "Define job responsibilities"
+      },
+      "intranetAdmin": {
+        "title": "Intranet Admin",
+        "description": "Manage announcements, gallery, and blog"
+      },
+      "onboarding": {
+        "title": "Employee Onboarding",
+        "description": "Manage onboarding templates and track new employees"
+      },
+      "offboarding": {
+        "title": "Employee Offboarding",
+        "description": "Manage offboarding templates and track departing employees"
+      }
+    }
+  },
+  "ess": {
+    "title": "Employee Self Service",
+    "subtitle": "Access your personal information, requests, and employment details",
+    "modules": {
+      "profile": {
+        "title": "My Profile",
+        "description": "View and update your personal information"
+      },
+      "approvals": {
+        "title": "My Approvals",
+        "description": "View and action pending approval requests"
+      },
+      "delegates": {
+        "title": "My Delegates",
+        "description": "Manage your approval delegates"
+      },
+      "leave": {
+        "title": "Leave Requests",
+        "description": "Apply for leave and view your leave balance"
+      },
+      "documents": {
+        "title": "My Documents",
+        "description": "Access your employment documents and certificates"
+      },
+      "timeAttendance": {
+        "title": "Time & Attendance",
+        "description": "Clock in/out and view your attendance records"
+      },
+      "payslips": {
+        "title": "Payslips",
+        "description": "View and download your payslips"
+      },
+      "training": {
+        "title": "My Training",
+        "description": "View enrolled courses and training history"
+      },
+      "goals": {
+        "title": "My Goals",
+        "description": "View and track your performance goals"
+      },
+      "tickets": {
+        "title": "Submit a Ticket",
+        "description": "Request help or report an issue to IT/HR support"
+      },
+      "letters": {
+        "title": "My Letters",
+        "description": "Request and view employment letters"
+      },
+      "onboarding": {
+        "title": "My Onboarding",
+        "description": "Complete your onboarding tasks and checklist"
+      },
+      "offboarding": {
+        "title": "My Offboarding",
+        "description": "Complete your exit tasks before leaving"
+      },
+      "property": {
+        "title": "My Property",
+        "description": "View assigned equipment and submit requests"
+      },
+      "relations": {
+        "title": "Employee Relations",
+        "description": "Recognition, surveys, and workplace concerns"
+      },
+      "benefits": {
+        "title": "My Benefits",
+        "description": "View your benefit plans and coverage"
+      },
+      "hse": {
+        "title": "Health & Safety",
+        "description": "Report incidents, view policies, and training"
+      },
+      "jobs": {
+        "title": "Job Openings",
+        "description": "Browse and apply for internal job openings"
+      },
+      "compensation": {
+        "title": "My Compensation",
+        "description": "View your salary, allowances, and total rewards"
+      },
+      "feedback": {
+        "title": "My Feedback",
+        "description": "Give and receive continuous feedback"
+      },
+      "recognition": {
+        "title": "My Recognition",
+        "description": "View your recognitions and recognize colleagues"
+      },
+      "reminders": {
+        "title": "My Reminders",
+        "description": "View your upcoming reminders and important dates"
+      },
+      "notifications": {
+        "title": "Notifications",
+        "description": "Manage your notification preferences"
+      }
+    }
+  },
+  "mss": {
+    "title": "Manager Self Service",
+    "subtitle": "Manage your team and direct reports",
+    "modules": {
+      "team": {
+        "title": "My Team",
+        "description": "View and manage your direct reports"
+      },
+      "approvals": {
+        "title": "Team Approvals",
+        "description": "Review and approve team requests"
+      },
+      "leave": {
+        "title": "Team Leave",
+        "description": "Manage leave requests for your team"
+      },
+      "timeAttendance": {
+        "title": "Team Attendance",
+        "description": "Monitor team attendance and timesheets"
+      },
+      "goals": {
+        "title": "Team Goals",
+        "description": "Set and track goals for your team"
+      },
+      "appraisals": {
+        "title": "Team Appraisals",
+        "description": "Conduct performance reviews for your team"
+      },
+      "training": {
+        "title": "Team Training",
+        "description": "Manage training assignments for your team"
+      },
+      "onboarding": {
+        "title": "Team Onboarding",
+        "description": "Track onboarding progress for new hires"
+      },
+      "offboarding": {
+        "title": "Team Offboarding",
+        "description": "Manage exit process for departing team members"
+      },
+      "feedback": {
+        "title": "Team Feedback",
+        "description": "Provide feedback to your direct reports"
+      },
+      "recognition": {
+        "title": "Team Recognition",
+        "description": "Recognize team member achievements"
+      },
+      "property": {
+        "title": "Team Property",
+        "description": "Manage equipment assignments for your team"
       }
     }
   },
@@ -312,6 +464,26 @@
       "languages": {
         "title": "Languages",
         "description": "Configure system languages"
+      },
+      "workflows": {
+        "title": "Workflow Templates",
+        "description": "Configure approval workflows"
+      },
+      "lookupValues": {
+        "title": "Lookup Values",
+        "description": "Manage dropdown options and codes"
+      },
+      "letterTemplates": {
+        "title": "Letter Templates",
+        "description": "Manage HR letter templates"
+      },
+      "policyDocuments": {
+        "title": "Policy Documents",
+        "description": "Manage company policies"
+      },
+      "lms": {
+        "title": "LMS Management",
+        "description": "Manage courses and learning content"
       }
     },
     "users": {
@@ -402,6 +574,390 @@
       "reviewRequests": "Review Requests"
     }
   },
+  "leaveManagement": {
+    "title": "Leave Management",
+    "subtitle": "Manage employee leave requests and balances",
+    "modules": {
+      "requests": {
+        "title": "Leave Requests",
+        "description": "View and manage leave requests"
+      },
+      "balances": {
+        "title": "Leave Balances",
+        "description": "View employee leave balances"
+      },
+      "types": {
+        "title": "Leave Types",
+        "description": "Configure leave types and policies"
+      },
+      "calendar": {
+        "title": "Leave Calendar",
+        "description": "View team leave schedule"
+      },
+      "accrualRules": {
+        "title": "Accrual Rules",
+        "description": "Configure leave accrual policies"
+      },
+      "rolloverRules": {
+        "title": "Rollover Rules",
+        "description": "Configure leave rollover policies"
+      },
+      "holidays": {
+        "title": "Holidays",
+        "description": "Manage company holidays"
+      },
+      "compTime": {
+        "title": "Compensatory Time",
+        "description": "Manage comp time policies"
+      },
+      "analytics": {
+        "title": "Leave Analytics",
+        "description": "View leave trends and reports"
+      }
+    }
+  },
+  "timeAttendance": {
+    "title": "Time & Attendance",
+    "subtitle": "Track employee time and attendance",
+    "modules": {
+      "timeClock": {
+        "title": "Time Clock",
+        "description": "Clock in/out tracking"
+      },
+      "timesheets": {
+        "title": "Timesheets",
+        "description": "View and approve timesheets"
+      },
+      "schedules": {
+        "title": "Work Schedules",
+        "description": "Manage employee schedules"
+      },
+      "exceptions": {
+        "title": "Attendance Exceptions",
+        "description": "Handle attendance issues"
+      },
+      "policies": {
+        "title": "Attendance Policies",
+        "description": "Configure attendance rules"
+      },
+      "geofencing": {
+        "title": "Geofencing",
+        "description": "Location-based time tracking"
+      },
+      "projects": {
+        "title": "Project Time",
+        "description": "Track time by project"
+      }
+    }
+  },
+  "payroll": {
+    "title": "Payroll",
+    "subtitle": "Process and manage employee payroll",
+    "modules": {
+      "processing": {
+        "title": "Payroll Processing",
+        "description": "Process payroll runs"
+      },
+      "payGroups": {
+        "title": "Pay Groups",
+        "description": "Manage pay group assignments"
+      },
+      "payPeriods": {
+        "title": "Pay Periods",
+        "description": "Configure pay period calendars"
+      },
+      "taxConfig": {
+        "title": "Tax Configuration",
+        "description": "Configure tax settings"
+      },
+      "deductions": {
+        "title": "Deductions",
+        "description": "Manage payroll deductions"
+      },
+      "bankFiles": {
+        "title": "Bank Files",
+        "description": "Generate bank payment files"
+      },
+      "reports": {
+        "title": "Payroll Reports",
+        "description": "View payroll reports"
+      },
+      "yearEnd": {
+        "title": "Year-End Processing",
+        "description": "Process year-end payroll"
+      }
+    }
+  },
+  "compensationModule": {
+    "title": "Compensation",
+    "subtitle": "Manage employee compensation and rewards",
+    "modules": {
+      "salaryGrades": {
+        "title": "Salary Grades",
+        "description": "Define salary grade structures"
+      },
+      "payElements": {
+        "title": "Pay Elements",
+        "description": "Configure pay components"
+      },
+      "positionCompensation": {
+        "title": "Position Compensation",
+        "description": "Assign compensation to positions"
+      },
+      "bonuses": {
+        "title": "Bonuses",
+        "description": "Manage bonus awards"
+      },
+      "equity": {
+        "title": "Equity",
+        "description": "Manage stock and equity awards"
+      },
+      "analytics": {
+        "title": "Compensation Analytics",
+        "description": "Analyze compensation data"
+      }
+    }
+  },
+  "benefitsModule": {
+    "title": "Benefits",
+    "subtitle": "Manage employee benefits and enrollments",
+    "modules": {
+      "plans": {
+        "title": "Benefit Plans",
+        "description": "Configure benefit plans"
+      },
+      "enrollments": {
+        "title": "Enrollments",
+        "description": "Manage employee enrollments"
+      },
+      "categories": {
+        "title": "Benefit Categories",
+        "description": "Organize benefit types"
+      },
+      "providers": {
+        "title": "Providers",
+        "description": "Manage benefit providers"
+      },
+      "claims": {
+        "title": "Claims",
+        "description": "Process benefit claims"
+      },
+      "lifeEvents": {
+        "title": "Life Events",
+        "description": "Handle qualifying life events"
+      }
+    }
+  },
+  "performanceModule": {
+    "title": "Performance",
+    "subtitle": "Manage performance reviews and goals",
+    "modules": {
+      "goals": {
+        "title": "Goals",
+        "description": "Manage performance goals"
+      },
+      "appraisals": {
+        "title": "Appraisals",
+        "description": "Conduct performance reviews"
+      },
+      "review360": {
+        "title": "360 Reviews",
+        "description": "Multi-rater feedback"
+      },
+      "feedback": {
+        "title": "Continuous Feedback",
+        "description": "Ongoing feedback and check-ins"
+      },
+      "pips": {
+        "title": "Performance Improvement Plans",
+        "description": "Manage PIPs"
+      },
+      "recognition": {
+        "title": "Recognition & Awards",
+        "description": "Employee recognition programs"
+      },
+      "analytics": {
+        "title": "Performance Analytics",
+        "description": "Analyze performance data"
+      }
+    }
+  },
+  "trainingModule": {
+    "title": "Training",
+    "subtitle": "Manage learning and development",
+    "modules": {
+      "catalog": {
+        "title": "Course Catalog",
+        "description": "Browse available courses"
+      },
+      "enrollments": {
+        "title": "Enrollments",
+        "description": "Manage training enrollments"
+      },
+      "sessions": {
+        "title": "Training Sessions",
+        "description": "Schedule training sessions"
+      },
+      "lms": {
+        "title": "Learning Management",
+        "description": "Online learning system"
+      },
+      "budgets": {
+        "title": "Training Budgets",
+        "description": "Manage training budgets"
+      },
+      "analytics": {
+        "title": "Training Analytics",
+        "description": "Track training metrics"
+      }
+    }
+  },
+  "recruitmentModule": {
+    "title": "Recruitment",
+    "subtitle": "Manage hiring and recruitment",
+    "modules": {
+      "requisitions": {
+        "title": "Job Requisitions",
+        "description": "Create and manage job openings"
+      },
+      "candidates": {
+        "title": "Candidates",
+        "description": "Manage candidate pool"
+      },
+      "applications": {
+        "title": "Applications",
+        "description": "Review job applications"
+      },
+      "interviews": {
+        "title": "Interviews",
+        "description": "Schedule and track interviews"
+      },
+      "offers": {
+        "title": "Offer Letters",
+        "description": "Generate offer letters"
+      },
+      "analytics": {
+        "title": "Recruitment Analytics",
+        "description": "Track hiring metrics"
+      }
+    }
+  },
+  "successionModule": {
+    "title": "Succession Planning",
+    "subtitle": "Plan for organizational continuity",
+    "modules": {
+      "nineBox": {
+        "title": "Nine Box Grid",
+        "description": "Talent assessment matrix"
+      },
+      "talentPools": {
+        "title": "Talent Pools",
+        "description": "Manage high-potential employees"
+      },
+      "plans": {
+        "title": "Succession Plans",
+        "description": "Plan key position succession"
+      },
+      "keyPositions": {
+        "title": "Key Positions",
+        "description": "Identify critical roles"
+      },
+      "careerPaths": {
+        "title": "Career Paths",
+        "description": "Define career progression"
+      },
+      "mentorship": {
+        "title": "Mentorship",
+        "description": "Manage mentorship programs"
+      },
+      "flightRisk": {
+        "title": "Flight Risk",
+        "description": "Track retention risks"
+      }
+    }
+  },
+  "hseModule": {
+    "title": "Health & Safety",
+    "subtitle": "Manage workplace health and safety",
+    "modules": {
+      "incidents": {
+        "title": "Incident Reports",
+        "description": "Report and track incidents"
+      },
+      "riskAssessment": {
+        "title": "Risk Assessment",
+        "description": "Identify and assess risks"
+      },
+      "safetyTraining": {
+        "title": "Safety Training",
+        "description": "Track safety training"
+      },
+      "compliance": {
+        "title": "Compliance",
+        "description": "Monitor regulatory compliance"
+      },
+      "policies": {
+        "title": "Safety Policies",
+        "description": "Manage safety policies"
+      }
+    }
+  },
+  "employeeRelationsModule": {
+    "title": "Employee Relations",
+    "subtitle": "Manage employee engagement and relations",
+    "modules": {
+      "cases": {
+        "title": "Case Management",
+        "description": "Track employee cases"
+      },
+      "disciplinary": {
+        "title": "Disciplinary Actions",
+        "description": "Manage disciplinary records"
+      },
+      "recognition": {
+        "title": "Recognition Programs",
+        "description": "Employee recognition"
+      },
+      "exitInterviews": {
+        "title": "Exit Interviews",
+        "description": "Conduct exit interviews"
+      },
+      "surveys": {
+        "title": "Employee Surveys",
+        "description": "Create and analyze surveys"
+      },
+      "wellness": {
+        "title": "Wellness Programs",
+        "description": "Employee wellness initiatives"
+      }
+    }
+  },
+  "propertyModule": {
+    "title": "Company Property",
+    "subtitle": "Manage company assets and equipment",
+    "modules": {
+      "categories": {
+        "title": "Property Categories",
+        "description": "Organize property types"
+      },
+      "items": {
+        "title": "Property Items",
+        "description": "Manage inventory"
+      },
+      "assignments": {
+        "title": "Assignments",
+        "description": "Track equipment assignments"
+      },
+      "requests": {
+        "title": "Property Requests",
+        "description": "Handle equipment requests"
+      },
+      "maintenance": {
+        "title": "Maintenance",
+        "description": "Schedule maintenance"
+      }
+    }
+  },
   "helpdesk": {
     "title": "Help & Support",
     "newTicket": "New Ticket",
@@ -429,6 +985,32 @@
       "medium": "Medium",
       "high": "High",
       "urgent": "Urgent"
+    }
+  },
+  "hrHub": {
+    "title": "HR Hub",
+    "subtitle": "Central hub for HR operations",
+    "modules": {
+      "dashboard": {
+        "title": "HR Dashboard",
+        "description": "Quick actions and overview"
+      },
+      "calendar": {
+        "title": "HR Calendar",
+        "description": "Important dates and events"
+      },
+      "tasks": {
+        "title": "HR Tasks",
+        "description": "Track HR tasks and actions"
+      },
+      "milestones": {
+        "title": "Milestones",
+        "description": "Birthdays and anniversaries"
+      },
+      "compliance": {
+        "title": "Compliance Tracker",
+        "description": "Monitor compliance deadlines"
+      }
     }
   },
   "language": {
@@ -460,5 +1042,15 @@
     "markAllAsRead": "Mark All as Read",
     "noNotifications": "No notifications",
     "viewAll": "View All"
+  },
+  "table": {
+    "showing": "Showing",
+    "of": "of",
+    "results": "results",
+    "noResults": "No results found",
+    "loading": "Loading...",
+    "rowsPerPage": "Rows per page",
+    "page": "Page",
+    "goToPage": "Go to page"
   }
 }
