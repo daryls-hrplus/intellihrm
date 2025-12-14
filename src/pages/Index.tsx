@@ -7,8 +7,6 @@ import { EmployeeDistribution } from "@/components/dashboard/EmployeeDistributio
 import { HeadcountTrend } from "@/components/dashboard/HeadcountTrend";
 import { PendingAccessRequests } from "@/components/dashboard/PendingAccessRequests";
 import { SlaRiskWidget } from "@/components/dashboard/SlaRiskWidget";
-import { IntranetButton } from "@/components/layout/IntranetButton";
-import { NotificationBell } from "@/components/layout/NotificationBell";
 import { useAuth } from "@/contexts/AuthContext";
 import {
   Users,
@@ -24,19 +22,13 @@ const Index = () => {
     <AppLayout>
       <div className="space-y-8">
         {/* Header */}
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between animate-fade-in">
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
-              Welcome back, {firstName}
-            </h1>
-            <p className="mt-1 text-muted-foreground">
-              Here's what's happening across your organization today.
-            </p>
-          </div>
-          <div className="flex items-center gap-3">
-            <IntranetButton />
-            <NotificationBell />
-          </div>
+        <div className="animate-fade-in">
+          <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+            Welcome back, {firstName}
+          </h1>
+          <p className="mt-1 text-muted-foreground">
+            Here's what's happening across your organization today.
+          </p>
         </div>
 
         {/* Stats Grid */}
