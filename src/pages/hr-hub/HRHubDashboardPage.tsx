@@ -37,6 +37,7 @@ export default function HRHubDashboardPage() {
         { titleKey: "hrHub.helpDesk", descKey: "hrHub.helpDeskDesc", icon: Headset, href: "/admin/helpdesk", badge: null },
         { titleKey: "hrHub.announcements", descKey: "hrHub.announcementsDesc", icon: Megaphone, href: "/admin/announcements", badge: null },
         { titleKey: "hrHub.knowledgeBase", descKey: "hrHub.knowledgeBaseDesc", icon: BookOpen, href: "/admin/knowledge-base", badge: null },
+        { titleKey: "hrHub.intranetAdmin.title", descKey: "hrHub.intranetAdmin.description", icon: Megaphone, href: "/hr-hub/intranet-admin", badge: null },
       ],
     },
     {

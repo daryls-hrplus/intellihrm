@@ -472,16 +472,16 @@ export default function IntranetAdminPage() {
       <div className="container mx-auto py-6 space-y-6">
         <Breadcrumbs
           items={[
-            { label: t("navigation.workforce"), href: "/workforce" },
-            { label: t("workforce.intranetAdmin.title"), href: "/workforce/intranet-admin" },
+            { label: t("hrHub.title"), href: "/hr-hub" },
+            { label: t("hrHub.intranetAdmin.title"), href: "/hr-hub/intranet-admin" },
           ]}
         />
 
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold">{t("workforce.intranetAdmin.title")}</h1>
+            <h1 className="text-3xl font-bold">{t("hrHub.intranetAdmin.title")}</h1>
             <p className="text-muted-foreground">
-              {t("workforce.intranetAdmin.subtitle")}
+              {t("hrHub.intranetAdmin.subtitle")}
             </p>
           </div>
         </div>
@@ -490,15 +490,15 @@ export default function IntranetAdminPage() {
           <TabsList>
             <TabsTrigger value="announcements" className="gap-2">
               <Megaphone className="h-4 w-4" />
-              {t("workforce.intranetAdmin.announcements")}
+              {t("hrHub.intranetAdmin.announcements")}
             </TabsTrigger>
             <TabsTrigger value="gallery" className="gap-2">
               <Image className="h-4 w-4" />
-              {t("workforce.intranetAdmin.photoGallery")}
+              {t("hrHub.intranetAdmin.photoGallery")}
             </TabsTrigger>
             <TabsTrigger value="blog" className="gap-2">
               <FileText className="h-4 w-4" />
-              {t("workforce.intranetAdmin.blogPosts")}
+              {t("hrHub.intranetAdmin.blogPosts")}
             </TabsTrigger>
           </TabsList>
 
