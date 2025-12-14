@@ -250,7 +250,13 @@ import CompanyAnnouncementsPage from "./pages/admin/CompanyAnnouncementsPage";
 import ApprovalDelegationsPage from "./pages/admin/ApprovalDelegationsPage";
 import CompanyDocumentsPage from "./pages/admin/CompanyDocumentsPage";
 
-// Workflow pages
+// HR Hub pages
+import HRHubDashboardPage from "./pages/hr-hub/HRHubDashboardPage";
+import HRCalendarPage from "./pages/hr-hub/HRCalendarPage";
+import HRTasksPage from "./pages/hr-hub/HRTasksPage";
+import HRMilestonesPage from "./pages/hr-hub/HRMilestonesPage";
+import ComplianceTrackerPage from "./pages/hr-hub/ComplianceTrackerPage";
+
 import AdminWorkflowTemplatesPage from "./pages/admin/AdminWorkflowTemplatesPage";
 import MyApprovalsPage from "./pages/workflow/MyApprovalsPage";
 import MyDelegatesPage from "./pages/workflow/MyDelegatesPage";
@@ -2100,6 +2106,48 @@ const App = () => (
               element={
                 <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
                   <CompanyDocumentsPage />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* HR Hub Routes */}
+            <Route
+              path="/hr-hub"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
+                  <HRHubDashboardPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/hr-hub/calendar"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
+                  <HRCalendarPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/hr-hub/tasks"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
+                  <HRTasksPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/hr-hub/milestones"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
+                  <HRMilestonesPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/hr-hub/compliance"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
+                  <ComplianceTrackerPage />
                 </ProtectedRoute>
               }
             />

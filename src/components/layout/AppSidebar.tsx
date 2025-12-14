@@ -29,6 +29,7 @@ import {
   UserCog,
   Clock,
   Wallet,
+  Briefcase,
 } from "lucide-react";
 
 interface NavItem {
@@ -59,6 +60,7 @@ const navItems: NavItem[] = [
   { title: "Employee Relations", href: "/employee-relations", icon: Heart, moduleCode: "employee_relations", hrOnly: true },
   { title: "Company Property", href: "/property", icon: Package, moduleCode: "property" },
   { title: "Help Center", href: "/help", icon: HelpCircle, moduleCode: "help" },
+  { title: "HR Hub", href: "/hr-hub", icon: Briefcase, moduleCode: "hr_hub", hrOnly: true },
   { title: "Admin & Security", href: "/admin", icon: Settings, moduleCode: "admin", adminOnly: true },
 ];
 
