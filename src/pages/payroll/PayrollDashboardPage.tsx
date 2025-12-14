@@ -14,6 +14,7 @@ import {
   Users,
   Clock,
   TrendingUp,
+  Settings,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
@@ -71,6 +72,13 @@ export default function PayrollDashboardPage() {
       icon: Clock,
       href: "/payroll/salary-overtime",
       color: "bg-accent/10 text-accent-foreground",
+    },
+    {
+      title: t("payroll.modules.leavePaymentConfig.title", "Leave Payment Config"),
+      description: t("payroll.modules.leavePaymentConfig.description", "Configure leave payment rules and payroll mappings"),
+      icon: Settings,
+      href: "/payroll/leave-payment-config",
+      color: "bg-primary/10 text-primary",
     },
   ];
 
