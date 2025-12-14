@@ -41,6 +41,7 @@ import { MyFeedbackSummary } from "@/components/performance/MyFeedbackSummary";
 import { CycleParticipantsManager } from "@/components/performance/CycleParticipantsManager";
 import { CycleQuestionsManager } from "@/components/performance/CycleQuestionsManager";
 import { PeerNominationManager } from "@/components/performance/PeerNominationManager";
+import { useLanguage } from "@/hooks/useLanguage";
 import { format } from "date-fns";
 
 interface ReviewCycle {
@@ -97,6 +98,7 @@ const tabHelpText: Record<string, string> = {
 };
 
 export default function Review360Page() {
+  const { t } = useLanguage();
   const { user, company, isAdmin, isHRManager } = useAuth();
   const [activeTab, setActiveTab] = useState("my-reviews");
   const [cycles, setCycles] = useState<ReviewCycle[]>([]);
@@ -344,10 +346,10 @@ export default function Review360Page() {
               </div>
               <div>
                 <h1 className="text-2xl font-bold tracking-tight text-foreground">
-                  360° Feedback
+                  {t('performance.review360.title')}
                 </h1>
                 <p className="text-muted-foreground">
-                  Comprehensive feedback from all perspectives
+                  {t('performance.review360.subtitle')}
                 </p>
               </div>
             </div>
@@ -358,7 +360,7 @@ export default function Review360Page() {
               <Select value={selectedCompanyId} onValueChange={setSelectedCompanyId}>
                 <SelectTrigger className="w-[200px]">
                   <Building2 className="mr-2 h-4 w-4" />
-                  <SelectValue placeholder="Select company" />
+                  <SelectValue placeholder={t('common.selectCompany')} />
                 </SelectTrigger>
                 <SelectContent>
                   {companies.map((c) => (
@@ -372,13 +374,13 @@ export default function Review360Page() {
             {(isAdmin || isHRManager) && (
               <Button onClick={() => handleCreateCycle(false)}>
                 <Plus className="mr-2 h-4 w-4" />
-                Create Central Cycle
+                {t('performance.review360.createCentralCycle')}
               </Button>
             )}
             {!isAdmin && !isHRManager && (
               <Button onClick={() => handleCreateCycle(true)}>
                 <Plus className="mr-2 h-4 w-4" />
-                Create Team Cycle
+                {t('performance.review360.createTeamCycle')}
               </Button>
             )}
           </div>
@@ -390,7 +392,7 @@ export default function Review360Page() {
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground">Active Cycles</p>
+                  <p className="text-sm text-muted-foreground">{t('performance.stats.activeCycles')}</p>
                   <p className="text-2xl font-bold">{stats.activeCycles}</p>
                 </div>
                 <Clock className="h-8 w-8 text-info" />
@@ -401,7 +403,7 @@ export default function Review360Page() {
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground">Pending Reviews</p>
+                  <p className="text-sm text-muted-foreground">{t('performance.stats.pendingReviews')}</p>
                   <p className="text-2xl font-bold">{stats.pendingReviews}</p>
                 </div>
                 <AlertCircle className="h-8 w-8 text-warning" />
@@ -412,7 +414,7 @@ export default function Review360Page() {
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground">Completed Cycles</p>
+                  <p className="text-sm text-muted-foreground">{t('performance.stats.completedCycles')}</p>
                   <p className="text-2xl font-bold">{stats.completedCycles}</p>
                 </div>
                 <CheckCircle className="h-8 w-8 text-success" />
@@ -423,7 +425,7 @@ export default function Review360Page() {
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground">My Participations</p>
+                  <p className="text-sm text-muted-foreground">{t('performance.stats.myParticipations')}</p>
                   <p className="text-2xl font-bold">{stats.myParticipations}</p>
                 </div>
                 <ClipboardList className="h-8 w-8 text-primary" />
@@ -438,7 +440,7 @@ export default function Review360Page() {
             <Button variant="outline" className="w-full justify-between">
               <span className="flex items-center gap-2">
                 <TrendingUp className="h-4 w-4" />
-                Analytics Dashboard
+                {t('performance.review360.analyticsDashboard')}
               </span>
               <ChevronDown className={`h-4 w-4 transition-transform ${showAnalytics ? "rotate-180" : ""}`} />
             </Button>
@@ -456,25 +458,25 @@ export default function Review360Page() {
           <TabsList className="flex-wrap">
             <TabsTrigger value="my-reviews" className="gap-2">
               <ClipboardList className="h-4 w-4" />
-              My Reviews
+              {t('performance.review360.myReviews')}
               <Tooltip>
                 <TooltipTrigger asChild>
                   <HelpCircle className="h-3.5 w-3.5 text-muted-foreground hover:text-foreground cursor-help" />
                 </TooltipTrigger>
                 <TooltipContent side="bottom" className="w-72 p-3 text-left whitespace-normal">
-                  <p className="text-sm leading-relaxed">{tabHelpText["my-reviews"]}</p>
+                  <p className="text-sm leading-relaxed">{t('performance.review360.tabs.myReviewsHelp')}</p>
                 </TooltipContent>
               </Tooltip>
             </TabsTrigger>
             <TabsTrigger value="my-feedback" className="gap-2">
               <BarChart3 className="h-4 w-4" />
-              My Feedback
+              {t('performance.review360.myFeedback')}
               <Tooltip>
                 <TooltipTrigger asChild>
                   <HelpCircle className="h-3.5 w-3.5 text-muted-foreground hover:text-foreground cursor-help" />
                 </TooltipTrigger>
                 <TooltipContent side="bottom" className="w-72 p-3 text-left whitespace-normal">
-                  <p className="text-sm leading-relaxed">{tabHelpText["my-feedback"]}</p>
+                  <p className="text-sm leading-relaxed">{t('performance.review360.tabs.myFeedbackHelp')}</p>
                 </TooltipContent>
               </Tooltip>
             </TabsTrigger>
@@ -482,25 +484,25 @@ export default function Review360Page() {
               <>
                 <TabsTrigger value="central-cycles" className="gap-2">
                   <Building2 className="h-4 w-4" />
-                  Central Cycles
+                  {t('performance.review360.centralCycles')}
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <HelpCircle className="h-3.5 w-3.5 text-muted-foreground hover:text-foreground cursor-help" />
                     </TooltipTrigger>
                     <TooltipContent side="bottom" className="w-72 p-3 text-left whitespace-normal">
-                      <p className="text-sm leading-relaxed">{tabHelpText["central-cycles"]}</p>
+                      <p className="text-sm leading-relaxed">{t('performance.review360.tabs.centralCyclesHelp')}</p>
                     </TooltipContent>
                   </Tooltip>
                 </TabsTrigger>
                 <TabsTrigger value="manager-cycles" className="gap-2">
                   <Users className="h-4 w-4" />
-                  Manager Cycles
+                  {t('performance.review360.managerCycles')}
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <HelpCircle className="h-3.5 w-3.5 text-muted-foreground hover:text-foreground cursor-help" />
                     </TooltipTrigger>
                     <TooltipContent side="bottom" className="w-72 p-3 text-left whitespace-normal">
-                      <p className="text-sm leading-relaxed">{tabHelpText["manager-cycles"]}</p>
+                      <p className="text-sm leading-relaxed">{t('performance.review360.tabs.managerCyclesHelp')}</p>
                     </TooltipContent>
                   </Tooltip>
                 </TabsTrigger>
@@ -509,13 +511,13 @@ export default function Review360Page() {
             {!isAdmin && !isHRManager && (
               <TabsTrigger value="manage-cycles" className="gap-2">
                 <Settings className="h-4 w-4" />
-                My Team Cycles
+                {t('performance.review360.manageCycles')}
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <HelpCircle className="h-3.5 w-3.5 text-muted-foreground hover:text-foreground cursor-help" />
                   </TooltipTrigger>
                   <TooltipContent side="bottom" className="w-72 p-3 text-left whitespace-normal">
-                    <p className="text-sm leading-relaxed">{tabHelpText["manage-cycles"]}</p>
+                    <p className="text-sm leading-relaxed">{t('performance.review360.tabs.manageCyclesHelp')}</p>
                   </TooltipContent>
                 </Tooltip>
               </TabsTrigger>
