@@ -3031,6 +3031,7 @@ export type Database = {
           phone: string | null
           postal_code: string | null
           state: string | null
+          territory_id: string | null
           updated_at: string
           website: string | null
         }
@@ -3051,6 +3052,7 @@ export type Database = {
           phone?: string | null
           postal_code?: string | null
           state?: string | null
+          territory_id?: string | null
           updated_at?: string
           website?: string | null
         }
@@ -3071,6 +3073,7 @@ export type Database = {
           phone?: string | null
           postal_code?: string | null
           state?: string | null
+          territory_id?: string | null
           updated_at?: string
           website?: string | null
         }
@@ -3087,6 +3090,13 @@ export type Database = {
             columns: ["group_id"]
             isOneToOne: false
             referencedRelation: "company_groups"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "companies_territory_id_fkey"
+            columns: ["territory_id"]
+            isOneToOne: false
+            referencedRelation: "territories"
             referencedColumns: ["id"]
           },
         ]
@@ -20489,6 +20499,56 @@ export type Database = {
             columns: ["employee_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      territories: {
+        Row: {
+          code: string
+          created_at: string
+          description: string | null
+          end_date: string | null
+          id: string
+          is_active: boolean
+          name: string
+          parent_territory_id: string | null
+          region_type: string | null
+          start_date: string
+          updated_at: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          parent_territory_id?: string | null
+          region_type?: string | null
+          start_date?: string
+          updated_at?: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          parent_territory_id?: string | null
+          region_type?: string | null
+          start_date?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "territories_parent_territory_id_fkey"
+            columns: ["parent_territory_id"]
+            isOneToOne: false
+            referencedRelation: "territories"
             referencedColumns: ["id"]
           },
         ]
