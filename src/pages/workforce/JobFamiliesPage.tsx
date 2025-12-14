@@ -9,6 +9,7 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Building2, FolderTree, Plus, Pencil, Trash2, Search } from "lucide-react";
+import { useLanguage } from "@/hooks/useLanguage";
 import { toast } from "sonner";
 import { useAuditLog } from "@/hooks/useAuditLog";
 import {
@@ -93,6 +94,7 @@ const emptyForm = {
 };
 
 export default function JobFamiliesPage() {
+  const { t } = useLanguage();
   const [companies, setCompanies] = useState<Company[]>([]);
   const [selectedCompanyId, setSelectedCompanyId] = useState<string>("");
   const [divisions, setDivisions] = useState<Division[]>([]);
@@ -164,7 +166,7 @@ export default function JobFamiliesPage() {
       .order("name");
 
     if (error) {
-      toast.error("Failed to fetch job families");
+      toast.error(t("workforce.jobFamilies.failedToFetch"));
     } else {
       setJobFamilies(data || []);
     }
@@ -194,15 +196,15 @@ export default function JobFamiliesPage() {
 
   const handleSave = async () => {
     if (!formData.name.trim() || !formData.code.trim()) {
-      toast.error("Name and code are required");
+      toast.error(t("workforce.jobFamilies.nameRequired"));
       return;
     }
     if (!formData.company_id) {
-      toast.error("Company is required");
+      toast.error(t("workforce.jobFamilies.companyRequired"));
       return;
     }
     if (!formData.department_id) {
-      toast.error("Department is required");
+      toast.error(t("workforce.jobFamilies.departmentRequired"));
       return;
     }
 
@@ -226,9 +228,9 @@ export default function JobFamiliesPage() {
         .eq("id", selectedJobFamily.id);
 
       if (error) {
-        toast.error("Failed to update job family");
+        toast.error(t("workforce.jobFamilies.failedToUpdate"));
       } else {
-        toast.success("Job family updated");
+        toast.success(t("workforce.jobFamilies.jobFamilyUpdated"));
         await logAction({
           action: "UPDATE",
           entityType: "job_family",
@@ -248,9 +250,9 @@ export default function JobFamiliesPage() {
         .single();
 
       if (error) {
-        toast.error(error.message.includes("duplicate") ? "Code already exists for this department" : "Failed to create job family");
+        toast.error(error.message.includes("duplicate") ? t("workforce.jobFamilies.codeExists") : t("workforce.jobFamilies.failedToCreate"));
       } else {
-        toast.success("Job family created");
+        toast.success(t("workforce.jobFamilies.jobFamilyCreated"));
         await logAction({
           action: "CREATE",
           entityType: "job_family",
@@ -274,9 +276,9 @@ export default function JobFamiliesPage() {
       .eq("id", selectedJobFamily.id);
 
     if (error) {
-      toast.error("Failed to delete job family. It may be in use.");
+      toast.error(t("workforce.jobFamilies.failedToDelete"));
     } else {
-      toast.success("Job family deleted");
+      toast.success(t("workforce.jobFamilies.jobFamilyDeleted"));
       await logAction({
         action: "DELETE",
         entityType: "job_family",
@@ -309,8 +311,8 @@ export default function JobFamiliesPage() {
       <div className="space-y-6">
         <Breadcrumbs
           items={[
-            { label: "Workforce", href: "/workforce" },
-            { label: "Job Families" },
+            { label: t("navigation.workforce"), href: "/workforce" },
+            { label: t("workforce.jobFamilies.breadcrumb") },
           ]}
         />
 
@@ -321,10 +323,10 @@ export default function JobFamiliesPage() {
             </div>
             <div>
               <h1 className="text-2xl font-bold tracking-tight text-foreground">
-                Job Families
+                {t("workforce.jobFamilies.title")}
               </h1>
               <p className="text-muted-foreground">
-                Group similar positions together
+                {t("workforce.jobFamilies.subtitle")}
               </p>
             </div>
           </div>
@@ -333,7 +335,7 @@ export default function JobFamiliesPage() {
             <Building2 className="h-4 w-4 text-muted-foreground" />
             <Select value={selectedCompanyId} onValueChange={setSelectedCompanyId}>
               <SelectTrigger className="w-[250px]">
-                <SelectValue placeholder="Select company" />
+                <SelectValue placeholder={t("workforce.selectCompany")} />
               </SelectTrigger>
               <SelectContent>
                 {companies.map((company) => (
@@ -353,12 +355,12 @@ export default function JobFamiliesPage() {
         ) : selectedCompanyId ? (
           <Card>
             <CardHeader className="flex flex-row items-center justify-between">
-              <CardTitle>Job Families</CardTitle>
+              <CardTitle>{t("workforce.jobFamilies.title")}</CardTitle>
               <div className="flex items-center gap-2">
                 <div className="relative">
                   <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                   <Input
-                    placeholder="Search..."
+                    placeholder={t("common.search")}
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className="pl-8 w-[200px]"
@@ -366,7 +368,7 @@ export default function JobFamiliesPage() {
                 </div>
                 <Button onClick={() => handleOpenDialog()}>
                   <Plus className="h-4 w-4 mr-2" />
-                  Add Job Family
+                  {t("workforce.jobFamilies.addJobFamily")}
                 </Button>
               </div>
             </CardHeader>
@@ -374,21 +376,21 @@ export default function JobFamiliesPage() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Code</TableHead>
-                    <TableHead>Name</TableHead>
-                    <TableHead>Division</TableHead>
-                    <TableHead>Department</TableHead>
-                    <TableHead>Start Date</TableHead>
-                    <TableHead>End Date</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead className="w-[100px]">Actions</TableHead>
+                    <TableHead>{t("common.code")}</TableHead>
+                    <TableHead>{t("common.name")}</TableHead>
+                    <TableHead>{t("workforce.division")}</TableHead>
+                    <TableHead>{t("workforce.departments")}</TableHead>
+                    <TableHead>{t("common.startDate")}</TableHead>
+                    <TableHead>{t("common.endDate")}</TableHead>
+                    <TableHead>{t("common.status")}</TableHead>
+                    <TableHead className="w-[100px]">{t("common.actions")}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {filteredJobFamilies.length === 0 ? (
                     <TableRow>
                       <TableCell colSpan={8} className="text-center text-muted-foreground py-8">
-                        No job families found
+                        {t("workforce.jobFamilies.noJobFamiliesFound")}
                       </TableCell>
                     </TableRow>
                   ) : (
@@ -412,7 +414,7 @@ export default function JobFamiliesPage() {
                                 : "bg-muted text-muted-foreground"
                             }`}
                           >
-                            {jf.is_active ? "Active" : "Inactive"}
+                            {jf.is_active ? t("common.active") : t("common.inactive")}
                           </span>
                         </TableCell>
                         <TableCell>
@@ -445,7 +447,7 @@ export default function JobFamiliesPage() {
           </Card>
         ) : (
           <div className="rounded-lg border border-border bg-card p-8 text-center">
-            <p className="text-muted-foreground">No companies found. Please add a company first.</p>
+            <p className="text-muted-foreground">{t("workforce.noCompaniesFound")}</p>
           </div>
         )}
       </div>
@@ -454,13 +456,13 @@ export default function JobFamiliesPage() {
         <DialogContent className="max-w-lg">
           <DialogHeader>
             <DialogTitle>
-              {selectedJobFamily ? "Edit Job Family" : "Add Job Family"}
+              {selectedJobFamily ? t("workforce.jobFamilies.editJobFamily") : t("workforce.jobFamilies.addJobFamily")}
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label>Code *</Label>
+                <Label>{t("common.code")} *</Label>
                 <Input
                   value={formData.code}
                   onChange={(e) => setFormData({ ...formData, code: e.target.value })}
@@ -468,7 +470,7 @@ export default function JobFamiliesPage() {
                 />
               </div>
               <div className="space-y-2">
-                <Label>Name *</Label>
+                <Label>{t("common.name")} *</Label>
                 <Input
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
@@ -478,7 +480,7 @@ export default function JobFamiliesPage() {
             </div>
 
             <div className="space-y-2">
-              <Label>Company *</Label>
+              <Label>{t("common.company")} *</Label>
               <Select
                 value={formData.company_id}
                 onValueChange={(value) =>
@@ -486,7 +488,7 @@ export default function JobFamiliesPage() {
                 }
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select company" />
+                  <SelectValue placeholder={t("workforce.selectCompany")} />
                 </SelectTrigger>
                 <SelectContent>
                   {companies.map((company) => (
@@ -500,7 +502,7 @@ export default function JobFamiliesPage() {
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label>Division (Optional)</Label>
+                <Label>{t("workforce.division")} ({t("common.optional")})</Label>
                 <Select
                   value={formData.company_division_id || "__none__"}
                   onValueChange={(value) =>
@@ -508,10 +510,10 @@ export default function JobFamiliesPage() {
                   }
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select division" />
+                    <SelectValue placeholder={t("workforce.selectDivision")} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="__none__">None</SelectItem>
+                    <SelectItem value="__none__">{t("common.none")}</SelectItem>
                     {formDivisions.map((div) => (
                       <SelectItem key={div.id} value={div.id}>
                         {div.name} ({div.code})
@@ -521,13 +523,13 @@ export default function JobFamiliesPage() {
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label>Department *</Label>
+                <Label>{t("workforce.departments")} *</Label>
                 <Select
                   value={formData.department_id}
                   onValueChange={(value) => setFormData({ ...formData, department_id: value })}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select department" />
+                    <SelectValue placeholder={t("workforce.selectDepartment")} />
                   </SelectTrigger>
                   <SelectContent>
                     {filteredDepartments.map((dept) => (
@@ -541,17 +543,16 @@ export default function JobFamiliesPage() {
             </div>
 
             <div className="space-y-2">
-              <Label>Description</Label>
+              <Label>{t("common.description")}</Label>
               <Textarea
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                placeholder="Describe this job family..."
                 rows={3}
               />
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label>Start Date *</Label>
+                <Label>{t("common.startDate")} *</Label>
                 <Input
                   type="date"
                   value={formData.start_date}
@@ -559,7 +560,7 @@ export default function JobFamiliesPage() {
                 />
               </div>
               <div className="space-y-2">
-                <Label>End Date</Label>
+                <Label>{t("common.endDate")}</Label>
                 <Input
                   type="date"
                   value={formData.end_date}
@@ -572,15 +573,15 @@ export default function JobFamiliesPage() {
                 checked={formData.is_active}
                 onCheckedChange={(checked) => setFormData({ ...formData, is_active: checked })}
               />
-              <Label>Active</Label>
+              <Label>{t("common.active")}</Label>
             </div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setDialogOpen(false)}>
-              Cancel
+              {t("common.cancel")}
             </Button>
             <Button onClick={handleSave} disabled={isSaving}>
-              {isSaving ? "Saving..." : "Save"}
+              {isSaving ? t("common.loading") : t("common.save")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -589,15 +590,15 @@ export default function JobFamiliesPage() {
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Job Family</AlertDialogTitle>
+            <AlertDialogTitle>{t("workforce.jobFamilies.deleteJobFamily")}</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete "{selectedJobFamily?.name}"? This action cannot be undone.
+              {t("workforce.deleteConfirmation", { name: selectedJobFamily?.name })}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{t("common.cancel")}</AlertDialogCancel>
             <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-              Delete
+              {t("common.delete")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

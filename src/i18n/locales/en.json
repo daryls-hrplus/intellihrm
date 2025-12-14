@@ -73,7 +73,8 @@
     "priority": "Priority",
     "amount": "Amount",
     "currency": "Currency",
-    "percentage": "Percentage"
+    "percentage": "Percentage",
+    "optional": "Optional"
   },
   "auth": {
     "login": "Log In",
@@ -282,6 +283,10 @@
     "noDivision": "No Division",
     "division": "Division",
     "sections": "Sections",
+    "selectDivision": "Select division",
+    "selectDepartment": "Select department",
+    "departments": "Departments",
+    "deleteConfirmation": "Are you sure you want to delete \"{{name}}\"? This action cannot be undone.",
     "jobFamilies": {
       "title": "Job Families",
       "subtitle": "Group similar positions together",
