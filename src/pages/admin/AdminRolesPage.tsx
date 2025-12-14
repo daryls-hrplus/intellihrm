@@ -4,12 +4,14 @@ import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useAuditLog } from "@/hooks/useAuditLog";
+import { useSubscription } from "@/hooks/useSubscription";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
   DialogContent,
@@ -28,6 +30,11 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import {
   Shield,
   Plus,
@@ -85,6 +92,12 @@ export default function AdminRolesPage() {
   const { toast } = useToast();
   const { logView } = useAuditLog();
   const hasLoggedView = useRef(false);
+  const { subscription } = useSubscription();
+
+  // Get subscribed modules (or all if in trial/no subscription)
+  const subscribedModules = subscription?.status === 'active' 
+    ? subscription.selected_modules 
+    : MENU_MODULES.map(m => m.code); // All modules available during trial or no subscription
 
   // Form state
   const [formData, setFormData] = useState({
@@ -462,24 +475,50 @@ export default function AdminRolesPage() {
                   Select which modules this role can access in the navigation
                 </p>
                 <div className="grid gap-2 sm:grid-cols-2">
-                  {MENU_MODULES.map((module) => (
-                    <div
-                      key={module.code}
-                      className="flex items-center space-x-3 rounded-lg border p-3"
-                    >
-                      <Checkbox
-                        id={module.code}
-                        checked={formData.menu_permissions.includes(module.code)}
-                        onCheckedChange={() => toggleMenuPermission(module.code)}
-                      />
-                      <Label
-                        htmlFor={module.code}
-                        className="flex-1 cursor-pointer text-sm font-normal"
-                      >
-                        {module.label}
-                      </Label>
-                    </div>
-                  ))}
+                  {MENU_MODULES.map((module) => {
+                    const isSubscribed = subscribedModules.includes(module.code);
+                    const isChecked = formData.menu_permissions.includes(module.code);
+                    
+                    return (
+                      <Tooltip key={module.code}>
+                        <TooltipTrigger asChild>
+                          <div
+                            className={cn(
+                              "flex items-center space-x-3 rounded-lg border p-3",
+                              !isSubscribed && "opacity-50 bg-muted cursor-not-allowed"
+                            )}
+                          >
+                            <Checkbox
+                              id={module.code}
+                              checked={isChecked}
+                              onCheckedChange={() => isSubscribed && toggleMenuPermission(module.code)}
+                              disabled={!isSubscribed}
+                            />
+                            <Label
+                              htmlFor={module.code}
+                              className={cn(
+                                "flex-1 text-sm font-normal",
+                                isSubscribed ? "cursor-pointer" : "cursor-not-allowed"
+                              )}
+                            >
+                              {module.label}
+                            </Label>
+                            {!isSubscribed && (
+                              <Badge variant="outline" className="text-xs">
+                                <Lock className="h-3 w-3 mr-1" />
+                                Upgrade
+                              </Badge>
+                            )}
+                          </div>
+                        </TooltipTrigger>
+                        {!isSubscribed && (
+                          <TooltipContent>
+                            <p>This module is not included in your subscription. Upgrade to enable.</p>
+                          </TooltipContent>
+                        )}
+                      </Tooltip>
+                    );
+                  })}
                 </div>
               </div>
             </div>
