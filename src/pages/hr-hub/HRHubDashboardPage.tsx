@@ -22,6 +22,7 @@ import {
   FolderTree,
   List,
   GitBranch,
+  Bot,
 } from "lucide-react";
 
 // Hub sections and quick actions are now defined inside the component for i18n
@@ -65,6 +66,7 @@ export default function HRHubDashboardPage() {
         { titleKey: "hrHub.workflowTemplates", descKey: "hrHub.workflowTemplatesDesc", icon: GitBranch, href: "/admin/workflow-templates", badge: null },
         { titleKey: "hrHub.approvalDelegations", descKey: "hrHub.approvalDelegationsDesc", icon: UserCheck, href: "/admin/delegations", badge: null },
         { titleKey: "hrHub.scheduledReports", descKey: "hrHub.scheduledReportsDesc", icon: BarChart3, href: "/admin/scheduled-reports", badge: null },
+        { titleKey: "hrHub.sopManagement.title", descKey: "hrHub.sopManagement.description", icon: Bot, href: "/hr-hub/sop-management", badge: null },
       ],
     },
     {
