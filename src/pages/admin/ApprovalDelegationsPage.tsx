@@ -1,5 +1,8 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+
+// Helper to avoid deep type instantiation
+const query = (table: string) => supabase.from(table as any);
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { AppLayout } from "@/components/layout/AppLayout";
@@ -57,25 +60,32 @@ export default function ApprovalDelegationsPage() {
     setIsLoading(true);
 
     try {
-      const [delegRes, empRes] = await Promise.all([
-        supabase
-          .from("approval_delegations")
-          .select(`
-            *,
-            delegator:profiles!approval_delegations_delegator_id_fkey(full_name),
-            delegate:profiles!approval_delegations_delegate_id_fkey(full_name)
-          `)
-          .or(`delegator_id.eq.${user.id},delegate_id.eq.${user.id}`)
-          .order("start_date", { ascending: false }),
-        supabase
-          .from("profiles")
-          .select("id, full_name")
-          .neq("id", user.id)
-          .eq("is_active", true)
-          .order("full_name"),
-      ]);
+      const delegRes: any = await query("approval_delegations")
+        .select("*")
+        .or(`delegator_id.eq.${user.id},delegate_id.eq.${user.id}`)
+        .order("start_date", { ascending: false });
 
-      setDelegations((delegRes.data || []) as Delegation[]);
+      const delegData = delegRes.data || [];
+
+      // Fetch delegator/delegate names separately
+      const delegationsWithNames: Delegation[] = [];
+      for (const deleg of delegData) {
+        const delegatorRes: any = await query("profiles").select("full_name").eq("id", deleg.delegator_id).single();
+        const delegateRes: any = await query("profiles").select("full_name").eq("id", deleg.delegate_id).single();
+        delegationsWithNames.push({
+          ...deleg,
+          delegator: { full_name: delegatorRes.data?.full_name || "Unknown" },
+          delegate: { full_name: delegateRes.data?.full_name || "Unknown" },
+        });
+      }
+
+      const empRes: any = await query("profiles")
+        .select("id, full_name")
+        .neq("id", user.id)
+        .eq("is_active", true)
+        .order("full_name");
+
+      setDelegations(delegationsWithNames);
       setEmployees((empRes.data || []) as Employee[]);
     } catch (error) {
       console.error("Error loading data:", error);
