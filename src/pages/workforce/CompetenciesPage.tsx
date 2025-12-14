@@ -336,7 +336,7 @@ export default function CompetenciesPage() {
 
   const handleSaveLevel = async () => {
     if (!levelCompetencyId || !levelFormData.name || !levelFormData.code) {
-      toast.error("Please fill in all required fields");
+      toast.error(t("workforce.competencies.fillRequired"));
       return;
     }
 
@@ -356,7 +356,7 @@ export default function CompetenciesPage() {
         .eq("id", selectedLevel.id);
 
       if (error) {
-        toast.error("Failed to update level");
+        toast.error(t("workforce.competencies.levels.failedToUpdate"));
         return;
       }
       await logAction({
@@ -367,7 +367,7 @@ export default function CompetenciesPage() {
         oldValues: { ...selectedLevel },
         newValues: payload,
       });
-      toast.success("Level updated");
+      toast.success(t("workforce.competencies.levels.levelUpdated"));
     } else {
       const { data, error } = await supabase
         .from("competency_levels")
@@ -376,7 +376,7 @@ export default function CompetenciesPage() {
         .single();
 
       if (error) {
-        toast.error("Failed to create level");
+        toast.error(t("workforce.competencies.levels.failedToCreate"));
         return;
       }
       await logAction({
@@ -386,7 +386,7 @@ export default function CompetenciesPage() {
         entityName: levelFormData.name,
         newValues: payload,
       });
-      toast.success("Level created");
+      toast.success(t("workforce.competencies.levels.levelCreated"));
     }
 
     setIsLevelDialogOpen(false);
@@ -402,7 +402,7 @@ export default function CompetenciesPage() {
       .eq("id", selectedLevel.id);
 
     if (error) {
-      toast.error("Failed to delete level");
+      toast.error(t("workforce.competencies.levels.failedToDelete"));
       return;
     }
 
@@ -413,7 +413,7 @@ export default function CompetenciesPage() {
       entityName: selectedLevel.name,
       oldValues: { ...selectedLevel },
     });
-    toast.success("Level deleted");
+    toast.success(t("workforce.competencies.levels.levelDeleted"));
     setIsLevelDeleteDialogOpen(false);
     fetchLevels(selectedLevel.competency_id);
   };
@@ -423,10 +423,10 @@ export default function CompetenciesPage() {
       <div className="space-y-6">
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
           <NavLink to="/workforce" className="hover:text-foreground">
-            Workforce
+            {t("workforce.title")}
           </NavLink>
           <ChevronLeft className="h-4 w-4 rotate-180" />
-          <span className="text-foreground">Competencies</span>
+          <span className="text-foreground">{t("workforce.competencies.title")}</span>
         </div>
 
         <div className="flex items-center justify-between">
@@ -435,15 +435,15 @@ export default function CompetenciesPage() {
               <Target className="h-5 w-5 text-primary" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold tracking-tight">Competencies</h1>
+              <h1 className="text-2xl font-bold tracking-tight">{t("workforce.competencies.title")}</h1>
               <p className="text-muted-foreground">
-                Manage competency definitions for workforce planning
+                {t("workforce.competencies.subtitle")}
               </p>
             </div>
           </div>
           <Button onClick={handleAdd}>
             <Plus className="mr-2 h-4 w-4" />
-            Add Competency
+            {t("workforce.competencies.addCompetency")}
           </Button>
         </div>
 
@@ -452,14 +452,14 @@ export default function CompetenciesPage() {
             <div className="flex items-center justify-between">
               <CardTitle className="flex items-center gap-2">
                 <Target className="h-5 w-5" />
-                Competencies List
+                {t("workforce.competencies.list")}
               </CardTitle>
               <Select value={selectedCompanyFilter} onValueChange={setSelectedCompanyFilter}>
                 <SelectTrigger className="w-[250px]">
-                  <SelectValue placeholder="Filter by company" />
+                  <SelectValue placeholder={t("workforce.filterByCompany")} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Companies</SelectItem>
+                  <SelectItem value="all">{t("workforce.allCompanies")}</SelectItem>
                   {companies.map((company) => (
                     <SelectItem key={company.id} value={company.id}>
                       {company.name}
@@ -471,24 +471,24 @@ export default function CompetenciesPage() {
           </CardHeader>
           <CardContent>
             {loading ? (
-              <div className="text-center py-8">Loading...</div>
+              <div className="text-center py-8">{t("common.loading")}</div>
             ) : competencies.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground">
-                No competencies found
+                {t("workforce.competencies.noCompetencies")}
               </div>
             ) : (
               <Table>
                 <TableHeader>
                   <TableRow>
                     <TableHead className="w-8"></TableHead>
-                    <TableHead>Name</TableHead>
-                    <TableHead>Code</TableHead>
-                    <TableHead>Company</TableHead>
-                    <TableHead>Category</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Start Date</TableHead>
-                    <TableHead>End Date</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
+                    <TableHead>{t("common.name")}</TableHead>
+                    <TableHead>{t("common.code")}</TableHead>
+                    <TableHead>{t("workforce.company")}</TableHead>
+                    <TableHead>{t("workforce.competencies.category")}</TableHead>
+                    <TableHead>{t("common.status")}</TableHead>
+                    <TableHead>{t("common.startDate")}</TableHead>
+                    <TableHead>{t("common.endDate")}</TableHead>
+                    <TableHead className="text-right">{t("common.actions")}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -521,7 +521,7 @@ export default function CompetenciesPage() {
                                 : "bg-red-100 text-red-800"
                             }`}
                           >
-                            {competency.is_active ? "Active" : "Inactive"}
+                            {competency.is_active ? t("common.active") : t("common.inactive")}
                           </span>
                         </TableCell>
                         <TableCell>{competency.start_date}</TableCell>
@@ -550,30 +550,30 @@ export default function CompetenciesPage() {
                               <div className="flex items-center justify-between">
                                 <h4 className="font-semibold flex items-center gap-2">
                                   <Layers className="h-4 w-4" />
-                                  Proficiency Levels
+                                  {t("workforce.competencies.levels.title")}
                                 </h4>
                                 <Button
                                   size="sm"
                                   onClick={() => handleAddLevel(competency.id)}
                                 >
                                   <Plus className="mr-1 h-3 w-3" />
-                                  Add Level
+                                  {t("workforce.competencies.levels.addLevel")}
                                 </Button>
                               </div>
                               {levelsLoading === competency.id ? (
-                                <div className="text-sm text-muted-foreground">Loading levels...</div>
+                                <div className="text-sm text-muted-foreground">{t("workforce.competencies.levels.loading")}</div>
                               ) : (competencyLevels[competency.id]?.length || 0) === 0 ? (
-                                <div className="text-sm text-muted-foreground">No levels defined</div>
+                                <div className="text-sm text-muted-foreground">{t("workforce.competencies.levels.noLevels")}</div>
                               ) : (
                                 <Table>
                                   <TableHeader>
                                     <TableRow>
-                                      <TableHead>Order</TableHead>
-                                      <TableHead>Name</TableHead>
-                                      <TableHead>Code</TableHead>
-                                      <TableHead>Description</TableHead>
-                                      <TableHead>Status</TableHead>
-                                      <TableHead className="text-right">Actions</TableHead>
+                                      <TableHead>{t("workforce.competencies.levels.order")}</TableHead>
+                                      <TableHead>{t("common.name")}</TableHead>
+                                      <TableHead>{t("common.code")}</TableHead>
+                                      <TableHead>{t("common.description")}</TableHead>
+                                      <TableHead>{t("common.status")}</TableHead>
+                                      <TableHead className="text-right">{t("common.actions")}</TableHead>
                                     </TableRow>
                                   </TableHeader>
                                   <TableBody>
@@ -593,7 +593,7 @@ export default function CompetenciesPage() {
                                                 : "bg-red-100 text-red-800"
                                             }`}
                                           >
-                                            {level.is_active ? "Active" : "Inactive"}
+                                            {level.is_active ? t("common.active") : t("common.inactive")}
                                           </span>
                                         </TableCell>
                                         <TableCell className="text-right">
@@ -634,12 +634,12 @@ export default function CompetenciesPage() {
           <DialogContent className="max-w-lg">
             <DialogHeader>
               <DialogTitle>
-                {selectedCompetency ? "Edit Competency" : "Add Competency"}
+                {selectedCompetency ? t("workforce.competencies.editCompetency") : t("workforce.competencies.addCompetency")}
               </DialogTitle>
             </DialogHeader>
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label>Company *</Label>
+                <Label>{t("workforce.company")} *</Label>
                 <Select
                   value={formData.company_id}
                   onValueChange={(value) =>
@@ -647,7 +647,7 @@ export default function CompetenciesPage() {
                   }
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select company" />
+                    <SelectValue placeholder={t("workforce.selectCompany")} />
                   </SelectTrigger>
                   <SelectContent>
                     {companies.map((company) => (
@@ -660,7 +660,7 @@ export default function CompetenciesPage() {
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>Name *</Label>
+                  <Label>{t("common.name")} *</Label>
                   <Input
                     value={formData.name}
                     onChange={(e) =>
@@ -669,7 +669,7 @@ export default function CompetenciesPage() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>Code *</Label>
+                  <Label>{t("common.code")} *</Label>
                   <Input
                     value={formData.code}
                     onChange={(e) =>
@@ -679,7 +679,7 @@ export default function CompetenciesPage() {
                 </div>
               </div>
               <div className="space-y-2">
-                <Label>Description</Label>
+                <Label>{t("common.description")}</Label>
                 <Textarea
                   value={formData.description}
                   onChange={(e) =>
@@ -688,7 +688,7 @@ export default function CompetenciesPage() {
                 />
               </div>
               <div className="space-y-2">
-                <Label>Category *</Label>
+                <Label>{t("workforce.competencies.category")} *</Label>
                 <Select
                   value={formData.category}
                   onValueChange={(value) =>
@@ -701,7 +701,7 @@ export default function CompetenciesPage() {
                   <SelectContent>
                     {categoryOptions.map((opt) => (
                       <SelectItem key={opt.value} value={opt.value}>
-                        {opt.label}
+                        {t(`workforce.competencies.categories.${opt.value}`)}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -709,7 +709,7 @@ export default function CompetenciesPage() {
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>Start Date *</Label>
+                  <Label>{t("common.startDate")} *</Label>
                   <Input
                     type="date"
                     value={formData.start_date}
@@ -719,7 +719,7 @@ export default function CompetenciesPage() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>End Date</Label>
+                  <Label>{t("common.endDate")}</Label>
                   <Input
                     type="date"
                     value={formData.end_date}
@@ -736,14 +736,14 @@ export default function CompetenciesPage() {
                     setFormData({ ...formData, is_active: checked })
                   }
                 />
-                <Label>Active</Label>
+                <Label>{t("common.active")}</Label>
               </div>
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
-                Cancel
+                {t("common.cancel")}
               </Button>
-              <Button onClick={handleSave}>Save</Button>
+              <Button onClick={handleSave}>{t("common.save")}</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -753,13 +753,13 @@ export default function CompetenciesPage() {
           <DialogContent className="max-w-md">
             <DialogHeader>
               <DialogTitle>
-                {selectedLevel ? "Edit Level" : "Add Level"}
+                {selectedLevel ? t("workforce.competencies.levels.editLevel") : t("workforce.competencies.levels.addLevel")}
               </DialogTitle>
             </DialogHeader>
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>Name *</Label>
+                  <Label>{t("common.name")} *</Label>
                   <Input
                     value={levelFormData.name}
                     onChange={(e) =>
@@ -768,7 +768,7 @@ export default function CompetenciesPage() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>Code *</Label>
+                  <Label>{t("common.code")} *</Label>
                   <Input
                     value={levelFormData.code}
                     onChange={(e) =>
@@ -778,7 +778,7 @@ export default function CompetenciesPage() {
                 </div>
               </div>
               <div className="space-y-2">
-                <Label>Description</Label>
+                <Label>{t("common.description")}</Label>
                 <Textarea
                   value={levelFormData.description}
                   onChange={(e) =>
@@ -787,7 +787,7 @@ export default function CompetenciesPage() {
                 />
               </div>
               <div className="space-y-2">
-                <Label>Level Order *</Label>
+                <Label>{t("workforce.competencies.levels.order")} *</Label>
                 <Input
                   type="number"
                   min={1}
@@ -804,14 +804,14 @@ export default function CompetenciesPage() {
                     setLevelFormData({ ...levelFormData, is_active: checked })
                   }
                 />
-                <Label>Active</Label>
+                <Label>{t("common.active")}</Label>
               </div>
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setIsLevelDialogOpen(false)}>
-                Cancel
+                {t("common.cancel")}
               </Button>
-              <Button onClick={handleSaveLevel}>Save</Button>
+              <Button onClick={handleSaveLevel}>{t("common.save")}</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -820,15 +820,14 @@ export default function CompetenciesPage() {
         <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>Delete Competency</AlertDialogTitle>
+              <AlertDialogTitle>{t("workforce.competencies.deleteCompetency")}</AlertDialogTitle>
               <AlertDialogDescription>
-                Are you sure you want to delete "{selectedCompetency?.name}"? This
-                will also delete all associated levels.
+                {t("workforce.competencies.deleteConfirm", { name: selectedCompetency?.name })}
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction onClick={confirmDelete}>Delete</AlertDialogAction>
+              <AlertDialogCancel>{t("common.cancel")}</AlertDialogCancel>
+              <AlertDialogAction onClick={confirmDelete}>{t("common.delete")}</AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
@@ -837,14 +836,14 @@ export default function CompetenciesPage() {
         <AlertDialog open={isLevelDeleteDialogOpen} onOpenChange={setIsLevelDeleteDialogOpen}>
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>Delete Level</AlertDialogTitle>
+              <AlertDialogTitle>{t("workforce.competencies.levels.deleteLevel")}</AlertDialogTitle>
               <AlertDialogDescription>
-                Are you sure you want to delete "{selectedLevel?.name}"?
+                {t("workforce.competencies.levels.deleteConfirm", { name: selectedLevel?.name })}
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction onClick={confirmDeleteLevel}>Delete</AlertDialogAction>
+              <AlertDialogCancel>{t("common.cancel")}</AlertDialogCancel>
+              <AlertDialogAction onClick={confirmDeleteLevel}>{t("common.delete")}</AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
