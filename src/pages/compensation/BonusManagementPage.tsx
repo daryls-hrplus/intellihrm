@@ -12,6 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 import { Gift, Plus, DollarSign, Award, Users, Calendar } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useTranslation } from "react-i18next";
 
 interface Company {
   id: string;
@@ -19,6 +20,7 @@ interface Company {
 }
 
 export default function BonusManagementPage() {
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState("plans");
   const [companies, setCompanies] = useState<Company[]>([]);
   const [selectedCompanyId, setSelectedCompanyId] = useState<string>("");
@@ -96,8 +98,8 @@ export default function BonusManagementPage() {
       <div className="space-y-6">
         <Breadcrumbs
           items={[
-            { label: "Compensation", href: "/compensation" },
-            { label: "Bonus Management" },
+            { label: t("compensation.title"), href: "/compensation" },
+            { label: t("compensation.bonus.title") },
           ]}
         />
 
@@ -107,14 +109,14 @@ export default function BonusManagementPage() {
               <Gift className="h-5 w-5 text-primary" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold tracking-tight">Bonus Management</h1>
-              <p className="text-muted-foreground">Manage bonus plans and awards</p>
+              <h1 className="text-2xl font-bold tracking-tight">{t("compensation.bonus.title")}</h1>
+              <p className="text-muted-foreground">{t("compensation.bonus.subtitle")}</p>
             </div>
           </div>
           <div className="flex items-center gap-3">
             <Select value={selectedCompanyId} onValueChange={setSelectedCompanyId}>
               <SelectTrigger className="w-[200px]">
-                <SelectValue placeholder="Select Company" />
+                <SelectValue placeholder={t("common.selectCompany")} />
               </SelectTrigger>
               <SelectContent>
                 {companies.map((company) => (
@@ -126,7 +128,7 @@ export default function BonusManagementPage() {
             </Select>
             <Button>
               <Plus className="mr-2 h-4 w-4" />
-              {activeTab === "plans" ? "New Plan" : "New Award"}
+              {activeTab === "plans" ? t("compensation.bonus.newPlan") : t("compensation.bonus.newAward")}
             </Button>
           </div>
         </div>
@@ -139,7 +141,7 @@ export default function BonusManagementPage() {
                   <Award className="h-5 w-5 text-primary" />
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Active Plans</p>
+                  <p className="text-sm text-muted-foreground">{t("compensation.bonus.activePlans")}</p>
                   <p className="text-2xl font-bold">{plans.filter((p: any) => p.is_active).length}</p>
                 </div>
               </div>
@@ -152,7 +154,7 @@ export default function BonusManagementPage() {
                   <Calendar className="h-5 w-5 text-amber-600" />
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Pending Awards</p>
+                  <p className="text-sm text-muted-foreground">{t("compensation.bonus.pendingAwards")}</p>
                   <p className="text-2xl font-bold">{awards.filter((a: any) => a.status === "pending").length}</p>
                 </div>
               </div>
@@ -165,7 +167,7 @@ export default function BonusManagementPage() {
                   <DollarSign className="h-5 w-5 text-emerald-600" />
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Total Paid</p>
+                  <p className="text-sm text-muted-foreground">{t("compensation.bonus.totalPaid")}</p>
                   <p className="text-2xl font-bold">
                     ${awards.filter((a: any) => a.status === "paid").reduce((sum: number, a: any) => sum + (a.final_amount || 0), 0).toLocaleString()}
                   </p>
@@ -180,7 +182,7 @@ export default function BonusManagementPage() {
                   <Users className="h-5 w-5 text-sky-600" />
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Recipients</p>
+                  <p className="text-sm text-muted-foreground">{t("compensation.bonus.recipients")}</p>
                   <p className="text-2xl font-bold">{new Set(awards.map((a: any) => a.employee_id)).size}</p>
                 </div>
               </div>
@@ -190,8 +192,8 @@ export default function BonusManagementPage() {
 
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList>
-            <TabsTrigger value="plans">Bonus Plans</TabsTrigger>
-            <TabsTrigger value="awards">Bonus Awards</TabsTrigger>
+            <TabsTrigger value="plans">{t("compensation.bonus.bonusPlans")}</TabsTrigger>
+            <TabsTrigger value="awards">{t("compensation.bonus.bonusAwards")}</TabsTrigger>
           </TabsList>
 
           <TabsContent value="plans">
@@ -207,18 +209,18 @@ export default function BonusManagementPage() {
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead>Plan Name</TableHead>
-                        <TableHead>Type</TableHead>
-                        <TableHead>Frequency</TableHead>
-                        <TableHead>Target %</TableHead>
-                        <TableHead>Status</TableHead>
+                        <TableHead>{t("compensation.bonus.planName")}</TableHead>
+                        <TableHead>{t("compensation.bonus.type")}</TableHead>
+                        <TableHead>{t("compensation.bonus.frequency")}</TableHead>
+                        <TableHead>{t("compensation.bonus.targetPercent")}</TableHead>
+                        <TableHead>{t("compensation.bonus.status")}</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {plans.length === 0 ? (
                         <TableRow>
                           <TableCell colSpan={5} className="text-center text-muted-foreground">
-                            No bonus plans found
+                            {t("compensation.bonus.noPlans")}
                           </TableCell>
                         </TableRow>
                       ) : (
@@ -230,7 +232,7 @@ export default function BonusManagementPage() {
                             <TableCell>{plan.target_percentage ? `${plan.target_percentage}%` : "-"}</TableCell>
                             <TableCell>
                               <Badge className={plan.is_active ? "bg-emerald-500/10 text-emerald-600" : "bg-muted"}>
-                                {plan.is_active ? "Active" : "Inactive"}
+                                {plan.is_active ? t("common.active") : t("common.inactive")}
                               </Badge>
                             </TableCell>
                           </TableRow>
@@ -256,18 +258,18 @@ export default function BonusManagementPage() {
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead>Employee</TableHead>
-                        <TableHead>Type</TableHead>
-                        <TableHead>Award Date</TableHead>
-                        <TableHead className="text-right">Amount</TableHead>
-                        <TableHead>Status</TableHead>
+                        <TableHead>{t("compensation.bonus.employee")}</TableHead>
+                        <TableHead>{t("compensation.bonus.type")}</TableHead>
+                        <TableHead>{t("compensation.bonus.awardDate")}</TableHead>
+                        <TableHead className="text-right">{t("compensation.bonus.amount")}</TableHead>
+                        <TableHead>{t("compensation.bonus.status")}</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {awards.length === 0 ? (
                         <TableRow>
                           <TableCell colSpan={5} className="text-center text-muted-foreground">
-                            No bonus awards found
+                            {t("compensation.bonus.noAwards")}
                           </TableCell>
                         </TableRow>
                       ) : (

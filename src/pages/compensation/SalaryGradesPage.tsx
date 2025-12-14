@@ -34,6 +34,7 @@ import {
 import { Layers, Plus, Pencil, Trash2, Loader2 } from "lucide-react";
 import { useCompensation, SalaryGrade } from "@/hooks/useCompensation";
 import { supabase } from "@/integrations/supabase/client";
+import { useTranslation } from "react-i18next";
 
 interface Company {
   id: string;
@@ -42,6 +43,7 @@ interface Company {
 }
 
 export default function SalaryGradesPage() {
+  const { t } = useTranslation();
   const {
     isLoading,
     fetchSalaryGrades,
@@ -160,7 +162,7 @@ export default function SalaryGradesPage() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this salary grade?")) return;
+    if (!confirm(t("compensation.salaryGrades.deleteConfirm"))) return;
     const success = await deleteSalaryGrade(id);
     if (success) loadGrades();
   };
@@ -180,8 +182,8 @@ export default function SalaryGradesPage() {
       <div className="space-y-6">
         <Breadcrumbs
           items={[
-            { label: "Compensation", href: "/compensation" },
-            { label: "Salary Grades" },
+            { label: t("compensation.title"), href: "/compensation" },
+            { label: t("compensation.salaryGrades.title") },
           ]}
         />
 
@@ -192,10 +194,10 @@ export default function SalaryGradesPage() {
             </div>
             <div>
               <h1 className="text-2xl font-bold tracking-tight text-foreground">
-                Salary Grades
+                {t("compensation.salaryGrades.title")}
               </h1>
               <p className="text-muted-foreground">
-                Define salary bands and compensation ranges
+                {t("compensation.salaryGrades.subtitle")}
               </p>
             </div>
           </div>
@@ -203,7 +205,7 @@ export default function SalaryGradesPage() {
           <div className="flex items-center gap-3">
             <Select value={selectedCompanyId} onValueChange={setSelectedCompanyId}>
               <SelectTrigger className="w-[200px]">
-                <SelectValue placeholder="Select company" />
+                <SelectValue placeholder={t("common.selectCompany")} />
               </SelectTrigger>
               <SelectContent>
                 {companies.map((c) => (
@@ -215,7 +217,7 @@ export default function SalaryGradesPage() {
             </Select>
             <Button onClick={openCreate}>
               <Plus className="h-4 w-4 mr-2" />
-              Add Grade
+              {t("compensation.salaryGrades.addGrade")}
             </Button>
           </div>
         </div>
@@ -228,21 +230,21 @@ export default function SalaryGradesPage() {
               </div>
             ) : grades.length === 0 ? (
               <div className="text-center py-12 text-muted-foreground">
-                No salary grades found. Create one to get started.
+                {t("compensation.salaryGrades.noGrades")}
               </div>
             ) : (
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Code</TableHead>
-                    <TableHead>Name</TableHead>
-                    <TableHead className="text-right">Min</TableHead>
-                    <TableHead className="text-right">Mid</TableHead>
-                    <TableHead className="text-right">Max</TableHead>
-                    <TableHead>Start Date</TableHead>
-                    <TableHead>End Date</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
+                    <TableHead>{t("compensation.salaryGrades.code")}</TableHead>
+                    <TableHead>{t("compensation.salaryGrades.name")}</TableHead>
+                    <TableHead className="text-right">{t("compensation.salaryGrades.min")}</TableHead>
+                    <TableHead className="text-right">{t("compensation.salaryGrades.mid")}</TableHead>
+                    <TableHead className="text-right">{t("compensation.salaryGrades.max")}</TableHead>
+                    <TableHead>{t("common.startDate")}</TableHead>
+                    <TableHead>{t("common.endDate")}</TableHead>
+                    <TableHead>{t("compensation.salaryGrades.status")}</TableHead>
+                    <TableHead className="text-right">{t("common.actions")}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -265,7 +267,7 @@ export default function SalaryGradesPage() {
                       <TableCell>{grade.end_date || "-"}</TableCell>
                       <TableCell>
                         <Badge variant={grade.is_active ? "default" : "secondary"}>
-                          {grade.is_active ? "Active" : "Inactive"}
+                          {grade.is_active ? t("common.active") : t("common.inactive")}
                         </Badge>
                       </TableCell>
                       <TableCell className="text-right">
@@ -298,37 +300,37 @@ export default function SalaryGradesPage() {
           <DialogContent className="max-w-lg">
             <DialogHeader>
               <DialogTitle>
-                {editing ? "Edit Salary Grade" : "Create Salary Grade"}
+                {editing ? t("compensation.salaryGrades.dialog.editTitle") : t("compensation.salaryGrades.dialog.createTitle")}
               </DialogTitle>
               <DialogDescription>
-                Define the salary range for this grade
+                {t("compensation.salaryGrades.dialog.description")}
               </DialogDescription>
             </DialogHeader>
 
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="code">Code *</Label>
+                  <Label htmlFor="code">{t("compensation.salaryGrades.code")} *</Label>
                   <Input
                     id="code"
                     value={formCode}
                     onChange={(e) => setFormCode(e.target.value.toUpperCase())}
-                    placeholder="e.g., G1, L5"
+                    placeholder={t("compensation.salaryGrades.dialog.codePlaceholder")}
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="name">Name *</Label>
+                  <Label htmlFor="name">{t("compensation.salaryGrades.name")} *</Label>
                   <Input
                     id="name"
                     value={formName}
                     onChange={(e) => setFormName(e.target.value)}
-                    placeholder="e.g., Grade 1, Level 5"
+                    placeholder={t("compensation.salaryGrades.dialog.namePlaceholder")}
                   />
                 </div>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="description">Description</Label>
+                <Label htmlFor="description">{t("common.description")}</Label>
                 <Textarea
                   id="description"
                   value={formDescription}
@@ -338,7 +340,7 @@ export default function SalaryGradesPage() {
               </div>
 
               <div className="space-y-2">
-                <Label>Currency</Label>
+                <Label>{t("compensation.salaryGrades.dialog.currency")}</Label>
                 <Select value={formCurrency} onValueChange={setFormCurrency}>
                   <SelectTrigger>
                     <SelectValue />
@@ -355,7 +357,7 @@ export default function SalaryGradesPage() {
 
               <div className="grid grid-cols-3 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="minSalary">Minimum</Label>
+                  <Label htmlFor="minSalary">{t("compensation.salaryGrades.dialog.minimum")}</Label>
                   <Input
                     id="minSalary"
                     type="number"
@@ -365,7 +367,7 @@ export default function SalaryGradesPage() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="midSalary">Midpoint</Label>
+                  <Label htmlFor="midSalary">{t("compensation.salaryGrades.dialog.midpoint")}</Label>
                   <Input
                     id="midSalary"
                     type="number"
@@ -375,7 +377,7 @@ export default function SalaryGradesPage() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="maxSalary">Maximum</Label>
+                  <Label htmlFor="maxSalary">{t("compensation.salaryGrades.dialog.maximum")}</Label>
                   <Input
                     id="maxSalary"
                     type="number"
@@ -388,7 +390,7 @@ export default function SalaryGradesPage() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="startDate">Start Date *</Label>
+                  <Label htmlFor="startDate">{t("common.startDate")} *</Label>
                   <Input
                     id="startDate"
                     type="date"
@@ -397,7 +399,7 @@ export default function SalaryGradesPage() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="endDate">End Date</Label>
+                  <Label htmlFor="endDate">{t("common.endDate")}</Label>
                   <Input
                     id="endDate"
                     type="date"
@@ -413,17 +415,17 @@ export default function SalaryGradesPage() {
                   checked={formIsActive}
                   onCheckedChange={setFormIsActive}
                 />
-                <Label htmlFor="active">Active</Label>
+                <Label htmlFor="active">{t("common.active")}</Label>
               </div>
             </div>
 
             <DialogFooter>
               <Button variant="outline" onClick={() => setDialogOpen(false)}>
-                Cancel
+                {t("common.cancel")}
               </Button>
               <Button onClick={handleSave} disabled={isProcessing}>
                 {isProcessing && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-                {editing ? "Update" : "Create"}
+                {editing ? t("common.update") : t("common.create")}
               </Button>
             </DialogFooter>
           </DialogContent>

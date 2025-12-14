@@ -34,6 +34,7 @@ import {
 import { Coins, Plus, Pencil, Trash2, Loader2 } from "lucide-react";
 import { useCompensation, PayElement, LookupValue } from "@/hooks/useCompensation";
 import { supabase } from "@/integrations/supabase/client";
+import { useTranslation } from "react-i18next";
 
 interface Company {
   id: string;
@@ -42,6 +43,7 @@ interface Company {
 }
 
 export default function PayElementsPage() {
+  const { t } = useTranslation();
   const {
     isLoading,
     fetchPayElements,
@@ -176,7 +178,7 @@ export default function PayElementsPage() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this pay element?")) return;
+    if (!confirm(t("compensation.payElements.deleteConfirm"))) return;
     const success = await deletePayElement(id);
     if (success) loadPayElements();
   };
@@ -186,8 +188,8 @@ export default function PayElementsPage() {
       <div className="space-y-6">
         <Breadcrumbs
           items={[
-            { label: "Compensation", href: "/compensation" },
-            { label: "Pay Elements" },
+            { label: t("compensation.title"), href: "/compensation" },
+            { label: t("compensation.payElements.title") },
           ]}
         />
 
@@ -198,10 +200,10 @@ export default function PayElementsPage() {
             </div>
             <div>
               <h1 className="text-2xl font-bold tracking-tight text-foreground">
-                Pay Elements
+                {t("compensation.payElements.title")}
               </h1>
               <p className="text-muted-foreground">
-                Manage salary, wages, allowances, and benefits
+                {t("compensation.payElements.subtitle")}
               </p>
             </div>
           </div>
@@ -209,7 +211,7 @@ export default function PayElementsPage() {
           <div className="flex items-center gap-3">
             <Select value={selectedCompanyId} onValueChange={setSelectedCompanyId}>
               <SelectTrigger className="w-[200px]">
-                <SelectValue placeholder="Select company" />
+                <SelectValue placeholder={t("common.selectCompany")} />
               </SelectTrigger>
               <SelectContent>
                 {companies.map((c) => (
@@ -221,7 +223,7 @@ export default function PayElementsPage() {
             </Select>
             <Button onClick={openCreate}>
               <Plus className="h-4 w-4 mr-2" />
-              Add Pay Element
+              {t("compensation.payElements.addPayElement")}
             </Button>
           </div>
         </div>
@@ -234,20 +236,20 @@ export default function PayElementsPage() {
               </div>
             ) : payElements.length === 0 ? (
               <div className="text-center py-12 text-muted-foreground">
-                No pay elements found. Create one to get started.
+                {t("compensation.payElements.noPayElements")}
               </div>
             ) : (
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Code</TableHead>
-                    <TableHead>Name</TableHead>
-                    <TableHead>Type</TableHead>
-                    <TableHead>Proration</TableHead>
-                    <TableHead>Start Date</TableHead>
-                    <TableHead>End Date</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
+                    <TableHead>{t("compensation.payElements.code")}</TableHead>
+                    <TableHead>{t("compensation.payElements.name")}</TableHead>
+                    <TableHead>{t("compensation.payElements.type")}</TableHead>
+                    <TableHead>{t("compensation.payElements.proration")}</TableHead>
+                    <TableHead>{t("compensation.payElements.startDate")}</TableHead>
+                    <TableHead>{t("compensation.payElements.endDate")}</TableHead>
+                    <TableHead>{t("compensation.payElements.status")}</TableHead>
+                    <TableHead className="text-right">{t("compensation.payElements.actions")}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -261,13 +263,13 @@ export default function PayElementsPage() {
                         {element.element_type?.name || "-"}
                       </TableCell>
                       <TableCell>
-                        {element.proration_method?.name || "None"}
+                        {element.proration_method?.name || t("common.none")}
                       </TableCell>
                       <TableCell>{element.start_date}</TableCell>
                       <TableCell>{element.end_date || "-"}</TableCell>
                       <TableCell>
                         <Badge variant={element.is_active ? "default" : "secondary"}>
-                          {element.is_active ? "Active" : "Inactive"}
+                          {element.is_active ? t("common.active") : t("common.inactive")}
                         </Badge>
                       </TableCell>
                       <TableCell className="text-right">
@@ -300,37 +302,37 @@ export default function PayElementsPage() {
           <DialogContent className="max-w-lg">
             <DialogHeader>
               <DialogTitle>
-                {editing ? "Edit Pay Element" : "Create Pay Element"}
+                {editing ? t("compensation.payElements.dialog.editTitle") : t("compensation.payElements.dialog.createTitle")}
               </DialogTitle>
               <DialogDescription>
-                Configure the pay element details and properties
+                {t("compensation.payElements.dialog.description")}
               </DialogDescription>
             </DialogHeader>
 
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="code">Code *</Label>
+                  <Label htmlFor="code">{t("compensation.payElements.code")} *</Label>
                   <Input
                     id="code"
                     value={formCode}
                     onChange={(e) => setFormCode(e.target.value.toUpperCase())}
-                    placeholder="e.g., BASE_SALARY"
+                    placeholder={t("compensation.payElements.dialog.codePlaceholder")}
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="name">Name *</Label>
+                  <Label htmlFor="name">{t("compensation.payElements.name")} *</Label>
                   <Input
                     id="name"
                     value={formName}
                     onChange={(e) => setFormName(e.target.value)}
-                    placeholder="e.g., Basic Salary"
+                    placeholder={t("compensation.payElements.dialog.namePlaceholder")}
                   />
                 </div>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="description">Description</Label>
+                <Label htmlFor="description">{t("common.description")}</Label>
                 <Textarea
                   id="description"
                   value={formDescription}
@@ -341,10 +343,10 @@ export default function PayElementsPage() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>Element Type</Label>
+                  <Label>{t("compensation.payElements.dialog.elementType")}</Label>
                   <Select value={formElementTypeId} onValueChange={setFormElementTypeId}>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select type" />
+                      <SelectValue placeholder={t("compensation.payElements.dialog.selectType")} />
                     </SelectTrigger>
                     <SelectContent>
                       {elementTypes.map((t) => (
@@ -356,10 +358,10 @@ export default function PayElementsPage() {
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label>Proration Method</Label>
+                  <Label>{t("compensation.payElements.dialog.prorationMethod")}</Label>
                   <Select value={formProrationMethodId} onValueChange={setFormProrationMethodId}>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select method" />
+                      <SelectValue placeholder={t("compensation.payElements.dialog.selectMethod")} />
                     </SelectTrigger>
                     <SelectContent>
                       {prorationMethods.map((m) => (
@@ -374,7 +376,7 @@ export default function PayElementsPage() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="startDate">Start Date *</Label>
+                  <Label htmlFor="startDate">{t("common.startDate")} *</Label>
                   <Input
                     id="startDate"
                     type="date"
@@ -383,7 +385,7 @@ export default function PayElementsPage() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="endDate">End Date</Label>
+                  <Label htmlFor="endDate">{t("common.endDate")}</Label>
                   <Input
                     id="endDate"
                     type="date"
@@ -394,7 +396,7 @@ export default function PayElementsPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="displayOrder">Display Order</Label>
+                <Label htmlFor="displayOrder">{t("compensation.payElements.dialog.displayOrder")}</Label>
                 <Input
                   id="displayOrder"
                   type="number"
@@ -410,7 +412,7 @@ export default function PayElementsPage() {
                     checked={formIsTaxable}
                     onCheckedChange={setFormIsTaxable}
                   />
-                  <Label htmlFor="taxable">Taxable</Label>
+                  <Label htmlFor="taxable">{t("compensation.payElements.dialog.taxable")}</Label>
                 </div>
                 <div className="flex items-center gap-2">
                   <Switch
@@ -418,7 +420,7 @@ export default function PayElementsPage() {
                     checked={formIsPensionable}
                     onCheckedChange={setFormIsPensionable}
                   />
-                  <Label htmlFor="pensionable">Pensionable</Label>
+                  <Label htmlFor="pensionable">{t("compensation.payElements.dialog.pensionable")}</Label>
                 </div>
                 <div className="flex items-center gap-2">
                   <Switch
@@ -426,18 +428,18 @@ export default function PayElementsPage() {
                     checked={formIsActive}
                     onCheckedChange={setFormIsActive}
                   />
-                  <Label htmlFor="active">Active</Label>
+                  <Label htmlFor="active">{t("compensation.payElements.dialog.active")}</Label>
                 </div>
               </div>
             </div>
 
             <DialogFooter>
               <Button variant="outline" onClick={() => setDialogOpen(false)}>
-                Cancel
+                {t("common.cancel")}
               </Button>
               <Button onClick={handleSave} disabled={isProcessing}>
                 {isProcessing && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-                {editing ? "Update" : "Create"}
+                {editing ? t("common.update") : t("common.create")}
               </Button>
             </DialogFooter>
           </DialogContent>
