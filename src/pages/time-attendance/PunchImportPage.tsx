@@ -9,9 +9,9 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { format, parseISO, parse } from "date-fns";
-import { Upload, FileText, CheckCircle, XCircle, Loader2, Download } from "lucide-react";
+import { format, parseISO } from "date-fns";
+import { Upload, Download, CheckCircle, XCircle, Loader2 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 interface ImportBatch {
   id: string;
@@ -41,6 +41,7 @@ const statusColors: Record<string, string> = {
 };
 
 export default function PunchImportPage() {
+  const { t } = useTranslation();
   const { user, profile } = useAuth();
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -84,7 +85,7 @@ export default function PunchImportPage() {
           punch_time: cols[1],
           punch_type: cols[2]?.toLowerCase() || "clock_in",
           valid: !!cols[0] && !!cols[1],
-          error: !cols[0] ? "Missing badge" : !cols[1] ? "Missing time" : undefined,
+          error: !cols[0] ? t("timeAttendance.punchImport.missingBadge") : !cols[1] ? t("timeAttendance.punchImport.missingTime") : undefined,
         });
       }
     }
@@ -156,12 +157,12 @@ export default function PunchImportPage() {
         completed_at: new Date().toISOString(),
       }).eq("id", batch.id);
 
-      toast({ title: "Import completed", description: `${successCount} records imported successfully` });
+      toast({ title: t("timeAttendance.punchImport.importCompleted"), description: t("timeAttendance.punchImport.recordsImported", { count: successCount }) });
       setShowPreview(false);
       setParsedData([]);
       loadBatches();
     } catch (error) {
-      toast({ title: "Import failed", variant: "destructive" });
+      toast({ title: t("timeAttendance.punchImport.importFailed"), variant: "destructive" });
     } finally {
       setIsUploading(false);
     }
@@ -184,13 +185,13 @@ export default function PunchImportPage() {
   return (
     <AppLayout>
       <div className="space-y-6">
-        <Breadcrumbs items={[{ label: "Time & Attendance", href: "/time-attendance" }, { label: "Punch Import" }]} />
+        <Breadcrumbs items={[{ label: t("navigation.timeAttendance"), href: "/time-attendance" }, { label: t("timeAttendance.punchImport.title") }]} />
 
         <div className="flex items-center gap-3">
           <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10"><Upload className="h-6 w-6 text-primary" /></div>
           <div>
-            <h1 className="text-2xl font-bold">Punch Import</h1>
-            <p className="text-muted-foreground">Import punches from external timeclock systems</p>
+            <h1 className="text-2xl font-bold">{t("timeAttendance.punchImport.title")}</h1>
+            <p className="text-muted-foreground">{t("timeAttendance.punchImport.subtitle")}</p>
           </div>
         </div>
 
@@ -198,34 +199,34 @@ export default function PunchImportPage() {
           <>
             <Card>
               <CardHeader>
-                <CardTitle>Upload Punch File</CardTitle>
-                <CardDescription>Upload a CSV file with punch data. Format: badge_number, punch_time, punch_type</CardDescription>
+                <CardTitle>{t("timeAttendance.punchImport.uploadFile")}</CardTitle>
+                <CardDescription>{t("timeAttendance.punchImport.uploadDescription")}</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex items-center gap-4">
                   <Input ref={fileInputRef} type="file" accept=".csv" onChange={handleFileSelect} className="max-w-md" />
-                  <Button variant="outline" onClick={downloadTemplate}><Download className="h-4 w-4 mr-2" />Download Template</Button>
+                  <Button variant="outline" onClick={downloadTemplate}><Download className="h-4 w-4 mr-2" />{t("timeAttendance.punchImport.downloadTemplate")}</Button>
                 </div>
               </CardContent>
             </Card>
 
             <Card>
-              <CardHeader><CardTitle>Import History</CardTitle></CardHeader>
+              <CardHeader><CardTitle>{t("timeAttendance.punchImport.importHistory")}</CardTitle></CardHeader>
               <CardContent>
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>File</TableHead>
-                      <TableHead>Date</TableHead>
-                      <TableHead>Total</TableHead>
-                      <TableHead>Success</TableHead>
-                      <TableHead>Errors</TableHead>
-                      <TableHead>Status</TableHead>
+                      <TableHead>{t("common.file")}</TableHead>
+                      <TableHead>{t("common.date")}</TableHead>
+                      <TableHead>{t("common.total")}</TableHead>
+                      <TableHead>{t("common.success")}</TableHead>
+                      <TableHead>{t("common.errors")}</TableHead>
+                      <TableHead>{t("common.status")}</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {batches.length === 0 ? (
-                      <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground">No imports yet</TableCell></TableRow>
+                      <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground">{t("timeAttendance.punchImport.noImports")}</TableCell></TableRow>
                     ) : batches.map((batch) => (
                       <TableRow key={batch.id}>
                         <TableCell className="font-medium">{batch.file_name}</TableCell>
@@ -244,18 +245,18 @@ export default function PunchImportPage() {
         ) : (
           <Card>
             <CardHeader>
-              <CardTitle>Preview Import</CardTitle>
-              <CardDescription>{parsedData.length} records found - {parsedData.filter(p => p.valid).length} valid, {parsedData.filter(p => !p.valid).length} invalid</CardDescription>
+              <CardTitle>{t("timeAttendance.punchImport.previewImport")}</CardTitle>
+              <CardDescription>{t("timeAttendance.punchImport.recordsFound", { total: parsedData.length, valid: parsedData.filter(p => p.valid).length, invalid: parsedData.filter(p => !p.valid).length })}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="max-h-96 overflow-auto">
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Badge</TableHead>
-                      <TableHead>Punch Time</TableHead>
-                      <TableHead>Type</TableHead>
-                      <TableHead>Status</TableHead>
+                      <TableHead>{t("timeAttendance.punchImport.badge")}</TableHead>
+                      <TableHead>{t("timeAttendance.punchImport.punchTime")}</TableHead>
+                      <TableHead>{t("common.type")}</TableHead>
+                      <TableHead>{t("common.status")}</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -266,7 +267,7 @@ export default function PunchImportPage() {
                         <TableCell>{punch.punch_type}</TableCell>
                         <TableCell>
                           {punch.valid ? (
-                            <Badge className="bg-green-500/20 text-green-700"><CheckCircle className="h-3 w-3 mr-1" />Valid</Badge>
+                            <Badge className="bg-green-500/20 text-green-700"><CheckCircle className="h-3 w-3 mr-1" />{t("common.valid")}</Badge>
                           ) : (
                             <Badge className="bg-red-500/20 text-red-700"><XCircle className="h-3 w-3 mr-1" />{punch.error}</Badge>
                           )}
@@ -277,9 +278,9 @@ export default function PunchImportPage() {
                 </Table>
               </div>
               <div className="flex justify-end gap-2">
-                <Button variant="outline" onClick={() => { setShowPreview(false); setParsedData([]); }}>Cancel</Button>
+                <Button variant="outline" onClick={() => { setShowPreview(false); setParsedData([]); }}>{t("common.cancel")}</Button>
                 <Button onClick={handleImport} disabled={isUploading || parsedData.filter(p => p.valid).length === 0}>
-                  {isUploading ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Importing...</> : <><Upload className="h-4 w-4 mr-2" />Import {parsedData.filter(p => p.valid).length} Records</>}
+                  {isUploading ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" />{t("timeAttendance.punchImport.importing")}</> : <><Upload className="h-4 w-4 mr-2" />{t("timeAttendance.punchImport.importRecords", { count: parsedData.filter(p => p.valid).length })}</>}
                 </Button>
               </div>
             </CardContent>
