@@ -7,12 +7,14 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } from "recharts";
-import { format, subDays, startOfMonth, endOfMonth, eachDayOfInterval, parseISO } from "date-fns";
-import { BarChart3, Clock, TrendingUp, Users, Loader2 } from "lucide-react";
+import { format, subDays, eachDayOfInterval, parseISO } from "date-fns";
+import { BarChart3, Loader2 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 const COLORS = ["hsl(var(--primary))", "hsl(var(--destructive))", "hsl(var(--warning))", "hsl(var(--success))"];
 
 export default function AttendanceAnalyticsPage() {
+  const { t } = useTranslation();
   const { profile } = useAuth();
   const [isLoading, setIsLoading] = useState(true);
   const [period, setPeriod] = useState("30");
@@ -35,7 +37,6 @@ export default function AttendanceAnalyticsPage() {
     const startDate = format(subDays(new Date(), parseInt(period)), "yyyy-MM-dd");
     const endDate = format(new Date(), "yyyy-MM-dd");
 
-    // Fetch time entries
     const { data: entries } = await supabase
       .from("time_clock_entries")
       .select("*")
@@ -43,7 +44,6 @@ export default function AttendanceAnalyticsPage() {
       .gte("clock_in", `${startDate}T00:00:00`)
       .lte("clock_in", `${endDate}T23:59:59`);
 
-    // Fetch exceptions
     const { data: exceptions } = await supabase
       .from("attendance_exceptions")
       .select("*")
@@ -52,7 +52,6 @@ export default function AttendanceAnalyticsPage() {
       .lte("exception_date", endDate);
 
     if (entries) {
-      // Calculate stats
       const totalHours = entries.reduce((sum, e) => sum + (e.total_hours || 0), 0);
       setStats({
         totalPunches: entries.length,
@@ -61,7 +60,6 @@ export default function AttendanceAnalyticsPage() {
         earlyDepartures: exceptions?.filter(e => e.exception_type === "early_departure").length || 0,
       });
 
-      // Daily data
       const days = eachDayOfInterval({ start: subDays(new Date(), parseInt(period)), end: new Date() });
       const daily = days.map(day => {
         const dayStr = format(day, "yyyy-MM-dd");
@@ -74,12 +72,10 @@ export default function AttendanceAnalyticsPage() {
       });
       setDailyData(daily);
 
-      // Status distribution
       const statusCounts: Record<string, number> = {};
       entries.forEach(e => { statusCounts[e.status] = (statusCounts[e.status] || 0) + 1; });
       setStatusDistribution(Object.entries(statusCounts).map(([name, value]) => ({ name, value })));
 
-      // Hourly distribution
       const hourlyIn: Record<number, number> = {};
       const hourlyOut: Record<number, number> = {};
       entries.forEach(e => {
@@ -110,43 +106,43 @@ export default function AttendanceAnalyticsPage() {
   return (
     <AppLayout>
       <div className="space-y-6">
-        <Breadcrumbs items={[{ label: "Time & Attendance", href: "/time-attendance" }, { label: "Analytics" }]} />
+        <Breadcrumbs items={[{ label: t("navigation.timeAttendance"), href: "/time-attendance" }, { label: t("timeAttendance.analytics.title") }]} />
 
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10"><BarChart3 className="h-6 w-6 text-primary" /></div>
             <div>
-              <h1 className="text-2xl font-bold">Attendance Analytics</h1>
-              <p className="text-muted-foreground">Trends, patterns, and insights</p>
+              <h1 className="text-2xl font-bold">{t("timeAttendance.analytics.title")}</h1>
+              <p className="text-muted-foreground">{t("timeAttendance.analytics.subtitle")}</p>
             </div>
           </div>
           <Select value={period} onValueChange={setPeriod}>
             <SelectTrigger className="w-40"><SelectValue /></SelectTrigger>
             <SelectContent>
-              <SelectItem value="7">Last 7 days</SelectItem>
-              <SelectItem value="30">Last 30 days</SelectItem>
-              <SelectItem value="90">Last 90 days</SelectItem>
+              <SelectItem value="7">{t("timeAttendance.analytics.last7Days")}</SelectItem>
+              <SelectItem value="30">{t("timeAttendance.analytics.last30Days")}</SelectItem>
+              <SelectItem value="90">{t("timeAttendance.analytics.last90Days")}</SelectItem>
             </SelectContent>
           </Select>
         </div>
 
         <div className="grid gap-4 md:grid-cols-4">
-          <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Total Punches</CardTitle></CardHeader><CardContent><div className="text-2xl font-bold">{stats.totalPunches}</div></CardContent></Card>
-          <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Avg Hours/Day</CardTitle></CardHeader><CardContent><div className="text-2xl font-bold">{stats.avgHoursPerDay.toFixed(1)}h</div></CardContent></Card>
-          <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Late Arrivals</CardTitle></CardHeader><CardContent><div className="text-2xl font-bold text-orange-600">{stats.lateArrivals}</div></CardContent></Card>
-          <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Early Departures</CardTitle></CardHeader><CardContent><div className="text-2xl font-bold text-red-600">{stats.earlyDepartures}</div></CardContent></Card>
+          <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">{t("timeAttendance.analytics.totalPunches")}</CardTitle></CardHeader><CardContent><div className="text-2xl font-bold">{stats.totalPunches}</div></CardContent></Card>
+          <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">{t("timeAttendance.analytics.avgHoursPerDay")}</CardTitle></CardHeader><CardContent><div className="text-2xl font-bold">{stats.avgHoursPerDay.toFixed(1)}h</div></CardContent></Card>
+          <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">{t("timeAttendance.analytics.lateArrivals")}</CardTitle></CardHeader><CardContent><div className="text-2xl font-bold text-orange-600">{stats.lateArrivals}</div></CardContent></Card>
+          <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">{t("timeAttendance.analytics.earlyDepartures")}</CardTitle></CardHeader><CardContent><div className="text-2xl font-bold text-red-600">{stats.earlyDepartures}</div></CardContent></Card>
         </div>
 
         <Tabs defaultValue="trends">
           <TabsList>
-            <TabsTrigger value="trends">Daily Trends</TabsTrigger>
-            <TabsTrigger value="distribution">Status Distribution</TabsTrigger>
-            <TabsTrigger value="hourly">Hourly Patterns</TabsTrigger>
+            <TabsTrigger value="trends">{t("timeAttendance.analytics.dailyTrends")}</TabsTrigger>
+            <TabsTrigger value="distribution">{t("timeAttendance.analytics.statusDistribution")}</TabsTrigger>
+            <TabsTrigger value="hourly">{t("timeAttendance.analytics.hourlyPatterns")}</TabsTrigger>
           </TabsList>
 
           <TabsContent value="trends">
             <Card>
-              <CardHeader><CardTitle>Daily Attendance Trend</CardTitle></CardHeader>
+              <CardHeader><CardTitle>{t("timeAttendance.analytics.dailyTrends")}</CardTitle></CardHeader>
               <CardContent>
                 <ResponsiveContainer width="100%" height={350}>
                   <LineChart data={dailyData}>
@@ -154,8 +150,8 @@ export default function AttendanceAnalyticsPage() {
                     <XAxis dataKey="date" className="text-xs" />
                     <YAxis className="text-xs" />
                     <Tooltip />
-                    <Line type="monotone" dataKey="punches" stroke="hsl(var(--primary))" strokeWidth={2} name="Punches" />
-                    <Line type="monotone" dataKey="hours" stroke="hsl(var(--success))" strokeWidth={2} name="Hours" />
+                    <Line type="monotone" dataKey="punches" stroke="hsl(var(--primary))" strokeWidth={2} name={t("timeAttendance.analytics.punches")} />
+                    <Line type="monotone" dataKey="hours" stroke="hsl(var(--success))" strokeWidth={2} name={t("timeAttendance.analytics.hours")} />
                   </LineChart>
                 </ResponsiveContainer>
               </CardContent>
@@ -164,7 +160,7 @@ export default function AttendanceAnalyticsPage() {
 
           <TabsContent value="distribution">
             <Card>
-              <CardHeader><CardTitle>Entry Status Distribution</CardTitle></CardHeader>
+              <CardHeader><CardTitle>{t("timeAttendance.analytics.statusDistribution")}</CardTitle></CardHeader>
               <CardContent className="flex justify-center">
                 <ResponsiveContainer width="100%" height={350}>
                   <PieChart>
@@ -180,7 +176,7 @@ export default function AttendanceAnalyticsPage() {
 
           <TabsContent value="hourly">
             <Card>
-              <CardHeader><CardTitle>Hourly Punch Distribution</CardTitle></CardHeader>
+              <CardHeader><CardTitle>{t("timeAttendance.analytics.hourlyPatterns")}</CardTitle></CardHeader>
               <CardContent>
                 <ResponsiveContainer width="100%" height={350}>
                   <BarChart data={hourlyDistribution}>
@@ -188,8 +184,8 @@ export default function AttendanceAnalyticsPage() {
                     <XAxis dataKey="hour" className="text-xs" />
                     <YAxis className="text-xs" />
                     <Tooltip />
-                    <Bar dataKey="clockIn" fill="hsl(var(--success))" name="Clock In" />
-                    <Bar dataKey="clockOut" fill="hsl(var(--destructive))" name="Clock Out" />
+                    <Bar dataKey="clockIn" fill="hsl(var(--success))" name={t("timeAttendance.analytics.clockIns")} />
+                    <Bar dataKey="clockOut" fill="hsl(var(--destructive))" name={t("timeAttendance.analytics.clockOuts")} />
                   </BarChart>
                 </ResponsiveContainer>
               </CardContent>

@@ -15,6 +15,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { format } from "date-fns";
+import { useTranslation } from "react-i18next";
 import { 
   Briefcase, 
   Plus, 
@@ -83,6 +84,7 @@ interface TimeEntry {
 }
 
 export default function ProjectTimeTrackingPage() {
+  const { t } = useTranslation();
   const [companies, setCompanies] = useState<Company[]>([]);
   const [selectedCompany, setSelectedCompany] = useState<string>("");
   const [loading, setLoading] = useState(true);
@@ -433,8 +435,8 @@ const loadTimeEntries = async () => {
       <div className="space-y-6">
         <Breadcrumbs 
           items={[
-            { label: "Time & Attendance", href: "/time-attendance" },
-            { label: "Project Time Tracking" }
+            { label: t("navigation.timeAttendance"), href: "/time-attendance" },
+            { label: t("timeAttendance.projects.title") }
           ]} 
         />
 
@@ -445,16 +447,16 @@ const loadTimeEntries = async () => {
             </div>
             <div>
               <h1 className="text-2xl font-bold tracking-tight text-foreground">
-                Project Time Tracking
+                {t("timeAttendance.projects.title")}
               </h1>
               <p className="text-muted-foreground">
-                Track time spent on clients, projects and tasks
+                {t("timeAttendance.projects.subtitle")}
               </p>
             </div>
           </div>
           <Select value={selectedCompany} onValueChange={setSelectedCompany}>
             <SelectTrigger className="w-[200px]">
-              <SelectValue placeholder="Select company" />
+              <SelectValue placeholder={t("common.selectCompany")} />
             </SelectTrigger>
             <SelectContent>
               {companies.map((c) => (
@@ -464,46 +466,45 @@ const loadTimeEntries = async () => {
           </Select>
         </div>
 
-        {/* Stats */}
         <div className="grid gap-4 md:grid-cols-4">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium">This Week</CardTitle>
+              <CardTitle className="text-sm font-medium">{t("timeAttendance.projects.thisWeek")}</CardTitle>
               <Clock className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{totalHoursThisWeek.toFixed(1)}h</div>
-              <p className="text-xs text-muted-foreground">Hours logged</p>
+              <p className="text-xs text-muted-foreground">{t("timeAttendance.projects.hoursLogged")}</p>
             </CardContent>
           </Card>
           <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium">Projects</CardTitle>
+              <CardTitle className="text-sm font-medium">{t("timeAttendance.projects.projectsTab")}</CardTitle>
               <FolderKanban className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{projects.filter(p => p.status === 'active').length}</div>
-              <p className="text-xs text-muted-foreground">Active projects</p>
+              <p className="text-xs text-muted-foreground">{t("timeAttendance.projects.activeProjects")}</p>
             </CardContent>
           </Card>
           <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium">Clients</CardTitle>
+              <CardTitle className="text-sm font-medium">{t("timeAttendance.projects.clients")}</CardTitle>
               <Building2 className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{clients.filter(c => c.is_active).length}</div>
-              <p className="text-xs text-muted-foreground">Active clients</p>
+              <p className="text-xs text-muted-foreground">{t("timeAttendance.projects.activeClients")}</p>
             </CardContent>
           </Card>
           <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium">Pending</CardTitle>
+              <CardTitle className="text-sm font-medium">{t("timeAttendance.projects.draft")}</CardTitle>
               <Send className="h-4 w-4 text-warning" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-warning">{timeEntries.filter(e => e.status === 'draft').length}</div>
-              <p className="text-xs text-muted-foreground">To submit</p>
+              <p className="text-xs text-muted-foreground">{t("timeAttendance.projects.submitted")}</p>
             </CardContent>
           </Card>
         </div>
@@ -512,15 +513,15 @@ const loadTimeEntries = async () => {
           <TabsList>
             <TabsTrigger value="timesheet" className="gap-2">
               <Clock className="h-4 w-4" />
-              My Timesheet
+              {t("timeAttendance.projects.timesheet")}
             </TabsTrigger>
             <TabsTrigger value="projects" className="gap-2">
               <FolderKanban className="h-4 w-4" />
-              Projects
+              {t("timeAttendance.projects.projectsTab")}
             </TabsTrigger>
             <TabsTrigger value="clients" className="gap-2">
               <Building2 className="h-4 w-4" />
-              Clients
+              {t("timeAttendance.projects.clients")}
             </TabsTrigger>
           </TabsList>
 

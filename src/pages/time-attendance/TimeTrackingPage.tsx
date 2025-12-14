@@ -13,6 +13,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { format, differenceInMinutes } from "date-fns";
+import { useTranslation } from "react-i18next";
 import { 
   Clock, 
   Play, 
@@ -92,6 +93,7 @@ interface EmployeeShiftAssignment {
 }
 
 export default function TimeTrackingPage() {
+  const { t } = useTranslation();
   const [companies, setCompanies] = useState<Company[]>([]);
   const [selectedCompany, setSelectedCompany] = useState<string>("");
   const [timeEntries, setTimeEntries] = useState<TimeEntry[]>([]);
@@ -490,8 +492,8 @@ export default function TimeTrackingPage() {
       <div className="space-y-6">
         <Breadcrumbs 
           items={[
-            { label: "Time & Attendance", href: "/time-attendance" },
-            { label: "Time Tracking" }
+            { label: t("navigation.timeAttendance"), href: "/time-attendance" },
+            { label: t("timeAttendance.timeTracking.title") }
           ]} 
         />
 
@@ -502,17 +504,17 @@ export default function TimeTrackingPage() {
             </div>
             <div>
               <h1 className="text-2xl font-bold tracking-tight text-foreground">
-                Time Tracking
+                {t("timeAttendance.timeTracking.title")}
               </h1>
               <p className="text-muted-foreground">
-                Clock in/out and track your work hours
+                {t("timeAttendance.timeTracking.subtitle")}
               </p>
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <Select value={selectedCompany} onValueChange={setSelectedCompany}>
+          <Select value={selectedCompany} onValueChange={setSelectedCompany}>
               <SelectTrigger className="w-[200px]">
-                <SelectValue placeholder="Select company" />
+                <SelectValue placeholder={t("common.selectCompany")} />
               </SelectTrigger>
               <SelectContent>
                 {companies.map((c) => (
@@ -524,22 +526,22 @@ export default function TimeTrackingPage() {
               <DialogTrigger asChild>
                 <Button variant="outline">
                   <Plus className="h-4 w-4 mr-2" />
-                  Manual Entry
+                  {t("timeAttendance.timeTracking.manualEntry")}
                 </Button>
               </DialogTrigger>
               <DialogContent>
                 <DialogHeader>
-                  <DialogTitle>Add Manual Time Entry</DialogTitle>
+                  <DialogTitle>{t("timeAttendance.timeTracking.addManualEntry")}</DialogTitle>
                 </DialogHeader>
                 <div className="space-y-4 py-4">
                   <div className="space-y-2">
-                    <Label>Employee</Label>
+                    <Label>{t("timeAttendance.timeTracking.employee")}</Label>
                     <Select 
                       value={manualEntry.employee_id} 
                       onValueChange={(v) => setManualEntry({...manualEntry, employee_id: v})}
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Select employee" />
+                        <SelectValue placeholder={t("common.selectEmployee")} />
                       </SelectTrigger>
                       <SelectContent>
                         {employees.map((e) => (
@@ -549,16 +551,16 @@ export default function TimeTrackingPage() {
                     </Select>
                   </div>
                   <div className="space-y-2">
-                    <Label>Shift (optional)</Label>
+                    <Label>{t("timeAttendance.timeTracking.shift")} ({t("common.optional").toLowerCase()})</Label>
                     <Select 
                       value={manualEntry.shift_id || "__none__"} 
                       onValueChange={(v) => setManualEntry({...manualEntry, shift_id: v === "__none__" ? "" : v})}
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Select shift" />
+                        <SelectValue placeholder={t("timeAttendance.timeTracking.noShiftAssigned")} />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="__none__">No shift</SelectItem>
+                        <SelectItem value="__none__">{t("timeAttendance.timeTracking.noShiftAssigned")}</SelectItem>
                         {shifts.map((s) => (
                           <SelectItem key={s.id} value={s.id}>
                             <div className="flex items-center gap-2">
@@ -573,6 +575,34 @@ export default function TimeTrackingPage() {
                       </SelectContent>
                     </Select>
                   </div>
+                  <div className="space-y-2">
+                    <Label>{t("timeAttendance.timeTracking.clockIn")}</Label>
+                    <Input 
+                      type="datetime-local" 
+                      value={manualEntry.clock_in}
+                      onChange={(e) => setManualEntry({...manualEntry, clock_in: e.target.value})}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>{t("timeAttendance.timeTracking.clockOut")} ({t("common.optional").toLowerCase()})</Label>
+                    <Input 
+                      type="datetime-local" 
+                      value={manualEntry.clock_out}
+                      onChange={(e) => setManualEntry({...manualEntry, clock_out: e.target.value})}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>{t("common.notes")}</Label>
+                    <Textarea 
+                      value={manualEntry.notes}
+                      onChange={(e) => setManualEntry({...manualEntry, notes: e.target.value})}
+                      placeholder={t("timeAttendance.exceptions.reason")}
+                    />
+                  </div>
+                  <Button onClick={handleManualEntry} className="w-full">
+                    {t("common.add")}
+                  </Button>
+                </div>
                   <div className="space-y-2">
                     <Label>Clock In</Label>
                     <Input 
