@@ -50,6 +50,7 @@ const STATUS_OPTIONS = ['submitted', 'processing', 'approved', 'denied', 'paid']
 
 export default function BenefitClaimsPage() {
   const { t } = useTranslation();
+  const { user, isAdmin, hasRole } = useAuth();
   const canManage = isAdmin || hasRole('hr_manager');
   
   const [claims, setClaims] = useState<BenefitClaim[]>([]);

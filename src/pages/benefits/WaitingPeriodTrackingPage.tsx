@@ -9,8 +9,10 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Building2, Clock, Users, CheckCircle, AlertCircle } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 export default function WaitingPeriodTrackingPage() {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const [companies, setCompanies] = useState<any[]>([]);
   const [selectedCompany, setSelectedCompany] = useState<string>("");

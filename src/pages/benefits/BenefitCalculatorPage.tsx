@@ -10,8 +10,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
 import { Building2, Calculator, DollarSign, Plus, Trash2 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 export default function BenefitCalculatorPage() {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const [companies, setCompanies] = useState<any[]>([]);
   const [selectedCompany, setSelectedCompany] = useState<string>("");

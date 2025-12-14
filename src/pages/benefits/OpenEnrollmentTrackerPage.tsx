@@ -9,8 +9,10 @@ import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Building2, Calendar, Users, Clock, CheckCircle, AlertTriangle } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 export default function OpenEnrollmentTrackerPage() {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const [companies, setCompanies] = useState<any[]>([]);
   const [selectedCompany, setSelectedCompany] = useState<string>("");
