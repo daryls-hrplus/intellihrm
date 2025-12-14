@@ -2,6 +2,7 @@ import { useState, useMemo } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { useLeaveManagement } from "@/hooks/useLeaveManagement";
 import { useAuth } from "@/contexts/AuthContext";
+import { useLanguage } from "@/hooks/useLanguage";
 import { LeaveCompanyFilter, useLeaveCompanyFilter } from "@/components/leave/LeaveCompanyFilter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -68,6 +69,7 @@ const COUNTRIES = [
 ];
 
 export default function LeaveHolidaysPage() {
+  const { t } = useLanguage();
   const { company } = useAuth();
   const { selectedCompanyId, setSelectedCompanyId } = useLeaveCompanyFilter();
   const { holidays, countryHolidays, loadingHolidays, loadingCountryHolidays, createHoliday, createCountryHoliday } = useLeaveManagement(selectedCompanyId);
@@ -167,8 +169,8 @@ export default function LeaveHolidaysPage() {
       <div className="space-y-6">
         <Breadcrumbs
           items={[
-            { label: "Leave Management", href: "/leave" },
-            { label: "Holidays Calendar" },
+            { label: t("leave.title"), href: "/leave" },
+            { label: t("leave.holidays.title") },
           ]}
         />
 
@@ -178,8 +180,8 @@ export default function LeaveHolidaysPage() {
               <PartyPopper className="h-5 w-5 text-primary" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold tracking-tight text-foreground">Holidays Calendar</h1>
-              <p className="text-muted-foreground">Manage country and company holidays that don't count against leave balances</p>
+              <h1 className="text-2xl font-bold tracking-tight text-foreground">{t("leave.holidays.title")}</h1>
+              <p className="text-muted-foreground">{t("leave.holidays.subtitle")}</p>
             </div>
           </div>
           <LeaveCompanyFilter 
@@ -193,11 +195,11 @@ export default function LeaveHolidaysPage() {
             <TabsList>
               <TabsTrigger value="country" className="flex items-center gap-2">
                 <Globe className="h-4 w-4" />
-                Country Holidays
+                {t("leave.holidays.countryHolidays")}
               </TabsTrigger>
               <TabsTrigger value="company" className="flex items-center gap-2">
                 <Building2 className="h-4 w-4" />
-                Company Holidays
+                {t("leave.holidays.companyHolidays")}
               </TabsTrigger>
             </TabsList>
 
@@ -206,22 +208,22 @@ export default function LeaveHolidaysPage() {
                 <DialogTrigger asChild>
                   <Button>
                     <Plus className="mr-2 h-4 w-4" />
-                    Add Country Holiday
+                    {t("leave.holidays.addCountryHoliday")}
                   </Button>
                 </DialogTrigger>
                 <DialogContent>
                   <DialogHeader>
-                    <DialogTitle>Add Country Holiday</DialogTitle>
+                    <DialogTitle>{t("leave.holidays.addCountryHoliday")}</DialogTitle>
                   </DialogHeader>
                   <div className="grid gap-4 py-4">
                     <div className="space-y-2">
-                      <Label>Country *</Label>
+                      <Label>{t("leave.holidays.country")} *</Label>
                       <Select
                         value={countryFormData.country}
                         onValueChange={(value) => setCountryFormData({ ...countryFormData, country: value })}
                       >
                         <SelectTrigger>
-                          <SelectValue placeholder="Select country" />
+                          <SelectValue placeholder={t("leave.holidays.selectCountry")} />
                         </SelectTrigger>
                         <SelectContent>
                           {COUNTRIES.map((country) => (
@@ -234,17 +236,17 @@ export default function LeaveHolidaysPage() {
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="country-name">Holiday Name *</Label>
+                      <Label htmlFor="country-name">{t("leave.holidays.holidayName")} *</Label>
                       <Input
                         id="country-name"
                         value={countryFormData.name}
                         onChange={(e) => setCountryFormData({ ...countryFormData, name: e.target.value })}
-                        placeholder="e.g., Independence Day"
+                        placeholder={t("leave.holidays.holidayNamePlaceholder")}
                       />
                     </div>
 
                     <div className="space-y-2">
-                      <Label>Date *</Label>
+                      <Label>{t("leave.holidays.date")} *</Label>
                       <Popover>
                         <PopoverTrigger asChild>
                           <Button
@@ -255,7 +257,7 @@ export default function LeaveHolidaysPage() {
                             )}
                           >
                             <CalendarDays className="mr-2 h-4 w-4" />
-                            {countryFormData.holiday_date ? format(countryFormData.holiday_date, "PPP") : "Select date"}
+                            {countryFormData.holiday_date ? format(countryFormData.holiday_date, "PPP") : t("leave.apply.selectDate")}
                           </Button>
                         </PopoverTrigger>
                         <PopoverContent className="w-auto p-0" align="start">
@@ -269,20 +271,20 @@ export default function LeaveHolidaysPage() {
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="description">Description</Label>
+                      <Label htmlFor="description">{t("leave.holidays.description")}</Label>
                       <Textarea
                         id="description"
                         value={countryFormData.description}
                         onChange={(e) => setCountryFormData({ ...countryFormData, description: e.target.value })}
-                        placeholder="Optional description"
+                        placeholder={t("leave.holidays.optionalDescription")}
                         rows={2}
                       />
                     </div>
 
                     <div className="flex items-center justify-between rounded-lg border p-3">
                       <div>
-                        <Label htmlFor="country-recurring">Recurring Annually</Label>
-                        <p className="text-xs text-muted-foreground">Repeats every year on the same date</p>
+                        <Label htmlFor="country-recurring">{t("leave.holidays.recurringAnnually")}</Label>
+                        <p className="text-xs text-muted-foreground">{t("leave.holidays.recurringDesc")}</p>
                       </div>
                       <Switch
                         id="country-recurring"
@@ -293,8 +295,8 @@ export default function LeaveHolidaysPage() {
 
                     <div className="flex items-center justify-between rounded-lg border p-3">
                       <div>
-                        <Label htmlFor="country-half-day">Half Day</Label>
-                        <p className="text-xs text-muted-foreground">Only half the day is off</p>
+                        <Label htmlFor="country-half-day">{t("leave.holidays.halfDay")}</Label>
+                        <p className="text-xs text-muted-foreground">{t("leave.holidays.halfDayDesc")}</p>
                       </div>
                       <Switch
                         id="country-half-day"
@@ -305,13 +307,13 @@ export default function LeaveHolidaysPage() {
 
                     <div className="flex justify-end gap-2 pt-4">
                       <Button variant="outline" onClick={() => { setIsCountryDialogOpen(false); resetCountryForm(); }}>
-                        Cancel
+                        {t("leave.common.cancel")}
                       </Button>
                       <Button 
                         onClick={handleSubmitCountryHoliday} 
                         disabled={!countryFormData.country || !countryFormData.name || !countryFormData.holiday_date}
                       >
-                        Add Holiday
+                        {t("leave.holidays.addHoliday")}
                       </Button>
                     </div>
                   </div>
