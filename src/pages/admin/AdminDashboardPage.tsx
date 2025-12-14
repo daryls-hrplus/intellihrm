@@ -33,6 +33,7 @@ import {
   Tag,
   Lock,
   Bot,
+  BookOpen,
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 
@@ -141,6 +142,13 @@ const getAdminModules = (t: (key: string) => string) => [
     href: "/admin/granular-permissions",
     icon: Lock,
     color: "bg-indigo-500/10 text-indigo-600",
+  },
+  {
+    title: "Implementation Handbook",
+    description: "Step-by-step guide for configuring all modules",
+    href: "/admin/implementation-handbook",
+    icon: BookOpen,
+    color: "bg-rose-500/10 text-rose-600",
   },
   {
     title: t("admin.modules.territories.title"),
