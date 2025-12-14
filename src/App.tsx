@@ -180,6 +180,16 @@ import HSEAnalyticsPage from "./pages/hse/HSEAnalyticsPage";
 
 // Employee Relations pages
 import EmployeeRelationsDashboardPage from "./pages/employee-relations/EmployeeRelationsDashboardPage";
+import ERAnalyticsPage from "./pages/employee-relations/ERAnalyticsPage";
+import ERCasesPage from "./pages/employee-relations/ERCasesPage";
+import ERDisciplinaryPage from "./pages/employee-relations/ERDisciplinaryPage";
+import ERRecognitionPage from "./pages/employee-relations/ERRecognitionPage";
+import ERExitInterviewsPage from "./pages/employee-relations/ERExitInterviewsPage";
+import ERSurveysPage from "./pages/employee-relations/ERSurveysPage";
+import ERWellnessPage from "./pages/employee-relations/ERWellnessPage";
+import ERUnionsPage from "./pages/employee-relations/ERUnionsPage";
+import ERGrievancesPage from "./pages/employee-relations/ERGrievancesPage";
+import ERCourtJudgementsPage from "./pages/employee-relations/ERCourtJudgementsPage";
 
 // Property pages
 import PropertyDashboardPage from "./pages/property/PropertyDashboardPage";
@@ -2091,6 +2101,87 @@ const App = () => (
               element={
                 <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
                   <EmployeeRelationsDashboardPage />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/employee-relations/analytics"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
+                  <ERAnalyticsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/employee-relations/cases"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
+                  <ERCasesPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/employee-relations/disciplinary"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
+                  <ERDisciplinaryPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/employee-relations/recognition"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
+                  <ERRecognitionPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/employee-relations/exit-interviews"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
+                  <ERExitInterviewsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/employee-relations/surveys"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
+                  <ERSurveysPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/employee-relations/wellness"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
+                  <ERWellnessPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/employee-relations/unions"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
+                  <ERUnionsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/employee-relations/grievances"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
+                  <ERGrievancesPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/employee-relations/court-judgements"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
+                  <ERCourtJudgementsPage />
                 </ProtectedRoute>
               }
             />
