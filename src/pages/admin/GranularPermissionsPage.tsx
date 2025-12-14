@@ -34,6 +34,7 @@ import {
   Layers,
   GitBranch,
   FolderTree,
+  Briefcase,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -106,6 +107,13 @@ interface Section {
   department_id: string;
 }
 
+interface PositionType {
+  id: string;
+  name: string;
+  code: string;
+  company_id: string;
+}
+
 const breadcrumbItems = [
   { label: "Admin", href: "/admin" },
   { label: "Granular Permissions" },
@@ -121,11 +129,13 @@ export default function GranularPermissionsPage() {
   const [divisions, setDivisions] = useState<Division[]>([]);
   const [departments, setDepartments] = useState<Department[]>([]);
   const [sections, setSections] = useState<Section[]>([]);
+  const [positionTypes, setPositionTypes] = useState<PositionType[]>([]);
   const [roleCompanyAccess, setRoleCompanyAccess] = useState<string[]>([]);
   const [roleTagAccess, setRoleTagAccess] = useState<string[]>([]);
   const [roleDivisionAccess, setRoleDivisionAccess] = useState<string[]>([]);
   const [roleDepartmentAccess, setRoleDepartmentAccess] = useState<string[]>([]);
   const [roleSectionAccess, setRoleSectionAccess] = useState<string[]>([]);
+  const [rolePositionTypeExclusions, setRolePositionTypeExclusions] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
@@ -144,7 +154,7 @@ export default function GranularPermissionsPage() {
 
   const fetchInitialData = async () => {
     try {
-      const [rolesRes, permissionsRes, companiesRes, tagsRes, divisionsRes, departmentsRes, sectionsRes] = await Promise.all([
+      const [rolesRes, permissionsRes, companiesRes, tagsRes, divisionsRes, departmentsRes, sectionsRes, positionTypesRes] = await Promise.all([
         supabase.from("roles").select("id, name, code, is_system").order("name"),
         supabase.from("module_permissions").select("*").eq("is_active", true).order("display_order"),
         supabase.from("companies").select("id, name").eq("is_active", true).order("name"),
@@ -152,6 +162,7 @@ export default function GranularPermissionsPage() {
         supabase.from("divisions").select("id, name").eq("is_active", true).order("name"),
         supabase.from("departments").select("id, name, company_id").eq("is_active", true).order("name"),
         supabase.from("sections").select("id, name, department_id").eq("is_active", true).order("name"),
+        supabase.from("position_types").select("id, name, code, company_id").eq("is_active", true).order("name"),
       ]);
 
       if (rolesRes.error) throw rolesRes.error;
@@ -164,6 +175,7 @@ export default function GranularPermissionsPage() {
       setDivisions(divisionsRes.data || []);
       setDepartments(departmentsRes.data || []);
       setSections(sectionsRes.data || []);
+      setPositionTypes(positionTypesRes.data || []);
 
       if (rolesRes.data && rolesRes.data.length > 0) {
         setSelectedRoleId(rolesRes.data[0].id);
@@ -201,12 +213,13 @@ export default function GranularPermissionsPage() {
 
   const fetchRoleAccess = async (roleId: string) => {
     try {
-      const [companyRes, tagRes, divisionRes, departmentRes, sectionRes] = await Promise.all([
+      const [companyRes, tagRes, divisionRes, departmentRes, sectionRes, positionTypeExclusionsRes] = await Promise.all([
         supabase.from("role_company_access").select("company_id").eq("role_id", roleId),
         supabase.from("role_tag_access").select("tag_id").eq("role_id", roleId),
         supabase.from("role_division_access").select("division_id").eq("role_id", roleId),
         supabase.from("role_department_access").select("department_id").eq("role_id", roleId),
         supabase.from("role_section_access").select("section_id").eq("role_id", roleId),
+        supabase.from("role_position_type_exclusions").select("position_type_id").eq("role_id", roleId),
       ]);
 
       setRoleCompanyAccess((companyRes.data || []).map((c) => c.company_id));
@@ -214,6 +227,7 @@ export default function GranularPermissionsPage() {
       setRoleDivisionAccess((divisionRes.data || []).map((d) => d.division_id));
       setRoleDepartmentAccess((departmentRes.data || []).map((d) => d.department_id));
       setRoleSectionAccess((sectionRes.data || []).map((s) => s.section_id));
+      setRolePositionTypeExclusions((positionTypeExclusionsRes.data || []).map((p) => p.position_type_id));
     } catch (error) {
       console.error("Error fetching role access:", error);
     }
@@ -330,6 +344,15 @@ export default function GranularPermissionsPage() {
     );
   };
 
+  const togglePositionTypeExclusion = (positionTypeId: string) => {
+    setHasChanges(true);
+    setRolePositionTypeExclusions((prev) =>
+      prev.includes(positionTypeId)
+        ? prev.filter((id) => id !== positionTypeId)
+        : [...prev, positionTypeId]
+    );
+  };
+
   const savePermissions = async () => {
     if (!selectedRoleId) return;
 
@@ -396,6 +419,15 @@ export default function GranularPermissionsPage() {
           .from("role_section_access")
           .insert(roleSectionAccess.map((sectionId) => ({ role_id: selectedRoleId, section_id: sectionId })));
         if (sectionError) throw sectionError;
+      }
+
+      // Save position type exclusions - delete existing and insert new
+      await supabase.from("role_position_type_exclusions").delete().eq("role_id", selectedRoleId);
+      if (rolePositionTypeExclusions.length > 0) {
+        const { error: positionTypeError } = await supabase
+          .from("role_position_type_exclusions")
+          .insert(rolePositionTypeExclusions.map((positionTypeId) => ({ role_id: selectedRoleId, position_type_id: positionTypeId })));
+        if (positionTypeError) throw positionTypeError;
       }
 
       toast({ title: "Permissions saved successfully" });
@@ -484,6 +516,7 @@ export default function GranularPermissionsPage() {
               <TabsTrigger value="permissions">Module Permissions</TabsTrigger>
               <TabsTrigger value="company_access">Company Access</TabsTrigger>
               <TabsTrigger value="org_access">Organization Access</TabsTrigger>
+              <TabsTrigger value="position_type_restrictions">Position Type Restrictions</TabsTrigger>
             </TabsList>
 
             <TabsContent value="permissions" className="space-y-4">
@@ -788,6 +821,58 @@ export default function GranularPermissionsPage() {
                   </CardContent>
                 </Card>
               </div>
+            </TabsContent>
+
+            <TabsContent value="position_type_restrictions" className="space-y-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Briefcase className="h-5 w-5" />
+                    Position Type Exclusions
+                  </CardTitle>
+                  <CardDescription>
+                    By default, this role can access employees in all position types. Check position types below to <strong>exclude</strong> them from this role's access. This affects employee visibility and reporting.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <ScrollArea className="h-[400px]">
+                    <div className="grid gap-2 md:grid-cols-2 lg:grid-cols-3">
+                      {positionTypes.map((posType) => {
+                        const company = companies.find((c) => c.id === posType.company_id);
+                        return (
+                          <div
+                            key={posType.id}
+                            className={cn(
+                              "flex items-center space-x-3 rounded-lg border p-3 hover:bg-muted/50",
+                              rolePositionTypeExclusions.includes(posType.id) && "border-destructive/50 bg-destructive/5"
+                            )}
+                          >
+                            <Checkbox
+                              id={`postype-${posType.id}`}
+                              checked={rolePositionTypeExclusions.includes(posType.id)}
+                              onCheckedChange={() => togglePositionTypeExclusion(posType.id)}
+                            />
+                            <label
+                              htmlFor={`postype-${posType.id}`}
+                              className="flex-1 cursor-pointer"
+                            >
+                              <div className="text-sm font-medium">{posType.name}</div>
+                              <div className="text-xs text-muted-foreground">
+                                {company?.name || "Unknown"} • {posType.code}
+                              </div>
+                            </label>
+                          </div>
+                        );
+                      })}
+                      {positionTypes.length === 0 && (
+                        <p className="text-center text-muted-foreground py-4 col-span-full">
+                          No position types found. Create position types in Workforce Management first.
+                        </p>
+                      )}
+                    </div>
+                  </ScrollArea>
+                </CardContent>
+              </Card>
             </TabsContent>
           </Tabs>
         )}

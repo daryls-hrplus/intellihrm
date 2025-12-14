@@ -17678,6 +17678,53 @@ export type Database = {
           },
         ]
       }
+      position_types: {
+        Row: {
+          code: string
+          company_id: string
+          created_at: string
+          description: string | null
+          end_date: string | null
+          id: string
+          is_active: boolean
+          name: string
+          start_date: string
+          updated_at: string
+        }
+        Insert: {
+          code: string
+          company_id: string
+          created_at?: string
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          start_date?: string
+          updated_at?: string
+        }
+        Update: {
+          code?: string
+          company_id?: string
+          created_at?: string
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          start_date?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "position_types_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       positions: {
         Row: {
           authorized_headcount: number
@@ -17690,6 +17737,7 @@ export type Database = {
           id: string
           is_active: boolean
           job_family_id: string | null
+          position_type_id: string | null
           reports_to_position_id: string | null
           salary_grade_id: string | null
           start_date: string
@@ -17707,6 +17755,7 @@ export type Database = {
           id?: string
           is_active?: boolean
           job_family_id?: string | null
+          position_type_id?: string | null
           reports_to_position_id?: string | null
           salary_grade_id?: string | null
           start_date?: string
@@ -17724,6 +17773,7 @@ export type Database = {
           id?: string
           is_active?: boolean
           job_family_id?: string | null
+          position_type_id?: string | null
           reports_to_position_id?: string | null
           salary_grade_id?: string | null
           start_date?: string
@@ -17743,6 +17793,13 @@ export type Database = {
             columns: ["job_family_id"]
             isOneToOne: false
             referencedRelation: "job_families"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "positions_position_type_id_fkey"
+            columns: ["position_type_id"]
+            isOneToOne: false
+            referencedRelation: "position_types"
             referencedColumns: ["id"]
           },
           {
@@ -19600,6 +19657,45 @@ export type Database = {
           },
           {
             foreignKeyName: "role_permissions_role_id_fkey"
+            columns: ["role_id"]
+            isOneToOne: false
+            referencedRelation: "roles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      role_position_type_exclusions: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          position_type_id: string
+          role_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          position_type_id: string
+          role_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          position_type_id?: string
+          role_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "role_position_type_exclusions_position_type_id_fkey"
+            columns: ["position_type_id"]
+            isOneToOne: false
+            referencedRelation: "position_types"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "role_position_type_exclusions_role_id_fkey"
             columns: ["role_id"]
             isOneToOne: false
             referencedRelation: "roles"
@@ -23409,6 +23505,10 @@ export type Database = {
           p_tab_code?: string
           p_user_id: string
         }
+        Returns: boolean
+      }
+      user_has_position_type_access: {
+        Args: { p_position_type_id: string; p_user_id: string }
         Returns: boolean
       }
     }
