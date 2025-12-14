@@ -13,12 +13,14 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Plus, Tags, Loader2 } from "lucide-react";
 import { format } from "date-fns";
+import { useLanguage } from "@/hooks/useLanguage";
 
 interface Props {
   companyId?: string;
 }
 
 const PropertyCategoriesTab = ({ companyId }: Props) => {
+  const { t } = useLanguage();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [formData, setFormData] = useState({
     company_id: companyId || "__global__",
@@ -70,28 +72,28 @@ const PropertyCategoriesTab = ({ companyId }: Props) => {
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle className="flex items-center gap-2">
           <Tags className="h-5 w-5" />
-          Property Categories
+          {t("companyProperty.categories.title")}
         </CardTitle>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
             <Button className="gap-2">
               <Plus className="h-4 w-4" />
-              Add Category
+              {t("companyProperty.categories.addCategory")}
             </Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Add Property Category</DialogTitle>
+              <DialogTitle>{t("companyProperty.categories.addCategoryTitle")}</DialogTitle>
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
-                <Label>Company</Label>
+                <Label>{t("companyProperty.categories.company")}</Label>
                 <Select value={formData.company_id} onValueChange={(v) => setFormData({ ...formData, company_id: v })}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select company (optional)" />
+                    <SelectValue placeholder={t("companyProperty.categories.selectCompany")} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="__global__">Global (All Companies)</SelectItem>
+                    <SelectItem value="__global__">{t("companyProperty.categories.globalAllCompanies")}</SelectItem>
                     {companies.map((c) => (
                       <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
                     ))}
@@ -100,7 +102,7 @@ const PropertyCategoriesTab = ({ companyId }: Props) => {
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>Name *</Label>
+                  <Label>{t("common.name")} *</Label>
                   <Input
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
@@ -108,7 +110,7 @@ const PropertyCategoriesTab = ({ companyId }: Props) => {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>Code *</Label>
+                  <Label>{t("common.code")} *</Label>
                   <Input
                     value={formData.code}
                     onChange={(e) => setFormData({ ...formData, code: e.target.value.toUpperCase() })}
@@ -117,14 +119,14 @@ const PropertyCategoriesTab = ({ companyId }: Props) => {
                 </div>
               </div>
               <div className="space-y-2">
-                <Label>Description</Label>
+                <Label>{t("common.description")}</Label>
                 <Textarea
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                 />
               </div>
               <div className="space-y-2">
-                <Label>Depreciation Years</Label>
+                <Label>{t("companyProperty.categories.depreciationYears")}</Label>
                 <Input
                   type="number"
                   value={formData.depreciation_years}
@@ -134,11 +136,11 @@ const PropertyCategoriesTab = ({ companyId }: Props) => {
               </div>
               <div className="flex justify-end gap-2">
                 <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
-                  Cancel
+                  {t("common.cancel")}
                 </Button>
                 <Button type="submit" disabled={createCategory.isPending}>
                   {createCategory.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  Create
+                  {t("common.create")}
                 </Button>
               </div>
             </form>
@@ -149,19 +151,19 @@ const PropertyCategoriesTab = ({ companyId }: Props) => {
         {categories.length === 0 ? (
           <div className="text-center py-12 text-muted-foreground">
             <Tags className="h-12 w-12 mx-auto mb-4 opacity-50" />
-            <p>No categories found</p>
-            <p className="text-sm">Create your first category to get started</p>
+            <p>{t("companyProperty.categories.noCategories")}</p>
+            <p className="text-sm">{t("companyProperty.categories.noCategoriesHint")}</p>
           </div>
         ) : (
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Code</TableHead>
-                <TableHead>Name</TableHead>
-                <TableHead>Description</TableHead>
-                <TableHead>Depreciation</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Created</TableHead>
+                <TableHead>{t("common.code")}</TableHead>
+                <TableHead>{t("common.name")}</TableHead>
+                <TableHead>{t("common.description")}</TableHead>
+                <TableHead>{t("companyProperty.categories.depreciation")}</TableHead>
+                <TableHead>{t("common.status")}</TableHead>
+                <TableHead>{t("common.createdAt")}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -173,11 +175,11 @@ const PropertyCategoriesTab = ({ companyId }: Props) => {
                     {category.description || "-"}
                   </TableCell>
                   <TableCell>
-                    {category.depreciation_years ? `${category.depreciation_years} years` : "-"}
+                    {category.depreciation_years ? `${category.depreciation_years} ${t("companyProperty.categories.years")}` : "-"}
                   </TableCell>
                   <TableCell>
                     <Badge variant={category.is_active ? "default" : "secondary"}>
-                      {category.is_active ? "Active" : "Inactive"}
+                      {category.is_active ? t("common.active") : t("common.inactive")}
                     </Badge>
                   </TableCell>
                   <TableCell className="text-muted-foreground">

@@ -6130,5 +6130,173 @@
       "createRequisitionDesc": "Create a new job requisition for an open position",
       "jobTitle": "Job Title"
     }
+  },
+  "companyProperty": {
+    "title": "Company Property",
+    "subtitle": "Asset management and tracking",
+    "dashboard": {
+      "title": "Company Property",
+      "subtitle": "Asset management and tracking"
+    },
+    "stats": {
+      "totalAssets": "Total Assets",
+      "assigned": "Assigned",
+      "pendingRequests": "Pending Requests",
+      "maintenanceDue": "Maintenance Due",
+      "totalAssetValue": "Total Asset Value",
+      "utilizationRate": "Utilization Rate",
+      "assetsNeedingAttention": "Assets Needing Attention"
+    },
+    "tabs": {
+      "analytics": "Analytics",
+      "assets": "Assets",
+      "assignments": "Assignments",
+      "requests": "Requests",
+      "maintenance": "Maintenance",
+      "categories": "Categories"
+    },
+    "categories": {
+      "title": "Property Categories",
+      "addCategory": "Add Category",
+      "addCategoryTitle": "Add Property Category",
+      "noCategories": "No categories found",
+      "noCategoriesHint": "Create your first category to get started",
+      "company": "Company",
+      "selectCompany": "Select company (optional)",
+      "globalAllCompanies": "Global (All Companies)",
+      "depreciation": "Depreciation",
+      "depreciationYears": "Depreciation Years",
+      "years": "years"
+    },
+    "assets": {
+      "title": "Property Assets",
+      "addAsset": "Add Asset",
+      "addAssetTitle": "Add Property Asset",
+      "searchAssets": "Search assets...",
+      "noAssets": "No assets found",
+      "noAssetsHint": "Add your first asset to get started",
+      "assetTag": "Asset Tag",
+      "serialNumber": "Serial #",
+      "serialNumberFull": "Serial Number",
+      "model": "Model",
+      "manufacturer": "Manufacturer",
+      "purchaseDate": "Purchase Date",
+      "purchaseCost": "Purchase Cost",
+      "warrantyExpiry": "Warranty Expiry",
+      "condition": "Condition",
+      "location": "Location",
+      "conditions": {
+        "excellent": "Excellent",
+        "good": "Good",
+        "fair": "Fair",
+        "poor": "Poor",
+        "damaged": "Damaged"
+      },
+      "statuses": {
+        "available": "Available",
+        "assigned": "Assigned",
+        "maintenance": "Maintenance",
+        "retired": "Retired",
+        "lost": "Lost"
+      }
+    },
+    "assignments": {
+      "title": "Property Assignments",
+      "assignAsset": "Assign Asset",
+      "assignAssetTitle": "Assign Property to Employee",
+      "noAssignments": "No assignments found",
+      "noAssignmentsHint": "Assign assets to employees to track usage",
+      "asset": "Asset",
+      "selectAsset": "Select an available asset",
+      "assignedDate": "Assigned Date",
+      "expectedReturn": "Expected Return",
+      "expectedReturnDate": "Expected Return Date",
+      "conditionAtAssignment": "Condition at Assignment",
+      "conditionAtReturn": "Condition at Return",
+      "assign": "Assign",
+      "return": "Return",
+      "returnProperty": "Return Property",
+      "confirmReturn": "Confirm Return",
+      "returnNotes": "Any notes about the return...",
+      "returned": "Returned"
+    },
+    "requests": {
+      "title": "Property Requests",
+      "noRequests": "No requests found",
+      "noRequestsHint": "Property requests from employees will appear here",
+      "requestType": "Type",
+      "submitted": "Submitted",
+      "approveRequest": "Approve Request",
+      "rejectRequest": "Reject Request",
+      "confirmApprove": "Are you sure you want to approve this property request?",
+      "confirmReject": "Are you sure you want to reject this property request?",
+      "reviewNotes": "Review Notes",
+      "rejectionReason": "Reason for rejection...",
+      "optionalNotes": "Optional notes...",
+      "types": {
+        "new": "New",
+        "replacement": "Replacement",
+        "upgrade": "Upgrade",
+        "repair": "Repair"
+      },
+      "priorities": {
+        "low": "Low",
+        "medium": "Medium",
+        "high": "High",
+        "urgent": "Urgent"
+      },
+      "statuses": {
+        "pending": "Pending",
+        "approved": "Approved",
+        "rejected": "Rejected",
+        "fulfilled": "Fulfilled"
+      }
+    },
+    "maintenance": {
+      "title": "Maintenance Records",
+      "scheduleMaintenance": "Schedule Maintenance",
+      "scheduleMaintenanceTitle": "Schedule Maintenance",
+      "noMaintenance": "No maintenance records found",
+      "noMaintenanceHint": "Schedule maintenance for your assets",
+      "maintenanceType": "Type",
+      "vendor": "Vendor",
+      "scheduledDate": "Scheduled Date",
+      "scheduled": "Scheduled",
+      "performedBy": "Performed By",
+      "cost": "Cost",
+      "complete": "Complete",
+      "schedule": "Schedule",
+      "types": {
+        "repair": "Repair",
+        "inspection": "Inspection",
+        "upgrade": "Upgrade",
+        "cleaning": "Cleaning",
+        "calibration": "Calibration"
+      },
+      "statuses": {
+        "scheduled": "Scheduled",
+        "in_progress": "In Progress",
+        "completed": "Completed",
+        "cancelled": "Cancelled"
+      }
+    },
+    "analytics": {
+      "assetStatus": "Asset Status",
+      "assetStatusDesc": "Distribution by current status",
+      "assetCondition": "Asset Condition",
+      "assetConditionDesc": "Physical condition of assets",
+      "requestStatus": "Request Status",
+      "requestStatusDesc": "Property requests by status",
+      "assetsByCategory": "Assets by Category",
+      "assetsByCategoryDesc": "Distribution across asset categories",
+      "assignmentTrends": "Assignment Trends",
+      "assignmentTrendsDesc": "Assigned vs returned over last 6 months",
+      "requestsByPriority": "Requests by Priority",
+      "requestsByPriorityDesc": "Property requests urgency distribution",
+      "maintenanceCosts": "Maintenance Costs",
+      "maintenanceCostsDesc": "Monthly maintenance spending",
+      "maintenanceByType": "Maintenance by Type",
+      "maintenanceByTypeDesc": "Distribution by maintenance category"
+    }
   }
 }

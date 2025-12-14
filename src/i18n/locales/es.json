@@ -497,5 +497,173 @@
     "markAllAsRead": "Marcar Todo como Leído",
     "noNotifications": "Sin notificaciones",
     "viewAll": "Ver Todo"
+  },
+  "companyProperty": {
+    "title": "Propiedad de la Empresa",
+    "subtitle": "Gestión y seguimiento de activos",
+    "dashboard": {
+      "title": "Propiedad de la Empresa",
+      "subtitle": "Gestión y seguimiento de activos"
+    },
+    "stats": {
+      "totalAssets": "Total de Activos",
+      "assigned": "Asignados",
+      "pendingRequests": "Solicitudes Pendientes",
+      "maintenanceDue": "Mantenimiento Pendiente",
+      "totalAssetValue": "Valor Total de Activos",
+      "utilizationRate": "Tasa de Utilización",
+      "assetsNeedingAttention": "Activos que Requieren Atención"
+    },
+    "tabs": {
+      "analytics": "Análisis",
+      "assets": "Activos",
+      "assignments": "Asignaciones",
+      "requests": "Solicitudes",
+      "maintenance": "Mantenimiento",
+      "categories": "Categorías"
+    },
+    "categories": {
+      "title": "Categorías de Propiedad",
+      "addCategory": "Agregar Categoría",
+      "addCategoryTitle": "Agregar Categoría de Propiedad",
+      "noCategories": "No se encontraron categorías",
+      "noCategoriesHint": "Crea tu primera categoría para comenzar",
+      "company": "Empresa",
+      "selectCompany": "Seleccionar empresa (opcional)",
+      "globalAllCompanies": "Global (Todas las Empresas)",
+      "depreciation": "Depreciación",
+      "depreciationYears": "Años de Depreciación",
+      "years": "años"
+    },
+    "assets": {
+      "title": "Activos de Propiedad",
+      "addAsset": "Agregar Activo",
+      "addAssetTitle": "Agregar Activo de Propiedad",
+      "searchAssets": "Buscar activos...",
+      "noAssets": "No se encontraron activos",
+      "noAssetsHint": "Agrega tu primer activo para comenzar",
+      "assetTag": "Etiqueta de Activo",
+      "serialNumber": "N° Serie",
+      "serialNumberFull": "Número de Serie",
+      "model": "Modelo",
+      "manufacturer": "Fabricante",
+      "purchaseDate": "Fecha de Compra",
+      "purchaseCost": "Costo de Compra",
+      "warrantyExpiry": "Vencimiento de Garantía",
+      "condition": "Condición",
+      "location": "Ubicación",
+      "conditions": {
+        "excellent": "Excelente",
+        "good": "Bueno",
+        "fair": "Regular",
+        "poor": "Malo",
+        "damaged": "Dañado"
+      },
+      "statuses": {
+        "available": "Disponible",
+        "assigned": "Asignado",
+        "maintenance": "Mantenimiento",
+        "retired": "Retirado",
+        "lost": "Perdido"
+      }
+    },
+    "assignments": {
+      "title": "Asignaciones de Propiedad",
+      "assignAsset": "Asignar Activo",
+      "assignAssetTitle": "Asignar Propiedad a Empleado",
+      "noAssignments": "No se encontraron asignaciones",
+      "noAssignmentsHint": "Asigna activos a empleados para seguimiento",
+      "asset": "Activo",
+      "selectAsset": "Seleccionar activo disponible",
+      "assignedDate": "Fecha de Asignación",
+      "expectedReturn": "Devolución Esperada",
+      "expectedReturnDate": "Fecha de Devolución Esperada",
+      "conditionAtAssignment": "Condición al Asignar",
+      "conditionAtReturn": "Condición al Devolver",
+      "assign": "Asignar",
+      "return": "Devolver",
+      "returnProperty": "Devolver Propiedad",
+      "confirmReturn": "Confirmar Devolución",
+      "returnNotes": "Notas sobre la devolución...",
+      "returned": "Devuelto"
+    },
+    "requests": {
+      "title": "Solicitudes de Propiedad",
+      "noRequests": "No se encontraron solicitudes",
+      "noRequestsHint": "Las solicitudes de propiedad aparecerán aquí",
+      "requestType": "Tipo",
+      "submitted": "Enviado",
+      "approveRequest": "Aprobar Solicitud",
+      "rejectRequest": "Rechazar Solicitud",
+      "confirmApprove": "¿Está seguro de aprobar esta solicitud?",
+      "confirmReject": "¿Está seguro de rechazar esta solicitud?",
+      "reviewNotes": "Notas de Revisión",
+      "rejectionReason": "Razón del rechazo...",
+      "optionalNotes": "Notas opcionales...",
+      "types": {
+        "new": "Nuevo",
+        "replacement": "Reemplazo",
+        "upgrade": "Mejora",
+        "repair": "Reparación"
+      },
+      "priorities": {
+        "low": "Baja",
+        "medium": "Media",
+        "high": "Alta",
+        "urgent": "Urgente"
+      },
+      "statuses": {
+        "pending": "Pendiente",
+        "approved": "Aprobado",
+        "rejected": "Rechazado",
+        "fulfilled": "Cumplido"
+      }
+    },
+    "maintenance": {
+      "title": "Registros de Mantenimiento",
+      "scheduleMaintenance": "Programar Mantenimiento",
+      "scheduleMaintenanceTitle": "Programar Mantenimiento",
+      "noMaintenance": "No se encontraron registros de mantenimiento",
+      "noMaintenanceHint": "Programa mantenimiento para tus activos",
+      "maintenanceType": "Tipo",
+      "vendor": "Proveedor",
+      "scheduledDate": "Fecha Programada",
+      "scheduled": "Programado",
+      "performedBy": "Realizado Por",
+      "cost": "Costo",
+      "complete": "Completar",
+      "schedule": "Programar",
+      "types": {
+        "repair": "Reparación",
+        "inspection": "Inspección",
+        "upgrade": "Mejora",
+        "cleaning": "Limpieza",
+        "calibration": "Calibración"
+      },
+      "statuses": {
+        "scheduled": "Programado",
+        "in_progress": "En Progreso",
+        "completed": "Completado",
+        "cancelled": "Cancelado"
+      }
+    },
+    "analytics": {
+      "assetStatus": "Estado de Activos",
+      "assetStatusDesc": "Distribución por estado actual",
+      "assetCondition": "Condición de Activos",
+      "assetConditionDesc": "Condición física de los activos",
+      "requestStatus": "Estado de Solicitudes",
+      "requestStatusDesc": "Solicitudes de propiedad por estado",
+      "assetsByCategory": "Activos por Categoría",
+      "assetsByCategoryDesc": "Distribución por categoría de activos",
+      "assignmentTrends": "Tendencias de Asignación",
+      "assignmentTrendsDesc": "Asignados vs devueltos últimos 6 meses",
+      "requestsByPriority": "Solicitudes por Prioridad",
+      "requestsByPriorityDesc": "Distribución de urgencia de solicitudes",
+      "maintenanceCosts": "Costos de Mantenimiento",
+      "maintenanceCostsDesc": "Gasto mensual en mantenimiento",
+      "maintenanceByType": "Mantenimiento por Tipo",
+      "maintenanceByTypeDesc": "Distribución por categoría de mantenimiento"
+    }
   }
 }

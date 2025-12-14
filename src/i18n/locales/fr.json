@@ -497,5 +497,173 @@
     "markAllAsRead": "Tout Marquer comme Lu",
     "noNotifications": "Aucune notification",
     "viewAll": "Voir Tout"
+  },
+  "companyProperty": {
+    "title": "Propriété de l'Entreprise",
+    "subtitle": "Gestion et suivi des actifs",
+    "dashboard": {
+      "title": "Propriété de l'Entreprise",
+      "subtitle": "Gestion et suivi des actifs"
+    },
+    "stats": {
+      "totalAssets": "Total des Actifs",
+      "assigned": "Attribués",
+      "pendingRequests": "Demandes en Attente",
+      "maintenanceDue": "Maintenance Due",
+      "totalAssetValue": "Valeur Totale des Actifs",
+      "utilizationRate": "Taux d'Utilisation",
+      "assetsNeedingAttention": "Actifs Nécessitant Attention"
+    },
+    "tabs": {
+      "analytics": "Analytique",
+      "assets": "Actifs",
+      "assignments": "Attributions",
+      "requests": "Demandes",
+      "maintenance": "Maintenance",
+      "categories": "Catégories"
+    },
+    "categories": {
+      "title": "Catégories de Propriété",
+      "addCategory": "Ajouter Catégorie",
+      "addCategoryTitle": "Ajouter Catégorie de Propriété",
+      "noCategories": "Aucune catégorie trouvée",
+      "noCategoriesHint": "Créez votre première catégorie pour commencer",
+      "company": "Entreprise",
+      "selectCompany": "Sélectionner entreprise (optionnel)",
+      "globalAllCompanies": "Global (Toutes les Entreprises)",
+      "depreciation": "Amortissement",
+      "depreciationYears": "Années d'Amortissement",
+      "years": "ans"
+    },
+    "assets": {
+      "title": "Actifs de Propriété",
+      "addAsset": "Ajouter Actif",
+      "addAssetTitle": "Ajouter Actif de Propriété",
+      "searchAssets": "Rechercher actifs...",
+      "noAssets": "Aucun actif trouvé",
+      "noAssetsHint": "Ajoutez votre premier actif pour commencer",
+      "assetTag": "Étiquette d'Actif",
+      "serialNumber": "N° Série",
+      "serialNumberFull": "Numéro de Série",
+      "model": "Modèle",
+      "manufacturer": "Fabricant",
+      "purchaseDate": "Date d'Achat",
+      "purchaseCost": "Coût d'Achat",
+      "warrantyExpiry": "Expiration de Garantie",
+      "condition": "État",
+      "location": "Emplacement",
+      "conditions": {
+        "excellent": "Excellent",
+        "good": "Bon",
+        "fair": "Correct",
+        "poor": "Mauvais",
+        "damaged": "Endommagé"
+      },
+      "statuses": {
+        "available": "Disponible",
+        "assigned": "Attribué",
+        "maintenance": "Maintenance",
+        "retired": "Retiré",
+        "lost": "Perdu"
+      }
+    },
+    "assignments": {
+      "title": "Attributions de Propriété",
+      "assignAsset": "Attribuer Actif",
+      "assignAssetTitle": "Attribuer Propriété à Employé",
+      "noAssignments": "Aucune attribution trouvée",
+      "noAssignmentsHint": "Attribuez des actifs aux employés pour suivi",
+      "asset": "Actif",
+      "selectAsset": "Sélectionner actif disponible",
+      "assignedDate": "Date d'Attribution",
+      "expectedReturn": "Retour Prévu",
+      "expectedReturnDate": "Date de Retour Prévue",
+      "conditionAtAssignment": "État à l'Attribution",
+      "conditionAtReturn": "État au Retour",
+      "assign": "Attribuer",
+      "return": "Retourner",
+      "returnProperty": "Retourner Propriété",
+      "confirmReturn": "Confirmer Retour",
+      "returnNotes": "Notes sur le retour...",
+      "returned": "Retourné"
+    },
+    "requests": {
+      "title": "Demandes de Propriété",
+      "noRequests": "Aucune demande trouvée",
+      "noRequestsHint": "Les demandes de propriété apparaîtront ici",
+      "requestType": "Type",
+      "submitted": "Soumis",
+      "approveRequest": "Approuver Demande",
+      "rejectRequest": "Rejeter Demande",
+      "confirmApprove": "Êtes-vous sûr d'approuver cette demande ?",
+      "confirmReject": "Êtes-vous sûr de rejeter cette demande ?",
+      "reviewNotes": "Notes de Révision",
+      "rejectionReason": "Raison du rejet...",
+      "optionalNotes": "Notes optionnelles...",
+      "types": {
+        "new": "Nouveau",
+        "replacement": "Remplacement",
+        "upgrade": "Mise à niveau",
+        "repair": "Réparation"
+      },
+      "priorities": {
+        "low": "Basse",
+        "medium": "Moyenne",
+        "high": "Haute",
+        "urgent": "Urgente"
+      },
+      "statuses": {
+        "pending": "En Attente",
+        "approved": "Approuvé",
+        "rejected": "Rejeté",
+        "fulfilled": "Exécuté"
+      }
+    },
+    "maintenance": {
+      "title": "Registres de Maintenance",
+      "scheduleMaintenance": "Planifier Maintenance",
+      "scheduleMaintenanceTitle": "Planifier Maintenance",
+      "noMaintenance": "Aucun registre de maintenance trouvé",
+      "noMaintenanceHint": "Planifiez la maintenance pour vos actifs",
+      "maintenanceType": "Type",
+      "vendor": "Fournisseur",
+      "scheduledDate": "Date Planifiée",
+      "scheduled": "Planifié",
+      "performedBy": "Effectué Par",
+      "cost": "Coût",
+      "complete": "Terminer",
+      "schedule": "Planifier",
+      "types": {
+        "repair": "Réparation",
+        "inspection": "Inspection",
+        "upgrade": "Mise à niveau",
+        "cleaning": "Nettoyage",
+        "calibration": "Calibration"
+      },
+      "statuses": {
+        "scheduled": "Planifié",
+        "in_progress": "En Cours",
+        "completed": "Terminé",
+        "cancelled": "Annulé"
+      }
+    },
+    "analytics": {
+      "assetStatus": "État des Actifs",
+      "assetStatusDesc": "Distribution par état actuel",
+      "assetCondition": "Condition des Actifs",
+      "assetConditionDesc": "État physique des actifs",
+      "requestStatus": "État des Demandes",
+      "requestStatusDesc": "Demandes de propriété par état",
+      "assetsByCategory": "Actifs par Catégorie",
+      "assetsByCategoryDesc": "Distribution par catégorie d'actifs",
+      "assignmentTrends": "Tendances d'Attribution",
+      "assignmentTrendsDesc": "Attribués vs retournés sur 6 mois",
+      "requestsByPriority": "Demandes par Priorité",
+      "requestsByPriorityDesc": "Distribution d'urgence des demandes",
+      "maintenanceCosts": "Coûts de Maintenance",
+      "maintenanceCostsDesc": "Dépenses mensuelles de maintenance",
+      "maintenanceByType": "Maintenance par Type",
+      "maintenanceByTypeDesc": "Distribution par catégorie de maintenance"
+    }
   }
 }

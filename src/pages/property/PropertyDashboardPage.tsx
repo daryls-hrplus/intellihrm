@@ -11,6 +11,7 @@ import PropertyAssignmentsTab from "@/components/property/PropertyAssignmentsTab
 import PropertyRequestsTab from "@/components/property/PropertyRequestsTab";
 import PropertyMaintenanceTab from "@/components/property/PropertyMaintenanceTab";
 import { PropertyAnalytics } from "@/components/property/PropertyAnalytics";
+import { useLanguage } from "@/hooks/useLanguage";
 import {
   Package,
   Laptop,
@@ -25,6 +26,7 @@ import {
 } from "lucide-react";
 
 export default function PropertyDashboardPage() {
+  const { t } = useLanguage();
   const { selectedCompanyId, setSelectedCompanyId } = useLeaveCompanyFilter();
   const { selectedDepartmentId, setSelectedDepartmentId } = useDepartmentFilter();
   const {
@@ -41,10 +43,10 @@ export default function PropertyDashboardPage() {
   const maintenanceDue = maintenance?.filter(m => m.status === 'scheduled').length || 0;
 
   const statCards = [
-    { label: "Total Assets", value: totalAssets, icon: Package, color: "bg-primary/10 text-primary" },
-    { label: "Assigned", value: assignedAssets, icon: CheckCircle, color: "bg-success/10 text-success" },
-    { label: "Pending Requests", value: pendingRequests, icon: Clock, color: "bg-warning/10 text-warning" },
-    { label: "Maintenance Due", value: maintenanceDue, icon: AlertTriangle, color: "bg-destructive/10 text-destructive" },
+    { label: t("companyProperty.stats.totalAssets"), value: totalAssets, icon: Package, color: "bg-primary/10 text-primary" },
+    { label: t("companyProperty.stats.assigned"), value: assignedAssets, icon: CheckCircle, color: "bg-success/10 text-success" },
+    { label: t("companyProperty.stats.pendingRequests"), value: pendingRequests, icon: Clock, color: "bg-warning/10 text-warning" },
+    { label: t("companyProperty.stats.maintenanceDue"), value: maintenanceDue, icon: AlertTriangle, color: "bg-destructive/10 text-destructive" },
   ];
 
   return (
@@ -58,10 +60,10 @@ export default function PropertyDashboardPage() {
               </div>
               <div>
                 <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
-                  Company Property
+                  {t("companyProperty.title")}
                 </h1>
                 <p className="text-muted-foreground">
-                  Asset management and tracking
+                  {t("companyProperty.subtitle")}
                 </p>
               </div>
             </div>
@@ -110,27 +112,27 @@ export default function PropertyDashboardPage() {
           <TabsList className="grid w-full grid-cols-6">
             <TabsTrigger value="analytics" className="flex items-center gap-2">
               <BarChart3 className="h-4 w-4" />
-              <span className="hidden sm:inline">Analytics</span>
+              <span className="hidden sm:inline">{t("companyProperty.tabs.analytics")}</span>
             </TabsTrigger>
             <TabsTrigger value="items" className="flex items-center gap-2">
               <Laptop className="h-4 w-4" />
-              <span className="hidden sm:inline">Assets</span>
+              <span className="hidden sm:inline">{t("companyProperty.tabs.assets")}</span>
             </TabsTrigger>
             <TabsTrigger value="assignments" className="flex items-center gap-2">
               <Users className="h-4 w-4" />
-              <span className="hidden sm:inline">Assignments</span>
+              <span className="hidden sm:inline">{t("companyProperty.tabs.assignments")}</span>
             </TabsTrigger>
             <TabsTrigger value="requests" className="flex items-center gap-2">
               <Clipboard className="h-4 w-4" />
-              <span className="hidden sm:inline">Requests</span>
+              <span className="hidden sm:inline">{t("companyProperty.tabs.requests")}</span>
             </TabsTrigger>
             <TabsTrigger value="maintenance" className="flex items-center gap-2">
               <Wrench className="h-4 w-4" />
-              <span className="hidden sm:inline">Maintenance</span>
+              <span className="hidden sm:inline">{t("companyProperty.tabs.maintenance")}</span>
             </TabsTrigger>
             <TabsTrigger value="categories" className="flex items-center gap-2">
               <FolderOpen className="h-4 w-4" />
-              <span className="hidden sm:inline">Categories</span>
+              <span className="hidden sm:inline">{t("companyProperty.tabs.categories")}</span>
             </TabsTrigger>
           </TabsList>
 
