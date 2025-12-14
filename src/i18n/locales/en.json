@@ -4767,5 +4767,69 @@
     "actions": {
       "newAssessment": "New Assessment"
     }
+  },
+  "recruitment": {
+    "dashboard": {
+      "title": "Recruitment",
+      "subtitle": "Manage job requisitions, candidates, and hiring"
+    },
+    "stats": {
+      "openPositions": "Open Positions",
+      "totalCandidates": "Total Candidates",
+      "interviewsToday": "Interviews Today",
+      "hiredThisMonth": "Hired This Month",
+      "activeApplications": "Active Applications",
+      "activeRequisitions": "Active requisitions",
+      "inTalentPool": "In talent pool",
+      "inPipeline": "In pipeline",
+      "newHires": "New hires"
+    },
+    "modules": {
+      "management": {
+        "title": "Recruitment Management",
+        "description": "Requisitions, candidates, applications & job board config"
+      },
+      "candidates": {
+        "title": "Candidates",
+        "description": "View and manage applicants"
+      },
+      "applications": {
+        "title": "Applications",
+        "description": "Review job applications"
+      },
+      "interviewSchedule": {
+        "title": "Interview Schedule",
+        "description": "Manage interview calendar"
+      },
+      "analytics": {
+        "title": "Recruitment Analytics",
+        "description": "Pipeline metrics, hiring trends & source analysis",
+        "subtitle": "Comprehensive hiring pipeline and trends analysis"
+      }
+    },
+    "tabs": {
+      "requisitions": "Requisitions",
+      "candidates": "Candidates",
+      "applications": "Applications",
+      "pipeline": "Pipeline",
+      "scorecards": "Scorecards",
+      "offers": "Offers",
+      "referrals": "Referrals",
+      "assessments": "Assessments",
+      "panels": "Panels",
+      "templates": "Templates",
+      "sources": "Sources",
+      "jobBoards": "Job Boards"
+    },
+    "actions": {
+      "newRequisition": "New Requisition",
+      "newCandidate": "New Candidate",
+      "searchRequisitions": "Search requisitions..."
+    },
+    "form": {
+      "createRequisition": "Create Job Requisition",
+      "createRequisitionDesc": "Create a new job requisition for an open position",
+      "jobTitle": "Job Title"
+    }
   }
 }

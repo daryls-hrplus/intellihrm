@@ -2,6 +2,7 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import { NavLink } from "react-router-dom";
 import { ModuleReportsButton } from "@/components/reports/ModuleReportsButton";
 import { ModuleBIButton } from "@/components/bi/ModuleBIButton";
+import { useLanguage } from "@/hooks/useLanguage";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { startOfMonth, startOfDay, endOfDay } from "date-fns";
@@ -18,47 +19,48 @@ import {
   BarChart3,
 } from "lucide-react";
 
-const recruitmentModules = [
-  {
-    title: "Recruitment Management",
-    description: "Requisitions, candidates, applications & job board config",
-    href: "/recruitment/manage",
-    icon: Briefcase,
-    color: "bg-primary/10 text-primary",
-  },
-  {
-    title: "Candidates",
-    description: "View and manage applicants",
-    href: "/recruitment/manage?tab=candidates",
-    icon: Users,
-    color: "bg-success/10 text-success",
-  },
-  {
-    title: "Applications",
-    description: "Review job applications",
-    href: "/recruitment/manage?tab=applications",
-    icon: FileText,
-    color: "bg-info/10 text-info",
-  },
-  {
-    title: "Interview Schedule",
-    description: "Manage interview calendar",
-    href: "/recruitment/manage?tab=interviews",
-    icon: Calendar,
-    color: "bg-warning/10 text-warning",
-  },
-  {
-    title: "Recruitment Analytics",
-    description: "Pipeline metrics, hiring trends & source analysis",
-    href: "/recruitment/analytics",
-    icon: BarChart3,
-    color: "bg-chart-3/10 text-chart-3",
-  },
-];
-
 export default function RecruitmentDashboardPage() {
+  const { t } = useLanguage();
   const { selectedCompanyId, setSelectedCompanyId } = useLeaveCompanyFilter();
   const { selectedDepartmentId, setSelectedDepartmentId } = useDepartmentFilter();
+
+  const recruitmentModules = [
+    {
+      title: t("recruitment.modules.management.title"),
+      description: t("recruitment.modules.management.description"),
+      href: "/recruitment/manage",
+      icon: Briefcase,
+      color: "bg-primary/10 text-primary",
+    },
+    {
+      title: t("recruitment.modules.candidates.title"),
+      description: t("recruitment.modules.candidates.description"),
+      href: "/recruitment/manage?tab=candidates",
+      icon: Users,
+      color: "bg-success/10 text-success",
+    },
+    {
+      title: t("recruitment.modules.applications.title"),
+      description: t("recruitment.modules.applications.description"),
+      href: "/recruitment/manage?tab=applications",
+      icon: FileText,
+      color: "bg-info/10 text-info",
+    },
+    {
+      title: t("recruitment.modules.interviewSchedule.title"),
+      description: t("recruitment.modules.interviewSchedule.description"),
+      href: "/recruitment/manage?tab=interviews",
+      icon: Calendar,
+      color: "bg-warning/10 text-warning",
+    },
+    {
+      title: t("recruitment.modules.analytics.title"),
+      description: t("recruitment.modules.analytics.description"),
+      href: "/recruitment/analytics",
+      icon: BarChart3,
+      color: "bg-chart-3/10 text-chart-3",
+    },
+  ];
 
   // Fetch open positions count
   const { data: openPositions = 0 } = useQuery({
@@ -119,10 +121,10 @@ export default function RecruitmentDashboardPage() {
   });
 
   const statCards = [
-    { label: "Open Positions", value: openPositions, icon: Briefcase, color: "bg-primary/10 text-primary", href: "/recruitment/manage?tab=requisitions" },
-    { label: "Total Candidates", value: totalCandidates, icon: Users, color: "bg-info/10 text-info", href: "/recruitment/manage?tab=candidates" },
-    { label: "Interviews Today", value: interviewsToday, icon: Calendar, color: "bg-warning/10 text-warning", href: "/recruitment/manage?tab=applications" },
-    { label: "Hired This Month", value: hiredThisMonth, icon: CheckCircle, color: "bg-success/10 text-success", href: "/recruitment/manage?tab=applications" },
+    { label: t("recruitment.stats.openPositions"), value: openPositions, icon: Briefcase, color: "bg-primary/10 text-primary", href: "/recruitment/manage?tab=requisitions" },
+    { label: t("recruitment.stats.totalCandidates"), value: totalCandidates, icon: Users, color: "bg-info/10 text-info", href: "/recruitment/manage?tab=candidates" },
+    { label: t("recruitment.stats.interviewsToday"), value: interviewsToday, icon: Calendar, color: "bg-warning/10 text-warning", href: "/recruitment/manage?tab=applications" },
+    { label: t("recruitment.stats.hiredThisMonth"), value: hiredThisMonth, icon: CheckCircle, color: "bg-success/10 text-success", href: "/recruitment/manage?tab=applications" },
   ];
 
   return (
@@ -136,10 +138,10 @@ export default function RecruitmentDashboardPage() {
               </div>
               <div>
                 <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
-                  Recruitment
+                  {t("recruitment.dashboard.title")}
                 </h1>
                 <p className="text-muted-foreground">
-                  Manage job requisitions, candidates, and hiring
+                  {t("recruitment.dashboard.subtitle")}
                 </p>
               </div>
             </div>
