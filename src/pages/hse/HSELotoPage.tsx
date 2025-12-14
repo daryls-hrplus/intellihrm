@@ -28,47 +28,47 @@ import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 import { Skeleton } from "@/components/ui/skeleton";
 import { 
-  ClipboardCheck, 
+  Lock, 
   Plus, 
   Search, 
+  FileText,
   CheckCircle,
-  XCircle,
   Clock,
-  AlertTriangle
+  Unlock
 } from "lucide-react";
 import { useState } from "react";
 
-export default function HSEInspectionsPage() {
+export default function HSELotoPage() {
   const { t } = useLanguage();
   const { selectedCompanyId, setSelectedCompanyId } = useLeaveCompanyFilter();
   const { selectedDepartmentId, setSelectedDepartmentId } = useDepartmentFilter();
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
-  const [activeTab, setActiveTab] = useState("inspections");
+  const [activeTab, setActiveTab] = useState("applications");
 
-  const { data: templates, isLoading: templatesLoading } = useQuery({
-    queryKey: ["hse-inspection-templates", selectedCompanyId],
+  const { data: procedures, isLoading: proceduresLoading } = useQuery({
+    queryKey: ["hse-loto-procedures", selectedCompanyId],
     queryFn: async () => {
       if (!selectedCompanyId) return [];
       const { data, error } = await supabase
-        .from("hse_inspection_templates")
+        .from("hse_loto_procedures")
         .select("*")
         .eq("company_id", selectedCompanyId)
-        .order("name");
+        .order("equipment_name");
       if (error) throw error;
       return data || [];
     },
     enabled: !!selectedCompanyId,
   });
 
-  const { data: findings, isLoading: findingsLoading } = useQuery({
-    queryKey: ["hse-inspection-findings", selectedCompanyId],
+  const { data: applications, isLoading: applicationsLoading } = useQuery({
+    queryKey: ["hse-loto-applications", selectedCompanyId],
     queryFn: async () => {
       if (!selectedCompanyId) return [];
       const { data, error } = await supabase
-        .from("hse_inspection_findings")
-        .select("*, hse_inspection_templates!inner(company_id)")
-        .eq("hse_inspection_templates.company_id", selectedCompanyId)
+        .from("hse_loto_applications")
+        .select("*, hse_loto_procedures(equipment_name)")
+        .eq("company_id", selectedCompanyId)
         .order("created_at", { ascending: false });
       if (error) throw error;
       return data || [];
@@ -76,56 +76,52 @@ export default function HSEInspectionsPage() {
     enabled: !!selectedCompanyId,
   });
 
-  const filteredFindings = findings?.filter((finding) => {
-    const matchesSearch = finding.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      finding.finding_type?.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesStatus = statusFilter === "all" || finding.status === statusFilter;
+  const filteredApplications = applications?.filter((app) => {
+    const matchesSearch = app.application_number?.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesStatus = statusFilter === "all" || app.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
 
-  const getStatusBadge = (status: string) => {
+  const getStatusBadge = (status: string | null) => {
+    if (!status) return <Badge variant="secondary">-</Badge>;
     const variants: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
-      open: "destructive",
-      in_progress: "default",
-      resolved: "secondary",
-      verified: "outline",
+      requested: "secondary",
+      locked_out: "default",
+      work_in_progress: "default",
+      verification_pending: "default",
+      released: "outline",
+      cancelled: "destructive",
     };
-    return <Badge variant={variants[status] || "secondary"}>{t(`hseModule.inspections.statusOptions.${status}`)}</Badge>;
-  };
-
-  const getSeverityBadge = (severity: string) => {
-    const colors: Record<string, string> = {
-      low: "bg-emerald-500/10 text-emerald-600",
-      medium: "bg-amber-500/10 text-amber-600",
-      high: "bg-orange-500/10 text-orange-600",
-      critical: "bg-destructive/10 text-destructive",
-    };
-    return <Badge className={colors[severity] || "bg-muted text-muted-foreground"}>{t(`hseModule.inspections.severityLevels.${severity}`)}</Badge>;
+    return <Badge variant={variants[status] || "secondary"}>{t(`hseModule.loto.statusOptions.${status}`)}</Badge>;
   };
 
   const stats = [
     { 
-      label: t("hseModule.inspections.stats.totalInspections"), 
-      value: findings?.length || 0, 
-      icon: ClipboardCheck, 
+      label: t("hseModule.loto.stats.totalProcedures"), 
+      value: procedures?.length || 0, 
+      icon: FileText, 
       color: "bg-primary/10 text-primary" 
     },
     { 
-      label: t("hseModule.inspections.stats.openFindings"), 
-      value: findings?.filter(f => f.status === "open").length || 0, 
-      icon: AlertTriangle, 
+      label: t("hseModule.loto.stats.activeLocouts"), 
+      value: applications?.filter(a => a.status === "locked_out" || a.status === "work_in_progress").length || 0, 
+      icon: Lock, 
       color: "bg-destructive/10 text-destructive" 
     },
     { 
-      label: t("hseModule.inspections.stats.inProgress"), 
-      value: findings?.filter(f => f.status === "in_progress").length || 0, 
+      label: t("hseModule.loto.stats.pendingVerification"), 
+      value: applications?.filter(a => a.status === "verification_pending").length || 0, 
       icon: Clock, 
       color: "bg-amber-500/10 text-amber-600" 
     },
     { 
-      label: t("hseModule.inspections.stats.resolved"), 
-      value: findings?.filter(f => f.status === "resolved" || f.status === "verified").length || 0, 
-      icon: CheckCircle, 
+      label: t("hseModule.loto.stats.completedToday"), 
+      value: applications?.filter(a => 
+        a.status === "released" && 
+        a.released_at && 
+        new Date(a.released_at).toDateString() === new Date().toDateString()
+      ).length || 0, 
+      icon: Unlock, 
       color: "bg-emerald-500/10 text-emerald-600" 
     },
   ];
@@ -136,21 +132,21 @@ export default function HSEInspectionsPage() {
         <Breadcrumbs
           items={[
             { label: t("hseModule.title"), href: "/hse" },
-            { label: t("hseModule.inspections.title") },
+            { label: t("hseModule.loto.title") },
           ]}
         />
 
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-500/10">
-              <ClipboardCheck className="h-5 w-5 text-emerald-600" />
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-red-500/10">
+              <Lock className="h-5 w-5 text-red-600" />
             </div>
             <div>
               <h1 className="text-2xl font-bold tracking-tight text-foreground">
-                {t("hseModule.inspections.title")}
+                {t("hseModule.loto.title")}
               </h1>
               <p className="text-muted-foreground">
-                {t("hseModule.inspections.subtitle")}
+                {t("hseModule.loto.subtitle")}
               </p>
             </div>
           </div>
@@ -192,22 +188,21 @@ export default function HSEInspectionsPage() {
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <div className="flex justify-between items-center">
             <TabsList>
-              <TabsTrigger value="inspections">{t("hseModule.inspections.tabs.findings")}</TabsTrigger>
-              <TabsTrigger value="templates">{t("hseModule.inspections.tabs.templates")}</TabsTrigger>
+              <TabsTrigger value="applications">{t("hseModule.loto.tabs.applications")}</TabsTrigger>
+              <TabsTrigger value="procedures">{t("hseModule.loto.tabs.procedures")}</TabsTrigger>
             </TabsList>
             <Button>
               <Plus className="h-4 w-4 mr-2" />
-              {activeTab === "inspections" ? t("hseModule.inspections.newInspection") : t("hseModule.inspections.addTemplate")}
+              {activeTab === "applications" ? t("hseModule.loto.newApplication") : t("hseModule.loto.addProcedure")}
             </Button>
           </div>
 
-          <TabsContent value="inspections" className="mt-4 space-y-4">
-            {/* Filters */}
+          <TabsContent value="applications" className="mt-4 space-y-4">
             <div className="flex gap-4">
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
-                  placeholder={t("hseModule.inspections.searchFindings")}
+                  placeholder={t("hseModule.loto.searchApplications")}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="pl-9"
@@ -219,33 +214,34 @@ export default function HSEInspectionsPage() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">{t("hseModule.common.allStatus")}</SelectItem>
-                  <SelectItem value="open">{t("hseModule.inspections.statusOptions.open")}</SelectItem>
-                  <SelectItem value="in_progress">{t("hseModule.inspections.statusOptions.in_progress")}</SelectItem>
-                  <SelectItem value="resolved">{t("hseModule.inspections.statusOptions.resolved")}</SelectItem>
-                  <SelectItem value="verified">{t("hseModule.inspections.statusOptions.verified")}</SelectItem>
+                  <SelectItem value="requested">{t("hseModule.loto.statusOptions.requested")}</SelectItem>
+                  <SelectItem value="locked_out">{t("hseModule.loto.statusOptions.locked_out")}</SelectItem>
+                  <SelectItem value="work_in_progress">{t("hseModule.loto.statusOptions.work_in_progress")}</SelectItem>
+                  <SelectItem value="verification_pending">{t("hseModule.loto.statusOptions.verification_pending")}</SelectItem>
+                  <SelectItem value="released">{t("hseModule.loto.statusOptions.released")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             <Card>
               <CardHeader>
-                <CardTitle>{t("hseModule.inspections.findingsList")}</CardTitle>
+                <CardTitle>{t("hseModule.loto.applicationsList")}</CardTitle>
               </CardHeader>
               <CardContent>
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>{t("hseModule.inspections.inspectionNumber")}</TableHead>
-                      <TableHead>{t("hseModule.inspections.inspectionDate")}</TableHead>
-                      <TableHead>{t("common.location")}</TableHead>
-                      <TableHead>{t("hseModule.inspections.findingDescription")}</TableHead>
-                      <TableHead>{t("hseModule.inspections.severity")}</TableHead>
+                      <TableHead>{t("hseModule.loto.applicationNumber")}</TableHead>
+                      <TableHead>{t("hseModule.loto.equipment")}</TableHead>
+                      <TableHead>{t("hseModule.loto.workDescription")}</TableHead>
+                      <TableHead>{t("hseModule.loto.lockedAt")}</TableHead>
+                      <TableHead>{t("hseModule.loto.releasedAt")}</TableHead>
                       <TableHead>{t("common.status")}</TableHead>
                       <TableHead>{t("common.actions")}</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {findingsLoading ? (
+                    {applicationsLoading ? (
                       Array.from({ length: 3 }).map((_, i) => (
                         <TableRow key={i}>
                           {Array.from({ length: 7 }).map((_, j) => (
@@ -253,21 +249,21 @@ export default function HSEInspectionsPage() {
                           ))}
                         </TableRow>
                       ))
-                    ) : filteredFindings?.length === 0 ? (
+                    ) : filteredApplications?.length === 0 ? (
                       <TableRow>
                         <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
-                          {t("hseModule.inspections.noFindings")}
+                          {t("hseModule.loto.noApplications")}
                         </TableCell>
                       </TableRow>
                     ) : (
-                      filteredFindings?.map((finding) => (
-                        <TableRow key={finding.id}>
-                          <TableCell className="font-medium">{finding.finding_type}</TableCell>
-                          <TableCell>{finding.due_date ? format(new Date(finding.due_date), "MMM d, yyyy") : "-"}</TableCell>
-                          <TableCell>{finding.location || "-"}</TableCell>
-                          <TableCell className="max-w-xs truncate">{finding.description || "-"}</TableCell>
-                          <TableCell>{getSeverityBadge(finding.severity)}</TableCell>
-                          <TableCell>{getStatusBadge(finding.status)}</TableCell>
+                      filteredApplications?.map((app) => (
+                        <TableRow key={app.id}>
+                          <TableCell className="font-medium">{app.application_number}</TableCell>
+                          <TableCell>{(app.hse_loto_procedures as any)?.equipment_name || "-"}</TableCell>
+                          <TableCell className="max-w-xs truncate">{app.work_description || "-"}</TableCell>
+                          <TableCell>{app.applied_at ? format(new Date(app.applied_at), "MMM d, HH:mm") : "-"}</TableCell>
+                          <TableCell>{app.released_by ? format(new Date(app.updated_at), "MMM d, HH:mm") : "-"}</TableCell>
+                          <TableCell>{getStatusBadge(app.status)}</TableCell>
                           <TableCell>
                             <Button variant="ghost" size="sm">{t("common.view")}</Button>
                           </TableCell>
@@ -280,48 +276,50 @@ export default function HSEInspectionsPage() {
             </Card>
           </TabsContent>
 
-          <TabsContent value="templates" className="mt-4">
+          <TabsContent value="procedures" className="mt-4">
             <Card>
               <CardHeader>
-                <CardTitle>{t("hseModule.inspections.inspectionTemplates")}</CardTitle>
+                <CardTitle>{t("hseModule.loto.proceduresList")}</CardTitle>
               </CardHeader>
               <CardContent>
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>{t("common.name")}</TableHead>
-                      <TableHead>{t("common.category")}</TableHead>
-                      <TableHead>{t("hseModule.inspections.frequency")}</TableHead>
-                      <TableHead>{t("common.description")}</TableHead>
+                      <TableHead>{t("hseModule.loto.equipmentName")}</TableHead>
+                      <TableHead>{t("hseModule.loto.equipmentId")}</TableHead>
+                      <TableHead>{t("common.location")}</TableHead>
+                      <TableHead>{t("hseModule.loto.energySources")}</TableHead>
+                      <TableHead>{t("hseModule.loto.lockoutPoints")}</TableHead>
                       <TableHead>{t("common.status")}</TableHead>
                       <TableHead>{t("common.actions")}</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {templatesLoading ? (
+                    {proceduresLoading ? (
                       Array.from({ length: 3 }).map((_, i) => (
                         <TableRow key={i}>
-                          {Array.from({ length: 6 }).map((_, j) => (
+                          {Array.from({ length: 7 }).map((_, j) => (
                             <TableCell key={j}><Skeleton className="h-6 w-full" /></TableCell>
                           ))}
                         </TableRow>
                       ))
-                    ) : templates?.length === 0 ? (
+                    ) : procedures?.length === 0 ? (
                       <TableRow>
-                        <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
-                          {t("hseModule.inspections.noTemplates")}
+                        <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
+                          {t("hseModule.loto.noProcedures")}
                         </TableCell>
                       </TableRow>
                     ) : (
-                      templates?.map((template) => (
-                        <TableRow key={template.id}>
-                          <TableCell className="font-medium">{template.name}</TableCell>
-                          <TableCell>{template.category || "-"}</TableCell>
-                          <TableCell>{template.frequency || "-"}</TableCell>
-                          <TableCell className="max-w-xs truncate">{template.description || "-"}</TableCell>
+                      procedures?.map((proc) => (
+                        <TableRow key={proc.id}>
+                          <TableCell className="font-medium">{proc.equipment_name}</TableCell>
+                          <TableCell>{proc.equipment_id || "-"}</TableCell>
+                          <TableCell>{proc.location || "-"}</TableCell>
+                          <TableCell>{(proc.energy_sources as any[])?.length || 0}</TableCell>
+                          <TableCell>{(proc.isolation_points as any[])?.length || 0}</TableCell>
                           <TableCell>
-                            <Badge variant={template.is_active ? "default" : "secondary"}>
-                              {template.is_active ? t("common.active") : t("common.inactive")}
+                            <Badge variant={proc.is_active ? "default" : "secondary"}>
+                              {proc.is_active ? t("common.active") : t("common.inactive")}
                             </Badge>
                           </TableCell>
                           <TableCell>

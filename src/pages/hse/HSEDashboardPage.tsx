@@ -17,6 +17,9 @@ import {
   ChevronRight,
   CheckCircle,
   Clock,
+  Briefcase,
+  HardHatIcon,
+  Siren,
 } from "lucide-react";
 
 const hseModules = [
@@ -120,6 +123,34 @@ export default function HSEDashboardPage() {
       href: "/hse/risk-assessment",
       icon: Shield,
       color: "bg-primary/10 text-primary",
+    },
+    {
+      title: t("hseModule.modules.workersComp.title"),
+      description: t("hseModule.modules.workersComp.description"),
+      href: "/hse/workers-comp",
+      icon: Briefcase,
+      color: "bg-violet-500/10 text-violet-600",
+    },
+    {
+      title: t("hseModule.modules.ppe.title"),
+      description: t("hseModule.modules.ppe.description"),
+      href: "/hse/ppe",
+      icon: HardHatIcon,
+      color: "bg-orange-500/10 text-orange-600",
+    },
+    {
+      title: t("hseModule.modules.inspections.title"),
+      description: t("hseModule.modules.inspections.description"),
+      href: "/hse/inspections",
+      icon: ClipboardCheck,
+      color: "bg-teal-500/10 text-teal-600",
+    },
+    {
+      title: t("hseModule.modules.emergencyResponse.title"),
+      description: t("hseModule.modules.emergencyResponse.description"),
+      href: "/hse/emergency-response",
+      icon: Siren,
+      color: "bg-rose-500/10 text-rose-600",
     },
   ];
 

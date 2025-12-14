@@ -27,30 +27,30 @@ import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 import { Skeleton } from "@/components/ui/skeleton";
 import { 
-  Briefcase, 
+  FileSpreadsheet, 
   Plus, 
   Search, 
-  DollarSign,
-  Clock,
+  FileText,
   CheckCircle,
-  XCircle,
-  FileText
+  Clock,
+  Send
 } from "lucide-react";
 import { useState } from "react";
 
-export default function HSEWorkersCompPage() {
+export default function HSEOshaReportingPage() {
   const { t } = useLanguage();
   const { selectedCompanyId, setSelectedCompanyId } = useLeaveCompanyFilter();
   const { selectedDepartmentId, setSelectedDepartmentId } = useDepartmentFilter();
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [yearFilter, setYearFilter] = useState(new Date().getFullYear().toString());
 
-  const { data: claims, isLoading } = useQuery({
-    queryKey: ["hse-workers-comp-claims", selectedCompanyId],
+  const { data: logs, isLoading } = useQuery({
+    queryKey: ["hse-osha-logs", selectedCompanyId, yearFilter],
     queryFn: async () => {
       if (!selectedCompanyId) return [];
       const { data, error } = await supabase
-        .from("hse_workers_comp_claims")
+        .from("hse_osha_logs")
         .select("*")
         .eq("company_id", selectedCompanyId)
         .order("created_at", { ascending: false });
@@ -60,50 +60,52 @@ export default function HSEWorkersCompPage() {
     enabled: !!selectedCompanyId,
   });
 
-  const filteredClaims = claims?.filter((claim) => {
-    const matchesSearch = claim.claim_number?.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesStatus = statusFilter === "all" || claim.claim_status === statusFilter;
+  const filteredLogs = logs?.filter((log) => {
+    const matchesSearch = log.establishment_name?.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesStatus = statusFilter === "all" || log.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
 
   const getStatusBadge = (status: string | null) => {
     if (!status) return <Badge variant="secondary">-</Badge>;
     const variants: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
-      filed: "secondary",
-      under_review: "default",
-      approved: "default",
-      denied: "destructive",
-      closed: "outline",
+      draft: "secondary",
+      pending_review: "default",
+      submitted: "outline",
+      accepted: "outline",
+      rejected: "destructive",
     };
-    return <Badge variant={variants[status] || "secondary"}>{t(`hseModule.workersComp.statusOptions.${status}`)}</Badge>;
+    return <Badge variant={variants[status] || "secondary"}>{status}</Badge>;
   };
 
   const stats = [
     { 
-      label: t("hseModule.workersComp.stats.totalClaims"), 
-      value: claims?.length || 0, 
+      label: t("hseModule.oshaReporting.stats.totalLogs"), 
+      value: logs?.length || 0, 
       icon: FileText, 
       color: "bg-primary/10 text-primary" 
     },
     { 
-      label: t("hseModule.workersComp.stats.pendingClaims"), 
-      value: claims?.filter(c => c.claim_status === "under_review" || c.claim_status === "filed").length || 0, 
+      label: t("hseModule.oshaReporting.stats.pendingSubmission"), 
+      value: logs?.filter(l => l.status === "draft").length || 0, 
       icon: Clock, 
       color: "bg-amber-500/10 text-amber-600" 
     },
-    {
-      label: t("hseModule.workersComp.stats.approvedClaims"), 
-      value: claims?.filter(c => c.claim_status === "approved").length || 0, 
-      icon: CheckCircle, 
+    { 
+      label: t("hseModule.oshaReporting.stats.submitted"), 
+      value: logs?.filter(l => l.status === "submitted").length || 0, 
+      icon: Send, 
       color: "bg-emerald-500/10 text-emerald-600" 
     },
     { 
-      label: t("hseModule.workersComp.stats.totalCompensation"), 
-      value: `$${(claims?.reduce((sum, c) => sum + ((c.total_medical_costs || 0) + (c.total_wage_replacement || 0)), 0) || 0).toLocaleString()}`, 
-      icon: DollarSign, 
+      label: t("hseModule.oshaReporting.stats.recordableIncidents"), 
+      value: logs?.reduce((sum, l) => sum + (l.total_deaths || 0), 0) || 0, 
+      icon: FileSpreadsheet, 
       color: "bg-sky-500/10 text-sky-600" 
     },
   ];
+
+  const years = Array.from({ length: 5 }, (_, i) => (new Date().getFullYear() - i).toString());
 
   return (
     <AppLayout>
@@ -111,21 +113,21 @@ export default function HSEWorkersCompPage() {
         <Breadcrumbs
           items={[
             { label: t("hseModule.title"), href: "/hse" },
-            { label: t("hseModule.workersComp.title") },
+            { label: t("hseModule.oshaReporting.title") },
           ]}
         />
 
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-              <Briefcase className="h-5 w-5 text-primary" />
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-500/10">
+              <FileSpreadsheet className="h-5 w-5 text-blue-600" />
             </div>
             <div>
               <h1 className="text-2xl font-bold tracking-tight text-foreground">
-                {t("hseModule.workersComp.title")}
+                {t("hseModule.oshaReporting.title")}
               </h1>
               <p className="text-muted-foreground">
-                {t("hseModule.workersComp.subtitle")}
+                {t("hseModule.oshaReporting.subtitle")}
               </p>
             </div>
           </div>
@@ -141,7 +143,7 @@ export default function HSEWorkersCompPage() {
             />
             <Button>
               <Plus className="h-4 w-4 mr-2" />
-              {t("hseModule.workersComp.fileClaim")}
+              {t("hseModule.oshaReporting.createLog")}
             </Button>
           </div>
         </div>
@@ -177,41 +179,50 @@ export default function HSEWorkersCompPage() {
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder={t("hseModule.workersComp.searchClaims")}
+              placeholder={t("hseModule.oshaReporting.searchLogs")}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-9"
             />
           </div>
+          <Select value={yearFilter} onValueChange={setYearFilter}>
+            <SelectTrigger className="w-32">
+              <SelectValue placeholder={t("hseModule.oshaReporting.year")} />
+            </SelectTrigger>
+            <SelectContent>
+              {years.map(year => (
+                <SelectItem key={year} value={year}>{year}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
           <Select value={statusFilter} onValueChange={setStatusFilter}>
             <SelectTrigger className="w-48">
               <SelectValue placeholder={t("common.status")} />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">{t("hseModule.common.allStatus")}</SelectItem>
-              <SelectItem value="filed">{t("hseModule.workersComp.statusOptions.filed")}</SelectItem>
-              <SelectItem value="under_review">{t("hseModule.workersComp.statusOptions.under_review")}</SelectItem>
-              <SelectItem value="approved">{t("hseModule.workersComp.statusOptions.approved")}</SelectItem>
-              <SelectItem value="denied">{t("hseModule.workersComp.statusOptions.denied")}</SelectItem>
-              <SelectItem value="closed">{t("hseModule.workersComp.statusOptions.closed")}</SelectItem>
+              <SelectItem value="draft">{t("hseModule.oshaReporting.statusOptions.draft")}</SelectItem>
+              <SelectItem value="pending_review">{t("hseModule.oshaReporting.statusOptions.pending_review")}</SelectItem>
+              <SelectItem value="submitted">{t("hseModule.oshaReporting.statusOptions.submitted")}</SelectItem>
+              <SelectItem value="accepted">{t("hseModule.oshaReporting.statusOptions.accepted")}</SelectItem>
             </SelectContent>
           </Select>
         </div>
 
-        {/* Claims Table */}
+        {/* Logs Table */}
         <Card>
           <CardHeader>
-            <CardTitle>{t("hseModule.workersComp.claimsList")}</CardTitle>
+            <CardTitle>{t("hseModule.oshaReporting.logsList")}</CardTitle>
           </CardHeader>
           <CardContent>
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>{t("hseModule.workersComp.claimNumber")}</TableHead>
-                  <TableHead>{t("hseModule.workersComp.injuryDate")}</TableHead>
-                  <TableHead>{t("hseModule.workersComp.injuryDescription")}</TableHead>
-                  <TableHead>{t("hseModule.workersComp.bodyParts")}</TableHead>
-                  <TableHead>{t("hseModule.workersComp.compensation")}</TableHead>
+                  <TableHead>{t("hseModule.oshaReporting.reportNumber")}</TableHead>
+                  <TableHead>{t("hseModule.oshaReporting.year")}</TableHead>
+                  <TableHead>{t("hseModule.oshaReporting.formType")}</TableHead>
+                  <TableHead>{t("hseModule.oshaReporting.recordableCases")}</TableHead>
+                  <TableHead>{t("hseModule.oshaReporting.daysAway")}</TableHead>
                   <TableHead>{t("common.status")}</TableHead>
                   <TableHead>{t("common.actions")}</TableHead>
                 </TableRow>
@@ -225,21 +236,21 @@ export default function HSEWorkersCompPage() {
                       ))}
                     </TableRow>
                   ))
-                ) : filteredClaims?.length === 0 ? (
+                ) : filteredLogs?.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
-                      {t("hseModule.workersComp.noClaims")}
+                      {t("hseModule.oshaReporting.noLogs")}
                     </TableCell>
                   </TableRow>
                 ) : (
-                  filteredClaims?.map((claim) => (
-                    <TableRow key={claim.id}>
-                      <TableCell className="font-medium">{claim.claim_number}</TableCell>
-                      <TableCell>{claim.injury_date ? format(new Date(claim.injury_date), "MMM d, yyyy") : "-"}</TableCell>
-                      <TableCell className="max-w-xs truncate">{claim.injury_description || "-"}</TableCell>
-                      <TableCell>{claim.body_parts_affected?.join(", ") || "-"}</TableCell>
-                      <TableCell>${((claim.total_medical_costs || 0) + (claim.total_wage_replacement || 0)).toLocaleString()}</TableCell>
-                      <TableCell>{getStatusBadge(claim.claim_status)}</TableCell>
+                  filteredLogs?.map((log) => (
+                    <TableRow key={log.id}>
+                      <TableCell className="font-medium">{log.establishment_name}</TableCell>
+                      <TableCell>{log.reporting_year}</TableCell>
+                      <TableCell>{log.form_300a_completed ? "300A" : "-"}</TableCell>
+                      <TableCell>{log.total_injuries || 0}</TableCell>
+                      <TableCell>{log.total_days_away || 0}</TableCell>
+                      <TableCell>{getStatusBadge(log.status)}</TableCell>
                       <TableCell>
                         <Button variant="ghost" size="sm">{t("common.view")}</Button>
                       </TableCell>
