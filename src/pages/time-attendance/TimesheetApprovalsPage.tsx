@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useWorkflow } from "@/hooks/useWorkflow";
@@ -50,6 +51,7 @@ const statusColors: Record<string, string> = {
 };
 
 export default function TimesheetApprovalsPage() {
+  const { t } = useTranslation();
   const { user, profile } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -125,7 +127,7 @@ export default function TimesheetApprovalsPage() {
         .lte("entry_date", format(selectedPeriod.end, "yyyy-MM-dd"));
 
       if (!entries || entries.length === 0) {
-        toast({ title: "No entries", description: "No time entries found for the selected period.", variant: "destructive" });
+        toast({ title: t("common.error"), description: t("common.noData"), variant: "destructive" });
         return;
       }
 
@@ -156,12 +158,12 @@ export default function TimesheetApprovalsPage() {
         await supabase.from("timesheet_submissions").update({ status: "pending_approval" }).eq("id", submission.id);
       } catch { /* workflow template may not exist */ }
 
-      toast({ title: "Timesheet submitted", description: "Your timesheet has been submitted for approval." });
+      toast({ title: t("common.success"), description: t("timeAttendance.timesheets.timesheetSubmitted") });
       setSubmitDialogOpen(false);
       setSubmissionNotes("");
       loadData();
     } catch (error) {
-      toast({ title: "Error", description: "Failed to submit timesheet.", variant: "destructive" });
+      toast({ title: t("common.error"), variant: "destructive" });
     } finally {
       setIsSubmitting(false);
     }
@@ -186,7 +188,7 @@ export default function TimesheetApprovalsPage() {
   if (isLoading) {
     return (
       <AppLayout>
-        <Breadcrumbs items={[{ label: "Time & Attendance", href: "/time-attendance" }, { label: "Timesheet Approvals" }]} />
+        <Breadcrumbs items={[{ label: t("timeAttendance.title"), href: "/time-attendance" }, { label: t("timeAttendance.timesheets.title") }]} />
         <div className="flex items-center justify-center h-64"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>
       </AppLayout>
     );
@@ -195,37 +197,76 @@ export default function TimesheetApprovalsPage() {
   return (
     <AppLayout>
       <div className="space-y-6">
-        <Breadcrumbs items={[{ label: "Time & Attendance", href: "/time-attendance" }, { label: "Timesheet Approvals" }]} />
+        <Breadcrumbs items={[{ label: t("timeAttendance.title"), href: "/time-attendance" }, { label: t("timeAttendance.timesheets.title") }]} />
         
         <div className="grid gap-4 md:grid-cols-4">
-          <Card><CardHeader className="flex flex-row items-center justify-between pb-2"><CardTitle className="text-sm font-medium">Unsubmitted</CardTitle><Clock className="h-4 w-4 text-muted-foreground" /></CardHeader><CardContent><div className="text-2xl font-bold">{unsubmittedEntries.length}</div></CardContent></Card>
-          <Card><CardHeader className="flex flex-row items-center justify-between pb-2"><CardTitle className="text-sm font-medium">Pending</CardTitle><Send className="h-4 w-4 text-muted-foreground" /></CardHeader><CardContent><div className="text-2xl font-bold">{mySubmissions.filter((s) => s.status === "pending_approval").length}</div></CardContent></Card>
-          <Card><CardHeader className="flex flex-row items-center justify-between pb-2"><CardTitle className="text-sm font-medium">Approved</CardTitle><CheckCircle className="h-4 w-4 text-muted-foreground" /></CardHeader><CardContent><div className="text-2xl font-bold">{mySubmissions.filter((s) => s.status === "approved").length}</div></CardContent></Card>
-          <Card><CardHeader className="flex flex-row items-center justify-between pb-2"><CardTitle className="text-sm font-medium">To Review</CardTitle><FileText className="h-4 w-4 text-muted-foreground" /></CardHeader><CardContent><div className="text-2xl font-bold">{pendingApprovals.length}</div></CardContent></Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium">{t("timeAttendance.timesheets.unsubmitted")}</CardTitle>
+              <Clock className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent><div className="text-2xl font-bold">{unsubmittedEntries.length}</div></CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium">{t("timeAttendance.timesheets.pending")}</CardTitle>
+              <Send className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent><div className="text-2xl font-bold">{mySubmissions.filter((s) => s.status === "pending_approval").length}</div></CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium">{t("timeAttendance.timesheets.approved")}</CardTitle>
+              <CheckCircle className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent><div className="text-2xl font-bold">{mySubmissions.filter((s) => s.status === "approved").length}</div></CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium">{t("timeAttendance.timesheets.toReview")}</CardTitle>
+              <FileText className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent><div className="text-2xl font-bold">{pendingApprovals.length}</div></CardContent>
+          </Card>
         </div>
 
         <Tabs defaultValue="my-submissions">
           <TabsList>
-            <TabsTrigger value="my-submissions">My Submissions</TabsTrigger>
-            <TabsTrigger value="pending-review">Pending Review{pendingApprovals.length > 0 && <Badge variant="secondary" className="ml-2">{pendingApprovals.length}</Badge>}</TabsTrigger>
+            <TabsTrigger value="my-submissions">{t("timeAttendance.timesheets.mySubmissions")}</TabsTrigger>
+            <TabsTrigger value="pending-review">
+              {t("timeAttendance.timesheets.pendingReview")}
+              {pendingApprovals.length > 0 && <Badge variant="secondary" className="ml-2">{pendingApprovals.length}</Badge>}
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="my-submissions" className="space-y-4">
             <div className="flex justify-between items-center">
-              <h3 className="text-lg font-medium">My Timesheet Submissions</h3>
-              <Button onClick={openSubmitDialog} disabled={unsubmittedEntries.length === 0}><Send className="h-4 w-4 mr-2" />Submit Timesheet</Button>
+              <h3 className="text-lg font-medium">{t("timeAttendance.timesheets.mySubmissions")}</h3>
+              <Button onClick={openSubmitDialog} disabled={unsubmittedEntries.length === 0}>
+                <Send className="h-4 w-4 mr-2" />{t("timeAttendance.timesheets.submitTimesheet")}
+              </Button>
             </div>
             <Card>
               <Table>
-                <TableHeader><TableRow><TableHead>Period</TableHead><TableHead>Hours</TableHead><TableHead>Status</TableHead><TableHead>Submitted</TableHead><TableHead>Actions</TableHead></TableRow></TableHeader>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>{t("timeAttendance.timesheets.period")}</TableHead>
+                    <TableHead>{t("timeAttendance.timesheets.hours")}</TableHead>
+                    <TableHead>{t("common.status")}</TableHead>
+                    <TableHead>{t("timeAttendance.timesheets.submitted")}</TableHead>
+                    <TableHead>{t("common.actions")}</TableHead>
+                  </TableRow>
+                </TableHeader>
                 <TableBody>
-                  {mySubmissions.length === 0 ? <TableRow><TableCell colSpan={5} className="text-center text-muted-foreground">No submissions yet</TableCell></TableRow> : mySubmissions.map((s) => (
+                  {mySubmissions.length === 0 ? (
+                    <TableRow><TableCell colSpan={5} className="text-center text-muted-foreground">{t("timeAttendance.timesheets.noSubmissions")}</TableCell></TableRow>
+                  ) : mySubmissions.map((s) => (
                     <TableRow key={s.id}>
                       <TableCell>{format(parseISO(s.period_start), "MMM d")} - {format(parseISO(s.period_end), "MMM d, yyyy")}</TableCell>
                       <TableCell>{s.total_hours}h</TableCell>
                       <TableCell><Badge className={statusColors[s.status]}>{s.status.replace("_", " ")}</Badge></TableCell>
                       <TableCell>{s.submitted_at ? format(parseISO(s.submitted_at), "MMM d, HH:mm") : "-"}</TableCell>
-                      <TableCell><Button variant="ghost" size="sm" onClick={() => handleViewEntries(s)}>View</Button></TableCell>
+                      <TableCell><Button variant="ghost" size="sm" onClick={() => handleViewEntries(s)}>{t("common.view")}</Button></TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -234,20 +275,30 @@ export default function TimesheetApprovalsPage() {
           </TabsContent>
 
           <TabsContent value="pending-review" className="space-y-4">
-            <h3 className="text-lg font-medium">Timesheets Pending Your Review</h3>
+            <h3 className="text-lg font-medium">{t("timeAttendance.timesheets.pendingReview")}</h3>
             <Card>
               <Table>
-                <TableHeader><TableRow><TableHead>Employee</TableHead><TableHead>Period</TableHead><TableHead>Hours</TableHead><TableHead>Submitted</TableHead><TableHead>Actions</TableHead></TableRow></TableHeader>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>{t("common.employee")}</TableHead>
+                    <TableHead>{t("timeAttendance.timesheets.period")}</TableHead>
+                    <TableHead>{t("timeAttendance.timesheets.hours")}</TableHead>
+                    <TableHead>{t("timeAttendance.timesheets.submitted")}</TableHead>
+                    <TableHead>{t("common.actions")}</TableHead>
+                  </TableRow>
+                </TableHeader>
                 <TableBody>
-                  {pendingApprovals.length === 0 ? <TableRow><TableCell colSpan={5} className="text-center text-muted-foreground">No timesheets pending</TableCell></TableRow> : pendingApprovals.map((s) => (
+                  {pendingApprovals.length === 0 ? (
+                    <TableRow><TableCell colSpan={5} className="text-center text-muted-foreground">{t("timeAttendance.timesheets.noTimesheetsPending")}</TableCell></TableRow>
+                  ) : pendingApprovals.map((s) => (
                     <TableRow key={s.id}>
-                      <TableCell>{s.employee?.full_name || "Unknown"}</TableCell>
+                      <TableCell>{s.employee?.full_name || t("timeAttendance.timesheets.unknown")}</TableCell>
                       <TableCell>{format(parseISO(s.period_start), "MMM d")} - {format(parseISO(s.period_end), "MMM d, yyyy")}</TableCell>
                       <TableCell>{s.total_hours}h</TableCell>
                       <TableCell>{s.submitted_at ? format(parseISO(s.submitted_at), "MMM d, HH:mm") : "-"}</TableCell>
                       <TableCell className="space-x-2">
-                        <Button variant="ghost" size="sm" onClick={() => handleViewEntries(s)}>View</Button>
-                        {s.workflow_instance_id && <Button variant="outline" size="sm" onClick={() => navigate("/workflow/approvals")}>Review</Button>}
+                        <Button variant="ghost" size="sm" onClick={() => handleViewEntries(s)}>{t("common.view")}</Button>
+                        {s.workflow_instance_id && <Button variant="outline" size="sm" onClick={() => navigate("/workflow/approvals")}>{t("timeAttendance.timesheets.review")}</Button>}
                       </TableCell>
                     </TableRow>
                   ))}
@@ -260,34 +311,64 @@ export default function TimesheetApprovalsPage() {
 
       <Dialog open={submitDialogOpen} onOpenChange={setSubmitDialogOpen}>
         <DialogContent>
-          <DialogHeader><DialogTitle>Submit Timesheet for Approval</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle>{t("timeAttendance.timesheets.submitTimesheet")}</DialogTitle></DialogHeader>
           <div className="space-y-4">
             {selectedPeriod && (
               <div className="p-4 bg-muted rounded-lg">
-                <p className="text-sm text-muted-foreground">Period</p>
+                <p className="text-sm text-muted-foreground">{t("timeAttendance.timesheets.period")}</p>
                 <p className="font-medium">{format(selectedPeriod.start, "MMMM d")} - {format(selectedPeriod.end, "MMMM d, yyyy")}</p>
-                <p className="text-sm text-muted-foreground mt-2">{unsubmittedEntries.filter((e) => parseISO(e.entry_date) >= selectedPeriod.start && parseISO(e.entry_date) <= selectedPeriod.end).length} entries, {unsubmittedEntries.filter((e) => parseISO(e.entry_date) >= selectedPeriod.start && parseISO(e.entry_date) <= selectedPeriod.end).reduce((sum, e) => sum + Number(e.hours), 0).toFixed(1)}h</p>
+                <p className="text-sm text-muted-foreground mt-2">
+                  {unsubmittedEntries.filter((e) => parseISO(e.entry_date) >= selectedPeriod.start && parseISO(e.entry_date) <= selectedPeriod.end).length} {t("timeAttendance.timesheets.entries")}, {unsubmittedEntries.filter((e) => parseISO(e.entry_date) >= selectedPeriod.start && parseISO(e.entry_date) <= selectedPeriod.end).reduce((sum, e) => sum + Number(e.hours), 0).toFixed(1)}h
+                </p>
               </div>
             )}
-            <div className="space-y-2"><Label>Notes (optional)</Label><Textarea value={submissionNotes} onChange={(e) => setSubmissionNotes(e.target.value)} placeholder="Add any notes..." /></div>
+            <div className="space-y-2">
+              <Label>{t("timeAttendance.timesheets.notes")}</Label>
+              <Textarea value={submissionNotes} onChange={(e) => setSubmissionNotes(e.target.value)} placeholder={t("timeAttendance.timesheets.addNotes")} />
+            </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setSubmitDialogOpen(false)}>Cancel</Button>
-            <Button onClick={handleSubmitTimesheet} disabled={isSubmitting}>{isSubmitting ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Submitting...</> : <><Send className="h-4 w-4 mr-2" />Submit</>}</Button>
+            <Button variant="outline" onClick={() => setSubmitDialogOpen(false)}>{t("common.cancel")}</Button>
+            <Button onClick={handleSubmitTimesheet} disabled={isSubmitting}>
+              {isSubmitting ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" />{t("timeAttendance.timesheets.submitting")}</> : <><Send className="h-4 w-4 mr-2" />{t("common.submit")}</>}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
       <Dialog open={viewEntriesDialog} onOpenChange={setViewEntriesDialog}>
         <DialogContent className="max-w-2xl">
-          <DialogHeader><DialogTitle>Timesheet Entries{viewingSubmission && <span className="text-muted-foreground font-normal ml-2">({format(parseISO(viewingSubmission.period_start), "MMM d")} - {format(parseISO(viewingSubmission.period_end), "MMM d, yyyy")})</span>}</DialogTitle></DialogHeader>
+          <DialogHeader>
+            <DialogTitle>
+              {t("timeAttendance.timesheets.timesheetEntries")}
+              {viewingSubmission && <span className="text-muted-foreground font-normal ml-2">({format(parseISO(viewingSubmission.period_start), "MMM d")} - {format(parseISO(viewingSubmission.period_end), "MMM d, yyyy")})</span>}
+            </DialogTitle>
+          </DialogHeader>
           <div className="max-h-96 overflow-auto">
             <Table>
-              <TableHeader><TableRow><TableHead>Date</TableHead><TableHead>Project</TableHead><TableHead>Task</TableHead><TableHead>Hours</TableHead><TableHead>Notes</TableHead></TableRow></TableHeader>
-              <TableBody>{submissionEntries.map((e) => (<TableRow key={e.id}><TableCell>{format(parseISO(e.entry_date), "MMM d, yyyy")}</TableCell><TableCell>{e.project?.name || "-"}</TableCell><TableCell>{e.task?.name || "-"}</TableCell><TableCell>{e.hours}h</TableCell><TableCell className="max-w-xs truncate">{e.notes || "-"}</TableCell></TableRow>))}</TableBody>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>{t("common.date")}</TableHead>
+                  <TableHead>{t("timeAttendance.timesheets.project")}</TableHead>
+                  <TableHead>{t("timeAttendance.timesheets.task")}</TableHead>
+                  <TableHead>{t("timeAttendance.timesheets.hours")}</TableHead>
+                  <TableHead>{t("common.notes")}</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {submissionEntries.map((e) => (
+                  <TableRow key={e.id}>
+                    <TableCell>{format(parseISO(e.entry_date), "MMM d, yyyy")}</TableCell>
+                    <TableCell>{e.project?.name || "-"}</TableCell>
+                    <TableCell>{e.task?.name || "-"}</TableCell>
+                    <TableCell>{e.hours}h</TableCell>
+                    <TableCell className="max-w-xs truncate">{e.notes || "-"}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
             </Table>
           </div>
-          <DialogFooter><Button variant="outline" onClick={() => setViewEntriesDialog(false)}>Close</Button></DialogFooter>
+          <DialogFooter><Button variant="outline" onClick={() => setViewEntriesDialog(false)}>{t("common.close")}</Button></DialogFooter>
         </DialogContent>
       </Dialog>
     </AppLayout>
