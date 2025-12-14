@@ -7,7 +7,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Send, Bot, User, Loader2, Info } from "lucide-react";
+import { Send, Brain, User, Loader2, Info } from "lucide-react";
 import { AIGuidelinesDialog } from "./AIGuidelinesDialog";
 
 interface Message {
@@ -103,7 +103,7 @@ export function AIAssistantDialog({ open, onOpenChange }: AIAssistantDialogProps
           <DialogHeader className="px-6 py-4 border-b">
             <div className="flex items-center justify-between w-full">
               <DialogTitle className="flex items-center gap-2">
-                <Bot className="h-5 w-5 text-primary" />
+                <Brain className="h-5 w-5 text-sky-400 animate-heartbeat" />
                 {t("ai.assistantTitle")}
               </DialogTitle>
               <Button
@@ -122,7 +122,7 @@ export function AIAssistantDialog({ open, onOpenChange }: AIAssistantDialogProps
             <div className="space-y-4">
               {messages.length === 0 && (
                 <div className="text-center text-muted-foreground py-8">
-                  <Bot className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                  <Brain className="h-12 w-12 mx-auto mb-4 text-sky-400 animate-heartbeat" />
                   <p>{t("ai.welcomeMessage")}</p>
                   <p className="text-xs mt-2 text-muted-foreground/70">
                     {t("ai.disclaimer", "Responses are based on company policies and SOPs. Verify with HR for official decisions.")}
@@ -136,8 +136,8 @@ export function AIAssistantDialog({ open, onOpenChange }: AIAssistantDialogProps
                 >
                   {message.role === "assistant" && (
                     <Avatar className="h-8 w-8">
-                      <AvatarFallback className="bg-primary text-primary-foreground">
-                        <Bot className="h-4 w-4" />
+                      <AvatarFallback className="bg-sky-400/20 text-sky-400">
+                        <Brain className="h-4 w-4" />
                       </AvatarFallback>
                     </Avatar>
                   )}
@@ -162,8 +162,8 @@ export function AIAssistantDialog({ open, onOpenChange }: AIAssistantDialogProps
               {isLoading && (
                 <div className="flex gap-3">
                   <Avatar className="h-8 w-8">
-                    <AvatarFallback className="bg-primary text-primary-foreground">
-                      <Bot className="h-4 w-4" />
+                    <AvatarFallback className="bg-sky-400/20 text-sky-400">
+                      <Brain className="h-4 w-4 animate-heartbeat" />
                     </AvatarFallback>
                   </Avatar>
                   <div className="bg-muted rounded-lg px-4 py-2">
