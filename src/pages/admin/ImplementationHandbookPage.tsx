@@ -22,7 +22,8 @@ import {
   Shield,
   MessageSquare,
   Package,
-  Layers
+  Layers,
+  CreditCard
 } from "lucide-react";
 import { toast } from "sonner";
 import jsPDF from "jspdf";
@@ -187,6 +188,25 @@ const phases: Phase[] = [
       { order: 8, area: "AI Assistant Config", description: "Budget tiers, guardrails" },
     ],
   },
+  {
+    id: "billing",
+    title: "Phase 9: Billing & Subscriptions",
+    icon: CreditCard,
+    description: "Subscription management and invoice processing",
+    items: [
+      { order: 1, area: "Subscription Tiers", description: "Define pricing tiers and module bundles" },
+      { order: 2, area: "Invoice Settings", description: "Company billing address, logo, terms" },
+      { order: 3, area: "Payment Methods", description: "Configure credit card or wire transfer options" },
+      { order: 4, area: "Trial Management", description: "30-day trial with module selection" },
+      { order: 5, area: "Grace Period Config", description: "7-day grace period after trial expiry" },
+      { order: 6, area: "Invoice Generation", description: "Auto-generate on activation and before renewal" },
+      { order: 7, area: "Payment Webhook", description: "Configure mail parsing service for auto-payment receipt" },
+      { order: 8, area: "Multi-Currency Billing", description: "Group base currency and local currency setup" },
+      { order: 9, area: "Employee Overage Rules", description: "Soft limit billing for count overages" },
+      { order: 10, area: "Leave Buyout Config", description: "Negotiated rates for leave balance buyouts" },
+      { order: 11, area: "Leave Payment Rules", description: "Tiered payment percentages by day range" },
+    ],
+  },
 ];
 
 const dependencies = [
@@ -199,6 +219,9 @@ const dependencies = [
   { module: "Performance", dependsOn: "Workforce + Training (competencies)" },
   { module: "Succession", dependsOn: "Performance (assessments)" },
   { module: "All ESS/MSS", dependsOn: "User accounts + Role assignments" },
+  { module: "Billing", dependsOn: "Admin (companies, currencies)" },
+  { module: "Invoices", dependsOn: "Billing (subscriptions, tiers)" },
+  { module: "Leave Buyout", dependsOn: "Leave + Payroll (pay groups)" },
 ];
 
 export default function ImplementationHandbookPage() {
