@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { NavLink } from "react-router-dom";
-import { UserPlus, MessageSquare, HelpCircle } from "lucide-react";
+import { UserPlus, MessageSquare, HelpCircle, Newspaper } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Popover,
@@ -12,6 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { LanguageSwitcher } from "./LanguageSwitcher";
+import { NotificationBell } from "./NotificationBell";
 import {
   Tooltip,
   TooltipContent,
@@ -22,6 +23,7 @@ export function AppHeader() {
   const { isAdmin, profile, user } = useAuth();
   const [pendingCount, setPendingCount] = useState(0);
   const [unreadMessages, setUnreadMessages] = useState(0);
+  const [intranetCount, setIntranetCount] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
 
   // Fetch unread message count
@@ -70,6 +72,45 @@ export function AppHeader() {
         "postgres_changes",
         { event: "INSERT", schema: "public", table: "messages" },
         () => fetchUnreadCount()
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user]);
+
+  // Fetch intranet announcement count
+  useEffect(() => {
+    if (!user) return;
+
+    const fetchIntranetCount = async () => {
+      const sevenDaysAgo = new Date();
+      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+      const { count, error } = await supabase
+        .from("intranet_announcements")
+        .select("*", { count: "exact", head: true })
+        .eq("is_published", true)
+        .gte("created_at", sevenDaysAgo.toISOString());
+
+      if (!error && count !== null) {
+        setIntranetCount(count);
+      }
+    };
+
+    fetchIntranetCount();
+
+    const channel = supabase
+      .channel("intranet-header-changes")
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "intranet_announcements",
+        },
+        () => fetchIntranetCount()
       )
       .subscribe();
 
@@ -129,6 +170,36 @@ export function AppHeader() {
     <div className="flex items-center justify-end gap-2 mb-4">
       {/* Language Switcher */}
       <LanguageSwitcher />
+      
+      {/* Intranet Button */}
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <NavLink to="/intranet">
+            <Button variant="ghost" size="icon" className="relative">
+              <Newspaper className="h-5 w-5" />
+              {intranetCount > 0 && (
+                <Badge
+                  variant="default"
+                  className="absolute -top-1 -right-1 h-5 min-w-[20px] px-1 text-[10px] font-bold"
+                >
+                  {intranetCount > 9 ? "9+" : intranetCount}
+                </Badge>
+              )}
+            </Button>
+          </NavLink>
+        </TooltipTrigger>
+        <TooltipContent>Intranet</TooltipContent>
+      </Tooltip>
+      
+      {/* Notifications Bell */}
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <div>
+            <NotificationBell />
+          </div>
+        </TooltipTrigger>
+        <TooltipContent>Notifications</TooltipContent>
+      </Tooltip>
       
       {/* Help Center Button */}
       <Tooltip>
