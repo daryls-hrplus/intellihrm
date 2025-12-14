@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { useTranslation } from 'react-i18next';
 import { AppLayout } from '@/components/layout/AppLayout';
+import { useLanguage } from '@/hooks/useLanguage';
 import { Breadcrumbs } from '@/components/ui/breadcrumbs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -31,7 +31,7 @@ import { toast } from 'sonner';
 const CONDITIONS = ['excellent', 'good', 'fair', 'poor', 'damaged'];
 
 export default function MssPropertyPage() {
-  const { t } = useTranslation();
+  const { t } = useLanguage();
   const { user, company } = useAuth();
   const [directReports, setDirectReports] = useState<{ id: string; full_name: string; email: string }[]>([]);
   const [isAssignDialogOpen, setIsAssignDialogOpen] = useState(false);
@@ -59,9 +59,8 @@ export default function MssPropertyPage() {
   } = usePropertyManagement(company?.id);
 
   const breadcrumbItems = [
-    { label: t('common.home'), path: '/' },
-    { label: 'Manager Self Service', path: '/mss' },
-    { label: 'Team Property' },
+    { label: t('navigation.mss'), path: '/mss' },
+    { label: t('mss.teamProperty.title') },
   ];
 
   // Fetch direct reports
@@ -165,30 +164,30 @@ export default function MssPropertyPage() {
           <div>
             <h1 className="text-3xl font-bold flex items-center gap-2">
               <Package className="h-8 w-8" />
-              Team Property
+              {t('mss.teamProperty.title')}
             </h1>
-            <p className="text-muted-foreground">Manage property for your direct reports</p>
+            <p className="text-muted-foreground">{t('mss.teamProperty.subtitle')}</p>
           </div>
           <Dialog open={isAssignDialogOpen} onOpenChange={setIsAssignDialogOpen}>
             <DialogTrigger asChild>
               <Button className="gap-2" disabled={availableItems.length === 0 || directReports.length === 0}>
                 <Plus className="h-4 w-4" />
-                Assign Property
+                {t('mss.teamProperty.assignProperty')}
               </Button>
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>Assign Property to Team Member</DialogTitle>
+                <DialogTitle>{t('mss.teamProperty.assignPropertyTitle')}</DialogTitle>
               </DialogHeader>
               <form onSubmit={handleAssignSubmit} className="space-y-4">
                 <div className="space-y-2">
-                  <Label>Team Member *</Label>
+                  <Label>{t('mss.teamProperty.teamMember')} *</Label>
                   <Select 
                     value={assignForm.employee_id} 
                     onValueChange={(v) => setAssignForm({ ...assignForm, employee_id: v })}
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Select team member" />
+                      <SelectValue placeholder={t('mss.teamProperty.selectTeamMember')} />
                     </SelectTrigger>
                     <SelectContent>
                       {directReports.map((emp) => (
@@ -200,13 +199,13 @@ export default function MssPropertyPage() {
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label>Asset *</Label>
+                  <Label>{t('mss.teamProperty.asset')} *</Label>
                   <Select 
                     value={assignForm.property_id} 
                     onValueChange={(v) => setAssignForm({ ...assignForm, property_id: v })}
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Select available asset" />
+                      <SelectValue placeholder={t('mss.teamProperty.selectAsset')} />
                     </SelectTrigger>
                     <SelectContent>
                       {availableItems.map((item) => (
@@ -219,7 +218,7 @@ export default function MssPropertyPage() {
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label>Assigned Date</Label>
+                    <Label>{t('mss.teamProperty.assignedDate')}</Label>
                     <Input
                       type="date"
                       value={assignForm.assigned_date}
@@ -227,7 +226,7 @@ export default function MssPropertyPage() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>Condition</Label>
+                    <Label>{t('mss.teamProperty.condition')}</Label>
                     <Select 
                       value={assignForm.condition_at_assignment} 
                       onValueChange={(v) => setAssignForm({ ...assignForm, condition_at_assignment: v })}
@@ -246,7 +245,7 @@ export default function MssPropertyPage() {
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label>Notes</Label>
+                  <Label>{t('mss.teamProperty.notes')}</Label>
                   <Textarea
                     value={assignForm.notes}
                     onChange={(e) => setAssignForm({ ...assignForm, notes: e.target.value })}
@@ -254,11 +253,11 @@ export default function MssPropertyPage() {
                 </div>
                 <div className="flex justify-end gap-2">
                   <Button type="button" variant="outline" onClick={() => setIsAssignDialogOpen(false)}>
-                    Cancel
+                    {t('common.cancel')}
                   </Button>
                   <Button type="submit" disabled={createAssignment.isPending}>
                     {createAssignment.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    Assign
+                    {t('mss.teamProperty.assign')}
                   </Button>
                 </div>
               </form>
@@ -275,7 +274,7 @@ export default function MssPropertyPage() {
                   <Users className="h-6 w-6 text-primary" />
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Direct Reports</p>
+                  <p className="text-sm text-muted-foreground">{t('mss.teamProperty.directReports')}</p>
                   <p className="text-2xl font-bold">{directReports.length}</p>
                 </div>
               </div>
@@ -288,7 +287,7 @@ export default function MssPropertyPage() {
                   <CheckCircle className="h-6 w-6 text-success" />
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Team Assignments</p>
+                  <p className="text-sm text-muted-foreground">{t('mss.teamProperty.teamAssignments')}</p>
                   <p className="text-2xl font-bold">{teamAssignments.length}</p>
                 </div>
               </div>
@@ -301,7 +300,7 @@ export default function MssPropertyPage() {
                   <Clock className="h-6 w-6 text-warning" />
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Pending Requests</p>
+                  <p className="text-sm text-muted-foreground">{t('mss.teamProperty.pendingRequests')}</p>
                   <p className="text-2xl font-bold">{pendingRequests.length}</p>
                 </div>
               </div>
@@ -313,35 +312,35 @@ export default function MssPropertyPage() {
           <TabsList>
             <TabsTrigger value="assignments" className="gap-2">
               <Package className="h-4 w-4" />
-              Team Assignments
+              {t('mss.teamProperty.teamAssignments')}
             </TabsTrigger>
             <TabsTrigger value="requests" className="gap-2">
               <Clock className="h-4 w-4" />
-              Pending Requests ({pendingRequests.length})
+              {t('mss.teamProperty.pendingRequests')} ({pendingRequests.length})
             </TabsTrigger>
           </TabsList>
 
           <TabsContent value="assignments">
             <Card>
               <CardHeader>
-                <CardTitle>Team Property Assignments</CardTitle>
-                <CardDescription>Property currently assigned to your direct reports</CardDescription>
+                <CardTitle>{t('mss.teamProperty.teamPropertyAssignments')}</CardTitle>
+                <CardDescription>{t('mss.teamProperty.propertyAssignedDesc')}</CardDescription>
               </CardHeader>
               <CardContent>
                 {teamAssignments.length === 0 ? (
                   <div className="text-center py-12 text-muted-foreground">
                     <Package className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                    <p>No property assigned to your team members</p>
+                    <p>{t('mss.teamProperty.noPropertyAssigned')}</p>
                   </div>
                 ) : (
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead>Employee</TableHead>
-                        <TableHead>Asset</TableHead>
-                        <TableHead>Category</TableHead>
-                        <TableHead>Assigned Date</TableHead>
-                        <TableHead>Condition</TableHead>
+                        <TableHead>{t('common.employee')}</TableHead>
+                        <TableHead>{t('mss.teamProperty.asset')}</TableHead>
+                        <TableHead>{t('mss.teamProperty.category')}</TableHead>
+                        <TableHead>{t('mss.teamProperty.assignedDate')}</TableHead>
+                        <TableHead>{t('mss.teamProperty.condition')}</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -376,25 +375,25 @@ export default function MssPropertyPage() {
           <TabsContent value="requests">
             <Card>
               <CardHeader>
-                <CardTitle>Pending Property Requests</CardTitle>
-                <CardDescription>Review property requests from your team</CardDescription>
+                <CardTitle>{t('mss.teamProperty.pendingPropertyRequests')}</CardTitle>
+                <CardDescription>{t('mss.teamProperty.reviewPropertyRequests')}</CardDescription>
               </CardHeader>
               <CardContent>
                 {pendingRequests.length === 0 ? (
                   <div className="text-center py-12 text-muted-foreground">
                     <CheckCircle className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                    <p>No pending requests</p>
+                    <p>{t('mss.teamProperty.noPendingRequests')}</p>
                   </div>
                 ) : (
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead>Employee</TableHead>
-                        <TableHead>Title</TableHead>
-                        <TableHead>Type</TableHead>
-                        <TableHead>Priority</TableHead>
-                        <TableHead>Submitted</TableHead>
-                        <TableHead>Actions</TableHead>
+                        <TableHead>{t('common.employee')}</TableHead>
+                        <TableHead>{t('common.name')}</TableHead>
+                        <TableHead>{t('mss.teamProperty.type')}</TableHead>
+                        <TableHead>{t('mss.teamProperty.priority')}</TableHead>
+                        <TableHead>{t('mss.teamProperty.submitted')}</TableHead>
+                        <TableHead>{t('mss.teamProperty.actions')}</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -464,27 +463,20 @@ export default function MssPropertyPage() {
           <DialogContent>
             <DialogHeader>
               <DialogTitle>
-                {reviewAction === 'approved' ? 'Approve Request' : 'Reject Request'}
+                {reviewAction === 'approved' ? t('mss.teamProperty.approve') : t('mss.teamProperty.reject')}
               </DialogTitle>
             </DialogHeader>
             <div className="space-y-4">
-              <p className="text-sm text-muted-foreground">
-                {reviewAction === 'approved' 
-                  ? 'Are you sure you want to approve this property request?'
-                  : 'Are you sure you want to reject this property request?'
-                }
-              </p>
               <div className="space-y-2">
-                <Label>Notes</Label>
+                <Label>{t('mss.teamProperty.reviewNotes')}</Label>
                 <Textarea
                   value={reviewNotes}
                   onChange={(e) => setReviewNotes(e.target.value)}
-                  placeholder={reviewAction === 'rejected' ? 'Reason for rejection...' : 'Optional notes...'}
                 />
               </div>
               <div className="flex justify-end gap-2">
                 <Button variant="outline" onClick={() => setIsReviewDialogOpen(false)}>
-                  Cancel
+                  {t('common.cancel')}
                 </Button>
                 <Button 
                   onClick={handleReview} 
@@ -492,7 +484,7 @@ export default function MssPropertyPage() {
                   variant={reviewAction === 'rejected' ? 'destructive' : 'default'}
                 >
                   {updateRequest.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  {reviewAction === 'approved' ? 'Approve' : 'Reject'}
+                  {reviewAction === 'approved' ? t('mss.teamProperty.approve') : t('mss.teamProperty.reject')}
                 </Button>
               </div>
             </div>
