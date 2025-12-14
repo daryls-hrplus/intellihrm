@@ -30,6 +30,7 @@ import {
   Palette,
   Tag,
   Lock,
+  Bot,
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 
@@ -68,6 +69,13 @@ const getAdminModules = (t: (key: string) => string) => [
     href: "/admin/audit-logs",
     icon: FileText,
     color: "bg-secondary/10 text-secondary-foreground",
+  },
+  {
+    title: t("admin.modules.aiUsage.title"),
+    description: t("admin.modules.aiUsage.description"),
+    href: "/admin/ai-usage",
+    icon: Bot,
+    color: "bg-purple-500/10 text-purple-600",
   },
   {
     title: t("admin.modules.piiAccess.title"),
