@@ -441,45 +441,44 @@ export default function AdminAIUsagePage() {
                       <TableHead>{t("common.name")}</TableHead>
                       <TableHead>{t("common.email")}</TableHead>
                       <TableHead className="text-right">{t("admin.modules.aiUsage.monthlyTokens")}</TableHead>
+                      <TableHead className="text-right">{t("admin.modules.aiUsage.estimatedCost")}</TableHead>
                       <TableHead className="text-right">{t("admin.modules.aiUsage.monthlyLimit")}</TableHead>
                       <TableHead className="text-right">{t("admin.modules.aiUsage.dailyLimit")}</TableHead>
-                      <TableHead className="text-center">{t("common.status")}</TableHead>
+                      <TableHead className="text-center">{t("admin.modules.aiUsage.aiAccess")}</TableHead>
                       <TableHead className="text-right">{t("common.actions")}</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {userSummaries.map((user) => (
-                      <TableRow key={user.user_id}>
-                        <TableCell className="font-medium">
-                          {user.full_name}
-                        </TableCell>
-                        <TableCell>{user.email}</TableCell>
-                        <TableCell className="text-right">
-                          {user.total_tokens.toLocaleString()}
-                        </TableCell>
-                        <TableCell className="text-right">
-                          {user.monthly_limit ? user.monthly_limit.toLocaleString() : t("common.unlimited")}
-                        </TableCell>
-                        <TableCell className="text-right">
-                          {user.daily_limit ? user.daily_limit.toLocaleString() : t("common.unlimited")}
-                        </TableCell>
-                        <TableCell className="text-center">
-                          <Badge variant={user.is_enabled ? "default" : "destructive"}>
-                            {user.is_enabled ? t("common.enabled") : t("common.disabled")}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <div className="flex items-center justify-end gap-3">
-                            <div className="flex items-center gap-2">
-                              <Label htmlFor={`toggle-${user.user_id}`} className="text-xs text-muted-foreground">
-                                {user.is_enabled ? t("common.enabled") : t("common.disabled")}
-                              </Label>
-                              <Switch
-                                id={`toggle-${user.user_id}`}
-                                checked={user.is_enabled}
-                                onCheckedChange={() => toggleUserEnabled(user.user_id, user.is_enabled)}
-                              />
-                            </div>
+                    {userSummaries.map((user) => {
+                      const estimatedCost = ((user.total_tokens / 1000) * 0.002).toFixed(2);
+                      return (
+                        <TableRow key={user.user_id}>
+                          <TableCell className="font-medium">
+                            {user.full_name}
+                          </TableCell>
+                          <TableCell>{user.email}</TableCell>
+                          <TableCell className="text-right">
+                            {user.total_tokens.toLocaleString()}
+                          </TableCell>
+                          <TableCell className="text-right font-medium">
+                            ${estimatedCost}
+                          </TableCell>
+                          <TableCell className="text-right">
+                            {user.monthly_limit ? user.monthly_limit.toLocaleString() : t("common.unlimited")}
+                          </TableCell>
+                          <TableCell className="text-right">
+                            {user.daily_limit ? user.daily_limit.toLocaleString() : t("common.unlimited")}
+                          </TableCell>
+                          <TableCell className="text-center">
+                            <Button
+                              variant={user.is_enabled ? "destructive" : "default"}
+                              size="sm"
+                              onClick={() => toggleUserEnabled(user.user_id, user.is_enabled)}
+                            >
+                              {user.is_enabled ? t("admin.modules.aiUsage.disableAccess") : t("admin.modules.aiUsage.enableAccess")}
+                            </Button>
+                          </TableCell>
+                          <TableCell className="text-right">
                             <Button
                               variant="ghost"
                               size="icon"
@@ -487,10 +486,10 @@ export default function AdminAIUsagePage() {
                             >
                               <Edit2 className="h-4 w-4" />
                             </Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
                   </TableBody>
                 </Table>
               </CardContent>

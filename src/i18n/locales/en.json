@@ -1659,7 +1659,9 @@
         "dailyTokenLimit": "Daily Token Limit",
         "settingsUpdated": "User AI settings updated",
         "estimatedCost": "Estimated Cost",
-        "basedOnUsage": "Based on token usage"
+        "basedOnUsage": "Based on token usage",
+        "disableAccess": "Disable",
+        "enableAccess": "Enable"
       },
       "piiAccess": {
         "title": "PII Access Report",
