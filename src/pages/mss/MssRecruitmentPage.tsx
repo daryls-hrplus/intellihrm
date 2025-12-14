@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
+import { useLanguage } from "@/hooks/useLanguage";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -103,6 +104,7 @@ const statusConfig: Record<string, { label: string; icon: any; color: string; va
 };
 
 export default function MssRecruitmentPage() {
+  const { t } = useLanguage();
   const { user, profile } = useAuth();
   const { startWorkflow, isLoading: workflowLoading } = useWorkflow();
   const [requests, setRequests] = useState<HeadcountRequest[]>([]);
@@ -313,21 +315,21 @@ export default function MssRecruitmentPage() {
       <div className="space-y-6">
         <Breadcrumbs
           items={[
-            { label: "Manager Self Service", href: "/mss" },
-            { label: "Recruitment Requests" },
+            { label: t('navigation.mss'), href: "/mss" },
+            { label: t('mss.recruitment.title') },
           ]}
         />
 
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">Recruitment Requests</h1>
+            <h1 className="text-3xl font-bold tracking-tight">{t('mss.recruitment.title')}</h1>
             <p className="text-muted-foreground">
-              Submit and track headcount requests for your team
+              {t('mss.recruitment.subtitle')}
             </p>
           </div>
           <Button onClick={openCreateDialog}>
             <Plus className="mr-2 h-4 w-4" />
-            New Headcount Request
+            {t('mss.recruitment.newHeadcountRequest')}
           </Button>
         </div>
 
@@ -336,7 +338,7 @@ export default function MssRecruitmentPage() {
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">
-                Pending Approval
+                {t('mss.recruitment.pendingApproval')}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -346,7 +348,7 @@ export default function MssRecruitmentPage() {
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">
-                Approved
+                {t('mss.recruitment.approved')}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -358,7 +360,7 @@ export default function MssRecruitmentPage() {
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">
-                Rejected
+                {t('mss.recruitment.rejected')}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -370,7 +372,7 @@ export default function MssRecruitmentPage() {
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">
-                Job Requisitions Created
+                {t('mss.recruitment.jobRequisitionsCreated')}
               </CardTitle>
             </CardHeader>
             <CardContent>

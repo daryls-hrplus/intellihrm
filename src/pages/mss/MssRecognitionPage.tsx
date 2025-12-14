@@ -26,6 +26,7 @@ import {
 import { toast } from "sonner";
 import { Plus, Loader2, Award, Star, Trophy, Heart, ThumbsUp, PartyPopper, Users } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
+import { useLanguage } from "@/hooks/useLanguage";
 
 interface Recognition {
   id: string;
@@ -57,6 +58,7 @@ const awardTypes = [
 ];
 
 export default function MssRecognitionPage() {
+  const { t } = useLanguage();
   const { user, company } = useAuth();
   const [directReports, setDirectReports] = useState<DirectReport[]>([]);
   const [teamRecognitions, setTeamRecognitions] = useState<Recognition[]>([]);
@@ -79,7 +81,6 @@ export default function MssRecognitionPage() {
   const fetchData = async () => {
     setIsLoading(true);
     try {
-      // Get direct reports
       const { data: reports } = await supabase.rpc("get_manager_direct_reports", {
         p_manager_id: user?.id,
       });
@@ -88,7 +89,6 @@ export default function MssRecognitionPage() {
       const reportIds = (reports || []).map((r: DirectReport) => r.employee_id);
 
       if (reportIds.length > 0) {
-        // Fetch recognitions received by team
         const { data: teamRecs } = await supabase
           .from("recognition_awards")
           .select(`
@@ -103,7 +103,6 @@ export default function MssRecognitionPage() {
         setTeamRecognitions((teamRecs as Recognition[]) || []);
       }
 
-      // Fetch recognitions sent by manager
       const { data: sent } = await supabase
         .from("recognition_awards")
         .select(`
@@ -123,7 +122,7 @@ export default function MssRecognitionPage() {
 
   const handleSubmit = async () => {
     if (!formData.recipient_id || !formData.title || !formData.description) {
-      toast.error("Please fill in required fields");
+      toast.error(t('mss.teamRecognition.fillRequired'));
       return;
     }
 
@@ -143,7 +142,7 @@ export default function MssRecognitionPage() {
 
       if (error) throw error;
 
-      toast.success("Recognition sent successfully");
+      toast.success(t('mss.teamRecognition.recognitionSuccess'));
       setDialogOpen(false);
       setFormData({
         recipient_id: "",
@@ -156,7 +155,7 @@ export default function MssRecognitionPage() {
       fetchData();
     } catch (error) {
       console.error("Error sending recognition:", error);
-      toast.error("Failed to send recognition");
+      toast.error(t('mss.teamRecognition.failedSend'));
     }
   };
 
@@ -183,21 +182,21 @@ export default function MssRecognitionPage() {
       <div className="space-y-6">
         <Breadcrumbs
           items={[
-            { label: "Manager Self Service", href: "/mss" },
-            { label: "Team Recognition" },
+            { label: t('navigation.mss'), href: "/mss" },
+            { label: t('mss.teamRecognition.title') },
           ]}
         />
 
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">Team Recognition</h1>
+            <h1 className="text-3xl font-bold tracking-tight">{t('mss.teamRecognition.title')}</h1>
             <p className="text-muted-foreground">
-              Recognize your direct reports and view team recognitions
+              {t('mss.teamRecognition.subtitle')}
             </p>
           </div>
           <Button onClick={() => setDialogOpen(true)} disabled={directReports.length === 0}>
             <Plus className="mr-2 h-4 w-4" />
-            Recognize Team Member
+            {t('mss.teamRecognition.recognizeTeamMember')}
           </Button>
         </div>
 
@@ -206,48 +205,48 @@ export default function MssRecognitionPage() {
             <CardHeader className="pb-2">
               <CardTitle className="text-lg flex items-center gap-2">
                 <Users className="h-5 w-5" />
-                Team Size
+                {t('mss.teamRecognition.teamSize')}
               </CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-3xl font-bold">{directReports.length}</p>
-              <p className="text-sm text-muted-foreground">direct reports</p>
+              <p className="text-sm text-muted-foreground">{t('mss.teamRecognition.directReports')}</p>
             </CardContent>
           </Card>
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-lg flex items-center gap-2">
                 <Award className="h-5 w-5" />
-                Team Received
+                {t('mss.teamRecognition.teamReceived')}
               </CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-3xl font-bold">{teamRecognitions.length}</p>
-              <p className="text-sm text-muted-foreground">recognitions</p>
+              <p className="text-sm text-muted-foreground">{t('mss.teamRecognition.recognitions')}</p>
             </CardContent>
           </Card>
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-lg flex items-center gap-2">
                 <ThumbsUp className="h-5 w-5" />
-                You Gave
+                {t('mss.teamRecognition.youGave')}
               </CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-3xl font-bold">{sentRecognitions.length}</p>
-              <p className="text-sm text-muted-foreground">recognitions</p>
+              <p className="text-sm text-muted-foreground">{t('mss.teamRecognition.recognitions')}</p>
             </CardContent>
           </Card>
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-lg flex items-center gap-2">
                 <Trophy className="h-5 w-5" />
-                Points Given
+                {t('mss.teamRecognition.pointsGiven')}
               </CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-3xl font-bold">{totalPointsGiven}</p>
-              <p className="text-sm text-muted-foreground">total points</p>
+              <p className="text-sm text-muted-foreground">{t('mss.teamRecognition.totalPoints')}</p>
             </CardContent>
           </Card>
         </div>
@@ -255,17 +254,17 @@ export default function MssRecognitionPage() {
         {directReports.length === 0 ? (
           <Card>
             <CardContent className="py-8 text-center text-muted-foreground">
-              No direct reports found. This page is for managers with team members.
+              {t('mss.teamRecognition.noDirectReports')}
             </CardContent>
           </Card>
         ) : (
           <div className="space-y-6">
             <div>
-              <h2 className="text-xl font-semibold mb-4">Team Recognitions</h2>
+              <h2 className="text-xl font-semibold mb-4">{t('mss.teamRecognition.teamRecognitions')}</h2>
               {teamRecognitions.length === 0 ? (
                 <Card>
                   <CardContent className="py-8 text-center text-muted-foreground">
-                    No recognitions received by team members yet
+                    {t('mss.teamRecognition.noRecognitions')}
                   </CardContent>
                 </Card>
               ) : (
@@ -280,14 +279,14 @@ export default function MssRecognitionPage() {
                           <div>
                             <h3 className="font-semibold">{recognition.title}</h3>
                             <p className="text-sm text-muted-foreground">
-                              To: {recognition.recipient?.full_name}
+                              {t('mss.teamRecognition.to')}: {recognition.recipient?.full_name}
                             </p>
                           </div>
                         </div>
                       </div>
                       <CardContent className="pt-4">
                         <p className="text-sm text-muted-foreground mb-2">
-                          From: {recognition.nominator?.full_name}
+                          {t('mss.teamRecognition.from')}: {recognition.nominator?.full_name}
                         </p>
                         <p className="text-muted-foreground line-clamp-2">{recognition.description}</p>
                         <div className="flex items-center justify-between mt-4">
@@ -310,17 +309,17 @@ export default function MssRecognitionPage() {
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogContent className="max-w-md">
             <DialogHeader>
-              <DialogTitle>Recognize Team Member</DialogTitle>
+              <DialogTitle>{t('mss.teamRecognition.recognizeTeamMemberTitle')}</DialogTitle>
             </DialogHeader>
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label>Team Member *</Label>
+                <Label>{t('mss.teamProperty.teamMember')} *</Label>
                 <Select
                   value={formData.recipient_id}
                   onValueChange={(value) => setFormData({ ...formData, recipient_id: value })}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select team member" />
+                    <SelectValue placeholder={t('mss.teamRecognition.selectTeamMember')} />
                   </SelectTrigger>
                   <SelectContent>
                     {directReports.map((report) => (
@@ -333,7 +332,7 @@ export default function MssRecognitionPage() {
               </div>
 
               <div className="space-y-2">
-                <Label>Award Type</Label>
+                <Label>{t('mss.teamRecognition.awardType')}</Label>
                 <Select
                   value={formData.award_type}
                   onValueChange={(value) => setFormData({ ...formData, award_type: value })}
@@ -352,26 +351,26 @@ export default function MssRecognitionPage() {
               </div>
 
               <div className="space-y-2">
-                <Label>Title *</Label>
+                <Label>{t('mss.teamRecognition.titleLabel')} *</Label>
                 <Input
                   value={formData.title}
                   onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                  placeholder="e.g., Outstanding Performance!"
+                  placeholder={t('mss.teamRecognition.titlePlaceholder')}
                 />
               </div>
 
               <div className="space-y-2">
-                <Label>Description *</Label>
+                <Label>{t('mss.teamRecognition.descriptionLabel')} *</Label>
                 <Textarea
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  placeholder="Describe their achievement..."
+                  placeholder={t('mss.teamRecognition.descriptionPlaceholder')}
                   rows={4}
                 />
               </div>
 
               <div className="space-y-2">
-                <Label>Points to Award</Label>
+                <Label>{t('mss.teamRecognition.pointsToAward')}</Label>
                 <Input
                   type="number"
                   value={formData.points_awarded}
@@ -382,19 +381,19 @@ export default function MssRecognitionPage() {
               </div>
 
               <div className="space-y-2">
-                <Label>Company Value (Optional)</Label>
+                <Label>{t('mss.teamRecognition.companyValue')}</Label>
                 <Input
                   value={formData.company_value}
                   onChange={(e) => setFormData({ ...formData, company_value: e.target.value })}
-                  placeholder="e.g., Excellence, Innovation"
+                  placeholder={t('mss.teamRecognition.companyValuePlaceholder')}
                 />
               </div>
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setDialogOpen(false)}>
-                Cancel
+                {t('common.cancel')}
               </Button>
-              <Button onClick={handleSubmit}>Send Recognition</Button>
+              <Button onClick={handleSubmit}>{t('mss.teamRecognition.sendRecognition')}</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>

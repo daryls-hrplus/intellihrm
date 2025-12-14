@@ -35,6 +35,7 @@ import { toast } from "sonner";
 import { Plus, Loader2, AlertTriangle, Eye, Users } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { format } from "date-fns";
+import { useLanguage } from "@/hooks/useLanguage";
 
 interface PIP {
   id: string;
@@ -57,6 +58,7 @@ interface DirectReport {
 }
 
 export default function MssPipsPage() {
+  const { t } = useLanguage();
   const { user, company } = useAuth();
   const [directReports, setDirectReports] = useState<DirectReport[]>([]);
   const [pips, setPips] = useState<PIP[]>([]);
@@ -80,7 +82,6 @@ export default function MssPipsPage() {
   const fetchData = async () => {
     setIsLoading(true);
     try {
-      // Get direct reports
       const { data: reports } = await supabase.rpc("get_manager_direct_reports", {
         p_manager_id: user?.id,
       });
@@ -89,7 +90,6 @@ export default function MssPipsPage() {
       const reportIds = (reports || []).map((r: DirectReport) => r.employee_id);
 
       if (reportIds.length > 0) {
-        // Fetch PIPs for direct reports
         const { data: pipData } = await supabase
           .from("performance_improvement_plans")
           .select(`
@@ -111,7 +111,7 @@ export default function MssPipsPage() {
 
   const handleSubmit = async () => {
     if (!formData.employee_id || !formData.title || !formData.reason || !formData.start_date || !formData.end_date) {
-      toast.error("Please fill in required fields");
+      toast.error(t('mss.teamPips.fillRequired'));
       return;
     }
 
@@ -131,7 +131,7 @@ export default function MssPipsPage() {
 
       if (error) throw error;
 
-      toast.success("Performance Improvement Plan created");
+      toast.success(t('mss.teamPips.pipCreated'));
       setDialogOpen(false);
       setFormData({
         employee_id: "",
@@ -145,7 +145,7 @@ export default function MssPipsPage() {
       fetchData();
     } catch (error) {
       console.error("Error creating PIP:", error);
-      toast.error("Failed to create PIP");
+      toast.error(t('mss.teamPips.failedCreate'));
     }
   };
 
@@ -182,21 +182,21 @@ export default function MssPipsPage() {
       <div className="space-y-6">
         <Breadcrumbs
           items={[
-            { label: "Manager Self Service", href: "/mss" },
-            { label: "Team Improvement Plans" },
+            { label: t('navigation.mss'), href: "/mss" },
+            { label: t('mss.teamPips.title') },
           ]}
         />
 
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">Team Improvement Plans</h1>
+            <h1 className="text-3xl font-bold tracking-tight">{t('mss.teamPips.title')}</h1>
             <p className="text-muted-foreground">
-              Create and manage performance improvement plans for your direct reports
+              {t('mss.teamPips.subtitle')}
             </p>
           </div>
           <Button onClick={() => setDialogOpen(true)} disabled={directReports.length === 0}>
             <Plus className="mr-2 h-4 w-4" />
-            Create PIP
+            {t('mss.teamPips.createPip')}
           </Button>
         </div>
 
@@ -205,33 +205,33 @@ export default function MssPipsPage() {
             <CardHeader className="pb-2">
               <CardTitle className="text-lg flex items-center gap-2">
                 <Users className="h-5 w-5" />
-                Direct Reports
+                {t('mss.teamPips.directReports')}
               </CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-3xl font-bold">{directReports.length}</p>
-              <p className="text-sm text-muted-foreground">team members</p>
+              <p className="text-sm text-muted-foreground">{t('mss.teamPips.teamMembers')}</p>
             </CardContent>
           </Card>
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-lg flex items-center gap-2">
                 <AlertTriangle className="h-5 w-5" />
-                Active PIPs
+                {t('mss.teamPips.activePips')}
               </CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-3xl font-bold">{activePips.length}</p>
-              <p className="text-sm text-muted-foreground">in progress</p>
+              <p className="text-sm text-muted-foreground">{t('mss.teamPips.inProgress')}</p>
             </CardContent>
           </Card>
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-lg">Total PIPs</CardTitle>
+              <CardTitle className="text-lg">{t('mss.teamPips.totalPips')}</CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-3xl font-bold">{pips.length}</p>
-              <p className="text-sm text-muted-foreground">all time</p>
+              <p className="text-sm text-muted-foreground">{t('mss.teamPips.allTime')}</p>
             </CardContent>
           </Card>
         </div>
@@ -239,13 +239,13 @@ export default function MssPipsPage() {
         {directReports.length === 0 ? (
           <Card>
             <CardContent className="py-8 text-center text-muted-foreground">
-              No direct reports found. This page is for managers with team members.
+              {t('mss.teamPips.noDirectReports')}
             </CardContent>
           </Card>
         ) : pips.length === 0 ? (
           <Card>
             <CardContent className="py-8 text-center text-muted-foreground">
-              No performance improvement plans created yet
+              {t('mss.teamPips.noPips')}
             </CardContent>
           </Card>
         ) : (
@@ -253,11 +253,11 @@ export default function MssPipsPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Employee</TableHead>
-                  <TableHead>Title</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Period</TableHead>
-                  <TableHead>Progress</TableHead>
+                  <TableHead>{t('mss.teamPips.employee')}</TableHead>
+                  <TableHead>{t('mss.teamPips.pipTitle')}</TableHead>
+                  <TableHead>{t('mss.teamPips.status')}</TableHead>
+                  <TableHead>{t('mss.teamPips.period')}</TableHead>
+                  <TableHead>{t('mss.teamPips.progress')}</TableHead>
                   <TableHead className="w-[80px]"></TableHead>
                 </TableRow>
               </TableHeader>
@@ -300,17 +300,17 @@ export default function MssPipsPage() {
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogContent className="max-w-lg">
             <DialogHeader>
-              <DialogTitle>Create Performance Improvement Plan</DialogTitle>
+              <DialogTitle>{t('mss.teamPips.createPipTitle')}</DialogTitle>
             </DialogHeader>
             <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-2">
               <div className="space-y-2">
-                <Label>Employee *</Label>
+                <Label>{t('mss.teamPips.employeeLabel')} *</Label>
                 <Select
                   value={formData.employee_id}
                   onValueChange={(value) => setFormData({ ...formData, employee_id: value })}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select team member" />
+                    <SelectValue placeholder={t('mss.teamPips.selectTeamMember')} />
                   </SelectTrigger>
                   <SelectContent>
                     {directReports.map((report) => (
@@ -323,27 +323,27 @@ export default function MssPipsPage() {
               </div>
 
               <div className="space-y-2">
-                <Label>Title *</Label>
+                <Label>{t('mss.teamPips.titleLabel')} *</Label>
                 <Input
                   value={formData.title}
                   onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                  placeholder="PIP Title"
+                  placeholder={t('mss.teamPips.pipTitlePlaceholder')}
                 />
               </div>
 
               <div className="space-y-2">
-                <Label>Reason *</Label>
+                <Label>{t('mss.teamPips.reason')} *</Label>
                 <Textarea
                   value={formData.reason}
                   onChange={(e) => setFormData({ ...formData, reason: e.target.value })}
-                  placeholder="Describe the performance concerns..."
+                  placeholder={t('mss.teamPips.reasonPlaceholder')}
                   rows={3}
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>Start Date *</Label>
+                  <Label>{t('mss.teamPips.startDate')} *</Label>
                   <Input
                     type="date"
                     value={formData.start_date}
@@ -351,7 +351,7 @@ export default function MssPipsPage() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>End Date *</Label>
+                  <Label>{t('mss.teamPips.endDate')} *</Label>
                   <Input
                     type="date"
                     value={formData.end_date}
@@ -361,29 +361,29 @@ export default function MssPipsPage() {
               </div>
 
               <div className="space-y-2">
-                <Label>Improvement Areas (comma-separated)</Label>
+                <Label>{t('mss.teamPips.improvementAreas')}</Label>
                 <Input
                   value={formData.improvement_areas}
                   onChange={(e) => setFormData({ ...formData, improvement_areas: e.target.value })}
-                  placeholder="e.g., Communication, Time Management, Quality"
+                  placeholder={t('mss.teamPips.improvementAreasPlaceholder')}
                 />
               </div>
 
               <div className="space-y-2">
-                <Label>Success Criteria</Label>
+                <Label>{t('mss.teamPips.successCriteria')}</Label>
                 <Textarea
                   value={formData.success_criteria}
                   onChange={(e) => setFormData({ ...formData, success_criteria: e.target.value })}
-                  placeholder="Define what success looks like..."
+                  placeholder={t('mss.teamPips.successCriteriaPlaceholder')}
                   rows={3}
                 />
               </div>
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setDialogOpen(false)}>
-                Cancel
+                {t('common.cancel')}
               </Button>
-              <Button onClick={handleSubmit}>Create PIP</Button>
+              <Button onClick={handleSubmit}>{t('mss.teamPips.createPip')}</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -397,29 +397,29 @@ export default function MssPipsPage() {
             {selectedPip && (
               <div className="space-y-4">
                 <div>
-                  <Label className="text-muted-foreground">Employee</Label>
+                  <Label className="text-muted-foreground">{t('mss.teamPips.employee')}</Label>
                   <p className="font-medium">{selectedPip.employee?.full_name}</p>
                 </div>
                 <div>
-                  <Label className="text-muted-foreground">Status</Label>
+                  <Label className="text-muted-foreground">{t('mss.teamPips.status')}</Label>
                   <Badge className={getStatusColor(selectedPip.status)} variant="outline">
                     {selectedPip.status}
                   </Badge>
                 </div>
                 <div>
-                  <Label className="text-muted-foreground">Period</Label>
+                  <Label className="text-muted-foreground">{t('mss.teamPips.period')}</Label>
                   <p>
                     {format(new Date(selectedPip.start_date), "MMM d, yyyy")} -{" "}
                     {format(new Date(selectedPip.end_date), "MMM d, yyyy")}
                   </p>
                 </div>
                 <div>
-                  <Label className="text-muted-foreground">Reason</Label>
+                  <Label className="text-muted-foreground">{t('mss.teamPips.reason')}</Label>
                   <p>{selectedPip.reason}</p>
                 </div>
                 {selectedPip.improvement_areas?.length > 0 && (
                   <div>
-                    <Label className="text-muted-foreground">Improvement Areas</Label>
+                    <Label className="text-muted-foreground">{t('mss.teamPips.improvementAreas')}</Label>
                     <div className="flex flex-wrap gap-2 mt-1">
                       {selectedPip.improvement_areas.map((area, i) => (
                         <Badge key={i} variant="secondary">{area}</Badge>
@@ -429,12 +429,12 @@ export default function MssPipsPage() {
                 )}
                 {selectedPip.success_criteria && (
                   <div>
-                    <Label className="text-muted-foreground">Success Criteria</Label>
+                    <Label className="text-muted-foreground">{t('mss.teamPips.successCriteria')}</Label>
                     <p>{selectedPip.success_criteria}</p>
                   </div>
                 )}
                 <div>
-                  <Label className="text-muted-foreground">Progress</Label>
+                  <Label className="text-muted-foreground">{t('mss.teamPips.progress')}</Label>
                   <div className="flex items-center gap-2 mt-1">
                     <Progress value={calculateProgress(selectedPip)} className="flex-1 h-2" />
                     <span className="text-sm">{calculateProgress(selectedPip)}%</span>
@@ -444,7 +444,7 @@ export default function MssPipsPage() {
             )}
             <DialogFooter>
               <Button variant="outline" onClick={() => setSelectedPip(null)}>
-                Close
+                {t('common.close')}
               </Button>
             </DialogFooter>
           </DialogContent>
