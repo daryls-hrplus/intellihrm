@@ -15202,6 +15202,168 @@ export type Database = {
           },
         ]
       }
+      leave_payment_rules: {
+        Row: {
+          code: string
+          company_id: string
+          created_at: string | null
+          description: string | null
+          end_date: string | null
+          id: string
+          is_active: boolean | null
+          leave_type_id: string
+          name: string
+          start_date: string
+          updated_at: string | null
+        }
+        Insert: {
+          code: string
+          company_id: string
+          created_at?: string | null
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          is_active?: boolean | null
+          leave_type_id: string
+          name: string
+          start_date?: string
+          updated_at?: string | null
+        }
+        Update: {
+          code?: string
+          company_id?: string
+          created_at?: string | null
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          is_active?: boolean | null
+          leave_type_id?: string
+          name?: string
+          start_date?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "leave_payment_rules_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leave_payment_rules_leave_type_id_fkey"
+            columns: ["leave_type_id"]
+            isOneToOne: false
+            referencedRelation: "leave_types"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      leave_payment_tiers: {
+        Row: {
+          created_at: string | null
+          from_day: number
+          id: string
+          leave_payment_rule_id: string
+          payment_percentage: number
+          sort_order: number
+          to_day: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          from_day: number
+          id?: string
+          leave_payment_rule_id: string
+          payment_percentage: number
+          sort_order?: number
+          to_day?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          from_day?: number
+          id?: string
+          leave_payment_rule_id?: string
+          payment_percentage?: number
+          sort_order?: number
+          to_day?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "leave_payment_tiers_leave_payment_rule_id_fkey"
+            columns: ["leave_payment_rule_id"]
+            isOneToOne: false
+            referencedRelation: "leave_payment_rules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      leave_payroll_mappings: {
+        Row: {
+          company_id: string
+          created_at: string | null
+          description: string | null
+          end_date: string | null
+          id: string
+          is_active: boolean | null
+          leave_type_id: string
+          pay_element_id: string | null
+          payroll_code: string
+          start_date: string
+          updated_at: string | null
+        }
+        Insert: {
+          company_id: string
+          created_at?: string | null
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          is_active?: boolean | null
+          leave_type_id: string
+          pay_element_id?: string | null
+          payroll_code: string
+          start_date?: string
+          updated_at?: string | null
+        }
+        Update: {
+          company_id?: string
+          created_at?: string | null
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          is_active?: boolean | null
+          leave_type_id?: string
+          pay_element_id?: string | null
+          payroll_code?: string
+          start_date?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "leave_payroll_mappings_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leave_payroll_mappings_leave_type_id_fkey"
+            columns: ["leave_type_id"]
+            isOneToOne: false
+            referencedRelation: "leave_types"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leave_payroll_mappings_pay_element_id_fkey"
+            columns: ["pay_element_id"]
+            isOneToOne: false
+            referencedRelation: "pay_elements"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       leave_requests: {
         Row: {
           contact_during_leave: string | null
