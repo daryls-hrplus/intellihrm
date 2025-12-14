@@ -109,7 +109,9 @@
     "approve": "Approve",
     "reject": "Reject",
     "location": "Location",
-    "selectLocation": "Select location"
+    "selectLocation": "Select location",
+    "selectDepartment": "Select department",
+    "allDepartments": "All Departments"
   },
   "auth": {
     "login": "Log In",
