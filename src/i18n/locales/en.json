@@ -1,26 +1,4 @@
 {
-  "workforce": {
-    "modules": {
-      "analytics": {
-        "title": "Analytics",
-        "description": "Employee headcount, hiring trends, and department metrics"
-      }
-    },
-    "analytics": {
-      "totalEmployees": "Total Employees",
-      "activeEmployees": "Active Employees",
-      "newHires": "New Hires",
-      "terminations": "Terminations",
-      "departments": "Departments",
-      "positions": "Positions",
-      "monthlyTrends": "Monthly Hiring & Termination Trends",
-      "departmentDistribution": "Employee Distribution by Department",
-      "positionsByDepartment": "Positions by Department",
-      "hires": "Hires",
-      "totalPositions": "Total Positions",
-      "filledPositions": "Filled Positions"
-    }
-  },
   "common": {
     "loading": "Loading...",
     "save": "Save",
@@ -315,37 +293,28 @@
         "terminationReason": "Termination Reason",
         "selectManagerOptional": "Select manager (optional)",
         "noManagerAssigned": "No manager assigned",
-        "notesPlaceholder": "Any additional notes for this offboarding",
-        "addTask": "Add Task",
-        "editTask": "Edit Task",
-        "addOffboardingTask": "Add Offboarding Task",
-        "updateTaskDetails": "Update the task details",
-        "addTaskDescription": "Add a new task to this template",
-        "taskName": "Task Name",
-        "taskNamePlaceholder": "e.g., Return company laptop",
-        "taskDescriptionPlaceholder": "Task description and instructions",
-        "taskType": "Task Type",
-        "assignedTo": "Assigned To",
-        "daysBefore": "Days Before",
-        "daysBeforeLastDate": "Days Before Last Date",
-        "requiredTask": "Required task",
-        "taskTypes": {
-          "general": "General",
-          "document": "Document",
-          "equipment": "Equipment",
-          "accessRevocation": "Access Revocation",
-          "knowledgeTransfer": "Knowledge Transfer",
-          "exitInterview": "Exit Interview"
-        },
-        "reasons": {
-          "resignation": "Resignation",
-          "retirement": "Retirement",
-          "termination": "Termination",
-          "layoff": "Layoff",
-          "contractEnd": "Contract End"
-        }
+        "notesPlaceholder": "Any additional notes for this offboarding"
+      },
+      "analytics": {
+        "title": "Analytics",
+        "description": "Employee headcount, hiring trends, and department metrics"
       }
     },
+    "analytics": {
+      "totalEmployees": "Total Employees",
+      "activeEmployees": "Active Employees",
+      "newHires": "New Hires",
+      "terminations": "Terminations",
+      "departments": "Departments",
+      "positions": "Positions",
+      "monthlyTrends": "Monthly Hiring Trends",
+      "departmentDistribution": "Employee Distribution by Department",
+      "positionsByDepartment": "Positions by Department",
+      "hires": "Hires",
+      "totalPositions": "Total Positions",
+      "filledPositions": "Filled Positions"
+    },
+    "title": "Workforce Management",
     "employees": "Employees",
     "positions": "Positions",
     "manageWorkforce": "Manage your organization's workforce",
