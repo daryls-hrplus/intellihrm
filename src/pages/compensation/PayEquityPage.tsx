@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -13,6 +14,7 @@ import { Scale, Plus, AlertTriangle, CheckCircle, Info, ChevronRight, Building2 
 import { Skeleton } from "@/components/ui/skeleton";
 
 export default function PayEquityPage() {
+  const { t } = useTranslation();
   const [companyFilter, setCompanyFilter] = useState<string>("all");
 
   const { data: companies = [] } = useQuery({
@@ -69,9 +71,9 @@ export default function PayEquityPage() {
       <div className="space-y-6">
         {/* Breadcrumbs */}
         <nav className="flex items-center gap-2 text-sm text-muted-foreground">
-          <Link to="/compensation" className="hover:text-foreground transition-colors">Compensation</Link>
+          <Link to="/compensation" className="hover:text-foreground transition-colors">{t("compensation.title")}</Link>
           <ChevronRight className="h-4 w-4" />
-          <span className="text-foreground font-medium">Pay Equity Analysis</span>
+          <span className="text-foreground font-medium">{t("compensation.payEquity.title")}</span>
         </nav>
 
         <div className="flex items-center justify-between">
@@ -80,18 +82,18 @@ export default function PayEquityPage() {
               <Scale className="h-5 w-5 text-primary" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold tracking-tight">Pay Equity Analysis</h1>
-              <p className="text-muted-foreground">Analyze and address compensation gaps</p>
+              <h1 className="text-2xl font-bold tracking-tight">{t("compensation.payEquity.title")}</h1>
+              <p className="text-muted-foreground">{t("compensation.payEquity.subtitle")}</p>
             </div>
           </div>
           <div className="flex items-center gap-3">
             <Select value={companyFilter} onValueChange={setCompanyFilter}>
               <SelectTrigger className="w-[200px]">
                 <Building2 className="mr-2 h-4 w-4" />
-                <SelectValue placeholder="All Companies" />
+                <SelectValue placeholder={t("common.all")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Companies</SelectItem>
+                <SelectItem value="all">{t("common.all")}</SelectItem>
                 {companies.map((company: any) => (
                   <SelectItem key={company.id} value={company.id}>{company.name}</SelectItem>
                 ))}
@@ -99,7 +101,7 @@ export default function PayEquityPage() {
             </Select>
             <Button>
               <Plus className="mr-2 h-4 w-4" />
-              New Analysis
+              {t("compensation.payEquity.newAnalysis")}
             </Button>
           </div>
         </div>
@@ -113,7 +115,7 @@ export default function PayEquityPage() {
                   <Scale className="h-5 w-5 text-primary" />
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Total Analyses</p>
+                  <p className="text-sm text-muted-foreground">{t("compensation.payEquity.totalAnalyses")}</p>
                   <p className="text-2xl font-bold">{analyses.length}</p>
                 </div>
               </div>
@@ -126,7 +128,7 @@ export default function PayEquityPage() {
                   <CheckCircle className="h-5 w-5 text-emerald-600" />
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Completed</p>
+                  <p className="text-sm text-muted-foreground">{t("compensation.payEquity.completed")}</p>
                   <p className="text-2xl font-bold">{analyses.filter((a: any) => a.status === "completed").length}</p>
                 </div>
               </div>
@@ -139,7 +141,7 @@ export default function PayEquityPage() {
                   <AlertTriangle className="h-5 w-5 text-amber-600" />
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">In Progress</p>
+                  <p className="text-sm text-muted-foreground">{t("compensation.payEquity.inProgress")}</p>
                   <p className="text-2xl font-bold">{analyses.filter((a: any) => a.status === "in_progress").length}</p>
                 </div>
               </div>
@@ -149,7 +151,7 @@ export default function PayEquityPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Pay Equity Analyses</CardTitle>
+            <CardTitle>{t("compensation.payEquity.title")}</CardTitle>
           </CardHeader>
           <CardContent>
             {isLoading ? (
@@ -162,18 +164,18 @@ export default function PayEquityPage() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Analysis Name</TableHead>
-                    <TableHead>Type</TableHead>
-                    <TableHead>Date</TableHead>
-                    <TableHead>Methodology</TableHead>
-                    <TableHead>Status</TableHead>
+                    <TableHead>{t("compensation.payEquity.analysisName")}</TableHead>
+                    <TableHead>{t("compensation.payEquity.type")}</TableHead>
+                    <TableHead>{t("compensation.payEquity.date")}</TableHead>
+                    <TableHead>{t("compensation.payEquity.methodology")}</TableHead>
+                    <TableHead>{t("compensation.payEquity.status")}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {analyses.length === 0 ? (
                     <TableRow>
                       <TableCell colSpan={5} className="text-center text-muted-foreground">
-                        No pay equity analyses found
+                        {t("compensation.payEquity.noAnalyses")}
                       </TableCell>
                     </TableRow>
                   ) : (

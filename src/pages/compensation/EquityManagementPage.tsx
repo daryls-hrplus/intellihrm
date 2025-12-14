@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -14,6 +15,7 @@ import { Gem, Plus, TrendingUp, Users, DollarSign, FileText, ChevronRight, Build
 import { Skeleton } from "@/components/ui/skeleton";
 
 export default function EquityManagementPage() {
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState("plans");
   const [companyFilter, setCompanyFilter] = useState<string>("all");
 
@@ -92,9 +94,9 @@ export default function EquityManagementPage() {
       <div className="space-y-6">
         {/* Breadcrumbs */}
         <nav className="flex items-center gap-2 text-sm text-muted-foreground">
-          <Link to="/compensation" className="hover:text-foreground transition-colors">Compensation</Link>
+          <Link to="/compensation" className="hover:text-foreground transition-colors">{t("compensation.title")}</Link>
           <ChevronRight className="h-4 w-4" />
-          <span className="text-foreground font-medium">Equity Management</span>
+          <span className="text-foreground font-medium">{t("compensation.equity.title")}</span>
         </nav>
 
         <div className="flex items-center justify-between">
@@ -103,18 +105,18 @@ export default function EquityManagementPage() {
               <Gem className="h-5 w-5 text-primary" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold tracking-tight">Equity Management</h1>
-              <p className="text-muted-foreground">Manage stock options, RSUs, and equity grants</p>
+              <h1 className="text-2xl font-bold tracking-tight">{t("compensation.equity.title")}</h1>
+              <p className="text-muted-foreground">{t("compensation.equity.subtitle")}</p>
             </div>
           </div>
           <div className="flex items-center gap-3">
             <Select value={companyFilter} onValueChange={setCompanyFilter}>
               <SelectTrigger className="w-[200px]">
                 <Building2 className="mr-2 h-4 w-4" />
-                <SelectValue placeholder="All Companies" />
+                <SelectValue placeholder={t("common.all")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Companies</SelectItem>
+                <SelectItem value="all">{t("common.all")}</SelectItem>
                 {companies.map((company: any) => (
                   <SelectItem key={company.id} value={company.id}>{company.name}</SelectItem>
                 ))}
@@ -122,7 +124,7 @@ export default function EquityManagementPage() {
             </Select>
             <Button>
               <Plus className="mr-2 h-4 w-4" />
-              {activeTab === "plans" ? "New Plan" : "New Grant"}
+              {activeTab === "plans" ? t("compensation.equity.newPlan") : t("compensation.equity.newGrant")}
             </Button>
           </div>
         </div>
@@ -136,7 +138,7 @@ export default function EquityManagementPage() {
                   <FileText className="h-5 w-5 text-primary" />
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Active Plans</p>
+                  <p className="text-sm text-muted-foreground">{t("compensation.equity.activePlans")}</p>
                   <p className="text-2xl font-bold">{plans.filter((p: any) => p.is_active).length}</p>
                 </div>
               </div>
@@ -149,7 +151,7 @@ export default function EquityManagementPage() {
                   <TrendingUp className="h-5 w-5 text-emerald-600" />
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Shares Granted</p>
+                  <p className="text-sm text-muted-foreground">{t("compensation.equity.sharesGranted")}</p>
                   <p className="text-2xl font-bold">{totalSharesGranted.toLocaleString()}</p>
                 </div>
               </div>
@@ -162,7 +164,7 @@ export default function EquityManagementPage() {
                   <Gem className="h-5 w-5 text-sky-600" />
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Shares Vested</p>
+                  <p className="text-sm text-muted-foreground">{t("compensation.equity.sharesVested")}</p>
                   <p className="text-2xl font-bold">{totalSharesVested.toLocaleString()}</p>
                 </div>
               </div>
@@ -175,7 +177,7 @@ export default function EquityManagementPage() {
                   <Users className="h-5 w-5 text-amber-600" />
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Grant Recipients</p>
+                  <p className="text-sm text-muted-foreground">{t("compensation.equity.grantRecipients")}</p>
                   <p className="text-2xl font-bold">{new Set(grants.map((g: any) => g.employee_id)).size}</p>
                 </div>
               </div>
@@ -185,8 +187,8 @@ export default function EquityManagementPage() {
 
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList>
-            <TabsTrigger value="plans">Equity Plans</TabsTrigger>
-            <TabsTrigger value="grants">Grants</TabsTrigger>
+            <TabsTrigger value="plans">{t("compensation.equity.equityPlans")}</TabsTrigger>
+            <TabsTrigger value="grants">{t("compensation.equity.grants")}</TabsTrigger>
           </TabsList>
 
           <TabsContent value="plans">
@@ -202,19 +204,19 @@ export default function EquityManagementPage() {
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead>Plan Name</TableHead>
-                        <TableHead>Type</TableHead>
-                        <TableHead className="text-right">Authorized</TableHead>
-                        <TableHead className="text-right">Available</TableHead>
-                        <TableHead className="text-right">Current Price</TableHead>
-                        <TableHead>Status</TableHead>
+                        <TableHead>{t("compensation.equity.planName")}</TableHead>
+                        <TableHead>{t("compensation.equity.type")}</TableHead>
+                        <TableHead className="text-right">{t("compensation.equity.authorized")}</TableHead>
+                        <TableHead className="text-right">{t("compensation.equity.available")}</TableHead>
+                        <TableHead className="text-right">{t("compensation.equity.currentPrice")}</TableHead>
+                        <TableHead>{t("compensation.equity.status")}</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {plans.length === 0 ? (
                         <TableRow>
                           <TableCell colSpan={6} className="text-center text-muted-foreground">
-                            No equity plans found
+                            {t("compensation.equity.noPlans")}
                           </TableCell>
                         </TableRow>
                       ) : (
@@ -227,7 +229,7 @@ export default function EquityManagementPage() {
                             <TableCell className="text-right">${plan.current_price || "-"}</TableCell>
                             <TableCell>
                               <Badge className={plan.is_active ? "bg-emerald-500/10 text-emerald-600" : "bg-muted"}>
-                                {plan.is_active ? "Active" : "Inactive"}
+                                {plan.is_active ? t("compensation.statuses.active") : t("compensation.statuses.inactive")}
                               </Badge>
                             </TableCell>
                           </TableRow>
@@ -253,19 +255,19 @@ export default function EquityManagementPage() {
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead>Employee</TableHead>
-                        <TableHead>Plan</TableHead>
-                        <TableHead>Grant Date</TableHead>
-                        <TableHead className="text-right">Granted</TableHead>
-                        <TableHead className="text-right">Vested</TableHead>
-                        <TableHead>Status</TableHead>
+                        <TableHead>{t("compensation.equity.employee")}</TableHead>
+                        <TableHead>{t("compensation.equity.plan")}</TableHead>
+                        <TableHead>{t("compensation.equity.grantDate")}</TableHead>
+                        <TableHead className="text-right">{t("compensation.equity.granted")}</TableHead>
+                        <TableHead className="text-right">{t("compensation.equity.vested")}</TableHead>
+                        <TableHead>{t("compensation.equity.status")}</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {grants.length === 0 ? (
                         <TableRow>
                           <TableCell colSpan={6} className="text-center text-muted-foreground">
-                            No equity grants found
+                            {t("compensation.equity.noGrants")}
                           </TableCell>
                         </TableRow>
                       ) : (
