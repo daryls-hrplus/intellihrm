@@ -94,6 +94,50 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_budget_tiers: {
+        Row: {
+          company_id: string | null
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean | null
+          monthly_budget_usd: number | null
+          tier_code: string
+          tier_name: string
+          updated_at: string
+        }
+        Insert: {
+          company_id?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          monthly_budget_usd?: number | null
+          tier_code: string
+          tier_name: string
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          monthly_budget_usd?: number | null
+          tier_code?: string
+          tier_name?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_budget_tiers_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ai_system_settings: {
         Row: {
           allowed_models: string[] | null
@@ -140,36 +184,45 @@ export type Database = {
           company_id: string | null
           completion_tokens: number
           created_at: string
+          estimated_cost_usd: number | null
           feature: string | null
           id: string
           model: string
           prompt_tokens: number
           request_metadata: Json | null
           total_tokens: number
+          usage_month: number | null
+          usage_year: number | null
           user_id: string
         }
         Insert: {
           company_id?: string | null
           completion_tokens?: number
           created_at?: string
+          estimated_cost_usd?: number | null
           feature?: string | null
           id?: string
           model: string
           prompt_tokens?: number
           request_metadata?: Json | null
           total_tokens?: number
+          usage_month?: number | null
+          usage_year?: number | null
           user_id: string
         }
         Update: {
           company_id?: string | null
           completion_tokens?: number
           created_at?: string
+          estimated_cost_usd?: number | null
           feature?: string | null
           id?: string
           model?: string
           prompt_tokens?: number
           request_metadata?: Json | null
           total_tokens?: number
+          usage_month?: number | null
+          usage_year?: number | null
           user_id?: string
         }
         Relationships: [
@@ -184,10 +237,13 @@ export type Database = {
       }
       ai_user_settings: {
         Row: {
+          budget_tier_id: string | null
           created_at: string
+          custom_budget_override: boolean | null
           daily_token_limit: number | null
           id: string
           is_enabled: boolean
+          monthly_budget_usd: number | null
           monthly_token_limit: number | null
           notes: string | null
           updated_at: string
@@ -195,10 +251,13 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          budget_tier_id?: string | null
           created_at?: string
+          custom_budget_override?: boolean | null
           daily_token_limit?: number | null
           id?: string
           is_enabled?: boolean
+          monthly_budget_usd?: number | null
           monthly_token_limit?: number | null
           notes?: string | null
           updated_at?: string
@@ -206,17 +265,28 @@ export type Database = {
           user_id: string
         }
         Update: {
+          budget_tier_id?: string | null
           created_at?: string
+          custom_budget_override?: boolean | null
           daily_token_limit?: number | null
           id?: string
           is_enabled?: boolean
+          monthly_budget_usd?: number | null
           monthly_token_limit?: number | null
           notes?: string | null
           updated_at?: string
           updated_by?: string | null
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "ai_user_settings_budget_tier_id_fkey"
+            columns: ["budget_tier_id"]
+            isOneToOne: false
+            referencedRelation: "ai_budget_tiers"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       applications: {
         Row: {
@@ -26318,6 +26388,16 @@ export type Database = {
       can_approve_headcount_request: {
         Args: { p_request_id: string; p_user_id: string }
         Returns: boolean
+      }
+      check_ai_budget: {
+        Args: { p_user_id: string }
+        Returns: {
+          budget_tier: string
+          is_within_budget: boolean
+          monthly_budget: number
+          monthly_spent: number
+          remaining_budget: number
+        }[]
       }
       check_auto_approval: {
         Args: { p_requested_modules: Json; p_user_id: string }
