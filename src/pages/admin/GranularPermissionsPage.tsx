@@ -181,29 +181,39 @@ export default function GranularPermissionsPage() {
     }
   };
 
+  // Helper to get permission value - defaults to TRUE (all permissions on by default)
+  const getPermissionValue = (modulePermissionId: string, action: string): boolean => {
+    const perm = rolePermissions[modulePermissionId];
+    if (!perm) return true; // Default to ON
+    return !!perm[action as keyof RolePermission];
+  };
+
   const togglePermission = (modulePermissionId: string, action: keyof RolePermission) => {
     setHasChanges(true);
     setRolePermissions((prev) => {
       const existing = prev[modulePermissionId];
+      const currentValue = existing ? !!existing[action as keyof RolePermission] : true; // Default is true
+      
       if (existing) {
         return {
           ...prev,
           [modulePermissionId]: {
             ...existing,
-            [action]: !existing[action as keyof RolePermission],
+            [action]: !currentValue,
           },
         };
       } else {
+        // First time toggling - set all to true except the one being toggled (which goes to false)
         return {
           ...prev,
           [modulePermissionId]: {
             id: "",
             role_id: selectedRoleId,
             module_permission_id: modulePermissionId,
-            can_view: action === "can_view",
-            can_create: action === "can_create",
-            can_edit: action === "can_edit",
-            can_delete: action === "can_delete",
+            can_view: action === "can_view" ? false : true,
+            can_create: action === "can_create" ? false : true,
+            can_edit: action === "can_edit" ? false : true,
+            can_delete: action === "can_delete" ? false : true,
           },
         };
       }
@@ -221,14 +231,15 @@ export default function GranularPermissionsPage() {
         if (existing) {
           updated[mp.id] = { ...existing, [action]: value };
         } else {
+          // Default all to true, then apply the specific action value
           updated[mp.id] = {
             id: "",
             role_id: selectedRoleId,
             module_permission_id: mp.id,
-            can_view: action === "can_view" ? value : false,
-            can_create: action === "can_create" ? value : false,
-            can_edit: action === "can_edit" ? value : false,
-            can_delete: action === "can_delete" ? value : false,
+            can_view: action === "can_view" ? value : true,
+            can_create: action === "can_create" ? value : true,
+            can_edit: action === "can_edit" ? value : true,
+            can_delete: action === "can_delete" ? value : true,
           };
         }
       });
@@ -420,7 +431,7 @@ export default function GranularPermissionsPage() {
                                 {["can_view", "can_create", "can_edit", "can_delete"].map((action) => (
                                   <div key={action} className="flex justify-center">
                                     <Checkbox
-                                      checked={!!rolePermissions[modulePerm.id]?.[action as keyof RolePermission]}
+                                      checked={getPermissionValue(modulePerm.id, action)}
                                       onCheckedChange={() =>
                                         togglePermission(modulePerm.id, action as keyof RolePermission)
                                       }
@@ -440,7 +451,7 @@ export default function GranularPermissionsPage() {
                                 {["can_view", "can_create", "can_edit", "can_delete"].map((action) => (
                                   <div key={action} className="flex justify-center">
                                     <Checkbox
-                                      checked={!!rolePermissions[tab.id]?.[action as keyof RolePermission]}
+                                      checked={getPermissionValue(tab.id, action)}
                                       onCheckedChange={() =>
                                         togglePermission(tab.id, action as keyof RolePermission)
                                       }
