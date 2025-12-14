@@ -34,6 +34,11 @@ const ALL_MODULES = [
 ];
 import { format } from 'date-fns';
 
+interface CompanyGroup {
+  id: string;
+  name: string;
+}
+
 interface CompanySubscription {
   id: string;
   company_id: string;
@@ -50,7 +55,7 @@ interface CompanySubscription {
   contact_name: string | null;
   contact_email: string | null;
   selected_modules: string[];
-  companies?: { name: string };
+  companies?: { name: string; group_id: string | null; company_groups?: { name: string } | null };
   subscription_tiers?: { name: string };
 }
 
@@ -87,6 +92,8 @@ export default function SubscriptionManagementPage() {
   const [subscriptions, setSubscriptions] = useState<CompanySubscription[]>([]);
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [tiers, setTiers] = useState<Tier[]>([]);
+  const [companyGroups, setCompanyGroups] = useState<CompanyGroup[]>([]);
+  const [selectedGroupId, setSelectedGroupId] = useState<string>('all');
   const [isLoading, setIsLoading] = useState(true);
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
   const [paymentReference, setPaymentReference] = useState('');
@@ -103,12 +110,19 @@ export default function SubscriptionManagementPage() {
   const fetchData = async () => {
     setIsLoading(true);
     try {
-      // Fetch subscriptions with company names
+      // Fetch company groups for filtering
+      const { data: groupsData } = await supabase
+        .from('company_groups')
+        .select('id, name')
+        .order('name');
+      setCompanyGroups(groupsData || []);
+
+      // Fetch subscriptions with company names and group info
       const { data: subs, error: subsError } = await supabase
         .from('company_subscriptions')
         .select(`
           *,
-          companies:company_id(name),
+          companies:company_id(name, group_id, company_groups:group_id(name)),
           subscription_tiers:tier_id(name)
         `)
         .order('created_at', { ascending: false });
@@ -249,11 +263,34 @@ export default function SubscriptionManagementPage() {
     );
   }
 
+  // Filter subscriptions by selected group
+  const filteredSubscriptions = selectedGroupId === 'all' 
+    ? subscriptions 
+    : subscriptions.filter(s => s.companies?.group_id === selectedGroupId);
+
   return (
     <div className="space-y-6 p-6">
-      <div>
-        <h1 className="text-2xl font-bold">Subscription Management</h1>
-        <p className="text-muted-foreground">Manage company subscriptions and invoices</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold">Subscription Management</h1>
+          <p className="text-muted-foreground">Manage company subscriptions and invoices</p>
+        </div>
+        {companyGroups.length > 0 && (
+          <div className="flex items-center gap-2">
+            <Label>Company Group:</Label>
+            <Select value={selectedGroupId} onValueChange={setSelectedGroupId}>
+              <SelectTrigger className="w-[200px]">
+                <SelectValue placeholder="All Groups" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Groups</SelectItem>
+                {companyGroups.map(g => (
+                  <SelectItem key={g.id} value={g.id}>{g.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
       </div>
 
       {/* Summary Cards */}
@@ -265,7 +302,7 @@ export default function SubscriptionManagementPage() {
                 <Building2 className="h-5 w-5 text-primary" />
               </div>
               <div>
-                <div className="text-2xl font-bold">{subscriptions.length}</div>
+                <div className="text-2xl font-bold">{filteredSubscriptions.length}</div>
                 <div className="text-sm text-muted-foreground">Total Subscriptions</div>
               </div>
             </div>
@@ -279,7 +316,7 @@ export default function SubscriptionManagementPage() {
               </div>
               <div>
                 <div className="text-2xl font-bold">
-                  {subscriptions.filter(s => s.status === 'active').length}
+                  {filteredSubscriptions.filter(s => s.status === 'active').length}
                 </div>
                 <div className="text-sm text-muted-foreground">Active</div>
               </div>
@@ -294,7 +331,7 @@ export default function SubscriptionManagementPage() {
               </div>
               <div>
                 <div className="text-2xl font-bold">
-                  {subscriptions.filter(s => s.status === 'trial').length}
+                  {filteredSubscriptions.filter(s => s.status === 'trial').length}
                 </div>
                 <div className="text-sm text-muted-foreground">On Trial</div>
               </div>
@@ -331,6 +368,7 @@ export default function SubscriptionManagementPage() {
               <Table>
                 <TableHeader>
                   <TableRow>
+                    <TableHead>Group</TableHead>
                     <TableHead>Company</TableHead>
                     <TableHead>Plan</TableHead>
                     <TableHead>Status</TableHead>
@@ -341,8 +379,11 @@ export default function SubscriptionManagementPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {subscriptions.map((sub) => (
+                  {filteredSubscriptions.map((sub) => (
                     <TableRow key={sub.id}>
+                      <TableCell className="text-muted-foreground">
+                        {sub.companies?.company_groups?.name || '-'}
+                      </TableCell>
                       <TableCell className="font-medium">
                         {sub.companies?.name || 'Unknown'}
                       </TableCell>
@@ -363,9 +404,9 @@ export default function SubscriptionManagementPage() {
                       </TableCell>
                     </TableRow>
                   ))}
-                  {subscriptions.length === 0 && (
+                  {filteredSubscriptions.length === 0 && (
                     <TableRow>
-                      <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
+                      <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
                         No subscriptions found
                       </TableCell>
                     </TableRow>
