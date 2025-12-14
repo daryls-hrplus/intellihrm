@@ -603,34 +603,6 @@ export default function TimeTrackingPage() {
                     {t("common.add")}
                   </Button>
                 </div>
-                  <div className="space-y-2">
-                    <Label>Clock In</Label>
-                    <Input 
-                      type="datetime-local" 
-                      value={manualEntry.clock_in}
-                      onChange={(e) => setManualEntry({...manualEntry, clock_in: e.target.value})}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Clock Out (optional)</Label>
-                    <Input 
-                      type="datetime-local" 
-                      value={manualEntry.clock_out}
-                      onChange={(e) => setManualEntry({...manualEntry, clock_out: e.target.value})}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Notes</Label>
-                    <Textarea 
-                      value={manualEntry.notes}
-                      onChange={(e) => setManualEntry({...manualEntry, notes: e.target.value})}
-                      placeholder="Reason for manual entry..."
-                    />
-                  </div>
-                  <Button onClick={handleManualEntry} className="w-full">
-                    Add Entry
-                  </Button>
-                </div>
               </DialogContent>
             </Dialog>
           </div>
