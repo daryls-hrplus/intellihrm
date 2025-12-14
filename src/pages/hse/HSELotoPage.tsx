@@ -316,7 +316,7 @@ export default function HSELotoPage() {
                           <TableCell>{proc.equipment_id || "-"}</TableCell>
                           <TableCell>{proc.location || "-"}</TableCell>
                           <TableCell>{(proc.energy_sources as any[])?.length || 0}</TableCell>
-                          <TableCell>{(proc.isolation_points as any[])?.length || 0}</TableCell>
+                          <TableCell>{(proc.verification_steps as any[])?.length || 0}</TableCell>
                           <TableCell>
                             <Badge variant={proc.is_active ? "default" : "secondary"}>
                               {proc.is_active ? t("common.active") : t("common.inactive")}

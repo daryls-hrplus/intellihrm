@@ -2878,6 +2878,22 @@
       "emergencyResponse": {
         "title": "Emergency Response",
         "description": "Emergency plans and drills"
+      },
+      "chemicals": {
+        "title": "SDS/Chemicals",
+        "description": "Chemical safety data sheets"
+      },
+      "oshaReporting": {
+        "title": "OSHA Reporting",
+        "description": "Regulatory reporting logs"
+      },
+      "permitToWork": {
+        "title": "Permit to Work",
+        "description": "Work permit management"
+      },
+      "loto": {
+        "title": "Lock-out/Tag-out",
+        "description": "Energy isolation procedures"
       }
     },
     "incidents": {
@@ -3231,6 +3247,117 @@
         "in_progress": "In Progress",
         "completed": "Completed",
         "cancelled": "Cancelled"
+      }
+    },
+    "chemicals": {
+      "title": "SDS/Chemical Management",
+      "subtitle": "Manage chemical safety data sheets and exposures",
+      "addChemical": "Add Chemical",
+      "addExposure": "Log Exposure",
+      "searchChemicals": "Search chemicals...",
+      "noChemicals": "No chemicals found",
+      "noExposures": "No exposures found",
+      "tabs": {
+        "chemicals": "Chemicals",
+        "exposures": "Exposures"
+      },
+      "stats": {
+        "totalChemicals": "Total Chemicals",
+        "highHazard": "High Hazard",
+        "withSDS": "With SDS",
+        "recentExposures": "Recent Exposures"
+      },
+      "chemicalName": "Chemical Name",
+      "casNumber": "CAS Number",
+      "hazardClass": "Hazard Classification",
+      "storageRequirements": "Storage Requirements",
+      "sdsDocument": "SDS Document"
+    },
+    "oshaReporting": {
+      "title": "OSHA Reporting",
+      "subtitle": "Manage OSHA 300 logs and regulatory reporting",
+      "addLog": "Add OSHA Log",
+      "searchLogs": "Search logs...",
+      "noLogs": "No OSHA logs found",
+      "stats": {
+        "totalLogs": "Total Logs",
+        "pendingSubmission": "Pending Submission",
+        "totalIncidents": "Total Incidents",
+        "daysAway": "Days Away"
+      },
+      "establishment": "Establishment",
+      "year": "Year",
+      "formType": "Form Type",
+      "totalInjuries": "Total Injuries",
+      "daysAway": "Days Away",
+      "statusOptions": {
+        "draft": "Draft",
+        "pending": "Pending",
+        "submitted": "Submitted",
+        "accepted": "Accepted"
+      }
+    },
+    "permitToWork": {
+      "title": "Permit to Work",
+      "subtitle": "Manage work permits for hazardous activities",
+      "addPermitType": "Add Permit Type",
+      "requestPermit": "Request Permit",
+      "searchPermits": "Search permits...",
+      "noPermitTypes": "No permit types found",
+      "noPermits": "No permits found",
+      "tabs": {
+        "types": "Permit Types",
+        "permits": "Active Permits"
+      },
+      "stats": {
+        "permitTypes": "Permit Types",
+        "activePermits": "Active Permits",
+        "pendingApproval": "Pending Approval",
+        "expiredToday": "Expired Today"
+      },
+      "permitNumber": "Permit #",
+      "permitType": "Permit Type",
+      "workDescription": "Work Description",
+      "validFrom": "Valid From",
+      "validUntil": "Valid Until",
+      "riskLevel": "Risk Level",
+      "statusOptions": {
+        "requested": "Requested",
+        "approved": "Approved",
+        "active": "Active",
+        "completed": "Completed",
+        "cancelled": "Cancelled",
+        "expired": "Expired"
+      }
+    },
+    "loto": {
+      "title": "Lock-out/Tag-out",
+      "subtitle": "Energy isolation procedures and applications",
+      "addProcedure": "Add Procedure",
+      "startApplication": "Start Application",
+      "searchProcedures": "Search procedures...",
+      "noProcedures": "No procedures found",
+      "noApplications": "No applications found",
+      "tabs": {
+        "procedures": "Procedures",
+        "applications": "Applications"
+      },
+      "stats": {
+        "totalProcedures": "Total Procedures",
+        "activeProcedures": "Active Procedures",
+        "activeApplications": "Active Applications",
+        "completedToday": "Completed Today"
+      },
+      "equipmentName": "Equipment Name",
+      "equipmentId": "Equipment ID",
+      "energySources": "Energy Sources",
+      "isolationPoints": "Verification Steps",
+      "authorizedPersonnel": "Authorized Personnel",
+      "statusOptions": {
+        "initiated": "Initiated",
+        "locked": "Locked",
+        "verified": "Verified",
+        "released": "Released"
       }
     }
   },
