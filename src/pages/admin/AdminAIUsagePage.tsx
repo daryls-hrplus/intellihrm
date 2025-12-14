@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -47,18 +48,35 @@ interface UserUsageSummary {
   is_enabled: boolean;
   monthly_limit: number | null;
   daily_limit: number | null;
+  company_id: string | null;
+  department_id: string | null;
 }
 
 interface Profile {
   id: string;
   full_name: string | null;
   email: string | null;
+  company_id: string | null;
+  department_id: string | null;
+}
+
+interface Company {
+  id: string;
+  name: string;
+}
+
+interface Department {
+  id: string;
+  name: string;
+  company_id: string;
 }
 
 export default function AdminAIUsagePage() {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState("");
+  const [selectedCompany, setSelectedCompany] = useState<string>("all");
+  const [selectedDepartment, setSelectedDepartment] = useState<string>("all");
   const [selectedUser, setSelectedUser] = useState<UserUsageSummary | null>(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [editSettings, setEditSettings] = useState({
@@ -100,6 +118,40 @@ export default function AdminAIUsagePage() {
     },
   });
 
+  // Fetch companies
+  const { data: companies = [] } = useQuery<Company[]>({
+    queryKey: ["companies-for-ai"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("companies")
+        .select("id, name")
+        .eq("is_active", true)
+        .order("name");
+      if (error) throw error;
+      return data as Company[];
+    },
+  });
+
+  // Fetch departments
+  const { data: departments = [] } = useQuery<Department[]>({
+    queryKey: ["departments-for-ai", selectedCompany],
+    queryFn: async () => {
+      let query = supabase
+        .from("departments")
+        .select("id, name, company_id")
+        .eq("is_active", true)
+        .order("name");
+      
+      if (selectedCompany !== "all") {
+        query = query.eq("company_id", selectedCompany);
+      }
+      
+      const { data, error } = await query;
+      if (error) throw error;
+      return data as Department[];
+    },
+  });
+
   // Fetch all profiles to show usage summary
   const { data: profiles = [] } = useQuery<Profile[]>({
     queryKey: ["profiles-for-ai"],
@@ -107,7 +159,7 @@ export default function AdminAIUsagePage() {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const { data, error } = await (supabase as any)
         .from("profiles")
-        .select("id, full_name, email")
+        .select("id, full_name, email, company_id, department_id")
         .eq("is_active", true);
       if (error) throw error;
       return (data || []) as Profile[];
@@ -117,36 +169,51 @@ export default function AdminAIUsagePage() {
   // Helper to get profile by user_id
   const getProfile = (userId: string) => profiles.find(p => p.id === userId);
 
-  // Calculate user usage summaries
-  const userSummaries: UserUsageSummary[] = profiles.map(profile => {
-    const userLogs = usageLogs.filter(log => log.user_id === profile.id);
-    const userSetting = userSettings.find(s => s.user_id === profile.id);
-    
-    const now = new Date();
-    const monthStart = startOfMonth(now);
-    const monthEnd = endOfMonth(now);
-    
-    const monthlyTokens = userLogs
-      .filter(log => {
-        const logDate = new Date(log.created_at);
-        return logDate >= monthStart && logDate <= monthEnd;
-      })
-      .reduce((sum, log) => sum + log.total_tokens, 0);
+  // Calculate user usage summaries with filtering
+  const userSummaries: UserUsageSummary[] = profiles
+    .filter(profile => {
+      if (selectedCompany !== "all" && profile.company_id !== selectedCompany) return false;
+      if (selectedDepartment !== "all" && profile.department_id !== selectedDepartment) return false;
+      return true;
+    })
+    .map(profile => {
+      const userLogs = usageLogs.filter(log => log.user_id === profile.id);
+      const userSetting = userSettings.find(s => s.user_id === profile.id);
+      
+      const now = new Date();
+      const monthStart = startOfMonth(now);
+      const monthEnd = endOfMonth(now);
+      
+      const monthlyTokens = userLogs
+        .filter(log => {
+          const logDate = new Date(log.created_at);
+          return logDate >= monthStart && logDate <= monthEnd;
+        })
+        .reduce((sum, log) => sum + log.total_tokens, 0);
 
-    return {
-      user_id: profile.id,
-      full_name: profile.full_name || "",
-      email: profile.email || "",
-      total_tokens: monthlyTokens,
-      request_count: userLogs.length,
-      is_enabled: userSetting?.is_enabled ?? true,
-      monthly_limit: userSetting?.monthly_token_limit ?? null,
-      daily_limit: userSetting?.daily_token_limit ?? null,
-    };
-  }).filter(u => 
-    u.full_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    u.email.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+      return {
+        user_id: profile.id,
+        full_name: profile.full_name || "",
+        email: profile.email || "",
+        total_tokens: monthlyTokens,
+        request_count: userLogs.length,
+        is_enabled: userSetting?.is_enabled ?? true,
+        monthly_limit: userSetting?.monthly_token_limit ?? null,
+        daily_limit: userSetting?.daily_token_limit ?? null,
+        company_id: profile.company_id,
+        department_id: profile.department_id,
+      };
+    })
+    .filter(u => 
+      u.full_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      u.email.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
+  // Reset department when company changes
+  const handleCompanyChange = (value: string) => {
+    setSelectedCompany(value);
+    setSelectedDepartment("all");
+  };
 
   // Update user settings mutation
   const updateSettingsMutation = useMutation({
@@ -243,13 +310,51 @@ export default function AdminAIUsagePage() {
       <div className="container mx-auto py-6 space-y-6">
         <Breadcrumbs items={breadcrumbItems} />
         
-        <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-            <Bot className="h-5 w-5 text-primary" />
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+              <Bot className="h-5 w-5 text-primary" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold">{t("admin.modules.aiUsage.title")}</h1>
+              <p className="text-muted-foreground">{t("admin.modules.aiUsage.description")}</p>
+            </div>
           </div>
-          <div>
-            <h1 className="text-2xl font-bold">{t("admin.modules.aiUsage.title")}</h1>
-            <p className="text-muted-foreground">{t("admin.modules.aiUsage.description")}</p>
+          
+          <div className="flex items-center gap-4">
+            <div className="flex flex-col gap-1">
+              <Label className="text-xs text-muted-foreground">{t("common.company")}</Label>
+              <Select value={selectedCompany} onValueChange={handleCompanyChange}>
+                <SelectTrigger className="w-[200px]">
+                  <SelectValue placeholder={t("common.allCompanies")} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">{t("common.allCompanies")}</SelectItem>
+                  {companies.map((company) => (
+                    <SelectItem key={company.id} value={company.id}>
+                      {company.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div className="flex flex-col gap-1">
+              <Label className="text-xs text-muted-foreground">{t("common.department")}</Label>
+              <Select value={selectedDepartment} onValueChange={setSelectedDepartment}>
+                <SelectTrigger className="w-[200px]">
+                  <SelectValue placeholder={t("common.allDepartments")} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">{t("common.allDepartments")}</SelectItem>
+                  {departments.map((department) => (
+                    <SelectItem key={department.id} value={department.id}>
+                      {department.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
         </div>
 
