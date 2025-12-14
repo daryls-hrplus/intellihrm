@@ -1,4 +1,5 @@
 import { AppLayout } from "@/components/layout/AppLayout";
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { useLanguage } from "@/hooks/useLanguage";
 import { LeaveCompanyFilter, useLeaveCompanyFilter } from "@/components/leave/LeaveCompanyFilter";
 import { DepartmentFilter, useDepartmentFilter } from "@/components/filters/DepartmentFilter";
@@ -73,6 +74,12 @@ export default function HSEFirstAidPage() {
   return (
     <AppLayout>
       <div className="space-y-6">
+        <Breadcrumbs
+          items={[
+            { label: t("hseModule.title"), href: "/hse" },
+            { label: t("hseModule.firstAid.title") },
+          ]}
+        />
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold">{t("hseModule.firstAid.title")}</h1>
