@@ -18,13 +18,18 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import defaultGroupLogo from "@/assets/default-group-logo.png";
+import defaultCompanyLogo from "@/assets/default-company-logo.png";
 
 export function AppHeader() {
-  const { isAdmin, profile, user } = useAuth();
+  const { isAdmin, profile, user, company } = useAuth();
   const [pendingCount, setPendingCount] = useState(0);
   const [unreadMessages, setUnreadMessages] = useState(0);
   const [intranetCount, setIntranetCount] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
+  
+  const groupLogoUrl = company?.company_group?.logo_url || (company?.company_group ? defaultGroupLogo : null);
+  const companyLogoUrl = company?.logo_url || defaultCompanyLogo;
 
   // Fetch unread message count
   useEffect(() => {
@@ -167,7 +172,27 @@ export function AppHeader() {
   };
 
   return (
-    <div className="flex items-center justify-end gap-2 mb-4">
+    <div className="flex items-center justify-between gap-4 mb-4">
+      {/* Company Logos - Left Side */}
+      {company && (
+        <div className="flex items-center gap-2">
+          {groupLogoUrl && (
+            <img 
+              src={groupLogoUrl} 
+              alt={company.company_group?.name || "Group"}
+              className="h-10 w-10 rounded-lg border bg-background object-contain p-1 shadow-sm"
+            />
+          )}
+          <img 
+            src={companyLogoUrl} 
+            alt={company.name}
+            className="h-10 w-10 rounded-lg border bg-background object-contain p-1 shadow-sm"
+          />
+        </div>
+      )}
+      
+      {/* Right Side Actions */}
+      <div className="flex items-center gap-2">
       {/* Language Switcher */}
       <LanguageSwitcher />
       
@@ -283,6 +308,7 @@ export function AppHeader() {
           </PopoverContent>
         </Popover>
       )}
+      </div>
     </div>
   );
 }
