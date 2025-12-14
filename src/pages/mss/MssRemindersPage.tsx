@@ -6,8 +6,10 @@ import { EmployeeRemindersList } from '@/components/reminders/EmployeeRemindersL
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Bell, Loader2, Users } from 'lucide-react';
+import { useLanguage } from '@/hooks/useLanguage';
 
 export default function MssRemindersPage() {
+  const { t } = useLanguage();
   const { user } = useAuth();
   const [directReportsCount, setDirectReportsCount] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -39,8 +41,8 @@ export default function MssRemindersPage() {
   }, [user?.id]);
 
   const breadcrumbItems = [
-    { label: 'Manager Self-Service', href: '/mss' },
-    { label: 'Team Reminders' },
+    { label: t('mss.title'), href: '/mss' },
+    { label: t('mss.teamReminders.breadcrumb') },
   ];
 
   if (loading) {
@@ -62,13 +64,13 @@ export default function MssRemindersPage() {
           <div>
             <h1 className="text-3xl font-bold flex items-center gap-2">
               <Bell className="h-8 w-8" />
-              Team Reminders
+              {t('mss.teamReminders.title')}
             </h1>
-            <p className="text-muted-foreground">Manage reminders for your direct reports</p>
+            <p className="text-muted-foreground">{t('mss.teamReminders.subtitle')}</p>
           </div>
           <div className="flex items-center gap-2 text-muted-foreground">
             <Users className="h-5 w-5" />
-            <span>{directReportsCount} direct reports</span>
+            <span>{directReportsCount} {t('mss.teamReminders.directReports')}</span>
           </div>
         </div>
 
@@ -76,16 +78,16 @@ export default function MssRemindersPage() {
           <Card>
             <CardContent className="py-12 text-center">
               <Users className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-              <p className="text-muted-foreground">No direct reports found</p>
-              <p className="text-sm text-muted-foreground">You need direct reports assigned to manage their reminders</p>
+              <p className="text-muted-foreground">{t('mss.teamReminders.noDirectReports')}</p>
+              <p className="text-sm text-muted-foreground">{t('mss.teamReminders.noDirectReportsDescription')}</p>
             </CardContent>
           </Card>
         ) : (
           <Card>
             <CardHeader>
-              <CardTitle>Direct Reports Reminders</CardTitle>
+              <CardTitle>{t('mss.teamReminders.directReportsReminders')}</CardTitle>
               <p className="text-sm text-muted-foreground">
-                Create and manage reminders for your team members. Employees can view these reminders but cannot modify or dismiss them unless you allow it.
+                {t('mss.teamReminders.directReportsRemindersDescription')}
               </p>
             </CardHeader>
             <CardContent>
