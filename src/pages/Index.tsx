@@ -8,6 +8,7 @@ import { HeadcountTrend } from "@/components/dashboard/HeadcountTrend";
 import { PendingAccessRequests } from "@/components/dashboard/PendingAccessRequests";
 import { SlaRiskWidget } from "@/components/dashboard/SlaRiskWidget";
 import { useAuth } from "@/contexts/AuthContext";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Users,
   UserPlus,
@@ -16,19 +17,55 @@ import {
 } from "lucide-react";
 
 const Index = () => {
-  const { profile, isAdmin } = useAuth();
+  const { profile, isAdmin, company } = useAuth();
   const firstName = profile?.full_name?.split(" ")[0] || "there";
+  
+  const hasGroupLogo = company?.company_group?.logo_url;
+  const hasCompanyLogo = company?.logo_url;
+
   return (
     <AppLayout>
       <div className="space-y-8">
         {/* Header */}
-        <div className="animate-fade-in">
-          <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
-            Welcome back, {firstName}
-          </h1>
-          <p className="mt-1 text-muted-foreground">
-            Here's what's happening across your organization today.
-          </p>
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between animate-fade-in">
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+              Welcome back, {firstName}
+            </h1>
+            <p className="mt-1 text-muted-foreground">
+              Here's what's happening across your organization today.
+            </p>
+          </div>
+          
+          {/* Company Logos */}
+          {(hasGroupLogo || hasCompanyLogo) && (
+            <div className="flex items-center gap-3">
+              {hasGroupLogo && (
+                <Avatar className="h-12 w-12 rounded-lg border bg-background shadow-sm">
+                  <AvatarImage 
+                    src={company.company_group!.logo_url!} 
+                    alt={company.company_group!.name}
+                    className="object-contain p-1"
+                  />
+                  <AvatarFallback className="rounded-lg text-xs font-medium">
+                    {company.company_group!.name.substring(0, 2).toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+              )}
+              {hasCompanyLogo && (
+                <Avatar className="h-12 w-12 rounded-lg border bg-background shadow-sm">
+                  <AvatarImage 
+                    src={company.logo_url!} 
+                    alt={company.name}
+                    className="object-contain p-1"
+                  />
+                  <AvatarFallback className="rounded-lg text-xs font-medium">
+                    {company.name.substring(0, 2).toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Stats Grid */}

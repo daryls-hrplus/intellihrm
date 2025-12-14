@@ -14,11 +14,20 @@ interface Profile {
   company_id: string | null;
 }
 
+interface CompanyGroup {
+  id: string;
+  name: string;
+  logo_url: string | null;
+}
+
 interface Company {
   id: string;
   name: string;
   code: string;
   territory_id: string | null;
+  logo_url: string | null;
+  group_id: string | null;
+  company_group: CompanyGroup | null;
 }
 
 interface AuthContextType {
@@ -105,16 +114,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setRoles(rolesData.map((r) => r.role as AppRole));
       }
 
-      // Fetch company if assigned
+      // Fetch company if assigned (with company group)
       if (profileData?.company_id) {
         const { data: companyData } = await supabase
           .from("companies")
-          .select("id, name, code, territory_id")
+          .select(`
+            id, name, code, territory_id, logo_url, group_id,
+            company_groups!companies_group_id_fkey(id, name, logo_url)
+          `)
           .eq("id", profileData.company_id)
           .maybeSingle();
 
         if (companyData) {
-          setCompany(companyData);
+          setCompany({
+            id: companyData.id,
+            name: companyData.name,
+            code: companyData.code,
+            territory_id: companyData.territory_id,
+            logo_url: companyData.logo_url,
+            group_id: companyData.group_id,
+            company_group: companyData.company_groups as CompanyGroup | null,
+          });
         }
       } else {
         setCompany(null);
