@@ -3418,6 +3418,7 @@ export type Database = {
           id: string
           industry: string | null
           is_active: boolean
+          local_currency_id: string | null
           logo_url: string | null
           name: string
           phone: string | null
@@ -3439,6 +3440,7 @@ export type Database = {
           id?: string
           industry?: string | null
           is_active?: boolean
+          local_currency_id?: string | null
           logo_url?: string | null
           name: string
           phone?: string | null
@@ -3460,6 +3462,7 @@ export type Database = {
           id?: string
           industry?: string | null
           is_active?: boolean
+          local_currency_id?: string | null
           logo_url?: string | null
           name?: string
           phone?: string | null
@@ -3482,6 +3485,13 @@ export type Database = {
             columns: ["group_id"]
             isOneToOne: false
             referencedRelation: "company_groups"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "companies_local_currency_id_fkey"
+            columns: ["local_currency_id"]
+            isOneToOne: false
+            referencedRelation: "currencies"
             referencedColumns: ["id"]
           },
           {
@@ -3748,6 +3758,7 @@ export type Database = {
       }
       company_groups: {
         Row: {
+          base_currency_id: string | null
           code: string
           created_at: string
           description: string | null
@@ -3758,6 +3769,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          base_currency_id?: string | null
           code: string
           created_at?: string
           description?: string | null
@@ -3768,6 +3780,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          base_currency_id?: string | null
           code?: string
           created_at?: string
           description?: string | null
@@ -3777,7 +3790,15 @@ export type Database = {
           name?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "company_groups_base_currency_id_fkey"
+            columns: ["base_currency_id"]
+            isOneToOne: false
+            referencedRelation: "currencies"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       company_tag_assignments: {
         Row: {
@@ -4695,8 +4716,10 @@ export type Database = {
         Row: {
           code: string
           created_at: string
+          decimal_places: number | null
           id: string
           is_active: boolean
+          is_group_base: boolean | null
           name: string
           symbol: string | null
           updated_at: string
@@ -4704,8 +4727,10 @@ export type Database = {
         Insert: {
           code: string
           created_at?: string
+          decimal_places?: number | null
           id?: string
           is_active?: boolean
+          is_group_base?: boolean | null
           name: string
           symbol?: string | null
           updated_at?: string
@@ -4713,8 +4738,10 @@ export type Database = {
         Update: {
           code?: string
           created_at?: string
+          decimal_places?: number | null
           id?: string
           is_active?: boolean
+          is_group_base?: boolean | null
           name?: string
           symbol?: string | null
           updated_at?: string
@@ -6290,11 +6317,14 @@ export type Database = {
           created_at: string
           currency: string | null
           employee_id: string
+          exchange_rate_applied: number | null
           id: string
           is_benefit_in_kind: boolean | null
           is_taxable: boolean | null
           notes: string | null
           pay_period_id: string | null
+          payout_amount: number | null
+          payout_currency_id: string | null
           tax_rate: number | null
           updated_at: string
         }
@@ -6306,11 +6336,14 @@ export type Database = {
           created_at?: string
           currency?: string | null
           employee_id: string
+          exchange_rate_applied?: number | null
           id?: string
           is_benefit_in_kind?: boolean | null
           is_taxable?: boolean | null
           notes?: string | null
           pay_period_id?: string | null
+          payout_amount?: number | null
+          payout_currency_id?: string | null
           tax_rate?: number | null
           updated_at?: string
         }
@@ -6322,11 +6355,14 @@ export type Database = {
           created_at?: string
           currency?: string | null
           employee_id?: string
+          exchange_rate_applied?: number | null
           id?: string
           is_benefit_in_kind?: boolean | null
           is_taxable?: boolean | null
           notes?: string | null
           pay_period_id?: string | null
+          payout_amount?: number | null
+          payout_currency_id?: string | null
           tax_rate?: number | null
           updated_at?: string
         }
@@ -6352,6 +6388,13 @@ export type Database = {
             referencedRelation: "pay_periods"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "employee_period_allowances_payout_currency_id_fkey"
+            columns: ["payout_currency_id"]
+            isOneToOne: false
+            referencedRelation: "currencies"
+            referencedColumns: ["id"]
+          },
         ]
       }
       employee_period_deductions: {
@@ -6364,10 +6407,13 @@ export type Database = {
           deduction_name: string
           deduction_type: string | null
           employee_id: string
+          exchange_rate_applied: number | null
           id: string
           is_pretax: boolean | null
           notes: string | null
           pay_period_id: string | null
+          payout_amount: number | null
+          payout_currency_id: string | null
           updated_at: string
         }
         Insert: {
@@ -6379,10 +6425,13 @@ export type Database = {
           deduction_name: string
           deduction_type?: string | null
           employee_id: string
+          exchange_rate_applied?: number | null
           id?: string
           is_pretax?: boolean | null
           notes?: string | null
           pay_period_id?: string | null
+          payout_amount?: number | null
+          payout_currency_id?: string | null
           updated_at?: string
         }
         Update: {
@@ -6394,10 +6443,13 @@ export type Database = {
           deduction_name?: string
           deduction_type?: string | null
           employee_id?: string
+          exchange_rate_applied?: number | null
           id?: string
           is_pretax?: boolean | null
           notes?: string | null
           pay_period_id?: string | null
+          payout_amount?: number | null
+          payout_currency_id?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -6420,6 +6472,13 @@ export type Database = {
             columns: ["pay_period_id"]
             isOneToOne: false
             referencedRelation: "pay_periods"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_period_deductions_payout_currency_id_fkey"
+            columns: ["payout_currency_id"]
+            isOneToOne: false
+            referencedRelation: "currencies"
             referencedColumns: ["id"]
           },
         ]
@@ -8608,6 +8667,60 @@ export type Database = {
             columns: ["priority_id"]
             isOneToOne: false
             referencedRelation: "ticket_priorities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      exchange_rates: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          from_currency_id: string
+          id: string
+          notes: string | null
+          rate: number
+          rate_date: string
+          source: string | null
+          to_currency_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          from_currency_id: string
+          id?: string
+          notes?: string | null
+          rate: number
+          rate_date: string
+          source?: string | null
+          to_currency_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          from_currency_id?: string
+          id?: string
+          notes?: string | null
+          rate?: number
+          rate_date?: string
+          source?: string | null
+          to_currency_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "exchange_rates_from_currency_id_fkey"
+            columns: ["from_currency_id"]
+            isOneToOne: false
+            referencedRelation: "currencies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "exchange_rates_to_currency_id_fkey"
+            columns: ["to_currency_id"]
+            isOneToOne: false
+            referencedRelation: "currencies"
             referencedColumns: ["id"]
           },
         ]
@@ -19380,6 +19493,7 @@ export type Database = {
         Row: {
           approved_at: string | null
           approved_by: string | null
+          base_currency_id: string | null
           calculated_at: string | null
           calculated_by: string | null
           company_id: string
@@ -19387,7 +19501,10 @@ export type Database = {
           created_by: string | null
           currency: string
           employee_count: number | null
+          exchange_rate_date: string | null
+          exchange_rate_to_base: number | null
           id: string
+          local_currency_id: string | null
           notes: string | null
           paid_at: string | null
           paid_by: string | null
@@ -19400,7 +19517,9 @@ export type Database = {
           total_employer_contributions: number | null
           total_employer_taxes: number | null
           total_gross_pay: number | null
+          total_gross_pay_base: number | null
           total_net_pay: number | null
+          total_net_pay_base: number | null
           total_taxes: number | null
           updated_at: string
           workflow_instance_id: string | null
@@ -19408,6 +19527,7 @@ export type Database = {
         Insert: {
           approved_at?: string | null
           approved_by?: string | null
+          base_currency_id?: string | null
           calculated_at?: string | null
           calculated_by?: string | null
           company_id: string
@@ -19415,7 +19535,10 @@ export type Database = {
           created_by?: string | null
           currency?: string
           employee_count?: number | null
+          exchange_rate_date?: string | null
+          exchange_rate_to_base?: number | null
           id?: string
+          local_currency_id?: string | null
           notes?: string | null
           paid_at?: string | null
           paid_by?: string | null
@@ -19428,7 +19551,9 @@ export type Database = {
           total_employer_contributions?: number | null
           total_employer_taxes?: number | null
           total_gross_pay?: number | null
+          total_gross_pay_base?: number | null
           total_net_pay?: number | null
+          total_net_pay_base?: number | null
           total_taxes?: number | null
           updated_at?: string
           workflow_instance_id?: string | null
@@ -19436,6 +19561,7 @@ export type Database = {
         Update: {
           approved_at?: string | null
           approved_by?: string | null
+          base_currency_id?: string | null
           calculated_at?: string | null
           calculated_by?: string | null
           company_id?: string
@@ -19443,7 +19569,10 @@ export type Database = {
           created_by?: string | null
           currency?: string
           employee_count?: number | null
+          exchange_rate_date?: string | null
+          exchange_rate_to_base?: number | null
           id?: string
+          local_currency_id?: string | null
           notes?: string | null
           paid_at?: string | null
           paid_by?: string | null
@@ -19456,7 +19585,9 @@ export type Database = {
           total_employer_contributions?: number | null
           total_employer_taxes?: number | null
           total_gross_pay?: number | null
+          total_gross_pay_base?: number | null
           total_net_pay?: number | null
+          total_net_pay_base?: number | null
           total_taxes?: number | null
           updated_at?: string
           workflow_instance_id?: string | null
@@ -19467,6 +19598,13 @@ export type Database = {
             columns: ["approved_by"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payroll_runs_base_currency_id_fkey"
+            columns: ["base_currency_id"]
+            isOneToOne: false
+            referencedRelation: "currencies"
             referencedColumns: ["id"]
           },
           {
@@ -19488,6 +19626,13 @@ export type Database = {
             columns: ["created_by"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payroll_runs_local_currency_id_fkey"
+            columns: ["local_currency_id"]
+            isOneToOne: false
+            referencedRelation: "currencies"
             referencedColumns: ["id"]
           },
           {
@@ -26718,6 +26863,14 @@ export type Database = {
           supervisor_position_id: string
           supervisor_position_title: string
         }[]
+      }
+      get_exchange_rate: {
+        Args: {
+          p_from_currency_id: string
+          p_rate_date?: string
+          p_to_currency_id: string
+        }
+        Returns: number
       }
       get_manager_direct_reports: {
         Args: { p_manager_id: string }
