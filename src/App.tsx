@@ -38,6 +38,8 @@ import AdminOnboardingPage from "./pages/admin/AdminOnboardingPage";
 import AdminOnboardingDetailPage from "./pages/admin/AdminOnboardingDetailPage";
 import AdminColorSchemePage from "./pages/admin/AdminColorSchemePage";
 import TerritoriesPage from "./pages/admin/TerritoriesPage";
+import CompanyTagsPage from "./pages/admin/CompanyTagsPage";
+import GranularPermissionsPage from "./pages/admin/GranularPermissionsPage";
 // Workforce pages
 import WorkforceDashboardPage from "./pages/workforce/WorkforceDashboardPage";
 import EmployeesPage from "./pages/workforce/EmployeesPage";
@@ -758,6 +760,22 @@ const App = () => (
               element={
                 <ProtectedRoute requiredRoles={["admin"]}>
                   <TerritoriesPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/company-tags"
+              element={
+                <ProtectedRoute requiredRoles={["admin"]}>
+                  <CompanyTagsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/granular-permissions"
+              element={
+                <ProtectedRoute requiredRoles={["admin"]}>
+                  <GranularPermissionsPage />
                 </ProtectedRoute>
               }
             />
