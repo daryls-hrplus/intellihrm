@@ -187,6 +187,12 @@ import ShiftManagementPage from "./pages/time-attendance/ShiftManagementPage";
 import GeofenceManagementPage from "./pages/time-attendance/GeofenceManagementPage";
 import ProjectTimeTrackingPage from "./pages/time-attendance/ProjectTimeTrackingPage";
 import TimesheetApprovalsPage from "./pages/time-attendance/TimesheetApprovalsPage";
+import TimeclockDevicesPage from "./pages/time-attendance/TimeclockDevicesPage";
+import AttendancePoliciesPage from "./pages/time-attendance/AttendancePoliciesPage";
+import AttendanceExceptionsPage from "./pages/time-attendance/AttendanceExceptionsPage";
+import LiveAttendancePage from "./pages/time-attendance/LiveAttendancePage";
+import PunchImportPage from "./pages/time-attendance/PunchImportPage";
+import AttendanceAnalyticsPage from "./pages/time-attendance/AttendanceAnalyticsPage";
 
 // ESS & MSS pages
 import EmployeeSelfServicePage from "./pages/ess/EmployeeSelfServicePage";
@@ -1049,6 +1055,54 @@ const App = () => (
               element={
                 <ProtectedRoute moduleCode="time_attendance">
                   <TimesheetApprovalsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/time-attendance/devices"
+              element={
+                <ProtectedRoute moduleCode="time_attendance" requiredRoles={["admin", "hr_manager"]}>
+                  <TimeclockDevicesPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/time-attendance/policies"
+              element={
+                <ProtectedRoute moduleCode="time_attendance" requiredRoles={["admin", "hr_manager"]}>
+                  <AttendancePoliciesPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/time-attendance/exceptions"
+              element={
+                <ProtectedRoute moduleCode="time_attendance" requiredRoles={["admin", "hr_manager"]}>
+                  <AttendanceExceptionsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/time-attendance/live"
+              element={
+                <ProtectedRoute moduleCode="time_attendance" requiredRoles={["admin", "hr_manager"]}>
+                  <LiveAttendancePage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/time-attendance/import"
+              element={
+                <ProtectedRoute moduleCode="time_attendance" requiredRoles={["admin", "hr_manager"]}>
+                  <PunchImportPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/time-attendance/analytics"
+              element={
+                <ProtectedRoute moduleCode="time_attendance" requiredRoles={["admin", "hr_manager"]}>
+                  <AttendanceAnalyticsPage />
                 </ProtectedRoute>
               }
             />

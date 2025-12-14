@@ -121,13 +121,18 @@ export default function PunchImportPage() {
 
       for (const punch of validPunches) {
         // Look up employee by badge
-        const { data: employee } = await supabase
-          .from("profiles")
+        const companyId = String(profile.company_id);
+        const badgeNumber = String(punch.badge_number);
+        
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const profilesTable = supabase.from("profiles") as any;
+        const { data: employeeData } = await profilesTable
           .select("id")
-          .eq("employee_id", punch.badge_number)
-          .eq("company_id", profile.company_id)
-          .single();
+          .eq("employee_id", badgeNumber)
+          .eq("company_id", companyId)
+          .limit(1);
 
+        const employee = employeeData?.[0];
         if (employee) {
           await supabase.from("timeclock_punch_queue").insert({
             device_id: null as unknown as string,
