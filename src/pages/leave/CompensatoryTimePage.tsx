@@ -20,13 +20,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-
-const breadcrumbItems = [
-  { label: "Leave", href: "/leave" },
-  { label: "Compensatory Time" },
-];
+import { useLanguage } from "@/hooks/useLanguage";
 
 export default function CompensatoryTimePage() {
+  const { t } = useLanguage();
   const { isAdmin, hasRole } = useAuth();
   const isAdminOrHR = isAdmin || hasRole("hr_manager");
   const {
@@ -36,6 +33,11 @@ export default function CompensatoryTimePage() {
     loadingEarned,
     loadingUsed,
   } = useCompensatoryTime();
+
+  const breadcrumbItems = [
+    { label: t("leave.title"), href: "/leave" },
+    { label: t("leave.compTime.title") },
+  ];
 
   const [earnDialogOpen, setEarnDialogOpen] = useState(false);
   const [useDialogOpen, setUseDialogOpen] = useState(false);
@@ -49,13 +51,13 @@ export default function CompensatoryTimePage() {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'pending':
-        return <Badge variant="outline" className="bg-warning/10 text-warning border-warning/20"><Clock className="h-3 w-3 mr-1" />Pending</Badge>;
+        return <Badge variant="outline" className="bg-warning/10 text-warning border-warning/20"><Clock className="h-3 w-3 mr-1" />{t("leave.compTime.pending")}</Badge>;
       case 'approved':
-        return <Badge variant="outline" className="bg-success/10 text-success border-success/20"><CheckCircle className="h-3 w-3 mr-1" />Approved</Badge>;
+        return <Badge variant="outline" className="bg-success/10 text-success border-success/20"><CheckCircle className="h-3 w-3 mr-1" />{t("leave.compTime.approved")}</Badge>;
       case 'rejected':
-        return <Badge variant="outline" className="bg-destructive/10 text-destructive border-destructive/20"><XCircle className="h-3 w-3 mr-1" />Rejected</Badge>;
+        return <Badge variant="outline" className="bg-destructive/10 text-destructive border-destructive/20"><XCircle className="h-3 w-3 mr-1" />{t("leave.compTime.rejected")}</Badge>;
       case 'expired':
-        return <Badge variant="outline" className="bg-muted text-muted-foreground"><History className="h-3 w-3 mr-1" />Expired</Badge>;
+        return <Badge variant="outline" className="bg-muted text-muted-foreground"><History className="h-3 w-3 mr-1" />{t("leave.compTime.expired")}</Badge>;
       default:
         return <Badge variant="secondary">{status}</Badge>;
     }
@@ -69,10 +71,10 @@ export default function CompensatoryTimePage() {
       other: 'bg-muted text-muted-foreground',
     };
     const labels: Record<string, string> = {
-      overtime: 'Overtime',
-      holiday_work: 'Holiday Work',
-      weekend_work: 'Weekend Work',
-      other: 'Other',
+      overtime: t("leave.compTime.overtime"),
+      holiday_work: t("leave.compTime.holidayWork"),
+      weekend_work: t("leave.compTime.weekendWork"),
+      other: t("leave.compTime.other"),
     };
     return <Badge variant="outline" className={colors[type] || colors.other}>{labels[type] || type}</Badge>;
   };
@@ -94,19 +96,19 @@ export default function CompensatoryTimePage() {
               <Timer className="h-5 w-5 text-primary" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold tracking-tight">Compensatory Time Off</h1>
-              <p className="text-muted-foreground">Manage earned and used comp time</p>
+              <h1 className="text-2xl font-bold tracking-tight">{t("leave.compTime.title")}</h1>
+              <p className="text-muted-foreground">{t("leave.compTime.subtitle")}</p>
             </div>
           </div>
           <div className="flex gap-2">
             <Button onClick={() => setEarnDialogOpen(true)}>
               <Plus className="h-4 w-4 mr-2" />
-              Request Comp Time
+              {t("leave.compTime.requestCompTime")}
             </Button>
             {myBalance && myBalance.current_balance > 0 && (
               <Button variant="outline" onClick={() => setUseDialogOpen(true)}>
                 <Clock className="h-4 w-4 mr-2" />
-                Use Comp Time
+                {t("leave.compTime.useCompTime")}
               </Button>
             )}
           </div>
@@ -116,33 +118,33 @@ export default function CompensatoryTimePage() {
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <Card>
             <CardHeader className="pb-2">
-              <CardDescription>Current Balance</CardDescription>
+              <CardDescription>{t("leave.compTime.currentBalance")}</CardDescription>
               <CardTitle className="text-3xl text-primary">
-                {myBalance ? myBalance.current_balance.toFixed(1) : '0.0'} hrs
+                {myBalance ? myBalance.current_balance.toFixed(1) : '0.0'} {t("leave.compTime.hrs")}
               </CardTitle>
             </CardHeader>
           </Card>
           <Card>
             <CardHeader className="pb-2">
-              <CardDescription>Total Earned</CardDescription>
+              <CardDescription>{t("leave.compTime.totalEarned")}</CardDescription>
               <CardTitle className="text-3xl text-success">
-                {myBalance ? myBalance.total_earned.toFixed(1) : '0.0'} hrs
+                {myBalance ? myBalance.total_earned.toFixed(1) : '0.0'} {t("leave.compTime.hrs")}
               </CardTitle>
             </CardHeader>
           </Card>
           <Card>
             <CardHeader className="pb-2">
-              <CardDescription>Total Used</CardDescription>
+              <CardDescription>{t("leave.compTime.totalUsed")}</CardDescription>
               <CardTitle className="text-3xl text-warning">
-                {myBalance ? myBalance.total_used.toFixed(1) : '0.0'} hrs
+                {myBalance ? myBalance.total_used.toFixed(1) : '0.0'} {t("leave.compTime.hrs")}
               </CardTitle>
             </CardHeader>
           </Card>
           <Card>
             <CardHeader className="pb-2">
-              <CardDescription>Expired</CardDescription>
+              <CardDescription>{t("leave.compTime.expired")}</CardDescription>
               <CardTitle className="text-3xl text-muted-foreground">
-                {myBalance ? myBalance.total_expired.toFixed(1) : '0.0'} hrs
+                {myBalance ? myBalance.total_expired.toFixed(1) : '0.0'} {t("leave.compTime.hrs")}
               </CardTitle>
             </CardHeader>
           </Card>
@@ -153,14 +155,14 @@ export default function CompensatoryTimePage() {
           <TabsList>
             <TabsTrigger value="earned" className="flex items-center gap-2">
               <TrendingUp className="h-4 w-4" />
-              Earned Requests
+              {t("leave.compTime.earnedRequests")}
               {pendingEarnedCount > 0 && isAdminOrHR && (
                 <Badge variant="destructive" className="ml-1">{pendingEarnedCount}</Badge>
               )}
             </TabsTrigger>
             <TabsTrigger value="used" className="flex items-center gap-2">
               <Clock className="h-4 w-4" />
-              Usage Requests
+              {t("leave.compTime.usageRequests")}
               {pendingUsedCount > 0 && isAdminOrHR && (
                 <Badge variant="destructive" className="ml-1">{pendingUsedCount}</Badge>
               )}
@@ -170,28 +172,28 @@ export default function CompensatoryTimePage() {
           <TabsContent value="earned">
             <Card>
               <CardHeader>
-                <CardTitle>Comp Time Earned</CardTitle>
+                <CardTitle>{t("leave.compTime.compTimeEarned")}</CardTitle>
                 <CardDescription>
-                  Track overtime and holiday work converted to time off
+                  {t("leave.compTime.compTimeEarnedDesc")}
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 {loadingEarned ? (
-                  <p className="text-muted-foreground text-center py-8">Loading...</p>
+                  <p className="text-muted-foreground text-center py-8">{t("leave.compTime.loading")}</p>
                 ) : earnedRequests.length === 0 ? (
-                  <p className="text-muted-foreground text-center py-8">No comp time requests yet</p>
+                  <p className="text-muted-foreground text-center py-8">{t("leave.compTime.noEarnedRequests")}</p>
                 ) : (
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        {isAdminOrHR && <TableHead>Employee</TableHead>}
-                        <TableHead>Work Date</TableHead>
-                        <TableHead>Type</TableHead>
-                        <TableHead>Hours</TableHead>
-                        <TableHead>Reason</TableHead>
-                        <TableHead>Status</TableHead>
-                        <TableHead>Expires</TableHead>
-                        {isAdminOrHR && <TableHead>Actions</TableHead>}
+                        {isAdminOrHR && <TableHead>{t("leave.compTime.employee")}</TableHead>}
+                        <TableHead>{t("leave.compTime.workDate")}</TableHead>
+                        <TableHead>{t("leave.compTime.type")}</TableHead>
+                        <TableHead>{t("leave.compTime.hours")}</TableHead>
+                        <TableHead>{t("leave.compTime.reason")}</TableHead>
+                        <TableHead>{t("leave.compTime.status")}</TableHead>
+                        <TableHead>{t("leave.compTime.expires")}</TableHead>
+                        {isAdminOrHR && <TableHead>{t("leave.compTime.actions")}</TableHead>}
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -218,7 +220,7 @@ export default function CompensatoryTimePage() {
                                   variant="outline"
                                   onClick={() => handleApprove(request, 'earned')}
                                 >
-                                  Review
+                                  {t("leave.compTime.review")}
                                 </Button>
                               )}
                             </TableCell>
@@ -235,26 +237,26 @@ export default function CompensatoryTimePage() {
           <TabsContent value="used">
             <Card>
               <CardHeader>
-                <CardTitle>Comp Time Used</CardTitle>
+                <CardTitle>{t("leave.compTime.compTimeUsed")}</CardTitle>
                 <CardDescription>
-                  Track when compensatory time has been taken
+                  {t("leave.compTime.compTimeUsedDesc")}
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 {loadingUsed ? (
-                  <p className="text-muted-foreground text-center py-8">Loading...</p>
+                  <p className="text-muted-foreground text-center py-8">{t("leave.compTime.loading")}</p>
                 ) : usedRequests.length === 0 ? (
-                  <p className="text-muted-foreground text-center py-8">No usage requests yet</p>
+                  <p className="text-muted-foreground text-center py-8">{t("leave.compTime.noUsageRequests")}</p>
                 ) : (
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        {isAdminOrHR && <TableHead>Employee</TableHead>}
-                        <TableHead>Use Date</TableHead>
-                        <TableHead>Hours</TableHead>
-                        <TableHead>Reason</TableHead>
-                        <TableHead>Status</TableHead>
-                        {isAdminOrHR && <TableHead>Actions</TableHead>}
+                        {isAdminOrHR && <TableHead>{t("leave.compTime.employee")}</TableHead>}
+                        <TableHead>{t("leave.compTime.useDate")}</TableHead>
+                        <TableHead>{t("leave.compTime.hours")}</TableHead>
+                        <TableHead>{t("leave.compTime.reason")}</TableHead>
+                        <TableHead>{t("leave.compTime.status")}</TableHead>
+                        {isAdminOrHR && <TableHead>{t("leave.compTime.actions")}</TableHead>}
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -277,7 +279,7 @@ export default function CompensatoryTimePage() {
                                   variant="outline"
                                   onClick={() => handleApprove(request, 'used')}
                                 >
-                                  Review
+                                  {t("leave.compTime.review")}
                                 </Button>
                               )}
                             </TableCell>

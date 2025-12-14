@@ -19,6 +19,7 @@ import {
   ChevronRight,
   Users,
 } from "lucide-react";
+import { useLanguage } from "@/hooks/useLanguage";
 import { 
   format, 
   startOfMonth, 
@@ -51,6 +52,7 @@ interface Department {
 }
 
 export default function LeaveCalendarPage() {
+  const { t } = useLanguage();
   const { company, isAdmin, hasRole } = useAuth();
   const { selectedCompanyId, setSelectedCompanyId } = useLeaveCompanyFilter();
   const isAdminOrHR = isAdmin || hasRole("hr_manager");
@@ -158,8 +160,8 @@ export default function LeaveCalendarPage() {
       <div className="space-y-6">
         <Breadcrumbs
           items={[
-            { label: "Leave Management", href: "/leave" },
-            { label: "Team Calendar" },
+            { label: t("leave.title"), href: "/leave" },
+            { label: t("leave.calendar.title") },
           ]}
         />
 
@@ -169,8 +171,8 @@ export default function LeaveCalendarPage() {
               <Calendar className="h-5 w-5 text-primary" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold tracking-tight text-foreground">Team Calendar</h1>
-              <p className="text-muted-foreground">View team leave and availability at a glance</p>
+              <h1 className="text-2xl font-bold tracking-tight text-foreground">{t("leave.calendar.title")}</h1>
+              <p className="text-muted-foreground">{t("leave.calendar.subtitle")}</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -181,10 +183,10 @@ export default function LeaveCalendarPage() {
             <Select value={selectedDepartment} onValueChange={setSelectedDepartment}>
               <SelectTrigger className="w-[180px]">
                 <Users className="mr-2 h-4 w-4" />
-                <SelectValue placeholder="Department" />
+                <SelectValue placeholder={t("leave.calendar.department")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Departments</SelectItem>
+                <SelectItem value="all">{t("leave.calendar.allDepartments")}</SelectItem>
                 {departments.map((dept) => (
                   <SelectItem key={dept.id} value={dept.id}>{dept.name}</SelectItem>
                 ))}
@@ -203,7 +205,7 @@ export default function LeaveCalendarPage() {
               <ChevronLeft className="h-4 w-4" />
             </Button>
             <Button variant="outline" size="sm" onClick={() => setCurrentMonth(new Date())}>
-              Today
+              {t("leave.calendar.today")}
             </Button>
             <Button variant="outline" size="icon" onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}>
               <ChevronRight className="h-4 w-4" />
