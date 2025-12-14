@@ -137,13 +137,6 @@ export default function WorkforceDashboardPage() {
       color: "bg-amber-500/10 text-amber-500",
     },
     {
-      title: t("workforce.modules.intranetAdmin.title"),
-      description: t("workforce.modules.intranetAdmin.description"),
-      href: "/workforce/intranet-admin",
-      icon: Megaphone,
-      color: "bg-pink-500/10 text-pink-500",
-    },
-    {
       title: t("workforce.modules.onboarding.title"),
       description: t("workforce.modules.onboarding.description"),
       href: "/workforce/onboarding",
