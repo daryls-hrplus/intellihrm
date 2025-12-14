@@ -4,6 +4,7 @@ import { ModuleReportsButton } from "@/components/reports/ModuleReportsButton";
 import { ModuleBIButton } from "@/components/bi/ModuleBIButton";
 import { usePropertyManagement } from "@/hooks/usePropertyManagement";
 import { LeaveCompanyFilter, useLeaveCompanyFilter } from "@/components/leave/LeaveCompanyFilter";
+import { DepartmentFilter, useDepartmentFilter } from "@/components/filters/DepartmentFilter";
 import PropertyCategoriesTab from "@/components/property/PropertyCategoriesTab";
 import PropertyItemsTab from "@/components/property/PropertyItemsTab";
 import PropertyAssignmentsTab from "@/components/property/PropertyAssignmentsTab";
@@ -25,6 +26,7 @@ import {
 
 export default function PropertyDashboardPage() {
   const { selectedCompanyId, setSelectedCompanyId } = useLeaveCompanyFilter();
+  const { selectedDepartmentId, setSelectedDepartmentId } = useDepartmentFilter();
   const {
     items,
     assignments,
@@ -66,7 +68,12 @@ export default function PropertyDashboardPage() {
             <div className="flex items-center gap-2">
               <LeaveCompanyFilter 
                 selectedCompanyId={selectedCompanyId} 
-                onCompanyChange={setSelectedCompanyId} 
+                onCompanyChange={(id) => { setSelectedCompanyId(id); setSelectedDepartmentId("all"); }} 
+              />
+              <DepartmentFilter
+                companyId={selectedCompanyId}
+                selectedDepartmentId={selectedDepartmentId}
+                onDepartmentChange={setSelectedDepartmentId}
               />
               <ModuleBIButton module="property" />
               <ModuleReportsButton module="property" />

@@ -3,6 +3,7 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { LeaveCompanyFilter, useLeaveCompanyFilter } from "@/components/leave/LeaveCompanyFilter";
+import { DepartmentFilter, useDepartmentFilter } from "@/components/filters/DepartmentFilter";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -90,6 +91,7 @@ const ADJUSTMENT_TYPES = [
 export default function LeaveBalanceAdjustmentsPage() {
   const { user, isAdmin, hasRole } = useAuth();
   const { selectedCompanyId, setSelectedCompanyId } = useLeaveCompanyFilter();
+  const { selectedDepartmentId, setSelectedDepartmentId } = useDepartmentFilter();
   const isAdminOrHR = isAdmin || hasRole("hr_manager");
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -330,7 +332,12 @@ export default function LeaveBalanceAdjustmentsPage() {
           <div className="flex items-center gap-2">
             <LeaveCompanyFilter 
               selectedCompanyId={selectedCompanyId} 
-              onCompanyChange={setSelectedCompanyId} 
+              onCompanyChange={(id) => { setSelectedCompanyId(id); setSelectedDepartmentId("all"); }} 
+            />
+            <DepartmentFilter
+              companyId={selectedCompanyId}
+              selectedDepartmentId={selectedDepartmentId}
+              onDepartmentChange={setSelectedDepartmentId}
             />
             <Dialog open={isDialogOpen} onOpenChange={(open) => { setIsDialogOpen(open); if (!open) resetForm(); }}>
               <DialogTrigger asChild>

@@ -176,7 +176,7 @@ export default function LeaveCalendarPage() {
           <div className="flex items-center gap-2">
             <LeaveCompanyFilter 
               selectedCompanyId={selectedCompanyId} 
-              onCompanyChange={setSelectedCompanyId} 
+              onCompanyChange={(id) => { setSelectedCompanyId(id); setSelectedDepartment("all"); }} 
             />
             <Select value={selectedDepartment} onValueChange={setSelectedDepartment}>
               <SelectTrigger className="w-[180px]">

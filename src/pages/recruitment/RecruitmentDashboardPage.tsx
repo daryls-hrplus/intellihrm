@@ -6,6 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { startOfMonth, startOfDay, endOfDay } from "date-fns";
 import { LeaveCompanyFilter, useLeaveCompanyFilter } from "@/components/leave/LeaveCompanyFilter";
+import { DepartmentFilter, useDepartmentFilter } from "@/components/filters/DepartmentFilter";
 import {
   UserPlus,
   Briefcase,
@@ -57,6 +58,7 @@ const recruitmentModules = [
 
 export default function RecruitmentDashboardPage() {
   const { selectedCompanyId, setSelectedCompanyId } = useLeaveCompanyFilter();
+  const { selectedDepartmentId, setSelectedDepartmentId } = useDepartmentFilter();
 
   // Fetch open positions count
   const { data: openPositions = 0 } = useQuery({
@@ -144,7 +146,12 @@ export default function RecruitmentDashboardPage() {
             <div className="flex items-center gap-2">
               <LeaveCompanyFilter 
                 selectedCompanyId={selectedCompanyId} 
-                onCompanyChange={setSelectedCompanyId} 
+                onCompanyChange={(id) => { setSelectedCompanyId(id); setSelectedDepartmentId("all"); }} 
+              />
+              <DepartmentFilter
+                companyId={selectedCompanyId}
+                selectedDepartmentId={selectedDepartmentId}
+                onDepartmentChange={setSelectedDepartmentId}
               />
               <ModuleBIButton module="recruitment" />
               <ModuleReportsButton module="recruitment" />
