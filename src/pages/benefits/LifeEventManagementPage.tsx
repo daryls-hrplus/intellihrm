@@ -15,6 +15,7 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { Plus, Building2, Calendar, Check, X } from "lucide-react";
 import { useAuditLog } from "@/hooks/useAuditLog";
+import { useTranslation } from "react-i18next";
 
 const LIFE_EVENT_TYPES = [
   { value: "marriage", label: "Marriage" },
@@ -29,6 +30,7 @@ const LIFE_EVENT_TYPES = [
 ];
 
 export default function LifeEventManagementPage() {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const { logAction } = useAuditLog();
   const [companies, setCompanies] = useState<any[]>([]);

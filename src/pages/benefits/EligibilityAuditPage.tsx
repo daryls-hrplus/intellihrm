@@ -15,6 +15,7 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { Plus, Building2, Shield, Check, X } from "lucide-react";
 import { useAuditLog } from "@/hooks/useAuditLog";
+import { useTranslation } from "react-i18next";
 
 const AUDIT_TYPES = [
   { value: "dependent_verification", label: "Dependent Verification" },
@@ -25,6 +26,7 @@ const AUDIT_TYPES = [
 ];
 
 export default function EligibilityAuditPage() {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const { logAction } = useAuditLog();
   const [companies, setCompanies] = useState<any[]>([]);

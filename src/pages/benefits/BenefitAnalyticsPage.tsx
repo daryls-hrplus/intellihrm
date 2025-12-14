@@ -29,10 +29,8 @@ export default function BenefitAnalyticsPage() {
   }, []);
 
   useEffect(() => {
-    if (user) {
-      fetchAnalytics();
-    }
-  }, [user, selectedCompany]);
+    fetchAnalytics();
+  }, [selectedCompany]);
 
   const fetchCompanies = async () => {
     const { data } = await supabase.from("companies").select("id, name").eq("is_active", true);

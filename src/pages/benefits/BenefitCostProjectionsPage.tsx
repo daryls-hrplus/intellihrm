@@ -11,8 +11,10 @@ import { Button } from "@/components/ui/button";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, LineChart, Line, Legend } from "recharts";
 import { Building2, Calculator, TrendingUp, DollarSign } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 export default function BenefitCostProjectionsPage() {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const [companies, setCompanies] = useState<any[]>([]);
   const [selectedCompany, setSelectedCompany] = useState<string>("all");

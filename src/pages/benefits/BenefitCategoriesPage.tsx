@@ -13,6 +13,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { Plus, Pencil, Trash2, FolderOpen } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 interface BenefitCategory {
   id: string;
@@ -39,6 +40,7 @@ const CATEGORY_TYPES = [
 ];
 
 export default function BenefitCategoriesPage() {
+  const { t } = useTranslation();
   const { isAdmin, hasRole } = useAuth();
   const canManage = isAdmin || hasRole('hr_manager');
   
