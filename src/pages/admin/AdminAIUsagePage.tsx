@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
@@ -10,13 +10,12 @@ import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Bot, Users, TrendingUp, Activity, Settings, Search, Edit2, Save } from "lucide-react";
-import { format, startOfMonth, endOfMonth, startOfDay, endOfDay } from "date-fns";
+import { format, startOfMonth, endOfMonth } from "date-fns";
 
 interface AIUserSetting {
   id: string;
@@ -72,7 +71,7 @@ export default function AdminAIUsagePage() {
   const breadcrumbItems = [
     { label: t("common.home"), href: "/" },
     { label: t("admin.title"), href: "/admin" },
-    { label: t("admin.aiUsage.title") },
+    { label: t("admin.modules.aiUsage.title") },
   ];
 
   // Fetch usage logs
@@ -181,7 +180,7 @@ export default function AdminAIUsagePage() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["ai-user-settings"] });
-      toast.success(t("admin.aiUsage.settingsUpdated"));
+      toast.success(t("admin.modules.aiUsage.settingsUpdated"));
       setEditDialogOpen(false);
     },
     onError: () => {
@@ -249,8 +248,8 @@ export default function AdminAIUsagePage() {
             <Bot className="h-5 w-5 text-primary" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold">{t("admin.aiUsage.title")}</h1>
-            <p className="text-muted-foreground">{t("admin.aiUsage.description")}</p>
+            <h1 className="text-2xl font-bold">{t("admin.modules.aiUsage.title")}</h1>
+            <p className="text-muted-foreground">{t("admin.modules.aiUsage.description")}</p>
           </div>
         </div>
 
@@ -258,57 +257,57 @@ export default function AdminAIUsagePage() {
         <div className="grid gap-4 md:grid-cols-4">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">{t("admin.aiUsage.totalTokens")}</CardTitle>
+              <CardTitle className="text-sm font-medium">{t("admin.modules.aiUsage.totalTokens")}</CardTitle>
               <TrendingUp className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{totalTokensThisMonth.toLocaleString()}</div>
-              <p className="text-xs text-muted-foreground">{t("admin.aiUsage.thisMonth")}</p>
+              <p className="text-xs text-muted-foreground">{t("admin.modules.aiUsage.thisMonth")}</p>
             </CardContent>
           </Card>
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">{t("admin.aiUsage.totalRequests")}</CardTitle>
+              <CardTitle className="text-sm font-medium">{t("admin.modules.aiUsage.totalRequests")}</CardTitle>
               <Activity className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{totalRequests}</div>
-              <p className="text-xs text-muted-foreground">{t("admin.aiUsage.allTime")}</p>
+              <p className="text-xs text-muted-foreground">{t("admin.modules.aiUsage.allTime")}</p>
             </CardContent>
           </Card>
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">{t("admin.aiUsage.activeUsers")}</CardTitle>
+              <CardTitle className="text-sm font-medium">{t("admin.modules.aiUsage.activeUsers")}</CardTitle>
               <Users className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{activeUsers}</div>
-              <p className="text-xs text-muted-foreground">{t("admin.aiUsage.usedAI")}</p>
+              <p className="text-xs text-muted-foreground">{t("admin.modules.aiUsage.usedAI")}</p>
             </CardContent>
           </Card>
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">{t("admin.aiUsage.disabledUsers")}</CardTitle>
+              <CardTitle className="text-sm font-medium">{t("admin.modules.aiUsage.disabledUsers")}</CardTitle>
               <Settings className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{disabledUsers}</div>
-              <p className="text-xs text-muted-foreground">{t("admin.aiUsage.accessRevoked")}</p>
+              <p className="text-xs text-muted-foreground">{t("admin.modules.aiUsage.accessRevoked")}</p>
             </CardContent>
           </Card>
         </div>
 
         <Tabs defaultValue="users" className="space-y-4">
           <TabsList>
-            <TabsTrigger value="users">{t("admin.aiUsage.userManagement")}</TabsTrigger>
-            <TabsTrigger value="logs">{t("admin.aiUsage.usageLogs")}</TabsTrigger>
+            <TabsTrigger value="users">{t("admin.modules.aiUsage.userManagement")}</TabsTrigger>
+            <TabsTrigger value="logs">{t("admin.modules.aiUsage.usageLogs")}</TabsTrigger>
           </TabsList>
 
           <TabsContent value="users" className="space-y-4">
             <Card>
               <CardHeader>
                 <div className="flex items-center justify-between">
-                  <CardTitle>{t("admin.aiUsage.userSettings")}</CardTitle>
+                  <CardTitle>{t("admin.modules.aiUsage.userSettings")}</CardTitle>
                   <div className="relative w-64">
                     <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
                     <Input
@@ -326,9 +325,9 @@ export default function AdminAIUsagePage() {
                     <TableRow>
                       <TableHead>{t("common.name")}</TableHead>
                       <TableHead>{t("common.email")}</TableHead>
-                      <TableHead className="text-right">{t("admin.aiUsage.monthlyTokens")}</TableHead>
-                      <TableHead className="text-right">{t("admin.aiUsage.monthlyLimit")}</TableHead>
-                      <TableHead className="text-right">{t("admin.aiUsage.dailyLimit")}</TableHead>
+                      <TableHead className="text-right">{t("admin.modules.aiUsage.monthlyTokens")}</TableHead>
+                      <TableHead className="text-right">{t("admin.modules.aiUsage.monthlyLimit")}</TableHead>
+                      <TableHead className="text-right">{t("admin.modules.aiUsage.dailyLimit")}</TableHead>
                       <TableHead className="text-center">{t("common.status")}</TableHead>
                       <TableHead className="text-right">{t("common.actions")}</TableHead>
                     </TableRow>
@@ -380,18 +379,18 @@ export default function AdminAIUsagePage() {
           <TabsContent value="logs" className="space-y-4">
             <Card>
               <CardHeader>
-                <CardTitle>{t("admin.aiUsage.recentLogs")}</CardTitle>
+                <CardTitle>{t("admin.modules.aiUsage.recentLogs")}</CardTitle>
               </CardHeader>
               <CardContent>
                 <Table>
                   <TableHeader>
                     <TableRow>
                       <TableHead>{t("common.user")}</TableHead>
-                      <TableHead>{t("admin.aiUsage.model")}</TableHead>
-                      <TableHead>{t("admin.aiUsage.feature")}</TableHead>
-                      <TableHead className="text-right">{t("admin.aiUsage.promptTokens")}</TableHead>
-                      <TableHead className="text-right">{t("admin.aiUsage.completionTokens")}</TableHead>
-                      <TableHead className="text-right">{t("admin.aiUsage.totalTokens")}</TableHead>
+                      <TableHead>{t("admin.modules.aiUsage.model")}</TableHead>
+                      <TableHead>{t("admin.modules.aiUsage.feature")}</TableHead>
+                      <TableHead className="text-right">{t("admin.modules.aiUsage.promptTokens")}</TableHead>
+                      <TableHead className="text-right">{t("admin.modules.aiUsage.completionTokens")}</TableHead>
+                      <TableHead className="text-right">{t("admin.modules.aiUsage.totalTokens")}</TableHead>
                       <TableHead>{t("common.date")}</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -414,7 +413,7 @@ export default function AdminAIUsagePage() {
                     {usageLogs.length === 0 && (
                       <TableRow>
                         <TableCell colSpan={7} className="text-center text-muted-foreground py-8">
-                          {t("admin.aiUsage.noLogs")}
+                          {t("admin.modules.aiUsage.noLogs")}
                         </TableCell>
                       </TableRow>
                     )}
@@ -430,19 +429,19 @@ export default function AdminAIUsagePage() {
           <DialogContent>
             <DialogHeader>
               <DialogTitle>
-                {t("admin.aiUsage.editSettings")} - {selectedUser?.full_name}
+                {t("admin.modules.aiUsage.editSettings")} - {selectedUser?.full_name}
               </DialogTitle>
             </DialogHeader>
             <div className="space-y-4 py-4">
               <div className="flex items-center justify-between">
-                <Label>{t("admin.aiUsage.aiAccess")}</Label>
+                <Label>{t("admin.modules.aiUsage.aiAccess")}</Label>
                 <Switch
                   checked={editSettings.is_enabled}
                   onCheckedChange={(checked) => setEditSettings(prev => ({ ...prev, is_enabled: checked }))}
                 />
               </div>
               <div className="space-y-2">
-                <Label>{t("admin.aiUsage.monthlyTokenLimit")}</Label>
+                <Label>{t("admin.modules.aiUsage.monthlyTokenLimit")}</Label>
                 <Input
                   type="number"
                   placeholder={t("common.unlimited")}
@@ -451,7 +450,7 @@ export default function AdminAIUsagePage() {
                 />
               </div>
               <div className="space-y-2">
-                <Label>{t("admin.aiUsage.dailyTokenLimit")}</Label>
+                <Label>{t("admin.modules.aiUsage.dailyTokenLimit")}</Label>
                 <Input
                   type="number"
                   placeholder={t("common.unlimited")}
