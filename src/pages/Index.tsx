@@ -14,14 +14,37 @@ import {
   Calendar,
   TrendingUp,
 } from "lucide-react";
+import defaultGroupLogo from "@/assets/default-group-logo.png";
+import defaultCompanyLogo from "@/assets/default-company-logo.png";
 
 const Index = () => {
-  const { profile, isAdmin } = useAuth();
+  const { profile, isAdmin, company } = useAuth();
   const firstName = profile?.full_name?.split(" ")[0] || "there";
+  
+  const groupLogoUrl = company?.company_group?.logo_url || (company?.company_group ? defaultGroupLogo : null);
+  const companyLogoUrl = company?.logo_url || defaultCompanyLogo;
 
   return (
     <AppLayout>
       <div className="space-y-8">
+        {/* Company Logos */}
+        {company && (
+          <div className="flex items-center gap-3 animate-fade-in">
+            {groupLogoUrl && (
+              <img 
+                src={groupLogoUrl} 
+                alt={company.company_group?.name || "Group"}
+                className="h-10 w-10 rounded-lg border bg-background object-contain p-1 shadow-sm"
+              />
+            )}
+            <img 
+              src={companyLogoUrl} 
+              alt={company.name}
+              className="h-10 w-10 rounded-lg border bg-background object-contain p-1 shadow-sm"
+            />
+          </div>
+        )}
+
         {/* Header */}
         <div className="animate-fade-in">
           <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
