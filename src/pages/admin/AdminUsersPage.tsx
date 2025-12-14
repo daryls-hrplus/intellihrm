@@ -368,7 +368,7 @@ export default function AdminUsersPage() {
         </div>
 
         {/* Users Table */}
-        <div className="rounded-xl border border-border bg-card shadow-card overflow-hidden animate-slide-up" style={{ animationDelay: "150ms" }}>
+        <div className="rounded-xl border border-border bg-card shadow-card animate-slide-up" style={{ animationDelay: "150ms" }}>
           {isLoading ? (
             <div className="flex items-center justify-center py-12">
               <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -378,7 +378,7 @@ export default function AdminUsersPage() {
               {searchQuery ? "No users found matching your search." : "No users found."}
             </div>
           ) : (
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto overflow-y-visible">
               <table className="w-full">
                 <thead>
                   <tr className="border-b border-border bg-muted/30">
@@ -444,8 +444,8 @@ export default function AdminUsersPage() {
                             </button>
                             {openCompanyDropdown === user.id && (
                               <>
-                                <div className="fixed inset-0 z-10" onClick={() => setOpenCompanyDropdown(null)} />
-                                <div className="absolute left-0 top-full z-20 mt-1 w-56 rounded-lg border border-border bg-card py-1 shadow-lg">
+                                <div className="fixed inset-0 z-40" onClick={() => setOpenCompanyDropdown(null)} />
+                                <div className="absolute left-0 top-full z-50 mt-1 w-56 max-h-64 overflow-y-auto rounded-lg border border-border bg-popover py-1 shadow-lg">
                                   <p className="px-3 py-2 text-xs font-semibold uppercase text-muted-foreground">
                                     Assign Company
                                   </p>
@@ -513,10 +513,10 @@ export default function AdminUsersPage() {
                             {openDropdown === user.id && (
                               <>
                                 <div
-                                  className="fixed inset-0 z-10"
+                                  className="fixed inset-0 z-40"
                                   onClick={() => setOpenDropdown(null)}
                                 />
-                                <div className="absolute right-0 top-full z-20 mt-1 w-48 rounded-lg border border-border bg-card py-1 shadow-lg">
+                                <div className="absolute right-0 top-full z-50 mt-1 w-48 rounded-lg border border-border bg-popover py-1 shadow-lg">
                                   <p className="px-3 py-2 text-xs font-semibold uppercase text-muted-foreground">
                                     Change Role
                                   </p>
