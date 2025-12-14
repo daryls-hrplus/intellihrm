@@ -228,6 +228,43 @@
         "title": "تعيينات الموظفين",
         "description": "إدارة تعيينات الموظفين في الوظائف"
       }
+    },
+    "profile": {
+      "tabs": {
+        "overview": "نظرة عامة",
+        "addresses": "العناوين",
+        "background": "التحقق من الخلفية",
+        "bank": "الحسابات المصرفية",
+        "beneficiaries": "المستفيدون",
+        "branches": "مواقع الفروع",
+        "certificates": "الشهادات",
+        "competencies": "الكفاءات",
+        "contacts": "جهات الاتصال",
+        "dependents": "المعالون",
+        "documents": "المستندات",
+        "emergency": "جهات الاتصال للطوارئ",
+        "interests": "الاهتمامات",
+        "licenses": "التراخيص",
+        "medical": "الملف الطبي",
+        "memberships": "العضويات",
+        "payGroup": "مجموعة الدفع",
+        "references": "المراجع",
+        "workPermits": "تصاريح العمل"
+      },
+      "positionHistory": "سجل الوظائف",
+      "noPositions": "لا توجد وظائف معينة",
+      "primary": "أساسي",
+      "ended": "منتهي",
+      "started": "بدأ",
+      "timezone": "المنطقة الزمنية",
+      "preferredLanguage": "اللغة المفضلة",
+      "dateFormat": "تنسيق التاريخ",
+      "timeFormat": "تنسيق الوقت",
+      "memberSince": "عضو منذ",
+      "employeeNotFound": "الموظف غير موجود",
+      "employeeNotFoundDescription": "الموظف الذي تبحث عنه غير موجود.",
+      "backToEmployees": "العودة إلى الموظفين",
+      "notSet": "غير محدد"
     }
   },
   "admin": {

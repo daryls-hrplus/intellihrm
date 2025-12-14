@@ -198,11 +198,11 @@ export default function EmployeeProfilePage() {
       <AppLayout>
         <div className="flex flex-col items-center justify-center py-24 text-center">
           <User className="h-16 w-16 text-muted-foreground/50" />
-          <h2 className="mt-4 text-xl font-semibold text-foreground">Employee not found</h2>
-          <p className="mt-2 text-muted-foreground">The employee you're looking for doesn't exist.</p>
+          <h2 className="mt-4 text-xl font-semibold text-foreground">{t("workforce.profile.employeeNotFound")}</h2>
+          <p className="mt-2 text-muted-foreground">{t("workforce.profile.employeeNotFoundDescription")}</p>
           <Button onClick={() => navigate('/workforce/employees')} className="mt-4">
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Employees
+            {t("workforce.profile.backToEmployees")}
           </Button>
         </div>
       </AppLayout>
@@ -216,15 +216,15 @@ export default function EmployeeProfilePage() {
     <AppLayout>
       <div className="space-y-6">
         <Breadcrumbs items={[
-          { label: "Workforce", href: "/workforce" },
-          { label: "Employees", href: "/workforce/employees" },
+          { label: t("workforce.title"), href: "/workforce" },
+          { label: t("workforce.employees"), href: "/workforce/employees" },
           { label: employee.full_name }
         ]} />
 
         {/* Back Button */}
         <Button variant="ghost" onClick={() => navigate('/workforce/employees')} className="gap-2">
           <ArrowLeft className="h-4 w-4" />
-          Back to Employees
+          {t("workforce.profile.backToEmployees")}
         </Button>
 
         {/* Profile Header */}

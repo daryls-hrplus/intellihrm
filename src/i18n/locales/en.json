@@ -562,6 +562,43 @@
       "companyRequired": "Company is required",
       "startDateRequired": "Start date is required",
       "deleteConfirm": "Are you sure you want to delete \"{{name}}\"? This action cannot be undone."
+    },
+    "profile": {
+      "tabs": {
+        "overview": "Overview",
+        "addresses": "Addresses",
+        "background": "Background Checks",
+        "bank": "Bank Accounts",
+        "beneficiaries": "Beneficiaries",
+        "branches": "Branch Locations",
+        "certificates": "Certificates",
+        "competencies": "Competencies",
+        "contacts": "Contacts",
+        "dependents": "Dependents",
+        "documents": "Documents",
+        "emergency": "Emergency Contacts",
+        "interests": "Interests",
+        "licenses": "Licenses",
+        "medical": "Medical Profile",
+        "memberships": "Memberships",
+        "payGroup": "Pay Group",
+        "references": "References",
+        "workPermits": "Work Permits"
+      },
+      "positionHistory": "Position History",
+      "noPositions": "No positions assigned",
+      "primary": "Primary",
+      "ended": "Ended",
+      "started": "Started",
+      "timezone": "Timezone",
+      "preferredLanguage": "Preferred Language",
+      "dateFormat": "Date Format",
+      "timeFormat": "Time Format",
+      "memberSince": "Member Since",
+      "employeeNotFound": "Employee not found",
+      "employeeNotFoundDescription": "The employee you're looking for doesn't exist.",
+      "backToEmployees": "Back to Employees",
+      "notSet": "Not set"
     }
   },
   "ess": {
