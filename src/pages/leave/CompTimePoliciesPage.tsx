@@ -36,22 +36,24 @@ import { useCompensatoryTime, CompTimePolicy } from "@/hooks/useCompensatoryTime
 import { useAuth } from "@/contexts/AuthContext";
 import { LeaveCompanyFilter } from "@/components/leave/LeaveCompanyFilter";
 import { format } from "date-fns";
-
-const breadcrumbItems = [
-  { label: "Leave", href: "/leave" },
-  { label: "Comp Time Policies" },
-];
-
-const expiryTypeLabels: Record<string, string> = {
-  configurable: 'Custom Period',
-  no_expiry: 'No Expiry',
-  year_end_reset: 'Year End Reset',
-};
+import { useLanguage } from "@/hooks/useLanguage";
 
 export default function CompTimePoliciesPage() {
+  const { t } = useLanguage();
   const { company } = useAuth();
   const [selectedCompanyId, setSelectedCompanyId] = useState<string>(company?.id || "");
   const { policies, loadingPolicies, createPolicy, updatePolicy } = useCompensatoryTime(selectedCompanyId);
+
+  const breadcrumbItems = [
+    { label: t("leave.title"), href: "/leave" },
+    { label: t("leave.compTimePolicies.title") },
+  ];
+
+  const expiryTypeLabels: Record<string, string> = {
+    configurable: t("leave.compTimePolicies.customPeriod"),
+    no_expiry: t("leave.compTimePolicies.noExpiry"),
+    year_end_reset: t("leave.compTimePolicies.yearEndReset"),
+  };
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingPolicy, setEditingPolicy] = useState<CompTimePolicy | null>(null);
@@ -128,8 +130,8 @@ export default function CompTimePoliciesPage() {
               <Settings className="h-5 w-5 text-primary" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold tracking-tight">Comp Time Policies</h1>
-              <p className="text-muted-foreground">Configure compensatory time off rules</p>
+              <h1 className="text-2xl font-bold tracking-tight">{t("leave.compTimePolicies.title")}</h1>
+              <p className="text-muted-foreground">{t("leave.compTimePolicies.subtitle")}</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -139,33 +141,33 @@ export default function CompTimePoliciesPage() {
             />
             <Button onClick={() => { resetForm(); setDialogOpen(true); }}>
               <Plus className="h-4 w-4 mr-2" />
-              Add Policy
+              {t("leave.compTimePolicies.addPolicy")}
             </Button>
           </div>
         </div>
 
         <Card>
           <CardHeader>
-            <CardTitle>Policies</CardTitle>
+            <CardTitle>{t("leave.compTimePolicies.policies")}</CardTitle>
             <CardDescription>
-              Manage how compensatory time is earned, tracked, and expires
+              {t("leave.compTimePolicies.policiesDesc")}
             </CardDescription>
           </CardHeader>
           <CardContent>
             {loadingPolicies ? (
-              <p className="text-muted-foreground text-center py-8">Loading...</p>
+              <p className="text-muted-foreground text-center py-8">{t("leave.compTimePolicies.loading")}</p>
             ) : policies.length === 0 ? (
-              <p className="text-muted-foreground text-center py-8">No policies configured</p>
+              <p className="text-muted-foreground text-center py-8">{t("leave.compTimePolicies.noPolicies")}</p>
             ) : (
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Name</TableHead>
-                    <TableHead>Expiry Type</TableHead>
-                    <TableHead>Max Balance</TableHead>
-                    <TableHead>Requires Approval</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Actions</TableHead>
+                    <TableHead>{t("leave.compTimePolicies.name")}</TableHead>
+                    <TableHead>{t("leave.compTimePolicies.expiryType")}</TableHead>
+                    <TableHead>{t("leave.compTimePolicies.maxBalance")}</TableHead>
+                    <TableHead>{t("leave.compTimePolicies.requiresApproval")}</TableHead>
+                    <TableHead>{t("leave.compTimePolicies.status")}</TableHead>
+                    <TableHead>{t("common.actions")}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -189,17 +191,17 @@ export default function CompTimePoliciesPage() {
                       </TableCell>
                       <TableCell>
                         {policy.max_balance_hours 
-                          ? `${policy.max_balance_hours} hrs` 
-                          : 'Unlimited'}
+                          ? `${policy.max_balance_hours} ${t("leave.compTime.hrs")}` 
+                          : t("leave.compTimePolicies.unlimited")}
                       </TableCell>
                       <TableCell>
                         <Badge variant={policy.requires_approval ? 'default' : 'secondary'}>
-                          {policy.requires_approval ? 'Yes' : 'No'}
+                          {policy.requires_approval ? t("common.yes") : t("common.no")}
                         </Badge>
                       </TableCell>
                       <TableCell>
                         <Badge variant={policy.is_active ? 'default' : 'secondary'}>
-                          {policy.is_active ? 'Active' : 'Inactive'}
+                          {policy.is_active ? t("leave.compTimePolicies.active") : t("leave.compTimePolicies.inactive")}
                         </Badge>
                       </TableCell>
                       <TableCell>
@@ -219,34 +221,34 @@ export default function CompTimePoliciesPage() {
       <Dialog open={dialogOpen} onOpenChange={(open) => { setDialogOpen(open); if (!open) resetForm(); }}>
         <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>
-            <DialogTitle>{editingPolicy ? 'Edit Policy' : 'Add Policy'}</DialogTitle>
+            <DialogTitle>{editingPolicy ? t("leave.compTimePolicies.editPolicy") : t("leave.compTimePolicies.addPolicy")}</DialogTitle>
             <DialogDescription>
-              Configure compensatory time policy settings
+              {t("leave.compTimePolicies.configureSettings")}
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Label>Policy Name *</Label>
+              <Label>{t("leave.compTimePolicies.policyName")} *</Label>
               <Input
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                placeholder="e.g., Standard Comp Time"
+                placeholder={t("leave.compTimePolicies.policyNamePlaceholder")}
               />
             </div>
 
             <div className="space-y-2">
-              <Label>Description</Label>
+              <Label>{t("leave.compTimePolicies.description")}</Label>
               <Textarea
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                placeholder="Policy description..."
+                placeholder={t("leave.compTimePolicies.descriptionPlaceholder")}
                 rows={2}
               />
             </div>
 
             <div className="space-y-2">
-              <Label>Expiry Type</Label>
+              <Label>{t("leave.compTimePolicies.expiryType")}</Label>
               <Select 
                 value={formData.expiry_type} 
                 onValueChange={(v) => setFormData({ ...formData, expiry_type: v as any })}
@@ -255,16 +257,16 @@ export default function CompTimePoliciesPage() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="no_expiry">No Expiry</SelectItem>
-                  <SelectItem value="configurable">Custom Period (days)</SelectItem>
-                  <SelectItem value="year_end_reset">Year End Reset</SelectItem>
+                  <SelectItem value="no_expiry">{t("leave.compTimePolicies.noExpiry")}</SelectItem>
+                  <SelectItem value="configurable">{t("leave.compTimePolicies.customPeriod")}</SelectItem>
+                  <SelectItem value="year_end_reset">{t("leave.compTimePolicies.yearEndReset")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             {formData.expiry_type === 'configurable' && (
               <div className="space-y-2">
-                <Label>Expiry Days</Label>
+                <Label>{t("leave.compTimePolicies.expiryDays")}</Label>
                 <Input
                   type="number"
                   min="1"
@@ -276,19 +278,19 @@ export default function CompTimePoliciesPage() {
             )}
 
             <div className="space-y-2">
-              <Label>Maximum Balance (hours)</Label>
+              <Label>{t("leave.compTimePolicies.maxBalanceLabel")}</Label>
               <Input
                 type="number"
                 min="0"
                 step="0.5"
                 value={formData.max_balance_hours}
                 onChange={(e) => setFormData({ ...formData, max_balance_hours: e.target.value })}
-                placeholder="Leave empty for unlimited"
+                placeholder={t("leave.compTimePolicies.maxBalancePlaceholder")}
               />
             </div>
 
             <div className="flex items-center justify-between">
-              <Label>Requires Approval</Label>
+              <Label>{t("leave.compTimePolicies.requiresApproval")}</Label>
               <Switch
                 checked={formData.requires_approval}
                 onCheckedChange={(checked) => setFormData({ ...formData, requires_approval: checked })}
@@ -296,7 +298,7 @@ export default function CompTimePoliciesPage() {
             </div>
 
             <div className="flex items-center justify-between">
-              <Label>Active</Label>
+              <Label>{t("leave.compTimePolicies.active")}</Label>
               <Switch
                 checked={formData.is_active}
                 onCheckedChange={(checked) => setFormData({ ...formData, is_active: checked })}
@@ -306,13 +308,13 @@ export default function CompTimePoliciesPage() {
 
           <DialogFooter>
             <Button variant="outline" onClick={() => setDialogOpen(false)}>
-              Cancel
+              {t("leave.compTimePolicies.cancel")}
             </Button>
             <Button 
               onClick={handleSubmit}
               disabled={!isValid || createPolicy.isPending || updatePolicy.isPending}
             >
-              {editingPolicy ? 'Update' : 'Create'}
+              {editingPolicy ? t("leave.compTimePolicies.update") : t("leave.compTimePolicies.create")}
             </Button>
           </DialogFooter>
         </DialogContent>
