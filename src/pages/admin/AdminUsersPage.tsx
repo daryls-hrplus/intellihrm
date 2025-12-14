@@ -13,6 +13,13 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
   Search,
   Shield,
   UserCog,
@@ -495,53 +502,51 @@ export default function AdminUsersPage() {
                           </div>
                         </td>
                         <td className="px-6 py-4 text-right">
-                          <div className="relative inline-block">
-                            <button
-                              onClick={() =>
-                                setOpenDropdown(openDropdown === user.id ? null : user.id)
-                              }
-                              disabled={updatingUserId === user.id}
-                              className="rounded-lg p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:opacity-50"
+                          <DropdownMenu
+                            open={openDropdown === user.id}
+                            onOpenChange={(open) =>
+                              setOpenDropdown(open ? user.id : null)
+                            }
+                          >
+                            <DropdownMenuTrigger asChild>
+                              <button
+                                disabled={updatingUserId === user.id}
+                                className="rounded-lg p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:opacity-50"
+                              >
+                                {updatingUserId === user.id ? (
+                                  <Loader2 className="h-4 w-4 animate-spin" />
+                                ) : (
+                                  <MoreHorizontal className="h-4 w-4" />
+                                )}
+                              </button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent
+                              align="end"
+                              className="z-50 w-48"
                             >
-                              {updatingUserId === user.id ? (
-                                <Loader2 className="h-4 w-4 animate-spin" />
-                              ) : (
-                                <MoreHorizontal className="h-4 w-4" />
-                              )}
-                            </button>
-
-                            {openDropdown === user.id && (
-                              <>
-                                <div
-                                  className="fixed inset-0 z-40"
-                                  onClick={() => setOpenDropdown(null)}
-                                />
-                                <div className="absolute right-0 top-full z-50 mt-1 w-48 rounded-lg border border-border bg-popover py-1 shadow-lg">
-                                  <p className="px-3 py-2 text-xs font-semibold uppercase text-muted-foreground">
-                                    Change Role
-                                  </p>
-                                  {roleConfig.map((role) => (
-                                    <button
-                                      key={role.value}
-                                      onClick={() => updateUserRole(user.id, role.value)}
-                                      className={cn(
-                                        "flex w-full items-center gap-2 px-3 py-2 text-sm transition-colors hover:bg-muted",
-                                        primaryRole === role.value
-                                          ? "text-primary"
-                                          : "text-card-foreground"
-                                      )}
-                                    >
-                                      <role.icon className="h-4 w-4" />
-                                      <span className="flex-1 text-left">{role.label}</span>
-                                      {primaryRole === role.value && (
-                                        <Check className="h-4 w-4" />
-                                      )}
-                                    </button>
-                                  ))}
-                                </div>
-                              </>
-                            )}
-                          </div>
+                              <DropdownMenuLabel className="px-3 py-2 text-xs font-semibold uppercase text-muted-foreground">
+                                Change Role
+                              </DropdownMenuLabel>
+                              {roleConfig.map((role) => (
+                                <DropdownMenuItem
+                                  key={role.value}
+                                  onClick={() => updateUserRole(user.id, role.value)}
+                                  className={cn(
+                                    "flex w-full items-center gap-2 px-3 py-2 text-sm",
+                                    primaryRole === role.value
+                                      ? "text-primary"
+                                      : "text-card-foreground"
+                                  )}
+                                >
+                                  <role.icon className="h-4 w-4" />
+                                  <span className="flex-1 text-left">{role.label}</span>
+                                  {primaryRole === role.value && (
+                                    <Check className="h-4 w-4" />
+                                  )}
+                                </DropdownMenuItem>
+                              ))}
+                            </DropdownMenuContent>
+                          </DropdownMenu>
                         </td>
                       </tr>
                     );
