@@ -135,6 +135,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             group_id: companyData.group_id,
             company_group: companyData.company_groups as CompanyGroup | null,
           });
+
+          // Ensure company has a subscription record (creates trial if missing)
+          const { data: existingSub } = await supabase
+            .from("company_subscriptions")
+            .select("id")
+            .eq("company_id", companyData.id)
+            .maybeSingle();
+
+          if (!existingSub) {
+            // Create trial subscription for this company
+            await supabase
+              .from("company_subscriptions")
+              .insert({
+                company_id: companyData.id,
+                status: 'trial',
+                billing_cycle: 'monthly',
+                active_employee_count: 1,
+                selected_modules: [],
+              });
+          }
         }
       } else {
         setCompany(null);

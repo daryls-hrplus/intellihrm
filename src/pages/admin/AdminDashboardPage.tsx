@@ -36,6 +36,7 @@ import {
   BookOpen,
   FileSpreadsheet,
   Layers,
+  CreditCard,
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 
@@ -165,6 +166,13 @@ const getAdminModules = (t: (key: string) => string) => [
     href: "/admin/modules-brochure",
     icon: Layers,
     color: "bg-green-500/10 text-green-600",
+  },
+  {
+    title: "Subscriptions",
+    description: "Manage company subscriptions and billing",
+    href: "/admin/subscriptions",
+    icon: CreditCard,
+    color: "bg-emerald-500/10 text-emerald-600",
   },
   {
     title: t("admin.modules.territories.title"),

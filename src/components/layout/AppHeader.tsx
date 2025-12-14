@@ -15,6 +15,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { LanguageSwitcher } from "./LanguageSwitcher";
 import { AIAssistantButton } from "./AIAssistantButton";
 import { NotificationBell } from "./NotificationBell";
+import { TrialBanner } from "@/components/subscription/TrialBanner";
 import {
   Tooltip,
   TooltipContent,
@@ -196,6 +197,9 @@ export function AppHeader() {
       
       {/* Right Side Actions */}
       <div className="flex items-center gap-2">
+      {/* Trial Banner */}
+      <TrialBanner />
+      
       {/* AI Assistant */}
       <AIAssistantButton />
       

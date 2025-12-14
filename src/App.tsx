@@ -45,6 +45,11 @@ import ImplementationHandbookPage from "./pages/admin/ImplementationHandbookPage
 import FeaturesBrochurePage from "./pages/admin/FeaturesBrochurePage";
 import ModulesBrochurePage from "./pages/admin/ModulesBrochurePage";
 import CurrencyManagementPage from "./pages/admin/CurrencyManagementPage";
+import SubscriptionManagementPage from "./pages/admin/SubscriptionManagementPage";
+
+// Subscription pages
+import SubscriptionPage from "./pages/subscription/SubscriptionPage";
+import UpgradePage from "./pages/subscription/UpgradePage";
 // Workforce pages
 import WorkforceDashboardPage from "./pages/workforce/WorkforceDashboardPage";
 import EmployeesPage from "./pages/workforce/EmployeesPage";
@@ -333,6 +338,10 @@ const App = () => (
           <Routes>
             <Route path="/auth" element={<AuthPage />} />
             <Route path="/unauthorized" element={<UnauthorizedPage />} />
+            
+            {/* Subscription Routes */}
+            <Route path="/subscription" element={<SubscriptionPage />} />
+            <Route path="/subscription/upgrade" element={<UpgradePage />} />
             
             {/* Main Dashboard */}
             <Route
@@ -985,6 +994,14 @@ const App = () => (
               element={
                 <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
                   <AdminLmsManagementPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/subscriptions"
+              element={
+                <ProtectedRoute requiredRoles={["admin"]}>
+                  <SubscriptionManagementPage />
                 </ProtectedRoute>
               }
             />
