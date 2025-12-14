@@ -794,7 +794,7 @@ export default function AdminCompaniesPage() {
                       {logoPreview ? "Change Logo" : "Upload Logo"}
                     </label>
                     <p className="mt-1 text-xs text-muted-foreground">
-                      PNG, JPG or WebP. Max 5MB.
+                      PNG, JPG or WebP. Max 5MB. Recommended: 200×200px (square)
                     </p>
                   </div>
                 </div>
