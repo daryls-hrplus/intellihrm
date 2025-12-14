@@ -18296,6 +18296,47 @@ export type Database = {
           },
         ]
       }
+      mfa_settings: {
+        Row: {
+          allowed_factors: string[] | null
+          company_id: string | null
+          created_at: string
+          grace_period_days: number | null
+          id: string
+          is_mfa_enabled: boolean
+          is_mfa_required: boolean
+          updated_at: string
+        }
+        Insert: {
+          allowed_factors?: string[] | null
+          company_id?: string | null
+          created_at?: string
+          grace_period_days?: number | null
+          id?: string
+          is_mfa_enabled?: boolean
+          is_mfa_required?: boolean
+          updated_at?: string
+        }
+        Update: {
+          allowed_factors?: string[] | null
+          company_id?: string | null
+          created_at?: string
+          grace_period_days?: number | null
+          id?: string
+          is_mfa_enabled?: boolean
+          is_mfa_required?: boolean
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mfa_settings_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: true
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       module_permissions: {
         Row: {
           created_at: string | null
@@ -24379,6 +24420,106 @@ export type Database = {
           },
         ]
       }
+      sso_domain_mappings: {
+        Row: {
+          created_at: string
+          domain: string
+          id: string
+          is_verified: boolean
+          sso_provider_id: string | null
+          verification_token: string | null
+          verified_at: string | null
+        }
+        Insert: {
+          created_at?: string
+          domain: string
+          id?: string
+          is_verified?: boolean
+          sso_provider_id?: string | null
+          verification_token?: string | null
+          verified_at?: string | null
+        }
+        Update: {
+          created_at?: string
+          domain?: string
+          id?: string
+          is_verified?: boolean
+          sso_provider_id?: string | null
+          verification_token?: string | null
+          verified_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sso_domain_mappings_sso_provider_id_fkey"
+            columns: ["sso_provider_id"]
+            isOneToOne: false
+            referencedRelation: "sso_providers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sso_providers: {
+        Row: {
+          attribute_mapping: Json | null
+          certificate: string | null
+          company_id: string | null
+          created_at: string
+          created_by: string | null
+          domain: string
+          entity_id: string | null
+          id: string
+          is_active: boolean
+          metadata_url: string | null
+          metadata_xml: string | null
+          provider_name: string
+          provider_type: string
+          sso_url: string | null
+          updated_at: string
+        }
+        Insert: {
+          attribute_mapping?: Json | null
+          certificate?: string | null
+          company_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          domain: string
+          entity_id?: string | null
+          id?: string
+          is_active?: boolean
+          metadata_url?: string | null
+          metadata_xml?: string | null
+          provider_name: string
+          provider_type?: string
+          sso_url?: string | null
+          updated_at?: string
+        }
+        Update: {
+          attribute_mapping?: Json | null
+          certificate?: string | null
+          company_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          domain?: string
+          entity_id?: string | null
+          id?: string
+          is_active?: boolean
+          metadata_url?: string | null
+          metadata_xml?: string | null
+          provider_name?: string
+          provider_type?: string
+          sso_url?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sso_providers_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       subscription_changes: {
         Row: {
           change_type: string
@@ -26818,6 +26959,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      user_mfa_status: {
+        Row: {
+          created_at: string
+          enrolled_at: string | null
+          factor_type: string | null
+          id: string
+          is_enrolled: boolean
+          last_verified_at: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          enrolled_at?: string | null
+          factor_type?: string | null
+          id?: string
+          is_enrolled?: boolean
+          last_verified_at?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          enrolled_at?: string | null
+          factor_type?: string | null
+          id?: string
+          is_enrolled?: boolean
+          last_verified_at?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       user_roles: {
         Row: {
