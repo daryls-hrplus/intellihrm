@@ -29,6 +29,7 @@ import {
   HeartPulse,
   Monitor,
   TriangleAlert,
+  BarChart3,
 } from "lucide-react";
 
 const hseModules = [
@@ -223,6 +224,13 @@ export default function HSEDashboardPage() {
       href: "/hse/ergonomics",
       icon: Monitor,
       color: "bg-pink-500/10 text-pink-600",
+    },
+    {
+      title: t("hseModule.modules.analytics.title"),
+      description: t("hseModule.modules.analytics.description"),
+      href: "/hse/analytics",
+      icon: BarChart3,
+      color: "bg-fuchsia-500/10 text-fuchsia-600",
     },
   ];
 
