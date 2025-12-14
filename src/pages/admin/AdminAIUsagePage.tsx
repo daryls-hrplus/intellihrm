@@ -159,8 +159,7 @@ export default function AdminAIUsagePage() {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const { data, error } = await (supabase as any)
         .from("profiles")
-        .select("id, full_name, email, company_id, department_id")
-        .eq("is_active", true);
+        .select("id, full_name, email, company_id, department_id");
       if (error) throw error;
       return (data || []) as Profile[];
     },
