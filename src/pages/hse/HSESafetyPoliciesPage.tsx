@@ -32,6 +32,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
+import { useLanguage } from "@/hooks/useLanguage";
 import {
   FileText,
   Plus,
@@ -63,6 +64,7 @@ const statusOptions = [
 ];
 
 export default function HSESafetyPoliciesPage() {
+  const { t } = useLanguage();
   const { user } = useAuth();
   const [companyId, setCompanyId] = useState<string>("");
   const [searchTerm, setSearchTerm] = useState("");
@@ -190,8 +192,8 @@ export default function HSESafetyPoliciesPage() {
             <FileText className="h-5 w-5 text-info" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold tracking-tight">Safety Policies</h1>
-            <p className="text-muted-foreground">Company safety guidelines and procedures</p>
+            <h1 className="text-2xl font-bold tracking-tight">{t("hseModule.policies.title")}</h1>
+            <p className="text-muted-foreground">{t("hseModule.policies.subtitle")}</p>
           </div>
         </div>
 

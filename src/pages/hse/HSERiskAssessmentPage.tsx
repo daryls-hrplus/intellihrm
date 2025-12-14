@@ -31,6 +31,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useLanguage } from "@/hooks/useLanguage";
 import {
   Shield,
   Plus,
@@ -68,6 +69,7 @@ const hazardTypes = [
 ];
 
 export default function HSERiskAssessmentPage() {
+  const { t } = useLanguage();
   const [companyId, setCompanyId] = useState<string>("");
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
@@ -182,8 +184,8 @@ export default function HSERiskAssessmentPage() {
             <Shield className="h-5 w-5 text-primary" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold tracking-tight">Risk Assessment</h1>
-            <p className="text-muted-foreground">Workplace hazard evaluation</p>
+            <h1 className="text-2xl font-bold tracking-tight">{t("hseModule.riskAssessment.title")}</h1>
+            <p className="text-muted-foreground">{t("hseModule.riskAssessment.subtitle")}</p>
           </div>
         </div>
 
@@ -193,7 +195,7 @@ export default function HSERiskAssessmentPage() {
             <div className="flex flex-wrap gap-4">
               <Select value={companyId} onValueChange={setCompanyId}>
                 <SelectTrigger className="w-[200px]">
-                  <SelectValue placeholder="Select company" />
+                  <SelectValue placeholder={t("hseModule.common.selectCompany")} />
                 </SelectTrigger>
                 <SelectContent>
                   {companies.map((c) => (
@@ -207,7 +209,7 @@ export default function HSERiskAssessmentPage() {
               <div className="relative flex-1 min-w-[200px]">
                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
-                  placeholder="Search assessments..."
+                  placeholder={t("hseModule.riskAssessment.searchAssessments")}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-9"
@@ -216,10 +218,10 @@ export default function HSERiskAssessmentPage() {
 
               <Select value={statusFilter} onValueChange={setStatusFilter}>
                 <SelectTrigger className="w-[150px]">
-                  <SelectValue placeholder="Status" />
+                  <SelectValue placeholder={t("common.status")} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Status</SelectItem>
+                  <SelectItem value="all">{t("hseModule.common.allStatus")}</SelectItem>
                   {statusOptions.map((s) => (
                     <SelectItem key={s.value} value={s.value}>
                       {s.label}
@@ -230,7 +232,7 @@ export default function HSERiskAssessmentPage() {
 
               <Button onClick={() => handleOpenDialog()} disabled={!companyId}>
                 <Plus className="mr-2 h-4 w-4" />
-                New Assessment
+                {t("hseModule.riskAssessment.newAssessment")}
               </Button>
             </div>
           </CardContent>
@@ -243,26 +245,26 @@ export default function HSERiskAssessmentPage() {
               <TableHeader>
                 <TableRow>
                   <TableHead className="w-10"></TableHead>
-                  <TableHead>Assessment #</TableHead>
-                  <TableHead>Title</TableHead>
-                  <TableHead>Department</TableHead>
-                  <TableHead>Risk Level</TableHead>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Review Date</TableHead>
-                  <TableHead>Status</TableHead>
+                  <TableHead>{t("hseModule.riskAssessment.assessmentNumber")}</TableHead>
+                  <TableHead>{t("hseModule.common.title")}</TableHead>
+                  <TableHead>{t("hseModule.common.department")}</TableHead>
+                  <TableHead>{t("hseModule.riskAssessment.overallRiskLevel")}</TableHead>
+                  <TableHead>{t("common.date")}</TableHead>
+                  <TableHead>{t("hseModule.riskAssessment.reviewDate")}</TableHead>
+                  <TableHead>{t("common.status")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {assessmentsLoading ? (
                   <TableRow>
                     <TableCell colSpan={8} className="text-center py-8">
-                      Loading...
+                      {t("hseModule.common.loading")}
                     </TableCell>
                   </TableRow>
                 ) : filteredAssessments.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
-                      No risk assessments found
+                      {t("hseModule.riskAssessment.noAssessments")}
                     </TableCell>
                   </TableRow>
                 ) : (
@@ -321,7 +323,7 @@ export default function HSERiskAssessmentPage() {
                               <div className="flex items-center justify-between">
                                 <h4 className="font-semibold flex items-center gap-2">
                                   <AlertTriangle className="h-4 w-4" />
-                                  Identified Hazards
+                                  {t("hseModule.riskAssessment.hazards.title")}
                                 </h4>
                                 <Button
                                   size="sm"
@@ -331,24 +333,24 @@ export default function HSERiskAssessmentPage() {
                                   }}
                                 >
                                   <Plus className="mr-2 h-4 w-4" />
-                                  Add Hazard
+                                  {t("hseModule.riskAssessment.hazards.addHazard")}
                                 </Button>
                               </div>
                               {hazards.length === 0 ? (
                                 <p className="text-sm text-muted-foreground">
-                                  No hazards identified yet
+                                  {t("hseModule.riskAssessment.hazards.noHazards")}
                                 </p>
                               ) : (
                                 <Table>
                                   <TableHeader>
                                     <TableRow>
-                                      <TableHead>Type</TableHead>
-                                      <TableHead>Description</TableHead>
-                                      <TableHead>L</TableHead>
-                                      <TableHead>S</TableHead>
-                                      <TableHead>Risk Score</TableHead>
-                                      <TableHead>Controls</TableHead>
-                                      <TableHead>Status</TableHead>
+                                      <TableHead>{t("common.type")}</TableHead>
+                                      <TableHead>{t("common.description")}</TableHead>
+                                      <TableHead>{t("hseModule.riskAssessment.hazards.likelihood")}</TableHead>
+                                      <TableHead>{t("hseModule.riskAssessment.hazards.severityShort")}</TableHead>
+                                      <TableHead>{t("hseModule.riskAssessment.hazards.riskScore")}</TableHead>
+                                      <TableHead>{t("hseModule.riskAssessment.hazards.controls")}</TableHead>
+                                      <TableHead>{t("common.status")}</TableHead>
                                     </TableRow>
                                   </TableHeader>
                                   <TableBody>
@@ -400,7 +402,7 @@ export default function HSERiskAssessmentPage() {
           <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>
-                {selectedAssessment ? "Edit Risk Assessment" : "New Risk Assessment"}
+                {selectedAssessment ? t("hseModule.riskAssessment.editAssessment") : t("hseModule.riskAssessment.newAssessment")}
               </DialogTitle>
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4">

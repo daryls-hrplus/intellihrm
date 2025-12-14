@@ -7,6 +7,7 @@ import { differenceInDays } from "date-fns";
 import { Skeleton } from "@/components/ui/skeleton";
 import { LeaveCompanyFilter, useLeaveCompanyFilter } from "@/components/leave/LeaveCompanyFilter";
 import { DepartmentFilter, useDepartmentFilter } from "@/components/filters/DepartmentFilter";
+import { useLanguage } from "@/hooks/useLanguage";
 import {
   Shield,
   AlertTriangle,
@@ -57,6 +58,7 @@ const hseModules = [
 ];
 
 export default function HSEDashboardPage() {
+  const { t } = useLanguage();
   const { selectedCompanyId, setSelectedCompanyId } = useLeaveCompanyFilter();
   const { selectedDepartmentId, setSelectedDepartmentId } = useDepartmentFilter();
   const { incidents, trainingRecords, complianceRequirements, incidentsLoading, recordsLoading, complianceLoading } = useHSE(selectedCompanyId || undefined);
@@ -83,11 +85,49 @@ export default function HSEDashboardPage() {
   const compliantCount = complianceRequirements?.filter(c => c.status === 'compliant').length || 0;
   const complianceRate = totalCompliance > 0 ? Math.round((compliantCount / totalCompliance) * 100) : 100;
 
+  const hseModules = [
+    {
+      title: t("hseModule.modules.incidents.title"),
+      description: t("hseModule.modules.incidents.description"),
+      href: "/hse/incidents",
+      icon: AlertTriangle,
+      color: "bg-destructive/10 text-destructive",
+    },
+    {
+      title: t("hseModule.modules.safetyTraining.title"),
+      description: t("hseModule.modules.safetyTraining.description"),
+      href: "/hse/safety-training",
+      icon: HardHat,
+      color: "bg-amber-500/10 text-amber-600",
+    },
+    {
+      title: t("hseModule.modules.compliance.title"),
+      description: t("hseModule.modules.compliance.description"),
+      href: "/hse/compliance",
+      icon: ClipboardCheck,
+      color: "bg-emerald-500/10 text-emerald-600",
+    },
+    {
+      title: t("hseModule.modules.policies.title"),
+      description: t("hseModule.modules.policies.description"),
+      href: "/hse/safety-policies",
+      icon: FileText,
+      color: "bg-sky-500/10 text-sky-600",
+    },
+    {
+      title: t("hseModule.modules.riskAssessment.title"),
+      description: t("hseModule.modules.riskAssessment.description"),
+      href: "/hse/risk-assessment",
+      icon: Shield,
+      color: "bg-primary/10 text-primary",
+    },
+  ];
+
   const statCards = [
-    { label: "Days Without Incident", value: daysWithoutIncident, icon: CheckCircle, color: "bg-emerald-500/10 text-emerald-600" },
-    { label: "Open Incidents", value: openIncidents, icon: AlertTriangle, color: "bg-destructive/10 text-destructive" },
-    { label: "Pending Training", value: pendingTraining, icon: Clock, color: "bg-amber-500/10 text-amber-600" },
-    { label: "Compliance Rate", value: `${complianceRate}%`, icon: ClipboardCheck, color: "bg-sky-500/10 text-sky-600" },
+    { label: t("hseModule.stats.daysWithoutIncident"), value: daysWithoutIncident, icon: CheckCircle, color: "bg-emerald-500/10 text-emerald-600" },
+    { label: t("hseModule.stats.openIncidents"), value: openIncidents, icon: AlertTriangle, color: "bg-destructive/10 text-destructive" },
+    { label: t("hseModule.stats.pendingTraining"), value: pendingTraining, icon: Clock, color: "bg-amber-500/10 text-amber-600" },
+    { label: t("hseModule.stats.complianceRate"), value: `${complianceRate}%`, icon: ClipboardCheck, color: "bg-sky-500/10 text-sky-600" },
   ];
 
   return (
@@ -101,10 +141,10 @@ export default function HSEDashboardPage() {
               </div>
               <div>
                 <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
-                  Health & Safety
+                  {t("hseModule.title")}
                 </h1>
                 <p className="text-muted-foreground">
-                  Workplace safety and compliance
+                  {t("hseModule.subtitle")}
                 </p>
               </div>
             </div>

@@ -32,6 +32,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
+import { useLanguage } from "@/hooks/useLanguage";
 import {
   HardHat,
   Plus,
@@ -62,6 +63,7 @@ const recordStatusOptions = [
 ];
 
 export default function HSESafetyTrainingPage() {
+  const { t } = useLanguage();
   const [companyId, setCompanyId] = useState<string>("");
   const [searchTerm, setSearchTerm] = useState("");
   const [activeTab, setActiveTab] = useState("courses");
@@ -193,8 +195,8 @@ export default function HSESafetyTrainingPage() {
             <HardHat className="h-5 w-5 text-warning" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold tracking-tight">Safety Training</h1>
-            <p className="text-muted-foreground">Mandatory safety courses and certifications</p>
+            <h1 className="text-2xl font-bold tracking-tight">{t("hseModule.safetyTraining.title")}</h1>
+            <p className="text-muted-foreground">{t("hseModule.safetyTraining.subtitle")}</p>
           </div>
         </div>
 
@@ -204,7 +206,7 @@ export default function HSESafetyTrainingPage() {
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground">Mandatory Courses</p>
+                  <p className="text-sm text-muted-foreground">{t("hseModule.stats.mandatoryCourses")}</p>
                   <p className="text-2xl font-bold">{mandatoryTrainings}</p>
                 </div>
                 <GraduationCap className="h-8 w-8 text-muted-foreground" />
@@ -215,7 +217,7 @@ export default function HSESafetyTrainingPage() {
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground">Completed</p>
+                  <p className="text-sm text-muted-foreground">{t("hseModule.stats.completed")}</p>
                   <p className="text-2xl font-bold text-success">{completedRecords}</p>
                 </div>
                 <Users className="h-8 w-8 text-success" />
@@ -226,7 +228,7 @@ export default function HSESafetyTrainingPage() {
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground">Pending</p>
+                  <p className="text-sm text-muted-foreground">{t("hseModule.stats.pending")}</p>
                   <p className="text-2xl font-bold text-warning">{pendingRecords}</p>
                 </div>
                 <Clock className="h-8 w-8 text-warning" />
@@ -237,7 +239,7 @@ export default function HSESafetyTrainingPage() {
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground">Expired</p>
+                  <p className="text-sm text-muted-foreground">{t("hseModule.stats.expired")}</p>
                   <p className="text-2xl font-bold text-destructive">{expiredRecords}</p>
                 </div>
                 <AlertTriangle className="h-8 w-8 text-destructive" />
@@ -252,7 +254,7 @@ export default function HSESafetyTrainingPage() {
             <div className="flex flex-wrap gap-4">
               <Select value={companyId} onValueChange={setCompanyId}>
                 <SelectTrigger className="w-[200px]">
-                  <SelectValue placeholder="Select company" />
+                  <SelectValue placeholder={t("hseModule.common.selectCompany")} />
                 </SelectTrigger>
                 <SelectContent>
                   {companies.map((c) => (
@@ -276,13 +278,13 @@ export default function HSESafetyTrainingPage() {
               {activeTab === "courses" && (
                 <Button onClick={() => handleOpenDialog()} disabled={!companyId}>
                   <Plus className="mr-2 h-4 w-4" />
-                  Add Training
+                  {t("hseModule.safetyTraining.addTraining")}
                 </Button>
               )}
               {activeTab === "records" && (
                 <Button onClick={() => handleOpenRecordDialog()} disabled={!companyId}>
                   <Plus className="mr-2 h-4 w-4" />
-                  Add Record
+                  {t("hseModule.safetyTraining.addRecord")}
                 </Button>
               )}
             </div>
@@ -292,37 +294,37 @@ export default function HSESafetyTrainingPage() {
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList>
-            <TabsTrigger value="courses">Training Courses</TabsTrigger>
-            <TabsTrigger value="records">Training Records</TabsTrigger>
+            <TabsTrigger value="courses">{t("hseModule.safetyTraining.tabs.courses")}</TabsTrigger>
+            <TabsTrigger value="records">{t("hseModule.safetyTraining.tabs.records")}</TabsTrigger>
           </TabsList>
 
           <TabsContent value="courses">
             <Card>
               <CardContent className="p-0">
                 <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Code</TableHead>
-                      <TableHead>Title</TableHead>
-                      <TableHead>Type</TableHead>
-                      <TableHead>Duration</TableHead>
-                      <TableHead>Frequency</TableHead>
-                      <TableHead>Mandatory</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>{t("common.code")}</TableHead>
+                  <TableHead>{t("hseModule.common.title")}</TableHead>
+                  <TableHead>{t("common.type")}</TableHead>
+                  <TableHead>{t("hseModule.safetyTraining.duration")}</TableHead>
+                  <TableHead>{t("hseModule.safetyTraining.frequency")}</TableHead>
+                  <TableHead>{t("hseModule.safetyTraining.mandatory")}</TableHead>
+                  <TableHead>{t("common.status")}</TableHead>
+                  <TableHead>{t("common.actions")}</TableHead>
+                </TableRow>
+              </TableHeader>
                   <TableBody>
-                    {trainingsLoading ? (
-                      <TableRow>
-                        <TableCell colSpan={8} className="text-center py-8">
-                          Loading...
-                        </TableCell>
-                      </TableRow>
-                    ) : filteredTrainings.length === 0 ? (
-                      <TableRow>
-                        <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
-                          No training courses found
+                {trainingsLoading ? (
+                  <TableRow>
+                    <TableCell colSpan={8} className="text-center py-8">
+                      {t("hseModule.common.loading")}
+                    </TableCell>
+                  </TableRow>
+                ) : filteredTrainings.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
+                      {t("hseModule.safetyTraining.noTrainingCourses")}
                         </TableCell>
                       </TableRow>
                     ) : (
@@ -338,14 +340,14 @@ export default function HSESafetyTrainingPage() {
                           </TableCell>
                           <TableCell>
                             {training.frequency_months
-                              ? `Every ${training.frequency_months} months`
-                              : "One-time"}
+                              ? t("hseModule.safetyTraining.everyMonths", { months: training.frequency_months })
+                              : t("hseModule.safetyTraining.oneTime")}
                           </TableCell>
                           <TableCell>
                             {training.is_mandatory ? (
-                              <Badge className="bg-destructive/10 text-destructive">Required</Badge>
+                              <Badge className="bg-destructive/10 text-destructive">{t("hseModule.safetyTraining.required")}</Badge>
                             ) : (
-                              <Badge variant="outline">Optional</Badge>
+                              <Badge variant="outline">{t("hseModule.safetyTraining.optional")}</Badge>
                             )}
                           </TableCell>
                           <TableCell>
@@ -361,7 +363,7 @@ export default function HSESafetyTrainingPage() {
                               variant="outline"
                               onClick={() => handleOpenRecordDialog(training)}
                             >
-                              Assign
+                              {t("hseModule.safetyTraining.assign")}
                             </Button>
                           </TableCell>
                         </TableRow>
@@ -377,28 +379,28 @@ export default function HSESafetyTrainingPage() {
             <Card>
               <CardContent className="p-0">
                 <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Employee</TableHead>
-                      <TableHead>Training</TableHead>
-                      <TableHead>Training Date</TableHead>
-                      <TableHead>Expiry Date</TableHead>
-                      <TableHead>Score</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Certificate</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {recordsLoading ? (
-                      <TableRow>
-                        <TableCell colSpan={7} className="text-center py-8">
-                          Loading...
-                        </TableCell>
-                      </TableRow>
-                    ) : filteredRecords.length === 0 ? (
-                      <TableRow>
-                        <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
-                          No training records found
+              <TableHeader>
+                <TableRow>
+                  <TableHead>{t("common.employee")}</TableHead>
+                  <TableHead>{t("training.title")}</TableHead>
+                  <TableHead>{t("hseModule.safetyTraining.trainingDate")}</TableHead>
+                  <TableHead>{t("hseModule.safetyTraining.expiryDate")}</TableHead>
+                  <TableHead>{t("hseModule.safetyTraining.score")}</TableHead>
+                  <TableHead>{t("common.status")}</TableHead>
+                  <TableHead>{t("hseModule.safetyTraining.certificate")}</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {recordsLoading ? (
+                  <TableRow>
+                    <TableCell colSpan={7} className="text-center py-8">
+                      {t("hseModule.common.loading")}
+                    </TableCell>
+                  </TableRow>
+                ) : filteredRecords.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
+                      {t("hseModule.safetyTraining.noTrainingRecords")}
                         </TableCell>
                       </TableRow>
                     ) : (
@@ -444,7 +446,7 @@ export default function HSESafetyTrainingPage() {
           <DialogContent className="max-w-lg">
             <DialogHeader>
               <DialogTitle>
-                {selectedTraining ? "Edit Training" : "Add Safety Training"}
+                {selectedTraining ? t("hseModule.safetyTraining.editTraining") : t("hseModule.safetyTraining.addTraining")}
               </DialogTitle>
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4">

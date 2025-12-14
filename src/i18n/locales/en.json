@@ -2822,28 +2822,263 @@
   },
   "hseModule": {
     "title": "Health & Safety",
-    "subtitle": "Manage workplace health and safety",
+    "subtitle": "Workplace safety and compliance",
+    "stats": {
+      "daysWithoutIncident": "Days Without Incident",
+      "openIncidents": "Open Incidents",
+      "pendingTraining": "Pending Training",
+      "complianceRate": "Compliance Rate",
+      "critical": "Critical",
+      "thisMonth": "This Month",
+      "totalIncidents": "Total Incidents",
+      "mandatoryCourses": "Mandatory Courses",
+      "completed": "Completed",
+      "pending": "Pending",
+      "expired": "Expired",
+      "compliant": "Compliant",
+      "nonCompliant": "Non-Compliant",
+      "expiringSoon": "Expiring Soon",
+      "totalPolicies": "Total Policies",
+      "active": "Active",
+      "requireAcknowledgment": "Require Acknowledgment"
+    },
     "modules": {
       "incidents": {
         "title": "Incident Reports",
-        "description": "Report and track incidents"
+        "description": "Report and track safety incidents"
       },
       "riskAssessment": {
         "title": "Risk Assessment",
-        "description": "Identify and assess risks"
+        "description": "Workplace hazard evaluation"
       },
       "safetyTraining": {
         "title": "Safety Training",
-        "description": "Track safety training"
+        "description": "Mandatory safety courses"
       },
       "compliance": {
         "title": "Compliance",
-        "description": "Monitor regulatory compliance"
+        "description": "Regulatory compliance tracking"
       },
       "policies": {
         "title": "Safety Policies",
-        "description": "Manage safety policies"
+        "description": "Company safety guidelines"
       }
+    },
+    "incidents": {
+      "title": "Incident Reports",
+      "subtitle": "Report and track safety incidents",
+      "reportIncident": "Report Incident",
+      "editIncident": "Edit Incident",
+      "newIncident": "Report New Incident",
+      "noIncidents": "No incidents found",
+      "searchIncidents": "Search incidents...",
+      "incidentNumber": "Incident #",
+      "incidentType": "Type",
+      "incidentDate": "Incident Date",
+      "incidentTime": "Incident Time",
+      "severity": "Severity",
+      "reportedBy": "Reported By",
+      "types": {
+        "injury": "Injury",
+        "near_miss": "Near Miss",
+        "property_damage": "Property Damage",
+        "environmental": "Environmental",
+        "fire": "Fire",
+        "chemical": "Chemical"
+      },
+      "severityLevels": {
+        "low": "Low",
+        "medium": "Medium",
+        "high": "High",
+        "critical": "Critical"
+      },
+      "statusOptions": {
+        "reported": "Reported",
+        "investigating": "Investigating",
+        "resolved": "Resolved",
+        "closed": "Closed"
+      },
+      "injuryType": "Injury Type",
+      "bodyPartAffected": "Body Part Affected",
+      "treatmentProvided": "Treatment Provided",
+      "treatmentOptions": {
+        "none": "None Required",
+        "first_aid": "First Aid",
+        "medical_attention": "Medical Attention",
+        "hospitalization": "Hospitalization"
+      }
+    },
+    "riskAssessment": {
+      "title": "Risk Assessment",
+      "subtitle": "Workplace hazard evaluation",
+      "newAssessment": "New Assessment",
+      "editAssessment": "Edit Risk Assessment",
+      "noAssessments": "No risk assessments found",
+      "searchAssessments": "Search assessments...",
+      "assessmentNumber": "Assessment #",
+      "assessmentDate": "Assessment Date",
+      "reviewDate": "Review Date",
+      "overallRiskLevel": "Risk Level",
+      "riskLevels": {
+        "low": "Low",
+        "medium": "Medium",
+        "high": "High",
+        "critical": "Critical"
+      },
+      "statusOptions": {
+        "draft": "Draft",
+        "pending_review": "Pending Review",
+        "approved": "Approved",
+        "requires_update": "Requires Update",
+        "archived": "Archived"
+      },
+      "hazards": {
+        "title": "Identified Hazards",
+        "addHazard": "Add Hazard",
+        "noHazards": "No hazards identified yet",
+        "hazardType": "Type",
+        "likelihood": "L",
+        "severityShort": "S",
+        "riskScore": "Risk Score",
+        "controls": "Controls",
+        "types": {
+          "physical": "Physical",
+          "chemical": "Chemical",
+          "biological": "Biological",
+          "ergonomic": "Ergonomic",
+          "psychosocial": "Psychosocial",
+          "environmental": "Environmental"
+        }
+      }
+    },
+    "safetyTraining": {
+      "title": "Safety Training",
+      "subtitle": "Mandatory safety courses and certifications",
+      "addTraining": "Add Training",
+      "editTraining": "Edit Training",
+      "addRecord": "Add Record",
+      "noTrainingCourses": "No training courses found",
+      "noTrainingRecords": "No training records found",
+      "tabs": {
+        "courses": "Training Courses",
+        "records": "Training Records"
+      },
+      "trainingTypes": {
+        "induction": "Induction",
+        "refresher": "Refresher",
+        "specialized": "Specialized",
+        "certification": "Certification"
+      },
+      "recordStatus": {
+        "scheduled": "Scheduled",
+        "in_progress": "In Progress",
+        "completed": "Completed",
+        "expired": "Expired",
+        "failed": "Failed"
+      },
+      "duration": "Duration",
+      "frequency": "Frequency",
+      "mandatory": "Mandatory",
+      "assign": "Assign",
+      "trainingDate": "Training Date",
+      "expiryDate": "Expiry Date",
+      "score": "Score",
+      "certificate": "Certificate",
+      "required": "Required",
+      "optional": "Optional",
+      "oneTime": "One-time",
+      "everyMonths": "Every {{months}} months"
+    },
+    "compliance": {
+      "title": "Compliance",
+      "subtitle": "Regulatory compliance tracking",
+      "addRequirement": "Add Requirement",
+      "editRequirement": "Edit Requirement",
+      "addAudit": "Add Audit",
+      "logAudit": "Log Audit",
+      "noRequirements": "No compliance requirements found",
+      "noAudits": "No audit records found",
+      "tabs": {
+        "requirements": "Requirements",
+        "audits": "Audit Records"
+      },
+      "requirementTypes": {
+        "regulatory": "Regulatory",
+        "permit": "Permit",
+        "license": "License",
+        "certification": "Certification",
+        "audit": "Audit"
+      },
+      "statusOptions": {
+        "active": "Active",
+        "pending_renewal": "Pending Renewal",
+        "expired": "Expired",
+        "not_applicable": "N/A"
+      },
+      "complianceStatus": {
+        "compliant": "Compliant",
+        "non_compliant": "Non-Compliant",
+        "partial": "Partial",
+        "under_review": "Under Review"
+      },
+      "regulatoryBody": "Regulatory Body",
+      "auditType": "Audit Type",
+      "auditDate": "Audit Date",
+      "auditor": "Auditor",
+      "rating": "Rating",
+      "dueDate": "Due Date",
+      "auditTypes": {
+        "internal": "Internal",
+        "external": "External",
+        "regulatory": "Regulatory"
+      }
+    },
+    "policies": {
+      "title": "Safety Policies",
+      "subtitle": "Company safety guidelines and procedures",
+      "addPolicy": "Add Policy",
+      "editPolicy": "Edit Policy",
+      "noPolicies": "No safety policies found",
+      "searchPolicies": "Search policies...",
+      "policyTypes": {
+        "general": "General Safety",
+        "emergency": "Emergency Procedures",
+        "ppe": "PPE Requirements",
+        "chemical": "Chemical Safety",
+        "electrical": "Electrical Safety",
+        "fire": "Fire Safety",
+        "ergonomic": "Ergonomic"
+      },
+      "statusOptions": {
+        "draft": "Draft",
+        "pending_approval": "Pending Approval",
+        "active": "Active",
+        "archived": "Archived"
+      },
+      "version": "Version",
+      "effectiveDate": "Effective Date",
+      "acknowledgment": "Acknowledgment",
+      "acknowledgePolicy": "Acknowledge Policy",
+      "acknowledged": "Acknowledged",
+      "viewPolicy": "View Policy",
+      "policyContent": "Policy Content",
+      "acknowledgmentRequired": "Acknowledgment Required",
+      "acknowledgments": "Acknowledgments"
+    },
+    "common": {
+      "selectCompany": "Select company",
+      "allStatus": "All Status",
+      "allTypes": "All Types",
+      "loading": "Loading...",
+      "department": "Department",
+      "title": "Title",
+      "code": "Code",
+      "description": "Description",
+      "location": "Location",
+      "status": "Status",
+      "owner": "Owner",
+      "selectOwner": "Select owner",
+      "selectDepartment": "Select department"
     }
   },
   "employeeRelationsModule": {
