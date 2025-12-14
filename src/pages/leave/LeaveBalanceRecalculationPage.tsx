@@ -33,6 +33,7 @@ import { Badge } from "@/components/ui/badge";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Calculator, RefreshCw, History } from "lucide-react";
 import { toast } from "sonner";
+import { useLanguage } from "@/hooks/useLanguage";
 
 interface Employee {
   id: string;
@@ -61,6 +62,7 @@ interface RecalculationHistory {
 }
 
 export default function LeaveBalanceRecalculationPage() {
+  const { t } = useLanguage();
   const { isAdmin, hasRole } = useAuth();
   const isAdminOrHR = isAdmin || hasRole("hr_manager");
   const { selectedCompanyId, setSelectedCompanyId } = useLeaveCompanyFilter();
@@ -142,35 +144,35 @@ export default function LeaveBalanceRecalculationPage() {
 
   const handleRecalculate = async () => {
     if (!selectedCompanyId) {
-      toast.error("Please select a company");
+      toast.error(t("leave.balanceRecalculation.selectCompanyError"));
       return;
     }
 
     if (scope === 'single' && !selectedEmployeeId) {
-      toast.error("Please select an employee");
+      toast.error(t("leave.balanceRecalculation.selectEmployeeError"));
       return;
     }
 
     if (scope === 'department' && !selectedDepartmentId) {
-      toast.error("Please select a department");
+      toast.error(t("leave.balanceRecalculation.selectDepartmentError"));
       return;
     }
 
     if (calculationType === 'custom_range' && (!periodStart || !periodEnd)) {
-      toast.error("Please specify both start and end dates for custom range");
+      toast.error(t("leave.balanceRecalculation.customRangeError"));
       return;
     }
 
     const targetEmployees = getTargetEmployees();
     
     if (targetEmployees.length === 0) {
-      toast.error("No employees found for the selected criteria");
+      toast.error(t("leave.balanceRecalculation.noEmployeesError"));
       return;
     }
 
     if (targetEmployees.length > 1) {
       const confirmed = window.confirm(
-        `This will recalculate leave balances for ${targetEmployees.length} employees. Continue?`
+        t("leave.balanceRecalculation.confirmBulk", { count: targetEmployees.length })
       );
       if (!confirmed) return;
     }
@@ -203,24 +205,24 @@ export default function LeaveBalanceRecalculationPage() {
     
     if (targetEmployees.length === 1 && singleResult) {
       setLastResult(singleResult);
-      toast.success("Recalculation completed successfully");
+      toast.success(t("leave.balanceRecalculation.recalculationCompleted"));
     } else {
-      toast.success(`Recalculation complete: ${successCount} succeeded, ${errorCount} failed`);
+      toast.success(t("leave.balanceRecalculation.recalculationCompleted"));
       setLastResult({ bulk: true, successCount, errorCount });
     }
   };
 
   const calculationTypeLabels: Record<string, string> = {
-    current_year: "Current Year (Jan 1 - Today)",
-    from_hire_date: "From Hire Date",
-    custom_range: "Custom Date Range",
+    current_year: t("leave.balanceRecalculation.currentYear"),
+    from_hire_date: t("leave.balanceRecalculation.fromHireDate"),
+    custom_range: t("leave.balanceRecalculation.customRange"),
   };
 
   if (!isAdminOrHR) {
     return (
       <AppLayout>
         <div className="flex items-center justify-center h-64">
-          <p className="text-muted-foreground">You do not have permission to access this page.</p>
+          <p className="text-muted-foreground">{t("leave.balanceRecalculation.noPermission")}</p>
         </div>
       </AppLayout>
     );
@@ -231,8 +233,8 @@ export default function LeaveBalanceRecalculationPage() {
       <div className="space-y-6">
         <Breadcrumbs
           items={[
-            { label: "Leave Management", href: "/leave" },
-            { label: "Balance Recalculation" },
+            { label: t("navigation.leave"), href: "/leave" },
+            { label: t("leave.balanceRecalculation.title") },
           ]}
         />
 
@@ -242,8 +244,8 @@ export default function LeaveBalanceRecalculationPage() {
               <Calculator className="h-5 w-5 text-primary" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold tracking-tight text-foreground">Leave Balance Recalculation</h1>
-              <p className="text-muted-foreground">Recalculate employee leave balances based on accrual rules</p>
+              <h1 className="text-2xl font-bold tracking-tight text-foreground">{t("leave.balanceRecalculation.title")}</h1>
+              <p className="text-muted-foreground">{t("leave.balanceRecalculation.subtitle")}</p>
             </div>
           </div>
           <LeaveCompanyFilter 
@@ -258,33 +260,33 @@ export default function LeaveBalanceRecalculationPage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <RefreshCw className="h-5 w-5" />
-                Recalculate Balance
+                {t("leave.balanceRecalculation.recalculateBalance")}
               </CardTitle>
               <CardDescription>
-                Select an employee and calculation period to recalculate their leave balance
+                {t("leave.balanceRecalculation.recalculateBalanceDesc")}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label>Recalculation Scope</Label>
+                <Label>{t("leave.balanceRecalculation.scope")}</Label>
                 <Select value={scope} onValueChange={(v) => setScope(v as typeof scope)}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="single">Single Employee</SelectItem>
-                    <SelectItem value="department">Department</SelectItem>
-                    <SelectItem value="all">All Employees</SelectItem>
+                    <SelectItem value="single">{t("leave.balanceRecalculation.singleEmployee")}</SelectItem>
+                    <SelectItem value="department">{t("leave.balanceRecalculation.department")}</SelectItem>
+                    <SelectItem value="all">{t("leave.balanceRecalculation.allEmployees")}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
               {scope === 'single' && (
                 <div className="space-y-2">
-                  <Label htmlFor="employee">Employee</Label>
+                  <Label htmlFor="employee">{t("leave.balanceRecalculation.employee")}</Label>
                   <Select value={selectedEmployeeId} onValueChange={setSelectedEmployeeId}>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select employee" />
+                      <SelectValue placeholder={t("leave.balanceRecalculation.selectEmployee")} />
                     </SelectTrigger>
                     <SelectContent>
                       {employees.map((emp) => (
@@ -299,10 +301,10 @@ export default function LeaveBalanceRecalculationPage() {
 
               {scope === 'department' && (
                 <div className="space-y-2">
-                  <Label htmlFor="department">Department</Label>
+                  <Label htmlFor="department">{t("leave.balanceRecalculation.department")}</Label>
                   <Select value={selectedDepartmentId} onValueChange={setSelectedDepartmentId}>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select department" />
+                      <SelectValue placeholder={t("leave.balanceRecalculation.selectDepartment")} />
                     </SelectTrigger>
                     <SelectContent>
                       {departments.map((dept) => (
@@ -314,7 +316,9 @@ export default function LeaveBalanceRecalculationPage() {
                   </Select>
                   {selectedDepartmentId && (
                     <p className="text-sm text-muted-foreground">
-                      {employees.filter(e => e.department_id === selectedDepartmentId).length} employees in this department
+                      {t("leave.balanceRecalculation.employeesInDepartment", { 
+                        count: employees.filter(e => e.department_id === selectedDepartmentId).length 
+                      })}
                     </p>
                   )}
                 </div>
@@ -322,14 +326,14 @@ export default function LeaveBalanceRecalculationPage() {
 
               {scope === 'all' && (
                 <div className="p-3 bg-muted rounded-lg">
-                  <p className="text-sm text-muted-foreground">
-                    This will recalculate leave balances for all <strong>{employees.length}</strong> employees in the selected company.
-                  </p>
+                  <p className="text-sm text-muted-foreground" dangerouslySetInnerHTML={{
+                    __html: t("leave.balanceRecalculation.allEmployeesNote", { count: employees.length })
+                  }} />
                 </div>
               )}
 
               <div className="space-y-2">
-                <Label htmlFor="calculation_type">Calculation Period</Label>
+                <Label htmlFor="calculation_type">{t("leave.balanceRecalculation.calculationPeriod")}</Label>
                 <Select 
                   value={calculationType} 
                   onValueChange={(v) => setCalculationType(v as typeof calculationType)}
@@ -338,9 +342,9 @@ export default function LeaveBalanceRecalculationPage() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="current_year">Current Year (Jan 1 - Today)</SelectItem>
-                    <SelectItem value="from_hire_date">From Hire Date</SelectItem>
-                    <SelectItem value="custom_range">Custom Date Range</SelectItem>
+                    <SelectItem value="current_year">{t("leave.balanceRecalculation.currentYear")}</SelectItem>
+                    <SelectItem value="from_hire_date">{t("leave.balanceRecalculation.fromHireDate")}</SelectItem>
+                    <SelectItem value="custom_range">{t("leave.balanceRecalculation.customRange")}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -348,7 +352,7 @@ export default function LeaveBalanceRecalculationPage() {
               {calculationType === 'custom_range' && (
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="period_start">Start Date</Label>
+                    <Label htmlFor="period_start">{t("leave.balanceRecalculation.startDate")}</Label>
                     <Input
                       id="period_start"
                       type="date"
@@ -357,7 +361,7 @@ export default function LeaveBalanceRecalculationPage() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="period_end">End Date</Label>
+                    <Label htmlFor="period_end">{t("leave.balanceRecalculation.endDate")}</Label>
                     <Input
                       id="period_end"
                       type="date"
@@ -377,12 +381,12 @@ export default function LeaveBalanceRecalculationPage() {
                   {isRecalculating ? (
                     <>
                       <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
-                      Recalculating...
+                      {t("leave.balanceRecalculation.recalculating")}
                     </>
                   ) : (
                     <>
                       <Calculator className="mr-2 h-4 w-4" />
-                      Recalculate {scope === 'single' ? 'Employee' : scope === 'department' ? 'Department' : `All (${employees.length})`}
+                      {t("leave.balanceRecalculation.recalculate")} {scope === 'single' ? t("leave.balanceRecalculation.singleEmployee") : scope === 'department' ? t("leave.balanceRecalculation.department") : `${t("leave.balanceRecalculation.allEmployees")} (${employees.length})`}
                     </>
                   )}
                 </Button>
@@ -394,15 +398,15 @@ export default function LeaveBalanceRecalculationPage() {
           {lastResult && !lastResult.bulk && (
             <Card>
               <CardHeader>
-                <CardTitle>Recalculation Result</CardTitle>
+                <CardTitle>{t("leave.balanceRecalculation.result")}</CardTitle>
                 <CardDescription>
-                  Period: {lastResult.period_start} to {lastResult.period_end}
+                  {t("leave.balanceRecalculation.period")}: {lastResult.period_start} to {lastResult.period_end}
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
                   <div>
-                    <h4 className="text-sm font-medium mb-2">New Balances</h4>
+                    <h4 className="text-sm font-medium mb-2">{t("leave.balanceRecalculation.newBalances")}</h4>
                     <div className="space-y-2">
                       {(lastResult.new_balances || []).map((balance: any, idx: number) => (
                         <div key={idx} className="flex justify-between items-center p-2 bg-muted rounded">
@@ -410,7 +414,7 @@ export default function LeaveBalanceRecalculationPage() {
                           <div className="text-right">
                             <span className="text-lg font-bold">{balance.balance?.toFixed(1)}</span>
                             <span className="text-xs text-muted-foreground ml-2">
-                              (Accrued: {balance.accrued?.toFixed(1)}, Taken: {balance.taken?.toFixed(1)})
+                              ({t("leave.balanceRecalculation.accrued")}: {balance.accrued?.toFixed(1)}, {t("leave.balanceRecalculation.taken")}: {balance.taken?.toFixed(1)})
                             </span>
                           </div>
                         </div>
@@ -428,34 +432,34 @@ export default function LeaveBalanceRecalculationPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <History className="h-5 w-5" />
-              Recalculation History
+              {t("leave.balanceRecalculation.history")}
             </CardTitle>
             <CardDescription>
-              Recent balance recalculations for this company
+              {t("leave.balanceRecalculation.historyDesc")}
             </CardDescription>
           </CardHeader>
           <CardContent>
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Employee</TableHead>
-                  <TableHead>Type</TableHead>
-                  <TableHead>Period</TableHead>
-                  <TableHead>Triggered By</TableHead>
-                  <TableHead>Date</TableHead>
+                  <TableHead>{t("leave.balanceRecalculation.employee")}</TableHead>
+                  <TableHead>{t("common.type")}</TableHead>
+                  <TableHead>{t("leave.balanceRecalculation.period")}</TableHead>
+                  <TableHead>{t("leave.balanceRecalculation.triggeredBy")}</TableHead>
+                  <TableHead>{t("leave.balanceRecalculation.date")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {loadingHistory ? (
                   <TableRow>
                     <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
-                      Loading...
+                      {t("common.loading")}
                     </TableCell>
                   </TableRow>
                 ) : history.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
-                      No recalculation history found.
+                      {t("leave.balanceRecalculation.noHistory")}
                     </TableCell>
                   </TableRow>
                 ) : (
