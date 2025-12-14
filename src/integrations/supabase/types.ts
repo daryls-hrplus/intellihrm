@@ -6407,6 +6407,171 @@ export type Database = {
           },
         ]
       }
+      employee_reminder_preferences: {
+        Row: {
+          created_at: string
+          default_days_before: number | null
+          employee_id: string
+          event_type_id: string | null
+          id: string
+          receive_email: boolean | null
+          receive_in_app: boolean | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          default_days_before?: number | null
+          employee_id: string
+          event_type_id?: string | null
+          id?: string
+          receive_email?: boolean | null
+          receive_in_app?: boolean | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          default_days_before?: number | null
+          employee_id?: string
+          event_type_id?: string | null
+          id?: string
+          receive_email?: boolean | null
+          receive_in_app?: boolean | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "employee_reminder_preferences_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_reminder_preferences_event_type_id_fkey"
+            columns: ["event_type_id"]
+            isOneToOne: false
+            referencedRelation: "reminder_event_types"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      employee_reminders: {
+        Row: {
+          can_employee_dismiss: boolean | null
+          company_id: string
+          created_at: string
+          created_by: string | null
+          created_by_role: string | null
+          dismissed_at: string | null
+          employee_id: string
+          event_date: string
+          event_type_id: string | null
+          id: string
+          is_recurring: boolean | null
+          message: string | null
+          notes: string | null
+          notification_method: string
+          priority: string | null
+          recurrence_pattern: string | null
+          reminder_date: string
+          rule_id: string | null
+          sent_at: string | null
+          source_record_id: string | null
+          source_table: string | null
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          can_employee_dismiss?: boolean | null
+          company_id: string
+          created_at?: string
+          created_by?: string | null
+          created_by_role?: string | null
+          dismissed_at?: string | null
+          employee_id: string
+          event_date: string
+          event_type_id?: string | null
+          id?: string
+          is_recurring?: boolean | null
+          message?: string | null
+          notes?: string | null
+          notification_method?: string
+          priority?: string | null
+          recurrence_pattern?: string | null
+          reminder_date: string
+          rule_id?: string | null
+          sent_at?: string | null
+          source_record_id?: string | null
+          source_table?: string | null
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          can_employee_dismiss?: boolean | null
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          created_by_role?: string | null
+          dismissed_at?: string | null
+          employee_id?: string
+          event_date?: string
+          event_type_id?: string | null
+          id?: string
+          is_recurring?: boolean | null
+          message?: string | null
+          notes?: string | null
+          notification_method?: string
+          priority?: string | null
+          recurrence_pattern?: string | null
+          reminder_date?: string
+          rule_id?: string | null
+          sent_at?: string | null
+          source_record_id?: string | null
+          source_table?: string | null
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "employee_reminders_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_reminders_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_reminders_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_reminders_event_type_id_fkey"
+            columns: ["event_type_id"]
+            isOneToOne: false
+            referencedRelation: "reminder_event_types"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_reminders_rule_id_fkey"
+            columns: ["rule_id"]
+            isOneToOne: false
+            referencedRelation: "reminder_rules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       employee_schedules: {
         Row: {
           created_at: string
@@ -19063,6 +19228,180 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      reminder_event_types: {
+        Row: {
+          category: string
+          code: string
+          company_id: string | null
+          created_at: string
+          date_field: string | null
+          description: string | null
+          id: string
+          is_active: boolean | null
+          is_system: boolean | null
+          name: string
+          source_table: string | null
+          updated_at: string
+        }
+        Insert: {
+          category: string
+          code: string
+          company_id?: string | null
+          created_at?: string
+          date_field?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_system?: boolean | null
+          name: string
+          source_table?: string | null
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          code?: string
+          company_id?: string | null
+          created_at?: string
+          date_field?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_system?: boolean | null
+          name?: string
+          source_table?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reminder_event_types_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      reminder_history: {
+        Row: {
+          action: string
+          created_at: string
+          details: Json | null
+          id: string
+          performed_by: string | null
+          reminder_id: string
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          details?: Json | null
+          id?: string
+          performed_by?: string | null
+          reminder_id: string
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          details?: Json | null
+          id?: string
+          performed_by?: string | null
+          reminder_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reminder_history_performed_by_fkey"
+            columns: ["performed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reminder_history_reminder_id_fkey"
+            columns: ["reminder_id"]
+            isOneToOne: false
+            referencedRelation: "employee_reminders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      reminder_rules: {
+        Row: {
+          company_id: string
+          created_at: string
+          created_by: string | null
+          days_before: number
+          description: string | null
+          event_type_id: string
+          id: string
+          is_active: boolean | null
+          message_template: string | null
+          name: string
+          notification_method: string
+          priority: string | null
+          send_to_employee: boolean | null
+          send_to_hr: boolean | null
+          send_to_manager: boolean | null
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          created_by?: string | null
+          days_before?: number
+          description?: string | null
+          event_type_id: string
+          id?: string
+          is_active?: boolean | null
+          message_template?: string | null
+          name: string
+          notification_method?: string
+          priority?: string | null
+          send_to_employee?: boolean | null
+          send_to_hr?: boolean | null
+          send_to_manager?: boolean | null
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          days_before?: number
+          description?: string | null
+          event_type_id?: string
+          id?: string
+          is_active?: boolean | null
+          message_template?: string | null
+          name?: string
+          notification_method?: string
+          priority?: string | null
+          send_to_employee?: boolean | null
+          send_to_hr?: boolean | null
+          send_to_manager?: boolean | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reminder_rules_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reminder_rules_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reminder_rules_event_type_id_fkey"
+            columns: ["event_type_id"]
+            isOneToOne: false
+            referencedRelation: "reminder_event_types"
             referencedColumns: ["id"]
           },
         ]
