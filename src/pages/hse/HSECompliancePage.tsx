@@ -244,7 +244,7 @@ export default function HSECompliancePage() {
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground">Compliant</p>
+                  <p className="text-sm text-muted-foreground">{t("hseModule.stats.compliant")}</p>
                   <p className="text-2xl font-bold text-success">{compliantCount}</p>
                 </div>
                 <CheckCircle className="h-8 w-8 text-success" />
@@ -255,7 +255,7 @@ export default function HSECompliancePage() {
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground">Non-Compliant</p>
+                  <p className="text-sm text-muted-foreground">{t("hseModule.stats.nonCompliant")}</p>
                   <p className="text-2xl font-bold text-destructive">{nonCompliantCount}</p>
                 </div>
                 <AlertTriangle className="h-8 w-8 text-destructive" />
@@ -266,7 +266,7 @@ export default function HSECompliancePage() {
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground">Expiring Soon</p>
+                  <p className="text-sm text-muted-foreground">{t("hseModule.stats.expiringSoon")}</p>
                   <p className="text-2xl font-bold text-warning">{expiringCount}</p>
                 </div>
                 <Clock className="h-8 w-8 text-warning" />
@@ -277,7 +277,7 @@ export default function HSECompliancePage() {
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground">Expired</p>
+                  <p className="text-sm text-muted-foreground">{t("hseModule.stats.expired")}</p>
                   <p className="text-2xl font-bold text-destructive">{expiredCount}</p>
                 </div>
                 <FileText className="h-8 w-8 text-destructive" />
@@ -292,7 +292,7 @@ export default function HSECompliancePage() {
             <div className="flex flex-wrap gap-4">
               <Select value={companyId} onValueChange={setCompanyId}>
                 <SelectTrigger className="w-[200px]">
-                  <SelectValue placeholder="Select company" />
+                  <SelectValue placeholder={t("hseModule.common.selectCompany")} />
                 </SelectTrigger>
                 <SelectContent>
                   {companies.map((c) => (
@@ -306,7 +306,7 @@ export default function HSECompliancePage() {
               <div className="relative flex-1 min-w-[200px]">
                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
-                  placeholder="Search..."
+                  placeholder={t("common.search")}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-9"
@@ -315,13 +315,13 @@ export default function HSECompliancePage() {
 
               <Select value={statusFilter} onValueChange={setStatusFilter}>
                 <SelectTrigger className="w-[150px]">
-                  <SelectValue placeholder="Status" />
+                  <SelectValue placeholder={t("common.status")} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Status</SelectItem>
+                  <SelectItem value="all">{t("hseModule.common.allStatus")}</SelectItem>
                   {statusOptions.map((s) => (
                     <SelectItem key={s.value} value={s.value}>
-                      {s.label}
+                      {t(`hseModule.compliance.statusOptions.${s.value}`)}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -330,13 +330,13 @@ export default function HSECompliancePage() {
               {activeTab === "requirements" && (
                 <Button onClick={() => handleOpenDialog()} disabled={!companyId}>
                   <Plus className="mr-2 h-4 w-4" />
-                  Add Requirement
+                  {t("hseModule.compliance.addRequirement")}
                 </Button>
               )}
               {activeTab === "audits" && (
                 <Button onClick={() => handleOpenAuditDialog()} disabled={!companyId}>
                   <Plus className="mr-2 h-4 w-4" />
-                  Add Audit
+                  {t("hseModule.compliance.addAudit")}
                 </Button>
               )}
             </div>
@@ -346,8 +346,8 @@ export default function HSECompliancePage() {
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList>
-            <TabsTrigger value="requirements">Requirements</TabsTrigger>
-            <TabsTrigger value="audits">Audit Records</TabsTrigger>
+            <TabsTrigger value="requirements">{t("hseModule.compliance.tabs.requirements")}</TabsTrigger>
+            <TabsTrigger value="audits">{t("hseModule.compliance.tabs.audits")}</TabsTrigger>
           </TabsList>
 
           <TabsContent value="requirements">
@@ -356,27 +356,27 @@ export default function HSECompliancePage() {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Code</TableHead>
-                      <TableHead>Title</TableHead>
-                      <TableHead>Type</TableHead>
-                      <TableHead>Regulatory Body</TableHead>
-                      <TableHead>Expiry Date</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Compliance</TableHead>
-                      <TableHead>Actions</TableHead>
+                      <TableHead>{t("hseModule.common.code")}</TableHead>
+                      <TableHead>{t("hseModule.common.title")}</TableHead>
+                      <TableHead>{t("common.type")}</TableHead>
+                      <TableHead>{t("hseModule.compliance.regulatoryBody")}</TableHead>
+                      <TableHead>{t("common.endDate")}</TableHead>
+                      <TableHead>{t("common.status")}</TableHead>
+                      <TableHead>{t("hseModule.stats.compliant")}</TableHead>
+                      <TableHead>{t("common.actions")}</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {complianceLoading ? (
                       <TableRow>
                         <TableCell colSpan={8} className="text-center py-8">
-                          Loading...
+                          {t("hseModule.common.loading")}
                         </TableCell>
                       </TableRow>
                     ) : filteredRequirements.length === 0 ? (
                       <TableRow>
                         <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
-                          No compliance requirements found
+                          {t("hseModule.compliance.noRequirements")}
                         </TableCell>
                       </TableRow>
                     ) : (
@@ -414,7 +414,7 @@ export default function HSECompliancePage() {
                                 handleOpenAuditDialog(req);
                               }}
                             >
-                              Log Audit
+                              {t("hseModule.compliance.logAudit")}
                             </Button>
                           </TableCell>
                         </TableRow>
@@ -432,26 +432,26 @@ export default function HSECompliancePage() {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Requirement</TableHead>
-                      <TableHead>Audit Type</TableHead>
-                      <TableHead>Audit Date</TableHead>
-                      <TableHead>Auditor</TableHead>
-                      <TableHead>Rating</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Due Date</TableHead>
+                      <TableHead>{t("hseModule.compliance.tabs.requirements")}</TableHead>
+                      <TableHead>{t("hseModule.compliance.auditType")}</TableHead>
+                      <TableHead>{t("hseModule.compliance.auditDate")}</TableHead>
+                      <TableHead>{t("hseModule.compliance.auditor")}</TableHead>
+                      <TableHead>{t("hseModule.compliance.rating")}</TableHead>
+                      <TableHead>{t("common.status")}</TableHead>
+                      <TableHead>{t("hseModule.compliance.dueDate")}</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {auditsLoading ? (
                       <TableRow>
                         <TableCell colSpan={7} className="text-center py-8">
-                          Loading...
+                          {t("hseModule.common.loading")}
                         </TableCell>
                       </TableRow>
                     ) : audits.length === 0 ? (
                       <TableRow>
                         <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
-                          No audit records found
+                          {t("hseModule.compliance.noAudits")}
                         </TableCell>
                       </TableRow>
                     ) : (
