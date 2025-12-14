@@ -3,6 +3,7 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { useLanguage } from "@/hooks/useLanguage";
 import {
   Award,
   Download,
@@ -34,6 +35,7 @@ interface Certificate {
 
 export default function CertificationsPage() {
   const { user } = useAuth();
+  const { t } = useLanguage();
   const { toast } = useToast();
   const [certificates, setCertificates] = useState<Certificate[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -71,7 +73,7 @@ export default function CertificationsPage() {
   const copyVerificationLink = (code: string) => {
     const url = `${window.location.origin}/verify-certificate/${code}`;
     navigator.clipboard.writeText(url);
-    toast({ title: "Verification link copied to clipboard" });
+    toast({ title: t("training.modules.certifications.verificationCopied") });
   };
 
   const isExpired = (expiresAt: string | null) => {
@@ -84,8 +86,8 @@ export default function CertificationsPage() {
       <div className="space-y-6">
         <Breadcrumbs
           items={[
-            { label: "Training", href: "/training" },
-            { label: "Certifications" },
+            { label: t("training.dashboard.title"), href: "/training" },
+            { label: t("training.modules.certifications.title") },
           ]}
         />
 
@@ -95,10 +97,10 @@ export default function CertificationsPage() {
           </div>
           <div>
             <h1 className="text-2xl font-bold tracking-tight text-foreground">
-              My Certifications
+              {t("training.modules.certifications.title")}
             </h1>
             <p className="text-muted-foreground">
-              View and share your earned certificates
+              {t("training.modules.certifications.description")}
             </p>
           </div>
         </div>

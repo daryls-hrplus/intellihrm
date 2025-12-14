@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
+import { useLanguage } from "@/hooks/useLanguage";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Calendar } from "@/components/ui/calendar";
@@ -67,6 +68,7 @@ const getEventColor = (type: string) => {
 };
 
 export default function TrainingCalendarPage() {
+  const { t } = useLanguage();
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
 
   const selectedDateEvents = events.filter(
@@ -82,8 +84,8 @@ export default function TrainingCalendarPage() {
       <div className="space-y-6">
         <Breadcrumbs
           items={[
-            { label: "Training", href: "/training" },
-            { label: "Training Calendar" },
+            { label: t("training.dashboard.title"), href: "/training" },
+            { label: t("training.modules.calendar.title") },
           ]}
         />
 
@@ -94,10 +96,10 @@ export default function TrainingCalendarPage() {
             </div>
             <div>
               <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
-                Training Calendar
+                {t("training.modules.calendar.title")}
               </h1>
               <p className="text-muted-foreground">
-                Schedule and upcoming events
+                {t("training.modules.calendar.description")}
               </p>
             </div>
           </div>

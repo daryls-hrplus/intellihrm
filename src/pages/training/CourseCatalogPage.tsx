@@ -3,6 +3,7 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { useLanguage } from "@/hooks/useLanguage";
 import { useToast } from "@/hooks/use-toast";
 import {
   BookOpen,
@@ -54,6 +55,7 @@ interface Course {
 
 export default function CourseCatalogPage() {
   const { user } = useAuth();
+  const { t } = useLanguage();
   const { toast } = useToast();
   const [courses, setCourses] = useState<Course[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -114,7 +116,7 @@ export default function CourseCatalogPage() {
 
   const handleEnroll = async (courseId: string) => {
     if (!user) {
-      toast({ title: "Please log in to enroll", variant: "destructive" });
+      toast({ title: t("training.modules.courseCatalog.loginToEnroll"), variant: "destructive" });
       return;
     }
 
@@ -128,11 +130,11 @@ export default function CourseCatalogPage() {
 
       if (error) throw error;
 
-      toast({ title: "Successfully enrolled in course" });
+      toast({ title: t("training.modules.courseCatalog.successEnrolled") });
       fetchData();
     } catch (error: unknown) {
       const err = error as { message?: string };
-      toast({ title: "Failed to enroll", description: err.message, variant: "destructive" });
+      toast({ title: t("training.modules.courseCatalog.failedEnroll"), description: err.message, variant: "destructive" });
     } finally {
       setEnrollingCourseId(null);
     }
@@ -174,8 +176,8 @@ export default function CourseCatalogPage() {
       <div className="space-y-6">
         <Breadcrumbs
           items={[
-            { label: "Training", href: "/training" },
-            { label: "Course Catalog" },
+            { label: t("training.dashboard.title"), href: "/training" },
+            { label: t("training.modules.courseCatalog.title") },
           ]}
         />
 
@@ -186,10 +188,10 @@ export default function CourseCatalogPage() {
             </div>
             <div>
               <h1 className="text-2xl font-bold tracking-tight text-foreground">
-                Course Catalog
+                {t("training.modules.courseCatalog.title")}
               </h1>
               <p className="text-muted-foreground">
-                Browse and enroll in available courses
+                {t("training.modules.courseCatalog.description")}
               </p>
             </div>
           </div>
@@ -200,7 +202,7 @@ export default function CourseCatalogPage() {
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
-              placeholder="Search courses..."
+              placeholder={t("training.modules.courseCatalog.searchPlaceholder")}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-9"
@@ -209,10 +211,10 @@ export default function CourseCatalogPage() {
           <Select value={selectedCategory} onValueChange={setSelectedCategory}>
             <SelectTrigger className="w-full sm:w-[200px]">
               <Filter className="mr-2 h-4 w-4" />
-              <SelectValue placeholder="Category" />
+              <SelectValue placeholder={t("common.category")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Categories</SelectItem>
+              <SelectItem value="all">{t("training.modules.courseCatalog.allCategories")}</SelectItem>
               {categories.map((cat) => (
                 <SelectItem key={cat.id} value={cat.id}>
                   {cat.name}
@@ -222,13 +224,13 @@ export default function CourseCatalogPage() {
           </Select>
           <Select value={selectedDifficulty} onValueChange={setSelectedDifficulty}>
             <SelectTrigger className="w-full sm:w-[180px]">
-              <SelectValue placeholder="Difficulty" />
+              <SelectValue placeholder={t("common.level")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Levels</SelectItem>
-              <SelectItem value="beginner">Beginner</SelectItem>
-              <SelectItem value="intermediate">Intermediate</SelectItem>
-              <SelectItem value="advanced">Advanced</SelectItem>
+              <SelectItem value="all">{t("training.modules.courseCatalog.allLevels")}</SelectItem>
+              <SelectItem value="beginner">{t("training.modules.courseCatalog.beginner")}</SelectItem>
+              <SelectItem value="intermediate">{t("training.modules.courseCatalog.intermediate")}</SelectItem>
+              <SelectItem value="advanced">{t("training.modules.courseCatalog.advanced")}</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -241,9 +243,9 @@ export default function CourseCatalogPage() {
         ) : filteredCourses.length === 0 ? (
           <div className="rounded-lg border border-border bg-card p-8 text-center">
             <GraduationCap className="mx-auto h-12 w-12 text-muted-foreground" />
-            <h3 className="mt-4 font-semibold text-foreground">No courses found</h3>
+            <h3 className="mt-4 font-semibold text-foreground">{t("training.modules.courseCatalog.noCourses")}</h3>
             <p className="mt-2 text-sm text-muted-foreground">
-              Try adjusting your search or filters
+              {t("training.modules.courseCatalog.adjustFilters")}
             </p>
           </div>
         ) : (
@@ -268,7 +270,7 @@ export default function CourseCatalogPage() {
                   )}
                   {course.is_mandatory && (
                     <Badge className="absolute left-2 top-2 bg-destructive">
-                      Mandatory
+                      {t("training.modules.courseCatalog.mandatory")}
                     </Badge>
                   )}
                   {course.is_enrolled && (
@@ -281,10 +283,10 @@ export default function CourseCatalogPage() {
                     >
                       {course.enrollment_status === "completed" ? (
                         <>
-                          <CheckCircle className="mr-1 h-3 w-3" /> Completed
+                          <CheckCircle className="mr-1 h-3 w-3" /> {t("training.stats.completed")}
                         </>
                       ) : (
-                        "Enrolled"
+                        t("training.modules.courseCatalog.enrolled")
                       )}
                     </Badge>
                   )}
@@ -306,7 +308,7 @@ export default function CourseCatalogPage() {
                   </div>
 
                   <p className="mt-2 text-sm text-muted-foreground line-clamp-2">
-                    {course.description || "No description available"}
+                    {course.description || t("training.modules.courseCatalog.noDescription")}
                   </p>
 
                   <div className="mt-4 flex items-center gap-3 text-sm text-muted-foreground">
@@ -328,8 +330,8 @@ export default function CourseCatalogPage() {
                         <NavLink to={`/training/course/${course.id}`}>
                           <Play className="mr-2 h-4 w-4" />
                           {course.enrollment_status === "completed"
-                            ? "Review"
-                            : "Continue"}
+                            ? t("training.modules.courseCatalog.review")
+                            : t("training.modules.courseCatalog.continue")}
                         </NavLink>
                       </Button>
                     ) : (
@@ -344,7 +346,7 @@ export default function CourseCatalogPage() {
                           ) : (
                             <GraduationCap className="mr-2 h-4 w-4" />
                           )}
-                          Enroll
+                          {t("training.modules.courseCatalog.enroll")}
                         </Button>
                         <Button variant="outline" asChild>
                           <NavLink to={`/training/course/${course.id}`}>

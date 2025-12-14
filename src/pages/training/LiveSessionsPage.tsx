@@ -1,5 +1,6 @@
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
+import { useLanguage } from "@/hooks/useLanguage";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -39,13 +40,15 @@ const upcomingSessions = [
 ];
 
 export default function LiveSessionsPage() {
+  const { t } = useLanguage();
+  
   return (
     <AppLayout>
       <div className="space-y-6">
         <Breadcrumbs
           items={[
-            { label: "Training", href: "/training" },
-            { label: "Live Sessions" },
+            { label: t("training.dashboard.title"), href: "/training" },
+            { label: t("training.modules.liveSessions.title") },
           ]}
         />
         <div className="animate-fade-in">
@@ -55,10 +58,10 @@ export default function LiveSessionsPage() {
             </div>
             <div>
               <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
-                Live Sessions
+                {t("training.modules.liveSessions.title")}
               </h1>
               <p className="text-muted-foreground">
-                Upcoming webinars and workshops
+                {t("training.modules.liveSessions.description")}
               </p>
             </div>
           </div>

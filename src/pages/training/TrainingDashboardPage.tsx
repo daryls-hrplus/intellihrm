@@ -3,6 +3,7 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import { NavLink } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { useLanguage } from "@/hooks/useLanguage";
 import { ModuleReportsButton } from "@/components/reports/ModuleReportsButton";
 import { ModuleBIButton } from "@/components/bi/ModuleBIButton";
 import {
@@ -176,6 +177,7 @@ interface Stats {
 
 export default function TrainingDashboardPage() {
   const { user } = useAuth();
+  const { t } = useLanguage();
   const [stats, setStats] = useState<Stats>({
     coursesAvailable: 0,
     inProgress: 0,
@@ -226,10 +228,147 @@ export default function TrainingDashboardPage() {
   };
 
   const statCards = [
-    { label: "Courses Available", value: stats.coursesAvailable, icon: BookOpen, color: "bg-primary/10 text-primary" },
-    { label: "In Progress", value: stats.inProgress, icon: Clock, color: "bg-warning/10 text-warning" },
-    { label: "Completed", value: stats.completed, icon: CheckCircle, color: "bg-success/10 text-success" },
-    { label: "Certifications", value: stats.certifications, icon: Award, color: "bg-info/10 text-info" },
+    { label: t("training.stats.coursesAvailable"), value: stats.coursesAvailable, icon: BookOpen, color: "bg-primary/10 text-primary" },
+    { label: t("training.stats.inProgress"), value: stats.inProgress, icon: Clock, color: "bg-warning/10 text-warning" },
+    { label: t("training.stats.completed"), value: stats.completed, icon: CheckCircle, color: "bg-success/10 text-success" },
+    { label: t("training.stats.certifications"), value: stats.certifications, icon: Award, color: "bg-info/10 text-info" },
+  ];
+
+  const trainingModulesTranslated = [
+    {
+      title: t("training.modules.courseCatalog.title"),
+      description: t("training.modules.courseCatalog.description"),
+      href: "/training/catalog",
+      icon: BookOpen,
+      color: "bg-primary/10 text-primary",
+    },
+    {
+      title: t("training.modules.myLearning.title"),
+      description: t("training.modules.myLearning.description"),
+      href: "/training/my-learning",
+      icon: GraduationCap,
+      color: "bg-success/10 text-success",
+    },
+    {
+      title: t("training.modules.learningPaths.title"),
+      description: t("training.modules.learningPaths.description"),
+      href: "/training/learning-paths",
+      icon: Route,
+      color: "bg-info/10 text-info",
+    },
+    {
+      title: t("training.modules.gapAnalysis.title"),
+      description: t("training.modules.gapAnalysis.description"),
+      href: "/training/gap-analysis",
+      icon: Target,
+      color: "bg-secondary/10 text-secondary-foreground",
+    },
+    {
+      title: t("training.modules.requests.title"),
+      description: t("training.modules.requests.description"),
+      href: "/training/requests",
+      icon: FileText,
+      color: "bg-warning/10 text-warning",
+    },
+    {
+      title: t("training.modules.external.title"),
+      description: t("training.modules.external.description"),
+      href: "/training/external",
+      icon: ExternalLink,
+      color: "bg-accent/10 text-accent-foreground",
+    },
+    {
+      title: t("training.modules.budgets.title"),
+      description: t("training.modules.budgets.description"),
+      href: "/training/budgets",
+      icon: DollarSign,
+      color: "bg-success/10 text-success",
+      adminOnly: true,
+    },
+    {
+      title: t("training.modules.instructors.title"),
+      description: t("training.modules.instructors.description"),
+      href: "/training/instructors",
+      icon: Users,
+      color: "bg-primary/10 text-primary",
+      adminOnly: true,
+    },
+    {
+      title: t("training.modules.evaluations.title"),
+      description: t("training.modules.evaluations.description"),
+      href: "/training/evaluations",
+      icon: ClipboardCheck,
+      color: "bg-info/10 text-info",
+    },
+    {
+      title: t("training.modules.compliance.title"),
+      description: t("training.modules.compliance.description"),
+      href: "/training/compliance",
+      icon: Shield,
+      color: "bg-destructive/10 text-destructive",
+      adminOnly: true,
+    },
+    {
+      title: t("training.modules.courseCompetencies.title"),
+      description: t("training.modules.courseCompetencies.description"),
+      href: "/training/course-competencies",
+      icon: Link,
+      color: "bg-warning/10 text-warning",
+      adminOnly: true,
+    },
+    {
+      title: t("training.modules.recertification.title"),
+      description: t("training.modules.recertification.description"),
+      href: "/training/recertification",
+      icon: RefreshCw,
+      color: "bg-secondary/10 text-secondary-foreground",
+      adminOnly: true,
+    },
+    {
+      title: t("training.modules.needs.title"),
+      description: t("training.modules.needs.description"),
+      href: "/training/needs",
+      icon: TrendingUp,
+      color: "bg-accent/10 text-accent-foreground",
+      adminOnly: true,
+    },
+    {
+      title: t("training.modules.liveSessions.title"),
+      description: t("training.modules.liveSessions.description"),
+      href: "/training/sessions",
+      icon: Video,
+      color: "bg-muted text-muted-foreground",
+    },
+    {
+      title: t("training.modules.certifications.title"),
+      description: t("training.modules.certifications.description"),
+      href: "/training/certifications",
+      icon: Award,
+      color: "bg-warning/10 text-warning",
+    },
+    {
+      title: t("training.modules.calendar.title"),
+      description: t("training.modules.calendar.description"),
+      href: "/training/calendar",
+      icon: Calendar,
+      color: "bg-destructive/10 text-destructive",
+    },
+    {
+      title: t("training.modules.analytics.title"),
+      description: t("training.modules.analytics.description"),
+      href: "/training/analytics",
+      icon: BarChart3,
+      color: "bg-primary/10 text-primary",
+      adminOnly: true,
+    },
+    {
+      title: t("training.modules.lms.title"),
+      description: t("training.modules.lms.description"),
+      href: "/admin/lms",
+      icon: Settings,
+      color: "bg-muted text-muted-foreground",
+      adminOnly: true,
+    },
   ];
 
   return (
@@ -243,10 +382,10 @@ export default function TrainingDashboardPage() {
               </div>
               <div>
                 <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
-                  Training
+                  {t("training.dashboard.title")}
                 </h1>
                 <p className="text-muted-foreground">
-                  Learning and development
+                  {t("training.dashboard.subtitle")}
                 </p>
               </div>
             </div>
@@ -284,7 +423,7 @@ export default function TrainingDashboardPage() {
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {trainingModules.map((module, index) => {
+          {trainingModulesTranslated.map((module, index) => {
             const Icon = module.icon;
             return (
               <NavLink
