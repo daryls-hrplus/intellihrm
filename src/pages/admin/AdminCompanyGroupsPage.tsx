@@ -18,6 +18,8 @@ import {
   ChevronDown,
   ChevronRight,
   Layers,
+  Upload,
+  Image,
 } from "lucide-react";
 
 interface CompanyGroup {
@@ -25,6 +27,7 @@ interface CompanyGroup {
   name: string;
   code: string;
   description: string | null;
+  logo_url: string | null;
   is_active: boolean;
   created_at: string;
   divisions: Division[];
@@ -82,6 +85,10 @@ export default function AdminCompanyGroupsPage() {
   const [editingGroup, setEditingGroup] = useState<CompanyGroup | null>(null);
   const [groupFormData, setGroupFormData] = useState<GroupFormData>(emptyGroupFormData);
   const [groupErrors, setGroupErrors] = useState<Record<string, string>>({});
+  const [groupLogoFile, setGroupLogoFile] = useState<File | null>(null);
+  const [groupLogoPreview, setGroupLogoPreview] = useState<string | null>(null);
+  const [isUploadingLogo, setIsUploadingLogo] = useState(false);
+  const groupLogoInputRef = useRef<HTMLInputElement>(null);
   
   // Division Modal
   const [isDivisionModalOpen, setIsDivisionModalOpen] = useState(false);
@@ -193,10 +200,13 @@ export default function AdminCompanyGroupsPage() {
     if (group) {
       setEditingGroup(group);
       setGroupFormData({ name: group.name, code: group.code, description: group.description || "" });
+      setGroupLogoPreview(group.logo_url);
     } else {
       setEditingGroup(null);
       setGroupFormData(emptyGroupFormData);
+      setGroupLogoPreview(null);
     }
+    setGroupLogoFile(null);
     setGroupErrors({});
     setIsGroupModalOpen(true);
   };
@@ -206,6 +216,63 @@ export default function AdminCompanyGroupsPage() {
     setEditingGroup(null);
     setGroupFormData(emptyGroupFormData);
     setGroupErrors({});
+    setGroupLogoFile(null);
+    setGroupLogoPreview(null);
+  };
+
+  const handleGroupLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        toast({ title: "File too large", description: "Logo must be less than 5MB", variant: "destructive" });
+        return;
+      }
+      if (!file.type.startsWith("image/")) {
+        toast({ title: "Invalid file type", description: "Please upload an image file", variant: "destructive" });
+        return;
+      }
+      setGroupLogoFile(file);
+      setGroupLogoPreview(URL.createObjectURL(file));
+    }
+  };
+
+  const uploadGroupLogo = async (groupId: string): Promise<string | null> => {
+    if (!groupLogoFile) return groupLogoPreview;
+    
+    setIsUploadingLogo(true);
+    try {
+      const fileExt = groupLogoFile.name.split(".").pop();
+      const filePath = `groups/${groupId}/logo.${fileExt}`;
+
+      // Delete existing logo if any
+      await supabase.storage.from("company-logos").remove([
+        `groups/${groupId}/logo.png`, 
+        `groups/${groupId}/logo.jpg`, 
+        `groups/${groupId}/logo.jpeg`, 
+        `groups/${groupId}/logo.webp`
+      ]);
+
+      const { error: uploadError } = await supabase.storage
+        .from("company-logos")
+        .upload(filePath, groupLogoFile, { upsert: true });
+
+      if (uploadError) throw uploadError;
+
+      const { data } = supabase.storage.from("company-logos").getPublicUrl(filePath);
+      return data.publicUrl;
+    } catch (error) {
+      console.error("Error uploading logo:", error);
+      toast({ title: "Upload failed", description: "Failed to upload group logo", variant: "destructive" });
+      return null;
+    } finally {
+      setIsUploadingLogo(false);
+    }
+  };
+
+  const removeGroupLogo = () => {
+    setGroupLogoFile(null);
+    setGroupLogoPreview(null);
+    if (groupLogoInputRef.current) groupLogoInputRef.current.value = "";
   };
 
   const handleGroupSubmit = async (e: React.FormEvent) => {
@@ -228,12 +295,24 @@ export default function AdminCompanyGroupsPage() {
         description: groupFormData.description || null,
       };
 
+      let logoUrl: string | null = null;
+
       if (editingGroup) {
-        const { error } = await supabase.from("company_groups").update(data).eq("id", editingGroup.id);
+        // Upload logo first if provided
+        if (groupLogoFile) {
+          logoUrl = await uploadGroupLogo(editingGroup.id);
+        } else if (groupLogoPreview === null && editingGroup.logo_url) {
+          // Logo was removed
+          logoUrl = null;
+        } else {
+          logoUrl = groupLogoPreview;
+        }
+
+        const { error } = await supabase.from("company_groups").update({ ...data, logo_url: logoUrl }).eq("id", editingGroup.id);
         if (error) throw error;
         toast({ title: "Group updated" });
       } else {
-        const { error } = await supabase.from("company_groups").insert(data);
+        const { data: newGroup, error } = await supabase.from("company_groups").insert(data).select().single();
         if (error) {
           if (error.code === "23505") {
             setGroupErrors({ code: "This code already exists" });
@@ -242,6 +321,15 @@ export default function AdminCompanyGroupsPage() {
           }
           throw error;
         }
+
+        // Upload logo if provided
+        if (groupLogoFile && newGroup) {
+          logoUrl = await uploadGroupLogo(newGroup.id);
+          if (logoUrl) {
+            await supabase.from("company_groups").update({ logo_url: logoUrl }).eq("id", newGroup.id);
+          }
+        }
+
         toast({ title: "Group created" });
       }
 
@@ -736,6 +824,53 @@ export default function AdminCompanyGroupsPage() {
                     rows={3}
                     className="w-full rounded-lg border border-input bg-background px-3 py-2 text-foreground resize-none"
                   />
+                </div>
+
+                {/* Logo Upload */}
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium text-card-foreground">Group Logo</label>
+                  <div className="flex items-center gap-4">
+                    {groupLogoPreview ? (
+                      <div className="relative">
+                        <img 
+                          src={groupLogoPreview} 
+                          alt="Logo preview" 
+                          className="h-16 w-16 rounded-lg object-cover border border-border"
+                        />
+                        <button
+                          type="button"
+                          onClick={removeGroupLogo}
+                          className="absolute -top-2 -right-2 rounded-full bg-destructive p-1 text-destructive-foreground hover:bg-destructive/90"
+                        >
+                          <X className="h-3 w-3" />
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="flex h-16 w-16 items-center justify-center rounded-lg border-2 border-dashed border-muted-foreground/25 bg-muted/50">
+                        <Image className="h-6 w-6 text-muted-foreground/50" />
+                      </div>
+                    )}
+                    <div className="flex-1">
+                      <input
+                        ref={groupLogoInputRef}
+                        type="file"
+                        accept="image/*"
+                        onChange={handleGroupLogoChange}
+                        className="hidden"
+                        id="group-logo-upload"
+                      />
+                      <label
+                        htmlFor="group-logo-upload"
+                        className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-border px-3 py-1.5 text-sm font-medium text-foreground hover:bg-muted transition-colors"
+                      >
+                        <Upload className="h-4 w-4" />
+                        {groupLogoPreview ? "Change" : "Upload"}
+                      </label>
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        PNG, JPG or WebP. Max 5MB. Recommended: 200×200px (square)
+                      </p>
+                    </div>
+                  </div>
                 </div>
 
                 <div className="flex justify-end gap-3 pt-4">
