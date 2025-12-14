@@ -156,6 +156,40 @@ export function useSubscription() {
     return false;
   }, [subscription]);
 
+  // Update active employee count and recalculate billing
+  const updateEmployeeCount = useCallback(async (newCount: number) => {
+    if (!subscription?.id) return { success: false, error: 'No subscription' };
+    
+    const currentTier = tiers.find(t => t.id === subscription.tier_id);
+    if (!currentTier) return { success: false, error: 'Tier not found' };
+    
+    // Calculate new pricing based on actual employee count
+    const pricing = calculatePrice(currentTier, newCount, subscription.billing_cycle);
+    
+    const { error: updateError } = await supabase
+      .from('company_subscriptions')
+      .update({
+        active_employee_count: newCount,
+        monthly_amount: pricing.monthly,
+        annual_amount: pricing.annual
+      })
+      .eq('id', subscription.id);
+    
+    if (updateError) {
+      console.error('Error updating employee count:', updateError);
+      return { success: false, error: updateError.message };
+    }
+    
+    await fetchSubscription();
+    return { success: true, newMonthlyAmount: pricing.monthly };
+  }, [subscription, tiers, calculatePrice, fetchSubscription]);
+
+  // Check if current employee count exceeds subscribed count
+  const isOverEmployeeLimit = useCallback((currentCount: number) => {
+    if (!subscription) return false;
+    return currentCount > subscription.active_employee_count;
+  }, [subscription]);
+
   return {
     subscription,
     tiers,
@@ -167,6 +201,8 @@ export function useSubscription() {
     isExpired,
     getDaysRemaining,
     hasModuleAccess,
+    updateEmployeeCount,
+    isOverEmployeeLimit,
     refetch: fetchSubscription
   };
 }
