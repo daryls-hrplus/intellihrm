@@ -3,11 +3,13 @@ import { ModuleReportsButton } from "@/components/reports/ModuleReportsButton";
 import { ModuleBIButton } from "@/components/bi/ModuleBIButton";
 import { RecognitionAwardsTab } from "@/components/performance/RecognitionAwardsTab";
 import { LeaveCompanyFilter, useLeaveCompanyFilter } from "@/components/leave/LeaveCompanyFilter";
+import { DepartmentFilter, useDepartmentFilter } from "@/components/filters/DepartmentFilter";
 import { Award, ChevronLeft } from "lucide-react";
 import { NavLink } from "react-router-dom";
 
 export default function RecognitionAwardsPage() {
   const { selectedCompanyId, setSelectedCompanyId } = useLeaveCompanyFilter();
+  const { selectedDepartmentId, setSelectedDepartmentId } = useDepartmentFilter();
 
   return (
     <AppLayout>
@@ -38,7 +40,12 @@ export default function RecognitionAwardsPage() {
             <div className="flex items-center gap-2">
               <LeaveCompanyFilter
                 selectedCompanyId={selectedCompanyId}
-                onCompanyChange={setSelectedCompanyId}
+                onCompanyChange={(id) => { setSelectedCompanyId(id); setSelectedDepartmentId("all"); }}
+              />
+              <DepartmentFilter
+                companyId={selectedCompanyId}
+                selectedDepartmentId={selectedDepartmentId}
+                onDepartmentChange={setSelectedDepartmentId}
               />
               <ModuleBIButton module="performance" />
               <ModuleReportsButton module="performance" />

@@ -16,6 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { DepartmentFilter, useDepartmentFilter } from "@/components/filters/DepartmentFilter";
 
 interface Company {
   id: string;
@@ -39,6 +40,7 @@ const workflowCodeMap: Record<TransactionType, string> = {
 
 export default function EmployeeTransactionsPage() {
   const { startWorkflow } = useWorkflow();
+  const { selectedDepartmentId, setSelectedDepartmentId } = useDepartmentFilter();
   const [companies, setCompanies] = useState<Company[]>([]);
   const [selectedCompanyId, setSelectedCompanyId] = useState<string>("all");
   const [formDialogOpen, setFormDialogOpen] = useState(false);
@@ -125,19 +127,26 @@ export default function EmployeeTransactionsPage() {
             </div>
           </div>
 
-          <Select value={selectedCompanyId} onValueChange={setSelectedCompanyId}>
-            <SelectTrigger className="w-[200px]">
-              <SelectValue placeholder="All Companies" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Companies</SelectItem>
-              {companies.map((company) => (
-                <SelectItem key={company.id} value={company.id}>
-                  {company.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <div className="flex items-center gap-2">
+            <Select value={selectedCompanyId} onValueChange={(id) => { setSelectedCompanyId(id); setSelectedDepartmentId("all"); }}>
+              <SelectTrigger className="w-[200px]">
+                <SelectValue placeholder="All Companies" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Companies</SelectItem>
+                {companies.map((company) => (
+                  <SelectItem key={company.id} value={company.id}>
+                    {company.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <DepartmentFilter
+              companyId={selectedCompanyId !== "all" ? selectedCompanyId : ""}
+              selectedDepartmentId={selectedDepartmentId}
+              onDepartmentChange={setSelectedDepartmentId}
+            />
+          </div>
         </div>
 
         <Card>
