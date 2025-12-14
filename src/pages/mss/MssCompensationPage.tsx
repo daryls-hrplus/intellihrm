@@ -9,9 +9,11 @@ import { useAuth } from "@/contexts/AuthContext";
 import { DollarSign, Users, Target, TrendingUp, ChevronRight, Gem, BarChart3 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { NavLink } from "@/components/NavLink";
+import { useLanguage } from "@/hooks/useLanguage";
 
 export default function MssCompensationPage() {
   const { user } = useAuth();
+  const { t } = useLanguage();
 
   const { data: directReports = [], isLoading } = useQuery({
     queryKey: ["mss-team-compensation", user?.id],
@@ -63,15 +65,15 @@ export default function MssCompensationPage() {
 
   const compensationLinks = [
     {
-      title: "Team Compa-Ratio",
-      description: "Analyze team pay positions",
+      title: t("mss.teamCompensation.teamCompaRatio"),
+      description: t("mss.teamCompensation.analyzeTeamPay"),
       href: "/mss/compensation/compa-ratio",
       icon: Target,
       color: "bg-pink-500/10 text-pink-600",
     },
     {
-      title: "Team Equity",
-      description: "View team equity grants",
+      title: t("mss.teamCompensation.teamEquity"),
+      description: t("mss.teamCompensation.viewTeamEquity"),
       href: "/mss/compensation/equity",
       icon: Gem,
       color: "bg-violet-500/10 text-violet-600",
@@ -83,9 +85,9 @@ export default function MssCompensationPage() {
       <div className="space-y-6">
         {/* Breadcrumbs */}
         <nav className="flex items-center gap-2 text-sm text-muted-foreground">
-          <Link to="/mss" className="hover:text-foreground transition-colors">Manager Self Service</Link>
+          <Link to="/mss" className="hover:text-foreground transition-colors">{t("mss.title")}</Link>
           <ChevronRight className="h-4 w-4" />
-          <span className="text-foreground font-medium">Team Compensation</span>
+          <span className="text-foreground font-medium">{t("mss.teamCompensation.breadcrumb")}</span>
         </nav>
 
         <div className="flex items-center gap-3">
@@ -93,8 +95,8 @@ export default function MssCompensationPage() {
             <DollarSign className="h-5 w-5 text-primary" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold tracking-tight">Team Compensation</h1>
-            <p className="text-muted-foreground">Overview of your team's compensation</p>
+            <h1 className="text-2xl font-bold tracking-tight">{t("mss.teamCompensation.title")}</h1>
+            <p className="text-muted-foreground">{t("mss.teamCompensation.subtitle")}</p>
           </div>
         </div>
 
@@ -107,7 +109,7 @@ export default function MssCompensationPage() {
                   <Users className="h-5 w-5 text-primary" />
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Direct Reports</p>
+                  <p className="text-sm text-muted-foreground">{t("mss.teamCompensation.directReports")}</p>
                   {isLoading ? (
                     <Skeleton className="h-8 w-16" />
                   ) : (
@@ -125,7 +127,7 @@ export default function MssCompensationPage() {
                   <Target className="h-5 w-5 text-emerald-600" />
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Avg Compa-Ratio</p>
+                  <p className="text-sm text-muted-foreground">{t("mss.teamCompensation.avgCompaRatio")}</p>
                   {compaLoading ? (
                     <Skeleton className="h-8 w-16" />
                   ) : (
@@ -143,7 +145,7 @@ export default function MssCompensationPage() {
                   <TrendingUp className="h-5 w-5 text-amber-600" />
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Below Midpoint</p>
+                  <p className="text-sm text-muted-foreground">{t("mss.teamCompensation.belowMidpoint")}</p>
                   {compaLoading ? (
                     <Skeleton className="h-8 w-16" />
                   ) : (
@@ -161,7 +163,7 @@ export default function MssCompensationPage() {
                   <TrendingUp className="h-5 w-5 text-sky-600" />
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Above Midpoint</p>
+                  <p className="text-sm text-muted-foreground">{t("mss.teamCompensation.aboveMidpoint")}</p>
                   {compaLoading ? (
                     <Skeleton className="h-8 w-16" />
                   ) : (
@@ -196,7 +198,7 @@ export default function MssCompensationPage() {
         {/* Team Overview Table */}
         <Card>
           <CardHeader>
-            <CardTitle>Team Compensation Overview</CardTitle>
+            <CardTitle>{t("mss.teamCompensation.teamOverview")}</CardTitle>
           </CardHeader>
           <CardContent>
             {isLoading ? (
@@ -207,17 +209,17 @@ export default function MssCompensationPage() {
               </div>
             ) : directReports.length === 0 ? (
               <div className="py-8 text-center text-muted-foreground">
-                No direct reports found
+                {t("mss.teamCompensation.noDirectReports")}
               </div>
             ) : (
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Employee</TableHead>
-                    <TableHead>Position</TableHead>
-                    <TableHead className="text-right">Salary</TableHead>
-                    <TableHead className="text-right">Compa-Ratio</TableHead>
-                    <TableHead>Status</TableHead>
+                    <TableHead>{t("mss.teamCompensation.employee")}</TableHead>
+                    <TableHead>{t("mss.teamCompensation.position")}</TableHead>
+                    <TableHead className="text-right">{t("mss.teamCompensation.salary")}</TableHead>
+                    <TableHead className="text-right">{t("mss.teamCompensation.compaRatio")}</TableHead>
+                    <TableHead>{t("mss.teamCompensation.status")}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -228,10 +230,10 @@ export default function MssCompensationPage() {
                         <TableCell className="font-medium">{report.employee_name}</TableCell>
                         <TableCell>{report.position_title || "-"}</TableCell>
                         <TableCell className="text-right">
-                          ${compaData?.current_salary?.toLocaleString() || "N/A"}
+                          ${compaData?.current_salary?.toLocaleString() || t("mss.teamCompensation.na")}
                         </TableCell>
                         <TableCell className="text-right">
-                          {compaData?.compa_ratio?.toFixed(2) || "N/A"}
+                          {compaData?.compa_ratio?.toFixed(2) || t("mss.teamCompensation.na")}
                         </TableCell>
                         <TableCell>
                           {compaData?.compa_ratio ? (
@@ -243,13 +245,13 @@ export default function MssCompensationPage() {
                                 : "bg-sky-500/10 text-sky-600"
                             }>
                               {compaData.compa_ratio < 0.95
-                                ? "Below"
+                                ? t("mss.teamCompensation.below")
                                 : compaData.compa_ratio <= 1.05
-                                ? "At Target"
-                                : "Above"}
+                                ? t("mss.teamCompensation.atTarget")
+                                : t("mss.teamCompensation.above")}
                             </Badge>
                           ) : (
-                            <Badge className="bg-muted text-muted-foreground">N/A</Badge>
+                            <Badge className="bg-muted text-muted-foreground">{t("mss.teamCompensation.na")}</Badge>
                           )}
                         </TableCell>
                       </TableRow>

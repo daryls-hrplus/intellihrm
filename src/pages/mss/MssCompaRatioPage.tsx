@@ -10,9 +10,11 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Target, ChevronRight, TrendingUp, TrendingDown, Minus } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import { useLanguage } from "@/hooks/useLanguage";
 
 export default function MssCompaRatioPage() {
   const { user } = useAuth();
+  const { t } = useLanguage();
 
   const { data: directReports = [], isLoading } = useQuery({
     queryKey: ["mss-team-for-compa", user?.id],
@@ -69,12 +71,12 @@ export default function MssCompaRatioPage() {
   ];
 
   const getCompaRatioBadge = (ratio: number | null) => {
-    if (!ratio) return <Badge className="bg-muted text-muted-foreground">N/A</Badge>;
-    if (ratio < 0.8) return <Badge className="bg-red-500/10 text-red-600">Below Range</Badge>;
-    if (ratio < 0.95) return <Badge className="bg-amber-500/10 text-amber-600">Below Midpoint</Badge>;
-    if (ratio <= 1.05) return <Badge className="bg-emerald-500/10 text-emerald-600">At Midpoint</Badge>;
-    if (ratio <= 1.2) return <Badge className="bg-sky-500/10 text-sky-600">Above Midpoint</Badge>;
-    return <Badge className="bg-violet-500/10 text-violet-600">Above Range</Badge>;
+    if (!ratio) return <Badge className="bg-muted text-muted-foreground">{t("mss.teamCompensation.na")}</Badge>;
+    if (ratio < 0.8) return <Badge className="bg-red-500/10 text-red-600">{t("mss.teamCompaRatio.belowRange")}</Badge>;
+    if (ratio < 0.95) return <Badge className="bg-amber-500/10 text-amber-600">{t("mss.teamCompaRatio.belowMidpoint")}</Badge>;
+    if (ratio <= 1.05) return <Badge className="bg-emerald-500/10 text-emerald-600">{t("mss.teamCompaRatio.atMidpoint")}</Badge>;
+    if (ratio <= 1.2) return <Badge className="bg-sky-500/10 text-sky-600">{t("mss.teamCompaRatio.aboveMidpoint")}</Badge>;
+    return <Badge className="bg-violet-500/10 text-violet-600">{t("mss.teamCompaRatio.aboveRange")}</Badge>;
   };
 
   return (
@@ -82,11 +84,11 @@ export default function MssCompaRatioPage() {
       <div className="space-y-6">
         {/* Breadcrumbs */}
         <nav className="flex items-center gap-2 text-sm text-muted-foreground">
-          <Link to="/mss" className="hover:text-foreground transition-colors">Manager Self Service</Link>
+          <Link to="/mss" className="hover:text-foreground transition-colors">{t("mss.title")}</Link>
           <ChevronRight className="h-4 w-4" />
-          <Link to="/mss/compensation" className="hover:text-foreground transition-colors">Team Compensation</Link>
+          <Link to="/mss/compensation" className="hover:text-foreground transition-colors">{t("mss.teamCompensation.title")}</Link>
           <ChevronRight className="h-4 w-4" />
-          <span className="text-foreground font-medium">Compa-Ratio Analysis</span>
+          <span className="text-foreground font-medium">{t("mss.teamCompaRatio.breadcrumb")}</span>
         </nav>
 
         <div className="flex items-center gap-3">
@@ -94,8 +96,8 @@ export default function MssCompaRatioPage() {
             <Target className="h-5 w-5 text-primary" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold tracking-tight">Team Compa-Ratio Analysis</h1>
-            <p className="text-muted-foreground">Analyze pay positions for your direct reports</p>
+            <h1 className="text-2xl font-bold tracking-tight">{t("mss.teamCompaRatio.title")}</h1>
+            <p className="text-muted-foreground">{t("mss.teamCompaRatio.subtitle")}</p>
           </div>
         </div>
 
@@ -103,7 +105,7 @@ export default function MssCompaRatioPage() {
         <div className="grid gap-6 lg:grid-cols-2">
           <Card>
             <CardHeader>
-              <CardTitle>Team Distribution</CardTitle>
+              <CardTitle>{t("mss.teamCompaRatio.teamDistribution")}</CardTitle>
             </CardHeader>
             <CardContent>
               {compaLoading ? (
@@ -124,7 +126,7 @@ export default function MssCompaRatioPage() {
 
           <Card>
             <CardHeader>
-              <CardTitle>Individual Compa-Ratios</CardTitle>
+              <CardTitle>{t("mss.teamCompaRatio.individualCompaRatios")}</CardTitle>
             </CardHeader>
             <CardContent>
               {compaLoading ? (
@@ -147,7 +149,7 @@ export default function MssCompaRatioPage() {
         {/* Detailed Table */}
         <Card>
           <CardHeader>
-            <CardTitle>Team Compa-Ratio Details</CardTitle>
+            <CardTitle>{t("mss.teamCompaRatio.teamDetails")}</CardTitle>
           </CardHeader>
           <CardContent>
             {isLoading || compaLoading ? (
@@ -158,18 +160,18 @@ export default function MssCompaRatioPage() {
               </div>
             ) : compaRatios.length === 0 ? (
               <div className="py-8 text-center text-muted-foreground">
-                No compa-ratio data available for your team
+                {t("mss.teamCompaRatio.noDataAvailable")}
               </div>
             ) : (
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Employee</TableHead>
-                    <TableHead className="text-right">Current Salary</TableHead>
-                    <TableHead className="text-right">Grade Midpoint</TableHead>
-                    <TableHead className="text-right">Compa-Ratio</TableHead>
-                    <TableHead>Range Position</TableHead>
-                    <TableHead>Status</TableHead>
+                    <TableHead>{t("mss.teamCompensation.employee")}</TableHead>
+                    <TableHead className="text-right">{t("mss.teamCompaRatio.currentSalary")}</TableHead>
+                    <TableHead className="text-right">{t("mss.teamCompaRatio.gradeMidpoint")}</TableHead>
+                    <TableHead className="text-right">{t("mss.teamCompensation.compaRatio")}</TableHead>
+                    <TableHead>{t("mss.teamCompaRatio.rangePosition")}</TableHead>
+                    <TableHead>{t("mss.teamCompensation.status")}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
