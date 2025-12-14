@@ -5,6 +5,7 @@ import { ModuleBIButton } from "@/components/bi/ModuleBIButton";
 import { useHSE } from "@/hooks/useHSE";
 import { differenceInDays } from "date-fns";
 import { Skeleton } from "@/components/ui/skeleton";
+import { LeaveCompanyFilter, useLeaveCompanyFilter } from "@/components/leave/LeaveCompanyFilter";
 import {
   Shield,
   AlertTriangle,
@@ -55,7 +56,8 @@ const hseModules = [
 ];
 
 export default function HSEDashboardPage() {
-  const { incidents, trainingRecords, complianceRequirements, incidentsLoading, recordsLoading, complianceLoading } = useHSE();
+  const { selectedCompanyId, setSelectedCompanyId } = useLeaveCompanyFilter();
+  const { incidents, trainingRecords, complianceRequirements, incidentsLoading, recordsLoading, complianceLoading } = useHSE(selectedCompanyId || undefined);
 
   const isLoading = incidentsLoading || recordsLoading || complianceLoading;
 
@@ -105,6 +107,10 @@ export default function HSEDashboardPage() {
               </div>
             </div>
             <div className="flex items-center gap-2">
+              <LeaveCompanyFilter 
+                selectedCompanyId={selectedCompanyId} 
+                onCompanyChange={setSelectedCompanyId} 
+              />
               <ModuleBIButton module="hse" />
               <ModuleReportsButton module="hse" />
             </div>
