@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { NavLink } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { UserPlus, MessageSquare, HelpCircle, Newspaper } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -22,6 +23,7 @@ import defaultGroupLogo from "@/assets/default-group-logo.png";
 import defaultCompanyLogo from "@/assets/default-company-logo.png";
 
 export function AppHeader() {
+  const { t } = useTranslation();
   const { isAdmin, profile, user, company } = useAuth();
   const [pendingCount, setPendingCount] = useState(0);
   const [unreadMessages, setUnreadMessages] = useState(0);
@@ -213,7 +215,7 @@ export function AppHeader() {
             </Button>
           </NavLink>
         </TooltipTrigger>
-        <TooltipContent>Intranet</TooltipContent>
+        <TooltipContent>{t("navigation.intranet")}</TooltipContent>
       </Tooltip>
       
       {/* Notifications Bell */}
@@ -223,7 +225,7 @@ export function AppHeader() {
             <NotificationBell />
           </div>
         </TooltipTrigger>
-        <TooltipContent>Notifications</TooltipContent>
+        <TooltipContent>{t("navigation.notifications")}</TooltipContent>
       </Tooltip>
       
       {/* Help Center Button */}
@@ -235,7 +237,7 @@ export function AppHeader() {
             </Button>
           </NavLink>
         </TooltipTrigger>
-        <TooltipContent>Help Center</TooltipContent>
+        <TooltipContent>{t("navigation.helpCenter")}</TooltipContent>
       </Tooltip>
       
       {/* Messages Button */}
@@ -255,7 +257,7 @@ export function AppHeader() {
             </Button>
           </NavLink>
         </TooltipTrigger>
-        <TooltipContent>Messages</TooltipContent>
+        <TooltipContent>{t("navigation.messages")}</TooltipContent>
       </Tooltip>
       
       {/* User Avatar */}
@@ -281,16 +283,16 @@ export function AppHeader() {
           </PopoverTrigger>
           <PopoverContent align="end" className="w-72 bg-popover border shadow-lg z-50">
             <div className="space-y-3">
-              <h4 className="font-semibold text-sm">Access Requests</h4>
+              <h4 className="font-semibold text-sm">{t("navigation.accessRequests")}</h4>
               <div className="space-y-2">
                 <div className="flex items-center gap-3 p-2 rounded-lg bg-muted">
                   <div className="flex h-8 w-8 items-center justify-center rounded-full bg-orange-500/20">
                     <UserPlus className="h-4 w-4 text-orange-600" />
                   </div>
                   <div className="flex-1">
-                    <p className="text-sm font-medium">Pending Requests</p>
+                    <p className="text-sm font-medium">{t("navigation.pendingRequests")}</p>
                     <p className="text-xs text-muted-foreground">
-                      {pendingCount} request{pendingCount !== 1 ? "s" : ""} awaiting review
+                      {t("navigation.requestsAwaiting", { count: pendingCount })}
                     </p>
                   </div>
                 </div>
@@ -300,7 +302,7 @@ export function AppHeader() {
                   className="block"
                 >
                   <Button variant="outline" size="sm" className="w-full">
-                    Review Requests
+                    {t("navigation.reviewRequests")}
                   </Button>
                 </NavLink>
               </div>

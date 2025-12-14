@@ -46,25 +46,25 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
-  { title: "Dashboard", href: "/", icon: LayoutDashboard, moduleCode: "dashboard" },
-  { title: "HR Hub", href: "/hr-hub", icon: Briefcase, moduleCode: "hr_hub", hrOnly: true },
-  { title: "Employee Self Service", href: "/ess", icon: UserCircle, moduleCode: "ess" },
-  { title: "Manager Self Service", href: "/mss", icon: UserCog, moduleCode: "mss", managerOnly: true },
-  { title: "Workforce", href: "/workforce", icon: Users, moduleCode: "workforce" },
-  { title: "Time & Attendance", href: "/time-attendance", icon: Clock, moduleCode: "time_attendance" },
-  { title: "Leave Management", href: "/leave", icon: Calendar, moduleCode: "leave" },
-  { title: "Payroll", href: "/payroll", icon: Wallet, moduleCode: "payroll", hrOnly: true },
-  { title: "Compensation", href: "/compensation", icon: DollarSign, moduleCode: "compensation", hrOnly: true },
-  { title: "Benefits", href: "/benefits", icon: Gift, moduleCode: "benefits" },
-  { title: "Performance", href: "/performance", icon: Target, moduleCode: "performance" },
-  { title: "Training", href: "/training", icon: GraduationCap, moduleCode: "training" },
-  { title: "Succession", href: "/succession", icon: TrendingUp, moduleCode: "succession", hrOnly: true },
-  { title: "Recruitment", href: "/recruitment", icon: UserPlus, moduleCode: "recruitment", hrOnly: true },
-  { title: "Health & Safety", href: "/hse", icon: Shield, moduleCode: "hse" },
-  { title: "Employee Relations", href: "/employee-relations", icon: Heart, moduleCode: "employee_relations", hrOnly: true },
-  { title: "Company Property", href: "/property", icon: Package, moduleCode: "property" },
-  { title: "Help Center", href: "/help", icon: HelpCircle, moduleCode: "help" },
-  { title: "Admin & Security", href: "/admin", icon: Settings, moduleCode: "admin", adminOnly: true },
+  { title: "navigation.dashboard", href: "/", icon: LayoutDashboard, moduleCode: "dashboard" },
+  { title: "navigation.hrHub", href: "/hr-hub", icon: Briefcase, moduleCode: "hr_hub", hrOnly: true },
+  { title: "navigation.ess", href: "/ess", icon: UserCircle, moduleCode: "ess" },
+  { title: "navigation.mss", href: "/mss", icon: UserCog, moduleCode: "mss", managerOnly: true },
+  { title: "navigation.workforce", href: "/workforce", icon: Users, moduleCode: "workforce" },
+  { title: "navigation.timeAttendance", href: "/time-attendance", icon: Clock, moduleCode: "time_attendance" },
+  { title: "navigation.leave", href: "/leave", icon: Calendar, moduleCode: "leave" },
+  { title: "navigation.payroll", href: "/payroll", icon: Wallet, moduleCode: "payroll", hrOnly: true },
+  { title: "navigation.compensation", href: "/compensation", icon: DollarSign, moduleCode: "compensation", hrOnly: true },
+  { title: "navigation.benefits", href: "/benefits", icon: Gift, moduleCode: "benefits" },
+  { title: "navigation.performance", href: "/performance", icon: Target, moduleCode: "performance" },
+  { title: "navigation.training", href: "/training", icon: GraduationCap, moduleCode: "training" },
+  { title: "navigation.succession", href: "/succession", icon: TrendingUp, moduleCode: "succession", hrOnly: true },
+  { title: "navigation.recruitment", href: "/recruitment", icon: UserPlus, moduleCode: "recruitment", hrOnly: true },
+  { title: "navigation.hse", href: "/hse", icon: Shield, moduleCode: "hse" },
+  { title: "navigation.employeeRelations", href: "/employee-relations", icon: Heart, moduleCode: "employee_relations", hrOnly: true },
+  { title: "navigation.property", href: "/property", icon: Package, moduleCode: "property" },
+  { title: "navigation.help", href: "/help", icon: HelpCircle, moduleCode: "help" },
+  { title: "navigation.admin", href: "/admin", icon: Settings, moduleCode: "admin", adminOnly: true },
 ];
 
 export function AppSidebar() {
@@ -73,7 +73,7 @@ export function AppSidebar() {
   const [territoryName, setTerritoryName] = useState<string | null>(null);
   const { profile, roles, company, signOut, isAdmin, isHRManager } = useAuth();
   const { hasMenuAccess } = useMenuPermissions();
-  const { i18n } = useTranslation();
+  const { i18n, t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -196,12 +196,12 @@ export function AppSidebar() {
           <div className="space-y-2 border-b border-sidebar-border p-4">
             <div className="flex items-center gap-2 rounded-lg bg-sidebar-accent px-3 py-2 text-xs text-sidebar-foreground/80">
               <Building2 className="h-4 w-4" />
-              <span className="truncate">{company?.name || "No Company Assigned"}</span>
+              <span className="truncate">{company?.name || t("navigation.noCompanyAssigned")}</span>
             </div>
             <div className="flex gap-2">
               <div className="flex flex-1 items-center gap-1.5 rounded-lg bg-sidebar-accent px-2 py-1.5 text-xs text-sidebar-foreground/60">
                 <Globe className="h-3.5 w-3.5" />
-                <span className="truncate">{territoryName || "No Territory"}</span>
+                <span className="truncate">{territoryName || t("navigation.noTerritory")}</span>
               </div>
               <div className="flex flex-1 items-center gap-1.5 rounded-lg bg-sidebar-accent px-2 py-1.5 text-xs text-sidebar-foreground/60">
                 <Languages className="h-3.5 w-3.5" />
@@ -229,7 +229,7 @@ export function AppSidebar() {
                 )}
               >
                 <Icon className="h-5 w-5 shrink-0" />
-                {!isCollapsed && <span>{item.title}</span>}
+                {!isCollapsed && <span>{t(item.title)}</span>}
               </NavLink>
             );
           })}
@@ -275,7 +275,7 @@ export function AppSidebar() {
                 className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground"
               >
                 <LogOut className="h-4 w-4" />
-                Sign Out
+                {t("navigation.signOut")}
               </button>
             </div>
           ) : (
