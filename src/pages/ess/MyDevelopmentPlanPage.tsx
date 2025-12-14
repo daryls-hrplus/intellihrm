@@ -13,6 +13,7 @@ import { Progress } from "@/components/ui/progress";
 import { BookOpen, Target, Plus, ChevronDown, ChevronRight, CheckCircle } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
+import { useLanguage } from "@/hooks/useLanguage";
 
 interface IDP {
   id: string;
@@ -43,6 +44,7 @@ interface IDPActivity {
 }
 
 export default function MyDevelopmentPlanPage() {
+  const { t } = useLanguage();
   const { user } = useAuth();
   const [idps, setIdps] = useState<IDP[]>([]);
   const [loading, setLoading] = useState(true);
@@ -99,9 +101,9 @@ export default function MyDevelopmentPlanPage() {
       })
       .eq('id', selectedGoal.id);
 
-    if (error) toast.error('Failed to update progress');
+    if (error) toast.error(t('common.error'));
     else {
-      toast.success('Progress updated');
+      toast.success(t('common.success'));
       loadIdps();
     }
     setProgressDialogOpen(false);
@@ -115,9 +117,9 @@ export default function MyDevelopmentPlanPage() {
       })
       .eq('id', activityId);
 
-    if (error) toast.error('Failed to update');
+    if (error) toast.error(t('common.error'));
     else {
-      toast.success('Updated');
+      toast.success(t('common.success'));
       loadIdps();
     }
   };
@@ -148,7 +150,7 @@ export default function MyDevelopmentPlanPage() {
   if (loading) {
     return (
       <AppLayout>
-        <div className="flex items-center justify-center p-8">Loading...</div>
+        <div className="flex items-center justify-center p-8">{t('common.loading')}</div>
       </AppLayout>
     );
   }
@@ -159,8 +161,8 @@ export default function MyDevelopmentPlanPage() {
         <div className="flex items-center gap-3">
           <BookOpen className="h-8 w-8 text-primary" />
           <div>
-            <h1 className="text-2xl font-bold">My Development Plan</h1>
-            <p className="text-muted-foreground">Track your career development goals and activities</p>
+            <h1 className="text-2xl font-bold">{t('ess.myDevelopmentPlan.title')}</h1>
+            <p className="text-muted-foreground">{t('ess.myDevelopmentPlan.subtitle')}</p>
           </div>
         </div>
 

@@ -27,6 +27,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { Plus, Loader2, Award, Star, Trophy, Heart, ThumbsUp, PartyPopper, Send, Gift } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
+import { useLanguage } from "@/hooks/useLanguage";
 
 interface Recognition {
   id: string;
@@ -54,6 +55,7 @@ const awardTypes = [
 ];
 
 export default function MyRecognitionPage() {
+  const { t } = useLanguage();
   const { user, company } = useAuth();
   const [receivedRecognitions, setReceivedRecognitions] = useState<Recognition[]>([]);
   const [sentRecognitions, setSentRecognitions] = useState<Recognition[]>([]);
@@ -139,7 +141,7 @@ export default function MyRecognitionPage() {
 
       if (error) throw error;
 
-      toast.success("Recognition sent successfully");
+      toast.success(t('common.success'));
       setDialogOpen(false);
       setFormData({
         recipient_id: "",
@@ -151,7 +153,7 @@ export default function MyRecognitionPage() {
       fetchData();
     } catch (error) {
       console.error("Error sending recognition:", error);
-      toast.error("Failed to send recognition");
+      toast.error(t('common.error'));
     }
   };
 
@@ -178,21 +180,21 @@ export default function MyRecognitionPage() {
       <div className="space-y-6">
         <Breadcrumbs
           items={[
-            { label: "Employee Self Service", href: "/ess" },
-            { label: "My Recognition" },
+            { label: t('navigation.ess'), href: "/ess" },
+            { label: t('ess.myRecognition.breadcrumb') },
           ]}
         />
 
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">My Recognition</h1>
+            <h1 className="text-3xl font-bold tracking-tight">{t('ess.myRecognition.title')}</h1>
             <p className="text-muted-foreground">
-              View your recognitions and recognize colleagues
+              {t('ess.myRecognition.subtitle')}
             </p>
           </div>
           <Button onClick={() => setDialogOpen(true)}>
             <Plus className="mr-2 h-4 w-4" />
-            Recognize Someone
+            {t('ess.myRecognition.recognizeSomeone')}
           </Button>
         </div>
 

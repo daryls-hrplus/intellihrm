@@ -15,8 +15,10 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useHSE } from "@/hooks/useHSE";
 import { toast } from "sonner";
 import { format } from "date-fns";
+import { useLanguage } from "@/hooks/useLanguage";
 
 export default function MyHSEPage() {
+  const { t } = useLanguage();
   const { user } = useAuth();
   const { incidents, safetyPolicies, trainingRecords, createIncident } = useHSE();
   const [isReportDialogOpen, setIsReportDialogOpen] = useState(false);
@@ -50,7 +52,7 @@ export default function MyHSEPage() {
         status: "reported",
       });
       
-      toast.success("Incident reported successfully");
+      toast.success(t('common.success'));
       setIsReportDialogOpen(false);
       setNewIncident({
         title: "",
@@ -60,7 +62,7 @@ export default function MyHSEPage() {
         location: "",
       });
     } catch (error) {
-      toast.error("Failed to report incident");
+      toast.error(t('common.error'));
     }
   };
 
@@ -89,16 +91,16 @@ export default function MyHSEPage() {
       <div className="space-y-6">
         <Breadcrumbs
           items={[
-            { label: "Employee Self Service", href: "/ess" },
-            { label: "Health & Safety" },
+            { label: t('navigation.ess'), href: "/ess" },
+            { label: t('ess.myHSE.breadcrumb') },
           ]}
         />
 
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">Health & Safety</h1>
+            <h1 className="text-3xl font-bold tracking-tight">{t('ess.myHSE.title')}</h1>
             <p className="text-muted-foreground">
-              Report incidents, view safety policies, and track your safety training
+              {t('ess.myHSE.subtitle')}
             </p>
           </div>
           
@@ -106,14 +108,14 @@ export default function MyHSEPage() {
             <DialogTrigger asChild>
               <Button>
                 <Plus className="mr-2 h-4 w-4" />
-                Report Incident
+                {t('ess.myHSE.reportIncident')}
               </Button>
             </DialogTrigger>
             <DialogContent className="max-w-lg">
               <DialogHeader>
-                <DialogTitle>Report Safety Incident</DialogTitle>
+                <DialogTitle>{t('ess.myHSE.reportSafetyIncident')}</DialogTitle>
                 <DialogDescription>
-                  Report any safety incident, near miss, or hazard you've observed
+                  {t('ess.myHSE.reportDescription')}
                 </DialogDescription>
               </DialogHeader>
               

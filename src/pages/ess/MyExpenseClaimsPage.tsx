@@ -15,6 +15,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { format } from "date-fns";
 import { Plus, Receipt, DollarSign, Clock, CheckCircle, Send, Trash2 } from "lucide-react";
+import { useLanguage } from "@/hooks/useLanguage";
 
 interface ExpenseClaim {
   id: string;
@@ -47,6 +48,7 @@ const EXPENSE_CATEGORIES = [
 ];
 
 export default function MyExpenseClaimsPage() {
+  const { t } = useLanguage();
   const { user, profile } = useAuth();
   const { toast } = useToast();
   
@@ -218,8 +220,8 @@ export default function MyExpenseClaimsPage() {
   const totalApproved = claims.filter(c => c.status === "approved" || c.status === "paid").reduce((s, c) => s + c.total_amount, 0);
 
   const breadcrumbItems = [
-    { label: "Employee Self-Service", href: "/ess" },
-    { label: "My Expense Claims" },
+    { label: t('navigation.ess'), href: "/ess" },
+    { label: t('ess.myExpenseClaims.breadcrumb') },
   ];
 
   return (
@@ -229,12 +231,12 @@ export default function MyExpenseClaimsPage() {
 
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold">My Expense Claims</h1>
-            <p className="text-muted-foreground">Submit and track expense reimbursements</p>
+            <h1 className="text-3xl font-bold">{t('ess.myExpenseClaims.title')}</h1>
+            <p className="text-muted-foreground">{t('ess.myExpenseClaims.subtitle')}</p>
           </div>
           <Button onClick={() => setDialogOpen(true)}>
             <Plus className="h-4 w-4 mr-2" />
-            New Claim
+            {t('ess.myExpenseClaims.newClaim')}
           </Button>
         </div>
 

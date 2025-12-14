@@ -28,6 +28,7 @@ import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import { Plus, Loader2, MessageSquare, ThumbsUp, Lightbulb, CheckCircle, Send, Inbox } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
+import { useLanguage } from "@/hooks/useLanguage";
 
 interface Feedback {
   id: string;
@@ -45,6 +46,7 @@ interface Feedback {
 }
 
 export default function MyFeedbackPage() {
+  const { t } = useLanguage();
   const { user, company } = useAuth();
   const [sentFeedback, setSentFeedback] = useState<Feedback[]>([]);
   const [receivedFeedback, setReceivedFeedback] = useState<Feedback[]>([]);
@@ -129,7 +131,7 @@ export default function MyFeedbackPage() {
 
       if (error) throw error;
 
-      toast.success("Feedback sent successfully");
+      toast.success(t('common.success'));
       setDialogOpen(false);
       setFormData({
         to_user_id: "",
@@ -142,7 +144,7 @@ export default function MyFeedbackPage() {
       fetchData();
     } catch (error) {
       console.error("Error sending feedback:", error);
-      toast.error("Failed to send feedback");
+      toast.error(t('common.error'));
     }
   };
 
@@ -154,10 +156,10 @@ export default function MyFeedbackPage() {
         .eq("id", feedbackId);
 
       if (error) throw error;
-      toast.success("Feedback acknowledged");
+      toast.success(t('common.success'));
       fetchData();
     } catch (error) {
-      toast.error("Failed to acknowledge feedback");
+      toast.error(t('common.error'));
     }
   };
 
@@ -193,21 +195,21 @@ export default function MyFeedbackPage() {
       <div className="space-y-6">
         <Breadcrumbs
           items={[
-            { label: "Employee Self Service", href: "/ess" },
-            { label: "My Feedback" },
+            { label: t('navigation.ess'), href: "/ess" },
+            { label: t('ess.myFeedback.breadcrumb') },
           ]}
         />
 
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">My Feedback</h1>
+            <h1 className="text-3xl font-bold tracking-tight">{t('ess.myFeedback.title')}</h1>
             <p className="text-muted-foreground">
-              Give and receive continuous feedback
+              {t('ess.myFeedback.subtitle')}
             </p>
           </div>
           <Button onClick={() => setDialogOpen(true)}>
             <Plus className="mr-2 h-4 w-4" />
-            Give Feedback
+            {t('ess.myFeedback.giveFeedback')}
           </Button>
         </div>
 
