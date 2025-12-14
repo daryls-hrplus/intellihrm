@@ -3384,6 +3384,75 @@ export type Database = {
         }
         Relationships: []
       }
+      company_tag_assignments: {
+        Row: {
+          company_id: string
+          created_at: string | null
+          id: string
+          tag_id: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string | null
+          id?: string
+          tag_id: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string | null
+          id?: string
+          tag_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_tag_assignments_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "company_tag_assignments_tag_id_fkey"
+            columns: ["tag_id"]
+            isOneToOne: false
+            referencedRelation: "company_tags"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      company_tags: {
+        Row: {
+          code: string
+          color: string | null
+          created_at: string | null
+          description: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          updated_at: string | null
+        }
+        Insert: {
+          code: string
+          color?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          updated_at?: string | null
+        }
+        Update: {
+          code?: string
+          color?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       compensation_budgets: {
         Row: {
           allocated_amount: number | null
@@ -14711,6 +14780,45 @@ export type Database = {
           },
         ]
       }
+      module_permissions: {
+        Row: {
+          created_at: string | null
+          display_order: number | null
+          id: string
+          is_active: boolean | null
+          module_code: string
+          module_name: string
+          parent_tab_code: string | null
+          tab_code: string | null
+          tab_name: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          display_order?: number | null
+          id?: string
+          is_active?: boolean | null
+          module_code: string
+          module_name: string
+          parent_tab_code?: string | null
+          tab_code?: string | null
+          tab_name?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          display_order?: number | null
+          id?: string
+          is_active?: boolean | null
+          module_code?: string
+          module_name?: string
+          parent_tab_code?: string | null
+          tab_code?: string | null
+          tab_name?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       nine_box_assessments: {
         Row: {
           assessed_by: string | null
@@ -19340,6 +19448,129 @@ export type Database = {
           },
         ]
       }
+      role_company_access: {
+        Row: {
+          company_id: string
+          created_at: string | null
+          id: string
+          role_id: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string | null
+          id?: string
+          role_id: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string | null
+          id?: string
+          role_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "role_company_access_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "role_company_access_role_id_fkey"
+            columns: ["role_id"]
+            isOneToOne: false
+            referencedRelation: "roles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      role_permissions: {
+        Row: {
+          can_create: boolean | null
+          can_delete: boolean | null
+          can_edit: boolean | null
+          can_view: boolean | null
+          created_at: string | null
+          id: string
+          module_permission_id: string
+          role_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          can_create?: boolean | null
+          can_delete?: boolean | null
+          can_edit?: boolean | null
+          can_view?: boolean | null
+          created_at?: string | null
+          id?: string
+          module_permission_id: string
+          role_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          can_create?: boolean | null
+          can_delete?: boolean | null
+          can_edit?: boolean | null
+          can_view?: boolean | null
+          created_at?: string | null
+          id?: string
+          module_permission_id?: string
+          role_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "role_permissions_module_permission_id_fkey"
+            columns: ["module_permission_id"]
+            isOneToOne: false
+            referencedRelation: "module_permissions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "role_permissions_role_id_fkey"
+            columns: ["role_id"]
+            isOneToOne: false
+            referencedRelation: "roles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      role_tag_access: {
+        Row: {
+          created_at: string | null
+          id: string
+          role_id: string
+          tag_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          role_id: string
+          tag_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          role_id?: string
+          tag_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "role_tag_access_role_id_fkey"
+            columns: ["role_id"]
+            isOneToOne: false
+            referencedRelation: "roles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "role_tag_access_tag_id_fkey"
+            columns: ["tag_id"]
+            isOneToOne: false
+            referencedRelation: "company_tags"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       roles: {
         Row: {
           can_view_pii: boolean | null
@@ -23049,6 +23280,19 @@ export type Database = {
             }
             Returns: Json
           }
+      user_has_company_access: {
+        Args: { p_company_id: string; p_user_id: string }
+        Returns: boolean
+      }
+      user_has_permission: {
+        Args: {
+          p_action?: string
+          p_module_code: string
+          p_tab_code?: string
+          p_user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
       app_role: "admin" | "hr_manager" | "employee"
