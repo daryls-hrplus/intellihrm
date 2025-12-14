@@ -13,6 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { LanguageSwitcher } from "./LanguageSwitcher";
+import { AIAssistantButton } from "./AIAssistantButton";
 import { NotificationBell } from "./NotificationBell";
 import {
   Tooltip,
@@ -195,6 +196,9 @@ export function AppHeader() {
       
       {/* Right Side Actions */}
       <div className="flex items-center gap-2">
+      {/* AI Assistant */}
+      <AIAssistantButton />
+      
       {/* Language Switcher */}
       <LanguageSwitcher />
       

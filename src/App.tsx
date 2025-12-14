@@ -19,6 +19,7 @@ import AdminUsersPage from "./pages/admin/AdminUsersPage";
 import AdminCompaniesPage from "./pages/admin/AdminCompaniesPage";
 import AdminCompanyGroupsPage from "./pages/admin/AdminCompanyGroupsPage";
 import AdminAuditLogsPage from "./pages/admin/AdminAuditLogsPage";
+import AdminAIUsagePage from "./pages/admin/AdminAIUsagePage";
 import AdminRolesPage from "./pages/admin/AdminRolesPage";
 import AdminPiiAccessPage from "./pages/admin/AdminPiiAccessPage";
 import AdminSettingsPage from "./pages/admin/AdminSettingsPage";
@@ -769,6 +770,14 @@ const App = () => (
               element={
                 <ProtectedRoute requiredRoles={["admin"]}>
                   <AdminAuditLogsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/ai-usage"
+              element={
+                <ProtectedRoute requiredRoles={["admin"]}>
+                  <AdminAIUsagePage />
                 </ProtectedRoute>
               }
             />
