@@ -114,7 +114,9 @@
     "allDepartments": "All Departments",
     "allCompanies": "All Companies",
     "department": "Department",
-    "unlimited": "Unlimited"
+    "unlimited": "Unlimited",
+    "estimatedCost": "Estimated Cost",
+    "basedOnUsage": "Based on usage"
   },
   "auth": {
     "login": "Log In",
@@ -1655,7 +1657,9 @@
         "aiAccess": "AI Access",
         "monthlyTokenLimit": "Monthly Token Limit",
         "dailyTokenLimit": "Daily Token Limit",
-        "settingsUpdated": "User AI settings updated"
+        "settingsUpdated": "User AI settings updated",
+        "estimatedCost": "Estimated Cost",
+        "basedOnUsage": "Based on token usage"
       },
       "piiAccess": {
         "title": "PII Access Report",

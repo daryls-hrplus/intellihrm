@@ -15,7 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Bot, Users, TrendingUp, Activity, Settings, Search, Edit2, Save } from "lucide-react";
+import { Bot, Users, TrendingUp, Activity, Settings, Search, Edit2, Save, DollarSign } from "lucide-react";
 import { format, startOfMonth, endOfMonth } from "date-fns";
 
 interface AIUserSetting {
@@ -359,7 +359,7 @@ export default function AdminAIUsagePage() {
         </div>
 
         {/* Stats Cards */}
-        <div className="grid gap-4 md:grid-cols-4">
+        <div className="grid gap-4 md:grid-cols-5">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">{t("admin.modules.aiUsage.totalTokens")}</CardTitle>
@@ -378,6 +378,16 @@ export default function AdminAIUsagePage() {
             <CardContent>
               <div className="text-2xl font-bold">{totalRequests}</div>
               <p className="text-xs text-muted-foreground">{t("admin.modules.aiUsage.allTime")}</p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">{t("admin.modules.aiUsage.estimatedCost")}</CardTitle>
+              <DollarSign className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">${((totalTokensThisMonth / 1000) * 0.002).toFixed(2)}</div>
+              <p className="text-xs text-muted-foreground">{t("admin.modules.aiUsage.basedOnUsage")}</p>
             </CardContent>
           </Card>
           <Card>
