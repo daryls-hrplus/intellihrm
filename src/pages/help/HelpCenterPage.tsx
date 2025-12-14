@@ -30,6 +30,8 @@ import {
   Video,
   FileQuestion,
   Lightbulb,
+  UserCircle,
+  UserCog,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Link } from "react-router-dom";
@@ -53,21 +55,23 @@ interface KBArticle {
 }
 
 const categoryIcons: Record<string, React.ElementType> = {
-  "leave-management": Calendar,
+  "hr-hub": Briefcase,
+  "ess": UserCircle,
+  "mss": UserCog,
   "workforce": Users,
   "time-attendance": Clock,
-  "admin-security": Shield,
-  "benefits": Heart,
-  "onboarding": UserPlus,
+  "leave-management": Calendar,
   "payroll-compensation": DollarSign,
-  "policies-compliance": FileText,
-  "recruitment": Briefcase,
+  "benefits": Heart,
+  "performance-management": Target,
+  "training-learning": GraduationCap,
+  "succession-planning": TrendingUp,
+  "recruitment": UserPlus,
   "health-safety": Shield,
   "employee-relations": Users,
-  "training-learning": GraduationCap,
   "company-property": Package,
-  "performance-management": Target,
-  "succession-planning": TrendingUp,
+  "policies-compliance": FileText,
+  "admin-security": Shield,
 };
 
 export default function HelpCenterPage() {
