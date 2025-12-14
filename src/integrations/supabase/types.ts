@@ -15016,6 +15016,141 @@ export type Database = {
           },
         ]
       }
+      leave_balance_buyouts: {
+        Row: {
+          agreement_date: string
+          agreement_document_name: string | null
+          agreement_document_url: string | null
+          approved_at: string | null
+          approved_by: string | null
+          buyout_rate: number
+          company_id: string
+          created_at: string
+          created_by: string | null
+          currency_id: string | null
+          daily_rate_amount: number
+          employee_id: string
+          id: string
+          leave_days_bought: number
+          leave_type_id: string
+          notes: string | null
+          paid_at: string | null
+          pay_group_id: string | null
+          pay_period_id: string | null
+          status: string
+          total_buyout_amount: number
+          transaction_date: string
+          updated_at: string
+        }
+        Insert: {
+          agreement_date: string
+          agreement_document_name?: string | null
+          agreement_document_url?: string | null
+          approved_at?: string | null
+          approved_by?: string | null
+          buyout_rate?: number
+          company_id: string
+          created_at?: string
+          created_by?: string | null
+          currency_id?: string | null
+          daily_rate_amount: number
+          employee_id: string
+          id?: string
+          leave_days_bought: number
+          leave_type_id: string
+          notes?: string | null
+          paid_at?: string | null
+          pay_group_id?: string | null
+          pay_period_id?: string | null
+          status?: string
+          total_buyout_amount: number
+          transaction_date: string
+          updated_at?: string
+        }
+        Update: {
+          agreement_date?: string
+          agreement_document_name?: string | null
+          agreement_document_url?: string | null
+          approved_at?: string | null
+          approved_by?: string | null
+          buyout_rate?: number
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          currency_id?: string | null
+          daily_rate_amount?: number
+          employee_id?: string
+          id?: string
+          leave_days_bought?: number
+          leave_type_id?: string
+          notes?: string | null
+          paid_at?: string | null
+          pay_group_id?: string | null
+          pay_period_id?: string | null
+          status?: string
+          total_buyout_amount?: number
+          transaction_date?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "leave_balance_buyouts_approved_by_fkey"
+            columns: ["approved_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leave_balance_buyouts_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leave_balance_buyouts_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leave_balance_buyouts_currency_id_fkey"
+            columns: ["currency_id"]
+            isOneToOne: false
+            referencedRelation: "currencies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leave_balance_buyouts_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leave_balance_buyouts_leave_type_id_fkey"
+            columns: ["leave_type_id"]
+            isOneToOne: false
+            referencedRelation: "leave_types"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leave_balance_buyouts_pay_group_id_fkey"
+            columns: ["pay_group_id"]
+            isOneToOne: false
+            referencedRelation: "pay_groups"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leave_balance_buyouts_pay_period_id_fkey"
+            columns: ["pay_period_id"]
+            isOneToOne: false
+            referencedRelation: "pay_periods"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       leave_balance_recalculations: {
         Row: {
           calculation_type: string

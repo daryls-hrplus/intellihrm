@@ -80,6 +80,13 @@ export default function PayrollDashboardPage() {
       href: "/payroll/leave-payment-config",
       color: "bg-primary/10 text-primary",
     },
+    {
+      title: t("payroll.modules.leaveBuyout.title", "Leave Buyout"),
+      description: t("payroll.modules.leaveBuyout.description", "Manage leave balance buyout agreements"),
+      icon: DollarSign,
+      href: "/payroll/leave-buyout",
+      color: "bg-success/10 text-success",
+    },
   ];
 
   const stats = [

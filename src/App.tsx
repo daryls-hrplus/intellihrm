@@ -210,6 +210,7 @@ import YearEndProcessingPage from "./pages/payroll/YearEndProcessingPage";
 import PayslipsPage from "./pages/payroll/PayslipsPage";
 import SalaryOvertimePage from "./pages/payroll/SalaryOvertimePage";
 import LeavePaymentConfigPage from "./pages/payroll/LeavePaymentConfigPage";
+import LeaveBalanceBuyoutPage from "./pages/payroll/LeaveBalanceBuyoutPage";
 
 // Time & Attendance pages
 import TimeAttendanceDashboardPage from "./pages/time-attendance/TimeAttendanceDashboardPage";
@@ -1461,6 +1462,14 @@ const App = () => (
               element={
                 <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="payroll">
                   <LeavePaymentConfigPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/payroll/leave-buyout"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="payroll">
+                  <LeaveBalanceBuyoutPage />
                 </ProtectedRoute>
               }
             />
