@@ -42,6 +42,7 @@ import { Plus, CalendarDays, Settings, TrendingUp, TrendingDown } from "lucide-r
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { useLanguage } from "@/hooks/useLanguage";
 
 interface Employee {
   id: string;
@@ -82,17 +83,18 @@ interface Adjustment {
   };
 }
 
-const ADJUSTMENT_TYPES = [
-  { value: "add", label: "Add Days/Hours", icon: TrendingUp },
-  { value: "deduct", label: "Deduct Days/Hours", icon: TrendingDown },
-  { value: "correction", label: "Correction", icon: Settings },
-];
-
 export default function LeaveBalanceAdjustmentsPage() {
+  const { t } = useLanguage();
   const { user, isAdmin, hasRole } = useAuth();
   const { selectedCompanyId, setSelectedCompanyId } = useLeaveCompanyFilter();
   const { selectedDepartmentId, setSelectedDepartmentId } = useDepartmentFilter();
   const isAdminOrHR = isAdmin || hasRole("hr_manager");
+
+  const ADJUSTMENT_TYPES = [
+    { value: "add", label: t("leave.balanceAdjustments.addDays"), icon: TrendingUp },
+    { value: "deduct", label: t("leave.balanceAdjustments.deductDays"), icon: TrendingDown },
+    { value: "correction", label: t("leave.balanceAdjustments.correction"), icon: Settings },
+  ];
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -202,7 +204,7 @@ export default function LeaveBalanceAdjustmentsPage() {
 
   const handleSubmit = async () => {
     if (!formData.employee_id || !formData.leave_type_id || !formData.amount || !formData.reason) {
-      toast.error("Please fill in all required fields");
+      toast.error(t("validation.required"));
       return;
     }
 
@@ -231,7 +233,7 @@ export default function LeaveBalanceAdjustmentsPage() {
         .single();
 
       if (balanceError) {
-        toast.error("Failed to create balance record");
+        toast.error(t("common.error"));
         return;
       }
       balanceId = newBalance.id;
@@ -254,7 +256,7 @@ export default function LeaveBalanceAdjustmentsPage() {
       });
 
     if (adjError) {
-      toast.error("Failed to create adjustment");
+      toast.error(t("common.error"));
       return;
     }
 
@@ -270,11 +272,11 @@ export default function LeaveBalanceAdjustmentsPage() {
       .eq("id", balanceId);
 
     if (updateError) {
-      toast.error("Failed to update balance");
+      toast.error(t("common.error"));
       return;
     }
 
-    toast.success("Balance adjustment created successfully");
+    toast.success(t("common.success"));
     setIsDialogOpen(false);
     resetForm();
 
@@ -314,8 +316,8 @@ export default function LeaveBalanceAdjustmentsPage() {
       <div className="space-y-6">
         <Breadcrumbs
           items={[
-            { label: "Leave Management", href: "/leave" },
-            { label: "Balance Adjustments" },
+            { label: t("navigation.leave"), href: "/leave" },
+            { label: t("leave.balanceAdjustments.title") },
           ]}
         />
 
@@ -325,8 +327,8 @@ export default function LeaveBalanceAdjustmentsPage() {
               <Settings className="h-5 w-5 text-primary" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold tracking-tight text-foreground">Balance Adjustments</h1>
-              <p className="text-muted-foreground">Manually adjust employee leave balances</p>
+              <h1 className="text-2xl font-bold tracking-tight text-foreground">{t("leave.balanceAdjustments.title")}</h1>
+              <p className="text-muted-foreground">{t("leave.balanceAdjustments.subtitle")}</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -343,22 +345,22 @@ export default function LeaveBalanceAdjustmentsPage() {
               <DialogTrigger asChild>
                 <Button>
                   <Plus className="mr-2 h-4 w-4" />
-                  New Adjustment
+                  {t("leave.balanceAdjustments.newAdjustment")}
                 </Button>
               </DialogTrigger>
               <DialogContent className="max-w-md">
                 <DialogHeader>
-                  <DialogTitle>Create Balance Adjustment</DialogTitle>
+                  <DialogTitle>{t("leave.balanceAdjustments.createAdjustment")}</DialogTitle>
                 </DialogHeader>
                 <div className="grid gap-4 py-4">
                   <div className="space-y-2">
-                    <Label>Employee *</Label>
+                    <Label>{t("leave.balanceAdjustments.employee")} *</Label>
                     <Select
                       value={formData.employee_id}
                       onValueChange={(value) => setFormData({ ...formData, employee_id: value, leave_type_id: "" })}
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Select employee" />
+                        <SelectValue placeholder={t("leave.balanceAdjustments.selectEmployee")} />
                       </SelectTrigger>
                       <SelectContent>
                         {employees.map((emp) => (
@@ -369,13 +371,13 @@ export default function LeaveBalanceAdjustmentsPage() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label>Leave Type *</Label>
+                    <Label>{t("leave.balanceAdjustments.leaveType")} *</Label>
                     <Select
                       value={formData.leave_type_id}
                       onValueChange={(value) => setFormData({ ...formData, leave_type_id: value })}
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Select leave type" />
+                        <SelectValue placeholder={t("leave.balanceAdjustments.selectLeaveType")} />
                       </SelectTrigger>
                       <SelectContent>
                         {leaveTypes.map((lt) => (
@@ -390,13 +392,13 @@ export default function LeaveBalanceAdjustmentsPage() {
                     </Select>
                     {formData.leave_type_id && leaveBalances.length > 0 && (
                       <p className="text-xs text-muted-foreground">
-                        Current balance: {leaveBalances.find(b => b.leave_type_id === formData.leave_type_id)?.current_balance?.toFixed(1) || "0"}
+                        {t("leave.balanceAdjustments.currentBalance")}: {leaveBalances.find(b => b.leave_type_id === formData.leave_type_id)?.current_balance?.toFixed(1) || "0"}
                       </p>
                     )}
                   </div>
 
                   <div className="space-y-2">
-                    <Label>Adjustment Type *</Label>
+                    <Label>{t("leave.balanceAdjustments.adjustmentType")} *</Label>
                     <Select
                       value={formData.adjustment_type}
                       onValueChange={(value) => setFormData({ ...formData, adjustment_type: value })}
@@ -418,19 +420,19 @@ export default function LeaveBalanceAdjustmentsPage() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label>Amount (Days/Hours) *</Label>
+                    <Label>{t("leave.balanceAdjustments.amount")} *</Label>
                     <Input
                       type="number"
                       step="0.5"
                       min="0"
                       value={formData.amount}
                       onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
-                      placeholder="Enter amount"
+                      placeholder={t("leave.balanceAdjustments.enterAmount")}
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <Label>Effective Date *</Label>
+                    <Label>{t("leave.balanceAdjustments.effectiveDate")} *</Label>
                     <Popover>
                       <PopoverTrigger asChild>
                         <Button variant="outline" className="w-full justify-start text-left font-normal">
@@ -449,21 +451,21 @@ export default function LeaveBalanceAdjustmentsPage() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label>Reason *</Label>
+                    <Label>{t("leave.balanceAdjustments.reason")} *</Label>
                     <Textarea
                       value={formData.reason}
                       onChange={(e) => setFormData({ ...formData, reason: e.target.value })}
-                      placeholder="Explain reason for adjustment"
+                      placeholder={t("leave.balanceAdjustments.reasonPlaceholder")}
                       rows={3}
                     />
                   </div>
 
                   <div className="flex justify-end gap-2 pt-4">
                     <Button variant="outline" onClick={() => { setIsDialogOpen(false); resetForm(); }}>
-                      Cancel
+                      {t("leave.balanceAdjustments.cancel")}
                     </Button>
                     <Button onClick={handleSubmit}>
-                      Create Adjustment
+                      {t("leave.balanceAdjustments.create")}
                     </Button>
                   </div>
                 </div>
@@ -477,26 +479,26 @@ export default function LeaveBalanceAdjustmentsPage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Employee</TableHead>
-                <TableHead>Leave Type</TableHead>
-                <TableHead>Type</TableHead>
-                <TableHead>Amount</TableHead>
-                <TableHead>Reason</TableHead>
-                <TableHead>Effective Date</TableHead>
-                <TableHead>Adjusted By</TableHead>
+                <TableHead>{t("leave.balanceAdjustments.employee")}</TableHead>
+                <TableHead>{t("leave.balanceAdjustments.leaveType")}</TableHead>
+                <TableHead>{t("leave.balanceAdjustments.type")}</TableHead>
+                <TableHead>{t("leave.balanceAdjustments.amount")}</TableHead>
+                <TableHead>{t("leave.balanceAdjustments.reason")}</TableHead>
+                <TableHead>{t("leave.balanceAdjustments.effectiveDate")}</TableHead>
+                <TableHead>{t("leave.balanceAdjustments.adjustedBy")}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {isLoading ? (
                 <TableRow>
                   <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
-                    Loading...
+                    {t("leave.balanceAdjustments.loading")}
                   </TableCell>
                 </TableRow>
               ) : adjustments.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
-                    No adjustments found
+                    {t("leave.balanceAdjustments.noAdjustments")}
                   </TableCell>
                 </TableRow>
               ) : (
