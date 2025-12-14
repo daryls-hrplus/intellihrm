@@ -3,6 +3,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
+import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,7 +19,7 @@ import { Plus, Pencil, Trash2, Building2, Settings } from "lucide-react";
 import { useAuditLog } from "@/hooks/useAuditLog";
 
 export default function AutoEnrollmentRulesPage() {
-  const { user } = useAuth();
+  const { t } = useTranslation();
   const { logAction } = useAuditLog();
   const [companies, setCompanies] = useState<any[]>([]);
   const [selectedCompany, setSelectedCompany] = useState<string>("");

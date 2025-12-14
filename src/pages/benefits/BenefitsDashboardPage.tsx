@@ -4,6 +4,7 @@ import { ModuleReportsButton } from "@/components/reports/ModuleReportsButton";
 import { ModuleBIButton } from "@/components/bi/ModuleBIButton";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useTranslation } from "react-i18next";
 import {
   Select,
   SelectContent,
@@ -38,117 +39,117 @@ interface Company {
   name: string;
 }
 
-const benefitsModules = [
+const getBenefitsModules = (t: any) => [
   {
-    title: "Benefit Categories",
-    description: "Manage benefit category types",
+    title: t("benefits.modules.categories.title"),
+    description: t("benefits.modules.categories.description"),
     href: "/benefits/categories",
     icon: Gift,
     color: "bg-primary/10 text-primary",
   },
   {
-    title: "Benefit Plans",
-    description: "Configure benefit plans and coverage",
+    title: t("benefits.modules.plans.title"),
+    description: t("benefits.modules.plans.description"),
     href: "/benefits/plans",
     icon: Shield,
     color: "bg-success/10 text-success",
   },
   {
-    title: "Benefit Providers",
-    description: "Manage insurance companies and providers",
+    title: t("benefits.modules.providers.title"),
+    description: t("benefits.modules.providers.description"),
     href: "/benefits/providers",
     icon: Building2,
     color: "bg-info/10 text-info",
   },
   {
-    title: "Enrollments",
-    description: "Manage employee benefit enrollments",
+    title: t("benefits.modules.enrollments.title"),
+    description: t("benefits.modules.enrollments.description"),
     href: "/benefits/enrollments",
     icon: Heart,
     color: "bg-accent/10 text-accent-foreground",
   },
   {
-    title: "Claims",
-    description: "Submit and track benefit claims",
+    title: t("benefits.modules.claims.title"),
+    description: t("benefits.modules.claims.description"),
     href: "/benefits/claims",
     icon: Stethoscope,
     color: "bg-warning/10 text-warning",
   },
 ];
 
-const analyticsModules = [
+const getAnalyticsModules = (t: any) => [
   {
-    title: "Benefits Analytics",
-    description: "Enrollment trends, utilization rates, and cost analysis",
+    title: t("benefits.modules.analytics.title"),
+    description: t("benefits.modules.analytics.description"),
     href: "/benefits/analytics",
     icon: BarChart3,
     color: "bg-primary/10 text-primary",
   },
   {
-    title: "Cost Projections",
-    description: "Forecast future benefit costs and budget planning",
+    title: t("benefits.modules.costProjections.title"),
+    description: t("benefits.modules.costProjections.description"),
     href: "/benefits/cost-projections",
     icon: TrendingUp,
     color: "bg-success/10 text-success",
   },
   {
-    title: "Plan Comparison",
-    description: "Compare different benefit plans side by side",
+    title: t("benefits.modules.comparison.title"),
+    description: t("benefits.modules.comparison.description"),
     href: "/benefits/compare",
     icon: Scale,
     color: "bg-info/10 text-info",
   },
   {
-    title: "Benefit Calculator",
-    description: "Calculate employee benefit costs and contributions",
+    title: t("benefits.modules.calculator.title"),
+    description: t("benefits.modules.calculator.description"),
     href: "/benefits/calculator",
     icon: Calculator,
     color: "bg-warning/10 text-warning",
   },
 ];
 
-const administrationModules = [
+const getAdministrationModules = (t: any) => [
   {
-    title: "Auto-Enrollment Rules",
-    description: "Configure automatic benefit enrollment criteria",
+    title: t("benefits.modules.autoEnrollment.title"),
+    description: t("benefits.modules.autoEnrollment.description"),
     href: "/benefits/auto-enrollment",
     icon: Settings,
     color: "bg-primary/10 text-primary",
   },
   {
-    title: "Life Event Management",
-    description: "Handle qualifying life events for enrollment changes",
+    title: t("benefits.modules.lifeEvents.title"),
+    description: t("benefits.modules.lifeEvents.description"),
     href: "/benefits/life-events",
     icon: Calendar,
     color: "bg-success/10 text-success",
   },
   {
-    title: "Waiting Period Tracking",
-    description: "Track employee benefit eligibility timelines",
+    title: t("benefits.modules.waitingPeriods.title"),
+    description: t("benefits.modules.waitingPeriods.description"),
     href: "/benefits/waiting-periods",
     icon: Clock,
     color: "bg-info/10 text-info",
   },
   {
-    title: "Open Enrollment Tracker",
-    description: "Monitor open enrollment period progress",
+    title: t("benefits.modules.openEnrollment.title"),
+    description: t("benefits.modules.openEnrollment.description"),
     href: "/benefits/open-enrollment",
     icon: CalendarCheck,
     color: "bg-warning/10 text-warning",
   },
 ];
 
-const complianceModules = [
+const getComplianceModules = (t: any) => [
   {
-    title: "Eligibility Audit",
-    description: "Verify dependent and employee eligibility",
+    title: t("benefits.modules.eligibilityAudit.title"),
+    description: t("benefits.modules.eligibilityAudit.description"),
     href: "/benefits/eligibility-audit",
     icon: FileCheck,
     color: "bg-primary/10 text-primary",
   },
   {
-    title: "Compliance Reports",
-    description: "Generate ACA, ERISA, and COBRA compliance reports",
+    title: t("benefits.modules.complianceReports.title"),
+    description: t("benefits.modules.complianceReports.description"),
     href: "/benefits/compliance",
     icon: FileText,
     color: "bg-success/10 text-success",
@@ -162,7 +163,7 @@ interface DashboardStats {
   pendingClaims: number;
 }
 
-function ModuleSection({ title, modules, startIndex }: { title: string; modules: typeof benefitsModules; startIndex: number }) {
+function ModuleSection({ title, modules, startIndex }: { title: string; modules: ReturnType<typeof getBenefitsModules>; startIndex: number }) {
   return (
     <div className="space-y-4">
       <h2 className="text-lg font-semibold text-foreground">{title}</h2>
@@ -197,6 +198,7 @@ function ModuleSection({ title, modules, startIndex }: { title: string; modules:
 }
 
 export default function BenefitsDashboardPage() {
+  const { t } = useTranslation();
   const [companies, setCompanies] = useState<Company[]>([]);
   const [selectedCompanyId, setSelectedCompanyId] = useState<string>("all");
   const [stats, setStats] = useState<DashboardStats>({
@@ -310,11 +312,16 @@ export default function BenefitsDashboardPage() {
   }, [selectedCompanyId]);
 
   const statCards = [
-    { label: "Active Plans", value: stats.activePlans, icon: CheckCircle, color: "bg-success/10 text-success" },
-    { label: "Enrolled Users", value: stats.enrolledUsers, icon: Users, color: "bg-primary/10 text-primary" },
-    { label: "Health Plans", value: stats.healthPlans, icon: Stethoscope, color: "bg-info/10 text-info" },
-    { label: "Pending Claims", value: stats.pendingClaims, icon: FileText, color: "bg-warning/10 text-warning" },
+    { label: t("benefits.activePlans"), value: stats.activePlans, icon: CheckCircle, color: "bg-success/10 text-success" },
+    { label: t("benefits.enrolledUsers"), value: stats.enrolledUsers, icon: Users, color: "bg-primary/10 text-primary" },
+    { label: t("benefits.healthPlans"), value: stats.healthPlans, icon: Stethoscope, color: "bg-info/10 text-info" },
+    { label: t("benefits.pendingClaims"), value: stats.pendingClaims, icon: FileText, color: "bg-warning/10 text-warning" },
   ];
+
+  const benefitsModules = getBenefitsModules(t);
+  const analyticsModules = getAnalyticsModules(t);
+  const administrationModules = getAdministrationModules(t);
+  const complianceModules = getComplianceModules(t);
 
   return (
     <AppLayout>
@@ -326,11 +333,11 @@ export default function BenefitsDashboardPage() {
                 <Gift className="h-5 w-5 text-primary" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
-                  Benefits
+              <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+                  {t("benefits.title")}
                 </h1>
                 <p className="text-muted-foreground">
-                  Employee benefits and perks management
+                  {t("benefits.subtitle")}
                 </p>
               </div>
             </div>
@@ -346,10 +353,10 @@ export default function BenefitsDashboardPage() {
           <Building2 className="h-4 w-4 text-muted-foreground" />
           <Select value={selectedCompanyId} onValueChange={setSelectedCompanyId}>
             <SelectTrigger className="w-[280px]">
-              <SelectValue placeholder="Select Company" />
+              <SelectValue placeholder={t("common.selectCompany")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Companies</SelectItem>
+              <SelectItem value="all">{t("benefits.allCompanies")}</SelectItem>
               {companies.map((company) => (
                 <SelectItem key={company.id} value={company.id}>
                   {company.name}
@@ -387,10 +394,10 @@ export default function BenefitsDashboardPage() {
           })}
         </div>
 
-        <ModuleSection title="Core Benefits" modules={benefitsModules} startIndex={4} />
-        <ModuleSection title="Analytics & Reporting" modules={analyticsModules} startIndex={8} />
-        <ModuleSection title="Administration" modules={administrationModules} startIndex={12} />
-        <ModuleSection title="Compliance" modules={complianceModules} startIndex={16} />
+        <ModuleSection title={t("benefits.sections.coreBenefits")} modules={benefitsModules} startIndex={4} />
+        <ModuleSection title={t("benefits.sections.analyticsReporting")} modules={analyticsModules} startIndex={8} />
+        <ModuleSection title={t("benefits.sections.administration")} modules={administrationModules} startIndex={12} />
+        <ModuleSection title={t("benefits.sections.compliance")} modules={complianceModules} startIndex={16} />
       </div>
     </AppLayout>
   );
