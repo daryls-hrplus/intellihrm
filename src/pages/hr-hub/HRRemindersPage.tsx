@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useLanguage } from '@/hooks/useLanguage';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Breadcrumbs } from '@/components/ui/breadcrumbs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -10,6 +11,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Bell, Settings, List, Loader2 } from 'lucide-react';
 
 export default function HRRemindersPage() {
+  const { t } = useLanguage();
   const [companies, setCompanies] = useState<{ id: string; name: string }[]>([]);
   const [selectedCompanyId, setSelectedCompanyId] = useState<string>('all');
   const [loading, setLoading] = useState(true);
@@ -28,8 +30,8 @@ export default function HRRemindersPage() {
   }, []);
 
   const breadcrumbItems = [
-    { label: 'HR Hub', href: '/hr-hub' },
-    { label: 'Reminders' },
+    { label: t('hrHub.title'), href: '/hr-hub' },
+    { label: t('hrHub.reminders') },
   ];
 
   if (loading) {
@@ -51,16 +53,16 @@ export default function HRRemindersPage() {
           <div>
             <h1 className="text-3xl font-bold flex items-center gap-2">
               <Bell className="h-8 w-8" />
-              HR Reminders
+              {t('hrHub.reminders')}
             </h1>
-            <p className="text-muted-foreground">Manage employee reminders and notification rules</p>
+            <p className="text-muted-foreground">{t('hrHub.remindersDesc')}</p>
           </div>
           <Select value={selectedCompanyId} onValueChange={setSelectedCompanyId}>
             <SelectTrigger className="w-[220px]">
-              <SelectValue placeholder="Select company" />
+              <SelectValue placeholder={t('common.select')} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Companies</SelectItem>
+              <SelectItem value="all">{t('common.all')} {t('admin.stats.companies')}</SelectItem>
               {companies.map((company) => (
                 <SelectItem key={company.id} value={company.id}>{company.name}</SelectItem>
               ))}
@@ -72,20 +74,20 @@ export default function HRRemindersPage() {
           <TabsList>
             <TabsTrigger value="reminders" className="flex items-center gap-2">
               <List className="h-4 w-4" />
-              Reminders
+              {t('hrHub.reminders')}
             </TabsTrigger>
             <TabsTrigger value="rules" className="flex items-center gap-2">
               <Settings className="h-4 w-4" />
-              Rules
+              {t('common.rules') || 'Rules'}
             </TabsTrigger>
           </TabsList>
 
           <TabsContent value="reminders">
             <Card>
               <CardHeader>
-                <CardTitle>Employee Reminders</CardTitle>
+                <CardTitle>{t('hrHub.reminders')}</CardTitle>
                 <p className="text-sm text-muted-foreground">
-                  Create and manage reminders for employees
+                  {t('hrHub.remindersDesc')}
                 </p>
               </CardHeader>
               <CardContent>
@@ -100,15 +102,15 @@ export default function HRRemindersPage() {
           <TabsContent value="rules">
             <Card>
               <CardHeader>
-                <CardTitle>Reminder Rules</CardTitle>
+                <CardTitle>{t('common.rules') || 'Reminder Rules'}</CardTitle>
                 <p className="text-sm text-muted-foreground">
-                  Configure automatic reminder rules for important dates
+                  {t('hrHub.remindersDesc')}
                 </p>
               </CardHeader>
               <CardContent>
                 {selectedCompanyId === 'all' ? (
                   <div className="text-center py-8 text-muted-foreground">
-                    Please select a company to manage reminder rules
+                    {t('common.select')} {t('common.company')}
                   </div>
                 ) : (
                   <ReminderRulesManager companyId={selectedCompanyId} />
