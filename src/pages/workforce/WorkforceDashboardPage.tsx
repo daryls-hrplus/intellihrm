@@ -17,6 +17,7 @@ import {
   TrendingUp,
   UserCog,
   LineChart,
+  BarChart3,
   Layers,
   Megaphone,
   Briefcase,
@@ -149,6 +150,13 @@ export default function WorkforceDashboardPage() {
       href: "/workforce/offboarding",
       icon: UserMinus,
       color: "bg-red-500/10 text-red-500",
+    },
+    {
+      title: t("workforce.modules.analytics.title"),
+      description: t("workforce.modules.analytics.description"),
+      href: "/workforce/analytics",
+      icon: BarChart3,
+      color: "bg-violet-500/10 text-violet-500",
     },
   ];
 
