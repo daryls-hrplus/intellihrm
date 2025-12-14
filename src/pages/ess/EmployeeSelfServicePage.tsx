@@ -175,6 +175,13 @@ const essModules = [
     color: "bg-amber-500/10 text-amber-600",
   },
   {
+    title: "My Reminders",
+    description: "View your upcoming reminders and important dates",
+    href: "/ess/reminders",
+    icon: Bell,
+    color: "bg-rose-500/10 text-rose-600",
+  },
+  {
     title: "Notifications",
     description: "Manage your notification preferences",
     href: "/profile/notifications",

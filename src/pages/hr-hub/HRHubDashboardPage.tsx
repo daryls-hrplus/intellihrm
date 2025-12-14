@@ -47,6 +47,7 @@ const hubSections = [
       { title: "HR Calendar", description: "View and manage HR events and deadlines", icon: Calendar, href: "/hr-hub/calendar", badge: null },
       { title: "HR Tasks", description: "Track and manage HR department tasks", icon: CheckSquare, href: "/hr-hub/tasks", badge: null },
       { title: "Milestones Dashboard", description: "Track birthdays, anniversaries, and milestones", icon: Gift, href: "/hr-hub/milestones", badge: null },
+      { title: "Reminders", description: "Manage employee notification reminders", icon: Megaphone, href: "/hr-hub/reminders", badge: null },
     ],
   },
   {

@@ -259,6 +259,14 @@ import HRCalendarPage from "./pages/hr-hub/HRCalendarPage";
 import HRTasksPage from "./pages/hr-hub/HRTasksPage";
 import HRMilestonesPage from "./pages/hr-hub/HRMilestonesPage";
 import ComplianceTrackerPage from "./pages/hr-hub/ComplianceTrackerPage";
+import HRRemindersPage from "./pages/hr-hub/HRRemindersPage";
+
+// Admin Reminders
+import AdminRemindersPage from "./pages/admin/AdminRemindersPage";
+
+// ESS & MSS Reminders
+import MyRemindersPage from "./pages/ess/MyRemindersPage";
+import MssRemindersPage from "./pages/mss/MssRemindersPage";
 
 import AdminWorkflowTemplatesPage from "./pages/admin/AdminWorkflowTemplatesPage";
 import MyApprovalsPage from "./pages/workflow/MyApprovalsPage";
@@ -481,6 +489,14 @@ const App = () => (
               }
             />
             <Route
+              path="/ess/reminders"
+              element={
+                <ProtectedRoute moduleCode="ess">
+                  <MyRemindersPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
               path="/ess/time-attendance"
               element={
                 <ProtectedRoute moduleCode="ess">
@@ -674,6 +690,14 @@ const App = () => (
               }
             />
             <Route
+              path="/mss/reminders"
+              element={
+                <ProtectedRoute moduleCode="mss" requiredRoles={["admin", "hr_manager"]}>
+                  <MssRemindersPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
               path="/mss/*"
               element={
                 <ProtectedRoute moduleCode="mss">
@@ -776,6 +800,14 @@ const App = () => (
               element={
                 <ProtectedRoute requiredRoles={["admin"]}>
                   <GranularPermissionsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/reminders"
+              element={
+                <ProtectedRoute requiredRoles={["admin"]}>
+                  <AdminRemindersPage />
                 </ProtectedRoute>
               }
             />
@@ -2175,6 +2207,14 @@ const App = () => (
               element={
                 <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
                   <ComplianceTrackerPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/hr-hub/reminders"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
+                  <HRRemindersPage />
                 </ProtectedRoute>
               }
             />

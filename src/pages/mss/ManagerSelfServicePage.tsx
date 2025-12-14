@@ -168,6 +168,13 @@ const mssModules = [
     color: "bg-amber-500/10 text-amber-600",
   },
   {
+    title: "Team Reminders",
+    description: "Manage reminders for your direct reports",
+    href: "/mss/reminders",
+    icon: Clock,
+    color: "bg-rose-500/10 text-rose-600",
+  },
+  {
     title: "Performance Improvement",
     description: "Manage PIPs for your direct reports",
     href: "/mss/pips",
