@@ -4,13 +4,15 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { 
   Plus, BarChart3, PieChart, LineChart, Table2, Gauge, 
-  LayoutDashboard, Eye, Edit, Trash2, Globe, Building2, Loader2
+  LayoutDashboard, Eye, Edit, Trash2, Globe, Building2, Loader2, Sparkles, ChevronDown
 } from 'lucide-react';
-import { useBITool, BIDashboard } from '@/hooks/useBITool';
+import { useBITool, BIDashboard, BIWidget } from '@/hooks/useBITool';
 import { BIDashboardDialog } from './BIDashboardDialog';
 import { BIDashboardViewer } from './BIDashboardViewer';
+import { BIAIAssistant } from './BIAIAssistant';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -28,8 +30,9 @@ interface BIDashboardsListProps {
 }
 
 export function BIDashboardsList({ module, companyId }: BIDashboardsListProps) {
-  const { getDashboards, deleteDashboard, isLoading } = useBITool();
+  const { getDashboards, getDataSources, deleteDashboard, createDashboard, createWidget, isLoading } = useBITool();
   const [dashboards, setDashboards] = useState<BIDashboard[]>([]);
+  const [dataSources, setDataSources] = useState<any[]>([]);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [viewerOpen, setViewerOpen] = useState(false);
   const [selectedDashboard, setSelectedDashboard] = useState<BIDashboard | null>(null);
@@ -37,9 +40,11 @@ export function BIDashboardsList({ module, companyId }: BIDashboardsListProps) {
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [dashboardToDelete, setDashboardToDelete] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [showAIAssistant, setShowAIAssistant] = useState(false);
 
   useEffect(() => {
     loadDashboards();
+    loadDataSources();
   }, [module, companyId]);
 
   const loadDashboards = async () => {
@@ -47,6 +52,11 @@ export function BIDashboardsList({ module, companyId }: BIDashboardsListProps) {
     const data = await getDashboards(module, companyId);
     setDashboards(data);
     setLoading(false);
+  };
+
+  const loadDataSources = async () => {
+    const sources = await getDataSources(module);
+    setDataSources(sources);
   };
 
   const handleCreate = () => {
@@ -83,6 +93,28 @@ export function BIDashboardsList({ module, companyId }: BIDashboardsListProps) {
     setDialogOpen(false);
   };
 
+  const handleAIGeneratedDashboard = async (dashboardData: Partial<BIDashboard>, widgets: Partial<BIWidget>[]) => {
+    // Create the dashboard first
+    const createdDashboard = await createDashboard({
+      ...dashboardData,
+      module,
+      company_id: companyId
+    });
+
+    if (createdDashboard && widgets.length > 0) {
+      // Create each widget for the dashboard
+      for (const widget of widgets) {
+        await createWidget({
+          ...widget,
+          dashboard_id: createdDashboard.id
+        });
+      }
+    }
+
+    loadDashboards();
+    setShowAIAssistant(false);
+  };
+
   const getWidgetTypeIcon = (type: string) => {
     switch (type) {
       case 'bar': return BarChart3;
@@ -111,11 +143,29 @@ export function BIDashboardsList({ module, companyId }: BIDashboardsListProps) {
         <p className="text-sm text-muted-foreground">
           Create and manage BI dashboards with interactive charts and KPIs
         </p>
-        <Button onClick={handleCreate} size="sm">
-          <Plus className="h-4 w-4 mr-2" />
-          New Dashboard
-        </Button>
+        <div className="flex gap-2">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={() => setShowAIAssistant(!showAIAssistant)}
+          >
+            <Sparkles className="h-4 w-4 mr-2" />
+            AI Generate
+          </Button>
+          <Button onClick={handleCreate} size="sm">
+            <Plus className="h-4 w-4 mr-2" />
+            New Dashboard
+          </Button>
+        </div>
       </div>
+
+      {showAIAssistant && (
+        <BIAIAssistant
+          module={module}
+          dataSources={dataSources}
+          onApplyDashboard={handleAIGeneratedDashboard}
+        />
+      )}
 
       <Tabs defaultValue="all" className="w-full">
         <TabsList>
