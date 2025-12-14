@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { ModuleReportsButton } from "@/components/reports/ModuleReportsButton";
 import { ModuleBIButton } from "@/components/bi/ModuleBIButton";
@@ -26,6 +27,7 @@ import { ERWellnessTab } from "@/components/employee-relations/ERWellnessTab";
 import { ERAnalytics } from "@/components/employee-relations/ERAnalytics";
 
 export default function EmployeeRelationsDashboardPage() {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const [selectedCompanyId, setSelectedCompanyId] = useState<string>("");
 
@@ -59,17 +61,17 @@ export default function EmployeeRelationsDashboardPage() {
               </div>
               <div>
                 <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
-                  Employee Relations
+                  {t('employeeRelationsModule.title')}
                 </h1>
                 <p className="text-muted-foreground">
-                  Workplace relations, recognition, and employee support
+                  {t('employeeRelationsModule.subtitle')}
                 </p>
               </div>
             </div>
             <div className="flex items-center gap-3">
               <Select value={selectedCompanyId} onValueChange={setSelectedCompanyId}>
                 <SelectTrigger className="w-[200px]">
-                  <SelectValue placeholder="Select company" />
+                  <SelectValue placeholder={t('employeeRelationsModule.selectCompany')} />
                 </SelectTrigger>
                 <SelectContent>
                   {companies.map((company) => (
@@ -90,31 +92,31 @@ export default function EmployeeRelationsDashboardPage() {
             <TabsList className="flex-wrap h-auto gap-1">
               <TabsTrigger value="analytics" className="gap-2">
                 <BarChart3 className="h-4 w-4" />
-                Analytics
+                {t('employeeRelationsModule.analytics.title')}
               </TabsTrigger>
               <TabsTrigger value="cases" className="gap-2">
                 <AlertTriangle className="h-4 w-4" />
-                Cases
+                {t('employeeRelationsModule.cases.title')}
               </TabsTrigger>
               <TabsTrigger value="disciplinary" className="gap-2">
                 <Scale className="h-4 w-4" />
-                Disciplinary
+                {t('employeeRelationsModule.disciplinary.title')}
               </TabsTrigger>
               <TabsTrigger value="recognition" className="gap-2">
                 <Award className="h-4 w-4" />
-                Recognition
+                {t('employeeRelationsModule.recognition.title')}
               </TabsTrigger>
               <TabsTrigger value="exit-interviews" className="gap-2">
                 <DoorOpen className="h-4 w-4" />
-                Exit Interviews
+                {t('employeeRelationsModule.exitInterviews.title')}
               </TabsTrigger>
               <TabsTrigger value="surveys" className="gap-2">
                 <MessageSquare className="h-4 w-4" />
-                Surveys
+                {t('employeeRelationsModule.surveys.title')}
               </TabsTrigger>
               <TabsTrigger value="wellness" className="gap-2">
                 <Activity className="h-4 w-4" />
-                Wellness
+                {t('employeeRelationsModule.wellness.title')}
               </TabsTrigger>
             </TabsList>
 
