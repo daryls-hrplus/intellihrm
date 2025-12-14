@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { NavLink } from "react-router-dom";
-import { UserPlus, MessageSquare } from "lucide-react";
+import { UserPlus, MessageSquare, HelpCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Popover,
@@ -129,6 +129,18 @@ export function AppHeader() {
     <div className="flex items-center justify-end gap-2 mb-4">
       {/* Language Switcher */}
       <LanguageSwitcher />
+      
+      {/* Help Center Button */}
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <NavLink to="/help">
+            <Button variant="ghost" size="icon">
+              <HelpCircle className="h-5 w-5" />
+            </Button>
+          </NavLink>
+        </TooltipTrigger>
+        <TooltipContent>Help Center</TooltipContent>
+      </Tooltip>
       
       {/* Messages Button */}
       <Tooltip>
