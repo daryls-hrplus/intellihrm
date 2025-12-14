@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { AppLayout } from "@/components/layout/AppLayout";
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { ModuleReportsButton } from "@/components/reports/ModuleReportsButton";
 import { ModuleBIButton } from "@/components/bi/ModuleBIButton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -191,9 +192,15 @@ export default function EmployeeRelationsDashboardPage() {
     { label: t("employeeRelationsModule.stats.activeUnions"), value: stats.activeUnions, icon: Users, color: "bg-primary/10 text-primary" },
   ];
 
+  const breadcrumbItems = [
+    { label: t("common.home"), path: "/" },
+    { label: t("employeeRelationsModule.title") },
+  ];
+
   return (
     <AppLayout>
       <div className="space-y-6">
+        <Breadcrumbs items={breadcrumbItems} />
         <div className="animate-fade-in">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
