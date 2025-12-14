@@ -10,8 +10,10 @@ import { useHSE } from "@/hooks/useHSE";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
+import { useLanguage } from "@/hooks/useLanguage";
 
 export default function MssHSEPage() {
+  const { t } = useLanguage();
   const { user } = useAuth();
   const { incidents, trainingRecords } = useHSE();
 
@@ -82,15 +84,15 @@ export default function MssHSEPage() {
       <div className="space-y-6">
         <Breadcrumbs
           items={[
-            { label: "Manager Self Service", href: "/mss" },
-            { label: "Team Health & Safety" },
+            { label: t('mss.title'), href: "/mss" },
+            { label: t('mss.teamHSE.title') },
           ]}
         />
 
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Team Health & Safety</h1>
+          <h1 className="text-3xl font-bold tracking-tight">{t('mss.teamHSE.title')}</h1>
           <p className="text-muted-foreground">
-            Monitor your team's safety incidents and training compliance
+            {t('mss.teamHSE.subtitle')}
           </p>
         </div>
 
@@ -98,45 +100,45 @@ export default function MssHSEPage() {
         <div className="grid gap-4 md:grid-cols-4">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Team Members</CardTitle>
+              <CardTitle className="text-sm font-medium">{t('mss.teamHSE.teamMembers')}</CardTitle>
               <Users className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{directReportIds.length}</div>
-              <p className="text-xs text-muted-foreground">Direct reports</p>
+              <p className="text-xs text-muted-foreground">{t('mss.teamHSE.directReportsLabel')}</p>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Open Incidents</CardTitle>
+              <CardTitle className="text-sm font-medium">{t('mss.teamHSE.openIncidents')}</CardTitle>
               <AlertTriangle className="h-4 w-4 text-destructive" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{openIncidents}</div>
-              <p className="text-xs text-muted-foreground">Requiring attention</p>
+              <p className="text-xs text-muted-foreground">{t('mss.teamHSE.requiringAttention')}</p>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Training Completed</CardTitle>
+              <CardTitle className="text-sm font-medium">{t('mss.teamHSE.trainingCompleted')}</CardTitle>
               <CheckCircle className="h-4 w-4 text-green-600" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{completedTraining}</div>
-              <p className="text-xs text-muted-foreground">Certifications earned</p>
+              <p className="text-xs text-muted-foreground">{t('mss.teamHSE.certificationsEarned')}</p>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Expiring Soon</CardTitle>
+              <CardTitle className="text-sm font-medium">{t('mss.teamHSE.expiringSoon')}</CardTitle>
               <Clock className="h-4 w-4 text-amber-600" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{expiringTraining}</div>
-              <p className="text-xs text-muted-foreground">Within 30 days</p>
+              <p className="text-xs text-muted-foreground">{t('mss.teamHSE.within30Days')}</p>
             </CardContent>
           </Card>
         </div>
@@ -145,11 +147,11 @@ export default function MssHSEPage() {
           <TabsList>
             <TabsTrigger value="incidents">
               <AlertTriangle className="mr-2 h-4 w-4" />
-              Team Incidents
+              {t('mss.teamHSE.teamIncidents')}
             </TabsTrigger>
             <TabsTrigger value="training">
               <GraduationCap className="mr-2 h-4 w-4" />
-              Training Compliance
+              {t('mss.teamHSE.trainingCompliance')}
             </TabsTrigger>
           </TabsList>
 
@@ -158,30 +160,30 @@ export default function MssHSEPage() {
               <Card>
                 <CardContent className="flex flex-col items-center justify-center py-12">
                   <Shield className="h-12 w-12 text-muted-foreground mb-4" />
-                  <h3 className="text-lg font-medium">No team incidents</h3>
+                  <h3 className="text-lg font-medium">{t('mss.teamHSE.noTeamIncidents')}</h3>
                   <p className="text-sm text-muted-foreground">
-                    No safety incidents involving your direct reports
+                    {t('mss.teamHSE.noIncidentsDesc')}
                   </p>
                 </CardContent>
               </Card>
             ) : (
               <Card>
                 <CardHeader>
-                  <CardTitle>Team Incidents</CardTitle>
+                  <CardTitle>{t('mss.teamHSE.teamIncidents')}</CardTitle>
                   <CardDescription>
-                    Safety incidents reported by or involving your direct reports
+                    {t('mss.teamHSE.teamIncidentsDesc')}
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead>Incident #</TableHead>
-                        <TableHead>Title</TableHead>
-                        <TableHead>Date</TableHead>
-                        <TableHead>Reporter</TableHead>
-                        <TableHead>Severity</TableHead>
-                        <TableHead>Status</TableHead>
+                        <TableHead>{t('mss.teamHSE.incidentNumber')}</TableHead>
+                        <TableHead>{t('mss.teamHSE.title')}</TableHead>
+                        <TableHead>{t('mss.teamHSE.date')}</TableHead>
+                        <TableHead>{t('mss.teamHSE.reporter')}</TableHead>
+                        <TableHead>{t('mss.teamHSE.severity')}</TableHead>
+                        <TableHead>{t('mss.teamHSE.status')}</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -213,30 +215,30 @@ export default function MssHSEPage() {
               <Card>
                 <CardContent className="flex flex-col items-center justify-center py-12">
                   <GraduationCap className="h-12 w-12 text-muted-foreground mb-4" />
-                  <h3 className="text-lg font-medium">No training records</h3>
+                  <h3 className="text-lg font-medium">{t('mss.teamHSE.noTrainingRecords')}</h3>
                   <p className="text-sm text-muted-foreground">
-                    No safety training records for your direct reports
+                    {t('mss.teamHSE.noTrainingDesc')}
                   </p>
                 </CardContent>
               </Card>
             ) : (
               <Card>
                 <CardHeader>
-                  <CardTitle>Training Compliance</CardTitle>
+                  <CardTitle>{t('mss.teamHSE.trainingCompliance')}</CardTitle>
                   <CardDescription>
-                    Safety training status for your direct reports
+                    {t('mss.teamHSE.trainingComplianceDesc')}
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead>Employee</TableHead>
-                        <TableHead>Training</TableHead>
-                        <TableHead>Completed</TableHead>
-                        <TableHead>Score</TableHead>
-                        <TableHead>Expiry</TableHead>
-                        <TableHead>Status</TableHead>
+                        <TableHead>{t('mss.teamHSE.employee')}</TableHead>
+                        <TableHead>{t('mss.teamHSE.training')}</TableHead>
+                        <TableHead>{t('mss.teamHSE.completed')}</TableHead>
+                        <TableHead>{t('mss.teamHSE.score')}</TableHead>
+                        <TableHead>{t('mss.teamHSE.expiry')}</TableHead>
+                        <TableHead>{t('mss.teamHSE.status')}</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -267,26 +269,26 @@ export default function MssHSEPage() {
                             <TableCell>
                               {record.expiry_date
                                 ? format(new Date(record.expiry_date), "PP")
-                                : "No expiry"}
+                                : t('mss.teamHSE.noExpiry')}
                             </TableCell>
                             <TableCell>
                               {isExpired ? (
                                 <Badge variant="destructive" className="gap-1">
                                   <XCircle className="h-3 w-3" />
-                                  Expired
+                                  {t('mss.teamHSE.expired')}
                                 </Badge>
                               ) : isExpiringSoon ? (
                                 <Badge variant="outline" className="border-amber-500 text-amber-600 gap-1">
                                   <Clock className="h-3 w-3" />
-                                  Expiring Soon
+                                  {t('mss.teamHSE.expiringSoon')}
                                 </Badge>
                               ) : isPassed ? (
                                 <Badge variant="secondary" className="bg-green-100 text-green-800 gap-1">
                                   <CheckCircle className="h-3 w-3" />
-                                  Valid
+                                  {t('mss.teamHSE.valid')}
                                 </Badge>
                               ) : (
-                                <Badge variant="outline">Incomplete</Badge>
+                                <Badge variant="outline">{t('mss.teamHSE.incomplete')}</Badge>
                               )}
                             </TableCell>
                           </TableRow>
