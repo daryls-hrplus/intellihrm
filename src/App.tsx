@@ -44,6 +44,7 @@ import GranularPermissionsPage from "./pages/admin/GranularPermissionsPage";
 import ImplementationHandbookPage from "./pages/admin/ImplementationHandbookPage";
 import FeaturesBrochurePage from "./pages/admin/FeaturesBrochurePage";
 import ModulesBrochurePage from "./pages/admin/ModulesBrochurePage";
+import CurrencyManagementPage from "./pages/admin/CurrencyManagementPage";
 // Workforce pages
 import WorkforceDashboardPage from "./pages/workforce/WorkforceDashboardPage";
 import EmployeesPage from "./pages/workforce/EmployeesPage";
@@ -806,6 +807,14 @@ const App = () => (
               element={
                 <ProtectedRoute requiredRoles={["admin"]}>
                   <AdminSettingsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/currencies"
+              element={
+                <ProtectedRoute requiredRoles={["admin"]}>
+                  <CurrencyManagementPage />
                 </ProtectedRoute>
               }
             />
