@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -7,8 +7,29 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Send, Brain, User, Loader2, Info } from "lucide-react";
+import { Send, Brain, User, Loader2, Info, Mic, MicOff } from "lucide-react";
 import { AIGuidelinesDialog } from "./AIGuidelinesDialog";
+
+// Extend Window interface for Speech Recognition
+interface SpeechRecognitionEvent extends Event {
+  results: SpeechRecognitionResultList;
+}
+
+interface SpeechRecognitionErrorEvent extends Event {
+  error: string;
+}
+
+interface SpeechRecognitionInstance {
+  continuous: boolean;
+  interimResults: boolean;
+  lang: string;
+  onresult: ((event: SpeechRecognitionEvent) => void) | null;
+  onerror: ((event: SpeechRecognitionErrorEvent) => void) | null;
+  onend: (() => void) | null;
+  start: () => void;
+  stop: () => void;
+  abort: () => void;
+}
 
 interface Message {
   role: "user" | "assistant";
@@ -26,7 +47,68 @@ export function AIAssistantDialog({ open, onOpenChange }: AIAssistantDialogProps
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [showGuidelines, setShowGuidelines] = useState(false);
+  const [isListening, setIsListening] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const recognitionRef = useRef<SpeechRecognitionInstance | null>(null);
+
+  // Initialize speech recognition
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+      if (SpeechRecognition) {
+        recognitionRef.current = new SpeechRecognition() as SpeechRecognitionInstance;
+        recognitionRef.current.continuous = false;
+        recognitionRef.current.interimResults = true;
+        recognitionRef.current.lang = 'en-US';
+
+        recognitionRef.current.onresult = (event) => {
+          const transcript = Array.from(event.results)
+            .map(result => result[0].transcript)
+            .join('');
+          setInput(transcript);
+        };
+
+        recognitionRef.current.onerror = (event) => {
+          console.error('Speech recognition error:', event.error);
+          setIsListening(false);
+          if (event.error === 'not-allowed') {
+            toast.error(t("ai.microphonePermissionDenied", "Microphone access denied. Please enable it in your browser settings."));
+          }
+        };
+
+        recognitionRef.current.onend = () => {
+          setIsListening(false);
+        };
+      }
+    }
+
+    return () => {
+      if (recognitionRef.current) {
+        recognitionRef.current.abort();
+      }
+    };
+  }, [t]);
+
+  const toggleListening = useCallback(() => {
+    if (!recognitionRef.current) {
+      toast.error(t("ai.speechNotSupported", "Speech recognition is not supported in your browser."));
+      return;
+    }
+
+    if (isListening) {
+      recognitionRef.current.stop();
+      setIsListening(false);
+    } else {
+      try {
+        recognitionRef.current.start();
+        setIsListening(true);
+      } catch (error) {
+        console.error('Failed to start speech recognition:', error);
+        toast.error(t("ai.speechError", "Failed to start voice input."));
+      }
+    }
+  }, [isListening, t]);
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -176,11 +258,21 @@ export function AIAssistantDialog({ open, onOpenChange }: AIAssistantDialogProps
 
           <div className="px-6 py-4 border-t space-y-2">
             <div className="flex gap-2">
+              <Button
+                variant={isListening ? "destructive" : "outline"}
+                size="icon"
+                onClick={toggleListening}
+                disabled={isLoading}
+                className={isListening ? "animate-pulse" : ""}
+                title={isListening ? t("ai.stopListening", "Stop listening") : t("ai.startListening", "Start voice input")}
+              >
+                {isListening ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
+              </Button>
               <Input
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyPress={handleKeyPress}
-                placeholder={t("ai.inputPlaceholder")}
+                placeholder={isListening ? t("ai.listening", "Listening...") : t("ai.inputPlaceholder")}
                 disabled={isLoading}
                 className="flex-1"
               />
