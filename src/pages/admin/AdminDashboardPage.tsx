@@ -4,6 +4,7 @@ import { NavLink } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { AccessRequestsAnalytics } from "@/components/admin/AccessRequestsAnalytics";
 import { useTranslation } from "react-i18next";
 import {
@@ -26,6 +27,7 @@ import {
   Grid3X3,
   ClipboardList,
   Zap,
+  ChevronDown,
   Upload,
   Palette,
   Tag,
@@ -185,6 +187,7 @@ export default function AdminDashboardPage() {
   const [stats, setStats] = useState<Stats>({ totalUsers: 0, totalCompanies: 0, totalGroups: 0, admins: 0 });
   const [piiAlertStats, setPiiAlertStats] = useState<PiiAlertStats>({ total: 0, emailsSent: 0, last24Hours: 0, recentAlerts: [] });
   const [isLoading, setIsLoading] = useState(true);
+  const [isPiiAlertsOpen, setIsPiiAlertsOpen] = useState(true);
 
   const adminModules = getAdminModules(t);
 
@@ -290,83 +293,90 @@ export default function AdminDashboardPage() {
         </div>
 
         {/* PII Alerts Widget */}
-        <Card className="animate-slide-up" style={{ animationDelay: "200ms" }}>
-          <CardHeader className="pb-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <ShieldAlert className="h-5 w-5 text-destructive" />
-                <CardTitle className="text-lg">PII Security Alerts</CardTitle>
+        <Collapsible open={isPiiAlertsOpen} onOpenChange={setIsPiiAlertsOpen}>
+          <Card className="animate-slide-up" style={{ animationDelay: "200ms" }}>
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <CollapsibleTrigger asChild>
+                  <button className="flex items-center gap-2 hover:opacity-80 transition-opacity">
+                    <ShieldAlert className="h-5 w-5 text-destructive" />
+                    <CardTitle className="text-lg">PII Security Alerts</CardTitle>
+                    <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform ${isPiiAlertsOpen ? '' : '-rotate-90'}`} />
+                  </button>
+                </CollapsibleTrigger>
+                <NavLink
+                  to="/admin/pii-access"
+                  className="text-sm text-primary hover:underline flex items-center gap-1"
+                >
+                  View all <ChevronRight className="h-4 w-4" />
+                </NavLink>
               </div>
-              <NavLink
-                to="/admin/pii-access"
-                className="text-sm text-primary hover:underline flex items-center gap-1"
-              >
-                View all <ChevronRight className="h-4 w-4" />
-              </NavLink>
-            </div>
-            <CardDescription>
-              Monitor suspicious PII access patterns
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            {/* Alert Stats */}
-            <div className="grid grid-cols-3 gap-4 mb-4">
-              <div className="text-center p-3 rounded-lg bg-muted/50">
-                <p className="text-2xl font-bold text-card-foreground">{piiAlertStats.total}</p>
-                <p className="text-xs text-muted-foreground">Total Alerts</p>
-              </div>
-              <div className="text-center p-3 rounded-lg bg-muted/50">
-                <p className="text-2xl font-bold text-warning">{piiAlertStats.last24Hours}</p>
-                <p className="text-xs text-muted-foreground">Last 24 Hours</p>
-              </div>
-              <div className="text-center p-3 rounded-lg bg-muted/50">
-                <p className="text-2xl font-bold text-success">{piiAlertStats.emailsSent}</p>
-                <p className="text-xs text-muted-foreground">Emails Sent</p>
-              </div>
-            </div>
-
-            {/* Recent Alerts */}
-            {piiAlertStats.recentAlerts.length > 0 ? (
-              <div className="space-y-2">
-                <p className="text-sm font-medium text-muted-foreground mb-2">Recent Alerts</p>
-                {piiAlertStats.recentAlerts.map((alert) => (
-                  <div
-                    key={alert.id}
-                    className="flex items-center justify-between p-3 rounded-lg border border-border bg-background/50"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className={`p-2 rounded-full ${alert.alert_type === "TEST_ALERT" ? "bg-info/10" : "bg-destructive/10"}`}>
-                        <AlertTriangle className={`h-4 w-4 ${alert.alert_type === "TEST_ALERT" ? "text-info" : "text-destructive"}`} />
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium text-card-foreground">{alert.user_email}</p>
-                        <p className="text-xs text-muted-foreground">
-                          {alert.access_count} accesses • {formatDistanceToNow(new Date(alert.created_at), { addSuffix: true })}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Badge variant={alert.alert_type === "TEST_ALERT" ? "secondary" : "destructive"} className="text-xs">
-                        {alert.alert_type === "TEST_ALERT" ? "Test" : "Alert"}
-                      </Badge>
-                      {alert.email_sent ? (
-                        <Mail className="h-4 w-4 text-success" />
-                      ) : (
-                        <MailX className="h-4 w-4 text-muted-foreground" />
-                      )}
-                    </div>
+              <CardDescription>
+                Monitor suspicious PII access patterns
+              </CardDescription>
+            </CardHeader>
+            <CollapsibleContent>
+              <CardContent>
+                {/* Alert Stats */}
+                <div className="grid grid-cols-3 gap-4 mb-4">
+                  <div className="text-center p-3 rounded-lg bg-muted/50">
+                    <p className="text-2xl font-bold text-card-foreground">{piiAlertStats.total}</p>
+                    <p className="text-xs text-muted-foreground">Total Alerts</p>
                   </div>
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-6 text-muted-foreground">
-                <ShieldAlert className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                <p className="text-sm">No security alerts yet</p>
-                <p className="text-xs">Alerts will appear here when suspicious PII access is detected</p>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+                  <div className="text-center p-3 rounded-lg bg-muted/50">
+                    <p className="text-2xl font-bold text-warning">{piiAlertStats.last24Hours}</p>
+                    <p className="text-xs text-muted-foreground">Last 24 Hours</p>
+                  </div>
+                  <div className="text-center p-3 rounded-lg bg-muted/50">
+                    <p className="text-2xl font-bold text-success">{piiAlertStats.emailsSent}</p>
+                    <p className="text-xs text-muted-foreground">Emails Sent</p>
+                  </div>
+                </div>
+
+                {/* Recent Alerts */}
+                {piiAlertStats.recentAlerts.length > 0 ? (
+                  <div className="space-y-2">
+                    <p className="text-sm font-medium text-muted-foreground mb-2">Recent Alerts</p>
+                    {piiAlertStats.recentAlerts.map((alert) => (
+                      <div
+                        key={alert.id}
+                        className="flex items-center justify-between p-3 rounded-lg border border-border bg-background/50"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className={`p-2 rounded-full ${alert.alert_type === "TEST_ALERT" ? "bg-info/10" : "bg-destructive/10"}`}>
+                            <AlertTriangle className={`h-4 w-4 ${alert.alert_type === "TEST_ALERT" ? "text-info" : "text-destructive"}`} />
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium text-card-foreground">{alert.user_email}</p>
+                            <p className="text-xs text-muted-foreground">
+                              {alert.access_count} accesses • {formatDistanceToNow(new Date(alert.created_at), { addSuffix: true })}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Badge variant={alert.alert_type === "TEST_ALERT" ? "secondary" : "destructive"} className="text-xs">
+                            {alert.alert_type === "TEST_ALERT" ? "Test" : "Alert"}
+                          </Badge>
+                          {alert.email_sent ? (
+                            <Mail className="h-4 w-4 text-success" />
+                          ) : (
+                            <MailX className="h-4 w-4 text-muted-foreground" />
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-6 text-muted-foreground">
+                    <ShieldAlert className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                    <p className="text-sm">No security alerts yet</p>
+                    <p className="text-xs">Alerts will appear here when suspicious PII access is detected</p>
+                  </div>
+                )}
+              </CardContent>
+            </CollapsibleContent>
+          </Card>
+        </Collapsible>
 
         {/* Access Request Analytics */}
         <AccessRequestsAnalytics />
