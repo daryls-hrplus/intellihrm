@@ -1,4 +1,26 @@
 {
+  "workforce": {
+    "modules": {
+      "analytics": {
+        "title": "Workforce Analytics",
+        "description": "View workforce metrics, trends, and insights"
+      }
+    },
+    "analytics": {
+      "totalEmployees": "Total Employees",
+      "activeEmployees": "Active Employees",
+      "newHires": "New Hires",
+      "terminations": "Terminations",
+      "departments": "Departments",
+      "positions": "Positions",
+      "monthlyTrends": "Monthly Hiring & Termination Trends",
+      "departmentDistribution": "Employee Distribution by Department",
+      "positionsByDepartment": "Positions by Department",
+      "hires": "Hires",
+      "totalPositions": "Total Positions",
+      "filledPositions": "Filled Positions"
+    }
+  },
   "common": {
     "loading": "Loading...",
     "save": "Save",
