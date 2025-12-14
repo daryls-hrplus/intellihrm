@@ -16,6 +16,7 @@ import {
   CalendarDays, AlertTriangle, CheckCircle, XCircle, Loader2
 } from "lucide-react";
 import { format, startOfYear, endOfYear, parseISO, getMonth, subYears } from "date-fns";
+import { useLanguage } from "@/hooks/useLanguage";
 
 interface Company {
   id: string;
@@ -42,6 +43,7 @@ const COLORS = [
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
 export default function LeaveAnalyticsPage() {
+  const { t } = useLanguage();
   const { company, isAdmin, hasRole } = useAuth();
   const isAdminOrHR = isAdmin || hasRole("hr_manager");
 
@@ -359,21 +361,21 @@ export default function LeaveAnalyticsPage() {
     <AppLayout>
       <div className="space-y-6">
         <Breadcrumbs items={[
-          { label: "Leave Management", href: "/leave" },
-          { label: "Analytics" }
+          { label: t("navigation.leave"), href: "/leave" },
+          { label: t("leave.analytics.title") }
         ]} />
 
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold">Leave Analytics</h1>
-            <p className="text-muted-foreground">Comprehensive leave utilization and trends analysis</p>
+            <h1 className="text-3xl font-bold">{t("leave.analytics.title")}</h1>
+            <p className="text-muted-foreground">{t("leave.analytics.subtitle")}</p>
           </div>
           <div className="flex items-center gap-2">
             {isAdminOrHR && companies.length > 1 && (
               <Select value={selectedCompanyId} onValueChange={setSelectedCompanyId}>
                 <SelectTrigger className="w-[180px]">
                   <Building2 className="mr-2 h-4 w-4" />
-                  <SelectValue placeholder="Company" />
+                  <SelectValue placeholder={t("common.company")} />
                 </SelectTrigger>
                 <SelectContent>
                   {companies.map((c) => (
@@ -385,10 +387,10 @@ export default function LeaveAnalyticsPage() {
             <Select value={selectedDepartmentId} onValueChange={setSelectedDepartmentId}>
               <SelectTrigger className="w-[160px]">
                 <Users className="mr-2 h-4 w-4" />
-                <SelectValue placeholder="Department" />
+                <SelectValue placeholder={t("leave.analytics.department")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Departments</SelectItem>
+                <SelectItem value="all">{t("leave.analytics.allDepartments")}</SelectItem>
                 {departments.map((d) => (
                   <SelectItem key={d.id} value={d.id}>{d.name}</SelectItem>
                 ))}
@@ -418,7 +420,7 @@ export default function LeaveAnalyticsPage() {
             <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-6">
               <Card>
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium text-muted-foreground">Total Requests</CardTitle>
+                  <CardTitle className="text-sm font-medium text-muted-foreground">{t("leave.analytics.totalRequests")}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">{kpis.totalRequests}</div>
@@ -426,7 +428,7 @@ export default function LeaveAnalyticsPage() {
               </Card>
               <Card>
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium text-muted-foreground">Approval Rate</CardTitle>
+                  <CardTitle className="text-sm font-medium text-muted-foreground">{t("leave.analytics.approvalRate")}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="flex items-center gap-2">
@@ -437,7 +439,7 @@ export default function LeaveAnalyticsPage() {
               </Card>
               <Card>
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium text-muted-foreground">Avg Days/Request</CardTitle>
+                  <CardTitle className="text-sm font-medium text-muted-foreground">{t("leave.analytics.avgDaysPerRequest")}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">{kpis.avgDaysPerRequest.toFixed(1)}</div>
@@ -445,7 +447,7 @@ export default function LeaveAnalyticsPage() {
               </Card>
               <Card>
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium text-muted-foreground">Pending</CardTitle>
+                  <CardTitle className="text-sm font-medium text-muted-foreground">{t("leave.analytics.pending")}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="flex items-center gap-2">
@@ -456,7 +458,7 @@ export default function LeaveAnalyticsPage() {
               </Card>
               <Card>
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium text-muted-foreground">Utilization Rate</CardTitle>
+                  <CardTitle className="text-sm font-medium text-muted-foreground">{t("leave.analytics.utilizationRate")}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="flex items-center gap-2">
@@ -467,20 +469,20 @@ export default function LeaveAnalyticsPage() {
               </Card>
               <Card>
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium text-muted-foreground">Avg Processing</CardTitle>
+                  <CardTitle className="text-sm font-medium text-muted-foreground">{t("leave.analytics.avgProcessing")}</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{kpis.avgProcessingTime.toFixed(1)} days</div>
+                  <div className="text-2xl font-bold">{kpis.avgProcessingTime.toFixed(1)} {t("leave.analytics.days")}</div>
                 </CardContent>
               </Card>
             </div>
 
             <Tabs defaultValue="overview" className="space-y-4">
               <TabsList>
-                <TabsTrigger value="overview">Overview</TabsTrigger>
-                <TabsTrigger value="trends">Trends</TabsTrigger>
-                <TabsTrigger value="distribution">Distribution</TabsTrigger>
-                <TabsTrigger value="comparison">Year Comparison</TabsTrigger>
+                <TabsTrigger value="overview">{t("leave.analytics.overview")}</TabsTrigger>
+                <TabsTrigger value="trends">{t("leave.analytics.trends")}</TabsTrigger>
+                <TabsTrigger value="distribution">{t("leave.analytics.distribution")}</TabsTrigger>
+                <TabsTrigger value="comparison">{t("leave.analytics.yearComparison")}</TabsTrigger>
               </TabsList>
 
               <TabsContent value="overview" className="space-y-4">
@@ -488,8 +490,8 @@ export default function LeaveAnalyticsPage() {
                   {/* Leave by Type */}
                   <Card>
                     <CardHeader>
-                      <CardTitle>Leave by Type</CardTitle>
-                      <CardDescription>Total days taken by leave category</CardDescription>
+                      <CardTitle>{t("leave.analytics.leaveByType")}</CardTitle>
+                      <CardDescription>{t("leave.analytics.leaveByTypeDesc")}</CardDescription>
                     </CardHeader>
                     <CardContent>
                       <ResponsiveContainer width="100%" height={300}>
@@ -507,8 +509,8 @@ export default function LeaveAnalyticsPage() {
                   {/* Status Distribution */}
                   <Card>
                     <CardHeader>
-                      <CardTitle>Request Status</CardTitle>
-                      <CardDescription>Distribution of leave request outcomes</CardDescription>
+                      <CardTitle>{t("leave.analytics.statusDistribution")}</CardTitle>
+                      <CardDescription>{t("leave.analytics.statusDistributionDesc")}</CardDescription>
                     </CardHeader>
                     <CardContent>
                       <ResponsiveContainer width="100%" height={300}>
@@ -537,8 +539,8 @@ export default function LeaveAnalyticsPage() {
                 {/* Top Leave Users */}
                 <Card>
                   <CardHeader>
-                    <CardTitle>Top Leave Users</CardTitle>
-                    <CardDescription>Employees with highest leave utilization</CardDescription>
+                    <CardTitle>{t("leave.analytics.topEmployees")}</CardTitle>
+                    <CardDescription>{t("leave.analytics.topEmployeesDesc")}</CardDescription>
                   </CardHeader>
                   <CardContent>
                     <ResponsiveContainer width="100%" height={300}>
@@ -548,8 +550,8 @@ export default function LeaveAnalyticsPage() {
                         <YAxis />
                         <Tooltip />
                         <Legend />
-                        <Bar dataKey="days" name="Days Taken" fill="hsl(var(--chart-1))" radius={[4, 4, 0, 0]} />
-                        <Bar dataKey="requests" name="Requests" fill="hsl(var(--chart-2))" radius={[4, 4, 0, 0]} />
+                        <Bar dataKey="days" name={t("leave.analytics.days")} fill="hsl(var(--chart-1))" radius={[4, 4, 0, 0]} />
+                        <Bar dataKey="requests" name={t("leave.analytics.requests")} fill="hsl(var(--chart-2))" radius={[4, 4, 0, 0]} />
                       </BarChart>
                     </ResponsiveContainer>
                   </CardContent>
@@ -560,8 +562,8 @@ export default function LeaveAnalyticsPage() {
                 {/* Monthly Trends */}
                 <Card>
                   <CardHeader>
-                    <CardTitle>Monthly Leave Trends</CardTitle>
-                    <CardDescription>Leave requests and days taken throughout the year</CardDescription>
+                    <CardTitle>{t("leave.analytics.monthlyTrends")}</CardTitle>
+                    <CardDescription>{t("leave.analytics.monthlyTrendsDesc")}</CardDescription>
                   </CardHeader>
                   <CardContent>
                     <ResponsiveContainer width="100%" height={350}>
@@ -572,8 +574,8 @@ export default function LeaveAnalyticsPage() {
                         <YAxis yAxisId="right" orientation="right" />
                         <Tooltip />
                         <Legend />
-                        <Area yAxisId="left" type="monotone" dataKey="days" name="Days Taken" stroke="hsl(var(--chart-1))" fill="hsl(var(--chart-1))" fillOpacity={0.3} />
-                        <Area yAxisId="right" type="monotone" dataKey="requests" name="Requests" stroke="hsl(var(--chart-2))" fill="hsl(var(--chart-2))" fillOpacity={0.3} />
+                        <Area yAxisId="left" type="monotone" dataKey="days" name={t("leave.analytics.days")} stroke="hsl(var(--chart-1))" fill="hsl(var(--chart-1))" fillOpacity={0.3} />
+                        <Area yAxisId="right" type="monotone" dataKey="requests" name={t("leave.analytics.requests")} stroke="hsl(var(--chart-2))" fill="hsl(var(--chart-2))" fillOpacity={0.3} />
                       </AreaChart>
                     </ResponsiveContainer>
                   </CardContent>
@@ -582,8 +584,8 @@ export default function LeaveAnalyticsPage() {
                 {/* Approval vs Rejection */}
                 <Card>
                   <CardHeader>
-                    <CardTitle>Approval vs Rejection Trends</CardTitle>
-                    <CardDescription>Monthly breakdown of request outcomes</CardDescription>
+                    <CardTitle>{t("leave.analytics.monthlyTrends")}</CardTitle>
+                    <CardDescription>{t("leave.analytics.monthlyTrendsDesc")}</CardDescription>
                   </CardHeader>
                   <CardContent>
                     <ResponsiveContainer width="100%" height={300}>
@@ -593,8 +595,8 @@ export default function LeaveAnalyticsPage() {
                         <YAxis />
                         <Tooltip />
                         <Legend />
-                        <Bar dataKey="approved" name="Approved" fill="hsl(var(--success))" stackId="a" />
-                        <Bar dataKey="rejected" name="Rejected" fill="hsl(var(--destructive))" stackId="a" />
+                        <Bar dataKey="approved" name={t("leave.analytics.approved")} fill="hsl(var(--success))" stackId="a" />
+                        <Bar dataKey="rejected" name={t("leave.analytics.rejected")} fill="hsl(var(--destructive))" stackId="a" />
                       </BarChart>
                     </ResponsiveContainer>
                   </CardContent>
@@ -603,8 +605,8 @@ export default function LeaveAnalyticsPage() {
                 {/* Peak Periods */}
                 <Card>
                   <CardHeader>
-                    <CardTitle>Peak Leave Dates</CardTitle>
-                    <CardDescription>Dates with highest number of leave requests</CardDescription>
+                    <CardTitle>{t("leave.analytics.peakPeriods")}</CardTitle>
+                    <CardDescription>{t("leave.analytics.peakPeriodsDesc")}</CardDescription>
                   </CardHeader>
                   <CardContent>
                     <div className="grid gap-2 md:grid-cols-5">
@@ -612,7 +614,7 @@ export default function LeaveAnalyticsPage() {
                         <div key={peak.date} className="flex items-center justify-between p-3 border rounded-lg">
                           <div>
                             <p className="font-medium text-sm">{peak.date}</p>
-                            <p className="text-xs text-muted-foreground">{peak.requests} requests</p>
+                            <p className="text-xs text-muted-foreground">{peak.requests} {t("leave.analytics.requests").toLowerCase()}</p>
                           </div>
                           {index < 3 && <AlertTriangle className="h-4 w-4 text-amber-500" />}
                         </div>
@@ -627,8 +629,8 @@ export default function LeaveAnalyticsPage() {
                   {/* Balance Distribution */}
                   <Card>
                     <CardHeader>
-                      <CardTitle>Balance Distribution</CardTitle>
-                      <CardDescription>Employee leave balance ranges</CardDescription>
+                      <CardTitle>{t("leave.analytics.balanceDistribution")}</CardTitle>
+                      <CardDescription>{t("leave.analytics.balanceDistributionDesc")}</CardDescription>
                     </CardHeader>
                     <CardContent>
                       <ResponsiveContainer width="100%" height={300}>
@@ -637,7 +639,7 @@ export default function LeaveAnalyticsPage() {
                           <XAxis dataKey="range" />
                           <YAxis />
                           <Tooltip />
-                          <Bar dataKey="count" name="Employees" fill="hsl(var(--chart-3))" radius={[4, 4, 0, 0]} />
+                          <Bar dataKey="count" name={t("leave.analytics.employees")} fill="hsl(var(--chart-3))" radius={[4, 4, 0, 0]} />
                         </BarChart>
                       </ResponsiveContainer>
                     </CardContent>
@@ -646,8 +648,8 @@ export default function LeaveAnalyticsPage() {
                   {/* Leave Type Distribution */}
                   <Card>
                     <CardHeader>
-                      <CardTitle>Leave Type Distribution</CardTitle>
-                      <CardDescription>Number of requests by leave type</CardDescription>
+                      <CardTitle>{t("leave.analytics.leaveByType")}</CardTitle>
+                      <CardDescription>{t("leave.analytics.leaveByTypeDesc")}</CardDescription>
                     </CardHeader>
                     <CardContent>
                       <ResponsiveContainer width="100%" height={300}>
@@ -675,8 +677,8 @@ export default function LeaveAnalyticsPage() {
               <TabsContent value="comparison" className="space-y-4">
                 <Card>
                   <CardHeader>
-                    <CardTitle>Year-over-Year Comparison</CardTitle>
-                    <CardDescription>Leave days comparison between {parseInt(selectedYear) - 1} and {selectedYear}</CardDescription>
+                    <CardTitle>{t("leave.analytics.yearOverYear")}</CardTitle>
+                    <CardDescription>{t("leave.analytics.yearOverYearDesc")}</CardDescription>
                   </CardHeader>
                   <CardContent>
                     <ResponsiveContainer width="100%" height={350}>
@@ -705,7 +707,7 @@ export default function LeaveAnalyticsPage() {
                       <>
                         <Card>
                           <CardHeader className="pb-2">
-                            <CardTitle className="text-sm font-medium text-muted-foreground">{selectedYear} Total Days</CardTitle>
+                            <CardTitle className="text-sm font-medium text-muted-foreground">{selectedYear} {t("common.total")} {t("leave.analytics.days")}</CardTitle>
                           </CardHeader>
                           <CardContent>
                             <div className="text-2xl font-bold">{currentTotal.toFixed(1)}</div>
@@ -713,7 +715,7 @@ export default function LeaveAnalyticsPage() {
                         </Card>
                         <Card>
                           <CardHeader className="pb-2">
-                            <CardTitle className="text-sm font-medium text-muted-foreground">{parseInt(selectedYear) - 1} Total Days</CardTitle>
+                            <CardTitle className="text-sm font-medium text-muted-foreground">{parseInt(selectedYear) - 1} {t("common.total")} {t("leave.analytics.days")}</CardTitle>
                           </CardHeader>
                           <CardContent>
                             <div className="text-2xl font-bold">{prevTotal.toFixed(1)}</div>
@@ -721,7 +723,7 @@ export default function LeaveAnalyticsPage() {
                         </Card>
                         <Card>
                           <CardHeader className="pb-2">
-                            <CardTitle className="text-sm font-medium text-muted-foreground">Year-over-Year Change</CardTitle>
+                            <CardTitle className="text-sm font-medium text-muted-foreground">{t("leave.analytics.yearOverYear")}</CardTitle>
                           </CardHeader>
                           <CardContent>
                             <div className="flex items-center gap-2">
