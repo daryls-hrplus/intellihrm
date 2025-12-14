@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Bot } from "lucide-react";
+import { Brain } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Tooltip,
@@ -23,7 +23,9 @@ export function AIAssistantButton() {
             onClick={() => setOpen(true)}
             className="relative"
           >
-            <Bot className="h-5 w-5" />
+            <Brain 
+              className={`h-5 w-5 text-sky-400 ${open ? "animate-heartbeat" : ""}`}
+            />
           </Button>
         </TooltipTrigger>
         <TooltipContent>{t("navigation.aiAssistant")}</TooltipContent>
