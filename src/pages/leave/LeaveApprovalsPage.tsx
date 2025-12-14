@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { useLeaveManagement, LeaveRequest } from "@/hooks/useLeaveManagement";
+import { useLanguage } from "@/hooks/useLanguage";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
@@ -31,6 +32,7 @@ import {
 } from "@/components/ui/select";
 
 export default function LeaveApprovalsPage() {
+  const { t } = useLanguage();
   const { allLeaveRequests, loadingAllRequests, updateLeaveRequestStatus } = useLeaveManagement();
   const [selectedRequest, setSelectedRequest] = useState<LeaveRequest | null>(null);
   const [reviewNotes, setReviewNotes] = useState("");
@@ -76,8 +78,8 @@ export default function LeaveApprovalsPage() {
       <div className="space-y-6">
         <Breadcrumbs
           items={[
-            { label: "Leave Management", href: "/leave" },
-            { label: "Leave Approvals" },
+            { label: t("leave.title"), href: "/leave" },
+            { label: t("leave.approvals.title") },
           ]}
         />
 
@@ -87,19 +89,19 @@ export default function LeaveApprovalsPage() {
               <CalendarCheck className="h-5 w-5 text-primary" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold tracking-tight text-foreground">Leave Approvals</h1>
-              <p className="text-muted-foreground">Review and approve team leave requests</p>
+              <h1 className="text-2xl font-bold tracking-tight text-foreground">{t("leave.approvals.title")}</h1>
+              <p className="text-muted-foreground">{t("leave.approvals.subtitle")}</p>
             </div>
           </div>
           <Select value={statusFilter} onValueChange={setStatusFilter}>
             <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Filter by status" />
+              <SelectValue placeholder={t("leave.approvals.filterByStatus")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Requests</SelectItem>
-              <SelectItem value="pending">Pending</SelectItem>
-              <SelectItem value="approved">Approved</SelectItem>
-              <SelectItem value="rejected">Rejected</SelectItem>
+              <SelectItem value="all">{t("leave.approvals.allRequests")}</SelectItem>
+              <SelectItem value="pending">{t("leave.approvals.pending")}</SelectItem>
+              <SelectItem value="approved">{t("leave.approvals.approved")}</SelectItem>
+              <SelectItem value="rejected">{t("leave.approvals.rejected")}</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -108,27 +110,27 @@ export default function LeaveApprovalsPage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Request #</TableHead>
-                <TableHead>Employee</TableHead>
-                <TableHead>Type</TableHead>
-                <TableHead>Dates</TableHead>
-                <TableHead>Duration</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Submitted</TableHead>
-                <TableHead className="w-[120px]">Actions</TableHead>
+                <TableHead>{t("leave.approvals.requestNumber")}</TableHead>
+                <TableHead>{t("leave.approvals.employee")}</TableHead>
+                <TableHead>{t("leave.approvals.type")}</TableHead>
+                <TableHead>{t("leave.approvals.dates")}</TableHead>
+                <TableHead>{t("leave.approvals.duration")}</TableHead>
+                <TableHead>{t("leave.common.status")}</TableHead>
+                <TableHead>{t("leave.approvals.submitted")}</TableHead>
+                <TableHead className="w-[120px]">{t("leave.approvals.actions")}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {loadingAllRequests ? (
                 <TableRow>
                   <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
-                    Loading...
+                    {t("leave.approvals.loading")}
                   </TableCell>
                 </TableRow>
               ) : filteredRequests.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
-                    No leave requests found.
+                    {t("leave.approvals.noRequests")}
                   </TableCell>
                 </TableRow>
               ) : (
@@ -221,21 +223,21 @@ export default function LeaveApprovalsPage() {
           <DialogContent>
             <DialogHeader>
               <DialogTitle>
-                {actionType === "approve" ? "Approve" : "Reject"} Leave Request
+                {actionType === "approve" ? t("leave.approvals.approveRequest") : t("leave.approvals.rejectRequest")}
               </DialogTitle>
             </DialogHeader>
             <div className="space-y-4">
               <div className="rounded-lg bg-muted p-4 space-y-2">
                 <div className="flex justify-between">
-                  <span className="text-sm text-muted-foreground">Employee</span>
+                  <span className="text-sm text-muted-foreground">{t("leave.approvals.employee")}</span>
                   <span className="font-medium">{selectedRequest?.employee?.full_name}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-sm text-muted-foreground">Leave Type</span>
+                  <span className="text-sm text-muted-foreground">{t("leave.approvals.leaveType")}</span>
                   <span className="font-medium">{selectedRequest?.leave_type?.name}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-sm text-muted-foreground">Dates</span>
+                  <span className="text-sm text-muted-foreground">{t("leave.approvals.dates")}</span>
                   <span className="font-medium">
                     {selectedRequest?.start_date && format(new Date(selectedRequest.start_date), "MMM d")}
                     {selectedRequest?.start_date !== selectedRequest?.end_date && (
@@ -244,29 +246,29 @@ export default function LeaveApprovalsPage() {
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-sm text-muted-foreground">Duration</span>
+                  <span className="text-sm text-muted-foreground">{t("leave.approvals.duration")}</span>
                   <span className="font-medium">{selectedRequest?.duration} {selectedRequest?.leave_type?.accrual_unit}</span>
                 </div>
                 {selectedRequest?.reason && (
                   <div className="pt-2 border-t">
-                    <span className="text-sm text-muted-foreground">Reason</span>
+                    <span className="text-sm text-muted-foreground">{t("leave.apply.reason")}</span>
                     <p className="mt-1">{selectedRequest.reason}</p>
                   </div>
                 )}
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-medium">Review Notes (Optional)</label>
+                <label className="text-sm font-medium">{t("leave.approvals.reviewNotes")}</label>
                 <Textarea
                   value={reviewNotes}
                   onChange={(e) => setReviewNotes(e.target.value)}
-                  placeholder="Add any notes for the employee..."
+                  placeholder={t("leave.approvals.reviewNotesPlaceholder")}
                   rows={3}
                 />
               </div>
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => { setSelectedRequest(null); setActionType(null); }}>
-                Cancel
+                {t("leave.common.cancel")}
               </Button>
               <Button
                 variant={actionType === "approve" ? "default" : "destructive"}
@@ -274,8 +276,8 @@ export default function LeaveApprovalsPage() {
                 disabled={updateLeaveRequestStatus.isPending}
               >
                 {updateLeaveRequestStatus.isPending 
-                  ? "Processing..." 
-                  : actionType === "approve" ? "Approve" : "Reject"
+                  ? t("leave.approvals.processing") 
+                  : actionType === "approve" ? t("leave.approvals.approve") : t("leave.approvals.reject")
                 }
               </Button>
             </DialogFooter>
@@ -289,24 +291,24 @@ export default function LeaveApprovalsPage() {
         >
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Leave Request Details</DialogTitle>
+              <DialogTitle>{t("leave.approvals.requestDetails")}</DialogTitle>
             </DialogHeader>
             <div className="space-y-4">
               <div className="rounded-lg bg-muted p-4 space-y-3">
                 <div className="flex justify-between">
-                  <span className="text-sm text-muted-foreground">Request #</span>
+                  <span className="text-sm text-muted-foreground">{t("leave.approvals.requestNumber")}</span>
                   <span className="font-mono">{selectedRequest?.request_number}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-sm text-muted-foreground">Employee</span>
+                  <span className="text-sm text-muted-foreground">{t("leave.approvals.employee")}</span>
                   <span className="font-medium">{selectedRequest?.employee?.full_name}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-sm text-muted-foreground">Leave Type</span>
+                  <span className="text-sm text-muted-foreground">{t("leave.approvals.leaveType")}</span>
                   <span className="font-medium">{selectedRequest?.leave_type?.name}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-sm text-muted-foreground">Dates</span>
+                  <span className="text-sm text-muted-foreground">{t("leave.approvals.dates")}</span>
                   <span className="font-medium">
                     {selectedRequest?.start_date && format(new Date(selectedRequest.start_date), "MMM d, yyyy")}
                     {selectedRequest?.start_date !== selectedRequest?.end_date && (
@@ -315,34 +317,34 @@ export default function LeaveApprovalsPage() {
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-sm text-muted-foreground">Duration</span>
+                  <span className="text-sm text-muted-foreground">{t("leave.approvals.duration")}</span>
                   <span className="font-medium">{selectedRequest?.duration} {selectedRequest?.leave_type?.accrual_unit}</span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-sm text-muted-foreground">Status</span>
+                  <span className="text-sm text-muted-foreground">{t("leave.common.status")}</span>
                   {selectedRequest && getStatusBadge(selectedRequest.status)}
                 </div>
                 {selectedRequest?.reason && (
                   <div className="pt-2 border-t">
-                    <span className="text-sm text-muted-foreground">Reason</span>
+                    <span className="text-sm text-muted-foreground">{t("leave.apply.reason")}</span>
                     <p className="mt-1">{selectedRequest.reason}</p>
                   </div>
                 )}
                 {selectedRequest?.contact_during_leave && (
                   <div className="pt-2 border-t">
-                    <span className="text-sm text-muted-foreground">Contact During Leave</span>
+                    <span className="text-sm text-muted-foreground">{t("leave.approvals.contactDuringLeave")}</span>
                     <p className="mt-1">{selectedRequest.contact_during_leave}</p>
                   </div>
                 )}
                 {selectedRequest?.handover_notes && (
                   <div className="pt-2 border-t">
-                    <span className="text-sm text-muted-foreground">Handover Notes</span>
+                    <span className="text-sm text-muted-foreground">{t("leave.approvals.handoverNotes")}</span>
                     <p className="mt-1">{selectedRequest.handover_notes}</p>
                   </div>
                 )}
                 {selectedRequest?.review_notes && (
                   <div className="pt-2 border-t">
-                    <span className="text-sm text-muted-foreground">Review Notes</span>
+                    <span className="text-sm text-muted-foreground">{t("leave.approvals.reviewNotesLabel")}</span>
                     <p className="mt-1">{selectedRequest.review_notes}</p>
                   </div>
                 )}

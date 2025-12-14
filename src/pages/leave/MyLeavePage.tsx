@@ -1,5 +1,6 @@
 import { AppLayout } from "@/components/layout/AppLayout";
 import { useLeaveManagement } from "@/hooks/useLeaveManagement";
+import { useLanguage } from "@/hooks/useLanguage";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
@@ -16,6 +17,7 @@ import {
 } from "@/components/ui/table";
 
 export default function MyLeavePage() {
+  const { t } = useLanguage();
   const { leaveBalances, leaveRequests, loadingBalances, loadingRequests } = useLeaveManagement();
 
   const getStatusBadge = (status: string) => {
@@ -41,8 +43,8 @@ export default function MyLeavePage() {
       <div className="space-y-6">
         <Breadcrumbs
           items={[
-            { label: "Leave Management", href: "/leave" },
-            { label: "My Leave" },
+            { label: t("leave.title"), href: "/leave" },
+            { label: t("leave.myLeave.title") },
           ]}
         />
 
@@ -52,26 +54,26 @@ export default function MyLeavePage() {
               <Calendar className="h-5 w-5 text-primary" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold tracking-tight text-foreground">My Leave</h1>
-              <p className="text-muted-foreground">View your leave balances and request history</p>
+              <h1 className="text-2xl font-bold tracking-tight text-foreground">{t("leave.myLeave.title")}</h1>
+              <p className="text-muted-foreground">{t("leave.myLeave.subtitle")}</p>
             </div>
           </div>
           <NavLink to="/leave/apply">
             <Button>
               <CalendarPlus className="mr-2 h-4 w-4" />
-              Apply for Leave
+              {t("leave.myLeave.applyForLeave")}
             </Button>
           </NavLink>
         </div>
 
         {/* Leave Balances */}
         <div>
-          <h2 className="text-lg font-semibold mb-4">Leave Balances</h2>
+          <h2 className="text-lg font-semibold mb-4">{t("leave.myLeave.leaveBalances")}</h2>
           {loadingBalances ? (
-            <div className="text-center py-8 text-muted-foreground">Loading balances...</div>
+            <div className="text-center py-8 text-muted-foreground">{t("leave.myLeave.loadingBalances")}</div>
           ) : leaveBalances.length === 0 ? (
             <div className="rounded-lg border border-border bg-card p-6 text-center text-muted-foreground">
-              No leave balances found. Contact HR to set up your leave entitlements.
+              {t("leave.myLeave.noBalances")}
             </div>
           ) : (
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
@@ -99,19 +101,19 @@ export default function MyLeavePage() {
                   </div>
                   <div className="grid grid-cols-2 gap-2 text-sm text-muted-foreground">
                     <div>
-                      <span className="block text-xs">Accrued</span>
+                      <span className="block text-xs">{t("leave.myLeave.accrued")}</span>
                       <span className="font-medium text-card-foreground">{balance.accrued_amount}</span>
                     </div>
                     <div>
-                      <span className="block text-xs">Used</span>
+                      <span className="block text-xs">{t("leave.myLeave.used")}</span>
                       <span className="font-medium text-card-foreground">{balance.used_amount}</span>
                     </div>
                     <div>
-                      <span className="block text-xs">Carried</span>
+                      <span className="block text-xs">{t("leave.myLeave.carried")}</span>
                       <span className="font-medium text-card-foreground">{balance.carried_forward}</span>
                     </div>
                     <div>
-                      <span className="block text-xs">Adjustments</span>
+                      <span className="block text-xs">{t("leave.myLeave.adjustments")}</span>
                       <span className="font-medium text-card-foreground">{balance.adjustment_amount}</span>
                     </div>
                   </div>
@@ -123,30 +125,30 @@ export default function MyLeavePage() {
 
         {/* Leave Requests */}
         <div>
-          <h2 className="text-lg font-semibold mb-4">Leave Requests</h2>
+          <h2 className="text-lg font-semibold mb-4">{t("leave.myLeave.leaveRequests")}</h2>
           <div className="rounded-lg border border-border bg-card">
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Request #</TableHead>
-                  <TableHead>Type</TableHead>
-                  <TableHead>Dates</TableHead>
-                  <TableHead>Duration</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Submitted</TableHead>
+                  <TableHead>{t("leave.myLeave.requestNumber")}</TableHead>
+                  <TableHead>{t("leave.myLeave.type")}</TableHead>
+                  <TableHead>{t("leave.myLeave.dates")}</TableHead>
+                  <TableHead>{t("leave.myLeave.duration")}</TableHead>
+                  <TableHead>{t("leave.common.status")}</TableHead>
+                  <TableHead>{t("leave.myLeave.submitted")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {loadingRequests ? (
                   <TableRow>
                     <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
-                      Loading...
+                      {t("leave.myLeave.loading")}
                     </TableCell>
                   </TableRow>
                 ) : leaveRequests.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
-                      No leave requests found. Submit your first leave request to get started.
+                      {t("leave.myLeave.noRequests")}
                     </TableCell>
                   </TableRow>
                 ) : (

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { useLeaveManagement } from "@/hooks/useLeaveManagement";
+import { useLanguage } from "@/hooks/useLanguage";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -25,6 +26,7 @@ import {
 import { cn } from "@/lib/utils";
 
 export default function ApplyLeavePage() {
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const { leaveTypes, leaveBalances, createLeaveRequest, loadingTypes } = useLeaveManagement();
   const [formData, setFormData] = useState({
@@ -83,8 +85,8 @@ export default function ApplyLeavePage() {
       <div className="space-y-6 max-w-3xl">
         <Breadcrumbs
           items={[
-            { label: "Leave Management", href: "/leave" },
-            { label: "Apply for Leave" },
+            { label: t("leave.title"), href: "/leave" },
+            { label: t("leave.apply.title") },
           ]}
         />
 
@@ -93,21 +95,21 @@ export default function ApplyLeavePage() {
             <CalendarPlus className="h-5 w-5 text-primary" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold tracking-tight text-foreground">Apply for Leave</h1>
-            <p className="text-muted-foreground">Submit a new leave request</p>
+            <h1 className="text-2xl font-bold tracking-tight text-foreground">{t("leave.apply.title")}</h1>
+            <p className="text-muted-foreground">{t("leave.apply.subtitle")}</p>
           </div>
         </div>
 
         <div className="rounded-lg border border-border bg-card p-6 space-y-6">
           {/* Leave Type Selection */}
           <div className="space-y-2">
-            <Label htmlFor="leave_type">Leave Type *</Label>
+            <Label htmlFor="leave_type">{t("leave.apply.leaveType")} *</Label>
             <Select
               value={formData.leave_type_id}
               onValueChange={(value) => setFormData({ ...formData, leave_type_id: value })}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Select leave type" />
+                <SelectValue placeholder={t("leave.apply.selectLeaveType")} />
               </SelectTrigger>
               <SelectContent>
                 {leaveTypes.map((type) => {
@@ -119,7 +121,7 @@ export default function ApplyLeavePage() {
                         <span>{type.name}</span>
                         {balance && (
                           <span className="text-muted-foreground">
-                            ({balance.current_balance} available)
+                            ({balance.current_balance} {t("leave.apply.available")})
                           </span>
                         )}
                       </div>
@@ -130,7 +132,7 @@ export default function ApplyLeavePage() {
             </Select>
             {selectedType && selectedBalance && (
               <p className="text-sm text-muted-foreground">
-                Available balance: <span className="font-medium text-foreground">{selectedBalance.current_balance}</span> {selectedType.accrual_unit}
+                {t("leave.apply.availableBalance")}: <span className="font-medium text-foreground">{selectedBalance.current_balance}</span> {selectedType.accrual_unit}
               </p>
             )}
           </div>
@@ -138,7 +140,7 @@ export default function ApplyLeavePage() {
           {/* Date Selection */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label>Start Date *</Label>
+              <Label>{t("leave.apply.startDate")} *</Label>
               <Popover>
                 <PopoverTrigger asChild>
                   <Button
@@ -149,7 +151,7 @@ export default function ApplyLeavePage() {
                     )}
                   >
                     <CalendarDays className="mr-2 h-4 w-4" />
-                    {formData.start_date ? format(formData.start_date, "PPP") : "Select date"}
+                    {formData.start_date ? format(formData.start_date, "PPP") : t("leave.apply.selectDate")}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
@@ -177,15 +179,15 @@ export default function ApplyLeavePage() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="full">Full Day</SelectItem>
-                  <SelectItem value="first_half">First Half</SelectItem>
-                  <SelectItem value="second_half">Second Half</SelectItem>
+                  <SelectItem value="full">{t("leave.apply.fullDay")}</SelectItem>
+                  <SelectItem value="first_half">{t("leave.apply.firstHalf")}</SelectItem>
+                  <SelectItem value="second_half">{t("leave.apply.secondHalf")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             <div className="space-y-2">
-              <Label>End Date *</Label>
+              <Label>{t("leave.apply.endDate")} *</Label>
               <Popover>
                 <PopoverTrigger asChild>
                   <Button
@@ -196,7 +198,7 @@ export default function ApplyLeavePage() {
                     )}
                   >
                     <CalendarDays className="mr-2 h-4 w-4" />
-                    {formData.end_date ? format(formData.end_date, "PPP") : "Select date"}
+                    {formData.end_date ? format(formData.end_date, "PPP") : t("leave.apply.selectDate")}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
@@ -218,9 +220,9 @@ export default function ApplyLeavePage() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="full">Full Day</SelectItem>
-                  <SelectItem value="first_half">First Half</SelectItem>
-                  <SelectItem value="second_half">Second Half</SelectItem>
+                  <SelectItem value="full">{t("leave.apply.fullDay")}</SelectItem>
+                  <SelectItem value="first_half">{t("leave.apply.firstHalf")}</SelectItem>
+                  <SelectItem value="second_half">{t("leave.apply.secondHalf")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -229,42 +231,42 @@ export default function ApplyLeavePage() {
           {/* Duration Display */}
           {duration > 0 && (
             <div className="rounded-lg bg-primary/5 p-4 text-center">
-              <p className="text-sm text-muted-foreground">Total Duration</p>
+              <p className="text-sm text-muted-foreground">{t("leave.apply.totalDuration")}</p>
               <p className="text-2xl font-bold text-primary">
-                {duration} {selectedType?.accrual_unit || "days"}
+                {duration} {selectedType?.accrual_unit || t("leave.leaveTypes.days").toLowerCase()}
               </p>
             </div>
           )}
 
           {/* Additional Info */}
           <div className="space-y-2">
-            <Label htmlFor="reason">Reason</Label>
+            <Label htmlFor="reason">{t("leave.apply.reason")}</Label>
             <Textarea
               id="reason"
               value={formData.reason}
               onChange={(e) => setFormData({ ...formData, reason: e.target.value })}
-              placeholder="Optional: Provide a reason for your leave request"
+              placeholder={t("leave.apply.reasonPlaceholder")}
               rows={3}
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="contact">Contact During Leave</Label>
+            <Label htmlFor="contact">{t("leave.apply.contactDuringLeave")}</Label>
             <Input
               id="contact"
               value={formData.contact_during_leave}
               onChange={(e) => setFormData({ ...formData, contact_during_leave: e.target.value })}
-              placeholder="Phone number or email for emergencies"
+              placeholder={t("leave.apply.contactPlaceholder")}
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="handover">Handover Notes</Label>
+            <Label htmlFor="handover">{t("leave.apply.handoverNotes")}</Label>
             <Textarea
               id="handover"
               value={formData.handover_notes}
               onChange={(e) => setFormData({ ...formData, handover_notes: e.target.value })}
-              placeholder="Any handover instructions for your team"
+              placeholder={t("leave.apply.handoverPlaceholder")}
               rows={3}
             />
           </div>
@@ -272,13 +274,13 @@ export default function ApplyLeavePage() {
           {/* Actions */}
           <div className="flex justify-end gap-2 pt-4 border-t">
             <Button variant="outline" onClick={() => navigate("/leave")}>
-              Cancel
+              {t("leave.common.cancel")}
             </Button>
             <Button 
               onClick={handleSubmit} 
               disabled={!isValid || createLeaveRequest.isPending}
             >
-              {createLeaveRequest.isPending ? "Submitting..." : "Submit Request"}
+              {createLeaveRequest.isPending ? t("leave.apply.submitting") : t("leave.apply.submitRequest")}
             </Button>
           </div>
         </div>
