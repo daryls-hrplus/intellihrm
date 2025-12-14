@@ -5,6 +5,8 @@ import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { supportedLanguages } from "@/i18n/config";
+import defaultGroupLogo from "@/assets/default-group-logo.png";
+import defaultCompanyLogo from "@/assets/default-company-logo.png";
 import { useMenuPermissions } from "@/hooks/useMenuPermissions";
 import {
   LayoutDashboard,
@@ -198,12 +200,26 @@ export function AppSidebar() {
               <Building2 className="h-4 w-4" />
               <span className="truncate">{company?.name || "No Company Assigned"}</span>
             </div>
-            <div className="flex gap-2">
+            <div className="flex items-center gap-2">
+              {/* Company Group Logo */}
+              {company?.company_group && (
+                <img 
+                  src={company.company_group.logo_url || defaultGroupLogo} 
+                  alt={company.company_group.name || "Group"}
+                  className="h-8 w-8 rounded-md border border-sidebar-border bg-background object-contain p-0.5"
+                />
+              )}
+              {/* Company Logo */}
+              <img 
+                src={company?.logo_url || defaultCompanyLogo} 
+                alt={company?.name || "Company"}
+                className="h-8 w-8 rounded-md border border-sidebar-border bg-background object-contain p-0.5"
+              />
               <div className="flex flex-1 items-center gap-1.5 rounded-lg bg-sidebar-accent px-2 py-1.5 text-xs text-sidebar-foreground/60">
                 <Globe className="h-3.5 w-3.5" />
                 <span className="truncate">{territoryName || "No Territory"}</span>
               </div>
-              <div className="flex flex-1 items-center gap-1.5 rounded-lg bg-sidebar-accent px-2 py-1.5 text-xs text-sidebar-foreground/60">
+              <div className="flex items-center gap-1.5 rounded-lg bg-sidebar-accent px-2 py-1.5 text-xs text-sidebar-foreground/60">
                 <Languages className="h-3.5 w-3.5" />
                 <span>{currentLanguage}</span>
               </div>
