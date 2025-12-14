@@ -15,8 +15,10 @@ import { Switch } from "@/components/ui/switch";
 import { usePayroll, PayrollTaxConfig, PayrollDeductionConfig } from "@/hooks/usePayroll";
 import { PayrollFilters, usePayrollFilters } from "@/components/payroll/PayrollFilters";
 import { Plus, Edit, Trash2, Receipt, Percent, DollarSign } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 export default function TaxConfigPage() {
+  const { t } = useTranslation();
   const { selectedCompanyId, setSelectedCompanyId } = usePayrollFilters();
   const {
     isLoading,
@@ -252,8 +254,8 @@ export default function TaxConfigPage() {
       <div className="space-y-6">
         <Breadcrumbs
           items={[
-            { label: "Payroll", href: "/payroll" },
-            { label: "Tax Configuration" },
+            { label: t("payroll.title"), href: "/payroll" },
+            { label: t("payroll.taxConfig.title") },
           ]}
         />
 
@@ -263,23 +265,23 @@ export default function TaxConfigPage() {
               <Receipt className="h-6 w-6 text-secondary-foreground" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold tracking-tight">Tax & Deduction Configuration</h1>
-              <p className="text-muted-foreground">Manage tax brackets and deduction rules</p>
+              <h1 className="text-2xl font-bold tracking-tight">{t("payroll.taxConfig.title")}</h1>
+              <p className="text-muted-foreground">{t("payroll.taxConfig.subtitle")}</p>
             </div>
           </div>
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList>
-            <TabsTrigger value="taxes">Tax Configuration</TabsTrigger>
-            <TabsTrigger value="deductions">Deduction Rules</TabsTrigger>
+            <TabsTrigger value="taxes">{t("payroll.taxConfig.taxConfigTab")}</TabsTrigger>
+            <TabsTrigger value="deductions">{t("payroll.taxConfig.deductionRulesTab")}</TabsTrigger>
           </TabsList>
 
           <TabsContent value="taxes" className="space-y-4">
             <div className="flex justify-end">
               <Button onClick={() => { resetTaxForm(); setTaxDialogOpen(true); }}>
                 <Plus className="h-4 w-4 mr-2" />
-                Add Tax
+                {t("payroll.taxConfig.addTax")}
               </Button>
             </div>
 
@@ -288,14 +290,14 @@ export default function TaxConfigPage() {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Tax Name</TableHead>
-                      <TableHead>Type</TableHead>
-                      <TableHead>Country/Region</TableHead>
-                      <TableHead>Rate</TableHead>
-                      <TableHead>Wage Base</TableHead>
-                      <TableHead>Applies To</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead className="text-right">Actions</TableHead>
+                      <TableHead>{t("payroll.taxConfig.taxName")}</TableHead>
+                      <TableHead>{t("payroll.taxConfig.taxType")}</TableHead>
+                      <TableHead>{t("payroll.taxConfig.countryRegion")}</TableHead>
+                      <TableHead>{t("payroll.taxConfig.rate")}</TableHead>
+                      <TableHead>{t("payroll.taxConfig.wageBase")}</TableHead>
+                      <TableHead>{t("payroll.taxConfig.appliesTo")}</TableHead>
+                      <TableHead>{t("common.status")}</TableHead>
+                      <TableHead className="text-right">{t("common.actions")}</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -311,17 +313,17 @@ export default function TaxConfigPage() {
                           {tax.rate ? `${(tax.rate * 100).toFixed(2)}%` : "-"}
                         </TableCell>
                         <TableCell>
-                          {tax.wage_base_limit ? `$${tax.wage_base_limit.toLocaleString()}` : "No limit"}
+                          {tax.wage_base_limit ? `$${tax.wage_base_limit.toLocaleString()}` : t("payroll.taxConfig.noLimit")}
                         </TableCell>
                         <TableCell>
                           <div className="flex gap-1">
-                            {tax.is_employee_tax && <Badge variant="outline">Employee</Badge>}
-                            {tax.is_employer_tax && <Badge variant="outline">Employer</Badge>}
+                            {tax.is_employee_tax && <Badge variant="outline">{t("payroll.taxConfig.employee")}</Badge>}
+                            {tax.is_employer_tax && <Badge variant="outline">{t("payroll.taxConfig.employer")}</Badge>}
                           </div>
                         </TableCell>
                         <TableCell>
                           <Badge variant={tax.is_active ? "default" : "secondary"}>
-                            {tax.is_active ? "Active" : "Inactive"}
+                            {tax.is_active ? t("common.active") : t("common.inactive")}
                           </Badge>
                         </TableCell>
                         <TableCell className="text-right">
@@ -339,7 +341,7 @@ export default function TaxConfigPage() {
                     {taxConfigs.length === 0 && (
                       <TableRow>
                         <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
-                          No tax configurations found
+                          {t("payroll.taxConfig.noTaxes")}
                         </TableCell>
                       </TableRow>
                     )}

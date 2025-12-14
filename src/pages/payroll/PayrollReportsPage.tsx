@@ -9,8 +9,10 @@ import { usePayroll } from "@/hooks/usePayroll";
 import { PayrollFilters, usePayrollFilters } from "@/components/payroll/PayrollFilters";
 import { FileSpreadsheet, TrendingUp, DollarSign, Users, Calendar, Download } from "lucide-react";
 import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from "recharts";
+import { useTranslation } from "react-i18next";
 
 export default function PayrollReportsPage() {
+  const { t } = useTranslation();
   const { selectedCompanyId, setSelectedCompanyId } = usePayrollFilters();
   const { fetchPayrollAnalytics, isLoading } = usePayroll();
   
@@ -69,7 +71,7 @@ export default function PayrollReportsPage() {
     return (
       <AppLayout>
         <div className="flex items-center justify-center h-64">
-          <p className="text-muted-foreground">Please select a company to view payroll reports.</p>
+          <p className="text-muted-foreground">{t("payroll.reports.selectCompanyPrompt")}</p>
         </div>
       </AppLayout>
     );
@@ -80,8 +82,8 @@ export default function PayrollReportsPage() {
       <div className="space-y-6">
         <Breadcrumbs
           items={[
-            { label: "Payroll", href: "/payroll" },
-            { label: "Reports" },
+            { label: t("payroll.title"), href: "/payroll" },
+            { label: t("payroll.reports.title") },
           ]}
         />
 
@@ -91,8 +93,8 @@ export default function PayrollReportsPage() {
               <FileSpreadsheet className="h-6 w-6 text-warning" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold tracking-tight">Payroll Reports</h1>
-              <p className="text-muted-foreground">Analytics and reporting for payroll data</p>
+              <h1 className="text-2xl font-bold tracking-tight">{t("payroll.reports.title")}</h1>
+              <p className="text-muted-foreground">{t("payroll.reports.subtitle")}</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -108,7 +110,7 @@ export default function PayrollReportsPage() {
             </Select>
             <Button variant="outline">
               <Download className="h-4 w-4 mr-2" />
-              Export
+              {t("common.export")}
             </Button>
           </div>
         </div>
@@ -121,7 +123,7 @@ export default function PayrollReportsPage() {
                 <DollarSign className="h-5 w-5 text-primary" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Total Gross Pay</p>
+                <p className="text-sm text-muted-foreground">{t("payroll.reports.totalGrossPay")}</p>
                 <p className="text-xl font-semibold">{formatCurrencyShort(analytics?.totalGrossPay || 0)}</p>
               </div>
             </CardContent>
@@ -132,7 +134,7 @@ export default function PayrollReportsPage() {
                 <TrendingUp className="h-5 w-5 text-success" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Total Net Pay</p>
+                <p className="text-sm text-muted-foreground">{t("payroll.reports.totalNetPay")}</p>
                 <p className="text-xl font-semibold">{formatCurrencyShort(analytics?.totalNetPay || 0)}</p>
               </div>
             </CardContent>
@@ -143,7 +145,7 @@ export default function PayrollReportsPage() {
                 <Calendar className="h-5 w-5 text-warning" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Payroll Runs</p>
+                <p className="text-sm text-muted-foreground">{t("payroll.reports.payrollRuns")}</p>
                 <p className="text-xl font-semibold">{analytics?.totalPayrollRuns || 0}</p>
               </div>
             </CardContent>
@@ -154,7 +156,7 @@ export default function PayrollReportsPage() {
                 <Users className="h-5 w-5 text-muted-foreground" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Avg Employees</p>
+                <p className="text-sm text-muted-foreground">{t("payroll.reports.avgEmployees")}</p>
                 <p className="text-xl font-semibold">{analytics?.avgEmployeesPerRun || 0}</p>
               </div>
             </CardContent>
@@ -163,16 +165,16 @@ export default function PayrollReportsPage() {
 
         <Tabs defaultValue="trends">
           <TabsList>
-            <TabsTrigger value="trends">Payroll Trends</TabsTrigger>
-            <TabsTrigger value="breakdown">Cost Breakdown</TabsTrigger>
-            <TabsTrigger value="comparison">Monthly Comparison</TabsTrigger>
+            <TabsTrigger value="trends">{t("payroll.reports.payrollTrendsTab")}</TabsTrigger>
+            <TabsTrigger value="breakdown">{t("payroll.reports.costBreakdownTab")}</TabsTrigger>
+            <TabsTrigger value="comparison">{t("payroll.reports.monthlyComparisonTab")}</TabsTrigger>
           </TabsList>
 
           <TabsContent value="trends" className="space-y-4">
             <Card>
               <CardHeader>
-                <CardTitle>Payroll Trends</CardTitle>
-                <CardDescription>Monthly gross vs net pay over time</CardDescription>
+                <CardTitle>{t("payroll.reports.payrollTrends")}</CardTitle>
+                <CardDescription>{t("payroll.reports.monthlyGrossVsNet")}</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="h-80">
@@ -203,7 +205,7 @@ export default function PayrollReportsPage() {
                       <Area
                         type="monotone"
                         dataKey="gross"
-                        name="Gross Pay"
+                        name={t("payroll.reports.grossPay")}
                         stroke="hsl(var(--primary))"
                         fillOpacity={1}
                         fill="url(#colorGross)"
@@ -211,7 +213,7 @@ export default function PayrollReportsPage() {
                       <Area
                         type="monotone"
                         dataKey="net"
-                        name="Net Pay"
+                        name={t("payroll.reports.netPay")}
                         stroke="hsl(var(--success))"
                         fillOpacity={1}
                         fill="url(#colorNet)"
@@ -227,8 +229,8 @@ export default function PayrollReportsPage() {
             <div className="grid gap-4 md:grid-cols-2">
               <Card>
                 <CardHeader>
-                  <CardTitle>Cost Breakdown</CardTitle>
-                  <CardDescription>Distribution of payroll costs</CardDescription>
+                  <CardTitle>{t("payroll.reports.costBreakdown")}</CardTitle>
+                  <CardDescription>{t("payroll.reports.costBreakdownSubtitle")}</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="h-80">
@@ -258,24 +260,24 @@ export default function PayrollReportsPage() {
 
               <Card>
                 <CardHeader>
-                  <CardTitle>Cost Summary</CardTitle>
-                  <CardDescription>Detailed breakdown of {selectedYear} payroll costs</CardDescription>
+                  <CardTitle>{t("payroll.reports.costSummary")}</CardTitle>
+                  <CardDescription>{t("payroll.reports.costSummarySubtitle", { year: selectedYear })}</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="flex justify-between items-center p-3 bg-muted rounded-lg">
-                    <span className="text-muted-foreground">Total Gross Pay</span>
+                    <span className="text-muted-foreground">{t("payroll.reports.totalGrossPay")}</span>
                     <span className="font-semibold">{formatCurrency(analytics?.totalGrossPay || 0)}</span>
                   </div>
                   <div className="flex justify-between items-center p-3 bg-muted rounded-lg">
-                    <span className="text-muted-foreground">Total Taxes</span>
+                    <span className="text-muted-foreground">{t("payroll.reports.totalTaxes")}</span>
                     <span className="font-semibold text-warning">{formatCurrency(analytics?.totalTaxes || 0)}</span>
                   </div>
                   <div className="flex justify-between items-center p-3 bg-muted rounded-lg">
-                    <span className="text-muted-foreground">Total Deductions</span>
+                    <span className="text-muted-foreground">{t("payroll.processing.deductions")}</span>
                     <span className="font-semibold">{formatCurrency(analytics?.totalDeductions || 0)}</span>
                   </div>
                   <div className="flex justify-between items-center p-3 bg-success/10 rounded-lg">
-                    <span className="text-success font-medium">Total Net Pay</span>
+                    <span className="text-success font-medium">{t("payroll.reports.totalNetPay")}</span>
                     <span className="font-bold text-success">{formatCurrency(analytics?.totalNetPay || 0)}</span>
                   </div>
                 </CardContent>
@@ -286,8 +288,8 @@ export default function PayrollReportsPage() {
           <TabsContent value="comparison" className="space-y-4">
             <Card>
               <CardHeader>
-                <CardTitle>Monthly Comparison</CardTitle>
-                <CardDescription>Compare gross pay, net pay, and taxes by month</CardDescription>
+                <CardTitle>{t("payroll.reports.monthlyComparison")}</CardTitle>
+                <CardDescription>{t("payroll.reports.monthlyComparisonSubtitle")}</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="h-80">
@@ -305,9 +307,9 @@ export default function PayrollReportsPage() {
                         }}
                       />
                       <Legend />
-                      <Bar dataKey="gross" name="Gross Pay" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
-                      <Bar dataKey="net" name="Net Pay" fill="hsl(var(--success))" radius={[4, 4, 0, 0]} />
-                      <Bar dataKey="taxes" name="Taxes" fill="hsl(var(--warning))" radius={[4, 4, 0, 0]} />
+                      <Bar dataKey="gross" name={t("payroll.reports.grossPay")} fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
+                      <Bar dataKey="net" name={t("payroll.reports.netPay")} fill="hsl(var(--success))" radius={[4, 4, 0, 0]} />
+                      <Bar dataKey="taxes" name={t("payroll.reports.taxes")} fill="hsl(var(--warning))" radius={[4, 4, 0, 0]} />
                     </BarChart>
                   </ResponsiveContainer>
                 </div>
