@@ -24,6 +24,11 @@ import {
   FileWarning,
   KeyRound,
   Lock,
+  Eye,
+  MessageSquare,
+  HeartPulse,
+  Monitor,
+  TriangleAlert,
 } from "lucide-react";
 
 const hseModules = [
@@ -183,6 +188,41 @@ export default function HSEDashboardPage() {
       href: "/hse/loto",
       icon: Lock,
       color: "bg-slate-500/10 text-slate-600",
+    },
+    {
+      title: t("hseModule.modules.nearMiss.title"),
+      description: t("hseModule.modules.nearMiss.description"),
+      href: "/hse/near-miss",
+      icon: TriangleAlert,
+      color: "bg-yellow-500/10 text-yellow-600",
+    },
+    {
+      title: t("hseModule.modules.safetyObservations.title"),
+      description: t("hseModule.modules.safetyObservations.description"),
+      href: "/hse/safety-observations",
+      icon: Eye,
+      color: "bg-blue-500/10 text-blue-600",
+    },
+    {
+      title: t("hseModule.modules.toolboxTalks.title"),
+      description: t("hseModule.modules.toolboxTalks.description"),
+      href: "/hse/toolbox-talks",
+      icon: MessageSquare,
+      color: "bg-green-500/10 text-green-600",
+    },
+    {
+      title: t("hseModule.modules.firstAid.title"),
+      description: t("hseModule.modules.firstAid.description"),
+      href: "/hse/first-aid",
+      icon: HeartPulse,
+      color: "bg-red-500/10 text-red-600",
+    },
+    {
+      title: t("hseModule.modules.ergonomics.title"),
+      description: t("hseModule.modules.ergonomics.description"),
+      href: "/hse/ergonomics",
+      icon: Monitor,
+      color: "bg-pink-500/10 text-pink-600",
     },
   ];
 
