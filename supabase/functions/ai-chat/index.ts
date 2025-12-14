@@ -148,46 +148,30 @@ serve(async (req) => {
     if (employeeNames.length > 0) {
       try {
         for (const name of employeeNames.slice(0, 3)) { // Limit to 3 names
-          const nameParts = name.split(" ");
-          const firstName = nameParts[0];
-          const lastName = nameParts.slice(1).join(" ");
-
-          // Query profiles with related data
-          const { data: employees } = await supabase
+          // Query profiles with related data using full_name
+          const { data: employees, error: empError } = await supabase
             .from("profiles")
             .select(`
-              id, first_name, last_name, employee_id, 
-              employment_status, gender, nationality,
-              email, phone_number, date_of_birth,
-              hire_date, termination_date,
+              id, full_name, email,
               company_id, department_id,
               companies:company_id (name),
               departments:department_id (name)
             `)
-            .or(`and(first_name.ilike.%${firstName}%,last_name.ilike.%${lastName}%),and(first_name.ilike.%${lastName}%,last_name.ilike.%${firstName}%)`)
+            .ilike("full_name", `%${name}%`)
             .limit(5);
+
+          console.log(`Employee search for "${name}":`, employees?.length || 0, "results", empError || "");
 
           if (employees && employees.length > 0) {
             for (const emp of employees) {
               // Build employee context respecting PII permissions
-              let empInfo = `\n--- Employee: ${emp.first_name} ${emp.last_name} ---\n`;
-              empInfo += `Employee ID: ${emp.employee_id || "N/A"}\n`;
-              empInfo += `Employment Status: ${emp.employment_status || "N/A"}\n`;
+              let empInfo = `\n--- Employee: ${emp.full_name} ---\n`;
               empInfo += `Company: ${(emp.companies as any)?.name || "N/A"}\n`;
               empInfo += `Department: ${(emp.departments as any)?.name || "N/A"}\n`;
-              empInfo += `Hire Date: ${emp.hire_date || "N/A"}\n`;
-              
-              if (emp.termination_date) {
-                empInfo += `Termination Date: ${emp.termination_date}\n`;
-              }
 
               // Include PII only if user has permission
               if (canViewPii) {
                 empInfo += `Email: ${emp.email || "N/A"}\n`;
-                empInfo += `Phone: ${emp.phone_number || "N/A"}\n`;
-                empInfo += `Date of Birth: ${emp.date_of_birth || "N/A"}\n`;
-                empInfo += `Gender: ${emp.gender || "N/A"}\n`;
-                empInfo += `Nationality: ${emp.nationality || "N/A"}\n`;
               } else {
                 empInfo += `[PII fields hidden - user does not have permission to view personal information]\n`;
               }
@@ -215,21 +199,41 @@ serve(async (req) => {
                 console.log("Position fetch error (non-critical):", e);
               }
 
-              // Get manager info if available
+              // Get manager info if available via employee_positions reporting
               try {
-                const { data: managerRelation } = await supabase
-                  .from("employee_managers")
+                const { data: empPositions } = await supabase
+                  .from("employee_positions")
                   .select(`
-                    manager:manager_id (first_name, last_name)
+                    positions:position_id (
+                      reports_to_position_id,
+                      reports_to:reports_to_position_id (
+                        title
+                      )
+                    )
                   `)
                   .eq("employee_id", emp.id)
                   .eq("is_primary", true)
                   .is("end_date", null)
                   .single();
 
-                if (managerRelation && managerRelation.manager) {
-                  const mgr = managerRelation.manager as any;
-                  empInfo += `Manager: ${mgr.first_name} ${mgr.last_name}\n`;
+                if (empPositions?.positions) {
+                  const posData = empPositions.positions as any;
+                  if (posData.reports_to_position_id) {
+                    // Find who occupies the reports_to position
+                    const { data: managerPos } = await supabase
+                      .from("employee_positions")
+                      .select(`
+                        employee:employee_id (full_name)
+                      `)
+                      .eq("position_id", posData.reports_to_position_id)
+                      .eq("is_primary", true)
+                      .is("end_date", null)
+                      .single();
+                    
+                    if (managerPos?.employee) {
+                      empInfo += `Manager: ${(managerPos.employee as any).full_name}\n`;
+                    }
+                  }
                 }
               } catch (e) {
                 // No manager found, that's ok
@@ -239,6 +243,7 @@ serve(async (req) => {
             }
           }
         }
+        console.log("Final employee context length:", employeeContext.length);
       } catch (e) {
         console.log("Employee fetch error:", e);
       }
