@@ -34,6 +34,8 @@ import {
   Lock,
   Bot,
   BookOpen,
+  FileSpreadsheet,
+  Layers,
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 
@@ -149,6 +151,20 @@ const getAdminModules = (t: (key: string) => string) => [
     href: "/admin/implementation-handbook",
     icon: BookOpen,
     color: "bg-rose-500/10 text-rose-600",
+  },
+  {
+    title: "Features Brochure",
+    description: "Marketing summary of HRplus Cerebra capabilities",
+    href: "/admin/features-brochure",
+    icon: FileSpreadsheet,
+    color: "bg-blue-500/10 text-blue-600",
+  },
+  {
+    title: "Modules Brochure",
+    description: "Comprehensive guide to all modules and features",
+    href: "/admin/modules-brochure",
+    icon: Layers,
+    color: "bg-green-500/10 text-green-600",
   },
   {
     title: t("admin.modules.territories.title"),
