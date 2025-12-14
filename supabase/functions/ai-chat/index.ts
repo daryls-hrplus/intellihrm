@@ -7,7 +7,27 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-const COST_PER_1K_TOKENS = 0.002; // $0.002 per 1K tokens
+const COST_PER_1K_TOKENS = 0.002;
+
+// Escalation topics that should prompt user to contact HR
+const ESCALATION_TOPICS = [
+  "termination", "fired", "firing", "let go",
+  "legal matter", "lawsuit", "litigation",
+  "harassment", "discrimination", "hostile work",
+  "violence", "threat", "safety concern",
+  "salary negotiation", "compensation dispute",
+  "union", "strike", "collective bargaining",
+  "disciplinary action", "written warning", "suspension",
+  "grievance", "formal complaint"
+];
+
+// PII fields that should not be revealed without proper permissions
+const PII_FIELDS = [
+  "email", "phone", "mobile", "address", "street",
+  "bank_account", "routing_number", "ssn", "social_security",
+  "national_id", "passport", "salary", "wage", "compensation",
+  "date_of_birth", "dob", "birth_date"
+];
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -37,6 +57,23 @@ serve(async (req) => {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+
+    // Get user profile and role
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("*, company_id")
+      .eq("id", user.id)
+      .single();
+
+    const { data: userRoles } = await supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", user.id);
+
+    const roles = userRoles?.map(r => r.role) || [];
+    const isAdmin = roles.includes("admin");
+    const isHrManager = roles.includes("hr_manager");
+    const canViewPii = isAdmin || isHrManager;
 
     // Check if user is enabled and within budget
     const { data: budgetCheck } = await supabase.rpc("check_ai_budget", { p_user_id: user.id });
@@ -71,6 +108,101 @@ serve(async (req) => {
     }
 
     const { messages, feature } = await req.json();
+    const userMessage = messages[messages.length - 1]?.content || "";
+
+    // Check for escalation topics
+    const lowerMessage = userMessage.toLowerCase();
+    const triggeredEscalation = ESCALATION_TOPICS.some(topic => lowerMessage.includes(topic));
+
+    // Check for PII requests
+    const requestsPii = PII_FIELDS.some(field => lowerMessage.includes(field));
+
+    // Fetch relevant context from policies, SOPs, and knowledge base
+    let policyContext = "";
+    let sopContext = "";
+    let helpCenterContext = "";
+
+    // Get policy documents context (existing RAG system)
+    try {
+      const { data: policyDocs } = await supabase
+        .from("policy_documents")
+        .select("title, content")
+        .eq("is_active", true)
+        .or(`is_global.eq.true,company_id.eq.${profile?.company_id}`)
+        .limit(5);
+
+      if (policyDocs && policyDocs.length > 0) {
+        policyContext = policyDocs.map(d => `Policy: ${d.title}\n${d.content?.substring(0, 500) || ""}`).join("\n\n");
+      }
+    } catch (e) {
+      console.log("Policy fetch error (non-critical):", e);
+    }
+
+    // Get SOP documents context
+    try {
+      const { data: sopDocs } = await supabase
+        .from("sop_documents")
+        .select("title, description, steps, task_type")
+        .eq("is_active", true)
+        .or(`is_global.eq.true,company_id.eq.${profile?.company_id}`)
+        .limit(5);
+
+      if (sopDocs && sopDocs.length > 0) {
+        sopContext = sopDocs.map(d => {
+          const stepsText = d.steps ? JSON.stringify(d.steps) : "";
+          return `SOP: ${d.title}\nTask Type: ${d.task_type || "General"}\nDescription: ${d.description || ""}\nSteps: ${stepsText}`;
+        }).join("\n\n");
+      }
+    } catch (e) {
+      console.log("SOP fetch error (non-critical):", e);
+    }
+
+    // Get knowledge base articles (Help Center)
+    try {
+      const { data: kbArticles } = await supabase
+        .from("knowledge_base_articles")
+        .select("title, content, category")
+        .eq("is_published", true)
+        .limit(5);
+
+      if (kbArticles && kbArticles.length > 0) {
+        helpCenterContext = kbArticles.map(a => `Help Article: ${a.title}\nCategory: ${a.category || "General"}\n${a.content?.substring(0, 500) || ""}`).join("\n\n");
+      }
+    } catch (e) {
+      console.log("Knowledge base fetch error (non-critical):", e);
+    }
+
+    // Build system prompt with guardrails
+    const systemPrompt = `You are the HRplus Cerebra AI Assistant, a helpful HR assistant for the HRplus Cerebra HRIS system.
+
+## YOUR ROLE AND GUIDELINES:
+
+1. **Role-Based Access Control**: The current user has the following roles: ${roles.join(", ") || "employee"}. Respect access levels and only provide information appropriate for their role.
+
+2. **Company Policies**: When answering questions, reference and adhere to company policies. Here are relevant policies:
+${policyContext || "No specific policies loaded."}
+
+3. **Standard Operating Procedures (SOPs)**: For task-related questions, guide users through the proper steps defined in SOPs:
+${sopContext || "No specific SOPs loaded."}
+
+4. **Help Center Guidelines**: Reference the Help Center for feature usage guidance:
+${helpCenterContext || "No specific help articles loaded."}
+
+5. **PII Protection**: ${canViewPii ? "This user has permission to view PII data." : "This user does NOT have permission to view PII (Personally Identifiable Information). Do NOT reveal specific emails, phone numbers, addresses, bank details, salaries, or other personal information of employees."}
+
+6. **Escalation Protocol**: ${triggeredEscalation ? "⚠️ IMPORTANT: This query involves a sensitive topic. Include a clear recommendation to contact HR directly for official guidance and documentation." : "For sensitive topics like terminations, legal matters, harassment, discrimination, or salary disputes, always recommend contacting HR directly."}
+
+7. **Response Disclaimer**: Always end your responses with a brief disclaimer that your guidance should be verified with HR for official decisions.
+
+## IMPORTANT RULES:
+- Be professional, concise, and helpful
+- When referencing SOPs, list the steps clearly
+- When referencing policies, cite the policy name
+- If you don't have information about something, say so clearly
+- Never make up policies or procedures - only reference what's provided
+- For complex HR matters, always recommend speaking with HR directly
+- Protect employee privacy at all times`;
+
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     
     if (!LOVABLE_API_KEY) {
@@ -86,10 +218,7 @@ serve(async (req) => {
       body: JSON.stringify({
         model: "google/gemini-2.5-flash",
         messages: [
-          { 
-            role: "system", 
-            content: "You are a helpful HR assistant for the HRplus Cerebra system. Help users with HR-related questions, explain policies, assist with workflows, and provide guidance on using the system. Be professional, concise, and helpful." 
-          },
+          { role: "system", content: systemPrompt },
           ...messages,
         ],
         stream: false,
@@ -124,10 +253,12 @@ serve(async (req) => {
     // Calculate cost
     const estimatedCost = (usage.total_tokens / 1000) * COST_PER_1K_TOKENS;
 
-    // Log usage to database
     const now = new Date();
+
+    // Log usage to ai_usage_logs
     await supabase.from("ai_usage_logs").insert({
       user_id: user.id,
+      company_id: profile?.company_id,
       model: "google/gemini-2.5-flash",
       prompt_tokens: usage.prompt_tokens,
       completion_tokens: usage.completion_tokens,
@@ -138,11 +269,33 @@ serve(async (req) => {
       estimated_cost_usd: estimatedCost,
     });
 
+    // Log AI interaction for audit (with guardrail tracking)
+    await supabase.from("ai_interaction_logs").insert({
+      user_id: user.id,
+      company_id: profile?.company_id,
+      user_message: userMessage,
+      ai_response: assistantMessage,
+      context_sources: {
+        policies_used: !!policyContext,
+        sops_used: !!sopContext,
+        help_center_used: !!helpCenterContext,
+      },
+      tokens_used: usage.total_tokens,
+      estimated_cost_usd: estimatedCost,
+      user_role: roles.join(", ") || "employee",
+      pii_accessed: requestsPii && canViewPii,
+      escalation_triggered: triggeredEscalation,
+    });
+
     return new Response(JSON.stringify({ 
       message: assistantMessage,
       usage: {
         ...usage,
         estimated_cost_usd: estimatedCost
+      },
+      guardrails: {
+        escalation_triggered: triggeredEscalation,
+        pii_protected: requestsPii && !canViewPii
       }
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },

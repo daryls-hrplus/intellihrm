@@ -138,6 +138,103 @@ export type Database = {
           },
         ]
       }
+      ai_guardrails_config: {
+        Row: {
+          company_id: string | null
+          config_key: string
+          config_value: Json
+          created_at: string | null
+          guardrail_type: string
+          id: string
+          is_active: boolean | null
+          updated_at: string | null
+        }
+        Insert: {
+          company_id?: string | null
+          config_key: string
+          config_value: Json
+          created_at?: string | null
+          guardrail_type: string
+          id?: string
+          is_active?: boolean | null
+          updated_at?: string | null
+        }
+        Update: {
+          company_id?: string | null
+          config_key?: string
+          config_value?: Json
+          created_at?: string | null
+          guardrail_type?: string
+          id?: string
+          is_active?: boolean | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_guardrails_config_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ai_interaction_logs: {
+        Row: {
+          ai_response: string
+          company_id: string | null
+          context_sources: Json | null
+          created_at: string | null
+          escalation_triggered: boolean | null
+          estimated_cost_usd: number | null
+          id: string
+          pii_accessed: boolean | null
+          session_id: string | null
+          tokens_used: number | null
+          user_id: string
+          user_message: string
+          user_role: string | null
+        }
+        Insert: {
+          ai_response: string
+          company_id?: string | null
+          context_sources?: Json | null
+          created_at?: string | null
+          escalation_triggered?: boolean | null
+          estimated_cost_usd?: number | null
+          id?: string
+          pii_accessed?: boolean | null
+          session_id?: string | null
+          tokens_used?: number | null
+          user_id: string
+          user_message: string
+          user_role?: string | null
+        }
+        Update: {
+          ai_response?: string
+          company_id?: string | null
+          context_sources?: Json | null
+          created_at?: string | null
+          escalation_triggered?: boolean | null
+          estimated_cost_usd?: number | null
+          id?: string
+          pii_accessed?: boolean | null
+          session_id?: string | null
+          tokens_used?: number | null
+          user_id?: string
+          user_message?: string
+          user_role?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_interaction_logs_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ai_system_settings: {
         Row: {
           allowed_models: string[] | null
@@ -23338,6 +23435,183 @@ export type Database = {
           },
         ]
       }
+      sop_categories: {
+        Row: {
+          code: string
+          company_id: string | null
+          created_at: string | null
+          description: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          updated_at: string | null
+        }
+        Insert: {
+          code: string
+          company_id?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          updated_at?: string | null
+        }
+        Update: {
+          code?: string
+          company_id?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sop_categories_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sop_documents: {
+        Row: {
+          applicable_roles: string[] | null
+          category_id: string | null
+          company_id: string | null
+          content: string | null
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          effective_date: string | null
+          expiry_date: string | null
+          file_path: string | null
+          id: string
+          is_active: boolean | null
+          is_global: boolean | null
+          processing_status: string | null
+          steps: Json | null
+          task_type: string | null
+          title: string
+          updated_at: string | null
+          updated_by: string | null
+          version: string | null
+        }
+        Insert: {
+          applicable_roles?: string[] | null
+          category_id?: string | null
+          company_id?: string | null
+          content?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          effective_date?: string | null
+          expiry_date?: string | null
+          file_path?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_global?: boolean | null
+          processing_status?: string | null
+          steps?: Json | null
+          task_type?: string | null
+          title: string
+          updated_at?: string | null
+          updated_by?: string | null
+          version?: string | null
+        }
+        Update: {
+          applicable_roles?: string[] | null
+          category_id?: string | null
+          company_id?: string | null
+          content?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          effective_date?: string | null
+          expiry_date?: string | null
+          file_path?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_global?: boolean | null
+          processing_status?: string | null
+          steps?: Json | null
+          task_type?: string | null
+          title?: string
+          updated_at?: string | null
+          updated_by?: string | null
+          version?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sop_documents_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "sop_categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sop_documents_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sop_documents_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sop_documents_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sop_embeddings: {
+        Row: {
+          chunk_index: number
+          content: string
+          created_at: string | null
+          embedding: string | null
+          id: string
+          metadata: Json | null
+          sop_id: string
+        }
+        Insert: {
+          chunk_index: number
+          content: string
+          created_at?: string | null
+          embedding?: string | null
+          id?: string
+          metadata?: Json | null
+          sop_id: string
+        }
+        Update: {
+          chunk_index?: number
+          content?: string
+          created_at?: string | null
+          embedding?: string | null
+          id?: string
+          metadata?: Json | null
+          sop_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sop_embeddings_sop_id_fkey"
+            columns: ["sop_id"]
+            isOneToOne: false
+            referencedRelation: "sop_documents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       succession_candidates: {
         Row: {
           created_at: string
@@ -26511,6 +26785,24 @@ export type Database = {
           document_title: string
           id: string
           similarity: number
+        }[]
+      }
+      match_sop_documents: {
+        Args: {
+          match_count?: number
+          match_threshold?: number
+          p_company_id?: string
+          p_task_type?: string
+          query_embedding: string
+        }
+        Returns: {
+          category_name: string
+          content: string
+          id: string
+          similarity: number
+          sop_id: string
+          sop_title: string
+          steps: Json
         }[]
       }
       recalculate_comp_time_balance: {
