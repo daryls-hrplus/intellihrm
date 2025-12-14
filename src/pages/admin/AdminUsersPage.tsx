@@ -33,7 +33,7 @@ import {
   EyeOff,
 } from "lucide-react";
 
-type AppRole = "admin" | "hr_manager" | "employee";
+type AppRole = string;
 
 interface Company {
   id: string;
@@ -52,16 +52,22 @@ interface UserWithRoles {
   email: string;
   full_name: string | null;
   created_at: string;
-  roles: AppRole[];
+  roles: string[];
   company_id: string | null;
   company_name: string | null;
 }
 
-const roleConfig: { value: AppRole; label: string; icon: React.ElementType; color: string }[] = [
-  { value: "admin", label: "Admin", icon: Shield, color: "bg-destructive/10 text-destructive" },
-  { value: "hr_manager", label: "HR Manager", icon: UserCog, color: "bg-primary/10 text-primary" },
-  { value: "employee", label: "Employee", icon: User, color: "bg-muted text-muted-foreground" },
-];
+// Default styling for known roles - used for stats cards only
+const defaultRoleStyles: Record<string, { icon: React.ElementType; color: string }> = {
+  admin: { icon: Shield, color: "bg-destructive/10 text-destructive" },
+  hr_manager: { icon: UserCog, color: "bg-primary/10 text-primary" },
+  employee: { icon: User, color: "bg-muted text-muted-foreground" },
+};
+
+const getRoleStyle = (roleCode: string) => {
+  return defaultRoleStyles[roleCode] || { icon: User, color: "bg-secondary text-secondary-foreground" };
+};
+
 
 export default function AdminUsersPage() {
   const [users, setUsers] = useState<UserWithRoles[]>([]);
@@ -189,7 +195,7 @@ export default function AdminUsersPage() {
       // Insert new role with role_id
       const { error: insertError } = await supabase
         .from("user_roles")
-        .insert({ user_id: userId, role: newRole, role_id: roleDef.id });
+        .insert({ user_id: userId, role: newRole as "admin" | "employee" | "hr_manager", role_id: roleDef.id });
 
       if (insertError) throw insertError;
 
@@ -202,7 +208,7 @@ export default function AdminUsersPage() {
 
       toast({
         title: "Role updated",
-        description: `User role has been changed to ${roleConfig.find(r => r.value === newRole)?.label}.`,
+        description: `User role has been changed to ${roleDefinitions.find(r => r.code === newRole)?.name || newRole}.`,
       });
     } catch (error) {
       console.error("Error updating role:", error);
@@ -274,10 +280,15 @@ export default function AdminUsersPage() {
     return email.slice(0, 2).toUpperCase();
   };
 
-  const getPrimaryRole = (roles: AppRole[]): AppRole => {
-    if (roles.includes("admin")) return "admin";
-    if (roles.includes("hr_manager")) return "hr_manager";
+  const getPrimaryRole = (roles: string[]): string => {
+    // Return the first role, or 'employee' as default
+    if (roles.length > 0) return roles[0];
     return "employee";
+  };
+
+  const getRoleName = (roleCode: string): string => {
+    const roleDef = roleDefinitions.find(r => r.code === roleCode);
+    return roleDef?.name || roleCode;
   };
 
   const formatDate = (dateString: string) => {
@@ -314,20 +325,21 @@ export default function AdminUsersPage() {
 
         {/* Stats */}
         <div className="grid gap-4 sm:grid-cols-4 animate-slide-up">
-          {roleConfig.map((role) => {
-            const count = users.filter((u) => getPrimaryRole(u.roles) === role.value).length;
-            const Icon = role.icon;
+          {roleDefinitions.slice(0, 3).map((role) => {
+            const count = users.filter((u) => u.roles.includes(role.code)).length;
+            const style = getRoleStyle(role.code);
+            const Icon = style.icon;
             return (
               <div
-                key={role.value}
+                key={role.id}
                 className="rounded-xl border border-border bg-card p-5 shadow-card"
               >
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-muted-foreground">{role.label}s</p>
+                    <p className="text-sm font-medium text-muted-foreground">{role.name}s</p>
                     <p className="mt-1 text-3xl font-bold text-card-foreground">{count}</p>
                   </div>
-                  <div className={cn("rounded-lg p-3", role.color)}>
+                  <div className={cn("rounded-lg p-3", style.color)}>
                     <Icon className="h-5 w-5" />
                   </div>
                 </div>
@@ -409,8 +421,8 @@ export default function AdminUsersPage() {
                 <tbody className="divide-y divide-border">
                   {filteredUsers.map((user) => {
                     const primaryRole = getPrimaryRole(user.roles);
-                    const roleInfo = roleConfig.find((r) => r.value === primaryRole)!;
-                    const RoleIcon = roleInfo.icon;
+                    const roleStyle = getRoleStyle(primaryRole);
+                    const RoleIcon = roleStyle.icon;
                     const isCurrentUser = user.id === currentUser?.id;
 
                     return (
@@ -488,11 +500,11 @@ export default function AdminUsersPage() {
                           <span
                             className={cn(
                               "inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium",
-                              roleInfo.color
+                              roleStyle.color
                             )}
                           >
                             <RoleIcon className="h-3.5 w-3.5" />
-                            {roleInfo.label}
+                            {getRoleName(primaryRole)}
                           </span>
                         </td>
                         <td className="px-6 py-4">
@@ -527,24 +539,28 @@ export default function AdminUsersPage() {
                               <DropdownMenuLabel className="px-3 py-2 text-xs font-semibold uppercase text-muted-foreground">
                                 Change Role
                               </DropdownMenuLabel>
-                              {roleConfig.map((role) => (
-                                <DropdownMenuItem
-                                  key={role.value}
-                                  onClick={() => updateUserRole(user.id, role.value)}
-                                  className={cn(
-                                    "flex w-full items-center gap-2 px-3 py-2 text-sm",
-                                    primaryRole === role.value
-                                      ? "text-primary"
-                                      : "text-card-foreground"
-                                  )}
-                                >
-                                  <role.icon className="h-4 w-4" />
-                                  <span className="flex-1 text-left">{role.label}</span>
-                                  {primaryRole === role.value && (
-                                    <Check className="h-4 w-4" />
-                                  )}
-                                </DropdownMenuItem>
-                              ))}
+                              {roleDefinitions.map((role) => {
+                                const style = getRoleStyle(role.code);
+                                const Icon = style.icon;
+                                return (
+                                  <DropdownMenuItem
+                                    key={role.id}
+                                    onClick={() => updateUserRole(user.id, role.code)}
+                                    className={cn(
+                                      "flex w-full items-center gap-2 px-3 py-2 text-sm",
+                                      primaryRole === role.code
+                                        ? "text-primary"
+                                        : "text-card-foreground"
+                                    )}
+                                  >
+                                    <Icon className="h-4 w-4" />
+                                    <span className="flex-1 text-left">{role.name}</span>
+                                    {primaryRole === role.code && (
+                                      <Check className="h-4 w-4" />
+                                    )}
+                                  </DropdownMenuItem>
+                                );
+                              })}
                             </DropdownMenuContent>
                           </DropdownMenu>
                         </td>
