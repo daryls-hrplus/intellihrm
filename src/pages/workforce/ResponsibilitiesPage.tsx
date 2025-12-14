@@ -52,6 +52,7 @@ import {
 } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { format } from "date-fns";
+import { useLanguage } from "@/hooks/useLanguage";
 
 interface Responsibility {
   id: string;
@@ -95,6 +96,7 @@ export default function ResponsibilitiesPage() {
   const [formData, setFormData] = useState(emptyForm);
 
   const { logAction } = useAuditLog();
+  const { t } = useLanguage();
 
   useEffect(() => {
     fetchCompanies();
@@ -115,7 +117,7 @@ export default function ResponsibilitiesPage() {
 
     if (error) {
       console.error("Error fetching companies:", error);
-      toast.error("Failed to load companies");
+      toast.error(t("workforce.responsibilities.failedToLoad"));
     } else {
       setCompanies(data || []);
       if (data && data.length > 0 && !selectedCompanyId) {
@@ -137,7 +139,7 @@ export default function ResponsibilitiesPage() {
 
     if (error) {
       console.error("Error fetching responsibilities:", error);
-      toast.error("Failed to load responsibilities");
+      toast.error(t("workforce.responsibilities.failedToLoad"));
     } else {
       setResponsibilities(data || []);
     }
@@ -165,15 +167,15 @@ export default function ResponsibilitiesPage() {
 
   const handleSave = async () => {
     if (!formData.name.trim() || !formData.code.trim()) {
-      toast.error("Name and code are required");
+      toast.error(t("workforce.responsibilities.nameRequired"));
       return;
     }
     if (!formData.company_id) {
-      toast.error("Company is required");
+      toast.error(t("workforce.responsibilities.companyRequired"));
       return;
     }
     if (!formData.start_date) {
-      toast.error("Start date is required");
+      toast.error(t("workforce.responsibilities.startDateRequired"));
       return;
     }
 
@@ -198,14 +200,14 @@ export default function ResponsibilitiesPage() {
         if (error) throw error;
 
         await logAction({ action: "UPDATE", entityType: "responsibilities", entityId: selectedResponsibility.id, entityName: formData.name });
-        toast.success("Responsibility updated successfully");
+        toast.success(t("workforce.responsibilities.responsibilityUpdated"));
       } else {
         const { error } = await supabase.from("responsibilities").insert(payload);
 
         if (error) throw error;
 
         await logAction({ action: "CREATE", entityType: "responsibilities", entityName: formData.name });
-        toast.success("Responsibility created successfully");
+        toast.success(t("workforce.responsibilities.responsibilityCreated"));
       }
 
       setDialogOpen(false);
@@ -213,9 +215,9 @@ export default function ResponsibilitiesPage() {
     } catch (error: any) {
       console.error("Error saving responsibility:", error);
       if (error.code === "23505") {
-        toast.error("A responsibility with this code already exists for this company");
+        toast.error(t("workforce.responsibilities.codeExists"));
       } else {
-        toast.error("Failed to save responsibility");
+        toast.error(t("workforce.responsibilities.failedToSave"));
       }
     } finally {
       setIsSaving(false);
@@ -234,12 +236,12 @@ export default function ResponsibilitiesPage() {
       if (error) throw error;
 
       await logAction({ action: "DELETE", entityType: "responsibilities", entityId: selectedResponsibility.id, entityName: selectedResponsibility.name });
-      toast.success("Responsibility deleted successfully");
+      toast.success(t("workforce.responsibilities.responsibilityDeleted"));
       setDeleteDialogOpen(false);
       fetchResponsibilities();
     } catch (error) {
       console.error("Error deleting responsibility:", error);
-      toast.error("Failed to delete responsibility");
+      toast.error(t("workforce.responsibilities.failedToDelete"));
     }
   };
 
@@ -254,10 +256,10 @@ export default function ResponsibilitiesPage() {
       <div className="space-y-6">
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
           <NavLink to="/workforce" className="hover:text-foreground">
-            Workforce
+            {t("navigation.workforce")}
           </NavLink>
           <ChevronLeft className="h-4 w-4 rotate-180" />
-          <span className="text-foreground">Responsibilities</span>
+          <span className="text-foreground">{t("workforce.responsibilities.breadcrumb")}</span>
         </div>
 
         <div className="flex items-center justify-between">
@@ -266,22 +268,22 @@ export default function ResponsibilitiesPage() {
               <ClipboardList className="h-5 w-5 text-primary" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold tracking-tight">Responsibilities</h1>
+              <h1 className="text-2xl font-bold tracking-tight">{t("workforce.responsibilities.title")}</h1>
               <p className="text-muted-foreground">
-                Define job responsibilities for your organization
+                {t("workforce.responsibilities.subtitle")}
               </p>
             </div>
           </div>
           <Button onClick={() => handleOpenDialog()}>
             <Plus className="mr-2 h-4 w-4" />
-            Add Responsibility
+            {t("workforce.responsibilities.addResponsibility")}
           </Button>
         </div>
 
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
           <Select value={selectedCompanyId} onValueChange={setSelectedCompanyId}>
             <SelectTrigger className="w-full sm:w-[250px]">
-              <SelectValue placeholder="Select company" />
+              <SelectValue placeholder={t("workforce.selectCompany")} />
             </SelectTrigger>
             <SelectContent>
               {companies.map((company) => (
@@ -294,7 +296,7 @@ export default function ResponsibilitiesPage() {
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
-              placeholder="Search responsibilities..."
+              placeholder={t("workforce.responsibilities.searchResponsibilities")}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10"
@@ -306,13 +308,13 @@ export default function ResponsibilitiesPage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Code</TableHead>
-                <TableHead>Description</TableHead>
-                <TableHead>Start Date</TableHead>
-                <TableHead>End Date</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="w-[100px]">Actions</TableHead>
+                <TableHead>{t("common.name")}</TableHead>
+                <TableHead>{t("common.code")}</TableHead>
+                <TableHead>{t("common.description")}</TableHead>
+                <TableHead>{t("common.startDate")}</TableHead>
+                <TableHead>{t("common.endDate")}</TableHead>
+                <TableHead>{t("common.status")}</TableHead>
+                <TableHead className="w-[100px]">{t("common.actions")}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -325,7 +327,7 @@ export default function ResponsibilitiesPage() {
               ) : filteredResponsibilities.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
-                    {searchTerm ? "No responsibilities found matching your search" : "No responsibilities found. Create one to get started."}
+                    {searchTerm ? t("workforce.responsibilities.noMatchingSearch") : t("workforce.responsibilities.createToStart")}
                   </TableCell>
                 </TableRow>
               ) : (
@@ -338,7 +340,7 @@ export default function ResponsibilitiesPage() {
                     <TableCell>{responsibility.end_date || "-"}</TableCell>
                     <TableCell>
                       <Badge variant={responsibility.is_active ? "default" : "secondary"}>
-                        {responsibility.is_active ? "Active" : "Inactive"}
+                        {responsibility.is_active ? t("common.active") : t("common.inactive")}
                       </Badge>
                     </TableCell>
                     <TableCell>
@@ -374,18 +376,18 @@ export default function ResponsibilitiesPage() {
           <DialogContent className="max-w-lg">
             <DialogHeader>
               <DialogTitle>
-                {selectedResponsibility ? "Edit Responsibility" : "Create Responsibility"}
+                {selectedResponsibility ? t("workforce.responsibilities.editResponsibility") : t("workforce.responsibilities.createResponsibility")}
               </DialogTitle>
             </DialogHeader>
             <div className="space-y-4 py-4">
               <div className="space-y-2">
-                <Label>Company *</Label>
+                <Label>{t("common.company")} *</Label>
                 <Select
                   value={formData.company_id}
                   onValueChange={(value) => setFormData({ ...formData, company_id: value })}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select company" />
+                    <SelectValue placeholder={t("workforce.selectCompany")} />
                   </SelectTrigger>
                   <SelectContent>
                     {companies.map((company) => (
@@ -399,7 +401,7 @@ export default function ResponsibilitiesPage() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>Name *</Label>
+                  <Label>{t("common.name")} *</Label>
                   <Input
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
@@ -407,7 +409,7 @@ export default function ResponsibilitiesPage() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>Code *</Label>
+                  <Label>{t("common.code")} *</Label>
                   <Input
                     value={formData.code}
                     onChange={(e) => setFormData({ ...formData, code: e.target.value.toUpperCase() })}
@@ -417,7 +419,7 @@ export default function ResponsibilitiesPage() {
               </div>
 
               <div className="space-y-2">
-                <Label>Description</Label>
+                <Label>{t("common.description")}</Label>
                 <Textarea
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
@@ -428,7 +430,7 @@ export default function ResponsibilitiesPage() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>Start Date *</Label>
+                  <Label>{t("common.startDate")} *</Label>
                   <Input
                     type="date"
                     value={formData.start_date}
@@ -436,7 +438,7 @@ export default function ResponsibilitiesPage() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>End Date</Label>
+                  <Label>{t("common.endDate")}</Label>
                   <Input
                     type="date"
                     value={formData.end_date}
@@ -450,16 +452,16 @@ export default function ResponsibilitiesPage() {
                   checked={formData.is_active}
                   onCheckedChange={(checked) => setFormData({ ...formData, is_active: checked })}
                 />
-                <Label>Active</Label>
+                <Label>{t("common.active")}</Label>
               </div>
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setDialogOpen(false)}>
-                Cancel
+                {t("common.cancel")}
               </Button>
               <Button onClick={handleSave} disabled={isSaving}>
                 {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                {selectedResponsibility ? "Update" : "Create"}
+                {selectedResponsibility ? t("common.update") : t("common.create")}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -469,15 +471,15 @@ export default function ResponsibilitiesPage() {
         <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>Delete Responsibility</AlertDialogTitle>
+              <AlertDialogTitle>{t("workforce.responsibilities.deleteResponsibility")}</AlertDialogTitle>
               <AlertDialogDescription>
-                Are you sure you want to delete "{selectedResponsibility?.name}"? This action cannot be undone.
+                {t("workforce.responsibilities.deleteConfirm", { name: selectedResponsibility?.name })}
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogCancel>{t("common.cancel")}</AlertDialogCancel>
               <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-                Delete
+                {t("common.delete")}
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
