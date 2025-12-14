@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { NavLink } from "@/components/NavLink";
@@ -26,184 +27,186 @@ import {
   DollarSign,
 } from "lucide-react";
 
-const essModules = [
-  {
-    title: "My Profile",
-    description: "View and update your personal information",
-    href: "/profile",
-    icon: User,
-    color: "bg-blue-500/10 text-blue-600",
-  },
-  {
-    title: "My Approvals",
-    description: "View and action pending approval requests",
-    href: "/workflow/approvals",
-    icon: CheckSquare,
-    color: "bg-violet-500/10 text-violet-600",
-  },
-  {
-    title: "My Delegates",
-    description: "Manage your approval delegates",
-    href: "/workflow/delegates",
-    icon: UserCheck,
-    color: "bg-fuchsia-500/10 text-fuchsia-600",
-  },
-  {
-    title: "Leave Requests",
-    description: "Apply for leave and view your leave balance",
-    href: "/ess/leave",
-    icon: Calendar,
-    color: "bg-green-500/10 text-green-600",
-  },
-  {
-    title: "My Documents",
-    description: "Access your employment documents and certificates",
-    href: "/ess/documents",
-    icon: FileText,
-    color: "bg-purple-500/10 text-purple-600",
-  },
-  {
-    title: "Time & Attendance",
-    description: "Clock in/out and view your attendance records",
-    href: "/ess/time-attendance",
-    icon: Clock,
-    color: "bg-orange-500/10 text-orange-600",
-  },
-  {
-    title: "Payslips",
-    description: "View and download your payslips",
-    href: "/ess/payslips",
-    icon: CreditCard,
-    color: "bg-emerald-500/10 text-emerald-600",
-  },
-  {
-    title: "My Training",
-    description: "View enrolled courses and training history",
-    href: "/ess/training",
-    icon: GraduationCap,
-    color: "bg-indigo-500/10 text-indigo-600",
-  },
-  {
-    title: "My Goals",
-    description: "View and track your performance goals",
-    href: "/ess/goals",
-    icon: Target,
-    color: "bg-pink-500/10 text-pink-600",
-  },
-  {
-    title: "Submit a Ticket",
-    description: "Request help or report an issue to IT/HR support",
-    href: "/help/tickets/new",
-    icon: TicketPlus,
-    color: "bg-red-500/10 text-red-600",
-  },
-  {
-    title: "My Letters",
-    description: "Request and view employment letters",
-    href: "/ess/letters",
-    icon: FileSignature,
-    color: "bg-cyan-500/10 text-cyan-600",
-  },
-  {
-    title: "My Onboarding",
-    description: "Complete your onboarding tasks and checklist",
-    href: "/ess/onboarding",
-    icon: Rocket,
-    color: "bg-teal-500/10 text-teal-600",
-  },
-  {
-    title: "My Offboarding",
-    description: "Complete your exit tasks before leaving",
-    href: "/ess/offboarding",
-    icon: UserMinus,
-    color: "bg-red-500/10 text-red-600",
-  },
-  {
-    title: "My Property",
-    description: "View assigned equipment and submit requests",
-    href: "/ess/property",
-    icon: Package,
-    color: "bg-slate-500/10 text-slate-600",
-  },
-  {
-    title: "Employee Relations",
-    description: "Recognition, surveys, and workplace concerns",
-    href: "/ess/relations",
-    icon: Heart,
-    color: "bg-rose-500/10 text-rose-600",
-  },
-  {
-    title: "My Benefits",
-    description: "View your benefit plans and coverage",
-    href: "/ess/benefits",
-    icon: Shield,
-    color: "bg-emerald-500/10 text-emerald-600",
-  },
-  {
-    title: "Health & Safety",
-    description: "Report incidents, view policies, and training",
-    href: "/ess/hse",
-    icon: HardHat,
-    color: "bg-yellow-500/10 text-yellow-600",
-  },
-  {
-    title: "Job Openings",
-    description: "Browse and apply for internal job openings",
-    href: "/ess/jobs",
-    icon: Briefcase,
-    color: "bg-blue-500/10 text-blue-600",
-  },
-  {
-    title: "My Compensation",
-    description: "View your salary, allowances, and total rewards",
-    href: "/ess/compensation",
-    icon: DollarSign,
-    color: "bg-emerald-500/10 text-emerald-600",
-  },
-  {
-    title: "My Feedback",
-    description: "Give and receive continuous feedback",
-    href: "/ess/feedback",
-    icon: MessageCircle,
-    color: "bg-violet-500/10 text-violet-600",
-  },
-  {
-    title: "My Recognition",
-    description: "View your recognitions and recognize colleagues",
-    href: "/ess/recognition",
-    icon: Award,
-    color: "bg-amber-500/10 text-amber-600",
-  },
-  {
-    title: "My Reminders",
-    description: "View your upcoming reminders and important dates",
-    href: "/ess/reminders",
-    icon: Bell,
-    color: "bg-rose-500/10 text-rose-600",
-  },
-  {
-    title: "Notifications",
-    description: "Manage your notification preferences",
-    href: "/profile/notifications",
-    icon: Bell,
-    color: "bg-amber-500/10 text-amber-600",
-  },
-];
-
 export default function EmployeeSelfServicePage() {
+  const { t } = useTranslation();
+
+  const essModules = [
+    {
+      title: t("ess.modules.profile.title"),
+      description: t("ess.modules.profile.description"),
+      href: "/profile",
+      icon: User,
+      color: "bg-blue-500/10 text-blue-600",
+    },
+    {
+      title: t("ess.modules.approvals.title"),
+      description: t("ess.modules.approvals.description"),
+      href: "/workflow/approvals",
+      icon: CheckSquare,
+      color: "bg-violet-500/10 text-violet-600",
+    },
+    {
+      title: t("ess.modules.delegates.title"),
+      description: t("ess.modules.delegates.description"),
+      href: "/workflow/delegates",
+      icon: UserCheck,
+      color: "bg-fuchsia-500/10 text-fuchsia-600",
+    },
+    {
+      title: t("ess.modules.leave.title"),
+      description: t("ess.modules.leave.description"),
+      href: "/ess/leave",
+      icon: Calendar,
+      color: "bg-green-500/10 text-green-600",
+    },
+    {
+      title: t("ess.modules.documents.title"),
+      description: t("ess.modules.documents.description"),
+      href: "/ess/documents",
+      icon: FileText,
+      color: "bg-purple-500/10 text-purple-600",
+    },
+    {
+      title: t("ess.modules.timeAttendance.title"),
+      description: t("ess.modules.timeAttendance.description"),
+      href: "/ess/time-attendance",
+      icon: Clock,
+      color: "bg-orange-500/10 text-orange-600",
+    },
+    {
+      title: t("ess.modules.payslips.title"),
+      description: t("ess.modules.payslips.description"),
+      href: "/ess/payslips",
+      icon: CreditCard,
+      color: "bg-emerald-500/10 text-emerald-600",
+    },
+    {
+      title: t("ess.modules.training.title"),
+      description: t("ess.modules.training.description"),
+      href: "/ess/training",
+      icon: GraduationCap,
+      color: "bg-indigo-500/10 text-indigo-600",
+    },
+    {
+      title: t("ess.modules.goals.title"),
+      description: t("ess.modules.goals.description"),
+      href: "/ess/goals",
+      icon: Target,
+      color: "bg-pink-500/10 text-pink-600",
+    },
+    {
+      title: t("ess.modules.tickets.title"),
+      description: t("ess.modules.tickets.description"),
+      href: "/help/tickets/new",
+      icon: TicketPlus,
+      color: "bg-red-500/10 text-red-600",
+    },
+    {
+      title: t("ess.modules.letters.title"),
+      description: t("ess.modules.letters.description"),
+      href: "/ess/letters",
+      icon: FileSignature,
+      color: "bg-cyan-500/10 text-cyan-600",
+    },
+    {
+      title: t("ess.modules.onboarding.title"),
+      description: t("ess.modules.onboarding.description"),
+      href: "/ess/onboarding",
+      icon: Rocket,
+      color: "bg-teal-500/10 text-teal-600",
+    },
+    {
+      title: t("ess.modules.offboarding.title"),
+      description: t("ess.modules.offboarding.description"),
+      href: "/ess/offboarding",
+      icon: UserMinus,
+      color: "bg-red-500/10 text-red-600",
+    },
+    {
+      title: t("ess.modules.property.title"),
+      description: t("ess.modules.property.description"),
+      href: "/ess/property",
+      icon: Package,
+      color: "bg-slate-500/10 text-slate-600",
+    },
+    {
+      title: t("ess.modules.relations.title"),
+      description: t("ess.modules.relations.description"),
+      href: "/ess/relations",
+      icon: Heart,
+      color: "bg-rose-500/10 text-rose-600",
+    },
+    {
+      title: t("ess.modules.benefits.title"),
+      description: t("ess.modules.benefits.description"),
+      href: "/ess/benefits",
+      icon: Shield,
+      color: "bg-emerald-500/10 text-emerald-600",
+    },
+    {
+      title: t("ess.modules.hse.title"),
+      description: t("ess.modules.hse.description"),
+      href: "/ess/hse",
+      icon: HardHat,
+      color: "bg-yellow-500/10 text-yellow-600",
+    },
+    {
+      title: t("ess.modules.jobs.title"),
+      description: t("ess.modules.jobs.description"),
+      href: "/ess/jobs",
+      icon: Briefcase,
+      color: "bg-blue-500/10 text-blue-600",
+    },
+    {
+      title: t("ess.modules.compensation.title"),
+      description: t("ess.modules.compensation.description"),
+      href: "/ess/compensation",
+      icon: DollarSign,
+      color: "bg-emerald-500/10 text-emerald-600",
+    },
+    {
+      title: t("ess.modules.feedback.title"),
+      description: t("ess.modules.feedback.description"),
+      href: "/ess/feedback",
+      icon: MessageCircle,
+      color: "bg-violet-500/10 text-violet-600",
+    },
+    {
+      title: t("ess.modules.recognition.title"),
+      description: t("ess.modules.recognition.description"),
+      href: "/ess/recognition",
+      icon: Award,
+      color: "bg-amber-500/10 text-amber-600",
+    },
+    {
+      title: t("ess.modules.reminders.title"),
+      description: t("ess.modules.reminders.description"),
+      href: "/ess/reminders",
+      icon: Bell,
+      color: "bg-rose-500/10 text-rose-600",
+    },
+    {
+      title: t("ess.modules.notifications.title"),
+      description: t("ess.modules.notifications.description"),
+      href: "/profile/notifications",
+      icon: Bell,
+      color: "bg-amber-500/10 text-amber-600",
+    },
+  ];
+
   return (
     <AppLayout>
       <div className="space-y-6">
         <Breadcrumbs
           items={[
-            { label: "Employee Self Service" },
+            { label: t("ess.title") },
           ]}
         />
         
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Employee Self Service</h1>
+          <h1 className="text-3xl font-bold tracking-tight">{t("ess.title")}</h1>
           <p className="text-muted-foreground">
-            Access your personal information, requests, and employment details
+            {t("ess.subtitle")}
           </p>
         </div>
 
