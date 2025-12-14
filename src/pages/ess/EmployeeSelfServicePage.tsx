@@ -64,8 +64,8 @@ const essModules = [
   },
   {
     title: "Time & Attendance",
-    description: "View your attendance records and timesheets",
-    href: "/ess/attendance",
+    description: "Clock in/out and view your attendance records",
+    href: "/ess/time-attendance",
     icon: Clock,
     color: "bg-orange-500/10 text-orange-600",
   },

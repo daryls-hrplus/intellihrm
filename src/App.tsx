@@ -238,6 +238,8 @@ import EssCompaRatioPage from "./pages/ess/EssCompaRatioPage";
 import MssCompensationPage from "./pages/mss/MssCompensationPage";
 import MssCompaRatioPage from "./pages/mss/MssCompaRatioPage";
 import MssEquityPage from "./pages/mss/MssEquityPage";
+import MyTimeAttendancePage from "./pages/ess/MyTimeAttendancePage";
+import MssTimeAttendancePage from "./pages/mss/MssTimeAttendancePage";
 
 // Workflow pages
 import AdminWorkflowTemplatesPage from "./pages/admin/AdminWorkflowTemplatesPage";
@@ -460,6 +462,14 @@ const App = () => (
                 </ProtectedRoute>
               }
             />
+            <Route
+              path="/ess/time-attendance"
+              element={
+                <ProtectedRoute moduleCode="ess">
+                  <MyTimeAttendancePage />
+                </ProtectedRoute>
+              }
+            />
             {/* Manager Self Service Routes */}
             <Route
               path="/mss"
@@ -634,6 +644,14 @@ const App = () => (
               element={
                 <ProtectedRoute moduleCode="mss">
                   <MssEquityPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/mss/time-attendance"
+              element={
+                <ProtectedRoute moduleCode="mss" requiredRoles={["admin", "hr_manager"]}>
+                  <MssTimeAttendancePage />
                 </ProtectedRoute>
               }
             />
