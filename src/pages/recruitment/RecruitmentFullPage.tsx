@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
+import { useLanguage } from "@/hooks/useLanguage";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -51,6 +52,7 @@ import { ModuleReportsButton } from "@/components/reports/ModuleReportsButton";
 import { ModuleBIButton } from "@/components/bi/ModuleBIButton";
 
 export default function RecruitmentFullPage() {
+  const { t } = useLanguage();
   const [companyId, setCompanyId] = useState<string>("");
   const [searchTerm, setSearchTerm] = useState("");
   const [isRequisitionDialogOpen, setIsRequisitionDialogOpen] = useState(false);
@@ -283,16 +285,16 @@ export default function RecruitmentFullPage() {
       <div className="space-y-6">
         <Breadcrumbs
           items={[
-            { label: "Recruitment", href: "/recruitment" },
-            { label: "Recruitment Management" },
+            { label: t("recruitment.dashboard.title"), href: "/recruitment" },
+            { label: t("recruitment.modules.management.title") },
           ]}
         />
 
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">Recruitment</h1>
+            <h1 className="text-3xl font-bold tracking-tight">{t("recruitment.dashboard.title")}</h1>
             <p className="text-muted-foreground">
-              Manage job requisitions, candidates, and job board integrations
+              {t("recruitment.dashboard.subtitle")}
             </p>
           </div>
           <div className="flex items-center gap-2">
@@ -306,7 +308,7 @@ export default function RecruitmentFullPage() {
           <div className="w-64">
             <Select value={companyId} onValueChange={setCompanyId}>
               <SelectTrigger>
-                <SelectValue placeholder="Select company" />
+                <SelectValue placeholder={t("common.selectCompany")} />
               </SelectTrigger>
               <SelectContent>
                 {companies.map((company: any) => (
@@ -321,7 +323,7 @@ export default function RecruitmentFullPage() {
             <div className="relative max-w-md">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Search requisitions..."
+                placeholder={t("recruitment.actions.searchRequisitions")}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10"
@@ -334,45 +336,45 @@ export default function RecruitmentFullPage() {
         <div className="grid gap-4 md:grid-cols-4">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Open Positions</CardTitle>
+              <CardTitle className="text-sm font-medium">{t("recruitment.stats.openPositions")}</CardTitle>
               <Briefcase className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{openReqs}</div>
-              <p className="text-xs text-muted-foreground">Active requisitions</p>
+              <p className="text-xs text-muted-foreground">{t("recruitment.stats.activeRequisitions")}</p>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Candidates</CardTitle>
+              <CardTitle className="text-sm font-medium">{t("recruitment.stats.totalCandidates")}</CardTitle>
               <Users className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{totalCandidates}</div>
-              <p className="text-xs text-muted-foreground">In talent pool</p>
+              <p className="text-xs text-muted-foreground">{t("recruitment.stats.inTalentPool")}</p>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Active Applications</CardTitle>
+              <CardTitle className="text-sm font-medium">{t("recruitment.stats.activeApplications")}</CardTitle>
               <FileText className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{activeApplications}</div>
-              <p className="text-xs text-muted-foreground">In pipeline</p>
+              <p className="text-xs text-muted-foreground">{t("recruitment.stats.inPipeline")}</p>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Hired This Month</CardTitle>
+              <CardTitle className="text-sm font-medium">{t("recruitment.stats.hiredThisMonth")}</CardTitle>
               <CheckCircle className="h-4 w-4 text-green-600" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{hiredThisMonth}</div>
-              <p className="text-xs text-muted-foreground">New hires</p>
+              <p className="text-xs text-muted-foreground">{t("recruitment.stats.newHires")}</p>
             </CardContent>
           </Card>
         </div>
@@ -381,51 +383,51 @@ export default function RecruitmentFullPage() {
           <TabsList className="flex-wrap h-auto gap-1">
             <TabsTrigger value="requisitions">
               <Briefcase className="mr-2 h-4 w-4" />
-              Requisitions
+              {t("recruitment.tabs.requisitions")}
             </TabsTrigger>
             <TabsTrigger value="candidates">
               <Users className="mr-2 h-4 w-4" />
-              Candidates
+              {t("recruitment.tabs.candidates")}
             </TabsTrigger>
             <TabsTrigger value="applications">
               <FileText className="mr-2 h-4 w-4" />
-              Applications
+              {t("recruitment.tabs.applications")}
             </TabsTrigger>
             <TabsTrigger value="pipeline">
               <TrendingUp className="mr-2 h-4 w-4" />
-              Pipeline
+              {t("recruitment.tabs.pipeline")}
             </TabsTrigger>
             <TabsTrigger value="scorecards">
               <ClipboardList className="mr-2 h-4 w-4" />
-              Scorecards
+              {t("recruitment.tabs.scorecards")}
             </TabsTrigger>
             <TabsTrigger value="offers">
               <Award className="mr-2 h-4 w-4" />
-              Offers
+              {t("recruitment.tabs.offers")}
             </TabsTrigger>
             <TabsTrigger value="referrals">
               <UserPlus className="mr-2 h-4 w-4" />
-              Referrals
+              {t("recruitment.tabs.referrals")}
             </TabsTrigger>
             <TabsTrigger value="assessments">
               <FlaskConical className="mr-2 h-4 w-4" />
-              Assessments
+              {t("recruitment.tabs.assessments")}
             </TabsTrigger>
             <TabsTrigger value="panels">
               <UsersRound className="mr-2 h-4 w-4" />
-              Panels
+              {t("recruitment.tabs.panels")}
             </TabsTrigger>
             <TabsTrigger value="emails">
               <Mail className="mr-2 h-4 w-4" />
-              Templates
+              {t("recruitment.tabs.templates")}
             </TabsTrigger>
             <TabsTrigger value="sources">
               <TrendingUp className="mr-2 h-4 w-4" />
-              Sources
+              {t("recruitment.tabs.sources")}
             </TabsTrigger>
             <TabsTrigger value="job-boards">
               <Settings className="mr-2 h-4 w-4" />
-              Job Boards
+              {t("recruitment.tabs.jobBoards")}
             </TabsTrigger>
           </TabsList>
 
@@ -436,14 +438,14 @@ export default function RecruitmentFullPage() {
                 <DialogTrigger asChild>
                   <Button disabled={!companyId}>
                     <Plus className="mr-2 h-4 w-4" />
-                    New Requisition
+                    {t("recruitment.actions.newRequisition")}
                   </Button>
                 </DialogTrigger>
                 <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                   <DialogHeader>
-                    <DialogTitle>Create Job Requisition</DialogTitle>
+                    <DialogTitle>{t("recruitment.form.createRequisition")}</DialogTitle>
                     <DialogDescription>
-                      Create a new job requisition for an open position
+                      {t("recruitment.form.createRequisitionDesc")}
                     </DialogDescription>
                   </DialogHeader>
                   

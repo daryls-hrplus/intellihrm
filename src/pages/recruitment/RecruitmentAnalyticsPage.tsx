@@ -3,6 +3,7 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useAuth } from "@/contexts/AuthContext";
+import { useLanguage } from "@/hooks/useLanguage";
 import { supabase } from "@/integrations/supabase/client";
 import { Building2, Loader2 } from "lucide-react";
 import { RecruitmentAnalytics } from "@/components/recruitment/RecruitmentAnalytics";
@@ -15,6 +16,7 @@ interface Company {
 
 export default function RecruitmentAnalyticsPage() {
   const { company, isAdmin, hasRole } = useAuth();
+  const { t } = useLanguage();
   const isAdminOrHR = isAdmin || hasRole("hr_manager");
 
   const [companies, setCompanies] = useState<Company[]>([]);
@@ -99,21 +101,21 @@ export default function RecruitmentAnalyticsPage() {
     <AppLayout>
       <div className="space-y-6">
         <Breadcrumbs items={[
-          { label: "Recruitment", href: "/recruitment" },
-          { label: "Analytics" }
+          { label: t("recruitment.dashboard.title"), href: "/recruitment" },
+          { label: t("succession.tabs.analytics") }
         ]} />
 
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold">Recruitment Analytics</h1>
-            <p className="text-muted-foreground">Comprehensive hiring pipeline and trends analysis</p>
+            <h1 className="text-3xl font-bold">{t("recruitment.modules.analytics.title")}</h1>
+            <p className="text-muted-foreground">{t("recruitment.modules.analytics.subtitle")}</p>
           </div>
           <div className="flex items-center gap-2">
             {isAdminOrHR && companies.length > 1 && (
               <Select value={selectedCompanyId} onValueChange={setSelectedCompanyId}>
                 <SelectTrigger className="w-[180px]">
                   <Building2 className="mr-2 h-4 w-4" />
-                  <SelectValue placeholder="Company" />
+                  <SelectValue placeholder={t("common.company")} />
                 </SelectTrigger>
                 <SelectContent>
                   {companies.map((c) => (
@@ -127,7 +129,7 @@ export default function RecruitmentAnalyticsPage() {
 
         {!selectedCompanyId ? (
           <div className="flex items-center justify-center py-20 text-muted-foreground">
-            Please select a company to view analytics
+            {t("succession.dashboard.selectCompany")}
           </div>
         ) : isLoading ? (
           <div className="flex items-center justify-center py-20">
