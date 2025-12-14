@@ -37,6 +37,7 @@ import {
   FileSpreadsheet,
   Layers,
   CreditCard,
+  ArrowUpCircle,
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 
@@ -173,6 +174,13 @@ const getAdminModules = (t: (key: string) => string) => [
     href: "/admin/subscriptions",
     icon: CreditCard,
     color: "bg-emerald-500/10 text-emerald-600",
+  },
+  {
+    title: "Upgrade Plan",
+    description: "Add or remove modules from your subscription",
+    href: "/subscription/upgrade",
+    icon: ArrowUpCircle,
+    color: "bg-gradient-to-r from-amber-500/10 to-orange-500/10 text-orange-600",
   },
   {
     title: t("admin.modules.territories.title"),
