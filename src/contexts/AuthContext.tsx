@@ -18,6 +18,7 @@ interface Company {
   id: string;
   name: string;
   code: string;
+  territory_id: string | null;
 }
 
 interface AuthContextType {
@@ -108,7 +109,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (profileData?.company_id) {
         const { data: companyData } = await supabase
           .from("companies")
-          .select("id, name, code")
+          .select("id, name, code, territory_id")
           .eq("id", profileData.company_id)
           .maybeSingle();
 

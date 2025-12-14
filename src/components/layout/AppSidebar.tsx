@@ -1,7 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { NavLink, useNavigate, useLocation } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
+import { supportedLanguages } from "@/i18n/config";
 import { useMenuPermissions } from "@/hooks/useMenuPermissions";
 import {
   LayoutDashboard,
@@ -67,10 +70,37 @@ const navItems: NavItem[] = [
 export function AppSidebar() {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
+  const [territoryName, setTerritoryName] = useState<string | null>(null);
   const { profile, roles, company, signOut, isAdmin, isHRManager } = useAuth();
   const { hasMenuAccess } = useMenuPermissions();
+  const { i18n } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
+
+  // Get current language name
+  const currentLanguage = supportedLanguages.find(lang => lang.code === i18n.language)?.name || "English";
+
+  // Fetch territory name based on company's territory_id
+  useEffect(() => {
+    const fetchTerritory = async () => {
+      if (!company?.territory_id) {
+        setTerritoryName(null);
+        return;
+      }
+
+      const { data, error } = await supabase
+        .from("territories")
+        .select("name")
+        .eq("id", company.territory_id)
+        .single();
+
+      if (!error && data) {
+        setTerritoryName(data.name);
+      }
+    };
+
+    fetchTerritory();
+  }, [company?.territory_id]);
 
   const handleSignOut = async () => {
     await signOut();
@@ -171,11 +201,11 @@ export function AppSidebar() {
             <div className="flex gap-2">
               <div className="flex flex-1 items-center gap-1.5 rounded-lg bg-sidebar-accent px-2 py-1.5 text-xs text-sidebar-foreground/60">
                 <Globe className="h-3.5 w-3.5" />
-                <span>US East</span>
+                <span className="truncate">{territoryName || "No Territory"}</span>
               </div>
               <div className="flex flex-1 items-center gap-1.5 rounded-lg bg-sidebar-accent px-2 py-1.5 text-xs text-sidebar-foreground/60">
                 <Languages className="h-3.5 w-3.5" />
-                <span>English</span>
+                <span>{currentLanguage}</span>
               </div>
             </div>
           </div>
