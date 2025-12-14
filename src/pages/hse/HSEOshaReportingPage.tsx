@@ -246,9 +246,9 @@ export default function HSEOshaReportingPage() {
                   filteredLogs?.map((log) => (
                     <TableRow key={log.id}>
                       <TableCell className="font-medium">{log.establishment_name}</TableCell>
-                      <TableCell>{log.reporting_year}</TableCell>
-                      <TableCell>{log.form_300a_completed ? "300A" : "-"}</TableCell>
-                      <TableCell>{log.total_injuries || 0}</TableCell>
+                      <TableCell>{log.log_year}</TableCell>
+                      <TableCell>{log.certification_date ? "300A" : "-"}</TableCell>
+                      <TableCell>{(log.total_other_recordable || 0) + (log.total_deaths || 0)}</TableCell>
                       <TableCell>{log.total_days_away || 0}</TableCell>
                       <TableCell>{getStatusBadge(log.status)}</TableCell>
                       <TableCell>

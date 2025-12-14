@@ -167,6 +167,10 @@ import HSEWorkersCompPage from "./pages/hse/HSEWorkersCompPage";
 import HSEPPEManagementPage from "./pages/hse/HSEPPEManagementPage";
 import HSEInspectionsPage from "./pages/hse/HSEInspectionsPage";
 import HSEEmergencyResponsePage from "./pages/hse/HSEEmergencyResponsePage";
+import HSEChemicalsPage from "./pages/hse/HSEChemicalsPage";
+import HSEOshaReportingPage from "./pages/hse/HSEOshaReportingPage";
+import HSEPermitToWorkPage from "./pages/hse/HSEPermitToWorkPage";
+import HSELotoPage from "./pages/hse/HSELotoPage";
 
 // Employee Relations pages
 import EmployeeRelationsDashboardPage from "./pages/employee-relations/EmployeeRelationsDashboardPage";
@@ -1992,6 +1996,38 @@ const App = () => (
               element={
                 <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
                   <HSEEmergencyResponsePage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/hse/chemicals"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
+                  <HSEChemicalsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/hse/osha-reporting"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
+                  <HSEOshaReportingPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/hse/permit-to-work"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
+                  <HSEPermitToWorkPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/hse/loto"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
+                  <HSELotoPage />
                 </ProtectedRoute>
               }
             />

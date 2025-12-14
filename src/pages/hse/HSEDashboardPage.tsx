@@ -20,6 +20,10 @@ import {
   Briefcase,
   HardHatIcon,
   Siren,
+  FlaskConical,
+  FileWarning,
+  KeyRound,
+  Lock,
 } from "lucide-react";
 
 const hseModules = [
@@ -151,6 +155,34 @@ export default function HSEDashboardPage() {
       href: "/hse/emergency-response",
       icon: Siren,
       color: "bg-rose-500/10 text-rose-600",
+    },
+    {
+      title: t("hseModule.modules.chemicals.title"),
+      description: t("hseModule.modules.chemicals.description"),
+      href: "/hse/chemicals",
+      icon: FlaskConical,
+      color: "bg-purple-500/10 text-purple-600",
+    },
+    {
+      title: t("hseModule.modules.oshaReporting.title"),
+      description: t("hseModule.modules.oshaReporting.description"),
+      href: "/hse/osha-reporting",
+      icon: FileWarning,
+      color: "bg-indigo-500/10 text-indigo-600",
+    },
+    {
+      title: t("hseModule.modules.permitToWork.title"),
+      description: t("hseModule.modules.permitToWork.description"),
+      href: "/hse/permit-to-work",
+      icon: KeyRound,
+      color: "bg-cyan-500/10 text-cyan-600",
+    },
+    {
+      title: t("hseModule.modules.loto.title"),
+      description: t("hseModule.modules.loto.description"),
+      href: "/hse/loto",
+      icon: Lock,
+      color: "bg-slate-500/10 text-slate-600",
     },
   ];
 

@@ -99,7 +99,7 @@ export default function HSEChemicalsPage() {
     },
     { 
       label: t("hseModule.chemicals.stats.highHazard"), 
-      value: chemicals?.filter(c => c.hazard_classification?.includes("high")).length || 0, 
+      value: chemicals?.filter(c => (c.hazard_classification as string[])?.some(h => h.includes("high"))).length || 0, 
       icon: AlertTriangle, 
       color: "bg-destructive/10 text-destructive" 
     },
@@ -237,7 +237,7 @@ export default function HSEChemicalsPage() {
                         <TableRow key={chem.id}>
                           <TableCell className="font-medium">{chem.chemical_name}</TableCell>
                           <TableCell>{chem.cas_number || "-"}</TableCell>
-                          <TableCell>{getHazardBadge(chem.hazard_classification)}</TableCell>
+                          <TableCell>{(chem.hazard_classification as string[])?.join(", ") || "-"}</TableCell>
                           <TableCell>{chem.storage_requirements || "-"}</TableCell>
                           <TableCell>
                             {chem.sds_document_url ? (
