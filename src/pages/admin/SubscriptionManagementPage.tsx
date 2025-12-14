@@ -11,10 +11,27 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
+import { Checkbox } from '@/components/ui/checkbox';
 import { 
   Building2, CreditCard, FileText, Settings, Check, X, Clock, 
-  DollarSign, Users, Package, Loader2 
+  DollarSign, Users, Package, Loader2, Pencil 
 } from 'lucide-react';
+
+const ALL_MODULES = [
+  { code: 'workforce', name: 'Workforce Management' },
+  { code: 'leave', name: 'Leave Management' },
+  { code: 'compensation', name: 'Compensation' },
+  { code: 'payroll', name: 'Payroll' },
+  { code: 'time_attendance', name: 'Time & Attendance' },
+  { code: 'benefits', name: 'Benefits' },
+  { code: 'training', name: 'Training & LMS' },
+  { code: 'performance', name: 'Performance Management' },
+  { code: 'succession', name: 'Succession Planning' },
+  { code: 'recruitment', name: 'Recruitment' },
+  { code: 'hse', name: 'Health & Safety' },
+  { code: 'employee_relations', name: 'Employee Relations' },
+  { code: 'property', name: 'Company Property' },
+];
 import { format } from 'date-fns';
 
 interface CompanySubscription {
@@ -74,6 +91,10 @@ export default function SubscriptionManagementPage() {
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
   const [paymentReference, setPaymentReference] = useState('');
   const [showPaymentDialog, setShowPaymentDialog] = useState(false);
+  const [editingTier, setEditingTier] = useState<Tier | null>(null);
+  const [tierModules, setTierModules] = useState<string[]>([]);
+  const [tierPrice, setTierPrice] = useState({ base: 0, perEmployee: 0 });
+  const [isSavingTier, setIsSavingTier] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -165,6 +186,44 @@ export default function SubscriptionManagementPage() {
         variant: "destructive"
       });
     }
+  };
+
+  const openEditTier = (tier: Tier) => {
+    setEditingTier(tier);
+    setTierModules(tier.modules);
+    setTierPrice({ base: tier.base_price_monthly, perEmployee: tier.price_per_employee });
+  };
+
+  const handleSaveTier = async () => {
+    if (!editingTier) return;
+    setIsSavingTier(true);
+
+    try {
+      const { error } = await supabase
+        .from('subscription_tiers')
+        .update({
+          modules: tierModules,
+          base_price_monthly: tierPrice.base,
+          price_per_employee: tierPrice.perEmployee
+        })
+        .eq('id', editingTier.id);
+
+      if (error) throw error;
+
+      toast({ title: "Tier Updated", description: `${editingTier.name} has been updated.` });
+      setEditingTier(null);
+      fetchData();
+    } catch (error: any) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    } finally {
+      setIsSavingTier(false);
+    }
+  };
+
+  const toggleModule = (code: string) => {
+    setTierModules(prev => 
+      prev.includes(code) ? prev.filter(m => m !== code) : [...prev, code]
+    );
   };
 
   const getStatusBadge = (status: string) => {
@@ -393,9 +452,14 @@ export default function SubscriptionManagementPage() {
                 <CardHeader>
                   <div className="flex items-center justify-between">
                     <CardTitle>{tier.name}</CardTitle>
-                    <Badge variant={tier.is_active ? 'default' : 'secondary'}>
-                      {tier.is_active ? 'Active' : 'Inactive'}
-                    </Badge>
+                    <div className="flex items-center gap-2">
+                      <Badge variant={tier.is_active ? 'default' : 'secondary'}>
+                        {tier.is_active ? 'Active' : 'Inactive'}
+                      </Badge>
+                      <Button variant="ghost" size="icon" onClick={() => openEditTier(tier)}>
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </div>
                   <CardDescription>{tier.description}</CardDescription>
                 </CardHeader>
@@ -412,7 +476,7 @@ export default function SubscriptionManagementPage() {
                       <div className="flex flex-wrap gap-1">
                         {tier.modules.map((mod) => (
                           <Badge key={mod} variant="outline" className="text-xs">
-                            {mod}
+                            {ALL_MODULES.find(m => m.code === mod)?.name || mod}
                           </Badge>
                         ))}
                       </div>
@@ -457,6 +521,58 @@ export default function SubscriptionManagementPage() {
             </Button>
             <Button onClick={handleMarkPaid}>
               Confirm Payment
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Tier Dialog */}
+      <Dialog open={!!editingTier} onOpenChange={(open) => !open && setEditingTier(null)}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Edit {editingTier?.name} Tier</DialogTitle>
+            <DialogDescription>Configure modules and pricing for this tier</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-6 py-4 max-h-[60vh] overflow-y-auto">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Base Price ($/month)</Label>
+                <Input
+                  type="number"
+                  value={tierPrice.base}
+                  onChange={(e) => setTierPrice(p => ({ ...p, base: parseFloat(e.target.value) || 0 }))}
+                />
+              </div>
+              <div>
+                <Label>Per Employee ($/month)</Label>
+                <Input
+                  type="number"
+                  value={tierPrice.perEmployee}
+                  onChange={(e) => setTierPrice(p => ({ ...p, perEmployee: parseFloat(e.target.value) || 0 }))}
+                />
+              </div>
+            </div>
+            <div>
+              <Label className="mb-3 block">Included Modules</Label>
+              <div className="space-y-2">
+                {ALL_MODULES.map((mod) => (
+                  <div key={mod.code} className="flex items-center gap-3 p-2 rounded hover:bg-muted/50">
+                    <Checkbox
+                      id={mod.code}
+                      checked={tierModules.includes(mod.code)}
+                      onCheckedChange={() => toggleModule(mod.code)}
+                    />
+                    <label htmlFor={mod.code} className="cursor-pointer flex-1">{mod.name}</label>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditingTier(null)}>Cancel</Button>
+            <Button onClick={handleSaveTier} disabled={isSavingTier}>
+              {isSavingTier && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Save Changes
             </Button>
           </DialogFooter>
         </DialogContent>
