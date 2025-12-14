@@ -56,8 +56,8 @@ export default function MssEmployeeRelationsPage() {
 
   const breadcrumbItems = [
     { label: t('common.home'), path: '/' },
-    { label: 'Manager Self Service', path: '/mss' },
-    { label: 'Team Relations' },
+    { label: t('mss.title'), path: '/mss' },
+    { label: t('mss.teamRelations.title') },
   ];
 
   // Fetch direct reports
@@ -109,7 +109,7 @@ export default function MssEmployeeRelationsPage() {
       is_public: true,
       monetary_value: '',
     });
-    toast.success('Recognition awarded successfully');
+    toast.success(t('mss.teamRelations.recognitionSuccess'));
   };
 
   const getStatusColor = (status: string) => {
@@ -143,30 +143,30 @@ export default function MssEmployeeRelationsPage() {
           <div>
             <h1 className="text-3xl font-bold flex items-center gap-2">
               <Heart className="h-8 w-8" />
-              Team Relations
+              {t('mss.teamRelations.title')}
             </h1>
-            <p className="text-muted-foreground">Recognize team members and track cases</p>
+            <p className="text-muted-foreground">{t('mss.teamRelations.subtitle')}</p>
           </div>
           <Dialog open={isRecognitionDialogOpen} onOpenChange={setIsRecognitionDialogOpen}>
             <DialogTrigger asChild>
               <Button className="gap-2" disabled={directReports.length === 0}>
                 <Award className="h-4 w-4" />
-                Give Recognition
+                {t('mss.teamRelations.giveRecognition')}
               </Button>
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>Recognize a Team Member</DialogTitle>
+                <DialogTitle>{t('mss.teamRelations.recognizeTeamMember')}</DialogTitle>
               </DialogHeader>
               <form onSubmit={handleRecognitionSubmit} className="space-y-4">
                 <div className="space-y-2">
-                  <Label>Team Member *</Label>
+                  <Label>{t('mss.teamRelations.teamMember')} *</Label>
                   <Select 
                     value={recognitionForm.employee_id} 
                     onValueChange={(v) => setRecognitionForm({ ...recognitionForm, employee_id: v })}
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Select team member" />
+                      <SelectValue placeholder={t('mss.teamRelations.selectTeamMember')} />
                     </SelectTrigger>
                     <SelectContent>
                       {directReports.map((emp) => (
@@ -178,7 +178,7 @@ export default function MssEmployeeRelationsPage() {
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label>Title *</Label>
+                  <Label>{t('mss.teamRelations.recognitionTitle')} *</Label>
                   <Input
                     value={recognitionForm.title}
                     onChange={(e) => setRecognitionForm({ ...recognitionForm, title: e.target.value })}
@@ -188,7 +188,7 @@ export default function MssEmployeeRelationsPage() {
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label>Type</Label>
+                    <Label>{t('mss.teamRelations.recognitionType')}</Label>
                     <Select 
                       value={recognitionForm.recognition_type} 
                       onValueChange={(v) => setRecognitionForm({ ...recognitionForm, recognition_type: v })}
@@ -206,7 +206,7 @@ export default function MssEmployeeRelationsPage() {
                     </Select>
                   </div>
                   <div className="space-y-2">
-                    <Label>Category</Label>
+                    <Label>{t('mss.teamRelations.category')}</Label>
                     <Select 
                       value={recognitionForm.category} 
                       onValueChange={(v) => setRecognitionForm({ ...recognitionForm, category: v })}
@@ -225,16 +225,16 @@ export default function MssEmployeeRelationsPage() {
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label>Description</Label>
+                  <Label>{t('mss.teamRelations.description')}</Label>
                   <Textarea
                     value={recognitionForm.description}
                     onChange={(e) => setRecognitionForm({ ...recognitionForm, description: e.target.value })}
-                    placeholder="Why is this person being recognized?"
+                    placeholder={t('mss.teamRelations.description')}
                   />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label>Monetary Value (optional)</Label>
+                    <Label>{t('mss.teamRelations.monetaryValue')}</Label>
                     <Input
                       type="number"
                       value={recognitionForm.monetary_value}
@@ -250,16 +250,16 @@ export default function MssEmployeeRelationsPage() {
                       onChange={(e) => setRecognitionForm({ ...recognitionForm, is_public: e.target.checked })}
                       className="rounded"
                     />
-                    <Label htmlFor="public" className="text-sm">Make public</Label>
+                    <Label htmlFor="public" className="text-sm">{t('mss.teamRelations.makePublic')}</Label>
                   </div>
                 </div>
                 <div className="flex justify-end gap-2">
                   <Button type="button" variant="outline" onClick={() => setIsRecognitionDialogOpen(false)}>
-                    Cancel
+                    {t('common.cancel')}
                   </Button>
                   <Button type="submit" disabled={createRecognition.isPending || !recognitionForm.employee_id}>
                     {createRecognition.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    Award Recognition
+                    {t('mss.teamRelations.awardRecognition')}
                   </Button>
                 </div>
               </form>
@@ -276,7 +276,7 @@ export default function MssEmployeeRelationsPage() {
                   <Users className="h-6 w-6 text-primary" />
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Direct Reports</p>
+                  <p className="text-sm text-muted-foreground">{t('mss.teamRelations.directReports')}</p>
                   <p className="text-2xl font-bold">{directReports.length}</p>
                 </div>
               </div>
@@ -289,7 +289,7 @@ export default function MssEmployeeRelationsPage() {
                   <AlertTriangle className="h-6 w-6 text-warning" />
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Open Team Cases</p>
+                  <p className="text-sm text-muted-foreground">{t('mss.teamRelations.openTeamCases')}</p>
                   <p className="text-2xl font-bold">{teamCases.filter(c => c.status === 'open').length}</p>
                 </div>
               </div>
@@ -302,7 +302,7 @@ export default function MssEmployeeRelationsPage() {
                   <Award className="h-6 w-6 text-success" />
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Recognition Given</p>
+                  <p className="text-sm text-muted-foreground">{t('mss.teamRelations.recognitionGiven')}</p>
                   <p className="text-2xl font-bold">{teamRecognitions.length}</p>
                 </div>
               </div>
@@ -314,26 +314,26 @@ export default function MssEmployeeRelationsPage() {
           <TabsList>
             <TabsTrigger value="recognition" className="gap-2">
               <Award className="h-4 w-4" />
-              Team Recognition ({teamRecognitions.length})
+              {t('mss.teamRelations.teamRecognition')} ({teamRecognitions.length})
             </TabsTrigger>
             <TabsTrigger value="cases" className="gap-2">
               <AlertTriangle className="h-4 w-4" />
-              Team Cases ({teamCases.length})
+              {t('mss.teamRelations.teamCases')} ({teamCases.length})
             </TabsTrigger>
           </TabsList>
 
           <TabsContent value="recognition">
             <Card>
               <CardHeader>
-                <CardTitle>Team Recognition</CardTitle>
-                <CardDescription>Recognition awarded to your direct reports</CardDescription>
+                <CardTitle>{t('mss.teamRelations.teamRecognition')}</CardTitle>
+                <CardDescription>{t('mss.teamRelations.teamRecognitionDesc')}</CardDescription>
               </CardHeader>
               <CardContent>
                 {teamRecognitions.length === 0 ? (
                   <div className="text-center py-12 text-muted-foreground">
                     <Award className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                    <p>No recognition awarded yet</p>
-                    <p className="text-sm">Use "Give Recognition" to recognize a team member</p>
+                    <p>{t('mss.teamRelations.noRecognitionYet')}</p>
+                    <p className="text-sm">{t('mss.teamRelations.useGiveRecognition')}</p>
                   </div>
                 ) : (
                   <div className="grid gap-4 md:grid-cols-2">
@@ -368,25 +368,25 @@ export default function MssEmployeeRelationsPage() {
           <TabsContent value="cases">
             <Card>
               <CardHeader>
-                <CardTitle>Team Cases</CardTitle>
-                <CardDescription>Cases involving your direct reports</CardDescription>
+                <CardTitle>{t('mss.teamRelations.teamCases')}</CardTitle>
+                <CardDescription>{t('mss.teamRelations.teamCasesDesc')}</CardDescription>
               </CardHeader>
               <CardContent>
                 {teamCases.length === 0 ? (
                   <div className="text-center py-12 text-muted-foreground">
                     <AlertTriangle className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                    <p>No cases for your team</p>
+                    <p>{t('mss.teamRelations.noCases')}</p>
                   </div>
                 ) : (
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead>Case #</TableHead>
-                        <TableHead>Employee</TableHead>
-                        <TableHead>Title</TableHead>
-                        <TableHead>Type</TableHead>
-                        <TableHead>Status</TableHead>
-                        <TableHead>Reported</TableHead>
+                        <TableHead>{t('mss.teamRelations.caseNumber')}</TableHead>
+                        <TableHead>{t('common.employee')}</TableHead>
+                        <TableHead>{t('mss.teamRelations.caseTitle')}</TableHead>
+                        <TableHead>{t('mss.teamRelations.caseType')}</TableHead>
+                        <TableHead>{t('common.status')}</TableHead>
+                        <TableHead>{t('mss.teamRelations.reported')}</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>

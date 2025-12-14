@@ -10,8 +10,10 @@ import { useAuth } from "@/contexts/AuthContext";
 import { format } from "date-fns";
 import { Gem, ChevronRight, TrendingUp, Users, DollarSign } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useLanguage } from "@/hooks/useLanguage";
 
 export default function MssEquityPage() {
+  const { t } = useLanguage();
   const { user } = useAuth();
 
   const { data: directReports = [], isLoading } = useQuery({
@@ -74,11 +76,11 @@ export default function MssEquityPage() {
       <div className="space-y-6">
         {/* Breadcrumbs */}
         <nav className="flex items-center gap-2 text-sm text-muted-foreground">
-          <Link to="/mss" className="hover:text-foreground transition-colors">Manager Self Service</Link>
+          <Link to="/mss" className="hover:text-foreground transition-colors">{t('mss.title')}</Link>
           <ChevronRight className="h-4 w-4" />
-          <Link to="/mss/compensation" className="hover:text-foreground transition-colors">Team Compensation</Link>
+          <Link to="/mss/compensation" className="hover:text-foreground transition-colors">{t('mss.modules.compensation')}</Link>
           <ChevronRight className="h-4 w-4" />
-          <span className="text-foreground font-medium">Team Equity</span>
+          <span className="text-foreground font-medium">{t('mss.teamEquity.title')}</span>
         </nav>
 
         <div className="flex items-center gap-3">
@@ -86,8 +88,8 @@ export default function MssEquityPage() {
             <Gem className="h-5 w-5 text-primary" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold tracking-tight">Team Equity</h1>
-            <p className="text-muted-foreground">View equity grants for your direct reports</p>
+            <h1 className="text-2xl font-bold tracking-tight">{t('mss.teamEquity.title')}</h1>
+            <p className="text-muted-foreground">{t('mss.teamEquity.subtitle')}</p>
           </div>
         </div>
 
@@ -100,7 +102,7 @@ export default function MssEquityPage() {
                   <Users className="h-5 w-5 text-primary" />
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Equity Holders</p>
+                  <p className="text-sm text-muted-foreground">{t('mss.teamEquity.equityHolders')}</p>
                   {equityLoading ? (
                     <Skeleton className="h-8 w-16" />
                   ) : (
@@ -118,7 +120,7 @@ export default function MssEquityPage() {
                   <Gem className="h-5 w-5 text-emerald-600" />
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Total Granted</p>
+                  <p className="text-sm text-muted-foreground">{t('mss.teamEquity.totalGranted')}</p>
                   {equityLoading ? (
                     <Skeleton className="h-8 w-24" />
                   ) : (
@@ -136,7 +138,7 @@ export default function MssEquityPage() {
                   <TrendingUp className="h-5 w-5 text-sky-600" />
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Total Vested</p>
+                  <p className="text-sm text-muted-foreground">{t('mss.teamEquity.totalVested')}</p>
                   {equityLoading ? (
                     <Skeleton className="h-8 w-24" />
                   ) : (
@@ -154,7 +156,7 @@ export default function MssEquityPage() {
                   <DollarSign className="h-5 w-5 text-violet-600" />
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Active Grants</p>
+                  <p className="text-sm text-muted-foreground">{t('mss.teamEquity.activeGrants')}</p>
                   {equityLoading ? (
                     <Skeleton className="h-8 w-16" />
                   ) : (
@@ -169,7 +171,7 @@ export default function MssEquityPage() {
         {/* Grants Table */}
         <Card>
           <CardHeader>
-            <CardTitle>Team Equity Grants</CardTitle>
+            <CardTitle>{t('mss.teamEquity.teamEquityGrants')}</CardTitle>
           </CardHeader>
           <CardContent>
             {isLoading || equityLoading ? (
@@ -180,19 +182,19 @@ export default function MssEquityPage() {
               </div>
             ) : equityGrants.length === 0 ? (
               <div className="py-8 text-center text-muted-foreground">
-                No equity grants found for your team
+                {t('mss.teamEquity.noEquityGrants')}
               </div>
             ) : (
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Employee</TableHead>
-                    <TableHead>Plan</TableHead>
-                    <TableHead>Grant Date</TableHead>
-                    <TableHead className="text-right">Granted</TableHead>
-                    <TableHead className="text-right">Vested</TableHead>
-                    <TableHead>Progress</TableHead>
-                    <TableHead>Status</TableHead>
+                    <TableHead>{t('mss.teamEquity.employee')}</TableHead>
+                    <TableHead>{t('mss.teamEquity.plan')}</TableHead>
+                    <TableHead>{t('mss.teamEquity.grantDate')}</TableHead>
+                    <TableHead className="text-right">{t('mss.teamEquity.granted')}</TableHead>
+                    <TableHead className="text-right">{t('mss.teamEquity.vested')}</TableHead>
+                    <TableHead>{t('mss.teamEquity.progress')}</TableHead>
+                    <TableHead>{t('mss.teamEquity.status')}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
