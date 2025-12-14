@@ -2914,6 +2914,39 @@
       "ergonomics": {
         "title": "Ergonomics",
         "description": "Workstation assessments"
+      },
+      "analytics": {
+        "title": "HSE Analytics",
+        "description": "Safety metrics and insights"
+      }
+    },
+    "analytics": {
+      "title": "HSE Analytics",
+      "subtitle": "Comprehensive safety metrics and insights",
+      "totalIncidents": "Total Incidents",
+      "openIncidents": "Open Incidents",
+      "nearMissReports": "Near-Miss Reports",
+      "trainingCompletion": "Training Completion",
+      "inspections": "Inspections",
+      "safetyObservations": "Safety Observations",
+      "incidentTrend": "Incident Trend",
+      "incidentsBySeverity": "Incidents by Severity",
+      "incidentsByType": "Incidents by Type",
+      "safetyObservationTypes": "Safety Observation Types",
+      "incidentStatus": "Incident Status Distribution",
+      "nearMissVsIncidents": "Near-Miss vs Incidents",
+      "trainingStatus": "Training Status",
+      "completionRate": "Completion Rate",
+      "trainingsCompleted": "trainings completed",
+      "observationTypes": "Observation Types",
+      "safetyRatio": "Safety Behavior Ratio",
+      "safeBehaviors": "Safe Behaviors",
+      "observations": "observations",
+      "tabs": {
+        "overview": "Overview",
+        "incidents": "Incidents",
+        "training": "Training",
+        "observations": "Observations"
       }
     },
     "incidents": {

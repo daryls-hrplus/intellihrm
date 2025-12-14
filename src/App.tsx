@@ -176,6 +176,7 @@ import HSESafetyObservationsPage from "./pages/hse/HSESafetyObservationsPage";
 import HSEToolboxTalksPage from "./pages/hse/HSEToolboxTalksPage";
 import HSEFirstAidPage from "./pages/hse/HSEFirstAidPage";
 import HSEErgonomicsPage from "./pages/hse/HSEErgonomicsPage";
+import HSEAnalyticsPage from "./pages/hse/HSEAnalyticsPage";
 
 // Employee Relations pages
 import EmployeeRelationsDashboardPage from "./pages/employee-relations/EmployeeRelationsDashboardPage";
@@ -2076,7 +2077,14 @@ const App = () => (
                 </ProtectedRoute>
               }
             />
-
+            <Route
+              path="/hse/analytics"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
+                  <HSEAnalyticsPage />
+                </ProtectedRoute>
+              }
+            />
 
             <Route
               path="/employee-relations"
