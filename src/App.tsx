@@ -41,6 +41,7 @@ import AdminColorSchemePage from "./pages/admin/AdminColorSchemePage";
 import TerritoriesPage from "./pages/admin/TerritoriesPage";
 import CompanyTagsPage from "./pages/admin/CompanyTagsPage";
 import GranularPermissionsPage from "./pages/admin/GranularPermissionsPage";
+import ImplementationHandbookPage from "./pages/admin/ImplementationHandbookPage";
 // Workforce pages
 import WorkforceDashboardPage from "./pages/workforce/WorkforceDashboardPage";
 import EmployeesPage from "./pages/workforce/EmployeesPage";
@@ -939,6 +940,14 @@ const App = () => (
               element={
                 <ProtectedRoute requiredRoles={["admin"]}>
                   <AdminLookupValuesPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/implementation-handbook"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
+                  <ImplementationHandbookPage />
                 </ProtectedRoute>
               }
             />
