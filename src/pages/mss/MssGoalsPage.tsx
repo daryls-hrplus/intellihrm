@@ -29,6 +29,7 @@ import { TeamGoalCard } from "@/components/mss/TeamGoalCard";
 import { SendReminderDialog } from "@/components/mss/SendReminderDialog";
 import { format, isPast } from "date-fns";
 import { toast } from "sonner";
+import { useLanguage } from "@/hooks/useLanguage";
 
 type GoalStatus = 'draft' | 'active' | 'in_progress' | 'completed' | 'cancelled' | 'overdue';
 type GoalType = 'okr_objective' | 'okr_key_result' | 'smart_goal';
@@ -62,10 +63,13 @@ interface DirectReport {
   position_title: string;
 }
 
-const breadcrumbItems = [
-  { label: "Manager Self Service", href: "/mss" },
-  { label: "Team Goals" },
-];
+export default function MssGoalsPage() {
+  const { t } = useLanguage();
+  
+  const breadcrumbItems = [
+    { label: t("mss.title"), href: "/mss" },
+    { label: t("mss.teamGoals.breadcrumb") },
+  ];
 
 const statusColors: Record<GoalStatus, string> = {
   draft: "bg-muted text-muted-foreground",
@@ -76,7 +80,7 @@ const statusColors: Record<GoalStatus, string> = {
   overdue: "bg-warning/10 text-warning",
 };
 
-export default function MssGoalsPage() {
+
   const { user, company } = useAuth();
   const [activeTab, setActiveTab] = useState("team-goals");
   const [directReports, setDirectReports] = useState<DirectReport[]>([]);

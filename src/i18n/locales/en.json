@@ -379,7 +379,241 @@
       "property": {
         "title": "Team Property",
         "description": "Manage equipment assignments for your team"
+      },
+      "hse": {
+        "title": "Team Health & Safety",
+        "description": "Monitor team incidents and training compliance"
+      },
+      "benefits": {
+        "title": "Team Benefits",
+        "description": "View team benefit enrollments"
+      },
+      "relations": {
+        "title": "Team Relations",
+        "description": "Recognize team members and view cases"
+      },
+      "pips": {
+        "title": "Performance Improvement",
+        "description": "Manage PIPs for your direct reports"
+      },
+      "compensation": {
+        "title": "Team Compensation",
+        "description": "View team compensation and compa-ratios"
+      },
+      "360": {
+        "title": "360° Feedback",
+        "description": "Manage 360-degree feedback reviews for your team"
+      },
+      "reminders": {
+        "title": "Team Reminders",
+        "description": "Manage reminders for your direct reports"
+      },
+      "recruitment": {
+        "title": "Recruitment Requests",
+        "description": "Submit and track headcount requests"
+      },
+      "analytics": {
+        "title": "Team Analytics",
+        "description": "View team performance metrics and reports"
+      },
+      "succession": {
+        "title": "Succession Planning",
+        "description": "Plan and develop team succession"
+      },
+      "delegates": {
+        "title": "My Delegates",
+        "description": "Manage your approval delegates"
+      },
+      "developmentPlans": {
+        "title": "Development Plans",
+        "description": "Manage development plans for your team"
+      },
+      "goalInterviews": {
+        "title": "Goal Interviews",
+        "description": "Schedule goal review meetings"
+      },
+      "appraisalInterviews": {
+        "title": "Appraisal Interviews",
+        "description": "Schedule appraisal meetings"
+      },
+      "compaRatio": {
+        "title": "Compa-Ratio Analysis",
+        "description": "Analyze team compensation ratios"
+      },
+      "equity": {
+        "title": "Pay Equity",
+        "description": "Review team pay equity"
       }
+    },
+    "dashboard": {
+      "myTeam": "My Team",
+      "myTeamDesc": "View and manage your direct reports",
+      "teamApprovals": "Team Approvals",
+      "teamApprovalsDesc": "Approve leave, expense, training, and other workflow requests",
+      "teamOnboarding": "Team Onboarding",
+      "teamOnboardingDesc": "Track onboarding progress of your direct reports",
+      "teamDepartures": "Team Departures",
+      "teamDeparturesDesc": "Track offboarding progress of departing team members",
+      "teamLeaveCalendar": "Team Leave Calendar",
+      "teamLeaveCalendarDesc": "View team leave schedules and availability",
+      "submitTicket": "Submit a Ticket",
+      "submitTicketDesc": "Request help or report an issue to IT/HR support"
+    },
+    "teamGoals": {
+      "title": "Team Goals",
+      "subtitle": "Manage and track goals for your direct reports",
+      "breadcrumb": "Team Goals",
+      "assignGoal": "Assign Goal",
+      "showAnalytics": "Show Analytics",
+      "hideAnalytics": "Hide Analytics",
+      "teamGoals": "Team Goals",
+      "active": "Active",
+      "overdue": "Overdue",
+      "completed": "Completed",
+      "activeGoals": "Active Goals",
+      "byEmployee": "By Employee",
+      "noActiveGoals": "No active goals for your team",
+      "noGoalsMatchFilter": "No goals match your filters",
+      "clearFilters": "Clear Filters",
+      "assignFirstGoal": "Assign First Goal",
+      "noDirectReports": "No direct reports found",
+      "goalsExported": "Goals exported successfully"
+    },
+    "teamAppraisals": {
+      "title": "Team Probation Reviews",
+      "subtitle": "Create and manage probation reviews for your direct reports",
+      "breadcrumb": "Performance Appraisals",
+      "createProbationReview": "Create Probation Review",
+      "activeReviews": "Active Reviews",
+      "pendingEvaluations": "Pending Evaluations",
+      "totalReviews": "Total Reviews",
+      "probationReviews": "Probation Reviews",
+      "completedEvaluations": "Completed Evaluations",
+      "noProbationReviews": "No probation reviews created yet",
+      "createReviewsDescription": "Create probation reviews for your direct reports",
+      "createFirstReview": "Create First Probation Review",
+      "probationReview": "Probation Review",
+      "participants": "Participants",
+      "complete": "complete",
+      "noPendingEvaluations": "No pending evaluations",
+      "centralCycle": "Central Cycle",
+      "deadline": "Deadline",
+      "startEvaluation": "Start Evaluation",
+      "continueEvaluation": "Continue Evaluation",
+      "noCompletedEvaluations": "No completed evaluations yet",
+      "submitted": "Submitted",
+      "reviewed": "Reviewed",
+      "score": "Score",
+      "viewEvaluation": "View Evaluation"
+    },
+    "teamTraining": {
+      "title": "Team Training",
+      "subtitle": "Monitor your team's training progress and approve requests",
+      "breadcrumb": "Team Training",
+      "teamSize": "Team Size",
+      "inProgress": "In Progress",
+      "completed": "Completed",
+      "overdue": "Overdue",
+      "pendingRequests": "Pending Requests",
+      "noDirectReports": "No direct reports",
+      "noDirectReportsAssigned": "You don't have any direct reports assigned",
+      "overview": "Overview",
+      "byEmployee": "By Employee",
+      "requests": "Requests",
+      "teamTrainingProgress": "Team Training Progress",
+      "employee": "Employee",
+      "course": "Course",
+      "progress": "Progress",
+      "dueDate": "Due Date",
+      "status": "Status",
+      "noTrainingEnrollments": "No training enrollments found",
+      "noTrainingEnrollmentsEmployee": "No training enrollments",
+      "courses": "courses",
+      "trainingRequests": "Training Requests",
+      "noRequests": "No training requests",
+      "courseName": "Course Name",
+      "type": "Type",
+      "estimatedCost": "Estimated Cost",
+      "requestedAt": "Requested At",
+      "actions": "Actions",
+      "approve": "Approve",
+      "reject": "Reject",
+      "statuses": {
+        "completed": "Completed",
+        "in_progress": "In Progress",
+        "enrolled": "Not Started",
+        "expired": "Expired",
+        "approved": "Approved",
+        "pending": "Pending",
+        "rejected": "Rejected"
+      }
+    },
+    "teamLeave": {
+      "title": "Team Leave Calendar",
+      "subtitle": "View your team's leave schedules and availability",
+      "breadcrumb": "Team Leave Calendar"
+    },
+    "teamTimeAttendance": {
+      "title": "Team Time & Attendance",
+      "subtitle": "Monitor and manage your team's attendance",
+      "breadcrumb": "Team Time & Attendance",
+      "directReports": "Direct Reports",
+      "currentlyClockedIn": "Currently Clocked In",
+      "pendingTimesheets": "Pending Timesheets",
+      "pendingExceptions": "Pending Exceptions",
+      "filterByEmployee": "Filter by employee",
+      "allDirectReports": "All Direct Reports",
+      "timeEntries": "Time Entries",
+      "timesheetApprovals": "Timesheet Approvals",
+      "exceptions": "Exceptions",
+      "teamTimeEntriesWeek": "Team Time Entries - This Week",
+      "loading": "Loading...",
+      "noTimeEntriesWeek": "No time entries this week",
+      "employee": "Employee",
+      "date": "Date",
+      "clockIn": "Clock In",
+      "clockOut": "Clock Out",
+      "hours": "Hours",
+      "status": "Status",
+      "pendingTimesheetApprovals": "Pending Timesheet Approvals",
+      "noPendingTimesheets": "No pending timesheets",
+      "period": "Period",
+      "totalHours": "Total Hours",
+      "submitted": "Submitted",
+      "actions": "Actions",
+      "review": "Review",
+      "pendingAttendanceExceptions": "Pending Attendance Exceptions",
+      "noPendingExceptions": "No pending exceptions",
+      "type": "Type",
+      "reason": "Reason",
+      "approve": "Approve",
+      "reject": "Reject",
+      "reviewTimesheet": "Review Timesheet",
+      "reviewTimesheetFor": "Review timesheet for",
+      "reviewNotes": "Review Notes (Optional)",
+      "notesPlaceholder": "Add notes about this timesheet...",
+      "cancel": "Cancel",
+      "approving": "Approving...",
+      "rejecting": "Rejecting...",
+      "timesheetApproved": "Timesheet Approved",
+      "timesheetRejected": "Timesheet Rejected",
+      "timesheetApprovedFor": "Timesheet for {{name}} has been approved.",
+      "timesheetRejectedFor": "Timesheet for {{name}} has been rejected.",
+      "exceptionApproved": "Exception Approved",
+      "exceptionRejected": "Exception Rejected",
+      "error": "Error",
+      "failedToProcessTimesheet": "Failed to process timesheet.",
+      "failedToProcessException": "Failed to process exception."
+    },
+    "teamReminders": {
+      "title": "Team Reminders",
+      "subtitle": "Manage reminders for your direct reports",
+      "breadcrumb": "Team Reminders",
+      "directReports": "direct reports",
+      "noDirectReports": "No direct reports found",
+      "noDirectReportsDescription": "You need direct reports assigned to manage their reminders",
+      "directReportsReminders": "Direct Reports Reminders",
+      "directReportsRemindersDescription": "Create and manage reminders for your team members. Employees can view these reminders but cannot modify or dismiss them unless you allow it."
     }
   },
   "admin": {

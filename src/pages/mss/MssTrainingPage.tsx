@@ -34,6 +34,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
+import { useLanguage } from "@/hooks/useLanguage";
 
 interface DirectReport {
   id: string;
@@ -71,6 +72,7 @@ interface TrainingRequest {
 }
 
 export default function MssTrainingPage() {
+  const { t } = useLanguage();
   const { user } = useAuth();
   const [directReports, setDirectReports] = useState<DirectReport[]>([]);
   const [teamEnrollments, setTeamEnrollments] = useState<TeamEnrollment[]>([]);

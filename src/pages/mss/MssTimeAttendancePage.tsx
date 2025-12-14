@@ -15,6 +15,7 @@ import { Users, Clock, CheckCircle, XCircle, AlertTriangle, Timer, Calendar, Cli
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { useLanguage } from "@/hooks/useLanguage";
 
 interface DirectReport {
   id: string;
@@ -55,6 +56,7 @@ interface AttendanceException {
 }
 
 export default function MssTimeAttendancePage() {
+  const { t } = useLanguage();
   const { user, profile } = useAuth();
   const { toast } = useToast();
   
@@ -234,8 +236,8 @@ export default function MssTimeAttendancePage() {
   const pendingExceptions = exceptions.length;
 
   const breadcrumbItems = [
-    { label: "Manager Self-Service", href: "/mss" },
-    { label: "Team Time & Attendance" },
+    { label: t("mss.title"), href: "/mss" },
+    { label: t("mss.teamTimeAttendance.breadcrumb") },
   ];
 
   return (
@@ -245,8 +247,8 @@ export default function MssTimeAttendancePage() {
 
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold">Team Time & Attendance</h1>
-            <p className="text-muted-foreground">Monitor and manage your team's attendance</p>
+            <h1 className="text-3xl font-bold">{t("mss.teamTimeAttendance.title")}</h1>
+            <p className="text-muted-foreground">{t("mss.teamTimeAttendance.subtitle")}</p>
           </div>
           <Select value={selectedEmployee} onValueChange={setSelectedEmployee}>
             <SelectTrigger className="w-[200px]">

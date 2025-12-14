@@ -26,6 +26,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { Plus, Loader2, MessageSquare, ThumbsUp, Lightbulb, Users } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
+import { useLanguage } from "@/hooks/useLanguage";
 
 interface Feedback {
   id: string;
@@ -47,6 +48,7 @@ interface DirectReport {
 }
 
 export default function MssFeedbackPage() {
+  const { t } = useLanguage();
   const { user } = useAuth();
   const [directReports, setDirectReports] = useState<DirectReport[]>([]);
   const [teamFeedback, setTeamFeedback] = useState<Feedback[]>([]);
@@ -178,21 +180,21 @@ export default function MssFeedbackPage() {
       <div className="space-y-6">
         <Breadcrumbs
           items={[
-            { label: "Manager Self Service", href: "/mss" },
-            { label: "Team Feedback" },
+            { label: t("mss.title"), href: "/mss" },
+            { label: t("mss.modules.feedback.title") },
           ]}
         />
 
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">Team Feedback</h1>
+            <h1 className="text-3xl font-bold tracking-tight">{t("mss.modules.feedback.title")}</h1>
             <p className="text-muted-foreground">
-              Give feedback to your direct reports and view team feedback trends
+              {t("mss.modules.feedback.description")}
             </p>
           </div>
           <Button onClick={() => setDialogOpen(true)} disabled={directReports.length === 0}>
             <Plus className="mr-2 h-4 w-4" />
-            Give Feedback
+            {t("ess.myFeedback.giveFeedback")}
           </Button>
         </div>
 

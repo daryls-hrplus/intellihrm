@@ -31,6 +31,7 @@ import { PeerNominationManager } from "@/components/performance/PeerNominationMa
 import { FeedbackFormDialog } from "@/components/performance/FeedbackFormDialog";
 import { Review360AnalyticsDashboard } from "@/components/performance/Review360AnalyticsDashboard";
 import { format } from "date-fns";
+import { useLanguage } from "@/hooks/useLanguage";
 
 interface ReviewCycle {
   id: string;
@@ -68,9 +69,12 @@ interface FeedbackItem {
   submitted_at?: string | null;
 }
 
+export default function MssReview360Page() {
+  const { t } = useLanguage();
+  
 const breadcrumbItems = [
-  { label: "Manager Self Service", href: "/mss" },
-  { label: "360° Feedback" },
+  { label: t("mss.title"), href: "/mss" },
+  { label: t("mss.modules.360.title") },
 ];
 
 const statusColors: Record<string, string> = {
@@ -90,7 +94,7 @@ const reviewerTypeLabels: Record<string, string> = {
   direct_report: "Direct Report Review",
 };
 
-export default function MssReview360Page() {
+
   const { user, company } = useAuth();
   const [activeTab, setActiveTab] = useState("team-cycles");
   const [myTeamCycles, setMyTeamCycles] = useState<ReviewCycle[]>([]);

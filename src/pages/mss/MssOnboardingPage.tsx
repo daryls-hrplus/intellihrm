@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
+import { useLanguage } from '@/hooks/useLanguage';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Breadcrumbs } from '@/components/ui/breadcrumbs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -34,7 +34,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { format, differenceInDays } from 'date-fns';
 
 export default function MssOnboardingPage() {
-  const { t } = useTranslation();
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const { user } = useAuth();
   const { fetchInstances, getOnboardingProgress } = useOnboarding();
@@ -46,8 +46,8 @@ export default function MssOnboardingPage() {
   const [statusFilter, setStatusFilter] = useState<string>('all');
 
   const breadcrumbItems = [
-    { label: 'Manager Self Service', path: '/mss' },
-    { label: 'Team Onboarding' },
+    { label: t('mss.title'), path: '/mss' },
+    { label: t('mss.modules.onboarding.title') },
   ];
 
   useEffect(() => {

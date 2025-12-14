@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
+import { useLanguage } from '@/hooks/useLanguage';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Breadcrumbs } from '@/components/ui/breadcrumbs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -33,7 +33,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { format, differenceInDays } from 'date-fns';
 
 export default function MssOffboardingPage() {
-  const { t } = useTranslation();
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const { user } = useAuth();
   const { fetchInstances, getOffboardingProgress } = useOffboarding();
@@ -45,8 +45,8 @@ export default function MssOffboardingPage() {
   const [statusFilter, setStatusFilter] = useState<string>('all');
 
   const breadcrumbItems = [
-    { label: 'Manager Self Service', path: '/mss' },
-    { label: 'Team Departures' },
+    { label: t('mss.title'), path: '/mss' },
+    { label: t('mss.modules.offboarding.title') },
   ];
 
   useEffect(() => {
