@@ -10,6 +10,7 @@ export function useMenuPermissions() {
   // Track if we've already fetched permissions for this user
   const fetchedForUserRef = useRef<string | null>(null);
   const cachedPermissionsRef = useRef<string[]>([]);
+  const hasFetchedRef = useRef(false);
 
   useEffect(() => {
     const fetchMenuPermissions = async () => {
@@ -17,15 +18,19 @@ export function useMenuPermissions() {
         setMenuPermissions([]);
         setIsLoading(false);
         fetchedForUserRef.current = null;
+        hasFetchedRef.current = false;
         return;
       }
 
-      // Skip re-fetch if we already have permissions for this user
-      if (fetchedForUserRef.current === user.id && cachedPermissionsRef.current.length >= 0) {
+      // Skip re-fetch if we already have permissions for this exact user
+      if (fetchedForUserRef.current === user.id && hasFetchedRef.current) {
         setMenuPermissions(cachedPermissionsRef.current);
         setIsLoading(false);
         return;
       }
+
+      // Set loading true while fetching
+      setIsLoading(true);
 
       try {
         // Get the user's role_ids from user_roles
@@ -40,6 +45,7 @@ export function useMenuPermissions() {
           setMenuPermissions([]);
           cachedPermissionsRef.current = [];
           fetchedForUserRef.current = user.id;
+          hasFetchedRef.current = true;
           setIsLoading(false);
           return;
         }
@@ -67,10 +73,12 @@ export function useMenuPermissions() {
         setMenuPermissions(permissionsArray);
         cachedPermissionsRef.current = permissionsArray;
         fetchedForUserRef.current = user.id;
+        hasFetchedRef.current = true;
       } catch (error) {
         console.error("Error fetching menu permissions:", error);
         setMenuPermissions([]);
         cachedPermissionsRef.current = [];
+        hasFetchedRef.current = true;
       } finally {
         setIsLoading(false);
       }
@@ -82,6 +90,10 @@ export function useMenuPermissions() {
   const hasMenuAccess = useCallback((moduleCode: string): boolean => {
     // Help center and ESS are always accessible to all authenticated users
     if (moduleCode === "help" || moduleCode === "ess") return true;
+    // Dashboard is always accessible to authenticated users
+    if (moduleCode === "dashboard") return true;
+    // Profile is always accessible to authenticated users
+    if (moduleCode === "profile") return true;
     // If permissions are still loading, default to false for security
     if (isLoading) return false;
     // Admins always have access to all modules
