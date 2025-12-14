@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuditLog } from "@/hooks/useAuditLog";
 import { usePiiVisibility } from "@/hooks/usePiiVisibility";
 import { supabase } from "@/integrations/supabase/client";
+import { useLanguage } from "@/hooks/useLanguage";
 import {
   Search,
   Filter,
@@ -70,6 +71,7 @@ interface Company {
 }
 
 export default function EmployeesPage() {
+  const { t } = useLanguage();
   const [searchQuery, setSearchQuery] = useState("");
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [companies, setCompanies] = useState<Company[]>([]);
@@ -288,23 +290,23 @@ export default function EmployeesPage() {
     <AppLayout>
       <div className="space-y-6">
         <Breadcrumbs items={[
-          { label: "Workforce", href: "/workforce" },
-          { label: "Employees" }
+          { label: t("workforce.title"), href: "/workforce" },
+          { label: t("workforce.employees") }
         ]} />
         
         {/* Header */}
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between animate-fade-in">
           <div>
             <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
-              Employees
+              {t("workforce.employees")}
             </h1>
             <p className="mt-1 text-muted-foreground">
-              Manage your organization's workforce
+              {t("workforce.manageWorkforce")}
             </p>
           </div>
           <button className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground shadow-sm transition-all hover:bg-primary/90">
             <Plus className="h-4 w-4" />
-            Add Employee
+            {t("workforce.addEmployee")}
           </button>
         </div>
 
@@ -316,7 +318,7 @@ export default function EmployeesPage() {
             onChange={(e) => setSelectedCompanyId(e.target.value)}
             className="h-10 rounded-lg border border-input bg-card px-3 text-sm text-card-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
           >
-            <option value="all">All Companies</option>
+            <option value="all">{t("workforce.allCompanies")}</option>
             {companies.map((company) => (
               <option key={company.id} value={company.id}>{company.name}</option>
             ))}
@@ -326,7 +328,7 @@ export default function EmployeesPage() {
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <input
               type="text"
-              placeholder="Search employees..."
+              placeholder={t("workforce.searchEmployees")}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="h-10 w-full rounded-lg border border-input bg-card pl-10 pr-4 text-sm text-card-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
@@ -337,7 +339,7 @@ export default function EmployeesPage() {
             <PopoverTrigger asChild>
               <button className="relative inline-flex items-center gap-2 rounded-lg border border-border bg-card px-4 py-2.5 text-sm font-medium text-card-foreground transition-all hover:bg-accent">
                 <Filter className="h-4 w-4" />
-                Filters
+                {t("workforce.filters")}
                 {activeFiltersCount > 0 && (
                   <Badge variant="secondary" className="ml-1 h-5 w-5 rounded-full p-0 text-xs">
                     {activeFiltersCount}
@@ -348,22 +350,22 @@ export default function EmployeesPage() {
             <PopoverContent className="w-72 p-4" align="end">
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <h4 className="font-medium text-foreground">Filters</h4>
+                  <h4 className="font-medium text-foreground">{t("workforce.filters")}</h4>
                   {activeFiltersCount > 0 && (
                     <Button variant="ghost" size="sm" onClick={clearFilters} className="h-auto p-1 text-xs">
-                      Clear all
+                      {t("workforce.clearAll")}
                     </Button>
                   )}
                 </div>
                 
                 {/* Status Filter */}
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-foreground">Status</label>
+                  <label className="text-sm font-medium text-foreground">{t("workforce.status")}</label>
                   <div className="flex flex-wrap gap-2">
                     {[
-                      { value: "all", label: "All" },
-                      { value: "active", label: "Active" },
-                      { value: "unassigned", label: "Unassigned" },
+                      { value: "all", label: t("workforce.all") },
+                      { value: "active", label: t("workforce.active") },
+                      { value: "unassigned", label: t("workforce.unassigned") },
                     ].map((option) => (
                       <button
                         key={option.value}
@@ -384,13 +386,13 @@ export default function EmployeesPage() {
 
                 {/* Department Filter */}
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-foreground">Department</label>
+                  <label className="text-sm font-medium text-foreground">{t("workforce.department")}</label>
                   <select
                     value={departmentFilter}
                     onChange={(e) => setDepartmentFilter(e.target.value)}
                     className="w-full rounded-lg border border-input bg-card px-3 py-2 text-sm text-card-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
                   >
-                    <option value="all">All Departments</option>
+                    <option value="all">{t("workforce.allDepartments")}</option>
                     {departments.map((dept) => (
                       <option key={dept} value={dept}>{dept}</option>
                     ))}
@@ -405,11 +407,11 @@ export default function EmployeesPage() {
               <TooltipTrigger asChild>
                 <div className="inline-flex items-center gap-1.5 rounded-lg bg-amber-500/10 px-3 py-2 text-xs font-medium text-amber-600">
                   <EyeOff className="h-3.5 w-3.5" />
-                  PII Hidden
+                  {t("workforce.piiHidden")}
                 </div>
               </TooltipTrigger>
               <TooltipContent>
-                <p>Personal information is hidden based on your role permissions</p>
+                <p>{t("workforce.piiHiddenTooltip")}</p>
               </TooltipContent>
             </Tooltip>
           )}
@@ -418,10 +420,10 @@ export default function EmployeesPage() {
         {/* Active Filter Badges */}
         {activeFiltersCount > 0 && (
           <div className="flex flex-wrap items-center gap-2">
-            <span className="text-sm text-muted-foreground">Active filters:</span>
+            <span className="text-sm text-muted-foreground">{t("workforce.activeFilters")}:</span>
             {statusFilter !== "all" && (
               <Badge variant="secondary" className="gap-1">
-                Status: {statusFilter}
+                {t("workforce.status")}: {statusFilter}
                 <button onClick={() => setStatusFilter("all")} className="ml-1 hover:text-destructive">
                   <X className="h-3 w-3" />
                 </button>
@@ -429,7 +431,7 @@ export default function EmployeesPage() {
             )}
             {departmentFilter !== "all" && (
               <Badge variant="secondary" className="gap-1">
-                Dept: {departmentFilter}
+                {t("workforce.department")}: {departmentFilter}
                 <button onClick={() => setDepartmentFilter("all")} className="ml-1 hover:text-destructive">
                   <X className="h-3 w-3" />
                 </button>
@@ -449,15 +451,15 @@ export default function EmployeesPage() {
         {!loading && filteredEmployees.length === 0 && (
           <div className="flex flex-col items-center justify-center py-12 text-center">
             <Building2 className="h-12 w-12 text-muted-foreground/50" />
-            <h3 className="mt-4 text-lg font-medium text-foreground">No employees found</h3>
+            <h3 className="mt-4 text-lg font-medium text-foreground">{t("workforce.noEmployeesFound")}</h3>
             <p className="mt-1 text-sm text-muted-foreground">
               {searchQuery || activeFiltersCount > 0 
-                ? "Try adjusting your search or filters" 
-                : "Add employees to get started"}
+                ? t("workforce.tryAdjustingFilters") 
+                : t("workforce.addEmployeesToStart")}
             </p>
             {activeFiltersCount > 0 && (
               <Button variant="outline" size="sm" onClick={clearFilters} className="mt-4">
-                Clear filters
+                {t("workforce.clearFilters")}
               </Button>
             )}
           </div>
@@ -485,7 +487,7 @@ export default function EmployeesPage() {
                         {employee.full_name}
                       </h3>
                       <p className="text-sm text-muted-foreground">
-                        {employee.position_title || "No position assigned"}
+                        {employee.position_title || t("workforce.noPositionAssigned")}
                       </p>
                     </div>
                   </div>
@@ -498,14 +500,14 @@ export default function EmployeesPage() {
                     <DropdownMenuContent align="end">
                       <DropdownMenuItem onClick={() => handleEditEmployee(employee)}>
                         <Pencil className="mr-2 h-4 w-4" />
-                        Edit
+                        {t("common.edit")}
                       </DropdownMenuItem>
                       <DropdownMenuItem 
                         onClick={() => handleDeleteClick(employee)}
                         className="text-destructive focus:text-destructive"
                       >
                         <Trash2 className="mr-2 h-4 w-4" />
-                        Delete
+                        {t("common.delete")}
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
@@ -543,13 +545,13 @@ export default function EmployeesPage() {
                         : "bg-muted text-muted-foreground"
                     )}
                   >
-                    {employee.is_active ? "Active" : "Unassigned"}
+                    {employee.is_active ? t("workforce.active") : t("workforce.unassigned")}
                   </span>
                   <button 
                     onClick={() => navigate(`/workforce/employees/${employee.id}`)}
                     className="text-sm font-medium text-primary hover:underline"
                   >
-                    View Profile
+                    {t("workforce.viewProfile")}
                   </button>
                 </div>
               </div>
@@ -561,15 +563,15 @@ export default function EmployeesPage() {
         <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>Delete Employee</AlertDialogTitle>
+              <AlertDialogTitle>{t("workforce.deleteEmployee")}</AlertDialogTitle>
               <AlertDialogDescription>
-                Are you sure you want to delete {employeeToDelete?.full_name}? This action cannot be undone.
+                {t("workforce.deleteEmployeeConfirm", { name: employeeToDelete?.full_name })}
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogCancel>{t("common.cancel")}</AlertDialogCancel>
               <AlertDialogAction onClick={handleDeleteConfirm} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-                Delete
+                {t("common.delete")}
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
