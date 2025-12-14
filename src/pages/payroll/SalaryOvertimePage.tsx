@@ -16,6 +16,7 @@ import { WorkRecordsSection } from "@/components/payroll/WorkRecordsSection";
 import { AllowancesSection } from "@/components/payroll/AllowancesSection";
 import { DeductionsSection } from "@/components/payroll/DeductionsSection";
 import { PayrollSimulator } from "@/components/payroll/PayrollSimulator";
+import { useTranslation } from "react-i18next";
 
 interface Company {
   id: string;
@@ -42,6 +43,7 @@ interface Employee {
 }
 
 export default function SalaryOvertimePage() {
+  const { t } = useTranslation();
   const [companies, setCompanies] = useState<Company[]>([]);
   const [payGroups, setPayGroups] = useState<PayGroup[]>([]);
   const [payPeriods, setPayPeriods] = useState<PayPeriod[]>([]);
@@ -79,7 +81,7 @@ export default function SalaryOvertimePage() {
       .order('name');
     
     if (error) {
-      toast.error("Failed to load companies");
+      toast.error(t("payroll.salaryOvertime.failedToLoadCompanies"));
       return;
     }
     setCompanies(data || []);
@@ -94,7 +96,7 @@ export default function SalaryOvertimePage() {
       .order('name');
     
     if (error) {
-      toast.error("Failed to load pay groups");
+      toast.error(t("payroll.salaryOvertime.failedToLoadPayGroups"));
       return;
     }
     setPayGroups(data || []);
@@ -108,7 +110,7 @@ export default function SalaryOvertimePage() {
       .order('period_number', { ascending: false });
     
     if (error) {
-      toast.error("Failed to load pay periods");
+      toast.error(t("payroll.salaryOvertime.failedToLoadPayPeriods"));
       return;
     }
     setPayPeriods(data || []);
@@ -122,7 +124,7 @@ export default function SalaryOvertimePage() {
       .order('full_name');
     
     if (error) {
-      toast.error("Failed to load employees");
+      toast.error(t("payroll.salaryOvertime.failedToLoadEmployees"));
       return;
     }
     setEmployees(data || []);
@@ -132,9 +134,9 @@ export default function SalaryOvertimePage() {
     <div className="container mx-auto py-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Salary & Overtime Tracking</h1>
+          <h1 className="text-3xl font-bold">{t("payroll.salaryOvertime.title")}</h1>
           <p className="text-muted-foreground">
-            View work records, allowances, deductions and simulate payroll calculations
+            {t("payroll.salaryOvertime.subtitle")}
           </p>
         </div>
       </div>
@@ -144,16 +146,16 @@ export default function SalaryOvertimePage() {
         <CardHeader>
           <CardTitle className="text-lg flex items-center gap-2">
             <FileText className="h-5 w-5" />
-            Select Employee & Pay Period
+            {t("payroll.salaryOvertime.selectEmployeePayPeriod")}
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div className="space-y-2">
-              <Label>Company</Label>
+              <Label>{t("payroll.salaryOvertime.company")}</Label>
               <Select value={selectedCompany} onValueChange={setSelectedCompany}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select company" />
+                  <SelectValue placeholder={t("payroll.salaryOvertime.selectCompany")} />
                 </SelectTrigger>
                 <SelectContent>
                   {companies.map((company) => (
@@ -166,14 +168,14 @@ export default function SalaryOvertimePage() {
             </div>
 
             <div className="space-y-2">
-              <Label>Pay Group</Label>
+              <Label>{t("payroll.salaryOvertime.payGroup")}</Label>
               <Select 
                 value={selectedPayGroup} 
                 onValueChange={setSelectedPayGroup}
                 disabled={!selectedCompany}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select pay group" />
+                  <SelectValue placeholder={t("payroll.salaryOvertime.selectPayGroup")} />
                 </SelectTrigger>
                 <SelectContent>
                   {payGroups.map((pg) => (
@@ -186,19 +188,19 @@ export default function SalaryOvertimePage() {
             </div>
 
             <div className="space-y-2">
-              <Label>Pay Period</Label>
+              <Label>{t("payroll.salaryOvertime.payPeriod")}</Label>
               <Select 
                 value={selectedPayPeriod} 
                 onValueChange={setSelectedPayPeriod}
                 disabled={!selectedPayGroup}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select pay period" />
+                  <SelectValue placeholder={t("payroll.salaryOvertime.selectPayPeriod")} />
                 </SelectTrigger>
                 <SelectContent>
                   {payPeriods.map((pp) => (
                     <SelectItem key={pp.id} value={pp.id}>
-                      Cycle {pp.period_number}: {format(new Date(pp.period_start), 'MMM d')} - {format(new Date(pp.period_end), 'MMM d, yyyy')}
+                      {t("payroll.salaryOvertime.cycle")} {pp.period_number}: {format(new Date(pp.period_start), 'MMM d')} - {format(new Date(pp.period_end), 'MMM d, yyyy')}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -206,14 +208,14 @@ export default function SalaryOvertimePage() {
             </div>
 
             <div className="space-y-2">
-              <Label>Employee</Label>
+              <Label>{t("payroll.salaryOvertime.employee")}</Label>
               <Select 
                 value={selectedEmployee} 
                 onValueChange={setSelectedEmployee}
                 disabled={!selectedCompany}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select employee" />
+                  <SelectValue placeholder={t("payroll.salaryOvertime.selectEmployee")} />
                 </SelectTrigger>
                 <SelectContent>
                   {employees.map((emp) => (
@@ -230,7 +232,7 @@ export default function SalaryOvertimePage() {
             <div className="mt-4 flex justify-end">
               <Button onClick={() => setShowSimulator(true)} className="gap-2">
                 <Calculator className="h-4 w-4" />
-                Simulate Payroll Calculation
+                {t("payroll.salaryOvertime.simulatePayrollCalculation")}
               </Button>
             </div>
           )}
@@ -266,7 +268,7 @@ export default function SalaryOvertimePage() {
       <Dialog open={showSimulator} onOpenChange={setShowSimulator}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Payroll Calculation Simulation</DialogTitle>
+            <DialogTitle>{t("payroll.salaryOvertime.payrollCalculationSimulation")}</DialogTitle>
           </DialogHeader>
           {selectedEmployee && selectedPayPeriod && (
             <PayrollSimulator 

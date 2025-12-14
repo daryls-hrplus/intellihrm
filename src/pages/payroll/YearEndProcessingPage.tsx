@@ -12,8 +12,10 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { usePayroll, PayrollYearEnd } from "@/hooks/usePayroll";
 import { PayrollFilters, usePayrollFilters } from "@/components/payroll/PayrollFilters";
 import { Plus, FileCheck, Calendar, DollarSign, Users, AlertCircle, CheckCircle } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 export default function YearEndProcessingPage() {
+  const { t } = useTranslation();
   const { selectedCompanyId, setSelectedCompanyId } = usePayrollFilters();
   const {
     isLoading,
@@ -122,7 +124,7 @@ export default function YearEndProcessingPage() {
     return (
       <AppLayout>
         <div className="flex items-center justify-center h-64">
-          <p className="text-muted-foreground">Please select a company to manage year-end processing.</p>
+          <p className="text-muted-foreground">{t("payroll.yearEnd.selectCompanyPrompt")}</p>
         </div>
       </AppLayout>
     );
@@ -133,8 +135,8 @@ export default function YearEndProcessingPage() {
       <div className="space-y-6">
         <Breadcrumbs
           items={[
-            { label: "Payroll", href: "/payroll" },
-            { label: "Year-End Processing" },
+            { label: t("payroll.title"), href: "/payroll" },
+            { label: t("payroll.yearEnd.title") },
           ]}
         />
 
@@ -144,33 +146,33 @@ export default function YearEndProcessingPage() {
               <FileCheck className="h-6 w-6 text-success" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold tracking-tight">Year-End Processing</h1>
-              <p className="text-muted-foreground">Generate and submit tax forms (W-2, etc.)</p>
+              <h1 className="text-2xl font-bold tracking-tight">{t("payroll.yearEnd.title")}</h1>
+              <p className="text-muted-foreground">{t("payroll.yearEnd.subtitle")}</p>
             </div>
           </div>
           <Button onClick={() => setCreateDialogOpen(true)}>
             <Plus className="h-4 w-4 mr-2" />
-            New Tax Year
+            {t("payroll.yearEnd.newTaxYear")}
           </Button>
         </div>
 
         {/* Year End Processing List */}
         <Card>
           <CardHeader>
-            <CardTitle>Tax Year Processing</CardTitle>
-            <CardDescription>Manage year-end tax form generation and submission</CardDescription>
+            <CardTitle>{t("payroll.yearEnd.taxYearProcessing")}</CardTitle>
+            <CardDescription>{t("payroll.yearEnd.taxYearProcessingSubtitle")}</CardDescription>
           </CardHeader>
           <CardContent className="p-0">
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Tax Year</TableHead>
-                  <TableHead>Employees</TableHead>
-                  <TableHead>Total Wages</TableHead>
-                  <TableHead>Taxes Withheld</TableHead>
-                  <TableHead>W-2 Status</TableHead>
-                  <TableHead>Overall Status</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+                  <TableHead>{t("payroll.yearEnd.taxYear")}</TableHead>
+                  <TableHead>{t("payroll.yearEnd.employees")}</TableHead>
+                  <TableHead>{t("payroll.yearEnd.totalWages")}</TableHead>
+                  <TableHead>{t("payroll.yearEnd.taxesWithheld")}</TableHead>
+                  <TableHead>{t("payroll.yearEnd.w2Status")}</TableHead>
+                  <TableHead>{t("payroll.yearEnd.overallStatus")}</TableHead>
+                  <TableHead className="text-right">{t("common.actions")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -189,10 +191,10 @@ export default function YearEndProcessingPage() {
                         )}
                         <span className="text-sm">
                           {yearEnd.w2_submitted
-                            ? "Submitted"
+                            ? t("payroll.yearEnd.submitted")
                             : yearEnd.w2_generated
-                              ? "Generated"
-                              : "Pending"}
+                              ? t("payroll.yearEnd.generated")
+                              : t("payroll.yearEnd.pending")}
                         </span>
                       </div>
                     </TableCell>
@@ -204,21 +206,21 @@ export default function YearEndProcessingPage() {
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-1">
                         <Button variant="ghost" size="sm" onClick={() => viewDetails(yearEnd)}>
-                          View
+                          {t("common.view")}
                         </Button>
                         {yearEnd.status === 'open' && (
                           <Button variant="outline" size="sm" onClick={() => handleGenerateW2s(yearEnd)}>
-                            Generate W-2s
+                            {t("payroll.yearEnd.generateW2s")}
                           </Button>
                         )}
                         {yearEnd.status === 'generated' && !yearEnd.w2_submitted && (
                           <Button variant="outline" size="sm" onClick={() => handleSubmitW2s(yearEnd)}>
-                            Submit W-2s
+                            {t("payroll.yearEnd.submitW2s")}
                           </Button>
                         )}
                         {yearEnd.status === 'submitted' && (
                           <Button variant="outline" size="sm" onClick={() => handleClose(yearEnd)}>
-                            Close Year
+                            {t("payroll.yearEnd.closeYear")}
                           </Button>
                         )}
                       </div>
@@ -228,7 +230,7 @@ export default function YearEndProcessingPage() {
                 {yearEnds.length === 0 && (
                   <TableRow>
                     <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
-                      No year-end processing records found
+                      {t("payroll.yearEnd.noYearEndRecords")}
                     </TableCell>
                   </TableRow>
                 )}
@@ -241,11 +243,11 @@ export default function YearEndProcessingPage() {
         <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
           <DialogContent className="max-w-md">
             <DialogHeader>
-              <DialogTitle>Start Year-End Processing</DialogTitle>
+              <DialogTitle>{t("payroll.yearEnd.startYearEndProcessing")}</DialogTitle>
             </DialogHeader>
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label>Tax Year</Label>
+                <Label>{t("payroll.yearEnd.taxYear")}</Label>
                 <Input
                   type="number"
                   min={2020}
@@ -255,19 +257,19 @@ export default function YearEndProcessingPage() {
                 />
               </div>
               <div className="space-y-2">
-                <Label>Processing Notes</Label>
+                <Label>{t("payroll.yearEnd.processingNotes")}</Label>
                 <Textarea
                   value={createForm.processing_notes}
                   onChange={(e) => setCreateForm({ ...createForm, processing_notes: e.target.value })}
-                  placeholder="Optional notes..."
+                  placeholder={t("payroll.yearEnd.optionalNotes")}
                   rows={3}
                 />
               </div>
             </div>
             <DialogFooter>
-              <Button variant="outline" onClick={() => setCreateDialogOpen(false)}>Cancel</Button>
+              <Button variant="outline" onClick={() => setCreateDialogOpen(false)}>{t("common.cancel")}</Button>
               <Button onClick={handleCreate} disabled={isLoading}>
-                Start Processing
+                {t("payroll.yearEnd.startProcessing")}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -277,7 +279,7 @@ export default function YearEndProcessingPage() {
         <Dialog open={detailDialogOpen} onOpenChange={setDetailDialogOpen}>
           <DialogContent className="max-w-lg">
             <DialogHeader>
-              <DialogTitle>Tax Year {selectedYearEnd?.tax_year} Details</DialogTitle>
+              <DialogTitle>{t("payroll.yearEnd.yearEndDetails", { year: selectedYearEnd?.tax_year })}</DialogTitle>
             </DialogHeader>
             {selectedYearEnd && (
               <div className="space-y-4">
@@ -285,28 +287,28 @@ export default function YearEndProcessingPage() {
                   <div className="bg-muted p-3 rounded-lg">
                     <div className="flex items-center gap-2 text-muted-foreground text-sm">
                       <Users className="h-4 w-4" />
-                      Employees
+                      {t("payroll.yearEnd.employees")}
                     </div>
                     <p className="text-lg font-semibold">{selectedYearEnd.total_employees}</p>
                   </div>
                   <div className="bg-muted p-3 rounded-lg">
                     <div className="flex items-center gap-2 text-muted-foreground text-sm">
                       <DollarSign className="h-4 w-4" />
-                      Total Wages
+                      {t("payroll.yearEnd.totalWages")}
                     </div>
                     <p className="text-lg font-semibold">{formatCurrency(selectedYearEnd.total_wages)}</p>
                   </div>
                   <div className="bg-muted p-3 rounded-lg">
                     <div className="flex items-center gap-2 text-muted-foreground text-sm">
                       <DollarSign className="h-4 w-4" />
-                      Taxes Withheld
+                      {t("payroll.yearEnd.taxesWithheld")}
                     </div>
                     <p className="text-lg font-semibold">{formatCurrency(selectedYearEnd.total_taxes_withheld)}</p>
                   </div>
                   <div className="bg-muted p-3 rounded-lg">
                     <div className="flex items-center gap-2 text-muted-foreground text-sm">
                       <Calendar className="h-4 w-4" />
-                      Status
+                      {t("common.status")}
                     </div>
                     <Badge className={getStatusColor(selectedYearEnd.status)}>
                       {selectedYearEnd.status.charAt(0).toUpperCase() + selectedYearEnd.status.slice(1)}
@@ -315,31 +317,31 @@ export default function YearEndProcessingPage() {
                 </div>
 
                 <div className="border rounded-lg p-4 space-y-3">
-                  <h4 className="font-medium">W-2 Processing</h4>
+                  <h4 className="font-medium">{t("payroll.yearEnd.w2Processing")}</h4>
                   <div className="flex items-center gap-3">
                     {selectedYearEnd.w2_generated ? (
                       <>
                         <CheckCircle className="h-5 w-5 text-success" />
-                        <span>Generated on {selectedYearEnd.w2_generated_at && new Date(selectedYearEnd.w2_generated_at).toLocaleDateString()}</span>
+                        <span>{t("payroll.yearEnd.generatedOn", { date: selectedYearEnd.w2_generated_at && new Date(selectedYearEnd.w2_generated_at).toLocaleDateString() })}</span>
                       </>
                     ) : (
                       <>
                         <AlertCircle className="h-5 w-5 text-muted-foreground" />
-                        <span className="text-muted-foreground">Not yet generated</span>
+                        <span className="text-muted-foreground">{t("payroll.yearEnd.notYetGenerated")}</span>
                       </>
                     )}
                   </div>
                   {selectedYearEnd.w2_submitted && (
                     <div className="flex items-center gap-3">
                       <CheckCircle className="h-5 w-5 text-success" />
-                      <span>Submitted on {selectedYearEnd.w2_submitted_at && new Date(selectedYearEnd.w2_submitted_at).toLocaleDateString()}</span>
+                      <span>{t("payroll.yearEnd.submittedOn", { date: selectedYearEnd.w2_submitted_at && new Date(selectedYearEnd.w2_submitted_at).toLocaleDateString() })}</span>
                     </div>
                   )}
                 </div>
 
                 {selectedYearEnd.processing_notes && (
                   <div className="border rounded-lg p-4">
-                    <h4 className="font-medium mb-2">Notes</h4>
+                    <h4 className="font-medium mb-2">{t("common.notes")}</h4>
                     <p className="text-sm text-muted-foreground">{selectedYearEnd.processing_notes}</p>
                   </div>
                 )}

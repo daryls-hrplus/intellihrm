@@ -11,8 +11,10 @@ import { usePayroll, Payslip } from "@/hooks/usePayroll";
 import { useAuth } from "@/contexts/AuthContext";
 import { FileText, Download, Eye, Search, DollarSign, Calendar } from "lucide-react";
 import { format } from "date-fns";
+import { useTranslation } from "react-i18next";
 
 export default function PayslipsPage() {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const { fetchPayslips, isLoading } = usePayroll();
   
@@ -93,8 +95,8 @@ ${formatCurrency(payslip.net_pay)}
       <div className="space-y-6">
         <Breadcrumbs
           items={[
-            { label: "Employee Self-Service", href: "/ess" },
-            { label: "My Payslips" },
+            { label: t("ess.title"), href: "/ess" },
+            { label: t("payroll.payslips.title") },
           ]}
         />
 
@@ -104,8 +106,8 @@ ${formatCurrency(payslip.net_pay)}
               <FileText className="h-6 w-6 text-primary" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold tracking-tight">My Payslips</h1>
-              <p className="text-muted-foreground">View and download your payslips</p>
+              <h1 className="text-2xl font-bold tracking-tight">{t("payroll.payslips.title")}</h1>
+              <p className="text-muted-foreground">{t("payroll.payslips.subtitle")}</p>
             </div>
           </div>
         </div>
@@ -118,7 +120,7 @@ ${formatCurrency(payslip.net_pay)}
                 <DollarSign className="h-5 w-5 text-primary" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">YTD Gross</p>
+                <p className="text-sm text-muted-foreground">{t("payroll.payslips.ytdGross")}</p>
                 <p className="text-xl font-semibold">{formatCurrency(ytdGross)}</p>
               </div>
             </CardContent>
@@ -129,7 +131,7 @@ ${formatCurrency(payslip.net_pay)}
                 <DollarSign className="h-5 w-5 text-success" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">YTD Net</p>
+                <p className="text-sm text-muted-foreground">{t("payroll.payslips.ytdNet")}</p>
                 <p className="text-xl font-semibold">{formatCurrency(ytdNet)}</p>
               </div>
             </CardContent>
@@ -140,7 +142,7 @@ ${formatCurrency(payslip.net_pay)}
                 <DollarSign className="h-5 w-5 text-warning" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">YTD Deductions</p>
+                <p className="text-sm text-muted-foreground">{t("payroll.payslips.ytdDeductions")}</p>
                 <p className="text-xl font-semibold">{formatCurrency(ytdDeductions)}</p>
               </div>
             </CardContent>
@@ -151,7 +153,7 @@ ${formatCurrency(payslip.net_pay)}
                 <Calendar className="h-5 w-5 text-muted-foreground" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Payslips ({currentYear})</p>
+                <p className="text-sm text-muted-foreground">{t("payroll.payslips.payslipsCount", { year: currentYear })}</p>
                 <p className="text-xl font-semibold">{ytdPayslips.length}</p>
               </div>
             </CardContent>
@@ -163,13 +165,13 @@ ${formatCurrency(payslip.net_pay)}
           <CardHeader>
             <div className="flex items-center justify-between">
               <div>
-                <CardTitle>Payslip History</CardTitle>
-                <CardDescription>Your payment history and payslips</CardDescription>
+                <CardTitle>{t("payroll.payslips.payslipHistory")}</CardTitle>
+                <CardDescription>{t("payroll.payslips.payslipHistorySubtitle")}</CardDescription>
               </div>
               <div className="relative w-64">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
-                  placeholder="Search payslips..."
+                  placeholder={t("payroll.payslips.search")}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="pl-9"
@@ -181,13 +183,13 @@ ${formatCurrency(payslip.net_pay)}
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Payslip #</TableHead>
-                  <TableHead>Pay Period</TableHead>
-                  <TableHead>Pay Date</TableHead>
-                  <TableHead>Gross Pay</TableHead>
-                  <TableHead>Deductions</TableHead>
-                  <TableHead>Net Pay</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+                  <TableHead>{t("payroll.payslips.payslipNumber")}</TableHead>
+                  <TableHead>{t("payroll.payslips.payPeriod")}</TableHead>
+                  <TableHead>{t("payroll.payslips.payDate")}</TableHead>
+                  <TableHead>{t("payroll.payslips.grossPay")}</TableHead>
+                  <TableHead>{t("payroll.payslips.deductions")}</TableHead>
+                  <TableHead>{t("payroll.payslips.netPay")}</TableHead>
+                  <TableHead className="text-right">{t("common.actions")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -220,7 +222,7 @@ ${formatCurrency(payslip.net_pay)}
                 {filteredPayslips.length === 0 && (
                   <TableRow>
                     <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
-                      No payslips found
+                      {t("payroll.payslips.noPayslips")}
                     </TableCell>
                   </TableRow>
                 )}
@@ -233,47 +235,47 @@ ${formatCurrency(payslip.net_pay)}
         <Dialog open={detailDialogOpen} onOpenChange={setDetailDialogOpen}>
           <DialogContent className="max-w-lg">
             <DialogHeader>
-              <DialogTitle>Payslip Details</DialogTitle>
+              <DialogTitle>{t("payroll.payslips.payslipDetails")}</DialogTitle>
             </DialogHeader>
             {selectedPayslip && (
               <div className="space-y-6">
                 <div className="text-center border-b pb-4">
                   <p className="text-lg font-semibold">{selectedPayslip.payslip_number}</p>
                   <p className="text-sm text-muted-foreground">
-                    Pay Period: {format(new Date(selectedPayslip.pay_period_start), "MMM d")} - {format(new Date(selectedPayslip.pay_period_end), "MMM d, yyyy")}
+                    {t("payroll.payslips.payPeriod")}: {format(new Date(selectedPayslip.pay_period_start), "MMM d")} - {format(new Date(selectedPayslip.pay_period_end), "MMM d, yyyy")}
                   </p>
                   <p className="text-sm text-muted-foreground">
-                    Pay Date: {format(new Date(selectedPayslip.pay_date), "MMMM d, yyyy")}
+                    {t("payroll.payslips.payDate")}: {format(new Date(selectedPayslip.pay_date), "MMMM d, yyyy")}
                   </p>
                 </div>
 
                 <div className="space-y-3">
                   <div className="flex justify-between p-3 bg-muted rounded-lg">
-                    <span className="font-medium">Gross Pay</span>
+                    <span className="font-medium">{t("payroll.payslips.grossPay")}</span>
                     <span className="font-semibold">{formatCurrency(selectedPayslip.gross_pay)}</span>
                   </div>
 
                   <div className="border rounded-lg p-3 space-y-2">
-                    <p className="font-medium text-sm text-muted-foreground">Deductions</p>
+                    <p className="font-medium text-sm text-muted-foreground">{t("payroll.payslips.deductions")}</p>
                     <div className="flex justify-between">
-                      <span className="text-sm">Total Deductions</span>
+                      <span className="text-sm">{t("payroll.payslips.totalDeductions")}</span>
                       <span className="text-sm text-destructive">-{formatCurrency(selectedPayslip.total_deductions)}</span>
                     </div>
                   </div>
 
                   <div className="flex justify-between p-3 bg-success/10 rounded-lg">
-                    <span className="font-bold text-success">Net Pay</span>
+                    <span className="font-bold text-success">{t("payroll.payslips.netPay")}</span>
                     <span className="font-bold text-success text-lg">{formatCurrency(selectedPayslip.net_pay)}</span>
                   </div>
                 </div>
 
                 <div className="flex justify-end gap-2">
                   <Button variant="outline" onClick={() => setDetailDialogOpen(false)}>
-                    Close
+                    {t("common.close")}
                   </Button>
                   <Button onClick={() => downloadPayslip(selectedPayslip)}>
                     <Download className="h-4 w-4 mr-2" />
-                    Download
+                    {t("common.download")}
                   </Button>
                 </div>
               </div>
