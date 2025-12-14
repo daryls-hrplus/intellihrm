@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2, Shield, AlertTriangle } from "lucide-react";
 import { useMFA } from "@/hooks/useMFA";
+import { useAuth } from "@/contexts/AuthContext";
 import { useTranslation } from "react-i18next";
 
 interface MFAVerificationProps {
@@ -16,6 +17,7 @@ interface MFAVerificationProps {
 export function MFAVerification({ onSuccess, onCancel }: MFAVerificationProps) {
   const { t } = useTranslation();
   const { verifyCode } = useMFA();
+  const { setMFAVerified } = useAuth();
   
   const [code, setCode] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -35,6 +37,7 @@ export function MFAVerification({ onSuccess, onCancel }: MFAVerificationProps) {
       setError(error.message || "Invalid verification code");
       setCode("");
     } else {
+      setMFAVerified();
       onSuccess();
     }
   };

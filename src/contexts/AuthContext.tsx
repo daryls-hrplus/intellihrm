@@ -37,13 +37,15 @@ interface AuthContextType {
   roles: AppRole[];
   company: Company | null;
   isLoading: boolean;
-  signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
+  requiresMFA: boolean;
+  signIn: (email: string, password: string) => Promise<{ error: Error | null; requiresMFA?: boolean }>;
   signUp: (email: string, password: string, fullName: string) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
   hasRole: (role: AppRole) => boolean;
   isAdmin: boolean;
   isHRManager: boolean;
   refreshProfile: () => Promise<void>;
+  setMFAVerified: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -55,6 +57,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [roles, setRoles] = useState<AppRole[]>([]);
   const [company, setCompany] = useState<Company | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [requiresMFA, setRequiresMFA] = useState(false);
 
   useEffect(() => {
     // Set up auth state listener FIRST
@@ -167,6 +170,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       password,
     });
     
+    // Check if MFA is required
+    if (!error && data.session) {
+      const { data: factorsData } = await supabase.auth.mfa.listFactors();
+      const hasEnrolledFactors = (factorsData?.totp?.length ?? 0) > 0;
+      
+      if (hasEnrolledFactors) {
+        // Check if MFA is verified in this session
+        const { data: aalData } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+        if (aalData?.currentLevel !== aalData?.nextLevel) {
+          setRequiresMFA(true);
+          return { error: null, requiresMFA: true };
+        }
+      }
+    }
+    
     // Log login event if successful
     if (!error && data.user) {
       try {
@@ -221,6 +239,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setProfile(null);
     setRoles([]);
     setCompany(null);
+    setRequiresMFA(false);
+  };
+
+  const setMFAVerified = () => {
+    setRequiresMFA(false);
   };
 
   const refreshProfile = async () => {
@@ -242,6 +265,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         roles,
         company,
         isLoading,
+        requiresMFA,
         signIn,
         signUp,
         signOut,
@@ -249,6 +273,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         isAdmin,
         isHRManager,
         refreshProfile,
+        setMFAVerified,
       }}
     >
       {children}

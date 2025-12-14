@@ -80,7 +80,7 @@ export default function AuthPage() {
           return;
         }
 
-        const { error } = await signIn(formData.email, formData.password);
+        const { error, requiresMFA } = await signIn(formData.email, formData.password);
         if (error) {
           if (error.message.includes("Invalid login credentials")) {
             toast({
@@ -95,6 +95,8 @@ export default function AuthPage() {
               variant: "destructive",
             });
           }
+        } else if (requiresMFA) {
+          navigate("/auth/mfa", { replace: true });
         } else {
           const from = location.state?.from?.pathname || "/";
           navigate(from, { replace: true });

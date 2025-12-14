@@ -38,6 +38,8 @@ import {
   Layers,
   CreditCard,
   ArrowUpCircle,
+  Fingerprint,
+  KeyRound,
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 
@@ -181,6 +183,20 @@ const getAdminModules = (t: (key: string) => string) => [
     href: "/subscription/upgrade",
     icon: ArrowUpCircle,
     color: "bg-gradient-to-r from-amber-500/10 to-orange-500/10 text-orange-600",
+  },
+  {
+    title: "MFA Settings",
+    description: "Configure multi-factor authentication requirements",
+    href: "/admin/mfa-settings",
+    icon: Fingerprint,
+    color: "bg-red-500/10 text-red-600",
+  },
+  {
+    title: "SSO Settings",
+    description: "Configure Single Sign-On providers and domain mappings",
+    href: "/admin/sso-settings",
+    icon: KeyRound,
+    color: "bg-sky-500/10 text-sky-600",
   },
   {
     title: t("admin.modules.territories.title"),
