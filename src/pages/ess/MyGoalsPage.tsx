@@ -36,6 +36,7 @@ import { ContactManagerDialog } from "@/components/performance/ContactManagerDia
 import { GoalDialog } from "@/components/performance/GoalDialog";
 import { GoalsAnalyticsDashboard } from "@/components/performance/GoalsAnalyticsDashboard";
 import { toast } from "sonner";
+import { useLanguage } from "@/hooks/useLanguage";
 
 type GoalStatus = "draft" | "active" | "in_progress" | "completed" | "cancelled" | "overdue";
 
@@ -65,6 +66,7 @@ const statusConfig: Record<GoalStatus, { label: string; className: string }> = {
 };
 
 export default function MyGoalsPage() {
+  const { t } = useLanguage();
   const { user, company } = useAuth();
   const [goals, setGoals] = useState<Goal[]>([]);
   const [loading, setLoading] = useState(true);
@@ -186,26 +188,26 @@ export default function MyGoalsPage() {
       <div className="space-y-6">
         <Breadcrumbs
           items={[
-            { label: "Employee Self Service", href: "/ess" },
-            { label: "My Goals" },
+            { label: t("ess.title"), href: "/ess" },
+            { label: t("pages.myGoals.title") },
           ]}
         />
 
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">My Goals</h1>
+            <h1 className="text-3xl font-bold tracking-tight">{t("pages.myGoals.title")}</h1>
             <p className="text-muted-foreground">
-              Track and update your performance goals
+              {t("pages.myGoals.subtitle")}
             </p>
           </div>
           <div className="flex gap-2">
             <Button variant="outline" onClick={() => setShowAnalytics(!showAnalytics)}>
               <BarChart3 className="mr-2 h-4 w-4" />
-              {showAnalytics ? "Hide" : "Show"} Analytics
+              {showAnalytics ? t("pages.myGoals.hideAnalytics") : t("pages.myGoals.showAnalytics")}
             </Button>
             <Button onClick={() => setCreateGoalOpen(true)}>
               <Plus className="mr-2 h-4 w-4" />
-              Create Goal
+              {t("pages.myGoals.createGoal")}
             </Button>
           </div>
         </div>
@@ -214,7 +216,7 @@ export default function MyGoalsPage() {
         <div className="grid gap-4 md:grid-cols-4">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium">Active Goals</CardTitle>
+              <CardTitle className="text-sm font-medium">{t("pages.myGoals.activeGoals")}</CardTitle>
               <Target className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
@@ -223,7 +225,7 @@ export default function MyGoalsPage() {
           </Card>
           <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium">Avg Progress</CardTitle>
+              <CardTitle className="text-sm font-medium">{t("pages.myGoals.avgProgress")}</CardTitle>
               <TrendingUp className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
@@ -232,7 +234,7 @@ export default function MyGoalsPage() {
           </Card>
           <Card className={overdueGoals.length > 0 ? "border-warning/50" : ""}>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium">Overdue</CardTitle>
+              <CardTitle className="text-sm font-medium">{t("pages.myGoals.overdue")}</CardTitle>
               <AlertCircle className={`h-4 w-4 ${overdueGoals.length > 0 ? "text-warning" : "text-muted-foreground"}`} />
             </CardHeader>
             <CardContent>
@@ -243,7 +245,7 @@ export default function MyGoalsPage() {
           </Card>
           <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium">Completed</CardTitle>
+              <CardTitle className="text-sm font-medium">{t("pages.myGoals.completed")}</CardTitle>
               <CheckCircle className="h-4 w-4 text-success" />
             </CardHeader>
             <CardContent>

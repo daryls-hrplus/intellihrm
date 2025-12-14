@@ -3,6 +3,7 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { useLanguage } from "@/hooks/useLanguage";
 import {
   GraduationCap,
   BookOpen,
@@ -57,6 +58,7 @@ interface Certificate {
 }
 
 export default function MyTrainingPage() {
+  const { t } = useLanguage();
   const { user } = useAuth();
   const [enrollments, setEnrollments] = useState<Enrollment[]>([]);
   const [certificates, setCertificates] = useState<Certificate[]>([]);
@@ -135,13 +137,13 @@ export default function MyTrainingPage() {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "completed":
-        return <Badge className="bg-success">Completed</Badge>;
+        return <Badge className="bg-success">{t("pages.myTraining.completed")}</Badge>;
       case "in_progress":
-        return <Badge className="bg-info">In Progress</Badge>;
+        return <Badge className="bg-info">{t("pages.myTraining.inProgress")}</Badge>;
       case "enrolled":
-        return <Badge variant="outline">Not Started</Badge>;
+        return <Badge variant="outline">{t("pages.myTraining.notStarted")}</Badge>;
       case "expired":
-        return <Badge className="bg-destructive">Expired</Badge>;
+        return <Badge className="bg-destructive">{t("pages.myTraining.expired")}</Badge>;
       default:
         return <Badge variant="outline">{status}</Badge>;
     }
@@ -178,7 +180,7 @@ export default function MyTrainingPage() {
 
         <div className="mt-3 space-y-2">
           <div className="flex items-center justify-between text-sm">
-            <span className="text-muted-foreground">Progress</span>
+            <span className="text-muted-foreground">{t("pages.myTraining.progress")}</span>
             <span className="font-medium">{enrollment.progress_percentage}%</span>
           </div>
           <Progress value={enrollment.progress_percentage} className="h-2" />
@@ -192,7 +194,7 @@ export default function MyTrainingPage() {
           {enrollment.due_date && (
             <span className="flex items-center gap-1">
               <Calendar className="h-4 w-4" />
-              Due {new Date(enrollment.due_date).toLocaleDateString()}
+              {t("pages.myTraining.due")} {new Date(enrollment.due_date).toLocaleDateString()}
             </span>
           )}
         </div>
@@ -201,15 +203,15 @@ export default function MyTrainingPage() {
           <NavLink to={`/training/course/${enrollment.course_id}`}>
             {enrollment.status === "completed" ? (
               <>
-                <CheckCircle className="mr-2 h-4 w-4" /> Review Course
+                <CheckCircle className="mr-2 h-4 w-4" /> {t("pages.myTraining.reviewCourse")}
               </>
             ) : enrollment.status === "in_progress" ? (
               <>
-                <Play className="mr-2 h-4 w-4" /> Continue
+                <Play className="mr-2 h-4 w-4" /> {t("pages.myTraining.continue")}
               </>
             ) : (
               <>
-                <Play className="mr-2 h-4 w-4" /> Start Course
+                <Play className="mr-2 h-4 w-4" /> {t("pages.myTraining.startCourse")}
               </>
             )}
           </NavLink>
@@ -223,8 +225,8 @@ export default function MyTrainingPage() {
       <div className="space-y-6">
         <Breadcrumbs
           items={[
-            { label: "Employee Self Service", href: "/ess" },
-            { label: "My Training" },
+            { label: t("ess.title"), href: "/ess" },
+            { label: t("pages.myTraining.title") },
           ]}
         />
 
@@ -234,10 +236,10 @@ export default function MyTrainingPage() {
           </div>
           <div>
             <h1 className="text-2xl font-bold tracking-tight text-foreground">
-              My Training
+              {t("pages.myTraining.title")}
             </h1>
             <p className="text-muted-foreground">
-              View your courses, progress, and certifications
+              {t("pages.myTraining.subtitle")}
             </p>
           </div>
         </div>
@@ -250,7 +252,7 @@ export default function MyTrainingPage() {
                 <BookOpen className="h-5 w-5 text-primary" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Total Courses</p>
+                <p className="text-sm text-muted-foreground">{t("pages.myTraining.totalCourses")}</p>
                 <p className="text-2xl font-bold">{stats.total}</p>
               </div>
             </div>
@@ -261,7 +263,7 @@ export default function MyTrainingPage() {
                 <TrendingUp className="h-5 w-5 text-info" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">In Progress</p>
+                <p className="text-sm text-muted-foreground">{t("pages.myTraining.inProgress")}</p>
                 <p className="text-2xl font-bold">{stats.inProgress}</p>
               </div>
             </div>
@@ -272,7 +274,7 @@ export default function MyTrainingPage() {
                 <CheckCircle className="h-5 w-5 text-success" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Completed</p>
+                <p className="text-sm text-muted-foreground">{t("pages.myTraining.completed")}</p>
                 <p className="text-2xl font-bold">{stats.completed}</p>
               </div>
             </div>
@@ -283,7 +285,7 @@ export default function MyTrainingPage() {
                 <Award className="h-5 w-5 text-warning" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Certificates</p>
+                <p className="text-sm text-muted-foreground">{t("pages.myTraining.certificates")}</p>
                 <p className="text-2xl font-bold">{stats.certificates}</p>
               </div>
             </div>
@@ -294,7 +296,7 @@ export default function MyTrainingPage() {
                 <Clock className="h-5 w-5 text-muted-foreground" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Total Hours</p>
+                <p className="text-sm text-muted-foreground">{t("pages.myTraining.totalHours")}</p>
                 <p className="text-2xl font-bold">{stats.totalHours}h</p>
               </div>
             </div>

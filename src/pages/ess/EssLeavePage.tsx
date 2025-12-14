@@ -3,6 +3,7 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import { useLeaveManagement } from "@/hooks/useLeaveManagement";
 import { useWorkflow } from "@/hooks/useWorkflow";
 import { useAuth } from "@/contexts/AuthContext";
+import { useLanguage } from "@/hooks/useLanguage";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -58,6 +59,7 @@ import { LeaveBalanceSummary } from "@/components/leave/LeaveBalanceSummary";
 import { LeaveCalendar } from "@/components/leave/LeaveCalendar";
 
 export default function EssLeavePage() {
+  const { t } = useLanguage();
   const { profile } = useAuth();
   const [departmentId, setDepartmentId] = useState<string | null>(null);
   
@@ -244,8 +246,8 @@ export default function EssLeavePage() {
       <div className="space-y-6">
         <Breadcrumbs
           items={[
-            { label: "Employee Self Service", href: "/ess" },
-            { label: "Leave Requests" },
+            { label: t("ess.title"), href: "/ess" },
+            { label: t("pages.myLeave.title") },
           ]}
         />
 
@@ -255,13 +257,13 @@ export default function EssLeavePage() {
               <CalendarIcon className="h-5 w-5 text-primary" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold tracking-tight text-foreground">Leave Requests</h1>
-              <p className="text-muted-foreground">View your leave balances and request time off</p>
+              <h1 className="text-2xl font-bold tracking-tight text-foreground">{t("pages.myLeave.title")}</h1>
+              <p className="text-muted-foreground">{t("pages.myLeave.subtitle")}</p>
             </div>
           </div>
           <Button onClick={() => setShowApplyDialog(true)}>
             <CalendarPlus className="mr-2 h-4 w-4" />
-            Apply for Leave
+            {t("pages.myLeave.applyLeave")}
           </Button>
         </div>
 
