@@ -113,8 +113,8 @@ export default function CertificationsPage() {
                 <Award className="h-5 w-5 text-success" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Total Certificates</p>
-                <p className="text-2xl font-bold">{certificates.length}</p>
+              <p className="text-sm text-muted-foreground">{t("training.modules.certifications.totalCertificates")}</p>
+              <p className="text-2xl font-bold">{certificates.length}</p>
               </div>
             </div>
           </div>
