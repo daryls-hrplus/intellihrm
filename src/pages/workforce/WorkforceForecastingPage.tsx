@@ -12,6 +12,7 @@ import { MonteCarloSimulation } from "@/components/admin/MonteCarloSimulation";
 import { SensitivityAnalysis } from "@/components/admin/SensitivityAnalysis";
 import { StressTestAnalysis } from "@/components/admin/StressTestAnalysis";
 import { supabase } from "@/integrations/supabase/client";
+import { useLanguage } from "@/hooks/useLanguage";
 
 // Default scenarios for analysis tabs when none are loaded
 const defaultScenarios: ScenarioParameters[] = [
@@ -51,6 +52,7 @@ const defaultScenarios: ScenarioParameters[] = [
 ];
 
 export default function WorkforceForecastingPage() {
+  const { t } = useLanguage();
   const [activeTab, setActiveTab] = useState("headcount");
   const [currentHeadcount, setCurrentHeadcount] = useState(0);
 
@@ -66,12 +68,12 @@ export default function WorkforceForecastingPage() {
   };
 
   const tabs = [
-    { id: "headcount", label: "Headcount Forecast", icon: TrendingUp },
-    { id: "scenario", label: "Scenario Planning", icon: Target },
-    { id: "whatif", label: "What-If Analysis", icon: Zap },
-    { id: "montecarlo", label: "Monte Carlo", icon: Activity },
-    { id: "sensitivity", label: "Sensitivity Analysis", icon: FlaskConical },
-    { id: "stress", label: "Stress Testing", icon: Lightbulb },
+    { id: "headcount", label: t("workforce.forecasting.headcountForecast"), icon: TrendingUp },
+    { id: "scenario", label: t("workforce.forecasting.scenarioPlanning"), icon: Target },
+    { id: "whatif", label: t("workforce.forecasting.whatIfAnalysis"), icon: Zap },
+    { id: "montecarlo", label: t("workforce.forecasting.monteCarlo"), icon: Activity },
+    { id: "sensitivity", label: t("workforce.forecasting.sensitivityAnalysis"), icon: FlaskConical },
+    { id: "stress", label: t("workforce.forecasting.stressTesting"), icon: Lightbulb },
   ];
 
   return (
@@ -82,13 +84,13 @@ export default function WorkforceForecastingPage() {
           <Link to="/workforce">
             <Button variant="ghost" size="sm">
               <ArrowLeft className="h-4 w-4 mr-2" />
-              Workforce
+              {t("navigation.workforce")}
             </Button>
           </Link>
           <div>
-            <h1 className="text-2xl font-bold tracking-tight">Workforce Forecasting</h1>
+            <h1 className="text-2xl font-bold tracking-tight">{t("workforce.forecasting.title")}</h1>
             <p className="text-muted-foreground">
-              Plan and analyze workforce trends with advanced forecasting tools
+              {t("workforce.forecasting.subtitle")}
             </p>
           </div>
         </div>
@@ -126,7 +128,7 @@ export default function WorkforceForecastingPage() {
                   <div className="flex items-center gap-2 text-muted-foreground">
                     <AlertCircle className="h-4 w-4" />
                     <CardDescription>
-                      Using default scenarios. Create custom scenarios in the Scenario Planning tab for personalized analysis.
+                      {t("workforce.forecasting.defaultScenariosNote")}
                     </CardDescription>
                   </div>
                 </CardHeader>
@@ -143,7 +145,7 @@ export default function WorkforceForecastingPage() {
                   <div className="flex items-center gap-2 text-muted-foreground">
                     <AlertCircle className="h-4 w-4" />
                     <CardDescription>
-                      Using default scenarios. Create custom scenarios in the Scenario Planning tab for personalized analysis.
+                      {t("workforce.forecasting.defaultScenariosNote")}
                     </CardDescription>
                   </div>
                 </CardHeader>
@@ -160,7 +162,7 @@ export default function WorkforceForecastingPage() {
                   <div className="flex items-center gap-2 text-muted-foreground">
                     <AlertCircle className="h-4 w-4" />
                     <CardDescription>
-                      Using default scenarios. Create custom scenarios in the Scenario Planning tab for personalized analysis.
+                      {t("workforce.forecasting.defaultScenariosNote")}
                     </CardDescription>
                   </div>
                 </CardHeader>
@@ -177,7 +179,7 @@ export default function WorkforceForecastingPage() {
                   <div className="flex items-center gap-2 text-muted-foreground">
                     <AlertCircle className="h-4 w-4" />
                     <CardDescription>
-                      Using default scenarios. Create custom scenarios in the Scenario Planning tab for personalized analysis.
+                      {t("workforce.forecasting.defaultScenariosNote")}
                     </CardDescription>
                   </div>
                 </CardHeader>

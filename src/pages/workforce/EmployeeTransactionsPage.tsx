@@ -17,16 +17,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { DepartmentFilter, useDepartmentFilter } from "@/components/filters/DepartmentFilter";
+import { useLanguage } from "@/hooks/useLanguage";
 
 interface Company {
   id: string;
   name: string;
 }
-
-const breadcrumbs = [
-  { label: "Workforce", href: "/workforce" },
-  { label: "Employee Transactions" },
-];
 
 const workflowCodeMap: Record<TransactionType, string> = {
   HIRE: "employee_hire",
@@ -39,6 +35,7 @@ const workflowCodeMap: Record<TransactionType, string> = {
 };
 
 export default function EmployeeTransactionsPage() {
+  const { t } = useLanguage();
   const { startWorkflow } = useWorkflow();
   const { selectedDepartmentId, setSelectedDepartmentId } = useDepartmentFilter();
   const [companies, setCompanies] = useState<Company[]>([]);
@@ -110,7 +107,10 @@ export default function EmployeeTransactionsPage() {
   return (
     <AppLayout>
       <div className="space-y-6">
-        <Breadcrumbs items={breadcrumbs} />
+        <Breadcrumbs items={[
+          { label: t("navigation.workforce"), href: "/workforce" },
+          { label: t("workforce.transactions.title") },
+        ]} />
 
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-3">
@@ -119,10 +119,10 @@ export default function EmployeeTransactionsPage() {
             </div>
             <div>
               <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
-                Employee Transactions
+                {t("workforce.transactions.title")}
               </h1>
               <p className="text-muted-foreground">
-                Manage employee lifecycle transactions
+                {t("workforce.transactions.subtitle")}
               </p>
             </div>
           </div>
@@ -130,10 +130,10 @@ export default function EmployeeTransactionsPage() {
           <div className="flex items-center gap-2">
             <Select value={selectedCompanyId} onValueChange={(id) => { setSelectedCompanyId(id); setSelectedDepartmentId("all"); }}>
               <SelectTrigger className="w-[200px]">
-                <SelectValue placeholder="All Companies" />
+                <SelectValue placeholder={t("workforce.allCompanies")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Companies</SelectItem>
+                <SelectItem value="all">{t("workforce.allCompanies")}</SelectItem>
                 {companies.map((company) => (
                   <SelectItem key={company.id} value={company.id}>
                     {company.name}
@@ -151,9 +151,9 @@ export default function EmployeeTransactionsPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle>All Transactions</CardTitle>
+            <CardTitle>{t("workforce.transactions.allTransactions")}</CardTitle>
             <CardDescription>
-              View and manage employee hires, confirmations, promotions, transfers, and terminations.
+              {t("workforce.transactions.description")}
             </CardDescription>
           </CardHeader>
           <CardContent>
