@@ -6296,7 +6296,10 @@
       "maintenanceCosts": "Maintenance Costs",
       "maintenanceCostsDesc": "Monthly maintenance spending",
       "maintenanceByType": "Maintenance by Type",
-      "maintenanceByTypeDesc": "Distribution by maintenance category"
+      "maintenanceByTypeDesc": "Distribution of maintenance activities",
+      "assigned": "Assigned",
+      "returned": "Returned",
+      "cost": "Cost"
     }
   }
 }

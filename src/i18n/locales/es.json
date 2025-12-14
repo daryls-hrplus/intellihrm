@@ -663,7 +663,10 @@
       "maintenanceCosts": "Costos de Mantenimiento",
       "maintenanceCostsDesc": "Gasto mensual en mantenimiento",
       "maintenanceByType": "Mantenimiento por Tipo",
-      "maintenanceByTypeDesc": "Distribución por categoría de mantenimiento"
+      "maintenanceByTypeDesc": "Distribución por categoría de mantenimiento",
+      "assigned": "Asignado",
+      "returned": "Devuelto",
+      "cost": "Costo"
     }
   }
 }

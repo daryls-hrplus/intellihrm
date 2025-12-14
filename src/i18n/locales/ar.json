@@ -663,7 +663,10 @@
       "maintenanceCosts": "تكاليف الصيانة",
       "maintenanceCostsDesc": "إنفاق الصيانة الشهري",
       "maintenanceByType": "الصيانة حسب النوع",
-      "maintenanceByTypeDesc": "التوزيع حسب فئة الصيانة"
+      "maintenanceByTypeDesc": "التوزيع حسب فئة الصيانة",
+      "assigned": "مُعيّن",
+      "returned": "مُرجع",
+      "cost": "التكلفة"
     }
   }
 }
