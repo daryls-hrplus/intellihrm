@@ -172,21 +172,21 @@ export function AppHeader() {
   };
 
   return (
-    <div className="flex items-center justify-between gap-4 mb-4">
+    <div className="flex items-center justify-between gap-4 mb-6 -mt-2">
       {/* Company Logos - Left Side */}
       {company && (
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           {groupLogoUrl && (
             <img 
               src={groupLogoUrl} 
               alt={company.company_group?.name || "Group"}
-              className="h-10 w-10 rounded-lg border bg-background object-contain p-1 shadow-sm"
+              className="h-14 w-14 rounded-lg border bg-background object-contain p-1.5 shadow-sm"
             />
           )}
           <img 
             src={companyLogoUrl} 
             alt={company.name}
-            className="h-10 w-10 rounded-lg border bg-background object-contain p-1 shadow-sm"
+            className="h-14 w-14 rounded-lg border bg-background object-contain p-1.5 shadow-sm"
           />
         </div>
       )}
