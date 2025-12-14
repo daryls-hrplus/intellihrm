@@ -331,6 +331,8 @@ import MessagingPage from "./pages/messaging/MessagingPage";
 
 const queryClient = new QueryClient();
 
+import { ProtectedLayout } from "@/components/layout/ProtectedLayout";
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
@@ -347,15 +349,17 @@ const App = () => (
             <Route path="/subscription" element={<SubscriptionPage />} />
             <Route path="/subscription/upgrade" element={<UpgradePage />} />
             
-            {/* Main Dashboard */}
-            <Route
-              path="/"
-              element={
-                <ProtectedRoute>
-                  <Index />
-                </ProtectedRoute>
-              }
-            />
+            {/* Protected Routes with Layout */}
+            <Route element={<ProtectedLayout />}>
+              {/* Main Dashboard */}
+              <Route
+                path="/"
+                element={
+                  <ProtectedRoute>
+                    <Index />
+                  </ProtectedRoute>
+                }
+              />
 
             {/* Employee Self Service Routes */}
             <Route
@@ -2555,6 +2559,7 @@ const App = () => (
 
             {/* Catch-all */}
             <Route path="*" element={<NotFound />} />
+            </Route>
           </Routes>
         </AuthProvider>
       </BrowserRouter>
