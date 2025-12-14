@@ -4,6 +4,7 @@ import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { PositionsManagement } from "@/components/admin/PositionsManagement";
 import { supabase } from "@/integrations/supabase/client";
 import { UserCheck, Building2 } from "lucide-react";
+import { useLanguage } from "@/hooks/useLanguage";
 import {
   Select,
   SelectContent,
@@ -19,6 +20,7 @@ interface Company {
 }
 
 export default function PositionsPage() {
+  const { t } = useLanguage();
   const [companies, setCompanies] = useState<Company[]>([]);
   const [selectedCompanyId, setSelectedCompanyId] = useState<string>("");
   const [isLoading, setIsLoading] = useState(true);
@@ -44,8 +46,8 @@ export default function PositionsPage() {
     <AppLayout>
       <div className="space-y-6">
         <Breadcrumbs items={[
-          { label: "Workforce", href: "/workforce" },
-          { label: "Positions" }
+          { label: t("workforce.title"), href: "/workforce" },
+          { label: t("workforce.positions") }
         ]} />
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-3">
@@ -54,10 +56,10 @@ export default function PositionsPage() {
             </div>
             <div>
               <h1 className="text-2xl font-bold tracking-tight text-foreground">
-                Positions
+                {t("workforce.positions")}
               </h1>
               <p className="text-muted-foreground">
-                Manage job positions and assignments
+                {t("workforce.managePositions")}
               </p>
             </div>
           </div>
@@ -66,7 +68,7 @@ export default function PositionsPage() {
             <Building2 className="h-4 w-4 text-muted-foreground" />
             <Select value={selectedCompanyId} onValueChange={setSelectedCompanyId}>
               <SelectTrigger className="w-[250px]">
-                <SelectValue placeholder="Select company" />
+                <SelectValue placeholder={t("workforce.selectCompany")} />
               </SelectTrigger>
               <SelectContent>
                 {companies.map((company) => (
@@ -87,7 +89,7 @@ export default function PositionsPage() {
           <PositionsManagement companyId={selectedCompanyId} />
         ) : (
           <div className="rounded-lg border border-border bg-card p-8 text-center">
-            <p className="text-muted-foreground">No companies found. Please add a company first.</p>
+            <p className="text-muted-foreground">{t("workforce.noCompaniesFound")}</p>
           </div>
         )}
       </div>
