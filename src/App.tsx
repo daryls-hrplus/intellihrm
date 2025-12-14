@@ -42,6 +42,8 @@ import TerritoriesPage from "./pages/admin/TerritoriesPage";
 import CompanyTagsPage from "./pages/admin/CompanyTagsPage";
 import GranularPermissionsPage from "./pages/admin/GranularPermissionsPage";
 import ImplementationHandbookPage from "./pages/admin/ImplementationHandbookPage";
+import FeaturesBrochurePage from "./pages/admin/FeaturesBrochurePage";
+import ModulesBrochurePage from "./pages/admin/ModulesBrochurePage";
 // Workforce pages
 import WorkforceDashboardPage from "./pages/workforce/WorkforceDashboardPage";
 import EmployeesPage from "./pages/workforce/EmployeesPage";
@@ -948,6 +950,22 @@ const App = () => (
               element={
                 <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
                   <ImplementationHandbookPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/features-brochure"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
+                  <FeaturesBrochurePage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/modules-brochure"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
+                  <ModulesBrochurePage />
                 </ProtectedRoute>
               }
             />
