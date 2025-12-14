@@ -228,6 +228,43 @@
         "title": "Affectations des Employés",
         "description": "Gérer les affectations de postes"
       }
+    },
+    "profile": {
+      "tabs": {
+        "overview": "Aperçu",
+        "addresses": "Adresses",
+        "background": "Vérification des Antécédents",
+        "bank": "Comptes Bancaires",
+        "beneficiaries": "Bénéficiaires",
+        "branches": "Sites des Succursales",
+        "certificates": "Certificats",
+        "competencies": "Compétences",
+        "contacts": "Contacts",
+        "dependents": "Personnes à Charge",
+        "documents": "Documents",
+        "emergency": "Contacts d'Urgence",
+        "interests": "Intérêts",
+        "licenses": "Licences",
+        "medical": "Profil Médical",
+        "memberships": "Adhésions",
+        "payGroup": "Groupe de Paie",
+        "references": "Références",
+        "workPermits": "Permis de Travail"
+      },
+      "positionHistory": "Historique des Postes",
+      "noPositions": "Aucun poste assigné",
+      "primary": "Principal",
+      "ended": "Terminé",
+      "started": "Commencé",
+      "timezone": "Fuseau Horaire",
+      "preferredLanguage": "Langue Préférée",
+      "dateFormat": "Format de Date",
+      "timeFormat": "Format d'Heure",
+      "memberSince": "Membre Depuis",
+      "employeeNotFound": "Employé non trouvé",
+      "employeeNotFoundDescription": "L'employé que vous recherchez n'existe pas.",
+      "backToEmployees": "Retour aux Employés",
+      "notSet": "Non défini"
     }
   },
   "admin": {

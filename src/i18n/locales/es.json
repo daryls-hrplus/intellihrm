@@ -228,6 +228,43 @@
         "title": "Asignaciones de Empleados",
         "description": "Gestionar asignaciones de posiciones"
       }
+    },
+    "profile": {
+      "tabs": {
+        "overview": "Resumen",
+        "addresses": "Direcciones",
+        "background": "Verificación de Antecedentes",
+        "bank": "Cuentas Bancarias",
+        "beneficiaries": "Beneficiarios",
+        "branches": "Ubicaciones de Sucursales",
+        "certificates": "Certificados",
+        "competencies": "Competencias",
+        "contacts": "Contactos",
+        "dependents": "Dependientes",
+        "documents": "Documentos",
+        "emergency": "Contactos de Emergencia",
+        "interests": "Intereses",
+        "licenses": "Licencias",
+        "medical": "Perfil Médico",
+        "memberships": "Membresías",
+        "payGroup": "Grupo de Pago",
+        "references": "Referencias",
+        "workPermits": "Permisos de Trabajo"
+      },
+      "positionHistory": "Historial de Posiciones",
+      "noPositions": "Sin posiciones asignadas",
+      "primary": "Principal",
+      "ended": "Terminado",
+      "started": "Iniciado",
+      "timezone": "Zona Horaria",
+      "preferredLanguage": "Idioma Preferido",
+      "dateFormat": "Formato de Fecha",
+      "timeFormat": "Formato de Hora",
+      "memberSince": "Miembro Desde",
+      "employeeNotFound": "Empleado no encontrado",
+      "employeeNotFoundDescription": "El empleado que buscas no existe.",
+      "backToEmployees": "Volver a Empleados",
+      "notSet": "No establecido"
     }
   },
   "admin": {
