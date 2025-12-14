@@ -1811,36 +1811,165 @@
   },
   "timeAttendance": {
     "title": "Time & Attendance",
-    "subtitle": "Track employee time and attendance",
+    "subtitle": "Track work hours, manage schedules, and monitor attendance",
+    "stats": {
+      "presentToday": "Present Today",
+      "absent": "Absent",
+      "onLeave": "On Leave",
+      "totalStaff": "Total Staff",
+      "late": "Late"
+    },
     "modules": {
-      "timeClock": {
-        "title": "Time Clock",
-        "description": "Clock in/out tracking"
+      "timeTracking": {
+        "title": "Time Tracking",
+        "description": "Clock in/out and track work hours"
       },
-      "timesheets": {
-        "title": "Timesheets",
-        "description": "View and approve timesheets"
+      "records": {
+        "title": "Attendance Records",
+        "description": "View and manage attendance history"
       },
       "schedules": {
-        "title": "Work Schedules",
-        "description": "Manage employee schedules"
+        "title": "Schedules",
+        "description": "Create and manage work schedules"
       },
-      "exceptions": {
-        "title": "Attendance Exceptions",
-        "description": "Handle attendance issues"
+      "overtime": {
+        "title": "Overtime Management",
+        "description": "Track and approve overtime requests"
       },
-      "policies": {
-        "title": "Attendance Policies",
-        "description": "Configure attendance rules"
+      "shifts": {
+        "title": "Shift Management",
+        "description": "Configure shifts, rounding rules, and pay differentials"
       },
       "geofencing": {
         "title": "Geofencing",
-        "description": "Location-based time tracking"
+        "description": "Location-based clock in/out restrictions"
       },
       "projects": {
-        "title": "Project Time",
-        "description": "Track time by project"
+        "title": "Project Time Tracking",
+        "description": "Track time against clients, projects and tasks"
+      },
+      "timesheetApprovals": {
+        "title": "Timesheet Approvals",
+        "description": "Submit timesheets for workflow approval"
+      },
+      "devices": {
+        "title": "Timeclock Devices",
+        "description": "Manage physical timeclock terminals"
+      },
+      "policies": {
+        "title": "Attendance Policies",
+        "description": "Configure late rules and rounding"
+      },
+      "exceptions": {
+        "title": "Exceptions",
+        "description": "Review missing punches and corrections"
+      },
+      "live": {
+        "title": "Live Dashboard",
+        "description": "Real-time attendance feed"
+      },
+      "import": {
+        "title": "Punch Import",
+        "description": "Import punches from external systems"
+      },
+      "analytics": {
+        "title": "Analytics",
+        "description": "Attendance trends and insights"
       }
+    },
+    "todayOverview": "Today's Attendance Overview",
+    "clickFeatureToStart": "Click on a feature above to get started with time tracking.",
+    "records": {
+      "title": "Attendance Records",
+      "subtitle": "View and manage employee attendance history",
+      "filters": "Filters",
+      "fromDate": "From Date",
+      "toDate": "To Date",
+      "status": "Status",
+      "allStatuses": "All Statuses",
+      "present": "Present",
+      "absent": "Absent",
+      "late": "Late",
+      "earlyDeparture": "Early Departure",
+      "halfDay": "Half Day",
+      "onLeave": "On Leave",
+      "holiday": "Holiday",
+      "export": "Export",
+      "noRecordsFound": "No attendance records found",
+      "employee": "Employee",
+      "date": "Date",
+      "scheduled": "Scheduled",
+      "actualInOut": "Actual In/Out",
+      "workHours": "Work Hours",
+      "overtime": "Overtime"
+    },
+    "schedules": {
+      "title": "Work Schedules",
+      "subtitle": "Create and manage employee work schedules",
+      "templates": "Schedule Templates",
+      "assignments": "Employee Assignments",
+      "createSchedule": "Create Schedule",
+      "scheduleCreated": "Schedule created successfully",
+      "scheduleDeleted": "Schedule deleted",
+      "assignSchedule": "Assign Schedule",
+      "scheduleAssigned": "Schedule assigned successfully",
+      "name": "Name",
+      "code": "Code",
+      "description": "Description",
+      "scheduleType": "Schedule Type",
+      "fixed": "Fixed",
+      "rotating": "Rotating",
+      "flexible": "Flexible",
+      "startTime": "Start Time",
+      "endTime": "End Time",
+      "breakDuration": "Break Duration (minutes)",
+      "workDays": "Work Days",
+      "overnightShift": "Overnight Shift",
+      "startDate": "Start Date",
+      "endDate": "End Date",
+      "noSchedules": "No schedules created yet",
+      "hours": "Hours",
+      "break": "Break",
+      "type": "Type",
+      "actions": "Actions",
+      "primary": "Primary",
+      "noAssignments": "No schedule assignments found"
+    },
+    "shifts": {
+      "title": "Shift Management",
+      "subtitle": "Configure shifts, rounding rules, and pay differentials",
+      "shiftsTab": "Shifts",
+      "roundingRules": "Rounding Rules",
+      "paymentRules": "Payment Rules",
+      "assignments": "Shift Assignments",
+      "createShift": "Create Shift",
+      "shiftCreated": "Shift created",
+      "shiftUpdated": "Shift updated",
+      "shiftDeleted": "Shift deleted",
+      "crossesMidnight": "Crosses Midnight",
+      "minimumHours": "Minimum Hours",
+      "color": "Color",
+      "noShifts": "No shifts created yet",
+      "createRoundingRule": "Create Rounding Rule",
+      "roundingRuleCreated": "Rounding rule created",
+      "roundingRuleUpdated": "Rounding rule updated",
+      "roundingRuleDeleted": "Rounding rule deleted",
+      "ruleType": "Rule Type",
+      "roundingInterval": "Rounding Interval",
+      "roundingDirection": "Rounding Direction",
+      "gracePeriod": "Grace Period",
+      "applyToOvertime": "Apply to Overtime",
+      "noRoundingRules": "No rounding rules created yet",
+      "createPaymentRule": "Create Payment Rule",
+      "paymentRuleCreated": "Payment rule created",
+      "paymentRuleUpdated": "Payment rule updated",
+      "paymentRuleDeleted": "Payment rule deleted",
+      "paymentType": "Payment Type",
+      "amount": "Amount",
+      "appliesTo": "Applies To",
+      "taxable": "Taxable",
+      "priority": "Priority",
+      "noPaymentRules": "No payment rules created yet"
     }
   },
   "payroll": {

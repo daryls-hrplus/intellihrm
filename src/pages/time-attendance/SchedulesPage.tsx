@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -63,6 +64,7 @@ interface EmployeeSchedule {
 const DAYS_OF_WEEK = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
 
 export default function SchedulesPage() {
+  const { t } = useTranslation();
   const [companies, setCompanies] = useState<Company[]>([]);
   const [selectedCompany, setSelectedCompany] = useState<string>("");
   const [schedules, setSchedules] = useState<Schedule[]>([]);
@@ -113,7 +115,7 @@ export default function SchedulesPage() {
       .order('name');
     
     if (error) {
-      toast.error("Failed to load companies");
+      toast.error(t("common.error"));
       return;
     }
     setCompanies(data || []);
@@ -168,7 +170,7 @@ export default function SchedulesPage() {
 
   const handleCreateSchedule = async () => {
     if (!newSchedule.name || !newSchedule.code) {
-      toast.error("Name and code are required");
+      toast.error(t("common.fillRequired"));
       return;
     }
 
@@ -181,10 +183,10 @@ export default function SchedulesPage() {
       });
 
     if (error) {
-      toast.error("Failed to create schedule");
+      toast.error(t("common.error"));
       console.error(error);
     } else {
-      toast.success("Schedule created successfully");
+      toast.success(t("timeAttendance.schedules.scheduleCreated"));
       setScheduleDialogOpen(false);
       setNewSchedule({
         name: "",
@@ -204,7 +206,7 @@ export default function SchedulesPage() {
 
   const handleAssignSchedule = async () => {
     if (!newAssignment.employee_id || !newAssignment.schedule_id) {
-      toast.error("Employee and schedule are required");
+      toast.error(t("common.fillRequired"));
       return;
     }
 
@@ -213,10 +215,10 @@ export default function SchedulesPage() {
       .insert(newAssignment);
 
     if (error) {
-      toast.error("Failed to assign schedule");
+      toast.error(t("common.error"));
       console.error(error);
     } else {
-      toast.success("Schedule assigned successfully");
+      toast.success(t("timeAttendance.schedules.scheduleAssigned"));
       setAssignDialogOpen(false);
       setNewAssignment({
         employee_id: "",
@@ -238,9 +240,9 @@ export default function SchedulesPage() {
       .eq('id', id);
 
     if (error) {
-      toast.error("Failed to delete schedule");
+      toast.error(t("common.error"));
     } else {
-      toast.success("Schedule deleted");
+      toast.success(t("timeAttendance.schedules.scheduleDeleted"));
       loadSchedules();
     }
   };
@@ -269,8 +271,8 @@ export default function SchedulesPage() {
       <div className="space-y-6">
         <Breadcrumbs 
           items={[
-            { label: "Time & Attendance", href: "/time-attendance" },
-            { label: "Schedules" }
+            { label: t("timeAttendance.title"), href: "/time-attendance" },
+            { label: t("timeAttendance.schedules.title") }
           ]} 
         />
 
@@ -281,17 +283,17 @@ export default function SchedulesPage() {
             </div>
             <div>
               <h1 className="text-2xl font-bold tracking-tight text-foreground">
-                Work Schedules
+                {t("timeAttendance.schedules.title")}
               </h1>
               <p className="text-muted-foreground">
-                Create and manage employee work schedules
+                {t("timeAttendance.schedules.subtitle")}
               </p>
             </div>
           </div>
           <div className="flex items-center gap-2">
             <Select value={selectedCompany} onValueChange={setSelectedCompany}>
               <SelectTrigger className="w-[200px]">
-                <SelectValue placeholder="Select company" />
+                <SelectValue placeholder={t("common.selectCompany")} />
               </SelectTrigger>
               <SelectContent>
                 {companies.map((c) => (
@@ -306,11 +308,11 @@ export default function SchedulesPage() {
           <TabsList>
             <TabsTrigger value="schedules" className="gap-2">
               <Settings className="h-4 w-4" />
-              Schedule Templates
+              {t("timeAttendance.schedules.templates")}
             </TabsTrigger>
             <TabsTrigger value="assignments" className="gap-2">
               <Users className="h-4 w-4" />
-              Employee Assignments
+              {t("timeAttendance.schedules.assignments")}
             </TabsTrigger>
           </TabsList>
 
@@ -320,26 +322,26 @@ export default function SchedulesPage() {
                 <DialogTrigger asChild>
                   <Button>
                     <Plus className="h-4 w-4 mr-2" />
-                    Create Schedule
+                    {t("timeAttendance.schedules.createSchedule")}
                   </Button>
                 </DialogTrigger>
                 <DialogContent className="max-w-lg">
                   <DialogHeader>
-                    <DialogTitle>Create Work Schedule</DialogTitle>
+                    <DialogTitle>{t("timeAttendance.schedules.createSchedule")}</DialogTitle>
                   </DialogHeader>
                   <div className="space-y-4 py-4 max-h-[70vh] overflow-y-auto">
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <Label>Name *</Label>
-                        <Input 
+                        <Label>{t("timeAttendance.schedules.name")} *</Label>
+                        <Input
                           value={newSchedule.name}
                           onChange={(e) => setNewSchedule({...newSchedule, name: e.target.value})}
                           placeholder="Standard Shift"
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label>Code *</Label>
-                        <Input 
+                        <Label>{t("timeAttendance.schedules.code")} *</Label>
+                        <Input
                           value={newSchedule.code}
                           onChange={(e) => setNewSchedule({...newSchedule, code: e.target.value})}
                           placeholder="STD-SHIFT"
@@ -347,15 +349,15 @@ export default function SchedulesPage() {
                       </div>
                     </div>
                     <div className="space-y-2">
-                      <Label>Description</Label>
-                      <Textarea 
+                      <Label>{t("timeAttendance.schedules.description")}</Label>
+                      <Textarea
                         value={newSchedule.description}
                         onChange={(e) => setNewSchedule({...newSchedule, description: e.target.value})}
                         placeholder="Schedule description..."
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label>Schedule Type</Label>
+                      <Label>{t("timeAttendance.schedules.scheduleType")}</Label>
                       <Select 
                         value={newSchedule.schedule_type} 
                         onValueChange={(v) => setNewSchedule({...newSchedule, schedule_type: v})}
@@ -364,24 +366,24 @@ export default function SchedulesPage() {
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="fixed">Fixed</SelectItem>
-                          <SelectItem value="rotating">Rotating</SelectItem>
-                          <SelectItem value="flexible">Flexible</SelectItem>
+                          <SelectItem value="fixed">{t("timeAttendance.schedules.fixed")}</SelectItem>
+                          <SelectItem value="rotating">{t("timeAttendance.schedules.rotating")}</SelectItem>
+                          <SelectItem value="flexible">{t("timeAttendance.schedules.flexible")}</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <Label>Start Time</Label>
-                        <Input 
+                        <Label>{t("timeAttendance.schedules.startTime")}</Label>
+                        <Input
                           type="time"
                           value={newSchedule.start_time}
                           onChange={(e) => setNewSchedule({...newSchedule, start_time: e.target.value})}
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label>End Time</Label>
-                        <Input 
+                        <Label>{t("timeAttendance.schedules.endTime")}</Label>
+                        <Input
                           type="time"
                           value={newSchedule.end_time}
                           onChange={(e) => setNewSchedule({...newSchedule, end_time: e.target.value})}
@@ -389,15 +391,15 @@ export default function SchedulesPage() {
                       </div>
                     </div>
                     <div className="space-y-2">
-                      <Label>Break Duration (minutes)</Label>
-                      <Input 
+                      <Label>{t("timeAttendance.schedules.breakDuration")}</Label>
+                      <Input
                         type="number"
                         value={newSchedule.break_duration_minutes}
                         onChange={(e) => setNewSchedule({...newSchedule, break_duration_minutes: parseInt(e.target.value) || 0})}
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label>Work Days</Label>
+                      <Label>{t("timeAttendance.schedules.workDays")}</Label>
                       <div className="flex flex-wrap gap-2">
                         {DAYS_OF_WEEK.map((day) => (
                           <Button
@@ -418,18 +420,18 @@ export default function SchedulesPage() {
                         checked={newSchedule.is_overnight}
                         onCheckedChange={(checked) => setNewSchedule({...newSchedule, is_overnight: checked})}
                       />
-                      <Label>Overnight Shift</Label>
+                      <Label>{t("timeAttendance.schedules.overnightShift")}</Label>
                     </div>
                     <div className="space-y-2">
-                      <Label>Start Date</Label>
-                      <Input 
+                      <Label>{t("timeAttendance.schedules.startDate")}</Label>
+                      <Input
                         type="date"
                         value={newSchedule.start_date}
                         onChange={(e) => setNewSchedule({...newSchedule, start_date: e.target.value})}
                       />
                     </div>
                     <Button onClick={handleCreateSchedule} className="w-full">
-                      Create Schedule
+                      {t("timeAttendance.schedules.createSchedule")}
                     </Button>
                   </div>
                 </DialogContent>
@@ -440,28 +442,28 @@ export default function SchedulesPage() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Clock className="h-5 w-5" />
-                  Schedule Templates
+                  {t("timeAttendance.schedules.templates")}
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Name</TableHead>
-                      <TableHead>Code</TableHead>
-                      <TableHead>Type</TableHead>
-                      <TableHead>Hours</TableHead>
-                      <TableHead>Break</TableHead>
-                      <TableHead>Work Days</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Actions</TableHead>
+                      <TableHead>{t("timeAttendance.schedules.name")}</TableHead>
+                      <TableHead>{t("timeAttendance.schedules.code")}</TableHead>
+                      <TableHead>{t("timeAttendance.schedules.type")}</TableHead>
+                      <TableHead>{t("timeAttendance.schedules.hours")}</TableHead>
+                      <TableHead>{t("timeAttendance.schedules.break")}</TableHead>
+                      <TableHead>{t("timeAttendance.schedules.workDays")}</TableHead>
+                      <TableHead>{t("common.status")}</TableHead>
+                      <TableHead>{t("timeAttendance.schedules.actions")}</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {schedules.length === 0 ? (
                       <TableRow>
                         <TableCell colSpan={8} className="text-center text-muted-foreground py-8">
-                          No schedules created yet
+                          {t("timeAttendance.schedules.noSchedules")}
                         </TableCell>
                       </TableRow>
                     ) : (
@@ -488,9 +490,9 @@ export default function SchedulesPage() {
                           </TableCell>
                           <TableCell>
                             {schedule.is_active ? (
-                              <Badge className="bg-success/20 text-success">Active</Badge>
+                              <Badge className="bg-success/20 text-success">{t("common.active")}</Badge>
                             ) : (
-                              <Badge variant="outline">Inactive</Badge>
+                              <Badge variant="outline">{t("common.inactive")}</Badge>
                             )}
                           </TableCell>
                           <TableCell>
@@ -522,22 +524,22 @@ export default function SchedulesPage() {
                 <DialogTrigger asChild>
                   <Button>
                     <Plus className="h-4 w-4 mr-2" />
-                    Assign Schedule
+                    {t("timeAttendance.schedules.assignSchedule")}
                   </Button>
                 </DialogTrigger>
                 <DialogContent>
                   <DialogHeader>
-                    <DialogTitle>Assign Schedule to Employee</DialogTitle>
+                    <DialogTitle>{t("timeAttendance.schedules.assignSchedule")}</DialogTitle>
                   </DialogHeader>
                   <div className="space-y-4 py-4">
                     <div className="space-y-2">
-                      <Label>Employee *</Label>
+                      <Label>{t("common.employee")} *</Label>
                       <Select 
                         value={newAssignment.employee_id} 
                         onValueChange={(v) => setNewAssignment({...newAssignment, employee_id: v})}
                       >
                         <SelectTrigger>
-                          <SelectValue placeholder="Select employee" />
+                          <SelectValue placeholder={t("common.selectEmployee")} />
                         </SelectTrigger>
                         <SelectContent>
                           {employees.map((e) => (
@@ -547,13 +549,13 @@ export default function SchedulesPage() {
                       </Select>
                     </div>
                     <div className="space-y-2">
-                      <Label>Schedule *</Label>
+                      <Label>{t("common.schedule")} *</Label>
                       <Select 
                         value={newAssignment.schedule_id} 
                         onValueChange={(v) => setNewAssignment({...newAssignment, schedule_id: v})}
                       >
                         <SelectTrigger>
-                          <SelectValue placeholder="Select schedule" />
+                          <SelectValue placeholder={t("common.selectSchedule")} />
                         </SelectTrigger>
                         <SelectContent>
                           {schedules.map((s) => (
@@ -565,7 +567,7 @@ export default function SchedulesPage() {
                       </Select>
                     </div>
                     <div className="space-y-2">
-                      <Label>Start Date</Label>
+                      <Label>{t("timeAttendance.schedules.startDate")}</Label>
                       <Input 
                         type="date"
                         value={newAssignment.start_date}
@@ -577,18 +579,17 @@ export default function SchedulesPage() {
                         checked={newAssignment.is_primary}
                         onCheckedChange={(checked) => setNewAssignment({...newAssignment, is_primary: checked})}
                       />
-                      <Label>Primary Schedule</Label>
+                      <Label>{t("timeAttendance.schedules.primary")}</Label>
                     </div>
                     <div className="space-y-2">
-                      <Label>Notes</Label>
+                      <Label>{t("common.notes")}</Label>
                       <Textarea 
                         value={newAssignment.notes}
                         onChange={(e) => setNewAssignment({...newAssignment, notes: e.target.value})}
-                        placeholder="Assignment notes..."
                       />
                     </div>
                     <Button onClick={handleAssignSchedule} className="w-full">
-                      Assign Schedule
+                      {t("timeAttendance.schedules.assignSchedule")}
                     </Button>
                   </div>
                 </DialogContent>
@@ -599,26 +600,26 @@ export default function SchedulesPage() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Users className="h-5 w-5" />
-                  Employee Schedule Assignments
+                  {t("timeAttendance.schedules.assignments")}
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Employee</TableHead>
-                      <TableHead>Schedule</TableHead>
-                      <TableHead>Start Date</TableHead>
-                      <TableHead>End Date</TableHead>
-                      <TableHead>Primary</TableHead>
-                      <TableHead>Notes</TableHead>
+                      <TableHead>{t("common.employee")}</TableHead>
+                      <TableHead>{t("common.schedule")}</TableHead>
+                      <TableHead>{t("timeAttendance.schedules.startDate")}</TableHead>
+                      <TableHead>{t("timeAttendance.schedules.endDate")}</TableHead>
+                      <TableHead>{t("timeAttendance.schedules.primary")}</TableHead>
+                      <TableHead>{t("common.notes")}</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {employeeSchedules.length === 0 ? (
                       <TableRow>
                         <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
-                          No schedule assignments yet
+                          {t("timeAttendance.schedules.noAssignments")}
                         </TableCell>
                       </TableRow>
                     ) : (

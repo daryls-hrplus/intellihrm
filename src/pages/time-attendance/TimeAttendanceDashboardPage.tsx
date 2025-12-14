@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -20,121 +21,122 @@ import {
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
-const features = [
-  {
-    title: "Time Tracking",
-    description: "Clock in/out and track work hours",
-    icon: Timer,
-    href: "/time-attendance/tracking",
-    color: "bg-primary/10 text-primary",
-  },
-  {
-    title: "Attendance Records",
-    description: "View and manage attendance history",
-    icon: ClipboardList,
-    href: "/time-attendance/records",
-    color: "bg-success/10 text-success",
-  },
-  {
-    title: "Schedules",
-    description: "Create and manage work schedules",
-    icon: Calendar,
-    href: "/time-attendance/schedules",
-    color: "bg-warning/10 text-warning",
-  },
-  {
-    title: "Overtime Management",
-    description: "Track and approve overtime requests",
-    icon: Clock,
-    href: "/time-attendance/overtime",
-    color: "bg-secondary/10 text-secondary-foreground",
-  },
-  {
-    title: "Shift Management",
-    description: "Configure shifts, rounding rules, and pay differentials",
-    icon: Sun,
-    href: "/time-attendance/shifts",
-    color: "bg-orange-500/10 text-orange-600",
-  },
-{
-    title: "Geofencing",
-    description: "Location-based clock in/out restrictions",
-    icon: MapPin,
-    href: "/time-attendance/geofencing",
-    color: "bg-teal-500/10 text-teal-600",
-  },
-  {
-    title: "Project Time Tracking",
-    description: "Track time against clients, projects and tasks",
-    icon: Briefcase,
-    href: "/time-attendance/projects",
-    color: "bg-violet-500/10 text-violet-600",
-  },
-  {
-    title: "Timesheet Approvals",
-    description: "Submit timesheets for workflow approval",
-    icon: ClipboardList,
-    href: "/time-attendance/timesheet-approvals",
-    color: "bg-indigo-500/10 text-indigo-600",
-  },
-  {
-    title: "Timeclock Devices",
-    description: "Manage physical timeclock terminals",
-    icon: Settings,
-    href: "/time-attendance/devices",
-    color: "bg-slate-500/10 text-slate-600",
-  },
-  {
-    title: "Attendance Policies",
-    description: "Configure late rules and rounding",
-    icon: Settings,
-    href: "/time-attendance/policies",
-    color: "bg-amber-500/10 text-amber-600",
-  },
-  {
-    title: "Exceptions",
-    description: "Review missing punches and corrections",
-    icon: AlertCircle,
-    href: "/time-attendance/exceptions",
-    color: "bg-red-500/10 text-red-600",
-  },
-  {
-    title: "Live Dashboard",
-    description: "Real-time attendance feed",
-    icon: UserCheck,
-    href: "/time-attendance/live",
-    color: "bg-green-500/10 text-green-600",
-  },
-  {
-    title: "Punch Import",
-    description: "Import punches from external systems",
-    icon: ClipboardList,
-    href: "/time-attendance/import",
-    color: "bg-cyan-500/10 text-cyan-600",
-  },
-  {
-    title: "Analytics",
-    description: "Attendance trends and insights",
-    icon: TrendingUp,
-    href: "/time-attendance/analytics",
-    color: "bg-purple-500/10 text-purple-600",
-  },
-];
-
-const stats = [
-  { label: "Present Today", value: "218", icon: UserCheck, color: "text-success" },
-  { label: "Absent", value: "12", icon: AlertCircle, color: "text-destructive" },
-  { label: "On Leave", value: "15", icon: Calendar, color: "text-warning" },
-  { label: "Total Staff", value: "245", icon: Users, color: "text-muted-foreground" },
-];
-
 export default function TimeAttendanceDashboardPage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
+
+  const features = [
+    {
+      title: t("timeAttendance.modules.timeTracking.title"),
+      description: t("timeAttendance.modules.timeTracking.description"),
+      icon: Timer,
+      href: "/time-attendance/tracking",
+      color: "bg-primary/10 text-primary",
+    },
+    {
+      title: t("timeAttendance.modules.records.title"),
+      description: t("timeAttendance.modules.records.description"),
+      icon: ClipboardList,
+      href: "/time-attendance/records",
+      color: "bg-success/10 text-success",
+    },
+    {
+      title: t("timeAttendance.modules.schedules.title"),
+      description: t("timeAttendance.modules.schedules.description"),
+      icon: Calendar,
+      href: "/time-attendance/schedules",
+      color: "bg-warning/10 text-warning",
+    },
+    {
+      title: t("timeAttendance.modules.overtime.title"),
+      description: t("timeAttendance.modules.overtime.description"),
+      icon: Clock,
+      href: "/time-attendance/overtime",
+      color: "bg-secondary/10 text-secondary-foreground",
+    },
+    {
+      title: t("timeAttendance.modules.shifts.title"),
+      description: t("timeAttendance.modules.shifts.description"),
+      icon: Sun,
+      href: "/time-attendance/shifts",
+      color: "bg-orange-500/10 text-orange-600",
+    },
+    {
+      title: t("timeAttendance.modules.geofencing.title"),
+      description: t("timeAttendance.modules.geofencing.description"),
+      icon: MapPin,
+      href: "/time-attendance/geofencing",
+      color: "bg-teal-500/10 text-teal-600",
+    },
+    {
+      title: t("timeAttendance.modules.projects.title"),
+      description: t("timeAttendance.modules.projects.description"),
+      icon: Briefcase,
+      href: "/time-attendance/projects",
+      color: "bg-violet-500/10 text-violet-600",
+    },
+    {
+      title: t("timeAttendance.modules.timesheetApprovals.title"),
+      description: t("timeAttendance.modules.timesheetApprovals.description"),
+      icon: ClipboardList,
+      href: "/time-attendance/timesheet-approvals",
+      color: "bg-indigo-500/10 text-indigo-600",
+    },
+    {
+      title: t("timeAttendance.modules.devices.title"),
+      description: t("timeAttendance.modules.devices.description"),
+      icon: Settings,
+      href: "/time-attendance/devices",
+      color: "bg-slate-500/10 text-slate-600",
+    },
+    {
+      title: t("timeAttendance.modules.policies.title"),
+      description: t("timeAttendance.modules.policies.description"),
+      icon: Settings,
+      href: "/time-attendance/policies",
+      color: "bg-amber-500/10 text-amber-600",
+    },
+    {
+      title: t("timeAttendance.modules.exceptions.title"),
+      description: t("timeAttendance.modules.exceptions.description"),
+      icon: AlertCircle,
+      href: "/time-attendance/exceptions",
+      color: "bg-red-500/10 text-red-600",
+    },
+    {
+      title: t("timeAttendance.modules.live.title"),
+      description: t("timeAttendance.modules.live.description"),
+      icon: UserCheck,
+      href: "/time-attendance/live",
+      color: "bg-green-500/10 text-green-600",
+    },
+    {
+      title: t("timeAttendance.modules.import.title"),
+      description: t("timeAttendance.modules.import.description"),
+      icon: ClipboardList,
+      href: "/time-attendance/import",
+      color: "bg-cyan-500/10 text-cyan-600",
+    },
+    {
+      title: t("timeAttendance.modules.analytics.title"),
+      description: t("timeAttendance.modules.analytics.description"),
+      icon: TrendingUp,
+      href: "/time-attendance/analytics",
+      color: "bg-purple-500/10 text-purple-600",
+    },
+  ];
+
+  const stats = [
+    { label: t("timeAttendance.stats.presentToday"), value: "218", icon: UserCheck, color: "text-success" },
+    { label: t("timeAttendance.stats.absent"), value: "12", icon: AlertCircle, color: "text-destructive" },
+    { label: t("timeAttendance.stats.onLeave"), value: "15", icon: Calendar, color: "text-warning" },
+    { label: t("timeAttendance.stats.totalStaff"), value: "245", icon: Users, color: "text-muted-foreground" },
+  ];
 
   return (
     <AppLayout>
       <div className="space-y-6">
-        <Breadcrumbs items={[{ label: "Time & Attendance" }]} />
+        <Breadcrumbs items={[{ label: t("timeAttendance.title") }]} />
 
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -143,10 +145,10 @@ export default function TimeAttendanceDashboardPage() {
             </div>
             <div>
               <h1 className="text-2xl font-bold tracking-tight text-foreground">
-                Time & Attendance
+                {t("timeAttendance.title")}
               </h1>
               <p className="text-muted-foreground">
-                Track work hours, manage schedules, and monitor attendance
+                {t("timeAttendance.subtitle")}
               </p>
             </div>
           </div>
@@ -208,12 +210,12 @@ export default function TimeAttendanceDashboardPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <TrendingUp className="h-5 w-5" />
-              Today's Attendance Overview
+              {t("timeAttendance.todayOverview")}
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-center py-8 text-muted-foreground">
-              Click on a feature above to get started with time tracking.
+              {t("timeAttendance.clickFeatureToStart")}
             </div>
           </CardContent>
         </Card>
