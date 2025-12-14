@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 import {
   UserPlus,
@@ -7,44 +8,62 @@ import {
   ArrowRight,
 } from "lucide-react";
 import { Link } from "react-router-dom";
-
-const actions = [
-  {
-    title: "Add Employee",
-    description: "Onboard a new team member",
-    href: "/workforce/employees",
-    icon: UserPlus,
-    color: "bg-primary/10 text-primary",
-  },
-  {
-    title: "Submit Leave Request",
-    description: "Request time off",
-    href: "/ess/leave",
-    icon: Calendar,
-    color: "bg-info/10 text-info",
-  },
-  {
-    title: "New Job Posting",
-    description: "Create recruitment listing",
-    href: "/recruitment/new",
-    icon: FileText,
-    color: "bg-success/10 text-success",
-  },
-  {
-    title: "Start Appraisal",
-    description: "Begin performance review",
-    href: "/performance/appraisals/new",
-    icon: ClipboardList,
-    color: "bg-warning/10 text-warning",
-  },
-];
+import { useAuth } from "@/contexts/AuthContext";
 
 export function QuickActions() {
+  const { t } = useTranslation();
+  const { isAdmin, isHRManager } = useAuth();
+
+  const actions = [
+    {
+      title: t("dashboard.quickActions.addEmployee", "Add Employee"),
+      description: t("dashboard.quickActions.addEmployeeDesc", "Onboard a new team member"),
+      href: "/workforce/employees",
+      icon: UserPlus,
+      color: "bg-primary/10 text-primary",
+      requiresHR: true,
+    },
+    {
+      title: t("dashboard.quickActions.submitLeave", "Submit Leave Request"),
+      description: t("dashboard.quickActions.submitLeaveDesc", "Request time off"),
+      href: "/ess/leave",
+      icon: Calendar,
+      color: "bg-info/10 text-info",
+      requiresHR: false,
+    },
+    {
+      title: t("dashboard.quickActions.newJobPosting", "New Job Posting"),
+      description: t("dashboard.quickActions.newJobPostingDesc", "Create recruitment listing"),
+      href: "/recruitment",
+      icon: FileText,
+      color: "bg-success/10 text-success",
+      requiresHR: true,
+    },
+    {
+      title: t("dashboard.quickActions.startAppraisal", "Start Appraisal"),
+      description: t("dashboard.quickActions.startAppraisalDesc", "Begin performance review"),
+      href: "/performance/appraisals",
+      icon: ClipboardList,
+      color: "bg-warning/10 text-warning",
+      requiresHR: true,
+    },
+  ];
+
+  // Filter actions based on user role
+  const filteredActions = actions.filter(action => {
+    if (action.requiresHR) {
+      return isAdmin || isHRManager;
+    }
+    return true;
+  });
+
   return (
     <div className="rounded-xl bg-card p-6 shadow-card animate-slide-up" style={{ animationDelay: "200ms" }}>
-      <h3 className="mb-4 text-lg font-semibold text-card-foreground">Quick Actions</h3>
+      <h3 className="mb-4 text-lg font-semibold text-card-foreground">
+        {t("dashboard.quickActionsTitle", "Quick Actions")}
+      </h3>
       <div className="grid gap-3 sm:grid-cols-2">
-        {actions.map((action) => {
+        {filteredActions.map((action) => {
           const Icon = action.icon;
           return (
             <Link
