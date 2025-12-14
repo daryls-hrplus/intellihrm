@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useLanguage } from "@/hooks/useLanguage";
 import {
   Table,
   TableBody,
@@ -103,6 +104,7 @@ const emptyLevelForm = {
 };
 
 export default function CompetenciesPage() {
+  const { t } = useLanguage();
   const [competencies, setCompetencies] = useState<Competency[]>([]);
   const [companies, setCompanies] = useState<Company[]>([]);
   const [loading, setLoading] = useState(true);
@@ -153,7 +155,7 @@ export default function CompetenciesPage() {
 
     const { data, error } = await query;
     if (error) {
-      toast.error("Failed to fetch competencies");
+      toast.error(t("workforce.competencies.failedToFetch"));
     } else {
       setCompetencies(data || []);
     }
@@ -169,7 +171,7 @@ export default function CompetenciesPage() {
       .order("level_order");
 
     if (error) {
-      toast.error("Failed to fetch competency levels");
+      toast.error(t("workforce.competencies.levels.failedToFetch"));
     } else {
       setCompetencyLevels((prev) => ({ ...prev, [competencyId]: data || [] }));
     }
@@ -219,7 +221,7 @@ export default function CompetenciesPage() {
 
   const handleSave = async () => {
     if (!formData.company_id || !formData.name || !formData.code) {
-      toast.error("Please fill in all required fields");
+      toast.error(t("workforce.competencies.fillRequired"));
       return;
     }
 
@@ -242,7 +244,7 @@ export default function CompetenciesPage() {
         .eq("id", selectedCompetency.id);
 
       if (error) {
-        toast.error("Failed to update competency");
+        toast.error(t("workforce.competencies.failedToUpdate"));
         return;
       }
       await logAction({
@@ -253,7 +255,7 @@ export default function CompetenciesPage() {
         oldValues: { ...selectedCompetency },
         newValues: payload,
       });
-      toast.success("Competency updated");
+      toast.success(t("workforce.competencies.competencyUpdated"));
     } else {
       const { data, error } = await supabase
         .from("competencies")
@@ -262,7 +264,7 @@ export default function CompetenciesPage() {
         .single();
 
       if (error) {
-        toast.error("Failed to create competency");
+        toast.error(t("workforce.competencies.failedToCreate"));
         return;
       }
       await logAction({
@@ -272,7 +274,7 @@ export default function CompetenciesPage() {
         entityName: formData.name,
         newValues: payload,
       });
-      toast.success("Competency created");
+      toast.success(t("workforce.competencies.competencyCreated"));
     }
 
     setIsDialogOpen(false);
@@ -288,7 +290,7 @@ export default function CompetenciesPage() {
       .eq("id", selectedCompetency.id);
 
     if (error) {
-      toast.error("Failed to delete competency");
+      toast.error(t("workforce.competencies.failedToDelete"));
       return;
     }
 
@@ -299,7 +301,7 @@ export default function CompetenciesPage() {
       entityName: selectedCompetency.name,
       oldValues: { ...selectedCompetency },
     });
-    toast.success("Competency deleted");
+    toast.success(t("workforce.competencies.competencyDeleted"));
     setIsDeleteDialogOpen(false);
     fetchCompetencies();
   };

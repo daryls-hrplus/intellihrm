@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
+import { useLanguage } from "@/hooks/useLanguage";
 import {
   Table,
   TableBody,
@@ -122,6 +123,7 @@ const emptyForm = {
 };
 
 export default function JobsPage() {
+  const { t } = useLanguage();
   const [jobs, setJobs] = useState<Job[]>([]);
   const [companies, setCompanies] = useState<Company[]>([]);
   const [jobFamilies, setJobFamilies] = useState<JobFamily[]>([]);
@@ -171,7 +173,7 @@ export default function JobsPage() {
 
     if (error) {
       console.error("Error fetching companies:", error);
-      toast.error("Failed to load companies");
+      toast.error(t("workforce.jobs.failedToLoad"));
     } else {
       setCompanies(data || []);
       if (data && data.length > 0 && !selectedCompanyId) {
@@ -194,7 +196,7 @@ export default function JobsPage() {
 
     if (error) {
       console.error("Error fetching jobs:", error);
-      toast.error("Failed to load jobs");
+      toast.error(t("workforce.jobs.failedToLoad"));
     } else {
       setJobs(data || []);
     }
@@ -248,19 +250,19 @@ export default function JobsPage() {
 
   const handleSave = async () => {
     if (!formData.name.trim() || !formData.code.trim()) {
-      toast.error("Name and code are required");
+      toast.error(t("workforce.jobs.nameRequired"));
       return;
     }
     if (!formData.company_id) {
-      toast.error("Company is required");
+      toast.error(t("workforce.jobs.companyRequired"));
       return;
     }
     if (!formData.job_family_id) {
-      toast.error("Job Family is required");
+      toast.error(t("workforce.jobs.jobFamilyRequired"));
       return;
     }
     if (!formData.start_date) {
-      toast.error("Start date is required");
+      toast.error(t("workforce.jobs.startDateRequired"));
       return;
     }
 
@@ -290,9 +292,9 @@ export default function JobsPage() {
 
       if (error) {
         console.error("Error updating job:", error);
-        toast.error("Failed to update job");
+        toast.error(t("workforce.jobs.failedToUpdate"));
       } else {
-        toast.success("Job updated successfully");
+        toast.success(t("workforce.jobs.jobUpdated"));
         logAction({
           action: "UPDATE",
           entityType: "jobs",
@@ -314,12 +316,12 @@ export default function JobsPage() {
       if (error) {
         console.error("Error creating job:", error);
         if (error.code === "23505") {
-          toast.error("A job with this code already exists in this company");
+          toast.error(t("workforce.jobs.codeExists"));
         } else {
-          toast.error("Failed to create job");
+          toast.error(t("workforce.jobs.failedToCreate"));
         }
       } else {
-        toast.success("Job created successfully");
+        toast.success(t("workforce.jobs.jobCreated"));
         logAction({
           action: "CREATE",
           entityType: "jobs",
@@ -341,9 +343,9 @@ export default function JobsPage() {
 
     if (error) {
       console.error("Error deleting job:", error);
-      toast.error("Failed to delete job");
+      toast.error(t("workforce.jobs.failedToDelete"));
     } else {
-      toast.success("Job deleted successfully");
+      toast.success(t("workforce.jobs.jobDeleted"));
       logAction({
         action: "DELETE",
         entityType: "jobs",
@@ -371,7 +373,7 @@ export default function JobsPage() {
   const handleCopyJob = async () => {
     if (!selectedJob) return;
     if (!copyFormData.name.trim() || !copyFormData.code.trim()) {
-      toast.error("Name and code are required");
+      toast.error(t("workforce.jobs.nameRequired"));
       return;
     }
 
@@ -468,7 +470,7 @@ export default function JobsPage() {
         }
       }
 
-      toast.success("Job copied successfully");
+      toast.success(t("workforce.jobs.jobCopied"));
       logAction({
         action: "CREATE",
         entityType: "jobs",
@@ -488,9 +490,9 @@ export default function JobsPage() {
     } catch (error: any) {
       console.error("Error copying job:", error);
       if (error.code === "23505") {
-        toast.error("A job with this code already exists");
+        toast.error(t("workforce.jobs.codeExists"));
       } else {
-        toast.error("Failed to copy job");
+        toast.error(t("workforce.jobs.failedToCopy"));
       }
     } finally {
       setIsCopying(false);
