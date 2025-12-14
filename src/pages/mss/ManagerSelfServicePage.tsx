@@ -91,9 +91,9 @@ const mssModules = [
     color: "bg-green-500/10 text-green-600",
   },
   {
-    title: "Timesheet Approvals",
-    description: "Review and approve team timesheets",
-    href: "/mss/timesheet-approvals",
+    title: "Team Time & Attendance",
+    description: "Monitor team attendance, approve timesheets and exceptions",
+    href: "/mss/time-attendance",
     icon: Clock,
     color: "bg-orange-500/10 text-orange-600",
   },
