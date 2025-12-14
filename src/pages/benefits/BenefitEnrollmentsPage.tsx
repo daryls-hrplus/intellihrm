@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -55,6 +56,7 @@ const COVERAGE_LEVELS = ['employee', 'employee+spouse', 'employee+children', 'fa
 const ENROLLMENT_SOURCES = ['open', 'auto', 'life_event', 'new_hire'];
 
 export default function BenefitEnrollmentsPage() {
+  const { t } = useTranslation();
   const { isAdmin, hasRole, user } = useAuth();
   const canManage = isAdmin || hasRole('hr_manager');
   
@@ -271,8 +273,8 @@ export default function BenefitEnrollmentsPage() {
     <AppLayout>
       <div className="space-y-6">
         <Breadcrumbs items={[
-          { label: "Benefits", href: "/benefits" },
-          { label: "Enrollments" }
+          { label: t("navigation.benefits"), href: "/benefits" },
+          { label: t("benefits.enrollments.title") }
         ]} />
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -280,15 +282,15 @@ export default function BenefitEnrollmentsPage() {
               <UserCheck className="h-5 w-5 text-primary" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold tracking-tight">Benefit Enrollments</h1>
-              <p className="text-muted-foreground">Manage employee benefit enrollments</p>
+              <h1 className="text-2xl font-bold tracking-tight">{t("benefits.enrollments.title")}</h1>
+              <p className="text-muted-foreground">{t("benefits.enrollments.subtitle")}</p>
             </div>
           </div>
           <div className="flex items-center gap-3">
             {canManage && (
               <Select value={selectedCompanyId} onValueChange={setSelectedCompanyId}>
                 <SelectTrigger className="w-[200px]">
-                  <SelectValue placeholder="Select company" />
+                  <SelectValue placeholder={t("common.selectCompany")} />
                 </SelectTrigger>
                 <SelectContent>
                   {companies.map(c => (
@@ -299,7 +301,7 @@ export default function BenefitEnrollmentsPage() {
             )}
             {canManage && (
               <Button onClick={openCreate} disabled={plans.length === 0}>
-                <Plus className="h-4 w-4 mr-2" /> Add Enrollment
+                <Plus className="h-4 w-4 mr-2" /> {t("benefits.enrollments.addEnrollment")}
               </Button>
             )}
           </div>
@@ -309,20 +311,20 @@ export default function BenefitEnrollmentsPage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Employee</TableHead>
-                <TableHead>Plan</TableHead>
-                <TableHead>Coverage</TableHead>
-                <TableHead>Effective Date</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Source</TableHead>
-                <TableHead className="w-[120px]">Actions</TableHead>
+                <TableHead>{t("benefits.enrollments.employee")}</TableHead>
+                <TableHead>{t("benefits.enrollments.plan")}</TableHead>
+                <TableHead>{t("benefits.enrollments.coverage")}</TableHead>
+                <TableHead>{t("benefits.enrollments.effectiveDate")}</TableHead>
+                <TableHead>{t("benefits.enrollments.status")}</TableHead>
+                <TableHead>{t("benefits.enrollments.source")}</TableHead>
+                <TableHead className="w-[120px]">{t("common.actions")}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {loading ? (
-                <TableRow><TableCell colSpan={7} className="text-center py-8">Loading...</TableCell></TableRow>
+                <TableRow><TableCell colSpan={7} className="text-center py-8">{t("common.loading")}</TableCell></TableRow>
               ) : enrollments.length === 0 ? (
-                <TableRow><TableCell colSpan={7} className="text-center py-8 text-muted-foreground">No enrollments found</TableCell></TableRow>
+                <TableRow><TableCell colSpan={7} className="text-center py-8 text-muted-foreground">{t("benefits.enrollments.noEnrollments")}</TableCell></TableRow>
               ) : enrollments.map(enr => (
                 <TableRow key={enr.id}>
                   <TableCell className="font-medium">{enr.profiles?.full_name}</TableCell>
@@ -360,7 +362,7 @@ export default function BenefitEnrollmentsPage() {
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle>{editingEnrollment ? "Edit Enrollment" : "New Enrollment"}</DialogTitle>
+            <DialogTitle>{editingEnrollment ? t("benefits.enrollments.editEnrollment") : t("benefits.enrollments.newEnrollment")}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4">

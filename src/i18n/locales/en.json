@@ -4002,5 +4002,355 @@
       "forfeited": "Forfeited",
       "expired": "Expired"
     }
+  },
+  "benefits": {
+    "title": "Benefits",
+    "subtitle": "Employee benefits and perks management",
+    "activePlans": "Active Plans",
+    "enrolledUsers": "Enrolled Users",
+    "healthPlans": "Health Plans",
+    "pendingClaims": "Pending Claims",
+    "allCompanies": "All Companies",
+    "sections": {
+      "coreBenefits": "Core Benefits",
+      "analyticsReporting": "Analytics & Reporting",
+      "administration": "Administration",
+      "compliance": "Compliance"
+    },
+    "modules": {
+      "categories": {
+        "title": "Benefit Categories",
+        "description": "Manage benefit category types"
+      },
+      "plans": {
+        "title": "Benefit Plans",
+        "description": "Configure benefit plans and coverage"
+      },
+      "providers": {
+        "title": "Benefit Providers",
+        "description": "Manage insurance companies and providers"
+      },
+      "enrollments": {
+        "title": "Enrollments",
+        "description": "Manage employee benefit enrollments"
+      },
+      "claims": {
+        "title": "Claims",
+        "description": "Submit and track benefit claims"
+      },
+      "analytics": {
+        "title": "Benefits Analytics",
+        "description": "Enrollment trends, utilization rates, and cost analysis"
+      },
+      "costProjections": {
+        "title": "Cost Projections",
+        "description": "Forecast future benefit costs and budget planning"
+      },
+      "comparison": {
+        "title": "Plan Comparison",
+        "description": "Compare different benefit plans side by side"
+      },
+      "calculator": {
+        "title": "Benefit Calculator",
+        "description": "Calculate employee benefit costs and contributions"
+      },
+      "autoEnrollment": {
+        "title": "Auto-Enrollment Rules",
+        "description": "Configure automatic benefit enrollment criteria"
+      },
+      "lifeEvents": {
+        "title": "Life Event Management",
+        "description": "Handle qualifying life events for enrollment changes"
+      },
+      "waitingPeriods": {
+        "title": "Waiting Period Tracking",
+        "description": "Track employee benefit eligibility timelines"
+      },
+      "openEnrollment": {
+        "title": "Open Enrollment Tracker",
+        "description": "Monitor open enrollment period progress"
+      },
+      "eligibilityAudit": {
+        "title": "Eligibility Audit",
+        "description": "Verify dependent and employee eligibility"
+      },
+      "complianceReports": {
+        "title": "Compliance Reports",
+        "description": "Generate ACA, ERISA, and COBRA compliance reports"
+      }
+    },
+    "plans": {
+      "title": "Benefit Plans",
+      "subtitle": "Manage benefit plans and coverage options",
+      "addPlan": "Add Plan",
+      "editPlan": "Edit Plan",
+      "newPlan": "New Plan",
+      "noCategoriesWarning": "Please create benefit categories first before adding plans.",
+      "noPlans": "No plans found",
+      "name": "Name",
+      "category": "Category",
+      "type": "Type",
+      "enrollment": "Enrollment",
+      "employeeContrib": "Employee Contrib.",
+      "employerContrib": "Employer Contrib.",
+      "status": "Status",
+      "planType": "Plan Type",
+      "provider": "Provider",
+      "noProvider": "No provider",
+      "enrollmentType": "Enrollment Type",
+      "contributionFrequency": "Contribution Frequency",
+      "waitingPeriod": "Waiting Period (days)",
+      "openEnrollment": "Open Enrollment",
+      "autoEnrollment": "Auto-Enrollment",
+      "both": "Both",
+      "monthly": "Monthly",
+      "biWeekly": "Bi-weekly",
+      "weekly": "Weekly",
+      "annually": "Annually"
+    },
+    "enrollments": {
+      "title": "Benefit Enrollments",
+      "subtitle": "Manage employee benefit enrollments",
+      "addEnrollment": "Add Enrollment",
+      "editEnrollment": "Edit Enrollment",
+      "newEnrollment": "New Enrollment",
+      "noEnrollments": "No enrollments found",
+      "employee": "Employee",
+      "plan": "Plan",
+      "coverage": "Coverage",
+      "effectiveDate": "Effective Date",
+      "status": "Status",
+      "source": "Source",
+      "coverageLevel": "Coverage Level",
+      "enrollmentDate": "Enrollment Date",
+      "terminationDate": "Termination Date",
+      "employeeOnly": "Employee",
+      "employeeSpouse": "Employee + Spouse",
+      "employeeChildren": "Employee + Children",
+      "family": "Family",
+      "openSource": "Open",
+      "autoSource": "Auto",
+      "lifeEventSource": "Life Event",
+      "newHireSource": "New Hire"
+    },
+    "claims": {
+      "title": "Benefit Claims",
+      "subtitle": "Submit and track benefit claims",
+      "submitClaim": "Submit Claim",
+      "editClaim": "Edit Claim",
+      "noClaims": "No claims found",
+      "claimNumber": "Claim #",
+      "employee": "Employee",
+      "plan": "Plan",
+      "type": "Type",
+      "serviceDate": "Service Date",
+      "amountClaimed": "Amount Claimed",
+      "amountApproved": "Amount Approved",
+      "status": "Status",
+      "providerName": "Provider Name",
+      "enrollmentPlan": "Enrollment (Plan)"
+    },
+    "autoEnrollment": {
+      "title": "Auto-Enrollment Rules",
+      "subtitle": "Configure automatic benefit enrollment criteria",
+      "addRule": "Add Rule",
+      "editRule": "Edit Rule",
+      "createRule": "Create Auto-Enrollment Rule",
+      "configuredRules": "Configured Rules",
+      "noRules": "No auto-enrollment rules configured",
+      "ruleName": "Rule Name",
+      "benefitPlan": "Benefit Plan",
+      "waitingPeriod": "Waiting Period",
+      "validity": "Validity",
+      "status": "Status",
+      "days": "days",
+      "minTenure": "Minimum Tenure (days after hire)",
+      "minTenureHelp": "Employees will be auto-enrolled after this many days of employment",
+      "enrollmentCriteria": "Enrollment Criteria"
+    },
+    "analytics": {
+      "title": "Benefits Analytics",
+      "subtitle": "Comprehensive insights into benefit programs",
+      "totalEnrollments": "Total Enrollments",
+      "pendingEnrollments": "Pending Enrollments",
+      "totalClaims": "Total Claims",
+      "avgProcessingTime": "Avg Processing Time",
+      "awaitingApproval": "Awaiting approval",
+      "approvalRate": "approval rate",
+      "forClaims": "For claims",
+      "enrollmentTrends": "Enrollment Trends",
+      "costAnalysis": "Cost Analysis",
+      "planDistribution": "Plan Distribution",
+      "claimsAnalytics": "Claims Analytics",
+      "enrollmentTrendsTitle": "Enrollment Trends Over Time",
+      "costDistribution": "Cost Distribution by Benefit Type",
+      "enrollmentByPlan": "Enrollment by Plan",
+      "claimsSummary": "Claims Summary",
+      "claimsAmounts": "Claims Amounts",
+      "totalClaimsSubmitted": "Total Claims Submitted",
+      "approvedClaims": "Approved Claims",
+      "avgProcessingDays": "Avg Processing Time",
+      "totalClaimed": "Total Claimed",
+      "totalApproved": "Total Approved",
+      "averageClaim": "Average Claim"
+    },
+    "compliance": {
+      "title": "Compliance Reports",
+      "subtitle": "Benefits compliance monitoring and reporting",
+      "complianceStatus": "Compliance Status",
+      "coverageRate": "Coverage Rate",
+      "activePlans": "Active Plans",
+      "activeEnrollments": "Active Enrollments",
+      "uncoveredEmployees": "Uncovered Employees",
+      "coverageReport": "Coverage Report",
+      "coverageReportDesc": "Detailed employee benefit coverage status",
+      "summaryReport": "Summary Report",
+      "summaryReportDesc": "High-level compliance metrics summary",
+      "exportCoverageReport": "Export Coverage Report",
+      "exportSummaryReport": "Export Summary Report",
+      "employeesWithoutCoverage": "Employees Without Coverage",
+      "enrollmentsByType": "Enrollments by Benefit Type",
+      "benefitType": "Benefit Type",
+      "noCoverage": "No Coverage",
+      "employees": "employees",
+      "of": "of"
+    },
+    "providers": {
+      "title": "Benefit Providers",
+      "subtitle": "Manage insurance companies and benefit providers",
+      "addProvider": "Add Provider",
+      "editProvider": "Edit Provider",
+      "noProviders": "No providers found",
+      "providerName": "Provider Name",
+      "type": "Type",
+      "company": "Company",
+      "contact": "Contact",
+      "status": "Status",
+      "contactName": "Contact Name",
+      "contactEmail": "Contact Email",
+      "contactPhone": "Contact Phone",
+      "city": "City",
+      "state": "State",
+      "country": "Country",
+      "postalCode": "Postal Code",
+      "providerTypes": {
+        "insurance": "Insurance",
+        "healthcare": "Healthcare",
+        "retirement": "Retirement",
+        "wellness": "Wellness",
+        "other": "Other"
+      }
+    },
+    "categories": {
+      "title": "Benefit Categories",
+      "subtitle": "Manage benefit category types",
+      "addCategory": "Add Category",
+      "editCategory": "Edit Category",
+      "noCategories": "No categories found"
+    },
+    "costProjections": {
+      "title": "Benefit Cost Projections",
+      "subtitle": "Forecast future benefit costs",
+      "monthlyEmployer": "Monthly Employer Cost",
+      "monthlyEmployee": "Monthly Employee Cost",
+      "activeEnrollments": "Active Enrollments",
+      "totalProjected": "Total Projected Cost",
+      "projectionParameters": "Projection Parameters",
+      "projectionPeriod": "Projection Period (months)",
+      "growthRate": "Growth Rate (%)",
+      "inflationRate": "Inflation Rate (%)",
+      "costProjectionChart": "Cost Projection Over Time",
+      "currentCostsByCategory": "Current Monthly Costs by Category"
+    },
+    "comparison": {
+      "title": "Plan Comparison",
+      "subtitle": "Compare benefit plans side by side",
+      "selectPlansPrompt": "Select plans to compare (up to 4)",
+      "availablePlans": "Available Plans",
+      "selected": "selected",
+      "comparisonTable": "Comparison Table",
+      "selectTwoPlans": "Select at least 2 plans to compare",
+      "noPlansSelected": "No Plans Selected",
+      "selectPlansDescription": "Select plans from the list above to see a side-by-side comparison."
+    },
+    "calculator": {
+      "title": "Benefit Calculator",
+      "subtitle": "Calculate employee benefit costs",
+      "selectPlans": "Select Benefit Plans",
+      "costSummary": "Cost Summary",
+      "monthlyCosts": "Monthly Costs",
+      "annualCosts": "Annual Costs",
+      "byCategory": "By Category",
+      "selectedPlans": "Selected Plans",
+      "noPlansSelected": "No plans selected",
+      "addPlansPrompt": "Click on plans to add them to your calculation"
+    },
+    "lifeEvents": {
+      "title": "Life Event Management",
+      "subtitle": "Handle qualifying life events for enrollment changes",
+      "recordEvent": "Record Life Event",
+      "noEvents": "No life events found",
+      "employee": "Employee",
+      "eventType": "Event Type",
+      "eventDate": "Event Date",
+      "enrollmentWindow": "Enrollment Window",
+      "status": "Status"
+    },
+    "waitingPeriods": {
+      "title": "Waiting Period Tracking",
+      "subtitle": "Track employee benefit eligibility timelines",
+      "waiting": "Waiting",
+      "eligible": "Eligible",
+      "enrolled": "Enrolled",
+      "noWaitingPeriods": "No waiting periods being tracked",
+      "employee": "Employee",
+      "benefitPlan": "Benefit Plan",
+      "hireDate": "Hire Date",
+      "eligibilityDate": "Eligibility Date",
+      "daysRemaining": "Days Remaining"
+    },
+    "openEnrollment": {
+      "title": "Open Enrollment Tracker",
+      "subtitle": "Monitor open enrollment period progress",
+      "selectPeriod": "Select Period",
+      "noPeriodsAvailable": "No enrollment periods available",
+      "currentEnrollmentPeriod": "Current Enrollment Period",
+      "enrollmentProgress": "Enrollment Progress",
+      "daysRemaining": "days remaining",
+      "totalEligible": "Total Eligible",
+      "enrolled": "Enrolled",
+      "pending": "Pending",
+      "daysLeft": "Days Left",
+      "employeeEnrollmentStatus": "Employee Enrollment Status",
+      "employeeName": "Employee Name",
+      "email": "Email",
+      "enrollmentStatus": "Enrollment Status",
+      "enrolledPlans": "Enrolled Plans"
+    },
+    "eligibilityAudit": {
+      "title": "Eligibility Audit",
+      "subtitle": "Verify dependent and employee eligibility",
+      "createAudit": "Create Audit",
+      "noAudits": "No audits found",
+      "employee": "Employee",
+      "auditType": "Audit Type",
+      "createdDate": "Created Date",
+      "verificationDate": "Verification Date",
+      "status": "Status",
+      "verify": "Verify"
+    },
+    "statuses": {
+      "active": "Active",
+      "inactive": "Inactive",
+      "pending": "Pending",
+      "approved": "Approved",
+      "denied": "Denied",
+      "terminated": "Terminated",
+      "cancelled": "Cancelled",
+      "waived": "Waived",
+      "submitted": "Submitted",
+      "processing": "Processing",
+      "paid": "Paid"
+    }
   }
 }
