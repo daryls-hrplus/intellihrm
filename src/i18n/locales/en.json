@@ -4739,5 +4739,33 @@
         "description": "Create and manage courses (Admin)"
       }
     }
+  },
+  "succession": {
+    "dashboard": {
+      "title": "Succession Planning",
+      "subtitle": "Talent pipeline, nine-box grid, and career development",
+      "selectCompany": "Please select a company to view succession data."
+    },
+    "stats": {
+      "highPotentials": "High Potentials",
+      "criticalRoles": "Critical Roles",
+      "readyNow": "Ready Now",
+      "inTalentPools": "In Talent Pools"
+    },
+    "tabs": {
+      "nineBox": "Nine-Box Grid",
+      "talentPools": "Talent Pools",
+      "successionPlans": "Succession Plans",
+      "keyPositions": "Key Positions",
+      "careerDevelopment": "Career Development",
+      "careerPaths": "Career Paths",
+      "mentorship": "Mentorship",
+      "flightRisk": "Flight Risk",
+      "benchStrength": "Bench Strength",
+      "analytics": "Analytics"
+    },
+    "actions": {
+      "newAssessment": "New Assessment"
+    }
   }
 }

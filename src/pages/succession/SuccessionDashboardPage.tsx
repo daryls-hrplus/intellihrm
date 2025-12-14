@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { ModuleReportsButton } from "@/components/reports/ModuleReportsButton";
 import { ModuleBIButton } from "@/components/bi/ModuleBIButton";
+import { useLanguage } from "@/hooks/useLanguage";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { NineBoxGrid } from "@/components/succession/NineBoxGrid";
@@ -28,6 +29,7 @@ interface Company {
 }
 
 export default function SuccessionDashboardPage() {
+  const { t } = useLanguage();
   const [companies, setCompanies] = useState<Company[]>([]);
   const [selectedCompanyId, setSelectedCompanyId] = useState<string>("");
   const [showAssessmentDialog, setShowAssessmentDialog] = useState(false);
@@ -117,10 +119,10 @@ export default function SuccessionDashboardPage() {
   }, 0);
 
   const statCards = [
-    { label: "High Potentials", value: highPotentials, icon: TrendingUp, color: "bg-warning/10 text-warning" },
-    { label: "Critical Roles", value: criticalRoles, icon: AlertTriangle, color: "bg-destructive/10 text-destructive" },
-    { label: "Ready Now", value: readyNow, icon: Target, color: "bg-success/10 text-success" },
-    { label: "In Talent Pools", value: inTalentPools, icon: Users, color: "bg-info/10 text-info" },
+    { label: t("succession.stats.highPotentials"), value: highPotentials, icon: TrendingUp, color: "bg-warning/10 text-warning" },
+    { label: t("succession.stats.criticalRoles"), value: criticalRoles, icon: AlertTriangle, color: "bg-destructive/10 text-destructive" },
+    { label: t("succession.stats.readyNow"), value: readyNow, icon: Target, color: "bg-success/10 text-success" },
+    { label: t("succession.stats.inTalentPools"), value: inTalentPools, icon: Users, color: "bg-info/10 text-info" },
   ];
 
   return (
@@ -135,10 +137,10 @@ export default function SuccessionDashboardPage() {
               </div>
               <div>
                 <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
-                  Succession Planning
+                  {t("succession.dashboard.title")}
                 </h1>
                 <p className="text-muted-foreground">
-                  Talent pipeline, nine-box grid, and career development
+                  {t("succession.dashboard.subtitle")}
                 </p>
               </div>
             </div>
@@ -153,7 +155,7 @@ export default function SuccessionDashboardPage() {
         <div className="flex items-center gap-4">
           <Select value={selectedCompanyId} onValueChange={setSelectedCompanyId}>
             <SelectTrigger className="w-64">
-              <SelectValue placeholder="Select company" />
+              <SelectValue placeholder={t("common.selectCompany")} />
             </SelectTrigger>
             <SelectContent>
               {companies.map((company) => (
@@ -193,43 +195,43 @@ export default function SuccessionDashboardPage() {
             <TabsList className="flex flex-wrap h-auto gap-1 p-1">
               <TabsTrigger value="nine-box" className="flex items-center gap-2">
                 <Grid3X3 className="h-4 w-4" />
-                Nine-Box Grid
+                {t("succession.tabs.nineBox")}
               </TabsTrigger>
               <TabsTrigger value="talent-pools" className="flex items-center gap-2">
                 <Users className="h-4 w-4" />
-                Talent Pools
+                {t("succession.tabs.talentPools")}
               </TabsTrigger>
               <TabsTrigger value="succession-plans" className="flex items-center gap-2">
                 <Target className="h-4 w-4" />
-                Succession Plans
+                {t("succession.tabs.successionPlans")}
               </TabsTrigger>
               <TabsTrigger value="key-positions" className="flex items-center gap-2">
                 <AlertTriangle className="h-4 w-4" />
-                Key Positions
+                {t("succession.tabs.keyPositions")}
               </TabsTrigger>
               <TabsTrigger value="career-development" className="flex items-center gap-2">
                 <BookOpen className="h-4 w-4" />
-                Career Development
+                {t("succession.tabs.careerDevelopment")}
               </TabsTrigger>
               <TabsTrigger value="career-paths" className="flex items-center gap-2">
                 <Route className="h-4 w-4" />
-                Career Paths
+                {t("succession.tabs.careerPaths")}
               </TabsTrigger>
               <TabsTrigger value="mentorship" className="flex items-center gap-2">
                 <UserCheck className="h-4 w-4" />
-                Mentorship
+                {t("succession.tabs.mentorship")}
               </TabsTrigger>
               <TabsTrigger value="flight-risk" className="flex items-center gap-2">
                 <TrendingDown className="h-4 w-4" />
-                Flight Risk
+                {t("succession.tabs.flightRisk")}
               </TabsTrigger>
               <TabsTrigger value="bench-strength" className="flex items-center gap-2">
                 <Layers className="h-4 w-4" />
-                Bench Strength
+                {t("succession.tabs.benchStrength")}
               </TabsTrigger>
               <TabsTrigger value="analytics" className="flex items-center gap-2">
                 <BarChart3 className="h-4 w-4" />
-                Analytics
+                {t("succession.tabs.analytics")}
               </TabsTrigger>
             </TabsList>
 
@@ -237,7 +239,7 @@ export default function SuccessionDashboardPage() {
               <div className="flex justify-end">
                 <Button onClick={() => { setEditingAssessment(null); setShowAssessmentDialog(true); }}>
                   <Plus className="mr-2 h-4 w-4" />
-                  New Assessment
+                  {t("succession.actions.newAssessment")}
                 </Button>
               </div>
               <NineBoxGrid 
@@ -292,7 +294,7 @@ export default function SuccessionDashboardPage() {
         {!selectedCompanyId && (
           <Card>
             <CardContent className="py-12 text-center">
-              <p className="text-muted-foreground">Please select a company to view succession data.</p>
+              <p className="text-muted-foreground">{t("succession.dashboard.selectCompany")}</p>
             </CardContent>
           </Card>
         )}
