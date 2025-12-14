@@ -118,7 +118,7 @@ export default function HelpCenterPage() {
 
   const additionalResources = [
     { title: "FAQs", description: "Frequently asked questions", icon: FileQuestion, href: "/help/knowledge-base?category=policies-compliance" },
-    { title: "Getting Started", description: "New user guides", icon: Lightbulb, href: "/help/knowledge-base?category=onboarding" },
+    { title: "Getting Started", description: "New user guides", icon: Lightbulb, href: "/help/knowledge-base?category=workforce" },
     { title: "Video Tutorials", description: "Step-by-step video guides", icon: Video, href: "/help/knowledge-base?category=training-learning" },
     { title: "Release Notes", description: "Latest updates and features", icon: ClipboardList, href: "/help/knowledge-base?category=admin-security" },
   ];
