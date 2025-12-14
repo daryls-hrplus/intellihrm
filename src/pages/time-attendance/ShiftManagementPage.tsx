@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -102,6 +103,7 @@ interface ShiftAssignment {
 }
 
 export default function ShiftManagementPage() {
+  const { t } = useTranslation();
   const [companies, setCompanies] = useState<Company[]>([]);
   const [selectedCompany, setSelectedCompany] = useState<string>("");
   const [loading, setLoading] = useState(true);
@@ -197,7 +199,7 @@ export default function ShiftManagementPage() {
       .order('name');
     
     if (error) {
-      toast.error("Failed to load companies");
+      toast.error(t("common.error"));
       return;
     }
     setCompanies(data || []);
@@ -285,7 +287,7 @@ export default function ShiftManagementPage() {
   // Shift CRUD
   const handleSaveShift = async () => {
     if (!shiftForm.name || !shiftForm.code) {
-      toast.error("Name and code are required");
+      toast.error(t("common.fillRequired"));
       return;
     }
 
@@ -314,12 +316,12 @@ export default function ShiftManagementPage() {
     }
 
     if (error) {
-      toast.error("Failed to save shift");
+      toast.error(t("common.error"));
       console.error(error);
       return;
     }
 
-    toast.success(editingShift ? "Shift updated" : "Shift created");
+    toast.success(editingShift ? t("timeAttendance.shifts.shiftUpdated") : t("timeAttendance.shifts.shiftCreated"));
     setShiftDialogOpen(false);
     resetShiftForm();
     loadShifts();
@@ -328,10 +330,10 @@ export default function ShiftManagementPage() {
   const handleDeleteShift = async (id: string) => {
     const { error } = await supabase.from('shifts').delete().eq('id', id);
     if (error) {
-      toast.error("Failed to delete shift");
+      toast.error(t("common.error"));
       return;
     }
-    toast.success("Shift deleted");
+    toast.success(t("timeAttendance.shifts.shiftDeleted"));
     loadShifts();
   };
 
@@ -377,7 +379,7 @@ export default function ShiftManagementPage() {
   // Rounding Rule CRUD
   const handleSaveRounding = async () => {
     if (!roundingForm.name) {
-      toast.error("Name is required");
+      toast.error(t("common.fillRequired"));
       return;
     }
 
@@ -403,12 +405,12 @@ export default function ShiftManagementPage() {
     }
 
     if (error) {
-      toast.error("Failed to save rounding rule");
+      toast.error(t("common.error"));
       console.error(error);
       return;
     }
 
-    toast.success(editingRounding ? "Rounding rule updated" : "Rounding rule created");
+    toast.success(editingRounding ? t("timeAttendance.shifts.roundingRuleUpdated") : t("timeAttendance.shifts.roundingRuleCreated"));
     setRoundingDialogOpen(false);
     resetRoundingForm();
     loadRoundingRules();
@@ -417,10 +419,10 @@ export default function ShiftManagementPage() {
   const handleDeleteRounding = async (id: string) => {
     const { error } = await supabase.from('shift_rounding_rules').delete().eq('id', id);
     if (error) {
-      toast.error("Failed to delete rounding rule");
+      toast.error(t("common.error"));
       return;
     }
-    toast.success("Rounding rule deleted");
+    toast.success(t("timeAttendance.shifts.roundingRuleDeleted"));
     loadRoundingRules();
   };
 
@@ -460,7 +462,7 @@ export default function ShiftManagementPage() {
   // Payment Rule CRUD
   const handleSavePayment = async () => {
     if (!paymentForm.name || !paymentForm.code) {
-      toast.error("Name and code are required");
+      toast.error(t("common.fillRequired"));
       return;
     }
 
@@ -490,12 +492,12 @@ export default function ShiftManagementPage() {
     }
 
     if (error) {
-      toast.error("Failed to save payment rule");
+      toast.error(t("common.error"));
       console.error(error);
       return;
     }
 
-    toast.success(editingPayment ? "Payment rule updated" : "Payment rule created");
+    toast.success(editingPayment ? t("timeAttendance.shifts.paymentRuleUpdated") : t("timeAttendance.shifts.paymentRuleCreated"));
     setPaymentDialogOpen(false);
     resetPaymentForm();
     loadPaymentRules();
@@ -504,10 +506,10 @@ export default function ShiftManagementPage() {
   const handleDeletePayment = async (id: string) => {
     const { error } = await supabase.from('shift_payment_rules').delete().eq('id', id);
     if (error) {
-      toast.error("Failed to delete payment rule");
+      toast.error(t("common.error"));
       return;
     }
-    toast.success("Payment rule deleted");
+    toast.success(t("timeAttendance.shifts.paymentRuleDeleted"));
     loadPaymentRules();
   };
 
@@ -555,11 +557,11 @@ export default function ShiftManagementPage() {
   // Assignment CRUD
   const handleSaveAssignment = async () => {
     if (!assignmentForm.employee_id || !assignmentForm.shift_id) {
-      toast.error("Employee and shift are required");
+      toast.error(t("common.fillRequired"));
       return;
     }
 
-    const payload = {
+    const { error } = await supabase.from('employee_shift_assignments').insert({
       company_id: selectedCompany,
       employee_id: assignmentForm.employee_id,
       shift_id: assignmentForm.shift_id,
@@ -568,17 +570,15 @@ export default function ShiftManagementPage() {
       is_primary: assignmentForm.is_primary,
       rotation_pattern: assignmentForm.rotation_pattern || null,
       notes: assignmentForm.notes || null
-    };
-
-    const { error } = await supabase.from('employee_shift_assignments').insert(payload);
+    });
 
     if (error) {
-      toast.error("Failed to assign shift");
+      toast.error(t("common.error"));
       console.error(error);
       return;
     }
 
-    toast.success("Shift assigned");
+    toast.success(t("common.success"));
     setAssignmentDialogOpen(false);
     setAssignmentForm({
       employee_id: "",
@@ -595,16 +595,11 @@ export default function ShiftManagementPage() {
   const handleDeleteAssignment = async (id: string) => {
     const { error } = await supabase.from('employee_shift_assignments').delete().eq('id', id);
     if (error) {
-      toast.error("Failed to delete assignment");
+      toast.error(t("common.error"));
       return;
     }
-    toast.success("Assignment deleted");
+    toast.success(t("common.success"));
     loadAssignments();
-  };
-
-  const getDayName = (day: number) => {
-    const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-    return days[day];
   };
 
   if (loading) {
@@ -622,8 +617,8 @@ export default function ShiftManagementPage() {
       <div className="space-y-6">
         <Breadcrumbs 
           items={[
-            { label: "Time & Attendance", href: "/time-attendance" },
-            { label: "Shift Management" }
+            { label: t("timeAttendance.title"), href: "/time-attendance" },
+            { label: t("timeAttendance.shifts.title") }
           ]} 
         />
 
@@ -634,16 +629,16 @@ export default function ShiftManagementPage() {
             </div>
             <div>
               <h1 className="text-2xl font-bold tracking-tight text-foreground">
-                Shift Management
+                {t("timeAttendance.shifts.title")}
               </h1>
               <p className="text-muted-foreground">
-                Configure shifts, rounding rules, and payment differentials
+                {t("timeAttendance.shifts.subtitle")}
               </p>
             </div>
           </div>
           <Select value={selectedCompany} onValueChange={setSelectedCompany}>
             <SelectTrigger className="w-[200px]">
-              <SelectValue placeholder="Select company" />
+              <SelectValue placeholder={t("common.selectCompany")} />
             </SelectTrigger>
             <SelectContent>
               {companies.map((c) => (
@@ -653,214 +648,258 @@ export default function ShiftManagementPage() {
           </Select>
         </div>
 
+        {/* Stats */}
+        <div className="grid gap-4 md:grid-cols-4">
+          <Card>
+            <CardContent className="flex items-center gap-4 p-4">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/20">
+                <Clock className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">{t("timeAttendance.shifts.shiftsTab")}</p>
+                <p className="text-xl font-semibold">{shifts.filter(s => s.is_active).length}</p>
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="flex items-center gap-4 p-4">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-secondary/20">
+                <Timer className="h-5 w-5 text-secondary-foreground" />
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">{t("timeAttendance.shifts.roundingRules")}</p>
+                <p className="text-xl font-semibold">{roundingRules.filter(r => r.is_active).length}</p>
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="flex items-center gap-4 p-4">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-success/20">
+                <DollarSign className="h-5 w-5 text-success" />
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">{t("timeAttendance.shifts.paymentRules")}</p>
+                <p className="text-xl font-semibold">{paymentRules.filter(r => r.is_active).length}</p>
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="flex items-center gap-4 p-4">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-warning/20">
+                <Users className="h-5 w-5 text-warning" />
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">{t("timeAttendance.shifts.assignments")}</p>
+                <p className="text-xl font-semibold">{assignments.length}</p>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList>
             <TabsTrigger value="shifts" className="flex items-center gap-2">
-              <Sun className="h-4 w-4" />
-              Shifts
+              <Clock className="h-4 w-4" />
+              {t("timeAttendance.shifts.shiftsTab")}
             </TabsTrigger>
             <TabsTrigger value="rounding" className="flex items-center gap-2">
               <Timer className="h-4 w-4" />
-              Rounding Rules
+              {t("timeAttendance.shifts.roundingRules")}
             </TabsTrigger>
             <TabsTrigger value="payment" className="flex items-center gap-2">
               <DollarSign className="h-4 w-4" />
-              Payment Rules
+              {t("timeAttendance.shifts.paymentRules")}
             </TabsTrigger>
             <TabsTrigger value="assignments" className="flex items-center gap-2">
               <Users className="h-4 w-4" />
-              Assignments
+              {t("timeAttendance.shifts.assignments")}
             </TabsTrigger>
           </TabsList>
 
           {/* Shifts Tab */}
-          <TabsContent value="shifts">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between">
-                <div>
-                  <CardTitle>Work Shifts</CardTitle>
-                  <CardDescription>Define shift schedules and timings</CardDescription>
-                </div>
-                <Dialog open={shiftDialogOpen} onOpenChange={(open) => { setShiftDialogOpen(open); if (!open) resetShiftForm(); }}>
-                  <DialogTrigger asChild>
-                    <Button>
-                      <Plus className="h-4 w-4 mr-2" />
-                      Add Shift
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="max-w-lg">
-                    <DialogHeader>
-                      <DialogTitle>{editingShift ? "Edit Shift" : "Add Shift"}</DialogTitle>
-                    </DialogHeader>
-                    <div className="space-y-4 py-4 max-h-[70vh] overflow-y-auto">
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label>Name *</Label>
-                          <Input 
-                            value={shiftForm.name}
-                            onChange={(e) => setShiftForm({...shiftForm, name: e.target.value})}
-                            placeholder="Day Shift"
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <Label>Code *</Label>
-                          <Input 
-                            value={shiftForm.code}
-                            onChange={(e) => setShiftForm({...shiftForm, code: e.target.value})}
-                            placeholder="DAY"
-                          />
-                        </div>
+          <TabsContent value="shifts" className="space-y-4">
+            <div className="flex justify-end">
+              <Dialog open={shiftDialogOpen} onOpenChange={setShiftDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button onClick={resetShiftForm}>
+                    <Plus className="h-4 w-4 mr-2" />
+                    {t("timeAttendance.shifts.createShift")}
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-2xl">
+                  <DialogHeader>
+                    <DialogTitle>
+                      {editingShift ? t("common.edit") : t("timeAttendance.shifts.createShift")}
+                    </DialogTitle>
+                  </DialogHeader>
+                  <div className="space-y-4 py-4 max-h-[60vh] overflow-y-auto">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label>{t("common.name")} *</Label>
+                        <Input 
+                          value={shiftForm.name} 
+                          onChange={(e) => setShiftForm({...shiftForm, name: e.target.value})} 
+                        />
                       </div>
                       <div className="space-y-2">
-                        <Label>Description</Label>
-                        <Textarea 
-                          value={shiftForm.description}
-                          onChange={(e) => setShiftForm({...shiftForm, description: e.target.value})}
+                        <Label>{t("common.code")} *</Label>
+                        <Input 
+                          value={shiftForm.code} 
+                          onChange={(e) => setShiftForm({...shiftForm, code: e.target.value})} 
                         />
                       </div>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label>Start Time</Label>
-                          <Input 
-                            type="time"
-                            value={shiftForm.start_time}
-                            onChange={(e) => setShiftForm({...shiftForm, start_time: e.target.value})}
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <Label>End Time</Label>
-                          <Input 
-                            type="time"
-                            value={shiftForm.end_time}
-                            onChange={(e) => setShiftForm({...shiftForm, end_time: e.target.value})}
-                          />
-                        </div>
+                    </div>
+                    <div className="space-y-2">
+                      <Label>{t("common.description")}</Label>
+                      <Textarea 
+                        value={shiftForm.description} 
+                        onChange={(e) => setShiftForm({...shiftForm, description: e.target.value})} 
+                      />
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label>{t("timeAttendance.schedules.startTime")}</Label>
+                        <Input 
+                          type="time"
+                          value={shiftForm.start_time} 
+                          onChange={(e) => setShiftForm({...shiftForm, start_time: e.target.value})} 
+                        />
                       </div>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label>Break Duration (min)</Label>
-                          <Input 
-                            type="number"
-                            value={shiftForm.break_duration_minutes}
-                            onChange={(e) => setShiftForm({...shiftForm, break_duration_minutes: parseInt(e.target.value)})}
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <Label>Minimum Hours</Label>
-                          <Input 
-                            type="number"
-                            step="0.5"
-                            value={shiftForm.minimum_hours}
-                            onChange={(e) => setShiftForm({...shiftForm, minimum_hours: parseFloat(e.target.value)})}
-                          />
-                        </div>
+                      <div className="space-y-2">
+                        <Label>{t("timeAttendance.schedules.endTime")}</Label>
+                        <Input 
+                          type="time"
+                          value={shiftForm.end_time} 
+                          onChange={(e) => setShiftForm({...shiftForm, end_time: e.target.value})} 
+                        />
                       </div>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label>Color</Label>
-                          <Input 
-                            type="color"
-                            value={shiftForm.color}
-                            onChange={(e) => setShiftForm({...shiftForm, color: e.target.value})}
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <Label>Start Date</Label>
-                          <Input 
-                            type="date"
-                            value={shiftForm.start_date}
-                            onChange={(e) => setShiftForm({...shiftForm, start_date: e.target.value})}
-                          />
-                        </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label>{t("timeAttendance.schedules.breakDuration")}</Label>
+                        <Input 
+                          type="number"
+                          value={shiftForm.break_duration_minutes} 
+                          onChange={(e) => setShiftForm({...shiftForm, break_duration_minutes: parseInt(e.target.value) || 0})} 
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>{t("timeAttendance.shifts.minimumHours")}</Label>
+                        <Input 
+                          type="number"
+                          value={shiftForm.minimum_hours} 
+                          onChange={(e) => setShiftForm({...shiftForm, minimum_hours: parseInt(e.target.value) || 0})} 
+                        />
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label>{t("common.startDate")}</Label>
+                        <Input 
+                          type="date"
+                          value={shiftForm.start_date} 
+                          onChange={(e) => setShiftForm({...shiftForm, start_date: e.target.value})} 
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>{t("common.endDate")}</Label>
+                        <Input 
+                          type="date"
+                          value={shiftForm.end_date} 
+                          onChange={(e) => setShiftForm({...shiftForm, end_date: e.target.value})} 
+                        />
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <Label>{t("timeAttendance.shifts.color")}</Label>
+                      <Input 
+                        type="color"
+                        value={shiftForm.color} 
+                        onChange={(e) => setShiftForm({...shiftForm, color: e.target.value})} 
+                        className="h-10"
+                      />
+                    </div>
+                    <div className="flex flex-col gap-3">
+                      <div className="flex items-center justify-between">
+                        <Label>{t("timeAttendance.shifts.crossesMidnight")}</Label>
+                        <Switch 
+                          checked={shiftForm.crosses_midnight} 
+                          onCheckedChange={(v) => setShiftForm({...shiftForm, crosses_midnight: v})} 
+                        />
                       </div>
                       <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <Switch 
-                            checked={shiftForm.crosses_midnight}
-                            onCheckedChange={(c) => setShiftForm({...shiftForm, crosses_midnight: c})}
-                          />
-                          <Label>Crosses Midnight</Label>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Switch 
-                            checked={shiftForm.is_overnight}
-                            onCheckedChange={(c) => setShiftForm({...shiftForm, is_overnight: c})}
-                          />
-                          <Label>Overnight Shift</Label>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2">
+                        <Label>{t("common.active")}</Label>
                         <Switch 
-                          checked={shiftForm.is_active}
-                          onCheckedChange={(c) => setShiftForm({...shiftForm, is_active: c})}
+                          checked={shiftForm.is_active} 
+                          onCheckedChange={(v) => setShiftForm({...shiftForm, is_active: v})} 
                         />
-                        <Label>Active</Label>
                       </div>
-                      <Button onClick={handleSaveShift} className="w-full">
-                        {editingShift ? "Update Shift" : "Create Shift"}
-                      </Button>
                     </div>
-                  </DialogContent>
-                </Dialog>
+                    <Button onClick={handleSaveShift} className="w-full">{t("common.save")}</Button>
+                  </div>
+                </DialogContent>
+              </Dialog>
+            </div>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>{t("timeAttendance.shifts.shiftsTab")}</CardTitle>
               </CardHeader>
               <CardContent>
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Shift</TableHead>
-                      <TableHead>Code</TableHead>
-                      <TableHead>Time</TableHead>
-                      <TableHead>Break</TableHead>
-                      <TableHead>Min Hours</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead className="text-right">Actions</TableHead>
+                      <TableHead>{t("common.name")}</TableHead>
+                      <TableHead>{t("common.code")}</TableHead>
+                      <TableHead>{t("common.time")}</TableHead>
+                      <TableHead>{t("timeAttendance.schedules.break")}</TableHead>
+                      <TableHead>{t("common.status")}</TableHead>
+                      <TableHead>{t("common.actions")}</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {shifts.length === 0 ? (
                       <TableRow>
-                        <TableCell colSpan={7} className="text-center text-muted-foreground py-8">
-                          No shifts defined
+                        <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
+                          {t("timeAttendance.shifts.noShifts")}
                         </TableCell>
                       </TableRow>
-                    ) : (
-                      shifts.map((shift) => (
-                        <TableRow key={shift.id}>
-                          <TableCell>
-                            <div className="flex items-center gap-2">
-                              <div 
-                                className="w-3 h-3 rounded-full" 
-                                style={{ backgroundColor: shift.color }}
-                              />
-                              <span className="font-medium">{shift.name}</span>
-                              {shift.is_overnight && <Moon className="h-4 w-4 text-muted-foreground" />}
-                            </div>
-                          </TableCell>
-                          <TableCell>{shift.code}</TableCell>
-                          <TableCell>
+                    ) : shifts.map((shift) => (
+                      <TableRow key={shift.id}>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            <div 
+                              className="w-3 h-3 rounded-full" 
+                              style={{ backgroundColor: shift.color }}
+                            />
+                            <span className="font-medium">{shift.name}</span>
+                          </div>
+                        </TableCell>
+                        <TableCell>{shift.code}</TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-1">
+                            {shift.is_overnight ? <Moon className="h-3 w-3" /> : <Sun className="h-3 w-3" />}
                             {shift.start_time} - {shift.end_time}
-                            {shift.crosses_midnight && <span className="text-xs text-muted-foreground ml-1">(+1)</span>}
-                          </TableCell>
-                          <TableCell>{shift.break_duration_minutes} min</TableCell>
-                          <TableCell>{shift.minimum_hours}h</TableCell>
-                          <TableCell>
-                            <Badge className={shift.is_active ? "bg-success/20 text-success" : "bg-muted text-muted-foreground"}>
-                              {shift.is_active ? "Active" : "Inactive"}
-                            </Badge>
-                          </TableCell>
-                          <TableCell className="text-right">
-                            <div className="flex justify-end gap-1">
-                              <Button variant="ghost" size="icon" onClick={() => openEditShift(shift)}>
-                                <Edit className="h-4 w-4" />
-                              </Button>
-                              <Button variant="ghost" size="icon" onClick={() => handleDeleteShift(shift.id)}>
-                                <Trash2 className="h-4 w-4 text-destructive" />
-                              </Button>
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      ))
-                    )}
+                          </div>
+                        </TableCell>
+                        <TableCell>{shift.break_duration_minutes} min</TableCell>
+                        <TableCell>
+                          <Badge className={shift.is_active ? "bg-success/20 text-success" : "bg-muted text-muted-foreground"}>
+                            {shift.is_active ? t("common.active") : t("common.inactive")}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex gap-1">
+                            <Button variant="ghost" size="icon" onClick={() => openEditShift(shift)}>
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                            <Button variant="ghost" size="icon" onClick={() => handleDeleteShift(shift.id)}>
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
                   </TableBody>
                 </Table>
               </CardContent>
@@ -868,195 +907,169 @@ export default function ShiftManagementPage() {
           </TabsContent>
 
           {/* Rounding Rules Tab */}
-          <TabsContent value="rounding">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between">
-                <div>
-                  <CardTitle>Rounding Rules</CardTitle>
-                  <CardDescription>Configure how clock times are rounded</CardDescription>
-                </div>
-                <Dialog open={roundingDialogOpen} onOpenChange={(open) => { setRoundingDialogOpen(open); if (!open) resetRoundingForm(); }}>
-                  <DialogTrigger asChild>
-                    <Button>
-                      <Plus className="h-4 w-4 mr-2" />
-                      Add Rule
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="max-w-lg">
-                    <DialogHeader>
-                      <DialogTitle>{editingRounding ? "Edit Rounding Rule" : "Add Rounding Rule"}</DialogTitle>
-                    </DialogHeader>
-                    <div className="space-y-4 py-4 max-h-[70vh] overflow-y-auto">
+          <TabsContent value="rounding" className="space-y-4">
+            <div className="flex justify-end">
+              <Dialog open={roundingDialogOpen} onOpenChange={setRoundingDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button onClick={resetRoundingForm}>
+                    <Plus className="h-4 w-4 mr-2" />
+                    {t("timeAttendance.shifts.createRoundingRule")}
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>
+                      {editingRounding ? t("common.edit") : t("timeAttendance.shifts.createRoundingRule")}
+                    </DialogTitle>
+                  </DialogHeader>
+                  <div className="space-y-4 py-4">
+                    <div className="space-y-2">
+                      <Label>{t("common.name")} *</Label>
+                      <Input 
+                        value={roundingForm.name} 
+                        onChange={(e) => setRoundingForm({...roundingForm, name: e.target.value})} 
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>{t("common.description")}</Label>
+                      <Textarea 
+                        value={roundingForm.description} 
+                        onChange={(e) => setRoundingForm({...roundingForm, description: e.target.value})} 
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>{t("timeAttendance.timeTracking.shift")}</Label>
+                      <Select value={roundingForm.shift_id} onValueChange={(v) => setRoundingForm({...roundingForm, shift_id: v})}>
+                        <SelectTrigger>
+                          <SelectValue placeholder={t("common.all")} />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="">{t("common.all")}</SelectItem>
+                          {shifts.map((s) => (
+                            <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <Label>Name *</Label>
-                        <Input 
-                          value={roundingForm.name}
-                          onChange={(e) => setRoundingForm({...roundingForm, name: e.target.value})}
-                          placeholder="15 Minute Rounding"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label>Description</Label>
-                        <Textarea 
-                          value={roundingForm.description}
-                          onChange={(e) => setRoundingForm({...roundingForm, description: e.target.value})}
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label>Apply to Shift (optional)</Label>
-                        <Select 
-                          value={roundingForm.shift_id || "__all__"} 
-                          onValueChange={(v) => setRoundingForm({...roundingForm, shift_id: v === "__all__" ? "" : v})}
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder="All shifts" />
-                          </SelectTrigger>
+                        <Label>{t("timeAttendance.shifts.ruleType")}</Label>
+                        <Select value={roundingForm.rule_type} onValueChange={(v) => setRoundingForm({...roundingForm, rule_type: v})}>
+                          <SelectTrigger><SelectValue /></SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="__all__">All shifts</SelectItem>
-                            {shifts.map((s) => (
-                              <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
-                            ))}
+                            <SelectItem value="both">Both</SelectItem>
+                            <SelectItem value="clock_in">Clock In</SelectItem>
+                            <SelectItem value="clock_out">Clock Out</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label>Applies To</Label>
-                          <Select 
-                            value={roundingForm.rule_type} 
-                            onValueChange={(v) => setRoundingForm({...roundingForm, rule_type: v})}
-                          >
-                            <SelectTrigger>
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="both">Clock In & Out</SelectItem>
-                              <SelectItem value="clock_in">Clock In Only</SelectItem>
-                              <SelectItem value="clock_out">Clock Out Only</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                        <div className="space-y-2">
-                          <Label>Interval (minutes)</Label>
-                          <Select 
-                            value={roundingForm.rounding_interval.toString()} 
-                            onValueChange={(v) => setRoundingForm({...roundingForm, rounding_interval: parseInt(v)})}
-                          >
-                            <SelectTrigger>
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="5">5 minutes</SelectItem>
-                              <SelectItem value="6">6 minutes</SelectItem>
-                              <SelectItem value="10">10 minutes</SelectItem>
-                              <SelectItem value="15">15 minutes</SelectItem>
-                              <SelectItem value="30">30 minutes</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
+                      <div className="space-y-2">
+                        <Label>{t("timeAttendance.shifts.roundingInterval")}</Label>
+                        <Select 
+                          value={roundingForm.rounding_interval.toString()} 
+                          onValueChange={(v) => setRoundingForm({...roundingForm, rounding_interval: parseInt(v)})}
+                        >
+                          <SelectTrigger><SelectValue /></SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="5">5 min</SelectItem>
+                            <SelectItem value="6">6 min</SelectItem>
+                            <SelectItem value="10">10 min</SelectItem>
+                            <SelectItem value="15">15 min</SelectItem>
+                            <SelectItem value="30">30 min</SelectItem>
+                          </SelectContent>
+                        </Select>
                       </div>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label>Rounding Direction</Label>
-                          <Select 
-                            value={roundingForm.rounding_direction} 
-                            onValueChange={(v) => setRoundingForm({...roundingForm, rounding_direction: v})}
-                          >
-                            <SelectTrigger>
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="nearest">Nearest</SelectItem>
-                              <SelectItem value="up">Always Up</SelectItem>
-                              <SelectItem value="down">Always Down</SelectItem>
-                              <SelectItem value="employer_favor">Employer Favorable</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                        <div className="space-y-2">
-                          <Label>Grace Period (minutes)</Label>
-                          <Input 
-                            type="number"
-                            value={roundingForm.grace_period_minutes}
-                            onChange={(e) => setRoundingForm({...roundingForm, grace_period_minutes: parseInt(e.target.value)})}
-                          />
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-4">
-                        <div className="flex items-center gap-2">
-                          <Switch 
-                            checked={roundingForm.apply_to_overtime}
-                            onCheckedChange={(c) => setRoundingForm({...roundingForm, apply_to_overtime: c})}
-                          />
-                          <Label>Apply to Overtime</Label>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Switch 
-                            checked={roundingForm.is_active}
-                            onCheckedChange={(c) => setRoundingForm({...roundingForm, is_active: c})}
-                          />
-                          <Label>Active</Label>
-                        </div>
-                      </div>
-                      <Button onClick={handleSaveRounding} className="w-full">
-                        {editingRounding ? "Update Rule" : "Create Rule"}
-                      </Button>
                     </div>
-                  </DialogContent>
-                </Dialog>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label>{t("timeAttendance.shifts.roundingDirection")}</Label>
+                        <Select value={roundingForm.rounding_direction} onValueChange={(v) => setRoundingForm({...roundingForm, rounding_direction: v})}>
+                          <SelectTrigger><SelectValue /></SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="nearest">Nearest</SelectItem>
+                            <SelectItem value="up">Up</SelectItem>
+                            <SelectItem value="down">Down</SelectItem>
+                            <SelectItem value="employer_favor">Employer Favor</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label>{t("timeAttendance.shifts.gracePeriod")} (min)</Label>
+                        <Input 
+                          type="number"
+                          value={roundingForm.grace_period_minutes} 
+                          onChange={(e) => setRoundingForm({...roundingForm, grace_period_minutes: parseInt(e.target.value) || 0})} 
+                        />
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <Label>{t("timeAttendance.shifts.applyToOvertime")}</Label>
+                      <Switch 
+                        checked={roundingForm.apply_to_overtime} 
+                        onCheckedChange={(v) => setRoundingForm({...roundingForm, apply_to_overtime: v})} 
+                      />
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <Label>{t("common.active")}</Label>
+                      <Switch 
+                        checked={roundingForm.is_active} 
+                        onCheckedChange={(v) => setRoundingForm({...roundingForm, is_active: v})} 
+                      />
+                    </div>
+                    <Button onClick={handleSaveRounding} className="w-full">{t("common.save")}</Button>
+                  </div>
+                </DialogContent>
+              </Dialog>
+            </div>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>{t("timeAttendance.shifts.roundingRules")}</CardTitle>
               </CardHeader>
               <CardContent>
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Rule Name</TableHead>
-                      <TableHead>Shift</TableHead>
-                      <TableHead>Applies To</TableHead>
-                      <TableHead>Interval</TableHead>
-                      <TableHead>Direction</TableHead>
-                      <TableHead>Grace</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead className="text-right">Actions</TableHead>
+                      <TableHead>{t("common.name")}</TableHead>
+                      <TableHead>{t("timeAttendance.timeTracking.shift")}</TableHead>
+                      <TableHead>{t("timeAttendance.shifts.ruleType")}</TableHead>
+                      <TableHead>{t("timeAttendance.shifts.roundingInterval")}</TableHead>
+                      <TableHead>{t("timeAttendance.shifts.roundingDirection")}</TableHead>
+                      <TableHead>{t("common.status")}</TableHead>
+                      <TableHead>{t("common.actions")}</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {roundingRules.length === 0 ? (
                       <TableRow>
-                        <TableCell colSpan={8} className="text-center text-muted-foreground py-8">
-                          No rounding rules defined
+                        <TableCell colSpan={7} className="text-center text-muted-foreground py-8">
+                          {t("timeAttendance.shifts.noRoundingRules")}
                         </TableCell>
                       </TableRow>
-                    ) : (
-                      roundingRules.map((rule) => (
-                        <TableRow key={rule.id}>
-                          <TableCell className="font-medium">{rule.name}</TableCell>
-                          <TableCell>{rule.shift?.name || "All shifts"}</TableCell>
-                          <TableCell>
-                            <Badge variant="outline" className="capitalize">
-                              {rule.rule_type.replace('_', ' ')}
-                            </Badge>
-                          </TableCell>
-                          <TableCell>{rule.rounding_interval} min</TableCell>
-                          <TableCell className="capitalize">{rule.rounding_direction.replace('_', ' ')}</TableCell>
-                          <TableCell>{rule.grace_period_minutes} min</TableCell>
-                          <TableCell>
-                            <Badge className={rule.is_active ? "bg-success/20 text-success" : "bg-muted text-muted-foreground"}>
-                              {rule.is_active ? "Active" : "Inactive"}
-                            </Badge>
-                          </TableCell>
-                          <TableCell className="text-right">
-                            <div className="flex justify-end gap-1">
-                              <Button variant="ghost" size="icon" onClick={() => openEditRounding(rule)}>
-                                <Edit className="h-4 w-4" />
-                              </Button>
-                              <Button variant="ghost" size="icon" onClick={() => handleDeleteRounding(rule.id)}>
-                                <Trash2 className="h-4 w-4 text-destructive" />
-                              </Button>
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      ))
-                    )}
+                    ) : roundingRules.map((rule) => (
+                      <TableRow key={rule.id}>
+                        <TableCell className="font-medium">{rule.name}</TableCell>
+                        <TableCell>{rule.shift?.name || t("common.all")}</TableCell>
+                        <TableCell className="capitalize">{rule.rule_type.replace('_', ' ')}</TableCell>
+                        <TableCell>{rule.rounding_interval} min</TableCell>
+                        <TableCell className="capitalize">{rule.rounding_direction}</TableCell>
+                        <TableCell>
+                          <Badge className={rule.is_active ? "bg-success/20 text-success" : "bg-muted text-muted-foreground"}>
+                            {rule.is_active ? t("common.active") : t("common.inactive")}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex gap-1">
+                            <Button variant="ghost" size="icon" onClick={() => openEditRounding(rule)}>
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                            <Button variant="ghost" size="icon" onClick={() => handleDeleteRounding(rule.id)}>
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
                   </TableBody>
                 </Table>
               </CardContent>
@@ -1064,235 +1077,173 @@ export default function ShiftManagementPage() {
           </TabsContent>
 
           {/* Payment Rules Tab */}
-          <TabsContent value="payment">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between">
-                <div>
-                  <CardTitle>Payment Rules</CardTitle>
-                  <CardDescription>Configure shift differentials and premiums</CardDescription>
-                </div>
-                <Dialog open={paymentDialogOpen} onOpenChange={(open) => { setPaymentDialogOpen(open); if (!open) resetPaymentForm(); }}>
-                  <DialogTrigger asChild>
-                    <Button>
-                      <Plus className="h-4 w-4 mr-2" />
-                      Add Rule
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="max-w-lg">
-                    <DialogHeader>
-                      <DialogTitle>{editingPayment ? "Edit Payment Rule" : "Add Payment Rule"}</DialogTitle>
-                    </DialogHeader>
-                    <div className="space-y-4 py-4 max-h-[70vh] overflow-y-auto">
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label>Name *</Label>
-                          <Input 
-                            value={paymentForm.name}
-                            onChange={(e) => setPaymentForm({...paymentForm, name: e.target.value})}
-                            placeholder="Night Shift Premium"
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <Label>Code *</Label>
-                          <Input 
-                            value={paymentForm.code}
-                            onChange={(e) => setPaymentForm({...paymentForm, code: e.target.value})}
-                            placeholder="NIGHT_PREM"
-                          />
-                        </div>
-                      </div>
+          <TabsContent value="payment" className="space-y-4">
+            <div className="flex justify-end">
+              <Dialog open={paymentDialogOpen} onOpenChange={setPaymentDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button onClick={resetPaymentForm}>
+                    <Plus className="h-4 w-4 mr-2" />
+                    {t("timeAttendance.shifts.createPaymentRule")}
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>
+                      {editingPayment ? t("common.edit") : t("timeAttendance.shifts.createPaymentRule")}
+                    </DialogTitle>
+                  </DialogHeader>
+                  <div className="space-y-4 py-4 max-h-[60vh] overflow-y-auto">
+                    <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <Label>Description</Label>
-                        <Textarea 
-                          value={paymentForm.description}
-                          onChange={(e) => setPaymentForm({...paymentForm, description: e.target.value})}
+                        <Label>{t("common.name")} *</Label>
+                        <Input 
+                          value={paymentForm.name} 
+                          onChange={(e) => setPaymentForm({...paymentForm, name: e.target.value})} 
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label>Apply to Shift (optional)</Label>
-                        <Select 
-                          value={paymentForm.shift_id || "__all__"} 
-                          onValueChange={(v) => setPaymentForm({...paymentForm, shift_id: v === "__all__" ? "" : v})}
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder="All shifts" />
-                          </SelectTrigger>
+                        <Label>{t("common.code")} *</Label>
+                        <Input 
+                          value={paymentForm.code} 
+                          onChange={(e) => setPaymentForm({...paymentForm, code: e.target.value})} 
+                        />
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <Label>{t("common.description")}</Label>
+                      <Textarea 
+                        value={paymentForm.description} 
+                        onChange={(e) => setPaymentForm({...paymentForm, description: e.target.value})} 
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>{t("timeAttendance.timeTracking.shift")}</Label>
+                      <Select value={paymentForm.shift_id} onValueChange={(v) => setPaymentForm({...paymentForm, shift_id: v})}>
+                        <SelectTrigger>
+                          <SelectValue placeholder={t("common.all")} />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="">{t("common.all")}</SelectItem>
+                          {shifts.map((s) => (
+                            <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label>{t("timeAttendance.shifts.paymentType")}</Label>
+                        <Select value={paymentForm.payment_type} onValueChange={(v) => setPaymentForm({...paymentForm, payment_type: v})}>
+                          <SelectTrigger><SelectValue /></SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="__all__">All shifts</SelectItem>
-                            {shifts.map((s) => (
-                              <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
-                            ))}
+                            <SelectItem value="percentage">{t("common.percentage")}</SelectItem>
+                            <SelectItem value="fixed">{t("common.amount")}</SelectItem>
+                            <SelectItem value="hourly">Hourly</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label>Payment Type</Label>
-                          <Select 
-                            value={paymentForm.payment_type} 
-                            onValueChange={(v) => setPaymentForm({...paymentForm, payment_type: v})}
-                          >
-                            <SelectTrigger>
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="percentage">Percentage of Base</SelectItem>
-                              <SelectItem value="fixed_hourly">Fixed Hourly Amount</SelectItem>
-                              <SelectItem value="fixed_daily">Fixed Daily Amount</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                        <div className="space-y-2">
-                          <Label>Amount {paymentForm.payment_type === 'percentage' ? '(%)' : '($)'}</Label>
-                          <Input 
-                            type="number"
-                            step="0.01"
-                            value={paymentForm.amount}
-                            onChange={(e) => setPaymentForm({...paymentForm, amount: parseFloat(e.target.value)})}
-                          />
-                        </div>
+                      <div className="space-y-2">
+                        <Label>{t("timeAttendance.shifts.amount")}</Label>
+                        <Input 
+                          type="number"
+                          value={paymentForm.amount} 
+                          onChange={(e) => setPaymentForm({...paymentForm, amount: parseFloat(e.target.value) || 0})} 
+                        />
                       </div>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label>Applies To</Label>
-                          <Select 
-                            value={paymentForm.applies_to} 
-                            onValueChange={(v) => setPaymentForm({...paymentForm, applies_to: v})}
-                          >
-                            <SelectTrigger>
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="all_hours">All Hours</SelectItem>
-                              <SelectItem value="regular_only">Regular Hours Only</SelectItem>
-                              <SelectItem value="overtime_only">Overtime Only</SelectItem>
-                              <SelectItem value="weekend">Weekend Hours</SelectItem>
-                              <SelectItem value="holiday">Holiday Hours</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                        <div className="space-y-2">
-                          <Label>Priority</Label>
-                          <Input 
-                            type="number"
-                            value={paymentForm.priority}
-                            onChange={(e) => setPaymentForm({...paymentForm, priority: parseInt(e.target.value)})}
-                          />
-                        </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label>{t("timeAttendance.shifts.appliesTo")}</Label>
+                        <Select value={paymentForm.applies_to} onValueChange={(v) => setPaymentForm({...paymentForm, applies_to: v})}>
+                          <SelectTrigger><SelectValue /></SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="all_hours">All Hours</SelectItem>
+                            <SelectItem value="overtime">Overtime Only</SelectItem>
+                            <SelectItem value="night">Night Hours</SelectItem>
+                            <SelectItem value="weekend">Weekend</SelectItem>
+                            <SelectItem value="holiday">Holiday</SelectItem>
+                          </SelectContent>
+                        </Select>
                       </div>
                       <div className="space-y-2">
-                        <Label>Apply on Days</Label>
-                        <div className="flex gap-2 flex-wrap">
-                          {[0, 1, 2, 3, 4, 5, 6].map((day) => (
-                            <Button
-                              key={day}
-                              type="button"
-                              variant={paymentForm.day_of_week.includes(day) ? "default" : "outline"}
-                              size="sm"
-                              onClick={() => {
-                                const newDays = paymentForm.day_of_week.includes(day)
-                                  ? paymentForm.day_of_week.filter(d => d !== day)
-                                  : [...paymentForm.day_of_week, day];
-                                setPaymentForm({...paymentForm, day_of_week: newDays});
-                              }}
-                            >
-                              {getDayName(day)}
-                            </Button>
-                          ))}
-                        </div>
-                        <p className="text-xs text-muted-foreground">Leave empty for all days</p>
+                        <Label>{t("timeAttendance.shifts.priority")}</Label>
+                        <Input 
+                          type="number"
+                          value={paymentForm.priority} 
+                          onChange={(e) => setPaymentForm({...paymentForm, priority: parseInt(e.target.value) || 0})} 
+                        />
                       </div>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label>Time Range Start</Label>
-                          <Input 
-                            type="time"
-                            value={paymentForm.start_time}
-                            onChange={(e) => setPaymentForm({...paymentForm, start_time: e.target.value})}
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <Label>Time Range End</Label>
-                          <Input 
-                            type="time"
-                            value={paymentForm.end_time}
-                            onChange={(e) => setPaymentForm({...paymentForm, end_time: e.target.value})}
-                          />
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-4">
-                        <div className="flex items-center gap-2">
-                          <Switch 
-                            checked={paymentForm.is_taxable}
-                            onCheckedChange={(c) => setPaymentForm({...paymentForm, is_taxable: c})}
-                          />
-                          <Label>Taxable</Label>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Switch 
-                            checked={paymentForm.is_active}
-                            onCheckedChange={(c) => setPaymentForm({...paymentForm, is_active: c})}
-                          />
-                          <Label>Active</Label>
-                        </div>
-                      </div>
-                      <Button onClick={handleSavePayment} className="w-full">
-                        {editingPayment ? "Update Rule" : "Create Rule"}
-                      </Button>
                     </div>
-                  </DialogContent>
-                </Dialog>
+                    <div className="flex items-center justify-between">
+                      <Label>{t("timeAttendance.shifts.taxable")}</Label>
+                      <Switch 
+                        checked={paymentForm.is_taxable} 
+                        onCheckedChange={(v) => setPaymentForm({...paymentForm, is_taxable: v})} 
+                      />
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <Label>{t("common.active")}</Label>
+                      <Switch 
+                        checked={paymentForm.is_active} 
+                        onCheckedChange={(v) => setPaymentForm({...paymentForm, is_active: v})} 
+                      />
+                    </div>
+                    <Button onClick={handleSavePayment} className="w-full">{t("common.save")}</Button>
+                  </div>
+                </DialogContent>
+              </Dialog>
+            </div>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>{t("timeAttendance.shifts.paymentRules")}</CardTitle>
               </CardHeader>
               <CardContent>
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Rule Name</TableHead>
-                      <TableHead>Code</TableHead>
-                      <TableHead>Shift</TableHead>
-                      <TableHead>Type</TableHead>
-                      <TableHead>Amount</TableHead>
-                      <TableHead>Applies To</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead className="text-right">Actions</TableHead>
+                      <TableHead>{t("common.name")}</TableHead>
+                      <TableHead>{t("timeAttendance.timeTracking.shift")}</TableHead>
+                      <TableHead>{t("common.type")}</TableHead>
+                      <TableHead>{t("timeAttendance.shifts.amount")}</TableHead>
+                      <TableHead>{t("timeAttendance.shifts.appliesTo")}</TableHead>
+                      <TableHead>{t("common.status")}</TableHead>
+                      <TableHead>{t("common.actions")}</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {paymentRules.length === 0 ? (
                       <TableRow>
-                        <TableCell colSpan={8} className="text-center text-muted-foreground py-8">
-                          No payment rules defined
+                        <TableCell colSpan={7} className="text-center text-muted-foreground py-8">
+                          {t("timeAttendance.shifts.noPaymentRules")}
                         </TableCell>
                       </TableRow>
-                    ) : (
-                      paymentRules.map((rule) => (
-                        <TableRow key={rule.id}>
-                          <TableCell className="font-medium">{rule.name}</TableCell>
-                          <TableCell>{rule.code}</TableCell>
-                          <TableCell>{rule.shift?.name || "All shifts"}</TableCell>
-                          <TableCell className="capitalize">{rule.payment_type.replace('_', ' ')}</TableCell>
-                          <TableCell>
-                            {rule.payment_type === 'percentage' ? `${rule.amount}%` : `$${rule.amount}`}
-                          </TableCell>
-                          <TableCell className="capitalize">{rule.applies_to.replace('_', ' ')}</TableCell>
-                          <TableCell>
-                            <Badge className={rule.is_active ? "bg-success/20 text-success" : "bg-muted text-muted-foreground"}>
-                              {rule.is_active ? "Active" : "Inactive"}
-                            </Badge>
-                          </TableCell>
-                          <TableCell className="text-right">
-                            <div className="flex justify-end gap-1">
-                              <Button variant="ghost" size="icon" onClick={() => openEditPayment(rule)}>
-                                <Edit className="h-4 w-4" />
-                              </Button>
-                              <Button variant="ghost" size="icon" onClick={() => handleDeletePayment(rule.id)}>
-                                <Trash2 className="h-4 w-4 text-destructive" />
-                              </Button>
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      ))
-                    )}
+                    ) : paymentRules.map((rule) => (
+                      <TableRow key={rule.id}>
+                        <TableCell className="font-medium">{rule.name}</TableCell>
+                        <TableCell>{rule.shift?.name || t("common.all")}</TableCell>
+                        <TableCell className="capitalize">{rule.payment_type}</TableCell>
+                        <TableCell>
+                          {rule.payment_type === 'percentage' ? `${rule.amount}%` : `$${rule.amount}`}
+                        </TableCell>
+                        <TableCell className="capitalize">{rule.applies_to.replace('_', ' ')}</TableCell>
+                        <TableCell>
+                          <Badge className={rule.is_active ? "bg-success/20 text-success" : "bg-muted text-muted-foreground"}>
+                            {rule.is_active ? t("common.active") : t("common.inactive")}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex gap-1">
+                            <Button variant="ghost" size="icon" onClick={() => openEditPayment(rule)}>
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                            <Button variant="ghost" size="icon" onClick={() => handleDeletePayment(rule.id)}>
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
                   </TableBody>
                 </Table>
               </CardContent>
@@ -1300,159 +1251,127 @@ export default function ShiftManagementPage() {
           </TabsContent>
 
           {/* Assignments Tab */}
-          <TabsContent value="assignments">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between">
-                <div>
-                  <CardTitle>Employee Shift Assignments</CardTitle>
-                  <CardDescription>Assign employees to shifts</CardDescription>
-                </div>
-                <Dialog open={assignmentDialogOpen} onOpenChange={setAssignmentDialogOpen}>
-                  <DialogTrigger asChild>
-                    <Button>
-                      <Plus className="h-4 w-4 mr-2" />
-                      Assign Shift
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent>
-                    <DialogHeader>
-                      <DialogTitle>Assign Shift to Employee</DialogTitle>
-                    </DialogHeader>
-                    <div className="space-y-4 py-4">
-                      <div className="space-y-2">
-                        <Label>Employee *</Label>
-                        <Select 
-                          value={assignmentForm.employee_id} 
-                          onValueChange={(v) => setAssignmentForm({...assignmentForm, employee_id: v})}
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select employee" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {employees.map((e) => (
-                              <SelectItem key={e.id} value={e.id}>{e.full_name}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div className="space-y-2">
-                        <Label>Shift *</Label>
-                        <Select 
-                          value={assignmentForm.shift_id} 
-                          onValueChange={(v) => setAssignmentForm({...assignmentForm, shift_id: v})}
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select shift" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {shifts.map((s) => (
-                              <SelectItem key={s.id} value={s.id}>{s.name} ({s.code})</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label>Effective Date</Label>
-                          <Input 
-                            type="date"
-                            value={assignmentForm.effective_date}
-                            onChange={(e) => setAssignmentForm({...assignmentForm, effective_date: e.target.value})}
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <Label>End Date</Label>
-                          <Input 
-                            type="date"
-                            value={assignmentForm.end_date}
-                            onChange={(e) => setAssignmentForm({...assignmentForm, end_date: e.target.value})}
-                          />
-                        </div>
-                      </div>
-                      <div className="space-y-2">
-                        <Label>Rotation Pattern</Label>
-                        <Select 
-                          value={assignmentForm.rotation_pattern || "__none__"} 
-                          onValueChange={(v) => setAssignmentForm({...assignmentForm, rotation_pattern: v === "__none__" ? "" : v})}
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder="No rotation" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="__none__">No rotation</SelectItem>
-                            <SelectItem value="4on-3off">4 on / 3 off</SelectItem>
-                            <SelectItem value="5on-2off">5 on / 2 off</SelectItem>
-                            <SelectItem value="weekly-rotate">Weekly Rotation</SelectItem>
-                            <SelectItem value="bi-weekly-rotate">Bi-weekly Rotation</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Switch 
-                          checked={assignmentForm.is_primary}
-                          onCheckedChange={(c) => setAssignmentForm({...assignmentForm, is_primary: c})}
-                        />
-                        <Label>Primary Shift</Label>
-                      </div>
-                      <div className="space-y-2">
-                        <Label>Notes</Label>
-                        <Textarea 
-                          value={assignmentForm.notes}
-                          onChange={(e) => setAssignmentForm({...assignmentForm, notes: e.target.value})}
-                        />
-                      </div>
-                      <Button onClick={handleSaveAssignment} className="w-full">
-                        Assign Shift
-                      </Button>
+          <TabsContent value="assignments" className="space-y-4">
+            <div className="flex justify-end">
+              <Dialog open={assignmentDialogOpen} onOpenChange={setAssignmentDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button>
+                    <Plus className="h-4 w-4 mr-2" />
+                    {t("timeAttendance.schedules.assignSchedule")}
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>{t("timeAttendance.schedules.assignSchedule")}</DialogTitle>
+                  </DialogHeader>
+                  <div className="space-y-4 py-4">
+                    <div className="space-y-2">
+                      <Label>{t("common.employee")} *</Label>
+                      <Select value={assignmentForm.employee_id} onValueChange={(v) => setAssignmentForm({...assignmentForm, employee_id: v})}>
+                        <SelectTrigger>
+                          <SelectValue placeholder={t("common.selectEmployee")} />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {employees.map((e) => (
+                            <SelectItem key={e.id} value={e.id}>{e.full_name}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </div>
-                  </DialogContent>
-                </Dialog>
+                    <div className="space-y-2">
+                      <Label>{t("timeAttendance.timeTracking.shift")} *</Label>
+                      <Select value={assignmentForm.shift_id} onValueChange={(v) => setAssignmentForm({...assignmentForm, shift_id: v})}>
+                        <SelectTrigger>
+                          <SelectValue placeholder={t("common.select")} />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {shifts.map((s) => (
+                            <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label>{t("common.startDate")}</Label>
+                        <Input 
+                          type="date"
+                          value={assignmentForm.effective_date} 
+                          onChange={(e) => setAssignmentForm({...assignmentForm, effective_date: e.target.value})} 
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>{t("common.endDate")}</Label>
+                        <Input 
+                          type="date"
+                          value={assignmentForm.end_date} 
+                          onChange={(e) => setAssignmentForm({...assignmentForm, end_date: e.target.value})} 
+                        />
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <Label>{t("timeAttendance.schedules.primary")}</Label>
+                      <Switch 
+                        checked={assignmentForm.is_primary} 
+                        onCheckedChange={(v) => setAssignmentForm({...assignmentForm, is_primary: v})} 
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>{t("common.notes")}</Label>
+                      <Textarea 
+                        value={assignmentForm.notes} 
+                        onChange={(e) => setAssignmentForm({...assignmentForm, notes: e.target.value})} 
+                      />
+                    </div>
+                    <Button onClick={handleSaveAssignment} className="w-full">{t("common.save")}</Button>
+                  </div>
+                </DialogContent>
+              </Dialog>
+            </div>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>{t("timeAttendance.shifts.assignments")}</CardTitle>
               </CardHeader>
               <CardContent>
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Employee</TableHead>
-                      <TableHead>Shift</TableHead>
-                      <TableHead>Effective Date</TableHead>
-                      <TableHead>End Date</TableHead>
-                      <TableHead>Rotation</TableHead>
-                      <TableHead>Primary</TableHead>
-                      <TableHead className="text-right">Actions</TableHead>
+                      <TableHead>{t("common.employee")}</TableHead>
+                      <TableHead>{t("timeAttendance.timeTracking.shift")}</TableHead>
+                      <TableHead>{t("common.startDate")}</TableHead>
+                      <TableHead>{t("common.endDate")}</TableHead>
+                      <TableHead>{t("timeAttendance.schedules.primary")}</TableHead>
+                      <TableHead>{t("common.actions")}</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {assignments.length === 0 ? (
                       <TableRow>
-                        <TableCell colSpan={7} className="text-center text-muted-foreground py-8">
-                          No shift assignments
+                        <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
+                          {t("timeAttendance.schedules.noAssignments")}
                         </TableCell>
                       </TableRow>
-                    ) : (
-                      assignments.map((assignment) => (
-                        <TableRow key={assignment.id}>
-                          <TableCell className="font-medium">
-                            {assignment.profile?.full_name || 'Unknown'}
-                          </TableCell>
-                          <TableCell>
-                            {assignment.shift?.name} ({assignment.shift?.code})
-                          </TableCell>
-                          <TableCell>{format(new Date(assignment.effective_date), 'MMM d, yyyy')}</TableCell>
-                          <TableCell>
-                            {assignment.end_date ? format(new Date(assignment.end_date), 'MMM d, yyyy') : '-'}
-                          </TableCell>
-                          <TableCell>{assignment.rotation_pattern || '-'}</TableCell>
-                          <TableCell>
-                            {assignment.is_primary && <Badge className="bg-primary/20 text-primary">Primary</Badge>}
-                          </TableCell>
-                          <TableCell className="text-right">
-                            <Button variant="ghost" size="icon" onClick={() => handleDeleteAssignment(assignment.id)}>
-                              <Trash2 className="h-4 w-4 text-destructive" />
-                            </Button>
-                          </TableCell>
-                        </TableRow>
-                      ))
-                    )}
+                    ) : assignments.map((assignment) => (
+                      <TableRow key={assignment.id}>
+                        <TableCell className="font-medium">{assignment.profile?.full_name}</TableCell>
+                        <TableCell>
+                          {assignment.shift?.name} ({assignment.shift?.code})
+                        </TableCell>
+                        <TableCell>{format(new Date(assignment.effective_date), 'MMM d, yyyy')}</TableCell>
+                        <TableCell>{assignment.end_date ? format(new Date(assignment.end_date), 'MMM d, yyyy') : '-'}</TableCell>
+                        <TableCell>
+                          {assignment.is_primary && (
+                            <Badge className="bg-primary/20 text-primary">{t("timeAttendance.schedules.primary")}</Badge>
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          <Button variant="ghost" size="icon" onClick={() => handleDeleteAssignment(assignment.id)}>
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
                   </TableBody>
                 </Table>
               </CardContent>

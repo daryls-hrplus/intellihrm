@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,7 +11,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { format, parseISO, differenceInHours } from "date-fns";
@@ -21,8 +21,7 @@ import {
   X,
   Timer,
   TrendingUp,
-  AlertCircle,
-  CalendarDays
+  AlertCircle
 } from "lucide-react";
 
 interface Company {
@@ -50,6 +49,7 @@ interface OvertimeRequest {
 }
 
 export default function OvertimeManagementPage() {
+  const { t } = useTranslation();
   const [companies, setCompanies] = useState<Company[]>([]);
   const [selectedCompany, setSelectedCompany] = useState<string>("");
   const [requests, setRequests] = useState<OvertimeRequest[]>([]);
@@ -96,7 +96,7 @@ export default function OvertimeManagementPage() {
       .order('name');
     
     if (error) {
-      toast.error("Failed to load companies");
+      toast.error(t("common.error"));
       return;
     }
     setCompanies(data || []);
@@ -130,7 +130,6 @@ export default function OvertimeManagementPage() {
     
     setRequests(data || []);
     
-    // Calculate stats
     const pending = data?.filter(r => r.status === 'pending').length || 0;
     const approved = data?.filter(r => r.status === 'approved' || r.status === 'completed').length || 0;
     const totalHours = data?.reduce((sum, r) => sum + (r.actual_hours || r.planned_hours || 0), 0) || 0;
@@ -149,7 +148,7 @@ export default function OvertimeManagementPage() {
 
   const handleCreateRequest = async () => {
     if (!newRequest.employee_id || !newRequest.planned_start || !newRequest.planned_end || !newRequest.reason) {
-      toast.error("Please fill in all required fields");
+      toast.error(t("common.fillRequired"));
       return;
     }
 
@@ -158,7 +157,7 @@ export default function OvertimeManagementPage() {
     const plannedHours = differenceInHours(plannedEnd, plannedStart);
 
     if (plannedHours <= 0) {
-      toast.error("End time must be after start time");
+      toast.error(t("common.error"));
       return;
     }
 
@@ -177,10 +176,10 @@ export default function OvertimeManagementPage() {
       });
 
     if (error) {
-      toast.error("Failed to create request");
+      toast.error(t("common.error"));
       console.error(error);
     } else {
-      toast.success("Overtime request submitted");
+      toast.success(t("timeAttendance.overtime.requestSubmitted"));
       setCreateDialogOpen(false);
       setNewRequest({
         employee_id: "",
@@ -210,13 +209,13 @@ export default function OvertimeManagementPage() {
         .eq('id', selectedRequest.id);
 
       if (error) {
-        toast.error("Failed to approve request");
+        toast.error(t("common.error"));
       } else {
-        toast.success("Request approved");
+        toast.success(t("timeAttendance.overtime.requestApproved"));
       }
     } else {
       if (!rejectionReason) {
-        toast.error("Please provide a rejection reason");
+        toast.error(t("common.fillRequired"));
         return;
       }
 
@@ -231,9 +230,9 @@ export default function OvertimeManagementPage() {
         .eq('id', selectedRequest.id);
 
       if (error) {
-        toast.error("Failed to reject request");
+        toast.error(t("common.error"));
       } else {
-        toast.success("Request rejected");
+        toast.success(t("timeAttendance.overtime.requestRejected"));
       }
     }
 
@@ -246,15 +245,15 @@ export default function OvertimeManagementPage() {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'pending':
-        return <Badge className="bg-warning/20 text-warning">Pending</Badge>;
+        return <Badge className="bg-warning/20 text-warning">{t("timeAttendance.overtime.pending")}</Badge>;
       case 'approved':
-        return <Badge className="bg-success/20 text-success">Approved</Badge>;
+        return <Badge className="bg-success/20 text-success">{t("timeAttendance.overtime.approved")}</Badge>;
       case 'rejected':
-        return <Badge className="bg-destructive/20 text-destructive">Rejected</Badge>;
+        return <Badge className="bg-destructive/20 text-destructive">{t("timeAttendance.overtime.rejected")}</Badge>;
       case 'completed':
-        return <Badge className="bg-primary/20 text-primary">Completed</Badge>;
+        return <Badge className="bg-primary/20 text-primary">{t("timeAttendance.overtime.completed")}</Badge>;
       case 'cancelled':
-        return <Badge variant="outline">Cancelled</Badge>;
+        return <Badge variant="outline">{t("timeAttendance.overtime.cancelled")}</Badge>;
       default:
         return <Badge variant="outline">{status}</Badge>;
     }
@@ -263,13 +262,13 @@ export default function OvertimeManagementPage() {
   const getTypeBadge = (type: string) => {
     switch (type) {
       case 'regular':
-        return <Badge variant="outline">Regular</Badge>;
+        return <Badge variant="outline">{t("timeAttendance.overtime.regular")}</Badge>;
       case 'weekend':
-        return <Badge className="bg-blue-500/20 text-blue-600">Weekend</Badge>;
+        return <Badge className="bg-blue-500/20 text-blue-600">{t("timeAttendance.overtime.weekend")}</Badge>;
       case 'holiday':
-        return <Badge className="bg-purple-500/20 text-purple-600">Holiday</Badge>;
+        return <Badge className="bg-purple-500/20 text-purple-600">{t("timeAttendance.overtime.holiday")}</Badge>;
       case 'emergency':
-        return <Badge className="bg-destructive/20 text-destructive">Emergency</Badge>;
+        return <Badge className="bg-destructive/20 text-destructive">{t("timeAttendance.overtime.emergency")}</Badge>;
       default:
         return <Badge variant="outline">{type}</Badge>;
     }
@@ -296,8 +295,8 @@ export default function OvertimeManagementPage() {
       <div className="space-y-6">
         <Breadcrumbs 
           items={[
-            { label: "Time & Attendance", href: "/time-attendance" },
-            { label: "Overtime Management" }
+            { label: t("timeAttendance.title"), href: "/time-attendance" },
+            { label: t("timeAttendance.overtime.title") }
           ]} 
         />
 
@@ -308,17 +307,17 @@ export default function OvertimeManagementPage() {
             </div>
             <div>
               <h1 className="text-2xl font-bold tracking-tight text-foreground">
-                Overtime Management
+                {t("timeAttendance.overtime.title")}
               </h1>
               <p className="text-muted-foreground">
-                Track and approve overtime requests
+                {t("timeAttendance.overtime.subtitle")}
               </p>
             </div>
           </div>
           <div className="flex items-center gap-2">
             <Select value={selectedCompany} onValueChange={setSelectedCompany}>
               <SelectTrigger className="w-[200px]">
-                <SelectValue placeholder="Select company" />
+                <SelectValue placeholder={t("common.selectCompany")} />
               </SelectTrigger>
               <SelectContent>
                 {companies.map((c) => (
@@ -330,22 +329,22 @@ export default function OvertimeManagementPage() {
               <DialogTrigger asChild>
                 <Button>
                   <Plus className="h-4 w-4 mr-2" />
-                  New Request
+                  {t("timeAttendance.overtime.newRequest")}
                 </Button>
               </DialogTrigger>
               <DialogContent>
                 <DialogHeader>
-                  <DialogTitle>Submit Overtime Request</DialogTitle>
+                  <DialogTitle>{t("timeAttendance.overtime.submitRequest")}</DialogTitle>
                 </DialogHeader>
                 <div className="space-y-4 py-4">
                   <div className="space-y-2">
-                    <Label>Employee *</Label>
+                    <Label>{t("common.employee")} *</Label>
                     <Select 
                       value={newRequest.employee_id} 
                       onValueChange={(v) => setNewRequest({...newRequest, employee_id: v})}
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Select employee" />
+                        <SelectValue placeholder={t("common.selectEmployee")} />
                       </SelectTrigger>
                       <SelectContent>
                         {employees.map((e) => (
@@ -355,7 +354,7 @@ export default function OvertimeManagementPage() {
                     </Select>
                   </div>
                   <div className="space-y-2">
-                    <Label>Request Date</Label>
+                    <Label>{t("common.date")}</Label>
                     <Input 
                       type="date"
                       value={newRequest.request_date}
@@ -364,7 +363,7 @@ export default function OvertimeManagementPage() {
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label>Planned Start *</Label>
+                      <Label>{t("timeAttendance.overtime.plannedStart")} *</Label>
                       <Input 
                         type="datetime-local"
                         value={newRequest.planned_start}
@@ -372,7 +371,7 @@ export default function OvertimeManagementPage() {
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label>Planned End *</Label>
+                      <Label>{t("timeAttendance.overtime.plannedEnd")} *</Label>
                       <Input 
                         type="datetime-local"
                         value={newRequest.planned_end}
@@ -381,7 +380,7 @@ export default function OvertimeManagementPage() {
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <Label>Overtime Type</Label>
+                    <Label>{t("timeAttendance.overtime.overtimeType")}</Label>
                     <Select 
                       value={newRequest.overtime_type} 
                       onValueChange={(v) => setNewRequest({...newRequest, overtime_type: v})}
@@ -390,23 +389,22 @@ export default function OvertimeManagementPage() {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="regular">Regular</SelectItem>
-                        <SelectItem value="weekend">Weekend</SelectItem>
-                        <SelectItem value="holiday">Holiday</SelectItem>
-                        <SelectItem value="emergency">Emergency</SelectItem>
+                        <SelectItem value="regular">{t("timeAttendance.overtime.regular")}</SelectItem>
+                        <SelectItem value="weekend">{t("timeAttendance.overtime.weekend")}</SelectItem>
+                        <SelectItem value="holiday">{t("timeAttendance.overtime.holiday")}</SelectItem>
+                        <SelectItem value="emergency">{t("timeAttendance.overtime.emergency")}</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
                   <div className="space-y-2">
-                    <Label>Reason *</Label>
+                    <Label>{t("timeAttendance.overtime.reason")} *</Label>
                     <Textarea 
                       value={newRequest.reason}
                       onChange={(e) => setNewRequest({...newRequest, reason: e.target.value})}
-                      placeholder="Explain the reason for overtime..."
                     />
                   </div>
                   <Button onClick={handleCreateRequest} className="w-full">
-                    Submit Request
+                    {t("common.submit")}
                   </Button>
                 </div>
               </DialogContent>
@@ -422,7 +420,7 @@ export default function OvertimeManagementPage() {
                 <AlertCircle className="h-5 w-5 text-warning" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Pending</p>
+                <p className="text-sm text-muted-foreground">{t("timeAttendance.overtime.pending")}</p>
                 <p className="text-xl font-semibold">{stats.pending}</p>
               </div>
             </CardContent>
@@ -433,7 +431,7 @@ export default function OvertimeManagementPage() {
                 <Check className="h-5 w-5 text-success" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Approved</p>
+                <p className="text-sm text-muted-foreground">{t("timeAttendance.overtime.approved")}</p>
                 <p className="text-xl font-semibold">{stats.approved}</p>
               </div>
             </CardContent>
@@ -444,7 +442,7 @@ export default function OvertimeManagementPage() {
                 <TrendingUp className="h-5 w-5 text-primary" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Total OT Hours</p>
+                <p className="text-sm text-muted-foreground">{t("timeAttendance.overtime.totalOTHours")}</p>
                 <p className="text-xl font-semibold">{stats.totalHours.toFixed(1)}h</p>
               </div>
             </CardContent>
@@ -458,12 +456,12 @@ export default function OvertimeManagementPage() {
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Statuses</SelectItem>
-              <SelectItem value="pending">Pending</SelectItem>
-              <SelectItem value="approved">Approved</SelectItem>
-              <SelectItem value="rejected">Rejected</SelectItem>
-              <SelectItem value="completed">Completed</SelectItem>
-              <SelectItem value="cancelled">Cancelled</SelectItem>
+              <SelectItem value="all">{t("timeAttendance.overtime.allStatuses")}</SelectItem>
+              <SelectItem value="pending">{t("timeAttendance.overtime.pending")}</SelectItem>
+              <SelectItem value="approved">{t("timeAttendance.overtime.approved")}</SelectItem>
+              <SelectItem value="rejected">{t("timeAttendance.overtime.rejected")}</SelectItem>
+              <SelectItem value="completed">{t("timeAttendance.overtime.completed")}</SelectItem>
+              <SelectItem value="cancelled">{t("timeAttendance.overtime.cancelled")}</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -473,82 +471,55 @@ export default function OvertimeManagementPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Timer className="h-5 w-5" />
-              Overtime Requests
+              {t("timeAttendance.overtime.overtimeRequests")}
             </CardTitle>
           </CardHeader>
           <CardContent>
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Employee</TableHead>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Time</TableHead>
-                  <TableHead>Hours</TableHead>
-                  <TableHead>Type</TableHead>
-                  <TableHead>Reason</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Actions</TableHead>
+                  <TableHead>{t("timeAttendance.overtime.employee")}</TableHead>
+                  <TableHead>{t("timeAttendance.overtime.date")}</TableHead>
+                  <TableHead>{t("timeAttendance.overtime.time")}</TableHead>
+                  <TableHead>{t("timeAttendance.overtime.hours")}</TableHead>
+                  <TableHead>{t("timeAttendance.overtime.type")}</TableHead>
+                  <TableHead>{t("timeAttendance.overtime.reason")}</TableHead>
+                  <TableHead>{t("timeAttendance.overtime.status")}</TableHead>
+                  <TableHead>{t("common.actions")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {requests.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={8} className="text-center text-muted-foreground py-8">
-                      No overtime requests found
+                      {t("timeAttendance.overtime.noRequests")}
                     </TableCell>
                   </TableRow>
-                ) : (
-                  requests.map((request) => (
-                    <TableRow key={request.id}>
-                      <TableCell className="font-medium">
-                        {request.profile?.full_name || 'Unknown'}
-                      </TableCell>
-                      <TableCell>
-                        {format(parseISO(request.request_date), 'MMM d, yyyy')}
-                      </TableCell>
-                      <TableCell>
-                        <span className="text-sm">
-                          {format(new Date(request.planned_start), 'HH:mm')} - {format(new Date(request.planned_end), 'HH:mm')}
-                        </span>
-                      </TableCell>
-                      <TableCell>
-                        <span className="font-mono">
-                          {request.actual_hours || request.planned_hours}h
-                        </span>
-                      </TableCell>
-                      <TableCell>{getTypeBadge(request.overtime_type)}</TableCell>
-                      <TableCell className="max-w-[200px] truncate">
-                        {request.reason}
-                      </TableCell>
-                      <TableCell>{getStatusBadge(request.status)}</TableCell>
-                      <TableCell>
-                        {request.status === 'pending' && (
-                          <div className="flex gap-1">
-                            <Button 
-                              variant="ghost" 
-                              size="icon"
-                              onClick={() => openActionDialog(request, 'approve')}
-                            >
-                              <Check className="h-4 w-4 text-success" />
-                            </Button>
-                            <Button 
-                              variant="ghost" 
-                              size="icon"
-                              onClick={() => openActionDialog(request, 'reject')}
-                            >
-                              <X className="h-4 w-4 text-destructive" />
-                            </Button>
-                          </div>
-                        )}
-                        {request.status !== 'pending' && request.approver && (
-                          <span className="text-xs text-muted-foreground">
-                            by {request.approver.full_name}
-                          </span>
-                        )}
-                      </TableCell>
-                    </TableRow>
-                  ))
-                )}
+                ) : requests.map((request) => (
+                  <TableRow key={request.id}>
+                    <TableCell className="font-medium">{request.profile?.full_name}</TableCell>
+                    <TableCell>{format(parseISO(request.request_date), 'MMM d, yyyy')}</TableCell>
+                    <TableCell>
+                      {format(parseISO(request.planned_start), 'HH:mm')} - {format(parseISO(request.planned_end), 'HH:mm')}
+                    </TableCell>
+                    <TableCell>{request.planned_hours}h</TableCell>
+                    <TableCell>{getTypeBadge(request.overtime_type)}</TableCell>
+                    <TableCell className="max-w-xs truncate">{request.reason}</TableCell>
+                    <TableCell>{getStatusBadge(request.status)}</TableCell>
+                    <TableCell>
+                      {request.status === 'pending' && (
+                        <div className="flex gap-1">
+                          <Button variant="ghost" size="icon" onClick={() => openActionDialog(request, 'approve')}>
+                            <Check className="h-4 w-4 text-success" />
+                          </Button>
+                          <Button variant="ghost" size="icon" onClick={() => openActionDialog(request, 'reject')}>
+                            <X className="h-4 w-4 text-destructive" />
+                          </Button>
+                        </div>
+                      )}
+                    </TableCell>
+                  </TableRow>
+                ))}
               </TableBody>
             </Table>
           </CardContent>
@@ -559,46 +530,22 @@ export default function OvertimeManagementPage() {
           <DialogContent>
             <DialogHeader>
               <DialogTitle>
-                {actionType === 'approve' ? 'Approve Overtime Request' : 'Reject Overtime Request'}
+                {actionType === 'approve' ? t("timeAttendance.overtime.approve") : t("timeAttendance.overtime.reject")}
               </DialogTitle>
             </DialogHeader>
             <div className="space-y-4 py-4">
-              {selectedRequest && (
-                <div className="space-y-2 p-4 bg-muted rounded-lg">
-                  <p><strong>Employee:</strong> {selectedRequest.profile?.full_name}</p>
-                  <p><strong>Date:</strong> {format(parseISO(selectedRequest.request_date), 'MMM d, yyyy')}</p>
-                  <p><strong>Hours:</strong> {selectedRequest.planned_hours}h</p>
-                  <p><strong>Reason:</strong> {selectedRequest.reason}</p>
-                </div>
-              )}
-              
               {actionType === 'reject' && (
                 <div className="space-y-2">
-                  <Label>Rejection Reason *</Label>
+                  <Label>{t("timeAttendance.overtime.rejectionReason")} *</Label>
                   <Textarea 
                     value={rejectionReason}
                     onChange={(e) => setRejectionReason(e.target.value)}
-                    placeholder="Explain why this request is being rejected..."
                   />
                 </div>
               )}
-
-              <div className="flex gap-2">
-                <Button 
-                  variant="outline" 
-                  onClick={() => setActionDialogOpen(false)}
-                  className="flex-1"
-                >
-                  Cancel
-                </Button>
-                <Button 
-                  onClick={handleAction}
-                  className="flex-1"
-                  variant={actionType === 'approve' ? 'default' : 'destructive'}
-                >
-                  {actionType === 'approve' ? 'Approve' : 'Reject'}
-                </Button>
-              </div>
+              <Button onClick={handleAction} className="w-full">
+                {actionType === 'approve' ? t("timeAttendance.overtime.approve") : t("timeAttendance.overtime.reject")}
+              </Button>
             </div>
           </DialogContent>
         </Dialog>
