@@ -3,9 +3,7 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   HelpCircle,
   Book,
@@ -16,6 +14,22 @@ import {
   FileText,
   Sparkles,
   ArrowRight,
+  Calendar,
+  Users,
+  Clock,
+  Shield,
+  Heart,
+  UserPlus,
+  DollarSign,
+  Target,
+  GraduationCap,
+  Package,
+  Briefcase,
+  TrendingUp,
+  ClipboardList,
+  Video,
+  FileQuestion,
+  Lightbulb,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Link } from "react-router-dom";
@@ -37,6 +51,24 @@ interface KBArticle {
   is_featured: boolean;
   view_count: number;
 }
+
+const categoryIcons: Record<string, React.ElementType> = {
+  "leave-management": Calendar,
+  "workforce": Users,
+  "time-attendance": Clock,
+  "admin-security": Shield,
+  "benefits": Heart,
+  "onboarding": UserPlus,
+  "payroll-compensation": DollarSign,
+  "policies-compliance": FileText,
+  "recruitment": Briefcase,
+  "health-safety": Shield,
+  "employee-relations": Users,
+  "training-learning": GraduationCap,
+  "company-property": Package,
+  "performance-management": Target,
+  "succession-planning": TrendingUp,
+};
 
 export default function HelpCenterPage() {
   const [categories, setCategories] = useState<KBCategory[]>([]);
@@ -78,11 +110,22 @@ export default function HelpCenterPage() {
   };
 
   const quickLinks = [
-    { title: "Getting Started", description: "Learn the basics of the HRIS", icon: Book, href: "/help/knowledge-base" },
+    { title: "Knowledge Base", description: "Browse all help articles", icon: Book, href: "/help/knowledge-base" },
     { title: "AI Assistant", description: "Get instant help from our AI", icon: Sparkles, href: "/help/chat" },
     { title: "Submit a Ticket", description: "Report an issue or request", icon: Ticket, href: "/help/tickets/new" },
     { title: "My Tickets", description: "View your support tickets", icon: MessageSquare, href: "/help/tickets" },
   ];
+
+  const additionalResources = [
+    { title: "FAQs", description: "Frequently asked questions", icon: FileQuestion, href: "/help/knowledge-base?category=policies-compliance" },
+    { title: "Getting Started", description: "New user guides", icon: Lightbulb, href: "/help/knowledge-base?category=onboarding" },
+    { title: "Video Tutorials", description: "Step-by-step video guides", icon: Video, href: "/help/knowledge-base?category=training-learning" },
+    { title: "Release Notes", description: "Latest updates and features", icon: ClipboardList, href: "/help/knowledge-base?category=admin-security" },
+  ];
+
+  const getCategoryIcon = (slug: string) => {
+    return categoryIcons[slug] || Book;
+  };
 
   return (
     <AppLayout>
@@ -97,7 +140,7 @@ export default function HelpCenterPage() {
               <h1 className="text-3xl font-bold tracking-tight">Help Center</h1>
             </div>
             <p className="text-lg text-muted-foreground mb-6">
-              Find answers, get support, and learn how to make the most of your HRIS
+              Find answers, get support, and learn how to make the most of HRplus Cerebra
             </p>
 
             {/* Search */}
@@ -157,24 +200,51 @@ export default function HelpCenterPage() {
         )}
 
         {/* Quick Links */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {quickLinks.map((link) => (
-            <Link key={link.href} to={link.href}>
-              <Card className="h-full hover:shadow-md transition-shadow cursor-pointer group">
-                <CardContent className="pt-6">
-                  <div className="flex items-start gap-4">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 group-hover:bg-primary/20 transition-colors">
-                      <link.icon className="h-5 w-5 text-primary" />
+        <div>
+          <h2 className="text-xl font-semibold mb-4">Quick Access</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {quickLinks.map((link) => (
+              <Link key={link.href} to={link.href}>
+                <Card className="h-full hover:shadow-md transition-shadow cursor-pointer group">
+                  <CardContent className="pt-6">
+                    <div className="flex items-start gap-4">
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 group-hover:bg-primary/20 transition-colors">
+                        <link.icon className="h-5 w-5 text-primary" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-semibold group-hover:text-primary transition-colors">{link.title}</h3>
+                        <p className="text-sm text-muted-foreground">{link.description}</p>
+                      </div>
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-semibold group-hover:text-primary transition-colors">{link.title}</h3>
-                      <p className="text-sm text-muted-foreground">{link.description}</p>
+                  </CardContent>
+                </Card>
+              </Link>
+            ))}
+          </div>
+        </div>
+
+        {/* Additional Resources */}
+        <div>
+          <h2 className="text-xl font-semibold mb-4">Additional Resources</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {additionalResources.map((link) => (
+              <Link key={link.title} to={link.href}>
+                <Card className="h-full hover:shadow-md transition-shadow cursor-pointer group">
+                  <CardContent className="pt-6">
+                    <div className="flex items-start gap-4">
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-secondary/50 group-hover:bg-secondary transition-colors">
+                        <link.icon className="h-5 w-5 text-secondary-foreground" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-semibold group-hover:text-primary transition-colors">{link.title}</h3>
+                        <p className="text-sm text-muted-foreground">{link.description}</p>
+                      </div>
                     </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </Link>
-          ))}
+                  </CardContent>
+                </Card>
+              </Link>
+            ))}
+          </div>
         </div>
 
         {/* Main Content */}
@@ -183,8 +253,8 @@ export default function HelpCenterPage() {
           <div className="lg:col-span-2">
             <Card>
               <CardHeader>
-                <CardTitle>Browse by Category</CardTitle>
-                <CardDescription>Find help articles organized by topic</CardDescription>
+                <CardTitle>Browse by Module</CardTitle>
+                <CardDescription>Find help articles organized by HRIS module</CardDescription>
               </CardHeader>
               <CardContent>
                 {categories.length === 0 ? (
@@ -193,32 +263,35 @@ export default function HelpCenterPage() {
                   </p>
                 ) : (
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    {categories.map((category) => (
-                      <Link
-                        key={category.id}
-                        to={`/help/knowledge-base?category=${category.slug}`}
-                        className="flex items-center gap-3 p-4 rounded-lg border hover:bg-muted transition-colors"
-                      >
-                        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                          <Book className="h-5 w-5 text-primary" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="font-medium">{category.name}</p>
-                          {category.description && (
-                            <p className="text-sm text-muted-foreground line-clamp-1">{category.description}</p>
-                          )}
-                        </div>
-                        <ChevronRight className="h-5 w-5 text-muted-foreground shrink-0" />
-                      </Link>
-                    ))}
+                    {categories.map((category) => {
+                      const IconComponent = getCategoryIcon(category.slug);
+                      return (
+                        <Link
+                          key={category.id}
+                          to={`/help/knowledge-base?category=${category.slug}`}
+                          className="flex items-center gap-3 p-4 rounded-lg border hover:bg-muted transition-colors"
+                        >
+                          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                            <IconComponent className="h-5 w-5 text-primary" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="font-medium">{category.name}</p>
+                            {category.description && (
+                              <p className="text-sm text-muted-foreground line-clamp-1">{category.description}</p>
+                            )}
+                          </div>
+                          <ChevronRight className="h-5 w-5 text-muted-foreground shrink-0" />
+                        </Link>
+                      );
+                    })}
                   </div>
                 )}
               </CardContent>
             </Card>
           </div>
 
-          {/* Featured Articles */}
-          <div>
+          {/* Featured Articles & AI Chat */}
+          <div className="space-y-4">
             <Card>
               <CardHeader>
                 <CardTitle>Popular Articles</CardTitle>
@@ -251,7 +324,7 @@ export default function HelpCenterPage() {
             </Card>
 
             {/* AI Chat CTA */}
-            <Card className="mt-4 bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20">
+            <Card className="bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20">
               <CardContent className="pt-6">
                 <div className="flex items-start gap-3">
                   <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/20">
@@ -265,6 +338,28 @@ export default function HelpCenterPage() {
                     <Link to="/help/chat">
                       <Button variant="link" className="px-0 mt-2">
                         Start Chat <ArrowRight className="h-4 w-4 ml-1" />
+                      </Button>
+                    </Link>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Contact Support */}
+            <Card>
+              <CardContent className="pt-6">
+                <div className="flex items-start gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted">
+                    <Ticket className="h-5 w-5 text-muted-foreground" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold">Still Need Help?</h3>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      Submit a support ticket and our team will assist you
+                    </p>
+                    <Link to="/help/tickets/new">
+                      <Button variant="outline" size="sm" className="mt-3">
+                        Submit Ticket
                       </Button>
                     </Link>
                   </div>
