@@ -57,7 +57,7 @@ export default function ERAnalyticsPage() {
             </div>
             <div>
               <h1 className="text-2xl font-bold">{t("employeeRelationsModule.analytics.title")}</h1>
-              <p className="text-muted-foreground">{t("employeeRelationsModule.subtitle")}</p>
+              <p className="text-muted-foreground">{t("employeeRelationsModule.analytics.description")}</p>
             </div>
           </div>
           <div className="flex items-center gap-3">
@@ -70,7 +70,7 @@ export default function ERAnalyticsPage() {
             <Select value={selectedDepartmentId} onValueChange={setSelectedDepartmentId}>
               <SelectTrigger className="w-[200px]"><SelectValue placeholder={t("common.selectDepartment")} /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">{t("common.allDepartments")}</SelectItem>
+                <SelectItem value="all">{t("workforce.allDepartments")}</SelectItem>
                 {departments.map((d) => (<SelectItem key={d.id} value={d.id}>{d.name}</SelectItem>))}
               </SelectContent>
             </Select>

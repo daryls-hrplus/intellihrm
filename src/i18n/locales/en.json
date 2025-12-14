@@ -3540,6 +3540,7 @@
     "selectCompany": "Select company",
     "analytics": {
       "title": "Analytics",
+      "description": "View insights and trends across employee relations",
       "openCases": "Open Cases",
       "activeDisciplinary": "Active Disciplinary",
       "recognitionsThisMonth": "Recognitions This Month",
