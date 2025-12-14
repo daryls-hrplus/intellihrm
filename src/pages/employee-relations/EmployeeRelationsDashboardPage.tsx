@@ -1,35 +1,42 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { ModuleReportsButton } from "@/components/reports/ModuleReportsButton";
 import { ModuleBIButton } from "@/components/bi/ModuleBIButton";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useAuth } from "@/contexts/AuthContext";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { NavLink } from "react-router-dom";
 import {
   Heart,
-  MessageSquare,
   AlertTriangle,
   Scale,
   Award,
   DoorOpen,
   Activity,
   BarChart3,
+  MessageSquare,
+  Building2,
+  Gavel,
+  ChevronRight,
+  Loader2,
+  Users,
+  FileText,
 } from "lucide-react";
-import { ERCasesTab } from "@/components/employee-relations/ERCasesTab";
-import { ERDisciplinaryTab } from "@/components/employee-relations/ERDisciplinaryTab";
-import { ERRecognitionTab } from "@/components/employee-relations/ERRecognitionTab";
-import { ERExitInterviewsTab } from "@/components/employee-relations/ERExitInterviewsTab";
-import { ERSurveysTab } from "@/components/employee-relations/ERSurveysTab";
-import { ERWellnessTab } from "@/components/employee-relations/ERWellnessTab";
-import { ERAnalytics } from "@/components/employee-relations/ERAnalytics";
+
+interface Stats {
+  openCases: number;
+  pendingGrievances: number;
+  recognitionsThisMonth: number;
+  activeUnions: number;
+}
 
 export default function EmployeeRelationsDashboardPage() {
   const { t } = useTranslation();
-  const { user } = useAuth();
   const [selectedCompanyId, setSelectedCompanyId] = useState<string>("");
+  const [selectedDepartmentId, setSelectedDepartmentId] = useState<string>("all");
+  const [stats, setStats] = useState<Stats>({ openCases: 0, pendingGrievances: 0, recognitionsThisMonth: 0, activeUnions: 0 });
+  const [isLoadingStats, setIsLoadingStats] = useState(true);
 
   // Fetch companies for filter
   const { data: companies = [] } = useQuery({
@@ -45,10 +52,144 @@ export default function EmployeeRelationsDashboardPage() {
     },
   });
 
+  // Fetch departments based on selected company
+  const { data: departments = [] } = useQuery({
+    queryKey: ["departments", selectedCompanyId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("departments")
+        .select("id, name, code")
+        .eq("company_id", selectedCompanyId)
+        .eq("is_active", true)
+        .order("name");
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!selectedCompanyId,
+  });
+
   // Set default company
-  if (companies.length > 0 && !selectedCompanyId) {
-    setSelectedCompanyId(companies[0].id);
-  }
+  useEffect(() => {
+    if (companies.length > 0 && !selectedCompanyId) {
+      setSelectedCompanyId(companies[0].id);
+    }
+  }, [companies, selectedCompanyId]);
+
+  // Reset department when company changes
+  useEffect(() => {
+    setSelectedDepartmentId("all");
+  }, [selectedCompanyId]);
+
+  // Fetch stats
+  useEffect(() => {
+    const fetchStats = async () => {
+      if (!selectedCompanyId) return;
+      setIsLoadingStats(true);
+      try {
+        const startOfMonth = new Date();
+        startOfMonth.setDate(1);
+        startOfMonth.setHours(0, 0, 0, 0);
+
+        const [casesRes, grievancesRes, recognitionsRes, unionsRes] = await Promise.all([
+          supabase.from("er_cases").select("id", { count: "exact", head: true }).eq("company_id", selectedCompanyId).eq("status", "open"),
+          supabase.from("grievances").select("id", { count: "exact", head: true }).eq("company_id", selectedCompanyId).in("status", ["filed", "under_review", "in_progress"]),
+          supabase.from("er_recognition").select("id", { count: "exact", head: true }).eq("company_id", selectedCompanyId).gte("award_date", startOfMonth.toISOString().split('T')[0]),
+          supabase.from("unions").select("id", { count: "exact", head: true }).eq("company_id", selectedCompanyId).eq("is_active", true),
+        ]);
+        setStats({
+          openCases: casesRes.count || 0,
+          pendingGrievances: grievancesRes.count || 0,
+          recognitionsThisMonth: recognitionsRes.count || 0,
+          activeUnions: unionsRes.count || 0,
+        });
+      } catch (error) {
+        console.error("Error fetching stats:", error);
+      } finally {
+        setIsLoadingStats(false);
+      }
+    };
+    fetchStats();
+  }, [selectedCompanyId]);
+
+  const erModules = [
+    {
+      title: t("employeeRelationsModule.analytics.title"),
+      description: t("employeeRelationsModule.analytics.description"),
+      href: `/employee-relations/analytics?company=${selectedCompanyId}&department=${selectedDepartmentId}`,
+      icon: BarChart3,
+      color: "bg-violet-500/10 text-violet-500",
+    },
+    {
+      title: t("employeeRelationsModule.cases.title"),
+      description: t("employeeRelationsModule.cases.description"),
+      href: `/employee-relations/cases?company=${selectedCompanyId}&department=${selectedDepartmentId}`,
+      icon: AlertTriangle,
+      color: "bg-warning/10 text-warning",
+    },
+    {
+      title: t("employeeRelationsModule.disciplinary.title"),
+      description: t("employeeRelationsModule.disciplinary.description"),
+      href: `/employee-relations/disciplinary?company=${selectedCompanyId}&department=${selectedDepartmentId}`,
+      icon: Scale,
+      color: "bg-destructive/10 text-destructive",
+    },
+    {
+      title: t("employeeRelationsModule.recognition.title"),
+      description: t("employeeRelationsModule.recognition.description"),
+      href: `/employee-relations/recognition?company=${selectedCompanyId}&department=${selectedDepartmentId}`,
+      icon: Award,
+      color: "bg-amber-500/10 text-amber-500",
+    },
+    {
+      title: t("employeeRelationsModule.exitInterviews.title"),
+      description: t("employeeRelationsModule.exitInterviews.description"),
+      href: `/employee-relations/exit-interviews?company=${selectedCompanyId}&department=${selectedDepartmentId}`,
+      icon: DoorOpen,
+      color: "bg-cyan-500/10 text-cyan-500",
+    },
+    {
+      title: t("employeeRelationsModule.surveys.title"),
+      description: t("employeeRelationsModule.surveys.description"),
+      href: `/employee-relations/surveys?company=${selectedCompanyId}&department=${selectedDepartmentId}`,
+      icon: MessageSquare,
+      color: "bg-info/10 text-info",
+    },
+    {
+      title: t("employeeRelationsModule.wellness.title"),
+      description: t("employeeRelationsModule.wellness.description"),
+      href: `/employee-relations/wellness?company=${selectedCompanyId}&department=${selectedDepartmentId}`,
+      icon: Activity,
+      color: "bg-success/10 text-success",
+    },
+    {
+      title: t("employeeRelationsModule.unions.title"),
+      description: t("employeeRelationsModule.unions.description"),
+      href: `/employee-relations/unions?company=${selectedCompanyId}&department=${selectedDepartmentId}`,
+      icon: Building2,
+      color: "bg-primary/10 text-primary",
+    },
+    {
+      title: t("employeeRelationsModule.grievances.title"),
+      description: t("employeeRelationsModule.grievances.description"),
+      href: `/employee-relations/grievances?company=${selectedCompanyId}&department=${selectedDepartmentId}`,
+      icon: FileText,
+      color: "bg-orange-500/10 text-orange-500",
+    },
+    {
+      title: t("employeeRelationsModule.courtJudgements.title"),
+      description: t("employeeRelationsModule.courtJudgements.description"),
+      href: `/employee-relations/court-judgements?company=${selectedCompanyId}&department=${selectedDepartmentId}`,
+      icon: Gavel,
+      color: "bg-rose-500/10 text-rose-500",
+    },
+  ];
+
+  const statCards = [
+    { label: t("employeeRelationsModule.stats.openCases"), value: stats.openCases, icon: AlertTriangle, color: "bg-warning/10 text-warning" },
+    { label: t("employeeRelationsModule.stats.pendingGrievances"), value: stats.pendingGrievances, icon: FileText, color: "bg-orange-500/10 text-orange-500" },
+    { label: t("employeeRelationsModule.stats.recognitionsThisMonth"), value: stats.recognitionsThisMonth, icon: Award, color: "bg-amber-500/10 text-amber-500" },
+    { label: t("employeeRelationsModule.stats.activeUnions"), value: stats.activeUnions, icon: Users, color: "bg-primary/10 text-primary" },
+  ];
 
   return (
     <AppLayout>
@@ -71,12 +212,25 @@ export default function EmployeeRelationsDashboardPage() {
             <div className="flex items-center gap-3">
               <Select value={selectedCompanyId} onValueChange={setSelectedCompanyId}>
                 <SelectTrigger className="w-[200px]">
-                  <SelectValue placeholder={t('employeeRelationsModule.selectCompany')} />
+                  <SelectValue placeholder={t('common.selectCompany')} />
                 </SelectTrigger>
                 <SelectContent>
                   {companies.map((company) => (
                     <SelectItem key={company.id} value={company.id}>
                       {company.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Select value={selectedDepartmentId} onValueChange={setSelectedDepartmentId}>
+                <SelectTrigger className="w-[200px]">
+                  <SelectValue placeholder={t('common.selectDepartment')} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">{t('common.allDepartments')}</SelectItem>
+                  {departments.map((dept) => (
+                    <SelectItem key={dept.id} value={dept.id}>
+                      {dept.name}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -87,68 +241,59 @@ export default function EmployeeRelationsDashboardPage() {
           </div>
         </div>
 
-        {selectedCompanyId && (
-          <Tabs defaultValue="analytics" className="space-y-4">
-            <TabsList className="flex-wrap h-auto gap-1">
-              <TabsTrigger value="analytics" className="gap-2">
-                <BarChart3 className="h-4 w-4" />
-                {t('employeeRelationsModule.analytics.title')}
-              </TabsTrigger>
-              <TabsTrigger value="cases" className="gap-2">
-                <AlertTriangle className="h-4 w-4" />
-                {t('employeeRelationsModule.cases.title')}
-              </TabsTrigger>
-              <TabsTrigger value="disciplinary" className="gap-2">
-                <Scale className="h-4 w-4" />
-                {t('employeeRelationsModule.disciplinary.title')}
-              </TabsTrigger>
-              <TabsTrigger value="recognition" className="gap-2">
-                <Award className="h-4 w-4" />
-                {t('employeeRelationsModule.recognition.title')}
-              </TabsTrigger>
-              <TabsTrigger value="exit-interviews" className="gap-2">
-                <DoorOpen className="h-4 w-4" />
-                {t('employeeRelationsModule.exitInterviews.title')}
-              </TabsTrigger>
-              <TabsTrigger value="surveys" className="gap-2">
-                <MessageSquare className="h-4 w-4" />
-                {t('employeeRelationsModule.surveys.title')}
-              </TabsTrigger>
-              <TabsTrigger value="wellness" className="gap-2">
-                <Activity className="h-4 w-4" />
-                {t('employeeRelationsModule.wellness.title')}
-              </TabsTrigger>
-            </TabsList>
+        {/* Stats Cards */}
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 animate-slide-up">
+          {statCards.map((stat, index) => {
+            const Icon = stat.icon;
+            return (
+              <div
+                key={stat.label}
+                className="rounded-xl border border-border bg-card p-5 shadow-card"
+                style={{ animationDelay: `${index * 50}ms` }}
+              >
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">{stat.label}</p>
+                    <p className="mt-1 text-3xl font-bold text-card-foreground">
+                      {isLoadingStats ? <Loader2 className="h-6 w-6 animate-spin" /> : stat.value}
+                    </p>
+                  </div>
+                  <div className={`rounded-lg p-3 ${stat.color}`}>
+                    <Icon className="h-5 w-5" />
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
 
-            <TabsContent value="analytics">
-              <ERAnalytics companyId={selectedCompanyId} />
-            </TabsContent>
-
-            <TabsContent value="cases">
-              <ERCasesTab companyId={selectedCompanyId} />
-            </TabsContent>
-
-            <TabsContent value="disciplinary">
-              <ERDisciplinaryTab companyId={selectedCompanyId} />
-            </TabsContent>
-
-            <TabsContent value="recognition">
-              <ERRecognitionTab companyId={selectedCompanyId} />
-            </TabsContent>
-
-            <TabsContent value="exit-interviews">
-              <ERExitInterviewsTab companyId={selectedCompanyId} />
-            </TabsContent>
-
-            <TabsContent value="surveys">
-              <ERSurveysTab companyId={selectedCompanyId} />
-            </TabsContent>
-
-            <TabsContent value="wellness">
-              <ERWellnessTab companyId={selectedCompanyId} />
-            </TabsContent>
-          </Tabs>
-        )}
+        {/* Module Cards */}
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {erModules.map((module, index) => {
+            const Icon = module.icon;
+            return (
+              <NavLink
+                key={module.href}
+                to={module.href}
+                className="group rounded-xl border border-border bg-card p-6 shadow-card transition-all hover:shadow-card-hover hover:border-primary/20 animate-slide-up"
+                style={{ animationDelay: `${(index + 4) * 50}ms` }}
+              >
+                <div className="flex items-start justify-between">
+                  <div className={`rounded-lg p-3 ${module.color}`}>
+                    <Icon className="h-6 w-6" />
+                  </div>
+                  <ChevronRight className="h-5 w-5 text-muted-foreground opacity-0 transition-all group-hover:opacity-100 group-hover:translate-x-1" />
+                </div>
+                <h3 className="mt-4 font-semibold text-card-foreground">
+                  {module.title}
+                </h3>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  {module.description}
+                </p>
+              </NavLink>
+            );
+          })}
+        </div>
       </div>
     </AppLayout>
   );

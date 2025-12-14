@@ -64,7 +64,7 @@ export function ERGrievancesTab({ companyId, departmentId }: ERGrievancesTabProp
         .eq('company_id', companyId)
         .order('filed_date', { ascending: false });
       if (error) throw error;
-      return data;
+      return data as any[];
     },
     enabled: !!companyId,
   });
@@ -80,7 +80,7 @@ export function ERGrievancesTab({ companyId, departmentId }: ERGrievancesTabProp
         .eq('is_active', true)
         .order('name');
       if (error) throw error;
-      return data;
+      return data as any[];
     },
     enabled: !!companyId,
   });
@@ -96,40 +96,52 @@ export function ERGrievancesTab({ companyId, departmentId }: ERGrievancesTabProp
         .eq('is_active', true)
         .order('name');
       if (error) throw error;
-      return data;
+      return data as { id: string; name: string }[];
     },
     enabled: !!companyId,
   });
 
-  // Fetch employees
-  const { data: employees = [] } = useQuery({
+  // Fetch employees - using any to avoid deep type instantiation issues
+  const { data: employees = [] } = useQuery<{ id: string; full_name: string }[]>({
     queryKey: ['employees', companyId],
     queryFn: async () => {
-      const { data, error } = await supabase
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const query = (supabase as any)
         .from('profiles')
         .select('id, full_name')
         .eq('company_id', companyId)
         .eq('is_active', true)
         .order('full_name');
+      const { data, error } = await query;
       if (error) throw error;
-      return data;
+      return data || [];
     },
     enabled: !!companyId,
   });
 
   // Create grievance mutation
   const createGrievance = useMutation({
-    mutationFn: async (data: Record<string, unknown>) => {
+    mutationFn: async (data: {
+      company_id: string;
+      employee_id: string;
+      title: string;
+      description: string;
+      grievance_type: string;
+      severity: string;
+      procedure_id?: string | null;
+      union_id?: string | null;
+      is_union_represented?: boolean;
+    }) => {
       const { error } = await supabase.from('grievances').insert(data);
       if (error) throw error;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['grievances'] });
-      toast.success(t('employeeRelationsModule.grievances.grievanceFiled'));
+      toast.success(String(t('employeeRelationsModule.grievances.grievanceFiled')));
       setIsDialogOpen(false);
       resetGrievanceForm();
     },
-    onError: () => toast.error(t('common.error')),
+    onError: () => toast.error(String(t('common.error'))),
   });
 
   // Create procedure mutation
@@ -530,12 +542,12 @@ export function ERGrievancesTab({ companyId, departmentId }: ERGrievancesTabProp
                         <TableCell className="capitalize">{grievance.grievance_type.replace(/_/g, ' ')}</TableCell>
                         <TableCell>
                           <Badge variant="outline" className={getSeverityColor(grievance.severity)}>
-                            {t(`employeeRelationsModule.cases.severities.${grievance.severity}`, grievance.severity)}
+                            {String(t(`employeeRelationsModule.cases.severities.${grievance.severity}`, grievance.severity))}
                           </Badge>
                         </TableCell>
                         <TableCell>
                           <Badge variant="outline" className={getStatusColor(grievance.status)}>
-                            {t(`employeeRelationsModule.grievances.statuses.${grievance.status}`, grievance.status.replace(/_/g, ' '))}
+                            {String(t(`employeeRelationsModule.grievances.statuses.${grievance.status}`, grievance.status.replace(/_/g, ' ')))}
                           </Badge>
                         </TableCell>
                         <TableCell className="text-muted-foreground">
