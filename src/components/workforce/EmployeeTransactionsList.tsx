@@ -37,6 +37,7 @@ import {
 } from "@/hooks/useEmployeeTransactions";
 
 interface EmployeeTransactionsListProps {
+  companyId?: string;
   onCreateNew: (type: string) => void;
   onView: (transaction: EmployeeTransaction) => void;
   onEdit: (transaction: EmployeeTransaction) => void;
@@ -53,6 +54,7 @@ const statusColors: Record<TransactionStatus, string> = {
 };
 
 export function EmployeeTransactionsList({
+  companyId,
   onCreateNew,
   onView,
   onEdit,
@@ -72,7 +74,7 @@ export function EmployeeTransactionsList({
   useEffect(() => {
     loadData();
     loadLookupValues();
-  }, [statusFilter, typeFilter]);
+  }, [statusFilter, typeFilter, companyId]);
 
   const loadData = async () => {
     const filters: any = {};
@@ -81,6 +83,9 @@ export function EmployeeTransactionsList({
     }
     if (typeFilter !== "all") {
       filters.transactionType = typeFilter;
+    }
+    if (companyId) {
+      filters.companyId = companyId;
     }
     const data = await fetchTransactions(filters);
     setTransactions(data);

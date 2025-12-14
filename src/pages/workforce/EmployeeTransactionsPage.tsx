@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,6 +8,19 @@ import { EmployeeTransaction, TransactionType } from "@/hooks/useEmployeeTransac
 import { useWorkflow } from "@/hooks/useWorkflow";
 import { toast } from "sonner";
 import { FileText } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
+interface Company {
+  id: string;
+  name: string;
+}
 
 const breadcrumbs = [
   { label: "Workforce", href: "/workforce" },
@@ -26,10 +39,24 @@ const workflowCodeMap: Record<TransactionType, string> = {
 
 export default function EmployeeTransactionsPage() {
   const { startWorkflow } = useWorkflow();
+  const [companies, setCompanies] = useState<Company[]>([]);
+  const [selectedCompanyId, setSelectedCompanyId] = useState<string>("all");
   const [formDialogOpen, setFormDialogOpen] = useState(false);
   const [selectedTransactionType, setSelectedTransactionType] = useState<TransactionType | null>(null);
   const [selectedTransaction, setSelectedTransaction] = useState<EmployeeTransaction | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
+
+  useEffect(() => {
+    const fetchCompanies = async () => {
+      const { data } = await supabase
+        .from('companies')
+        .select('id, name')
+        .eq('is_active', true)
+        .order('name');
+      setCompanies(data || []);
+    };
+    fetchCompanies();
+  }, []);
 
   const handleCreateNew = (typeCode: string) => {
     setSelectedTransactionType(typeCode as TransactionType);
@@ -83,18 +110,34 @@ export default function EmployeeTransactionsPage() {
       <div className="space-y-6">
         <Breadcrumbs items={breadcrumbs} />
 
-        <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-            <FileText className="h-5 w-5 text-primary" />
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+              <FileText className="h-5 w-5 text-primary" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+                Employee Transactions
+              </h1>
+              <p className="text-muted-foreground">
+                Manage employee lifecycle transactions
+              </p>
+            </div>
           </div>
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
-              Employee Transactions
-            </h1>
-            <p className="text-muted-foreground">
-              Manage employee lifecycle transactions
-            </p>
-          </div>
+
+          <Select value={selectedCompanyId} onValueChange={setSelectedCompanyId}>
+            <SelectTrigger className="w-[200px]">
+              <SelectValue placeholder="All Companies" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Companies</SelectItem>
+              {companies.map((company) => (
+                <SelectItem key={company.id} value={company.id}>
+                  {company.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
 
         <Card>
@@ -106,7 +149,8 @@ export default function EmployeeTransactionsPage() {
           </CardHeader>
           <CardContent>
             <EmployeeTransactionsList
-              key={refreshKey}
+              key={`${refreshKey}-${selectedCompanyId}`}
+              companyId={selectedCompanyId !== "all" ? selectedCompanyId : undefined}
               onCreateNew={handleCreateNew}
               onView={handleView}
               onEdit={handleEdit}
