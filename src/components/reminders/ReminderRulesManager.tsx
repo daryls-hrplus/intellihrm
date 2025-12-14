@@ -25,7 +25,19 @@ export function ReminderRulesManager({ companyId }: ReminderRulesManagerProps) {
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingRule, setEditingRule] = useState<ReminderRule | null>(null);
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<{
+    name: string;
+    description: string;
+    event_type_id: string;
+    days_before: number;
+    send_to_employee: boolean;
+    send_to_manager: boolean;
+    send_to_hr: boolean;
+    notification_method: 'in_app' | 'email' | 'both';
+    message_template: string;
+    priority: 'low' | 'medium' | 'high' | 'critical';
+    is_active: boolean;
+  }>({
     name: '',
     description: '',
     event_type_id: '',
@@ -33,9 +45,9 @@ export function ReminderRulesManager({ companyId }: ReminderRulesManagerProps) {
     send_to_employee: true,
     send_to_manager: true,
     send_to_hr: false,
-    notification_method: 'both' as const,
+    notification_method: 'both',
     message_template: '',
-    priority: 'medium' as const,
+    priority: 'medium',
     is_active: true,
   });
 
