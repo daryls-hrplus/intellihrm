@@ -8,6 +8,7 @@ import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import AuthPage from "./pages/AuthPage";
+import MFAChallengePage from "./pages/auth/MFAChallengePage";
 import UnauthorizedPage from "./pages/UnauthorizedPage";
 
 // Initialize i18n
@@ -46,6 +47,8 @@ import FeaturesBrochurePage from "./pages/admin/FeaturesBrochurePage";
 import ModulesBrochurePage from "./pages/admin/ModulesBrochurePage";
 import CurrencyManagementPage from "./pages/admin/CurrencyManagementPage";
 import SubscriptionManagementPage from "./pages/admin/SubscriptionManagementPage";
+import MFASettingsPage from "./pages/admin/MFASettingsPage";
+import SSOSettingsPage from "./pages/admin/SSOSettingsPage";
 
 // Subscription pages
 import SubscriptionPage from "./pages/subscription/SubscriptionPage";
@@ -337,6 +340,7 @@ const App = () => (
         <AuthProvider>
           <Routes>
             <Route path="/auth" element={<AuthPage />} />
+            <Route path="/auth/mfa" element={<MFAChallengePage />} />
             <Route path="/unauthorized" element={<UnauthorizedPage />} />
             
             {/* Subscription Routes */}
@@ -1002,6 +1006,22 @@ const App = () => (
               element={
                 <ProtectedRoute requiredRoles={["admin"]}>
                   <SubscriptionManagementPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/mfa-settings"
+              element={
+                <ProtectedRoute requiredRoles={["admin"]}>
+                  <MFASettingsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/sso-settings"
+              element={
+                <ProtectedRoute requiredRoles={["admin"]}>
+                  <SSOSettingsPage />
                 </ProtectedRoute>
               }
             />
