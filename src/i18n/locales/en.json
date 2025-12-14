@@ -111,7 +111,10 @@
     "location": "Location",
     "selectLocation": "Select location",
     "selectDepartment": "Select department",
-    "allDepartments": "All Departments"
+    "allDepartments": "All Departments",
+    "allCompanies": "All Companies",
+    "department": "Department",
+    "unlimited": "Unlimited"
   },
   "auth": {
     "login": "Log In",

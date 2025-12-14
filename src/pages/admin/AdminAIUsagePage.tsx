@@ -459,11 +459,17 @@ export default function AdminAIUsagePage() {
                           </Badge>
                         </TableCell>
                         <TableCell className="text-right">
-                          <div className="flex items-center justify-end gap-2">
-                            <Switch
-                              checked={user.is_enabled}
-                              onCheckedChange={() => toggleUserEnabled(user.user_id, user.is_enabled)}
-                            />
+                          <div className="flex items-center justify-end gap-3">
+                            <div className="flex items-center gap-2">
+                              <Label htmlFor={`toggle-${user.user_id}`} className="text-xs text-muted-foreground">
+                                {user.is_enabled ? t("common.enabled") : t("common.disabled")}
+                              </Label>
+                              <Switch
+                                id={`toggle-${user.user_id}`}
+                                checked={user.is_enabled}
+                                onCheckedChange={() => toggleUserEnabled(user.user_id, user.is_enabled)}
+                              />
+                            </div>
                             <Button
                               variant="ghost"
                               size="icon"
