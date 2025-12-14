@@ -31,6 +31,9 @@ import {
   ChevronRight,
   Building2,
   Tag,
+  Layers,
+  GitBranch,
+  FolderTree,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -86,6 +89,23 @@ interface RoleTagAccess {
   tag_id: string;
 }
 
+interface Division {
+  id: string;
+  name: string;
+}
+
+interface Department {
+  id: string;
+  name: string;
+  company_id: string;
+}
+
+interface Section {
+  id: string;
+  name: string;
+  department_id: string;
+}
+
 const breadcrumbItems = [
   { label: "Admin", href: "/admin" },
   { label: "Granular Permissions" },
@@ -98,8 +118,14 @@ export default function GranularPermissionsPage() {
   const [rolePermissions, setRolePermissions] = useState<Record<string, RolePermission>>({});
   const [companies, setCompanies] = useState<Company[]>([]);
   const [companyTags, setCompanyTags] = useState<CompanyTag[]>([]);
+  const [divisions, setDivisions] = useState<Division[]>([]);
+  const [departments, setDepartments] = useState<Department[]>([]);
+  const [sections, setSections] = useState<Section[]>([]);
   const [roleCompanyAccess, setRoleCompanyAccess] = useState<string[]>([]);
   const [roleTagAccess, setRoleTagAccess] = useState<string[]>([]);
+  const [roleDivisionAccess, setRoleDivisionAccess] = useState<string[]>([]);
+  const [roleDepartmentAccess, setRoleDepartmentAccess] = useState<string[]>([]);
+  const [roleSectionAccess, setRoleSectionAccess] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
@@ -118,11 +144,14 @@ export default function GranularPermissionsPage() {
 
   const fetchInitialData = async () => {
     try {
-      const [rolesRes, permissionsRes, companiesRes, tagsRes] = await Promise.all([
+      const [rolesRes, permissionsRes, companiesRes, tagsRes, divisionsRes, departmentsRes, sectionsRes] = await Promise.all([
         supabase.from("roles").select("id, name, code, is_system").order("name"),
         supabase.from("module_permissions").select("*").eq("is_active", true).order("display_order"),
         supabase.from("companies").select("id, name").eq("is_active", true).order("name"),
         supabase.from("company_tags").select("*").eq("is_active", true).order("name"),
+        supabase.from("divisions").select("id, name").eq("is_active", true).order("name"),
+        supabase.from("departments").select("id, name, company_id").eq("is_active", true).order("name"),
+        supabase.from("sections").select("id, name, department_id").eq("is_active", true).order("name"),
       ]);
 
       if (rolesRes.error) throw rolesRes.error;
@@ -132,6 +161,9 @@ export default function GranularPermissionsPage() {
       setModulePermissions(permissionsRes.data || []);
       setCompanies(companiesRes.data || []);
       setCompanyTags(tagsRes.data || []);
+      setDivisions(divisionsRes.data || []);
+      setDepartments(departmentsRes.data || []);
+      setSections(sectionsRes.data || []);
 
       if (rolesRes.data && rolesRes.data.length > 0) {
         setSelectedRoleId(rolesRes.data[0].id);
@@ -169,13 +201,19 @@ export default function GranularPermissionsPage() {
 
   const fetchRoleAccess = async (roleId: string) => {
     try {
-      const [companyRes, tagRes] = await Promise.all([
+      const [companyRes, tagRes, divisionRes, departmentRes, sectionRes] = await Promise.all([
         supabase.from("role_company_access").select("company_id").eq("role_id", roleId),
         supabase.from("role_tag_access").select("tag_id").eq("role_id", roleId),
+        supabase.from("role_division_access").select("division_id").eq("role_id", roleId),
+        supabase.from("role_department_access").select("department_id").eq("role_id", roleId),
+        supabase.from("role_section_access").select("section_id").eq("role_id", roleId),
       ]);
 
       setRoleCompanyAccess((companyRes.data || []).map((c) => c.company_id));
       setRoleTagAccess((tagRes.data || []).map((t) => t.tag_id));
+      setRoleDivisionAccess((divisionRes.data || []).map((d) => d.division_id));
+      setRoleDepartmentAccess((departmentRes.data || []).map((d) => d.department_id));
+      setRoleSectionAccess((sectionRes.data || []).map((s) => s.section_id));
     } catch (error) {
       console.error("Error fetching role access:", error);
     }
@@ -265,6 +303,33 @@ export default function GranularPermissionsPage() {
     );
   };
 
+  const toggleDivisionAccess = (divisionId: string) => {
+    setHasChanges(true);
+    setRoleDivisionAccess((prev) =>
+      prev.includes(divisionId)
+        ? prev.filter((id) => id !== divisionId)
+        : [...prev, divisionId]
+    );
+  };
+
+  const toggleDepartmentAccess = (departmentId: string) => {
+    setHasChanges(true);
+    setRoleDepartmentAccess((prev) =>
+      prev.includes(departmentId)
+        ? prev.filter((id) => id !== departmentId)
+        : [...prev, departmentId]
+    );
+  };
+
+  const toggleSectionAccess = (sectionId: string) => {
+    setHasChanges(true);
+    setRoleSectionAccess((prev) =>
+      prev.includes(sectionId)
+        ? prev.filter((id) => id !== sectionId)
+        : [...prev, sectionId]
+    );
+  };
+
   const savePermissions = async () => {
     if (!selectedRoleId) return;
 
@@ -304,6 +369,33 @@ export default function GranularPermissionsPage() {
           .from("role_tag_access")
           .insert(roleTagAccess.map((tagId) => ({ role_id: selectedRoleId, tag_id: tagId })));
         if (tagError) throw tagError;
+      }
+
+      // Save division access - delete existing and insert new
+      await supabase.from("role_division_access").delete().eq("role_id", selectedRoleId);
+      if (roleDivisionAccess.length > 0) {
+        const { error: divisionError } = await supabase
+          .from("role_division_access")
+          .insert(roleDivisionAccess.map((divisionId) => ({ role_id: selectedRoleId, division_id: divisionId })));
+        if (divisionError) throw divisionError;
+      }
+
+      // Save department access - delete existing and insert new
+      await supabase.from("role_department_access").delete().eq("role_id", selectedRoleId);
+      if (roleDepartmentAccess.length > 0) {
+        const { error: departmentError } = await supabase
+          .from("role_department_access")
+          .insert(roleDepartmentAccess.map((departmentId) => ({ role_id: selectedRoleId, department_id: departmentId })));
+        if (departmentError) throw departmentError;
+      }
+
+      // Save section access - delete existing and insert new
+      await supabase.from("role_section_access").delete().eq("role_id", selectedRoleId);
+      if (roleSectionAccess.length > 0) {
+        const { error: sectionError } = await supabase
+          .from("role_section_access")
+          .insert(roleSectionAccess.map((sectionId) => ({ role_id: selectedRoleId, section_id: sectionId })));
+        if (sectionError) throw sectionError;
       }
 
       toast({ title: "Permissions saved successfully" });
@@ -391,6 +483,7 @@ export default function GranularPermissionsPage() {
             <TabsList>
               <TabsTrigger value="permissions">Module Permissions</TabsTrigger>
               <TabsTrigger value="company_access">Company Access</TabsTrigger>
+              <TabsTrigger value="org_access">Organization Access</TabsTrigger>
             </TabsList>
 
             <TabsContent value="permissions" className="space-y-4">
@@ -555,6 +648,139 @@ export default function GranularPermissionsPage() {
                         {companyTags.length === 0 && (
                           <p className="text-center text-muted-foreground py-4">
                             No company tags found. Create tags first.
+                          </p>
+                        )}
+                      </div>
+                    </ScrollArea>
+                  </CardContent>
+                </Card>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="org_access" className="space-y-4">
+              <p className="text-sm text-muted-foreground mb-4">
+                By default, roles have access to all divisions, departments, and sections. Check items below to <strong>restrict</strong> access to only the selected items.
+              </p>
+              <div className="grid gap-6 md:grid-cols-3">
+                {/* Division Access */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Layers className="h-5 w-5" />
+                      Division Access
+                    </CardTitle>
+                    <CardDescription>
+                      Restrict to specific divisions (empty = all access)
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <ScrollArea className="h-[300px]">
+                      <div className="space-y-2">
+                        {divisions.map((division) => (
+                          <div
+                            key={division.id}
+                            className="flex items-center space-x-3 rounded-lg border p-3 hover:bg-muted/50"
+                          >
+                            <Checkbox
+                              id={`division-${division.id}`}
+                              checked={roleDivisionAccess.includes(division.id)}
+                              onCheckedChange={() => toggleDivisionAccess(division.id)}
+                            />
+                            <label
+                              htmlFor={`division-${division.id}`}
+                              className="flex-1 cursor-pointer text-sm"
+                            >
+                              {division.name}
+                            </label>
+                          </div>
+                        ))}
+                        {divisions.length === 0 && (
+                          <p className="text-center text-muted-foreground py-4">
+                            No divisions found
+                          </p>
+                        )}
+                      </div>
+                    </ScrollArea>
+                  </CardContent>
+                </Card>
+
+                {/* Department Access */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <GitBranch className="h-5 w-5" />
+                      Department Access
+                    </CardTitle>
+                    <CardDescription>
+                      Restrict to specific departments (empty = all access)
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <ScrollArea className="h-[300px]">
+                      <div className="space-y-2">
+                        {departments.map((department) => (
+                          <div
+                            key={department.id}
+                            className="flex items-center space-x-3 rounded-lg border p-3 hover:bg-muted/50"
+                          >
+                            <Checkbox
+                              id={`department-${department.id}`}
+                              checked={roleDepartmentAccess.includes(department.id)}
+                              onCheckedChange={() => toggleDepartmentAccess(department.id)}
+                            />
+                            <label
+                              htmlFor={`department-${department.id}`}
+                              className="flex-1 cursor-pointer text-sm"
+                            >
+                              {department.name}
+                            </label>
+                          </div>
+                        ))}
+                        {departments.length === 0 && (
+                          <p className="text-center text-muted-foreground py-4">
+                            No departments found
+                          </p>
+                        )}
+                      </div>
+                    </ScrollArea>
+                  </CardContent>
+                </Card>
+
+                {/* Section Access */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <FolderTree className="h-5 w-5" />
+                      Section Access
+                    </CardTitle>
+                    <CardDescription>
+                      Restrict to specific sections (empty = all access)
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <ScrollArea className="h-[300px]">
+                      <div className="space-y-2">
+                        {sections.map((section) => (
+                          <div
+                            key={section.id}
+                            className="flex items-center space-x-3 rounded-lg border p-3 hover:bg-muted/50"
+                          >
+                            <Checkbox
+                              id={`section-${section.id}`}
+                              checked={roleSectionAccess.includes(section.id)}
+                              onCheckedChange={() => toggleSectionAccess(section.id)}
+                            />
+                            <label
+                              htmlFor={`section-${section.id}`}
+                              className="flex-1 cursor-pointer text-sm"
+                            >
+                              {section.name}
+                            </label>
+                          </div>
+                        ))}
+                        {sections.length === 0 && (
+                          <p className="text-center text-muted-foreground py-4">
+                            No sections found
                           </p>
                         )}
                       </div>
