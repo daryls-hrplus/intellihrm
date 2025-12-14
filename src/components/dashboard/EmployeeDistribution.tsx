@@ -1,17 +1,43 @@
+import { useTranslation } from "react-i18next";
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from "recharts";
-
-const data = [
-  { name: "Engineering", value: 145, color: "hsl(168, 76%, 36%)" },
-  { name: "Sales", value: 89, color: "hsl(199, 89%, 48%)" },
-  { name: "Marketing", value: 56, color: "hsl(38, 92%, 50%)" },
-  { name: "Operations", value: 78, color: "hsl(142, 76%, 36%)" },
-  { name: "HR", value: 32, color: "hsl(280, 65%, 60%)" },
-];
+import { useEmployeeDistribution } from "@/hooks/useDashboardData";
+import { Loader2 } from "lucide-react";
 
 export function EmployeeDistribution() {
+  const { t } = useTranslation();
+  const { data, isLoading } = useEmployeeDistribution();
+
+  if (isLoading) {
+    return (
+      <div className="rounded-xl bg-card p-6 shadow-card animate-slide-up" style={{ animationDelay: "500ms" }}>
+        <h3 className="mb-4 text-lg font-semibold text-card-foreground">
+          {t("dashboard.employeeDistribution", "Employee Distribution")}
+        </h3>
+        <div className="h-64 flex items-center justify-center">
+          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        </div>
+      </div>
+    );
+  }
+
+  if (!data || data.length === 0) {
+    return (
+      <div className="rounded-xl bg-card p-6 shadow-card animate-slide-up" style={{ animationDelay: "500ms" }}>
+        <h3 className="mb-4 text-lg font-semibold text-card-foreground">
+          {t("dashboard.employeeDistribution", "Employee Distribution")}
+        </h3>
+        <div className="h-64 flex items-center justify-center text-muted-foreground">
+          {t("dashboard.noData", "No data available")}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="rounded-xl bg-card p-6 shadow-card animate-slide-up" style={{ animationDelay: "500ms" }}>
-      <h3 className="mb-4 text-lg font-semibold text-card-foreground">Employee Distribution</h3>
+      <h3 className="mb-4 text-lg font-semibold text-card-foreground">
+        {t("dashboard.employeeDistribution", "Employee Distribution")}
+      </h3>
       <div className="h-64">
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>

@@ -9,6 +9,7 @@ import { HeadcountTrend } from "@/components/dashboard/HeadcountTrend";
 import { PendingAccessRequests } from "@/components/dashboard/PendingAccessRequests";
 import { SlaRiskWidget } from "@/components/dashboard/SlaRiskWidget";
 import { useAuth } from "@/contexts/AuthContext";
+import { useDashboardStats } from "@/hooks/useDashboardData";
 import {
   Users,
   UserPlus,
@@ -18,8 +19,11 @@ import {
 
 const Index = () => {
   const { t } = useTranslation();
-  const { profile, isAdmin } = useAuth();
+  const { profile, isAdmin, isHRManager } = useAuth();
+  const { data: stats, isLoading } = useDashboardStats();
   const firstName = profile?.full_name?.split(" ")[0] || "there";
+
+  const canViewCharts = isAdmin || isHRManager;
 
   return (
     <AppLayout>
@@ -38,32 +42,31 @@ const Index = () => {
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <StatCard
             title={t("dashboard.totalEmployees")}
-            value="1,284"
-            change={`+12% ${t("dashboard.fromLastMonth")}`}
-            changeType="positive"
+            value={isLoading ? "..." : stats?.totalEmployees.toLocaleString() || "0"}
+            change={stats?.employeeChange ? `${stats.employeeChange > 0 ? "+" : ""}${stats.employeeChange}% ${t("dashboard.fromLastMonth")}` : undefined}
+            changeType={stats?.employeeChange ? (stats.employeeChange > 0 ? "positive" : stats.employeeChange < 0 ? "negative" : "neutral") : "neutral"}
             icon={Users}
             delay={0}
           />
           <StatCard
             title={t("dashboard.newHires")}
-            value="28"
-            change={`+5 ${t("dashboard.fromLastMonth")}`}
-            changeType="positive"
+            value={isLoading ? "..." : stats?.newHires || "0"}
+            change={stats?.newHiresChange !== undefined ? `${stats.newHiresChange >= 0 ? "+" : ""}${stats.newHiresChange} ${t("dashboard.fromLastMonth")}` : undefined}
+            changeType={stats?.newHiresChange ? (stats.newHiresChange > 0 ? "positive" : stats.newHiresChange < 0 ? "negative" : "neutral") : "neutral"}
             icon={UserPlus}
             delay={50}
           />
           <StatCard
             title={t("dashboard.leaveRequests")}
-            value="47"
-            change={`12 ${t("dashboard.pendingApproval")}`}
+            value={isLoading ? "..." : stats?.pendingLeaveRequests || "0"}
+            change={t("dashboard.pendingApproval")}
             changeType="neutral"
             icon={Calendar}
             delay={100}
           />
           <StatCard
             title={t("dashboard.openPositions")}
-            value="23"
-            change={`8 ${t("dashboard.inFinalStage")}`}
+            value={isLoading ? "..." : stats?.openPositions || "0"}
             changeType="neutral"
             icon={TrendingUp}
             delay={150}
@@ -73,11 +76,13 @@ const Index = () => {
         {/* Quick Actions */}
         <QuickActions />
 
-        {/* Charts Row */}
-        <div className="grid gap-6 lg:grid-cols-2">
-          <HeadcountTrend />
-          <EmployeeDistribution />
-        </div>
+        {/* Charts Row - Only for Admin/HR */}
+        {canViewCharts && (
+          <div className="grid gap-6 lg:grid-cols-2">
+            <HeadcountTrend />
+            <EmployeeDistribution />
+          </div>
+        )}
 
         {/* Activity, Events & Admin Widgets */}
         <div className="grid gap-6 lg:grid-cols-3">
