@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -6,11 +6,23 @@ export function useMenuPermissions() {
   const { user, roles } = useAuth();
   const [menuPermissions, setMenuPermissions] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  
+  // Track if we've already fetched permissions for this user
+  const fetchedForUserRef = useRef<string | null>(null);
+  const cachedPermissionsRef = useRef<string[]>([]);
 
   useEffect(() => {
     const fetchMenuPermissions = async () => {
       if (!user || roles.length === 0) {
         setMenuPermissions([]);
+        setIsLoading(false);
+        fetchedForUserRef.current = null;
+        return;
+      }
+
+      // Skip re-fetch if we already have permissions for this user
+      if (fetchedForUserRef.current === user.id && cachedPermissionsRef.current.length >= 0) {
+        setMenuPermissions(cachedPermissionsRef.current);
         setIsLoading(false);
         return;
       }
@@ -26,6 +38,8 @@ export function useMenuPermissions() {
 
         if (!userRoles || userRoles.length === 0) {
           setMenuPermissions([]);
+          cachedPermissionsRef.current = [];
+          fetchedForUserRef.current = user.id;
           setIsLoading(false);
           return;
         }
@@ -49,19 +63,23 @@ export function useMenuPermissions() {
           permissions.forEach((p) => allPermissions.add(p));
         });
 
-        setMenuPermissions(Array.from(allPermissions));
+        const permissionsArray = Array.from(allPermissions);
+        setMenuPermissions(permissionsArray);
+        cachedPermissionsRef.current = permissionsArray;
+        fetchedForUserRef.current = user.id;
       } catch (error) {
         console.error("Error fetching menu permissions:", error);
         setMenuPermissions([]);
+        cachedPermissionsRef.current = [];
       } finally {
         setIsLoading(false);
       }
     };
 
     fetchMenuPermissions();
-  }, [user, roles]);
+  }, [user?.id, roles.length]); // Only re-fetch when user ID or roles count changes
 
-  const hasMenuAccess = (moduleCode: string): boolean => {
+  const hasMenuAccess = useCallback((moduleCode: string): boolean => {
     // Help center and ESS are always accessible to all authenticated users
     if (moduleCode === "help" || moduleCode === "ess") return true;
     // If permissions are still loading, default to false for security
@@ -73,7 +91,7 @@ export function useMenuPermissions() {
     // If no specific permissions set, deny access (fail-safe)
     if (menuPermissions.length === 0) return false;
     return menuPermissions.includes(moduleCode);
-  };
+  }, [isLoading, roles, menuPermissions]);
 
   return {
     menuPermissions,
