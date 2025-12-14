@@ -35,6 +35,7 @@ import {
   Clock,
   Users
 } from 'lucide-react';
+import { useLanguage } from '@/hooks/useLanguage';
 
 interface PropertyAnalyticsProps {
   items: PropertyItem[];
@@ -61,6 +62,7 @@ export function PropertyAnalytics({
   maintenance,
   categories 
 }: PropertyAnalyticsProps) {
+  const { t } = useLanguage();
   
   // Asset Status Distribution
   const statusDistribution = useMemo(() => {
@@ -224,28 +226,28 @@ export function PropertyAnalytics({
   // KPI Cards Data
   const kpiData = [
     {
-      title: "Total Asset Value",
+      title: t('companyProperty.stats.totalAssetValue'),
       value: `$${totalAssetValue.toLocaleString()}`,
       icon: DollarSign,
       color: "text-success",
       bgColor: "bg-success/10",
     },
     {
-      title: "Utilization Rate",
+      title: t('companyProperty.stats.utilizationRate'),
       value: `${items.length > 0 ? Math.round((items.filter(i => i.status === 'assigned').length / items.length) * 100) : 0}%`,
       icon: TrendingUp,
       color: "text-primary",
       bgColor: "bg-primary/10",
     },
     {
-      title: "Pending Requests",
+      title: t('companyProperty.stats.pendingRequests'),
       value: requests.filter(r => r.status === 'pending').length,
       icon: Clock,
       color: "text-warning",
       bgColor: "bg-warning/10",
     },
     {
-      title: "Assets Needing Attention",
+      title: t('companyProperty.stats.assetsNeedingAttention'),
       value: assetsNeedingAttention.damagedOrPoor + assetsNeedingAttention.warrantyExpiring,
       icon: AlertTriangle,
       color: "text-destructive",
@@ -282,8 +284,8 @@ export function PropertyAnalytics({
         {/* Asset Status */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg">Asset Status</CardTitle>
-            <CardDescription>Distribution by current status</CardDescription>
+            <CardTitle className="text-lg">{t('companyProperty.analytics.assetStatus')}</CardTitle>
+            <CardDescription>{t('companyProperty.analytics.assetStatusDesc')}</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="h-[200px]">
@@ -314,8 +316,8 @@ export function PropertyAnalytics({
         {/* Asset Condition */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg">Asset Condition</CardTitle>
-            <CardDescription>Physical condition of assets</CardDescription>
+            <CardTitle className="text-lg">{t('companyProperty.analytics.assetCondition')}</CardTitle>
+            <CardDescription>{t('companyProperty.analytics.assetConditionDesc')}</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="h-[200px]">
@@ -346,8 +348,8 @@ export function PropertyAnalytics({
         {/* Request Status */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg">Request Status</CardTitle>
-            <CardDescription>Property requests by status</CardDescription>
+            <CardTitle className="text-lg">{t('companyProperty.analytics.requestStatus')}</CardTitle>
+            <CardDescription>{t('companyProperty.analytics.requestStatusDesc')}</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="h-[200px]">
@@ -381,8 +383,8 @@ export function PropertyAnalytics({
         {/* Assets by Category */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg">Assets by Category</CardTitle>
-            <CardDescription>Distribution across asset categories</CardDescription>
+            <CardTitle className="text-lg">{t('companyProperty.analytics.assetsByCategory')}</CardTitle>
+            <CardDescription>{t('companyProperty.analytics.assetsByCategoryDesc')}</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="h-[280px]">
@@ -414,8 +416,8 @@ export function PropertyAnalytics({
         {/* Assignment Trends */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg">Assignment Trends</CardTitle>
-            <CardDescription>Assigned vs returned over last 6 months</CardDescription>
+            <CardTitle className="text-lg">{t('companyProperty.analytics.assignmentTrends')}</CardTitle>
+            <CardDescription>{t('companyProperty.analytics.assignmentTrendsDesc')}</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="h-[280px]">
@@ -439,7 +441,7 @@ export function PropertyAnalytics({
                     stroke="hsl(var(--primary))" 
                     fill="hsl(var(--primary))" 
                     fillOpacity={0.6}
-                    name="Assigned"
+                    name={t('companyProperty.analytics.assigned')}
                   />
                   <Area 
                     type="monotone" 
@@ -448,7 +450,7 @@ export function PropertyAnalytics({
                     stroke="hsl(var(--chart-2))" 
                     fill="hsl(var(--chart-2))" 
                     fillOpacity={0.6}
-                    name="Returned"
+                    name={t('companyProperty.analytics.returned')}
                   />
                 </AreaChart>
               </ResponsiveContainer>
@@ -462,8 +464,8 @@ export function PropertyAnalytics({
         {/* Request Priority */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg">Requests by Priority</CardTitle>
-            <CardDescription>Property requests urgency distribution</CardDescription>
+            <CardTitle className="text-lg">{t('companyProperty.analytics.requestsByPriority')}</CardTitle>
+            <CardDescription>{t('companyProperty.analytics.requestsByPriorityDesc')}</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="h-[220px]">
@@ -489,8 +491,8 @@ export function PropertyAnalytics({
         {/* Maintenance Cost Trend */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg">Maintenance Costs</CardTitle>
-            <CardDescription>Monthly maintenance spending</CardDescription>
+            <CardTitle className="text-lg">{t('companyProperty.analytics.maintenanceCosts')}</CardTitle>
+            <CardDescription>{t('companyProperty.analytics.maintenanceCostsDesc')}</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="h-[220px]">
@@ -505,7 +507,7 @@ export function PropertyAnalytics({
                       border: '1px solid hsl(var(--border))',
                       borderRadius: '8px'
                     }}
-                    formatter={(value: number) => [`$${value.toLocaleString()}`, 'Cost']}
+                    formatter={(value: number) => [`$${value.toLocaleString()}`, t('companyProperty.analytics.cost')]}
                   />
                   <Line 
                     type="monotone" 
@@ -524,8 +526,8 @@ export function PropertyAnalytics({
       {/* Maintenance by Type */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg">Maintenance by Type</CardTitle>
-          <CardDescription>Distribution of maintenance activities</CardDescription>
+          <CardTitle className="text-lg">{t('companyProperty.analytics.maintenanceByType')}</CardTitle>
+          <CardDescription>{t('companyProperty.analytics.maintenanceByTypeDesc')}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="h-[200px]">

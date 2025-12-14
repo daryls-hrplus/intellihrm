@@ -663,7 +663,10 @@
       "maintenanceCosts": "Coûts de Maintenance",
       "maintenanceCostsDesc": "Dépenses mensuelles de maintenance",
       "maintenanceByType": "Maintenance par Type",
-      "maintenanceByTypeDesc": "Distribution par catégorie de maintenance"
+      "maintenanceByTypeDesc": "Distribution par catégorie de maintenance",
+      "assigned": "Attribué",
+      "returned": "Retourné",
+      "cost": "Coût"
     }
   }
 }
