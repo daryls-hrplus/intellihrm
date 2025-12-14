@@ -41,8 +41,8 @@ export default function ERRecognitionPage() {
   }, [companies, selectedCompanyId]);
 
   const breadcrumbItems = [
-    { label: t("common.home"), path: "/" },
-    { label: t("employeeRelationsModule.title"), path: "/employee-relations" },
+    { label: t("common.home"), href: "/" },
+    { label: t("employeeRelationsModule.title"), href: "/employee-relations" },
     { label: t("employeeRelationsModule.recognition.title") },
   ];
 
