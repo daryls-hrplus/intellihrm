@@ -4598,5 +4598,146 @@
       "title": "Performance Analytics",
       "subtitle": "Comprehensive analytics and insights across performance data"
     }
+  },
+  "training": {
+    "dashboard": {
+      "title": "Training",
+      "subtitle": "Learning and development"
+    },
+    "stats": {
+      "coursesAvailable": "Courses Available",
+      "inProgress": "In Progress",
+      "completed": "Completed",
+      "certifications": "Certifications",
+      "totalCourses": "Total Courses",
+      "totalHours": "Total Hours"
+    },
+    "modules": {
+      "courseCatalog": {
+        "title": "Course Catalog",
+        "description": "Browse available training courses",
+        "searchPlaceholder": "Search courses...",
+        "allCategories": "All Categories",
+        "allLevels": "All Levels",
+        "beginner": "Beginner",
+        "intermediate": "Intermediate",
+        "advanced": "Advanced",
+        "mandatory": "Mandatory",
+        "enrolled": "Enrolled",
+        "enroll": "Enroll",
+        "continue": "Continue",
+        "review": "Review",
+        "noDescription": "No description available",
+        "noCourses": "No courses found",
+        "adjustFilters": "Try adjusting your search or filters",
+        "successEnrolled": "Successfully enrolled in course",
+        "failedEnroll": "Failed to enroll",
+        "loginToEnroll": "Please log in to enroll"
+      },
+      "myLearning": {
+        "title": "My Learning",
+        "description": "Your enrolled courses and progress",
+        "trackProgress": "Track your courses and progress",
+        "inProgressTab": "In Progress",
+        "completedTab": "Completed",
+        "noCoursesInProgress": "No courses in progress",
+        "noCompletedCourses": "No completed courses yet",
+        "noCourses": "No courses yet",
+        "browseCatalog": "Browse the course catalog to start learning",
+        "browseCourses": "Browse Courses",
+        "startCourse": "Start Course",
+        "reviewCourse": "Review Course"
+      },
+      "learningPaths": {
+        "title": "Learning Paths",
+        "description": "Structured course sequences"
+      },
+      "gapAnalysis": {
+        "title": "Competency Gap Analysis",
+        "description": "Compare skills with job requirements"
+      },
+      "requests": {
+        "title": "Training Requests",
+        "description": "Submit and track training requests"
+      },
+      "external": {
+        "title": "External Training",
+        "description": "Track external training records"
+      },
+      "budgets": {
+        "title": "Training Budgets",
+        "description": "Manage training budgets"
+      },
+      "instructors": {
+        "title": "Instructors",
+        "description": "Manage course instructors"
+      },
+      "evaluations": {
+        "title": "Training Evaluations",
+        "description": "Course feedback and evaluations"
+      },
+      "compliance": {
+        "title": "Compliance Training",
+        "description": "Mandatory training tracking"
+      },
+      "courseCompetencies": {
+        "title": "Course Competencies",
+        "description": "Map courses to competencies"
+      },
+      "recertification": {
+        "title": "Recertification",
+        "description": "Track recertification requirements"
+      },
+      "needs": {
+        "title": "Training Needs",
+        "description": "Analyze training needs"
+      },
+      "liveSessions": {
+        "title": "Live Sessions",
+        "description": "Upcoming webinars and workshops",
+        "instructor": "Instructor",
+        "registered": "registered",
+        "register": "Register",
+        "addToCalendar": "Add to Calendar",
+        "noSessions": "No upcoming sessions",
+        "checkBack": "Check back later for scheduled webinars and workshops."
+      },
+      "certifications": {
+        "title": "My Certifications",
+        "description": "View and share your earned certificates",
+        "totalCertificates": "Total Certificates",
+        "active": "Active",
+        "expired": "Expired",
+        "noCertificates": "No certificates yet",
+        "completeCourses": "Complete courses to earn certificates",
+        "certificateOfCompletion": "Certificate of Completion",
+        "issued": "Issued",
+        "expires": "Expires",
+        "score": "Score",
+        "download": "Download",
+        "verificationCopied": "Verification link copied to clipboard"
+      },
+      "calendar": {
+        "title": "Training Calendar",
+        "description": "Schedule and upcoming events",
+        "selectDate": "Select a date",
+        "eventsScheduled": "event(s) scheduled",
+        "noEvents": "No events scheduled for this date",
+        "upcomingEvents": "Upcoming Events",
+        "allActivities": "All scheduled training activities",
+        "webinar": "Webinar",
+        "workshop": "Workshop",
+        "deadline": "Deadline",
+        "certification": "Certification"
+      },
+      "analytics": {
+        "title": "Training Analytics",
+        "description": "Insights and metrics for training programs"
+      },
+      "lms": {
+        "title": "LMS Management",
+        "description": "Create and manage courses (Admin)"
+      }
+    }
   }
 }

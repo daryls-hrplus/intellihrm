@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { useLanguage } from "@/hooks/useLanguage";
 import { RecertificationTab } from "@/components/training/RecertificationTab";
 import { RefreshCw, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -9,6 +10,7 @@ import { NavLink } from "react-router-dom";
 
 export default function RecertificationPage() {
   const { user } = useAuth();
+  const { t } = useLanguage();
   const [companyId, setCompanyId] = useState<string>("");
 
   useEffect(() => {
@@ -38,8 +40,8 @@ export default function RecertificationPage() {
               <RefreshCw className="h-5 w-5 text-secondary-foreground" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold tracking-tight text-foreground">Recertification</h1>
-              <p className="text-muted-foreground">Track recertification requirements</p>
+              <h1 className="text-2xl font-bold tracking-tight text-foreground">{t("training.modules.recertification.title")}</h1>
+              <p className="text-muted-foreground">{t("training.modules.recertification.description")}</p>
             </div>
           </div>
         </div>

@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { useLanguage } from "@/hooks/useLanguage";
 import { InstructorsTab } from "@/components/training/InstructorsTab";
 import { Users, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -9,6 +10,7 @@ import { NavLink } from "react-router-dom";
 
 export default function InstructorsPage() {
   const { user } = useAuth();
+  const { t } = useLanguage();
   const [companyId, setCompanyId] = useState<string>("");
 
   useEffect(() => {
@@ -38,8 +40,8 @@ export default function InstructorsPage() {
               <Users className="h-5 w-5 text-primary" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold tracking-tight text-foreground">Instructors</h1>
-              <p className="text-muted-foreground">Manage course instructors</p>
+              <h1 className="text-2xl font-bold tracking-tight text-foreground">{t("training.modules.instructors.title")}</h1>
+              <p className="text-muted-foreground">{t("training.modules.instructors.description")}</p>
             </div>
           </div>
         </div>

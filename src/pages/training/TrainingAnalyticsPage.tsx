@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { useLanguage } from "@/hooks/useLanguage";
 import { TrainingAnalytics } from "@/components/training/TrainingAnalytics";
 import { BarChart3, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -9,6 +10,7 @@ import { NavLink } from "react-router-dom";
 
 export default function TrainingAnalyticsPage() {
   const { user } = useAuth();
+  const { t } = useLanguage();
   const [companyId, setCompanyId] = useState<string>("");
 
   useEffect(() => {
@@ -38,8 +40,8 @@ export default function TrainingAnalyticsPage() {
               <BarChart3 className="h-5 w-5 text-primary" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold tracking-tight text-foreground">Training Analytics</h1>
-              <p className="text-muted-foreground">Insights and metrics for training programs</p>
+              <h1 className="text-2xl font-bold tracking-tight text-foreground">{t("training.modules.analytics.title")}</h1>
+              <p className="text-muted-foreground">{t("training.modules.analytics.description")}</p>
             </div>
           </div>
         </div>

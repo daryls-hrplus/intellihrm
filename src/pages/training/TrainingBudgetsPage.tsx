@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { useLanguage } from "@/hooks/useLanguage";
 import { TrainingBudgetsTab } from "@/components/training/TrainingBudgetsTab";
 import { DollarSign, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -9,6 +10,7 @@ import { NavLink } from "react-router-dom";
 
 export default function TrainingBudgetsPage() {
   const { user } = useAuth();
+  const { t } = useLanguage();
   const [companyId, setCompanyId] = useState<string>("");
 
   useEffect(() => {
@@ -38,8 +40,8 @@ export default function TrainingBudgetsPage() {
               <DollarSign className="h-5 w-5 text-success" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold tracking-tight text-foreground">Training Budgets</h1>
-              <p className="text-muted-foreground">Manage training budgets</p>
+              <h1 className="text-2xl font-bold tracking-tight text-foreground">{t("training.modules.budgets.title")}</h1>
+              <p className="text-muted-foreground">{t("training.modules.budgets.description")}</p>
             </div>
           </div>
         </div>

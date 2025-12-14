@@ -3,6 +3,7 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { useLanguage } from "@/hooks/useLanguage";
 import {
   GraduationCap,
   BookOpen,
@@ -44,6 +45,7 @@ interface Enrollment {
 
 export default function MyLearningPage() {
   const { user } = useAuth();
+  const { t } = useLanguage();
   const [enrollments, setEnrollments] = useState<Enrollment[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("in_progress");
@@ -105,13 +107,13 @@ export default function MyLearningPage() {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "completed":
-        return <Badge className="bg-success">Completed</Badge>;
+        return <Badge className="bg-success">{t("training.stats.completed")}</Badge>;
       case "in_progress":
-        return <Badge className="bg-info">In Progress</Badge>;
+        return <Badge className="bg-info">{t("training.stats.inProgress")}</Badge>;
       case "enrolled":
-        return <Badge variant="outline">Not Started</Badge>;
+        return <Badge variant="outline">{t("training.modules.myLearning.startCourse")}</Badge>;
       case "expired":
-        return <Badge className="bg-destructive">Expired</Badge>;
+        return <Badge className="bg-destructive">{t("training.modules.certifications.expired")}</Badge>;
       default:
         return <Badge variant="outline">{status}</Badge>;
     }
@@ -148,7 +150,7 @@ export default function MyLearningPage() {
 
         <div className="mt-3 space-y-2">
           <div className="flex items-center justify-between text-sm">
-            <span className="text-muted-foreground">Progress</span>
+            <span className="text-muted-foreground">{t("common.progress")}</span>
             <span className="font-medium">{enrollment.progress_percentage}%</span>
           </div>
           <Progress value={enrollment.progress_percentage} className="h-2" />
@@ -171,15 +173,15 @@ export default function MyLearningPage() {
           <NavLink to={`/training/course/${enrollment.course_id}`}>
             {enrollment.status === "completed" ? (
               <>
-                <CheckCircle className="mr-2 h-4 w-4" /> Review Course
+                <CheckCircle className="mr-2 h-4 w-4" /> {t("training.modules.myLearning.reviewCourse")}
               </>
             ) : enrollment.status === "in_progress" ? (
               <>
-                <Play className="mr-2 h-4 w-4" /> Continue
+                <Play className="mr-2 h-4 w-4" /> {t("training.modules.courseCatalog.continue")}
               </>
             ) : (
               <>
-                <Play className="mr-2 h-4 w-4" /> Start Course
+                <Play className="mr-2 h-4 w-4" /> {t("training.modules.myLearning.startCourse")}
               </>
             )}
           </NavLink>
@@ -193,8 +195,8 @@ export default function MyLearningPage() {
       <div className="space-y-6">
         <Breadcrumbs
           items={[
-            { label: "Training", href: "/training" },
-            { label: "My Learning" },
+            { label: t("training.dashboard.title"), href: "/training" },
+            { label: t("training.modules.myLearning.title") },
           ]}
         />
 
@@ -204,10 +206,10 @@ export default function MyLearningPage() {
           </div>
           <div>
             <h1 className="text-2xl font-bold tracking-tight text-foreground">
-              My Learning
+              {t("training.modules.myLearning.title")}
             </h1>
             <p className="text-muted-foreground">
-              Track your courses and progress
+              {t("training.modules.myLearning.trackProgress")}
             </p>
           </div>
         </div>
@@ -220,7 +222,7 @@ export default function MyLearningPage() {
                 <BookOpen className="h-5 w-5 text-primary" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Total Courses</p>
+                <p className="text-sm text-muted-foreground">{t("training.stats.totalCourses")}</p>
                 <p className="text-2xl font-bold">{stats.total}</p>
               </div>
             </div>
@@ -231,7 +233,7 @@ export default function MyLearningPage() {
                 <TrendingUp className="h-5 w-5 text-info" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">In Progress</p>
+                <p className="text-sm text-muted-foreground">{t("training.stats.inProgress")}</p>
                 <p className="text-2xl font-bold">{stats.inProgress}</p>
               </div>
             </div>
@@ -242,7 +244,7 @@ export default function MyLearningPage() {
                 <CheckCircle className="h-5 w-5 text-success" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Completed</p>
+                <p className="text-sm text-muted-foreground">{t("training.stats.completed")}</p>
                 <p className="text-2xl font-bold">{stats.completed}</p>
               </div>
             </div>
@@ -253,7 +255,7 @@ export default function MyLearningPage() {
                 <Clock className="h-5 w-5 text-warning" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Total Hours</p>
+                <p className="text-sm text-muted-foreground">{t("training.stats.totalHours")}</p>
                 <p className="text-2xl font-bold">{stats.totalHours}h</p>
               </div>
             </div>
@@ -268,23 +270,23 @@ export default function MyLearningPage() {
           <div className="rounded-lg border border-border bg-card p-8 text-center">
             <GraduationCap className="mx-auto h-12 w-12 text-muted-foreground" />
             <h3 className="mt-4 font-semibold text-foreground">
-              No courses yet
+              {t("training.modules.myLearning.noCourses")}
             </h3>
             <p className="mt-2 text-sm text-muted-foreground">
-              Browse the course catalog to start learning
+              {t("training.modules.myLearning.browseCatalog")}
             </p>
             <Button asChild className="mt-4">
-              <NavLink to="/training/catalog">Browse Courses</NavLink>
+              <NavLink to="/training/catalog">{t("training.modules.myLearning.browseCourses")}</NavLink>
             </Button>
           </div>
         ) : (
           <Tabs value={activeTab} onValueChange={setActiveTab}>
             <TabsList>
               <TabsTrigger value="in_progress">
-                In Progress ({inProgressEnrollments.length})
+                {t("training.modules.myLearning.inProgressTab")} ({inProgressEnrollments.length})
               </TabsTrigger>
               <TabsTrigger value="completed">
-                Completed ({completedEnrollments.length})
+                {t("training.modules.myLearning.completedTab")} ({completedEnrollments.length})
               </TabsTrigger>
             </TabsList>
 
@@ -292,7 +294,7 @@ export default function MyLearningPage() {
               {inProgressEnrollments.length === 0 ? (
                 <div className="rounded-lg border border-border bg-card p-8 text-center">
                   <p className="text-muted-foreground">
-                    No courses in progress
+                    {t("training.modules.myLearning.noCoursesInProgress")}
                   </p>
                 </div>
               ) : (
@@ -308,7 +310,7 @@ export default function MyLearningPage() {
               {completedEnrollments.length === 0 ? (
                 <div className="rounded-lg border border-border bg-card p-8 text-center">
                   <p className="text-muted-foreground">
-                    No completed courses yet
+                    {t("training.modules.myLearning.noCompletedCourses")}
                   </p>
                 </div>
               ) : (

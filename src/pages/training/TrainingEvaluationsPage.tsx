@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { useLanguage } from "@/hooks/useLanguage";
 import { TrainingEvaluationsTab } from "@/components/training/TrainingEvaluationsTab";
 import { ClipboardCheck, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -9,6 +10,7 @@ import { NavLink } from "react-router-dom";
 
 export default function TrainingEvaluationsPage() {
   const { user } = useAuth();
+  const { t } = useLanguage();
   const [companyId, setCompanyId] = useState<string>("");
 
   useEffect(() => {
@@ -38,8 +40,8 @@ export default function TrainingEvaluationsPage() {
               <ClipboardCheck className="h-5 w-5 text-info" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold tracking-tight text-foreground">Training Evaluations</h1>
-              <p className="text-muted-foreground">Course feedback and evaluations</p>
+              <h1 className="text-2xl font-bold tracking-tight text-foreground">{t("training.modules.evaluations.title")}</h1>
+              <p className="text-muted-foreground">{t("training.modules.evaluations.description")}</p>
             </div>
           </div>
         </div>
