@@ -94,6 +94,130 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_system_settings: {
+        Row: {
+          allowed_models: string[] | null
+          company_id: string | null
+          created_at: string
+          default_daily_token_limit: number | null
+          default_monthly_token_limit: number | null
+          id: string
+          is_ai_enabled: boolean
+          updated_at: string
+        }
+        Insert: {
+          allowed_models?: string[] | null
+          company_id?: string | null
+          created_at?: string
+          default_daily_token_limit?: number | null
+          default_monthly_token_limit?: number | null
+          id?: string
+          is_ai_enabled?: boolean
+          updated_at?: string
+        }
+        Update: {
+          allowed_models?: string[] | null
+          company_id?: string | null
+          created_at?: string
+          default_daily_token_limit?: number | null
+          default_monthly_token_limit?: number | null
+          id?: string
+          is_ai_enabled?: boolean
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_system_settings_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: true
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ai_usage_logs: {
+        Row: {
+          company_id: string | null
+          completion_tokens: number
+          created_at: string
+          feature: string | null
+          id: string
+          model: string
+          prompt_tokens: number
+          request_metadata: Json | null
+          total_tokens: number
+          user_id: string
+        }
+        Insert: {
+          company_id?: string | null
+          completion_tokens?: number
+          created_at?: string
+          feature?: string | null
+          id?: string
+          model: string
+          prompt_tokens?: number
+          request_metadata?: Json | null
+          total_tokens?: number
+          user_id: string
+        }
+        Update: {
+          company_id?: string | null
+          completion_tokens?: number
+          created_at?: string
+          feature?: string | null
+          id?: string
+          model?: string
+          prompt_tokens?: number
+          request_metadata?: Json | null
+          total_tokens?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_usage_logs_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ai_user_settings: {
+        Row: {
+          created_at: string
+          daily_token_limit: number | null
+          id: string
+          is_enabled: boolean
+          monthly_token_limit: number | null
+          notes: string | null
+          updated_at: string
+          updated_by: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          daily_token_limit?: number | null
+          id?: string
+          is_enabled?: boolean
+          monthly_token_limit?: number | null
+          notes?: string | null
+          updated_at?: string
+          updated_by?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          daily_token_limit?: number | null
+          id?: string
+          is_enabled?: boolean
+          monthly_token_limit?: number | null
+          notes?: string | null
+          updated_at?: string
+          updated_by?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       applications: {
         Row: {
           application_number: string | null
