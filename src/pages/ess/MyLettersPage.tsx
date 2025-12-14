@@ -16,6 +16,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { format } from "date-fns";
+import { useLanguage } from "@/hooks/useLanguage";
 
 interface LetterTemplate {
   id: string;
@@ -45,6 +46,7 @@ interface GeneratedLetter {
 }
 
 export default function MyLettersPage() {
+  const { t } = useLanguage();
   const { user, profile } = useAuth();
   const [templates, setTemplates] = useState<LetterTemplate[]>([]);
   const [letters, setLetters] = useState<GeneratedLetter[]>([]);
@@ -84,7 +86,7 @@ export default function MyLettersPage() {
       setLetters(lettersRes.data as GeneratedLetter[]);
     } catch (error) {
       console.error("Error fetching data:", error);
-      toast.error("Failed to load data");
+      toast.error(t('common.error'));
     } finally {
       setIsLoading(false);
     }
@@ -141,8 +143,8 @@ export default function MyLettersPage() {
 
       toast.success(
         selectedTemplate.requires_approval
-          ? "Letter request submitted for approval"
-          : "Letter generated successfully"
+          ? t('common.success')
+          : t('common.success')
       );
       setIsDialogOpen(false);
       setSelectedTemplate(null);
@@ -150,7 +152,7 @@ export default function MyLettersPage() {
       fetchData();
     } catch (error) {
       console.error("Error submitting request:", error);
-      toast.error("Failed to submit request");
+      toast.error(t('common.error'));
     } finally {
       setIsSubmitting(false);
     }
@@ -159,11 +161,11 @@ export default function MyLettersPage() {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "approved":
-        return <Badge className="bg-green-500/10 text-green-600"><CheckCircle className="h-3 w-3 mr-1" />Approved</Badge>;
+        return <Badge className="bg-green-500/10 text-green-600"><CheckCircle className="h-3 w-3 mr-1" />{t('ess.myLetters.approved')}</Badge>;
       case "rejected":
-        return <Badge className="bg-red-500/10 text-red-600"><XCircle className="h-3 w-3 mr-1" />Rejected</Badge>;
+        return <Badge className="bg-red-500/10 text-red-600"><XCircle className="h-3 w-3 mr-1" />{t('ess.myLetters.rejected')}</Badge>;
       default:
-        return <Badge className="bg-yellow-500/10 text-yellow-600"><Clock className="h-3 w-3 mr-1" />Pending</Badge>;
+        return <Badge className="bg-yellow-500/10 text-yellow-600"><Clock className="h-3 w-3 mr-1" />{t('ess.myLetters.pending')}</Badge>;
     }
   };
 
@@ -217,8 +219,8 @@ export default function MyLettersPage() {
       <div className="space-y-6">
         <Breadcrumbs
           items={[
-            { label: "Employee Self Service", href: "/ess" },
-            { label: "My Letters" },
+            { label: t('navigation.ess'), href: "/ess" },
+            { label: t('ess.myLetters.breadcrumb') },
           ]}
         />
 
@@ -226,17 +228,17 @@ export default function MyLettersPage() {
           <div>
             <h1 className="text-2xl font-bold flex items-center gap-2">
               <FileText className="h-6 w-6" />
-              My Letters
+              {t('ess.myLetters.title')}
             </h1>
             <p className="text-muted-foreground">
-              Request and view your employment letters
+              {t('ess.myLetters.subtitle')}
             </p>
           </div>
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
               <Button>
                 <Plus className="h-4 w-4 mr-2" />
-                Request Letter
+                {t('ess.myLetters.requestLetter')}
               </Button>
             </DialogTrigger>
             <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden">

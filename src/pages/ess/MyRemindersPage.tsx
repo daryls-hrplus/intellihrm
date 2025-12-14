@@ -2,11 +2,14 @@ import { AppLayout } from '@/components/layout/AppLayout';
 import { Breadcrumbs } from '@/components/ui/breadcrumbs';
 import { MyRemindersList } from '@/components/reminders/MyRemindersList';
 import { Bell } from 'lucide-react';
+import { useLanguage } from '@/hooks/useLanguage';
 
 export default function MyRemindersPage() {
+  const { t } = useLanguage();
+  
   const breadcrumbItems = [
-    { label: 'Employee Self-Service', href: '/ess' },
-    { label: 'My Reminders' },
+    { label: t('navigation.ess'), href: '/ess' },
+    { label: t('ess.myReminders.breadcrumb') },
   ];
 
   return (
@@ -17,9 +20,9 @@ export default function MyRemindersPage() {
         <div>
           <h1 className="text-3xl font-bold flex items-center gap-2">
             <Bell className="h-8 w-8" />
-            My Reminders
+            {t('ess.myReminders.title')}
           </h1>
-          <p className="text-muted-foreground">View your upcoming reminders and important dates</p>
+          <p className="text-muted-foreground">{t('ess.myReminders.subtitle')}</p>
         </div>
 
         <MyRemindersList />

@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { useTranslation } from 'react-i18next';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Breadcrumbs } from '@/components/ui/breadcrumbs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -24,12 +23,13 @@ import { usePropertyManagement } from '@/hooks/usePropertyManagement';
 import { useAuth } from '@/contexts/AuthContext';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
+import { useLanguage } from '@/hooks/useLanguage';
 
 const REQUEST_TYPES = ['new', 'replacement', 'upgrade', 'repair'];
 const PRIORITIES = ['low', 'medium', 'high', 'urgent'];
 
 export default function MyPropertyPage() {
-  const { t } = useTranslation();
+  const { t } = useLanguage();
   const { user, company } = useAuth();
   const [isRequestDialogOpen, setIsRequestDialogOpen] = useState(false);
   const [isReportDialogOpen, setIsReportDialogOpen] = useState(false);
@@ -57,9 +57,8 @@ export default function MyPropertyPage() {
   } = usePropertyManagement(company?.id);
 
   const breadcrumbItems = [
-    { label: t('common.home'), path: '/' },
-    { label: 'Employee Self Service', path: '/ess' },
-    { label: 'My Property' },
+    { label: t('navigation.ess'), path: '/ess' },
+    { label: t('ess.myProperty.breadcrumb') },
   ];
 
   // Filter to only show current user's assignments
@@ -94,7 +93,7 @@ export default function MyPropertyPage() {
       priority: 'medium',
       justification: '',
     });
-    toast.success('Property request submitted successfully');
+    toast.success(t('ess.myProperty.toast.requestSubmitted'));
   };
 
   const handleReportIssue = async () => {
@@ -109,7 +108,7 @@ export default function MyPropertyPage() {
     setIsReportDialogOpen(false);
     setSelectedItemId('');
     setReportNotes('');
-    toast.success(`Item reported as ${reportType}`);
+    toast.success(t('ess.myProperty.toast.itemReported', { type: reportType }));
   };
 
   const getStatusColor = (status: string) => {
@@ -141,20 +140,20 @@ export default function MyPropertyPage() {
           <div>
             <h1 className="text-3xl font-bold flex items-center gap-2">
               <Package className="h-8 w-8" />
-              My Property
+              {t('ess.myProperty.title')}
             </h1>
-            <p className="text-muted-foreground">View your assigned equipment and submit requests</p>
+            <p className="text-muted-foreground">{t('ess.myProperty.subtitle')}</p>
           </div>
           <Dialog open={isRequestDialogOpen} onOpenChange={setIsRequestDialogOpen}>
             <DialogTrigger asChild>
               <Button className="gap-2">
                 <Plus className="h-4 w-4" />
-                Request Property
+                {t('ess.myProperty.requestProperty')}
               </Button>
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>Request Property</DialogTitle>
+                <DialogTitle>{t('ess.myProperty.requestProperty')}</DialogTitle>
               </DialogHeader>
               <form onSubmit={handleRequestSubmit} className="space-y-4">
                 <div className="space-y-2">
