@@ -74,3 +74,12 @@ verify_jwt = false
 
 [functions.bi-ai-assistant]
 verify_jwt = false
+
+[functions.payment-received-webhook]
+verify_jwt = false
+
+[functions.send-invoice-email]
+verify_jwt = false
+
+[functions.generate-invoice]
+verify_jwt = false
