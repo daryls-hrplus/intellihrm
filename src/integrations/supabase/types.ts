@@ -346,6 +346,7 @@ export type Database = {
           updated_at: string
           updated_by: string | null
           user_id: string
+          voice_enabled: boolean | null
         }
         Insert: {
           budget_tier_id?: string | null
@@ -360,6 +361,7 @@ export type Database = {
           updated_at?: string
           updated_by?: string | null
           user_id: string
+          voice_enabled?: boolean | null
         }
         Update: {
           budget_tier_id?: string | null
@@ -374,6 +376,7 @@ export type Database = {
           updated_at?: string
           updated_by?: string | null
           user_id?: string
+          voice_enabled?: boolean | null
         }
         Relationships: [
           {

@@ -14,7 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Bot, Users, TrendingUp, Activity, Settings, Search, Edit2, DollarSign, Calendar } from "lucide-react";
+import { Bot, Users, TrendingUp, Activity, Settings, Search, Edit2, DollarSign, Calendar, Volume2, VolumeX, Key } from "lucide-react";
 import { format } from "date-fns";
 
 interface AIBudgetTier {
@@ -30,6 +30,7 @@ interface AIUserSetting {
   id: string;
   user_id: string;
   is_enabled: boolean;
+  voice_enabled: boolean;
   monthly_token_limit: number | null;
   daily_token_limit: number | null;
   budget_tier_id: string | null;
@@ -266,6 +267,7 @@ export default function AdminAIUsagePage() {
           .from("ai_user_settings")
           .update({
             is_enabled: data.settings.is_enabled,
+            voice_enabled: data.settings.voice_enabled,
             budget_tier_id: data.settings.budget_tier_id || null,
             monthly_budget_usd: data.settings.monthly_budget_usd,
             updated_at: new Date().toISOString(),
@@ -279,6 +281,7 @@ export default function AdminAIUsagePage() {
           .insert({
             user_id: data.userId,
             is_enabled: data.settings.is_enabled ?? true,
+            voice_enabled: data.settings.voice_enabled ?? false,
             budget_tier_id: data.settings.budget_tier_id || null,
             monthly_budget_usd: data.settings.monthly_budget_usd,
           });
@@ -300,6 +303,14 @@ export default function AdminAIUsagePage() {
     updateUserSettingsMutation.mutate({
       userId,
       settings: { is_enabled: !currentEnabled }
+    });
+  };
+
+  // Toggle user voice enabled
+  const toggleUserVoice = (userId: string, currentVoiceEnabled: boolean) => {
+    updateUserSettingsMutation.mutate({
+      userId,
+      settings: { voice_enabled: !currentVoiceEnabled }
     });
   };
 
@@ -494,6 +505,7 @@ export default function AdminAIUsagePage() {
             <TabsTrigger value="usage">{t("admin.modules.aiUsage.monthlyUsage")}</TabsTrigger>
             <TabsTrigger value="tiers">{t("admin.modules.aiUsage.budgetTiers")}</TabsTrigger>
             <TabsTrigger value="logs">{t("admin.modules.aiUsage.usageLogs")}</TabsTrigger>
+            <TabsTrigger value="settings">{t("common.settings")}</TabsTrigger>
           </TabsList>
 
           <TabsContent value="usage" className="space-y-4">
@@ -568,6 +580,15 @@ export default function AdminAIUsagePage() {
                           </TableCell>
                           <TableCell className="text-right">
                             <div className="flex items-center justify-end gap-2">
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => toggleUserVoice(usage.user_id, userSetting?.voice_enabled ?? false)}
+                                title={userSetting?.voice_enabled ? t("admin.modules.aiUsage.disableVoice", "Disable voice") : t("admin.modules.aiUsage.enableVoice", "Enable voice")}
+                                className={userSetting?.voice_enabled ? "text-primary" : "text-muted-foreground"}
+                              >
+                                {userSetting?.voice_enabled ? <Volume2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />}
+                              </Button>
                               <Button
                                 variant={isEnabled ? "destructive" : "default"}
                                 size="sm"
@@ -679,6 +700,45 @@ export default function AdminAIUsagePage() {
                     )}
                   </TableBody>
                 </Table>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="settings" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Key className="h-5 w-5" />
+                  {t("admin.modules.aiUsage.voiceSettings", "Voice Settings")}
+                </CardTitle>
+                <CardDescription>
+                  {t("admin.modules.aiUsage.voiceSettingsDescription", "Configure ElevenLabs API key for AI voice responses")}
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="p-4 bg-muted/50 rounded-lg space-y-3">
+                  <div className="flex items-start gap-3">
+                    <Volume2 className="h-5 w-5 text-primary mt-0.5" />
+                    <div className="space-y-1">
+                      <p className="font-medium">{t("admin.modules.aiUsage.elevenLabsApiKey", "ElevenLabs API Key")}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {t("admin.modules.aiUsage.elevenLabsDescription", "To enable natural voice responses for the AI Assistant, add your ElevenLabs API key. Users with voice enabled will hear spoken responses.")}
+                      </p>
+                    </div>
+                  </div>
+                  <Button 
+                    variant="outline" 
+                    onClick={() => {
+                      toast.info(t("admin.modules.aiUsage.contactAdmin", "Please contact your workspace admin to configure the ElevenLabs API key in the project secrets."));
+                    }}
+                  >
+                    <Key className="h-4 w-4 mr-2" />
+                    {t("admin.modules.aiUsage.configureApiKey", "Configure API Key")}
+                  </Button>
+                </div>
+                <div className="text-sm text-muted-foreground">
+                  <p>{t("admin.modules.aiUsage.voiceUsageNote", "Note: Voice responses will incur additional costs based on ElevenLabs pricing (~$0.003-0.006 per response). Enable voice access per user in the Monthly Usage tab using the voice icon.")}</p>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
