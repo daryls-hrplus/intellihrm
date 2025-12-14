@@ -5,6 +5,7 @@ import { ModuleBIButton } from "@/components/bi/ModuleBIButton";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { startOfMonth, startOfDay, endOfDay } from "date-fns";
+import { LeaveCompanyFilter, useLeaveCompanyFilter } from "@/components/leave/LeaveCompanyFilter";
 import {
   UserPlus,
   Briefcase,
@@ -55,19 +56,25 @@ const recruitmentModules = [
 ];
 
 export default function RecruitmentDashboardPage() {
+  const { selectedCompanyId, setSelectedCompanyId } = useLeaveCompanyFilter();
+
   // Fetch open positions count
   const { data: openPositions = 0 } = useQuery({
-    queryKey: ["recruitment-stats-open-positions"],
+    queryKey: ["recruitment-stats-open-positions", selectedCompanyId],
     queryFn: async () => {
-      const { count } = await supabase
+      let query = supabase
         .from("job_requisitions")
         .select("*", { count: "exact", head: true })
         .eq("status", "open");
+      if (selectedCompanyId) {
+        query = query.eq("company_id", selectedCompanyId);
+      }
+      const { count } = await query;
       return count || 0;
     },
   });
 
-  // Fetch total candidates count
+  // Fetch total candidates count (candidates table doesn't have company_id, so we can't filter)
   const { data: totalCandidates = 0 } = useQuery({
     queryKey: ["recruitment-stats-candidates"],
     queryFn: async () => {
@@ -80,9 +87,10 @@ export default function RecruitmentDashboardPage() {
 
   // Fetch interviews scheduled for today
   const { data: interviewsToday = 0 } = useQuery({
-    queryKey: ["recruitment-stats-interviews-today"],
+    queryKey: ["recruitment-stats-interviews-today", selectedCompanyId],
     queryFn: async () => {
       const today = new Date();
+      // interview_schedules doesn't have company_id directly, would need to join
       const { count } = await supabase
         .from("interview_schedules")
         .select("*", { count: "exact", head: true })
@@ -95,9 +103,10 @@ export default function RecruitmentDashboardPage() {
 
   // Fetch hired this month count
   const { data: hiredThisMonth = 0 } = useQuery({
-    queryKey: ["recruitment-stats-hired-month"],
+    queryKey: ["recruitment-stats-hired-month", selectedCompanyId],
     queryFn: async () => {
       const monthStart = startOfMonth(new Date());
+      // applications doesn't have company_id directly
       const { count } = await supabase
         .from("applications")
         .select("*", { count: "exact", head: true })
@@ -133,6 +142,10 @@ export default function RecruitmentDashboardPage() {
               </div>
             </div>
             <div className="flex items-center gap-2">
+              <LeaveCompanyFilter 
+                selectedCompanyId={selectedCompanyId} 
+                onCompanyChange={setSelectedCompanyId} 
+              />
               <ModuleBIButton module="recruitment" />
               <ModuleReportsButton module="recruitment" />
             </div>
