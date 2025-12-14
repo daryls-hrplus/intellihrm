@@ -64,9 +64,16 @@ interface Employee {
   is_active: boolean;
 }
 
+interface Company {
+  id: string;
+  name: string;
+}
+
 export default function EmployeesPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [employees, setEmployees] = useState<Employee[]>([]);
+  const [companies, setCompanies] = useState<Company[]>([]);
+  const [selectedCompanyId, setSelectedCompanyId] = useState<string>("all");
   const [loading, setLoading] = useState(true);
   const [filterOpen, setFilterOpen] = useState(false);
   const [statusFilter, setStatusFilter] = useState<"all" | "active" | "unassigned">("all");
@@ -81,8 +88,21 @@ export default function EmployeesPage() {
   const hasLoggedView = useRef(false);
 
   useEffect(() => {
-    fetchEmployees();
+    fetchCompanies();
   }, []);
+
+  useEffect(() => {
+    fetchEmployees();
+  }, [selectedCompanyId]);
+
+  const fetchCompanies = async () => {
+    const { data } = await supabase
+      .from('companies')
+      .select('id, name')
+      .eq('is_active', true)
+      .order('name');
+    setCompanies(data || []);
+  };
 
   useEffect(() => {
     if (!hasLoggedView.current && !loading) {
@@ -92,11 +112,18 @@ export default function EmployeesPage() {
   }, [loading, employees.length]);
 
   const fetchEmployees = async () => {
+    setLoading(true);
     try {
-      // Fetch profiles
-      const { data: profiles, error: profilesError } = await supabase
+      // Fetch profiles - optionally filter by company
+      let profilesQuery = supabase
         .from('profiles')
-        .select('id, full_name, email, avatar_url');
+        .select('id, full_name, email, avatar_url, company_id');
+      
+      if (selectedCompanyId !== "all") {
+        profilesQuery = profilesQuery.eq('company_id', selectedCompanyId);
+      }
+
+      const { data: profiles, error: profilesError } = await profilesQuery;
 
       if (profilesError) throw profilesError;
 
@@ -110,6 +137,7 @@ export default function EmployeesPage() {
             title,
             departments:department_id (
               name,
+              company_id,
               companies:company_id (
                 city,
                 country
@@ -282,6 +310,18 @@ export default function EmployeesPage() {
 
         {/* Filters */}
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center animate-slide-up">
+          {/* Company Filter */}
+          <select
+            value={selectedCompanyId}
+            onChange={(e) => setSelectedCompanyId(e.target.value)}
+            className="h-10 rounded-lg border border-input bg-card px-3 text-sm text-card-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+          >
+            <option value="all">All Companies</option>
+            {companies.map((company) => (
+              <option key={company.id} value={company.id}>{company.name}</option>
+            ))}
+          </select>
+
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <input

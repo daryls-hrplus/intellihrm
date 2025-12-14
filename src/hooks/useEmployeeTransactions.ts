@@ -115,6 +115,7 @@ export function useEmployeeTransactions() {
     status?: TransactionStatus;
     transactionType?: string;
     employeeId?: string;
+    companyId?: string;
     fromDate?: string;
     toDate?: string;
   }) => {
@@ -142,6 +143,9 @@ export function useEmployeeTransactions() {
       }
       if (filters?.employeeId) {
         query = query.eq("employee_id", filters.employeeId);
+      }
+      if (filters?.companyId) {
+        query = query.eq("company_id", filters.companyId);
       }
       if (filters?.fromDate) {
         query = query.gte("effective_date", filters.fromDate);
