@@ -2622,6 +2622,104 @@ export type Database = {
           },
         ]
       }
+      collective_agreements: {
+        Row: {
+          agreement_number: string | null
+          approved_at: string | null
+          approved_by: string | null
+          benefits_provisions: string | null
+          company_id: string
+          created_at: string
+          description: string | null
+          dispute_resolution_clause: string | null
+          document_url: string | null
+          effective_date: string
+          expiry_date: string | null
+          id: string
+          negotiated_by: string | null
+          status: string | null
+          terms: Json | null
+          title: string
+          union_id: string
+          updated_at: string
+          wage_provisions: string | null
+          working_conditions: string | null
+        }
+        Insert: {
+          agreement_number?: string | null
+          approved_at?: string | null
+          approved_by?: string | null
+          benefits_provisions?: string | null
+          company_id: string
+          created_at?: string
+          description?: string | null
+          dispute_resolution_clause?: string | null
+          document_url?: string | null
+          effective_date: string
+          expiry_date?: string | null
+          id?: string
+          negotiated_by?: string | null
+          status?: string | null
+          terms?: Json | null
+          title: string
+          union_id: string
+          updated_at?: string
+          wage_provisions?: string | null
+          working_conditions?: string | null
+        }
+        Update: {
+          agreement_number?: string | null
+          approved_at?: string | null
+          approved_by?: string | null
+          benefits_provisions?: string | null
+          company_id?: string
+          created_at?: string
+          description?: string | null
+          dispute_resolution_clause?: string | null
+          document_url?: string | null
+          effective_date?: string
+          expiry_date?: string | null
+          id?: string
+          negotiated_by?: string | null
+          status?: string | null
+          terms?: Json | null
+          title?: string
+          union_id?: string
+          updated_at?: string
+          wage_provisions?: string | null
+          working_conditions?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "collective_agreements_approved_by_fkey"
+            columns: ["approved_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "collective_agreements_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "collective_agreements_negotiated_by_fkey"
+            columns: ["negotiated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "collective_agreements_union_id_fkey"
+            columns: ["union_id"]
+            isOneToOne: false
+            referencedRelation: "unions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       color_schemes: {
         Row: {
           colors: Json
@@ -9308,6 +9406,362 @@ export type Database = {
           },
         ]
       }
+      grievance_documents: {
+        Row: {
+          document_name: string
+          document_type: string | null
+          document_url: string | null
+          grievance_id: string
+          id: string
+          uploaded_at: string
+          uploaded_by: string | null
+        }
+        Insert: {
+          document_name: string
+          document_type?: string | null
+          document_url?: string | null
+          grievance_id: string
+          id?: string
+          uploaded_at?: string
+          uploaded_by?: string | null
+        }
+        Update: {
+          document_name?: string
+          document_type?: string | null
+          document_url?: string | null
+          grievance_id?: string
+          id?: string
+          uploaded_at?: string
+          uploaded_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "grievance_documents_grievance_id_fkey"
+            columns: ["grievance_id"]
+            isOneToOne: false
+            referencedRelation: "grievances"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "grievance_documents_uploaded_by_fkey"
+            columns: ["uploaded_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      grievance_procedure_steps: {
+        Row: {
+          created_at: string
+          description: string | null
+          escalation_path: string | null
+          id: string
+          name: string
+          procedure_id: string
+          required_documents: string[] | null
+          responsible_role: string | null
+          step_number: number
+          time_limit_days: number | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          escalation_path?: string | null
+          id?: string
+          name: string
+          procedure_id: string
+          required_documents?: string[] | null
+          responsible_role?: string | null
+          step_number: number
+          time_limit_days?: number | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          escalation_path?: string | null
+          id?: string
+          name?: string
+          procedure_id?: string
+          required_documents?: string[] | null
+          responsible_role?: string | null
+          step_number?: number
+          time_limit_days?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "grievance_procedure_steps_procedure_id_fkey"
+            columns: ["procedure_id"]
+            isOneToOne: false
+            referencedRelation: "grievance_procedures"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      grievance_procedures: {
+        Row: {
+          code: string
+          company_id: string
+          created_at: string
+          description: string | null
+          end_date: string | null
+          id: string
+          is_active: boolean | null
+          is_default: boolean | null
+          name: string
+          start_date: string
+          union_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          code: string
+          company_id: string
+          created_at?: string
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_default?: boolean | null
+          name: string
+          start_date?: string
+          union_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          code?: string
+          company_id?: string
+          created_at?: string
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_default?: boolean | null
+          name?: string
+          start_date?: string
+          union_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "grievance_procedures_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "grievance_procedures_union_id_fkey"
+            columns: ["union_id"]
+            isOneToOne: false
+            referencedRelation: "unions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      grievance_step_history: {
+        Row: {
+          action_taken: string | null
+          completed_at: string | null
+          created_at: string
+          deadline_at: string | null
+          escalated: boolean | null
+          escalation_reason: string | null
+          grievance_id: string
+          handled_by: string | null
+          id: string
+          notes: string | null
+          started_at: string
+          status: string | null
+          step_id: string
+          updated_at: string
+        }
+        Insert: {
+          action_taken?: string | null
+          completed_at?: string | null
+          created_at?: string
+          deadline_at?: string | null
+          escalated?: boolean | null
+          escalation_reason?: string | null
+          grievance_id: string
+          handled_by?: string | null
+          id?: string
+          notes?: string | null
+          started_at?: string
+          status?: string | null
+          step_id: string
+          updated_at?: string
+        }
+        Update: {
+          action_taken?: string | null
+          completed_at?: string | null
+          created_at?: string
+          deadline_at?: string | null
+          escalated?: boolean | null
+          escalation_reason?: string | null
+          grievance_id?: string
+          handled_by?: string | null
+          id?: string
+          notes?: string | null
+          started_at?: string
+          status?: string | null
+          step_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "grievance_step_history_grievance_id_fkey"
+            columns: ["grievance_id"]
+            isOneToOne: false
+            referencedRelation: "grievances"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "grievance_step_history_handled_by_fkey"
+            columns: ["handled_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "grievance_step_history_step_id_fkey"
+            columns: ["step_id"]
+            isOneToOne: false
+            referencedRelation: "grievance_procedure_steps"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      grievances: {
+        Row: {
+          assigned_to: string | null
+          category: string | null
+          company_id: string
+          created_at: string
+          current_step_id: string | null
+          description: string
+          employee_id: string
+          filed_date: string
+          grievance_number: string | null
+          grievance_type: string
+          id: string
+          is_union_represented: boolean | null
+          outcome: string | null
+          procedure_id: string | null
+          resolution_summary: string | null
+          resolved_date: string | null
+          severity: string | null
+          status: string | null
+          target_resolution_date: string | null
+          title: string
+          union_id: string | null
+          union_representative_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          assigned_to?: string | null
+          category?: string | null
+          company_id: string
+          created_at?: string
+          current_step_id?: string | null
+          description: string
+          employee_id: string
+          filed_date?: string
+          grievance_number?: string | null
+          grievance_type: string
+          id?: string
+          is_union_represented?: boolean | null
+          outcome?: string | null
+          procedure_id?: string | null
+          resolution_summary?: string | null
+          resolved_date?: string | null
+          severity?: string | null
+          status?: string | null
+          target_resolution_date?: string | null
+          title: string
+          union_id?: string | null
+          union_representative_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          assigned_to?: string | null
+          category?: string | null
+          company_id?: string
+          created_at?: string
+          current_step_id?: string | null
+          description?: string
+          employee_id?: string
+          filed_date?: string
+          grievance_number?: string | null
+          grievance_type?: string
+          id?: string
+          is_union_represented?: boolean | null
+          outcome?: string | null
+          procedure_id?: string | null
+          resolution_summary?: string | null
+          resolved_date?: string | null
+          severity?: string | null
+          status?: string | null
+          target_resolution_date?: string | null
+          title?: string
+          union_id?: string | null
+          union_representative_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "grievances_assigned_to_fkey"
+            columns: ["assigned_to"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "grievances_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "grievances_current_step_id_fkey"
+            columns: ["current_step_id"]
+            isOneToOne: false
+            referencedRelation: "grievance_procedure_steps"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "grievances_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "grievances_procedure_id_fkey"
+            columns: ["procedure_id"]
+            isOneToOne: false
+            referencedRelation: "grievance_procedures"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "grievances_union_id_fkey"
+            columns: ["union_id"]
+            isOneToOne: false
+            referencedRelation: "unions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "grievances_union_representative_id_fkey"
+            columns: ["union_representative_id"]
+            isOneToOne: false
+            referencedRelation: "union_representatives"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       headcount_forecasts: {
         Row: {
           company_id: string | null
@@ -12282,6 +12736,114 @@ export type Database = {
           {
             foreignKeyName: "individual_development_plans_manager_id_fkey"
             columns: ["manager_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      industrial_court_judgements: {
+        Row: {
+          case_name: string
+          case_number: string
+          category: string | null
+          company_id: string | null
+          court_name: string
+          created_at: string
+          created_by: string | null
+          currency: string | null
+          damages_awarded: number | null
+          defendant: string | null
+          document_url: string | null
+          full_judgement: string | null
+          id: string
+          industry: string | null
+          is_public: boolean | null
+          judge_name: string | null
+          judgement_date: string
+          keywords: string[] | null
+          notes: string | null
+          outcome: string
+          parties_involved: Json | null
+          plaintiff: string | null
+          precedent_value: string | null
+          related_cases: string[] | null
+          source: string | null
+          subject_matter: string[] | null
+          summary: string | null
+          updated_at: string
+        }
+        Insert: {
+          case_name: string
+          case_number: string
+          category?: string | null
+          company_id?: string | null
+          court_name: string
+          created_at?: string
+          created_by?: string | null
+          currency?: string | null
+          damages_awarded?: number | null
+          defendant?: string | null
+          document_url?: string | null
+          full_judgement?: string | null
+          id?: string
+          industry?: string | null
+          is_public?: boolean | null
+          judge_name?: string | null
+          judgement_date: string
+          keywords?: string[] | null
+          notes?: string | null
+          outcome: string
+          parties_involved?: Json | null
+          plaintiff?: string | null
+          precedent_value?: string | null
+          related_cases?: string[] | null
+          source?: string | null
+          subject_matter?: string[] | null
+          summary?: string | null
+          updated_at?: string
+        }
+        Update: {
+          case_name?: string
+          case_number?: string
+          category?: string | null
+          company_id?: string | null
+          court_name?: string
+          created_at?: string
+          created_by?: string | null
+          currency?: string | null
+          damages_awarded?: number | null
+          defendant?: string | null
+          document_url?: string | null
+          full_judgement?: string | null
+          id?: string
+          industry?: string | null
+          is_public?: boolean | null
+          judge_name?: string | null
+          judgement_date?: string
+          keywords?: string[] | null
+          notes?: string | null
+          outcome?: string
+          parties_involved?: Json | null
+          plaintiff?: string | null
+          precedent_value?: string | null
+          related_cases?: string[] | null
+          source?: string | null
+          subject_matter?: string[] | null
+          summary?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "industrial_court_judgements_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "industrial_court_judgements_created_by_fkey"
+            columns: ["created_by"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
@@ -24611,6 +25173,194 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      union_memberships: {
+        Row: {
+          created_at: string
+          dues_amount: number | null
+          dues_frequency: string | null
+          employee_id: string
+          id: string
+          join_date: string
+          leave_date: string | null
+          membership_number: string | null
+          notes: string | null
+          status: string | null
+          union_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          dues_amount?: number | null
+          dues_frequency?: string | null
+          employee_id: string
+          id?: string
+          join_date: string
+          leave_date?: string | null
+          membership_number?: string | null
+          notes?: string | null
+          status?: string | null
+          union_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          dues_amount?: number | null
+          dues_frequency?: string | null
+          employee_id?: string
+          id?: string
+          join_date?: string
+          leave_date?: string | null
+          membership_number?: string | null
+          notes?: string | null
+          status?: string | null
+          union_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "union_memberships_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "union_memberships_union_id_fkey"
+            columns: ["union_id"]
+            isOneToOne: false
+            referencedRelation: "unions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      union_representatives: {
+        Row: {
+          created_at: string
+          email: string | null
+          employee_id: string | null
+          end_date: string | null
+          id: string
+          is_primary: boolean | null
+          phone: string | null
+          representative_name: string
+          role: string
+          start_date: string
+          union_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          employee_id?: string | null
+          end_date?: string | null
+          id?: string
+          is_primary?: boolean | null
+          phone?: string | null
+          representative_name: string
+          role: string
+          start_date?: string
+          union_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          employee_id?: string | null
+          end_date?: string | null
+          id?: string
+          is_primary?: boolean | null
+          phone?: string | null
+          representative_name?: string
+          role?: string
+          start_date?: string
+          union_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "union_representatives_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "union_representatives_union_id_fkey"
+            columns: ["union_id"]
+            isOneToOne: false
+            referencedRelation: "unions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      unions: {
+        Row: {
+          address: string | null
+          code: string
+          company_id: string
+          contact_email: string | null
+          contact_person: string | null
+          contact_phone: string | null
+          created_at: string
+          description: string | null
+          end_date: string | null
+          established_date: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          registration_number: string | null
+          start_date: string
+          updated_at: string
+          website: string | null
+        }
+        Insert: {
+          address?: string | null
+          code: string
+          company_id: string
+          contact_email?: string | null
+          contact_person?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          description?: string | null
+          end_date?: string | null
+          established_date?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          registration_number?: string | null
+          start_date?: string
+          updated_at?: string
+          website?: string | null
+        }
+        Update: {
+          address?: string | null
+          code?: string
+          company_id?: string
+          contact_email?: string | null
+          contact_person?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          description?: string | null
+          end_date?: string | null
+          established_date?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          registration_number?: string | null
+          start_date?: string
+          updated_at?: string
+          website?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "unions_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
             referencedColumns: ["id"]
           },
         ]
