@@ -18,6 +18,9 @@ import {
   Gift,
   Zap,
   BarChart3,
+  FolderTree,
+  List,
+  GitBranch,
 } from "lucide-react";
 
 const hubSections = [
@@ -50,8 +53,16 @@ const hubSections = [
     title: "Compliance & Workflows",
     items: [
       { title: "Compliance Tracker", description: "Track compliance deadlines and requirements", icon: ShieldCheck, href: "/hr-hub/compliance", badge: null },
+      { title: "Workflow Templates", description: "Configure approval workflow templates", icon: GitBranch, href: "/admin/workflow-templates", badge: null },
       { title: "Approval Delegations", description: "Manage approval delegation settings", icon: UserCheck, href: "/admin/delegations", badge: null },
       { title: "Scheduled Reports", description: "Configure automated report delivery", icon: BarChart3, href: "/admin/scheduled-reports", badge: null },
+    ],
+  },
+  {
+    title: "Organization & Configuration",
+    items: [
+      { title: "Organisational Structure", description: "Manage company org structure and hierarchy", icon: FolderTree, href: "/admin/org-structure", badge: null },
+      { title: "Lookup Values", description: "Manage system lookup values and codes", icon: List, href: "/admin/lookup-values", badge: null },
     ],
   },
 ];

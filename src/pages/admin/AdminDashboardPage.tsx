@@ -27,9 +27,6 @@ import {
   ClipboardList,
   Zap,
   Upload,
-  FolderTree,
-  GitBranch,
-  List,
   Palette,
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
@@ -111,27 +108,6 @@ const getAdminModules = (t: (key: string) => string) => [
     href: "/admin/bulk-import",
     icon: Upload,
     color: "bg-cyan-500/10 text-cyan-600",
-  },
-  {
-    title: t("admin.modules.orgStructure.title"),
-    description: t("admin.modules.orgStructure.description"),
-    href: "/admin/org-structure",
-    icon: FolderTree,
-    color: "bg-teal-500/10 text-teal-600",
-  },
-  {
-    title: "Workflow Templates",
-    description: "Configure approval workflows with escalation and auto-termination",
-    href: "/admin/workflow-templates",
-    icon: GitBranch,
-    color: "bg-sky-500/10 text-sky-600",
-  },
-  {
-    title: "Lookup Values",
-    description: "Manage employee statuses, types, termination reasons, and more",
-    href: "/admin/lookup-values",
-    icon: List,
-    color: "bg-lime-500/10 text-lime-600",
   },
   {
     title: "Color Scheme",
