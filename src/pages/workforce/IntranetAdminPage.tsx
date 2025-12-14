@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { useLanguage } from "@/hooks/useLanguage";
 import { toast } from "sonner";
 import { 
   Megaphone, 
@@ -96,6 +97,7 @@ interface BlogPost {
 }
 
 export default function IntranetAdminPage() {
+  const { t } = useLanguage();
   const { user } = useAuth();
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [gallery, setGallery] = useState<GalleryItem[]>([]);
@@ -449,11 +451,11 @@ export default function IntranetAdminPage() {
       }
       
       if (error) throw error;
-      toast.success("Item deleted");
+      toast.success(t("common.success"));
       fetchAllData();
     } catch (error) {
       console.error("Error deleting item:", error);
-      toast.error("Failed to delete item");
+      toast.error(t("common.error"));
     } finally {
       setDeleteDialogOpen(false);
       setItemToDelete(null);
@@ -470,16 +472,16 @@ export default function IntranetAdminPage() {
       <div className="container mx-auto py-6 space-y-6">
         <Breadcrumbs
           items={[
-            { label: "Workforce", href: "/workforce" },
-            { label: "Intranet Admin", href: "/workforce/intranet-admin" },
+            { label: t("navigation.workforce"), href: "/workforce" },
+            { label: t("workforce.intranetAdmin.title"), href: "/workforce/intranet-admin" },
           ]}
         />
 
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold">Intranet Administration</h1>
+            <h1 className="text-3xl font-bold">{t("workforce.intranetAdmin.title")}</h1>
             <p className="text-muted-foreground">
-              Manage announcements, photo gallery, and blog posts
+              {t("workforce.intranetAdmin.subtitle")}
             </p>
           </div>
         </div>
@@ -488,15 +490,15 @@ export default function IntranetAdminPage() {
           <TabsList>
             <TabsTrigger value="announcements" className="gap-2">
               <Megaphone className="h-4 w-4" />
-              Announcements
+              {t("workforce.intranetAdmin.announcements")}
             </TabsTrigger>
             <TabsTrigger value="gallery" className="gap-2">
               <Image className="h-4 w-4" />
-              Photo Gallery
+              {t("workforce.intranetAdmin.photoGallery")}
             </TabsTrigger>
             <TabsTrigger value="blog" className="gap-2">
               <FileText className="h-4 w-4" />
-              Blog Posts
+              {t("workforce.intranetAdmin.blogPosts")}
             </TabsTrigger>
           </TabsList>
 

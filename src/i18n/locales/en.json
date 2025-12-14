@@ -195,11 +195,21 @@
       },
       "transactions": {
         "title": "Employee Transactions",
-        "description": "Manage hires, promotions, transfers, terminations"
+        "description": "Manage hires, promotions, transfers, terminations",
+        "subtitle": "Manage employee lifecycle transactions",
+        "allTransactions": "All Transactions"
       },
       "forecasting": {
         "title": "Workforce Forecasting",
-        "description": "Headcount forecasts, scenario planning, and analytics"
+        "description": "Headcount forecasts, scenario planning, and analytics",
+        "subtitle": "Plan and analyze workforce trends with advanced forecasting tools",
+        "headcountForecast": "Headcount Forecast",
+        "scenarioPlanning": "Scenario Planning",
+        "whatIfAnalysis": "What-If Analysis",
+        "monteCarlo": "Monte Carlo",
+        "sensitivityAnalysis": "Sensitivity Analysis",
+        "stressTesting": "Stress Testing",
+        "defaultScenariosNote": "Using default scenarios. Create custom scenarios in the Scenario Planning tab for personalized analysis."
       },
       "jobFamilies": {
         "title": "Job Families",
@@ -219,7 +229,11 @@
       },
       "intranetAdmin": {
         "title": "Intranet Admin",
-        "description": "Manage announcements, gallery, and blog"
+        "description": "Manage announcements, gallery, and blog",
+        "subtitle": "Manage announcements, photo gallery, and blog posts",
+        "announcements": "Announcements",
+        "photoGallery": "Photo Gallery",
+        "blogPosts": "Blog Posts"
       },
       "onboarding": {
         "title": "Employee Onboarding",
