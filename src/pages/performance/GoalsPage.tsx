@@ -45,6 +45,7 @@ import { EnhancedGoalCard } from "@/components/performance/EnhancedGoalCard";
 import { GoalProgressDialog } from "@/components/performance/GoalProgressDialog";
 import { GoalCommentsDialog } from "@/components/performance/GoalCommentsDialog";
 import { useAuditLog } from "@/hooks/useAuditLog";
+import { useLanguage } from "@/hooks/useLanguage";
 import { format, isPast } from "date-fns";
 
 type GoalStatus = 'draft' | 'active' | 'in_progress' | 'completed' | 'cancelled' | 'overdue';
@@ -88,6 +89,7 @@ const breadcrumbItems = [
 ];
 
 export default function GoalsPage() {
+  const { t } = useLanguage();
   const { user, company, isAdmin, isHRManager } = useAuth();
   const { logView } = useAuditLog();
   const [goals, setGoals] = useState<Goal[]>([]);
@@ -369,10 +371,10 @@ export default function GoalsPage() {
               </div>
               <div>
                 <h1 className="text-2xl font-bold tracking-tight text-foreground">
-                  Goals Management
+                  {t('performance.goals.title')}
                 </h1>
                 <p className="text-muted-foreground">
-                  Set, track, and achieve your performance goals
+                  {t('performance.goals.subtitle')}
                 </p>
               </div>
             </div>
@@ -383,7 +385,7 @@ export default function GoalsPage() {
               <Select value={selectedCompanyId} onValueChange={setSelectedCompanyId}>
                 <SelectTrigger className="w-[200px]">
                   <Building2 className="mr-2 h-4 w-4" />
-                  <SelectValue placeholder="Select Company" />
+                  <SelectValue placeholder={t('performance.goals.selectCompany')} />
                 </SelectTrigger>
                 <SelectContent>
                   {companies.map((c) => (
@@ -396,11 +398,11 @@ export default function GoalsPage() {
             )}
             <Button variant="outline" onClick={() => setShowAnalytics(!showAnalytics)}>
               <BarChart3 className="mr-2 h-4 w-4" />
-              {showAnalytics ? "Hide" : "Show"} Analytics
+              {showAnalytics ? t('performance.goals.hideAnalytics') : t('performance.goals.showAnalytics')}
             </Button>
             <Button onClick={handleCreateGoal}>
               <Plus className="mr-2 h-4 w-4" />
-              Create Goal
+              {t('performance.goals.createGoal')}
             </Button>
           </div>
         </div>
@@ -411,7 +413,7 @@ export default function GoalsPage() {
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground">Total Goals</p>
+                  <p className="text-sm text-muted-foreground">{t('performance.stats.totalGoals')}</p>
                   <p className="text-2xl font-bold">{stats.total}</p>
                 </div>
                 <Target className="h-8 w-8 text-primary" />
@@ -422,7 +424,7 @@ export default function GoalsPage() {
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground">Active</p>
+                  <p className="text-sm text-muted-foreground">{t('performance.stats.active')}</p>
                   <p className="text-2xl font-bold">{stats.active}</p>
                 </div>
                 <Clock className="h-8 w-8 text-info" />
@@ -433,7 +435,7 @@ export default function GoalsPage() {
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground">Overdue</p>
+                  <p className="text-sm text-muted-foreground">{t('performance.stats.overdue')}</p>
                   <p className={`text-2xl font-bold ${stats.overdue > 0 ? "text-warning" : ""}`}>
                     {stats.overdue}
                   </p>
@@ -446,7 +448,7 @@ export default function GoalsPage() {
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground">Completed</p>
+                  <p className="text-sm text-muted-foreground">{t('performance.stats.completed')}</p>
                   <p className="text-2xl font-bold">{stats.completed}</p>
                 </div>
                 <CheckCircle className="h-8 w-8 text-success" />
@@ -457,7 +459,7 @@ export default function GoalsPage() {
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground">Avg Progress</p>
+                  <p className="text-sm text-muted-foreground">{t('performance.stats.avgProgress')}</p>
                   <p className="text-2xl font-bold">{stats.avgProgress}%</p>
                 </div>
                 <TrendingUp className="h-8 w-8 text-primary" />
@@ -476,12 +478,12 @@ export default function GoalsPage() {
             <TabsList className="flex-wrap">
               <TabsTrigger value="my-goals" className="gap-2">
                 <User className="h-4 w-4" />
-                My Goals
+                {t('performance.goals.myGoals')}
               </TabsTrigger>
               {directReports.length > 0 && (
                 <TabsTrigger value="direct-reports" className="gap-2">
                   <UserCircle className="h-4 w-4" />
-                  Direct Reports
+                  {t('performance.goals.directReports')}
                   <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-xs">
                     {directReports.length}
                   </Badge>
@@ -489,19 +491,19 @@ export default function GoalsPage() {
               )}
               <TabsTrigger value="team-goals" className="gap-2">
                 <Users className="h-4 w-4" />
-                Team Goals
+                {t('performance.goals.teamGoals')}
               </TabsTrigger>
               <TabsTrigger value="company-goals" className="gap-2">
                 <Building2 className="h-4 w-4" />
-                Company Goals
+                {t('performance.goals.companyGoals')}
               </TabsTrigger>
               <TabsTrigger value="hierarchy" className="gap-2">
                 <ChevronRight className="h-4 w-4" />
-                Hierarchy
+                {t('performance.goals.hierarchy')}
               </TabsTrigger>
               <TabsTrigger value="templates" className="gap-2">
                 <LayoutGrid className="h-4 w-4" />
-                Templates
+                {t('performance.goals.templates')}
               </TabsTrigger>
             </TabsList>
           </div>
@@ -528,20 +530,20 @@ export default function GoalsPage() {
 
           <TabsContent value="my-goals" className="mt-6">
             {loading ? (
-              <div className="text-center py-12 text-muted-foreground">Loading goals...</div>
+              <div className="text-center py-12 text-muted-foreground">{t('common.loading')}</div>
             ) : filteredGoals.length === 0 ? (
               <Card>
                 <CardContent className="flex flex-col items-center justify-center py-12">
                   <Target className="h-12 w-12 text-muted-foreground mb-4" />
                   <p className="text-muted-foreground mb-4">
-                    {hasActiveFilters ? "No goals match your filters" : "No goals found. Create your first goal to get started."}
+                    {hasActiveFilters ? t('common.noResults') : t('performance.goals.noGoalsFound')}
                   </p>
                   {hasActiveFilters ? (
-                    <Button variant="outline" onClick={clearFilters}>Clear Filters</Button>
+                    <Button variant="outline" onClick={clearFilters}>{t('performance.goals.filters.clearFilters')}</Button>
                   ) : (
                     <Button onClick={handleCreateGoal}>
                       <Plus className="mr-2 h-4 w-4" />
-                      Create Goal
+                      {t('performance.goals.createGoal')}
                     </Button>
                   )}
                 </CardContent>

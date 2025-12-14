@@ -6,8 +6,10 @@ import { LeaveCompanyFilter, useLeaveCompanyFilter } from "@/components/leave/Le
 import { DepartmentFilter, useDepartmentFilter } from "@/components/filters/DepartmentFilter";
 import { MessageCircle, ChevronLeft } from "lucide-react";
 import { NavLink } from "react-router-dom";
+import { useLanguage } from "@/hooks/useLanguage";
 
 export default function ContinuousFeedbackPage() {
+  const { t } = useLanguage();
   const { selectedCompanyId, setSelectedCompanyId } = useLeaveCompanyFilter();
   const { selectedDepartmentId, setSelectedDepartmentId } = useDepartmentFilter();
 
@@ -17,10 +19,10 @@ export default function ContinuousFeedbackPage() {
         <div className="animate-fade-in">
           <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4">
             <NavLink to="/performance" className="hover:text-foreground transition-colors">
-              Performance
+              {t('performance.title')}
             </NavLink>
             <ChevronLeft className="h-4 w-4 rotate-180" />
-            <span className="text-foreground">Continuous Feedback</span>
+            <span className="text-foreground">{t('performance.modules.continuousFeedback')}</span>
           </div>
           
           <div className="flex items-center justify-between mb-2">
@@ -30,10 +32,10 @@ export default function ContinuousFeedbackPage() {
               </div>
               <div>
                 <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
-                  Continuous Feedback
+                  {t('performance.feedback.title')}
                 </h1>
                 <p className="text-muted-foreground">
-                  Quick feedback and check-ins between formal reviews
+                  {t('performance.feedback.subtitle')}
                 </p>
               </div>
             </div>
