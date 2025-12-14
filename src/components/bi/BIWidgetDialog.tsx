@@ -6,8 +6,11 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { BarChart3, PieChart, LineChart, TrendingUp, Hash, Table, Save, Loader2 } from 'lucide-react';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { BarChart3, PieChart, LineChart, TrendingUp, Hash, Table, Save, Loader2, ChevronDown, Sparkles } from 'lucide-react';
 import { useBITool, BIWidget, BIDataSource, WidgetConfig } from '@/hooks/useBITool';
+import { BISQLPreview } from './BISQLPreview';
+import { BIAIAssistant } from './BIAIAssistant';
 
 interface BIWidgetDialogProps {
   open: boolean;
@@ -45,6 +48,7 @@ export function BIWidgetDialog({
   const { getDataSources, createWidget, updateWidget, isLoading } = useBITool();
   
   const [dataSources, setDataSources] = useState<BIDataSource[]>([]);
+  const [showAIAssistant, setShowAIAssistant] = useState(false);
   const [widget, setWidget] = useState<Partial<BIWidget>>({
     name: '',
     widget_type: 'chart',
@@ -117,11 +121,39 @@ export function BIWidgetDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <BarChart3 className="h-5 w-5" />
-            {widgetId ? 'Edit Widget' : 'Add Widget'}
+          <DialogTitle className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <BarChart3 className="h-5 w-5" />
+              {widgetId ? 'Edit Widget' : 'Add Widget'}
+            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowAIAssistant(!showAIAssistant)}
+              className="text-primary"
+            >
+              <Sparkles className="h-4 w-4 mr-1" />
+              AI Assist
+            </Button>
           </DialogTitle>
         </DialogHeader>
+
+        {showAIAssistant && (
+          <div className="mb-4">
+            <BIAIAssistant
+              module={module}
+              dataSources={dataSources}
+              onApplyWidget={(generatedWidget) => {
+                setWidget(prev => ({
+                  ...prev,
+                  ...generatedWidget,
+                  dashboard_id: dashboardId
+                }));
+                setShowAIAssistant(false);
+              }}
+            />
+          </div>
+        )}
 
         <Tabs defaultValue="basic" className="w-full">
           <TabsList className="grid w-full grid-cols-3">
@@ -315,6 +347,28 @@ export function BIWidgetDialog({
                 className="font-mono text-sm"
               />
             </div>
+
+            <Collapsible>
+              <CollapsibleTrigger asChild>
+                <Button variant="ghost" size="sm" className="w-full justify-between">
+                  <span>SQL Preview & Testing</span>
+                  <ChevronDown className="h-4 w-4" />
+                </Button>
+              </CollapsibleTrigger>
+              <CollapsibleContent className="pt-2">
+                <BISQLPreview
+                  sql={widget.custom_sql || ''}
+                  onSQLChange={(sql) => setWidget(prev => ({ ...prev, custom_sql: sql }))}
+                  module={module}
+                  widgetConfig={{
+                    widget_type: widget.widget_type,
+                    chart_type: widget.chart_type,
+                    data_source: widget.data_source,
+                    config: widget.config
+                  }}
+                />
+              </CollapsibleContent>
+            </Collapsible>
           </TabsContent>
 
           <TabsContent value="appearance" className="space-y-4 mt-4">
