@@ -137,24 +137,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           });
 
           // Ensure company has a subscription record (creates trial if missing)
-          const { data: existingSub } = await supabase
+          // Use upsert with onConflict to prevent duplicates from race conditions
+          await supabase
             .from("company_subscriptions")
-            .select("id")
-            .eq("company_id", companyData.id)
-            .maybeSingle();
-
-          if (!existingSub) {
-            // Create trial subscription for this company
-            await supabase
-              .from("company_subscriptions")
-              .insert({
-                company_id: companyData.id,
-                status: 'trial',
-                billing_cycle: 'monthly',
-                active_employee_count: 1,
-                selected_modules: [],
-              });
-          }
+            .upsert({
+              company_id: companyData.id,
+              status: 'trial',
+              billing_cycle: 'monthly',
+              active_employee_count: 1,
+              selected_modules: [],
+            }, { 
+              onConflict: 'company_id',
+              ignoreDuplicates: true 
+            });
         }
       } else {
         setCompany(null);
