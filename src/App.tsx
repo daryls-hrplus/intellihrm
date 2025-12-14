@@ -163,6 +163,10 @@ import HSERiskAssessmentPage from "./pages/hse/HSERiskAssessmentPage";
 import HSESafetyTrainingPage from "./pages/hse/HSESafetyTrainingPage";
 import HSECompliancePage from "./pages/hse/HSECompliancePage";
 import HSESafetyPoliciesPage from "./pages/hse/HSESafetyPoliciesPage";
+import HSEWorkersCompPage from "./pages/hse/HSEWorkersCompPage";
+import HSEPPEManagementPage from "./pages/hse/HSEPPEManagementPage";
+import HSEInspectionsPage from "./pages/hse/HSEInspectionsPage";
+import HSEEmergencyResponsePage from "./pages/hse/HSEEmergencyResponsePage";
 
 // Employee Relations pages
 import EmployeeRelationsDashboardPage from "./pages/employee-relations/EmployeeRelationsDashboardPage";
@@ -1956,6 +1960,38 @@ const App = () => (
               element={
                 <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
                   <HSESafetyPoliciesPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/hse/workers-comp"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
+                  <HSEWorkersCompPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/hse/ppe"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
+                  <HSEPPEManagementPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/hse/inspections"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
+                  <HSEInspectionsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/hse/emergency-response"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
+                  <HSEEmergencyResponsePage />
                 </ProtectedRoute>
               }
             />

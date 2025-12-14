@@ -2862,6 +2862,22 @@
       "policies": {
         "title": "Safety Policies",
         "description": "Company safety guidelines"
+      },
+      "workersComp": {
+        "title": "Workers' Compensation",
+        "description": "Claims and injury management"
+      },
+      "ppe": {
+        "title": "PPE Management",
+        "description": "Personal protective equipment"
+      },
+      "inspections": {
+        "title": "Workplace Inspections",
+        "description": "Inspection checklists and findings"
+      },
+      "emergencyResponse": {
+        "title": "Emergency Response",
+        "description": "Emergency plans and drills"
       }
     },
     "incidents": {
@@ -3079,6 +3095,143 @@
       "owner": "Owner",
       "selectOwner": "Select owner",
       "selectDepartment": "Select department"
+    },
+    "workersComp": {
+      "title": "Workers' Compensation",
+      "subtitle": "Manage workers' compensation claims and injuries",
+      "fileClaim": "File Claim",
+      "claimsList": "Compensation Claims",
+      "searchClaims": "Search claims...",
+      "noClaims": "No claims found",
+      "claimNumber": "Claim #",
+      "injuryDate": "Injury Date",
+      "injuryDescription": "Injury Description",
+      "bodyParts": "Body Parts",
+      "compensation": "Compensation",
+      "stats": {
+        "totalClaims": "Total Claims",
+        "pendingClaims": "Pending Claims",
+        "approvedClaims": "Approved Claims",
+        "totalCompensation": "Total Compensation"
+      },
+      "statusOptions": {
+        "filed": "Filed",
+        "under_review": "Under Review",
+        "approved": "Approved",
+        "denied": "Denied",
+        "closed": "Closed"
+      }
+    },
+    "ppe": {
+      "title": "PPE Management",
+      "subtitle": "Personal protective equipment tracking",
+      "addPPEType": "Add PPE Type",
+      "addInventory": "Add Inventory",
+      "issueEquipment": "Issue Equipment",
+      "searchInventory": "Search inventory...",
+      "noTypes": "No PPE types found",
+      "noInventory": "No inventory found",
+      "noIssuances": "No issuances found",
+      "tabs": {
+        "types": "PPE Types",
+        "inventory": "Inventory",
+        "issuances": "Issuances"
+      },
+      "stats": {
+        "totalTypes": "PPE Types",
+        "totalInventory": "Total Inventory",
+        "lowStock": "Low Stock Items",
+        "activeIssuances": "Active Issuances"
+      },
+      "serialNumber": "Serial #",
+      "condition": "Condition",
+      "quantity": "Quantity",
+      "issueDate": "Issue Date",
+      "returnDate": "Return Date",
+      "size": "Size",
+      "minStock": "Min Stock",
+      "replacementDays": "Replacement Days",
+      "requiresTraining": "Requires Training"
+    },
+    "inspections": {
+      "title": "Workplace Inspections",
+      "subtitle": "Inspection checklists and findings",
+      "newInspection": "New Inspection",
+      "addTemplate": "Add Template",
+      "findingsList": "Inspection Findings",
+      "inspectionTemplates": "Inspection Templates",
+      "searchFindings": "Search findings...",
+      "noFindings": "No findings found",
+      "noTemplates": "No templates found",
+      "tabs": {
+        "findings": "Findings",
+        "templates": "Templates"
+      },
+      "stats": {
+        "totalInspections": "Total Findings",
+        "openFindings": "Open Findings",
+        "inProgress": "In Progress",
+        "resolved": "Resolved"
+      },
+      "inspectionNumber": "Finding Type",
+      "inspectionDate": "Due Date",
+      "findingDescription": "Description",
+      "severity": "Severity",
+      "frequency": "Frequency",
+      "statusOptions": {
+        "open": "Open",
+        "in_progress": "In Progress",
+        "resolved": "Resolved",
+        "verified": "Verified"
+      },
+      "severityLevels": {
+        "low": "Low",
+        "medium": "Medium",
+        "high": "High",
+        "critical": "Critical"
+      }
+    },
+    "emergencyResponse": {
+      "title": "Emergency Response",
+      "subtitle": "Emergency plans and drill management",
+      "addPlan": "Add Plan",
+      "scheduleDrill": "Schedule Drill",
+      "plansList": "Emergency Plans",
+      "drillsList": "Emergency Drills",
+      "searchPlans": "Search plans...",
+      "noPlans": "No emergency plans found",
+      "noDrills": "No drills found",
+      "tabs": {
+        "plans": "Plans",
+        "drills": "Drills"
+      },
+      "stats": {
+        "activePlans": "Active Plans",
+        "scheduledDrills": "Scheduled Drills",
+        "completedDrills": "Completed Drills",
+        "avgEvacuationTime": "Avg Evacuation Time"
+      },
+      "planName": "Plan Name",
+      "planType": "Plan Type",
+      "assemblyPoints": "Assembly Points",
+      "reviewDate": "Review Date",
+      "drillType": "Drill Type",
+      "scheduledDate": "Scheduled Date",
+      "actualDate": "Actual Date",
+      "participants": "Participants",
+      "evacuationTime": "Evacuation Time",
+      "statusOptions": {
+        "draft": "Draft",
+        "active": "Active",
+        "under_review": "Under Review",
+        "archived": "Archived"
+      },
+      "drillStatus": {
+        "scheduled": "Scheduled",
+        "in_progress": "In Progress",
+        "completed": "Completed",
+        "cancelled": "Cancelled"
+      }
     }
   },
   "employeeRelationsModule": {
