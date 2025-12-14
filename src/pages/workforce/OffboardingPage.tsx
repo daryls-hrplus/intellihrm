@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useTranslation } from 'react-i18next';
+import { useLanguage } from '@/hooks/useLanguage';
 import { useNavigate } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Breadcrumbs } from '@/components/ui/breadcrumbs';
@@ -62,7 +62,7 @@ import { toast } from 'sonner';
 import { format } from 'date-fns';
 
 export default function OffboardingPage() {
-  const { t } = useTranslation();
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const { 
     isLoading, 
@@ -142,8 +142,8 @@ export default function OffboardingPage() {
 
   const breadcrumbItems = [
     { label: t('common.home'), path: '/' },
-    { label: 'Workforce', path: '/workforce' },
-    { label: 'Employee Offboarding' },
+    { label: t('navigation.workforce'), path: '/workforce' },
+    { label: t('workforce.offboarding.title') },
   ];
 
   useEffect(() => {
@@ -185,7 +185,7 @@ export default function OffboardingPage() {
 
   const handleTemplateSubmit = async () => {
     if (!templateForm.name || !templateForm.company_id) {
-      toast.error('Please fill in required fields');
+      toast.error(t('common.fillRequired'));
       return;
     }
 
@@ -202,7 +202,7 @@ export default function OffboardingPage() {
     }
 
     if (result) {
-      toast.success(editingTemplate ? 'Template updated' : 'Template created');
+      toast.success(editingTemplate ? t('workforce.offboarding.templateUpdated') : t('workforce.offboarding.templateCreated'));
       setTemplateDialogOpen(false);
       setEditingTemplate(null);
       resetTemplateForm();
@@ -212,14 +212,14 @@ export default function OffboardingPage() {
 
   const handleDeleteTemplate = async (id: string) => {
     if (await deleteTemplate(id)) {
-      toast.success('Template deleted');
+      toast.success(t('workforce.offboarding.templateDeleted'));
       loadData();
     }
   };
 
   const handleTaskSubmit = async () => {
     if (!taskForm.name || !selectedTemplateId) {
-      toast.error('Please fill in required fields');
+      toast.error(t('common.fillRequired'));
       return;
     }
 
@@ -237,7 +237,7 @@ export default function OffboardingPage() {
     }
 
     if (result) {
-      toast.success(editingTask ? 'Task updated' : 'Task created');
+      toast.success(editingTask ? t('workforce.offboarding.taskUpdated') : t('workforce.offboarding.taskCreated'));
       setTaskDialogOpen(false);
       setEditingTask(null);
       resetTaskForm();
@@ -247,14 +247,14 @@ export default function OffboardingPage() {
 
   const handleDeleteTask = async (id: string, templateId: string) => {
     if (await deleteTemplateTask(id)) {
-      toast.success('Task deleted');
+      toast.success(t('workforce.offboarding.taskDeleted'));
       loadTemplateTasks(templateId);
     }
   };
 
   const handleInstanceSubmit = async () => {
     if (!instanceForm.employee_id || !instanceForm.template_id || !instanceForm.company_id || !instanceForm.last_working_date) {
-      toast.error('Please fill in required fields');
+      toast.error(t('common.fillRequired'));
       return;
     }
 
@@ -267,7 +267,7 @@ export default function OffboardingPage() {
 
     const result = await createInstance(data);
     if (result) {
-      toast.success('Offboarding started for employee');
+      toast.success(t('workforce.offboarding.offboardingStarted'));
       setInstanceDialogOpen(false);
       resetInstanceForm();
       loadInstances();
@@ -374,11 +374,11 @@ export default function OffboardingPage() {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'completed':
-        return <Badge className="bg-green-500/20 text-green-700 border-green-500/30">Completed</Badge>;
+        return <Badge className="bg-green-500/20 text-green-700 border-green-500/30">{t('common.completed')}</Badge>;
       case 'cancelled':
-        return <Badge variant="destructive">Cancelled</Badge>;
+        return <Badge variant="destructive">{t('common.cancelled')}</Badge>;
       default:
-        return <Badge className="bg-blue-500/20 text-blue-700 border-blue-500/30">In Progress</Badge>;
+        return <Badge className="bg-blue-500/20 text-blue-700 border-blue-500/30">{t('common.inProgress')}</Badge>;
     }
   };
 
@@ -400,19 +400,19 @@ export default function OffboardingPage() {
           <div>
             <h1 className="text-3xl font-bold flex items-center gap-2">
               <UserMinus className="h-8 w-8" />
-              Employee Offboarding
+              {t('workforce.offboarding.title')}
             </h1>
-            <p className="text-muted-foreground">Manage offboarding templates and track departing employee progress</p>
+            <p className="text-muted-foreground">{t('workforce.offboarding.subtitle')}</p>
           </div>
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList>
-            <TabsTrigger value="instances">Active Offboarding</TabsTrigger>
-            <TabsTrigger value="templates">Templates</TabsTrigger>
+            <TabsTrigger value="instances">{t('workforce.offboarding.activeOffboarding')}</TabsTrigger>
+            <TabsTrigger value="templates">{t('common.templates')}</TabsTrigger>
             <TabsTrigger value="analytics" className="flex items-center gap-2">
               <BarChart3 className="h-4 w-4" />
-              Analytics
+              {t('common.analytics')}
             </TabsTrigger>
           </TabsList>
 
@@ -422,7 +422,7 @@ export default function OffboardingPage() {
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
-                    placeholder="Search employees..."
+                    placeholder={t('workforce.offboarding.searchEmployees')}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="pl-10 w-64"
@@ -430,10 +430,10 @@ export default function OffboardingPage() {
                 </div>
                 <Select value={selectedCompany} onValueChange={setSelectedCompany}>
                   <SelectTrigger className="w-48">
-                    <SelectValue placeholder="All Companies" />
+                    <SelectValue placeholder={t('workforce.allCompanies')} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All Companies</SelectItem>
+                    <SelectItem value="all">{t('workforce.allCompanies')}</SelectItem>
                     {companies.map(c => (
                       <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
                     ))}
@@ -441,19 +441,19 @@ export default function OffboardingPage() {
                 </Select>
                 <Select value={selectedStatus} onValueChange={setSelectedStatus}>
                   <SelectTrigger className="w-40">
-                    <SelectValue placeholder="All Status" />
+                    <SelectValue placeholder={t('common.allStatus')} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All Status</SelectItem>
-                    <SelectItem value="in_progress">In Progress</SelectItem>
-                    <SelectItem value="completed">Completed</SelectItem>
-                    <SelectItem value="cancelled">Cancelled</SelectItem>
+                    <SelectItem value="all">{t('common.allStatus')}</SelectItem>
+                    <SelectItem value="in_progress">{t('common.inProgress')}</SelectItem>
+                    <SelectItem value="completed">{t('common.completed')}</SelectItem>
+                    <SelectItem value="cancelled">{t('common.cancelled')}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               <Button onClick={() => setInstanceDialogOpen(true)}>
                 <Plus className="h-4 w-4 mr-2" />
-                Start Offboarding
+                {t('workforce.offboarding.startOffboarding')}
               </Button>
             </div>
 
@@ -461,7 +461,7 @@ export default function OffboardingPage() {
               {filteredInstances.length === 0 ? (
                 <Card>
                   <CardContent className="py-12 text-center text-muted-foreground">
-                    No offboarding records found
+                    {t('workforce.offboarding.noRecordsFound')}
                   </CardContent>
                 </Card>
               ) : (
@@ -485,7 +485,7 @@ export default function OffboardingPage() {
                             size="sm"
                             onClick={() => navigate(`/workforce/offboarding/${instance.id}`)}
                           >
-                            View Details
+                            {t('common.viewDetails')}
                           </Button>
                         </div>
                       </div>
@@ -493,19 +493,19 @@ export default function OffboardingPage() {
                     <CardContent>
                       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                         <div>
-                          <p className="text-sm text-muted-foreground">Template</p>
+                          <p className="text-sm text-muted-foreground">{t('common.template')}</p>
                           <p className="font-medium">{instance.offboarding_templates?.name}</p>
                         </div>
                         <div>
-                          <p className="text-sm text-muted-foreground">Last Working Date</p>
+                          <p className="text-sm text-muted-foreground">{t('workforce.offboarding.lastWorkingDate')}</p>
                           <p className="font-medium">{format(new Date(instance.last_working_date), 'MMM dd, yyyy')}</p>
                         </div>
                         <div>
-                          <p className="text-sm text-muted-foreground">Reason</p>
+                          <p className="text-sm text-muted-foreground">{t('common.reason')}</p>
                           <p className="font-medium">{instance.termination_reason || '-'}</p>
                         </div>
                         <div>
-                          <p className="text-sm text-muted-foreground">Progress</p>
+                          <p className="text-sm text-muted-foreground">{t('common.progress')}</p>
                           <div className="flex items-center gap-2">
                             <Progress value={instanceProgress[instance.id]?.percentage || 0} className="h-2 flex-1" />
                             <span className="text-sm font-medium">
@@ -526,7 +526,7 @@ export default function OffboardingPage() {
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
-                  placeholder="Search templates..."
+                  placeholder={t('workforce.offboarding.searchTemplates')}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="pl-10 w-64"
@@ -534,7 +534,7 @@ export default function OffboardingPage() {
               </div>
               <Button onClick={() => { resetTemplateForm(); setEditingTemplate(null); setTemplateDialogOpen(true); }}>
                 <Plus className="h-4 w-4 mr-2" />
-                Create Template
+                {t('workforce.offboarding.createTemplate')}
               </Button>
             </div>
 
@@ -542,7 +542,7 @@ export default function OffboardingPage() {
               {filteredTemplates.length === 0 ? (
                 <Card>
                   <CardContent className="py-12 text-center text-muted-foreground">
-                    No templates found
+                    {t('workforce.offboarding.noTemplatesFound')}
                   </CardContent>
                 </Card>
               ) : (
@@ -562,13 +562,13 @@ export default function OffboardingPage() {
                           <div>
                             <CardTitle className="text-lg">{template.name}</CardTitle>
                             <CardDescription>
-                              {template.companies?.name} • {template.description || 'No description'}
+                              {template.companies?.name} • {template.description || t('common.noDescription')}
                             </CardDescription>
                           </div>
                         </div>
                         <div className="flex items-center gap-2">
                           <Badge variant={template.is_active ? 'default' : 'secondary'}>
-                            {template.is_active ? 'Active' : 'Inactive'}
+                            {template.is_active ? t('common.active') : t('common.inactive')}
                           </Badge>
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
@@ -579,18 +579,18 @@ export default function OffboardingPage() {
                             <DropdownMenuContent align="end">
                               <DropdownMenuItem onClick={() => openEditTemplate(template)}>
                                 <Pencil className="h-4 w-4 mr-2" />
-                                Edit
+                                {t('common.edit')}
                               </DropdownMenuItem>
                               <DropdownMenuItem onClick={() => openAddTask(template.id)}>
                                 <Plus className="h-4 w-4 mr-2" />
-                                Add Task
+                                {t('workforce.offboarding.addTask')}
                               </DropdownMenuItem>
                               <DropdownMenuItem 
                                 className="text-destructive"
                                 onClick={() => handleDeleteTemplate(template.id)}
                               >
                                 <Trash2 className="h-4 w-4 mr-2" />
-                                Delete
+                                {t('common.delete')}
                               </DropdownMenuItem>
                             </DropdownMenuContent>
                           </DropdownMenu>
@@ -604,11 +604,11 @@ export default function OffboardingPage() {
                           <Table>
                             <TableHeader>
                               <TableRow>
-                                <TableHead>Task</TableHead>
-                                <TableHead>Type</TableHead>
-                                <TableHead>Days Before</TableHead>
-                                <TableHead>Assigned To</TableHead>
-                                <TableHead>Required</TableHead>
+                                <TableHead>{t('common.task')}</TableHead>
+                                <TableHead>{t('common.type')}</TableHead>
+                                <TableHead>{t('workforce.offboarding.daysBefore')}</TableHead>
+                                <TableHead>{t('workforce.offboarding.assignedTo')}</TableHead>
+                                <TableHead>{t('common.required')}</TableHead>
                                 <TableHead className="w-12"></TableHead>
                               </TableRow>
                             </TableHeader>
@@ -616,7 +616,7 @@ export default function OffboardingPage() {
                               {(templateTasks[template.id] || []).length === 0 ? (
                                 <TableRow>
                                   <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
-                                    No tasks defined. Click "Add Task" to create one.
+                                    {t('workforce.offboarding.noTasksDefined')}
                                   </TableCell>
                                 </TableRow>
                               ) : (
@@ -640,7 +640,7 @@ export default function OffboardingPage() {
                                     <TableCell className="capitalize">{task.assigned_to_type}</TableCell>
                                     <TableCell>
                                       <Badge variant={task.is_required ? 'default' : 'outline'}>
-                                        {task.is_required ? 'Required' : 'Optional'}
+                                        {task.is_required ? t('common.required') : t('common.optional')}
                                       </Badge>
                                     </TableCell>
                                     <TableCell>
@@ -653,14 +653,14 @@ export default function OffboardingPage() {
                                         <DropdownMenuContent align="end">
                                           <DropdownMenuItem onClick={() => openEditTask(task)}>
                                             <Pencil className="h-4 w-4 mr-2" />
-                                            Edit
+                                            {t('common.edit')}
                                           </DropdownMenuItem>
                                           <DropdownMenuItem 
                                             className="text-destructive"
                                             onClick={() => handleDeleteTask(task.id, template.id)}
                                           >
                                             <Trash2 className="h-4 w-4 mr-2" />
-                                            Delete
+                                            {t('common.delete')}
                                           </DropdownMenuItem>
                                         </DropdownMenuContent>
                                       </DropdownMenu>
@@ -688,36 +688,36 @@ export default function OffboardingPage() {
         <Dialog open={templateDialogOpen} onOpenChange={setTemplateDialogOpen}>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>{editingTemplate ? 'Edit Template' : 'Create Offboarding Template'}</DialogTitle>
+              <DialogTitle>{editingTemplate ? t('workforce.offboarding.editTemplate') : t('workforce.offboarding.createTemplate')}</DialogTitle>
               <DialogDescription>
-                {editingTemplate ? 'Update the offboarding template details' : 'Create a new offboarding template with tasks'}
+                {editingTemplate ? t('workforce.offboarding.updateTemplateDetails') : t('workforce.offboarding.createTemplateDescription')}
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4">
               <div>
-                <Label>Template Name *</Label>
+                <Label>{t('workforce.offboarding.templateName')} *</Label>
                 <Input
                   value={templateForm.name}
                   onChange={(e) => setTemplateForm(prev => ({ ...prev, name: e.target.value }))}
-                  placeholder="e.g., Standard Offboarding"
+                  placeholder={t('workforce.offboarding.templateNamePlaceholder')}
                 />
               </div>
               <div>
-                <Label>Description</Label>
+                <Label>{t('common.description')}</Label>
                 <Textarea
                   value={templateForm.description}
                   onChange={(e) => setTemplateForm(prev => ({ ...prev, description: e.target.value }))}
-                  placeholder="Brief description of this offboarding template"
+                  placeholder={t('workforce.offboarding.templateDescriptionPlaceholder')}
                 />
               </div>
               <div>
-                <Label>Company *</Label>
+                <Label>{t('common.company')} *</Label>
                 <Select 
                   value={templateForm.company_id} 
                   onValueChange={(v) => setTemplateForm(prev => ({ ...prev, company_id: v }))}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select company" />
+                    <SelectValue placeholder={t('common.selectCompany')} />
                   </SelectTrigger>
                   <SelectContent>
                     {companies.map(c => (
@@ -728,7 +728,7 @@ export default function OffboardingPage() {
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label>Start Date</Label>
+                  <Label>{t('common.startDate')}</Label>
                   <Input
                     type="date"
                     value={templateForm.start_date}
@@ -736,7 +736,7 @@ export default function OffboardingPage() {
                   />
                 </div>
                 <div>
-                  <Label>End Date</Label>
+                  <Label>{t('common.endDate')}</Label>
                   <Input
                     type="date"
                     value={templateForm.end_date}
@@ -746,9 +746,9 @@ export default function OffboardingPage() {
               </div>
             </div>
             <DialogFooter>
-              <Button variant="outline" onClick={() => setTemplateDialogOpen(false)}>Cancel</Button>
+              <Button variant="outline" onClick={() => setTemplateDialogOpen(false)}>{t('common.cancel')}</Button>
               <Button onClick={handleTemplateSubmit} disabled={isLoading}>
-                {editingTemplate ? 'Update' : 'Create'}
+                {editingTemplate ? t('common.update') : t('common.create')}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -758,31 +758,31 @@ export default function OffboardingPage() {
         <Dialog open={taskDialogOpen} onOpenChange={setTaskDialogOpen}>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>{editingTask ? 'Edit Task' : 'Add Offboarding Task'}</DialogTitle>
+              <DialogTitle>{editingTask ? t('workforce.offboarding.editTask') : t('workforce.offboarding.addOffboardingTask')}</DialogTitle>
               <DialogDescription>
-                {editingTask ? 'Update the task details' : 'Add a new task to this template'}
+                {editingTask ? t('workforce.offboarding.updateTaskDetails') : t('workforce.offboarding.addTaskDescription')}
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4">
               <div>
-                <Label>Task Name *</Label>
+                <Label>{t('workforce.offboarding.taskName')} *</Label>
                 <Input
                   value={taskForm.name}
                   onChange={(e) => setTaskForm(prev => ({ ...prev, name: e.target.value }))}
-                  placeholder="e.g., Return company laptop"
+                  placeholder={t('workforce.offboarding.taskNamePlaceholder')}
                 />
               </div>
               <div>
-                <Label>Description</Label>
+                <Label>{t('common.description')}</Label>
                 <Textarea
                   value={taskForm.description}
                   onChange={(e) => setTaskForm(prev => ({ ...prev, description: e.target.value }))}
-                  placeholder="Task description and instructions"
+                  placeholder={t('workforce.offboarding.taskDescriptionPlaceholder')}
                 />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label>Task Type</Label>
+                  <Label>{t('workforce.offboarding.taskType')}</Label>
                   <Select 
                     value={taskForm.task_type} 
                     onValueChange={(v: any) => setTaskForm(prev => ({ ...prev, task_type: v }))}
@@ -791,17 +791,17 @@ export default function OffboardingPage() {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="general">General</SelectItem>
-                      <SelectItem value="document">Document</SelectItem>
-                      <SelectItem value="equipment">Equipment</SelectItem>
-                      <SelectItem value="access">Access Revocation</SelectItem>
-                      <SelectItem value="knowledge_transfer">Knowledge Transfer</SelectItem>
-                      <SelectItem value="exit_interview">Exit Interview</SelectItem>
+                      <SelectItem value="general">{t('workforce.offboarding.taskTypes.general')}</SelectItem>
+                      <SelectItem value="document">{t('workforce.offboarding.taskTypes.document')}</SelectItem>
+                      <SelectItem value="equipment">{t('workforce.offboarding.taskTypes.equipment')}</SelectItem>
+                      <SelectItem value="access">{t('workforce.offboarding.taskTypes.accessRevocation')}</SelectItem>
+                      <SelectItem value="knowledge_transfer">{t('workforce.offboarding.taskTypes.knowledgeTransfer')}</SelectItem>
+                      <SelectItem value="exit_interview">{t('workforce.offboarding.taskTypes.exitInterview')}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
                 <div>
-                  <Label>Assigned To</Label>
+                  <Label>{t('workforce.offboarding.assignedTo')}</Label>
                   <Select 
                     value={taskForm.assigned_to_type} 
                     onValueChange={(v: any) => setTaskForm(prev => ({ ...prev, assigned_to_type: v }))}
@@ -810,17 +810,17 @@ export default function OffboardingPage() {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="employee">Employee</SelectItem>
-                      <SelectItem value="manager">Manager</SelectItem>
-                      <SelectItem value="hr">HR</SelectItem>
-                      <SelectItem value="it">IT</SelectItem>
+                      <SelectItem value="employee">{t('common.employee')}</SelectItem>
+                      <SelectItem value="manager">{t('common.manager')}</SelectItem>
+                      <SelectItem value="hr">{t('common.hr')}</SelectItem>
+                      <SelectItem value="it">{t('common.it')}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label>Days Before Last Date</Label>
+                  <Label>{t('workforce.offboarding.daysBeforeLastDate')}</Label>
                   <Input
                     type="number"
                     min="0"
@@ -836,15 +836,15 @@ export default function OffboardingPage() {
                       onChange={(e) => setTaskForm(prev => ({ ...prev, is_required: e.target.checked }))}
                       className="rounded"
                     />
-                    <span>Required task</span>
+                    <span>{t('workforce.offboarding.requiredTask')}</span>
                   </label>
                 </div>
               </div>
             </div>
             <DialogFooter>
-              <Button variant="outline" onClick={() => setTaskDialogOpen(false)}>Cancel</Button>
+              <Button variant="outline" onClick={() => setTaskDialogOpen(false)}>{t('common.cancel')}</Button>
               <Button onClick={handleTaskSubmit} disabled={isLoading}>
-                {editingTask ? 'Update' : 'Add Task'}
+                {editingTask ? t('common.update') : t('workforce.offboarding.addTask')}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -854,20 +854,20 @@ export default function OffboardingPage() {
         <Dialog open={instanceDialogOpen} onOpenChange={setInstanceDialogOpen}>
           <DialogContent className="max-w-lg">
             <DialogHeader>
-              <DialogTitle>Start Employee Offboarding</DialogTitle>
+              <DialogTitle>{t('workforce.offboarding.startOffboarding')}</DialogTitle>
               <DialogDescription>
-                Begin the offboarding process for a departing employee
+                {t('workforce.offboarding.startOffboardingDescription')}
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4">
               <div>
-                <Label>Employee *</Label>
+                <Label>{t('common.employee')} *</Label>
                 <Select 
                   value={instanceForm.employee_id} 
                   onValueChange={(v) => setInstanceForm(prev => ({ ...prev, employee_id: v }))}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select employee" />
+                    <SelectValue placeholder={t('common.selectEmployee')} />
                   </SelectTrigger>
                   <SelectContent>
                     {employees.map(e => (
@@ -877,13 +877,13 @@ export default function OffboardingPage() {
                 </Select>
               </div>
               <div>
-                <Label>Company *</Label>
+                <Label>{t('common.company')} *</Label>
                 <Select 
                   value={instanceForm.company_id} 
                   onValueChange={(v) => setInstanceForm(prev => ({ ...prev, company_id: v, template_id: '' }))}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select company" />
+                    <SelectValue placeholder={t('common.selectCompany')} />
                   </SelectTrigger>
                   <SelectContent>
                     {companies.map(c => (
@@ -893,14 +893,14 @@ export default function OffboardingPage() {
                 </Select>
               </div>
               <div>
-                <Label>Offboarding Template *</Label>
+                <Label>{t('workforce.offboarding.offboardingTemplate')} *</Label>
                 <Select 
                   value={instanceForm.template_id} 
                   onValueChange={(v) => setInstanceForm(prev => ({ ...prev, template_id: v }))}
                   disabled={!instanceForm.company_id}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select template" />
+                    <SelectValue placeholder={t('common.selectTemplate')} />
                   </SelectTrigger>
                   <SelectContent>
                     {templates
@@ -912,16 +912,16 @@ export default function OffboardingPage() {
                 </Select>
               </div>
               <div>
-                <Label>Manager</Label>
+                <Label>{t('common.manager')}</Label>
                 <Select 
                   value={instanceForm.manager_id} 
                   onValueChange={(v) => setInstanceForm(prev => ({ ...prev, manager_id: v }))}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select manager (optional)" />
+                    <SelectValue placeholder={t('workforce.offboarding.selectManagerOptional')} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="none">No manager assigned</SelectItem>
+                    <SelectItem value="none">{t('workforce.offboarding.noManagerAssigned')}</SelectItem>
                     {employees.map(e => (
                       <SelectItem key={e.id} value={e.id}>{e.full_name}</SelectItem>
                     ))}
@@ -929,7 +929,7 @@ export default function OffboardingPage() {
                 </Select>
               </div>
               <div>
-                <Label>Last Working Date *</Label>
+                <Label>{t('workforce.offboarding.lastWorkingDate')} *</Label>
                 <Input
                   type="date"
                   value={instanceForm.last_working_date}
@@ -937,37 +937,37 @@ export default function OffboardingPage() {
                 />
               </div>
               <div>
-                <Label>Termination Reason</Label>
+                <Label>{t('workforce.offboarding.terminationReason')}</Label>
                 <Select 
                   value={instanceForm.termination_reason} 
                   onValueChange={(v) => setInstanceForm(prev => ({ ...prev, termination_reason: v }))}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select reason" />
+                    <SelectValue placeholder={t('common.selectReason')} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="resignation">Resignation</SelectItem>
-                    <SelectItem value="retirement">Retirement</SelectItem>
-                    <SelectItem value="termination">Termination</SelectItem>
-                    <SelectItem value="layoff">Layoff</SelectItem>
-                    <SelectItem value="contract_end">Contract End</SelectItem>
-                    <SelectItem value="other">Other</SelectItem>
+                    <SelectItem value="resignation">{t('workforce.offboarding.reasons.resignation')}</SelectItem>
+                    <SelectItem value="retirement">{t('workforce.offboarding.reasons.retirement')}</SelectItem>
+                    <SelectItem value="termination">{t('workforce.offboarding.reasons.termination')}</SelectItem>
+                    <SelectItem value="layoff">{t('workforce.offboarding.reasons.layoff')}</SelectItem>
+                    <SelectItem value="contract_end">{t('workforce.offboarding.reasons.contractEnd')}</SelectItem>
+                    <SelectItem value="other">{t('common.other')}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               <div>
-                <Label>Notes</Label>
+                <Label>{t('common.notes')}</Label>
                 <Textarea
                   value={instanceForm.notes}
                   onChange={(e) => setInstanceForm(prev => ({ ...prev, notes: e.target.value }))}
-                  placeholder="Any additional notes for this offboarding"
+                  placeholder={t('workforce.offboarding.notesPlaceholder')}
                 />
               </div>
             </div>
             <DialogFooter>
-              <Button variant="outline" onClick={() => setInstanceDialogOpen(false)}>Cancel</Button>
+              <Button variant="outline" onClick={() => setInstanceDialogOpen(false)}>{t('common.cancel')}</Button>
               <Button onClick={handleInstanceSubmit} disabled={isLoading}>
-                Start Offboarding
+                {t('workforce.offboarding.startOffboarding')}
               </Button>
             </DialogFooter>
           </DialogContent>
