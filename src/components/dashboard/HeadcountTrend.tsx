@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import {
   AreaChart,
   Area,
@@ -7,33 +8,51 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
-
-const data = [
-  { month: "Jan", employees: 380 },
-  { month: "Feb", employees: 385 },
-  { month: "Mar", employees: 392 },
-  { month: "Apr", employees: 388 },
-  { month: "May", employees: 395 },
-  { month: "Jun", employees: 402 },
-  { month: "Jul", employees: 398 },
-  { month: "Aug", employees: 410 },
-  { month: "Sep", employees: 415 },
-  { month: "Oct", employees: 420 },
-  { month: "Nov", employees: 428 },
-  { month: "Dec", employees: 435 },
-];
+import { useHeadcountTrend } from "@/hooks/useDashboardData";
+import { Loader2 } from "lucide-react";
 
 export function HeadcountTrend() {
+  const { t } = useTranslation();
+  const { data, isLoading } = useHeadcountTrend();
+
+  if (isLoading) {
+    return (
+      <div className="rounded-xl bg-card p-6 shadow-card animate-slide-up" style={{ animationDelay: "600ms" }}>
+        <h3 className="mb-4 text-lg font-semibold text-card-foreground">
+          {t("dashboard.headcountTrend", "Headcount Trend")}
+        </h3>
+        <div className="h-64 flex items-center justify-center">
+          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        </div>
+      </div>
+    );
+  }
+
+  if (!data || data.length === 0) {
+    return (
+      <div className="rounded-xl bg-card p-6 shadow-card animate-slide-up" style={{ animationDelay: "600ms" }}>
+        <h3 className="mb-4 text-lg font-semibold text-card-foreground">
+          {t("dashboard.headcountTrend", "Headcount Trend")}
+        </h3>
+        <div className="h-64 flex items-center justify-center text-muted-foreground">
+          {t("dashboard.noData", "No data available")}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="rounded-xl bg-card p-6 shadow-card animate-slide-up" style={{ animationDelay: "600ms" }}>
-      <h3 className="mb-4 text-lg font-semibold text-card-foreground">Headcount Trend</h3>
+      <h3 className="mb-4 text-lg font-semibold text-card-foreground">
+        {t("dashboard.headcountTrend", "Headcount Trend")}
+      </h3>
       <div className="h-64">
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart data={data}>
             <defs>
               <linearGradient id="colorEmployees" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="hsl(168, 76%, 36%)" stopOpacity={0.3} />
-                <stop offset="95%" stopColor="hsl(168, 76%, 36%)" stopOpacity={0} />
+                <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3} />
+                <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0} />
               </linearGradient>
             </defs>
             <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
@@ -61,7 +80,7 @@ export function HeadcountTrend() {
             <Area
               type="monotone"
               dataKey="employees"
-              stroke="hsl(168, 76%, 36%)"
+              stroke="hsl(var(--primary))"
               strokeWidth={2}
               fillOpacity={1}
               fill="url(#colorEmployees)"
