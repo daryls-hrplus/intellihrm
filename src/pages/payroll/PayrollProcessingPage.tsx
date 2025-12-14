@@ -9,9 +9,9 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { usePayroll, PayrollRun, PayPeriod, EmployeePayroll } from "@/hooks/usePayroll";
 import { PayrollFilters, usePayrollFilters } from "@/components/payroll/PayrollFilters";
+import { useTranslation } from "react-i18next";
 import { 
   Plus, 
   Play, 
@@ -22,12 +22,12 @@ import {
   Calculator,
   Users,
   Clock,
-  AlertCircle,
   Eye,
 } from "lucide-react";
 import { format } from "date-fns";
 
 export default function PayrollProcessingPage() {
+  const { t } = useTranslation();
   const { selectedCompanyId, setSelectedCompanyId, selectedPayGroupId, setSelectedPayGroupId } = usePayrollFilters();
   const {
     isLoading,
@@ -168,7 +168,7 @@ export default function PayrollProcessingPage() {
     return (
       <AppLayout>
         <div className="flex items-center justify-center h-64">
-          <p className="text-muted-foreground">Please select a company to process payroll.</p>
+          <p className="text-muted-foreground">{t("payroll.processing.selectCompanyPrompt")}</p>
         </div>
       </AppLayout>
     );
@@ -179,8 +179,8 @@ export default function PayrollProcessingPage() {
       <div className="space-y-6">
         <Breadcrumbs
           items={[
-            { label: "Payroll", href: "/payroll" },
-            { label: "Processing" },
+            { label: t("navigation.payroll"), href: "/payroll" },
+            { label: t("payroll.processing.title") },
           ]}
         />
 
@@ -190,13 +190,13 @@ export default function PayrollProcessingPage() {
               <Calculator className="h-6 w-6 text-primary" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold tracking-tight">Payroll Processing</h1>
-              <p className="text-muted-foreground">Run payroll calculations and process payments</p>
+              <h1 className="text-2xl font-bold tracking-tight">{t("payroll.processing.title")}</h1>
+              <p className="text-muted-foreground">{t("payroll.processing.subtitle")}</p>
             </div>
           </div>
           <Button onClick={() => setCreateDialogOpen(true)}>
             <Plus className="h-4 w-4 mr-2" />
-            New Payroll Run
+            {t("payroll.processing.newPayrollRun")}
           </Button>
         </div>
 
@@ -208,7 +208,7 @@ export default function PayrollProcessingPage() {
                 <DollarSign className="h-5 w-5 text-primary" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Total Runs</p>
+                <p className="text-sm text-muted-foreground">{t("payroll.processing.totalRuns")}</p>
                 <p className="text-xl font-semibold">{payrollRuns.length}</p>
               </div>
             </CardContent>
@@ -219,7 +219,7 @@ export default function PayrollProcessingPage() {
                 <Clock className="h-5 w-5 text-warning" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Pending</p>
+                <p className="text-sm text-muted-foreground">{t("payroll.processing.pending")}</p>
                 <p className="text-xl font-semibold">
                   {payrollRuns.filter(r => ['draft', 'calculated', 'pending_approval'].includes(r.status)).length}
                 </p>
@@ -232,7 +232,7 @@ export default function PayrollProcessingPage() {
                 <CheckCircle className="h-5 w-5 text-success" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Paid</p>
+                <p className="text-sm text-muted-foreground">{t("payroll.payPeriods.paid")}</p>
                 <p className="text-xl font-semibold">
                   {payrollRuns.filter(r => r.status === 'paid').length}
                 </p>
@@ -245,7 +245,7 @@ export default function PayrollProcessingPage() {
                 <Users className="h-5 w-5 text-muted-foreground" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Avg Employees</p>
+                <p className="text-sm text-muted-foreground">{t("payroll.processing.avgEmployees")}</p>
                 <p className="text-xl font-semibold">
                   {payrollRuns.length ? Math.round(payrollRuns.reduce((sum, r) => sum + r.employee_count, 0) / payrollRuns.length) : 0}
                 </p>
@@ -257,21 +257,21 @@ export default function PayrollProcessingPage() {
         {/* Payroll Runs Table */}
         <Card>
           <CardHeader>
-            <CardTitle>Payroll Runs</CardTitle>
-            <CardDescription>Manage and process payroll runs</CardDescription>
+            <CardTitle>{t("payroll.processing.payrollRuns")}</CardTitle>
+            <CardDescription>{t("payroll.processing.payrollRunsSubtitle")}</CardDescription>
           </CardHeader>
           <CardContent className="p-0">
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Run Number</TableHead>
-                  <TableHead>Type</TableHead>
-                  <TableHead>Pay Period</TableHead>
-                  <TableHead>Employees</TableHead>
-                  <TableHead>Gross Pay</TableHead>
-                  <TableHead>Net Pay</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+                  <TableHead>{t("payroll.processing.runNumber")}</TableHead>
+                  <TableHead>{t("common.type")}</TableHead>
+                  <TableHead>{t("payroll.processing.payPeriod")}</TableHead>
+                  <TableHead>{t("payroll.processing.employees")}</TableHead>
+                  <TableHead>{t("payroll.processing.grossPay")}</TableHead>
+                  <TableHead>{t("payroll.processing.netPay")}</TableHead>
+                  <TableHead>{t("common.status")}</TableHead>
+                  <TableHead className="text-right">{t("common.actions")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -329,7 +329,7 @@ export default function PayrollProcessingPage() {
                 {payrollRuns.length === 0 && (
                   <TableRow>
                     <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
-                      No payroll runs found. Create a new run to get started.
+                      {t("payroll.processing.noPayrollRuns")}
                     </TableCell>
                   </TableRow>
                 )}
