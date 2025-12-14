@@ -2,8 +2,8 @@
   "workforce": {
     "modules": {
       "analytics": {
-        "title": "Workforce Analytics",
-        "description": "View workforce metrics, trends, and insights"
+        "title": "Analytics",
+        "description": "Employee headcount, hiring trends, and department metrics"
       }
     },
     "analytics": {
