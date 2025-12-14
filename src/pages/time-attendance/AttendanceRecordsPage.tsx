@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -6,7 +7,6 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Input } from "@/components/ui/input";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { supabase } from "@/integrations/supabase/client";
@@ -46,6 +46,7 @@ interface AttendanceRecord {
 }
 
 export default function AttendanceRecordsPage() {
+  const { t } = useTranslation();
   const [companies, setCompanies] = useState<Company[]>([]);
   const [selectedCompany, setSelectedCompany] = useState<string>("");
   const [records, setRecords] = useState<AttendanceRecord[]>([]);
@@ -80,7 +81,7 @@ export default function AttendanceRecordsPage() {
       .order('name');
     
     if (error) {
-      toast.error("Failed to load companies");
+      toast.error(t("common.error"));
       return;
     }
     setCompanies(data || []);
@@ -115,7 +116,6 @@ export default function AttendanceRecordsPage() {
     
     setRecords(data || []);
     
-    // Calculate stats
     const present = data?.filter(r => r.status === 'present').length || 0;
     const absent = data?.filter(r => r.status === 'absent').length || 0;
     const late = data?.filter(r => r.status === 'late').length || 0;
@@ -127,26 +127,26 @@ export default function AttendanceRecordsPage() {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'present':
-        return <Badge className="bg-success/20 text-success">Present</Badge>;
+        return <Badge className="bg-success/20 text-success">{t("timeAttendance.records.present")}</Badge>;
       case 'absent':
-        return <Badge className="bg-destructive/20 text-destructive">Absent</Badge>;
+        return <Badge className="bg-destructive/20 text-destructive">{t("timeAttendance.records.absent")}</Badge>;
       case 'late':
-        return <Badge className="bg-warning/20 text-warning">Late</Badge>;
+        return <Badge className="bg-warning/20 text-warning">{t("timeAttendance.records.late")}</Badge>;
       case 'early_departure':
-        return <Badge className="bg-orange-500/20 text-orange-600">Early Departure</Badge>;
+        return <Badge className="bg-orange-500/20 text-orange-600">{t("timeAttendance.records.earlyDeparture")}</Badge>;
       case 'half_day':
-        return <Badge className="bg-blue-500/20 text-blue-600">Half Day</Badge>;
+        return <Badge className="bg-blue-500/20 text-blue-600">{t("timeAttendance.records.halfDay")}</Badge>;
       case 'leave':
-        return <Badge className="bg-purple-500/20 text-purple-600">On Leave</Badge>;
+        return <Badge className="bg-purple-500/20 text-purple-600">{t("timeAttendance.records.onLeave")}</Badge>;
       case 'holiday':
-        return <Badge className="bg-cyan-500/20 text-cyan-600">Holiday</Badge>;
+        return <Badge className="bg-cyan-500/20 text-cyan-600">{t("timeAttendance.records.holiday")}</Badge>;
       default:
         return <Badge variant="outline">{status}</Badge>;
     }
   };
 
   const exportToCSV = () => {
-    const headers = ['Employee', 'Date', 'Status', 'Clock In', 'Clock Out', 'Work Hours', 'Overtime', 'Late Minutes'];
+    const headers = [t("timeAttendance.records.employee"), t("timeAttendance.records.date"), t("timeAttendance.records.status"), 'Clock In', 'Clock Out', t("timeAttendance.records.workHours"), t("timeAttendance.records.overtime"), t("timeAttendance.records.late")];
     const rows = records.map(r => [
       r.profile?.full_name || 'Unknown',
       r.work_date,
@@ -182,8 +182,8 @@ export default function AttendanceRecordsPage() {
       <div className="space-y-6">
         <Breadcrumbs 
           items={[
-            { label: "Time & Attendance", href: "/time-attendance" },
-            { label: "Attendance Records" }
+            { label: t("timeAttendance.title"), href: "/time-attendance" },
+            { label: t("timeAttendance.records.title") }
           ]} 
         />
 
@@ -194,17 +194,17 @@ export default function AttendanceRecordsPage() {
             </div>
             <div>
               <h1 className="text-2xl font-bold tracking-tight text-foreground">
-                Attendance Records
+                {t("timeAttendance.records.title")}
               </h1>
               <p className="text-muted-foreground">
-                View and manage employee attendance history
+                {t("timeAttendance.records.subtitle")}
               </p>
             </div>
           </div>
           <div className="flex items-center gap-2">
             <Select value={selectedCompany} onValueChange={setSelectedCompany}>
               <SelectTrigger className="w-[200px]">
-                <SelectValue placeholder="Select company" />
+                <SelectValue placeholder={t("common.selectCompany")} />
               </SelectTrigger>
               <SelectContent>
                 {companies.map((c) => (
@@ -214,7 +214,7 @@ export default function AttendanceRecordsPage() {
             </Select>
             <Button variant="outline" onClick={exportToCSV}>
               <Download className="h-4 w-4 mr-2" />
-              Export
+              {t("timeAttendance.records.export")}
             </Button>
           </div>
         </div>
@@ -227,7 +227,7 @@ export default function AttendanceRecordsPage() {
                 <UserCheck className="h-5 w-5 text-success" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Present</p>
+                <p className="text-sm text-muted-foreground">{t("timeAttendance.records.present")}</p>
                 <p className="text-xl font-semibold">{stats.present}</p>
               </div>
             </CardContent>
@@ -238,7 +238,7 @@ export default function AttendanceRecordsPage() {
                 <UserX className="h-5 w-5 text-destructive" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Absent</p>
+                <p className="text-sm text-muted-foreground">{t("timeAttendance.records.absent")}</p>
                 <p className="text-xl font-semibold">{stats.absent}</p>
               </div>
             </CardContent>
@@ -249,7 +249,7 @@ export default function AttendanceRecordsPage() {
                 <Clock className="h-5 w-5 text-warning" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Late</p>
+                <p className="text-sm text-muted-foreground">{t("timeAttendance.records.late")}</p>
                 <p className="text-xl font-semibold">{stats.late}</p>
               </div>
             </CardContent>
@@ -260,7 +260,7 @@ export default function AttendanceRecordsPage() {
                 <AlertCircle className="h-5 w-5 text-purple-600" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">On Leave</p>
+                <p className="text-sm text-muted-foreground">{t("timeAttendance.records.onLeave")}</p>
                 <p className="text-xl font-semibold">{stats.onLeave}</p>
               </div>
             </CardContent>
@@ -272,13 +272,13 @@ export default function AttendanceRecordsPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Filter className="h-5 w-5" />
-              Filters
+              {t("timeAttendance.records.filters")}
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex flex-wrap gap-4">
               <div className="space-y-2">
-                <label className="text-sm font-medium">From Date</label>
+                <label className="text-sm font-medium">{t("timeAttendance.records.fromDate")}</label>
                 <Popover>
                   <PopoverTrigger asChild>
                     <Button variant="outline" className="w-[180px] justify-start">
@@ -296,7 +296,7 @@ export default function AttendanceRecordsPage() {
                 </Popover>
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-medium">To Date</label>
+                <label className="text-sm font-medium">{t("timeAttendance.records.toDate")}</label>
                 <Popover>
                   <PopoverTrigger asChild>
                     <Button variant="outline" className="w-[180px] justify-start">
@@ -314,20 +314,20 @@ export default function AttendanceRecordsPage() {
                 </Popover>
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-medium">Status</label>
+                <label className="text-sm font-medium">{t("timeAttendance.records.status")}</label>
                 <Select value={statusFilter} onValueChange={setStatusFilter}>
                   <SelectTrigger className="w-[180px]">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All Statuses</SelectItem>
-                    <SelectItem value="present">Present</SelectItem>
-                    <SelectItem value="absent">Absent</SelectItem>
-                    <SelectItem value="late">Late</SelectItem>
-                    <SelectItem value="early_departure">Early Departure</SelectItem>
-                    <SelectItem value="half_day">Half Day</SelectItem>
-                    <SelectItem value="leave">On Leave</SelectItem>
-                    <SelectItem value="holiday">Holiday</SelectItem>
+                    <SelectItem value="all">{t("timeAttendance.records.allStatuses")}</SelectItem>
+                    <SelectItem value="present">{t("timeAttendance.records.present")}</SelectItem>
+                    <SelectItem value="absent">{t("timeAttendance.records.absent")}</SelectItem>
+                    <SelectItem value="late">{t("timeAttendance.records.late")}</SelectItem>
+                    <SelectItem value="early_departure">{t("timeAttendance.records.earlyDeparture")}</SelectItem>
+                    <SelectItem value="half_day">{t("timeAttendance.records.halfDay")}</SelectItem>
+                    <SelectItem value="leave">{t("timeAttendance.records.onLeave")}</SelectItem>
+                    <SelectItem value="holiday">{t("timeAttendance.records.holiday")}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -338,27 +338,27 @@ export default function AttendanceRecordsPage() {
         {/* Records Table */}
         <Card>
           <CardHeader>
-            <CardTitle>Attendance Records</CardTitle>
+            <CardTitle>{t("timeAttendance.records.title")}</CardTitle>
           </CardHeader>
           <CardContent>
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Employee</TableHead>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Scheduled</TableHead>
-                  <TableHead>Actual In/Out</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Work Hours</TableHead>
-                  <TableHead>Overtime</TableHead>
-                  <TableHead>Late</TableHead>
+                  <TableHead>{t("timeAttendance.records.employee")}</TableHead>
+                  <TableHead>{t("timeAttendance.records.date")}</TableHead>
+                  <TableHead>{t("timeAttendance.records.scheduled")}</TableHead>
+                  <TableHead>{t("timeAttendance.records.actualInOut")}</TableHead>
+                  <TableHead>{t("timeAttendance.records.status")}</TableHead>
+                  <TableHead>{t("timeAttendance.records.workHours")}</TableHead>
+                  <TableHead>{t("timeAttendance.records.overtime")}</TableHead>
+                  <TableHead>{t("timeAttendance.records.late")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {records.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={8} className="text-center text-muted-foreground py-8">
-                      No attendance records found
+                      {t("timeAttendance.records.noRecordsFound")}
                     </TableCell>
                   </TableRow>
                 ) : (
