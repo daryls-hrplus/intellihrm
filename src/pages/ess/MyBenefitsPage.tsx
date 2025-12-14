@@ -8,8 +8,10 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Heart, DollarSign, Users, FileText, Shield, Calendar } from "lucide-react";
+import { useLanguage } from "@/hooks/useLanguage";
 
 export default function MyBenefitsPage() {
+  const { t } = useLanguage();
   const { user } = useAuth();
   const [enrollments, setEnrollments] = useState<any[]>([]);
   const [claims, setClaims] = useState<any[]>([]);
@@ -98,53 +100,53 @@ export default function MyBenefitsPage() {
     <AppLayout>
       <div className="space-y-6">
         <Breadcrumbs items={[
-          { label: "Employee Self Service", href: "/ess" },
-          { label: "My Benefits" }
+          { label: t("ess.title"), href: "/ess" },
+          { label: t("pages.myBenefits.title") }
         ]} />
         <div>
-          <h1 className="text-3xl font-bold">My Benefits</h1>
-          <p className="text-muted-foreground">View your enrolled benefit plans and coverage</p>
+          <h1 className="text-3xl font-bold">{t("pages.myBenefits.title")}</h1>
+          <p className="text-muted-foreground">{t("pages.myBenefits.subtitle")}</p>
         </div>
 
         {/* Summary Cards */}
         <div className="grid gap-4 md:grid-cols-3">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium">Active Plans</CardTitle>
+              <CardTitle className="text-sm font-medium">{t("pages.myBenefits.activePlans")}</CardTitle>
               <Shield className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{enrollments.length}</div>
-              <p className="text-xs text-muted-foreground">Benefit enrollments</p>
+              <p className="text-xs text-muted-foreground">{t("pages.myBenefits.benefitEnrollments")}</p>
             </CardContent>
           </Card>
           <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium">Employer Contribution</CardTitle>
+              <CardTitle className="text-sm font-medium">{t("pages.myBenefits.employerContribution")}</CardTitle>
               <DollarSign className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-green-600">${totals.employer.toLocaleString()}</div>
-              <p className="text-xs text-muted-foreground">Monthly</p>
+              <p className="text-xs text-muted-foreground">{t("pages.myBenefits.monthly")}</p>
             </CardContent>
           </Card>
           <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium">Your Contribution</CardTitle>
+              <CardTitle className="text-sm font-medium">{t("pages.myBenefits.yourContribution")}</CardTitle>
               <DollarSign className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">${totals.employee.toLocaleString()}</div>
-              <p className="text-xs text-muted-foreground">Monthly</p>
+              <p className="text-xs text-muted-foreground">{t("pages.myBenefits.monthly")}</p>
             </CardContent>
           </Card>
         </div>
 
         <Tabs defaultValue="plans" className="space-y-4">
           <TabsList>
-            <TabsTrigger value="plans">My Plans</TabsTrigger>
-            <TabsTrigger value="dependents">Covered Dependents</TabsTrigger>
-            <TabsTrigger value="claims">Recent Claims</TabsTrigger>
+            <TabsTrigger value="plans">{t("pages.myBenefits.myPlans")}</TabsTrigger>
+            <TabsTrigger value="dependents">{t("pages.myBenefits.coveredDependents")}</TabsTrigger>
+            <TabsTrigger value="claims">{t("pages.myBenefits.recentClaims")}</TabsTrigger>
           </TabsList>
 
           <TabsContent value="plans">
@@ -152,7 +154,7 @@ export default function MyBenefitsPage() {
               {enrollments.length === 0 ? (
                 <Card className="md:col-span-2">
                   <CardContent className="pt-6 text-center text-muted-foreground">
-                    You have no active benefit enrollments.
+                    {t("pages.myBenefits.noActiveEnrollments")}
                   </CardContent>
                 </Card>
               ) : (

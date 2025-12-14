@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
+import { useLanguage } from "@/hooks/useLanguage";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Button } from "@/components/ui/button";
@@ -37,6 +38,7 @@ interface AttendanceSummary {
 }
 
 export default function MyTimeAttendancePage() {
+  const { t } = useLanguage();
   const { user, profile } = useAuth();
   const { toast } = useToast();
   const { getCurrentPosition, loading: geoLoading } = useGeolocation();
@@ -180,8 +182,8 @@ export default function MyTimeAttendancePage() {
   };
 
   const breadcrumbItems = [
-    { label: "Employee Self-Service", href: "/ess" },
-    { label: "My Time & Attendance" },
+    { label: t("ess.title"), href: "/ess" },
+    { label: t("pages.myTimeAttendance.title") },
   ];
 
   return (
@@ -191,8 +193,8 @@ export default function MyTimeAttendancePage() {
 
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold">My Time & Attendance</h1>
-            <p className="text-muted-foreground">Track your work hours and attendance</p>
+            <h1 className="text-3xl font-bold">{t("pages.myTimeAttendance.title")}</h1>
+            <p className="text-muted-foreground">{t("pages.myTimeAttendance.subtitle")}</p>
           </div>
         </div>
 
