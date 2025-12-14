@@ -117,10 +117,132 @@ serve(async (req) => {
     // Check for PII requests
     const requestsPii = PII_FIELDS.some(field => lowerMessage.includes(field));
 
-    // Fetch relevant context from policies, SOPs, and knowledge base
+    // Fetch relevant context from policies, SOPs, knowledge base, and employee data
     let policyContext = "";
     let sopContext = "";
     let helpCenterContext = "";
+    let employeeContext = "";
+
+    // Detect if user is asking about an employee
+    const employeeQueryPatterns = [
+      /(?:about|info|information|details|profile|who is|tell me about|find|look up|search for)\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)+)/gi,
+      /([A-Z][a-z]+(?:\s+[A-Z][a-z]+)+)(?:'s|s')?\s+(?:profile|details|info|information|department|position|manager|email|phone)/gi,
+    ];
+
+    let employeeNames: string[] = [];
+    for (const pattern of employeeQueryPatterns) {
+      const matches = userMessage.matchAll(pattern);
+      for (const match of matches) {
+        if (match[1]) {
+          employeeNames.push(match[1].trim());
+        }
+      }
+    }
+
+    // Also check for common name patterns in the message
+    const namePattern = /\b([A-Z][a-z]+)\s+([A-Z][a-z]+)\b/g;
+    const potentialNames = [...userMessage.matchAll(namePattern)].map(m => `${m[1]} ${m[2]}`);
+    employeeNames = [...new Set([...employeeNames, ...potentialNames])];
+
+    // Query employee data if names detected
+    if (employeeNames.length > 0) {
+      try {
+        for (const name of employeeNames.slice(0, 3)) { // Limit to 3 names
+          const nameParts = name.split(" ");
+          const firstName = nameParts[0];
+          const lastName = nameParts.slice(1).join(" ");
+
+          // Query profiles with related data
+          const { data: employees } = await supabase
+            .from("profiles")
+            .select(`
+              id, first_name, last_name, employee_id, 
+              employment_status, gender, nationality,
+              email, phone_number, date_of_birth,
+              hire_date, termination_date,
+              company_id, department_id,
+              companies:company_id (name),
+              departments:department_id (name)
+            `)
+            .or(`and(first_name.ilike.%${firstName}%,last_name.ilike.%${lastName}%),and(first_name.ilike.%${lastName}%,last_name.ilike.%${firstName}%)`)
+            .limit(5);
+
+          if (employees && employees.length > 0) {
+            for (const emp of employees) {
+              // Build employee context respecting PII permissions
+              let empInfo = `\n--- Employee: ${emp.first_name} ${emp.last_name} ---\n`;
+              empInfo += `Employee ID: ${emp.employee_id || "N/A"}\n`;
+              empInfo += `Employment Status: ${emp.employment_status || "N/A"}\n`;
+              empInfo += `Company: ${(emp.companies as any)?.name || "N/A"}\n`;
+              empInfo += `Department: ${(emp.departments as any)?.name || "N/A"}\n`;
+              empInfo += `Hire Date: ${emp.hire_date || "N/A"}\n`;
+              
+              if (emp.termination_date) {
+                empInfo += `Termination Date: ${emp.termination_date}\n`;
+              }
+
+              // Include PII only if user has permission
+              if (canViewPii) {
+                empInfo += `Email: ${emp.email || "N/A"}\n`;
+                empInfo += `Phone: ${emp.phone_number || "N/A"}\n`;
+                empInfo += `Date of Birth: ${emp.date_of_birth || "N/A"}\n`;
+                empInfo += `Gender: ${emp.gender || "N/A"}\n`;
+                empInfo += `Nationality: ${emp.nationality || "N/A"}\n`;
+              } else {
+                empInfo += `[PII fields hidden - user does not have permission to view personal information]\n`;
+              }
+
+              // Get current position if available
+              try {
+                const { data: positions } = await supabase
+                  .from("employee_positions")
+                  .select(`
+                    is_primary, start_date, end_date,
+                    positions:position_id (title, position_code)
+                  `)
+                  .eq("employee_id", emp.id)
+                  .is("end_date", null)
+                  .order("is_primary", { ascending: false })
+                  .limit(1);
+
+                if (positions && positions.length > 0) {
+                  const pos = positions[0];
+                  empInfo += `Current Position: ${(pos.positions as any)?.title || "N/A"}\n`;
+                  empInfo += `Position Code: ${(pos.positions as any)?.position_code || "N/A"}\n`;
+                  empInfo += `Position Start Date: ${pos.start_date || "N/A"}\n`;
+                }
+              } catch (e) {
+                console.log("Position fetch error (non-critical):", e);
+              }
+
+              // Get manager info if available
+              try {
+                const { data: managerRelation } = await supabase
+                  .from("employee_managers")
+                  .select(`
+                    manager:manager_id (first_name, last_name)
+                  `)
+                  .eq("employee_id", emp.id)
+                  .eq("is_primary", true)
+                  .is("end_date", null)
+                  .single();
+
+                if (managerRelation && managerRelation.manager) {
+                  const mgr = managerRelation.manager as any;
+                  empInfo += `Manager: ${mgr.first_name} ${mgr.last_name}\n`;
+                }
+              } catch (e) {
+                // No manager found, that's ok
+              }
+
+              employeeContext += empInfo;
+            }
+          }
+        }
+      } catch (e) {
+        console.log("Employee fetch error:", e);
+      }
+    }
 
     // Get policy documents context (existing RAG system)
     try {
@@ -188,18 +310,22 @@ ${sopContext || "No specific SOPs loaded."}
 4. **Help Center Guidelines**: Reference the Help Center for feature usage guidance:
 ${helpCenterContext || "No specific help articles loaded."}
 
-5. **PII Protection**: ${canViewPii ? "This user has permission to view PII data." : "This user does NOT have permission to view PII (Personally Identifiable Information). Do NOT reveal specific emails, phone numbers, addresses, bank details, salaries, or other personal information of employees."}
+5. **Employee Data**: When users ask about specific employees, use this information from the database:
+${employeeContext || "No employee data found matching the query."}
 
-6. **Escalation Protocol**: ${triggeredEscalation ? "⚠️ IMPORTANT: This query involves a sensitive topic. Include a clear recommendation to contact HR directly for official guidance and documentation." : "For sensitive topics like terminations, legal matters, harassment, discrimination, or salary disputes, always recommend contacting HR directly."}
+6. **PII Protection**: ${canViewPii ? "This user has permission to view PII data." : "This user does NOT have permission to view PII (Personally Identifiable Information). Do NOT reveal specific emails, phone numbers, addresses, bank details, salaries, or other personal information of employees."}
 
-7. **Response Disclaimer**: Always end your responses with a brief disclaimer that your guidance should be verified with HR for official decisions.
+7. **Escalation Protocol**: ${triggeredEscalation ? "⚠️ IMPORTANT: This query involves a sensitive topic. Include a clear recommendation to contact HR directly for official guidance and documentation." : "For sensitive topics like terminations, legal matters, harassment, discrimination, or salary disputes, always recommend contacting HR directly."}
+
+8. **Response Disclaimer**: Always end your responses with a brief disclaimer that your guidance should be verified with HR for official decisions.
 
 ## IMPORTANT RULES:
 - Be professional, concise, and helpful
+- When answering questions about employees, use ONLY the employee data provided above - do not make up information
 - When referencing SOPs, list the steps clearly
 - When referencing policies, cite the policy name
 - If you don't have information about something, say so clearly
-- Never make up policies or procedures - only reference what's provided
+- Never make up policies, procedures, or employee details - only reference what's provided
 - For complex HR matters, always recommend speaking with HR directly
 - Protect employee privacy at all times`;
 
