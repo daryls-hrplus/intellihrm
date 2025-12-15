@@ -5072,6 +5072,10 @@
       "spinalPoints": {
         "title": "Spinal Points",
         "description": "Manage pay spines and spinal point salary scales"
+      },
+      "employeeCompensation": {
+        "title": "Employee Compensation",
+        "description": "Individual employee pay adjustments"
       }
     },
     "spinalPoints": {
@@ -5230,12 +5234,6 @@
         "isOverride": "This is an override to position compensation",
         "overrideReason": "Override Reason",
         "overrideReasonPlaceholder": "Reason for override..."
-      }
-    },
-    "modules": {
-      "employeeCompensation": {
-        "title": "Employee Compensation",
-        "description": "Individual employee pay adjustments"
       }
     },
     "meritCycles": {
