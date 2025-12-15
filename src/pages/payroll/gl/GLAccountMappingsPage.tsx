@@ -359,12 +359,15 @@ const GLAccountMappingsPage = () => {
                 </div>
                 <div className="space-y-2">
                   <Label>{t('payroll.gl.payElement', 'Pay Element')}</Label>
-                  <Select value={formData.pay_element_id} onValueChange={(v) => setFormData({ ...formData, pay_element_id: v })}>
+                  <Select
+                    value={formData.pay_element_id || 'all'}
+                    onValueChange={(v) => setFormData({ ...formData, pay_element_id: v === 'all' ? '' : v })}
+                  >
                     <SelectTrigger>
                       <SelectValue placeholder={t('common.all', 'All (Default)')} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">{t('common.all', 'All (Default)')}</SelectItem>
+                      <SelectItem value="all">{t('common.all', 'All (Default)')}</SelectItem>
                       {payElements.map(pe => (
                         <SelectItem key={pe.id} value={pe.id}>{pe.code} - {pe.name}</SelectItem>
                       ))}
@@ -375,12 +378,15 @@ const GLAccountMappingsPage = () => {
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>{t('payroll.gl.debitAccount', 'Debit Account')}</Label>
-                  <Select value={formData.debit_account_id} onValueChange={(v) => setFormData({ ...formData, debit_account_id: v })}>
+                  <Select
+                    value={formData.debit_account_id || 'none'}
+                    onValueChange={(v) => setFormData({ ...formData, debit_account_id: v === 'none' ? '' : v })}
+                  >
                     <SelectTrigger>
                       <SelectValue placeholder={t('common.select', 'Select...')} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">{t('common.none', 'None')}</SelectItem>
+                      <SelectItem value="none">{t('common.none', 'None')}</SelectItem>
                       {glAccounts.map(acc => (
                         <SelectItem key={acc.id} value={acc.id}>{acc.account_code} - {acc.account_name}</SelectItem>
                       ))}
@@ -389,12 +395,15 @@ const GLAccountMappingsPage = () => {
                 </div>
                 <div className="space-y-2">
                   <Label>{t('payroll.gl.creditAccount', 'Credit Account')}</Label>
-                  <Select value={formData.credit_account_id} onValueChange={(v) => setFormData({ ...formData, credit_account_id: v })}>
+                  <Select
+                    value={formData.credit_account_id || 'none'}
+                    onValueChange={(v) => setFormData({ ...formData, credit_account_id: v === 'none' ? '' : v })}
+                  >
                     <SelectTrigger>
                       <SelectValue placeholder={t('common.select', 'Select...')} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">{t('common.none', 'None')}</SelectItem>
+                      <SelectItem value="none">{t('common.none', 'None')}</SelectItem>
                       {glAccounts.map(acc => (
                         <SelectItem key={acc.id} value={acc.id}>{acc.account_code} - {acc.account_name}</SelectItem>
                       ))}
@@ -405,12 +414,15 @@ const GLAccountMappingsPage = () => {
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>{t('payroll.gl.defaultCostCenter', 'Default Cost Center')}</Label>
-                  <Select value={formData.default_cost_center_id} onValueChange={(v) => setFormData({ ...formData, default_cost_center_id: v })}>
+                  <Select
+                    value={formData.default_cost_center_id || 'none'}
+                    onValueChange={(v) => setFormData({ ...formData, default_cost_center_id: v === 'none' ? '' : v })}
+                  >
                     <SelectTrigger>
                       <SelectValue placeholder={t('common.none', 'None')} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">{t('common.none', 'None')}</SelectItem>
+                      <SelectItem value="none">{t('common.none', 'None')}</SelectItem>
                       {costCenters.map(cc => (
                         <SelectItem key={cc.id} value={cc.id}>{cc.cost_center_code} - {cc.cost_center_name}</SelectItem>
                       ))}
