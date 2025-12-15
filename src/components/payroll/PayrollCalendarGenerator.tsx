@@ -129,38 +129,58 @@ export function PayrollCalendarGenerator({ companyId, payGroup, onGenerated }: P
     return adjustPayDate(rawPayDate);
   };
 
-  // Calculate default start date and cycle number based on current date
+  // Check for existing cycles and calculate next available cycle number
   useEffect(() => {
-    if (!payGroup?.pay_frequency) return;
+    if (!payGroup?.id || !payGroup?.pay_frequency) return;
     
-    const now = new Date();
-    const currentMonth = now.getMonth();
-    const currentDay = now.getDate();
-    
-    switch (payGroup.pay_frequency) {
-      case "monthly":
-        // Default to current month
-        setStartingCycleNumber(currentMonth + 1);
-        setStartDate(format(new Date(selectedYear, currentMonth, 1), "yyyy-MM-dd"));
-        break;
-      case "semimonthly":
-        // Calculate which bi-monthly period we're in
-        const semiMonthlyPeriod = currentMonth * 2 + (currentDay > 15 ? 2 : 1);
-        setStartingCycleNumber(semiMonthlyPeriod);
-        if (currentDay > 15) {
-          setStartDate(format(new Date(selectedYear, currentMonth, 16), "yyyy-MM-dd"));
-        } else {
-          setStartDate(format(new Date(selectedYear, currentMonth, 1), "yyyy-MM-dd"));
+    const fetchExistingCycles = async () => {
+      // Query existing pay periods for this pay group and year
+      const { data: existingPeriods } = await supabase
+        .from("pay_periods")
+        .select("period_number, period_end")
+        .eq("pay_group_id", payGroup.id)
+        .eq("year", selectedYear)
+        .order("period_number", { ascending: false });
+      
+      if (existingPeriods && existingPeriods.length > 0) {
+        // Extract the numeric cycle number from period_number (format: "YYYY-NN")
+        const lastPeriodNumber = existingPeriods[0].period_number;
+        const lastCycleNum = parseInt(lastPeriodNumber.split("-")[1], 10);
+        const nextCycle = lastCycleNum + 1;
+        
+        // Set next available cycle number
+        setStartingCycleNumber(nextCycle);
+        
+        // Calculate next start date based on last period's end date
+        const lastEndDate = new Date(existingPeriods[0].period_end);
+        const nextStartDate = addDays(lastEndDate, 1);
+        setStartDate(format(nextStartDate, "yyyy-MM-dd"));
+      } else {
+        // No existing cycles - use defaults based on frequency
+        const now = new Date();
+        const currentMonth = now.getMonth();
+        const currentDay = now.getDate();
+        
+        switch (payGroup.pay_frequency) {
+          case "monthly":
+            setStartingCycleNumber(1);
+            setStartDate(format(new Date(selectedYear, 0, 1), "yyyy-MM-dd"));
+            break;
+          case "semimonthly":
+            setStartingCycleNumber(1);
+            setStartDate(format(new Date(selectedYear, 0, 1), "yyyy-MM-dd"));
+            break;
+          case "weekly":
+          case "biweekly":
+            setStartingCycleNumber(1);
+            setStartDate(format(startOfYear(new Date(selectedYear, 0, 1)), "yyyy-MM-dd"));
+            break;
         }
-        break;
-      case "weekly":
-      case "biweekly":
-        // For weekly/biweekly, default to start of year
-        setStartingCycleNumber(1);
-        setStartDate("");
-        break;
-    }
-  }, [payGroup.pay_frequency, selectedYear]);
+      }
+    };
+    
+    fetchExistingCycles();
+  }, [payGroup.id, payGroup.pay_frequency, selectedYear]);
 
   const countMondaysInPeriod = (start: Date, end: Date): number => {
     const days = eachDayOfInterval({ start, end });
