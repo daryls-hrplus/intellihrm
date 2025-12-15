@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import AppLayout from '@/components/AppLayout';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { AppLayout } from '@/components/layout/AppLayout';
+import { Breadcrumbs } from '@/components/ui/breadcrumbs';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -12,7 +13,9 @@ import { Badge } from '@/components/ui/badge';
 import { Plus, Search, Edit, Trash2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { usePayrollFilters } from '@/hooks/usePayrollFilters';
+import { PayrollFilters, usePayrollFilters } from '@/components/payroll/PayrollFilters';
+
+type AccountType = 'asset' | 'liability' | 'equity' | 'revenue' | 'expense';
 
 interface GLAccount {
   id: string;
@@ -30,7 +33,7 @@ interface GLAccount {
 
 const GLAccountsPage = () => {
   const { t } = useTranslation();
-  const { selectedCompanyId, CompanyFilter } = usePayrollFilters();
+  const { selectedCompanyId, setSelectedCompanyId } = usePayrollFilters();
   const [accounts, setAccounts] = useState<GLAccount[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -39,7 +42,7 @@ const GLAccountsPage = () => {
   const [formData, setFormData] = useState({
     account_code: '',
     account_name: '',
-    account_type: 'expense' as 'asset' | 'liability' | 'equity' | 'revenue' | 'expense',
+    account_type: 'expense' as AccountType,
     description: '',
     normal_balance: 'debit' as string,
     parent_account_id: '',
@@ -129,7 +132,7 @@ const GLAccountsPage = () => {
     setFormData({
       account_code: account.account_code,
       account_name: account.account_name,
-      account_type: account.account_type,
+      account_type: account.account_type as AccountType,
       description: account.description || '',
       normal_balance: account.normal_balance || 'debit',
       parent_account_id: account.parent_account_id || '',
@@ -160,16 +163,9 @@ const GLAccountsPage = () => {
 
   const accountTypes = ['asset', 'liability', 'equity', 'revenue', 'expense'];
 
-  const breadcrumbs = [
-    { label: t('common.home', 'Home'), href: '/' },
-    { label: t('payroll.title', 'Payroll'), href: '/payroll' },
-    { label: t('payroll.gl.title', 'GL Interface'), href: '/payroll/gl' },
-    { label: t('payroll.gl.chartOfAccounts', 'Chart of Accounts') }
-  ];
-
   if (!selectedCompanyId) {
     return (
-      <AppLayout breadcrumbs={breadcrumbs}>
+      <AppLayout>
         <div className="flex items-center justify-center h-64">
           <p className="text-muted-foreground">{t('common.selectCompany', 'Please select a company')}</p>
         </div>
@@ -178,8 +174,16 @@ const GLAccountsPage = () => {
   }
 
   return (
-    <AppLayout breadcrumbs={breadcrumbs}>
+    <AppLayout>
       <div className="space-y-6">
+        <Breadcrumbs
+          items={[
+            { label: t('payroll.title', 'Payroll'), href: '/payroll' },
+            { label: t('payroll.gl.title', 'GL Interface'), href: '/payroll/gl' },
+            { label: t('payroll.gl.chartOfAccounts', 'Chart of Accounts') }
+          ]}
+        />
+
         <div className="flex justify-between items-center">
           <div>
             <h1 className="text-3xl font-bold">{t('payroll.gl.chartOfAccounts', 'Chart of Accounts')}</h1>
@@ -194,7 +198,11 @@ const GLAccountsPage = () => {
         <Card>
           <CardHeader>
             <div className="flex gap-4 items-center">
-              <CompanyFilter />
+              <PayrollFilters
+                selectedCompanyId={selectedCompanyId}
+                onCompanyChange={setSelectedCompanyId}
+                showPayGroupFilter={false}
+              />
               <div className="relative flex-1 max-w-sm">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
@@ -278,7 +286,7 @@ const GLAccountsPage = () => {
                 </div>
                 <div className="space-y-2">
                   <Label>{t('payroll.gl.accountType', 'Account Type')}</Label>
-                  <Select value={formData.account_type} onValueChange={(v) => setFormData({ ...formData, account_type: v })}>
+                  <Select value={formData.account_type} onValueChange={(v) => setFormData({ ...formData, account_type: v as AccountType })}>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>

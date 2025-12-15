@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import AppLayout from '@/components/AppLayout';
+import { AppLayout } from '@/components/layout/AppLayout';
+import { Breadcrumbs } from '@/components/ui/breadcrumbs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { 
   BookOpen, 
@@ -68,15 +69,16 @@ const GLDashboardPage = () => {
     }
   ];
 
-  const breadcrumbs = [
-    { label: t('common.home', 'Home'), href: '/' },
-    { label: t('payroll.title', 'Payroll'), href: '/payroll' },
-    { label: t('payroll.gl.title', 'GL Interface') }
-  ];
-
   return (
-    <AppLayout breadcrumbs={breadcrumbs}>
+    <AppLayout>
       <div className="space-y-6">
+        <Breadcrumbs
+          items={[
+            { label: t('payroll.title', 'Payroll'), href: '/payroll' },
+            { label: t('payroll.gl.title', 'GL Interface') }
+          ]}
+        />
+
         <div>
           <h1 className="text-3xl font-bold">{t('payroll.gl.title', 'GL Interface')}</h1>
           <p className="text-muted-foreground mt-1">
