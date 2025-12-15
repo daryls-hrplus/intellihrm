@@ -20873,6 +20873,60 @@ export type Database = {
           },
         ]
       }
+      payroll_change_restrictions: {
+        Row: {
+          attempted_at: string
+          attempted_by: string | null
+          blocked: boolean | null
+          created_at: string
+          employee_id: string
+          id: string
+          operation: string
+          payroll_run_id: string | null
+          reason: string | null
+          table_name: string
+        }
+        Insert: {
+          attempted_at?: string
+          attempted_by?: string | null
+          blocked?: boolean | null
+          created_at?: string
+          employee_id: string
+          id?: string
+          operation: string
+          payroll_run_id?: string | null
+          reason?: string | null
+          table_name: string
+        }
+        Update: {
+          attempted_at?: string
+          attempted_by?: string | null
+          blocked?: boolean | null
+          created_at?: string
+          employee_id?: string
+          id?: string
+          operation?: string
+          payroll_run_id?: string | null
+          reason?: string | null
+          table_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payroll_change_restrictions_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payroll_change_restrictions_payroll_run_id_fkey"
+            columns: ["payroll_run_id"]
+            isOneToOne: false
+            referencedRelation: "payroll_runs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       payroll_deduction_config: {
         Row: {
           affects_pensionable_income: boolean | null
@@ -20943,6 +20997,67 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      payroll_employee_locks: {
+        Row: {
+          created_at: string
+          employee_id: string
+          id: string
+          lock_reason: string | null
+          locked_at: string
+          locked_by: string | null
+          pay_group_id: string
+          payroll_run_id: string
+          unlocked_at: string | null
+          unlocked_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          employee_id: string
+          id?: string
+          lock_reason?: string | null
+          locked_at?: string
+          locked_by?: string | null
+          pay_group_id: string
+          payroll_run_id: string
+          unlocked_at?: string | null
+          unlocked_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          employee_id?: string
+          id?: string
+          lock_reason?: string | null
+          locked_at?: string
+          locked_by?: string | null
+          pay_group_id?: string
+          payroll_run_id?: string
+          unlocked_at?: string | null
+          unlocked_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payroll_employee_locks_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payroll_employee_locks_pay_group_id_fkey"
+            columns: ["pay_group_id"]
+            isOneToOne: false
+            referencedRelation: "pay_groups"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payroll_employee_locks_payroll_run_id_fkey"
+            columns: ["payroll_run_id"]
+            isOneToOne: false
+            referencedRelation: "payroll_runs"
             referencedColumns: ["id"]
           },
         ]
@@ -21150,6 +21265,7 @@ export type Database = {
           base_currency_id: string | null
           calculated_at: string | null
           calculated_by: string | null
+          calculation_started_at: string | null
           company_id: string
           created_at: string
           created_by: string | null
@@ -21158,12 +21274,18 @@ export type Database = {
           exchange_rate_date: string | null
           exchange_rate_to_base: number | null
           id: string
+          is_locked: boolean | null
           local_currency_id: string | null
+          locked_at: string | null
+          locked_by: string | null
           notes: string | null
           paid_at: string | null
           paid_by: string | null
           pay_group_id: string | null
           pay_period_id: string
+          recalculation_approved_at: string | null
+          recalculation_approved_by: string | null
+          recalculation_requested_by: string | null
           run_number: string
           run_type: string
           status: string
@@ -21175,6 +21297,8 @@ export type Database = {
           total_net_pay: number | null
           total_net_pay_base: number | null
           total_taxes: number | null
+          unlocked_at: string | null
+          unlocked_by: string | null
           updated_at: string
           workflow_instance_id: string | null
         }
@@ -21184,6 +21308,7 @@ export type Database = {
           base_currency_id?: string | null
           calculated_at?: string | null
           calculated_by?: string | null
+          calculation_started_at?: string | null
           company_id: string
           created_at?: string
           created_by?: string | null
@@ -21192,12 +21317,18 @@ export type Database = {
           exchange_rate_date?: string | null
           exchange_rate_to_base?: number | null
           id?: string
+          is_locked?: boolean | null
           local_currency_id?: string | null
+          locked_at?: string | null
+          locked_by?: string | null
           notes?: string | null
           paid_at?: string | null
           paid_by?: string | null
           pay_group_id?: string | null
           pay_period_id: string
+          recalculation_approved_at?: string | null
+          recalculation_approved_by?: string | null
+          recalculation_requested_by?: string | null
           run_number: string
           run_type?: string
           status?: string
@@ -21209,6 +21340,8 @@ export type Database = {
           total_net_pay?: number | null
           total_net_pay_base?: number | null
           total_taxes?: number | null
+          unlocked_at?: string | null
+          unlocked_by?: string | null
           updated_at?: string
           workflow_instance_id?: string | null
         }
@@ -21218,6 +21351,7 @@ export type Database = {
           base_currency_id?: string | null
           calculated_at?: string | null
           calculated_by?: string | null
+          calculation_started_at?: string | null
           company_id?: string
           created_at?: string
           created_by?: string | null
@@ -21226,12 +21360,18 @@ export type Database = {
           exchange_rate_date?: string | null
           exchange_rate_to_base?: number | null
           id?: string
+          is_locked?: boolean | null
           local_currency_id?: string | null
+          locked_at?: string | null
+          locked_by?: string | null
           notes?: string | null
           paid_at?: string | null
           paid_by?: string | null
           pay_group_id?: string | null
           pay_period_id?: string
+          recalculation_approved_at?: string | null
+          recalculation_approved_by?: string | null
+          recalculation_requested_by?: string | null
           run_number?: string
           run_type?: string
           status?: string
@@ -21243,6 +21383,8 @@ export type Database = {
           total_net_pay?: number | null
           total_net_pay_base?: number | null
           total_taxes?: number | null
+          unlocked_at?: string | null
+          unlocked_by?: string | null
           updated_at?: string
           workflow_instance_id?: string | null
         }
@@ -29250,6 +29392,14 @@ export type Database = {
       is_admin_or_hr:
         | { Args: never; Returns: boolean }
         | { Args: { p_user_id: string }; Returns: boolean }
+      is_employee_payroll_finalized: {
+        Args: { p_employee_id: string; p_pay_period_id?: string }
+        Returns: boolean
+      }
+      is_employee_payroll_locked: {
+        Args: { p_employee_id: string }
+        Returns: boolean
+      }
       is_messaging_channel_admin: {
         Args: { p_channel_id: string; p_user_id: string }
         Returns: boolean

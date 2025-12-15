@@ -7,12 +7,14 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { usePayroll, PayrollRun, PayPeriod, EmployeePayroll } from "@/hooks/usePayroll";
 import { PayrollFilters, usePayrollFilters } from "@/components/payroll/PayrollFilters";
 import { supabase } from "@/integrations/supabase/client";
 import { useTranslation } from "react-i18next";
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
 import { 
   Plus, 
   Play, 
@@ -24,11 +26,25 @@ import {
   Users,
   Clock,
   Eye,
+  RefreshCw,
+  Lock,
+  Unlock,
+  AlertTriangle,
 } from "lucide-react";
 import { format, parseISO } from "date-fns";
 
+interface ExtendedPayrollRun extends PayrollRun {
+  calculation_started_at?: string | null;
+  is_locked?: boolean;
+  locked_at?: string | null;
+  recalculation_requested_by?: string | null;
+  recalculation_approved_by?: string | null;
+  recalculation_approved_at?: string | null;
+}
+
 export default function PayrollProcessingPage() {
   const { t } = useTranslation();
+  const { hasRole } = useAuth();
   const { selectedCompanyId, setSelectedCompanyId, selectedPayGroupId, setSelectedPayGroupId } = usePayrollFilters();
   const {
     isLoading,
@@ -36,6 +52,10 @@ export default function PayrollProcessingPage() {
     fetchPayrollRuns,
     createPayrollRun,
     calculatePayroll,
+    recalculatePayroll,
+    requestRecalculationApproval,
+    approveRecalculation,
+    reopenPayroll,
     approvePayroll,
     processPayment,
     fetchEmployeePayroll,
@@ -45,11 +65,19 @@ export default function PayrollProcessingPage() {
   } = usePayroll();
 
   const [periods, setPeriods] = useState<PayPeriod[]>([]);
-  const [payrollRuns, setPayrollRuns] = useState<PayrollRun[]>([]);
-  const [selectedRun, setSelectedRun] = useState<PayrollRun | null>(null);
+  const [payrollRuns, setPayrollRuns] = useState<ExtendedPayrollRun[]>([]);
+  const [selectedRun, setSelectedRun] = useState<ExtendedPayrollRun | null>(null);
   const [employeePayroll, setEmployeePayroll] = useState<EmployeePayroll[]>([]);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [detailDialogOpen, setDetailDialogOpen] = useState(false);
+  const [recalcConfirmOpen, setRecalcConfirmOpen] = useState(false);
+  const [reopenConfirmOpen, setReopenConfirmOpen] = useState(false);
+  const [runToRecalc, setRunToRecalc] = useState<ExtendedPayrollRun | null>(null);
+  const [runToReopen, setRunToReopen] = useState<ExtendedPayrollRun | null>(null);
+
+  const isAdmin = hasRole('admin');
+  const isHRManager = hasRole('hr_manager');
+  const canApproveSupervisor = isAdmin || isHRManager;
 
   const [createForm, setCreateForm] = useState({
     pay_period_id: "",
@@ -94,7 +122,62 @@ export default function PayrollProcessingPage() {
       .eq('pay_group_id', selectedPayGroupId)
       .order('created_at', { ascending: false });
     
-    setPayrollRuns((runData || []) as PayrollRun[]);
+    setPayrollRuns((runData || []) as ExtendedPayrollRun[]);
+  };
+
+  const handleCalculate = async (run: ExtendedPayrollRun) => {
+    if (!selectedCompanyId || !selectedPayGroupId) return;
+    const success = await calculatePayroll(run.id, selectedCompanyId, run.pay_period_id, selectedPayGroupId);
+    if (success) loadData();
+  };
+
+  const handleRecalculate = async (run: ExtendedPayrollRun) => {
+    if (run.status === 'approved') {
+      // For approved runs, need supervisor approval first
+      if (canApproveSupervisor) {
+        setRunToRecalc(run);
+        setRecalcConfirmOpen(true);
+      } else {
+        // Request approval from supervisor
+        const success = await requestRecalculationApproval(run.id);
+        if (success) loadData();
+      }
+    } else if (run.status === 'calculated') {
+      // For calculated runs, can recalculate directly
+      setRunToRecalc(run);
+      setRecalcConfirmOpen(true);
+    }
+  };
+
+  const confirmRecalculate = async () => {
+    if (!runToRecalc || !selectedCompanyId || !selectedPayGroupId) return;
+    
+    // If supervisor approving for approved run
+    if (runToRecalc.status === 'approved' && canApproveSupervisor) {
+      await approveRecalculation(runToRecalc.id);
+    }
+    
+    const success = await recalculatePayroll(runToRecalc.id, selectedCompanyId, runToRecalc.pay_period_id, selectedPayGroupId);
+    if (success) {
+      setRecalcConfirmOpen(false);
+      setRunToRecalc(null);
+      loadData();
+    }
+  };
+
+  const handleReopen = async (run: ExtendedPayrollRun) => {
+    setRunToReopen(run);
+    setReopenConfirmOpen(true);
+  };
+
+  const confirmReopen = async () => {
+    if (!runToReopen) return;
+    const success = await reopenPayroll(runToReopen.id);
+    if (success) {
+      setReopenConfirmOpen(false);
+      setRunToReopen(null);
+      loadData();
+    }
   };
 
   const handleCreateRun = async () => {
@@ -116,41 +199,34 @@ export default function PayrollProcessingPage() {
     }
   };
 
-  const handleCalculate = async (run: PayrollRun) => {
-    if (!selectedCompanyId) return;
-    const success = await calculatePayroll(run.id, selectedCompanyId, run.pay_period_id);
-    if (success) loadData();
-  };
-
-  const handleApprove = async (run: PayrollRun) => {
+  const handleApprove = async (run: ExtendedPayrollRun) => {
     const success = await approvePayroll(run.id);
     if (success) loadData();
   };
 
-  const handleProcessPayment = async (run: PayrollRun) => {
+  const handleProcessPayment = async (run: ExtendedPayrollRun) => {
     const success = await processPayment(run.id);
     if (success) loadData();
   };
 
-  const handleGeneratePayslips = async (run: PayrollRun) => {
+  const handleGeneratePayslips = async (run: ExtendedPayrollRun) => {
     const success = await generatePayslips(run.id);
     if (success) loadData();
   };
 
-  const handleGenerateBankFile = async (run: PayrollRun) => {
+  const handleGenerateBankFile = async (run: ExtendedPayrollRun) => {
     if (!selectedCompanyId) return;
     
     const bankConfigs = await fetchBankFileConfig(selectedCompanyId);
     const primaryConfig = bankConfigs.find(c => c.is_primary) || bankConfigs[0];
     
     if (!primaryConfig) {
-      alert("Please configure a bank file first");
+      toast.error("Please configure a bank file first");
       return;
     }
     
     const content = await generateBankFile(run.id, primaryConfig.id, selectedCompanyId);
     if (content) {
-      // Download the file
       const blob = new Blob([content], { type: 'text/csv' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -161,7 +237,7 @@ export default function PayrollProcessingPage() {
     }
   };
 
-  const viewRunDetails = async (run: PayrollRun) => {
+  const viewRunDetails = async (run: ExtendedPayrollRun) => {
     setSelectedRun(run);
     const empPayroll = await fetchEmployeePayroll(run.id);
     setEmployeePayroll(empPayroll);
@@ -314,6 +390,8 @@ export default function PayrollProcessingPage() {
                   <TableHead>{t("payroll.processing.employees")}</TableHead>
                   <TableHead>{t("payroll.processing.grossPay")}</TableHead>
                   <TableHead>{t("payroll.processing.netPay")}</TableHead>
+                  <TableHead>Started</TableHead>
+                  <TableHead>Completed</TableHead>
                   <TableHead>{t("common.status")}</TableHead>
                   <TableHead className="text-right">{t("common.actions")}</TableHead>
                 </TableRow>
@@ -321,7 +399,14 @@ export default function PayrollProcessingPage() {
               <TableBody>
                 {payrollRuns.map((run) => (
                   <TableRow key={run.id}>
-                    <TableCell className="font-medium">{run.run_number}</TableCell>
+                    <TableCell className="font-medium">
+                      <div className="flex items-center gap-2">
+                        {run.run_number}
+                        {run.is_locked && (
+                          <Lock className="h-3 w-3 text-warning" />
+                        )}
+                      </div>
+                    </TableCell>
                     <TableCell className="capitalize">{run.run_type.replace('_', ' ')}</TableCell>
                     <TableCell>
                       {run.pay_period && (
@@ -333,10 +418,24 @@ export default function PayrollProcessingPage() {
                     <TableCell>{run.employee_count}</TableCell>
                     <TableCell>{formatCurrency(run.total_gross_pay, run.currency)}</TableCell>
                     <TableCell>{formatCurrency(run.total_net_pay, run.currency)}</TableCell>
+                    <TableCell className="text-xs text-muted-foreground">
+                      {run.calculation_started_at ? format(parseISO(run.calculation_started_at), "MMM d HH:mm") : '-'}
+                    </TableCell>
+                    <TableCell className="text-xs text-muted-foreground">
+                      {run.calculated_at ? format(parseISO(run.calculated_at), "MMM d HH:mm") : '-'}
+                    </TableCell>
                     <TableCell>
-                      <Badge className={getStatusColor(run.status)}>
-                        {run.status.replace('_', ' ').charAt(0).toUpperCase() + run.status.slice(1).replace('_', ' ')}
-                      </Badge>
+                      <div className="flex flex-col gap-1">
+                        <Badge className={getStatusColor(run.status)}>
+                          {run.status.replace('_', ' ').charAt(0).toUpperCase() + run.status.slice(1).replace('_', ' ')}
+                        </Badge>
+                        {run.recalculation_requested_by && !run.recalculation_approved_by && (
+                          <Badge variant="outline" className="text-xs">
+                            <AlertTriangle className="h-3 w-3 mr-1" />
+                            Recalc Pending
+                          </Badge>
+                        )}
+                      </div>
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-1">
@@ -344,27 +443,40 @@ export default function PayrollProcessingPage() {
                           <Eye className="h-4 w-4" />
                         </Button>
                         {run.status === 'draft' && (
-                          <Button variant="ghost" size="sm" onClick={() => handleCalculate(run)} title="Calculate">
+                          <Button variant="ghost" size="sm" onClick={() => handleCalculate(run)} title="Calculate" disabled={isLoading}>
                             <Play className="h-4 w-4" />
                           </Button>
                         )}
                         {run.status === 'calculated' && (
-                          <Button variant="ghost" size="sm" onClick={() => handleApprove(run)} title="Approve">
-                            <CheckCircle className="h-4 w-4" />
-                          </Button>
+                          <>
+                            <Button variant="ghost" size="sm" onClick={() => handleRecalculate(run)} title="Recalculate" disabled={isLoading}>
+                              <RefreshCw className="h-4 w-4" />
+                            </Button>
+                            <Button variant="ghost" size="sm" onClick={() => handleApprove(run)} title="Approve" disabled={isLoading}>
+                              <CheckCircle className="h-4 w-4" />
+                            </Button>
+                          </>
                         )}
                         {run.status === 'approved' && (
                           <>
-                            <Button variant="ghost" size="sm" onClick={() => handleGeneratePayslips(run)} title="Generate Payslips">
+                            <Button variant="ghost" size="sm" onClick={() => handleRecalculate(run)} title="Request Recalculation" disabled={isLoading}>
+                              <RefreshCw className="h-4 w-4" />
+                            </Button>
+                            <Button variant="ghost" size="sm" onClick={() => handleGeneratePayslips(run)} title="Generate Payslips" disabled={isLoading}>
                               <FileText className="h-4 w-4" />
                             </Button>
-                            <Button variant="ghost" size="sm" onClick={() => handleGenerateBankFile(run)} title="Generate Bank File">
+                            <Button variant="ghost" size="sm" onClick={() => handleGenerateBankFile(run)} title="Generate Bank File" disabled={isLoading}>
                               <Download className="h-4 w-4" />
                             </Button>
-                            <Button variant="ghost" size="sm" onClick={() => handleProcessPayment(run)} title="Process Payment">
+                            <Button variant="ghost" size="sm" onClick={() => handleProcessPayment(run)} title="Process Payment" disabled={isLoading}>
                               <DollarSign className="h-4 w-4" />
                             </Button>
                           </>
+                        )}
+                        {run.status === 'paid' && canApproveSupervisor && (
+                          <Button variant="ghost" size="sm" onClick={() => handleReopen(run)} title="Reopen for Changes" disabled={isLoading}>
+                            <Unlock className="h-4 w-4" />
+                          </Button>
                         )}
                       </div>
                     </TableCell>
@@ -518,6 +630,47 @@ export default function PayrollProcessingPage() {
                 </Table>
               </div>
             )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Recalculation Confirmation Dialog */}
+        <Dialog open={recalcConfirmOpen} onOpenChange={setRecalcConfirmOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Confirm Recalculation</DialogTitle>
+              <DialogDescription>
+                {runToRecalc?.status === 'approved' 
+                  ? "This payroll run has been approved. Recalculating will delete existing calculations and require re-approval."
+                  : "This will delete existing calculations and recalculate payroll for all employees in this run."}
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setRecalcConfirmOpen(false)}>Cancel</Button>
+              <Button onClick={confirmRecalculate} disabled={isLoading}>
+                <RefreshCw className="h-4 w-4 mr-2" />
+                Recalculate
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Reopen Confirmation Dialog */}
+        <Dialog open={reopenConfirmOpen} onOpenChange={setReopenConfirmOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Reopen Payroll Run</DialogTitle>
+              <DialogDescription>
+                This will unlock employees for data changes and reset the payroll run to draft status. 
+                All calculations will be deleted and must be re-run. This action should only be used for corrections.
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setReopenConfirmOpen(false)}>Cancel</Button>
+              <Button variant="destructive" onClick={confirmReopen} disabled={isLoading}>
+                <Unlock className="h-4 w-4 mr-2" />
+                Reopen for Changes
+              </Button>
+            </DialogFooter>
           </DialogContent>
         </Dialog>
       </div>
