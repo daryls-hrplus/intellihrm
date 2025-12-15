@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -140,9 +140,18 @@ export function PayrollCalendarGenerator({ companyId, payGroup, onGenerated }: P
     }
   };
 
+  // Track if we're auto-updating the year to prevent double-increment
+  const isAutoUpdatingYear = useRef(false);
+
   // Check for existing cycles and calculate next available cycle number
   useEffect(() => {
     if (!payGroup?.id || !payGroup?.pay_frequency) return;
+    
+    // Skip if we just auto-updated the year
+    if (isAutoUpdatingYear.current) {
+      isAutoUpdatingYear.current = false;
+      return;
+    }
     
     const fetchExistingCycles = async () => {
       // Query existing pay periods for this pay group and year
@@ -162,10 +171,12 @@ export function PayrollCalendarGenerator({ companyId, payGroup, onGenerated }: P
         
         // Check if all cycles for the year are already generated
         if (lastCycleNum >= maxCycles) {
-          // Year is complete - default to next year, cycle 1
-          setSelectedYear(selectedYear + 1);
+          // Year is complete - update year to next year and set cycle 1
+          const nextYear = selectedYear + 1;
+          isAutoUpdatingYear.current = true;
+          setSelectedYear(nextYear);
           setStartingCycleNumber(1);
-          setStartDate(format(new Date(selectedYear + 1, 0, 1), "yyyy-MM-dd"));
+          setStartDate(format(new Date(nextYear, 0, 1), "yyyy-MM-dd"));
         } else {
           // Set next available cycle number
           setStartingCycleNumber(lastCycleNum + 1);
