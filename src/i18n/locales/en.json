@@ -5058,7 +5058,40 @@
       "analytics": {
         "title": "Analytics",
         "description": "Compensation insights and trends"
+      },
+      "spinalPoints": {
+        "title": "Spinal Points",
+        "description": "Manage pay spines and spinal point salary scales"
       }
+    },
+    "spinalPoints": {
+      "title": "Spinal Points",
+      "subtitle": "Manage pay spines and spinal point salary scales",
+      "paySpines": "Pay Spines",
+      "addPaySpine": "Add Pay Spine",
+      "noPaySpines": "No pay spines found. Create one to get started.",
+      "addPoint": "Add Point",
+      "noPoints": "No spinal points defined",
+      "point": "Point",
+      "annualSalary": "Annual Salary",
+      "hourlyRate": "Hourly Rate",
+      "effectiveDate": "Effective Date",
+      "dialog": {
+        "createSpine": "Create Pay Spine",
+        "editSpine": "Edit Pay Spine",
+        "createPoint": "Add Spinal Point",
+        "editPoint": "Edit Spinal Point",
+        "namePlaceholder": "e.g., NJC Pay Spine",
+        "codePlaceholder": "e.g., NJC-2024"
+      },
+      "confirmDeleteSpine": "Delete pay spine \"{{name}}\"? This will also delete all spinal points.",
+      "confirmDeletePoint": "Delete point {{number}}?",
+      "spineCreated": "Pay spine created",
+      "spineUpdated": "Pay spine updated",
+      "spineDeleted": "Pay spine deleted",
+      "pointCreated": "Spinal point created",
+      "pointUpdated": "Spinal point updated",
+      "pointDeleted": "Spinal point deleted"
     },
     "payElements": {
       "title": "Pay Elements",

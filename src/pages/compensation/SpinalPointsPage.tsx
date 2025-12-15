@@ -37,6 +37,7 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import { Plus, Pencil, Trash2, ChevronDown, ChevronRight, Loader2 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { format } from "date-fns";
 
 interface Company {
@@ -68,6 +69,7 @@ interface SpinalPoint {
 }
 
 export default function SpinalPointsPage() {
+  const { t } = useTranslation();
   const [companies, setCompanies] = useState<Company[]>([]);
   const [selectedCompanyId, setSelectedCompanyId] = useState<string>("");
   const [paySpines, setPaySpines] = useState<PaySpine[]>([]);
@@ -103,8 +105,8 @@ export default function SpinalPointsPage() {
   });
 
   const breadcrumbItems = [
-    { label: "Compensation", href: "/compensation" },
-    { label: "Spinal Points" },
+    { label: t("compensation.title"), href: "/compensation" },
+    { label: t("compensation.spinalPoints.title") },
   ];
 
   useEffect(() => {
@@ -231,7 +233,7 @@ export default function SpinalPointsPage() {
 
   async function handleSaveSpine() {
     if (!spineForm.name || !spineForm.code) {
-      toast.error("Name and code are required");
+      toast.error(t("common.fillRequired"));
       return;
     }
 
@@ -258,9 +260,9 @@ export default function SpinalPointsPage() {
     }
 
     if (error) {
-      toast.error("Failed to save pay spine");
+      toast.error(t("common.error"));
     } else {
-      toast.success(editingSpine ? "Pay spine updated" : "Pay spine created");
+      toast.success(editingSpine ? t("compensation.spinalPoints.spineUpdated") : t("compensation.spinalPoints.spineCreated"));
       setSpineDialogOpen(false);
       loadPaySpines();
     }
@@ -268,22 +270,22 @@ export default function SpinalPointsPage() {
   }
 
   async function handleDeleteSpine(spine: PaySpine) {
-    if (!confirm(`Delete pay spine "${spine.name}"? This will also delete all spinal points.`)) {
+    if (!confirm(t("compensation.spinalPoints.confirmDeleteSpine", { name: spine.name }))) {
       return;
     }
 
     const { error } = await supabase.from("pay_spines").delete().eq("id", spine.id);
     if (error) {
-      toast.error("Failed to delete pay spine");
+      toast.error(t("common.error"));
     } else {
-      toast.success("Pay spine deleted");
+      toast.success(t("compensation.spinalPoints.spineDeleted"));
       loadPaySpines();
     }
   }
 
   async function handleSavePoint() {
     if (!pointForm.point_number || !pointForm.annual_salary) {
-      toast.error("Point number and annual salary are required");
+      toast.error(t("common.fillRequired"));
       return;
     }
 
@@ -309,9 +311,9 @@ export default function SpinalPointsPage() {
     }
 
     if (error) {
-      toast.error("Failed to save spinal point");
+      toast.error(t("common.error"));
     } else {
-      toast.success(editingPoint ? "Spinal point updated" : "Spinal point created");
+      toast.success(editingPoint ? t("compensation.spinalPoints.pointUpdated") : t("compensation.spinalPoints.pointCreated"));
       setPointDialogOpen(false);
       loadSpinalPoints(selectedSpineId);
     }
@@ -319,13 +321,13 @@ export default function SpinalPointsPage() {
   }
 
   async function handleDeletePoint(point: SpinalPoint) {
-    if (!confirm(`Delete point ${point.point_number}?`)) return;
+    if (!confirm(t("compensation.spinalPoints.confirmDeletePoint", { number: point.point_number }))) return;
 
     const { error } = await supabase.from("spinal_points").delete().eq("id", point.id);
     if (error) {
-      toast.error("Failed to delete spinal point");
+      toast.error(t("common.error"));
     } else {
-      toast.success("Spinal point deleted");
+      toast.success(t("compensation.spinalPoints.pointDeleted"));
       loadSpinalPoints(point.pay_spine_id);
     }
   }
@@ -344,15 +346,15 @@ export default function SpinalPointsPage() {
 
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold">Spinal Points</h1>
+            <h1 className="text-2xl font-bold">{t("compensation.spinalPoints.title")}</h1>
             <p className="text-muted-foreground">
-              Manage pay spines and spinal point salary scales
+              {t("compensation.spinalPoints.subtitle")}
             </p>
           </div>
           <div className="flex items-center gap-4">
             <Select value={selectedCompanyId} onValueChange={setSelectedCompanyId}>
               <SelectTrigger className="w-[200px]">
-                <SelectValue placeholder="Select company" />
+                <SelectValue placeholder={t("common.selectCompany")} />
               </SelectTrigger>
               <SelectContent>
                 {companies.map((c) => (
@@ -364,14 +366,14 @@ export default function SpinalPointsPage() {
             </Select>
             <Button onClick={() => openSpineDialog()}>
               <Plus className="mr-2 h-4 w-4" />
-              Add Pay Spine
+              {t("compensation.spinalPoints.addPaySpine")}
             </Button>
           </div>
         </div>
 
         <Card>
           <CardHeader>
-            <CardTitle>Pay Spines</CardTitle>
+            <CardTitle>{t("compensation.spinalPoints.paySpines")}</CardTitle>
           </CardHeader>
           <CardContent>
             {isLoading ? (
@@ -380,7 +382,7 @@ export default function SpinalPointsPage() {
               </div>
             ) : paySpines.length === 0 ? (
               <p className="text-center text-muted-foreground py-8">
-                No pay spines found. Create one to get started.
+                {t("compensation.spinalPoints.noPaySpines")}
               </p>
             ) : (
               <div className="space-y-2">
@@ -431,14 +433,14 @@ export default function SpinalPointsPage() {
                       <CollapsibleContent>
                         <div className="border-t p-4">
                           <div className="flex items-center justify-between mb-4">
-                            <h4 className="font-medium">Spinal Points</h4>
+                            <h4 className="font-medium">{t("compensation.spinalPoints.title")}</h4>
                             <Button
                               size="sm"
                               variant="outline"
                               onClick={() => openPointDialog(spine.id)}
                             >
                               <Plus className="mr-2 h-3 w-3" />
-                              Add Point
+                              {t("compensation.spinalPoints.addPoint")}
                             </Button>
                           </div>
                           {!spinalPoints[spine.id] ? (
@@ -447,18 +449,18 @@ export default function SpinalPointsPage() {
                             </div>
                           ) : spinalPoints[spine.id].length === 0 ? (
                             <p className="text-sm text-muted-foreground text-center py-4">
-                              No spinal points defined
+                              {t("compensation.spinalPoints.noPoints")}
                             </p>
                           ) : (
                             <Table>
                               <TableHeader>
                                 <TableRow>
-                                  <TableHead className="w-20">Point</TableHead>
-                                  <TableHead>Annual Salary</TableHead>
-                                  <TableHead>Hourly Rate</TableHead>
-                                  <TableHead>Effective Date</TableHead>
-                                  <TableHead>End Date</TableHead>
-                                  <TableHead className="w-20">Actions</TableHead>
+                                  <TableHead className="w-20">{t("compensation.spinalPoints.point")}</TableHead>
+                                  <TableHead>{t("compensation.spinalPoints.annualSalary")}</TableHead>
+                                  <TableHead>{t("compensation.spinalPoints.hourlyRate")}</TableHead>
+                                  <TableHead>{t("compensation.spinalPoints.effectiveDate")}</TableHead>
+                                  <TableHead>{t("common.endDate")}</TableHead>
+                                  <TableHead className="w-20">{t("common.actions")}</TableHead>
                                 </TableRow>
                               </TableHeader>
                               <TableBody>
@@ -517,39 +519,39 @@ export default function SpinalPointsPage() {
           <DialogContent className="max-w-md">
             <DialogHeader>
               <DialogTitle>
-                {editingSpine ? "Edit Pay Spine" : "Create Pay Spine"}
+                {editingSpine ? t("compensation.spinalPoints.dialog.editSpine") : t("compensation.spinalPoints.dialog.createSpine")}
               </DialogTitle>
             </DialogHeader>
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>Name *</Label>
+                  <Label>{t("common.name")} *</Label>
                   <Input
                     value={spineForm.name}
                     onChange={(e) => setSpineForm({ ...spineForm, name: e.target.value })}
-                    placeholder="e.g., NJC Pay Spine"
+                    placeholder={t("compensation.spinalPoints.dialog.namePlaceholder")}
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>Code *</Label>
+                  <Label>{t("common.code")} *</Label>
                   <Input
                     value={spineForm.code}
                     onChange={(e) => setSpineForm({ ...spineForm, code: e.target.value })}
-                    placeholder="e.g., NJC-2024"
+                    placeholder={t("compensation.spinalPoints.dialog.codePlaceholder")}
                   />
                 </div>
               </div>
               <div className="space-y-2">
-                <Label>Description</Label>
+                <Label>{t("common.description")}</Label>
                 <Textarea
                   value={spineForm.description}
                   onChange={(e) => setSpineForm({ ...spineForm, description: e.target.value })}
-                  placeholder="Optional description"
+                  placeholder={t("common.optional")}
                 />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>Currency</Label>
+                  <Label>{t("common.currency")}</Label>
                   <Select
                     value={spineForm.currency}
                     onValueChange={(v) => setSpineForm({ ...spineForm, currency: v })}
@@ -565,7 +567,7 @@ export default function SpinalPointsPage() {
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label>Effective Date</Label>
+                  <Label>{t("compensation.spinalPoints.effectiveDate")}</Label>
                   <Input
                     type="date"
                     value={spineForm.effective_date}
@@ -575,7 +577,7 @@ export default function SpinalPointsPage() {
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>End Date</Label>
+                  <Label>{t("common.endDate")}</Label>
                   <Input
                     type="date"
                     value={spineForm.end_date}
@@ -587,17 +589,17 @@ export default function SpinalPointsPage() {
                     checked={spineForm.is_active}
                     onCheckedChange={(v) => setSpineForm({ ...spineForm, is_active: v })}
                   />
-                  <Label>Active</Label>
+                  <Label>{t("common.active")}</Label>
                 </div>
               </div>
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setSpineDialogOpen(false)}>
-                Cancel
+                {t("common.cancel")}
               </Button>
               <Button onClick={handleSaveSpine} disabled={isSaving}>
                 {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                {editingSpine ? "Update" : "Create"}
+                {editingSpine ? t("common.update") : t("common.create")}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -608,13 +610,13 @@ export default function SpinalPointsPage() {
           <DialogContent className="max-w-md">
             <DialogHeader>
               <DialogTitle>
-                {editingPoint ? "Edit Spinal Point" : "Add Spinal Point"}
+                {editingPoint ? t("compensation.spinalPoints.dialog.editPoint") : t("compensation.spinalPoints.dialog.createPoint")}
               </DialogTitle>
             </DialogHeader>
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>Point Number *</Label>
+                  <Label>{t("compensation.spinalPoints.point")} *</Label>
                   <Input
                     type="number"
                     value={pointForm.point_number}
@@ -622,7 +624,7 @@ export default function SpinalPointsPage() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>Annual Salary *</Label>
+                  <Label>{t("compensation.spinalPoints.annualSalary")} *</Label>
                   <Input
                     type="number"
                     step="0.01"
@@ -632,7 +634,7 @@ export default function SpinalPointsPage() {
                 </div>
               </div>
               <div className="space-y-2">
-                <Label>Hourly Rate (optional)</Label>
+                <Label>{t("compensation.spinalPoints.hourlyRate")} ({t("common.optional")})</Label>
                 <Input
                   type="number"
                   step="0.0001"
@@ -642,7 +644,7 @@ export default function SpinalPointsPage() {
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>Effective Date</Label>
+                  <Label>{t("compensation.spinalPoints.effectiveDate")}</Label>
                   <Input
                     type="date"
                     value={pointForm.effective_date}
@@ -650,7 +652,7 @@ export default function SpinalPointsPage() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>End Date</Label>
+                  <Label>{t("common.endDate")}</Label>
                   <Input
                     type="date"
                     value={pointForm.end_date}
@@ -659,7 +661,7 @@ export default function SpinalPointsPage() {
                 </div>
               </div>
               <div className="space-y-2">
-                <Label>Notes</Label>
+                <Label>{t("common.notes")}</Label>
                 <Textarea
                   value={pointForm.notes}
                   onChange={(e) => setPointForm({ ...pointForm, notes: e.target.value })}
@@ -668,11 +670,11 @@ export default function SpinalPointsPage() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setPointDialogOpen(false)}>
-                Cancel
+                {t("common.cancel")}
               </Button>
               <Button onClick={handleSavePoint} disabled={isSaving}>
                 {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                {editingPoint ? "Update" : "Add"}
+                {editingPoint ? t("common.update") : t("common.add")}
               </Button>
             </DialogFooter>
           </DialogContent>
