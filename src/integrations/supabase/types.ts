@@ -25764,6 +25764,7 @@ export type Database = {
           min_age: number | null
           min_amount: number
           notes: string | null
+          pay_frequency: string | null
           per_monday_amount: number | null
           start_date: string
           statutory_type_id: string
@@ -25788,6 +25789,7 @@ export type Database = {
           min_age?: number | null
           min_amount?: number
           notes?: string | null
+          pay_frequency?: string | null
           per_monday_amount?: number | null
           start_date: string
           statutory_type_id: string
@@ -25812,6 +25814,7 @@ export type Database = {
           min_age?: number | null
           min_amount?: number
           notes?: string | null
+          pay_frequency?: string | null
           per_monday_amount?: number | null
           start_date?: string
           statutory_type_id?: string
