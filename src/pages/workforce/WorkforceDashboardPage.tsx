@@ -5,6 +5,7 @@ import { NavLink } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { ModuleReportsButton } from "@/components/reports/ModuleReportsButton";
 import { ModuleBIButton } from "@/components/bi/ModuleBIButton";
+import { useGranularPermissions } from "@/hooks/useGranularPermissions";
 import {
   Users,
   UserCheck,
@@ -37,14 +38,16 @@ export default function WorkforceDashboardPage() {
   const { t } = useTranslation();
   const [stats, setStats] = useState<Stats>({ totalEmployees: 0, activeCompanies: 0, newThisMonth: 0 });
   const [isLoading, setIsLoading] = useState(true);
+  const { hasTabAccess, isLoading: permissionsLoading } = useGranularPermissions();
 
-  const workforceModules = [
+  const workforceModulesAll = [
     {
       title: t("workforce.modules.companyGroups.title"),
       description: t("workforce.modules.companyGroups.description"),
       href: "/workforce/company-groups",
       icon: Layers,
       color: "bg-cyan-500/10 text-cyan-500",
+      tabCode: "company_groups",
     },
     {
       title: t("workforce.modules.companies.title"),
@@ -52,6 +55,7 @@ export default function WorkforceDashboardPage() {
       href: "/workforce/companies",
       icon: Building2,
       color: "bg-orange-500/10 text-orange-500",
+      tabCode: "companies",
     },
     {
       title: t("workforce.modules.employees.title"),
@@ -59,6 +63,7 @@ export default function WorkforceDashboardPage() {
       href: "/workforce/employees",
       icon: Users,
       color: "bg-primary/10 text-primary",
+      tabCode: "employees",
     },
     {
       title: t("workforce.modules.positions.title"),
@@ -66,6 +71,7 @@ export default function WorkforceDashboardPage() {
       href: "/workforce/positions",
       icon: UserCheck,
       color: "bg-info/10 text-info",
+      tabCode: "positions",
     },
     {
       title: t("workforce.modules.assignments.title"),
@@ -73,6 +79,7 @@ export default function WorkforceDashboardPage() {
       href: "/workforce/assignments",
       icon: UserCog,
       color: "bg-purple-500/10 text-purple-500",
+      tabCode: "assignments",
     },
     {
       title: t("workforce.modules.orgStructure.title"),
@@ -80,6 +87,7 @@ export default function WorkforceDashboardPage() {
       href: "/workforce/org-structure",
       icon: Network,
       color: "bg-success/10 text-success",
+      tabCode: "org_structure",
     },
     {
       title: t("workforce.modules.departments.title"),
@@ -87,6 +95,7 @@ export default function WorkforceDashboardPage() {
       href: "/workforce/departments",
       icon: FolderTree,
       color: "bg-warning/10 text-warning",
+      tabCode: "departments",
     },
     {
       title: t("workforce.modules.orgChanges.title"),
@@ -94,6 +103,7 @@ export default function WorkforceDashboardPage() {
       href: "/workforce/org-changes",
       icon: TrendingUp,
       color: "bg-accent/10 text-accent-foreground",
+      tabCode: "org_changes",
     },
     {
       title: t("workforce.modules.transactions.title"),
@@ -101,6 +111,7 @@ export default function WorkforceDashboardPage() {
       href: "/workforce/transactions",
       icon: UserPlus,
       color: "bg-destructive/10 text-destructive",
+      tabCode: "transactions",
     },
     {
       title: t("workforce.modules.forecasting.title"),
@@ -108,6 +119,7 @@ export default function WorkforceDashboardPage() {
       href: "/workforce/forecasting",
       icon: LineChart,
       color: "bg-indigo-500/10 text-indigo-500",
+      tabCode: "forecasting",
     },
     {
       title: t("workforce.modules.jobFamilies.title"),
@@ -115,6 +127,7 @@ export default function WorkforceDashboardPage() {
       href: "/workforce/job-families",
       icon: FolderTree,
       color: "bg-teal-500/10 text-teal-500",
+      tabCode: "job_families",
     },
     {
       title: t("workforce.modules.jobs.title"),
@@ -122,6 +135,7 @@ export default function WorkforceDashboardPage() {
       href: "/workforce/jobs",
       icon: Briefcase,
       color: "bg-emerald-500/10 text-emerald-500",
+      tabCode: "jobs",
     },
     {
       title: t("workforce.modules.competencies.title"),
@@ -129,6 +143,7 @@ export default function WorkforceDashboardPage() {
       href: "/workforce/competencies",
       icon: Target,
       color: "bg-rose-500/10 text-rose-500",
+      tabCode: "competencies",
     },
     {
       title: t("workforce.modules.responsibilities.title"),
@@ -136,6 +151,7 @@ export default function WorkforceDashboardPage() {
       href: "/workforce/responsibilities",
       icon: ClipboardList,
       color: "bg-amber-500/10 text-amber-500",
+      tabCode: "responsibilities",
     },
     {
       title: t("workforce.modules.onboarding.title"),
@@ -143,6 +159,7 @@ export default function WorkforceDashboardPage() {
       href: "/workforce/onboarding",
       icon: Rocket,
       color: "bg-emerald-500/10 text-emerald-500",
+      tabCode: "onboarding",
     },
     {
       title: t("workforce.modules.offboarding.title"),
@@ -150,6 +167,7 @@ export default function WorkforceDashboardPage() {
       href: "/workforce/offboarding",
       icon: UserMinus,
       color: "bg-red-500/10 text-red-500",
+      tabCode: "offboarding",
     },
     {
       title: t("workforce.modules.analytics.title"),
@@ -157,8 +175,14 @@ export default function WorkforceDashboardPage() {
       href: "/workforce/analytics",
       icon: BarChart3,
       color: "bg-violet-500/10 text-violet-500",
+      tabCode: "analytics",
     },
   ];
+
+  // Filter modules based on granular tab permissions
+  const workforceModules = workforceModulesAll.filter((module) =>
+    hasTabAccess("workforce", module.tabCode)
+  );
 
   useEffect(() => {
     const fetchStats = async () => {
