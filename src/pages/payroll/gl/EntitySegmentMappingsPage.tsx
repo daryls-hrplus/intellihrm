@@ -258,11 +258,33 @@ const EntitySegmentMappingsPage = () => {
     setDialogOpen(true);
   };
 
+  const normalizeSegmentKey = (value: string) =>
+    value.toLowerCase().trim().replace(/[\s-]+/g, "_");
+
+  const SEGMENT_KEYS_BY_ENTITY: Record<string, string[]> = {
+    company: ["company"],
+    division: ["division"],
+    department: ["department", "dept"],
+    section: ["section"],
+    pay_element: ["pay_element", "payelement", "account"],
+    job: ["job"],
+    location: ["location"],
+    employee: ["employee"],
+  };
+
+  const getRequiredSegmentKeys = (entityType: string) =>
+    SEGMENT_KEYS_BY_ENTITY[entityType] ?? [entityType];
+
   const getDefaultSegmentForEntityType = (entityType: string) => {
-    const entity = ENTITY_TYPES.find(e => e.value === entityType);
-    if (!entity) return segments[0]?.id || '';
-    const matchingSegment = segments.find(s => s.segment_code === entity.segmentCode);
-    return matchingSegment?.id || segments[0]?.id || '';
+    const keys = getRequiredSegmentKeys(entityType);
+
+    const matchingSegment = segments.find((s) => {
+      const nameKey = normalizeSegmentKey(s.segment_name || "");
+      const codeKey = normalizeSegmentKey(s.segment_code || "");
+      return keys.includes(nameKey) || keys.includes(codeKey);
+    });
+
+    return matchingSegment?.id || "";
   };
 
   const resetForm = () => {
@@ -270,9 +292,9 @@ const EntitySegmentMappingsPage = () => {
     setFormData({
       segment_id: getDefaultSegmentForEntityType(activeEntityType),
       entity_type: activeEntityType,
-      entity_id: '',
-      segment_value: '',
-      description: ''
+      entity_id: "",
+      segment_value: "",
+      description: "",
     });
   };
 
@@ -281,17 +303,28 @@ const EntitySegmentMappingsPage = () => {
     setDialogOpen(true);
   };
 
-  const getSegmentName = (id: string) => segments.find(s => s.id === id)?.segment_name || '';
-  const getSegmentLength = (id: string) => segments.find(s => s.id === id)?.segment_length || 0;
-  
+  const getSegmentName = (id: string) =>
+    segments.find((s) => s.id === id)?.segment_name || "";
+  const getSegmentLength = (id: string) =>
+    segments.find((s) => s.id === id)?.segment_length || 0;
+
   const getFilteredSegments = () => {
-    const entity = ENTITY_TYPES.find(e => e.value === formData.entity_type);
-    if (!entity) return segments;
-    return segments.filter(s => s.segment_code === entity.segmentCode);
+    const keys = getRequiredSegmentKeys(formData.entity_type);
+    return segments.filter((s) => {
+      const nameKey = normalizeSegmentKey(s.segment_name || "");
+      const codeKey = normalizeSegmentKey(s.segment_code || "");
+      return keys.includes(nameKey) || keys.includes(codeKey);
+    });
+  };
+
+  const getRequiredSegmentHint = () => {
+    const keys = getRequiredSegmentKeys(formData.entity_type);
+    const display = keys.map((k) => k.replace(/_/g, " "));
+    return Array.from(new Set(display)).join(" / ");
   };
 
   const getEntityLabel = () => {
-    return ENTITY_TYPES.find(e => e.value === activeEntityType)?.label || 'Entity';
+    return ENTITY_TYPES.find((e) => e.value === activeEntityType)?.label || "Entity";
   };
 
   const filteredMappings = mappings.filter(m => 
@@ -447,6 +480,27 @@ const EntitySegmentMappingsPage = () => {
                     ))}
                   </SelectContent>
                 </Select>
+                {segments.length > 0 && getFilteredSegments().length === 0 && (
+                  <p className="text-xs text-muted-foreground">
+                    {t(
+                      "payroll.gl.noMatchingSegment",
+                      "No matching segment is defined for this entity type."
+                    )}{" "}
+                    <span className="font-medium">{getRequiredSegmentHint()}</span>.{" "}
+                    {t(
+                      "payroll.gl.createRequiredSegment",
+                      "Create the required segment in Cost Center Segments."
+                    )}{" "}
+                    <Button
+                      type="button"
+                      variant="link"
+                      className="h-auto p-0"
+                      onClick={() => (window.location.href = "/payroll/gl/segments")}
+                    >
+                      {t("payroll.gl.goToSegments", "Go to Cost Center Segments")}
+                    </Button>
+                  </p>
+                )}
               </div>
               
               <div className="space-y-2">
