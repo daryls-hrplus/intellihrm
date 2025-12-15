@@ -283,6 +283,16 @@ const EntitySegmentMappingsPage = () => {
 
   const getSegmentName = (id: string) => segments.find(s => s.id === id)?.segment_name || '';
   const getSegmentLength = (id: string) => segments.find(s => s.id === id)?.segment_length || 0;
+  
+  const getFilteredSegments = () => {
+    const entity = ENTITY_TYPES.find(e => e.value === formData.entity_type);
+    if (!entity) return segments;
+    return segments.filter(s => s.segment_code === entity.segmentCode);
+  };
+
+  const getEntityLabel = () => {
+    return ENTITY_TYPES.find(e => e.value === activeEntityType)?.label || 'Entity';
+  };
 
   const filteredMappings = mappings.filter(m => 
     !searchQuery || 
@@ -430,7 +440,7 @@ const EntitySegmentMappingsPage = () => {
                     <SelectValue placeholder={t('payroll.gl.selectSegment', 'Select segment')} />
                   </SelectTrigger>
                   <SelectContent>
-                    {segments.map((seg) => (
+                    {getFilteredSegments().map((seg) => (
                       <SelectItem key={seg.id} value={seg.id}>
                         {seg.segment_name} ({seg.segment_code})
                       </SelectItem>
@@ -440,13 +450,13 @@ const EntitySegmentMappingsPage = () => {
               </div>
               
               <div className="space-y-2">
-                <Label>{t('payroll.gl.entity', 'Entity')}</Label>
+                <Label>{getEntityLabel()}</Label>
                 <Select
                   value={formData.entity_id}
                   onValueChange={(value) => setFormData({ ...formData, entity_id: value })}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder={t('payroll.gl.selectEntity', 'Select entity')} />
+                    <SelectValue placeholder={`Select ${getEntityLabel().toLowerCase()}`} />
                   </SelectTrigger>
                   <SelectContent>
                     {entityOptions.map((entity) => (
