@@ -25702,6 +25702,48 @@ export type Database = {
           },
         ]
       }
+      statutory_deduction_types: {
+        Row: {
+          country: string
+          created_at: string
+          description: string | null
+          end_date: string | null
+          id: string
+          is_active: boolean
+          start_date: string
+          statutory_code: string
+          statutory_name: string
+          statutory_type: string
+          updated_at: string
+        }
+        Insert: {
+          country: string
+          created_at?: string
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          is_active?: boolean
+          start_date?: string
+          statutory_code: string
+          statutory_name: string
+          statutory_type: string
+          updated_at?: string
+        }
+        Update: {
+          country?: string
+          created_at?: string
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          is_active?: boolean
+          start_date?: string
+          statutory_code?: string
+          statutory_name?: string
+          statutory_type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       subscription_changes: {
         Row: {
           change_type: string
