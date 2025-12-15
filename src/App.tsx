@@ -168,6 +168,18 @@ import SuccessionDashboardPage from "./pages/succession/SuccessionDashboardPage"
 import RecruitmentDashboardPage from "./pages/recruitment/RecruitmentDashboardPage";
 import RecruitmentFullPage from "./pages/recruitment/RecruitmentFullPage";
 import RecruitmentAnalyticsPage from "./pages/recruitment/RecruitmentAnalyticsPage";
+import RequisitionsPage from "./pages/recruitment/RequisitionsPage";
+import CandidatesPage from "./pages/recruitment/CandidatesPage";
+import ApplicationsPage from "./pages/recruitment/ApplicationsPage";
+import PipelinePage from "./pages/recruitment/PipelinePage";
+import ScorecardsPage from "./pages/recruitment/ScorecardsPage";
+import OffersPage from "./pages/recruitment/OffersPage";
+import ReferralsPage from "./pages/recruitment/ReferralsPage";
+import AssessmentsPage from "./pages/recruitment/AssessmentsPage";
+import InterviewPanelsPage from "./pages/recruitment/InterviewPanelsPage";
+import EmailTemplatesPage from "./pages/recruitment/EmailTemplatesPage";
+import SourcesPage from "./pages/recruitment/SourcesPage";
+import JobBoardsPage from "./pages/recruitment/JobBoardsPage";
 
 // HSE pages
 import HSEDashboardPage from "./pages/hse/HSEDashboardPage";
@@ -2038,6 +2050,18 @@ const App = () => (
                 </ProtectedRoute>
               }
             />
+            <Route path="/recruitment/requisitions" element={<ProtectedRoute requiredRoles={["admin", "hr_manager"]}><RequisitionsPage /></ProtectedRoute>} />
+            <Route path="/recruitment/candidates" element={<ProtectedRoute requiredRoles={["admin", "hr_manager"]}><CandidatesPage /></ProtectedRoute>} />
+            <Route path="/recruitment/applications" element={<ProtectedRoute requiredRoles={["admin", "hr_manager"]}><ApplicationsPage /></ProtectedRoute>} />
+            <Route path="/recruitment/pipeline" element={<ProtectedRoute requiredRoles={["admin", "hr_manager"]}><PipelinePage /></ProtectedRoute>} />
+            <Route path="/recruitment/scorecards" element={<ProtectedRoute requiredRoles={["admin", "hr_manager"]}><ScorecardsPage /></ProtectedRoute>} />
+            <Route path="/recruitment/offers" element={<ProtectedRoute requiredRoles={["admin", "hr_manager"]}><OffersPage /></ProtectedRoute>} />
+            <Route path="/recruitment/referrals" element={<ProtectedRoute requiredRoles={["admin", "hr_manager"]}><ReferralsPage /></ProtectedRoute>} />
+            <Route path="/recruitment/assessments" element={<ProtectedRoute requiredRoles={["admin", "hr_manager"]}><AssessmentsPage /></ProtectedRoute>} />
+            <Route path="/recruitment/panels" element={<ProtectedRoute requiredRoles={["admin", "hr_manager"]}><InterviewPanelsPage /></ProtectedRoute>} />
+            <Route path="/recruitment/email-templates" element={<ProtectedRoute requiredRoles={["admin", "hr_manager"]}><EmailTemplatesPage /></ProtectedRoute>} />
+            <Route path="/recruitment/sources" element={<ProtectedRoute requiredRoles={["admin", "hr_manager"]}><SourcesPage /></ProtectedRoute>} />
+            <Route path="/recruitment/job-boards" element={<ProtectedRoute requiredRoles={["admin", "hr_manager"]}><JobBoardsPage /></ProtectedRoute>} />
 
             {/* HSE Routes */}
             <Route
