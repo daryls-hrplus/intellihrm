@@ -11,10 +11,27 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { Plus, Edit, Trash2, ChevronDown, ChevronRight } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Plus, Edit, Trash2, ChevronDown, ChevronRight, AlertCircle } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { PayrollFilters, usePayrollFilters } from '@/components/payroll/PayrollFilters';
+
+const PREDEFINED_SEGMENTS = [
+  { code: 'COMPANY', name: 'Company', defaultLength: 4 },
+  { code: 'DIVISION', name: 'Division', defaultLength: 4 },
+  { code: 'DEPT', name: 'Department', defaultLength: 6 },
+  { code: 'SECTION', name: 'Section', defaultLength: 4 },
+  { code: 'ACCOUNT', name: 'Account', defaultLength: 8 },
+  { code: 'SUBACCT', name: 'Sub-Account', defaultLength: 6 },
+  { code: 'JOB', name: 'Job', defaultLength: 6 },
+  { code: 'LOCATION', name: 'Location', defaultLength: 6 },
+  { code: 'EMPLOYEE', name: 'Employee', defaultLength: 8 },
+  { code: 'USERDEF', name: 'User Defined', defaultLength: 8 }
+];
+
+const MAX_SEGMENTS = 10;
+const MAX_TOTAL_LENGTH = 60;
 
 interface Segment {
   id: string;
@@ -62,6 +79,28 @@ const CostCenterSegmentsPage = () => {
     segment_value: '',
     segment_description: ''
   });
+
+  // Calculate total length of all segments
+  const totalLength = segments.reduce((sum, seg) => sum + seg.segment_length, 0);
+
+  // Get available segment types (not already used)
+  const getAvailableSegmentTypes = () => {
+    const usedCodes = segments.filter(s => editingSegment ? s.id !== editingSegment.id : true).map(s => s.segment_code);
+    return PREDEFINED_SEGMENTS.filter(seg => !usedCodes.includes(seg.code));
+  };
+
+  // Handle segment type selection
+  const handleSegmentTypeChange = (code: string) => {
+    const segmentType = PREDEFINED_SEGMENTS.find(s => s.code === code);
+    if (segmentType) {
+      setFormData(prev => ({
+        ...prev,
+        segment_name: segmentType.name,
+        segment_code: segmentType.code,
+        segment_length: segmentType.defaultLength
+      }));
+    }
+  };
 
   useEffect(() => {
     if (selectedCompanyId) {
@@ -279,10 +318,43 @@ const CostCenterSegmentsPage = () => {
             <h1 className="text-3xl font-bold">{t('payroll.gl.costCenterSegments', 'Cost Center Segments')}</h1>
             <p className="text-muted-foreground">{t('payroll.gl.costCenterSegmentsDesc', 'Define cost center structure and segments')}</p>
           </div>
-          <Button onClick={() => { resetSegmentForm(); setDialogOpen(true); }}>
+          <Button 
+            onClick={() => { resetSegmentForm(); setDialogOpen(true); }}
+            disabled={segments.length >= MAX_SEGMENTS}
+          >
             <Plus className="h-4 w-4 mr-2" />
             {t('common.addSegment', 'Add Segment')}
           </Button>
+        </div>
+
+        {/* Usage Stats */}
+        <div className="grid grid-cols-2 gap-4">
+          <Card>
+            <CardContent className="pt-4">
+              <div className="flex items-center justify-between">
+                <div className="text-sm text-muted-foreground">{t('payroll.gl.segmentsUsed', 'Segments Used')}</div>
+                <div className={`text-lg font-semibold ${segments.length >= MAX_SEGMENTS ? 'text-destructive' : ''}`}>
+                  {segments.length} / {MAX_SEGMENTS}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="pt-4">
+              <div className="flex items-center justify-between">
+                <div className="text-sm text-muted-foreground">{t('payroll.gl.totalLength', 'Total Length')}</div>
+                <div className={`text-lg font-semibold ${totalLength > MAX_TOTAL_LENGTH ? 'text-destructive' : ''}`}>
+                  {totalLength} / {MAX_TOTAL_LENGTH} {t('payroll.gl.characters', 'chars')}
+                </div>
+              </div>
+              {totalLength > MAX_TOTAL_LENGTH && (
+                <div className="flex items-center gap-1 text-destructive text-sm mt-1">
+                  <AlertCircle className="h-4 w-4" />
+                  {t('payroll.gl.lengthExceeded', 'Total length exceeds maximum')}
+                </div>
+              )}
+            </CardContent>
+          </Card>
         </div>
 
         <Card>
@@ -392,29 +464,31 @@ const CostCenterSegmentsPage = () => {
               </DialogTitle>
             </DialogHeader>
             <div className="grid gap-4 py-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>{t('common.name', 'Name')}</Label>
-                  <Input
-                    value={formData.segment_name}
-                    onChange={(e) => setFormData({ ...formData, segment_name: e.target.value })}
-                    placeholder="e.g., Department"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>{t('common.code', 'Code')}</Label>
-                  <Input
-                    value={formData.segment_code}
-                    onChange={(e) => setFormData({ ...formData, segment_code: e.target.value })}
-                    placeholder="e.g., DEPT"
-                  />
-                </div>
+              <div className="space-y-2">
+                <Label>{t('payroll.gl.segmentType', 'Segment Type')}</Label>
+                <Select
+                  value={formData.segment_code || 'placeholder'}
+                  onValueChange={(value) => value !== 'placeholder' && handleSegmentTypeChange(value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder={t('payroll.gl.selectSegmentType', 'Select segment type')} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {(editingSegment ? PREDEFINED_SEGMENTS : getAvailableSegmentTypes()).map((seg) => (
+                      <SelectItem key={seg.code} value={seg.code}>
+                        {seg.name} ({seg.code})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>{t('payroll.gl.order', 'Order')}</Label>
                   <Input
                     type="number"
+                    min={1}
+                    max={10}
                     value={formData.segment_order}
                     onChange={(e) => setFormData({ ...formData, segment_order: parseInt(e.target.value) || 1 })}
                   />
@@ -423,6 +497,8 @@ const CostCenterSegmentsPage = () => {
                   <Label>{t('payroll.gl.length', 'Length')}</Label>
                   <Input
                     type="number"
+                    min={1}
+                    max={20}
                     value={formData.segment_length}
                     onChange={(e) => setFormData({ ...formData, segment_length: parseInt(e.target.value) || 4 })}
                   />
@@ -443,10 +519,26 @@ const CostCenterSegmentsPage = () => {
                 />
                 <Label htmlFor="is_required">{t('common.required', 'Required')}</Label>
               </div>
+              {/* Length validation warning */}
+              {(() => {
+                const currentEditingLength = editingSegment?.segment_length || 0;
+                const newTotalLength = totalLength - currentEditingLength + formData.segment_length;
+                return newTotalLength > MAX_TOTAL_LENGTH ? (
+                  <div className="flex items-center gap-2 p-2 bg-destructive/10 rounded-md text-destructive text-sm">
+                    <AlertCircle className="h-4 w-4" />
+                    {t('payroll.gl.lengthWouldExceed', 'Total length would be')} {newTotalLength} ({t('payroll.gl.maxIs', 'max is')} {MAX_TOTAL_LENGTH})
+                  </div>
+                ) : null;
+              })()}
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setDialogOpen(false)}>{t('common.cancel', 'Cancel')}</Button>
-              <Button onClick={handleSaveSegment}>{t('common.save', 'Save')}</Button>
+              <Button 
+                onClick={handleSaveSegment}
+                disabled={!formData.segment_code || (totalLength - (editingSegment?.segment_length || 0) + formData.segment_length > MAX_TOTAL_LENGTH)}
+              >
+                {t('common.save', 'Save')}
+              </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
