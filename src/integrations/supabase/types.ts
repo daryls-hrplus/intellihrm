@@ -7231,6 +7231,64 @@ export type Database = {
           },
         ]
       }
+      employee_spinal_points: {
+        Row: {
+          approved_by: string | null
+          created_at: string
+          effective_date: string
+          employee_id: string
+          end_date: string | null
+          id: string
+          reason: string | null
+          spinal_point_id: string
+          updated_at: string
+        }
+        Insert: {
+          approved_by?: string | null
+          created_at?: string
+          effective_date: string
+          employee_id: string
+          end_date?: string | null
+          id?: string
+          reason?: string | null
+          spinal_point_id: string
+          updated_at?: string
+        }
+        Update: {
+          approved_by?: string | null
+          created_at?: string
+          effective_date?: string
+          employee_id?: string
+          end_date?: string | null
+          id?: string
+          reason?: string | null
+          spinal_point_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "employee_spinal_points_approved_by_fkey"
+            columns: ["approved_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_spinal_points_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_spinal_points_spinal_point_id_fkey"
+            columns: ["spinal_point_id"]
+            isOneToOne: false
+            referencedRelation: "spinal_points"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       employee_tax_elections: {
         Row: {
           additional_withholding: number | null
@@ -19805,6 +19863,56 @@ export type Database = {
           },
         ]
       }
+      pay_spines: {
+        Row: {
+          code: string
+          company_id: string
+          created_at: string
+          currency: string
+          description: string | null
+          effective_date: string
+          end_date: string | null
+          id: string
+          is_active: boolean
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          code: string
+          company_id: string
+          created_at?: string
+          currency?: string
+          description?: string | null
+          effective_date?: string
+          end_date?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          code?: string
+          company_id?: string
+          created_at?: string
+          currency?: string
+          description?: string | null
+          effective_date?: string
+          end_date?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pay_spines_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       payroll_audit_log: {
         Row: {
           action: string
@@ -23577,6 +23685,60 @@ export type Database = {
         }
         Relationships: []
       }
+      salary_grade_spinal_ranges: {
+        Row: {
+          created_at: string
+          end_date: string | null
+          entry_point: number | null
+          id: string
+          max_point: number
+          min_point: number
+          pay_spine_id: string
+          salary_grade_id: string
+          start_date: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          end_date?: string | null
+          entry_point?: number | null
+          id?: string
+          max_point: number
+          min_point: number
+          pay_spine_id: string
+          salary_grade_id: string
+          start_date?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          end_date?: string | null
+          entry_point?: number | null
+          id?: string
+          max_point?: number
+          min_point?: number
+          pay_spine_id?: string
+          salary_grade_id?: string
+          start_date?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "salary_grade_spinal_ranges_pay_spine_id_fkey"
+            columns: ["pay_spine_id"]
+            isOneToOne: false
+            referencedRelation: "pay_spines"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "salary_grade_spinal_ranges_salary_grade_id_fkey"
+            columns: ["salary_grade_id"]
+            isOneToOne: false
+            referencedRelation: "salary_grades"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       salary_grades: {
         Row: {
           code: string
@@ -24416,6 +24578,118 @@ export type Database = {
             columns: ["sop_id"]
             isOneToOne: false
             referencedRelation: "sop_documents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      spinal_point_increments: {
+        Row: {
+          approved_by: string | null
+          created_at: string
+          employee_id: string
+          from_point_id: string | null
+          id: string
+          increment_date: string
+          increment_type: string
+          reason: string | null
+          to_point_id: string
+        }
+        Insert: {
+          approved_by?: string | null
+          created_at?: string
+          employee_id: string
+          from_point_id?: string | null
+          id?: string
+          increment_date: string
+          increment_type?: string
+          reason?: string | null
+          to_point_id: string
+        }
+        Update: {
+          approved_by?: string | null
+          created_at?: string
+          employee_id?: string
+          from_point_id?: string | null
+          id?: string
+          increment_date?: string
+          increment_type?: string
+          reason?: string | null
+          to_point_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "spinal_point_increments_approved_by_fkey"
+            columns: ["approved_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "spinal_point_increments_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "spinal_point_increments_from_point_id_fkey"
+            columns: ["from_point_id"]
+            isOneToOne: false
+            referencedRelation: "spinal_points"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "spinal_point_increments_to_point_id_fkey"
+            columns: ["to_point_id"]
+            isOneToOne: false
+            referencedRelation: "spinal_points"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      spinal_points: {
+        Row: {
+          annual_salary: number
+          created_at: string
+          effective_date: string
+          end_date: string | null
+          hourly_rate: number | null
+          id: string
+          notes: string | null
+          pay_spine_id: string
+          point_number: number
+          updated_at: string
+        }
+        Insert: {
+          annual_salary: number
+          created_at?: string
+          effective_date?: string
+          end_date?: string | null
+          hourly_rate?: number | null
+          id?: string
+          notes?: string | null
+          pay_spine_id: string
+          point_number: number
+          updated_at?: string
+        }
+        Update: {
+          annual_salary?: number
+          created_at?: string
+          effective_date?: string
+          end_date?: string | null
+          hourly_rate?: number | null
+          id?: string
+          notes?: string | null
+          pay_spine_id?: string
+          point_number?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "spinal_points_pay_spine_id_fkey"
+            columns: ["pay_spine_id"]
+            isOneToOne: false
+            referencedRelation: "pay_spines"
             referencedColumns: ["id"]
           },
         ]
