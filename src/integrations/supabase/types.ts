@@ -6647,6 +6647,7 @@ export type Database = {
           is_active: boolean
           is_primary: boolean
           position_id: string
+          spinal_point_id: string | null
           start_date: string
           updated_at: string
         }
@@ -6662,6 +6663,7 @@ export type Database = {
           is_active?: boolean
           is_primary?: boolean
           position_id: string
+          spinal_point_id?: string | null
           start_date?: string
           updated_at?: string
         }
@@ -6677,6 +6679,7 @@ export type Database = {
           is_active?: boolean
           is_primary?: boolean
           position_id?: string
+          spinal_point_id?: string | null
           start_date?: string
           updated_at?: string
         }
@@ -6693,6 +6696,13 @@ export type Database = {
             columns: ["position_id"]
             isOneToOne: false
             referencedRelation: "positions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_positions_spinal_point_id_fkey"
+            columns: ["spinal_point_id"]
+            isOneToOne: false
+            referencedRelation: "spinal_points"
             referencedColumns: ["id"]
           },
         ]
@@ -21426,14 +21436,19 @@ export type Database = {
         Row: {
           authorized_headcount: number
           code: string
+          compensation_model: string
           created_at: string
           department_id: string
           description: string | null
           end_date: string | null
+          entry_spinal_point: number | null
           headcount_notes: string | null
           id: string
           is_active: boolean
           job_family_id: string | null
+          max_spinal_point: number | null
+          min_spinal_point: number | null
+          pay_spine_id: string | null
           position_type_id: string | null
           reports_to_position_id: string | null
           salary_grade_id: string | null
@@ -21444,14 +21459,19 @@ export type Database = {
         Insert: {
           authorized_headcount?: number
           code: string
+          compensation_model?: string
           created_at?: string
           department_id: string
           description?: string | null
           end_date?: string | null
+          entry_spinal_point?: number | null
           headcount_notes?: string | null
           id?: string
           is_active?: boolean
           job_family_id?: string | null
+          max_spinal_point?: number | null
+          min_spinal_point?: number | null
+          pay_spine_id?: string | null
           position_type_id?: string | null
           reports_to_position_id?: string | null
           salary_grade_id?: string | null
@@ -21462,14 +21482,19 @@ export type Database = {
         Update: {
           authorized_headcount?: number
           code?: string
+          compensation_model?: string
           created_at?: string
           department_id?: string
           description?: string | null
           end_date?: string | null
+          entry_spinal_point?: number | null
           headcount_notes?: string | null
           id?: string
           is_active?: boolean
           job_family_id?: string | null
+          max_spinal_point?: number | null
+          min_spinal_point?: number | null
+          pay_spine_id?: string | null
           position_type_id?: string | null
           reports_to_position_id?: string | null
           salary_grade_id?: string | null
@@ -21490,6 +21515,13 @@ export type Database = {
             columns: ["job_family_id"]
             isOneToOne: false
             referencedRelation: "job_families"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "positions_pay_spine_id_fkey"
+            columns: ["pay_spine_id"]
+            isOneToOne: false
+            referencedRelation: "pay_spines"
             referencedColumns: ["id"]
           },
           {

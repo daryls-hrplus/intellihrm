@@ -59,6 +59,11 @@ interface Position {
   authorized_headcount: number;
   start_date: string;
   end_date: string | null;
+  compensation_model: string;
+  pay_spine_id: string | null;
+  min_spinal_point: number | null;
+  max_spinal_point: number | null;
+  entry_spinal_point: number | null;
   department?: {
     name: string;
     code: string;
@@ -81,6 +86,7 @@ interface EmployeePosition {
   compensation_frequency: string;
   benefits_profile: any;
   is_active: boolean;
+  spinal_point_id: string | null;
   employee?: {
     full_name: string;
     email: string;
@@ -88,7 +94,13 @@ interface EmployeePosition {
   position?: {
     title: string;
     code: string;
+    compensation_model?: string;
+    pay_spine_id?: string | null;
   };
+  spinal_point?: {
+    point_number: number;
+    annual_salary: number;
+  } | null;
 }
 
 interface Department {
@@ -103,6 +115,20 @@ interface Employee {
   email: string;
 }
 
+interface PaySpine {
+  id: string;
+  name: string;
+  code: string;
+  currency: string;
+}
+
+interface SpinalPoint {
+  id: string;
+  pay_spine_id: string;
+  point_number: number;
+  annual_salary: number;
+}
+
 interface PositionsManagementProps {
   companyId: string;
 }
@@ -114,6 +140,9 @@ export function PositionsManagement({ companyId }: PositionsManagementProps) {
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [expandedDepts, setExpandedDepts] = useState<Set<string>>(new Set());
+
+  const [paySpines, setPaySpines] = useState<PaySpine[]>([]);
+  const [spinalPoints, setSpinalPoints] = useState<SpinalPoint[]>([]);
 
   // Position dialog state
   const [positionDialogOpen, setPositionDialogOpen] = useState(false);
@@ -130,6 +159,11 @@ export function PositionsManagement({ companyId }: PositionsManagementProps) {
   const [formAuthorizedHeadcount, setFormAuthorizedHeadcount] = useState("1");
   const [formStartDate, setFormStartDate] = useState(new Date().toISOString().split("T")[0]);
   const [formEndDate, setFormEndDate] = useState("");
+  const [formCompensationModel, setFormCompensationModel] = useState("salary_grade");
+  const [formPaySpineId, setFormPaySpineId] = useState("");
+  const [formMinSpinalPoint, setFormMinSpinalPoint] = useState("");
+  const [formMaxSpinalPoint, setFormMaxSpinalPoint] = useState("");
+  const [formEntrySpinalPoint, setFormEntrySpinalPoint] = useState("");
 
   // Assignment dialog state
   const [assignDialogOpen, setAssignDialogOpen] = useState(false);
@@ -145,6 +179,7 @@ export function PositionsManagement({ companyId }: PositionsManagementProps) {
   const [assignCompCurrency, setAssignCompCurrency] = useState("USD");
   const [assignCompFrequency, setAssignCompFrequency] = useState("monthly");
   const [assignIsActive, setAssignIsActive] = useState(true);
+  const [assignSpinalPointId, setAssignSpinalPointId] = useState("");
 
   useEffect(() => {
     if (companyId) {
@@ -218,6 +253,32 @@ export function PositionsManagement({ companyId }: PositionsManagementProps) {
       if (empError) throw empError;
       setEmployees(empData || []);
 
+      // Fetch pay spines for this company
+      const { data: spineData, error: spineError } = await supabase
+        .from("pay_spines")
+        .select("id, name, code, currency")
+        .eq("company_id", companyId)
+        .eq("is_active", true)
+        .order("name");
+
+      if (!spineError && spineData) {
+        setPaySpines(spineData);
+      }
+
+      // Fetch all spinal points for these spines
+      if (spineData && spineData.length > 0) {
+        const spineIds = spineData.map(s => s.id);
+        const { data: pointsData, error: pointsError } = await supabase
+          .from("spinal_points")
+          .select("id, pay_spine_id, point_number, annual_salary")
+          .in("pay_spine_id", spineIds)
+          .order("point_number");
+
+        if (!pointsError && pointsData) {
+          setSpinalPoints(pointsData);
+        }
+      }
+
     } catch (error) {
       console.error("Error fetching data:", error);
       toast.error("Failed to load positions data");
@@ -253,6 +314,11 @@ export function PositionsManagement({ companyId }: PositionsManagementProps) {
     setFormAuthorizedHeadcount("1");
     setFormStartDate(new Date().toISOString().split("T")[0]);
     setFormEndDate("");
+    setFormCompensationModel("salary_grade");
+    setFormPaySpineId("");
+    setFormMinSpinalPoint("");
+    setFormMaxSpinalPoint("");
+    setFormEntrySpinalPoint("");
     setPositionDialogOpen(true);
   };
 
@@ -267,6 +333,11 @@ export function PositionsManagement({ companyId }: PositionsManagementProps) {
     setFormAuthorizedHeadcount(position.authorized_headcount?.toString() || "1");
     setFormStartDate(position.start_date);
     setFormEndDate(position.end_date || "");
+    setFormCompensationModel(position.compensation_model || "salary_grade");
+    setFormPaySpineId(position.pay_spine_id || "");
+    setFormMinSpinalPoint(position.min_spinal_point?.toString() || "");
+    setFormMaxSpinalPoint(position.max_spinal_point?.toString() || "");
+    setFormEntrySpinalPoint(position.entry_spinal_point?.toString() || "");
     setPositionDialogOpen(true);
   };
 
@@ -278,7 +349,7 @@ export function PositionsManagement({ companyId }: PositionsManagementProps) {
 
     setIsProcessing(true);
     try {
-      const data = {
+      const data: any = {
         department_id: formDepartmentId,
         title: formTitle.trim(),
         code: formCode.trim(),
@@ -288,6 +359,11 @@ export function PositionsManagement({ companyId }: PositionsManagementProps) {
         authorized_headcount: parseInt(formAuthorizedHeadcount) || 1,
         start_date: formStartDate,
         end_date: formEndDate || null,
+        compensation_model: formCompensationModel,
+        pay_spine_id: formCompensationModel !== 'salary_grade' && formPaySpineId ? formPaySpineId : null,
+        min_spinal_point: formCompensationModel !== 'salary_grade' && formMinSpinalPoint ? parseInt(formMinSpinalPoint) : null,
+        max_spinal_point: formCompensationModel !== 'salary_grade' && formMaxSpinalPoint ? parseInt(formMaxSpinalPoint) : null,
+        entry_spinal_point: formCompensationModel !== 'salary_grade' && formEntrySpinalPoint ? parseInt(formEntrySpinalPoint) : null,
       };
 
       if (editingPosition) {
@@ -341,6 +417,7 @@ export function PositionsManagement({ companyId }: PositionsManagementProps) {
     setAssignCompCurrency("USD");
     setAssignCompFrequency("monthly");
     setAssignIsActive(true);
+    setAssignSpinalPointId("");
     setAssignDialogOpen(true);
   };
 
@@ -355,7 +432,22 @@ export function PositionsManagement({ companyId }: PositionsManagementProps) {
     setAssignCompCurrency(assignment.compensation_currency);
     setAssignCompFrequency(assignment.compensation_frequency);
     setAssignIsActive(assignment.is_active);
+    setAssignSpinalPointId(assignment.spinal_point_id || "");
     setAssignDialogOpen(true);
+  };
+
+  const getPositionById = (posId: string) => positions.find(p => p.id === posId);
+
+  const getSpinalPointsForPosition = (posId: string) => {
+    const position = getPositionById(posId);
+    if (!position?.pay_spine_id) return [];
+    return spinalPoints
+      .filter(sp => sp.pay_spine_id === position.pay_spine_id)
+      .filter(sp => {
+        if (position.min_spinal_point && sp.point_number < position.min_spinal_point) return false;
+        if (position.max_spinal_point && sp.point_number > position.max_spinal_point) return false;
+        return true;
+      });
   };
 
   const handleSaveAssignment = async () => {
@@ -366,7 +458,7 @@ export function PositionsManagement({ companyId }: PositionsManagementProps) {
 
     setIsProcessing(true);
     try {
-      const data = {
+      const data: any = {
         employee_id: assignEmployeeId,
         position_id: assignPositionId,
         start_date: assignStartDate,
@@ -377,6 +469,7 @@ export function PositionsManagement({ companyId }: PositionsManagementProps) {
         compensation_frequency: assignCompFrequency,
         benefits_profile: {},
         is_active: assignIsActive,
+        spinal_point_id: assignSpinalPointId || null,
       };
 
       if (editingAssignment) {
@@ -737,6 +830,72 @@ export function PositionsManagement({ companyId }: PositionsManagementProps) {
                 How many employees can fill this position
               </p>
             </div>
+            
+            {/* Compensation Model */}
+            <div className="space-y-2">
+              <Label>Compensation Model</Label>
+              <Select value={formCompensationModel} onValueChange={setFormCompensationModel}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="salary_grade">Salary Grade (Min/Max Ranges)</SelectItem>
+                  <SelectItem value="spinal_point">Spinal Point System</SelectItem>
+                  <SelectItem value="hybrid">Hybrid (Both Systems)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Spinal Point Configuration - shown when spinal_point or hybrid */}
+            {(formCompensationModel === 'spinal_point' || formCompensationModel === 'hybrid') && (
+              <>
+                <div className="space-y-2">
+                  <Label>Pay Spine</Label>
+                  <Select value={formPaySpineId} onValueChange={setFormPaySpineId}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select pay spine" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {paySpines.map((spine) => (
+                        <SelectItem key={spine.id} value={spine.id}>
+                          {spine.name} ({spine.code})
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="grid grid-cols-3 gap-4">
+                  <div className="space-y-2">
+                    <Label>Min Point</Label>
+                    <Input
+                      type="number"
+                      value={formMinSpinalPoint}
+                      onChange={(e) => setFormMinSpinalPoint(e.target.value)}
+                      placeholder="e.g., 10"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Max Point</Label>
+                    <Input
+                      type="number"
+                      value={formMaxSpinalPoint}
+                      onChange={(e) => setFormMaxSpinalPoint(e.target.value)}
+                      placeholder="e.g., 20"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Entry Point</Label>
+                    <Input
+                      type="number"
+                      value={formEntrySpinalPoint}
+                      onChange={(e) => setFormEntrySpinalPoint(e.target.value)}
+                      placeholder="e.g., 12"
+                    />
+                  </div>
+                </div>
+              </>
+            )}
+
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>Start Date *</Label>
@@ -816,6 +975,33 @@ export function PositionsManagement({ companyId }: PositionsManagementProps) {
                 />
               </div>
             </div>
+
+            {/* Spinal Point Selection - only show if position uses spinal points */}
+            {(() => {
+              const pos = getPositionById(assignPositionId);
+              const availablePoints = getSpinalPointsForPosition(assignPositionId);
+              if (pos && (pos.compensation_model === 'spinal_point' || pos.compensation_model === 'hybrid') && availablePoints.length > 0) {
+                return (
+                  <div className="space-y-2">
+                    <Label>Spinal Point</Label>
+                    <Select value={assignSpinalPointId} onValueChange={setAssignSpinalPointId}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select spinal point" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {availablePoints.map((sp) => (
+                          <SelectItem key={sp.id} value={sp.id}>
+                            SCP {sp.point_number} - {sp.annual_salary.toLocaleString()}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                );
+              }
+              return null;
+            })()}
+
             <div className="grid grid-cols-3 gap-4">
               <div className="space-y-2">
                 <Label>Compensation</Label>
