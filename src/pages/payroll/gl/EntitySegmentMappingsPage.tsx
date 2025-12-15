@@ -317,6 +317,19 @@ const EntitySegmentMappingsPage = () => {
           </Button>
         </div>
 
+        {segments.length === 0 && (
+          <Card className="border-dashed border-2 border-muted-foreground/25">
+            <CardContent className="py-8 text-center">
+              <p className="text-muted-foreground mb-4">
+                {t('payroll.gl.noSegmentsDefined', 'No cost center segments defined. Create segments first before mapping entities.')}
+              </p>
+              <Button variant="outline" onClick={() => window.location.href = '/payroll/gl/segments'}>
+                {t('payroll.gl.goToSegments', 'Go to Cost Center Segments')}
+              </Button>
+            </CardContent>
+          </Card>
+        )}
+
         <Card>
           <CardHeader>
             <PayrollFilters
