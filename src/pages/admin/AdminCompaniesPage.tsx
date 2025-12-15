@@ -63,6 +63,10 @@ interface Division {
   code: string;
 }
 
+interface StatutoryCountry {
+  country: string;
+}
+
 const companySchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters").max(100),
   code: z.string().min(2, "Code must be at least 2 characters").max(20).regex(/^[A-Z0-9_-]+$/i, "Code must be alphanumeric"),
@@ -115,6 +119,7 @@ export default function AdminCompaniesPage() {
   const [companies, setCompanies] = useState<Company[]>([]);
   const [groups, setGroups] = useState<CompanyGroup[]>([]);
   const [divisions, setDivisions] = useState<Division[]>([]);
+  const [statutoryCountries, setStatutoryCountries] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -135,7 +140,26 @@ export default function AdminCompaniesPage() {
   useEffect(() => {
     fetchCompanies();
     fetchGroupsAndDivisions();
+    fetchStatutoryCountries();
   }, []);
+
+  const fetchStatutoryCountries = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("statutory_deduction_types")
+        .select("country")
+        .not("country", "is", null)
+        .order("country");
+      
+      if (error) throw error;
+      
+      // Get unique countries
+      const uniqueCountries = [...new Set((data || []).map(d => d.country).filter(Boolean))] as string[];
+      setStatutoryCountries(uniqueCountries);
+    } catch (error) {
+      console.error("Error fetching statutory countries:", error);
+    }
+  };
 
   // Log view when companies are loaded
   useEffect(() => {
@@ -967,14 +991,17 @@ export default function AdminCompaniesPage() {
 
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-foreground">Country</label>
-                  <input
-                    type="text"
+                  <select
                     name="country"
                     value={formData.country}
                     onChange={handleChange}
-                    placeholder="United States"
-                    className="h-10 w-full rounded-lg border border-input bg-background px-3 text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-                  />
+                    className="h-10 w-full rounded-lg border border-input bg-background px-3 text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  >
+                    <option value="">Select country</option>
+                    {statutoryCountries.map((country) => (
+                      <option key={country} value={country}>{country}</option>
+                    ))}
+                  </select>
                 </div>
 
                 <div className="space-y-2">
