@@ -82,12 +82,12 @@ export default function TaxConfigPage() {
   }, []);
 
   useEffect(() => {
-    if (selectedTypeId) {
+    if (selectedCountry && filteredTypes.length > 0) {
       loadRateBands();
     } else {
       setRateBands([]);
     }
-  }, [selectedTypeId]);
+  }, [selectedCountry, statutoryTypes]);
 
   const loadStatutoryTypes = async () => {
     setIsLoading(true);
@@ -119,13 +119,14 @@ export default function TaxConfigPage() {
   };
 
   const loadRateBands = async () => {
-    if (!selectedTypeId) return;
+    const typeIds = filteredTypes.map(t => t.id);
+    if (typeIds.length === 0) return;
     
     try {
       const { data, error } = await supabase
         .from('statutory_rate_bands')
         .select('*')
-        .eq('statutory_type_id', selectedTypeId)
+        .in('statutory_type_id', typeIds)
         .order('display_order', { ascending: true })
         .order('min_amount', { ascending: true });
 
@@ -150,6 +151,7 @@ export default function TaxConfigPage() {
 
   const resetForm = () => {
     setEditingBand(null);
+    const currentTypeBands = rateBands.filter(b => b.statutory_type_id === selectedTypeId);
     setBandForm({
       band_name: "",
       min_amount: 0,
@@ -162,7 +164,7 @@ export default function TaxConfigPage() {
       start_date: new Date().toISOString().split('T')[0],
       end_date: null,
       notes: "",
-      display_order: rateBands.length,
+      display_order: currentTypeBands.length,
       calculation_method: 'percentage',
       per_monday_amount: null,
       employer_per_monday_amount: null,
