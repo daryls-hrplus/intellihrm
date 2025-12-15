@@ -626,28 +626,41 @@ export function usePayroll() {
         .select('*')
         .eq('is_active', true);
       
-      // Get active employees with positions - filter by pay group if provided
-      let empQuery = supabase
+      // Get active employees with positions
+      const { data: employees, error: empError } = await supabase
         .from("employee_positions")
         .select(`
           id,
           employee_id,
           position_id,
-          employee:profiles!employee_positions_employee_id_fkey(id, full_name, email, company_id, pay_group_id),
+          employee:profiles!employee_positions_employee_id_fkey(id, full_name, email, company_id),
           position:positions!employee_positions_position_id_fkey(id, title)
         `)
         .eq("is_active", true);
-      
-      const { data: employees, error: empError } = await empQuery;
-      
+
       if (empError) throw empError;
-      
-      // Filter to only employees from this company and pay group
-      const companyEmployees = (employees || []).filter((emp: any) => {
-        if (emp.employee?.company_id !== companyId) return false;
-        if (payGroupId && emp.employee?.pay_group_id !== payGroupId) return false;
-        return true;
-      });
+
+      // Filter to only employees from this company
+      const baseCompanyEmployees = (employees || []).filter((emp: any) => emp.employee?.company_id === companyId);
+
+      // If a pay group is provided, prefer explicit employee-to-pay-group assignments
+      let companyEmployees = baseCompanyEmployees;
+      if (payGroupId) {
+        const today = new Date().toISOString().split("T")[0];
+        const { data: payGroupEmployees, error: payGroupErr } = await supabase
+          .from("employee_pay_groups")
+          .select("employee_id")
+          .eq("pay_group_id", payGroupId)
+          .lte("start_date", today)
+          .or(`end_date.is.null,end_date.gte.${today}`);
+
+        if (payGroupErr) throw payGroupErr;
+
+        const assignedIds = new Set((payGroupEmployees || []).map((r: any) => r.employee_id));
+        if (assignedIds.size > 0) {
+          companyEmployees = baseCompanyEmployees.filter((emp: any) => assignedIds.has(emp.employee_id));
+        }
+      }
       
       // Lock employees before processing
       const employeeIds = companyEmployees.map((emp: any) => emp.employee_id);
