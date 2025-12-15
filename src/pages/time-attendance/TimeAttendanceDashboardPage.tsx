@@ -1,9 +1,11 @@
 import { useTranslation } from "react-i18next";
+import { useState, useEffect } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ModuleReportsButton } from "@/components/reports/ModuleReportsButton";
 import { ModuleBIButton } from "@/components/bi/ModuleBIButton";
+import { LeaveCompanyFilter } from "@/components/leave/LeaveCompanyFilter";
 import { 
   Clock, 
   Calendar, 
@@ -20,10 +22,76 @@ import {
   Briefcase,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
+import { format } from "date-fns";
 
 export default function TimeAttendanceDashboardPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const { profile } = useAuth();
+  const [selectedCompanyId, setSelectedCompanyId] = useState<string>("all");
+  const [stats, setStats] = useState({
+    presentToday: 0,
+    absent: 0,
+    onLeave: 0,
+    totalStaff: 0,
+  });
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      if (!profile?.company_id) return;
+      
+      setIsLoading(true);
+      const today = format(new Date(), 'yyyy-MM-dd');
+      const companyFilter = selectedCompanyId !== "all" ? selectedCompanyId : profile.company_id;
+
+      try {
+        // Get total employees
+        const { count: totalStaff } = await supabase
+          .from('profiles')
+          .select('id', { count: 'exact', head: true })
+          .eq('company_id', companyFilter);
+
+        // Get employees who clocked in today
+        const { data: clockedInToday } = await supabase
+          .from('time_clock_entries')
+          .select('employee_id')
+          .eq('company_id', companyFilter)
+          .gte('clock_in', `${today}T00:00:00`)
+          .lte('clock_in', `${today}T23:59:59`);
+
+        const presentToday = new Set((clockedInToday || []).map(e => e.employee_id)).size;
+
+        // Get employees on leave today
+        const leaveResult = await (supabase as any)
+          .from('leave_requests')
+          .select('id', { count: 'exact', head: true })
+          .eq('company_id', companyFilter)
+          .eq('status', 'approved')
+          .lte('start_date', today)
+          .gte('end_date', today);
+        const onLeave = leaveResult.count as number | null;
+
+        // Calculate absent (total - present - on leave)
+        const absent = Math.max(0, (totalStaff || 0) - presentToday - (onLeave || 0));
+
+        setStats({
+          presentToday,
+          absent,
+          onLeave: onLeave || 0,
+          totalStaff: totalStaff || 0,
+        });
+      } catch (error) {
+        console.error('Error fetching stats:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchStats();
+  }, [profile?.company_id, selectedCompanyId]);
 
   const features = [
     {
@@ -126,11 +194,11 @@ export default function TimeAttendanceDashboardPage() {
     },
   ];
 
-  const stats = [
-    { label: t("timeAttendance.stats.presentToday"), value: "218", icon: UserCheck, color: "text-success" },
-    { label: t("timeAttendance.stats.absent"), value: "12", icon: AlertCircle, color: "text-destructive" },
-    { label: t("timeAttendance.stats.onLeave"), value: "15", icon: Calendar, color: "text-warning" },
-    { label: t("timeAttendance.stats.totalStaff"), value: "245", icon: Users, color: "text-muted-foreground" },
+  const statCards = [
+    { label: t("timeAttendance.stats.presentToday"), value: stats.presentToday, icon: UserCheck, color: "text-success" },
+    { label: t("timeAttendance.stats.absent"), value: stats.absent, icon: AlertCircle, color: "text-destructive" },
+    { label: t("timeAttendance.stats.onLeave"), value: stats.onLeave, icon: Calendar, color: "text-warning" },
+    { label: t("timeAttendance.stats.totalStaff"), value: stats.totalStaff, icon: Users, color: "text-muted-foreground" },
   ];
 
   return (
@@ -152,7 +220,11 @@ export default function TimeAttendanceDashboardPage() {
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
+            <LeaveCompanyFilter 
+              selectedCompanyId={selectedCompanyId}
+              onCompanyChange={setSelectedCompanyId}
+            />
             <ModuleBIButton module="time_attendance" />
             <ModuleReportsButton module="time_attendance" />
           </div>
@@ -160,7 +232,7 @@ export default function TimeAttendanceDashboardPage() {
 
         {/* Stats */}
         <div className="grid gap-4 md:grid-cols-4">
-          {stats.map((stat) => {
+          {statCards.map((stat) => {
             const Icon = stat.icon;
             return (
               <Card key={stat.label}>
@@ -170,7 +242,9 @@ export default function TimeAttendanceDashboardPage() {
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">{stat.label}</p>
-                    <p className="text-xl font-semibold">{stat.value}</p>
+                    <p className="text-xl font-semibold">
+                      {isLoading ? "..." : stat.value}
+                    </p>
                   </div>
                 </CardContent>
               </Card>
