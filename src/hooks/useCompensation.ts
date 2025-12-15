@@ -216,7 +216,10 @@ export function useCompensation() {
         .from("position_compensation")
         .select(`
           *,
-          pay_element:pay_elements(*),
+          pay_element:pay_elements(
+            *,
+            element_type:lookup_values!pay_elements_element_type_id_fkey(code, name)
+          ),
           frequency:lookup_values!position_compensation_frequency_id_fkey(code, name)
         `)
         .eq("position_id", positionId)
