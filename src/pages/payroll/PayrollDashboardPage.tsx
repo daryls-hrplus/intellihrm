@@ -3,6 +3,7 @@ import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ModuleReportsButton } from "@/components/reports/ModuleReportsButton";
 import { ModuleBIButton } from "@/components/bi/ModuleBIButton";
+import { useGranularPermissions } from "@/hooks/useGranularPermissions";
 import { 
   Wallet, 
   Calculator, 
@@ -22,6 +23,7 @@ import { useTranslation } from "react-i18next";
 export default function PayrollDashboardPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const { hasTabAccess } = useGranularPermissions();
 
   const features = [
     {
@@ -30,6 +32,7 @@ export default function PayrollDashboardPage() {
       icon: Users,
       href: "/payroll/pay-groups",
       color: "bg-primary/10 text-primary",
+      tabCode: "pay_groups",
     },
     {
       title: t("payroll.modules.processing.title"),
@@ -37,6 +40,7 @@ export default function PayrollDashboardPage() {
       icon: Calculator,
       href: "/payroll/processing",
       color: "bg-success/10 text-success",
+      tabCode: "processing",
     },
     {
       title: t("payroll.modules.payPeriods.title"),
@@ -44,6 +48,7 @@ export default function PayrollDashboardPage() {
       icon: CalendarCheck,
       href: "/payroll/pay-periods",
       color: "bg-warning/10 text-warning",
+      tabCode: "pay_periods",
     },
     {
       title: t("payroll.modules.reports.title"),
@@ -51,6 +56,7 @@ export default function PayrollDashboardPage() {
       icon: FileSpreadsheet,
       href: "/payroll/reports",
       color: "bg-secondary/10 text-secondary-foreground",
+      tabCode: "reports",
     },
     {
       title: t("payroll.modules.taxConfig.title"),
@@ -58,6 +64,7 @@ export default function PayrollDashboardPage() {
       icon: Receipt,
       href: "/payroll/tax-config",
       color: "bg-muted text-muted-foreground",
+      tabCode: "tax_config",
     },
     {
       title: t("payroll.modules.yearEnd.title"),
@@ -65,6 +72,7 @@ export default function PayrollDashboardPage() {
       icon: FileSpreadsheet,
       href: "/payroll/year-end",
       color: "bg-destructive/10 text-destructive",
+      tabCode: "year_end",
     },
     {
       title: t("payroll.modules.salaryOvertime.title"),
@@ -72,6 +80,7 @@ export default function PayrollDashboardPage() {
       icon: Clock,
       href: "/payroll/salary-overtime",
       color: "bg-accent/10 text-accent-foreground",
+      tabCode: "salary_overtime",
     },
     {
       title: t("payroll.modules.leavePaymentConfig.title", "Leave Payment Config"),
@@ -79,6 +88,7 @@ export default function PayrollDashboardPage() {
       icon: Settings,
       href: "/payroll/leave-payment-config",
       color: "bg-primary/10 text-primary",
+      tabCode: "leave_payment_config",
     },
     {
       title: t("payroll.modules.leaveBuyout.title", "Leave Buyout"),
@@ -86,8 +96,9 @@ export default function PayrollDashboardPage() {
       icon: DollarSign,
       href: "/payroll/leave-buyout",
       color: "bg-success/10 text-success",
+      tabCode: "leave_buyout",
     },
-  ];
+  ].filter(f => hasTabAccess("payroll", f.tabCode));
 
   const stats = [
     { label: t("payroll.stats.currentPeriod"), value: "Dec 2024", icon: CalendarCheck },

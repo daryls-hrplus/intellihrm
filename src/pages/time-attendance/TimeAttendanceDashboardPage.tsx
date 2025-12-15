@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { ModuleReportsButton } from "@/components/reports/ModuleReportsButton";
 import { ModuleBIButton } from "@/components/bi/ModuleBIButton";
 import { LeaveCompanyFilter } from "@/components/leave/LeaveCompanyFilter";
+import { useGranularPermissions } from "@/hooks/useGranularPermissions";
 import { 
   Clock, 
   Calendar, 
@@ -30,6 +31,7 @@ export default function TimeAttendanceDashboardPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { profile } = useAuth();
+  const { hasTabAccess } = useGranularPermissions();
   const [selectedCompanyId, setSelectedCompanyId] = useState<string>("all");
   const [stats, setStats] = useState({
     presentToday: 0,
@@ -100,6 +102,7 @@ export default function TimeAttendanceDashboardPage() {
       icon: Timer,
       href: "/time-attendance/tracking",
       color: "bg-primary/10 text-primary",
+      tabCode: "tracking",
     },
     {
       title: t("timeAttendance.modules.records.title"),
@@ -107,6 +110,7 @@ export default function TimeAttendanceDashboardPage() {
       icon: ClipboardList,
       href: "/time-attendance/records",
       color: "bg-success/10 text-success",
+      tabCode: "records",
     },
     {
       title: t("timeAttendance.modules.schedules.title"),
@@ -114,6 +118,7 @@ export default function TimeAttendanceDashboardPage() {
       icon: Calendar,
       href: "/time-attendance/schedules",
       color: "bg-warning/10 text-warning",
+      tabCode: "schedules",
     },
     {
       title: t("timeAttendance.modules.overtime.title"),
@@ -121,6 +126,7 @@ export default function TimeAttendanceDashboardPage() {
       icon: Clock,
       href: "/time-attendance/overtime",
       color: "bg-secondary/10 text-secondary-foreground",
+      tabCode: "overtime",
     },
     {
       title: t("timeAttendance.modules.shifts.title"),
@@ -128,6 +134,7 @@ export default function TimeAttendanceDashboardPage() {
       icon: Sun,
       href: "/time-attendance/shifts",
       color: "bg-orange-500/10 text-orange-600",
+      tabCode: "shifts",
     },
     {
       title: t("timeAttendance.modules.geofencing.title"),
@@ -135,6 +142,7 @@ export default function TimeAttendanceDashboardPage() {
       icon: MapPin,
       href: "/time-attendance/geofencing",
       color: "bg-teal-500/10 text-teal-600",
+      tabCode: "geofencing",
     },
     {
       title: t("timeAttendance.modules.projects.title"),
@@ -142,6 +150,7 @@ export default function TimeAttendanceDashboardPage() {
       icon: Briefcase,
       href: "/time-attendance/projects",
       color: "bg-violet-500/10 text-violet-600",
+      tabCode: "projects",
     },
     {
       title: t("timeAttendance.modules.timesheetApprovals.title"),
@@ -149,6 +158,7 @@ export default function TimeAttendanceDashboardPage() {
       icon: ClipboardList,
       href: "/time-attendance/timesheet-approvals",
       color: "bg-indigo-500/10 text-indigo-600",
+      tabCode: "timesheet_approvals",
     },
     {
       title: t("timeAttendance.modules.devices.title"),
@@ -156,6 +166,7 @@ export default function TimeAttendanceDashboardPage() {
       icon: Settings,
       href: "/time-attendance/devices",
       color: "bg-slate-500/10 text-slate-600",
+      tabCode: "devices",
     },
     {
       title: t("timeAttendance.modules.policies.title"),
@@ -163,6 +174,7 @@ export default function TimeAttendanceDashboardPage() {
       icon: Settings,
       href: "/time-attendance/policies",
       color: "bg-amber-500/10 text-amber-600",
+      tabCode: "policies",
     },
     {
       title: t("timeAttendance.modules.exceptions.title"),
@@ -170,6 +182,7 @@ export default function TimeAttendanceDashboardPage() {
       icon: AlertCircle,
       href: "/time-attendance/exceptions",
       color: "bg-red-500/10 text-red-600",
+      tabCode: "exceptions",
     },
     {
       title: t("timeAttendance.modules.live.title"),
@@ -177,6 +190,7 @@ export default function TimeAttendanceDashboardPage() {
       icon: UserCheck,
       href: "/time-attendance/live",
       color: "bg-green-500/10 text-green-600",
+      tabCode: "live",
     },
     {
       title: t("timeAttendance.modules.import.title"),
@@ -184,6 +198,7 @@ export default function TimeAttendanceDashboardPage() {
       icon: ClipboardList,
       href: "/time-attendance/import",
       color: "bg-cyan-500/10 text-cyan-600",
+      tabCode: "import",
     },
     {
       title: t("timeAttendance.modules.analytics.title"),
@@ -191,8 +206,9 @@ export default function TimeAttendanceDashboardPage() {
       icon: TrendingUp,
       href: "/time-attendance/analytics",
       color: "bg-purple-500/10 text-purple-600",
+      tabCode: "analytics",
     },
-  ];
+  ].filter(f => hasTabAccess("time_attendance", f.tabCode));
 
   const statCards = [
     { label: t("timeAttendance.stats.presentToday"), value: stats.presentToday, icon: UserCheck, color: "text-success" },

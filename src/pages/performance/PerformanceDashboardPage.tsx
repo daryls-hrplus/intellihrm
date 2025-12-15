@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useLanguage } from "@/hooks/useLanguage";
+import { useGranularPermissions } from "@/hooks/useGranularPermissions";
 import {
   Target,
   ClipboardCheck,
@@ -25,6 +26,7 @@ import {
 export default function PerformanceDashboardPage() {
   const { t } = useLanguage();
   const { user } = useAuth();
+  const { hasTabAccess } = useGranularPermissions();
 
   const performanceModules = [
     {
@@ -33,6 +35,7 @@ export default function PerformanceDashboardPage() {
       href: "/performance/appraisals",
       icon: ClipboardCheck,
       color: "bg-primary/10 text-primary",
+      tabCode: "appraisals",
     },
     {
       title: t('performance.modules.feedback360'),
@@ -40,6 +43,7 @@ export default function PerformanceDashboardPage() {
       href: "/performance/360",
       icon: MessageSquare,
       color: "bg-sky-500/10 text-sky-600",
+      tabCode: "360",
     },
     {
       title: t('performance.modules.goals'),
@@ -47,6 +51,7 @@ export default function PerformanceDashboardPage() {
       href: "/performance/goals",
       icon: Flag,
       color: "bg-emerald-500/10 text-emerald-600",
+      tabCode: "goals",
     },
     {
       title: t('performance.modules.improvementPlans'),
@@ -54,6 +59,7 @@ export default function PerformanceDashboardPage() {
       href: "/performance/pips",
       icon: AlertTriangle,
       color: "bg-amber-500/10 text-amber-600",
+      tabCode: "pips",
     },
     {
       title: t('performance.modules.continuousFeedback'),
@@ -61,6 +67,7 @@ export default function PerformanceDashboardPage() {
       href: "/performance/feedback",
       icon: MessageCircle,
       color: "bg-violet-500/10 text-violet-600",
+      tabCode: "feedback",
     },
     {
       title: t('performance.modules.recognitionAwards'),
@@ -68,6 +75,7 @@ export default function PerformanceDashboardPage() {
       href: "/performance/recognition",
       icon: Award,
       color: "bg-rose-500/10 text-rose-600",
+      tabCode: "recognition",
     },
     {
       title: t('performance.modules.analytics'),
@@ -75,8 +83,9 @@ export default function PerformanceDashboardPage() {
       href: "/performance/analytics",
       icon: BarChart3,
       color: "bg-muted text-muted-foreground",
+      tabCode: "analytics",
     },
-  ];
+  ].filter(m => hasTabAccess("performance", m.tabCode));
 
   // Fetch goals data
   const { data: goals = [], isLoading: goalsLoading } = useQuery({

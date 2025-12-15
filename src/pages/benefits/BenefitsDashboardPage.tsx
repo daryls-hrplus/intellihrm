@@ -5,6 +5,7 @@ import { ModuleBIButton } from "@/components/bi/ModuleBIButton";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useTranslation } from "react-i18next";
+import { useGranularPermissions } from "@/hooks/useGranularPermissions";
 import {
   Select,
   SelectContent,
@@ -46,6 +47,7 @@ const getBenefitsModules = (t: any) => [
     href: "/benefits/categories",
     icon: Gift,
     color: "bg-primary/10 text-primary",
+    tabCode: "categories",
   },
   {
     title: t("benefits.modules.plans.title"),
@@ -53,6 +55,7 @@ const getBenefitsModules = (t: any) => [
     href: "/benefits/plans",
     icon: Shield,
     color: "bg-success/10 text-success",
+    tabCode: "plans",
   },
   {
     title: t("benefits.modules.providers.title"),
@@ -60,6 +63,7 @@ const getBenefitsModules = (t: any) => [
     href: "/benefits/providers",
     icon: Building2,
     color: "bg-info/10 text-info",
+    tabCode: "providers",
   },
   {
     title: t("benefits.modules.enrollments.title"),
@@ -67,6 +71,7 @@ const getBenefitsModules = (t: any) => [
     href: "/benefits/enrollments",
     icon: Heart,
     color: "bg-accent/10 text-accent-foreground",
+    tabCode: "enrollments",
   },
   {
     title: t("benefits.modules.claims.title"),
@@ -74,6 +79,7 @@ const getBenefitsModules = (t: any) => [
     href: "/benefits/claims",
     icon: Stethoscope,
     color: "bg-warning/10 text-warning",
+    tabCode: "claims",
   },
 ];
 
@@ -84,6 +90,7 @@ const getAnalyticsModules = (t: any) => [
     href: "/benefits/analytics",
     icon: BarChart3,
     color: "bg-primary/10 text-primary",
+    tabCode: "analytics",
   },
   {
     title: t("benefits.modules.costProjections.title"),
@@ -91,6 +98,7 @@ const getAnalyticsModules = (t: any) => [
     href: "/benefits/cost-projections",
     icon: TrendingUp,
     color: "bg-success/10 text-success",
+    tabCode: "cost_projections",
   },
   {
     title: t("benefits.modules.comparison.title"),
@@ -98,6 +106,7 @@ const getAnalyticsModules = (t: any) => [
     href: "/benefits/compare",
     icon: Scale,
     color: "bg-info/10 text-info",
+    tabCode: "compare",
   },
   {
     title: t("benefits.modules.calculator.title"),
@@ -105,6 +114,7 @@ const getAnalyticsModules = (t: any) => [
     href: "/benefits/calculator",
     icon: Calculator,
     color: "bg-warning/10 text-warning",
+    tabCode: "calculator",
   },
 ];
 
@@ -115,6 +125,7 @@ const getAdministrationModules = (t: any) => [
     href: "/benefits/auto-enrollment",
     icon: Settings,
     color: "bg-primary/10 text-primary",
+    tabCode: "auto_enrollment",
   },
   {
     title: t("benefits.modules.lifeEvents.title"),
@@ -122,6 +133,7 @@ const getAdministrationModules = (t: any) => [
     href: "/benefits/life-events",
     icon: Calendar,
     color: "bg-success/10 text-success",
+    tabCode: "life_events",
   },
   {
     title: t("benefits.modules.waitingPeriods.title"),
@@ -129,6 +141,7 @@ const getAdministrationModules = (t: any) => [
     href: "/benefits/waiting-periods",
     icon: Clock,
     color: "bg-info/10 text-info",
+    tabCode: "waiting_periods",
   },
   {
     title: t("benefits.modules.openEnrollment.title"),
@@ -136,6 +149,7 @@ const getAdministrationModules = (t: any) => [
     href: "/benefits/open-enrollment",
     icon: CalendarCheck,
     color: "bg-warning/10 text-warning",
+    tabCode: "open_enrollment",
   },
 ];
 
@@ -146,6 +160,7 @@ const getComplianceModules = (t: any) => [
     href: "/benefits/eligibility-audit",
     icon: FileCheck,
     color: "bg-primary/10 text-primary",
+    tabCode: "eligibility_audit",
   },
   {
     title: t("benefits.modules.complianceReports.title"),
@@ -153,6 +168,7 @@ const getComplianceModules = (t: any) => [
     href: "/benefits/compliance",
     icon: FileText,
     color: "bg-success/10 text-success",
+    tabCode: "compliance",
   },
 ];
 
@@ -199,6 +215,7 @@ function ModuleSection({ title, modules, startIndex }: { title: string; modules:
 
 export default function BenefitsDashboardPage() {
   const { t } = useTranslation();
+  const { hasTabAccess } = useGranularPermissions();
   const [companies, setCompanies] = useState<Company[]>([]);
   const [selectedCompanyId, setSelectedCompanyId] = useState<string>("all");
   const [stats, setStats] = useState<DashboardStats>({
@@ -318,10 +335,10 @@ export default function BenefitsDashboardPage() {
     { label: t("benefits.pendingClaims"), value: stats.pendingClaims, icon: FileText, color: "bg-warning/10 text-warning" },
   ];
 
-  const benefitsModules = getBenefitsModules(t);
-  const analyticsModules = getAnalyticsModules(t);
-  const administrationModules = getAdministrationModules(t);
-  const complianceModules = getComplianceModules(t);
+  const benefitsModules = getBenefitsModules(t).filter(m => hasTabAccess("benefits", m.tabCode));
+  const analyticsModules = getAnalyticsModules(t).filter(m => hasTabAccess("benefits", m.tabCode));
+  const administrationModules = getAdministrationModules(t).filter(m => hasTabAccess("benefits", m.tabCode));
+  const complianceModules = getComplianceModules(t).filter(m => hasTabAccess("benefits", m.tabCode));
 
   return (
     <AppLayout>
