@@ -68,6 +68,14 @@ export default function PayrollDashboardPage() {
       tabCode: "tax_config",
     },
     {
+      title: t("payroll.modules.statutoryTypes.title", "Statutory Deduction Types"),
+      description: t("payroll.modules.statutoryTypes.description", "Manage country-level statutory deductions"),
+      icon: FileSpreadsheet,
+      href: "/payroll/statutory-deduction-types",
+      color: "bg-warning/10 text-warning",
+      tabCode: "statutory_types",
+    },
+    {
       title: t("payroll.modules.yearEnd.title"),
       description: t("payroll.modules.yearEnd.description"),
       icon: FileSpreadsheet,
