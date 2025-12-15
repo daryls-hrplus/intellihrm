@@ -9663,6 +9663,723 @@ export type Database = {
           },
         ]
       }
+      gl_account_mappings: {
+        Row: {
+          company_id: string
+          created_at: string
+          credit_account_id: string | null
+          debit_account_id: string | null
+          default_cost_center_id: string | null
+          description: string | null
+          end_date: string | null
+          id: string
+          is_active: boolean | null
+          mapping_type: string
+          pay_element_id: string | null
+          priority: number | null
+          start_date: string
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          credit_account_id?: string | null
+          debit_account_id?: string | null
+          default_cost_center_id?: string | null
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          is_active?: boolean | null
+          mapping_type: string
+          pay_element_id?: string | null
+          priority?: number | null
+          start_date?: string
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          credit_account_id?: string | null
+          debit_account_id?: string | null
+          default_cost_center_id?: string | null
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          is_active?: boolean | null
+          mapping_type?: string
+          pay_element_id?: string | null
+          priority?: number | null
+          start_date?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gl_account_mappings_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gl_account_mappings_credit_account_id_fkey"
+            columns: ["credit_account_id"]
+            isOneToOne: false
+            referencedRelation: "gl_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gl_account_mappings_debit_account_id_fkey"
+            columns: ["debit_account_id"]
+            isOneToOne: false
+            referencedRelation: "gl_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gl_account_mappings_default_cost_center_id_fkey"
+            columns: ["default_cost_center_id"]
+            isOneToOne: false
+            referencedRelation: "gl_cost_centers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gl_account_mappings_pay_element_id_fkey"
+            columns: ["pay_element_id"]
+            isOneToOne: false
+            referencedRelation: "pay_elements"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      gl_accounts: {
+        Row: {
+          account_code: string
+          account_name: string
+          account_type: Database["public"]["Enums"]["gl_account_type"]
+          company_id: string
+          created_at: string
+          description: string | null
+          end_date: string | null
+          id: string
+          is_active: boolean | null
+          is_control_account: boolean | null
+          normal_balance: string | null
+          parent_account_id: string | null
+          start_date: string
+          updated_at: string
+        }
+        Insert: {
+          account_code: string
+          account_name: string
+          account_type: Database["public"]["Enums"]["gl_account_type"]
+          company_id: string
+          created_at?: string
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_control_account?: boolean | null
+          normal_balance?: string | null
+          parent_account_id?: string | null
+          start_date?: string
+          updated_at?: string
+        }
+        Update: {
+          account_code?: string
+          account_name?: string
+          account_type?: Database["public"]["Enums"]["gl_account_type"]
+          company_id?: string
+          created_at?: string
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_control_account?: boolean | null
+          normal_balance?: string | null
+          parent_account_id?: string | null
+          start_date?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gl_accounts_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gl_accounts_parent_account_id_fkey"
+            columns: ["parent_account_id"]
+            isOneToOne: false
+            referencedRelation: "gl_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      gl_cost_center_segment_values: {
+        Row: {
+          created_at: string
+          end_date: string | null
+          id: string
+          is_active: boolean | null
+          segment_description: string | null
+          segment_id: string
+          segment_value: string
+          start_date: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          end_date?: string | null
+          id?: string
+          is_active?: boolean | null
+          segment_description?: string | null
+          segment_id: string
+          segment_value: string
+          start_date?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          end_date?: string | null
+          id?: string
+          is_active?: boolean | null
+          segment_description?: string | null
+          segment_id?: string
+          segment_value?: string
+          start_date?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gl_cost_center_segment_values_segment_id_fkey"
+            columns: ["segment_id"]
+            isOneToOne: false
+            referencedRelation: "gl_cost_center_segments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      gl_cost_center_segments: {
+        Row: {
+          company_id: string
+          created_at: string
+          description: string | null
+          end_date: string | null
+          id: string
+          is_active: boolean | null
+          is_required: boolean | null
+          segment_code: string
+          segment_length: number
+          segment_name: string
+          segment_order: number
+          start_date: string
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_required?: boolean | null
+          segment_code: string
+          segment_length?: number
+          segment_name: string
+          segment_order?: number
+          start_date?: string
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_required?: boolean | null
+          segment_code?: string
+          segment_length?: number
+          segment_name?: string
+          segment_order?: number
+          start_date?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gl_cost_center_segments_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      gl_cost_centers: {
+        Row: {
+          company_id: string
+          cost_center_code: string
+          cost_center_name: string
+          created_at: string
+          department_id: string | null
+          description: string | null
+          end_date: string | null
+          id: string
+          is_active: boolean | null
+          segment_values: Json
+          start_date: string
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          cost_center_code: string
+          cost_center_name: string
+          created_at?: string
+          department_id?: string | null
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          is_active?: boolean | null
+          segment_values?: Json
+          start_date?: string
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          cost_center_code?: string
+          cost_center_name?: string
+          created_at?: string
+          department_id?: string | null
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          is_active?: boolean | null
+          segment_values?: Json
+          start_date?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gl_cost_centers_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gl_cost_centers_department_id_fkey"
+            columns: ["department_id"]
+            isOneToOne: false
+            referencedRelation: "departments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      gl_cost_reallocation_targets: {
+        Row: {
+          allocation_amount: number | null
+          allocation_percentage: number | null
+          created_at: string
+          id: string
+          is_active: boolean | null
+          notes: string | null
+          reallocation_id: string
+          target_cost_center_id: string
+          updated_at: string
+        }
+        Insert: {
+          allocation_amount?: number | null
+          allocation_percentage?: number | null
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          notes?: string | null
+          reallocation_id: string
+          target_cost_center_id: string
+          updated_at?: string
+        }
+        Update: {
+          allocation_amount?: number | null
+          allocation_percentage?: number | null
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          notes?: string | null
+          reallocation_id?: string
+          target_cost_center_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gl_cost_reallocation_targets_reallocation_id_fkey"
+            columns: ["reallocation_id"]
+            isOneToOne: false
+            referencedRelation: "gl_cost_reallocations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gl_cost_reallocation_targets_target_cost_center_id_fkey"
+            columns: ["target_cost_center_id"]
+            isOneToOne: false
+            referencedRelation: "gl_cost_centers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      gl_cost_reallocations: {
+        Row: {
+          allocation_method: string
+          company_id: string
+          created_at: string
+          created_by: string | null
+          description: string | null
+          effective_date: string
+          end_date: string | null
+          id: string
+          is_active: boolean | null
+          rule_code: string
+          rule_name: string
+          source_cost_center_id: string
+          updated_at: string
+        }
+        Insert: {
+          allocation_method: string
+          company_id: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          effective_date?: string
+          end_date?: string | null
+          id?: string
+          is_active?: boolean | null
+          rule_code: string
+          rule_name: string
+          source_cost_center_id: string
+          updated_at?: string
+        }
+        Update: {
+          allocation_method?: string
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          effective_date?: string
+          end_date?: string | null
+          id?: string
+          is_active?: boolean | null
+          rule_code?: string
+          rule_name?: string
+          source_cost_center_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gl_cost_reallocations_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gl_cost_reallocations_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gl_cost_reallocations_source_cost_center_id_fkey"
+            columns: ["source_cost_center_id"]
+            isOneToOne: false
+            referencedRelation: "gl_cost_centers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      gl_export_history: {
+        Row: {
+          batch_id: string | null
+          company_id: string
+          error_message: string | null
+          export_format: string
+          exported_at: string
+          exported_by: string | null
+          file_content: string | null
+          file_name: string | null
+          id: string
+          record_count: number | null
+          status: string | null
+          total_amount: number | null
+        }
+        Insert: {
+          batch_id?: string | null
+          company_id: string
+          error_message?: string | null
+          export_format: string
+          exported_at?: string
+          exported_by?: string | null
+          file_content?: string | null
+          file_name?: string | null
+          id?: string
+          record_count?: number | null
+          status?: string | null
+          total_amount?: number | null
+        }
+        Update: {
+          batch_id?: string | null
+          company_id?: string
+          error_message?: string | null
+          export_format?: string
+          exported_at?: string
+          exported_by?: string | null
+          file_content?: string | null
+          file_name?: string | null
+          id?: string
+          record_count?: number | null
+          status?: string | null
+          total_amount?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gl_export_history_batch_id_fkey"
+            columns: ["batch_id"]
+            isOneToOne: false
+            referencedRelation: "gl_journal_batches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gl_export_history_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gl_export_history_exported_by_fkey"
+            columns: ["exported_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      gl_journal_batches: {
+        Row: {
+          batch_date: string
+          batch_number: string
+          company_id: string
+          created_at: string
+          created_by: string | null
+          currency_id: string | null
+          description: string | null
+          id: string
+          pay_period_id: string | null
+          payroll_run_id: string | null
+          posted_at: string | null
+          posted_by: string | null
+          reversal_batch_id: string | null
+          reversed_at: string | null
+          reversed_by: string | null
+          status: Database["public"]["Enums"]["gl_posting_status"]
+          total_credits: number | null
+          total_debits: number | null
+          updated_at: string
+        }
+        Insert: {
+          batch_date: string
+          batch_number: string
+          company_id: string
+          created_at?: string
+          created_by?: string | null
+          currency_id?: string | null
+          description?: string | null
+          id?: string
+          pay_period_id?: string | null
+          payroll_run_id?: string | null
+          posted_at?: string | null
+          posted_by?: string | null
+          reversal_batch_id?: string | null
+          reversed_at?: string | null
+          reversed_by?: string | null
+          status?: Database["public"]["Enums"]["gl_posting_status"]
+          total_credits?: number | null
+          total_debits?: number | null
+          updated_at?: string
+        }
+        Update: {
+          batch_date?: string
+          batch_number?: string
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          currency_id?: string | null
+          description?: string | null
+          id?: string
+          pay_period_id?: string | null
+          payroll_run_id?: string | null
+          posted_at?: string | null
+          posted_by?: string | null
+          reversal_batch_id?: string | null
+          reversed_at?: string | null
+          reversed_by?: string | null
+          status?: Database["public"]["Enums"]["gl_posting_status"]
+          total_credits?: number | null
+          total_debits?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gl_journal_batches_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gl_journal_batches_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gl_journal_batches_currency_id_fkey"
+            columns: ["currency_id"]
+            isOneToOne: false
+            referencedRelation: "currencies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gl_journal_batches_pay_period_id_fkey"
+            columns: ["pay_period_id"]
+            isOneToOne: false
+            referencedRelation: "pay_periods"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gl_journal_batches_payroll_run_id_fkey"
+            columns: ["payroll_run_id"]
+            isOneToOne: false
+            referencedRelation: "payroll_runs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gl_journal_batches_posted_by_fkey"
+            columns: ["posted_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gl_journal_batches_reversal_batch_id_fkey"
+            columns: ["reversal_batch_id"]
+            isOneToOne: false
+            referencedRelation: "gl_journal_batches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gl_journal_batches_reversed_by_fkey"
+            columns: ["reversed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      gl_journal_entries: {
+        Row: {
+          account_id: string
+          batch_id: string
+          cost_center_id: string | null
+          created_at: string
+          credit_amount: number | null
+          debit_amount: number | null
+          description: string | null
+          employee_id: string | null
+          entry_date: string
+          entry_number: number
+          id: string
+          reallocation_id: string | null
+          reference_id: string | null
+          reference_type: string | null
+          source_type: string | null
+          updated_at: string
+        }
+        Insert: {
+          account_id: string
+          batch_id: string
+          cost_center_id?: string | null
+          created_at?: string
+          credit_amount?: number | null
+          debit_amount?: number | null
+          description?: string | null
+          employee_id?: string | null
+          entry_date: string
+          entry_number: number
+          id?: string
+          reallocation_id?: string | null
+          reference_id?: string | null
+          reference_type?: string | null
+          source_type?: string | null
+          updated_at?: string
+        }
+        Update: {
+          account_id?: string
+          batch_id?: string
+          cost_center_id?: string | null
+          created_at?: string
+          credit_amount?: number | null
+          debit_amount?: number | null
+          description?: string | null
+          employee_id?: string | null
+          entry_date?: string
+          entry_number?: number
+          id?: string
+          reallocation_id?: string | null
+          reference_id?: string | null
+          reference_type?: string | null
+          source_type?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gl_journal_entries_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "gl_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gl_journal_entries_batch_id_fkey"
+            columns: ["batch_id"]
+            isOneToOne: false
+            referencedRelation: "gl_journal_batches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gl_journal_entries_cost_center_id_fkey"
+            columns: ["cost_center_id"]
+            isOneToOne: false
+            referencedRelation: "gl_cost_centers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gl_journal_entries_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gl_journal_entries_reallocation_id_fkey"
+            columns: ["reallocation_id"]
+            isOneToOne: false
+            referencedRelation: "gl_cost_reallocations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       goal_alignments: {
         Row: {
           alignment_percentage: number | null
@@ -28329,8 +29046,12 @@ export type Database = {
         }
         Returns: boolean
       }
-      is_admin: { Args: never; Returns: boolean }
-      is_admin_or_hr: { Args: never; Returns: boolean }
+      is_admin:
+        | { Args: never; Returns: boolean }
+        | { Args: { p_user_id: string }; Returns: boolean }
+      is_admin_or_hr:
+        | { Args: never; Returns: boolean }
+        | { Args: { p_user_id: string }; Returns: boolean }
       log_audit_event: {
         Args: {
           p_action: Database["public"]["Enums"]["audit_action"]
@@ -28443,6 +29164,8 @@ export type Database = {
         | "LOGIN"
         | "LOGOUT"
       channel_type: "direct" | "group" | "channel"
+      gl_account_type: "asset" | "liability" | "equity" | "revenue" | "expense"
+      gl_posting_status: "draft" | "pending" | "posted" | "reversed" | "failed"
       goal_level: "company" | "department" | "team" | "individual"
       goal_source: "cascaded" | "manager_assigned" | "self_created"
       goal_status:
@@ -28637,6 +29360,8 @@ export const Constants = {
         "LOGOUT",
       ],
       channel_type: ["direct", "group", "channel"],
+      gl_account_type: ["asset", "liability", "equity", "revenue", "expense"],
+      gl_posting_status: ["draft", "pending", "posted", "reversed", "failed"],
       goal_level: ["company", "department", "team", "individual"],
       goal_source: ["cascaded", "manager_assigned", "self_created"],
       goal_status: [

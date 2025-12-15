@@ -1,0 +1,486 @@
+import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
+import AppLayout from '@/components/AppLayout';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Badge } from '@/components/ui/badge';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { Plus, Edit, Trash2, ChevronDown, ChevronRight } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
+import { usePayrollFilters } from '@/hooks/usePayrollFilters';
+
+interface Segment {
+  id: string;
+  company_id: string;
+  segment_name: string;
+  segment_code: string;
+  segment_order: number;
+  segment_length: number;
+  description: string | null;
+  is_required: boolean;
+  is_active: boolean;
+}
+
+interface SegmentValue {
+  id: string;
+  segment_id: string;
+  segment_value: string;
+  segment_description: string | null;
+  is_active: boolean;
+}
+
+const CostCenterSegmentsPage = () => {
+  const { t } = useTranslation();
+  const { selectedCompanyId, CompanyFilter } = usePayrollFilters();
+  const [segments, setSegments] = useState<Segment[]>([]);
+  const [segmentValues, setSegmentValues] = useState<Record<string, SegmentValue[]>>({});
+  const [loading, setLoading] = useState(true);
+  const [expandedSegments, setExpandedSegments] = useState<string[]>([]);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [valueDialogOpen, setValueDialogOpen] = useState(false);
+  const [editingSegment, setEditingSegment] = useState<Segment | null>(null);
+  const [editingValue, setEditingValue] = useState<SegmentValue | null>(null);
+  const [selectedSegmentId, setSelectedSegmentId] = useState<string | null>(null);
+
+  const [formData, setFormData] = useState({
+    segment_name: '',
+    segment_code: '',
+    segment_order: 1,
+    segment_length: 4,
+    description: '',
+    is_required: true
+  });
+
+  const [valueFormData, setValueFormData] = useState({
+    segment_value: '',
+    segment_description: ''
+  });
+
+  useEffect(() => {
+    if (selectedCompanyId) {
+      loadSegments();
+    }
+  }, [selectedCompanyId]);
+
+  const loadSegments = async () => {
+    if (!selectedCompanyId) return;
+    setLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('gl_cost_center_segments')
+        .select('*')
+        .eq('company_id', selectedCompanyId)
+        .order('segment_order');
+
+      if (error) throw error;
+      setSegments(data || []);
+
+      // Load values for each segment
+      for (const segment of data || []) {
+        await loadSegmentValues(segment.id);
+      }
+    } catch (error) {
+      console.error('Error loading segments:', error);
+      toast.error(t('common.error', 'Error loading data'));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadSegmentValues = async (segmentId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('gl_cost_center_segment_values')
+        .select('*')
+        .eq('segment_id', segmentId)
+        .order('segment_value');
+
+      if (error) throw error;
+      setSegmentValues(prev => ({ ...prev, [segmentId]: data || [] }));
+    } catch (error) {
+      console.error('Error loading segment values:', error);
+    }
+  };
+
+  const handleSaveSegment = async () => {
+    if (!selectedCompanyId) return;
+    try {
+      const payload = {
+        company_id: selectedCompanyId,
+        segment_name: formData.segment_name,
+        segment_code: formData.segment_code,
+        segment_order: formData.segment_order,
+        segment_length: formData.segment_length,
+        description: formData.description || null,
+        is_required: formData.is_required
+      };
+
+      if (editingSegment) {
+        const { error } = await supabase
+          .from('gl_cost_center_segments')
+          .update(payload)
+          .eq('id', editingSegment.id);
+        if (error) throw error;
+        toast.success(t('common.updated', 'Segment updated'));
+      } else {
+        const { error } = await supabase
+          .from('gl_cost_center_segments')
+          .insert(payload);
+        if (error) throw error;
+        toast.success(t('common.created', 'Segment created'));
+      }
+
+      setDialogOpen(false);
+      resetSegmentForm();
+      loadSegments();
+    } catch (error: any) {
+      toast.error(error.message || t('common.error', 'Error saving'));
+    }
+  };
+
+  const handleSaveValue = async () => {
+    if (!selectedSegmentId) return;
+    try {
+      const payload = {
+        segment_id: selectedSegmentId,
+        segment_value: valueFormData.segment_value,
+        segment_description: valueFormData.segment_description || null
+      };
+
+      if (editingValue) {
+        const { error } = await supabase
+          .from('gl_cost_center_segment_values')
+          .update(payload)
+          .eq('id', editingValue.id);
+        if (error) throw error;
+        toast.success(t('common.updated', 'Value updated'));
+      } else {
+        const { error } = await supabase
+          .from('gl_cost_center_segment_values')
+          .insert(payload);
+        if (error) throw error;
+        toast.success(t('common.created', 'Value created'));
+      }
+
+      setValueDialogOpen(false);
+      resetValueForm();
+      loadSegmentValues(selectedSegmentId);
+    } catch (error: any) {
+      toast.error(error.message || t('common.error', 'Error saving'));
+    }
+  };
+
+  const handleDeleteSegment = async (id: string) => {
+    if (!confirm(t('common.confirmDelete', 'Are you sure?'))) return;
+    try {
+      const { error } = await supabase.from('gl_cost_center_segments').delete().eq('id', id);
+      if (error) throw error;
+      toast.success(t('common.deleted', 'Segment deleted'));
+      loadSegments();
+    } catch (error: any) {
+      toast.error(error.message || t('common.error', 'Error deleting'));
+    }
+  };
+
+  const handleDeleteValue = async (id: string, segmentId: string) => {
+    if (!confirm(t('common.confirmDelete', 'Are you sure?'))) return;
+    try {
+      const { error } = await supabase.from('gl_cost_center_segment_values').delete().eq('id', id);
+      if (error) throw error;
+      toast.success(t('common.deleted', 'Value deleted'));
+      loadSegmentValues(segmentId);
+    } catch (error: any) {
+      toast.error(error.message || t('common.error', 'Error deleting'));
+    }
+  };
+
+  const openEditSegment = (segment: Segment) => {
+    setEditingSegment(segment);
+    setFormData({
+      segment_name: segment.segment_name,
+      segment_code: segment.segment_code,
+      segment_order: segment.segment_order,
+      segment_length: segment.segment_length,
+      description: segment.description || '',
+      is_required: segment.is_required
+    });
+    setDialogOpen(true);
+  };
+
+  const openAddValue = (segmentId: string) => {
+    setSelectedSegmentId(segmentId);
+    setEditingValue(null);
+    setValueFormData({ segment_value: '', segment_description: '' });
+    setValueDialogOpen(true);
+  };
+
+  const openEditValue = (value: SegmentValue) => {
+    setSelectedSegmentId(value.segment_id);
+    setEditingValue(value);
+    setValueFormData({
+      segment_value: value.segment_value,
+      segment_description: value.segment_description || ''
+    });
+    setValueDialogOpen(true);
+  };
+
+  const resetSegmentForm = () => {
+    setEditingSegment(null);
+    setFormData({
+      segment_name: '',
+      segment_code: '',
+      segment_order: segments.length + 1,
+      segment_length: 4,
+      description: '',
+      is_required: true
+    });
+  };
+
+  const resetValueForm = () => {
+    setEditingValue(null);
+    setValueFormData({ segment_value: '', segment_description: '' });
+  };
+
+  const toggleExpand = (id: string) => {
+    setExpandedSegments(prev =>
+      prev.includes(id) ? prev.filter(s => s !== id) : [...prev, id]
+    );
+  };
+
+  const breadcrumbs = [
+    { label: t('common.home', 'Home'), href: '/' },
+    { label: t('payroll.title', 'Payroll'), href: '/payroll' },
+    { label: t('payroll.gl.title', 'GL Interface'), href: '/payroll/gl' },
+    { label: t('payroll.gl.costCenterSegments', 'Cost Center Segments') }
+  ];
+
+  if (!selectedCompanyId) {
+    return (
+      <AppLayout breadcrumbs={breadcrumbs}>
+        <div className="flex items-center justify-center h-64">
+          <p className="text-muted-foreground">{t('common.selectCompany', 'Please select a company')}</p>
+        </div>
+      </AppLayout>
+    );
+  }
+
+  return (
+    <AppLayout breadcrumbs={breadcrumbs}>
+      <div className="space-y-6">
+        <div className="flex justify-between items-center">
+          <div>
+            <h1 className="text-3xl font-bold">{t('payroll.gl.costCenterSegments', 'Cost Center Segments')}</h1>
+            <p className="text-muted-foreground">{t('payroll.gl.costCenterSegmentsDesc', 'Define cost center structure and segments')}</p>
+          </div>
+          <Button onClick={() => { resetSegmentForm(); setDialogOpen(true); }}>
+            <Plus className="h-4 w-4 mr-2" />
+            {t('common.addSegment', 'Add Segment')}
+          </Button>
+        </div>
+
+        <Card>
+          <CardHeader>
+            <CompanyFilter />
+          </CardHeader>
+          <CardContent>
+            {loading ? (
+              <div className="text-center py-8">{t('common.loading', 'Loading...')}</div>
+            ) : segments.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">{t('common.noData', 'No segments defined')}</div>
+            ) : (
+              <div className="space-y-2">
+                {segments.map((segment) => (
+                  <Collapsible
+                    key={segment.id}
+                    open={expandedSegments.includes(segment.id)}
+                    onOpenChange={() => toggleExpand(segment.id)}
+                  >
+                    <div className="border rounded-lg">
+                      <CollapsibleTrigger asChild>
+                        <div className="flex items-center justify-between p-4 cursor-pointer hover:bg-muted/50">
+                          <div className="flex items-center gap-4">
+                            {expandedSegments.includes(segment.id) ? (
+                              <ChevronDown className="h-4 w-4" />
+                            ) : (
+                              <ChevronRight className="h-4 w-4" />
+                            )}
+                            <div>
+                              <div className="font-medium">
+                                {segment.segment_order}. {segment.segment_name}
+                                <span className="ml-2 text-sm text-muted-foreground font-mono">({segment.segment_code})</span>
+                              </div>
+                              <div className="text-sm text-muted-foreground">
+                                {t('payroll.gl.length', 'Length')}: {segment.segment_length}
+                                {segment.is_required && (
+                                  <Badge variant="secondary" className="ml-2">{t('common.required', 'Required')}</Badge>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+                            <Button variant="ghost" size="sm" onClick={() => openAddValue(segment.id)}>
+                              <Plus className="h-4 w-4" />
+                            </Button>
+                            <Button variant="ghost" size="sm" onClick={() => openEditSegment(segment)}>
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                            <Button variant="ghost" size="sm" onClick={() => handleDeleteSegment(segment.id)}>
+                              <Trash2 className="h-4 w-4 text-destructive" />
+                            </Button>
+                          </div>
+                        </div>
+                      </CollapsibleTrigger>
+                      <CollapsibleContent>
+                        <div className="border-t p-4 bg-muted/20">
+                          <h4 className="text-sm font-medium mb-2">{t('payroll.gl.segmentValues', 'Segment Values')}</h4>
+                          {(segmentValues[segment.id] || []).length === 0 ? (
+                            <p className="text-sm text-muted-foreground">{t('common.noValues', 'No values defined')}</p>
+                          ) : (
+                            <Table>
+                              <TableHeader>
+                                <TableRow>
+                                  <TableHead>{t('common.value', 'Value')}</TableHead>
+                                  <TableHead>{t('common.description', 'Description')}</TableHead>
+                                  <TableHead className="text-right">{t('common.actions', 'Actions')}</TableHead>
+                                </TableRow>
+                              </TableHeader>
+                              <TableBody>
+                                {(segmentValues[segment.id] || []).map((value) => (
+                                  <TableRow key={value.id}>
+                                    <TableCell className="font-mono">{value.segment_value}</TableCell>
+                                    <TableCell>{value.segment_description}</TableCell>
+                                    <TableCell className="text-right">
+                                      <Button variant="ghost" size="sm" onClick={() => openEditValue(value)}>
+                                        <Edit className="h-4 w-4" />
+                                      </Button>
+                                      <Button variant="ghost" size="sm" onClick={() => handleDeleteValue(value.id, segment.id)}>
+                                        <Trash2 className="h-4 w-4 text-destructive" />
+                                      </Button>
+                                    </TableCell>
+                                  </TableRow>
+                                ))}
+                              </TableBody>
+                            </Table>
+                          )}
+                        </div>
+                      </CollapsibleContent>
+                    </div>
+                  </Collapsible>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Segment Dialog */}
+        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>
+                {editingSegment ? t('common.edit', 'Edit Segment') : t('common.add', 'Add Segment')}
+              </DialogTitle>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>{t('common.name', 'Name')}</Label>
+                  <Input
+                    value={formData.segment_name}
+                    onChange={(e) => setFormData({ ...formData, segment_name: e.target.value })}
+                    placeholder="e.g., Department"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>{t('common.code', 'Code')}</Label>
+                  <Input
+                    value={formData.segment_code}
+                    onChange={(e) => setFormData({ ...formData, segment_code: e.target.value })}
+                    placeholder="e.g., DEPT"
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>{t('payroll.gl.order', 'Order')}</Label>
+                  <Input
+                    type="number"
+                    value={formData.segment_order}
+                    onChange={(e) => setFormData({ ...formData, segment_order: parseInt(e.target.value) || 1 })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>{t('payroll.gl.length', 'Length')}</Label>
+                  <Input
+                    type="number"
+                    value={formData.segment_length}
+                    onChange={(e) => setFormData({ ...formData, segment_length: parseInt(e.target.value) || 4 })}
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>{t('common.description', 'Description')}</Label>
+                <Input
+                  value={formData.description}
+                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                />
+              </div>
+              <div className="flex items-center gap-2">
+                <Checkbox
+                  id="is_required"
+                  checked={formData.is_required}
+                  onCheckedChange={(checked) => setFormData({ ...formData, is_required: !!checked })}
+                />
+                <Label htmlFor="is_required">{t('common.required', 'Required')}</Label>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setDialogOpen(false)}>{t('common.cancel', 'Cancel')}</Button>
+              <Button onClick={handleSaveSegment}>{t('common.save', 'Save')}</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Value Dialog */}
+        <Dialog open={valueDialogOpen} onOpenChange={setValueDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>
+                {editingValue ? t('common.editValue', 'Edit Value') : t('common.addValue', 'Add Value')}
+              </DialogTitle>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+              <div className="space-y-2">
+                <Label>{t('common.value', 'Value')}</Label>
+                <Input
+                  value={valueFormData.segment_value}
+                  onChange={(e) => setValueFormData({ ...valueFormData, segment_value: e.target.value })}
+                  placeholder="e.g., 1000"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>{t('common.description', 'Description')}</Label>
+                <Input
+                  value={valueFormData.segment_description}
+                  onChange={(e) => setValueFormData({ ...valueFormData, segment_description: e.target.value })}
+                  placeholder="e.g., Finance Department"
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setValueDialogOpen(false)}>{t('common.cancel', 'Cancel')}</Button>
+              <Button onClick={handleSaveValue}>{t('common.save', 'Save')}</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </div>
+    </AppLayout>
+  );
+};
+
+export default CostCenterSegmentsPage;
