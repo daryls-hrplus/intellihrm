@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Calendar, RefreshCw, AlertCircle, Check } from "lucide-react";
-import { format, addDays, subDays, startOfYear, endOfYear, isMonday, isWeekend, eachDayOfInterval, lastDayOfMonth, isBefore, parseISO } from "date-fns";
+import { format, addDays, subDays, startOfYear, endOfYear, isMonday, isWeekend, eachDayOfInterval, lastDayOfMonth, isBefore } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -44,6 +44,18 @@ export function PayrollCalendarGenerator({ companyId, payGroup, onGenerated }: P
   const [startDate, setStartDate] = useState<string>("");
   const [startingCycleNumber, setStartingCycleNumber] = useState(1);
   const [payDayOffsetInput, setPayDayOffsetInput] = useState("0");
+  const [previewMeta, setPreviewMeta] = useState<{
+    year: number;
+    startDate: string;
+    startingCycleNumber: number;
+    payDayOffset: number;
+  } | null>(null);
+
+  const clearPreview = () => {
+    if (previewPeriods.length === 0) return;
+    setPreviewPeriods([]);
+    setPreviewMeta(null);
+  };
 
   // Fetch holidays for the company
   useEffect(() => {
@@ -284,15 +296,17 @@ export function PayrollCalendarGenerator({ companyId, payGroup, onGenerated }: P
       toast.error("Please enter a cycle start date");
       return;
     }
-    
+
     if (startingCycleNumber < 1) {
       toast.error("Starting cycle number must be at least 1");
       return;
     }
 
-    const cycleStart = parseISO(startDate);
+    const cycleStart = new Date(`${startDate}T00:00:00`);
+    const payDayOffset = getPayDayOffsetNumber();
+
     let periods: GeneratedPeriod[] = [];
-    
+
     switch (payGroup.pay_frequency) {
       case "monthly":
         periods = generateMonthlyPeriods(selectedYear, startingCycleNumber, cycleStart);
@@ -307,7 +321,13 @@ export function PayrollCalendarGenerator({ companyId, payGroup, onGenerated }: P
         periods = generateBiweeklyPeriods(selectedYear, startingCycleNumber, cycleStart);
         break;
     }
-    
+
+    setPreviewMeta({
+      year: selectedYear,
+      startDate,
+      startingCycleNumber,
+      payDayOffset,
+    });
     setPreviewPeriods(periods);
   };
 
@@ -320,13 +340,16 @@ export function PayrollCalendarGenerator({ companyId, payGroup, onGenerated }: P
     setIsSaving(true);
     try {
       // Check for existing periods for this pay group and year with overlapping period numbers
-      const periodNumbers = previewPeriods.map(p => `${selectedYear}-${String(p.period_number).padStart(2, "0")}`);
+      const previewYear = previewMeta?.year ?? selectedYear;
+      const periodNumbers = previewPeriods.map(
+        (p) => `${previewYear}-${String(p.period_number).padStart(2, "0")}`
+      );
       
       const { data: existing } = await supabase
         .from("pay_periods")
         .select("id, period_number")
         .eq("pay_group_id", payGroup.id)
-        .eq("year", selectedYear)
+        .eq("year", previewYear)
         .in("period_number", periodNumbers);
       
       if (existing && existing.length > 0) {
@@ -341,7 +364,7 @@ export function PayrollCalendarGenerator({ companyId, payGroup, onGenerated }: P
           .from("pay_periods")
           .delete()
           .eq("pay_group_id", payGroup.id)
-          .eq("year", selectedYear)
+          .eq("year", previewYear)
           .in("period_number", periodNumbers);
       }
 
@@ -360,7 +383,7 @@ export function PayrollCalendarGenerator({ companyId, payGroup, onGenerated }: P
           .from("pay_period_schedules")
           .insert({
             company_id: companyId,
-            code: `${payGroup.code}-${selectedYear}`,
+            code: `${payGroup.code}-${previewYear}`,
             name: `${payGroup.name} Schedule`,
             frequency: payGroup.pay_frequency === "biweekly" ? "bi_weekly" : 
                        payGroup.pay_frequency === "semimonthly" ? "semi_monthly" : 
@@ -379,12 +402,12 @@ export function PayrollCalendarGenerator({ companyId, payGroup, onGenerated }: P
         company_id: companyId,
         schedule_id: scheduleId,
         pay_group_id: payGroup.id,
-        period_number: `${selectedYear}-${String(p.period_number).padStart(2, "0")}`,
+        period_number: `${previewYear}-${String(p.period_number).padStart(2, "0")}`,
         period_start: format(p.period_start, "yyyy-MM-dd"),
         period_end: format(p.period_end, "yyyy-MM-dd"),
         pay_date: format(p.pay_date, "yyyy-MM-dd"),
         monday_count: p.monday_count,
-        year: selectedYear,
+        year: previewYear,
         status: "open",
       }));
 
@@ -463,7 +486,10 @@ export function PayrollCalendarGenerator({ companyId, payGroup, onGenerated }: P
                     <Input
                       type="number"
                       value={selectedYear}
-                      onChange={(e) => setSelectedYear(parseInt(e.target.value))}
+                      onChange={(e) => {
+                        clearPreview();
+                        setSelectedYear(parseInt(e.target.value));
+                      }}
                       min={currentYear - 1}
                       max={currentYear + 2}
                     />
@@ -477,7 +503,10 @@ export function PayrollCalendarGenerator({ companyId, payGroup, onGenerated }: P
                     <Input
                       type="date"
                       value={startDate}
-                      onChange={(e) => setStartDate(e.target.value)}
+                      onChange={(e) => {
+                        clearPreview();
+                        setStartDate(e.target.value);
+                      }}
                     />
                     <p className="text-xs text-muted-foreground">
                       First day of the first cycle to generate
@@ -492,7 +521,10 @@ export function PayrollCalendarGenerator({ companyId, payGroup, onGenerated }: P
                     <Input
                       type="number"
                       value={startingCycleNumber}
-                      onChange={(e) => setStartingCycleNumber(parseInt(e.target.value) || 1)}
+                      onChange={(e) => {
+                        clearPreview();
+                        setStartingCycleNumber(parseInt(e.target.value) || 1);
+                      }}
                       min={1}
                       max={getMaxCycles()}
                     />
@@ -508,7 +540,10 @@ export function PayrollCalendarGenerator({ companyId, payGroup, onGenerated }: P
                       inputMode="numeric"
                       pattern="-?[0-9]*"
                       value={payDayOffsetInput}
-                      onChange={(e) => setPayDayOffsetInput(e.target.value)}
+                      onChange={(e) => {
+                        clearPreview();
+                        setPayDayOffsetInput(e.target.value);
+                      }}
                       onBlur={() => setPayDayOffsetInput(String(getPayDayOffsetNumber()))}
                       placeholder="0"
                     />
