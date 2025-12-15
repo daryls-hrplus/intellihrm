@@ -32,6 +32,7 @@ import {
   Gem,
   Target,
   CalendarIcon,
+  ListOrdered,
 } from "lucide-react";
 
 export default function CompensationDashboardPage() {
@@ -44,6 +45,7 @@ export default function CompensationDashboardPage() {
   const compensationModules = [
     { title: t("compensation.modules.payElements.title"), description: t("compensation.modules.payElements.description"), href: "/compensation/pay-elements", icon: Coins, color: "bg-primary/10 text-primary", tabCode: "pay_elements" },
     { title: t("compensation.modules.salaryGrades.title"), description: t("compensation.modules.salaryGrades.description"), href: "/compensation/salary-grades", icon: Layers, color: "bg-emerald-500/10 text-emerald-600", tabCode: "salary_grades" },
+    { title: "Spinal Points", description: "Manage pay spines and spinal point salary scales", href: "/compensation/spinal-points", icon: ListOrdered, color: "bg-slate-500/10 text-slate-600", tabCode: "spinal_points" },
     { title: t("compensation.modules.positionCompensation.title"), description: t("compensation.modules.positionCompensation.description"), href: "/compensation/position-compensation", icon: Wallet, color: "bg-sky-500/10 text-sky-600", tabCode: "position_compensation" },
     { title: t("compensation.modules.history.title"), description: t("compensation.modules.history.description"), href: "/compensation/history", icon: History, color: "bg-violet-500/10 text-violet-600", tabCode: "history" },
     { title: t("compensation.modules.meritCycles.title"), description: t("compensation.modules.meritCycles.description"), href: "/compensation/merit-cycles", icon: Award, color: "bg-amber-500/10 text-amber-600", tabCode: "merit_cycles" },
