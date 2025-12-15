@@ -544,6 +544,16 @@ export default function PositionCompensationPage() {
                 </Select>
               </div>
 
+              {/* Show element type when a pay element is selected */}
+              {formPayElementId && (
+                <div className="p-3 rounded-lg bg-muted/50 border">
+                  <p className="text-sm text-muted-foreground">{t("compensation.positionCompensation.type")}</p>
+                  <p className="font-medium">
+                    {payElements.find(pe => pe.id === formPayElementId)?.element_type?.name || "-"}
+                  </p>
+                </div>
+              )}
+
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="amount">{t("compensation.positionCompensation.amount")} *</Label>
