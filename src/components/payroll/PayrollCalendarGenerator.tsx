@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Calendar, RefreshCw, AlertCircle, Check } from "lucide-react";
-import { format, addDays, subDays, startOfYear, endOfYear, isMonday, isSaturday, isSunday, isWeekend, eachDayOfInterval, lastDayOfMonth, isBefore, parseISO } from "date-fns";
+import { format, addDays, subDays, startOfYear, endOfYear, isMonday, isWeekend, eachDayOfInterval, lastDayOfMonth, isBefore, parseISO } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -43,7 +43,7 @@ export function PayrollCalendarGenerator({ companyId, payGroup, onGenerated }: P
   const [selectedYear, setSelectedYear] = useState(currentYear);
   const [startDate, setStartDate] = useState<string>("");
   const [startingCycleNumber, setStartingCycleNumber] = useState(1);
-  const [payDayOffset, setPayDayOffset] = useState(0);
+  const [payDayOffsetInput, setPayDayOffsetInput] = useState("0");
 
   // Fetch holidays for the company
   useEffect(() => {
@@ -102,9 +102,18 @@ export function PayrollCalendarGenerator({ companyId, payGroup, onGenerated }: P
     return adjustedDate;
   };
 
+  const clampPayDayOffset = (n: number) => Math.max(-30, Math.min(30, n));
+
+  const getPayDayOffsetNumber = () => {
+    const raw = payDayOffsetInput.trim();
+    if (raw === "" || raw === "-") return 0;
+    const n = Number(raw);
+    return Number.isFinite(n) ? clampPayDayOffset(n) : 0;
+  };
+
   // Calculate pay date with offset and adjustment
   const calculatePayDate = (periodEnd: Date): Date => {
-    const rawPayDate = addDays(periodEnd, payDayOffset);
+    const rawPayDate = addDays(periodEnd, getPayDayOffsetNumber());
     return adjustPayDate(rawPayDate);
   };
 
@@ -495,14 +504,13 @@ export function PayrollCalendarGenerator({ companyId, payGroup, onGenerated }: P
                   <div className="space-y-2">
                     <Label>Pay Day Offset</Label>
                     <Input
-                      type="number"
-                      value={payDayOffset}
-                      onChange={(e) => {
-                        const num = e.target.valueAsNumber;
-                        setPayDayOffset(isNaN(num) ? 0 : num);
-                      }}
-                      min={-30}
-                      max={30}
+                      type="text"
+                      inputMode="numeric"
+                      pattern="-?[0-9]*"
+                      value={payDayOffsetInput}
+                      onChange={(e) => setPayDayOffsetInput(e.target.value)}
+                      onBlur={() => setPayDayOffsetInput(String(getPayDayOffsetNumber()))}
+                      placeholder="0"
                     />
                     <p className="text-xs text-muted-foreground">
                       Days before (-) or after (+) period end. Auto-adjusts to previous business day if on weekend/holiday.
