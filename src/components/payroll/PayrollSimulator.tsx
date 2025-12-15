@@ -111,11 +111,21 @@ export function PayrollSimulator({ companyId, employeeId, payPeriodId }: Payroll
         .eq('pay_period_id', payPeriodId);
 
       // Fetch pay period info for period-based calculations
-      const { data: payPeriod } = await supabase
+      const { data: payPeriod, error: payPeriodError } = await supabase
         .from('pay_periods')
         .select('period_start, period_end, pay_groups(pay_frequency)')
         .eq('id', payPeriodId)
-        .single();
+        .maybeSingle();
+
+      if (payPeriodError) {
+        console.error('Pay period fetch error:', payPeriodError);
+      }
+      
+      console.log('Simulation data:', {
+        positionData,
+        payPeriod,
+        employeeComp
+      });
 
       // Calculate hourly rate from position compensation
       const posComp = positionData?.compensation_amount || 0;
@@ -285,8 +295,13 @@ export function PayrollSimulator({ companyId, employeeId, payPeriodId }: Payroll
         rules_applied: Array.from(rulesApplied.values())
       });
 
-      toast.success("Payroll simulation complete");
+      if (periodBaseSalary === 0 && additionalCompList.length === 0) {
+        toast.warning("No salary configured for this employee. Please set up position compensation first.");
+      } else {
+        toast.success("Payroll simulation complete");
+      }
     } catch (error) {
+      console.error('Simulation error:', error);
       toast.error("Failed to run simulation");
     }
     
@@ -338,26 +353,34 @@ export function PayrollSimulator({ companyId, employeeId, payPeriodId }: Payroll
       )}
 
       {/* Salary Info */}
-      <div className="p-4 bg-muted/50 rounded-lg">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-          <div>
-            <p className="text-muted-foreground">Base Salary</p>
-            <p className="font-semibold">${result.salary.base_salary.toFixed(2)}</p>
-          </div>
-          <div>
-            <p className="text-muted-foreground">Hourly Rate</p>
-            <p className="font-semibold">${result.salary.hourly_rate.toFixed(2)}/hr</p>
-          </div>
-          <div>
-            <p className="text-muted-foreground">Currency</p>
-            <p className="font-semibold">{result.salary.currency}</p>
-          </div>
-          <div>
-            <p className="text-muted-foreground">Pay Frequency</p>
-            <p className="font-semibold capitalize">{result.salary.frequency}</p>
+      {result.salary.base_salary === 0 ? (
+        <div className="p-4 bg-destructive/10 border border-destructive/20 rounded-lg">
+          <p className="text-sm text-destructive font-medium">
+            ⚠️ No salary configured for this employee. Please set up position compensation in the Compensation module first.
+          </p>
+        </div>
+      ) : (
+        <div className="p-4 bg-muted/50 rounded-lg">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+            <div>
+              <p className="text-muted-foreground">Base Salary</p>
+              <p className="font-semibold">${result.salary.base_salary.toFixed(2)}</p>
+            </div>
+            <div>
+              <p className="text-muted-foreground">Hourly Rate</p>
+              <p className="font-semibold">${result.salary.hourly_rate.toFixed(2)}/hr</p>
+            </div>
+            <div>
+              <p className="text-muted-foreground">Currency</p>
+              <p className="font-semibold">{result.salary.currency}</p>
+            </div>
+            <div>
+              <p className="text-muted-foreground">Pay Frequency</p>
+              <p className="font-semibold capitalize">{result.salary.frequency}</p>
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* Earnings */}
       <Card>
