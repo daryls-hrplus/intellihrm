@@ -25,7 +25,7 @@ import {
   Clock,
   Eye,
 } from "lucide-react";
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns";
 
 export default function PayrollProcessingPage() {
   const { t } = useTranslation();
@@ -326,7 +326,7 @@ export default function PayrollProcessingPage() {
                     <TableCell>
                       {run.pay_period && (
                         <span className="text-sm">
-                          {format(new Date(run.pay_period.period_start), "MMM d")} - {format(new Date(run.pay_period.period_end), "MMM d, yyyy")}
+                          {format(parseISO(run.pay_period.period_start), "MMM d")} - {format(parseISO(run.pay_period.period_end), "MMM d, yyyy")}
                         </span>
                       )}
                     </TableCell>
@@ -403,7 +403,7 @@ export default function PayrollProcessingPage() {
                   <SelectContent>
                     {periods.filter(p => p.status === 'open').map((period) => (
                       <SelectItem key={period.id} value={period.id}>
-                        {period.period_number} ({format(new Date(period.period_start), "MMM d")} - {format(new Date(period.period_end), "MMM d")})
+                        {period.period_number} ({format(parseISO(period.period_start), "MMM d")} - {format(parseISO(period.period_end), "MMM d")})
                       </SelectItem>
                     ))}
                   </SelectContent>
