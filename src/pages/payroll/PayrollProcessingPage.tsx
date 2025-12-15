@@ -494,6 +494,9 @@ export default function PayrollProcessingPage() {
                             <Button variant="ghost" size="sm" onClick={() => handleProcessPayment(run)} title="Process Payment" disabled={isLoading}>
                               <DollarSign className="h-4 w-4" />
                             </Button>
+                            <Button variant="ghost" size="sm" onClick={() => handleReopen(run)} title="Reopen for Changes" disabled={isLoading}>
+                              <Unlock className="h-4 w-4" />
+                            </Button>
                           </>
                         )}
                         {run.status === 'paid' && canApproveSupervisor && (
