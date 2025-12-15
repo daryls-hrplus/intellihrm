@@ -45,6 +45,7 @@ export interface PayPeriod {
 export interface PayrollRun {
   id: string;
   company_id: string;
+  pay_group_id: string;
   pay_period_id: string;
   run_number: string;
   run_type: 'regular' | 'supplemental' | 'bonus' | 'correction' | 'off_cycle';

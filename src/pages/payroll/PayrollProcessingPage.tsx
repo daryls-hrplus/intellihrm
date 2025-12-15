@@ -11,6 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { usePayroll, PayrollRun, PayPeriod, EmployeePayroll } from "@/hooks/usePayroll";
 import { PayrollFilters, usePayrollFilters } from "@/components/payroll/PayrollFilters";
+import { supabase } from "@/integrations/supabase/client";
 import { useTranslation } from "react-i18next";
 import { 
   Plus, 
@@ -56,27 +57,52 @@ export default function PayrollProcessingPage() {
     notes: "",
   });
 
+  // Reset pay group when company changes
   useEffect(() => {
-    if (selectedCompanyId) {
-      loadData();
-    }
+    setSelectedPayGroupId("all");
   }, [selectedCompanyId]);
 
+  useEffect(() => {
+    if (selectedCompanyId && selectedPayGroupId && selectedPayGroupId !== "all") {
+      loadData();
+    } else {
+      setPeriods([]);
+      setPayrollRuns([]);
+    }
+  }, [selectedCompanyId, selectedPayGroupId]);
+
   const loadData = async () => {
-    if (!selectedCompanyId) return;
-    const [periodData, runData] = await Promise.all([
-      fetchPayPeriods(selectedCompanyId),
-      fetchPayrollRuns(selectedCompanyId),
-    ]);
-    setPeriods(periodData);
-    setPayrollRuns(runData);
+    if (!selectedCompanyId || !selectedPayGroupId || selectedPayGroupId === "all") return;
+    
+    // Fetch pay periods for the selected pay group
+    const { data: periodData } = await supabase
+      .from('pay_periods')
+      .select('*')
+      .eq('pay_group_id', selectedPayGroupId)
+      .order('period_start', { ascending: false });
+    
+    setPeriods((periodData || []) as PayPeriod[]);
+    
+    // Fetch payroll runs for the selected pay group
+    const { data: runData } = await supabase
+      .from('payroll_runs')
+      .select(`
+        *,
+        pay_period:pay_periods(*)
+      `)
+      .eq('company_id', selectedCompanyId)
+      .eq('pay_group_id', selectedPayGroupId)
+      .order('created_at', { ascending: false });
+    
+    setPayrollRuns((runData || []) as PayrollRun[]);
   };
 
   const handleCreateRun = async () => {
-    if (!selectedCompanyId || !createForm.pay_period_id) return;
+    if (!selectedCompanyId || !selectedPayGroupId || selectedPayGroupId === "all" || !createForm.pay_period_id) return;
 
     const result = await createPayrollRun({
       company_id: selectedCompanyId,
+      pay_group_id: selectedPayGroupId,
       pay_period_id: createForm.pay_period_id,
       run_type: createForm.run_type,
       notes: createForm.notes,
@@ -164,15 +190,7 @@ export default function PayrollProcessingPage() {
     }).format(amount);
   };
 
-  if (!selectedCompanyId) {
-    return (
-      <AppLayout>
-        <div className="flex items-center justify-center h-64">
-          <p className="text-muted-foreground">{t("payroll.processing.selectCompanyPrompt")}</p>
-        </div>
-      </AppLayout>
-    );
-  }
+  const showContent = selectedCompanyId && selectedPayGroupId && selectedPayGroupId !== "all";
 
   return (
     <AppLayout>
@@ -194,11 +212,37 @@ export default function PayrollProcessingPage() {
               <p className="text-muted-foreground">{t("payroll.processing.subtitle")}</p>
             </div>
           </div>
-          <Button onClick={() => setCreateDialogOpen(true)}>
-            <Plus className="h-4 w-4 mr-2" />
-            {t("payroll.processing.newPayrollRun")}
-          </Button>
+          {showContent && (
+            <Button onClick={() => setCreateDialogOpen(true)}>
+              <Plus className="h-4 w-4 mr-2" />
+              {t("payroll.processing.newPayrollRun")}
+            </Button>
+          )}
         </div>
+
+        {/* Company and Pay Group Filters */}
+        <Card>
+          <CardContent className="pt-6">
+            <PayrollFilters
+              selectedCompanyId={selectedCompanyId}
+              onCompanyChange={setSelectedCompanyId}
+              selectedPayGroupId={selectedPayGroupId}
+              onPayGroupChange={setSelectedPayGroupId}
+              showPayGroupFilter={true}
+            />
+          </CardContent>
+        </Card>
+
+        {!showContent && (
+          <Card>
+            <CardContent className="py-12 text-center text-muted-foreground">
+              Please select a company and pay group to view payroll processing
+            </CardContent>
+          </Card>
+        )}
+
+        {showContent && (
+          <>
 
         {/* Summary Cards */}
         <div className="grid gap-4 md:grid-cols-4">
@@ -337,6 +381,8 @@ export default function PayrollProcessingPage() {
             </Table>
           </CardContent>
         </Card>
+        </>
+        )}
 
         {/* Create Run Dialog */}
         <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
