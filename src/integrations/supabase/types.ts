@@ -10106,6 +10106,60 @@ export type Database = {
           },
         ]
       }
+      gl_entity_segment_mappings: {
+        Row: {
+          company_id: string
+          created_at: string | null
+          description: string | null
+          entity_id: string
+          entity_type: string
+          id: string
+          is_active: boolean | null
+          segment_id: string
+          segment_value: string
+          updated_at: string | null
+        }
+        Insert: {
+          company_id: string
+          created_at?: string | null
+          description?: string | null
+          entity_id: string
+          entity_type: string
+          id?: string
+          is_active?: boolean | null
+          segment_id: string
+          segment_value: string
+          updated_at?: string | null
+        }
+        Update: {
+          company_id?: string
+          created_at?: string | null
+          description?: string | null
+          entity_id?: string
+          entity_type?: string
+          id?: string
+          is_active?: boolean | null
+          segment_id?: string
+          segment_value?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gl_entity_segment_mappings_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gl_entity_segment_mappings_segment_id_fkey"
+            columns: ["segment_id"]
+            isOneToOne: false
+            referencedRelation: "gl_cost_center_segments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       gl_export_history: {
         Row: {
           batch_id: string | null

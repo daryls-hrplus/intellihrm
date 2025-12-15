@@ -10,7 +10,8 @@ import {
   FileText, 
   ArrowRightLeft, 
   Download,
-  Building2
+  Building2,
+  Link2
 } from 'lucide-react';
 
 const GLDashboardPage = () => {
@@ -38,6 +39,13 @@ const GLDashboardPage = () => {
       icon: Building2,
       link: '/payroll/gl/cost-centers',
       color: 'bg-green-500'
+    },
+    {
+      title: t('payroll.gl.entityMappings', 'Entity Segment Mappings'),
+      description: t('payroll.gl.entityMappingsDesc', 'Assign GL segment codes to organizational entities'),
+      icon: Link2,
+      link: '/payroll/gl/entity-mappings',
+      color: 'bg-indigo-500'
     },
     {
       title: t('payroll.gl.accountMappings', 'Account Mappings'),

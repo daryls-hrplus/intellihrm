@@ -257,6 +257,7 @@ import CostCentersPage from "./pages/payroll/gl/CostCentersPage";
 import CostReallocationsPage from "./pages/payroll/gl/CostReallocationsPage";
 import GLAccountMappingsPage from "./pages/payroll/gl/GLAccountMappingsPage";
 import GLJournalBatchesPage from "./pages/payroll/gl/GLJournalBatchesPage";
+import EntitySegmentMappingsPage from "./pages/payroll/gl/EntitySegmentMappingsPage";
 
 // Time & Attendance pages
 import TimeAttendanceDashboardPage from "./pages/time-attendance/TimeAttendanceDashboardPage";
@@ -1605,6 +1606,14 @@ const App = () => (
               element={
                 <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="payroll">
                   <GLJournalBatchesPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/payroll/gl/entity-mappings"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="payroll">
+                  <EntitySegmentMappingsPage />
                 </ProtectedRoute>
               }
             />
