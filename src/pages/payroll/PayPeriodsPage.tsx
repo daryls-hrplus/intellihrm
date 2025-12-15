@@ -12,7 +12,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { PayrollFilters, usePayrollFilters } from "@/components/payroll/PayrollFilters";
 import { Calendar, Trash2, Pencil } from "lucide-react";
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
@@ -307,9 +307,9 @@ export default function PayPeriodsPage() {
                           </span>
                         </div>
                       </TableCell>
-                      <TableCell>{format(new Date(period.period_start), "MMM d, yyyy")}</TableCell>
-                      <TableCell>{format(new Date(period.period_end), "MMM d, yyyy")}</TableCell>
-                      <TableCell>{format(new Date(period.pay_date), "MMM d, yyyy")}</TableCell>
+                      <TableCell>{format(parseISO(period.period_start), "MMM d, yyyy")}</TableCell>
+                      <TableCell>{format(parseISO(period.period_end), "MMM d, yyyy")}</TableCell>
+                      <TableCell>{format(parseISO(period.pay_date), "MMM d, yyyy")}</TableCell>
                       {hasNITracking && (
                         <TableCell className="text-center">
                           {period.pay_group?.uses_national_insurance ? (
