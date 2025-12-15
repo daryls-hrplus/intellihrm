@@ -3,7 +3,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Calculator, RefreshCw } from "lucide-react";
@@ -12,6 +11,14 @@ interface PayrollSimulatorProps {
   companyId: string;
   employeeId: string;
   payPeriodId: string;
+}
+
+interface StatutoryDeduction {
+  name: string;
+  code: string;
+  employee_amount: number;
+  employer_amount: number;
+  calculation_method: string;
 }
 
 interface SimulationResult {
@@ -37,7 +44,7 @@ interface SimulationResult {
   };
   deductions: {
     pretax: Array<{ name: string; amount: number; type: string }>;
-    taxes: { income_tax: number; social_security: number; medicare: number };
+    statutory: StatutoryDeduction[];
     posttax: Array<{ name: string; amount: number; type: string }>;
     total_deductions: number;
   };
@@ -45,9 +52,113 @@ interface SimulationResult {
   rules_applied: Array<{ name: string; type: string; multiplier: number }>;
 }
 
+interface StatutoryRateBand {
+  id: string;
+  statutory_type_id: string;
+  band_name: string;
+  min_amount: number;
+  max_amount: number | null;
+  employee_rate: number | null;
+  employer_rate: number | null;
+  calculation_method: string;
+  per_monday_amount: number;
+  employer_per_monday_amount: number | null;
+  min_age: number | null;
+  max_age: number | null;
+  pay_frequency: string;
+}
+
+interface StatutoryType {
+  id: string;
+  country: string;
+  statutory_type: string;
+  statutory_code: string;
+  statutory_name: string;
+}
+
 export function PayrollSimulator({ companyId, employeeId, payPeriodId }: PayrollSimulatorProps) {
   const [isCalculating, setIsCalculating] = useState(false);
   const [result, setResult] = useState<SimulationResult | null>(null);
+
+  const calculateStatutoryDeductions = (
+    taxableIncome: number,
+    statutoryTypes: StatutoryType[],
+    rateBands: StatutoryRateBand[],
+    mondayCount: number,
+    employeeAge: number | null,
+    payFrequency: string
+  ): StatutoryDeduction[] => {
+    const deductions: StatutoryDeduction[] = [];
+
+    for (const statType of statutoryTypes) {
+      // Get rate bands for this statutory type
+      const bands = rateBands
+        .filter(b => b.statutory_type_id === statType.id)
+        .sort((a, b) => (a.min_amount || 0) - (b.min_amount || 0));
+
+      if (bands.length === 0) continue;
+
+      let employeeAmount = 0;
+      let employerAmount = 0;
+      let method = 'percentage';
+
+      // Find applicable band based on income
+      for (const band of bands) {
+        // Check age restrictions
+        if (employeeAge !== null) {
+          if (band.min_age !== null && employeeAge < band.min_age) continue;
+          if (band.max_age !== null && employeeAge > band.max_age) continue;
+        }
+
+        // Check if income falls within this band
+        const minAmount = band.min_amount || 0;
+        const maxAmount = band.max_amount;
+        
+        if (taxableIncome < minAmount) continue;
+        if (maxAmount !== null && taxableIncome > maxAmount) continue;
+
+        method = band.calculation_method || 'percentage';
+
+        if (method === 'per_monday') {
+          // Per-monday calculation (e.g., NIS, Health Surcharge)
+          employeeAmount = (band.per_monday_amount || 0) * mondayCount;
+          employerAmount = (band.employer_per_monday_amount || 0) * mondayCount;
+        } else if (method === 'fixed') {
+          // Fixed amount
+          employeeAmount = band.per_monday_amount || 0;
+          employerAmount = band.employer_per_monday_amount || 0;
+        } else {
+          // Percentage-based calculation (e.g., PAYE)
+          const rate = band.employee_rate || 0;
+          const employerRate = band.employer_rate || 0;
+          
+          // For income tax, calculate on the amount above the threshold
+          if (statType.statutory_type === 'income_tax') {
+            const taxableAboveThreshold = Math.max(0, taxableIncome - minAmount);
+            employeeAmount = taxableAboveThreshold * rate;
+          } else {
+            employeeAmount = taxableIncome * rate;
+          }
+          employerAmount = taxableIncome * employerRate;
+        }
+
+        // Found matching band, break
+        break;
+      }
+
+      if (employeeAmount > 0 || employerAmount > 0) {
+        deductions.push({
+          name: statType.statutory_name,
+          code: statType.statutory_code,
+          employee_amount: employeeAmount,
+          employer_amount: employerAmount,
+          calculation_method: method
+        });
+      }
+    }
+
+    return deductions;
+  };
 
   const runSimulation = async () => {
     setIsCalculating(true);
@@ -59,6 +170,20 @@ export function PayrollSimulator({ companyId, employeeId, payPeriodId }: Payroll
         .select('full_name')
         .eq('id', employeeId)
         .single();
+
+      // Note: Age-based statutory exemptions would need date_of_birth from employee_profiles table
+      // For now, we skip age checks (employeeAge = null means all ages apply)
+      let employeeAge: number | null = null;
+
+      // Fetch company to get territory/country
+      const { data: company } = await supabase
+        .from('companies')
+        .select('territory_id, territories(country_code)')
+        .eq('id', companyId)
+        .single();
+
+      // Determine country code (default to TT if not set)
+      const countryCode = (company?.territories as any)?.country_code || 'TT';
 
       // Fetch employee position with compensation
       const { data: positionData, error: positionError } = await supabase
@@ -117,22 +242,32 @@ export function PayrollSimulator({ companyId, employeeId, payPeriodId }: Payroll
       // Fetch pay period info for period-based calculations
       const { data: payPeriod, error: payPeriodError } = await supabase
         .from('pay_periods')
-        .select('period_start, period_end, pay_groups(pay_frequency)')
+        .select('period_start, period_end, monday_count, pay_groups(pay_frequency)')
         .eq('id', payPeriodId)
         .maybeSingle();
 
       if (payPeriodError) {
         console.error('Pay period fetch error:', payPeriodError);
       }
-      
-      console.log('Simulation data:', {
-        positionData,
-        payPeriod,
-        employeeComp
-      });
+
+      // Fetch statutory deduction types for the country
+      const { data: statutoryTypes } = await supabase
+        .from('statutory_deduction_types')
+        .select('*')
+        .eq('country', countryCode)
+        .eq('is_active', true);
+
+      // Fetch rate bands for the statutory types
+      const statutoryTypeIds = (statutoryTypes || []).map(s => s.id);
+      const { data: rateBands } = await supabase
+        .from('statutory_rate_bands')
+        .select('*')
+        .in('statutory_type_id', statutoryTypeIds.length > 0 ? statutoryTypeIds : ['00000000-0000-0000-0000-000000000000'])
+        .eq('is_active', true);
 
       // Determine pay frequency for this simulation
       const payFrequency = (payPeriod?.pay_groups as any)?.pay_frequency || 'monthly';
+      const mondayCount = payPeriod?.monday_count || 4; // Default to 4 Mondays if not set
 
       // Employee compensation overrides position compensation when present
       const employeeCompList = employeeComp || [];
@@ -274,13 +409,19 @@ export function PayrollSimulator({ companyId, employeeId, payPeriodId }: Payroll
       const totalPretax = pretaxDeductions.reduce((sum, d) => sum + d.amount, 0);
       const taxableIncome = totalGross - totalPretax;
 
-      // Simulate taxes (simplified)
-      const incomeTax = taxableIncome * 0.22;
-      const socialSecurity = Math.min(taxableIncome * 0.062, 9932.40);
-      const medicare = taxableIncome * 0.0145;
+      // Calculate statutory deductions using configured rates
+      const statutoryDeductions = calculateStatutoryDeductions(
+        taxableIncome,
+        statutoryTypes || [],
+        rateBands || [],
+        mondayCount,
+        employeeAge,
+        payFrequency
+      );
 
+      const totalStatutory = statutoryDeductions.reduce((sum, d) => sum + d.employee_amount, 0);
       const totalPosttax = posttaxDeductions.reduce((sum, d) => sum + d.amount, 0);
-      const totalDeductions = totalPretax + incomeTax + socialSecurity + medicare + totalPosttax;
+      const totalDeductions = totalPretax + totalStatutory + totalPosttax;
       const netPay = totalGross - totalDeductions;
 
       // Collect unique rules applied
@@ -318,11 +459,7 @@ export function PayrollSimulator({ companyId, employeeId, payPeriodId }: Payroll
         },
         deductions: {
           pretax: pretaxDeductions,
-          taxes: {
-            income_tax: incomeTax,
-            social_security: socialSecurity,
-            medicare: medicare
-          },
+          statutory: statutoryDeductions,
           posttax: posttaxDeductions,
           total_deductions: totalDeductions
         },
@@ -356,6 +493,13 @@ export function PayrollSimulator({ companyId, employeeId, payPeriodId }: Payroll
       </div>
     );
   }
+
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('en-US', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    }).format(amount);
+  };
 
   return (
     <div className="space-y-6">
@@ -401,11 +545,11 @@ export function PayrollSimulator({ companyId, employeeId, payPeriodId }: Payroll
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
             <div>
               <p className="text-muted-foreground">Base Salary</p>
-              <p className="font-semibold">${result.salary.base_salary.toFixed(2)}</p>
+              <p className="font-semibold">{result.salary.currency} {formatCurrency(result.salary.base_salary)}</p>
             </div>
             <div>
               <p className="text-muted-foreground">Hourly Rate</p>
-              <p className="font-semibold">${result.salary.hourly_rate.toFixed(2)}/hr</p>
+              <p className="font-semibold">{result.salary.currency} {formatCurrency(result.salary.hourly_rate)}/hr</p>
             </div>
             <div>
               <p className="text-muted-foreground">Currency</p>
@@ -429,18 +573,18 @@ export function PayrollSimulator({ companyId, employeeId, payPeriodId }: Payroll
             <TableBody>
               <TableRow>
                 <TableCell>Base Salary ({result.salary.frequency})</TableCell>
-                <TableCell className="text-right">${result.earnings.regular_pay.toFixed(2)}</TableCell>
+                <TableCell className="text-right">{result.salary.currency} {formatCurrency(result.earnings.regular_pay)}</TableCell>
               </TableRow>
               {result.earnings.overtime_hours > 0 && (
                 <TableRow>
-                  <TableCell>Overtime ({result.earnings.overtime_hours}h @ ${result.salary.hourly_rate.toFixed(2)} × 1.5)</TableCell>
-                  <TableCell className="text-right">${result.earnings.overtime_pay.toFixed(2)}</TableCell>
+                  <TableCell>Overtime ({result.earnings.overtime_hours}h @ {result.salary.currency} {formatCurrency(result.salary.hourly_rate)} × 1.5)</TableCell>
+                  <TableCell className="text-right">{result.salary.currency} {formatCurrency(result.earnings.overtime_pay)}</TableCell>
                 </TableRow>
               )}
               {result.earnings.additional_comp.map((comp, idx) => (
                 <TableRow key={`comp-${idx}`}>
                   <TableCell>{comp.name}</TableCell>
-                  <TableCell className="text-right">${comp.amount.toFixed(2)}</TableCell>
+                  <TableCell className="text-right">{result.salary.currency} {formatCurrency(comp.amount)}</TableCell>
                 </TableRow>
               ))}
               {result.earnings.allowances.map((allowance, idx) => (
@@ -450,12 +594,12 @@ export function PayrollSimulator({ companyId, employeeId, payPeriodId }: Payroll
                     {allowance.is_bik && <Badge variant="secondary" className="text-xs">BIK</Badge>}
                     {!allowance.is_taxable && <Badge variant="outline" className="text-xs">Non-taxable</Badge>}
                   </TableCell>
-                  <TableCell className="text-right">${allowance.amount.toFixed(2)}</TableCell>
+                  <TableCell className="text-right">{result.salary.currency} {formatCurrency(allowance.amount)}</TableCell>
                 </TableRow>
               ))}
               <TableRow className="font-medium bg-muted/50">
                 <TableCell>Total Gross Pay</TableCell>
-                <TableCell className="text-right">${result.earnings.total_gross.toFixed(2)}</TableCell>
+                <TableCell className="text-right">{result.salary.currency} {formatCurrency(result.earnings.total_gross)}</TableCell>
               </TableRow>
             </TableBody>
           </Table>
@@ -480,29 +624,41 @@ export function PayrollSimulator({ companyId, employeeId, payPeriodId }: Payroll
                   {result.deductions.pretax.map((d, idx) => (
                     <TableRow key={idx}>
                       <TableCell className="pl-6">{d.name}</TableCell>
-                      <TableCell className="text-right text-destructive">-${d.amount.toFixed(2)}</TableCell>
+                      <TableCell className="text-right text-destructive">-{result.salary.currency} {formatCurrency(d.amount)}</TableCell>
                     </TableRow>
                   ))}
                 </>
               )}
               
-              <TableRow>
-                <TableCell colSpan={2} className="text-sm text-muted-foreground font-medium">
-                  Taxes
-                </TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell className="pl-6">Federal Income Tax</TableCell>
-                <TableCell className="text-right text-destructive">-${result.deductions.taxes.income_tax.toFixed(2)}</TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell className="pl-6">Social Security</TableCell>
-                <TableCell className="text-right text-destructive">-${result.deductions.taxes.social_security.toFixed(2)}</TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell className="pl-6">Medicare</TableCell>
-                <TableCell className="text-right text-destructive">-${result.deductions.taxes.medicare.toFixed(2)}</TableCell>
-              </TableRow>
+              {result.deductions.statutory.length > 0 && (
+                <>
+                  <TableRow>
+                    <TableCell colSpan={2} className="text-sm text-muted-foreground font-medium">
+                      Statutory Deductions
+                    </TableCell>
+                  </TableRow>
+                  {result.deductions.statutory.map((d, idx) => (
+                    <TableRow key={idx}>
+                      <TableCell className="pl-6 flex items-center gap-2">
+                        {d.name}
+                        <Badge variant="outline" className="text-xs">{d.code}</Badge>
+                        {d.calculation_method === 'per_monday' && (
+                          <Badge variant="secondary" className="text-xs">Per Monday</Badge>
+                        )}
+                      </TableCell>
+                      <TableCell className="text-right text-destructive">-{result.salary.currency} {formatCurrency(d.employee_amount)}</TableCell>
+                    </TableRow>
+                  ))}
+                </>
+              )}
+
+              {result.deductions.statutory.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={2} className="text-sm text-muted-foreground italic">
+                    No statutory deductions configured for this territory
+                  </TableCell>
+                </TableRow>
+              )}
 
               {result.deductions.posttax.length > 0 && (
                 <>
@@ -514,7 +670,7 @@ export function PayrollSimulator({ companyId, employeeId, payPeriodId }: Payroll
                   {result.deductions.posttax.map((d, idx) => (
                     <TableRow key={idx}>
                       <TableCell className="pl-6">{d.name}</TableCell>
-                      <TableCell className="text-right text-destructive">-${d.amount.toFixed(2)}</TableCell>
+                      <TableCell className="text-right text-destructive">-{result.salary.currency} {formatCurrency(d.amount)}</TableCell>
                     </TableRow>
                   ))}
                 </>
@@ -522,7 +678,7 @@ export function PayrollSimulator({ companyId, employeeId, payPeriodId }: Payroll
 
               <TableRow className="font-medium bg-muted/50">
                 <TableCell>Total Deductions</TableCell>
-                <TableCell className="text-right text-destructive">-${result.deductions.total_deductions.toFixed(2)}</TableCell>
+                <TableCell className="text-right text-destructive">-{result.salary.currency} {formatCurrency(result.deductions.total_deductions)}</TableCell>
               </TableRow>
             </TableBody>
           </Table>
@@ -532,7 +688,7 @@ export function PayrollSimulator({ companyId, employeeId, payPeriodId }: Payroll
       {/* Net Pay */}
       <div className="p-4 bg-primary/10 rounded-lg flex justify-between items-center">
         <span className="text-lg font-medium">Net Pay</span>
-        <span className="text-2xl font-bold text-primary">${result.net_pay.toFixed(2)}</span>
+        <span className="text-2xl font-bold text-primary">{result.salary.currency} {formatCurrency(result.net_pay)}</span>
       </div>
 
       <Button onClick={runSimulation} disabled={isCalculating} className="w-full gap-2">
