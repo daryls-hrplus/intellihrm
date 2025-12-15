@@ -57,7 +57,7 @@ const GLDashboardPage = () => {
       title: t('payroll.gl.journalBatches', 'Journal Batches'),
       description: t('payroll.gl.journalBatchesDesc', 'View and manage GL journal entries'),
       icon: FileText,
-      link: '/payroll/gl/journals',
+      link: '/payroll/gl/batches',
       color: 'bg-cyan-500'
     },
     {
