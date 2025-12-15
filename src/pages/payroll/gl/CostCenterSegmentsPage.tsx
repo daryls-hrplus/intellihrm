@@ -30,18 +30,6 @@ const PREDEFINED_SEGMENTS = [
   { code: 'USERDEF', name: 'User Defined', defaultLength: 8 }
 ];
 
-const ENTITY_MAPPINGS = [
-  { value: '', label: 'None (Manual Entry)' },
-  { value: 'company', label: 'Company' },
-  { value: 'division', label: 'Division' },
-  { value: 'department', label: 'Department' },
-  { value: 'section', label: 'Section' },
-  { value: 'pay_element', label: 'Pay Element' },
-  { value: 'job', label: 'Job' },
-  { value: 'location', label: 'Location' },
-  { value: 'employee', label: 'Employee' },
-];
-
 const MAX_SEGMENTS = 10;
 const MAX_TOTAL_LENGTH = 60;
 
@@ -54,7 +42,6 @@ interface Segment {
   segment_length: number;
   delimiter: string | null;
   default_value: string | null;
-  maps_to: string | null;
   description: string | null;
   is_required: boolean;
   is_active: boolean;
@@ -88,7 +75,6 @@ const CostCenterSegmentsPage = () => {
     segment_length: 4,
     delimiter: '-',
     default_value: '0000',
-    maps_to: '',
     description: '',
     is_required: true
   });
@@ -181,7 +167,6 @@ const CostCenterSegmentsPage = () => {
         segment_length: formData.segment_length,
         delimiter: formData.delimiter || '-',
         default_value: formData.default_value || generateDefaultValue(formData.segment_length),
-        maps_to: formData.maps_to || null,
         description: formData.description || null,
         is_required: formData.is_required
       };
@@ -274,7 +259,6 @@ const CostCenterSegmentsPage = () => {
       segment_length: segment.segment_length,
       delimiter: segment.delimiter || '-',
       default_value: segment.default_value || generateDefaultValue(segment.segment_length),
-      maps_to: segment.maps_to || '',
       description: segment.description || '',
       is_required: segment.is_required
     });
@@ -307,7 +291,6 @@ const CostCenterSegmentsPage = () => {
       segment_length: 4,
       delimiter: '-',
       default_value: '0000',
-      maps_to: '',
       description: '',
       is_required: true
     });
@@ -430,12 +413,6 @@ const CostCenterSegmentsPage = () => {
                                 {t('payroll.gl.delimiter', 'Delimiter')}: <span className="font-mono">{segment.delimiter || '-'}</span>
                                 <span className="mx-2">|</span>
                                 {t('payroll.gl.defaultValue', 'Default')}: <span className="font-mono">{segment.default_value || '0'.repeat(segment.segment_length)}</span>
-                                {segment.maps_to && (
-                                  <>
-                                    <span className="mx-2">|</span>
-                                    {t('payroll.gl.mapsTo', 'Maps to')}: <Badge variant="outline" className="ml-1">{ENTITY_MAPPINGS.find(e => e.value === segment.maps_to)?.label || segment.maps_to}</Badge>
-                                  </>
-                                )}
                                 {segment.is_required && (
                                   <Badge variant="secondary" className="ml-2">{t('common.required', 'Required')}</Badge>
                                 )}
@@ -584,27 +561,6 @@ const CostCenterSegmentsPage = () => {
                     {t('payroll.gl.defaultValueHint', 'Must match segment length')} ({formData.segment_length} {t('payroll.gl.characters', 'chars')})
                   </p>
                 </div>
-              </div>
-              <div className="space-y-2">
-                <Label>{t('payroll.gl.mapsTo', 'Maps To Entity')}</Label>
-                <Select
-                  value={formData.maps_to || 'none'}
-                  onValueChange={(value) => setFormData({ ...formData, maps_to: value === 'none' ? '' : value })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder={t('payroll.gl.selectMapping', 'Select entity mapping')} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {ENTITY_MAPPINGS.map((mapping) => (
-                      <SelectItem key={mapping.value || 'none'} value={mapping.value || 'none'}>
-                        {mapping.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <p className="text-xs text-muted-foreground">
-                  {t('payroll.gl.mapsToHint', 'Automatically populate segment from selected entity')}
-                </p>
               </div>
               <div className="space-y-2">
                 <Label>{t('common.description', 'Description')}</Label>
