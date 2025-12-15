@@ -2599,7 +2599,17 @@
       "processing": "Processing",
       "approved": "Approved",
       "paid": "Paid",
-      "closed": "Closed"
+      "closed": "Closed",
+      "deleteYear": "Delete Year",
+      "deleteConfirmTitle": "Delete Pay Periods?",
+      "deleteConfirmMessage": "This will permanently delete all pay periods for {{year}} ({{payGroup}}). This action cannot be undone.",
+      "allPayGroups": "All Pay Groups",
+      "deleteSuccess": "Pay periods deleted successfully",
+      "deleteError": "Failed to delete pay periods",
+      "editPayDate": "Edit Pay Date",
+      "period": "Period",
+      "payDateUpdated": "Pay date updated successfully",
+      "payDateUpdateError": "Failed to update pay date"
     },
     "processing": {
       "title": "Payroll Processing",
