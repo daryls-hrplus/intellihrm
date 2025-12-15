@@ -16,6 +16,7 @@ import {
   Clock,
   TrendingUp,
   Settings,
+  BookOpen,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
@@ -97,6 +98,14 @@ export default function PayrollDashboardPage() {
       href: "/payroll/leave-buyout",
       color: "bg-success/10 text-success",
       tabCode: "leave_buyout",
+    },
+    {
+      title: t("payroll.modules.glInterface.title", "GL Interface"),
+      description: t("payroll.modules.glInterface.description", "General ledger integration, cost centers, and journal entries"),
+      icon: BookOpen,
+      href: "/payroll/gl",
+      color: "bg-accent/10 text-accent-foreground",
+      tabCode: "gl_interface",
     },
   ].filter(f => hasTabAccess("payroll", f.tabCode));
 

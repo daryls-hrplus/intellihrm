@@ -249,6 +249,15 @@ import SalaryOvertimePage from "./pages/payroll/SalaryOvertimePage";
 import LeavePaymentConfigPage from "./pages/payroll/LeavePaymentConfigPage";
 import LeaveBalanceBuyoutPage from "./pages/payroll/LeaveBalanceBuyoutPage";
 
+// Payroll GL pages
+import GLDashboardPage from "./pages/payroll/gl/GLDashboardPage";
+import GLAccountsPage from "./pages/payroll/gl/GLAccountsPage";
+import CostCenterSegmentsPage from "./pages/payroll/gl/CostCenterSegmentsPage";
+import CostCentersPage from "./pages/payroll/gl/CostCentersPage";
+import CostReallocationsPage from "./pages/payroll/gl/CostReallocationsPage";
+import GLAccountMappingsPage from "./pages/payroll/gl/GLAccountMappingsPage";
+import GLJournalBatchesPage from "./pages/payroll/gl/GLJournalBatchesPage";
+
 // Time & Attendance pages
 import TimeAttendanceDashboardPage from "./pages/time-attendance/TimeAttendanceDashboardPage";
 import TimeTrackingPage from "./pages/time-attendance/TimeTrackingPage";
@@ -1540,6 +1549,62 @@ const App = () => (
               element={
                 <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="payroll">
                   <LeaveBalanceBuyoutPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/payroll/gl"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="payroll">
+                  <GLDashboardPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/payroll/gl/accounts"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="payroll">
+                  <GLAccountsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/payroll/gl/segments"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="payroll">
+                  <CostCenterSegmentsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/payroll/gl/cost-centers"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="payroll">
+                  <CostCentersPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/payroll/gl/reallocations"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="payroll">
+                  <CostReallocationsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/payroll/gl/mappings"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="payroll">
+                  <GLAccountMappingsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/payroll/gl/batches"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="payroll">
+                  <GLJournalBatchesPage />
                 </ProtectedRoute>
               }
             />
