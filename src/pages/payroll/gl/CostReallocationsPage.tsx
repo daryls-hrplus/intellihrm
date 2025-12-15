@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import AppLayout from '@/components/AppLayout';
+import { AppLayout } from '@/components/layout/AppLayout';
+import { Breadcrumbs } from '@/components/ui/breadcrumbs';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -13,7 +14,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import { Plus, Search, Edit, Trash2, ChevronDown, ChevronRight, ArrowRight } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { usePayrollFilters } from '@/hooks/usePayrollFilters';
+import { PayrollFilters, usePayrollFilters } from '@/components/payroll/PayrollFilters';
 
 interface CostCenter {
   id: string;
@@ -46,7 +47,7 @@ interface ReallocationTarget {
 
 const CostReallocationsPage = () => {
   const { t } = useTranslation();
-  const { selectedCompanyId, CompanyFilter } = usePayrollFilters();
+  const { selectedCompanyId, setSelectedCompanyId } = usePayrollFilters();
   const [reallocations, setReallocations] = useState<Reallocation[]>([]);
   const [targets, setTargets] = useState<Record<string, ReallocationTarget[]>>({});
   const [costCenters, setCostCenters] = useState<CostCenter[]>([]);
@@ -93,7 +94,6 @@ const CostReallocationsPage = () => {
     if (!selectedCompanyId) return;
     setLoading(true);
     try {
-      // Load reallocations
       const { data: reallocData, error: reallocError } = await supabase
         .from('gl_cost_reallocations')
         .select('*')
@@ -102,12 +102,10 @@ const CostReallocationsPage = () => {
       if (reallocError) throw reallocError;
       setReallocations(reallocData || []);
 
-      // Load targets for each reallocation
       for (const rule of reallocData || []) {
         await loadTargets(rule.id);
       }
 
-      // Load cost centers
       const { data: ccData } = await supabase
         .from('gl_cost_centers')
         .select('id, cost_center_code, cost_center_name')
@@ -309,16 +307,9 @@ const CostReallocationsPage = () => {
     r.rule_code.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const breadcrumbs = [
-    { label: t('common.home', 'Home'), href: '/' },
-    { label: t('payroll.title', 'Payroll'), href: '/payroll' },
-    { label: t('payroll.gl.title', 'GL Interface'), href: '/payroll/gl' },
-    { label: t('payroll.gl.costReallocations', 'Cost Reallocations') }
-  ];
-
   if (!selectedCompanyId) {
     return (
-      <AppLayout breadcrumbs={breadcrumbs}>
+      <AppLayout>
         <div className="flex items-center justify-center h-64">
           <p className="text-muted-foreground">{t('common.selectCompany', 'Please select a company')}</p>
         </div>
@@ -327,8 +318,16 @@ const CostReallocationsPage = () => {
   }
 
   return (
-    <AppLayout breadcrumbs={breadcrumbs}>
+    <AppLayout>
       <div className="space-y-6">
+        <Breadcrumbs
+          items={[
+            { label: t('payroll.title', 'Payroll'), href: '/payroll' },
+            { label: t('payroll.gl.title', 'GL Interface'), href: '/payroll/gl' },
+            { label: t('payroll.gl.costReallocations', 'Cost Reallocations') }
+          ]}
+        />
+
         <div className="flex justify-between items-center">
           <div>
             <h1 className="text-3xl font-bold">{t('payroll.gl.costReallocations', 'Cost Reallocations')}</h1>
@@ -343,7 +342,11 @@ const CostReallocationsPage = () => {
         <Card>
           <CardHeader>
             <div className="flex gap-4 items-center">
-              <CompanyFilter />
+              <PayrollFilters
+                selectedCompanyId={selectedCompanyId}
+                onCompanyChange={setSelectedCompanyId}
+                showPayGroupFilter={false}
+              />
               <div className="relative flex-1 max-w-sm">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
@@ -459,7 +462,7 @@ const CostReallocationsPage = () => {
           <DialogContent className="max-w-lg">
             <DialogHeader>
               <DialogTitle>
-                {editingRule ? t('common.edit', 'Edit Reallocation Rule') : t('common.add', 'Add Reallocation Rule')}
+                {editingRule ? t('common.edit', 'Edit Rule') : t('common.add', 'Add Rule')}
               </DialogTitle>
             </DialogHeader>
             <div className="grid gap-4 py-4">
@@ -543,7 +546,7 @@ const CostReallocationsPage = () => {
           <DialogContent>
             <DialogHeader>
               <DialogTitle>
-                {editingTarget ? t('common.editTarget', 'Edit Target') : t('common.addTarget', 'Add Target')}
+                {editingTarget ? t('common.edit', 'Edit Target') : t('common.add', 'Add Target')}
               </DialogTitle>
             </DialogHeader>
             <div className="grid gap-4 py-4">
@@ -562,22 +565,21 @@ const CostReallocationsPage = () => {
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>{t('payroll.gl.percentage', 'Percentage')}</Label>
+                  <Label>{t('payroll.gl.percentage', 'Percentage (%)')}</Label>
                   <Input
                     type="number"
-                    step="0.01"
                     value={targetFormData.allocation_percentage}
                     onChange={(e) => setTargetFormData({ ...targetFormData, allocation_percentage: e.target.value })}
-                    placeholder="e.g., 25.00"
+                    placeholder="e.g., 25"
                   />
                 </div>
                 <div className="space-y-2">
                   <Label>{t('payroll.gl.amount', 'Fixed Amount')}</Label>
                   <Input
                     type="number"
-                    step="0.01"
                     value={targetFormData.allocation_amount}
                     onChange={(e) => setTargetFormData({ ...targetFormData, allocation_amount: e.target.value })}
+                    placeholder="e.g., 1000"
                   />
                 </div>
               </div>

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import AppLayout from '@/components/AppLayout';
+import { AppLayout } from '@/components/layout/AppLayout';
+import { Breadcrumbs } from '@/components/ui/breadcrumbs';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -12,7 +13,7 @@ import { Badge } from '@/components/ui/badge';
 import { Plus, Search, Edit, Trash2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { usePayrollFilters } from '@/hooks/usePayrollFilters';
+import { PayrollFilters, usePayrollFilters } from '@/components/payroll/PayrollFilters';
 
 interface GLAccount {
   id: string;
@@ -47,7 +48,7 @@ interface Mapping {
 
 const GLAccountMappingsPage = () => {
   const { t } = useTranslation();
-  const { selectedCompanyId, CompanyFilter } = usePayrollFilters();
+  const { selectedCompanyId, setSelectedCompanyId } = usePayrollFilters();
   const [mappings, setMappings] = useState<Mapping[]>([]);
   const [glAccounts, setGLAccounts] = useState<GLAccount[]>([]);
   const [payElements, setPayElements] = useState<PayElement[]>([]);
@@ -91,7 +92,6 @@ const GLAccountMappingsPage = () => {
     if (!selectedCompanyId) return;
     setLoading(true);
     try {
-      // Load mappings
       const { data: mappingData, error: mappingError } = await supabase
         .from('gl_account_mappings')
         .select('*')
@@ -100,7 +100,6 @@ const GLAccountMappingsPage = () => {
       if (mappingError) throw mappingError;
       setMappings(mappingData || []);
 
-      // Load GL accounts
       const { data: glData } = await supabase
         .from('gl_accounts')
         .select('id, account_code, account_name')
@@ -109,7 +108,6 @@ const GLAccountMappingsPage = () => {
         .order('account_code');
       setGLAccounts(glData || []);
 
-      // Load pay elements
       const { data: peData } = await supabase
         .from('pay_elements')
         .select('id, code, name')
@@ -118,7 +116,6 @@ const GLAccountMappingsPage = () => {
         .order('code');
       setPayElements(peData || []);
 
-      // Load cost centers
       const { data: ccData } = await supabase
         .from('gl_cost_centers')
         .select('id, cost_center_code, cost_center_name')
@@ -238,16 +235,9 @@ const GLAccountMappingsPage = () => {
     getPayElementName(m.pay_element_id).toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const breadcrumbs = [
-    { label: t('common.home', 'Home'), href: '/' },
-    { label: t('payroll.title', 'Payroll'), href: '/payroll' },
-    { label: t('payroll.gl.title', 'GL Interface'), href: '/payroll/gl' },
-    { label: t('payroll.gl.accountMappings', 'Account Mappings') }
-  ];
-
   if (!selectedCompanyId) {
     return (
-      <AppLayout breadcrumbs={breadcrumbs}>
+      <AppLayout>
         <div className="flex items-center justify-center h-64">
           <p className="text-muted-foreground">{t('common.selectCompany', 'Please select a company')}</p>
         </div>
@@ -256,8 +246,16 @@ const GLAccountMappingsPage = () => {
   }
 
   return (
-    <AppLayout breadcrumbs={breadcrumbs}>
+    <AppLayout>
       <div className="space-y-6">
+        <Breadcrumbs
+          items={[
+            { label: t('payroll.title', 'Payroll'), href: '/payroll' },
+            { label: t('payroll.gl.title', 'GL Interface'), href: '/payroll/gl' },
+            { label: t('payroll.gl.accountMappings', 'Account Mappings') }
+          ]}
+        />
+
         <div className="flex justify-between items-center">
           <div>
             <h1 className="text-3xl font-bold">{t('payroll.gl.accountMappings', 'Account Mappings')}</h1>
@@ -272,7 +270,11 @@ const GLAccountMappingsPage = () => {
         <Card>
           <CardHeader>
             <div className="flex gap-4 items-center">
-              <CompanyFilter />
+              <PayrollFilters
+                selectedCompanyId={selectedCompanyId}
+                onCompanyChange={setSelectedCompanyId}
+                showPayGroupFilter={false}
+              />
               <div className="relative flex-1 max-w-sm">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input

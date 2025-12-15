@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import AppLayout from '@/components/AppLayout';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { AppLayout } from '@/components/layout/AppLayout';
+import { Breadcrumbs } from '@/components/ui/breadcrumbs';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -13,7 +14,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import { Plus, Edit, Trash2, ChevronDown, ChevronRight } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { usePayrollFilters } from '@/hooks/usePayrollFilters';
+import { PayrollFilters, usePayrollFilters } from '@/components/payroll/PayrollFilters';
 
 interface Segment {
   id: string;
@@ -37,7 +38,7 @@ interface SegmentValue {
 
 const CostCenterSegmentsPage = () => {
   const { t } = useTranslation();
-  const { selectedCompanyId, CompanyFilter } = usePayrollFilters();
+  const { selectedCompanyId, setSelectedCompanyId } = usePayrollFilters();
   const [segments, setSegments] = useState<Segment[]>([]);
   const [segmentValues, setSegmentValues] = useState<Record<string, SegmentValue[]>>({});
   const [loading, setLoading] = useState(true);
@@ -81,7 +82,6 @@ const CostCenterSegmentsPage = () => {
       if (error) throw error;
       setSegments(data || []);
 
-      // Load values for each segment
       for (const segment of data || []) {
         await loadSegmentValues(segment.id);
       }
@@ -253,16 +253,9 @@ const CostCenterSegmentsPage = () => {
     );
   };
 
-  const breadcrumbs = [
-    { label: t('common.home', 'Home'), href: '/' },
-    { label: t('payroll.title', 'Payroll'), href: '/payroll' },
-    { label: t('payroll.gl.title', 'GL Interface'), href: '/payroll/gl' },
-    { label: t('payroll.gl.costCenterSegments', 'Cost Center Segments') }
-  ];
-
   if (!selectedCompanyId) {
     return (
-      <AppLayout breadcrumbs={breadcrumbs}>
+      <AppLayout>
         <div className="flex items-center justify-center h-64">
           <p className="text-muted-foreground">{t('common.selectCompany', 'Please select a company')}</p>
         </div>
@@ -271,8 +264,16 @@ const CostCenterSegmentsPage = () => {
   }
 
   return (
-    <AppLayout breadcrumbs={breadcrumbs}>
+    <AppLayout>
       <div className="space-y-6">
+        <Breadcrumbs
+          items={[
+            { label: t('payroll.title', 'Payroll'), href: '/payroll' },
+            { label: t('payroll.gl.title', 'GL Interface'), href: '/payroll/gl' },
+            { label: t('payroll.gl.costCenterSegments', 'Cost Center Segments') }
+          ]}
+        />
+
         <div className="flex justify-between items-center">
           <div>
             <h1 className="text-3xl font-bold">{t('payroll.gl.costCenterSegments', 'Cost Center Segments')}</h1>
@@ -286,7 +287,11 @@ const CostCenterSegmentsPage = () => {
 
         <Card>
           <CardHeader>
-            <CompanyFilter />
+            <PayrollFilters
+              selectedCompanyId={selectedCompanyId}
+              onCompanyChange={setSelectedCompanyId}
+              showPayGroupFilter={false}
+            />
           </CardHeader>
           <CardContent>
             {loading ? (
@@ -451,7 +456,7 @@ const CostCenterSegmentsPage = () => {
           <DialogContent>
             <DialogHeader>
               <DialogTitle>
-                {editingValue ? t('common.editValue', 'Edit Value') : t('common.addValue', 'Add Value')}
+                {editingValue ? t('common.edit', 'Edit Value') : t('common.add', 'Add Value')}
               </DialogTitle>
             </DialogHeader>
             <div className="grid gap-4 py-4">
