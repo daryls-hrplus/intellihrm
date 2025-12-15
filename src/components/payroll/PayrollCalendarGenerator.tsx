@@ -497,7 +497,10 @@ export function PayrollCalendarGenerator({ companyId, payGroup, onGenerated }: P
                     <Input
                       type="number"
                       value={payDayOffset}
-                      onChange={(e) => setPayDayOffset(parseInt(e.target.value) || 0)}
+                      onChange={(e) => {
+                        const num = e.target.valueAsNumber;
+                        setPayDayOffset(isNaN(num) ? 0 : num);
+                      }}
                       min={-30}
                       max={30}
                     />
