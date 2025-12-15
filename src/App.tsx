@@ -228,7 +228,12 @@ import ERCourtJudgementsPage from "./pages/employee-relations/ERCourtJudgementsP
 
 // Property pages
 import PropertyDashboardPage from "./pages/property/PropertyDashboardPage";
-
+import PropertyAnalyticsPage from "./pages/property/PropertyAnalyticsPage";
+import PropertyAssetsPage from "./pages/property/PropertyAssetsPage";
+import PropertyAssignmentsPage from "./pages/property/PropertyAssignmentsPage";
+import PropertyRequestsPage from "./pages/property/PropertyRequestsPage";
+import PropertyMaintenancePage from "./pages/property/PropertyMaintenancePage";
+import PropertyCategoriesPage from "./pages/property/PropertyCategoriesPage";
 // Payroll pages
 import PayrollDashboardPage from "./pages/payroll/PayrollDashboardPage";
 import PayGroupsPage from "./pages/payroll/PayGroupsPage";
@@ -2341,6 +2346,54 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <PropertyDashboardPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/property/analytics"
+              element={
+                <ProtectedRoute>
+                  <PropertyAnalyticsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/property/assets"
+              element={
+                <ProtectedRoute>
+                  <PropertyAssetsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/property/assignments"
+              element={
+                <ProtectedRoute>
+                  <PropertyAssignmentsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/property/requests"
+              element={
+                <ProtectedRoute>
+                  <PropertyRequestsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/property/maintenance"
+              element={
+                <ProtectedRoute>
+                  <PropertyMaintenancePage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/property/categories"
+              element={
+                <ProtectedRoute>
+                  <PropertyCategoriesPage />
                 </ProtectedRoute>
               }
             />
