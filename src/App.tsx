@@ -244,6 +244,7 @@ import PayrollProcessingPage from "./pages/payroll/PayrollProcessingPage";
 import TaxConfigPage from "./pages/payroll/TaxConfigPage";
 import PayrollReportsPage from "./pages/payroll/PayrollReportsPage";
 import YearEndProcessingPage from "./pages/payroll/YearEndProcessingPage";
+import StatutoryDeductionTypesPage from "./pages/payroll/StatutoryDeductionTypesPage";
 import PayslipsPage from "./pages/payroll/PayslipsPage";
 import SalaryOvertimePage from "./pages/payroll/SalaryOvertimePage";
 import LeavePaymentConfigPage from "./pages/payroll/LeavePaymentConfigPage";
@@ -1510,6 +1511,14 @@ const App = () => (
               element={
                 <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="payroll">
                   <TaxConfigPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/payroll/statutory-deduction-types"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="payroll">
+                  <StatutoryDeductionTypesPage />
                 </ProtectedRoute>
               }
             />
