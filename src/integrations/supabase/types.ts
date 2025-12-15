@@ -9871,6 +9871,7 @@ export type Database = {
           id: string
           is_active: boolean | null
           is_required: boolean | null
+          maps_to: string | null
           segment_code: string
           segment_length: number
           segment_name: string
@@ -9888,6 +9889,7 @@ export type Database = {
           id?: string
           is_active?: boolean | null
           is_required?: boolean | null
+          maps_to?: string | null
           segment_code: string
           segment_length?: number
           segment_name: string
@@ -9905,6 +9907,7 @@ export type Database = {
           id?: string
           is_active?: boolean | null
           is_required?: boolean | null
+          maps_to?: string | null
           segment_code?: string
           segment_length?: number
           segment_name?: string
