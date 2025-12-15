@@ -150,14 +150,20 @@ export default function PayrollProcessingPage() {
   };
 
   const confirmRecalculate = async () => {
-    if (!runToRecalc || !selectedCompanyId || !selectedPayGroupId) return;
+    if (!runToRecalc || !selectedCompanyId) return;
     
     // If supervisor approving for approved run
     if (runToRecalc.status === 'approved' && canApproveSupervisor) {
       await approveRecalculation(runToRecalc.id);
     }
     
-    const success = await recalculatePayroll(runToRecalc.id, selectedCompanyId, runToRecalc.pay_period_id, selectedPayGroupId);
+    // Use the run's pay_group_id, not the filter selection
+    const success = await recalculatePayroll(
+      runToRecalc.id, 
+      selectedCompanyId, 
+      runToRecalc.pay_period_id, 
+      runToRecalc.pay_group_id
+    );
     if (success) {
       setRecalcConfirmOpen(false);
       setRunToRecalc(null);
