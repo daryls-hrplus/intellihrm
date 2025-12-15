@@ -11,7 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Calculator, Plus, Clock, DollarSign, FileText } from "lucide-react";
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns";
 import { WorkRecordsSection } from "@/components/payroll/WorkRecordsSection";
 import { AllowancesSection } from "@/components/payroll/AllowancesSection";
 import { DeductionsSection } from "@/components/payroll/DeductionsSection";
@@ -200,7 +200,7 @@ export default function SalaryOvertimePage() {
                 <SelectContent>
                   {payPeriods.map((pp) => (
                     <SelectItem key={pp.id} value={pp.id}>
-                      {t("payroll.salaryOvertime.cycle")} {pp.period_number}: {format(new Date(pp.period_start), 'MMM d')} - {format(new Date(pp.period_end), 'MMM d, yyyy')}
+                      {t("payroll.salaryOvertime.cycle")} {pp.period_number}: {format(parseISO(pp.period_start), 'MMM d')} - {format(parseISO(pp.period_end), 'MMM d, yyyy')}
                     </SelectItem>
                   ))}
                 </SelectContent>
