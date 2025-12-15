@@ -1,22 +1,20 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Calculator, Plus, Clock, DollarSign, FileText } from "lucide-react";
+import { Calculator, FileText } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import { WorkRecordsSection } from "@/components/payroll/WorkRecordsSection";
 import { AllowancesSection } from "@/components/payroll/AllowancesSection";
 import { DeductionsSection } from "@/components/payroll/DeductionsSection";
 import { PayrollSimulator } from "@/components/payroll/PayrollSimulator";
 import { useTranslation } from "react-i18next";
+import { AppLayout } from "@/components/layout/AppLayout";
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 
 interface Company {
   id: string;
@@ -131,15 +129,24 @@ export default function SalaryOvertimePage() {
   };
 
   return (
-    <div className="container mx-auto py-6 space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">{t("payroll.salaryOvertime.title")}</h1>
-          <p className="text-muted-foreground">
-            {t("payroll.salaryOvertime.subtitle")}
-          </p>
+    <AppLayout>
+      <div className="space-y-6">
+        <Breadcrumbs
+          items={[
+            { label: t("navigation.payroll"), href: "/payroll" },
+            { label: t("payroll.salaryOvertime.title") },
+          ]}
+        />
+
+        <div className="flex items-center gap-3">
+          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10">
+            <FileText className="h-6 w-6 text-primary" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight">{t("payroll.salaryOvertime.title")}</h1>
+            <p className="text-muted-foreground">{t("payroll.salaryOvertime.subtitle")}</p>
+          </div>
         </div>
-      </div>
 
       {/* Filters */}
       <Card>
@@ -279,6 +286,7 @@ export default function SalaryOvertimePage() {
           )}
         </DialogContent>
       </Dialog>
-    </div>
+      </div>
+    </AppLayout>
   );
 }
