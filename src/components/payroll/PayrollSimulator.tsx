@@ -61,30 +61,34 @@ export function PayrollSimulator({ companyId, employeeId, payPeriodId }: Payroll
         .single();
 
       // Fetch employee position with compensation
-      const { data: positionData } = await supabase
+      const { data: positionData, error: positionError } = await supabase
         .from('employee_positions')
         .select(`
           compensation_amount,
           compensation_currency,
           compensation_frequency,
-          positions (title, standard_hours, standard_work_period)
+          positions (title)
         `)
         .eq('employee_id', employeeId)
         .eq('is_primary', true)
         .eq('is_active', true)
         .maybeSingle();
 
-      // Fetch additional employee compensation
-      const { data: employeeComp } = await supabase
+      if (positionError) throw positionError;
+
+      // Fetch employee compensation (overrides position compensation when present)
+      const { data: employeeComp, error: employeeCompError } = await supabase
         .from('employee_compensation')
         .select(`
           amount,
           currency,
           frequency,
-          pay_elements (name, code, element_type)
+          pay_elements (name, code)
         `)
         .eq('employee_id', employeeId)
         .eq('is_active', true);
+
+      if (employeeCompError) throw employeeCompError;
 
       // Fetch work records with periods
       const { data: workRecords } = await supabase
@@ -127,40 +131,52 @@ export function PayrollSimulator({ companyId, employeeId, payPeriodId }: Payroll
         employeeComp
       });
 
-      // Calculate hourly rate from position compensation
-      const posComp = positionData?.compensation_amount || 0;
-      const posFreq = positionData?.compensation_frequency || 'monthly';
-      const standardHours = (positionData?.positions as any)?.standard_hours || 40;
-      
-      // Convert salary to hourly rate based on frequency
-      // Assuming standard work periods per year
-      const hoursPerYear = standardHours * 52; // 52 weeks
-      let annualSalary = posComp;
-      
-      switch (posFreq) {
+      // Determine pay frequency for this simulation
+      const payFrequency = (payPeriod?.pay_groups as any)?.pay_frequency || 'monthly';
+
+      // Employee compensation overrides position compensation when present
+      const employeeCompList = employeeComp || [];
+      const baseSalaryItemIndex = employeeCompList.findIndex(
+        (c) => ((c.pay_elements as any)?.code || '').toUpperCase() === 'SAL'
+      );
+      const baseSalaryItem =
+        employeeCompList.length > 0
+          ? employeeCompList[baseSalaryItemIndex >= 0 ? baseSalaryItemIndex : 0]
+          : null;
+
+      const baseCompAmount = baseSalaryItem ? (baseSalaryItem.amount || 0) : (positionData?.compensation_amount || 0);
+      const baseCompFrequency = baseSalaryItem ? (baseSalaryItem.frequency || 'monthly') : (positionData?.compensation_frequency || 'monthly');
+      const baseCompCurrency = baseSalaryItem
+        ? (baseSalaryItem.currency || positionData?.compensation_currency || 'USD')
+        : (positionData?.compensation_currency || 'USD');
+
+      // Use default standard hours until positions/jobs standard hours are wired here
+      const standardHours = 40;
+
+      const hoursPerYear = standardHours * 52;
+      let annualSalary = baseCompAmount;
+
+      switch (baseCompFrequency) {
         case 'monthly':
-          annualSalary = posComp * 12;
+          annualSalary = baseCompAmount * 12;
           break;
         case 'biweekly':
         case 'fortnightly':
-          annualSalary = posComp * 26;
+          annualSalary = baseCompAmount * 26;
           break;
         case 'weekly':
-          annualSalary = posComp * 52;
+          annualSalary = baseCompAmount * 52;
           break;
         case 'annual':
-          annualSalary = posComp;
+          annualSalary = baseCompAmount;
           break;
       }
-      
+
       const hourlyRate = hoursPerYear > 0 ? annualSalary / hoursPerYear : 0;
 
-      // Calculate period-based base salary (for salaried employees)
-      const payFrequency = (payPeriod?.pay_groups as any)?.pay_frequency || 'monthly';
-      let periodBaseSalary = posComp;
-      
-      // Adjust base salary to match pay period frequency
-      if (posFreq !== payFrequency) {
+      // Calculate period-based base salary
+      let periodBaseSalary = baseCompAmount;
+      if (baseCompFrequency !== payFrequency) {
         switch (payFrequency) {
           case 'monthly':
             periodBaseSalary = annualSalary / 12;
@@ -181,37 +197,56 @@ export function PayrollSimulator({ companyId, employeeId, payPeriodId }: Payroll
       // Calculate totals from work records
       const regularHours = (workRecords || []).reduce((sum, r) => sum + (r.regular_hours || 0), 0);
       const overtimeHours = (workRecords || []).reduce((sum, r) => sum + (r.overtime_hours || 0), 0);
-      
+
       // Use base salary for regular pay, hourly rate for overtime
       const regularPay = periodBaseSalary;
       const overtimePay = overtimeHours * hourlyRate * 1.5;
 
-      // Process additional compensation items (convert to period amount)
-      const additionalCompList = (employeeComp || []).map(c => {
+      // Any remaining employee compensation items (besides Base Salary) are treated as additional comp
+      const remainingEmployeeComp = baseSalaryItem
+        ? employeeCompList.filter((_, idx) => idx !== (baseSalaryItemIndex >= 0 ? baseSalaryItemIndex : 0))
+        : [];
+
+      const additionalCompList = remainingEmployeeComp.map((c) => {
         let periodAmount = c.amount || 0;
         const freq = c.frequency || 'monthly';
-        
-        // Convert to pay period frequency
+
         if (freq !== payFrequency) {
           let annualAmount = periodAmount;
           switch (freq) {
-            case 'monthly': annualAmount = periodAmount * 12; break;
-            case 'biweekly': annualAmount = periodAmount * 26; break;
-            case 'weekly': annualAmount = periodAmount * 52; break;
-            case 'annual': annualAmount = periodAmount; break;
+            case 'monthly':
+              annualAmount = periodAmount * 12;
+              break;
+            case 'biweekly':
+              annualAmount = periodAmount * 26;
+              break;
+            case 'weekly':
+              annualAmount = periodAmount * 52;
+              break;
+            case 'annual':
+              annualAmount = periodAmount;
+              break;
           }
-          
+
           switch (payFrequency) {
-            case 'monthly': periodAmount = annualAmount / 12; break;
-            case 'biweekly': periodAmount = annualAmount / 26; break;
-            case 'weekly': periodAmount = annualAmount / 52; break;
-            case 'semimonthly': periodAmount = annualAmount / 24; break;
+            case 'monthly':
+              periodAmount = annualAmount / 12;
+              break;
+            case 'biweekly':
+              periodAmount = annualAmount / 26;
+              break;
+            case 'weekly':
+              periodAmount = annualAmount / 52;
+              break;
+            case 'semimonthly':
+              periodAmount = annualAmount / 24;
+              break;
           }
         }
-        
+
         return {
-          name: (c.pay_elements as any)?.name || 'Additional Compensation',
-          amount: periodAmount
+          name: (c.pay_elements as any)?.name || 'Compensation',
+          amount: periodAmount,
         };
       });
 
@@ -269,7 +304,7 @@ export function PayrollSimulator({ companyId, employeeId, payPeriodId }: Payroll
         salary: {
           base_salary: periodBaseSalary,
           hourly_rate: hourlyRate,
-          currency: positionData?.compensation_currency || 'USD',
+          currency: baseCompCurrency,
           frequency: payFrequency
         },
         earnings: {
@@ -296,7 +331,9 @@ export function PayrollSimulator({ companyId, employeeId, payPeriodId }: Payroll
       });
 
       if (periodBaseSalary === 0 && additionalCompList.length === 0) {
-        toast.warning("No salary configured for this employee. Please set up position compensation first.");
+        toast.warning(
+          "No base salary configured for this employee. Please set up employee compensation or position compensation."
+        );
       } else {
         toast.success("Payroll simulation complete");
       }
@@ -356,7 +393,7 @@ export function PayrollSimulator({ companyId, employeeId, payPeriodId }: Payroll
       {result.salary.base_salary === 0 ? (
         <div className="p-4 bg-destructive/10 border border-destructive/20 rounded-lg">
           <p className="text-sm text-destructive font-medium">
-            ⚠️ No salary configured for this employee. Please set up position compensation in the Compensation module first.
+            ⚠️ No base salary configured for this employee. Please set up employee compensation or position compensation.
           </p>
         </div>
       ) : (
