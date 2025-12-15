@@ -6,7 +6,7 @@ import { useLanguage } from "@/hooks/useLanguage";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useSuccession, NineBoxAssessment } from "@/hooks/useSuccession";
 import { supabase } from "@/integrations/supabase/client";
-import { TrendingUp, Grid3X3, Users, Target, AlertTriangle, BarChart3, BookOpen, Route, UserCheck, TrendingDown, Layers } from "lucide-react";
+import { TrendingUp, Grid3X3, Users, Target, AlertTriangle, BarChart3, BookOpen, Route, UserCheck, TrendingDown, Layers, ChevronRight } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { NavLink } from "@/components/NavLink";
 
@@ -229,33 +229,28 @@ export default function SuccessionDashboardPage() {
           })}
         </div>
 
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {successionModules.map((module, index) => {
             const Icon = module.icon;
             return (
               <NavLink
                 key={module.href}
                 to={module.href}
-                className="group block animate-slide-up"
-                style={{ animationDelay: `${index * 50}ms` }}
+                className="group rounded-xl border border-border bg-card p-6 shadow-card transition-all hover:shadow-card-hover hover:border-primary/20 animate-slide-up"
+                style={{ animationDelay: `${(index + 4) * 50}ms` }}
               >
-                <Card className="h-full transition-all duration-200 hover:shadow-md hover:border-primary/20 group-hover:bg-accent/5">
-                  <CardContent className="p-5">
-                    <div className="flex items-start gap-4">
-                      <div className={`rounded-lg p-3 ${module.colorClass}`}>
-                        <Icon className="h-5 w-5" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <h3 className="font-semibold text-card-foreground group-hover:text-primary transition-colors">
-                          {module.title}
-                        </h3>
-                        <p className="mt-1 text-sm text-muted-foreground line-clamp-2">
-                          {module.description}
-                        </p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
+                <div className="flex items-start justify-between">
+                  <div className={`rounded-lg p-3 ${module.colorClass}`}>
+                    <Icon className="h-6 w-6" />
+                  </div>
+                  <ChevronRight className="h-5 w-5 text-muted-foreground opacity-0 transition-all group-hover:opacity-100 group-hover:translate-x-1" />
+                </div>
+                <h3 className="mt-4 font-semibold text-card-foreground">
+                  {module.title}
+                </h3>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  {module.description}
+                </p>
               </NavLink>
             );
           })}
