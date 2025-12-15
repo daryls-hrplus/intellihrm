@@ -38,11 +38,13 @@ export default function PayrollDashboardPage() {
 
   useEffect(() => {
     const fetchStats = async () => {
-      // Fetch current pay period (latest open period)
+      const today = new Date().toISOString().split('T')[0];
+      
+      // Fetch current pay period (period that contains today or most recent past period)
       const { data: currentPeriod } = await supabase
         .from('pay_periods')
         .select('period_start, period_end')
-        .eq('status', 'open')
+        .lte('period_start', today)
         .order('period_start', { ascending: false })
         .limit(1)
         .single();
@@ -53,7 +55,8 @@ export default function PayrollDashboardPage() {
         .select('total_gross_pay, total_net_pay, employee_count, status');
 
       const totalPayroll = payrollRuns?.reduce((sum, r) => sum + (r.total_gross_pay || 0), 0) || 0;
-      const employeesPaid = payrollRuns?.filter(r => r.status === 'paid').reduce((sum, r) => sum + (r.employee_count || 0), 0) || 0;
+      // Count total employees across all calculated/approved/paid runs (not just paid)
+      const totalEmployees = payrollRuns?.filter(r => ['calculated', 'approved', 'paid'].includes(r.status)).reduce((sum, r) => sum + (r.employee_count || 0), 0) || 0;
       const pendingApprovals = payrollRuns?.filter(r => ['calculated', 'pending_approval'].includes(r.status)).length || 0;
 
       const formatCurrency = (amount: number) => {
@@ -70,7 +73,7 @@ export default function PayrollDashboardPage() {
           ? format(new Date(currentPeriod.period_start), 'MMM yyyy')
           : "-",
         totalPayroll: formatCurrency(totalPayroll),
-        employeesPaid: employeesPaid.toString(),
+        employeesPaid: totalEmployees.toString(),
         pendingApprovals: pendingApprovals.toString(),
       });
     };
