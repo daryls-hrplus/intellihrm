@@ -321,12 +321,12 @@ const GLAccountsPage = () => {
                 </div>
                 <div className="space-y-2">
                   <Label>{t('payroll.gl.parentAccount', 'Parent Account')}</Label>
-                  <Select value={formData.parent_account_id} onValueChange={(v) => setFormData({ ...formData, parent_account_id: v })}>
+                  <Select value={formData.parent_account_id || "none"} onValueChange={(v) => setFormData({ ...formData, parent_account_id: v === "none" ? "" : v })}>
                     <SelectTrigger>
                       <SelectValue placeholder={t('common.none', 'None')} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">{t('common.none', 'None')}</SelectItem>
+                      <SelectItem value="none">{t('common.none', 'None')}</SelectItem>
                       {accounts.filter(a => a.id !== editingAccount?.id).map(a => (
                         <SelectItem key={a.id} value={a.id}>{a.account_code} - {a.account_name}</SelectItem>
                       ))}
