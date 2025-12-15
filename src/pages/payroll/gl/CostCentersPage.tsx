@@ -377,14 +377,14 @@ const CostCentersPage = () => {
               <div className="space-y-2">
                 <Label>{t('common.department', 'Department')}</Label>
                 <Select
-                  value={formData.department_id}
-                  onValueChange={(v) => setFormData({ ...formData, department_id: v })}
+                  value={formData.department_id || "none"}
+                  onValueChange={(v) => setFormData({ ...formData, department_id: v === "none" ? "" : v })}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder={t('common.none', 'None')} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">{t('common.none', 'None')}</SelectItem>
+                    <SelectItem value="none">{t('common.none', 'None')}</SelectItem>
                     {departments.map(d => (
                       <SelectItem key={d.id} value={d.id}>{d.name}</SelectItem>
                     ))}
