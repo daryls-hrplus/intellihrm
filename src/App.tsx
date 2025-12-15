@@ -120,6 +120,7 @@ import EquityManagementPage from "./pages/compensation/EquityManagementPage";
 import CompaRatioPage from "./pages/compensation/CompaRatioPage";
 import CompensationAnalyticsPage from "./pages/compensation/CompensationAnalyticsPage";
 import SpinalPointsPage from "./pages/compensation/SpinalPointsPage";
+import EmployeeCompensationPage from "./pages/compensation/EmployeeCompensationPage";
 
 // Benefits pages
 import BenefitsDashboardPage from "./pages/benefits/BenefitsDashboardPage";
@@ -1581,6 +1582,14 @@ const App = () => (
               element={
                 <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
                   <PositionCompensationPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/compensation/employee-compensation"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
+                  <EmployeeCompensationPage />
                 </ProtectedRoute>
               }
             />

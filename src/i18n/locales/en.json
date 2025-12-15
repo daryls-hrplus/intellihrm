@@ -5187,6 +5187,47 @@
         "notesPlaceholder": "Optional notes"
       }
     },
+    "employeeCompensation": {
+      "title": "Employee Compensation",
+      "subtitle": "Manage individual employee pay adjustments and overrides",
+      "add": "Add Compensation",
+      "employee": "Employee",
+      "payElement": "Pay Element",
+      "amount": "Amount",
+      "currency": "Currency",
+      "frequencyLabel": "Frequency",
+      "effectiveDates": "Effective Dates",
+      "override": "Override",
+      "searchPlaceholder": "Search by employee or pay element...",
+      "noItems": "No employee compensation items found",
+      "deleteConfirm": "Are you sure you want to delete this compensation item?",
+      "validation": {
+        "required": "Employee, pay element, and amount are required"
+      },
+      "frequency": {
+        "monthly": "Monthly",
+        "annual": "Annual",
+        "weekly": "Weekly",
+        "biWeekly": "Bi-Weekly",
+        "oneTime": "One-Time"
+      },
+      "dialog": {
+        "createTitle": "Add Employee Compensation",
+        "editTitle": "Edit Employee Compensation",
+        "description": "Add individual compensation items for this employee",
+        "selectEmployee": "Select employee",
+        "selectPayElement": "Select pay element",
+        "isOverride": "This is an override to position compensation",
+        "overrideReason": "Override Reason",
+        "overrideReasonPlaceholder": "Reason for override..."
+      }
+    },
+    "modules": {
+      "employeeCompensation": {
+        "title": "Employee Compensation",
+        "description": "Individual employee pay adjustments"
+      }
+    },
     "meritCycles": {
       "title": "Merit Cycles",
       "subtitle": "Manage annual merit increase programs",

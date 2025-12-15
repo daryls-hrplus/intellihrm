@@ -5448,6 +5448,102 @@ export type Database = {
           },
         ]
       }
+      employee_compensation: {
+        Row: {
+          amount: number
+          company_id: string
+          created_at: string
+          created_by: string | null
+          currency: string
+          employee_id: string
+          end_date: string | null
+          frequency: string
+          id: string
+          is_active: boolean
+          is_override: boolean
+          notes: string | null
+          override_reason: string | null
+          pay_element_id: string
+          start_date: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          amount: number
+          company_id: string
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          employee_id: string
+          end_date?: string | null
+          frequency?: string
+          id?: string
+          is_active?: boolean
+          is_override?: boolean
+          notes?: string | null
+          override_reason?: string | null
+          pay_element_id: string
+          start_date?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          amount?: number
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          employee_id?: string
+          end_date?: string | null
+          frequency?: string
+          id?: string
+          is_active?: boolean
+          is_override?: boolean
+          notes?: string | null
+          override_reason?: string | null
+          pay_element_id?: string
+          start_date?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "employee_compensation_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_compensation_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_compensation_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_compensation_pay_element_id_fkey"
+            columns: ["pay_element_id"]
+            isOneToOne: false
+            referencedRelation: "pay_elements"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_compensation_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       employee_competencies: {
         Row: {
           competency_id: string
