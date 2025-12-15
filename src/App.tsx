@@ -163,6 +163,16 @@ import TrainingAnalyticsPage from "./pages/training/TrainingAnalyticsPage";
 
 // Succession pages
 import SuccessionDashboardPage from "./pages/succession/SuccessionDashboardPage";
+import NineBoxPage from "./pages/succession/NineBoxPage";
+import TalentPoolsPage from "./pages/succession/TalentPoolsPage";
+import SuccessionPlansPage from "./pages/succession/SuccessionPlansPage";
+import KeyPositionsPage from "./pages/succession/KeyPositionsPage";
+import CareerDevelopmentPage from "./pages/succession/CareerDevelopmentPage";
+import CareerPathsPage from "./pages/succession/CareerPathsPage";
+import MentorshipPage from "./pages/succession/MentorshipPage";
+import FlightRiskPage from "./pages/succession/FlightRiskPage";
+import BenchStrengthPage from "./pages/succession/BenchStrengthPage";
+import SuccessionAnalyticsPage from "./pages/succession/SuccessionAnalyticsPage";
 
 // Recruitment pages
 import RecruitmentDashboardPage from "./pages/recruitment/RecruitmentDashboardPage";
@@ -2024,6 +2034,16 @@ const App = () => (
                 </ProtectedRoute>
               }
             />
+            <Route path="/succession/nine-box" element={<ProtectedRoute requiredRoles={["admin", "hr_manager"]}><NineBoxPage /></ProtectedRoute>} />
+            <Route path="/succession/talent-pools" element={<ProtectedRoute requiredRoles={["admin", "hr_manager"]}><TalentPoolsPage /></ProtectedRoute>} />
+            <Route path="/succession/plans" element={<ProtectedRoute requiredRoles={["admin", "hr_manager"]}><SuccessionPlansPage /></ProtectedRoute>} />
+            <Route path="/succession/key-positions" element={<ProtectedRoute requiredRoles={["admin", "hr_manager"]}><KeyPositionsPage /></ProtectedRoute>} />
+            <Route path="/succession/career-development" element={<ProtectedRoute requiredRoles={["admin", "hr_manager"]}><CareerDevelopmentPage /></ProtectedRoute>} />
+            <Route path="/succession/career-paths" element={<ProtectedRoute requiredRoles={["admin", "hr_manager"]}><CareerPathsPage /></ProtectedRoute>} />
+            <Route path="/succession/mentorship" element={<ProtectedRoute requiredRoles={["admin", "hr_manager"]}><MentorshipPage /></ProtectedRoute>} />
+            <Route path="/succession/flight-risk" element={<ProtectedRoute requiredRoles={["admin", "hr_manager"]}><FlightRiskPage /></ProtectedRoute>} />
+            <Route path="/succession/bench-strength" element={<ProtectedRoute requiredRoles={["admin", "hr_manager"]}><BenchStrengthPage /></ProtectedRoute>} />
+            <Route path="/succession/analytics" element={<ProtectedRoute requiredRoles={["admin", "hr_manager"]}><SuccessionAnalyticsPage /></ProtectedRoute>} />
 
             {/* Recruitment Routes */}
             <Route

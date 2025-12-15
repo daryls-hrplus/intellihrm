@@ -3,24 +3,12 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import { ModuleReportsButton } from "@/components/reports/ModuleReportsButton";
 import { ModuleBIButton } from "@/components/bi/ModuleBIButton";
 import { useLanguage } from "@/hooks/useLanguage";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { NineBoxGrid } from "@/components/succession/NineBoxGrid";
-import { NineBoxAssessmentDialog } from "@/components/succession/NineBoxAssessmentDialog";
-import { TalentPoolsTab } from "@/components/succession/TalentPoolsTab";
-import { SuccessionPlansTab } from "@/components/succession/SuccessionPlansTab";
-import { KeyPositionsTab } from "@/components/succession/KeyPositionsTab";
-import { SuccessionAnalytics } from "@/components/succession/SuccessionAnalytics";
-import { CareerDevelopmentTab } from "@/components/succession/CareerDevelopmentTab";
-import { CareerPathsTab } from "@/components/succession/CareerPathsTab";
-import { MentorshipTab } from "@/components/succession/MentorshipTab";
-import { FlightRiskTab } from "@/components/succession/FlightRiskTab";
-import { BenchStrengthTab } from "@/components/succession/BenchStrengthTab";
 import { useSuccession, NineBoxAssessment } from "@/hooks/useSuccession";
 import { supabase } from "@/integrations/supabase/client";
-import { TrendingUp, Grid3X3, Users, Target, AlertTriangle, BarChart3, Plus, BookOpen, Route, UserCheck, TrendingDown, Layers } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { TrendingUp, Grid3X3, Users, Target, AlertTriangle, BarChart3, BookOpen, Route, UserCheck, TrendingDown, Layers } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
+import { NavLink } from "@/components/NavLink";
 
 interface Company {
   id: string;
@@ -32,21 +20,14 @@ export default function SuccessionDashboardPage() {
   const { t } = useLanguage();
   const [companies, setCompanies] = useState<Company[]>([]);
   const [selectedCompanyId, setSelectedCompanyId] = useState<string>("");
-  const [showAssessmentDialog, setShowAssessmentDialog] = useState(false);
-  const [editingAssessment, setEditingAssessment] = useState<NineBoxAssessment | null>(null);
-  const [activeTab, setActiveTab] = useState("nine-box");
   
-  // State for data
   const [nineBoxAssessments, setNineBoxAssessments] = useState<NineBoxAssessment[]>([]);
   const [talentPools, setTalentPools] = useState<any[]>([]);
   const [successionPlans, setSuccessionPlans] = useState<any[]>([]);
   const [keyPositionRisks, setKeyPositionRisks] = useState<any[]>([]);
 
   const { 
-    loading,
     fetchNineBoxAssessments,
-    createNineBoxAssessment,
-    updateNineBoxAssessment,
     fetchTalentPools,
     fetchSuccessionPlans,
     fetchKeyPositionRisks,
@@ -88,17 +69,6 @@ export default function SuccessionDashboardPage() {
     setKeyPositionRisks(positions);
   };
 
-  const handleRefreshAssessments = async () => {
-    const assessments = await fetchNineBoxAssessments();
-    setNineBoxAssessments(assessments);
-  };
-
-  const handleEmployeeClick = (assessment: NineBoxAssessment) => {
-    setEditingAssessment(assessment);
-    setShowAssessmentDialog(true);
-  };
-
-  // Calculate stats
   const highPotentials = nineBoxAssessments.filter(a => 
     (a.performance_rating >= 3 && a.potential_rating >= 3)
   ).length;
@@ -125,10 +95,82 @@ export default function SuccessionDashboardPage() {
     { label: t("succession.stats.inTalentPools"), value: inTalentPools, icon: Users, color: "bg-info/10 text-info" },
   ];
 
+  const successionModules = [
+    {
+      title: t("succession.tabs.nineBox"),
+      description: t("succession.nineBox.description"),
+      href: "/succession/nine-box",
+      icon: Grid3X3,
+      colorClass: "bg-primary/10 text-primary",
+    },
+    {
+      title: t("succession.tabs.talentPools"),
+      description: t("succession.talentPools.description"),
+      href: "/succession/talent-pools",
+      icon: Users,
+      colorClass: "bg-info/10 text-info",
+    },
+    {
+      title: t("succession.tabs.successionPlans"),
+      description: t("succession.successionPlans.description"),
+      href: "/succession/plans",
+      icon: Target,
+      colorClass: "bg-success/10 text-success",
+    },
+    {
+      title: t("succession.tabs.keyPositions"),
+      description: t("succession.keyPositions.description"),
+      href: "/succession/key-positions",
+      icon: AlertTriangle,
+      colorClass: "bg-destructive/10 text-destructive",
+    },
+    {
+      title: t("succession.tabs.careerDevelopment"),
+      description: t("succession.careerDevelopment.description"),
+      href: "/succession/career-development",
+      icon: BookOpen,
+      colorClass: "bg-warning/10 text-warning",
+    },
+    {
+      title: t("succession.tabs.careerPaths"),
+      description: t("succession.careerPaths.description"),
+      href: "/succession/career-paths",
+      icon: Route,
+      colorClass: "bg-secondary/50 text-secondary-foreground",
+    },
+    {
+      title: t("succession.tabs.mentorship"),
+      description: t("succession.mentorship.description"),
+      href: "/succession/mentorship",
+      icon: UserCheck,
+      colorClass: "bg-accent/50 text-accent-foreground",
+    },
+    {
+      title: t("succession.tabs.flightRisk"),
+      description: t("succession.flightRisk.description"),
+      href: "/succession/flight-risk",
+      icon: TrendingDown,
+      colorClass: "bg-destructive/10 text-destructive",
+    },
+    {
+      title: t("succession.tabs.benchStrength"),
+      description: t("succession.benchStrength.description"),
+      href: "/succession/bench-strength",
+      icon: Layers,
+      colorClass: "bg-primary/10 text-primary",
+    },
+    {
+      title: t("succession.tabs.analytics"),
+      description: t("succession.analytics.description"),
+      href: "/succession/analytics",
+      icon: BarChart3,
+      colorClass: "bg-info/10 text-info",
+    },
+  ];
+
   return (
     <AppLayout>
       <div className="space-y-6">
-        {/* Header */}
         <div className="animate-fade-in">
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center gap-3">
@@ -151,7 +193,6 @@ export default function SuccessionDashboardPage() {
           </div>
         </div>
 
-        {/* Company Filter */}
         <div className="flex items-center gap-4">
           <Select value={selectedCompanyId} onValueChange={setSelectedCompanyId}>
             <SelectTrigger className="w-64">
@@ -167,7 +208,6 @@ export default function SuccessionDashboardPage() {
           </Select>
         </div>
 
-        {/* Stats Cards */}
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 animate-slide-up">
           {statCards.map((stat, index) => {
             const Icon = stat.icon;
@@ -189,130 +229,37 @@ export default function SuccessionDashboardPage() {
           })}
         </div>
 
-        {/* Main Content Tabs */}
-        {selectedCompanyId && (
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-            <TabsList className="flex flex-wrap h-auto gap-1 p-1">
-              <TabsTrigger value="nine-box" className="flex items-center gap-2">
-                <Grid3X3 className="h-4 w-4" />
-                {t("succession.tabs.nineBox")}
-              </TabsTrigger>
-              <TabsTrigger value="talent-pools" className="flex items-center gap-2">
-                <Users className="h-4 w-4" />
-                {t("succession.tabs.talentPools")}
-              </TabsTrigger>
-              <TabsTrigger value="succession-plans" className="flex items-center gap-2">
-                <Target className="h-4 w-4" />
-                {t("succession.tabs.successionPlans")}
-              </TabsTrigger>
-              <TabsTrigger value="key-positions" className="flex items-center gap-2">
-                <AlertTriangle className="h-4 w-4" />
-                {t("succession.tabs.keyPositions")}
-              </TabsTrigger>
-              <TabsTrigger value="career-development" className="flex items-center gap-2">
-                <BookOpen className="h-4 w-4" />
-                {t("succession.tabs.careerDevelopment")}
-              </TabsTrigger>
-              <TabsTrigger value="career-paths" className="flex items-center gap-2">
-                <Route className="h-4 w-4" />
-                {t("succession.tabs.careerPaths")}
-              </TabsTrigger>
-              <TabsTrigger value="mentorship" className="flex items-center gap-2">
-                <UserCheck className="h-4 w-4" />
-                {t("succession.tabs.mentorship")}
-              </TabsTrigger>
-              <TabsTrigger value="flight-risk" className="flex items-center gap-2">
-                <TrendingDown className="h-4 w-4" />
-                {t("succession.tabs.flightRisk")}
-              </TabsTrigger>
-              <TabsTrigger value="bench-strength" className="flex items-center gap-2">
-                <Layers className="h-4 w-4" />
-                {t("succession.tabs.benchStrength")}
-              </TabsTrigger>
-              <TabsTrigger value="analytics" className="flex items-center gap-2">
-                <BarChart3 className="h-4 w-4" />
-                {t("succession.tabs.analytics")}
-              </TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="nine-box" className="space-y-4">
-              <div className="flex justify-end">
-                <Button onClick={() => { setEditingAssessment(null); setShowAssessmentDialog(true); }}>
-                  <Plus className="mr-2 h-4 w-4" />
-                  {t("succession.actions.newAssessment")}
-                </Button>
-              </div>
-              <NineBoxGrid 
-                assessments={nineBoxAssessments} 
-                onEmployeeClick={handleEmployeeClick}
-              />
-            </TabsContent>
-
-            <TabsContent value="talent-pools">
-              <TalentPoolsTab companyId={selectedCompanyId} />
-            </TabsContent>
-
-            <TabsContent value="succession-plans">
-              <SuccessionPlansTab companyId={selectedCompanyId} />
-            </TabsContent>
-
-            <TabsContent value="key-positions">
-              <KeyPositionsTab companyId={selectedCompanyId} />
-            </TabsContent>
-
-            <TabsContent value="career-development">
-              <CareerDevelopmentTab companyId={selectedCompanyId} />
-            </TabsContent>
-
-            <TabsContent value="career-paths">
-              <CareerPathsTab companyId={selectedCompanyId} />
-            </TabsContent>
-
-            <TabsContent value="mentorship">
-              <MentorshipTab companyId={selectedCompanyId} />
-            </TabsContent>
-
-            <TabsContent value="flight-risk">
-              <FlightRiskTab companyId={selectedCompanyId} />
-            </TabsContent>
-
-            <TabsContent value="bench-strength">
-              <BenchStrengthTab companyId={selectedCompanyId} />
-            </TabsContent>
-
-            <TabsContent value="analytics">
-              <SuccessionAnalytics 
-                assessments={nineBoxAssessments}
-                plans={successionPlans}
-                keyPositions={keyPositionRisks}
-                talentPools={talentPools}
-              />
-            </TabsContent>
-          </Tabs>
-        )}
-
-        {!selectedCompanyId && (
-          <Card>
-            <CardContent className="py-12 text-center">
-              <p className="text-muted-foreground">{t("succession.dashboard.selectCompany")}</p>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Assessment Dialog */}
-        <NineBoxAssessmentDialog
-          open={showAssessmentDialog}
-          onOpenChange={setShowAssessmentDialog}
-          assessment={editingAssessment}
-          companyId={selectedCompanyId}
-          onSuccess={() => {
-            setShowAssessmentDialog(false);
-            setEditingAssessment(null);
-            handleRefreshAssessments();
-          }}
-          onCreate={createNineBoxAssessment}
-          onUpdate={updateNineBoxAssessment}
-        />
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {successionModules.map((module, index) => {
+            const Icon = module.icon;
+            return (
+              <NavLink
+                key={module.href}
+                to={module.href}
+                className="group block animate-slide-up"
+                style={{ animationDelay: `${index * 50}ms` }}
+              >
+                <Card className="h-full transition-all duration-200 hover:shadow-md hover:border-primary/20 group-hover:bg-accent/5">
+                  <CardContent className="p-5">
+                    <div className="flex items-start gap-4">
+                      <div className={`rounded-lg p-3 ${module.colorClass}`}>
+                        <Icon className="h-5 w-5" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-semibold text-card-foreground group-hover:text-primary transition-colors">
+                          {module.title}
+                        </h3>
+                        <p className="mt-1 text-sm text-muted-foreground line-clamp-2">
+                          {module.description}
+                        </p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </NavLink>
+            );
+          })}
+        </div>
       </div>
     </AppLayout>
   );
