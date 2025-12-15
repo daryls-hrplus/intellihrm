@@ -668,5 +668,50 @@
       "returned": "Retourné",
       "cost": "Coût"
     }
+  },
+  "compensation": {
+    "positionCompensation": {
+      "title": "Rémunération par Poste",
+      "subtitle": "Définir la structure de rémunération des postes",
+      "company": "Entreprise",
+      "position": "Poste",
+      "selectCompany": "Sélectionner entreprise",
+      "selectPosition": "Sélectionner poste",
+      "totalPackage": "Package Total",
+      "additionalElements": "Éléments Supplémentaires",
+      "addPayElement": "Ajouter Élément de Paie",
+      "compensationFor": "Rémunération pour",
+      "noElements": "Aucun élément de rémunération défini pour ce poste.",
+      "deleteConfirm": "Êtes-vous sûr de vouloir supprimer cet élément de rémunération?",
+      "payElement": "Élément de Paie",
+      "type": "Type",
+      "amount": "Montant",
+      "frequency": "Fréquence",
+      "effective": "Effectif",
+      "status": "Statut",
+      "compensationModel": "Modèle de Rémunération",
+      "salaryGrade": "Grade Salarial",
+      "spinalPoint": "Point d'Échelle",
+      "hybrid": "Hybride",
+      "spinalPointBase": "Salaire de Base d'Échelle",
+      "pointRange": "Plage de Points",
+      "entryPoint": "Point d'Entrée",
+      "salaryRange": "Plage Salariale",
+      "availablePoints": "Points Disponibles",
+      "dialog": {
+        "createTitle": "Ajouter Rémunération",
+        "editTitle": "Modifier Rémunération",
+        "description": "Configurer l'élément de rémunération pour ce poste",
+        "selectPayElement": "Sélectionner élément de paie",
+        "paymentFrequency": "Fréquence de Paiement",
+        "selectFrequency": "Sélectionner fréquence",
+        "effectiveDate": "Date d'Effet",
+        "notes": "Notes",
+        "notesPlaceholder": "Notes optionnelles"
+      }
+    },
+    "spinalPoints": {
+      "paySpine": "Grille Salariale"
+    }
   }
 }
