@@ -489,11 +489,11 @@ const openEditLocation = (location: GeofenceLocation) => {
   const getViolationBadge = (type: string) => {
     switch (type) {
       case 'clock_in_outside':
-        return <Badge className="bg-warning/20 text-warning">Clock In Outside</Badge>;
+        return <Badge className="bg-warning/20 text-warning">{t("timeAttendance.geofencing.clockInOutside")}</Badge>;
       case 'clock_out_outside':
-        return <Badge className="bg-warning/20 text-warning">Clock Out Outside</Badge>;
+        return <Badge className="bg-warning/20 text-warning">{t("timeAttendance.geofencing.clockOutOutside")}</Badge>;
       case 'no_location':
-        return <Badge className="bg-destructive/20 text-destructive">No Location</Badge>;
+        return <Badge className="bg-destructive/20 text-destructive">{t("timeAttendance.geofencing.noLocation")}</Badge>;
       default:
         return <Badge variant="outline">{type}</Badge>;
     }
@@ -619,24 +619,24 @@ const openEditLocation = (location: GeofenceLocation) => {
             <Card>
               <CardHeader className="flex flex-row items-center justify-between">
                 <div>
-                  <CardTitle>Geofence Locations</CardTitle>
-                  <CardDescription>Define physical locations for clock restrictions</CardDescription>
+                  <CardTitle>{t("timeAttendance.geofencing.geofenceLocations")}</CardTitle>
+                  <CardDescription>{t("timeAttendance.geofencing.defineLocations")}</CardDescription>
                 </div>
                 <Dialog open={locationDialogOpen} onOpenChange={(open) => { setLocationDialogOpen(open); if (!open) resetLocationForm(); }}>
                   <DialogTrigger asChild>
                     <Button>
                       <Plus className="h-4 w-4 mr-2" />
-                      Add Location
+                      {t("timeAttendance.geofencing.addLocation")}
                     </Button>
                   </DialogTrigger>
                   <DialogContent className="max-w-lg">
                     <DialogHeader>
-                      <DialogTitle>{editingLocation ? "Edit Location" : "Add Location"}</DialogTitle>
+                      <DialogTitle>{editingLocation ? t("timeAttendance.geofencing.editLocation") : t("timeAttendance.geofencing.addLocation")}</DialogTitle>
                     </DialogHeader>
                     <div className="space-y-4 py-4 max-h-[70vh] overflow-y-auto">
                       <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
-                          <Label>Name *</Label>
+                          <Label>{t("timeAttendance.geofencing.name")} *</Label>
                           <Input 
                             value={locationForm.name}
                             onChange={(e) => setLocationForm({...locationForm, name: e.target.value})}
@@ -644,7 +644,7 @@ const openEditLocation = (location: GeofenceLocation) => {
                           />
                         </div>
                         <div className="space-y-2">
-                          <Label>Code *</Label>
+                          <Label>{t("timeAttendance.geofencing.code")} *</Label>
                           <Input 
                             value={locationForm.code}
                             onChange={(e) => setLocationForm({...locationForm, code: e.target.value})}
@@ -653,7 +653,7 @@ const openEditLocation = (location: GeofenceLocation) => {
                         </div>
                       </div>
                       <div className="space-y-2">
-                        <Label>Address</Label>
+                        <Label>{t("timeAttendance.geofencing.address")}</Label>
                         <Textarea 
                           value={locationForm.address}
                           onChange={(e) => setLocationForm({...locationForm, address: e.target.value})}
@@ -662,7 +662,7 @@ const openEditLocation = (location: GeofenceLocation) => {
                       </div>
                       <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
-                          <Label>Latitude *</Label>
+                          <Label>{t("timeAttendance.geofencing.latitude")} *</Label>
                           <Input 
                             type="number"
                             step="0.00000001"
@@ -672,7 +672,7 @@ const openEditLocation = (location: GeofenceLocation) => {
                           />
                         </div>
                         <div className="space-y-2">
-                          <Label>Longitude *</Label>
+                          <Label>{t("timeAttendance.geofencing.longitude")} *</Label>
                           <Input 
                             type="number"
                             step="0.00000001"
@@ -684,11 +684,11 @@ const openEditLocation = (location: GeofenceLocation) => {
                       </div>
                       <Button type="button" variant="outline" onClick={getCurrentLocation} className="w-full">
                         <Navigation className="h-4 w-4 mr-2" />
-                        Use Current Location
+                        {t("timeAttendance.geofencing.useCurrentLocation")}
                       </Button>
                       <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
-                          <Label>Radius (meters)</Label>
+                          <Label>{t("timeAttendance.geofencing.radius")}</Label>
                           <Input 
                             type="number"
                             value={locationForm.radius_meters}
@@ -696,7 +696,7 @@ const openEditLocation = (location: GeofenceLocation) => {
                           />
                         </div>
                         <div className="space-y-2">
-                          <Label>Start Date</Label>
+                          <Label>{t("timeAttendance.geofencing.startDate")}</Label>
                           <Input 
                             type="date"
                             value={locationForm.start_date}
@@ -705,7 +705,7 @@ const openEditLocation = (location: GeofenceLocation) => {
                         </div>
                       </div>
                       <div className="space-y-2">
-                        <Label>Description</Label>
+                        <Label>{t("timeAttendance.geofencing.description")}</Label>
                         <Textarea 
                           value={locationForm.description}
                           onChange={(e) => setLocationForm({...locationForm, description: e.target.value})}
@@ -717,14 +717,14 @@ const openEditLocation = (location: GeofenceLocation) => {
                             checked={locationForm.is_headquarters}
                             onCheckedChange={(c) => setLocationForm({...locationForm, is_headquarters: c})}
                           />
-                          <Label>Headquarters</Label>
+                          <Label>{t("timeAttendance.geofencing.headquarters")}</Label>
                         </div>
                         <div className="flex items-center gap-2">
                           <Switch 
                             checked={locationForm.is_active}
                             onCheckedChange={(c) => setLocationForm({...locationForm, is_active: c})}
                           />
-                          <Label>Active</Label>
+                          <Label>{t("timeAttendance.geofencing.active")}</Label>
                         </div>
                       </div>
                       <div className="grid grid-cols-2 gap-4">
@@ -733,21 +733,21 @@ const openEditLocation = (location: GeofenceLocation) => {
                             checked={locationForm.requires_geofence}
                             onCheckedChange={(c) => setLocationForm({...locationForm, requires_geofence: c})}
 />
-                          <Label>Require Geofence</Label>
+                          <Label>{t("timeAttendance.geofencing.requireGeofence")}</Label>
                         </div>
                         <div className="flex items-center gap-2">
                           <Switch 
                             checked={locationForm.allow_clock_outside}
                             onCheckedChange={(c) => setLocationForm({...locationForm, allow_clock_outside: c})}
                           />
-                          <Label>Allow Outside</Label>
+                          <Label>{t("timeAttendance.geofencing.allowOutside")}</Label>
                         </div>
                       </div>
                       <div className="flex items-center gap-2 p-3 rounded-lg bg-primary/5 border border-primary/20">
                         <Camera className="h-5 w-5 text-primary" />
                         <div className="flex-1">
-                          <Label className="cursor-pointer">Require Face Capture</Label>
-                          <p className="text-xs text-muted-foreground">Employees must capture photo when clocking in/out</p>
+                          <Label className="cursor-pointer">{t("timeAttendance.geofencing.requireFaceCapture")}</Label>
+                          <p className="text-xs text-muted-foreground">{t("timeAttendance.geofencing.requireFaceCaptureDesc")}</p>
                         </div>
                         <Switch 
                           checked={locationForm.requires_face_capture}
@@ -755,7 +755,7 @@ const openEditLocation = (location: GeofenceLocation) => {
                         />
                       </div>
                       <Button onClick={handleSaveLocation} className="w-full">
-                        {editingLocation ? "Update Location" : "Create Location"}
+                        {editingLocation ? t("timeAttendance.geofencing.updateLocation") : t("timeAttendance.geofencing.createLocation")}
                       </Button>
                     </div>
                   </DialogContent>
@@ -765,20 +765,20 @@ const openEditLocation = (location: GeofenceLocation) => {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Location</TableHead>
-                      <TableHead>Code</TableHead>
-                      <TableHead>Coordinates</TableHead>
-                      <TableHead>Radius</TableHead>
-                      <TableHead>Settings</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead className="text-right">Actions</TableHead>
+                      <TableHead>{t("timeAttendance.geofencing.location")}</TableHead>
+                      <TableHead>{t("timeAttendance.geofencing.code")}</TableHead>
+                      <TableHead>{t("timeAttendance.geofencing.coordinates")}</TableHead>
+                      <TableHead>{t("timeAttendance.geofencing.radius")}</TableHead>
+                      <TableHead>{t("timeAttendance.geofencing.settings")}</TableHead>
+                      <TableHead>{t("timeAttendance.geofencing.status")}</TableHead>
+                      <TableHead className="text-right">{t("timeAttendance.geofencing.actions")}</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {locations.length === 0 ? (
                       <TableRow>
                         <TableCell colSpan={7} className="text-center text-muted-foreground py-8">
-                          No locations defined
+                          {t("timeAttendance.geofencing.noLocationsDefined")}
                         </TableCell>
                       </TableRow>
                     ) : (
@@ -789,7 +789,7 @@ const openEditLocation = (location: GeofenceLocation) => {
                               <MapPin className="h-4 w-4 text-primary" />
                               <span className="font-medium">{location.name}</span>
                               {location.is_headquarters && (
-                                <Badge variant="outline" className="text-xs">HQ</Badge>
+                                <Badge variant="outline" className="text-xs">{t("timeAttendance.geofencing.hq")}</Badge>
                               )}
                             </div>
                           </TableCell>
@@ -801,22 +801,22 @@ const openEditLocation = (location: GeofenceLocation) => {
 <TableCell>
                             <div className="flex flex-wrap gap-1">
                               {location.requires_geofence && (
-                                <Badge variant="outline" className="text-xs">Required</Badge>
+                                <Badge variant="outline" className="text-xs">{t("timeAttendance.geofencing.required")}</Badge>
                               )}
                               {location.allow_clock_outside && (
-                                <Badge variant="outline" className="text-xs bg-warning/10">Allow Outside</Badge>
+                                <Badge variant="outline" className="text-xs bg-warning/10">{t("timeAttendance.geofencing.allowOutside")}</Badge>
                               )}
                               {location.requires_face_capture && (
                                 <Badge variant="outline" className="text-xs bg-primary/10 text-primary">
                                   <Camera className="h-3 w-3 mr-1" />
-                                  Face
+                                  {t("timeAttendance.geofencing.face")}
                                 </Badge>
                               )}
                             </div>
                           </TableCell>
                           <TableCell>
                             <Badge className={location.is_active ? "bg-success/20 text-success" : "bg-muted text-muted-foreground"}>
-                              {location.is_active ? "Active" : "Inactive"}
+                              {location.is_active ? t("timeAttendance.geofencing.active") : t("timeAttendance.geofencing.inactive")}
                             </Badge>
                           </TableCell>
                           <TableCell className="text-right">
@@ -843,29 +843,29 @@ const openEditLocation = (location: GeofenceLocation) => {
             <Card>
               <CardHeader className="flex flex-row items-center justify-between">
                 <div>
-                  <CardTitle>Employee Location Assignments</CardTitle>
-                  <CardDescription>Assign employees to geofence locations</CardDescription>
+                  <CardTitle>{t("timeAttendance.geofencing.employeeLocationAssignments")}</CardTitle>
+                  <CardDescription>{t("timeAttendance.geofencing.assignEmployeesToLocations")}</CardDescription>
                 </div>
                 <Dialog open={assignmentDialogOpen} onOpenChange={setAssignmentDialogOpen}>
                   <DialogTrigger asChild>
                     <Button>
                       <Plus className="h-4 w-4 mr-2" />
-                      Add Assignment
+                      {t("timeAttendance.geofencing.addAssignment")}
                     </Button>
                   </DialogTrigger>
                   <DialogContent>
                     <DialogHeader>
-                      <DialogTitle>Assign Employee to Location</DialogTitle>
+                      <DialogTitle>{t("timeAttendance.geofencing.assignEmployee")}</DialogTitle>
                     </DialogHeader>
                     <div className="space-y-4 py-4">
                       <div className="space-y-2">
-                        <Label>Employee *</Label>
+                        <Label>{t("timeAttendance.geofencing.employee")} *</Label>
                         <Select 
                           value={assignmentForm.employee_id} 
                           onValueChange={(v) => setAssignmentForm({...assignmentForm, employee_id: v})}
                         >
                           <SelectTrigger>
-                            <SelectValue placeholder="Select employee" />
+                            <SelectValue placeholder={t("timeAttendance.geofencing.selectEmployee")} />
                           </SelectTrigger>
                           <SelectContent>
                             {employees.map((e) => (
@@ -875,13 +875,13 @@ const openEditLocation = (location: GeofenceLocation) => {
                         </Select>
                       </div>
                       <div className="space-y-2">
-                        <Label>Location *</Label>
+                        <Label>{t("timeAttendance.geofencing.location")} *</Label>
                         <Select 
                           value={assignmentForm.geofence_id} 
                           onValueChange={(v) => setAssignmentForm({...assignmentForm, geofence_id: v})}
                         >
                           <SelectTrigger>
-                            <SelectValue placeholder="Select location" />
+                            <SelectValue placeholder={t("timeAttendance.geofencing.selectLocation")} />
                           </SelectTrigger>
                           <SelectContent>
                             {locations.filter(l => l.is_active).map((l) => (
@@ -892,7 +892,7 @@ const openEditLocation = (location: GeofenceLocation) => {
                       </div>
                       <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
-                          <Label>Effective Date</Label>
+                          <Label>{t("timeAttendance.geofencing.effectiveDate")}</Label>
                           <Input 
                             type="date"
                             value={assignmentForm.effective_date}
@@ -900,7 +900,7 @@ const openEditLocation = (location: GeofenceLocation) => {
                           />
                         </div>
                         <div className="space-y-2">
-                          <Label>End Date</Label>
+                          <Label>{t("timeAttendance.geofencing.endDate")}</Label>
                           <Input 
                             type="date"
                             value={assignmentForm.end_date}
@@ -913,17 +913,17 @@ const openEditLocation = (location: GeofenceLocation) => {
                           checked={assignmentForm.is_primary}
                           onCheckedChange={(c) => setAssignmentForm({...assignmentForm, is_primary: c})}
                         />
-                        <Label>Primary Location</Label>
+                        <Label>{t("timeAttendance.geofencing.primaryLocation")}</Label>
                       </div>
                       <div className="space-y-2">
-                        <Label>Notes</Label>
+                        <Label>{t("timeAttendance.geofencing.notes")}</Label>
                         <Textarea 
                           value={assignmentForm.notes}
                           onChange={(e) => setAssignmentForm({...assignmentForm, notes: e.target.value})}
                         />
                       </div>
                       <Button onClick={handleSaveAssignment} className="w-full">
-                        Assign Location
+                        {t("timeAttendance.geofencing.assignLocation")}
                       </Button>
                     </div>
                   </DialogContent>
@@ -933,26 +933,26 @@ const openEditLocation = (location: GeofenceLocation) => {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Employee</TableHead>
-                      <TableHead>Location</TableHead>
-                      <TableHead>Effective Date</TableHead>
-                      <TableHead>End Date</TableHead>
-                      <TableHead>Primary</TableHead>
-                      <TableHead className="text-right">Actions</TableHead>
+                      <TableHead>{t("timeAttendance.geofencing.employee")}</TableHead>
+                      <TableHead>{t("timeAttendance.geofencing.location")}</TableHead>
+                      <TableHead>{t("timeAttendance.geofencing.effectiveDate")}</TableHead>
+                      <TableHead>{t("timeAttendance.geofencing.endDate")}</TableHead>
+                      <TableHead>{t("timeAttendance.geofencing.primary")}</TableHead>
+                      <TableHead className="text-right">{t("timeAttendance.geofencing.actions")}</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {assignments.length === 0 ? (
                       <TableRow>
                         <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
-                          No assignments
+                          {t("timeAttendance.geofencing.noAssignments")}
                         </TableCell>
                       </TableRow>
                     ) : (
                       assignments.map((assignment) => (
                         <TableRow key={assignment.id}>
                           <TableCell className="font-medium">
-                            {assignment.profile?.full_name || 'Unknown'}
+                            {assignment.profile?.full_name || t("timeAttendance.geofencing.unknown")}
                           </TableCell>
                           <TableCell>
                             {assignment.geofence?.name} ({assignment.geofence?.code})
@@ -962,7 +962,7 @@ const openEditLocation = (location: GeofenceLocation) => {
                             {assignment.end_date ? format(new Date(assignment.end_date), 'MMM d, yyyy') : '-'}
                           </TableCell>
                           <TableCell>
-                            {assignment.is_primary && <Badge className="bg-primary/20 text-primary">Primary</Badge>}
+                            {assignment.is_primary && <Badge className="bg-primary/20 text-primary">{t("timeAttendance.geofencing.primary")}</Badge>}
                           </TableCell>
                           <TableCell className="text-right">
                             <Button variant="ghost" size="icon" onClick={() => handleDeleteAssignment(assignment.id)}>
@@ -985,10 +985,10 @@ const openEditLocation = (location: GeofenceLocation) => {
                 <div>
                   <CardTitle className="flex items-center gap-2">
                     <UserCheck className="h-5 w-5" />
-                    Face Enrollment
+                    {t("timeAttendance.geofencing.faceEnrollment")}
                   </CardTitle>
                   <CardDescription>
-                    Register employee faces for identity verification during clock in/out
+                    {t("timeAttendance.geofencing.registerFaces")}
                   </CardDescription>
                 </div>
                 <div className="flex gap-2">
@@ -997,7 +997,7 @@ const openEditLocation = (location: GeofenceLocation) => {
                     onValueChange={setSelectedEmployeeForFace}
                   >
                     <SelectTrigger className="w-[200px]">
-                      <SelectValue placeholder="Select employee" />
+                      <SelectValue placeholder={t("timeAttendance.geofencing.selectEmployee")} />
                     </SelectTrigger>
                     <SelectContent>
                       {employees.map((e) => (
@@ -1010,7 +1010,7 @@ const openEditLocation = (location: GeofenceLocation) => {
                     disabled={!selectedEmployeeForFace}
                   >
                     <Camera className="h-4 w-4 mr-2" />
-                    Enroll Face
+                    {t("timeAttendance.geofencing.enrollFace")}
                   </Button>
                 </div>
               </CardHeader>
@@ -1019,8 +1019,8 @@ const openEditLocation = (location: GeofenceLocation) => {
                   {faceEnrollments.length === 0 ? (
                     <div className="col-span-full text-center py-12 text-muted-foreground">
                       <Camera className="h-12 w-12 mx-auto mb-3 opacity-50" />
-                      <p>No face enrollments yet</p>
-                      <p className="text-sm">Select an employee and click "Enroll Face" to register</p>
+                      <p>{t("timeAttendance.geofencing.noEnrollments")}</p>
+                      <p className="text-sm">{t("timeAttendance.geofencing.noEnrollmentsDesc")}</p>
                     </div>
                   ) : (
                     faceEnrollments.map((enrollment) => (
@@ -1028,21 +1028,21 @@ const openEditLocation = (location: GeofenceLocation) => {
                         <div className="aspect-square relative bg-muted">
                           <img 
                             src={enrollment.photo_url} 
-                            alt={enrollment.profile?.full_name || "Employee"}
+                            alt={enrollment.profile?.full_name || t("timeAttendance.geofencing.employee")}
                             className="w-full h-full object-cover"
                           />
                           {enrollment.is_active && (
                             <Badge className="absolute top-2 right-2 bg-success/90 text-success-foreground">
-                              Active
+                              {t("timeAttendance.geofencing.active")}
                             </Badge>
                           )}
                         </div>
                         <CardContent className="p-3">
                           <div className="flex items-center justify-between">
                             <div>
-                              <p className="font-medium text-sm">{enrollment.profile?.full_name || 'Unknown'}</p>
+                              <p className="font-medium text-sm">{enrollment.profile?.full_name || t("timeAttendance.geofencing.unknown")}</p>
                               <p className="text-xs text-muted-foreground">
-                                Enrolled {format(new Date(enrollment.enrolled_at), 'MMM d, yyyy')}
+                                {t("timeAttendance.geofencing.enrolled")} {format(new Date(enrollment.enrolled_at), 'MMM d, yyyy')}
                               </p>
                             </div>
                             <Button 
@@ -1066,26 +1066,26 @@ const openEditLocation = (location: GeofenceLocation) => {
           <TabsContent value="violations">
             <Card>
               <CardHeader>
-                <CardTitle>Geofence Violations</CardTitle>
-                <CardDescription>Clock attempts outside allowed locations</CardDescription>
+                <CardTitle>{t("timeAttendance.geofencing.geofenceViolations")}</CardTitle>
+                <CardDescription>{t("timeAttendance.geofencing.violationsDesc")}</CardDescription>
               </CardHeader>
               <CardContent>
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Date/Time</TableHead>
-                      <TableHead>Employee</TableHead>
-                      <TableHead>Violation Type</TableHead>
-                      <TableHead>Distance</TableHead>
-                      <TableHead>Nearest Location</TableHead>
-                      <TableHead>Action</TableHead>
+                      <TableHead>{t("timeAttendance.geofencing.dateTime")}</TableHead>
+                      <TableHead>{t("timeAttendance.geofencing.employee")}</TableHead>
+                      <TableHead>{t("timeAttendance.geofencing.violationType")}</TableHead>
+                      <TableHead>{t("timeAttendance.geofencing.distance")}</TableHead>
+                      <TableHead>{t("timeAttendance.geofencing.nearestLocation")}</TableHead>
+                      <TableHead>{t("timeAttendance.geofencing.action")}</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {violations.length === 0 ? (
                       <TableRow>
                         <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
-                          No violations recorded
+                          {t("timeAttendance.geofencing.noViolations")}
                         </TableCell>
                       </TableRow>
                     ) : (
@@ -1095,7 +1095,7 @@ const openEditLocation = (location: GeofenceLocation) => {
                             {format(new Date(violation.created_at), 'MMM d, yyyy HH:mm')}
                           </TableCell>
                           <TableCell className="font-medium">
-                            {violation.profile?.full_name || 'Unknown'}
+                            {violation.profile?.full_name || t("timeAttendance.geofencing.unknown")}
                           </TableCell>
                           <TableCell>{getViolationBadge(violation.violation_type)}</TableCell>
                           <TableCell>
@@ -1105,7 +1105,7 @@ const openEditLocation = (location: GeofenceLocation) => {
                             {violation.nearest_geofence?.name || '-'}
                           </TableCell>
                           <TableCell>
-                            <Badge variant="outline">{violation.action_taken || 'flagged'}</Badge>
+                            <Badge variant="outline">{violation.action_taken || t("timeAttendance.geofencing.flagged")}</Badge>
                           </TableCell>
                         </TableRow>
                       ))
@@ -1122,8 +1122,8 @@ const openEditLocation = (location: GeofenceLocation) => {
           open={faceDialogOpen}
           onOpenChange={setFaceDialogOpen}
           onCapture={handleFaceCapture}
-          title="Enroll Employee Face"
-          description="Position the employee's face within the frame for enrollment"
+          title={t("timeAttendance.geofencing.enrollEmployeeFace")}
+          description={t("timeAttendance.geofencing.enrollFaceDesc")}
         />
       </div>
     </AppLayout>
