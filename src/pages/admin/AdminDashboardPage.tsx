@@ -3,6 +3,7 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import { NavLink } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useGranularPermissions } from "@/hooks/useGranularPermissions";
 import { Badge } from "@/components/ui/badge";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { AccessRequestsAnalytics } from "@/components/admin/AccessRequestsAnalytics";
@@ -50,6 +51,7 @@ const getAdminModules = (t: (key: string) => string) => [
     href: "/admin/company-groups",
     icon: Building,
     color: "bg-primary/10 text-primary",
+    tabCode: "company-groups",
   },
   {
     title: t("admin.modules.companies.title"),
@@ -57,6 +59,7 @@ const getAdminModules = (t: (key: string) => string) => [
     href: "/admin/companies",
     icon: Building2,
     color: "bg-info/10 text-info",
+    tabCode: "companies",
   },
   {
     title: t("admin.modules.users.title"),
@@ -64,6 +67,7 @@ const getAdminModules = (t: (key: string) => string) => [
     href: "/admin/users",
     icon: Users,
     color: "bg-success/10 text-success",
+    tabCode: "users",
   },
   {
     title: t("admin.modules.roles.title"),
@@ -71,6 +75,7 @@ const getAdminModules = (t: (key: string) => string) => [
     href: "/admin/roles",
     icon: Shield,
     color: "bg-warning/10 text-warning",
+    tabCode: "roles",
   },
   {
     title: t("admin.modules.auditLogs.title"),
@@ -78,6 +83,7 @@ const getAdminModules = (t: (key: string) => string) => [
     href: "/admin/audit-logs",
     icon: FileText,
     color: "bg-secondary/10 text-secondary-foreground",
+    tabCode: "audit-logs",
   },
   {
     title: t("admin.modules.aiUsage.title"),
@@ -85,6 +91,7 @@ const getAdminModules = (t: (key: string) => string) => [
     href: "/admin/ai-usage",
     icon: Bot,
     color: "bg-purple-500/10 text-purple-600",
+    tabCode: "ai-usage",
   },
   {
     title: t("admin.modules.piiAccess.title"),
@@ -92,6 +99,7 @@ const getAdminModules = (t: (key: string) => string) => [
     href: "/admin/pii-access",
     icon: Eye,
     color: "bg-amber-500/10 text-amber-600",
+    tabCode: "pii-access",
   },
   {
     title: t("admin.modules.settings.title"),
@@ -99,6 +107,7 @@ const getAdminModules = (t: (key: string) => string) => [
     href: "/admin/settings",
     icon: Cog,
     color: "bg-slate-500/10 text-slate-600",
+    tabCode: "settings",
   },
   {
     title: t("admin.modules.permissions.title"),
@@ -106,6 +115,7 @@ const getAdminModules = (t: (key: string) => string) => [
     href: "/admin/permissions",
     icon: Grid3X3,
     color: "bg-violet-500/10 text-violet-600",
+    tabCode: "permissions",
   },
   {
     title: t("admin.modules.accessRequests.title"),
@@ -113,6 +123,7 @@ const getAdminModules = (t: (key: string) => string) => [
     href: "/admin/access-requests",
     icon: ClipboardList,
     color: "bg-emerald-500/10 text-emerald-600",
+    tabCode: "access-requests",
   },
   {
     title: t("admin.modules.autoApproval.title"),
@@ -120,6 +131,7 @@ const getAdminModules = (t: (key: string) => string) => [
     href: "/admin/auto-approval",
     icon: Zap,
     color: "bg-orange-500/10 text-orange-600",
+    tabCode: "auto-approval",
   },
   {
     title: t("admin.modules.bulkImport.title"),
@@ -127,6 +139,7 @@ const getAdminModules = (t: (key: string) => string) => [
     href: "/admin/bulk-import",
     icon: Upload,
     color: "bg-cyan-500/10 text-cyan-600",
+    tabCode: "bulk-import",
   },
   {
     title: "Color Scheme",
@@ -134,6 +147,7 @@ const getAdminModules = (t: (key: string) => string) => [
     href: "/admin/color-scheme",
     icon: Palette,
     color: "bg-gradient-to-r from-pink-500/10 to-violet-500/10 text-violet-600",
+    tabCode: "color-scheme",
   },
   {
     title: "Company Tags",
@@ -141,6 +155,7 @@ const getAdminModules = (t: (key: string) => string) => [
     href: "/admin/company-tags",
     icon: Tag,
     color: "bg-teal-500/10 text-teal-600",
+    tabCode: "company-tags",
   },
   {
     title: "Granular Permissions",
@@ -148,6 +163,7 @@ const getAdminModules = (t: (key: string) => string) => [
     href: "/admin/granular-permissions",
     icon: Lock,
     color: "bg-indigo-500/10 text-indigo-600",
+    tabCode: "granular-permissions",
   },
   {
     title: "Implementation Handbook",
@@ -155,6 +171,7 @@ const getAdminModules = (t: (key: string) => string) => [
     href: "/admin/implementation-handbook",
     icon: BookOpen,
     color: "bg-rose-500/10 text-rose-600",
+    tabCode: "implementation-handbook",
   },
   {
     title: "Features Brochure",
@@ -162,6 +179,7 @@ const getAdminModules = (t: (key: string) => string) => [
     href: "/admin/features-brochure",
     icon: FileSpreadsheet,
     color: "bg-blue-500/10 text-blue-600",
+    tabCode: "features-brochure",
   },
   {
     title: "Modules Brochure",
@@ -169,6 +187,7 @@ const getAdminModules = (t: (key: string) => string) => [
     href: "/admin/modules-brochure",
     icon: Layers,
     color: "bg-green-500/10 text-green-600",
+    tabCode: "modules-brochure",
   },
   {
     title: "Subscriptions",
@@ -176,6 +195,7 @@ const getAdminModules = (t: (key: string) => string) => [
     href: "/admin/subscriptions",
     icon: CreditCard,
     color: "bg-emerald-500/10 text-emerald-600",
+    tabCode: "subscriptions",
   },
   {
     title: "Upgrade Plan",
@@ -183,6 +203,7 @@ const getAdminModules = (t: (key: string) => string) => [
     href: "/subscription/upgrade",
     icon: ArrowUpCircle,
     color: "bg-gradient-to-r from-amber-500/10 to-orange-500/10 text-orange-600",
+    tabCode: "upgrade",
   },
   {
     title: "MFA Settings",
@@ -190,6 +211,7 @@ const getAdminModules = (t: (key: string) => string) => [
     href: "/admin/mfa-settings",
     icon: Fingerprint,
     color: "bg-red-500/10 text-red-600",
+    tabCode: "mfa-settings",
   },
   {
     title: "SSO Settings",
@@ -197,6 +219,7 @@ const getAdminModules = (t: (key: string) => string) => [
     href: "/admin/sso-settings",
     icon: KeyRound,
     color: "bg-sky-500/10 text-sky-600",
+    tabCode: "sso-settings",
   },
   {
     title: t("admin.modules.territories.title"),
@@ -204,6 +227,7 @@ const getAdminModules = (t: (key: string) => string) => [
     href: "/admin/territories",
     icon: Globe,
     color: "bg-destructive/10 text-destructive",
+    tabCode: "territories",
   },
   {
     title: t("admin.modules.languages.title"),
@@ -211,6 +235,7 @@ const getAdminModules = (t: (key: string) => string) => [
     href: "/admin/languages",
     icon: Languages,
     color: "bg-accent/10 text-accent-foreground",
+    tabCode: "languages",
   },
 ];
 
@@ -240,12 +265,13 @@ interface PiiAlertStats {
 
 export default function AdminDashboardPage() {
   const { t } = useTranslation();
+  const { hasTabAccess } = useGranularPermissions();
   const [stats, setStats] = useState<Stats>({ totalUsers: 0, totalCompanies: 0, totalGroups: 0, admins: 0 });
   const [piiAlertStats, setPiiAlertStats] = useState<PiiAlertStats>({ total: 0, emailsSent: 0, last24Hours: 0, recentAlerts: [] });
   const [isLoading, setIsLoading] = useState(true);
   const [isPiiAlertsOpen, setIsPiiAlertsOpen] = useState(true);
 
-  const adminModules = getAdminModules(t);
+  const adminModules = getAdminModules(t).filter(module => hasTabAccess("admin", module.tabCode));
 
   useEffect(() => {
     const fetchStats = async () => {

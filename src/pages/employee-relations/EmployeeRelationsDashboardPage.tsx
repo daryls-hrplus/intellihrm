@@ -4,6 +4,7 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { ModuleReportsButton } from "@/components/reports/ModuleReportsButton";
 import { ModuleBIButton } from "@/components/bi/ModuleBIButton";
+import { useGranularPermissions } from "@/hooks/useGranularPermissions";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -34,6 +35,7 @@ interface Stats {
 
 export default function EmployeeRelationsDashboardPage() {
   const { t } = useTranslation();
+  const { hasTabAccess } = useGranularPermissions();
   const [selectedCompanyId, setSelectedCompanyId] = useState<string>("");
   const [selectedDepartmentId, setSelectedDepartmentId] = useState<string>("all");
   const [stats, setStats] = useState<Stats>({ openCases: 0, pendingGrievances: 0, recognitionsThisMonth: 0, activeUnions: 0 });
@@ -119,6 +121,7 @@ export default function EmployeeRelationsDashboardPage() {
       href: `/employee-relations/analytics?company=${selectedCompanyId}&department=${selectedDepartmentId}`,
       icon: BarChart3,
       color: "bg-violet-500/10 text-violet-500",
+      tabCode: "analytics",
     },
     {
       title: t("employeeRelationsModule.cases.title"),
@@ -126,6 +129,7 @@ export default function EmployeeRelationsDashboardPage() {
       href: `/employee-relations/cases?company=${selectedCompanyId}&department=${selectedDepartmentId}`,
       icon: AlertTriangle,
       color: "bg-warning/10 text-warning",
+      tabCode: "cases",
     },
     {
       title: t("employeeRelationsModule.disciplinary.title"),
@@ -133,6 +137,7 @@ export default function EmployeeRelationsDashboardPage() {
       href: `/employee-relations/disciplinary?company=${selectedCompanyId}&department=${selectedDepartmentId}`,
       icon: Scale,
       color: "bg-destructive/10 text-destructive",
+      tabCode: "disciplinary",
     },
     {
       title: t("employeeRelationsModule.recognition.title"),
@@ -140,6 +145,7 @@ export default function EmployeeRelationsDashboardPage() {
       href: `/employee-relations/recognition?company=${selectedCompanyId}&department=${selectedDepartmentId}`,
       icon: Award,
       color: "bg-amber-500/10 text-amber-500",
+      tabCode: "recognition",
     },
     {
       title: t("employeeRelationsModule.exitInterviews.title"),
@@ -147,6 +153,7 @@ export default function EmployeeRelationsDashboardPage() {
       href: `/employee-relations/exit-interviews?company=${selectedCompanyId}&department=${selectedDepartmentId}`,
       icon: DoorOpen,
       color: "bg-cyan-500/10 text-cyan-500",
+      tabCode: "exit-interviews",
     },
     {
       title: t("employeeRelationsModule.surveys.title"),
@@ -154,6 +161,7 @@ export default function EmployeeRelationsDashboardPage() {
       href: `/employee-relations/surveys?company=${selectedCompanyId}&department=${selectedDepartmentId}`,
       icon: MessageSquare,
       color: "bg-info/10 text-info",
+      tabCode: "surveys",
     },
     {
       title: t("employeeRelationsModule.wellness.title"),
@@ -161,6 +169,7 @@ export default function EmployeeRelationsDashboardPage() {
       href: `/employee-relations/wellness?company=${selectedCompanyId}&department=${selectedDepartmentId}`,
       icon: Activity,
       color: "bg-success/10 text-success",
+      tabCode: "wellness",
     },
     {
       title: t("employeeRelationsModule.unions.title"),
@@ -168,6 +177,7 @@ export default function EmployeeRelationsDashboardPage() {
       href: `/employee-relations/unions?company=${selectedCompanyId}&department=${selectedDepartmentId}`,
       icon: Building2,
       color: "bg-primary/10 text-primary",
+      tabCode: "unions",
     },
     {
       title: t("employeeRelationsModule.grievances.title"),
@@ -175,6 +185,7 @@ export default function EmployeeRelationsDashboardPage() {
       href: `/employee-relations/grievances?company=${selectedCompanyId}&department=${selectedDepartmentId}`,
       icon: FileText,
       color: "bg-orange-500/10 text-orange-500",
+      tabCode: "grievances",
     },
     {
       title: t("employeeRelationsModule.courtJudgements.title"),
@@ -182,8 +193,9 @@ export default function EmployeeRelationsDashboardPage() {
       href: `/employee-relations/court-judgements?company=${selectedCompanyId}&department=${selectedDepartmentId}`,
       icon: Gavel,
       color: "bg-rose-500/10 text-rose-500",
+      tabCode: "court-judgements",
     },
-  ];
+  ].filter(module => hasTabAccess("employee_relations", module.tabCode));
 
   const statCards = [
     { label: t("employeeRelationsModule.stats.openCases"), value: stats.openCases, icon: AlertTriangle, color: "bg-warning/10 text-warning" },

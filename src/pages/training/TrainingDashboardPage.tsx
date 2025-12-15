@@ -4,6 +4,7 @@ import { NavLink } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/hooks/useLanguage";
+import { useGranularPermissions } from "@/hooks/useGranularPermissions";
 import { ModuleReportsButton } from "@/components/reports/ModuleReportsButton";
 import { ModuleBIButton } from "@/components/bi/ModuleBIButton";
 import { LeaveCompanyFilter, useLeaveCompanyFilter } from "@/components/leave/LeaveCompanyFilter";
@@ -180,6 +181,7 @@ interface Stats {
 export default function TrainingDashboardPage() {
   const { user } = useAuth();
   const { t } = useLanguage();
+  const { hasTabAccess } = useGranularPermissions();
   const { selectedCompanyId, setSelectedCompanyId } = useLeaveCompanyFilter();
   const { selectedDepartmentId, setSelectedDepartmentId } = useDepartmentFilter();
   const [stats, setStats] = useState<Stats>({
@@ -245,6 +247,7 @@ export default function TrainingDashboardPage() {
       href: "/training/catalog",
       icon: BookOpen,
       color: "bg-primary/10 text-primary",
+      tabCode: "catalog",
     },
     {
       title: t("training.modules.myLearning.title"),
@@ -252,6 +255,7 @@ export default function TrainingDashboardPage() {
       href: "/training/my-learning",
       icon: GraduationCap,
       color: "bg-success/10 text-success",
+      tabCode: "my-learning",
     },
     {
       title: t("training.modules.learningPaths.title"),
@@ -259,6 +263,7 @@ export default function TrainingDashboardPage() {
       href: "/training/learning-paths",
       icon: Route,
       color: "bg-info/10 text-info",
+      tabCode: "learning-paths",
     },
     {
       title: t("training.modules.gapAnalysis.title"),
@@ -266,6 +271,7 @@ export default function TrainingDashboardPage() {
       href: "/training/gap-analysis",
       icon: Target,
       color: "bg-secondary/10 text-secondary-foreground",
+      tabCode: "gap-analysis",
     },
     {
       title: t("training.modules.requests.title"),
@@ -273,6 +279,7 @@ export default function TrainingDashboardPage() {
       href: "/training/requests",
       icon: FileText,
       color: "bg-warning/10 text-warning",
+      tabCode: "requests",
     },
     {
       title: t("training.modules.external.title"),
@@ -280,6 +287,7 @@ export default function TrainingDashboardPage() {
       href: "/training/external",
       icon: ExternalLink,
       color: "bg-accent/10 text-accent-foreground",
+      tabCode: "external",
     },
     {
       title: t("training.modules.budgets.title"),
@@ -288,6 +296,7 @@ export default function TrainingDashboardPage() {
       icon: DollarSign,
       color: "bg-success/10 text-success",
       adminOnly: true,
+      tabCode: "budgets",
     },
     {
       title: t("training.modules.instructors.title"),
@@ -296,6 +305,7 @@ export default function TrainingDashboardPage() {
       icon: Users,
       color: "bg-primary/10 text-primary",
       adminOnly: true,
+      tabCode: "instructors",
     },
     {
       title: t("training.modules.evaluations.title"),
@@ -303,6 +313,7 @@ export default function TrainingDashboardPage() {
       href: "/training/evaluations",
       icon: ClipboardCheck,
       color: "bg-info/10 text-info",
+      tabCode: "evaluations",
     },
     {
       title: t("training.modules.compliance.title"),
@@ -311,6 +322,7 @@ export default function TrainingDashboardPage() {
       icon: Shield,
       color: "bg-destructive/10 text-destructive",
       adminOnly: true,
+      tabCode: "compliance",
     },
     {
       title: t("training.modules.courseCompetencies.title"),
@@ -319,6 +331,7 @@ export default function TrainingDashboardPage() {
       icon: Link,
       color: "bg-warning/10 text-warning",
       adminOnly: true,
+      tabCode: "course-competencies",
     },
     {
       title: t("training.modules.recertification.title"),
@@ -327,6 +340,7 @@ export default function TrainingDashboardPage() {
       icon: RefreshCw,
       color: "bg-secondary/10 text-secondary-foreground",
       adminOnly: true,
+      tabCode: "recertification",
     },
     {
       title: t("training.modules.needs.title"),
@@ -335,6 +349,7 @@ export default function TrainingDashboardPage() {
       icon: TrendingUp,
       color: "bg-accent/10 text-accent-foreground",
       adminOnly: true,
+      tabCode: "needs",
     },
     {
       title: t("training.modules.liveSessions.title"),
@@ -342,6 +357,7 @@ export default function TrainingDashboardPage() {
       href: "/training/sessions",
       icon: Video,
       color: "bg-muted text-muted-foreground",
+      tabCode: "sessions",
     },
     {
       title: t("training.modules.certifications.title"),
@@ -349,6 +365,7 @@ export default function TrainingDashboardPage() {
       href: "/training/certifications",
       icon: Award,
       color: "bg-warning/10 text-warning",
+      tabCode: "certifications",
     },
     {
       title: t("training.modules.calendar.title"),
@@ -356,6 +373,7 @@ export default function TrainingDashboardPage() {
       href: "/training/calendar",
       icon: Calendar,
       color: "bg-destructive/10 text-destructive",
+      tabCode: "calendar",
     },
     {
       title: t("training.modules.analytics.title"),
@@ -364,6 +382,7 @@ export default function TrainingDashboardPage() {
       icon: BarChart3,
       color: "bg-primary/10 text-primary",
       adminOnly: true,
+      tabCode: "analytics",
     },
     {
       title: t("training.modules.lms.title"),
@@ -372,8 +391,9 @@ export default function TrainingDashboardPage() {
       icon: Settings,
       color: "bg-muted text-muted-foreground",
       adminOnly: true,
+      tabCode: "lms",
     },
-  ];
+  ].filter(module => hasTabAccess("training", module.tabCode));
 
   return (
     <AppLayout>

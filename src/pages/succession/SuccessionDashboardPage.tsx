@@ -3,6 +3,7 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import { ModuleReportsButton } from "@/components/reports/ModuleReportsButton";
 import { ModuleBIButton } from "@/components/bi/ModuleBIButton";
 import { useLanguage } from "@/hooks/useLanguage";
+import { useGranularPermissions } from "@/hooks/useGranularPermissions";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useSuccession, NineBoxAssessment } from "@/hooks/useSuccession";
 import { supabase } from "@/integrations/supabase/client";
@@ -18,6 +19,7 @@ interface Company {
 
 export default function SuccessionDashboardPage() {
   const { t } = useLanguage();
+  const { hasTabAccess } = useGranularPermissions();
   const [companies, setCompanies] = useState<Company[]>([]);
   const [selectedCompanyId, setSelectedCompanyId] = useState<string>("");
   
@@ -102,6 +104,7 @@ export default function SuccessionDashboardPage() {
       href: "/succession/nine-box",
       icon: Grid3X3,
       colorClass: "bg-primary/10 text-primary",
+      tabCode: "nine-box",
     },
     {
       title: t("succession.tabs.talentPools"),
@@ -109,6 +112,7 @@ export default function SuccessionDashboardPage() {
       href: "/succession/talent-pools",
       icon: Users,
       colorClass: "bg-info/10 text-info",
+      tabCode: "talent-pools",
     },
     {
       title: t("succession.tabs.successionPlans"),
@@ -116,6 +120,7 @@ export default function SuccessionDashboardPage() {
       href: "/succession/plans",
       icon: Target,
       colorClass: "bg-success/10 text-success",
+      tabCode: "plans",
     },
     {
       title: t("succession.tabs.keyPositions"),
@@ -123,6 +128,7 @@ export default function SuccessionDashboardPage() {
       href: "/succession/key-positions",
       icon: AlertTriangle,
       colorClass: "bg-destructive/10 text-destructive",
+      tabCode: "key-positions",
     },
     {
       title: t("succession.tabs.careerDevelopment"),
@@ -130,6 +136,7 @@ export default function SuccessionDashboardPage() {
       href: "/succession/career-development",
       icon: BookOpen,
       colorClass: "bg-warning/10 text-warning",
+      tabCode: "career-development",
     },
     {
       title: t("succession.tabs.careerPaths"),
@@ -137,6 +144,7 @@ export default function SuccessionDashboardPage() {
       href: "/succession/career-paths",
       icon: Route,
       colorClass: "bg-secondary/50 text-secondary-foreground",
+      tabCode: "career-paths",
     },
     {
       title: t("succession.tabs.mentorship"),
@@ -144,6 +152,7 @@ export default function SuccessionDashboardPage() {
       href: "/succession/mentorship",
       icon: UserCheck,
       colorClass: "bg-accent/50 text-accent-foreground",
+      tabCode: "mentorship",
     },
     {
       title: t("succession.tabs.flightRisk"),
@@ -151,6 +160,7 @@ export default function SuccessionDashboardPage() {
       href: "/succession/flight-risk",
       icon: TrendingDown,
       colorClass: "bg-destructive/10 text-destructive",
+      tabCode: "flight-risk",
     },
     {
       title: t("succession.tabs.benchStrength"),
@@ -158,6 +168,7 @@ export default function SuccessionDashboardPage() {
       href: "/succession/bench-strength",
       icon: Layers,
       colorClass: "bg-primary/10 text-primary",
+      tabCode: "bench-strength",
     },
     {
       title: t("succession.tabs.analytics"),
@@ -165,8 +176,9 @@ export default function SuccessionDashboardPage() {
       href: "/succession/analytics",
       icon: BarChart3,
       colorClass: "bg-info/10 text-info",
+      tabCode: "analytics",
     },
-  ];
+  ].filter(module => hasTabAccess("succession", module.tabCode));
 
   return (
     <AppLayout>
