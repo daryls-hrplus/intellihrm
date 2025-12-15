@@ -325,6 +325,18 @@ export default function PayrollProcessingPage() {
 
         {showContent && (
           <>
+            {/* Lock Banner */}
+            {payrollRuns.some(r => r.is_locked) && (
+              <div className="flex items-center gap-3 rounded-lg border border-warning/50 bg-warning/10 p-4">
+                <Lock className="h-5 w-5 text-warning" />
+                <div>
+                  <p className="font-medium text-warning">Pay Group Locked for Processing</p>
+                  <p className="text-sm text-muted-foreground">
+                    Employee compensation data is locked while payroll is being processed. Changes will be restricted until the payroll run is reopened.
+                  </p>
+                </div>
+              </div>
+            )}
 
         {/* Summary Cards */}
         <div className="grid gap-4 md:grid-cols-4">
