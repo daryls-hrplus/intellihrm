@@ -26,12 +26,13 @@ interface CostCenter {
   is_active: boolean;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type CostCenterFromDB = any;
-  description: string | null;
-  department_id: string | null;
-  is_active: boolean;
-}
+const parseCostCenters = (data: any[]): CostCenter[] => {
+  return data.map(item => ({
+    ...item,
+    segment_values: typeof item.segment_values === 'object' ? item.segment_values : null
+  }));
+};
+
 
 interface Segment {
   id: string;
@@ -84,7 +85,7 @@ const CostCentersPage = () => {
         .eq('company_id', selectedCompanyId)
         .order('cost_center_code');
       if (ccError) throw ccError;
-      setCostCenters(ccData || []);
+      setCostCenters(parseCostCenters(ccData || []));
 
       const { data: segData, error: segError } = await supabase
         .from('gl_cost_center_segments')
