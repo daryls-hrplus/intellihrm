@@ -38,26 +38,31 @@ export default function PayrollDashboardPage() {
 
   useEffect(() => {
     const fetchStats = async () => {
-      const today = new Date().toISOString().split('T')[0];
-      
-      // Fetch current pay period (period that contains today or most recent past period)
-      const { data: currentPeriod } = await supabase
-        .from('pay_periods')
-        .select('period_start, period_end')
-        .lte('period_start', today)
-        .order('period_start', { ascending: false })
-        .limit(1)
-        .single();
-
-      // Fetch payroll runs summary
+      // Fetch payroll runs summary (company-wide)
       const { data: payrollRuns } = await supabase
         .from('payroll_runs')
-        .select('total_gross_pay, total_net_pay, employee_count, status');
+        .select('total_gross_pay, total_net_pay, employee_count, status, pay_period_id')
+        .order('created_at', { ascending: false });
 
       const totalPayroll = payrollRuns?.reduce((sum, r) => sum + (r.total_gross_pay || 0), 0) || 0;
-      // Count total employees across all calculated/approved/paid runs (not just paid)
+      // Count total employees across all processed runs (calculated/approved/paid)
       const totalEmployees = payrollRuns?.filter(r => ['calculated', 'approved', 'paid'].includes(r.status)).reduce((sum, r) => sum + (r.employee_count || 0), 0) || 0;
       const pendingApprovals = payrollRuns?.filter(r => ['calculated', 'pending_approval'].includes(r.status)).length || 0;
+
+      // Get the pay period of the most recent payroll run
+      let currentPeriodLabel = "-";
+      const latestRun = payrollRuns?.[0];
+      if (latestRun?.pay_period_id) {
+        const { data: period } = await supabase
+          .from('pay_periods')
+          .select('period_start, period_end')
+          .eq('id', latestRun.pay_period_id)
+          .single();
+        
+        if (period) {
+          currentPeriodLabel = format(new Date(period.period_start), 'MMM yyyy');
+        }
+      }
 
       const formatCurrency = (amount: number) => {
         if (amount >= 1000000) {
@@ -69,9 +74,7 @@ export default function PayrollDashboardPage() {
       };
 
       setStats({
-        currentPeriod: currentPeriod 
-          ? format(new Date(currentPeriod.period_start), 'MMM yyyy')
-          : "-",
+        currentPeriod: currentPeriodLabel,
         totalPayroll: formatCurrency(totalPayroll),
         employeesPaid: totalEmployees.toString(),
         pendingApprovals: pendingApprovals.toString(),
