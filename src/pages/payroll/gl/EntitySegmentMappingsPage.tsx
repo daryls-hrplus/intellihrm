@@ -17,14 +17,14 @@ import { toast } from 'sonner';
 import { PayrollFilters, usePayrollFilters } from '@/components/payroll/PayrollFilters';
 
 const ENTITY_TYPES = [
-  { value: 'company', label: 'Company', table: 'companies', codeField: 'code', nameField: 'name' },
-  { value: 'division', label: 'Division', table: 'divisions', codeField: 'code', nameField: 'name' },
-  { value: 'department', label: 'Department', table: 'departments', codeField: 'code', nameField: 'name' },
-  { value: 'section', label: 'Section', table: 'sections', codeField: 'code', nameField: 'name' },
-  { value: 'pay_element', label: 'Pay Element', table: 'pay_elements', codeField: 'code', nameField: 'name' },
-  { value: 'job', label: 'Job', table: 'jobs', codeField: 'code', nameField: 'name' },
-  { value: 'location', label: 'Location', table: 'company_locations', codeField: 'code', nameField: 'name' },
-  { value: 'employee', label: 'Employee', table: 'profiles', codeField: 'employee_number', nameField: 'full_name' },
+  { value: 'company', label: 'Company', table: 'companies', codeField: 'code', nameField: 'name', segmentCode: 'COMPANY' },
+  { value: 'division', label: 'Division', table: 'divisions', codeField: 'code', nameField: 'name', segmentCode: 'DIVISION' },
+  { value: 'department', label: 'Department', table: 'departments', codeField: 'code', nameField: 'name', segmentCode: 'DEPARTMENT' },
+  { value: 'section', label: 'Section', table: 'sections', codeField: 'code', nameField: 'name', segmentCode: 'SECTION' },
+  { value: 'pay_element', label: 'Pay Element', table: 'pay_elements', codeField: 'code', nameField: 'name', segmentCode: 'ACCOUNT' },
+  { value: 'job', label: 'Job', table: 'jobs', codeField: 'code', nameField: 'name', segmentCode: 'JOB' },
+  { value: 'location', label: 'Location', table: 'company_locations', codeField: 'code', nameField: 'name', segmentCode: 'LOCATION' },
+  { value: 'employee', label: 'Employee', table: 'profiles', codeField: 'employee_number', nameField: 'full_name', segmentCode: 'EMPLOYEE' },
 ];
 
 interface Segment {
@@ -258,10 +258,17 @@ const EntitySegmentMappingsPage = () => {
     setDialogOpen(true);
   };
 
+  const getDefaultSegmentForEntityType = (entityType: string) => {
+    const entity = ENTITY_TYPES.find(e => e.value === entityType);
+    if (!entity) return segments[0]?.id || '';
+    const matchingSegment = segments.find(s => s.segment_code === entity.segmentCode);
+    return matchingSegment?.id || segments[0]?.id || '';
+  };
+
   const resetForm = () => {
     setEditingMapping(null);
     setFormData({
-      segment_id: segments[0]?.id || '',
+      segment_id: getDefaultSegmentForEntityType(activeEntityType),
       entity_type: activeEntityType,
       entity_id: '',
       segment_value: '',
@@ -271,7 +278,6 @@ const EntitySegmentMappingsPage = () => {
 
   const openAdd = () => {
     resetForm();
-    setFormData(prev => ({ ...prev, entity_type: activeEntityType }));
     setDialogOpen(true);
   };
 
