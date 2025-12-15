@@ -46,6 +46,8 @@ export function PayrollCalendarGenerator({ companyId, payGroup, onGenerated }: P
 
   // Calculate default start date and cycle number based on current date
   useEffect(() => {
+    if (!payGroup?.pay_frequency) return;
+    
     const now = new Date();
     const currentMonth = now.getMonth();
     const currentDay = now.getDate();
