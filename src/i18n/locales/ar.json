@@ -668,5 +668,50 @@
       "returned": "مُرجع",
       "cost": "التكلفة"
     }
+  },
+  "compensation": {
+    "positionCompensation": {
+      "title": "تعويضات المناصب",
+      "subtitle": "تحديد هيكل التعويضات للمناصب الوظيفية",
+      "company": "الشركة",
+      "position": "المنصب",
+      "selectCompany": "اختر الشركة",
+      "selectPosition": "اختر المنصب",
+      "totalPackage": "إجمالي الحزمة",
+      "additionalElements": "عناصر إضافية",
+      "addPayElement": "إضافة عنصر دفع",
+      "compensationFor": "التعويض لـ",
+      "noElements": "لم يتم تحديد عناصر تعويض لهذا المنصب.",
+      "deleteConfirm": "هل أنت متأكد من حذف عنصر التعويض هذا؟",
+      "payElement": "عنصر الدفع",
+      "type": "النوع",
+      "amount": "المبلغ",
+      "frequency": "التكرار",
+      "effective": "تاريخ السريان",
+      "status": "الحالة",
+      "compensationModel": "نموذج التعويض",
+      "salaryGrade": "درجة الراتب",
+      "spinalPoint": "نقطة العمود الفقري",
+      "hybrid": "هجين",
+      "spinalPointBase": "الراتب الأساسي لنقطة العمود الفقري",
+      "pointRange": "نطاق النقاط",
+      "entryPoint": "نقطة الدخول",
+      "salaryRange": "نطاق الراتب",
+      "availablePoints": "النقاط المتاحة",
+      "dialog": {
+        "createTitle": "إضافة تعويض",
+        "editTitle": "تعديل التعويض",
+        "description": "تكوين عنصر التعويض لهذا المنصب",
+        "selectPayElement": "اختر عنصر الدفع",
+        "paymentFrequency": "تكرار الدفع",
+        "selectFrequency": "اختر التكرار",
+        "effectiveDate": "تاريخ السريان",
+        "notes": "ملاحظات",
+        "notesPlaceholder": "ملاحظات اختيارية"
+      }
+    },
+    "spinalPoints": {
+      "paySpine": "سلم الرواتب"
+    }
   }
 }

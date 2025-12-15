@@ -668,5 +668,50 @@
       "returned": "Devuelto",
       "cost": "Costo"
     }
+  },
+  "compensation": {
+    "positionCompensation": {
+      "title": "Compensación por Puesto",
+      "subtitle": "Definir estructura de compensación para puestos",
+      "company": "Empresa",
+      "position": "Puesto",
+      "selectCompany": "Seleccionar empresa",
+      "selectPosition": "Seleccionar puesto",
+      "totalPackage": "Paquete Total",
+      "additionalElements": "Elementos Adicionales",
+      "addPayElement": "Agregar Elemento de Pago",
+      "compensationFor": "Compensación para",
+      "noElements": "No hay elementos de compensación definidos para este puesto.",
+      "deleteConfirm": "¿Está seguro de eliminar este elemento de compensación?",
+      "payElement": "Elemento de Pago",
+      "type": "Tipo",
+      "amount": "Monto",
+      "frequency": "Frecuencia",
+      "effective": "Efectivo",
+      "status": "Estado",
+      "compensationModel": "Modelo de Compensación",
+      "salaryGrade": "Grado Salarial",
+      "spinalPoint": "Punto de Escala",
+      "hybrid": "Híbrido",
+      "spinalPointBase": "Salario Base de Escala",
+      "pointRange": "Rango de Puntos",
+      "entryPoint": "Punto de Entrada",
+      "salaryRange": "Rango Salarial",
+      "availablePoints": "Puntos Disponibles",
+      "dialog": {
+        "createTitle": "Agregar Compensación",
+        "editTitle": "Editar Compensación",
+        "description": "Configurar elemento de compensación para este puesto",
+        "selectPayElement": "Seleccionar elemento de pago",
+        "paymentFrequency": "Frecuencia de Pago",
+        "selectFrequency": "Seleccionar frecuencia",
+        "effectiveDate": "Fecha Efectiva",
+        "notes": "Notas",
+        "notesPlaceholder": "Notas opcionales"
+      }
+    },
+    "spinalPoints": {
+      "paySpine": "Escala Salarial"
+    }
   }
 }
