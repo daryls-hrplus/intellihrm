@@ -1,17 +1,11 @@
 import { AppLayout } from "@/components/layout/AppLayout";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ModuleReportsButton } from "@/components/reports/ModuleReportsButton";
 import { ModuleBIButton } from "@/components/bi/ModuleBIButton";
 import { usePropertyManagement } from "@/hooks/usePropertyManagement";
 import { LeaveCompanyFilter, useLeaveCompanyFilter } from "@/components/leave/LeaveCompanyFilter";
 import { DepartmentFilter, useDepartmentFilter } from "@/components/filters/DepartmentFilter";
-import PropertyCategoriesTab from "@/components/property/PropertyCategoriesTab";
-import PropertyItemsTab from "@/components/property/PropertyItemsTab";
-import PropertyAssignmentsTab from "@/components/property/PropertyAssignmentsTab";
-import PropertyRequestsTab from "@/components/property/PropertyRequestsTab";
-import PropertyMaintenanceTab from "@/components/property/PropertyMaintenanceTab";
-import { PropertyAnalytics } from "@/components/property/PropertyAnalytics";
 import { useLanguage } from "@/hooks/useLanguage";
+import { NavLink } from "react-router-dom";
 import {
   Package,
   Laptop,
@@ -23,6 +17,7 @@ import {
   Clock,
   AlertTriangle,
   BarChart3,
+  ChevronRight,
 } from "lucide-react";
 
 export default function PropertyDashboardPage() {
@@ -34,7 +29,6 @@ export default function PropertyDashboardPage() {
     assignments,
     requests,
     maintenance,
-    categories,
   } = usePropertyManagement(selectedCompanyId);
 
   const totalAssets = items?.length || 0;
@@ -47,6 +41,51 @@ export default function PropertyDashboardPage() {
     { label: t("companyProperty.stats.assigned"), value: assignedAssets, icon: CheckCircle, color: "bg-success/10 text-success" },
     { label: t("companyProperty.stats.pendingRequests"), value: pendingRequests, icon: Clock, color: "bg-warning/10 text-warning" },
     { label: t("companyProperty.stats.maintenanceDue"), value: maintenanceDue, icon: AlertTriangle, color: "bg-destructive/10 text-destructive" },
+  ];
+
+  const propertyModules = [
+    {
+      title: t("companyProperty.tabs.analytics"),
+      description: t("companyProperty.modules.analyticsDesc", "View property analytics and insights"),
+      href: "/property/analytics",
+      icon: BarChart3,
+      color: "text-chart-1",
+    },
+    {
+      title: t("companyProperty.tabs.assets"),
+      description: t("companyProperty.modules.assetsDesc", "Manage company assets and inventory"),
+      href: "/property/assets",
+      icon: Laptop,
+      color: "text-chart-2",
+    },
+    {
+      title: t("companyProperty.tabs.assignments"),
+      description: t("companyProperty.modules.assignmentsDesc", "Track asset assignments to employees"),
+      href: "/property/assignments",
+      icon: Users,
+      color: "text-chart-3",
+    },
+    {
+      title: t("companyProperty.tabs.requests"),
+      description: t("companyProperty.modules.requestsDesc", "Handle property requests from employees"),
+      href: "/property/requests",
+      icon: Clipboard,
+      color: "text-chart-4",
+    },
+    {
+      title: t("companyProperty.tabs.maintenance"),
+      description: t("companyProperty.modules.maintenanceDesc", "Schedule and track maintenance tasks"),
+      href: "/property/maintenance",
+      icon: Wrench,
+      color: "text-chart-5",
+    },
+    {
+      title: t("companyProperty.tabs.categories"),
+      description: t("companyProperty.modules.categoriesDesc", "Organize assets by category"),
+      href: "/property/categories",
+      icon: FolderOpen,
+      color: "text-primary",
+    },
   ];
 
   return (
@@ -107,60 +146,32 @@ export default function PropertyDashboardPage() {
           })}
         </div>
 
-        {/* Tabs for Property Management */}
-        <Tabs defaultValue="analytics" className="space-y-4">
-          <TabsList className="grid w-full grid-cols-6">
-            <TabsTrigger value="analytics" className="flex items-center gap-2">
-              <BarChart3 className="h-4 w-4" />
-              <span className="hidden sm:inline">{t("companyProperty.tabs.analytics")}</span>
-            </TabsTrigger>
-            <TabsTrigger value="items" className="flex items-center gap-2">
-              <Laptop className="h-4 w-4" />
-              <span className="hidden sm:inline">{t("companyProperty.tabs.assets")}</span>
-            </TabsTrigger>
-            <TabsTrigger value="assignments" className="flex items-center gap-2">
-              <Users className="h-4 w-4" />
-              <span className="hidden sm:inline">{t("companyProperty.tabs.assignments")}</span>
-            </TabsTrigger>
-            <TabsTrigger value="requests" className="flex items-center gap-2">
-              <Clipboard className="h-4 w-4" />
-              <span className="hidden sm:inline">{t("companyProperty.tabs.requests")}</span>
-            </TabsTrigger>
-            <TabsTrigger value="maintenance" className="flex items-center gap-2">
-              <Wrench className="h-4 w-4" />
-              <span className="hidden sm:inline">{t("companyProperty.tabs.maintenance")}</span>
-            </TabsTrigger>
-            <TabsTrigger value="categories" className="flex items-center gap-2">
-              <FolderOpen className="h-4 w-4" />
-              <span className="hidden sm:inline">{t("companyProperty.tabs.categories")}</span>
-            </TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="analytics">
-            <PropertyAnalytics 
-              items={items}
-              assignments={assignments}
-              requests={requests}
-              maintenance={maintenance}
-              categories={categories}
-            />
-          </TabsContent>
-          <TabsContent value="items">
-            <PropertyItemsTab companyId={selectedCompanyId} />
-          </TabsContent>
-          <TabsContent value="assignments">
-            <PropertyAssignmentsTab companyId={selectedCompanyId} />
-          </TabsContent>
-          <TabsContent value="requests">
-            <PropertyRequestsTab companyId={selectedCompanyId} />
-          </TabsContent>
-          <TabsContent value="maintenance">
-            <PropertyMaintenanceTab companyId={selectedCompanyId} />
-          </TabsContent>
-          <TabsContent value="categories">
-            <PropertyCategoriesTab companyId={selectedCompanyId} />
-          </TabsContent>
-        </Tabs>
+        {/* Module Navigation Cards */}
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {propertyModules.map((module) => {
+            const Icon = module.icon;
+            return (
+              <NavLink
+                key={module.href}
+                to={module.href}
+                className="group rounded-xl border border-border bg-card p-6 shadow-card transition-all hover:shadow-lg hover:border-primary/50"
+              >
+                <div className="flex items-start justify-between">
+                  <div className={`rounded-lg p-3 bg-muted ${module.color}`}>
+                    <Icon className="h-6 w-6" />
+                  </div>
+                  <ChevronRight className="h-5 w-5 text-muted-foreground transition-transform group-hover:translate-x-1" />
+                </div>
+                <h3 className="mt-4 text-lg font-semibold text-card-foreground">
+                  {module.title}
+                </h3>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  {module.description}
+                </p>
+              </NavLink>
+            );
+          })}
+        </div>
       </div>
     </AppLayout>
   );
