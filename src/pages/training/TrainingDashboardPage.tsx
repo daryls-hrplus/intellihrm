@@ -6,6 +6,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/hooks/useLanguage";
 import { ModuleReportsButton } from "@/components/reports/ModuleReportsButton";
 import { ModuleBIButton } from "@/components/bi/ModuleBIButton";
+import { LeaveCompanyFilter, useLeaveCompanyFilter } from "@/components/leave/LeaveCompanyFilter";
+import { DepartmentFilter, useDepartmentFilter } from "@/components/filters/DepartmentFilter";
 import {
   GraduationCap,
   BookOpen,
@@ -178,6 +180,8 @@ interface Stats {
 export default function TrainingDashboardPage() {
   const { user } = useAuth();
   const { t } = useLanguage();
+  const { selectedCompanyId, setSelectedCompanyId } = useLeaveCompanyFilter();
+  const { selectedDepartmentId, setSelectedDepartmentId } = useDepartmentFilter();
   const [stats, setStats] = useState<Stats>({
     coursesAvailable: 0,
     inProgress: 0,
@@ -188,7 +192,7 @@ export default function TrainingDashboardPage() {
 
   useEffect(() => {
     fetchStats();
-  }, [user]);
+  }, [user, selectedCompanyId]);
 
   const fetchStats = async () => {
     try {
@@ -390,6 +394,15 @@ export default function TrainingDashboardPage() {
               </div>
             </div>
             <div className="flex items-center gap-2">
+              <LeaveCompanyFilter 
+                selectedCompanyId={selectedCompanyId} 
+                onCompanyChange={(id) => { setSelectedCompanyId(id); setSelectedDepartmentId("all"); }} 
+              />
+              <DepartmentFilter
+                companyId={selectedCompanyId}
+                selectedDepartmentId={selectedDepartmentId}
+                onDepartmentChange={setSelectedDepartmentId}
+              />
               <ModuleBIButton module="training" />
               <ModuleReportsButton module="training" />
             </div>
