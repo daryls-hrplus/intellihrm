@@ -12,6 +12,7 @@ import { WorkRecordsSection } from "@/components/payroll/WorkRecordsSection";
 import { AllowancesSection } from "@/components/payroll/AllowancesSection";
 import { DeductionsSection } from "@/components/payroll/DeductionsSection";
 import { PayrollSimulator } from "@/components/payroll/PayrollSimulator";
+import { SalarySummarySection } from "@/components/payroll/SalarySummarySection";
 import { useTranslation } from "react-i18next";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
@@ -248,6 +249,12 @@ export default function SalaryOvertimePage() {
 
       {selectedEmployee && selectedPayPeriod && (
         <>
+          {/* Salary Summary Section */}
+          <SalarySummarySection 
+            companyId={selectedCompany}
+            employeeId={selectedEmployee}
+          />
+
           {/* Work Records Section */}
           <WorkRecordsSection 
             companyId={selectedCompany}
