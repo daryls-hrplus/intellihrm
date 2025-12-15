@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
-import { Settings, Mail, Eye, EyeOff, Save, Loader2, ShieldAlert, ArrowLeft, Send, CheckCircle, XCircle, Calendar, BarChart3, AlertTriangle, Video, FileText } from "lucide-react";
+import { Settings, Mail, Eye, EyeOff, Save, Loader2, ShieldAlert, ArrowLeft, Send, CheckCircle, XCircle, Calendar, BarChart3, AlertTriangle, Video, FileText, MapPin } from "lucide-react";
 import { NavLink } from "react-router-dom";
 
 interface SystemSetting {
@@ -300,6 +300,7 @@ export default function AdminSettingsPage() {
     if (key.includes("pii") || key.includes("alert")) return ShieldAlert;
     if (key.includes("daily") || key.includes("video")) return Video;
     if (key.includes("copyright")) return FileText;
+    if (key.includes("mapbox")) return MapPin;
     return Settings;
   };
 
@@ -317,6 +318,7 @@ export default function AdminSettingsPage() {
   const alertSettings = settings.filter((s) => s.key.includes("pii") || s.key.includes("alert"));
   const videoSettings = settings.filter((s) => s.key.includes("daily") || s.key.includes("video"));
   const brandingSettings = settings.filter((s) => s.key.includes("copyright"));
+  const mapboxSettings = settings.filter((s) => s.key.includes("mapbox"));
 
   return (
     <AppLayout>
@@ -547,7 +549,84 @@ export default function AdminSettingsPage() {
           </Card>
         )}
 
-        {/* Test Alert */}
+        {/* Mapbox Configuration */}
+        {mapboxSettings.length > 0 && (
+          <Card className="animate-slide-up" style={{ animationDelay: "35ms" }}>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <MapPin className="h-5 w-5 text-primary" />
+                Mapbox Configuration
+              </CardTitle>
+              <CardDescription>
+                Configure Mapbox for geofencing and location selection features. Get your public token from{" "}
+                <a
+                  href="https://account.mapbox.com/access-tokens/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-primary hover:underline"
+                >
+                  account.mapbox.com/access-tokens
+                </a>
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {mapboxSettings.map((setting) => {
+                const Icon = getSettingIcon(setting.key);
+                return (
+                  <div key={setting.id} className="space-y-2">
+                    <Label htmlFor={setting.key} className="flex items-center gap-2">
+                      <Icon className="h-4 w-4 text-muted-foreground" />
+                      {formatSettingName(setting.key)}
+                    </Label>
+                    {setting.description && (
+                      <p className="text-xs text-muted-foreground">{setting.description}</p>
+                    )}
+                    <div className="flex gap-2">
+                      <div className="relative flex-1">
+                        <Input
+                          id={setting.key}
+                          type={setting.is_sensitive && !showSensitive[setting.key] ? "password" : "text"}
+                          value={editedValues[setting.key] || ""}
+                          onChange={(e) =>
+                            setEditedValues((prev) => ({ ...prev, [setting.key]: e.target.value }))
+                          }
+                          placeholder={setting.is_sensitive ? "Enter public token..." : "Enter value..."}
+                          className="pr-10"
+                        />
+                        {setting.is_sensitive && (
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 p-0"
+                            onClick={() =>
+                              setShowSensitive((prev) => ({ ...prev, [setting.key]: !prev[setting.key] }))
+                            }
+                          >
+                            {showSensitive[setting.key] ? (
+                              <EyeOff className="h-4 w-4" />
+                            ) : (
+                              <Eye className="h-4 w-4" />
+                            )}
+                          </Button>
+                        )}
+                      </div>
+                      <Button
+                        onClick={() => handleSave(setting.key)}
+                        disabled={isSaving}
+                        size="sm"
+                      >
+                        {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+                      </Button>
+                    </div>
+                  </div>
+                );
+              })}
+            </CardContent>
+          </Card>
+        )}
+
+
         <Card className="animate-slide-up" style={{ animationDelay: "50ms" }}>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
