@@ -142,8 +142,8 @@ export default function PayrollProcessingPage() {
         const success = await requestRecalculationApproval(run.id);
         if (success) loadData();
       }
-    } else if (run.status === 'calculated') {
-      // For calculated runs, can recalculate directly
+    } else if (run.status === 'calculated' || run.status === 'calculating' || run.status === 'failed') {
+      // For calculated, stuck calculating, or failed runs, can recalculate directly
       setRunToRecalc(run);
       setRecalcConfirmOpen(true);
     }
@@ -451,6 +451,11 @@ export default function PayrollProcessingPage() {
                         {run.status === 'draft' && (
                           <Button variant="ghost" size="sm" onClick={() => handleCalculate(run)} title="Calculate" disabled={isLoading}>
                             <Play className="h-4 w-4" />
+                          </Button>
+                        )}
+                        {(run.status === 'calculating' || run.status === 'failed') && (
+                          <Button variant="ghost" size="sm" onClick={() => handleRecalculate(run)} title="Retry Calculation" disabled={isLoading}>
+                            <RefreshCw className="h-4 w-4" />
                           </Button>
                         )}
                         {run.status === 'calculated' && (
