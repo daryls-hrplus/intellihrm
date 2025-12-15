@@ -40,6 +40,8 @@ interface Segment {
   segment_code: string;
   segment_order: number;
   segment_length: number;
+  delimiter: string | null;
+  default_value: string | null;
   description: string | null;
   is_required: boolean;
   is_active: boolean;
@@ -71,6 +73,8 @@ const CostCenterSegmentsPage = () => {
     segment_code: '',
     segment_order: 1,
     segment_length: 4,
+    delimiter: '-',
+    default_value: '0000',
     description: '',
     is_required: true
   });
@@ -93,14 +97,19 @@ const CostCenterSegmentsPage = () => {
   const handleSegmentTypeChange = (code: string) => {
     const segmentType = PREDEFINED_SEGMENTS.find(s => s.code === code);
     if (segmentType) {
+      const defaultVal = '0'.repeat(segmentType.defaultLength);
       setFormData(prev => ({
         ...prev,
         segment_name: segmentType.name,
         segment_code: segmentType.code,
-        segment_length: segmentType.defaultLength
+        segment_length: segmentType.defaultLength,
+        default_value: defaultVal
       }));
     }
   };
+
+  // Generate default value based on length
+  const generateDefaultValue = (length: number) => '0'.repeat(length);
 
   useEffect(() => {
     if (selectedCompanyId) {
@@ -156,6 +165,8 @@ const CostCenterSegmentsPage = () => {
         segment_code: formData.segment_code,
         segment_order: formData.segment_order,
         segment_length: formData.segment_length,
+        delimiter: formData.delimiter || '-',
+        default_value: formData.default_value || generateDefaultValue(formData.segment_length),
         description: formData.description || null,
         is_required: formData.is_required
       };
@@ -246,6 +257,8 @@ const CostCenterSegmentsPage = () => {
       segment_code: segment.segment_code,
       segment_order: segment.segment_order,
       segment_length: segment.segment_length,
+      delimiter: segment.delimiter || '-',
+      default_value: segment.default_value || generateDefaultValue(segment.segment_length),
       description: segment.description || '',
       is_required: segment.is_required
     });
@@ -276,6 +289,8 @@ const CostCenterSegmentsPage = () => {
       segment_code: '',
       segment_order: segments.length + 1,
       segment_length: 4,
+      delimiter: '-',
+      default_value: '0000',
       description: '',
       is_required: true
     });
@@ -394,6 +409,10 @@ const CostCenterSegmentsPage = () => {
                               </div>
                               <div className="text-sm text-muted-foreground">
                                 {t('payroll.gl.length', 'Length')}: {segment.segment_length}
+                                <span className="mx-2">|</span>
+                                {t('payroll.gl.delimiter', 'Delimiter')}: <span className="font-mono">{segment.delimiter || '-'}</span>
+                                <span className="mx-2">|</span>
+                                {t('payroll.gl.defaultValue', 'Default')}: <span className="font-mono">{segment.default_value || '0'.repeat(segment.segment_length)}</span>
                                 {segment.is_required && (
                                   <Badge variant="secondary" className="ml-2">{t('common.required', 'Required')}</Badge>
                                 )}
@@ -500,8 +519,47 @@ const CostCenterSegmentsPage = () => {
                     min={1}
                     max={20}
                     value={formData.segment_length}
-                    onChange={(e) => setFormData({ ...formData, segment_length: parseInt(e.target.value) || 4 })}
+                    onChange={(e) => {
+                      const newLength = parseInt(e.target.value) || 4;
+                      setFormData({ 
+                        ...formData, 
+                        segment_length: newLength,
+                        default_value: generateDefaultValue(newLength)
+                      });
+                    }}
                   />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>{t('payroll.gl.delimiter', 'Delimiter')}</Label>
+                  <Select
+                    value={formData.delimiter}
+                    onValueChange={(value) => setFormData({ ...formData, delimiter: value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="-">- (Dash)</SelectItem>
+                      <SelectItem value=".">. (Dot)</SelectItem>
+                      <SelectItem value="/">/  (Slash)</SelectItem>
+                      <SelectItem value="_">_ (Underscore)</SelectItem>
+                      <SelectItem value=" ">  (Space)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label>{t('payroll.gl.defaultValue', 'Default Value')}</Label>
+                  <Input
+                    value={formData.default_value}
+                    onChange={(e) => setFormData({ ...formData, default_value: e.target.value })}
+                    maxLength={formData.segment_length}
+                    placeholder={generateDefaultValue(formData.segment_length)}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    {t('payroll.gl.defaultValueHint', 'Must match segment length')} ({formData.segment_length} {t('payroll.gl.characters', 'chars')})
+                  </p>
                 </div>
               </div>
               <div className="space-y-2">
