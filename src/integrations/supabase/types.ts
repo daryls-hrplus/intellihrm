@@ -28329,6 +28329,8 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_admin: { Args: never; Returns: boolean }
+      is_admin_or_hr: { Args: never; Returns: boolean }
       log_audit_event: {
         Args: {
           p_action: Database["public"]["Enums"]["audit_action"]
