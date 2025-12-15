@@ -1,6 +1,7 @@
 import { Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useMenuPermissions } from "@/hooks/useMenuPermissions";
+import { Loader2 } from "lucide-react";
 
 type AppRole = "admin" | "hr_manager" | "employee";
 
@@ -31,9 +32,18 @@ interface ProtectedRouteProps {
 }
 
 export function ProtectedRoute({ children, requiredRoles, moduleCode }: ProtectedRouteProps) {
-  const { roles } = useAuth();
-  const { hasMenuAccess } = useMenuPermissions();
+  const { roles, isLoading: authLoading } = useAuth();
+  const { hasMenuAccess, isLoading: permissionsLoading } = useMenuPermissions();
   const location = useLocation();
+
+  // Show loading while auth or permissions are being fetched
+  if (authLoading || permissionsLoading) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   // Check role-based access (legacy system roles)
   if (requiredRoles && requiredRoles.length > 0) {
