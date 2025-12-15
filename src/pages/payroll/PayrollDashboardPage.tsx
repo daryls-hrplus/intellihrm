@@ -41,26 +41,26 @@ export default function PayrollDashboardPage() {
       // Fetch payroll runs summary (company-wide)
       const { data: payrollRuns } = await supabase
         .from('payroll_runs')
-        .select('total_gross_pay, total_net_pay, employee_count, status, pay_period_id')
+        .select('total_gross_pay, total_net_pay, employee_count, status, pay_period_id, created_at')
         .order('created_at', { ascending: false });
 
       const totalPayroll = payrollRuns?.reduce((sum, r) => sum + (r.total_gross_pay || 0), 0) || 0;
-      // Count total employees across all processed runs (calculated/approved/paid)
-      const totalEmployees = payrollRuns?.filter(r => ['calculated', 'approved', 'paid'].includes(r.status)).reduce((sum, r) => sum + (r.employee_count || 0), 0) || 0;
       const pendingApprovals = payrollRuns?.filter(r => ['calculated', 'pending_approval'].includes(r.status)).length || 0;
 
-      // Get the pay period of the most recent payroll run
+      // Get the most recent payroll run to determine current period
       let currentPeriodLabel = "-";
+      let currentPeriodEmployees = 0;
       const latestRun = payrollRuns?.[0];
-      if (latestRun?.pay_period_id) {
-        const { data: period } = await supabase
-          .from('pay_periods')
-          .select('period_start, period_end')
-          .eq('id', latestRun.pay_period_id)
-          .single();
+      
+      if (latestRun) {
+        // Current period is based on when payroll was run (created_at)
+        currentPeriodLabel = format(new Date(latestRun.created_at), 'MMM yyyy');
         
-        if (period) {
-          currentPeriodLabel = format(new Date(period.period_start), 'MMM yyyy');
+        // Count employees from all runs in the same pay period as the latest run
+        if (latestRun.pay_period_id) {
+          currentPeriodEmployees = payrollRuns
+            ?.filter(r => r.pay_period_id === latestRun.pay_period_id && ['draft', 'calculating', 'calculated', 'pending_approval', 'approved', 'processing', 'paid'].includes(r.status))
+            .reduce((sum, r) => sum + (r.employee_count || 0), 0) || 0;
         }
       }
 
@@ -76,7 +76,7 @@ export default function PayrollDashboardPage() {
       setStats({
         currentPeriod: currentPeriodLabel,
         totalPayroll: formatCurrency(totalPayroll),
-        employeesPaid: totalEmployees.toString(),
+        employeesPaid: currentPeriodEmployees.toString(),
         pendingApprovals: pendingApprovals.toString(),
       });
     };
