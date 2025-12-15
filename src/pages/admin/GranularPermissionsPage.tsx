@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { supabase } from "@/integrations/supabase/client";
@@ -120,6 +121,9 @@ const breadcrumbItems = [
 ];
 
 export default function GranularPermissionsPage() {
+  const [searchParams] = useSearchParams();
+  const roleIdFromUrl = searchParams.get("role");
+  
   const [roles, setRoles] = useState<Role[]>([]);
   const [selectedRoleId, setSelectedRoleId] = useState<string>("");
   const [modulePermissions, setModulePermissions] = useState<ModulePermission[]>([]);
@@ -177,7 +181,10 @@ export default function GranularPermissionsPage() {
       setSections(sectionsRes.data || []);
       setPositionTypes(positionTypesRes.data || []);
 
-      if (rolesRes.data && rolesRes.data.length > 0) {
+      // Use role from URL if provided, otherwise first role
+      if (roleIdFromUrl && rolesRes.data?.find(r => r.id === roleIdFromUrl)) {
+        setSelectedRoleId(roleIdFromUrl);
+      } else if (rolesRes.data && rolesRes.data.length > 0) {
         setSelectedRoleId(rolesRes.data[0].id);
       }
     } catch (error) {
