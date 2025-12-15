@@ -9864,6 +9864,8 @@ export type Database = {
         Row: {
           company_id: string
           created_at: string
+          default_value: string | null
+          delimiter: string | null
           description: string | null
           end_date: string | null
           id: string
@@ -9879,6 +9881,8 @@ export type Database = {
         Insert: {
           company_id: string
           created_at?: string
+          default_value?: string | null
+          delimiter?: string | null
           description?: string | null
           end_date?: string | null
           id?: string
@@ -9894,6 +9898,8 @@ export type Database = {
         Update: {
           company_id?: string
           created_at?: string
+          default_value?: string | null
+          delimiter?: string | null
           description?: string | null
           end_date?: string | null
           id?: string
