@@ -6063,6 +6063,36 @@
       "benchStrength": "Bench Strength",
       "analytics": "Analytics"
     },
+    "nineBox": {
+      "description": "Assess employee performance and potential using the nine-box matrix"
+    },
+    "talentPools": {
+      "description": "Group and track high-potential employees for development"
+    },
+    "successionPlans": {
+      "description": "Create and manage succession plans for key positions"
+    },
+    "keyPositions": {
+      "description": "Identify and assess risk levels for critical roles"
+    },
+    "careerDevelopment": {
+      "description": "Manage individual development plans for employees"
+    },
+    "careerPaths": {
+      "description": "Define and visualize career progression pathways"
+    },
+    "mentorship": {
+      "description": "Pair mentors with mentees and track program progress"
+    },
+    "flightRisk": {
+      "description": "Identify and monitor employees at risk of leaving"
+    },
+    "benchStrength": {
+      "description": "Analyze organizational bench strength and readiness"
+    },
+    "analytics": {
+      "description": "View succession planning metrics and insights"
+    },
     "actions": {
       "newAssessment": "New Assessment"
     }
