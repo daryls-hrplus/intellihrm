@@ -20,11 +20,18 @@ interface SimulationResult {
     employee_id: string;
     position: string;
   };
+  salary: {
+    base_salary: number;
+    hourly_rate: number;
+    currency: string;
+    frequency: string;
+  };
   earnings: {
     regular_hours: number;
     overtime_hours: number;
     regular_pay: number;
     overtime_pay: number;
+    additional_comp: Array<{ name: string; amount: number }>;
     allowances: Array<{ name: string; amount: number; is_taxable: boolean; is_bik: boolean }>;
     total_gross: number;
   };
@@ -53,13 +60,31 @@ export function PayrollSimulator({ companyId, employeeId, payPeriodId }: Payroll
         .eq('id', employeeId)
         .single();
 
-      // Fetch employee position
-      const { data: positions } = await supabase
+      // Fetch employee position with compensation
+      const { data: positionData } = await supabase
         .from('employee_positions')
-        .select('position:positions(title)')
+        .select(`
+          compensation_amount,
+          compensation_currency,
+          compensation_frequency,
+          positions (title, standard_hours, standard_work_period)
+        `)
         .eq('employee_id', employeeId)
         .eq('is_primary', true)
-        .limit(1);
+        .eq('is_active', true)
+        .maybeSingle();
+
+      // Fetch additional employee compensation
+      const { data: employeeComp } = await supabase
+        .from('employee_compensation')
+        .select(`
+          amount,
+          currency,
+          frequency,
+          pay_elements (name, code, element_type)
+        `)
+        .eq('employee_id', employeeId)
+        .eq('is_active', true);
 
       // Fetch work records with periods
       const { data: workRecords } = await supabase
@@ -85,14 +110,102 @@ export function PayrollSimulator({ companyId, employeeId, payPeriodId }: Payroll
         .eq('employee_id', employeeId)
         .eq('pay_period_id', payPeriodId);
 
-      // Calculate totals
+      // Fetch pay period info for period-based calculations
+      const { data: payPeriod } = await supabase
+        .from('pay_periods')
+        .select('period_start, period_end, pay_groups(pay_frequency)')
+        .eq('id', payPeriodId)
+        .single();
+
+      // Calculate hourly rate from position compensation
+      const posComp = positionData?.compensation_amount || 0;
+      const posFreq = positionData?.compensation_frequency || 'monthly';
+      const standardHours = (positionData?.positions as any)?.standard_hours || 40;
+      
+      // Convert salary to hourly rate based on frequency
+      // Assuming standard work periods per year
+      const hoursPerYear = standardHours * 52; // 52 weeks
+      let annualSalary = posComp;
+      
+      switch (posFreq) {
+        case 'monthly':
+          annualSalary = posComp * 12;
+          break;
+        case 'biweekly':
+        case 'fortnightly':
+          annualSalary = posComp * 26;
+          break;
+        case 'weekly':
+          annualSalary = posComp * 52;
+          break;
+        case 'annual':
+          annualSalary = posComp;
+          break;
+      }
+      
+      const hourlyRate = hoursPerYear > 0 ? annualSalary / hoursPerYear : 0;
+
+      // Calculate period-based base salary (for salaried employees)
+      const payFrequency = (payPeriod?.pay_groups as any)?.pay_frequency || 'monthly';
+      let periodBaseSalary = posComp;
+      
+      // Adjust base salary to match pay period frequency
+      if (posFreq !== payFrequency) {
+        switch (payFrequency) {
+          case 'monthly':
+            periodBaseSalary = annualSalary / 12;
+            break;
+          case 'biweekly':
+          case 'fortnightly':
+            periodBaseSalary = annualSalary / 26;
+            break;
+          case 'weekly':
+            periodBaseSalary = annualSalary / 52;
+            break;
+          case 'semimonthly':
+            periodBaseSalary = annualSalary / 24;
+            break;
+        }
+      }
+
+      // Calculate totals from work records
       const regularHours = (workRecords || []).reduce((sum, r) => sum + (r.regular_hours || 0), 0);
       const overtimeHours = (workRecords || []).reduce((sum, r) => sum + (r.overtime_hours || 0), 0);
       
-      // Assume hourly rate for simulation (would normally come from position compensation)
-      const hourlyRate = 25; // Default for simulation
-      const regularPay = regularHours * hourlyRate;
+      // Use base salary for regular pay, hourly rate for overtime
+      const regularPay = periodBaseSalary;
       const overtimePay = overtimeHours * hourlyRate * 1.5;
+
+      // Process additional compensation items (convert to period amount)
+      const additionalCompList = (employeeComp || []).map(c => {
+        let periodAmount = c.amount || 0;
+        const freq = c.frequency || 'monthly';
+        
+        // Convert to pay period frequency
+        if (freq !== payFrequency) {
+          let annualAmount = periodAmount;
+          switch (freq) {
+            case 'monthly': annualAmount = periodAmount * 12; break;
+            case 'biweekly': annualAmount = periodAmount * 26; break;
+            case 'weekly': annualAmount = periodAmount * 52; break;
+            case 'annual': annualAmount = periodAmount; break;
+          }
+          
+          switch (payFrequency) {
+            case 'monthly': periodAmount = annualAmount / 12; break;
+            case 'biweekly': periodAmount = annualAmount / 26; break;
+            case 'weekly': periodAmount = annualAmount / 52; break;
+            case 'semimonthly': periodAmount = annualAmount / 24; break;
+          }
+        }
+        
+        return {
+          name: (c.pay_elements as any)?.name || 'Additional Compensation',
+          amount: periodAmount
+        };
+      });
+
+      const totalAdditionalComp = additionalCompList.reduce((sum, c) => sum + c.amount, 0);
 
       const allowanceList = (allowances || []).map(a => ({
         name: a.allowance_name,
@@ -102,7 +215,7 @@ export function PayrollSimulator({ companyId, employeeId, payPeriodId }: Payroll
       }));
 
       const totalAllowances = allowanceList.reduce((sum, a) => sum + a.amount, 0);
-      const totalGross = regularPay + overtimePay + totalAllowances;
+      const totalGross = regularPay + overtimePay + totalAdditionalComp + totalAllowances;
 
       // Calculate deductions
       const pretaxDeductions = (deductions || [])
@@ -141,13 +254,20 @@ export function PayrollSimulator({ companyId, employeeId, payPeriodId }: Payroll
         employee: {
           name: employee?.full_name || 'N/A',
           employee_id: employeeId.slice(0, 8).toUpperCase(),
-          position: (positions?.[0]?.position as { title: string } | null)?.title || 'N/A'
+          position: (positionData?.positions as any)?.title || 'N/A'
+        },
+        salary: {
+          base_salary: periodBaseSalary,
+          hourly_rate: hourlyRate,
+          currency: positionData?.compensation_currency || 'USD',
+          frequency: payFrequency
         },
         earnings: {
           regular_hours: regularHours,
           overtime_hours: overtimeHours,
           regular_pay: regularPay,
           overtime_pay: overtimePay,
+          additional_comp: additionalCompList,
           allowances: allowanceList,
           total_gross: totalGross
         },
@@ -217,6 +337,28 @@ export function PayrollSimulator({ companyId, employeeId, payPeriodId }: Payroll
         </div>
       )}
 
+      {/* Salary Info */}
+      <div className="p-4 bg-muted/50 rounded-lg">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+          <div>
+            <p className="text-muted-foreground">Base Salary</p>
+            <p className="font-semibold">${result.salary.base_salary.toFixed(2)}</p>
+          </div>
+          <div>
+            <p className="text-muted-foreground">Hourly Rate</p>
+            <p className="font-semibold">${result.salary.hourly_rate.toFixed(2)}/hr</p>
+          </div>
+          <div>
+            <p className="text-muted-foreground">Currency</p>
+            <p className="font-semibold">{result.salary.currency}</p>
+          </div>
+          <div>
+            <p className="text-muted-foreground">Pay Frequency</p>
+            <p className="font-semibold capitalize">{result.salary.frequency}</p>
+          </div>
+        </div>
+      </div>
+
       {/* Earnings */}
       <Card>
         <CardHeader className="py-3">
@@ -226,15 +368,23 @@ export function PayrollSimulator({ companyId, employeeId, payPeriodId }: Payroll
           <Table>
             <TableBody>
               <TableRow>
-                <TableCell>Regular Hours ({result.earnings.regular_hours}h)</TableCell>
+                <TableCell>Base Salary ({result.salary.frequency})</TableCell>
                 <TableCell className="text-right">${result.earnings.regular_pay.toFixed(2)}</TableCell>
               </TableRow>
-              <TableRow>
-                <TableCell>Overtime Hours ({result.earnings.overtime_hours}h @ 1.5x)</TableCell>
-                <TableCell className="text-right">${result.earnings.overtime_pay.toFixed(2)}</TableCell>
-              </TableRow>
+              {result.earnings.overtime_hours > 0 && (
+                <TableRow>
+                  <TableCell>Overtime ({result.earnings.overtime_hours}h @ ${result.salary.hourly_rate.toFixed(2)} × 1.5)</TableCell>
+                  <TableCell className="text-right">${result.earnings.overtime_pay.toFixed(2)}</TableCell>
+                </TableRow>
+              )}
+              {result.earnings.additional_comp.map((comp, idx) => (
+                <TableRow key={`comp-${idx}`}>
+                  <TableCell>{comp.name}</TableCell>
+                  <TableCell className="text-right">${comp.amount.toFixed(2)}</TableCell>
+                </TableRow>
+              ))}
               {result.earnings.allowances.map((allowance, idx) => (
-                <TableRow key={idx}>
+                <TableRow key={`allow-${idx}`}>
                   <TableCell className="flex items-center gap-2">
                     {allowance.name}
                     {allowance.is_bik && <Badge variant="secondary" className="text-xs">BIK</Badge>}
