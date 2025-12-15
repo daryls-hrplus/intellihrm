@@ -48,6 +48,7 @@ interface StatutoryRateBand {
   employer_per_monday_amount: number | null;
   min_age: number | null;
   max_age: number | null;
+  pay_frequency: string;
 }
 
 export default function TaxConfigPage() {
@@ -80,6 +81,7 @@ export default function TaxConfigPage() {
     employer_per_monday_amount: null as number | null,
     min_age: null as number | null,
     max_age: null as number | null,
+    pay_frequency: 'monthly' as string,
   });
 
   useEffect(() => {
@@ -175,6 +177,7 @@ export default function TaxConfigPage() {
       employer_per_monday_amount: null,
       min_age: null,
       max_age: null,
+      pay_frequency: 'monthly',
     });
   };
 
@@ -198,6 +201,7 @@ export default function TaxConfigPage() {
       employer_per_monday_amount: band.employer_per_monday_amount,
       min_age: band.min_age,
       max_age: band.max_age,
+      pay_frequency: band.pay_frequency || 'monthly',
     });
     setDialogOpen(true);
   };
@@ -231,6 +235,7 @@ export default function TaxConfigPage() {
         employer_per_monday_amount: bandForm.employer_per_monday_amount,
         min_age: bandForm.min_age,
         max_age: bandForm.max_age,
+        pay_frequency: bandForm.pay_frequency,
       };
 
       if (editingBand) {
@@ -379,6 +384,7 @@ export default function TaxConfigPage() {
                       <TableHeader>
                         <TableRow>
                           <TableHead>Band/Class</TableHead>
+                          <TableHead>Pay Frequency</TableHead>
                           <TableHead>Calc Method</TableHead>
                           <TableHead className="text-right">Min Amount</TableHead>
                           <TableHead className="text-right">Max Amount</TableHead>
@@ -395,6 +401,11 @@ export default function TaxConfigPage() {
                           <TableRow key={band.id}>
                             <TableCell className="font-medium">
                               {band.band_name || band.earnings_class || `Band ${band.display_order + 1}`}
+                            </TableCell>
+                            <TableCell>
+                              <Badge variant="secondary" className="text-xs capitalize">
+                                {band.pay_frequency || 'monthly'}
+                              </Badge>
                             </TableCell>
                             <TableCell>
                               <Badge variant="outline" className="text-xs">
@@ -439,7 +450,7 @@ export default function TaxConfigPage() {
                         ))}
                         {rateBands.filter(b => b.statutory_type_id === type.id).length === 0 && (
                           <TableRow>
-                            <TableCell colSpan={10} className="text-center py-8 text-muted-foreground">
+                            <TableCell colSpan={11} className="text-center py-8 text-muted-foreground">
                               No rate bands configured for {type.statutory_name}. Click "Add Band" to create one.
                             </TableCell>
                           </TableRow>
@@ -490,21 +501,41 @@ export default function TaxConfigPage() {
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <Label>Calculation Method *</Label>
-                <Select 
-                  value={bandForm.calculation_method} 
-                  onValueChange={(value) => setBandForm({ ...bandForm, calculation_method: value })}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="percentage">Percentage of Earnings</SelectItem>
-                    <SelectItem value="per_monday">Per Monday (NI/Health Surcharge)</SelectItem>
-                    <SelectItem value="fixed">Fixed Amount</SelectItem>
-                  </SelectContent>
-                </Select>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Pay Frequency *</Label>
+                  <Select 
+                    value={bandForm.pay_frequency} 
+                    onValueChange={(value) => setBandForm({ ...bandForm, pay_frequency: value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="weekly">Weekly</SelectItem>
+                      <SelectItem value="monthly">Monthly</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <p className="text-xs text-muted-foreground">
+                    Fortnightly uses weekly ranges (÷2)
+                  </p>
+                </div>
+                <div className="space-y-2">
+                  <Label>Calculation Method *</Label>
+                  <Select 
+                    value={bandForm.calculation_method} 
+                    onValueChange={(value) => setBandForm({ ...bandForm, calculation_method: value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="percentage">Percentage of Earnings</SelectItem>
+                      <SelectItem value="per_monday">Per Monday (NI/Health Surcharge)</SelectItem>
+                      <SelectItem value="fixed">Fixed Amount</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
