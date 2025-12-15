@@ -46,6 +46,8 @@ interface StatutoryRateBand {
   calculation_method: string;
   per_monday_amount: number | null;
   employer_per_monday_amount: number | null;
+  min_age: number | null;
+  max_age: number | null;
 }
 
 export default function TaxConfigPage() {
@@ -76,6 +78,8 @@ export default function TaxConfigPage() {
     calculation_method: 'percentage' as string,
     per_monday_amount: null as number | null,
     employer_per_monday_amount: null as number | null,
+    min_age: null as number | null,
+    max_age: null as number | null,
   });
 
   useEffect(() => {
@@ -169,6 +173,8 @@ export default function TaxConfigPage() {
       calculation_method: 'percentage',
       per_monday_amount: null,
       employer_per_monday_amount: null,
+      min_age: null,
+      max_age: null,
     });
   };
 
@@ -190,6 +196,8 @@ export default function TaxConfigPage() {
       calculation_method: band.calculation_method || 'percentage',
       per_monday_amount: band.per_monday_amount,
       employer_per_monday_amount: band.employer_per_monday_amount,
+      min_age: band.min_age,
+      max_age: band.max_age,
     });
     setDialogOpen(true);
   };
@@ -221,6 +229,8 @@ export default function TaxConfigPage() {
         calculation_method: bandForm.calculation_method,
         per_monday_amount: bandForm.per_monday_amount,
         employer_per_monday_amount: bandForm.employer_per_monday_amount,
+        min_age: bandForm.min_age,
+        max_age: bandForm.max_age,
       };
 
       if (editingBand) {
@@ -601,6 +611,26 @@ export default function TaxConfigPage() {
                 </div>
               </div>
 
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Min Age</Label>
+                  <Input
+                    type="number"
+                    value={bandForm.min_age ?? ''}
+                    onChange={(e) => setBandForm({ ...bandForm, min_age: e.target.value ? parseInt(e.target.value) : null })}
+                    placeholder="e.g., 16 (leave empty for no min)"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Max Age</Label>
+                  <Input
+                    type="number"
+                    value={bandForm.max_age ?? ''}
+                    onChange={(e) => setBandForm({ ...bandForm, max_age: e.target.value ? parseInt(e.target.value) : null })}
+                    placeholder="e.g., 60 (leave empty for no max)"
+                  />
+                </div>
+              </div>
               <div className="space-y-2">
                 <Label>Display Order</Label>
                 <Input

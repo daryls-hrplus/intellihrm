@@ -25759,7 +25759,9 @@ export type Database = {
           fixed_amount: number | null
           id: string
           is_active: boolean
+          max_age: number | null
           max_amount: number | null
+          min_age: number | null
           min_amount: number
           notes: string | null
           per_monday_amount: number | null
@@ -25781,7 +25783,9 @@ export type Database = {
           fixed_amount?: number | null
           id?: string
           is_active?: boolean
+          max_age?: number | null
           max_amount?: number | null
+          min_age?: number | null
           min_amount?: number
           notes?: string | null
           per_monday_amount?: number | null
@@ -25803,7 +25807,9 @@ export type Database = {
           fixed_amount?: number | null
           id?: string
           is_active?: boolean
+          max_age?: number | null
           max_amount?: number | null
+          min_age?: number | null
           min_amount?: number
           notes?: string | null
           per_monday_amount?: number | null
