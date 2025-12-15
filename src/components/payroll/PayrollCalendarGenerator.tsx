@@ -129,6 +129,17 @@ export function PayrollCalendarGenerator({ companyId, payGroup, onGenerated }: P
     return adjustPayDate(rawPayDate);
   };
 
+  // Get max cycles per year based on frequency
+  const getMaxCyclesPerYear = (frequency: string): number => {
+    switch (frequency) {
+      case "monthly": return 12;
+      case "semimonthly": return 24;
+      case "biweekly": return 26;
+      case "weekly": return 52;
+      default: return 12;
+    }
+  };
+
   // Check for existing cycles and calculate next available cycle number
   useEffect(() => {
     if (!payGroup?.id || !payGroup?.pay_frequency) return;
@@ -142,40 +153,32 @@ export function PayrollCalendarGenerator({ companyId, payGroup, onGenerated }: P
         .eq("year", selectedYear)
         .order("period_number", { ascending: false });
       
+      const maxCycles = getMaxCyclesPerYear(payGroup.pay_frequency);
+      
       if (existingPeriods && existingPeriods.length > 0) {
         // Extract the numeric cycle number from period_number (format: "YYYY-NN")
         const lastPeriodNumber = existingPeriods[0].period_number;
         const lastCycleNum = parseInt(lastPeriodNumber.split("-")[1], 10);
-        const nextCycle = lastCycleNum + 1;
         
-        // Set next available cycle number
-        setStartingCycleNumber(nextCycle);
-        
-        // Calculate next start date based on last period's end date
-        const lastEndDate = new Date(existingPeriods[0].period_end);
-        const nextStartDate = addDays(lastEndDate, 1);
-        setStartDate(format(nextStartDate, "yyyy-MM-dd"));
-      } else {
-        // No existing cycles - use defaults based on frequency
-        const now = new Date();
-        const currentMonth = now.getMonth();
-        const currentDay = now.getDate();
-        
-        switch (payGroup.pay_frequency) {
-          case "monthly":
-            setStartingCycleNumber(1);
-            setStartDate(format(new Date(selectedYear, 0, 1), "yyyy-MM-dd"));
-            break;
-          case "semimonthly":
-            setStartingCycleNumber(1);
-            setStartDate(format(new Date(selectedYear, 0, 1), "yyyy-MM-dd"));
-            break;
-          case "weekly":
-          case "biweekly":
-            setStartingCycleNumber(1);
-            setStartDate(format(startOfYear(new Date(selectedYear, 0, 1)), "yyyy-MM-dd"));
-            break;
+        // Check if all cycles for the year are already generated
+        if (lastCycleNum >= maxCycles) {
+          // Year is complete - default to next year, cycle 1
+          setSelectedYear(selectedYear + 1);
+          setStartingCycleNumber(1);
+          setStartDate(format(new Date(selectedYear + 1, 0, 1), "yyyy-MM-dd"));
+        } else {
+          // Set next available cycle number
+          setStartingCycleNumber(lastCycleNum + 1);
+          
+          // Calculate next start date based on last period's end date
+          const lastEndDate = new Date(existingPeriods[0].period_end);
+          const nextStartDate = addDays(lastEndDate, 1);
+          setStartDate(format(nextStartDate, "yyyy-MM-dd"));
         }
+      } else {
+        // No existing cycles - default to cycle 1 at start of year
+        setStartingCycleNumber(1);
+        setStartDate(format(new Date(selectedYear, 0, 1), "yyyy-MM-dd"));
       }
     };
     
