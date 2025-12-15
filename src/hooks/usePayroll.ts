@@ -510,12 +510,78 @@ export function usePayroll() {
     }
   };
 
+  // Lock employees for payroll processing
+  const lockEmployeesForPayroll = async (payrollRunId: string, payGroupId: string, employeeIds: string[]) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      const locks = employeeIds.map(empId => ({
+        payroll_run_id: payrollRunId,
+        employee_id: empId,
+        pay_group_id: payGroupId,
+        locked_by: user?.id,
+        lock_reason: 'payroll_processing',
+      }));
+      
+      await supabase.from("payroll_employee_locks").upsert(locks, { onConflict: 'payroll_run_id,employee_id' });
+      
+      await supabase.from("payroll_runs").update({
+        is_locked: true,
+        locked_at: new Date().toISOString(),
+        locked_by: user?.id,
+      }).eq("id", payrollRunId);
+      
+      return true;
+    } catch (err) {
+      console.error("Failed to lock employees:", err);
+      return false;
+    }
+  };
+
+  // Unlock employees after payroll is reopened
+  const unlockEmployeesForPayroll = async (payrollRunId: string) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      await supabase.from("payroll_employee_locks")
+        .update({ unlocked_at: new Date().toISOString(), unlocked_by: user?.id })
+        .eq("payroll_run_id", payrollRunId)
+        .is("unlocked_at", null);
+      
+      await supabase.from("payroll_runs").update({
+        is_locked: false,
+        unlocked_at: new Date().toISOString(),
+        unlocked_by: user?.id,
+      }).eq("id", payrollRunId);
+      
+      return true;
+    } catch (err) {
+      console.error("Failed to unlock employees:", err);
+      return false;
+    }
+  };
+
+  // Check if employee is locked
+  const checkEmployeeLocked = async (employeeId: string): Promise<boolean> => {
+    const { data } = await supabase
+      .from("payroll_employee_locks")
+      .select("id")
+      .eq("employee_id", employeeId)
+      .is("unlocked_at", null)
+      .limit(1);
+    return (data?.length || 0) > 0;
+  };
+
   // Calculate payroll for all employees
-  const calculatePayroll = async (payrollRunId: string, companyId: string, payPeriodId: string) => {
+  const calculatePayroll = async (payrollRunId: string, companyId: string, payPeriodId: string, payGroupId?: string) => {
     setIsLoading(true);
     try {
-      // Update run status
-      await supabase.from("payroll_runs").update({ status: 'calculating' }).eq("id", payrollRunId);
+      const calculationStartedAt = new Date().toISOString();
+      
+      // Update run status with start time
+      await supabase.from("payroll_runs").update({ 
+        status: 'calculating',
+        calculation_started_at: calculationStartedAt,
+      }).eq("id", payrollRunId);
       
       // Get company info for country code
       const { data: company } = await supabase
@@ -560,24 +626,34 @@ export function usePayroll() {
         .select('*')
         .eq('is_active', true);
       
-      // Get active employees with positions
-      const { data: employees, error: empError } = await supabase
+      // Get active employees with positions - filter by pay group if provided
+      let empQuery = supabase
         .from("employee_positions")
         .select(`
           id,
           employee_id,
           position_id,
-          employee:profiles!employee_positions_employee_id_fkey(id, full_name, email, company_id),
+          employee:profiles!employee_positions_employee_id_fkey(id, full_name, email, company_id, pay_group_id),
           position:positions!employee_positions_position_id_fkey(id, title)
         `)
         .eq("is_active", true);
       
+      const { data: employees, error: empError } = await empQuery;
+      
       if (empError) throw empError;
       
-      // Filter to only employees from this company
-      const companyEmployees = (employees || []).filter((emp: any) => 
-        emp.employee?.company_id === companyId
-      );
+      // Filter to only employees from this company and pay group
+      const companyEmployees = (employees || []).filter((emp: any) => {
+        if (emp.employee?.company_id !== companyId) return false;
+        if (payGroupId && emp.employee?.pay_group_id !== payGroupId) return false;
+        return true;
+      });
+      
+      // Lock employees before processing
+      const employeeIds = companyEmployees.map((emp: any) => emp.employee_id);
+      if (payGroupId && employeeIds.length > 0) {
+        await lockEmployeesForPayroll(payrollRunId, payGroupId, employeeIds);
+      }
       
       // Get position compensation for each employee
       const employeePayrolls: Partial<EmployeePayroll>[] = [];
@@ -673,7 +749,7 @@ export function usePayroll() {
         if (insertError) throw insertError;
       }
       
-      // Update run totals
+      // Update run totals with completion time
       await supabase.from("payroll_runs").update({
         status: 'calculated',
         total_gross_pay: totalGross,
@@ -691,6 +767,96 @@ export function usePayroll() {
     } catch (err: any) {
       await supabase.from("payroll_runs").update({ status: 'failed' }).eq("id", payrollRunId);
       toast.error(err.message || "Failed to calculate payroll");
+      return false;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Recalculate payroll (for calculated status only, or approved with supervisor approval)
+  const recalculatePayroll = async (payrollRunId: string, companyId: string, payPeriodId: string, payGroupId?: string) => {
+    setIsLoading(true);
+    try {
+      // Delete existing employee_payroll records for this run
+      await supabase.from("employee_payroll").delete().eq("payroll_run_id", payrollRunId);
+      
+      // Reset run to calculating state
+      await supabase.from("payroll_runs").update({
+        status: 'calculating',
+        calculation_started_at: new Date().toISOString(),
+        recalculation_approved_at: null,
+        recalculation_approved_by: null,
+      }).eq("id", payrollRunId);
+      
+      // Run calculation again
+      return await calculatePayroll(payrollRunId, companyId, payPeriodId, payGroupId);
+    } catch (err: any) {
+      toast.error(err.message || "Failed to recalculate payroll");
+      return false;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Request recalculation approval (for approved runs)
+  const requestRecalculationApproval = async (payrollRunId: string) => {
+    setIsLoading(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      await supabase.from("payroll_runs").update({
+        recalculation_requested_by: user?.id,
+      }).eq("id", payrollRunId);
+      
+      toast.success("Recalculation request submitted for supervisor approval");
+      return true;
+    } catch (err: any) {
+      toast.error(err.message || "Failed to request recalculation");
+      return false;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Approve recalculation (supervisor function)
+  const approveRecalculation = async (payrollRunId: string) => {
+    setIsLoading(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      await supabase.from("payroll_runs").update({
+        recalculation_approved_by: user?.id,
+        recalculation_approved_at: new Date().toISOString(),
+        status: 'calculated', // Reset to calculated so recalculation can proceed
+      }).eq("id", payrollRunId);
+      
+      toast.success("Recalculation approved");
+      return true;
+    } catch (err: any) {
+      toast.error(err.message || "Failed to approve recalculation");
+      return false;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Reopen payroll (unlock employees for changes)
+  const reopenPayroll = async (payrollRunId: string) => {
+    setIsLoading(true);
+    try {
+      await unlockEmployeesForPayroll(payrollRunId);
+      
+      await supabase.from("payroll_runs").update({
+        status: 'draft',
+      }).eq("id", payrollRunId);
+      
+      // Delete existing calculations
+      await supabase.from("employee_payroll").delete().eq("payroll_run_id", payrollRunId);
+      
+      toast.success("Payroll reopened for changes");
+      return true;
+    } catch (err: any) {
+      toast.error(err.message || "Failed to reopen payroll");
       return false;
     } finally {
       setIsLoading(false);
@@ -1213,8 +1379,16 @@ export function usePayroll() {
     createPayrollRun,
     updatePayrollRun,
     calculatePayroll,
+    recalculatePayroll,
+    requestRecalculationApproval,
+    approveRecalculation,
+    reopenPayroll,
     approvePayroll,
     processPayment,
+    // Locking
+    lockEmployeesForPayroll,
+    unlockEmployeesForPayroll,
+    checkEmployeeLocked,
     // Employee Payroll
     fetchEmployeePayroll,
     // Tax Config
