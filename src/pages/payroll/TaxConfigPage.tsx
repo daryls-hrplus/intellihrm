@@ -51,6 +51,7 @@ interface StatutoryRateBand {
 export default function TaxConfigPage() {
   const { t } = useTranslation();
   const [isLoading, setIsLoading] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const [statutoryTypes, setStatutoryTypes] = useState<StatutoryDeductionType[]>([]);
   const [rateBands, setRateBands] = useState<StatutoryRateBand[]>([]);
   const [countries, setCountries] = useState<string[]>([]);
@@ -199,6 +200,9 @@ export default function TaxConfigPage() {
       return;
     }
 
+    if (isSaving) return;
+    setIsSaving(true);
+
     try {
       const data = {
         statutory_type_id: selectedTypeId,
@@ -240,6 +244,8 @@ export default function TaxConfigPage() {
     } catch (error) {
       console.error('Error saving rate band:', error);
       toast.error('Failed to save rate band');
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -623,11 +629,11 @@ export default function TaxConfigPage() {
               </div>
             </div>
             <DialogFooter>
-              <Button variant="outline" onClick={() => setDialogOpen(false)}>
+              <Button variant="outline" onClick={() => setDialogOpen(false)} disabled={isSaving}>
                 Cancel
               </Button>
-              <Button onClick={handleSubmit}>
-                {editingBand ? 'Update' : 'Create'}
+              <Button onClick={handleSubmit} disabled={isSaving}>
+                {isSaving ? 'Saving...' : editingBand ? 'Update' : 'Create'}
               </Button>
             </DialogFooter>
           </DialogContent>
