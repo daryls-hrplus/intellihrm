@@ -45,6 +45,24 @@ interface Position {
   title: string;
   code: string;
   department?: { name: string };
+  compensation_model: 'salary_grade' | 'spinal_point' | 'hybrid';
+  pay_spine_id?: string;
+  min_spinal_point?: number;
+  max_spinal_point?: number;
+  entry_spinal_point?: number;
+}
+
+interface PaySpine {
+  id: string;
+  name: string;
+  code: string;
+  currency: string;
+}
+
+interface SpinalPoint {
+  id: string;
+  point_number: number;
+  annual_salary: number;
 }
 
 export default function PositionCompensationPage() {
@@ -69,6 +87,8 @@ export default function PositionCompensationPage() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<PositionCompensation | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [paySpine, setPaySpine] = useState<PaySpine | null>(null);
+  const [spinalPoints, setSpinalPoints] = useState<SpinalPoint[]>([]);
 
   // Form state
   const [formPayElementId, setFormPayElementId] = useState("");
@@ -93,8 +113,17 @@ export default function PositionCompensationPage() {
   useEffect(() => {
     if (selectedPositionId) {
       loadCompensation();
+      const pos = positions.find((p) => p.id === selectedPositionId);
+      if (pos && (pos.compensation_model === 'spinal_point' || pos.compensation_model === 'hybrid')) {
+        loadSpinalPointData(pos);
+      } else {
+        setPaySpine(null);
+        setSpinalPoints([]);
+      }
     } else {
       setCompensation([]);
+      setPaySpine(null);
+      setSpinalPoints([]);
     }
   }, [selectedPositionId]);
 
@@ -125,17 +154,57 @@ export default function PositionCompensationPage() {
       const deptIds = deptData.map((d) => d.id);
       const { data: posData } = await supabase
         .from("positions")
-        .select("id, title, code, department:departments(name)")
+        .select("id, title, code, department:departments(name), compensation_model, pay_spine_id, min_spinal_point, max_spinal_point, entry_spinal_point")
         .in("department_id", deptIds)
         .eq("is_active", true)
         .order("title");
 
-      setPositions(posData || []);
+      setPositions((posData as Position[]) || []);
       setSelectedPositionId("");
+      setPaySpine(null);
+      setSpinalPoints([]);
     } else {
       setPositions([]);
       setSelectedPositionId("");
+      setPaySpine(null);
+      setSpinalPoints([]);
     }
+  };
+
+  const loadSpinalPointData = async (position: Position) => {
+    if (!position.pay_spine_id) {
+      setPaySpine(null);
+      setSpinalPoints([]);
+      return;
+    }
+
+    // Fetch pay spine
+    const { data: spineData } = await supabase
+      .from("pay_spines")
+      .select("id, name, code, currency")
+      .eq("id", position.pay_spine_id)
+      .single();
+
+    if (spineData) {
+      setPaySpine(spineData);
+    }
+
+    // Fetch spinal points within range
+    let query = supabase
+      .from("spinal_points")
+      .select("id, point_number, annual_salary")
+      .eq("pay_spine_id", position.pay_spine_id)
+      .order("point_number");
+
+    if (position.min_spinal_point !== undefined && position.min_spinal_point !== null) {
+      query = query.gte("point_number", position.min_spinal_point);
+    }
+    if (position.max_spinal_point !== undefined && position.max_spinal_point !== null) {
+      query = query.lte("point_number", position.max_spinal_point);
+    }
+
+    const { data: pointsData } = await query;
+    setSpinalPoints((pointsData as SpinalPoint[]) || []);
   };
 
   const loadPayElements = async () => {
@@ -281,8 +350,73 @@ export default function PositionCompensationPage() {
           </div>
         </div>
 
-        {selectedPositionId && (
+        {selectedPositionId && selectedPosition && (
           <>
+            {/* Compensation Model Badge */}
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-muted-foreground">{t("compensation.positionCompensation.compensationModel")}:</span>
+              <Badge variant={
+                selectedPosition.compensation_model === 'spinal_point' ? 'default' :
+                selectedPosition.compensation_model === 'hybrid' ? 'secondary' : 'outline'
+              }>
+                {selectedPosition.compensation_model === 'salary_grade' && t("compensation.positionCompensation.salaryGrade")}
+                {selectedPosition.compensation_model === 'spinal_point' && t("compensation.positionCompensation.spinalPoint")}
+                {selectedPosition.compensation_model === 'hybrid' && t("compensation.positionCompensation.hybrid")}
+              </Badge>
+            </div>
+
+            {/* Spinal Point Info Card - show for spinal_point or hybrid */}
+            {(selectedPosition.compensation_model === 'spinal_point' || selectedPosition.compensation_model === 'hybrid') && paySpine && (
+              <Card className="border-primary/20 bg-primary/5">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-base flex items-center gap-2">
+                    <Wallet className="h-4 w-4" />
+                    {t("compensation.positionCompensation.spinalPointBase")}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                    <div>
+                      <p className="text-sm text-muted-foreground">{t("compensation.spinalPoints.paySpine")}</p>
+                      <p className="font-medium">{paySpine.name} ({paySpine.code})</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground">{t("compensation.positionCompensation.pointRange")}</p>
+                      <p className="font-medium">
+                        {selectedPosition.min_spinal_point ?? '-'} - {selectedPosition.max_spinal_point ?? '-'}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground">{t("compensation.positionCompensation.entryPoint")}</p>
+                      <p className="font-medium">{selectedPosition.entry_spinal_point ?? '-'}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground">{t("compensation.positionCompensation.salaryRange")}</p>
+                      <p className="font-medium">
+                        {spinalPoints.length > 0 ? (
+                          <>
+                            {formatCurrency(spinalPoints[0].annual_salary, paySpine.currency)} - {formatCurrency(spinalPoints[spinalPoints.length - 1].annual_salary, paySpine.currency)}
+                          </>
+                        ) : '-'}
+                      </p>
+                    </div>
+                  </div>
+                  {spinalPoints.length > 0 && (
+                    <div className="mt-4">
+                      <p className="text-sm text-muted-foreground mb-2">{t("compensation.positionCompensation.availablePoints")}</p>
+                      <div className="flex flex-wrap gap-2">
+                        {spinalPoints.map((sp) => (
+                          <Badge key={sp.id} variant="outline" className="font-mono">
+                            Pt {sp.point_number}: {formatCurrency(sp.annual_salary, paySpine.currency)}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            )}
+
             <div className="flex items-center justify-between">
               <Card className="w-fit">
                 <CardContent className="flex items-center gap-4 py-3">
@@ -290,7 +424,11 @@ export default function PositionCompensationPage() {
                     <Briefcase className="h-5 w-5 text-primary" />
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">{t("compensation.positionCompensation.totalPackage")}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {selectedPosition.compensation_model === 'spinal_point' 
+                        ? t("compensation.positionCompensation.additionalElements")
+                        : t("compensation.positionCompensation.totalPackage")}
+                    </p>
                     <p className="text-2xl font-bold">{formatCurrency(totalCompensation, "USD")}</p>
                   </div>
                 </CardContent>
