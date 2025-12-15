@@ -677,22 +677,59 @@ export function usePayroll() {
       let totalEmployerTaxes = 0;
       
       for (const emp of companyEmployees) {
-        // Get compensation for this position
-        const { data: compensation } = await supabase
-          .from("position_compensation")
-          .select(`*, pay_element:pay_elements(*)`)
-          .eq("position_id", emp.position_id)
+        // First check employee_compensation (overrides position compensation)
+        const { data: employeeComp } = await supabase
+          .from("employee_compensation")
+          .select(`*, pay_elements(name, code)`)
+          .eq("employee_id", emp.employee_id)
           .eq("is_active", true);
         
         let grossPay = 0;
         let regularPay = 0;
         
-        for (const comp of compensation || []) {
-          grossPay += comp.amount || 0;
-          if (comp.pay_element?.element_type_id) {
-            regularPay += comp.amount || 0;
+        if (employeeComp && employeeComp.length > 0) {
+          // Use employee compensation
+          for (const comp of employeeComp) {
+            grossPay += comp.amount || 0;
+            // Base salary (SAL code) goes to regular_pay
+            if ((comp.pay_elements as any)?.code?.toUpperCase() === 'SAL') {
+              regularPay += comp.amount || 0;
+            }
+          }
+        } else {
+          // Fall back to position compensation
+          const { data: positionComp } = await supabase
+            .from("position_compensation")
+            .select(`*, pay_element:pay_elements(*)`)
+            .eq("position_id", emp.position_id)
+            .eq("is_active", true);
+          
+          for (const comp of positionComp || []) {
+            grossPay += comp.amount || 0;
+            if (comp.pay_element?.element_type_id) {
+              regularPay += comp.amount || 0;
+            }
           }
         }
+        
+        // Add period allowances
+        const { data: allowances } = await supabase
+          .from("employee_period_allowances")
+          .select("amount")
+          .eq("employee_id", emp.employee_id)
+          .eq("pay_period_id", payPeriodId);
+        
+        const totalAllowances = (allowances || []).reduce((sum: number, a: any) => sum + (a.amount || 0), 0);
+        grossPay += totalAllowances;
+        
+        // Add period deductions (non-statutory)
+        const { data: periodDeductions } = await supabase
+          .from("employee_period_deductions")
+          .select("amount, is_pretax")
+          .eq("employee_id", emp.employee_id)
+          .eq("pay_period_id", payPeriodId);
+        
+        const totalPeriodDeductions = (periodDeductions || []).reduce((sum: number, d: any) => sum + (d.amount || 0), 0);
         
         // Calculate statutory deductions based on company's country
         let taxDeductions = 0;
@@ -727,7 +764,7 @@ export function usePayroll() {
           }
         }
         
-        const totalDed = taxDeductions;
+        const totalDed = taxDeductions + totalPeriodDeductions;
         const netPay = grossPay - totalDed;
         
         employeePayrolls.push({
@@ -742,6 +779,7 @@ export function usePayroll() {
           total_deductions: totalDed,
           tax_deductions: taxDeductions,
           benefit_deductions: 0,
+          other_deductions: totalPeriodDeductions,
           net_pay: netPay,
           employer_taxes: employerTaxes,
           currency: currency,
