@@ -517,6 +517,49 @@ export function usePayroll() {
       // Update run status
       await supabase.from("payroll_runs").update({ status: 'calculating' }).eq("id", payrollRunId);
       
+      // Get company info for country code
+      const { data: company } = await supabase
+        .from("companies")
+        .select("country, local_currency_id")
+        .eq("id", companyId)
+        .single();
+      
+      const countryCode = company?.country || 'US';
+      
+      // Get currency code from local_currency_id
+      let currency = 'USD';
+      if (company?.local_currency_id) {
+        const { data: currencyData } = await supabase
+          .from("currencies")
+          .select("code")
+          .eq("id", company.local_currency_id)
+          .single();
+        currency = currencyData?.code || 'USD';
+      }
+      
+      // Get pay period info for monday count
+      const { data: payPeriod } = await supabase
+        .from("pay_periods")
+        .select("period_start, period_end, monday_count")
+        .eq("id", payPeriodId)
+        .single();
+      
+      const mondayCount = payPeriod?.monday_count || 4;
+      
+      // Get statutory deduction types for this country
+      const { data: statutoryTypes } = await supabase
+        .from('statutory_deduction_types')
+        .select('*')
+        .eq('country', countryCode)
+        .lte('start_date', new Date().toISOString().split('T')[0])
+        .or(`end_date.is.null,end_date.gte.${new Date().toISOString().split('T')[0]}`);
+      
+      // Get statutory rate bands
+      const { data: rateBands } = await supabase
+        .from('statutory_rate_bands')
+        .select('*')
+        .eq('is_active', true);
+      
       // Get active employees with positions
       const { data: employees, error: empError } = await supabase
         .from("employee_positions")
@@ -524,12 +567,17 @@ export function usePayroll() {
           id,
           employee_id,
           position_id,
-          employee:profiles!employee_positions_employee_id_fkey(id, full_name, email),
+          employee:profiles!employee_positions_employee_id_fkey(id, full_name, email, company_id),
           position:positions!employee_positions_position_id_fkey(id, title)
         `)
         .eq("is_active", true);
       
       if (empError) throw empError;
+      
+      // Filter to only employees from this company
+      const companyEmployees = (employees || []).filter((emp: any) => 
+        emp.employee?.company_id === companyId
+      );
       
       // Get position compensation for each employee
       const employeePayrolls: Partial<EmployeePayroll>[] = [];
@@ -537,8 +585,9 @@ export function usePayroll() {
       let totalNet = 0;
       let totalDeductions = 0;
       let totalTaxes = 0;
+      let totalEmployerTaxes = 0;
       
-      for (const emp of employees || []) {
+      for (const emp of companyEmployees) {
         // Get compensation for this position
         const { data: compensation } = await supabase
           .from("position_compensation")
@@ -550,17 +599,46 @@ export function usePayroll() {
         let regularPay = 0;
         
         for (const comp of compensation || []) {
-          // Simplified: assume monthly amounts
           grossPay += comp.amount || 0;
           if (comp.pay_element?.element_type_id) {
             regularPay += comp.amount || 0;
           }
         }
         
-        // Simple tax calculation (placeholder - should use tax config)
-        const taxDeductions = grossPay * 0.22; // 22% tax placeholder
-        const benefitDeductions = grossPay * 0.05; // 5% benefits placeholder
-        const totalDed = taxDeductions + benefitDeductions;
+        // Calculate statutory deductions based on company's country
+        let taxDeductions = 0;
+        let employerTaxes = 0;
+        
+        if (statutoryTypes && statutoryTypes.length > 0 && rateBands) {
+          for (const statType of statutoryTypes) {
+            const applicableBand = rateBands.find((band: any) => 
+              band.statutory_type_id === statType.id &&
+              (band.min_amount === null || grossPay >= band.min_amount) &&
+              (band.max_amount === null || grossPay <= band.max_amount) &&
+              band.is_active
+            );
+
+            if (!applicableBand) continue;
+
+            const calcMethod = (applicableBand as any).calculation_method || 'percentage';
+
+            switch (calcMethod) {
+              case 'percentage':
+                taxDeductions += grossPay * ((applicableBand as any).employee_rate || 0) / 100;
+                employerTaxes += grossPay * ((applicableBand as any).employer_rate || 0) / 100;
+                break;
+              case 'per_monday':
+                taxDeductions += mondayCount * ((applicableBand as any).per_monday_amount || 0);
+                employerTaxes += mondayCount * ((applicableBand as any).employer_per_monday_amount || 0);
+                break;
+              case 'fixed':
+                taxDeductions += (applicableBand as any).fixed_amount || 0;
+                break;
+            }
+          }
+        }
+        
+        const totalDed = taxDeductions;
         const netPay = grossPay - totalDed;
         
         employeePayrolls.push({
@@ -569,20 +647,22 @@ export function usePayroll() {
           employee_position_id: emp.id,
           pay_period_id: payPeriodId,
           status: 'calculated',
-          regular_hours: 160, // Placeholder
+          regular_hours: 160,
           gross_pay: grossPay,
           regular_pay: regularPay,
           total_deductions: totalDed,
           tax_deductions: taxDeductions,
-          benefit_deductions: benefitDeductions,
+          benefit_deductions: 0,
           net_pay: netPay,
-          currency: 'USD',
+          employer_taxes: employerTaxes,
+          currency: currency,
         });
         
         totalGross += grossPay;
         totalNet += netPay;
         totalDeductions += totalDed;
         totalTaxes += taxDeductions;
+        totalEmployerTaxes += employerTaxes;
       }
       
       // Insert employee payroll records
@@ -600,7 +680,9 @@ export function usePayroll() {
         total_net_pay: totalNet,
         total_deductions: totalDeductions,
         total_taxes: totalTaxes,
+        total_employer_taxes: totalEmployerTaxes,
         employee_count: employeePayrolls.length,
+        currency: currency,
         calculated_at: new Date().toISOString(),
       }).eq("id", payrollRunId);
       
