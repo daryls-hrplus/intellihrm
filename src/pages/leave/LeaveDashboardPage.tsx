@@ -6,6 +6,7 @@ import { ModuleBIButton } from "@/components/bi/ModuleBIButton";
 import { useLeaveManagement } from "@/hooks/useLeaveManagement";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/hooks/useLanguage";
+import { useGranularPermissions } from "@/hooks/useGranularPermissions";
 import { supabase } from "@/integrations/supabase/client";
 import {
   Select,
@@ -44,6 +45,7 @@ const getLeaveModules = (t: (key: string) => string) => [
     href: "/leave/my-leave",
     icon: Calendar,
     color: "bg-primary/10 text-primary",
+    tabCode: "my_leave",
   },
   {
     title: t("leave.modules.applyLeave"),
@@ -51,6 +53,7 @@ const getLeaveModules = (t: (key: string) => string) => [
     href: "/leave/apply",
     icon: CalendarPlus,
     color: "bg-success/10 text-success",
+    tabCode: "apply",
   },
   {
     title: t("leave.modules.approvals"),
@@ -58,7 +61,7 @@ const getLeaveModules = (t: (key: string) => string) => [
     href: "/leave/approvals",
     icon: CalendarCheck,
     color: "bg-warning/10 text-warning",
-    adminOnly: true,
+    tabCode: "approvals",
   },
   {
     title: t("leave.modules.types"),
@@ -66,7 +69,7 @@ const getLeaveModules = (t: (key: string) => string) => [
     href: "/leave/types",
     icon: Settings,
     color: "bg-info/10 text-info",
-    adminOnly: true,
+    tabCode: "types",
   },
   {
     title: t("leave.modules.accrualRules"),
@@ -74,7 +77,7 @@ const getLeaveModules = (t: (key: string) => string) => [
     href: "/leave/accrual-rules",
     icon: TrendingUp,
     color: "bg-primary/10 text-primary",
-    adminOnly: true,
+    tabCode: "accrual_rules",
   },
   {
     title: t("leave.modules.rolloverRules"),
@@ -82,7 +85,7 @@ const getLeaveModules = (t: (key: string) => string) => [
     href: "/leave/rollover-rules",
     icon: RotateCcw,
     color: "bg-secondary/10 text-secondary-foreground",
-    adminOnly: true,
+    tabCode: "rollover_rules",
   },
   {
     title: t("leave.modules.holidays"),
@@ -90,7 +93,7 @@ const getLeaveModules = (t: (key: string) => string) => [
     href: "/leave/holidays",
     icon: PartyPopper,
     color: "bg-destructive/10 text-destructive",
-    adminOnly: true,
+    tabCode: "holidays",
   },
   {
     title: t("leave.modules.teamCalendar"),
@@ -98,7 +101,7 @@ const getLeaveModules = (t: (key: string) => string) => [
     href: "/leave/calendar",
     icon: Calendar,
     color: "bg-cyan-500/10 text-cyan-600",
-    adminOnly: true,
+    tabCode: "calendar",
   },
   {
     title: t("leave.modules.balanceAdjustments"),
@@ -106,7 +109,7 @@ const getLeaveModules = (t: (key: string) => string) => [
     href: "/leave/balance-adjustments",
     icon: Settings,
     color: "bg-slate-500/10 text-slate-600",
-    adminOnly: true,
+    tabCode: "balance_adjustments",
   },
   {
     title: t("leave.modules.balanceRecalculation"),
@@ -114,7 +117,7 @@ const getLeaveModules = (t: (key: string) => string) => [
     href: "/leave/balance-recalculation",
     icon: Calculator,
     color: "bg-accent text-accent-foreground",
-    adminOnly: true,
+    tabCode: "balance_recalculation",
   },
   {
     title: t("leave.modules.analytics"),
@@ -122,7 +125,7 @@ const getLeaveModules = (t: (key: string) => string) => [
     href: "/leave/analytics",
     icon: BarChart3,
     color: "bg-violet-500/10 text-violet-600",
-    adminOnly: true,
+    tabCode: "analytics",
   },
   {
     title: t("leave.modules.compensatoryTime"),
@@ -130,6 +133,7 @@ const getLeaveModules = (t: (key: string) => string) => [
     href: "/leave/compensatory-time",
     icon: Timer,
     color: "bg-info/10 text-info",
+    tabCode: "compensatory_time",
   },
   {
     title: t("leave.modules.compTimePolicies"),
@@ -137,13 +141,14 @@ const getLeaveModules = (t: (key: string) => string) => [
     href: "/leave/comp-time-policies",
     icon: Settings,
     color: "bg-muted text-muted-foreground",
-    adminOnly: true,
+    tabCode: "comp_time_policies",
   },
 ];
 
 export default function LeaveDashboardPage() {
   const { t } = useLanguage();
   const { company, isAdmin, hasRole } = useAuth();
+  const { hasTabAccess } = useGranularPermissions();
   const isAdminOrHR = isAdmin || hasRole("hr_manager");
   const leaveModules = getLeaveModules(t);
   
@@ -185,7 +190,7 @@ export default function LeaveDashboardPage() {
     { label: t("leave.stats.leaveTypes"), value: leaveBalances.length, icon: CalendarCheck, color: "bg-info/10 text-info" },
   ];
 
-  const filteredModules = leaveModules.filter(m => !m.adminOnly || isAdminOrHR);
+  const filteredModules = leaveModules.filter(m => hasTabAccess("leave", m.tabCode));
 
   return (
     <AppLayout>
