@@ -1,9 +1,11 @@
+import { useState, useEffect } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ModuleReportsButton } from "@/components/reports/ModuleReportsButton";
 import { ModuleBIButton } from "@/components/bi/ModuleBIButton";
 import { useGranularPermissions } from "@/hooks/useGranularPermissions";
+import { supabase } from "@/integrations/supabase/client";
 import { 
   Wallet, 
   Calculator, 
@@ -20,11 +22,61 @@ import {
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { format } from "date-fns";
 
 export default function PayrollDashboardPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { hasTabAccess } = useGranularPermissions();
+
+  const [stats, setStats] = useState({
+    currentPeriod: "-",
+    totalPayroll: "$0",
+    employeesPaid: "0",
+    pendingApprovals: "0",
+  });
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      // Fetch current pay period (latest open period)
+      const { data: currentPeriod } = await supabase
+        .from('pay_periods')
+        .select('period_start, period_end')
+        .eq('status', 'open')
+        .order('period_start', { ascending: false })
+        .limit(1)
+        .single();
+
+      // Fetch payroll runs summary
+      const { data: payrollRuns } = await supabase
+        .from('payroll_runs')
+        .select('total_gross_pay, total_net_pay, employee_count, status');
+
+      const totalPayroll = payrollRuns?.reduce((sum, r) => sum + (r.total_gross_pay || 0), 0) || 0;
+      const employeesPaid = payrollRuns?.filter(r => r.status === 'paid').reduce((sum, r) => sum + (r.employee_count || 0), 0) || 0;
+      const pendingApprovals = payrollRuns?.filter(r => ['calculated', 'pending_approval'].includes(r.status)).length || 0;
+
+      const formatCurrency = (amount: number) => {
+        if (amount >= 1000000) {
+          return `$${(amount / 1000000).toFixed(1)}M`;
+        } else if (amount >= 1000) {
+          return `$${(amount / 1000).toFixed(1)}K`;
+        }
+        return `$${amount.toFixed(0)}`;
+      };
+
+      setStats({
+        currentPeriod: currentPeriod 
+          ? format(new Date(currentPeriod.period_start), 'MMM yyyy')
+          : "-",
+        totalPayroll: formatCurrency(totalPayroll),
+        employeesPaid: employeesPaid.toString(),
+        pendingApprovals: pendingApprovals.toString(),
+      });
+    };
+
+    fetchStats();
+  }, []);
 
   const features = [
     {
@@ -117,11 +169,11 @@ export default function PayrollDashboardPage() {
     },
   ].filter(f => hasTabAccess("payroll", f.tabCode));
 
-  const stats = [
-    { label: t("payroll.stats.currentPeriod"), value: "Dec 2024", icon: CalendarCheck },
-    { label: t("payroll.stats.totalPayroll"), value: "$1.2M", icon: DollarSign },
-    { label: t("payroll.stats.employeesPaid"), value: "245", icon: Users },
-    { label: t("payroll.stats.pendingApprovals"), value: "12", icon: Clock },
+  const statItems = [
+    { label: t("payroll.stats.currentPeriod"), value: stats.currentPeriod, icon: CalendarCheck },
+    { label: t("payroll.stats.totalPayroll"), value: stats.totalPayroll, icon: DollarSign },
+    { label: t("payroll.stats.employeesPaid"), value: stats.employeesPaid, icon: Users },
+    { label: t("payroll.stats.pendingApprovals"), value: stats.pendingApprovals, icon: Clock },
   ];
 
   return (
@@ -151,7 +203,7 @@ export default function PayrollDashboardPage() {
 
         {/* Stats */}
         <div className="grid gap-4 md:grid-cols-4">
-          {stats.map((stat) => {
+          {statItems.map((stat) => {
             const Icon = stat.icon;
             return (
               <Card key={stat.label}>
