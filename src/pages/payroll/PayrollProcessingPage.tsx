@@ -346,8 +346,23 @@ export default function PayrollProcessingPage() {
                 <DollarSign className="h-5 w-5 text-primary" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">{t("payroll.processing.totalRuns")}</p>
-                <p className="text-xl font-semibold">{payrollRuns.length}</p>
+                <p className="text-sm text-muted-foreground">{t("payroll.processing.totalGrossPay")}</p>
+                <p className="text-xl font-semibold">
+                  {formatCurrency(payrollRuns.reduce((sum, r) => sum + (r.total_gross_pay || 0), 0))}
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="flex items-center gap-4 p-4">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-success/10">
+                <CheckCircle className="h-5 w-5 text-success" />
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">{t("payroll.processing.totalNetPay")}</p>
+                <p className="text-xl font-semibold">
+                  {formatCurrency(payrollRuns.reduce((sum, r) => sum + (r.total_net_pay || 0), 0))}
+                </p>
               </div>
             </CardContent>
           </Card>
@@ -366,26 +381,13 @@ export default function PayrollProcessingPage() {
           </Card>
           <Card>
             <CardContent className="flex items-center gap-4 p-4">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-success/10">
-                <CheckCircle className="h-5 w-5 text-success" />
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">{t("payroll.payPeriods.paid")}</p>
-                <p className="text-xl font-semibold">
-                  {payrollRuns.filter(r => r.status === 'paid').length}
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="flex items-center gap-4 p-4">
               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-muted">
                 <Users className="h-5 w-5 text-muted-foreground" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">{t("payroll.processing.avgEmployees")}</p>
+                <p className="text-sm text-muted-foreground">{t("payroll.processing.totalEmployees")}</p>
                 <p className="text-xl font-semibold">
-                  {payrollRuns.length ? Math.round(payrollRuns.reduce((sum, r) => sum + r.employee_count, 0) / payrollRuns.length) : 0}
+                  {payrollRuns.reduce((sum, r) => sum + r.employee_count, 0)}
                 </p>
               </div>
             </CardContent>
