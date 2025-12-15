@@ -29250,6 +29250,14 @@ export type Database = {
       is_admin_or_hr:
         | { Args: never; Returns: boolean }
         | { Args: { p_user_id: string }; Returns: boolean }
+      is_messaging_channel_admin: {
+        Args: { p_channel_id: string; p_user_id: string }
+        Returns: boolean
+      }
+      is_messaging_channel_member: {
+        Args: { p_channel_id: string; p_user_id: string }
+        Returns: boolean
+      }
       log_audit_event: {
         Args: {
           p_action: Database["public"]["Enums"]["audit_action"]
