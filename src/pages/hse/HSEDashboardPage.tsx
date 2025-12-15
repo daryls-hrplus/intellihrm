@@ -3,6 +3,7 @@ import { NavLink } from "react-router-dom";
 import { ModuleReportsButton } from "@/components/reports/ModuleReportsButton";
 import { ModuleBIButton } from "@/components/bi/ModuleBIButton";
 import { useHSE } from "@/hooks/useHSE";
+import { useGranularPermissions } from "@/hooks/useGranularPermissions";
 import { differenceInDays } from "date-fns";
 import { Skeleton } from "@/components/ui/skeleton";
 import { LeaveCompanyFilter, useLeaveCompanyFilter } from "@/components/leave/LeaveCompanyFilter";
@@ -72,6 +73,7 @@ const hseModules = [
 
 export default function HSEDashboardPage() {
   const { t } = useLanguage();
+  const { hasTabAccess } = useGranularPermissions();
   const { selectedCompanyId, setSelectedCompanyId } = useLeaveCompanyFilter();
   const { selectedDepartmentId, setSelectedDepartmentId } = useDepartmentFilter();
   const { incidents, trainingRecords, complianceRequirements, incidentsLoading, recordsLoading, complianceLoading } = useHSE(selectedCompanyId || undefined);
@@ -105,6 +107,7 @@ export default function HSEDashboardPage() {
       href: "/hse/incidents",
       icon: AlertTriangle,
       color: "bg-destructive/10 text-destructive",
+      tabCode: "incidents",
     },
     {
       title: t("hseModule.modules.safetyTraining.title"),
@@ -112,6 +115,7 @@ export default function HSEDashboardPage() {
       href: "/hse/safety-training",
       icon: HardHat,
       color: "bg-amber-500/10 text-amber-600",
+      tabCode: "safety-training",
     },
     {
       title: t("hseModule.modules.compliance.title"),
@@ -119,6 +123,7 @@ export default function HSEDashboardPage() {
       href: "/hse/compliance",
       icon: ClipboardCheck,
       color: "bg-emerald-500/10 text-emerald-600",
+      tabCode: "compliance",
     },
     {
       title: t("hseModule.modules.policies.title"),
@@ -126,6 +131,7 @@ export default function HSEDashboardPage() {
       href: "/hse/safety-policies",
       icon: FileText,
       color: "bg-sky-500/10 text-sky-600",
+      tabCode: "safety-policies",
     },
     {
       title: t("hseModule.modules.riskAssessment.title"),
@@ -133,6 +139,7 @@ export default function HSEDashboardPage() {
       href: "/hse/risk-assessment",
       icon: Shield,
       color: "bg-primary/10 text-primary",
+      tabCode: "risk-assessment",
     },
     {
       title: t("hseModule.modules.workersComp.title"),
@@ -140,6 +147,7 @@ export default function HSEDashboardPage() {
       href: "/hse/workers-comp",
       icon: Briefcase,
       color: "bg-violet-500/10 text-violet-600",
+      tabCode: "workers-comp",
     },
     {
       title: t("hseModule.modules.ppe.title"),
@@ -147,6 +155,7 @@ export default function HSEDashboardPage() {
       href: "/hse/ppe",
       icon: HardHatIcon,
       color: "bg-orange-500/10 text-orange-600",
+      tabCode: "ppe",
     },
     {
       title: t("hseModule.modules.inspections.title"),
@@ -154,6 +163,7 @@ export default function HSEDashboardPage() {
       href: "/hse/inspections",
       icon: ClipboardCheck,
       color: "bg-teal-500/10 text-teal-600",
+      tabCode: "inspections",
     },
     {
       title: t("hseModule.modules.emergencyResponse.title"),
@@ -161,6 +171,7 @@ export default function HSEDashboardPage() {
       href: "/hse/emergency-response",
       icon: Siren,
       color: "bg-rose-500/10 text-rose-600",
+      tabCode: "emergency-response",
     },
     {
       title: t("hseModule.modules.chemicals.title"),
@@ -168,6 +179,7 @@ export default function HSEDashboardPage() {
       href: "/hse/chemicals",
       icon: FlaskConical,
       color: "bg-purple-500/10 text-purple-600",
+      tabCode: "chemicals",
     },
     {
       title: t("hseModule.modules.oshaReporting.title"),
@@ -175,6 +187,7 @@ export default function HSEDashboardPage() {
       href: "/hse/osha-reporting",
       icon: FileWarning,
       color: "bg-indigo-500/10 text-indigo-600",
+      tabCode: "osha-reporting",
     },
     {
       title: t("hseModule.modules.permitToWork.title"),
@@ -182,6 +195,7 @@ export default function HSEDashboardPage() {
       href: "/hse/permit-to-work",
       icon: KeyRound,
       color: "bg-cyan-500/10 text-cyan-600",
+      tabCode: "permit-to-work",
     },
     {
       title: t("hseModule.modules.loto.title"),
@@ -189,6 +203,7 @@ export default function HSEDashboardPage() {
       href: "/hse/loto",
       icon: Lock,
       color: "bg-slate-500/10 text-slate-600",
+      tabCode: "loto",
     },
     {
       title: t("hseModule.modules.nearMiss.title"),
@@ -196,6 +211,7 @@ export default function HSEDashboardPage() {
       href: "/hse/near-miss",
       icon: TriangleAlert,
       color: "bg-yellow-500/10 text-yellow-600",
+      tabCode: "near-miss",
     },
     {
       title: t("hseModule.modules.safetyObservations.title"),
@@ -203,6 +219,7 @@ export default function HSEDashboardPage() {
       href: "/hse/safety-observations",
       icon: Eye,
       color: "bg-blue-500/10 text-blue-600",
+      tabCode: "safety-observations",
     },
     {
       title: t("hseModule.modules.toolboxTalks.title"),
@@ -210,6 +227,7 @@ export default function HSEDashboardPage() {
       href: "/hse/toolbox-talks",
       icon: MessageSquare,
       color: "bg-green-500/10 text-green-600",
+      tabCode: "toolbox-talks",
     },
     {
       title: t("hseModule.modules.firstAid.title"),
@@ -217,6 +235,7 @@ export default function HSEDashboardPage() {
       href: "/hse/first-aid",
       icon: HeartPulse,
       color: "bg-red-500/10 text-red-600",
+      tabCode: "first-aid",
     },
     {
       title: t("hseModule.modules.ergonomics.title"),
@@ -224,6 +243,7 @@ export default function HSEDashboardPage() {
       href: "/hse/ergonomics",
       icon: Monitor,
       color: "bg-pink-500/10 text-pink-600",
+      tabCode: "ergonomics",
     },
     {
       title: t("hseModule.modules.analytics.title"),
@@ -231,8 +251,9 @@ export default function HSEDashboardPage() {
       href: "/hse/analytics",
       icon: BarChart3,
       color: "bg-fuchsia-500/10 text-fuchsia-600",
+      tabCode: "analytics",
     },
-  ];
+  ].filter(module => hasTabAccess("hse", module.tabCode));
 
   const statCards = [
     { label: t("hseModule.stats.daysWithoutIncident"), value: daysWithoutIncident, icon: CheckCircle, color: "bg-emerald-500/10 text-emerald-600" },

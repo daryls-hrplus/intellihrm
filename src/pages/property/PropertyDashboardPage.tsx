@@ -2,6 +2,7 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import { ModuleReportsButton } from "@/components/reports/ModuleReportsButton";
 import { ModuleBIButton } from "@/components/bi/ModuleBIButton";
 import { usePropertyManagement } from "@/hooks/usePropertyManagement";
+import { useGranularPermissions } from "@/hooks/useGranularPermissions";
 import { LeaveCompanyFilter, useLeaveCompanyFilter } from "@/components/leave/LeaveCompanyFilter";
 import { DepartmentFilter, useDepartmentFilter } from "@/components/filters/DepartmentFilter";
 import { useLanguage } from "@/hooks/useLanguage";
@@ -22,6 +23,7 @@ import {
 
 export default function PropertyDashboardPage() {
   const { t } = useLanguage();
+  const { hasTabAccess } = useGranularPermissions();
   const { selectedCompanyId, setSelectedCompanyId } = useLeaveCompanyFilter();
   const { selectedDepartmentId, setSelectedDepartmentId } = useDepartmentFilter();
   const {
@@ -50,6 +52,7 @@ export default function PropertyDashboardPage() {
       href: "/property/analytics",
       icon: BarChart3,
       color: "text-chart-1",
+      tabCode: "analytics",
     },
     {
       title: t("companyProperty.tabs.assets"),
@@ -57,6 +60,7 @@ export default function PropertyDashboardPage() {
       href: "/property/assets",
       icon: Laptop,
       color: "text-chart-2",
+      tabCode: "assets",
     },
     {
       title: t("companyProperty.tabs.assignments"),
@@ -64,6 +68,7 @@ export default function PropertyDashboardPage() {
       href: "/property/assignments",
       icon: Users,
       color: "text-chart-3",
+      tabCode: "assignments",
     },
     {
       title: t("companyProperty.tabs.requests"),
@@ -71,6 +76,7 @@ export default function PropertyDashboardPage() {
       href: "/property/requests",
       icon: Clipboard,
       color: "text-chart-4",
+      tabCode: "requests",
     },
     {
       title: t("companyProperty.tabs.maintenance"),
@@ -78,6 +84,7 @@ export default function PropertyDashboardPage() {
       href: "/property/maintenance",
       icon: Wrench,
       color: "text-chart-5",
+      tabCode: "maintenance",
     },
     {
       title: t("companyProperty.tabs.categories"),
@@ -85,8 +92,9 @@ export default function PropertyDashboardPage() {
       href: "/property/categories",
       icon: FolderOpen,
       color: "text-primary",
+      tabCode: "categories",
     },
-  ];
+  ].filter(module => hasTabAccess("property", module.tabCode));
 
   return (
     <AppLayout>

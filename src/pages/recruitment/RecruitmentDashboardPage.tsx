@@ -3,6 +3,7 @@ import { NavLink } from "react-router-dom";
 import { ModuleReportsButton } from "@/components/reports/ModuleReportsButton";
 import { ModuleBIButton } from "@/components/bi/ModuleBIButton";
 import { useLanguage } from "@/hooks/useLanguage";
+import { useGranularPermissions } from "@/hooks/useGranularPermissions";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { startOfMonth, startOfDay, endOfDay } from "date-fns";
@@ -28,6 +29,7 @@ import {
 
 export default function RecruitmentDashboardPage() {
   const { t } = useLanguage();
+  const { hasTabAccess } = useGranularPermissions();
   const { selectedCompanyId, setSelectedCompanyId } = useLeaveCompanyFilter();
   const { selectedDepartmentId, setSelectedDepartmentId } = useDepartmentFilter();
 
@@ -38,6 +40,7 @@ export default function RecruitmentDashboardPage() {
       href: "/recruitment/requisitions",
       icon: Briefcase,
       color: "bg-primary/10 text-primary",
+      tabCode: "requisitions",
     },
     {
       title: t("recruitment.tabs.candidates"),
@@ -45,6 +48,7 @@ export default function RecruitmentDashboardPage() {
       href: "/recruitment/candidates",
       icon: Users,
       color: "bg-success/10 text-success",
+      tabCode: "candidates",
     },
     {
       title: t("recruitment.tabs.applications"),
@@ -52,6 +56,7 @@ export default function RecruitmentDashboardPage() {
       href: "/recruitment/applications",
       icon: FileText,
       color: "bg-info/10 text-info",
+      tabCode: "applications",
     },
     {
       title: t("recruitment.tabs.pipeline"),
@@ -59,6 +64,7 @@ export default function RecruitmentDashboardPage() {
       href: "/recruitment/pipeline",
       icon: Calendar,
       color: "bg-purple-500/10 text-purple-600",
+      tabCode: "pipeline",
     },
     {
       title: t("recruitment.tabs.scorecards"),
@@ -66,6 +72,7 @@ export default function RecruitmentDashboardPage() {
       href: "/recruitment/scorecards",
       icon: ClipboardList,
       color: "bg-orange-500/10 text-orange-600",
+      tabCode: "scorecards",
     },
     {
       title: t("recruitment.tabs.offers"),
@@ -73,6 +80,7 @@ export default function RecruitmentDashboardPage() {
       href: "/recruitment/offers",
       icon: Award,
       color: "bg-green-500/10 text-green-600",
+      tabCode: "offers",
     },
     {
       title: t("recruitment.tabs.referrals"),
@@ -80,6 +88,7 @@ export default function RecruitmentDashboardPage() {
       href: "/recruitment/referrals",
       icon: UserPlus,
       color: "bg-cyan-500/10 text-cyan-600",
+      tabCode: "referrals",
     },
     {
       title: t("recruitment.tabs.assessments"),
@@ -87,6 +96,7 @@ export default function RecruitmentDashboardPage() {
       href: "/recruitment/assessments",
       icon: FlaskConical,
       color: "bg-violet-500/10 text-violet-600",
+      tabCode: "assessments",
     },
     {
       title: t("recruitment.tabs.panels"),
@@ -94,6 +104,7 @@ export default function RecruitmentDashboardPage() {
       href: "/recruitment/panels",
       icon: UsersRound,
       color: "bg-pink-500/10 text-pink-600",
+      tabCode: "panels",
     },
     {
       title: t("recruitment.tabs.templates"),
@@ -101,6 +112,7 @@ export default function RecruitmentDashboardPage() {
       href: "/recruitment/email-templates",
       icon: Mail,
       color: "bg-blue-500/10 text-blue-600",
+      tabCode: "email-templates",
     },
     {
       title: t("recruitment.tabs.sources"),
@@ -108,6 +120,7 @@ export default function RecruitmentDashboardPage() {
       href: "/recruitment/sources",
       icon: TrendingUp,
       color: "bg-amber-500/10 text-amber-600",
+      tabCode: "sources",
     },
     {
       title: t("recruitment.tabs.jobBoards"),
@@ -115,6 +128,7 @@ export default function RecruitmentDashboardPage() {
       href: "/recruitment/job-boards",
       icon: Settings,
       color: "bg-slate-500/10 text-slate-600",
+      tabCode: "job-boards",
     },
     {
       title: t("recruitment.modules.analytics.title"),
@@ -122,8 +136,9 @@ export default function RecruitmentDashboardPage() {
       href: "/recruitment/analytics",
       icon: BarChart3,
       color: "bg-chart-3/10 text-chart-3",
+      tabCode: "analytics",
     },
-  ];
+  ].filter(module => hasTabAccess("recruitment", module.tabCode));
 
   // Fetch open positions count
   const { data: openPositions = 0 } = useQuery({
