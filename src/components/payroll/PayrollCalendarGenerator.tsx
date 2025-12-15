@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Calendar, RefreshCw, AlertCircle, Check } from "lucide-react";
-import { format, addDays, startOfYear, endOfYear, isMonday, eachDayOfInterval, lastDayOfMonth, isBefore, parseISO } from "date-fns";
+import { format, addDays, subDays, startOfYear, endOfYear, isMonday, isSaturday, isSunday, isWeekend, eachDayOfInterval, lastDayOfMonth, isBefore, parseISO } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -37,12 +37,76 @@ export function PayrollCalendarGenerator({ companyId, payGroup, onGenerated }: P
   const [dialogOpen, setDialogOpen] = useState(false);
   const [previewPeriods, setPreviewPeriods] = useState<GeneratedPeriod[]>([]);
   const [isSaving, setIsSaving] = useState(false);
+  const [holidays, setHolidays] = useState<Date[]>([]);
   
   const currentYear = new Date().getFullYear();
   const [selectedYear, setSelectedYear] = useState(currentYear);
   const [startDate, setStartDate] = useState<string>("");
   const [startingCycleNumber, setStartingCycleNumber] = useState(1);
   const [payDayOffset, setPayDayOffset] = useState(0);
+
+  // Fetch holidays for the company
+  useEffect(() => {
+    const fetchHolidays = async () => {
+      if (!companyId) return;
+      
+      const yearStart = `${selectedYear}-01-01`;
+      const yearEnd = `${selectedYear}-12-31`;
+      
+      // Fetch company-specific holidays
+      const { data: companyHolidays } = await supabase
+        .from('leave_holidays')
+        .select('holiday_date')
+        .eq('company_id', companyId)
+        .eq('is_active', true)
+        .gte('holiday_date', yearStart)
+        .lte('holiday_date', yearEnd);
+      
+      // Fetch country holidays (if company has country set)
+      const { data: countryHolidays } = await supabase
+        .from('country_holidays')
+        .select('holiday_date')
+        .eq('is_active', true)
+        .gte('holiday_date', yearStart)
+        .lte('holiday_date', yearEnd);
+      
+      const allHolidayDates = [
+        ...(companyHolidays || []).map(h => new Date(h.holiday_date)),
+        ...(countryHolidays || []).map(h => new Date(h.holiday_date))
+      ];
+      
+      setHolidays(allHolidayDates);
+    };
+    
+    fetchHolidays();
+  }, [companyId, selectedYear]);
+
+  // Check if a date is a holiday
+  const isHoliday = (date: Date): boolean => {
+    return holidays.some(h => 
+      h.getFullYear() === date.getFullYear() &&
+      h.getMonth() === date.getMonth() &&
+      h.getDate() === date.getDate()
+    );
+  };
+
+  // Adjust pay date to previous business day if it falls on weekend or holiday
+  const adjustPayDate = (date: Date): Date => {
+    let adjustedDate = new Date(date);
+    
+    // Keep moving to previous day while it's a weekend or holiday
+    while (isWeekend(adjustedDate) || isHoliday(adjustedDate)) {
+      adjustedDate = subDays(adjustedDate, 1);
+    }
+    
+    return adjustedDate;
+  };
+
+  // Calculate pay date with offset and adjustment
+  const calculatePayDate = (periodEnd: Date): Date => {
+    const rawPayDate = addDays(periodEnd, payDayOffset);
+    return adjustPayDate(rawPayDate);
+  };
 
   // Calculate default start date and cycle number based on current date
   useEffect(() => {
@@ -89,7 +153,7 @@ export function PayrollCalendarGenerator({ companyId, payGroup, onGenerated }: P
     for (let month = startMonth; month < 12; month++) {
       const periodStart = new Date(year, month, 1);
       const periodEnd = lastDayOfMonth(periodStart);
-      const payDate = addDays(periodEnd, payDayOffset);
+      const payDate = calculatePayDate(periodEnd);
       
       periods.push({
         period_number: startCycle + (month - startMonth),
@@ -117,7 +181,7 @@ export function PayrollCalendarGenerator({ companyId, payGroup, onGenerated }: P
       if (!isFirstMonth || !startInSecondHalf) {
         const firstStart = new Date(year, month, 1);
         const firstEnd = new Date(year, month, 15);
-        const firstPayDate = addDays(firstEnd, payDayOffset);
+        const firstPayDate = calculatePayDate(firstEnd);
         
         periods.push({
           period_number: periodNum++,
@@ -131,7 +195,7 @@ export function PayrollCalendarGenerator({ companyId, payGroup, onGenerated }: P
       // Second half: 16th to end of month
       const secondStart = new Date(year, month, 16);
       const secondEnd = lastDayOfMonth(secondStart);
-      const secondPayDate = addDays(secondEnd, payDayOffset);
+      const secondPayDate = calculatePayDate(secondEnd);
       
       periods.push({
         period_number: periodNum++,
@@ -153,7 +217,7 @@ export function PayrollCalendarGenerator({ companyId, payGroup, onGenerated }: P
     
     while (isBefore(currentStart, yearEnd) || currentStart.getFullYear() === year) {
       const periodEnd = addDays(currentStart, 6);
-      const payDate = addDays(periodEnd, payDayOffset);
+      const payDate = calculatePayDate(periodEnd);
       
       if (periodEnd.getFullYear() === year || 
           (currentStart.getFullYear() < year && periodEnd.getFullYear() >= year)) {
@@ -184,7 +248,7 @@ export function PayrollCalendarGenerator({ companyId, payGroup, onGenerated }: P
     
     while (isBefore(currentStart, yearEnd) || currentStart.getFullYear() === year) {
       const periodEnd = addDays(currentStart, 13);
-      const payDate = addDays(periodEnd, payDayOffset);
+      const payDate = calculatePayDate(periodEnd);
       
       if (periodEnd.getFullYear() === year || 
           (currentStart.getFullYear() < year && periodEnd.getFullYear() >= year)) {
@@ -434,11 +498,11 @@ export function PayrollCalendarGenerator({ companyId, payGroup, onGenerated }: P
                       type="number"
                       value={payDayOffset}
                       onChange={(e) => setPayDayOffset(parseInt(e.target.value) || 0)}
-                      min={0}
-                      max={14}
+                      min={-30}
+                      max={30}
                     />
                     <p className="text-xs text-muted-foreground">
-                      Days after period end
+                      Days before (-) or after (+) period end. Auto-adjusts to previous business day if on weekend/holiday.
                     </p>
                   </div>
                 </div>
