@@ -43,6 +43,9 @@ interface StatutoryRateBand {
   end_date: string | null;
   notes: string | null;
   display_order: number;
+  calculation_method: string;
+  per_monday_amount: number | null;
+  employer_per_monday_amount: number | null;
 }
 
 export default function TaxConfigPage() {
@@ -69,6 +72,9 @@ export default function TaxConfigPage() {
     end_date: null as string | null,
     notes: "",
     display_order: 0,
+    calculation_method: 'percentage' as string,
+    per_monday_amount: null as number | null,
+    employer_per_monday_amount: null as number | null,
   });
 
   useEffect(() => {
@@ -157,6 +163,9 @@ export default function TaxConfigPage() {
       end_date: null,
       notes: "",
       display_order: rateBands.length,
+      calculation_method: 'percentage',
+      per_monday_amount: null,
+      employer_per_monday_amount: null,
     });
   };
 
@@ -175,6 +184,9 @@ export default function TaxConfigPage() {
       end_date: band.end_date,
       notes: band.notes || "",
       display_order: band.display_order,
+      calculation_method: band.calculation_method || 'percentage',
+      per_monday_amount: band.per_monday_amount,
+      employer_per_monday_amount: band.employer_per_monday_amount,
     });
     setDialogOpen(true);
   };
@@ -200,6 +212,9 @@ export default function TaxConfigPage() {
         end_date: bandForm.end_date,
         notes: bandForm.notes || null,
         display_order: bandForm.display_order,
+        calculation_method: bandForm.calculation_method,
+        per_monday_amount: bandForm.per_monday_amount,
+        employer_per_monday_amount: bandForm.employer_per_monday_amount,
       };
 
       if (editingBand) {
@@ -346,11 +361,11 @@ export default function TaxConfigPage() {
                       <TableHeader>
                         <TableRow>
                           <TableHead>Band/Class</TableHead>
+                          <TableHead>Calc Method</TableHead>
                           <TableHead className="text-right">Min Amount</TableHead>
                           <TableHead className="text-right">Max Amount</TableHead>
-                          <TableHead className="text-right">Employee Rate</TableHead>
-                          <TableHead className="text-right">Employer Rate</TableHead>
-                          <TableHead className="text-right">Fixed Amount</TableHead>
+                          <TableHead className="text-right">Employee</TableHead>
+                          <TableHead className="text-right">Employer</TableHead>
                           <TableHead>Valid From</TableHead>
                           <TableHead>Valid To</TableHead>
                           <TableHead>Status</TableHead>
@@ -363,11 +378,28 @@ export default function TaxConfigPage() {
                             <TableCell className="font-medium">
                               {band.band_name || band.earnings_class || `Band ${band.display_order + 1}`}
                             </TableCell>
+                            <TableCell>
+                              <Badge variant="outline" className="text-xs">
+                                {band.calculation_method === 'per_monday' ? 'Per Monday' : 
+                                 band.calculation_method === 'fixed' ? 'Fixed' : 'Percentage'}
+                              </Badge>
+                            </TableCell>
                             <TableCell className="text-right">{formatAmount(band.min_amount)}</TableCell>
                             <TableCell className="text-right">{formatAmount(band.max_amount)}</TableCell>
-                            <TableCell className="text-right">{formatRate(band.employee_rate)}</TableCell>
-                            <TableCell className="text-right">{formatRate(band.employer_rate)}</TableCell>
-                            <TableCell className="text-right">{formatAmount(band.fixed_amount)}</TableCell>
+                            <TableCell className="text-right">
+                              {band.calculation_method === 'per_monday' 
+                                ? `$${band.per_monday_amount?.toFixed(2) || '0'}/Mon`
+                                : band.calculation_method === 'fixed'
+                                ? formatAmount(band.fixed_amount)
+                                : formatRate(band.employee_rate)}
+                            </TableCell>
+                            <TableCell className="text-right">
+                              {band.calculation_method === 'per_monday' 
+                                ? `$${band.employer_per_monday_amount?.toFixed(2) || '0'}/Mon`
+                                : band.calculation_method === 'fixed'
+                                ? '-'
+                                : formatRate(band.employer_rate)}
+                            </TableCell>
                             <TableCell>{band.start_date}</TableCell>
                             <TableCell>{band.end_date || '-'}</TableCell>
                             <TableCell>
@@ -440,6 +472,23 @@ export default function TaxConfigPage() {
                 </div>
               </div>
 
+              <div className="space-y-2">
+                <Label>Calculation Method *</Label>
+                <Select 
+                  value={bandForm.calculation_method} 
+                  onValueChange={(value) => setBandForm({ ...bandForm, calculation_method: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="percentage">Percentage of Earnings</SelectItem>
+                    <SelectItem value="per_monday">Per Monday (NI/Health Surcharge)</SelectItem>
+                    <SelectItem value="fixed">Fixed Amount</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>Min Amount</Label>
@@ -462,39 +511,68 @@ export default function TaxConfigPage() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Employee Rate (%)</Label>
-                  <Input
-                    type="number"
-                    step="0.01"
-                    value={bandForm.employee_rate !== null ? bandForm.employee_rate * 100 : ''}
-                    onChange={(e) => setBandForm({ ...bandForm, employee_rate: e.target.value ? parseFloat(e.target.value) / 100 : null })}
-                    placeholder="e.g., 12.5"
-                  />
+              {bandForm.calculation_method === 'percentage' && (
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Employee Rate (%)</Label>
+                    <Input
+                      type="number"
+                      step="0.01"
+                      value={bandForm.employee_rate !== null ? bandForm.employee_rate * 100 : ''}
+                      onChange={(e) => setBandForm({ ...bandForm, employee_rate: e.target.value ? parseFloat(e.target.value) / 100 : null })}
+                      placeholder="e.g., 12.5"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Employer Rate (%)</Label>
+                    <Input
+                      type="number"
+                      step="0.01"
+                      value={bandForm.employer_rate !== null ? bandForm.employer_rate * 100 : ''}
+                      onChange={(e) => setBandForm({ ...bandForm, employer_rate: e.target.value ? parseFloat(e.target.value) / 100 : null })}
+                      placeholder="e.g., 13.8"
+                    />
+                  </div>
                 </div>
-                <div className="space-y-2">
-                  <Label>Employer Rate (%)</Label>
-                  <Input
-                    type="number"
-                    step="0.01"
-                    value={bandForm.employer_rate !== null ? bandForm.employer_rate * 100 : ''}
-                    onChange={(e) => setBandForm({ ...bandForm, employer_rate: e.target.value ? parseFloat(e.target.value) / 100 : null })}
-                    placeholder="e.g., 13.8"
-                  />
-                </div>
-              </div>
+              )}
 
-              <div className="space-y-2">
-                <Label>Fixed Amount (if applicable)</Label>
-                <Input
-                  type="number"
-                  step="0.01"
-                  value={bandForm.fixed_amount || ''}
-                  onChange={(e) => setBandForm({ ...bandForm, fixed_amount: e.target.value ? parseFloat(e.target.value) : null })}
-                  placeholder="Fixed deduction amount"
-                />
-              </div>
+              {bandForm.calculation_method === 'per_monday' && (
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Employee Amount per Monday</Label>
+                    <Input
+                      type="number"
+                      step="0.01"
+                      value={bandForm.per_monday_amount || ''}
+                      onChange={(e) => setBandForm({ ...bandForm, per_monday_amount: e.target.value ? parseFloat(e.target.value) : null })}
+                      placeholder="e.g., 15.60"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Employer Amount per Monday</Label>
+                    <Input
+                      type="number"
+                      step="0.01"
+                      value={bandForm.employer_per_monday_amount || ''}
+                      onChange={(e) => setBandForm({ ...bandForm, employer_per_monday_amount: e.target.value ? parseFloat(e.target.value) : null })}
+                      placeholder="e.g., 23.40"
+                    />
+                  </div>
+                </div>
+              )}
+
+              {bandForm.calculation_method === 'fixed' && (
+                <div className="space-y-2">
+                  <Label>Fixed Amount</Label>
+                  <Input
+                    type="number"
+                    step="0.01"
+                    value={bandForm.fixed_amount || ''}
+                    onChange={(e) => setBandForm({ ...bandForm, fixed_amount: e.target.value ? parseFloat(e.target.value) : null })}
+                    placeholder="Fixed deduction amount"
+                  />
+                </div>
+              )}
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">

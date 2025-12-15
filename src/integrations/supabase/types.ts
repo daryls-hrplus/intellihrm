@@ -25747,11 +25747,13 @@ export type Database = {
       statutory_rate_bands: {
         Row: {
           band_name: string | null
+          calculation_method: string
           company_id: string | null
           created_at: string
           display_order: number | null
           earnings_class: string | null
           employee_rate: number | null
+          employer_per_monday_amount: number | null
           employer_rate: number | null
           end_date: string | null
           fixed_amount: number | null
@@ -25760,17 +25762,20 @@ export type Database = {
           max_amount: number | null
           min_amount: number
           notes: string | null
+          per_monday_amount: number | null
           start_date: string
           statutory_type_id: string
           updated_at: string
         }
         Insert: {
           band_name?: string | null
+          calculation_method?: string
           company_id?: string | null
           created_at?: string
           display_order?: number | null
           earnings_class?: string | null
           employee_rate?: number | null
+          employer_per_monday_amount?: number | null
           employer_rate?: number | null
           end_date?: string | null
           fixed_amount?: number | null
@@ -25779,17 +25784,20 @@ export type Database = {
           max_amount?: number | null
           min_amount?: number
           notes?: string | null
+          per_monday_amount?: number | null
           start_date: string
           statutory_type_id: string
           updated_at?: string
         }
         Update: {
           band_name?: string | null
+          calculation_method?: string
           company_id?: string | null
           created_at?: string
           display_order?: number | null
           earnings_class?: string | null
           employee_rate?: number | null
+          employer_per_monday_amount?: number | null
           employer_rate?: number | null
           end_date?: string | null
           fixed_amount?: number | null
@@ -25798,6 +25806,7 @@ export type Database = {
           max_amount?: number | null
           min_amount?: number
           notes?: string | null
+          per_monday_amount?: number | null
           start_date?: string
           statutory_type_id?: string
           updated_at?: string
