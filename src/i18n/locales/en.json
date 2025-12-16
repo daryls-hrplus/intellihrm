@@ -808,7 +808,11 @@
       "active": "Active",
       "inactive": "Inactive",
       "yes": "Yes",
-      "no": "No"
+      "no": "No",
+      "genderApplicability": "Applicable To",
+      "genderAll": "All Employees",
+      "genderMale": "Male Only",
+      "genderFemale": "Female Only"
     },
     "accrualRules": {
       "title": "Leave Accrual Rules",
