@@ -89,7 +89,7 @@ export function AddEmployeeDialog({
         .from("profiles")
         .select("id")
         .eq("email", email.trim().toLowerCase())
-        .single();
+        .maybeSingle();
 
       if (existingProfile) {
         toast.error(t("workforce.addEmployeeDialog.emailExists", "An employee with this email already exists"));
