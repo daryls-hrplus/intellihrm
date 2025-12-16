@@ -25,6 +25,7 @@ import {
   MessageCircle,
   Award,
   DollarSign,
+  Receipt,
 } from "lucide-react";
 
 export default function EmployeeSelfServicePage() {
@@ -79,6 +80,13 @@ export default function EmployeeSelfServicePage() {
       href: "/ess/payslips",
       icon: CreditCard,
       color: "bg-emerald-500/10 text-emerald-600",
+    },
+    {
+      title: t("ess.modules.expenses.title", "Expense Claims"),
+      description: t("ess.modules.expenses.description", "Submit and track expense reimbursements"),
+      href: "/ess/expenses",
+      icon: Receipt,
+      color: "bg-orange-500/10 text-orange-600",
     },
     {
       title: t("ess.modules.training.title"),
