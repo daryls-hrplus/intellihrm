@@ -168,42 +168,40 @@ const CATEGORY_CONFIG: Record<LookupCategory, LookupCategoryConfig> = {
   },
 };
 
-// Get categories grouped by module and subgroup, sorted alphabetically
+// Get categories grouped by module with subgroups, sorted alphabetically
 const getGroupedCategories = () => {
-  const result: { module: string; subgroup?: string; categories: LookupCategory[] }[] = [];
-  const moduleMap: Record<string, Record<string, LookupCategory[]>> = {};
+  const moduleMap: Record<string, { general: LookupCategory[]; subgroups: Record<string, LookupCategory[]> }> = {};
   
   Object.entries(CATEGORY_CONFIG).forEach(([key, config]) => {
-    const subgroupKey = config.subgroup || "_general";
     if (!moduleMap[config.module]) {
-      moduleMap[config.module] = {};
+      moduleMap[config.module] = { general: [], subgroups: {} };
     }
-    if (!moduleMap[config.module][subgroupKey]) {
-      moduleMap[config.module][subgroupKey] = [];
+    if (config.subgroup) {
+      if (!moduleMap[config.module].subgroups[config.subgroup]) {
+        moduleMap[config.module].subgroups[config.subgroup] = [];
+      }
+      moduleMap[config.module].subgroups[config.subgroup].push(key as LookupCategory);
+    } else {
+      moduleMap[config.module].general.push(key as LookupCategory);
     }
-    moduleMap[config.module][subgroupKey].push(key as LookupCategory);
   });
   
-  // Sort and build result
-  Object.keys(moduleMap).sort().forEach(module => {
-    const subgroups = moduleMap[module];
-    // General items first (no subgroup)
-    if (subgroups["_general"]) {
-      subgroups["_general"].sort((a, b) => 
-        CATEGORY_CONFIG[a].label.localeCompare(CATEGORY_CONFIG[b].label)
-      );
-      result.push({ module, categories: subgroups["_general"] });
-    }
-    // Then named subgroups alphabetically
-    Object.keys(subgroups).filter(s => s !== "_general").sort().forEach(subgroup => {
-      subgroups[subgroup].sort((a, b) => 
-        CATEGORY_CONFIG[a].label.localeCompare(CATEGORY_CONFIG[b].label)
-      );
-      result.push({ module, subgroup, categories: subgroups[subgroup] });
+  // Sort within each group
+  Object.keys(moduleMap).forEach(module => {
+    moduleMap[module].general.sort((a, b) => CATEGORY_CONFIG[a].label.localeCompare(CATEGORY_CONFIG[b].label));
+    Object.keys(moduleMap[module].subgroups).forEach(subgroup => {
+      moduleMap[module].subgroups[subgroup].sort((a, b) => CATEGORY_CONFIG[a].label.localeCompare(CATEGORY_CONFIG[b].label));
     });
   });
   
-  return result;
+  return Object.keys(moduleMap).sort().map(module => ({
+    module,
+    general: moduleMap[module].general,
+    subgroups: Object.keys(moduleMap[module].subgroups).sort().map(name => ({
+      name,
+      categories: moduleMap[module].subgroups[name]
+    }))
+  }));
 };
 
 const groupedCategories = getGroupedCategories();
@@ -407,16 +405,28 @@ export function LookupValuesManagement() {
     <div className="space-y-6">
       <Tabs value={activeCategory} onValueChange={(v) => setActiveCategory(v as LookupCategory)}>
         <div className="space-y-4">
-          {groupedCategories.map(({ module, subgroup, categories }, index) => (
-            <div key={`${module}-${subgroup || 'general'}-${index}`}>
+          {groupedCategories.map(({ module, general, subgroups }) => (
+            <div key={module}>
               <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">
-                {subgroup ? `${module} › ${subgroup}` : module}
+                {module}
               </h4>
-              <TabsList className="flex flex-wrap h-auto gap-1">
-                {categories.map((key) => (
+              <TabsList className="flex flex-wrap h-auto gap-1 items-center">
+                {general.map((key) => (
                   <TabsTrigger key={key} value={key} className="text-xs sm:text-sm">
                     {CATEGORY_CONFIG[key].label}
                   </TabsTrigger>
+                ))}
+                {subgroups.map(({ name, categories }) => (
+                  <>
+                    <span key={`sep-${name}`} className="text-xs text-muted-foreground px-2 border-l border-border ml-1">
+                      {name}:
+                    </span>
+                    {categories.map((key) => (
+                      <TabsTrigger key={key} value={key} className="text-xs sm:text-sm">
+                        {CATEGORY_CONFIG[key].label}
+                      </TabsTrigger>
+                    ))}
+                  </>
                 ))}
               </TabsList>
             </div>
