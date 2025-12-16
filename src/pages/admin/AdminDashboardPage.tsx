@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { NavLink } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -8,6 +8,8 @@ import { Badge } from "@/components/ui/badge";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { AccessRequestsAnalytics } from "@/components/admin/AccessRequestsAnalytics";
 import { useTranslation } from "react-i18next";
+import { DraggableModuleGrid, DraggableModule } from "@/components/ui/DraggableModuleGrid";
+import { useDraggableOrder } from "@/hooks/useDraggableOrder";
 import {
   Building,
   Building2,
@@ -271,7 +273,15 @@ export default function AdminDashboardPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isPiiAlertsOpen, setIsPiiAlertsOpen] = useState(false);
 
-  const adminModules = getAdminModules(t).filter(module => hasTabAccess("admin", module.tabCode));
+  const adminModulesFiltered = getAdminModules(t).filter(module => hasTabAccess("admin", module.tabCode)) as DraggableModule[];
+  
+  const getModuleId = useCallback((module: DraggableModule) => module.tabCode, []);
+  
+  const { orderedItems: adminModules, updateOrder, resetOrder } = useDraggableOrder({
+    items: adminModulesFiltered,
+    storageKey: "admin-dashboard-module-order",
+    getItemId: getModuleId,
+  });
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -463,32 +473,11 @@ export default function AdminDashboardPage() {
         {/* Access Request Analytics */}
         <AccessRequestsAnalytics />
 
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {adminModules.map((module, index) => {
-            const Icon = module.icon;
-            return (
-              <NavLink
-                key={module.href}
-                to={module.href}
-                className="group rounded-xl border border-border bg-card p-6 shadow-card transition-all hover:shadow-card-hover hover:border-primary/20 animate-slide-up"
-                style={{ animationDelay: `${(index + 4) * 50}ms` }}
-              >
-                <div className="flex items-start justify-between">
-                  <div className={`rounded-lg p-3 ${module.color}`}>
-                    <Icon className="h-6 w-6" />
-                  </div>
-                  <ChevronRight className="h-5 w-5 text-muted-foreground opacity-0 transition-all group-hover:opacity-100 group-hover:translate-x-1" />
-                </div>
-                <h3 className="mt-4 font-semibold text-card-foreground">
-                  {module.title}
-                </h3>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  {module.description}
-                </p>
-              </NavLink>
-            );
-          })}
-        </div>
+        <DraggableModuleGrid
+          modules={adminModules}
+          onReorder={updateOrder}
+          onReset={resetOrder}
+        />
       </div>
     </AppLayout>
   );
