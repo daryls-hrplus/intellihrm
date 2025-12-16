@@ -49,6 +49,7 @@ import CurrencyManagementPage from "./pages/admin/CurrencyManagementPage";
 import SubscriptionManagementPage from "./pages/admin/SubscriptionManagementPage";
 import MFASettingsPage from "./pages/admin/MFASettingsPage";
 import SSOSettingsPage from "./pages/admin/SSOSettingsPage";
+import PasswordPoliciesPage from "./pages/admin/PasswordPoliciesPage";
 import StaffLoanDesignDocumentPage from "./pages/documents/StaffLoanDesignDocumentPage";
 
 // Subscription pages
@@ -1068,6 +1069,14 @@ const App = () => (
               element={
                 <ProtectedRoute requiredRoles={["admin"]}>
                   <SSOSettingsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/password-policies"
+              element={
+                <ProtectedRoute requiredRoles={["admin"]}>
+                  <PasswordPoliciesPage />
                 </ProtectedRoute>
               }
             />

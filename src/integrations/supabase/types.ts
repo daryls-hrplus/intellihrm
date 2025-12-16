@@ -20340,6 +20340,83 @@ export type Database = {
           },
         ]
       }
+      password_policies: {
+        Row: {
+          company_id: string | null
+          created_at: string
+          created_by: string | null
+          expiry_warning_days: number | null
+          id: string
+          is_active: boolean
+          max_password_length: number
+          mfa_enforcement_level: string | null
+          min_password_length: number
+          password_expiry_days: number | null
+          password_history_count: number
+          require_change_on_first_login: boolean
+          require_lowercase: boolean
+          require_numbers: boolean
+          require_special_chars: boolean
+          require_uppercase: boolean
+          session_timeout_minutes: number | null
+          special_chars_allowed: string | null
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          company_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          expiry_warning_days?: number | null
+          id?: string
+          is_active?: boolean
+          max_password_length?: number
+          mfa_enforcement_level?: string | null
+          min_password_length?: number
+          password_expiry_days?: number | null
+          password_history_count?: number
+          require_change_on_first_login?: boolean
+          require_lowercase?: boolean
+          require_numbers?: boolean
+          require_special_chars?: boolean
+          require_uppercase?: boolean
+          session_timeout_minutes?: number | null
+          special_chars_allowed?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          company_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          expiry_warning_days?: number | null
+          id?: string
+          is_active?: boolean
+          max_password_length?: number
+          mfa_enforcement_level?: string | null
+          min_password_length?: number
+          password_expiry_days?: number | null
+          password_history_count?: number
+          require_change_on_first_login?: boolean
+          require_lowercase?: boolean
+          require_numbers?: boolean
+          require_special_chars?: boolean
+          require_uppercase?: boolean
+          session_timeout_minutes?: number | null
+          special_chars_allowed?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "password_policies_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: true
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pay_elements: {
         Row: {
           code: string
@@ -28627,6 +28704,60 @@ export type Database = {
           id?: string
           is_enrolled?: boolean
           last_verified_at?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_password_history: {
+        Row: {
+          created_at: string
+          id: string
+          password_hash: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          password_hash: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          password_hash?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_password_metadata: {
+        Row: {
+          created_at: string
+          expiry_notification_shown_at: string | null
+          id: string
+          is_first_login: boolean
+          last_password_change: string
+          password_expires_at: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          expiry_notification_shown_at?: string | null
+          id?: string
+          is_first_login?: boolean
+          last_password_change?: string
+          password_expires_at?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          expiry_notification_shown_at?: string | null
+          id?: string
+          is_first_login?: boolean
+          last_password_change?: string
+          password_expires_at?: string | null
           updated_at?: string
           user_id?: string
         }
