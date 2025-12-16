@@ -12,7 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+import { RichTextEditor } from "@/components/intranet/RichTextEditor";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { format } from "date-fns";
@@ -251,11 +251,10 @@ export default function CompanyAnnouncementsPage() {
               </div>
               <div>
                 <Label>Content</Label>
-                <Textarea
+                <RichTextEditor
                   value={formData.content}
-                  onChange={(e) => setFormData({ ...formData, content: e.target.value })}
+                  onChange={(val) => setFormData({ ...formData, content: val })}
                   placeholder="Announcement content..."
-                  rows={5}
                 />
               </div>
               <div className="grid grid-cols-2 gap-4">
