@@ -49,6 +49,7 @@ import CurrencyManagementPage from "./pages/admin/CurrencyManagementPage";
 import SubscriptionManagementPage from "./pages/admin/SubscriptionManagementPage";
 import MFASettingsPage from "./pages/admin/MFASettingsPage";
 import SSOSettingsPage from "./pages/admin/SSOSettingsPage";
+import StaffLoanDesignDocumentPage from "./pages/documents/StaffLoanDesignDocumentPage";
 
 // Subscription pages
 import SubscriptionPage from "./pages/subscription/SubscriptionPage";
@@ -2760,6 +2761,16 @@ const App = () => (
               element={
                 <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
                   <SOPManagementPage />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Document Downloads */}
+            <Route
+              path="/documents/staff-loan-design"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
+                  <StaffLoanDesignDocumentPage />
                 </ProtectedRoute>
               }
             />
