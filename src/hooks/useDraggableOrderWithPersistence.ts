@@ -15,23 +15,18 @@ export function useDraggableOrderWithPersistence<T>({
 }: UseDraggableOrderOptions<T>) {
   const [orderedItems, setOrderedItems] = useState<T[]>(items);
   const [isLoading, setIsLoading] = useState(true);
-  const { user } = useAuth();
+  const { isAdmin } = useAuth();
 
-  // Load saved order from database
+  // Load shared order from database (not per-user, shared across all users)
   useEffect(() => {
     const loadOrder = async () => {
-      if (!user?.id) {
-        setOrderedItems(items);
-        setIsLoading(false);
-        return;
-      }
-
       try {
+        // Load shared preference (no user_id filter - shared for all users)
         const { data, error } = await (supabase as any)
           .from("user_preferences")
           .select("preference_value")
-          .eq("user_id", user.id)
           .eq("preference_key", preferenceKey)
+          .is("user_id", null)
           .maybeSingle();
 
         if (error) {
@@ -77,20 +72,21 @@ export function useDraggableOrderWithPersistence<T>({
     };
 
     loadOrder();
-  }, [items, preferenceKey, getItemId, user?.id]);
+  }, [items, preferenceKey, getItemId]);
 
   const updateOrder = useCallback(async (newItems: T[]) => {
+    if (!isAdmin) return; // Only admins can update
+
     setOrderedItems(newItems);
     
-    if (!user?.id) return;
-
     const orderIds = newItems.map(getItemId);
     
     try {
+      // Save as shared preference (user_id = null)
       const { error } = await (supabase as any)
         .from("user_preferences")
         .upsert({
-          user_id: user.id,
+          user_id: null,
           preference_key: preferenceKey,
           preference_value: orderIds,
           updated_at: new Date().toISOString(),
@@ -104,23 +100,23 @@ export function useDraggableOrderWithPersistence<T>({
     } catch (error) {
       console.error("Error saving preference:", error);
     }
-  }, [preferenceKey, getItemId, user?.id]);
+  }, [preferenceKey, getItemId, isAdmin]);
 
   const resetOrder = useCallback(async () => {
+    if (!isAdmin) return; // Only admins can reset
+
     setOrderedItems(items);
     
-    if (!user?.id) return;
-
     try {
       await (supabase as any)
         .from("user_preferences")
         .delete()
-        .eq("user_id", user.id)
+        .is("user_id", null)
         .eq("preference_key", preferenceKey);
     } catch (error) {
       console.error("Error resetting preference:", error);
     }
-  }, [items, preferenceKey, user?.id]);
+  }, [items, preferenceKey, isAdmin]);
 
-  return { orderedItems, updateOrder, resetOrder, isLoading };
+  return { orderedItems, updateOrder, resetOrder, isLoading, canEdit: isAdmin };
 }

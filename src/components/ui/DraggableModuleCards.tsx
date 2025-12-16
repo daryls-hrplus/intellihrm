@@ -39,9 +39,10 @@ interface SortableModuleCardProps {
   module: ModuleCardItem;
   index: number;
   isDragging?: boolean;
+  canEdit?: boolean;
 }
 
-function SortableModuleCard({ module, index, isDragging }: SortableModuleCardProps) {
+function SortableModuleCard({ module, index, isDragging, canEdit }: SortableModuleCardProps) {
   const {
     attributes,
     listeners,
@@ -49,7 +50,7 @@ function SortableModuleCard({ module, index, isDragging }: SortableModuleCardPro
     transform,
     transition,
     isDragging: isCurrentDragging,
-  } = useSortable({ id: module.tabCode });
+  } = useSortable({ id: module.tabCode, disabled: !canEdit });
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -69,15 +70,17 @@ function SortableModuleCard({ module, index, isDragging }: SortableModuleCardPro
         isDragging && !isCurrentDragging && "transition-transform"
       )}
     >
-      {/* Drag Handle */}
-      <button
-        {...attributes}
-        {...listeners}
-        className="absolute top-3 right-3 p-1.5 rounded-md opacity-0 group-hover:opacity-100 hover:bg-muted transition-all cursor-grab active:cursor-grabbing z-10"
-        aria-label="Drag to reorder"
-      >
-        <GripVertical className="h-4 w-4 text-muted-foreground" />
-      </button>
+      {/* Drag Handle - Only visible for admins */}
+      {canEdit && (
+        <button
+          {...attributes}
+          {...listeners}
+          className="absolute top-3 right-3 p-1.5 rounded-md opacity-0 group-hover:opacity-100 hover:bg-muted transition-all cursor-grab active:cursor-grabbing z-10"
+          aria-label="Drag to reorder"
+        >
+          <GripVertical className="h-4 w-4 text-muted-foreground" />
+        </button>
+      )}
 
       <NavLink
         to={module.href}
@@ -140,7 +143,7 @@ export function DraggableModuleCards({
 
   const getModuleId = useCallback((module: ModuleCardItem) => module.tabCode, []);
 
-  const { orderedItems, updateOrder, resetOrder, isLoading } = useDraggableOrderWithPersistence({
+  const { orderedItems, updateOrder, resetOrder, isLoading, canEdit } = useDraggableOrderWithPersistence({
     items: modules,
     preferenceKey,
     getItemId: getModuleId,
@@ -198,7 +201,7 @@ export function DraggableModuleCards({
 
   return (
     <div className="space-y-4">
-      {showResetButton && (
+      {showResetButton && canEdit && (
         <div className="flex items-center justify-end">
           <Button
             variant="ghost"
@@ -229,6 +232,7 @@ export function DraggableModuleCards({
                 module={module}
                 index={index}
                 isDragging={!!activeId}
+                canEdit={canEdit}
               />
             ))}
           </div>
