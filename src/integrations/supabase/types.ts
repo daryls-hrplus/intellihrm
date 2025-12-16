@@ -6988,6 +6988,9 @@ export type Database = {
           id: string
           is_active: boolean
           is_primary: boolean
+          pay_group_end_date: string | null
+          pay_group_id: string | null
+          pay_group_start_date: string | null
           position_id: string
           spinal_point_id: string | null
           start_date: string
@@ -7004,6 +7007,9 @@ export type Database = {
           id?: string
           is_active?: boolean
           is_primary?: boolean
+          pay_group_end_date?: string | null
+          pay_group_id?: string | null
+          pay_group_start_date?: string | null
           position_id: string
           spinal_point_id?: string | null
           start_date?: string
@@ -7020,6 +7026,9 @@ export type Database = {
           id?: string
           is_active?: boolean
           is_primary?: boolean
+          pay_group_end_date?: string | null
+          pay_group_id?: string | null
+          pay_group_start_date?: string | null
           position_id?: string
           spinal_point_id?: string | null
           start_date?: string
@@ -7031,6 +7040,13 @@ export type Database = {
             columns: ["employee_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_positions_pay_group_id_fkey"
+            columns: ["pay_group_id"]
+            isOneToOne: false
+            referencedRelation: "pay_groups"
             referencedColumns: ["id"]
           },
           {

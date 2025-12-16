@@ -89,6 +89,9 @@ interface EmployeePosition {
   benefits_profile: any;
   is_active: boolean;
   spinal_point_id: string | null;
+  pay_group_id: string | null;
+  pay_group_start_date: string | null;
+  pay_group_end_date: string | null;
   employee?: {
     full_name: string;
     email: string;
@@ -102,6 +105,11 @@ interface EmployeePosition {
   spinal_point?: {
     point_number: number;
     annual_salary: number;
+  } | null;
+  pay_group?: {
+    name: string;
+    code: string;
+    pay_frequency: string;
   } | null;
 }
 
@@ -250,7 +258,8 @@ export function PositionsManagement({ companyId }: PositionsManagementProps) {
             .select(`
               *,
               employee:profiles(full_name, email),
-              position:positions(title, code)
+              position:positions(title, code),
+              pay_group:pay_groups(name, code, pay_frequency)
             `)
             .in("position_id", posIds)
             .order("start_date", { ascending: false });
@@ -452,7 +461,7 @@ export function PositionsManagement({ companyId }: PositionsManagementProps) {
     setAssignDialogOpen(true);
   };
 
-  const openEditAssignment = async (assignment: EmployeePosition) => {
+  const openEditAssignment = (assignment: EmployeePosition) => {
     setEditingAssignment(assignment);
     setAssignPositionId(assignment.position_id);
     setAssignEmployeeId(assignment.employee_id);
@@ -465,24 +474,10 @@ export function PositionsManagement({ companyId }: PositionsManagementProps) {
     setAssignIsActive(assignment.is_active);
     setAssignSpinalPointId(assignment.spinal_point_id || "");
     
-    // Fetch current pay group assignment for this employee
-    const { data: payGroupData } = await supabase
-      .from("employee_pay_groups")
-      .select("pay_group_id, start_date, end_date")
-      .eq("employee_id", assignment.employee_id)
-      .order("start_date", { ascending: false })
-      .limit(1)
-      .maybeSingle();
-    
-    if (payGroupData) {
-      setAssignPayGroupId(payGroupData.pay_group_id || "");
-      setAssignPayGroupStartDate(payGroupData.start_date || "");
-      setAssignPayGroupEndDate(payGroupData.end_date || "");
-    } else {
-      setAssignPayGroupId("");
-      setAssignPayGroupStartDate(assignment.start_date);
-      setAssignPayGroupEndDate("");
-    }
+    // Pay group is now stored directly on the assignment
+    setAssignPayGroupId(assignment.pay_group_id || "");
+    setAssignPayGroupStartDate(assignment.pay_group_start_date || assignment.start_date);
+    setAssignPayGroupEndDate(assignment.pay_group_end_date || "");
     
     setAssignDialogOpen(true);
   };
@@ -521,6 +516,9 @@ export function PositionsManagement({ companyId }: PositionsManagementProps) {
         benefits_profile: {},
         is_active: assignIsActive,
         spinal_point_id: assignSpinalPointId || null,
+        pay_group_id: assignPayGroupId || null,
+        pay_group_start_date: assignPayGroupId && assignPayGroupStartDate ? assignPayGroupStartDate : null,
+        pay_group_end_date: assignPayGroupId && assignPayGroupEndDate ? assignPayGroupEndDate : null,
       };
 
       if (editingAssignment) {
@@ -536,39 +534,6 @@ export function PositionsManagement({ companyId }: PositionsManagementProps) {
           .insert(data);
         if (error) throw error;
         toast.success("Employee assigned to position");
-      }
-
-      // Save pay group assignment if selected
-      if (assignPayGroupId && assignPayGroupStartDate) {
-        const selectedPayGroup = payGroups.find(pg => pg.id === assignPayGroupId);
-        const payGroupData = {
-          employee_id: assignEmployeeId,
-          pay_group_id: assignPayGroupId,
-          pay_group_name: selectedPayGroup?.name || "",
-          pay_frequency: selectedPayGroup?.pay_frequency || "monthly",
-          payment_method: "bank_transfer",
-          start_date: assignPayGroupStartDate,
-          end_date: assignPayGroupEndDate || null,
-        };
-
-        // Check if there's an existing pay group assignment for this employee
-        const { data: existingPayGroup } = await supabase
-          .from("employee_pay_groups")
-          .select("id")
-          .eq("employee_id", assignEmployeeId)
-          .eq("pay_group_id", assignPayGroupId)
-          .maybeSingle();
-
-        if (existingPayGroup) {
-          await supabase
-            .from("employee_pay_groups")
-            .update(payGroupData)
-            .eq("id", existingPayGroup.id);
-        } else {
-          await supabase
-            .from("employee_pay_groups")
-            .insert(payGroupData);
-        }
       }
 
       setAssignDialogOpen(false);
