@@ -11,12 +11,13 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   Plus, Search, GraduationCap, Award, FileCheck, Loader2,
-  CheckCircle, XCircle, Clock, Filter, Building2, ChevronRight
+  CheckCircle, XCircle, Clock, Filter, Building2, ChevronRight, Upload
 } from "lucide-react";
 import { toast } from "sonner";
 import { QualificationDialog } from "@/components/workforce/qualifications/QualificationDialog";
 import { VerificationDialog } from "@/components/workforce/qualifications/VerificationDialog";
 import { QualificationAnalytics } from "@/components/workforce/qualifications/QualificationAnalytics";
+import { BulkQualificationUpload } from "@/components/workforce/qualifications/BulkQualificationUpload";
 import { format } from "date-fns";
 
 interface Company {
@@ -52,6 +53,7 @@ export default function QualificationsPage() {
   const [verificationFilter, setVerificationFilter] = useState<string>("all");
   const [activeTab, setActiveTab] = useState("list");
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [bulkUploadOpen, setBulkUploadOpen] = useState(false);
   const [verifyDialogOpen, setVerifyDialogOpen] = useState(false);
   const [selectedQualification, setSelectedQualification] = useState<Qualification | null>(null);
   const [stats, setStats] = useState({
@@ -207,10 +209,16 @@ export default function QualificationsPage() {
               <p className="text-muted-foreground">{t("workforce.modules.qualifications.description")}</p>
             </div>
           </div>
-          <Button onClick={() => setDialogOpen(true)}>
-            <Plus className="h-4 w-4 mr-2" />
-            {t("workforce.modules.qualifications.addQualification")}
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" onClick={() => setBulkUploadOpen(true)}>
+              <Upload className="h-4 w-4 mr-2" />
+              Bulk Upload
+            </Button>
+            <Button onClick={() => setDialogOpen(true)}>
+              <Plus className="h-4 w-4 mr-2" />
+              Add Qualification
+            </Button>
+          </div>
         </div>
 
         {/* Stats Cards */}
@@ -477,6 +485,12 @@ export default function QualificationsPage() {
           setSelectedQualification(null);
           fetchQualifications();
         }}
+      />
+
+      <BulkQualificationUpload
+        open={bulkUploadOpen}
+        onOpenChange={setBulkUploadOpen}
+        onSuccess={fetchQualifications}
       />
     </AppLayout>
   );
