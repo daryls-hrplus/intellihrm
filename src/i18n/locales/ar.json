@@ -795,5 +795,43 @@
     "MyExpenseClaims": {
       "myClaims": "مطالباتي"
     }
+  },
+  "admin": {
+    "passwordPolicies": {
+      "title": "سياسات كلمة المرور",
+      "subtitle": "تكوين متطلبات أمان كلمة المرور للمؤسسة",
+      "saveChanges": "حفظ التغييرات",
+      "saved": "تم حفظ سياسة كلمة المرور بنجاح",
+      "lengthRequirements": {
+        "title": "متطلبات الطول",
+        "description": "تعيين الحد الأدنى والأقصى لطول كلمة المرور",
+        "minLength": "الحد الأدنى للطول",
+        "maxLength": "الحد الأقصى للطول"
+      },
+      "complexityRules": {
+        "title": "قواعد التعقيد",
+        "description": "تطلب أنواعًا معينة من الأحرف في كلمات المرور",
+        "requireUppercase": "تطلب أحرف كبيرة",
+        "requireLowercase": "تطلب أحرف صغيرة",
+        "requireNumbers": "تطلب أرقام",
+        "requireSpecialChars": "تطلب أحرف خاصة"
+      },
+      "passwordHistory": {
+        "title": "سجل كلمات المرور",
+        "description": "منع إعادة استخدام كلمات المرور السابقة"
+      },
+      "passwordExpiration": {
+        "title": "انتهاء صلاحية كلمة المرور",
+        "description": "فرض تغييرات دورية لكلمة المرور مع تحذيرات مسبقة"
+      },
+      "sessionTimeout": {
+        "title": "مهلة الجلسة",
+        "description": "تسجيل الخروج تلقائيًا بعد فترة من عدم النشاط"
+      },
+      "additionalSecurity": {
+        "title": "أمان إضافي",
+        "description": "متطلبات تسجيل الدخول الأول وتطبيق المصادقة الثنائية"
+      }
+    }
   }
 }

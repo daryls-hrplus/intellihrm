@@ -795,5 +795,43 @@
     "MyExpenseClaims": {
       "myClaims": "Mes demandes"
     }
+  },
+  "admin": {
+    "passwordPolicies": {
+      "title": "Politiques de Mot de Passe",
+      "subtitle": "Configurer les exigences de sécurité des mots de passe entreprise",
+      "saveChanges": "Enregistrer",
+      "saved": "Politique de mot de passe enregistrée avec succès",
+      "lengthRequirements": {
+        "title": "Exigences de Longueur",
+        "description": "Définir la longueur minimale et maximale du mot de passe",
+        "minLength": "Longueur Minimale",
+        "maxLength": "Longueur Maximale"
+      },
+      "complexityRules": {
+        "title": "Règles de Complexité",
+        "description": "Exiger des types de caractères spécifiques dans les mots de passe",
+        "requireUppercase": "Exiger des Majuscules",
+        "requireLowercase": "Exiger des Minuscules",
+        "requireNumbers": "Exiger des Chiffres",
+        "requireSpecialChars": "Exiger des Caractères Spéciaux"
+      },
+      "passwordHistory": {
+        "title": "Historique des Mots de Passe",
+        "description": "Empêcher la réutilisation des mots de passe récents"
+      },
+      "passwordExpiration": {
+        "title": "Expiration du Mot de Passe",
+        "description": "Forcer les changements périodiques de mot de passe avec des avertissements"
+      },
+      "sessionTimeout": {
+        "title": "Délai de Session",
+        "description": "Déconnexion automatique après une période d'inactivité"
+      },
+      "additionalSecurity": {
+        "title": "Sécurité Supplémentaire",
+        "description": "Exigences de première connexion et application MFA"
+      }
+    }
   }
 }
