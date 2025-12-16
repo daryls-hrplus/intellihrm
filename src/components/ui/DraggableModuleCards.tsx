@@ -43,6 +43,7 @@ interface SortableModuleCardProps {
 }
 
 function SortableModuleCard({ module, index, isDragging, canEdit }: SortableModuleCardProps) {
+  const { t } = useTranslation();
   const {
     attributes,
     listeners,
@@ -76,7 +77,7 @@ function SortableModuleCard({ module, index, isDragging, canEdit }: SortableModu
           {...attributes}
           {...listeners}
           className="absolute top-3 right-3 p-1.5 rounded-md opacity-0 group-hover:opacity-100 hover:bg-muted transition-all cursor-grab active:cursor-grabbing z-10"
-          aria-label="Drag to reorder"
+          aria-label={t("common.dragToReorder")}
         >
           <GripVertical className="h-4 w-4 text-muted-foreground" />
         </button>
