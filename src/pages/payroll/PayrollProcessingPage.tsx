@@ -318,7 +318,7 @@ export default function PayrollProcessingPage() {
         {!showContent && (
           <Card>
             <CardContent className="py-12 text-center text-muted-foreground">
-              Please select a company and pay group to view payroll processing
+              {t("payroll.processing.selectCompanyAndPayGroupPrompt")}
             </CardContent>
           </Card>
         )}
@@ -330,9 +330,9 @@ export default function PayrollProcessingPage() {
               <div className="flex items-center gap-3 rounded-lg border border-warning/50 bg-warning/10 p-4">
                 <Lock className="h-5 w-5 text-warning" />
                 <div>
-                  <p className="font-medium text-warning">Pay Group Locked for Processing</p>
+                  <p className="font-medium text-warning">{t("payroll.processing.payGroupLocked")}</p>
                   <p className="text-sm text-muted-foreground">
-                    Employee compensation data is locked while payroll is being processed. Changes will be restricted until the payroll run is reopened.
+                    {t("payroll.processing.payGroupLockedDescription")}
                   </p>
                 </div>
               </div>
@@ -410,8 +410,8 @@ export default function PayrollProcessingPage() {
                   <TableHead>{t("payroll.processing.employees")}</TableHead>
                   <TableHead>{t("payroll.processing.grossPay")}</TableHead>
                   <TableHead>{t("payroll.processing.netPay")}</TableHead>
-                  <TableHead>Started</TableHead>
-                  <TableHead>Completed</TableHead>
+                  <TableHead>{t("payroll.processing.started")}</TableHead>
+                  <TableHead>{t("payroll.processing.completed")}</TableHead>
                   <TableHead>{t("common.status")}</TableHead>
                   <TableHead className="text-right">{t("common.actions")}</TableHead>
                 </TableRow>
@@ -452,7 +452,7 @@ export default function PayrollProcessingPage() {
                         {run.recalculation_requested_by && !run.recalculation_approved_by && (
                           <Badge variant="outline" className="text-xs">
                             <AlertTriangle className="h-3 w-3 mr-1" />
-                            Recalc Pending
+                            {t("payroll.processing.recalcPending")}
                           </Badge>
                         )}
                       </div>
@@ -528,17 +528,17 @@ export default function PayrollProcessingPage() {
         <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
           <DialogContent className="max-w-md">
             <DialogHeader>
-              <DialogTitle>Create Payroll Run</DialogTitle>
+              <DialogTitle>{t("payroll.processing.createPayrollRun")}</DialogTitle>
             </DialogHeader>
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label>Pay Period</Label>
+                <Label>{t("payroll.processing.payPeriod")}</Label>
                 <Select
                   value={createForm.pay_period_id}
                   onValueChange={(value) => setCreateForm({ ...createForm, pay_period_id: value })}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select a pay period" />
+                    <SelectValue placeholder={t("payroll.processing.selectPayPeriod")} />
                   </SelectTrigger>
                   <SelectContent>
                     {periods.filter(p => p.status === 'open').map((period) => (
@@ -551,7 +551,7 @@ export default function PayrollProcessingPage() {
               </div>
 
               <div className="space-y-2">
-                <Label>Run Type</Label>
+                <Label>{t("payroll.processing.runType")}</Label>
                 <Select
                   value={createForm.run_type}
                   onValueChange={(value) => setCreateForm({ ...createForm, run_type: value as any })}
@@ -560,28 +560,28 @@ export default function PayrollProcessingPage() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="regular">Regular</SelectItem>
-                    <SelectItem value="supplemental">Supplemental</SelectItem>
-                    <SelectItem value="bonus">Bonus</SelectItem>
-                    <SelectItem value="correction">Correction</SelectItem>
-                    <SelectItem value="off_cycle">Off-Cycle</SelectItem>
+                    <SelectItem value="regular">{t("payroll.processing.regular")}</SelectItem>
+                    <SelectItem value="supplemental">{t("payroll.processing.supplemental")}</SelectItem>
+                    <SelectItem value="bonus">{t("payroll.processing.bonus")}</SelectItem>
+                    <SelectItem value="correction">{t("payroll.processing.correction")}</SelectItem>
+                    <SelectItem value="off_cycle">{t("payroll.processing.offCycle")}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
               <div className="space-y-2">
-                <Label>Notes</Label>
+                <Label>{t("payroll.processing.notes")}</Label>
                 <Input
                   value={createForm.notes}
                   onChange={(e) => setCreateForm({ ...createForm, notes: e.target.value })}
-                  placeholder="Optional notes..."
+                  placeholder={t("payroll.processing.optionalNotes")}
                 />
               </div>
             </div>
             <DialogFooter>
-              <Button variant="outline" onClick={() => setCreateDialogOpen(false)}>Cancel</Button>
+              <Button variant="outline" onClick={() => setCreateDialogOpen(false)}>{t("common.cancel")}</Button>
               <Button onClick={handleCreateRun} disabled={isLoading || !createForm.pay_period_id}>
-                Create Run
+                {t("payroll.processing.createRun")}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -591,25 +591,25 @@ export default function PayrollProcessingPage() {
         <Dialog open={detailDialogOpen} onOpenChange={setDetailDialogOpen}>
           <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle>Payroll Run Details - {selectedRun?.run_number}</DialogTitle>
+              <DialogTitle>{t("payroll.processing.runDetailsTitle", { runNumber: selectedRun?.run_number })}</DialogTitle>
             </DialogHeader>
             {selectedRun && (
               <div className="space-y-4">
                 <div className="grid grid-cols-4 gap-4">
                   <div className="bg-muted p-3 rounded-lg">
-                    <p className="text-sm text-muted-foreground">Gross Pay</p>
+                    <p className="text-sm text-muted-foreground">{t("payroll.processing.grossPay")}</p>
                     <p className="text-lg font-semibold">{formatCurrency(selectedRun.total_gross_pay)}</p>
                   </div>
                   <div className="bg-muted p-3 rounded-lg">
-                    <p className="text-sm text-muted-foreground">Deductions</p>
+                    <p className="text-sm text-muted-foreground">{t("payroll.processing.deductions")}</p>
                     <p className="text-lg font-semibold">{formatCurrency(selectedRun.total_deductions)}</p>
                   </div>
                   <div className="bg-muted p-3 rounded-lg">
-                    <p className="text-sm text-muted-foreground">Taxes</p>
+                    <p className="text-sm text-muted-foreground">{t("payroll.processing.taxes")}</p>
                     <p className="text-lg font-semibold">{formatCurrency(selectedRun.total_taxes)}</p>
                   </div>
                   <div className="bg-muted p-3 rounded-lg">
-                    <p className="text-sm text-muted-foreground">Net Pay</p>
+                    <p className="text-sm text-muted-foreground">{t("payroll.processing.netPay")}</p>
                     <p className="text-lg font-semibold">{formatCurrency(selectedRun.total_net_pay)}</p>
                   </div>
                 </div>
@@ -617,13 +617,13 @@ export default function PayrollProcessingPage() {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Employee</TableHead>
-                      <TableHead>Hours</TableHead>
-                      <TableHead>Gross Pay</TableHead>
-                      <TableHead>Taxes</TableHead>
-                      <TableHead>Deductions</TableHead>
-                      <TableHead>Net Pay</TableHead>
-                      <TableHead>Status</TableHead>
+                      <TableHead>{t("payroll.processing.employee")}</TableHead>
+                      <TableHead>{t("payroll.processing.hours")}</TableHead>
+                      <TableHead>{t("payroll.processing.grossPay")}</TableHead>
+                      <TableHead>{t("payroll.processing.taxes")}</TableHead>
+                      <TableHead>{t("payroll.processing.deductions")}</TableHead>
+                      <TableHead>{t("payroll.processing.netPay")}</TableHead>
+                      <TableHead>{t("common.status")}</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -650,7 +650,7 @@ export default function PayrollProcessingPage() {
                     {employeePayroll.length === 0 && (
                       <TableRow>
                         <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
-                          No employee payroll records. Calculate payroll first.
+                          {t("payroll.processing.noEmployeeRecords")}
                         </TableCell>
                       </TableRow>
                     )}
@@ -665,18 +665,18 @@ export default function PayrollProcessingPage() {
         <Dialog open={recalcConfirmOpen} onOpenChange={setRecalcConfirmOpen}>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Confirm Recalculation</DialogTitle>
+              <DialogTitle>{t("payroll.processing.confirmRecalculation")}</DialogTitle>
               <DialogDescription>
                 {runToRecalc?.status === 'approved' 
-                  ? "This payroll run has been approved. Recalculating will delete existing calculations and require re-approval."
-                  : "This will delete existing calculations and recalculate payroll for all employees in this run."}
+                  ? t("payroll.processing.recalcApprovedWarning")
+                  : t("payroll.processing.recalcWarning")}
               </DialogDescription>
             </DialogHeader>
             <DialogFooter>
-              <Button variant="outline" onClick={() => setRecalcConfirmOpen(false)}>Cancel</Button>
+              <Button variant="outline" onClick={() => setRecalcConfirmOpen(false)}>{t("common.cancel")}</Button>
               <Button onClick={confirmRecalculate} disabled={isLoading}>
                 <RefreshCw className="h-4 w-4 mr-2" />
-                Recalculate
+                {t("payroll.processing.recalculate")}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -686,17 +686,16 @@ export default function PayrollProcessingPage() {
         <Dialog open={reopenConfirmOpen} onOpenChange={setReopenConfirmOpen}>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Reopen Payroll Run</DialogTitle>
+              <DialogTitle>{t("payroll.processing.reopenPayrollRun")}</DialogTitle>
               <DialogDescription>
-                This will unlock employees for data changes and reset the payroll run to draft status. 
-                All calculations will be deleted and must be re-run. This action should only be used for corrections.
+                {t("payroll.processing.reopenWarning")}
               </DialogDescription>
             </DialogHeader>
             <DialogFooter>
-              <Button variant="outline" onClick={() => setReopenConfirmOpen(false)}>Cancel</Button>
+              <Button variant="outline" onClick={() => setReopenConfirmOpen(false)}>{t("common.cancel")}</Button>
               <Button variant="destructive" onClick={confirmReopen} disabled={isLoading}>
                 <Unlock className="h-4 w-4 mr-2" />
-                Reopen for Changes
+                {t("payroll.processing.reopenForChanges")}
               </Button>
             </DialogFooter>
           </DialogContent>
