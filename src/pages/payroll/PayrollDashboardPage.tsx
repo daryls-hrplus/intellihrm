@@ -19,6 +19,7 @@ import {
   TrendingUp,
   Settings,
   BookOpen,
+  Palette,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
@@ -175,6 +176,14 @@ export default function PayrollDashboardPage() {
       href: "/payroll/leave-buyout",
       color: "bg-success/10 text-success",
       tabCode: "leave_buyout",
+    },
+    {
+      title: t("payroll.modules.templates.title"),
+      description: t("payroll.modules.templates.description"),
+      icon: Palette,
+      href: "/payroll/templates",
+      color: "bg-purple-500/10 text-purple-600",
+      tabCode: "templates",
     },
     {
       title: t("payroll.modules.glInterface.title", "GL Interface"),

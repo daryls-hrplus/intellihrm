@@ -1,27 +1,35 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { usePayroll, Payslip } from "@/hooks/usePayroll";
+import { usePayslipTemplates, PayslipTemplate } from "@/hooks/usePayslipTemplates";
 import { useAuth } from "@/contexts/AuthContext";
-import { FileText, Download, Eye, Search, DollarSign, Calendar } from "lucide-react";
+import { PayslipDocument } from "@/components/payroll/PayslipDocument";
+import { FileText, Download, Eye, Search, DollarSign, Calendar, Loader2 } from "lucide-react";
 import { format } from "date-fns";
 import { useTranslation } from "react-i18next";
+import { jsPDF } from "jspdf";
+import html2canvas from "html2canvas";
+import { toast } from "sonner";
 
 export default function PayslipsPage() {
   const { t } = useTranslation();
-  const { user } = useAuth();
+  const { user, company } = useAuth();
   const { fetchPayslips, isLoading } = usePayroll();
+  const { fetchDefaultTemplate } = usePayslipTemplates();
   
   const [payslips, setPayslips] = useState<Payslip[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedPayslip, setSelectedPayslip] = useState<Payslip | null>(null);
   const [detailDialogOpen, setDetailDialogOpen] = useState(false);
+  const [template, setTemplate] = useState<PayslipTemplate | null>(null);
+  const [isDownloading, setIsDownloading] = useState(false);
+  const payslipRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (user?.id) {
@@ -29,10 +37,22 @@ export default function PayslipsPage() {
     }
   }, [user?.id]);
 
+  useEffect(() => {
+    if (company?.id) {
+      loadTemplate();
+    }
+  }, [company?.id]);
+
   const loadPayslips = async () => {
     if (!user?.id) return;
     const data = await fetchPayslips(user.id);
     setPayslips(data);
+  };
+
+  const loadTemplate = async () => {
+    if (!company?.id) return;
+    const tmpl = await fetchDefaultTemplate(company.id);
+    setTemplate(tmpl);
   };
 
   const formatCurrency = (amount: number, currency: string = 'USD') => {
@@ -52,35 +72,54 @@ export default function PayslipsPage() {
     setDetailDialogOpen(true);
   };
 
-  const downloadPayslip = (payslip: Payslip) => {
-    // In a real app, this would download the actual PDF
-    const content = `
-PAYSLIP
-${payslip.payslip_number}
-
-Pay Period: ${format(new Date(payslip.pay_period_start), "MMM d, yyyy")} - ${format(new Date(payslip.pay_period_end), "MMM d, yyyy")}
-Pay Date: ${format(new Date(payslip.pay_date), "MMM d, yyyy")}
-
-EARNINGS
----------
-Gross Pay: ${formatCurrency(payslip.gross_pay)}
-
-DEDUCTIONS
------------
-Total Deductions: ${formatCurrency(payslip.total_deductions)}
-
-NET PAY
---------
-${formatCurrency(payslip.net_pay)}
-    `;
+  const downloadPayslipPDF = async (payslip: Payslip) => {
+    setIsDownloading(true);
     
-    const blob = new Blob([content], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `payslip_${payslip.payslip_number}.txt`;
-    a.click();
-    URL.revokeObjectURL(url);
+    try {
+      // Wait for dialog to render if not already open
+      if (!detailDialogOpen) {
+        setSelectedPayslip(payslip);
+        setDetailDialogOpen(true);
+        await new Promise(resolve => setTimeout(resolve, 300));
+      }
+
+      const element = payslipRef.current;
+      if (!element) {
+        throw new Error("Payslip element not found");
+      }
+
+      const canvas = await html2canvas(element, {
+        scale: 2,
+        useCORS: true,
+        logging: false,
+        backgroundColor: '#ffffff',
+      });
+
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4',
+      });
+
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = pdf.internal.pageSize.getHeight();
+      const imgWidth = canvas.width;
+      const imgHeight = canvas.height;
+      const ratio = Math.min(pdfWidth / imgWidth, pdfHeight / imgHeight);
+      const imgX = (pdfWidth - imgWidth * ratio) / 2;
+      const imgY = 10;
+
+      pdf.addImage(imgData, 'PNG', imgX, imgY, imgWidth * ratio, imgHeight * ratio);
+      pdf.save(`payslip_${payslip.payslip_number}.pdf`);
+      
+      toast.success(t("payroll.payslips.downloadSuccess"));
+    } catch (error) {
+      console.error("PDF generation error:", error);
+      toast.error(t("payroll.payslips.downloadError"));
+    } finally {
+      setIsDownloading(false);
+    }
   };
 
   // Calculate YTD totals
@@ -89,6 +128,22 @@ ${formatCurrency(payslip.net_pay)}
   const ytdGross = ytdPayslips.reduce((sum, p) => sum + p.gross_pay, 0);
   const ytdNet = ytdPayslips.reduce((sum, p) => sum + p.net_pay, 0);
   const ytdDeductions = ytdPayslips.reduce((sum, p) => sum + p.total_deductions, 0);
+
+  // Employee info for template
+  const employeeInfo = {
+    full_name: user?.user_metadata?.full_name || user?.email || 'Employee',
+    email: user?.email || '',
+    employee_number: '',
+    department: '',
+    position: '',
+  };
+
+  // YTD totals for template
+  const ytdTotals = {
+    gross: ytdGross,
+    deductions: ytdDeductions,
+    net: ytdNet,
+  };
 
   return (
     <AppLayout>
@@ -212,8 +267,17 @@ ${formatCurrency(payslip.net_pay)}
                         <Button variant="ghost" size="sm" onClick={() => viewPayslip(payslip)}>
                           <Eye className="h-4 w-4" />
                         </Button>
-                        <Button variant="ghost" size="sm" onClick={() => downloadPayslip(payslip)}>
-                          <Download className="h-4 w-4" />
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          onClick={() => downloadPayslipPDF(payslip)}
+                          disabled={isDownloading}
+                        >
+                          {isDownloading ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <Download className="h-4 w-4" />
+                          )}
                         </Button>
                       </div>
                     </TableCell>
@@ -231,51 +295,35 @@ ${formatCurrency(payslip.net_pay)}
           </CardContent>
         </Card>
 
-        {/* Payslip Detail Dialog */}
+        {/* Payslip Detail Dialog with Template */}
         <Dialog open={detailDialogOpen} onOpenChange={setDetailDialogOpen}>
-          <DialogContent className="max-w-lg">
+          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>{t("payroll.payslips.payslipDetails")}</DialogTitle>
             </DialogHeader>
             {selectedPayslip && (
-              <div className="space-y-6">
-                <div className="text-center border-b pb-4">
-                  <p className="text-lg font-semibold">{selectedPayslip.payslip_number}</p>
-                  <p className="text-sm text-muted-foreground">
-                    {t("payroll.payslips.payPeriod")}: {format(new Date(selectedPayslip.pay_period_start), "MMM d")} - {format(new Date(selectedPayslip.pay_period_end), "MMM d, yyyy")}
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    {t("payroll.payslips.payDate")}: {format(new Date(selectedPayslip.pay_date), "MMMM d, yyyy")}
-                  </p>
+              <div className="space-y-4">
+                <div ref={payslipRef}>
+                  <PayslipDocument
+                    payslip={selectedPayslip}
+                    template={template}
+                    employee={employeeInfo}
+                    company={{ name: company?.name || 'Company' }}
+                    ytdTotals={ytdTotals}
+                  />
                 </div>
 
-                <div className="space-y-3">
-                  <div className="flex justify-between p-3 bg-muted rounded-lg">
-                    <span className="font-medium">{t("payroll.payslips.grossPay")}</span>
-                    <span className="font-semibold">{formatCurrency(selectedPayslip.gross_pay)}</span>
-                  </div>
-
-                  <div className="border rounded-lg p-3 space-y-2">
-                    <p className="font-medium text-sm text-muted-foreground">{t("payroll.payslips.deductions")}</p>
-                    <div className="flex justify-between">
-                      <span className="text-sm">{t("payroll.payslips.totalDeductions")}</span>
-                      <span className="text-sm text-destructive">-{formatCurrency(selectedPayslip.total_deductions)}</span>
-                    </div>
-                  </div>
-
-                  <div className="flex justify-between p-3 bg-success/10 rounded-lg">
-                    <span className="font-bold text-success">{t("payroll.payslips.netPay")}</span>
-                    <span className="font-bold text-success text-lg">{formatCurrency(selectedPayslip.net_pay)}</span>
-                  </div>
-                </div>
-
-                <div className="flex justify-end gap-2">
+                <div className="flex justify-end gap-2 pt-4 border-t">
                   <Button variant="outline" onClick={() => setDetailDialogOpen(false)}>
                     {t("common.close")}
                   </Button>
-                  <Button onClick={() => downloadPayslip(selectedPayslip)}>
-                    <Download className="h-4 w-4 mr-2" />
-                    {t("common.download")}
+                  <Button onClick={() => downloadPayslipPDF(selectedPayslip)} disabled={isDownloading}>
+                    {isDownloading ? (
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    ) : (
+                      <Download className="h-4 w-4 mr-2" />
+                    )}
+                    {t("payroll.payslips.downloadPdf")}
                   </Button>
                 </div>
               </div>
