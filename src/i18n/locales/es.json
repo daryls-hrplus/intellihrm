@@ -720,6 +720,80 @@
         "title": "Reclamaciones de Gastos",
         "description": "Enviar y rastrear reembolsos de gastos"
       }
+    },
+    "myExpenseClaims": {
+      "title": "Mis reclamaciones de gastos",
+      "subtitle": "Enviar y rastrear reembolsos de gastos",
+      "breadcrumb": "Mis reclamaciones de gastos",
+      "newClaim": "Nueva reclamación",
+      "totalClaims": "Total de reclamaciones",
+      "pendingAmount": "Importe pendiente",
+      "approvedPaid": "Aprobado/Pagado",
+      "myClaims": "Mis reclamaciones",
+      "loading": "Cargando...",
+      "noClaimsYet": "Aún no hay reclamaciones de gastos",
+      "claimNumber": "Reclamación #",
+      "date": "Fecha",
+      "amount": "Importe",
+      "status": "Estado",
+      "claim": "Reclamación",
+      "total": "Total",
+      "addItem": "Agregar ítem",
+      "submit": "Enviar",
+      "noItemsYet": "Aún no hay ítems",
+      "category": "Categoría",
+      "newClaimDialog": {
+        "title": "Nueva reclamación de gastos",
+        "description": "Descripción (Opcional)",
+        "descriptionPlaceholder": "Viaje a sitio del cliente, gastos de conferencia, etc.",
+        "cancel": "Cancelar",
+        "create": "Crear reclamación",
+        "creating": "Creando..."
+      },
+      "addItemDialog": {
+        "title": "Agregar ítem de gasto",
+        "date": "Fecha",
+        "category": "Categoría",
+        "selectCategory": "Seleccionar categoría",
+        "amount": "Importe",
+        "description": "Descripción",
+        "descriptionPlaceholder": "Detalles sobre este gasto",
+        "receipt": "Recibo/Documento (Opcional)",
+        "uploadReceipt": "Subir recibo",
+        "fileHint": "Imágenes o PDF, máx. 5MB",
+        "cancel": "Cancelar",
+        "add": "Agregar ítem",
+        "adding": "Agregando..."
+      },
+      "receipt": "Recibo",
+      "statuses": {
+        "draft": "Borrador",
+        "submitted": "Enviado",
+        "pending_approval": "Pendiente de aprobación",
+        "approved": "Aprobado",
+        "rejected": "Rechazado",
+        "paid": "Pagado",
+        "pending_payment": "Pendiente de pago"
+      },
+      "toast": {
+        "success": "Éxito",
+        "error": "Error",
+        "claimCreated": "Reclamación de gastos creada",
+        "createFailed": "No se pudo crear la reclamación",
+        "itemAdded": "Ítem de gasto agregado",
+        "addFailed": "No se pudo agregar el ítem",
+        "itemRemoved": "Ítem eliminado",
+        "deleteFailed": "No se pudo eliminar el ítem",
+        "submitted": "Reclamación enviada para aprobación",
+        "submitFailed": "No se pudo enviar la reclamación",
+        "fillRequired": "Por favor completa los campos obligatorios",
+        "addItem": "Agrega al menos un ítem de gasto",
+        "invalidFileType": "Solo se permiten imágenes y PDF",
+        "fileTooLarge": "El archivo debe ser menor de 5MB"
+      }
+    },
+    "MyExpenseClaims": {
+      "myClaims": "Mis reclamaciones"
     }
   }
 }
