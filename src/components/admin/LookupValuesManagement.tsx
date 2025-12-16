@@ -47,7 +47,14 @@ type LookupCategory =
   | "employee_type"
   | "employment_action"
   | "leave_type"
-  | "contract_type";
+  | "contract_type"
+  | "qualification_type"
+  | "education_level"
+  | "field_of_study"
+  | "institution_name"
+  | "certification_type"
+  | "certification_name"
+  | "accrediting_body";
 
 interface LookupValue {
   id: string;
@@ -82,6 +89,13 @@ const CATEGORY_LABELS: Record<LookupCategory, string> = {
   employment_action: "Employment Actions",
   leave_type: "Leave Types",
   contract_type: "Contract Types",
+  qualification_type: "Qualification Types",
+  education_level: "Education Levels",
+  field_of_study: "Fields of Study",
+  institution_name: "Institution Names",
+  certification_type: "Certification Types",
+  certification_name: "Certification/License Names",
+  accrediting_body: "Certifying/Accrediting Bodies",
 };
 
 const CATEGORY_DESCRIPTIONS: Record<LookupCategory, string> = {
@@ -91,6 +105,13 @@ const CATEGORY_DESCRIPTIONS: Record<LookupCategory, string> = {
   employment_action: "Actions that can be taken on employee records",
   leave_type: "Types of leave available to employees",
   contract_type: "Types of employment contracts",
+  qualification_type: "Types of qualifications (academic, professional, etc.)",
+  education_level: "Levels of educational attainment",
+  field_of_study: "Academic and professional fields of study",
+  institution_name: "Names of educational institutions",
+  certification_type: "Types of professional certifications",
+  certification_name: "Names of certifications and licenses",
+  accrediting_body: "Organizations that issue certifications and accreditations",
 };
 
 const defaultFormValues: LookupValueForm = {
