@@ -270,7 +270,7 @@ export default function EmployeeAssignmentsPage() {
 
   const handleSave = async () => {
     if (!formEmployeeId || !formPositionId || !formStartDate) {
-      toast.error("Employee, position, and start date are required");
+      toast.error(t("workforce.employeePositionRequired"));
       return;
     }
 
@@ -295,14 +295,14 @@ export default function EmployeeAssignmentsPage() {
           .eq("id", editingAssignment.id);
 
         if (error) throw error;
-        toast.success("Assignment updated successfully");
+        toast.success(t("workforce.assignmentUpdated"));
       } else {
         const { error } = await supabase
           .from("employee_positions")
           .insert(data);
 
         if (error) throw error;
-        toast.success("Assignment created successfully");
+        toast.success(t("workforce.assignmentCreated"));
       }
 
       setDialogOpen(false);
@@ -310,7 +310,7 @@ export default function EmployeeAssignmentsPage() {
       fetchAssignments();
     } catch (error: any) {
       console.error("Error saving assignment:", error);
-      toast.error(error.message || "Failed to save assignment");
+      toast.error(error.message || t("common.error"));
     } finally {
       setIsSaving(false);
     }
@@ -326,12 +326,12 @@ export default function EmployeeAssignmentsPage() {
         .eq("id", deleteId);
 
       if (error) throw error;
-      toast.success("Assignment deleted successfully");
+      toast.success(t("workforce.assignmentDeleted"));
       setDeleteId(null);
       fetchAssignments();
     } catch (error) {
       console.error("Error deleting assignment:", error);
-      toast.error("Failed to delete assignment");
+      toast.error(t("common.error"));
     }
   };
 
@@ -356,7 +356,7 @@ export default function EmployeeAssignmentsPage() {
     link.href = URL.createObjectURL(blob);
     link.download = `employee-assignments-${format(new Date(), "yyyy-MM-dd")}.csv`;
     link.click();
-    toast.success("CSV exported successfully");
+    toast.success(t("workforce.csvExported"));
   };
 
   const filteredDepartments = selectedCompanyId !== "all"
@@ -446,13 +446,13 @@ export default function EmployeeAssignmentsPage() {
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label>Department</Label>
+                <Label>{t("workforce.department")}</Label>
                 <Select value={selectedDepartmentId} onValueChange={setSelectedDepartmentId}>
                   <SelectTrigger className="w-[180px]">
-                    <SelectValue placeholder="All Departments" />
+                    <SelectValue placeholder={t("workforce.allDepartments")} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All Departments</SelectItem>
+                    <SelectItem value="all">{t("workforce.allDepartments")}</SelectItem>
                     {filteredDepartments.map((dept) => (
                       <SelectItem key={dept.id} value={dept.id}>
                         {dept.name}
@@ -462,24 +462,24 @@ export default function EmployeeAssignmentsPage() {
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label>Status</Label>
+                <Label>{t("workforce.status")}</Label>
                 <Select value={selectedStatus} onValueChange={setSelectedStatus}>
                   <SelectTrigger className="w-[140px]">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All</SelectItem>
-                    <SelectItem value="active">Active</SelectItem>
-                    <SelectItem value="inactive">Inactive</SelectItem>
+                    <SelectItem value="all">{t("workforce.all")}</SelectItem>
+                    <SelectItem value="active">{t("workforce.active")}</SelectItem>
+                    <SelectItem value="inactive">{t("common.inactive")}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               <div className="space-y-2 flex-1 min-w-[200px]">
-                <Label>Search</Label>
+                <Label>{t("common.search")}</Label>
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
-                    placeholder="Search employee, position, department..."
+                    placeholder={t("workforce.searchAssignments")}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="pl-10"
@@ -493,9 +493,9 @@ export default function EmployeeAssignmentsPage() {
         {/* Assignments Table */}
         <Card>
           <CardHeader>
-            <CardTitle>Assignments ({filteredAssignments.length})</CardTitle>
+            <CardTitle>{t("workforce.assignmentsCount")} ({filteredAssignments.length})</CardTitle>
             <CardDescription>
-              All employee-position assignments across the organization
+              {t("workforce.allAssignmentsDescription")}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -505,22 +505,22 @@ export default function EmployeeAssignmentsPage() {
               </div>
             ) : filteredAssignments.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground">
-                No assignments found
+                {t("workforce.noAssignmentsFound")}
               </div>
             ) : (
               <div className="rounded-md border overflow-x-auto">
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Employee</TableHead>
-                      <TableHead>Position</TableHead>
-                      <TableHead>Department</TableHead>
-                      <TableHead>Company</TableHead>
-                      <TableHead>Start Date</TableHead>
-                      <TableHead>End Date</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Primary</TableHead>
-                      {isAdmin && <TableHead className="text-right">Actions</TableHead>}
+                      <TableHead>{t("workforce.employee")}</TableHead>
+                      <TableHead>{t("workforce.position")}</TableHead>
+                      <TableHead>{t("workforce.department")}</TableHead>
+                      <TableHead>{t("workforce.company")}</TableHead>
+                      <TableHead>{t("common.startDate")}</TableHead>
+                      <TableHead>{t("common.endDate")}</TableHead>
+                      <TableHead>{t("common.status")}</TableHead>
+                      <TableHead>{t("workforce.primaryAssignment")}</TableHead>
+                      {isAdmin && <TableHead className="text-right">{t("common.actions")}</TableHead>}
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -546,12 +546,12 @@ export default function EmployeeAssignmentsPage() {
                         </TableCell>
                         <TableCell>
                           <Badge variant={assignment.is_active ? "default" : "secondary"}>
-                            {assignment.is_active ? "Active" : "Inactive"}
+                            {assignment.is_active ? t("common.active") : t("common.inactive")}
                           </Badge>
                         </TableCell>
                         <TableCell>
                           {assignment.is_primary && (
-                            <Badge variant="outline" className="bg-primary/10">Primary</Badge>
+                            <Badge variant="outline" className="bg-primary/10">{t("workforce.primaryAssignment")}</Badge>
                           )}
                         </TableCell>
                         {isAdmin && (
@@ -560,7 +560,7 @@ export default function EmployeeAssignmentsPage() {
                               <Button
                                 variant="ghost"
                                 size="icon"
-                                title="View history"
+                                title={t("workforce.viewHistory")}
                                 onClick={() => {
                                   setHistoryEmployee({
                                     id: assignment.employee_id,
@@ -601,18 +601,18 @@ export default function EmployeeAssignmentsPage() {
         <Dialog open={dialogOpen} onOpenChange={(open) => { setDialogOpen(open); if (!open) resetForm(); }}>
           <DialogContent className="max-w-lg">
             <DialogHeader>
-              <DialogTitle>{editingAssignment ? "Edit Assignment" : "New Assignment"}</DialogTitle>
+              <DialogTitle>{editingAssignment ? t("workforce.editAssignment") : t("workforce.newAssignment")}</DialogTitle>
               <DialogDescription>
-                {editingAssignment ? "Update the employee-position assignment" : "Assign an employee to a position"}
+                {editingAssignment ? t("workforce.updateAssignment") : t("workforce.assignToPosition")}
               </DialogDescription>
             </DialogHeader>
 
             <div className="space-y-4 py-4">
               <div className="space-y-2">
-                <Label htmlFor="employee">Employee *</Label>
+                <Label htmlFor="employee">{t("workforce.employee")} *</Label>
                 <Select value={formEmployeeId} onValueChange={setFormEmployeeId}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select employee" />
+                    <SelectValue placeholder={t("workforce.selectEmployee")} />
                   </SelectTrigger>
                   <SelectContent>
                     {employees.map((emp) => (
@@ -625,10 +625,10 @@ export default function EmployeeAssignmentsPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="position">Position *</Label>
+                <Label htmlFor="position">{t("workforce.position")} *</Label>
                 <Select value={formPositionId} onValueChange={setFormPositionId}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select position" />
+                    <SelectValue placeholder={t("workforce.selectPosition")} />
                   </SelectTrigger>
                   <SelectContent>
                     {filteredPositionsForForm.map((pos) => (
@@ -642,7 +642,7 @@ export default function EmployeeAssignmentsPage() {
 
               <div className="grid gap-4 grid-cols-2">
                 <div className="space-y-2">
-                  <Label htmlFor="startDate">Start Date *</Label>
+                  <Label htmlFor="startDate">{t("common.startDate")} *</Label>
                   <Input
                     id="startDate"
                     type="date"
@@ -651,7 +651,7 @@ export default function EmployeeAssignmentsPage() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="endDate">End Date</Label>
+                  <Label htmlFor="endDate">{t("common.endDate")}</Label>
                   <Input
                     id="endDate"
                     type="date"
@@ -663,17 +663,17 @@ export default function EmployeeAssignmentsPage() {
 
               <div className="grid gap-4 grid-cols-3">
                 <div className="space-y-2">
-                  <Label htmlFor="compAmount">Compensation</Label>
+                  <Label htmlFor="compAmount">{t("workforce.compensationAmount")}</Label>
                   <Input
                     id="compAmount"
                     type="number"
-                    placeholder="Amount"
+                    placeholder={t("common.amount")}
                     value={formCompAmount}
                     onChange={(e) => setFormCompAmount(e.target.value)}
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="compCurrency">Currency</Label>
+                  <Label htmlFor="compCurrency">{t("workforce.currency")}</Label>
                   <Select value={formCompCurrency} onValueChange={setFormCompCurrency}>
                     <SelectTrigger>
                       <SelectValue />
@@ -688,17 +688,17 @@ export default function EmployeeAssignmentsPage() {
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="compFrequency">Frequency</Label>
+                  <Label htmlFor="compFrequency">{t("workforce.frequency")}</Label>
                   <Select value={formCompFrequency} onValueChange={setFormCompFrequency}>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="hourly">Hourly</SelectItem>
-                      <SelectItem value="daily">Daily</SelectItem>
-                      <SelectItem value="weekly">Weekly</SelectItem>
-                      <SelectItem value="monthly">Monthly</SelectItem>
-                      <SelectItem value="yearly">Yearly</SelectItem>
+                      <SelectItem value="hourly">{t("workforce.hourly")}</SelectItem>
+                      <SelectItem value="daily">{t("workforce.daily")}</SelectItem>
+                      <SelectItem value="weekly">{t("workforce.weekly")}</SelectItem>
+                      <SelectItem value="monthly">{t("workforce.monthly")}</SelectItem>
+                      <SelectItem value="yearly">{t("workforce.yearly")}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -711,7 +711,7 @@ export default function EmployeeAssignmentsPage() {
                     checked={formIsPrimary}
                     onCheckedChange={setFormIsPrimary}
                   />
-                  <Label htmlFor="isPrimary">Primary Position</Label>
+                  <Label htmlFor="isPrimary">{t("workforce.primaryPosition")}</Label>
                 </div>
                 <div className="flex items-center gap-2">
                   <Switch
@@ -719,18 +719,18 @@ export default function EmployeeAssignmentsPage() {
                     checked={formIsActive}
                     onCheckedChange={setFormIsActive}
                   />
-                  <Label htmlFor="isActive">Active</Label>
+                  <Label htmlFor="isActive">{t("common.active")}</Label>
                 </div>
               </div>
             </div>
 
             <DialogFooter>
               <Button variant="outline" onClick={() => setDialogOpen(false)}>
-                Cancel
+                {t("common.cancel")}
               </Button>
               <Button onClick={handleSave} disabled={isSaving}>
                 {isSaving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-                {editingAssignment ? "Update" : "Create"}
+                {editingAssignment ? t("common.update") : t("common.create")}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -740,15 +740,15 @@ export default function EmployeeAssignmentsPage() {
         <AlertDialog open={!!deleteId} onOpenChange={(open) => !open && setDeleteId(null)}>
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>Delete Assignment?</AlertDialogTitle>
+              <AlertDialogTitle>{t("workforce.deleteAssignment")}</AlertDialogTitle>
               <AlertDialogDescription>
-                This action cannot be undone. The employee will be unassigned from this position.
+                {t("workforce.deleteAssignmentConfirm")}
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogCancel>{t("common.cancel")}</AlertDialogCancel>
               <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-                Delete
+                {t("common.delete")}
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
