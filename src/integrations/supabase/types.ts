@@ -5464,6 +5464,7 @@ export type Database = {
           notes: string | null
           override_reason: string | null
           pay_element_id: string
+          position_id: string | null
           start_date: string
           updated_at: string
           updated_by: string | null
@@ -5483,6 +5484,7 @@ export type Database = {
           notes?: string | null
           override_reason?: string | null
           pay_element_id: string
+          position_id?: string | null
           start_date?: string
           updated_at?: string
           updated_by?: string | null
@@ -5502,6 +5504,7 @@ export type Database = {
           notes?: string | null
           override_reason?: string | null
           pay_element_id?: string
+          position_id?: string | null
           start_date?: string
           updated_at?: string
           updated_by?: string | null
@@ -5533,6 +5536,13 @@ export type Database = {
             columns: ["pay_element_id"]
             isOneToOne: false
             referencedRelation: "pay_elements"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_compensation_position_id_fkey"
+            columns: ["position_id"]
+            isOneToOne: false
+            referencedRelation: "positions"
             referencedColumns: ["id"]
           },
           {
