@@ -1,8 +1,11 @@
 import { AppLayout } from "@/components/layout/AppLayout";
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { ScheduledOrgReports } from "@/components/admin/ScheduledOrgReports";
 import { useLocation } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 export default function AdminScheduledReportsPage() {
+  const { t } = useTranslation();
   const location = useLocation();
   const state = location.state as { 
     prefill?: boolean; 
@@ -13,10 +16,14 @@ export default function AdminScheduledReportsPage() {
   return (
     <AppLayout>
       <div className="space-y-6">
+        <Breadcrumbs items={[
+          { label: t("navigation.hrHub"), href: "/hr-hub" },
+          { label: t("hrHub.scheduledReports") }
+        ]} />
         <div>
-          <h1 className="text-3xl font-bold">Scheduled Reports</h1>
+          <h1 className="text-3xl font-bold">{t("hrHub.scheduledReports")}</h1>
           <p className="text-muted-foreground">
-            Configure automated organizational change reports to be sent via email
+            {t("hrHub.scheduledReportsDesc")}
           </p>
         </div>
         <ScheduledOrgReports 
