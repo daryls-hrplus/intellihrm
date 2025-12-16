@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout } from "@/components/layout/AppLayout";
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
+import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -47,6 +49,7 @@ const statusColors: Record<string, string> = {
 };
 
 export default function AdminHelpdeskPage() {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [selectedTicket, setSelectedTicket] = useState<any>(null);
   const [commentText, setCommentText] = useState("");
@@ -256,10 +259,14 @@ export default function AdminHelpdeskPage() {
   return (
     <AppLayout>
       <div className="space-y-6">
+        <Breadcrumbs items={[
+          { label: t("navigation.hrHub"), href: "/hr-hub" },
+          { label: t("hrHub.helpDesk") }
+        ]} />
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">Helpdesk Dashboard</h1>
-            <p className="text-muted-foreground">Manage support tickets and monitor SLAs</p>
+            <h1 className="text-3xl font-bold tracking-tight">{t("hrHub.helpDesk")}</h1>
+            <p className="text-muted-foreground">{t("hrHub.helpDeskDesc")}</p>
           </div>
         </div>
 
