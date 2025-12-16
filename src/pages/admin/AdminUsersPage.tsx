@@ -7,6 +7,24 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuditLog } from "@/hooks/useAuditLog";
 import { usePiiVisibility } from "@/hooks/usePiiVisibility";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Tooltip,
   TooltipContent,
@@ -17,6 +35,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
@@ -27,10 +46,16 @@ import {
   MoreHorizontal,
   Check,
   Loader2,
-  Mail,
   Calendar,
   Building2,
   EyeOff,
+  UserPlus,
+  Mail,
+  Key,
+  UserX,
+  UserCheck,
+  Copy,
+  Ban,
 } from "lucide-react";
 
 type AppRole = string;
@@ -55,6 +80,9 @@ interface UserWithRoles {
   roles: string[];
   company_id: string | null;
   company_name: string | null;
+  is_active: boolean;
+  invited_at: string | null;
+  invitation_status: string | null;
 }
 
 // Default styling for known roles - used for stats cards only
@@ -78,9 +106,22 @@ export default function AdminUsersPage() {
   const [updatingUserId, setUpdatingUserId] = useState<string | null>(null);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [openCompanyDropdown, setOpenCompanyDropdown] = useState<string | null>(null);
+  
+  // Invite dialog state
+  const [showInviteDialog, setShowInviteDialog] = useState(false);
+  const [inviteEmail, setInviteEmail] = useState("");
+  const [inviteFullName, setInviteFullName] = useState("");
+  const [inviteCompanyId, setInviteCompanyId] = useState<string>("");
+  const [isInviting, setIsInviting] = useState(false);
+  
+  // Temp password dialog state
+  const [showTempPasswordDialog, setShowTempPasswordDialog] = useState(false);
+  const [tempPassword, setTempPassword] = useState("");
+  const [tempPasswordEmail, setTempPasswordEmail] = useState("");
+  
   const { user: currentUser } = useAuth();
   const { toast } = useToast();
-  const { logView } = useAuditLog();
+  const { logView, logAction } = useAuditLog();
   const { canViewPii, maskPii } = usePiiVisibility();
   const hasLoggedView = useRef(false);
 
@@ -146,6 +187,9 @@ export default function AdminUsersPage() {
         created_at: profile.created_at,
         company_id: profile.company_id,
         company_name: profile.company_id ? companyLookup[profile.company_id] || null : null,
+        is_active: profile.is_active ?? true,
+        invited_at: profile.invited_at,
+        invitation_status: profile.invitation_status,
         roles: (roles || [])
           .filter((r) => r.user_id === profile.id)
           .map((r) => r.role as AppRole),
@@ -261,12 +305,238 @@ export default function AdminUsersPage() {
     }
   };
 
+  const handleInviteUser = async () => {
+    if (!inviteEmail) {
+      toast({
+        title: "Email required",
+        description: "Please enter an email address.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsInviting(true);
+    try {
+      const { data: session } = await supabase.auth.getSession();
+      const { data, error } = await supabase.functions.invoke("manage-user", {
+        body: {
+          action: "invite",
+          email: inviteEmail,
+          full_name: inviteFullName,
+          company_id: inviteCompanyId || null,
+        },
+        headers: {
+          Authorization: `Bearer ${session?.session?.access_token}`,
+        },
+      });
+
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+
+      logAction({
+        action: "CREATE",
+        entityType: "user",
+        entityId: data.user_id,
+        entityName: inviteEmail,
+        newValues: { email: inviteEmail, full_name: inviteFullName },
+      });
+
+      // Show temp password
+      setTempPasswordEmail(inviteEmail);
+      setTempPassword(data.temp_password);
+      setShowInviteDialog(false);
+      setShowTempPasswordDialog(true);
+      
+      // Reset form
+      setInviteEmail("");
+      setInviteFullName("");
+      setInviteCompanyId("");
+      
+      // Refresh user list
+      fetchData();
+
+      toast({
+        title: "User invited",
+        description: data.email_sent 
+          ? "Invitation email sent successfully." 
+          : "User created. Email not sent (RESEND_API_KEY not configured).",
+      });
+    } catch (error: unknown) {
+      console.error("Error inviting user:", error);
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to invite user.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsInviting(false);
+    }
+  };
+
+  const handleResendInvite = async (userId: string) => {
+    setUpdatingUserId(userId);
+    setOpenDropdown(null);
+
+    try {
+      const { data: session } = await supabase.auth.getSession();
+      const { data, error } = await supabase.functions.invoke("manage-user", {
+        body: {
+          action: "resend_invite",
+          user_id: userId,
+        },
+        headers: {
+          Authorization: `Bearer ${session?.session?.access_token}`,
+        },
+      });
+
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+
+      const user = users.find(u => u.id === userId);
+      setTempPasswordEmail(user?.email || "");
+      setTempPassword(data.temp_password);
+      setShowTempPasswordDialog(true);
+
+      toast({
+        title: "Invite resent",
+        description: data.email_sent 
+          ? "New credentials email sent." 
+          : "Credentials reset. Email not sent (RESEND_API_KEY not configured).",
+      });
+    } catch (error: unknown) {
+      console.error("Error resending invite:", error);
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to resend invite.",
+        variant: "destructive",
+      });
+    } finally {
+      setUpdatingUserId(null);
+    }
+  };
+
+  const handleToggleUserStatus = async (userId: string, enable: boolean) => {
+    if (!enable && userId === currentUser?.id) {
+      toast({
+        title: "Cannot disable yourself",
+        description: "You cannot disable your own account.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setUpdatingUserId(userId);
+    setOpenDropdown(null);
+
+    try {
+      const { data: session } = await supabase.auth.getSession();
+      const { data, error } = await supabase.functions.invoke("manage-user", {
+        body: {
+          action: enable ? "enable" : "disable",
+          user_id: userId,
+        },
+        headers: {
+          Authorization: `Bearer ${session?.session?.access_token}`,
+        },
+      });
+
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+
+      const user = users.find(u => u.id === userId);
+      logAction({
+        action: "UPDATE",
+        entityType: "user",
+        entityId: userId,
+        entityName: user?.email,
+        oldValues: { is_active: !enable },
+        newValues: { is_active: enable },
+      });
+
+      // Update local state
+      setUsers((prev) =>
+        prev.map((u) =>
+          u.id === userId ? { ...u, is_active: enable } : u
+        )
+      );
+
+      toast({
+        title: enable ? "User enabled" : "User disabled",
+        description: enable 
+          ? "User can now access the system." 
+          : "User access has been revoked.",
+      });
+    } catch (error: unknown) {
+      console.error("Error toggling user status:", error);
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to update user status.",
+        variant: "destructive",
+      });
+    } finally {
+      setUpdatingUserId(null);
+    }
+  };
+
+  const handleGenerateTempPassword = async (userId: string) => {
+    setUpdatingUserId(userId);
+    setOpenDropdown(null);
+
+    try {
+      const { data: session } = await supabase.auth.getSession();
+      const { data, error } = await supabase.functions.invoke("manage-user", {
+        body: {
+          action: "generate_temp_password",
+          user_id: userId,
+        },
+        headers: {
+          Authorization: `Bearer ${session?.session?.access_token}`,
+        },
+      });
+
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+
+      const user = users.find(u => u.id === userId);
+      setTempPasswordEmail(user?.email || "");
+      setTempPassword(data.temp_password);
+      setShowTempPasswordDialog(true);
+
+      toast({
+        title: "Password reset",
+        description: data.email_sent 
+          ? "New password sent to user." 
+          : "Password reset. Email not sent (RESEND_API_KEY not configured).",
+      });
+    } catch (error: unknown) {
+      console.error("Error generating temp password:", error);
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to generate password.",
+        variant: "destructive",
+      });
+    } finally {
+      setUpdatingUserId(null);
+    }
+  };
+
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+    toast({
+      title: "Copied",
+      description: "Password copied to clipboard.",
+    });
+  };
+
   const filteredUsers = users.filter(
     (user) =>
       user.full_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
       user.company_name?.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  const activeUsers = users.filter(u => u.is_active);
+  const disabledUsers = users.filter(u => !u.is_active);
 
   const getInitials = (name: string | null, email: string) => {
     if (name) {
@@ -317,14 +587,20 @@ export default function AdminUsersPage() {
               Manage users, roles, and company assignments
             </p>
           </div>
-          <div className="flex items-center gap-2 rounded-lg bg-primary/10 px-3 py-2 text-sm text-primary">
-            <Shield className="h-4 w-4" />
-            Admin Access
+          <div className="flex items-center gap-3">
+            <Button onClick={() => setShowInviteDialog(true)}>
+              <UserPlus className="mr-2 h-4 w-4" />
+              Invite User
+            </Button>
+            <div className="flex items-center gap-2 rounded-lg bg-primary/10 px-3 py-2 text-sm text-primary">
+              <Shield className="h-4 w-4" />
+              Admin Access
+            </div>
           </div>
         </div>
 
         {/* Stats */}
-        <div className="grid gap-4 sm:grid-cols-4 animate-slide-up">
+        <div className="grid gap-4 sm:grid-cols-5 animate-slide-up">
           {roleDefinitions.slice(0, 3).map((role) => {
             const count = users.filter((u) => u.roles.includes(role.code)).length;
             const style = getRoleStyle(role.code);
@@ -349,11 +625,22 @@ export default function AdminUsersPage() {
           <div className="rounded-xl border border-border bg-card p-5 shadow-card">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Companies</p>
-                <p className="mt-1 text-3xl font-bold text-card-foreground">{companies.length}</p>
+                <p className="text-sm font-medium text-muted-foreground">Active Users</p>
+                <p className="mt-1 text-3xl font-bold text-card-foreground">{activeUsers.length}</p>
               </div>
-              <div className="rounded-lg bg-info/10 p-3 text-info">
-                <Building2 className="h-5 w-5" />
+              <div className="rounded-lg bg-success/10 p-3 text-success">
+                <UserCheck className="h-5 w-5" />
+              </div>
+            </div>
+          </div>
+          <div className="rounded-xl border border-border bg-card p-5 shadow-card">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Disabled</p>
+                <p className="mt-1 text-3xl font-bold text-card-foreground">{disabledUsers.length}</p>
+              </div>
+              <div className="rounded-lg bg-destructive/10 p-3 text-destructive">
+                <Ban className="h-5 w-5" />
               </div>
             </div>
           </div>
@@ -411,6 +698,9 @@ export default function AdminUsersPage() {
                       Role
                     </th>
                     <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                      Status
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                       Joined
                     </th>
                     <th className="px-6 py-4 text-right text-xs font-semibold uppercase tracking-wider text-muted-foreground">
@@ -428,11 +718,19 @@ export default function AdminUsersPage() {
                     return (
                       <tr
                         key={user.id}
-                        className="transition-colors hover:bg-muted/30"
+                        className={cn(
+                          "transition-colors hover:bg-muted/30",
+                          !user.is_active && "opacity-60"
+                        )}
                       >
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-3">
-                            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-sm font-semibold text-primary">
+                            <div className={cn(
+                              "flex h-10 w-10 items-center justify-center rounded-full text-sm font-semibold",
+                              user.is_active 
+                                ? "bg-primary/10 text-primary" 
+                                : "bg-muted text-muted-foreground"
+                            )}>
                               {getInitials(user.full_name, user.email)}
                             </div>
                             <div>
@@ -508,6 +806,28 @@ export default function AdminUsersPage() {
                           </span>
                         </td>
                         <td className="px-6 py-4">
+                          <span
+                            className={cn(
+                              "inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium",
+                              user.is_active 
+                                ? "bg-success/10 text-success" 
+                                : "bg-destructive/10 text-destructive"
+                            )}
+                          >
+                            {user.is_active ? (
+                              <>
+                                <UserCheck className="h-3.5 w-3.5" />
+                                Active
+                              </>
+                            ) : (
+                              <>
+                                <Ban className="h-3.5 w-3.5" />
+                                Disabled
+                              </>
+                            )}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4">
                           <div className="flex items-center gap-2 text-sm text-muted-foreground">
                             <Calendar className="h-4 w-4" />
                             {formatDate(user.created_at)}
@@ -534,7 +854,7 @@ export default function AdminUsersPage() {
                             </DropdownMenuTrigger>
                             <DropdownMenuContent
                               align="end"
-                              className="z-50 w-48"
+                              className="z-50 w-56"
                             >
                               <DropdownMenuLabel className="px-3 py-2 text-xs font-semibold uppercase text-muted-foreground">
                                 Change Role
@@ -561,6 +881,49 @@ export default function AdminUsersPage() {
                                   </DropdownMenuItem>
                                 );
                               })}
+                              
+                              <DropdownMenuSeparator />
+                              
+                              <DropdownMenuLabel className="px-3 py-2 text-xs font-semibold uppercase text-muted-foreground">
+                                User Actions
+                              </DropdownMenuLabel>
+                              
+                              <DropdownMenuItem
+                                onClick={() => handleResendInvite(user.id)}
+                                className="flex w-full items-center gap-2 px-3 py-2 text-sm"
+                              >
+                                <Mail className="h-4 w-4" />
+                                <span className="flex-1 text-left">Resend Invite</span>
+                              </DropdownMenuItem>
+                              
+                              <DropdownMenuItem
+                                onClick={() => handleGenerateTempPassword(user.id)}
+                                className="flex w-full items-center gap-2 px-3 py-2 text-sm"
+                              >
+                                <Key className="h-4 w-4" />
+                                <span className="flex-1 text-left">Generate Temp Password</span>
+                              </DropdownMenuItem>
+                              
+                              <DropdownMenuSeparator />
+                              
+                              {user.is_active ? (
+                                <DropdownMenuItem
+                                  onClick={() => handleToggleUserStatus(user.id, false)}
+                                  disabled={isCurrentUser}
+                                  className="flex w-full items-center gap-2 px-3 py-2 text-sm text-destructive focus:text-destructive"
+                                >
+                                  <UserX className="h-4 w-4" />
+                                  <span className="flex-1 text-left">Disable User</span>
+                                </DropdownMenuItem>
+                              ) : (
+                                <DropdownMenuItem
+                                  onClick={() => handleToggleUserStatus(user.id, true)}
+                                  className="flex w-full items-center gap-2 px-3 py-2 text-sm text-success focus:text-success"
+                                >
+                                  <UserCheck className="h-4 w-4" />
+                                  <span className="flex-1 text-left">Enable User</span>
+                                </DropdownMenuItem>
+                              )}
                             </DropdownMenuContent>
                           </DropdownMenu>
                         </td>
@@ -573,6 +936,112 @@ export default function AdminUsersPage() {
           )}
         </div>
       </div>
+
+      {/* Invite User Dialog */}
+      <Dialog open={showInviteDialog} onOpenChange={setShowInviteDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Invite New User</DialogTitle>
+            <DialogDescription>
+              Send an invitation to a new user. They will receive login credentials via email.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="invite-email">Email *</Label>
+              <Input
+                id="invite-email"
+                type="email"
+                placeholder="user@company.com"
+                value={inviteEmail}
+                onChange={(e) => setInviteEmail(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="invite-name">Full Name</Label>
+              <Input
+                id="invite-name"
+                placeholder="John Doe"
+                value={inviteFullName}
+                onChange={(e) => setInviteFullName(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="invite-company">Company</Label>
+              <Select value={inviteCompanyId} onValueChange={setInviteCompanyId}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select company (optional)" />
+                </SelectTrigger>
+                <SelectContent>
+                  {companies.map((company) => (
+                    <SelectItem key={company.id} value={company.id}>
+                      {company.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowInviteDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleInviteUser} disabled={isInviting}>
+              {isInviting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Inviting...
+                </>
+              ) : (
+                <>
+                  <Mail className="mr-2 h-4 w-4" />
+                  Send Invite
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Temp Password Dialog */}
+      <Dialog open={showTempPasswordDialog} onOpenChange={setShowTempPasswordDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Temporary Password</DialogTitle>
+            <DialogDescription>
+              Share these credentials with the user. They should change their password after first login.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Email</Label>
+              <div className="rounded-md bg-muted p-3 font-mono text-sm">
+                {tempPasswordEmail}
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label>Temporary Password</Label>
+              <div className="flex items-center gap-2">
+                <div className="flex-1 rounded-md bg-muted p-3 font-mono text-sm">
+                  {tempPassword}
+                </div>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() => copyToClipboard(tempPassword)}
+                >
+                  <Copy className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button onClick={() => setShowTempPasswordDialog(false)}>
+              Done
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </AppLayout>
   );
 }
