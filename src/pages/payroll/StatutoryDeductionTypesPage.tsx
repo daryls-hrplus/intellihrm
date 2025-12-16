@@ -15,6 +15,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { Plus, Edit, Trash2, FileText, Search } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
+import { CountrySelect } from "@/components/ui/country-select";
+import { getCountryName, countries } from "@/lib/countries";
 
 interface StatutoryDeductionType {
   id: string;
@@ -29,24 +31,6 @@ interface StatutoryDeductionType {
   created_at: string;
   updated_at: string;
 }
-
-const COUNTRIES = [
-  { code: "US", name: "United States" },
-  { code: "GB", name: "United Kingdom" },
-  { code: "CA", name: "Canada" },
-  { code: "AU", name: "Australia" },
-  { code: "IE", name: "Ireland" },
-  { code: "JM", name: "Jamaica" },
-  { code: "TT", name: "Trinidad and Tobago" },
-  { code: "BB", name: "Barbados" },
-  { code: "GY", name: "Guyana" },
-  { code: "NG", name: "Nigeria" },
-  { code: "GH", name: "Ghana" },
-  { code: "ZA", name: "South Africa" },
-  { code: "KE", name: "Kenya" },
-  { code: "IN", name: "India" },
-  { code: "PH", name: "Philippines" },
-];
 
 const STATUTORY_TYPES = [
   { value: "income_tax", label: "Income Tax" },
@@ -201,9 +185,7 @@ export default function StatutoryDeductionTypesPage() {
     return STATUTORY_TYPES.find((t) => t.value === type)?.label || type;
   };
 
-  const getCountryName = (code: string) => {
-    return COUNTRIES.find((c) => c.code === code)?.name || code;
-  };
+  // getCountryName is imported from @/lib/countries
 
   return (
     <AppLayout>
@@ -254,7 +236,7 @@ export default function StatutoryDeductionTypesPage() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Countries</SelectItem>
-                  {COUNTRIES.map((c) => (
+                  {countries.map((c) => (
                     <SelectItem key={c.code} value={c.code}>
                       {c.name}
                     </SelectItem>
@@ -338,18 +320,12 @@ export default function StatutoryDeductionTypesPage() {
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>Country *</Label>
-                  <Select value={form.country} onValueChange={(v) => setForm({ ...form, country: v })}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select country" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {COUNTRIES.map((c) => (
-                        <SelectItem key={c.code} value={c.code}>
-                          {c.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <CountrySelect
+                    value={form.country}
+                    onChange={(v) => setForm({ ...form, country: v })}
+                    valueType="code"
+                    placeholder="Select country"
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label>Statutory Type *</Label>

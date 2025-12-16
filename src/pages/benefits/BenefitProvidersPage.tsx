@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout } from "@/components/layout/AppLayout";
@@ -31,6 +31,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
+import { CountrySelect } from "@/components/ui/country-select";
 import { toast } from "sonner";
 import { Plus, Pencil, Trash2, Building2, Globe, Phone, Mail } from "lucide-react";
 import { format } from "date-fns";
@@ -48,6 +49,11 @@ export default function BenefitProvidersPage() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingProvider, setEditingProvider] = useState<any>(null);
   const [selectedCompanyId, setSelectedCompanyId] = useState<string>("");
+  const [selectedCountry, setSelectedCountry] = useState<string>("");
+
+  useEffect(() => {
+    setSelectedCountry(editingProvider?.country || "");
+  }, [editingProvider]);
   const queryClient = useQueryClient();
 
   const { data: companies = [] } = useQuery({
@@ -310,11 +316,13 @@ export default function BenefitProvidersPage() {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="country">Country</Label>
-                    <Input
-                      id="country"
-                      name="country"
-                      defaultValue={editingProvider?.country || ""}
+                    <CountrySelect
+                      value={selectedCountry}
+                      onChange={setSelectedCountry}
+                      valueType="name"
+                      placeholder="Select country"
                     />
+                    <input type="hidden" name="country" value={selectedCountry} />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="postal_code">Postal Code</Label>

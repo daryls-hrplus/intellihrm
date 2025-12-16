@@ -10,6 +10,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { CountrySelect } from "@/components/ui/country-select";
 import { CalendarIcon, Loader2, GraduationCap, Award } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
@@ -336,10 +337,11 @@ export function QualificationDialog({
                 </div>
                 <div>
                   <Label>Country</Label>
-                  <Input
+                  <CountrySelect
                     value={formData.country}
-                    onChange={(e) => setFormData({ ...formData, country: e.target.value })}
-                    placeholder="e.g., United States"
+                    onChange={(v) => setFormData({ ...formData, country: v })}
+                    valueType="name"
+                    placeholder="Select country"
                   />
                 </div>
                 <div>
@@ -440,10 +442,11 @@ export function QualificationDialog({
                 </div>
                 <div>
                   <Label>Country</Label>
-                  <Input
+                  <CountrySelect
                     value={formData.country}
-                    onChange={(e) => setFormData({ ...formData, country: e.target.value })}
-                    placeholder="e.g., United States"
+                    onChange={(v) => setFormData({ ...formData, country: v })}
+                    valueType="name"
+                    placeholder="Select country"
                   />
                 </div>
                 <div>
