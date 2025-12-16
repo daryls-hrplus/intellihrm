@@ -435,7 +435,15 @@ export default function PayrollProcessingPage() {
                         </span>
                       )}
                     </TableCell>
-                    <TableCell>{run.employee_count}</TableCell>
+                    <TableCell>
+                      <Button
+                        variant="link"
+                        className="p-0 h-auto font-normal text-primary underline-offset-4 hover:underline"
+                        onClick={() => viewRunDetails(run)}
+                      >
+                        {run.employee_count}
+                      </Button>
+                    </TableCell>
                     <TableCell>{formatCurrency(run.total_gross_pay, run.currency)}</TableCell>
                     <TableCell>{formatCurrency(run.total_net_pay, run.currency)}</TableCell>
                     <TableCell className="text-xs text-muted-foreground">
