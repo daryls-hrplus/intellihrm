@@ -127,13 +127,13 @@ export default function MyExpenseClaimsPage() {
 
       if (error) throw error;
 
-      toast({ title: "Success", description: "Expense claim created" });
+      toast({ title: t('ess.myExpenseClaims.toast.success'), description: t('ess.myExpenseClaims.toast.claimCreated') });
       setDialogOpen(false);
       setClaimForm({ description: "" });
       loadClaims();
       setSelectedClaim(data as ExpenseClaim);
     } catch (error) {
-      toast({ title: "Error", description: "Failed to create claim", variant: "destructive" });
+      toast({ title: t('ess.myExpenseClaims.toast.error'), description: t('ess.myExpenseClaims.toast.createFailed'), variant: "destructive" });
     } finally {
       setIsSubmitting(false);
     }
@@ -143,16 +143,14 @@ export default function MyExpenseClaimsPage() {
     const file = e.target.files?.[0];
     if (!file) return;
     
-    // Validate file type
     const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'application/pdf'];
     if (!allowedTypes.includes(file.type)) {
-      toast({ title: "Error", description: "Only images and PDFs are allowed", variant: "destructive" });
+      toast({ title: t('ess.myExpenseClaims.toast.error'), description: t('ess.myExpenseClaims.toast.invalidFileType'), variant: "destructive" });
       return;
     }
     
-    // Validate file size (5MB max)
     if (file.size > 5 * 1024 * 1024) {
-      toast({ title: "Error", description: "File size must be less than 5MB", variant: "destructive" });
+      toast({ title: t('ess.myExpenseClaims.toast.error'), description: t('ess.myExpenseClaims.toast.fileTooLarge'), variant: "destructive" });
       return;
     }
     
@@ -188,7 +186,7 @@ export default function MyExpenseClaimsPage() {
 
   const handleAddItem = async () => {
     if (!selectedClaim || !itemForm.category || !itemForm.amount) {
-      toast({ title: "Error", description: "Please fill in required fields", variant: "destructive" });
+      toast({ title: t('ess.myExpenseClaims.toast.error'), description: t('ess.myExpenseClaims.toast.fillRequired'), variant: "destructive" });
       return;
     }
     setIsSubmitting(true);
@@ -211,11 +209,10 @@ export default function MyExpenseClaimsPage() {
 
       if (error) throw error;
 
-      // Update total
       const newTotal = claimItems.reduce((sum, i) => sum + i.amount, 0) + parseFloat(itemForm.amount);
       await supabase.from("expense_claims").update({ total_amount: newTotal }).eq("id", selectedClaim.id);
 
-      toast({ title: "Success", description: "Expense item added" });
+      toast({ title: t('ess.myExpenseClaims.toast.success'), description: t('ess.myExpenseClaims.toast.itemAdded') });
       setItemDialogOpen(false);
       setItemForm({ expense_date: format(new Date(), "yyyy-MM-dd"), category: "", description: "", amount: "" });
       setSelectedFile(null);
@@ -223,7 +220,7 @@ export default function MyExpenseClaimsPage() {
       loadClaimItems(selectedClaim.id);
       loadClaims();
     } catch (error) {
-      toast({ title: "Error", description: "Failed to add item", variant: "destructive" });
+      toast({ title: t('ess.myExpenseClaims.toast.error'), description: t('ess.myExpenseClaims.toast.addFailed'), variant: "destructive" });
     } finally {
       setIsSubmitting(false);
     }
@@ -237,17 +234,17 @@ export default function MyExpenseClaimsPage() {
       const newTotal = Math.max(0, selectedClaim.total_amount - amount);
       await supabase.from("expense_claims").update({ total_amount: newTotal }).eq("id", selectedClaim.id);
 
-      toast({ title: "Success", description: "Item removed" });
+      toast({ title: t('ess.myExpenseClaims.toast.success'), description: t('ess.myExpenseClaims.toast.itemRemoved') });
       loadClaimItems(selectedClaim.id);
       loadClaims();
     } catch (error) {
-      toast({ title: "Error", description: "Failed to delete item", variant: "destructive" });
+      toast({ title: t('ess.myExpenseClaims.toast.error'), description: t('ess.myExpenseClaims.toast.deleteFailed'), variant: "destructive" });
     }
   };
 
   const handleSubmitClaim = async () => {
     if (!selectedClaim || claimItems.length === 0) {
-      toast({ title: "Error", description: "Add at least one expense item", variant: "destructive" });
+      toast({ title: t('ess.myExpenseClaims.toast.error'), description: t('ess.myExpenseClaims.toast.addItem'), variant: "destructive" });
       return;
     }
 
@@ -257,11 +254,11 @@ export default function MyExpenseClaimsPage() {
         .update({ status: "submitted", submitted_at: new Date().toISOString() })
         .eq("id", selectedClaim.id);
 
-      toast({ title: "Success", description: "Claim submitted for approval" });
+      toast({ title: t('ess.myExpenseClaims.toast.success'), description: t('ess.myExpenseClaims.toast.submitted') });
       setSelectedClaim(null);
       loadClaims();
     } catch (error) {
-      toast({ title: "Error", description: "Failed to submit claim", variant: "destructive" });
+      toast({ title: t('ess.myExpenseClaims.toast.error'), description: t('ess.myExpenseClaims.toast.submitFailed'), variant: "destructive" });
     }
   };
 
@@ -273,8 +270,10 @@ export default function MyExpenseClaimsPage() {
       approved: "bg-green-500/20 text-green-700",
       rejected: "bg-red-500/20 text-red-700",
       paid: "bg-emerald-500/20 text-emerald-700",
+      pending_payment: "bg-blue-500/20 text-blue-700",
     };
-    return <Badge className={colors[status] || "bg-muted"}>{status.replace("_", " ")}</Badge>;
+    const statusKey = status as keyof typeof colors;
+    return <Badge className={colors[statusKey] || "bg-muted"}>{t(`ess.myExpenseClaims.statuses.${status}`, status.replace("_", " "))}</Badge>;
   };
 
   const totalPending = claims.filter(c => c.status === "submitted" || c.status === "pending_approval").reduce((s, c) => s + c.total_amount, 0);
@@ -304,7 +303,7 @@ export default function MyExpenseClaimsPage() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Total Claims</CardTitle>
+              <CardTitle className="text-sm font-medium text-muted-foreground">{t('ess.myExpenseClaims.totalClaims')}</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="flex items-center gap-2">
@@ -315,7 +314,7 @@ export default function MyExpenseClaimsPage() {
           </Card>
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Pending Amount</CardTitle>
+              <CardTitle className="text-sm font-medium text-muted-foreground">{t('ess.myExpenseClaims.pendingAmount')}</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="flex items-center gap-2">
@@ -326,7 +325,7 @@ export default function MyExpenseClaimsPage() {
           </Card>
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Approved/Paid</CardTitle>
+              <CardTitle className="text-sm font-medium text-muted-foreground">{t('ess.myExpenseClaims.approvedPaid')}</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="flex items-center gap-2">
@@ -340,21 +339,21 @@ export default function MyExpenseClaimsPage() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <Card>
             <CardHeader>
-              <CardTitle>My Claims</CardTitle>
+              <CardTitle>{t('ess.myExpenseClaims.myClaims')}</CardTitle>
             </CardHeader>
             <CardContent>
               {isLoading ? (
-                <div className="text-center py-8 text-muted-foreground">Loading...</div>
+                <div className="text-center py-8 text-muted-foreground">{t('ess.myExpenseClaims.loading')}</div>
               ) : claims.length === 0 ? (
-                <div className="text-center py-8 text-muted-foreground">No expense claims yet</div>
+                <div className="text-center py-8 text-muted-foreground">{t('ess.myExpenseClaims.noClaimsYet')}</div>
               ) : (
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Claim #</TableHead>
-                      <TableHead>Date</TableHead>
-                      <TableHead>Amount</TableHead>
-                      <TableHead>Status</TableHead>
+                      <TableHead>{t('ess.myExpenseClaims.claimNumber')}</TableHead>
+                      <TableHead>{t('ess.myExpenseClaims.date')}</TableHead>
+                      <TableHead>{t('ess.myExpenseClaims.amount')}</TableHead>
+                      <TableHead>{t('ess.myExpenseClaims.status')}</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -380,33 +379,33 @@ export default function MyExpenseClaimsPage() {
             <Card>
               <CardHeader className="flex flex-row items-center justify-between">
                 <div>
-                  <CardTitle>Claim {selectedClaim.claim_number}</CardTitle>
+                  <CardTitle>{t('ess.myExpenseClaims.claim')} {selectedClaim.claim_number}</CardTitle>
                   <p className="text-sm text-muted-foreground mt-1">
-                    Total: ${selectedClaim.total_amount.toFixed(2)} • {getStatusBadge(selectedClaim.status)}
+                    {t('ess.myExpenseClaims.total')}: ${selectedClaim.total_amount.toFixed(2)} • {getStatusBadge(selectedClaim.status)}
                   </p>
                 </div>
                 {selectedClaim.status === "draft" && (
                   <div className="flex gap-2">
                     <Button size="sm" variant="outline" onClick={() => setItemDialogOpen(true)}>
-                      <Plus className="h-4 w-4 mr-1" /> Add Item
+                      <Plus className="h-4 w-4 mr-1" /> {t('ess.myExpenseClaims.addItem')}
                     </Button>
                     <Button size="sm" onClick={handleSubmitClaim}>
-                      <Send className="h-4 w-4 mr-1" /> Submit
+                      <Send className="h-4 w-4 mr-1" /> {t('ess.myExpenseClaims.submit')}
                     </Button>
                   </div>
                 )}
               </CardHeader>
               <CardContent>
                 {claimItems.length === 0 ? (
-                  <div className="text-center py-8 text-muted-foreground">No items yet</div>
+                  <div className="text-center py-8 text-muted-foreground">{t('ess.myExpenseClaims.noItemsYet')}</div>
                 ) : (
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead>Date</TableHead>
-                        <TableHead>Category</TableHead>
-                        <TableHead>Amount</TableHead>
-                        <TableHead>Receipt</TableHead>
+                        <TableHead>{t('ess.myExpenseClaims.date')}</TableHead>
+                        <TableHead>{t('ess.myExpenseClaims.category')}</TableHead>
+                        <TableHead>{t('ess.myExpenseClaims.amount')}</TableHead>
+                        <TableHead>{t('ess.myExpenseClaims.receipt')}</TableHead>
                         {selectedClaim.status === "draft" && <TableHead></TableHead>}
                       </TableRow>
                     </TableHeader>
@@ -455,22 +454,22 @@ export default function MyExpenseClaimsPage() {
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>New Expense Claim</DialogTitle>
+              <DialogTitle>{t('ess.myExpenseClaims.newClaimDialog.title')}</DialogTitle>
             </DialogHeader>
             <div className="space-y-4">
               <div>
-                <Label>Description (Optional)</Label>
+                <Label>{t('ess.myExpenseClaims.newClaimDialog.description')}</Label>
                 <Textarea
                   value={claimForm.description}
                   onChange={(e) => setClaimForm({ description: e.target.value })}
-                  placeholder="Trip to client site, conference expenses, etc."
+                  placeholder={t('ess.myExpenseClaims.newClaimDialog.descriptionPlaceholder')}
                 />
               </div>
             </div>
             <DialogFooter>
-              <Button variant="outline" onClick={() => setDialogOpen(false)}>Cancel</Button>
+              <Button variant="outline" onClick={() => setDialogOpen(false)}>{t('ess.myExpenseClaims.newClaimDialog.cancel')}</Button>
               <Button onClick={handleCreateClaim} disabled={isSubmitting}>
-                {isSubmitting ? "Creating..." : "Create Claim"}
+                {isSubmitting ? t('ess.myExpenseClaims.newClaimDialog.creating') : t('ess.myExpenseClaims.newClaimDialog.create')}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -479,11 +478,11 @@ export default function MyExpenseClaimsPage() {
         <Dialog open={itemDialogOpen} onOpenChange={setItemDialogOpen}>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Add Expense Item</DialogTitle>
+              <DialogTitle>{t('ess.myExpenseClaims.addItemDialog.title')}</DialogTitle>
             </DialogHeader>
             <div className="space-y-4">
               <div>
-                <Label>Date</Label>
+                <Label>{t('ess.myExpenseClaims.addItemDialog.date')}</Label>
                 <Input
                   type="date"
                   value={itemForm.expense_date}
@@ -491,10 +490,10 @@ export default function MyExpenseClaimsPage() {
                 />
               </div>
               <div>
-                <Label>Category</Label>
+                <Label>{t('ess.myExpenseClaims.addItemDialog.category')}</Label>
                 <Select value={itemForm.category} onValueChange={(v) => setItemForm({ ...itemForm, category: v })}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select category" />
+                    <SelectValue placeholder={t('ess.myExpenseClaims.addItemDialog.selectCategory')} />
                   </SelectTrigger>
                   <SelectContent>
                     {EXPENSE_CATEGORIES.map((cat) => (
@@ -504,7 +503,7 @@ export default function MyExpenseClaimsPage() {
                 </Select>
               </div>
               <div>
-                <Label>Amount</Label>
+                <Label>{t('ess.myExpenseClaims.addItemDialog.amount')}</Label>
                 <Input
                   type="number"
                   step="0.01"
@@ -515,15 +514,15 @@ export default function MyExpenseClaimsPage() {
                 />
               </div>
               <div>
-                <Label>Description</Label>
+                <Label>{t('ess.myExpenseClaims.addItemDialog.description')}</Label>
                 <Textarea
                   value={itemForm.description}
                   onChange={(e) => setItemForm({ ...itemForm, description: e.target.value })}
-                  placeholder="Details about this expense"
+                  placeholder={t('ess.myExpenseClaims.addItemDialog.descriptionPlaceholder')}
                 />
               </div>
               <div>
-                <Label>Receipt/Document (Optional)</Label>
+                <Label>{t('ess.myExpenseClaims.addItemDialog.receipt')}</Label>
                 <div className="mt-2">
                   <input
                     type="file"
@@ -556,19 +555,19 @@ export default function MyExpenseClaimsPage() {
                       onClick={() => fileInputRef.current?.click()}
                     >
                       <Upload className="h-4 w-4 mr-2" />
-                      Upload Receipt
+                      {t('ess.myExpenseClaims.addItemDialog.uploadReceipt')}
                     </Button>
                   )}
                   <p className="text-xs text-muted-foreground mt-1">
-                    Images or PDF, max 5MB
+                    {t('ess.myExpenseClaims.addItemDialog.fileHint')}
                   </p>
                 </div>
               </div>
             </div>
             <DialogFooter>
-              <Button variant="outline" onClick={() => setItemDialogOpen(false)}>Cancel</Button>
+              <Button variant="outline" onClick={() => setItemDialogOpen(false)}>{t('ess.myExpenseClaims.addItemDialog.cancel')}</Button>
               <Button onClick={handleAddItem} disabled={isSubmitting}>
-                {isSubmitting ? "Adding..." : "Add Item"}
+                {isSubmitting ? t('ess.myExpenseClaims.addItemDialog.adding') : t('ess.myExpenseClaims.addItemDialog.add')}
               </Button>
             </DialogFooter>
           </DialogContent>
