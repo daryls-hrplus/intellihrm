@@ -16948,6 +16948,7 @@ export type Database = {
           description: string | null
           encashment_rate: number | null
           end_date: string | null
+          gender_applicability: string | null
           id: string
           is_accrual_based: boolean
           is_active: boolean
@@ -16973,6 +16974,7 @@ export type Database = {
           description?: string | null
           encashment_rate?: number | null
           end_date?: string | null
+          gender_applicability?: string | null
           id?: string
           is_accrual_based?: boolean
           is_active?: boolean
@@ -16998,6 +17000,7 @@ export type Database = {
           description?: string | null
           encashment_rate?: number | null
           end_date?: string | null
+          gender_applicability?: string | null
           id?: string
           is_accrual_based?: boolean
           is_active?: boolean

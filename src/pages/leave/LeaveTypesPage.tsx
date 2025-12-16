@@ -59,6 +59,7 @@ export default function LeaveTypesPage() {
     encashment_rate: 1,
     color: "#3B82F6",
     accrues_leave_while_on: true,
+    gender_applicability: "all" as "all" | "male" | "female",
   });
 
   const resetForm = () => {
@@ -79,6 +80,7 @@ export default function LeaveTypesPage() {
       encashment_rate: 1,
       color: "#3B82F6",
       accrues_leave_while_on: true,
+      gender_applicability: "all",
     });
     setEditingType(null);
   };
@@ -102,6 +104,7 @@ export default function LeaveTypesPage() {
       encashment_rate: type.encashment_rate,
       color: type.color,
       accrues_leave_while_on: type.accrues_leave_while_on,
+      gender_applicability: type.gender_applicability || "all",
     });
     setIsOpen(true);
   };
@@ -211,6 +214,25 @@ export default function LeaveTypesPage() {
                       value={formData.default_annual_entitlement}
                       onChange={(e) => setFormData({ ...formData, default_annual_entitlement: parseFloat(e.target.value) || 0 })}
                     />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="gender_applicability">{t("leave.leaveTypes.genderApplicability")}</Label>
+                    <Select
+                      value={formData.gender_applicability}
+                      onValueChange={(value: "all" | "male" | "female") => setFormData({ ...formData, gender_applicability: value })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">{t("leave.leaveTypes.genderAll")}</SelectItem>
+                        <SelectItem value="male">{t("leave.leaveTypes.genderMale")}</SelectItem>
+                        <SelectItem value="female">{t("leave.leaveTypes.genderFemale")}</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
 
@@ -331,6 +353,7 @@ export default function LeaveTypesPage() {
               <TableRow>
                 <TableHead>{t("leave.leaveTypes.name")}</TableHead>
                 <TableHead>{t("leave.leaveTypes.code")}</TableHead>
+                <TableHead>{t("leave.leaveTypes.genderApplicability")}</TableHead>
                 <TableHead>{t("leave.leaveTypes.accrualUnit")}</TableHead>
                 <TableHead>{t("leave.leaveTypes.entitlement")}</TableHead>
                 <TableHead>{t("leave.leaveTypes.accrualBased")}</TableHead>
@@ -343,13 +366,13 @@ export default function LeaveTypesPage() {
             <TableBody>
               {loadingTypes ? (
                 <TableRow>
-                  <TableCell colSpan={9} className="text-center py-8 text-muted-foreground">
+                  <TableCell colSpan={10} className="text-center py-8 text-muted-foreground">
                     {t("leave.leaveTypes.loading")}
                   </TableCell>
                 </TableRow>
               ) : leaveTypes.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={9} className="text-center py-8 text-muted-foreground">
+                  <TableCell colSpan={10} className="text-center py-8 text-muted-foreground">
                     {t("leave.leaveTypes.noTypes")}
                   </TableCell>
                 </TableRow>
@@ -363,6 +386,11 @@ export default function LeaveTypesPage() {
                       </div>
                     </TableCell>
                     <TableCell>{type.code}</TableCell>
+                    <TableCell>
+                      <Badge variant={type.gender_applicability === "all" ? "secondary" : "default"}>
+                        {t(`leave.leaveTypes.gender${type.gender_applicability?.charAt(0).toUpperCase()}${type.gender_applicability?.slice(1) || 'All'}`)}
+                      </Badge>
+                    </TableCell>
                     <TableCell className="capitalize">{type.accrual_unit}</TableCell>
                     <TableCell>{type.default_annual_entitlement} {type.accrual_unit}</TableCell>
                     <TableCell>
