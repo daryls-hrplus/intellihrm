@@ -1,5 +1,4 @@
 import { AppLayout } from "@/components/layout/AppLayout";
-import { NavLink } from "react-router-dom";
 import { ModuleReportsButton } from "@/components/reports/ModuleReportsButton";
 import { ModuleBIButton } from "@/components/bi/ModuleBIButton";
 import { useEffect, useState } from "react";
@@ -18,7 +17,6 @@ import {
   Heart,
   Shield,
   Stethoscope,
-  ChevronRight,
   CheckCircle,
   Users,
   BarChart3,
@@ -34,6 +32,7 @@ import {
   Building2,
   Loader2,
 } from "lucide-react";
+import { DraggableModuleCards, ModuleCardItem } from "@/components/ui/DraggableModuleCards";
 
 interface Company {
   id: string;
@@ -179,36 +178,15 @@ interface DashboardStats {
   pendingClaims: number;
 }
 
-function ModuleSection({ title, modules, startIndex }: { title: string; modules: ReturnType<typeof getBenefitsModules>; startIndex: number }) {
+function ModuleSection({ title, modules, preferenceKey }: { title: string; modules: ModuleCardItem[]; preferenceKey: string }) {
   return (
     <div className="space-y-4">
       <h2 className="text-lg font-semibold text-foreground">{title}</h2>
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {modules.map((module, index) => {
-          const Icon = module.icon;
-          return (
-            <NavLink
-              key={module.href}
-              to={module.href}
-              className="group rounded-xl border border-border bg-card p-5 shadow-card transition-all hover:shadow-card-hover hover:border-primary/20 animate-slide-up"
-              style={{ animationDelay: `${(startIndex + index) * 50}ms` }}
-            >
-              <div className="flex items-start justify-between">
-                <div className={`rounded-lg p-2.5 ${module.color}`}>
-                  <Icon className="h-5 w-5" />
-                </div>
-                <ChevronRight className="h-4 w-4 text-muted-foreground opacity-0 transition-all group-hover:opacity-100 group-hover:translate-x-1" />
-              </div>
-              <h3 className="mt-3 font-semibold text-card-foreground text-sm">
-                {module.title}
-              </h3>
-              <p className="mt-1 text-xs text-muted-foreground line-clamp-2">
-                {module.description}
-              </p>
-            </NavLink>
-          );
-        })}
-      </div>
+      <DraggableModuleCards 
+        modules={modules} 
+        preferenceKey={preferenceKey} 
+        showResetButton={false}
+      />
     </div>
   );
 }
@@ -411,10 +389,10 @@ export default function BenefitsDashboardPage() {
           })}
         </div>
 
-        <ModuleSection title={t("benefits.sections.coreBenefits")} modules={benefitsModules} startIndex={4} />
-        <ModuleSection title={t("benefits.sections.analyticsReporting")} modules={analyticsModules} startIndex={8} />
-        <ModuleSection title={t("benefits.sections.administration")} modules={administrationModules} startIndex={12} />
-        <ModuleSection title={t("benefits.sections.compliance")} modules={complianceModules} startIndex={16} />
+        <ModuleSection title={t("benefits.sections.coreBenefits")} modules={benefitsModules} preferenceKey="benefits_core_order" />
+        <ModuleSection title={t("benefits.sections.analyticsReporting")} modules={analyticsModules} preferenceKey="benefits_analytics_order" />
+        <ModuleSection title={t("benefits.sections.administration")} modules={administrationModules} preferenceKey="benefits_admin_order" />
+        <ModuleSection title={t("benefits.sections.compliance")} modules={complianceModules} preferenceKey="benefits_compliance_order" />
       </div>
     </AppLayout>
   );

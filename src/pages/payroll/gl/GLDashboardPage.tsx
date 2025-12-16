@@ -1,8 +1,6 @@
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Breadcrumbs } from '@/components/ui/breadcrumbs';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { 
   BookOpen, 
   Layers, 
@@ -13,67 +11,75 @@ import {
   Building2,
   Link2
 } from 'lucide-react';
+import { DraggableModuleCards, ModuleCardItem } from '@/components/ui/DraggableModuleCards';
 
 const GLDashboardPage = () => {
   const { t } = useTranslation();
-  const navigate = useNavigate();
 
-  const features = [
+  const features: ModuleCardItem[] = [
     {
       title: t('payroll.gl.chartOfAccounts', 'Chart of Accounts'),
       description: t('payroll.gl.chartOfAccountsDesc', 'Manage GL account codes and hierarchy'),
       icon: BookOpen,
-      link: '/payroll/gl/accounts',
-      color: 'bg-blue-500'
+      href: '/payroll/gl/accounts',
+      color: 'bg-blue-500/10 text-blue-600',
+      tabCode: 'chart_of_accounts',
     },
     {
       title: t('payroll.gl.costCenterSegments', 'Cost Center Segments'),
       description: t('payroll.gl.costCenterSegmentsDesc', 'Define cost center structure and segments'),
       icon: Layers,
-      link: '/payroll/gl/segments',
-      color: 'bg-purple-500'
+      href: '/payroll/gl/segments',
+      color: 'bg-purple-500/10 text-purple-600',
+      tabCode: 'cost_center_segments',
     },
     {
       title: t('payroll.gl.costCenters', 'Cost Centers'),
       description: t('payroll.gl.costCentersDesc', 'Manage cost centers with flexible segment values'),
       icon: Building2,
-      link: '/payroll/gl/cost-centers',
-      color: 'bg-green-500'
+      href: '/payroll/gl/cost-centers',
+      color: 'bg-green-500/10 text-green-600',
+      tabCode: 'cost_centers',
     },
     {
       title: t('payroll.gl.entityMappings', 'Entity Segment Mappings'),
       description: t('payroll.gl.entityMappingsDesc', 'Assign GL segment codes to organizational entities'),
       icon: Link2,
-      link: '/payroll/gl/entity-mappings',
-      color: 'bg-indigo-500'
+      href: '/payroll/gl/entity-mappings',
+      color: 'bg-indigo-500/10 text-indigo-600',
+      tabCode: 'entity_mappings',
     },
     {
       title: t('payroll.gl.accountMappings', 'Account Mappings'),
       description: t('payroll.gl.accountMappingsDesc', 'Map pay elements to GL accounts'),
       icon: GitBranch,
-      link: '/payroll/gl/mappings',
-      color: 'bg-orange-500'
+      href: '/payroll/gl/mappings',
+      color: 'bg-orange-500/10 text-orange-600',
+      tabCode: 'account_mappings',
     },
     {
       title: t('payroll.gl.costReallocations', 'Cost Reallocations'),
       description: t('payroll.gl.costReallocationsDesc', 'Redirect costs between cost centers'),
       icon: ArrowRightLeft,
-      link: '/payroll/gl/reallocations',
-      color: 'bg-red-500'
+      href: '/payroll/gl/reallocations',
+      color: 'bg-red-500/10 text-red-600',
+      tabCode: 'cost_reallocations',
     },
     {
       title: t('payroll.gl.journalBatches', 'Journal Batches'),
       description: t('payroll.gl.journalBatchesDesc', 'View and manage GL journal entries'),
       icon: FileText,
-      link: '/payroll/gl/batches',
-      color: 'bg-cyan-500'
+      href: '/payroll/gl/batches',
+      color: 'bg-cyan-500/10 text-cyan-600',
+      tabCode: 'journal_batches',
     },
     {
       title: t('payroll.gl.exportHistory', 'Export History'),
       description: t('payroll.gl.exportHistoryDesc', 'View GL export history and download files'),
       icon: Download,
-      link: '/payroll/gl/exports',
-      color: 'bg-gray-500'
+      href: '/payroll/gl/exports',
+      color: 'bg-gray-500/10 text-gray-600',
+      tabCode: 'export_history',
     }
   ];
 
@@ -94,27 +100,10 @@ const GLDashboardPage = () => {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {features.map((feature) => (
-            <Card
-              key={feature.link}
-              className="cursor-pointer hover:shadow-lg transition-shadow"
-              onClick={() => navigate(feature.link)}
-            >
-              <CardHeader className="flex flex-row items-center gap-4">
-                <div className={`p-3 rounded-lg ${feature.color}`}>
-                  <feature.icon className="h-6 w-6 text-white" />
-                </div>
-                <div>
-                  <CardTitle className="text-lg">{feature.title}</CardTitle>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <CardDescription>{feature.description}</CardDescription>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+        <DraggableModuleCards 
+          modules={features} 
+          preferenceKey="gl_interface_dashboard_order" 
+        />
       </div>
     </AppLayout>
   );

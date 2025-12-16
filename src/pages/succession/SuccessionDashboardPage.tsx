@@ -7,9 +7,9 @@ import { useGranularPermissions } from "@/hooks/useGranularPermissions";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useSuccession, NineBoxAssessment } from "@/hooks/useSuccession";
 import { supabase } from "@/integrations/supabase/client";
-import { TrendingUp, Grid3X3, Users, Target, AlertTriangle, BarChart3, BookOpen, Route, UserCheck, TrendingDown, Layers, ChevronRight } from "lucide-react";
+import { TrendingUp, Grid3X3, Users, Target, AlertTriangle, BarChart3, BookOpen, Route, UserCheck, TrendingDown, Layers } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
-import { NavLink } from "@/components/NavLink";
+import { DraggableModuleCards, ModuleCardItem } from "@/components/ui/DraggableModuleCards";
 
 interface Company {
   id: string;
@@ -97,13 +97,13 @@ export default function SuccessionDashboardPage() {
     { label: t("succession.stats.inTalentPools"), value: inTalentPools, icon: Users, color: "bg-info/10 text-info" },
   ];
 
-  const successionModules = [
+  const successionModules: ModuleCardItem[] = [
     {
       title: t("succession.tabs.nineBox"),
       description: t("succession.nineBox.description"),
       href: "/succession/nine-box",
       icon: Grid3X3,
-      colorClass: "bg-primary/10 text-primary",
+      color: "bg-primary/10 text-primary",
       tabCode: "nine-box",
     },
     {
@@ -111,7 +111,7 @@ export default function SuccessionDashboardPage() {
       description: t("succession.talentPools.description"),
       href: "/succession/talent-pools",
       icon: Users,
-      colorClass: "bg-info/10 text-info",
+      color: "bg-info/10 text-info",
       tabCode: "talent-pools",
     },
     {
@@ -119,7 +119,7 @@ export default function SuccessionDashboardPage() {
       description: t("succession.successionPlans.description"),
       href: "/succession/plans",
       icon: Target,
-      colorClass: "bg-success/10 text-success",
+      color: "bg-success/10 text-success",
       tabCode: "plans",
     },
     {
@@ -127,7 +127,7 @@ export default function SuccessionDashboardPage() {
       description: t("succession.keyPositions.description"),
       href: "/succession/key-positions",
       icon: AlertTriangle,
-      colorClass: "bg-destructive/10 text-destructive",
+      color: "bg-destructive/10 text-destructive",
       tabCode: "key-positions",
     },
     {
@@ -135,7 +135,7 @@ export default function SuccessionDashboardPage() {
       description: t("succession.careerDevelopment.description"),
       href: "/succession/career-development",
       icon: BookOpen,
-      colorClass: "bg-warning/10 text-warning",
+      color: "bg-warning/10 text-warning",
       tabCode: "career-development",
     },
     {
@@ -143,7 +143,7 @@ export default function SuccessionDashboardPage() {
       description: t("succession.careerPaths.description"),
       href: "/succession/career-paths",
       icon: Route,
-      colorClass: "bg-secondary/50 text-secondary-foreground",
+      color: "bg-secondary/50 text-secondary-foreground",
       tabCode: "career-paths",
     },
     {
@@ -151,7 +151,7 @@ export default function SuccessionDashboardPage() {
       description: t("succession.mentorship.description"),
       href: "/succession/mentorship",
       icon: UserCheck,
-      colorClass: "bg-accent/50 text-accent-foreground",
+      color: "bg-accent/50 text-accent-foreground",
       tabCode: "mentorship",
     },
     {
@@ -159,7 +159,7 @@ export default function SuccessionDashboardPage() {
       description: t("succession.flightRisk.description"),
       href: "/succession/flight-risk",
       icon: TrendingDown,
-      colorClass: "bg-destructive/10 text-destructive",
+      color: "bg-destructive/10 text-destructive",
       tabCode: "flight-risk",
     },
     {
@@ -167,7 +167,7 @@ export default function SuccessionDashboardPage() {
       description: t("succession.benchStrength.description"),
       href: "/succession/bench-strength",
       icon: Layers,
-      colorClass: "bg-primary/10 text-primary",
+      color: "bg-primary/10 text-primary",
       tabCode: "bench-strength",
     },
     {
@@ -175,7 +175,7 @@ export default function SuccessionDashboardPage() {
       description: t("succession.analytics.description"),
       href: "/succession/analytics",
       icon: BarChart3,
-      colorClass: "bg-info/10 text-info",
+      color: "bg-info/10 text-info",
       tabCode: "analytics",
     },
   ].filter(module => hasTabAccess("succession", module.tabCode));
@@ -241,32 +241,10 @@ export default function SuccessionDashboardPage() {
           })}
         </div>
 
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {successionModules.map((module, index) => {
-            const Icon = module.icon;
-            return (
-              <NavLink
-                key={module.href}
-                to={module.href}
-                className="group rounded-xl border border-border bg-card p-6 shadow-card transition-all hover:shadow-card-hover hover:border-primary/20 animate-slide-up"
-                style={{ animationDelay: `${(index + 4) * 50}ms` }}
-              >
-                <div className="flex items-start justify-between">
-                  <div className={`rounded-lg p-3 ${module.colorClass}`}>
-                    <Icon className="h-6 w-6" />
-                  </div>
-                  <ChevronRight className="h-5 w-5 text-muted-foreground opacity-0 transition-all group-hover:opacity-100 group-hover:translate-x-1" />
-                </div>
-                <h3 className="mt-4 font-semibold text-card-foreground">
-                  {module.title}
-                </h3>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  {module.description}
-                </p>
-              </NavLink>
-            );
-          })}
-        </div>
+        <DraggableModuleCards 
+          modules={successionModules} 
+          preferenceKey="succession_dashboard_order" 
+        />
       </div>
     </AppLayout>
   );

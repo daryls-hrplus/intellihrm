@@ -15,7 +15,6 @@ import {
   FileText,
   Users,
   Calendar,
-  ChevronRight,
   CheckCircle,
   BarChart3,
   ClipboardList,
@@ -26,6 +25,7 @@ import {
   TrendingUp,
   Settings,
 } from "lucide-react";
+import { DraggableModuleCards, ModuleCardItem } from "@/components/ui/DraggableModuleCards";
 
 export default function RecruitmentDashboardPage() {
   const { t } = useLanguage();
@@ -264,32 +264,10 @@ export default function RecruitmentDashboardPage() {
           })}
         </div>
 
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {recruitmentModules.map((module, index) => {
-            const Icon = module.icon;
-            return (
-              <NavLink
-                key={module.href}
-                to={module.href}
-                className="group rounded-xl border border-border bg-card p-6 shadow-card transition-all hover:shadow-card-hover hover:border-primary/20 animate-slide-up"
-                style={{ animationDelay: `${(index + 4) * 50}ms` }}
-              >
-                <div className="flex items-start justify-between">
-                  <div className={`rounded-lg p-3 ${module.color}`}>
-                    <Icon className="h-6 w-6" />
-                  </div>
-                  <ChevronRight className="h-5 w-5 text-muted-foreground opacity-0 transition-all group-hover:opacity-100 group-hover:translate-x-1" />
-                </div>
-                <h3 className="mt-4 font-semibold text-card-foreground">
-                  {module.title}
-                </h3>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  {module.description}
-                </p>
-              </NavLink>
-            );
-          })}
-        </div>
+        <DraggableModuleCards 
+          modules={recruitmentModules} 
+          preferenceKey="recruitment_dashboard_order" 
+        />
       </div>
     </AppLayout>
   );

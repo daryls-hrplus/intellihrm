@@ -12,7 +12,6 @@ import {
   FileSpreadsheet, 
   Receipt, 
   CalendarCheck,
-  ArrowRight,
   DollarSign,
   Users,
   Clock,
@@ -21,6 +20,7 @@ import {
   BookOpen,
   Palette,
 } from "lucide-react";
+import { DraggableModuleCards, ModuleCardItem } from "@/components/ui/DraggableModuleCards";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { format } from "date-fns";
@@ -256,31 +256,10 @@ export default function PayrollDashboardPage() {
         </div>
 
         {/* Features */}
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          {features.map((feature) => {
-            const Icon = feature.icon;
-            return (
-              <Card
-                key={feature.title}
-                className="group cursor-pointer transition-all hover:shadow-md"
-                onClick={() => navigate(feature.href)}
-              >
-                <CardHeader className="pb-2">
-                  <div className={`mb-2 flex h-10 w-10 items-center justify-center rounded-lg ${feature.color}`}>
-                    <Icon className="h-5 w-5" />
-                  </div>
-                  <CardTitle className="flex items-center justify-between text-base">
-                    {feature.title}
-                    <ArrowRight className="h-4 w-4 opacity-0 transition-opacity group-hover:opacity-100" />
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <CardDescription>{feature.description}</CardDescription>
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
+        <DraggableModuleCards 
+          modules={features} 
+          preferenceKey="payroll_dashboard_order" 
+        />
 
         {/* Quick Actions */}
         <Card>
