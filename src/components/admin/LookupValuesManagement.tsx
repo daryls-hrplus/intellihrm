@@ -37,7 +37,8 @@ import {
   TabsTrigger,
 } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { Plus, Pencil, Trash2, Loader2 } from "lucide-react";
+import { Plus, Pencil, Trash2, Loader2, Upload } from "lucide-react";
+import { BulkLookupValuesUpload } from "./BulkLookupValuesUpload";
 import { format } from "date-fns";
 import { useAuditLog } from "@/hooks/useAuditLog";
 
@@ -220,6 +221,7 @@ const defaultFormValues: LookupValueForm = {
 export function LookupValuesManagement() {
   const [activeCategory, setActiveCategory] = useState<LookupCategory>("employee_status");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isBulkUploadOpen, setIsBulkUploadOpen] = useState(false);
   const [editingValue, setEditingValue] = useState<LookupValue | null>(null);
   const [formData, setFormData] = useState<LookupValueForm>(defaultFormValues);
   const queryClient = useQueryClient();
@@ -442,10 +444,16 @@ export function LookupValuesManagement() {
                   {CATEGORY_CONFIG[category as LookupCategory].description}
                 </p>
               </div>
-              <Button onClick={() => handleOpenDialog()}>
-                <Plus className="h-4 w-4 mr-2" />
-                Add Value
-              </Button>
+              <div className="flex items-center gap-2">
+                <Button variant="outline" onClick={() => setIsBulkUploadOpen(true)}>
+                  <Upload className="h-4 w-4 mr-2" />
+                  Bulk Import
+                </Button>
+                <Button onClick={() => handleOpenDialog()}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Value
+                </Button>
+              </div>
             </div>
 
             {isLoading ? (
@@ -640,6 +648,14 @@ export function LookupValuesManagement() {
           </form>
         </DialogContent>
       </Dialog>
+
+      <BulkLookupValuesUpload
+        open={isBulkUploadOpen}
+        onOpenChange={setIsBulkUploadOpen}
+        category={activeCategory}
+        categoryLabel={CATEGORY_CONFIG[activeCategory].label}
+        onSuccess={() => queryClient.invalidateQueries({ queryKey: ["lookup-values", activeCategory] })}
+      />
     </div>
   );
 }
