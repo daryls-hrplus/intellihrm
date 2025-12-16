@@ -10,7 +10,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Plus, Pencil, Trash2, Bell, Mail, BellRing, Loader2 } from 'lucide-react';
+import { Plus, Pencil, Trash2, Bell, Mail, BellRing, Loader2, X } from 'lucide-react';
 import type { ReminderRule, ReminderEventType } from '@/types/reminders';
 import { PRIORITY_OPTIONS, NOTIFICATION_METHODS } from '@/types/reminders';
 
@@ -25,11 +25,13 @@ export function ReminderRulesManager({ companyId }: ReminderRulesManagerProps) {
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingRule, setEditingRule] = useState<ReminderRule | null>(null);
+  const [newInterval, setNewInterval] = useState<string>('');
   const [formData, setFormData] = useState<{
     name: string;
     description: string;
     event_type_id: string;
     days_before: number;
+    reminder_intervals: number[];
     send_to_employee: boolean;
     send_to_manager: boolean;
     send_to_hr: boolean;
@@ -42,6 +44,7 @@ export function ReminderRulesManager({ companyId }: ReminderRulesManagerProps) {
     description: '',
     event_type_id: '',
     days_before: 7,
+    reminder_intervals: [7],
     send_to_employee: true,
     send_to_manager: true,
     send_to_hr: false,
@@ -76,11 +79,13 @@ export function ReminderRulesManager({ companyId }: ReminderRulesManagerProps) {
   const handleOpenDialog = (rule?: ReminderRule) => {
     if (rule) {
       setEditingRule(rule);
+      const intervals = rule.reminder_intervals || [rule.days_before];
       setFormData({
         name: rule.name,
         description: rule.description || '',
         event_type_id: rule.event_type_id,
         days_before: rule.days_before,
+        reminder_intervals: intervals,
         send_to_employee: rule.send_to_employee,
         send_to_manager: rule.send_to_manager,
         send_to_hr: rule.send_to_hr,
@@ -96,6 +101,7 @@ export function ReminderRulesManager({ companyId }: ReminderRulesManagerProps) {
         description: '',
         event_type_id: '',
         days_before: 7,
+        reminder_intervals: [7],
         send_to_employee: true,
         send_to_manager: true,
         send_to_hr: false,
@@ -105,7 +111,24 @@ export function ReminderRulesManager({ companyId }: ReminderRulesManagerProps) {
         is_active: true,
       });
     }
+    setNewInterval('');
     setDialogOpen(true);
+  };
+
+  const addInterval = () => {
+    const value = parseInt(newInterval);
+    if (value > 0 && value <= 365 && !formData.reminder_intervals.includes(value)) {
+      const newIntervals = [...formData.reminder_intervals, value].sort((a, b) => b - a);
+      setFormData({ ...formData, reminder_intervals: newIntervals, days_before: newIntervals[0] });
+      setNewInterval('');
+    }
+  };
+
+  const removeInterval = (interval: number) => {
+    const newIntervals = formData.reminder_intervals.filter(i => i !== interval);
+    if (newIntervals.length > 0) {
+      setFormData({ ...formData, reminder_intervals: newIntervals, days_before: newIntervals[0] });
+    }
   };
 
   const handleSave = async () => {
@@ -207,17 +230,44 @@ export function ReminderRulesManager({ companyId }: ReminderRulesManagerProps) {
                 />
               </div>
 
-              <div className="grid grid-cols-3 gap-4">
-                <div className="space-y-2">
-                  <Label>Days Before Event</Label>
+              <div className="space-y-2">
+                <Label>Reminder Intervals (days before event)</Label>
+                <div className="flex flex-wrap gap-2 mb-2">
+                  {formData.reminder_intervals.map((interval) => (
+                    <Badge key={interval} variant="secondary" className="px-3 py-1 text-sm">
+                      {interval} days
+                      <button
+                        type="button"
+                        onClick={() => removeInterval(interval)}
+                        className="ml-2 hover:text-destructive"
+                        disabled={formData.reminder_intervals.length === 1}
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </Badge>
+                  ))}
+                </div>
+                <div className="flex gap-2">
                   <Input
                     type="number"
                     min={1}
                     max={365}
-                    value={formData.days_before}
-                    onChange={(e) => setFormData({ ...formData, days_before: parseInt(e.target.value) || 7 })}
+                    placeholder="Add interval (e.g., 10)"
+                    value={newInterval}
+                    onChange={(e) => setNewInterval(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addInterval())}
+                    className="w-40"
                   />
+                  <Button type="button" variant="outline" size="sm" onClick={addInterval}>
+                    <Plus className="h-4 w-4 mr-1" /> Add
+                  </Button>
                 </div>
+                <p className="text-xs text-muted-foreground">
+                  Add multiple intervals to send reminders at different times (e.g., 30, 14, 7, 3 days before)
+                </p>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>Priority</Label>
                   <Select
@@ -329,7 +379,7 @@ export function ReminderRulesManager({ companyId }: ReminderRulesManagerProps) {
               <TableRow>
                 <TableHead>Rule Name</TableHead>
                 <TableHead>Event Type</TableHead>
-                <TableHead>Days Before</TableHead>
+                <TableHead>Reminder Intervals</TableHead>
                 <TableHead>Recipients</TableHead>
                 <TableHead>Method</TableHead>
                 <TableHead>Priority</TableHead>
@@ -338,11 +388,21 @@ export function ReminderRulesManager({ companyId }: ReminderRulesManagerProps) {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {rules.map((rule) => (
+              {rules.map((rule) => {
+                const intervals = rule.reminder_intervals || [rule.days_before];
+                return (
                 <TableRow key={rule.id}>
                   <TableCell className="font-medium">{rule.name}</TableCell>
                   <TableCell>{rule.event_type?.name || '-'}</TableCell>
-                  <TableCell>{rule.days_before} days</TableCell>
+                  <TableCell>
+                    <div className="flex flex-wrap gap-1">
+                      {intervals.sort((a, b) => b - a).map((interval) => (
+                        <Badge key={interval} variant="outline" className="text-xs">
+                          {interval}d
+                        </Badge>
+                      ))}
+                    </div>
+                  </TableCell>
                   <TableCell>
                     <div className="flex gap-1">
                       {rule.send_to_employee && <Badge variant="outline" className="text-xs">Employee</Badge>}
@@ -370,7 +430,8 @@ export function ReminderRulesManager({ companyId }: ReminderRulesManagerProps) {
                     </div>
                   </TableCell>
                 </TableRow>
-              ))}
+              );
+              })}
             </TableBody>
           </Table>
         </Card>

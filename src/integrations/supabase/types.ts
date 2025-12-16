@@ -24056,6 +24056,7 @@ export type Database = {
           name: string
           notification_method: string
           priority: string | null
+          reminder_intervals: number[] | null
           send_to_employee: boolean | null
           send_to_hr: boolean | null
           send_to_manager: boolean | null
@@ -24074,6 +24075,7 @@ export type Database = {
           name: string
           notification_method?: string
           priority?: string | null
+          reminder_intervals?: number[] | null
           send_to_employee?: boolean | null
           send_to_hr?: boolean | null
           send_to_manager?: boolean | null
@@ -24092,6 +24094,7 @@ export type Database = {
           name?: string
           notification_method?: string
           priority?: string | null
+          reminder_intervals?: number[] | null
           send_to_employee?: boolean | null
           send_to_hr?: boolean | null
           send_to_manager?: boolean | null
