@@ -86,9 +86,10 @@ interface LookupCategoryConfig {
   label: string;
   description: string;
   module: string;
+  subgroup?: string;
 }
 
-// Grouped by module, alphabetically ordered within each module
+// Grouped by module, alphabetically ordered within each module/subgroup
 const CATEGORY_CONFIG: Record<LookupCategory, LookupCategoryConfig> = {
   // Leave Management
   leave_type: {
@@ -96,43 +97,7 @@ const CATEGORY_CONFIG: Record<LookupCategory, LookupCategoryConfig> = {
     description: "Types of leave available to employees",
     module: "Leave Management",
   },
-  // Qualifications
-  accrediting_body: {
-    label: "Certifying/Accrediting Bodies",
-    description: "Organizations that issue certifications and accreditations",
-    module: "Qualifications",
-  },
-  certification_name: {
-    label: "Certification/License Names",
-    description: "Names of certifications and licenses",
-    module: "Qualifications",
-  },
-  certification_type: {
-    label: "Certification Types",
-    description: "Types of professional certifications",
-    module: "Qualifications",
-  },
-  education_level: {
-    label: "Education Levels",
-    description: "Levels of educational attainment",
-    module: "Qualifications",
-  },
-  field_of_study: {
-    label: "Fields of Study",
-    description: "Academic and professional fields of study",
-    module: "Qualifications",
-  },
-  institution_name: {
-    label: "Institution Names",
-    description: "Names of educational institutions",
-    module: "Qualifications",
-  },
-  qualification_type: {
-    label: "Qualification Types",
-    description: "Types of qualifications (academic, professional, etc.)",
-    module: "Qualifications",
-  },
-  // Workforce
+  // Workforce - General
   contract_type: {
     label: "Contract Types",
     description: "Types of employment contracts",
@@ -158,30 +123,87 @@ const CATEGORY_CONFIG: Record<LookupCategory, LookupCategoryConfig> = {
     description: "Reasons for employment termination",
     module: "Workforce",
   },
+  // Workforce - Qualifications subgroup
+  accrediting_body: {
+    label: "Certifying/Accrediting Bodies",
+    description: "Organizations that issue certifications and accreditations",
+    module: "Workforce",
+    subgroup: "Qualifications",
+  },
+  certification_name: {
+    label: "Certification/License Names",
+    description: "Names of certifications and licenses",
+    module: "Workforce",
+    subgroup: "Qualifications",
+  },
+  certification_type: {
+    label: "Certification Types",
+    description: "Types of professional certifications",
+    module: "Workforce",
+    subgroup: "Qualifications",
+  },
+  education_level: {
+    label: "Education Levels",
+    description: "Levels of educational attainment",
+    module: "Workforce",
+    subgroup: "Qualifications",
+  },
+  field_of_study: {
+    label: "Fields of Study",
+    description: "Academic and professional fields of study",
+    module: "Workforce",
+    subgroup: "Qualifications",
+  },
+  institution_name: {
+    label: "Institution Names",
+    description: "Names of educational institutions",
+    module: "Workforce",
+    subgroup: "Qualifications",
+  },
+  qualification_type: {
+    label: "Qualification Types",
+    description: "Types of qualifications (academic, professional, etc.)",
+    module: "Workforce",
+    subgroup: "Qualifications",
+  },
 };
 
-// Get categories grouped by module, sorted alphabetically
+// Get categories grouped by module and subgroup, sorted alphabetically
 const getGroupedCategories = () => {
-  const modules: Record<string, LookupCategory[]> = {};
+  const result: { module: string; subgroup?: string; categories: LookupCategory[] }[] = [];
+  const moduleMap: Record<string, Record<string, LookupCategory[]>> = {};
   
   Object.entries(CATEGORY_CONFIG).forEach(([key, config]) => {
-    if (!modules[config.module]) {
-      modules[config.module] = [];
+    const subgroupKey = config.subgroup || "_general";
+    if (!moduleMap[config.module]) {
+      moduleMap[config.module] = {};
     }
-    modules[config.module].push(key as LookupCategory);
+    if (!moduleMap[config.module][subgroupKey]) {
+      moduleMap[config.module][subgroupKey] = [];
+    }
+    moduleMap[config.module][subgroupKey].push(key as LookupCategory);
   });
   
-  // Sort categories alphabetically within each module
-  Object.keys(modules).forEach(module => {
-    modules[module].sort((a, b) => 
-      CATEGORY_CONFIG[a].label.localeCompare(CATEGORY_CONFIG[b].label)
-    );
+  // Sort and build result
+  Object.keys(moduleMap).sort().forEach(module => {
+    const subgroups = moduleMap[module];
+    // General items first (no subgroup)
+    if (subgroups["_general"]) {
+      subgroups["_general"].sort((a, b) => 
+        CATEGORY_CONFIG[a].label.localeCompare(CATEGORY_CONFIG[b].label)
+      );
+      result.push({ module, categories: subgroups["_general"] });
+    }
+    // Then named subgroups alphabetically
+    Object.keys(subgroups).filter(s => s !== "_general").sort().forEach(subgroup => {
+      subgroups[subgroup].sort((a, b) => 
+        CATEGORY_CONFIG[a].label.localeCompare(CATEGORY_CONFIG[b].label)
+      );
+      result.push({ module, subgroup, categories: subgroups[subgroup] });
+    });
   });
   
-  // Return modules sorted alphabetically
-  return Object.keys(modules)
-    .sort()
-    .map(module => ({ module, categories: modules[module] }));
+  return result;
 };
 
 const groupedCategories = getGroupedCategories();
@@ -385,10 +407,10 @@ export function LookupValuesManagement() {
     <div className="space-y-6">
       <Tabs value={activeCategory} onValueChange={(v) => setActiveCategory(v as LookupCategory)}>
         <div className="space-y-4">
-          {groupedCategories.map(({ module, categories }) => (
-            <div key={module}>
+          {groupedCategories.map(({ module, subgroup, categories }, index) => (
+            <div key={`${module}-${subgroup || 'general'}-${index}`}>
               <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">
-                {module}
+                {subgroup ? `${module} › ${subgroup}` : module}
               </h4>
               <TabsList className="flex flex-wrap h-auto gap-1">
                 {categories.map((key) => (
