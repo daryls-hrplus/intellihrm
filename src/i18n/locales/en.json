@@ -739,6 +739,10 @@
       "notifications": {
         "title": "Notifications",
         "description": "Manage your notification preferences"
+      },
+      "expenses": {
+        "title": "Expense Claims",
+        "description": "Submit and track expense reimbursements"
       }
     }
   },
