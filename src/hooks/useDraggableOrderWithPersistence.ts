@@ -82,20 +82,41 @@ export function useDraggableOrderWithPersistence<T>({
     const orderIds = newItems.map(getItemId);
     
     try {
-      // Save as shared preference (user_id = null)
-      const { error } = await (supabase as any)
+      // Check if shared preference exists
+      const { data: existing } = await (supabase as any)
         .from("user_preferences")
-        .upsert({
-          user_id: null,
-          preference_key: preferenceKey,
-          preference_value: orderIds,
-          updated_at: new Date().toISOString(),
-        }, {
-          onConflict: "user_id,preference_key"
-        });
+        .select("id")
+        .eq("preference_key", preferenceKey)
+        .is("user_id", null)
+        .maybeSingle();
 
-      if (error) {
-        console.error("Error saving preference:", error);
+      if (existing) {
+        // Update existing
+        const { error } = await (supabase as any)
+          .from("user_preferences")
+          .update({
+            preference_value: orderIds,
+            updated_at: new Date().toISOString(),
+          })
+          .eq("id", existing.id);
+
+        if (error) {
+          console.error("Error updating preference:", error);
+        }
+      } else {
+        // Insert new
+        const { error } = await (supabase as any)
+          .from("user_preferences")
+          .insert({
+            user_id: null,
+            preference_key: preferenceKey,
+            preference_value: orderIds,
+            updated_at: new Date().toISOString(),
+          });
+
+        if (error) {
+          console.error("Error inserting preference:", error);
+        }
       }
     } catch (error) {
       console.error("Error saving preference:", error);
