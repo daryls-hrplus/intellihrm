@@ -1030,46 +1030,6 @@ export function PositionsManagement({ companyId }: PositionsManagementProps) {
               return null;
             })()}
 
-            <div className="grid grid-cols-3 gap-4">
-              <div className="space-y-2">
-                <Label>Compensation</Label>
-                <Input
-                  type="number"
-                  value={assignCompAmount}
-                  onChange={(e) => setAssignCompAmount(e.target.value)}
-                  placeholder="Amount"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>Currency</Label>
-                <Select value={assignCompCurrency} onValueChange={setAssignCompCurrency}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="USD">USD</SelectItem>
-                    <SelectItem value="EUR">EUR</SelectItem>
-                    <SelectItem value="GBP">GBP</SelectItem>
-                    <SelectItem value="AED">AED</SelectItem>
-                    <SelectItem value="SAR">SAR</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label>Frequency</Label>
-                <Select value={assignCompFrequency} onValueChange={setAssignCompFrequency}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="hourly">Hourly</SelectItem>
-                    <SelectItem value="weekly">Weekly</SelectItem>
-                    <SelectItem value="monthly">Monthly</SelectItem>
-                    <SelectItem value="yearly">Yearly</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Switch checked={assignIsPrimary} onCheckedChange={setAssignIsPrimary} />
