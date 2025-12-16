@@ -5179,6 +5179,9 @@
         "invalidFileType": "Only images and PDFs are allowed",
         "fileTooLarge": "File size must be less than 5MB"
       }
+    },
+    "MyExpenseClaims": {
+      "myClaims": "My Claims"
     }
   },
   "compensation": {

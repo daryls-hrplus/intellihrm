@@ -720,6 +720,80 @@
         "title": "مطالبات المصروفات",
         "description": "تقديم وتتبع تعويضات المصروفات"
       }
+    },
+    "myExpenseClaims": {
+      "title": "مطالبات مصروفاتي",
+      "subtitle": "تقديم وتتبع تعويضات المصروفات",
+      "breadcrumb": "مطالبات مصروفاتي",
+      "newClaim": "مطالبة جديدة",
+      "totalClaims": "إجمالي المطالبات",
+      "pendingAmount": "المبلغ المعلق",
+      "approvedPaid": "معتمد/مدفوع",
+      "myClaims": "مطالباتي",
+      "loading": "جاري التحميل...",
+      "noClaimsYet": "لا توجد مطالبات مصروفات بعد",
+      "claimNumber": "رقم المطالبة",
+      "date": "التاريخ",
+      "amount": "المبلغ",
+      "status": "الحالة",
+      "claim": "مطالبة",
+      "total": "الإجمالي",
+      "addItem": "إضافة بند",
+      "submit": "إرسال",
+      "noItemsYet": "لا توجد بنود بعد",
+      "category": "الفئة",
+      "newClaimDialog": {
+        "title": "مطالبة مصروفات جديدة",
+        "description": "الوصف (اختياري)",
+        "descriptionPlaceholder": "رحلة لموقع العميل، مصروفات مؤتمر، إلخ.",
+        "cancel": "إلغاء",
+        "create": "إنشاء المطالبة",
+        "creating": "جارٍ الإنشاء..."
+      },
+      "addItemDialog": {
+        "title": "إضافة بند مصروف",
+        "date": "التاريخ",
+        "category": "الفئة",
+        "selectCategory": "اختر الفئة",
+        "amount": "المبلغ",
+        "description": "الوصف",
+        "descriptionPlaceholder": "تفاصيل حول هذا المصروف",
+        "receipt": "إيصال/مستند (اختياري)",
+        "uploadReceipt": "رفع إيصال",
+        "fileHint": "صور أو PDF، بحد أقصى 5MB",
+        "cancel": "إلغاء",
+        "add": "إضافة بند",
+        "adding": "جارٍ الإضافة..."
+      },
+      "receipt": "الإيصال",
+      "statuses": {
+        "draft": "مسودة",
+        "submitted": "مُرسل",
+        "pending_approval": "بانتظار الموافقة",
+        "approved": "معتمد",
+        "rejected": "مرفوض",
+        "paid": "مدفوع",
+        "pending_payment": "بانتظار الدفع"
+      },
+      "toast": {
+        "success": "نجاح",
+        "error": "خطأ",
+        "claimCreated": "تم إنشاء مطالبة المصروفات",
+        "createFailed": "فشل إنشاء المطالبة",
+        "itemAdded": "تمت إضافة بند مصروف",
+        "addFailed": "فشل إضافة البند",
+        "itemRemoved": "تم حذف البند",
+        "deleteFailed": "فشل حذف البند",
+        "submitted": "تم إرسال المطالبة للموافقة",
+        "submitFailed": "فشل إرسال المطالبة",
+        "fillRequired": "يرجى تعبئة الحقول المطلوبة",
+        "addItem": "أضف بند مصروف واحدًا على الأقل",
+        "invalidFileType": "يسمح فقط بالصور وملفات PDF",
+        "fileTooLarge": "يجب أن يكون حجم الملف أقل من 5MB"
+      }
+    },
+    "MyExpenseClaims": {
+      "myClaims": "مطالباتي"
     }
   }
 }

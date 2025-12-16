@@ -720,6 +720,80 @@
         "title": "Notes de Frais",
         "description": "Soumettre et suivre les remboursements de frais"
       }
+    },
+    "myExpenseClaims": {
+      "title": "Mes notes de frais",
+      "subtitle": "Soumettre et suivre les remboursements de frais",
+      "breadcrumb": "Mes notes de frais",
+      "newClaim": "Nouvelle demande",
+      "totalClaims": "Total des demandes",
+      "pendingAmount": "Montant en attente",
+      "approvedPaid": "Approuvé/Payé",
+      "myClaims": "Mes demandes",
+      "loading": "Chargement...",
+      "noClaimsYet": "Aucune note de frais pour le moment",
+      "claimNumber": "Demande #",
+      "date": "Date",
+      "amount": "Montant",
+      "status": "Statut",
+      "claim": "Demande",
+      "total": "Total",
+      "addItem": "Ajouter un élément",
+      "submit": "Soumettre",
+      "noItemsYet": "Aucun élément pour le moment",
+      "category": "Catégorie",
+      "newClaimDialog": {
+        "title": "Nouvelle note de frais",
+        "description": "Description (Optionnel)",
+        "descriptionPlaceholder": "Déplacement chez le client, frais de conférence, etc.",
+        "cancel": "Annuler",
+        "create": "Créer la demande",
+        "creating": "Création..."
+      },
+      "addItemDialog": {
+        "title": "Ajouter un élément de frais",
+        "date": "Date",
+        "category": "Catégorie",
+        "selectCategory": "Sélectionner une catégorie",
+        "amount": "Montant",
+        "description": "Description",
+        "descriptionPlaceholder": "Détails sur cette dépense",
+        "receipt": "Reçu/Document (Optionnel)",
+        "uploadReceipt": "Téléverser un reçu",
+        "fileHint": "Images ou PDF, max 5 Mo",
+        "cancel": "Annuler",
+        "add": "Ajouter",
+        "adding": "Ajout..."
+      },
+      "receipt": "Reçu",
+      "statuses": {
+        "draft": "Brouillon",
+        "submitted": "Soumise",
+        "pending_approval": "En attente d'approbation",
+        "approved": "Approuvée",
+        "rejected": "Rejetée",
+        "paid": "Payée",
+        "pending_payment": "En attente de paiement"
+      },
+      "toast": {
+        "success": "Succès",
+        "error": "Erreur",
+        "claimCreated": "Note de frais créée",
+        "createFailed": "Échec de la création de la demande",
+        "itemAdded": "Élément de frais ajouté",
+        "addFailed": "Échec de l'ajout de l'élément",
+        "itemRemoved": "Élément supprimé",
+        "deleteFailed": "Échec de la suppression de l'élément",
+        "submitted": "Demande soumise pour approbation",
+        "submitFailed": "Échec de la soumission de la demande",
+        "fillRequired": "Veuillez remplir les champs obligatoires",
+        "addItem": "Ajoutez au moins un élément de frais",
+        "invalidFileType": "Seules les images et les PDF sont autorisés",
+        "fileTooLarge": "La taille du fichier doit être inférieure à 5 Mo"
+      }
+    },
+    "MyExpenseClaims": {
+      "myClaims": "Mes demandes"
     }
   }
 }
