@@ -22731,6 +22731,9 @@ export type Database = {
           email: string
           full_name: string | null
           id: string
+          invitation_status: string | null
+          invited_at: string | null
+          is_active: boolean | null
           preferred_language: string | null
           section_id: string | null
           time_format: string | null
@@ -22746,6 +22749,9 @@ export type Database = {
           email: string
           full_name?: string | null
           id: string
+          invitation_status?: string | null
+          invited_at?: string | null
+          is_active?: boolean | null
           preferred_language?: string | null
           section_id?: string | null
           time_format?: string | null
@@ -22761,6 +22767,9 @@ export type Database = {
           email?: string
           full_name?: string | null
           id?: string
+          invitation_status?: string | null
+          invited_at?: string | null
+          is_active?: boolean | null
           preferred_language?: string | null
           section_id?: string | null
           time_format?: string | null
