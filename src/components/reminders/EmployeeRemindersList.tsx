@@ -41,13 +41,14 @@ export function EmployeeRemindersList({
   const [statusFilter, setStatusFilter] = useState('pending');
   const [categoryFilter, setCategoryFilter] = useState('all');
 
+  const [newInterval, setNewInterval] = useState('');
   const [formData, setFormData] = useState<{
     employee_id: string;
     event_type_id: string;
     title: string;
     message: string;
     event_date: string;
-    reminder_date: string;
+    reminder_intervals: number[];
     priority: 'low' | 'medium' | 'high' | 'critical';
     notification_method: 'in_app' | 'email' | 'both';
     can_employee_dismiss: boolean;
@@ -60,7 +61,7 @@ export function EmployeeRemindersList({
     title: '',
     message: '',
     event_date: '',
-    reminder_date: '',
+    reminder_intervals: [7],
     priority: 'medium',
     notification_method: 'both',
     can_employee_dismiss: true,
@@ -68,6 +69,22 @@ export function EmployeeRemindersList({
     recurrence_pattern: '',
     notes: '',
   });
+
+  const addInterval = () => {
+    const value = parseInt(newInterval);
+    if (value >= 0 && value <= 365 && !formData.reminder_intervals.includes(value)) {
+      const newIntervals = [...formData.reminder_intervals, value].sort((a, b) => b - a);
+      setFormData({ ...formData, reminder_intervals: newIntervals });
+      setNewInterval('');
+    }
+  };
+
+  const removeInterval = (interval: number) => {
+    const newIntervals = formData.reminder_intervals.filter(i => i !== interval);
+    if (newIntervals.length > 0) {
+      setFormData({ ...formData, reminder_intervals: newIntervals });
+    }
+  };
 
   const loadData = async () => {
     setLoading(true);
@@ -118,13 +135,17 @@ export function EmployeeRemindersList({
   const handleOpenDialog = (reminder?: EmployeeReminder) => {
     if (reminder) {
       setEditingReminder(reminder);
+      // Calculate days between event_date and reminder_date for editing
+      const eventDate = new Date(reminder.event_date);
+      const reminderDate = new Date(reminder.reminder_date);
+      const daysDiff = Math.ceil((eventDate.getTime() - reminderDate.getTime()) / (1000 * 60 * 60 * 24));
       setFormData({
         employee_id: reminder.employee_id,
         event_type_id: reminder.event_type_id || '',
         title: reminder.title,
         message: reminder.message || '',
         event_date: reminder.event_date,
-        reminder_date: reminder.reminder_date,
+        reminder_intervals: [daysDiff >= 0 ? daysDiff : 0],
         priority: reminder.priority as 'low' | 'medium' | 'high' | 'critical',
         notification_method: reminder.notification_method as 'in_app' | 'email' | 'both',
         can_employee_dismiss: reminder.can_employee_dismiss,
@@ -140,7 +161,7 @@ export function EmployeeRemindersList({
         title: '',
         message: '',
         event_date: '',
-        reminder_date: '',
+        reminder_intervals: [7],
         priority: 'medium',
         notification_method: 'both',
         can_employee_dismiss: true,
@@ -149,18 +170,36 @@ export function EmployeeRemindersList({
         notes: '',
       });
     }
+    setNewInterval('');
     setDialogOpen(true);
   };
 
   const handleSave = async () => {
     try {
       if (editingReminder) {
-        await updateReminder(editingReminder.id, formData);
-      } else {
-        await createReminder({
+        // For editing, calculate reminder_date from event_date and first interval
+        const eventDate = new Date(formData.event_date);
+        const reminderDate = new Date(eventDate);
+        reminderDate.setDate(reminderDate.getDate() - formData.reminder_intervals[0]);
+        
+        await updateReminder(editingReminder.id, {
           ...formData,
-          company_id: companyId,
-        }, creatorRole);
+          reminder_date: reminderDate.toISOString().split('T')[0],
+        });
+      } else {
+        // For creating, create multiple reminders based on intervals
+        const eventDate = new Date(formData.event_date);
+        
+        for (const interval of formData.reminder_intervals) {
+          const reminderDate = new Date(eventDate);
+          reminderDate.setDate(reminderDate.getDate() - interval);
+          
+          await createReminder({
+            ...formData,
+            company_id: companyId,
+            reminder_date: reminderDate.toISOString().split('T')[0],
+          }, creatorRole);
+        }
       }
       setDialogOpen(false);
       loadData();
@@ -305,23 +344,50 @@ export function EmployeeRemindersList({
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Event Date *</Label>
-                  <Input
-                    type="date"
-                    value={formData.event_date}
-                    onChange={(e) => setFormData({ ...formData, event_date: e.target.value })}
-                  />
+              <div className="space-y-2">
+                <Label>Event Date *</Label>
+                <Input
+                  type="date"
+                  value={formData.event_date}
+                  onChange={(e) => setFormData({ ...formData, event_date: e.target.value })}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label>Reminder Intervals (days before event)</Label>
+                <div className="flex flex-wrap gap-2 mb-2">
+                  {formData.reminder_intervals.map((interval) => (
+                    <Badge key={interval} variant="secondary" className="px-3 py-1 text-sm">
+                      {interval === 0 ? 'On event day' : `${interval} days before`}
+                      <button
+                        type="button"
+                        onClick={() => removeInterval(interval)}
+                        className="ml-2 hover:text-destructive"
+                        disabled={formData.reminder_intervals.length === 1}
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </Badge>
+                  ))}
                 </div>
-                <div className="space-y-2">
-                  <Label>Reminder Date *</Label>
+                <div className="flex gap-2">
                   <Input
-                    type="date"
-                    value={formData.reminder_date}
-                    onChange={(e) => setFormData({ ...formData, reminder_date: e.target.value })}
+                    type="number"
+                    min={0}
+                    max={365}
+                    placeholder="Days before (e.g., 10)"
+                    value={newInterval}
+                    onChange={(e) => setNewInterval(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addInterval())}
+                    className="w-40"
                   />
+                  <Button type="button" variant="outline" size="sm" onClick={addInterval}>
+                    <Plus className="h-4 w-4 mr-1" /> Add
+                  </Button>
                 </div>
+                <p className="text-xs text-muted-foreground">
+                  Add multiple intervals to send reminders at different times (e.g., 30, 14, 7, 3 days before). Use 0 for the event day.
+                </p>
               </div>
 
               <div className="grid grid-cols-3 gap-4">
@@ -382,10 +448,10 @@ export function EmployeeRemindersList({
               <Button variant="outline" onClick={() => setDialogOpen(false)}>Cancel</Button>
               <Button 
                 onClick={handleSave} 
-                disabled={isLoading || !formData.employee_id || !formData.title || !formData.event_date || !formData.reminder_date}
+                disabled={isLoading || !formData.employee_id || !formData.title || !formData.event_date || formData.reminder_intervals.length === 0}
               >
                 {isLoading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-                {editingReminder ? 'Update' : 'Create'}
+                {editingReminder ? 'Update' : `Create ${formData.reminder_intervals.length > 1 ? `(${formData.reminder_intervals.length} reminders)` : ''}`}
               </Button>
             </DialogFooter>
           </DialogContent>
