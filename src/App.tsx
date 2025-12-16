@@ -251,8 +251,8 @@ import SalaryOvertimePage from "./pages/payroll/SalaryOvertimePage";
 import LeavePaymentConfigPage from "./pages/payroll/LeavePaymentConfigPage";
 import LeaveBalanceBuyoutPage from "./pages/payroll/LeaveBalanceBuyoutPage";
 import PayslipTemplateConfigPage from "./pages/payroll/PayslipTemplateConfigPage";
+import PayrollExpenseClaimsPage from "./pages/payroll/PayrollExpenseClaimsPage";
 
-// Payroll GL pages
 import GLDashboardPage from "./pages/payroll/gl/GLDashboardPage";
 import GLAccountsPage from "./pages/payroll/gl/GLAccountsPage";
 import CostCenterSegmentsPage from "./pages/payroll/gl/CostCenterSegmentsPage";
@@ -1569,6 +1569,14 @@ const App = () => (
               element={
                 <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="payroll">
                   <PayslipTemplateConfigPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/payroll/expense-claims"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="payroll">
+                  <PayrollExpenseClaimsPage />
                 </ProtectedRoute>
               }
             />

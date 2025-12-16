@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
@@ -14,7 +14,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { format } from "date-fns";
-import { Plus, Receipt, DollarSign, Clock, CheckCircle, Send, Trash2 } from "lucide-react";
+import { Plus, Receipt, DollarSign, Clock, CheckCircle, Send, Trash2, Upload, FileText, ExternalLink, X } from "lucide-react";
 import { useLanguage } from "@/hooks/useLanguage";
 
 interface ExpenseClaim {
@@ -33,6 +33,7 @@ interface ExpenseItem {
   category: string;
   description: string | null;
   amount: number;
+  receipt_url: string | null;
 }
 
 const EXPENSE_CATEGORIES = [
@@ -51,6 +52,7 @@ export default function MyExpenseClaimsPage() {
   const { t } = useLanguage();
   const { user, profile } = useAuth();
   const { toast } = useToast();
+  const fileInputRef = useRef<HTMLInputElement>(null);
   
   const [claims, setClaims] = useState<ExpenseClaim[]>([]);
   const [selectedClaim, setSelectedClaim] = useState<ExpenseClaim | null>(null);
@@ -59,6 +61,9 @@ export default function MyExpenseClaimsPage() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [itemDialogOpen, setItemDialogOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [uploadingFile, setUploadingFile] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [receiptUrl, setReceiptUrl] = useState<string>("");
   
   const [claimForm, setClaimForm] = useState({ description: "" });
   const [itemForm, setItemForm] = useState({
@@ -134,6 +139,53 @@ export default function MyExpenseClaimsPage() {
     }
   };
 
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    
+    // Validate file type
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'application/pdf'];
+    if (!allowedTypes.includes(file.type)) {
+      toast({ title: "Error", description: "Only images and PDFs are allowed", variant: "destructive" });
+      return;
+    }
+    
+    // Validate file size (5MB max)
+    if (file.size > 5 * 1024 * 1024) {
+      toast({ title: "Error", description: "File size must be less than 5MB", variant: "destructive" });
+      return;
+    }
+    
+    setSelectedFile(file);
+  };
+
+  const uploadReceipt = async (): Promise<string | null> => {
+    if (!selectedFile || !user) return null;
+    
+    setUploadingFile(true);
+    try {
+      const fileExt = selectedFile.name.split('.').pop();
+      const fileName = `${user.id}/${Date.now()}.${fileExt}`;
+      
+      const { error: uploadError } = await supabase.storage
+        .from('expense-receipts')
+        .upload(fileName, selectedFile);
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('expense-receipts')
+        .getPublicUrl(fileName);
+
+      return publicUrl;
+    } catch (error) {
+      console.error("Upload error:", error);
+      return null;
+    } finally {
+      setUploadingFile(false);
+    }
+  };
+
   const handleAddItem = async () => {
     if (!selectedClaim || !itemForm.category || !itemForm.amount) {
       toast({ title: "Error", description: "Please fill in required fields", variant: "destructive" });
@@ -142,12 +194,19 @@ export default function MyExpenseClaimsPage() {
     setIsSubmitting(true);
 
     try {
+      // Upload receipt if selected
+      let uploadedReceiptUrl: string | null = null;
+      if (selectedFile) {
+        uploadedReceiptUrl = await uploadReceipt();
+      }
+
       const { error } = await supabase.from("expense_claim_items").insert({
         claim_id: selectedClaim.id,
         expense_date: itemForm.expense_date,
         category: itemForm.category,
         description: itemForm.description || null,
         amount: parseFloat(itemForm.amount),
+        receipt_url: uploadedReceiptUrl,
       });
 
       if (error) throw error;
@@ -159,6 +218,8 @@ export default function MyExpenseClaimsPage() {
       toast({ title: "Success", description: "Expense item added" });
       setItemDialogOpen(false);
       setItemForm({ expense_date: format(new Date(), "yyyy-MM-dd"), category: "", description: "", amount: "" });
+      setSelectedFile(null);
+      setReceiptUrl("");
       loadClaimItems(selectedClaim.id);
       loadClaims();
     } catch (error) {
@@ -345,6 +406,7 @@ export default function MyExpenseClaimsPage() {
                         <TableHead>Date</TableHead>
                         <TableHead>Category</TableHead>
                         <TableHead>Amount</TableHead>
+                        <TableHead>Receipt</TableHead>
                         {selectedClaim.status === "draft" && <TableHead></TableHead>}
                       </TableRow>
                     </TableHeader>
@@ -354,6 +416,21 @@ export default function MyExpenseClaimsPage() {
                           <TableCell>{format(new Date(item.expense_date), "MMM d")}</TableCell>
                           <TableCell>{item.category}</TableCell>
                           <TableCell>${item.amount.toFixed(2)}</TableCell>
+                          <TableCell>
+                            {item.receipt_url ? (
+                              <a
+                                href={item.receipt_url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-primary hover:underline flex items-center gap-1"
+                              >
+                                <FileText className="h-4 w-4" />
+                                <ExternalLink className="h-3 w-3" />
+                              </a>
+                            ) : (
+                              <span className="text-muted-foreground text-xs">—</span>
+                            )}
+                          </TableCell>
                           {selectedClaim.status === "draft" && (
                             <TableCell>
                               <Button
@@ -444,6 +521,48 @@ export default function MyExpenseClaimsPage() {
                   onChange={(e) => setItemForm({ ...itemForm, description: e.target.value })}
                   placeholder="Details about this expense"
                 />
+              </div>
+              <div>
+                <Label>Receipt/Document (Optional)</Label>
+                <div className="mt-2">
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    onChange={handleFileChange}
+                    accept="image/*,.pdf"
+                    className="hidden"
+                  />
+                  {selectedFile ? (
+                    <div className="flex items-center gap-2 p-3 border rounded-md bg-muted">
+                      <FileText className="h-4 w-4 text-primary" />
+                      <span className="text-sm flex-1 truncate">{selectedFile.name}</span>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => {
+                          setSelectedFile(null);
+                          if (fileInputRef.current) fileInputRef.current.value = "";
+                        }}
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ) : (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="w-full"
+                      onClick={() => fileInputRef.current?.click()}
+                    >
+                      <Upload className="h-4 w-4 mr-2" />
+                      Upload Receipt
+                    </Button>
+                  )}
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Images or PDF, max 5MB
+                  </p>
+                </div>
               </div>
             </div>
             <DialogFooter>

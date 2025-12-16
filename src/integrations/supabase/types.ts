@@ -9048,6 +9048,8 @@ export type Database = {
       }
       expense_claims: {
         Row: {
+          approved_for_payment_at: string | null
+          approved_for_payment_by: string | null
           claim_date: string
           claim_number: string | null
           company_id: string
@@ -9057,6 +9059,7 @@ export type Database = {
           employee_id: string
           id: string
           paid_at: string | null
+          pay_period_id: string | null
           review_notes: string | null
           reviewed_at: string | null
           reviewed_by: string | null
@@ -9067,6 +9070,8 @@ export type Database = {
           workflow_instance_id: string | null
         }
         Insert: {
+          approved_for_payment_at?: string | null
+          approved_for_payment_by?: string | null
           claim_date?: string
           claim_number?: string | null
           company_id: string
@@ -9076,6 +9081,7 @@ export type Database = {
           employee_id: string
           id?: string
           paid_at?: string | null
+          pay_period_id?: string | null
           review_notes?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
@@ -9086,6 +9092,8 @@ export type Database = {
           workflow_instance_id?: string | null
         }
         Update: {
+          approved_for_payment_at?: string | null
+          approved_for_payment_by?: string | null
           claim_date?: string
           claim_number?: string | null
           company_id?: string
@@ -9095,6 +9103,7 @@ export type Database = {
           employee_id?: string
           id?: string
           paid_at?: string | null
+          pay_period_id?: string | null
           review_notes?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
@@ -9105,6 +9114,13 @@ export type Database = {
           workflow_instance_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "expense_claims_approved_for_payment_by_fkey"
+            columns: ["approved_for_payment_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "expense_claims_company_id_fkey"
             columns: ["company_id"]
@@ -9117,6 +9133,13 @@ export type Database = {
             columns: ["employee_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "expense_claims_pay_period_id_fkey"
+            columns: ["pay_period_id"]
+            isOneToOne: false
+            referencedRelation: "pay_periods"
             referencedColumns: ["id"]
           },
           {
