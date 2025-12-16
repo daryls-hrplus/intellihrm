@@ -15,7 +15,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { format } from "date-fns";
 import { Plus, Receipt, DollarSign, Clock, CheckCircle, Send, Trash2, Upload, FileText, ExternalLink, X } from "lucide-react";
-import { useLanguage } from "@/hooks/useLanguage";
+import { useTranslation } from "react-i18next";
 
 interface ExpenseClaim {
   id: string;
@@ -49,7 +49,7 @@ const EXPENSE_CATEGORIES = [
 ];
 
 export default function MyExpenseClaimsPage() {
-  const { t } = useLanguage();
+  const { t } = useTranslation();
   const { user, profile } = useAuth();
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
