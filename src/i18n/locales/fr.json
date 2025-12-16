@@ -704,6 +704,8 @@
       "pointRange": "Plage de Points",
       "entryPoint": "Point d'Entrée",
       "salaryRange": "Plage Salariale",
+      "paySpine": "Grille Salariale",
+      "payElements": "Éléments de Paie",
       "availablePoints": "Points Disponibles",
       "dialog": {
         "createTitle": "Ajouter Rémunération",

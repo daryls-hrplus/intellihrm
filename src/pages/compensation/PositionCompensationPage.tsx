@@ -603,6 +603,57 @@ export default function PositionCompensationPage() {
             </DialogHeader>
 
             <div className="space-y-4">
+              {/* Salary Range Section - Show at top when position has grade/spine */}
+              {selectedPosition && (
+                (selectedPosition.compensation_model === 'salary_grade' || selectedPosition.compensation_model === 'hybrid') && selectedPosition.salary_grade ? (
+                  <div className="p-4 rounded-lg bg-info/10 border border-info/20">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm text-muted-foreground">{t("compensation.positionCompensation.salaryGrade")}</p>
+                        <p className="font-medium">{selectedPosition.salary_grade.name} ({selectedPosition.salary_grade.code})</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-sm text-muted-foreground">{t("compensation.positionCompensation.salaryRange")}</p>
+                        <p className="font-mono font-semibold">
+                          {formatCurrency(selectedPosition.salary_grade.min_salary, selectedPosition.salary_grade.currency)} — {formatCurrency(selectedPosition.salary_grade.max_salary, selectedPosition.salary_grade.currency)}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ) : selectedPosition.compensation_model === 'spinal_point' && paySpine && spinalPoints.length > 0 ? (
+                  <div className="p-4 rounded-lg bg-primary/10 border border-primary/20">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm text-muted-foreground">{t("compensation.positionCompensation.paySpine")}</p>
+                        <p className="font-medium">{paySpine.name} ({paySpine.code})</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-sm text-muted-foreground">{t("compensation.positionCompensation.salaryRange")}</p>
+                        <p className="font-mono font-semibold">
+                          {formatCurrency(spinalPoints[0].annual_salary, paySpine.currency)} — {formatCurrency(spinalPoints[spinalPoints.length - 1].annual_salary, paySpine.currency)}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ) : null
+              )}
+
+              {/* Separator when salary range is shown */}
+              {selectedPosition && (
+                ((selectedPosition.compensation_model === 'salary_grade' || selectedPosition.compensation_model === 'hybrid') && selectedPosition.salary_grade) ||
+                (selectedPosition.compensation_model === 'spinal_point' && paySpine && spinalPoints.length > 0)
+              ) && (
+                <div className="relative">
+                  <div className="absolute inset-0 flex items-center">
+                    <span className="w-full border-t" />
+                  </div>
+                  <div className="relative flex justify-center text-xs uppercase">
+                    <span className="bg-background px-2 text-muted-foreground">
+                      {t("compensation.positionCompensation.payElements")}
+                    </span>
+                  </div>
+                </div>
+              )}
               <div className="space-y-2">
                 <Label>{t("compensation.positionCompensation.payElement")} *</Label>
                 <Select value={formPayElementId} onValueChange={setFormPayElementId}>
