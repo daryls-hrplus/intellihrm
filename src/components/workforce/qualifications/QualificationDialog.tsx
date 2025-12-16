@@ -30,30 +30,13 @@ interface Employee {
   company_id: string;
 }
 
-interface EducationLevel {
+interface LookupValue {
   id: string;
+  code: string;
   name: string;
+  description: string | null;
   display_order: number;
-}
-
-interface QualificationType {
-  id: string;
-  name: string;
-  record_type: string;
-  requires_expiry: boolean;
-}
-
-interface FieldOfStudy {
-  id: string;
-  name: string;
-  category: string;
-}
-
-interface AccreditingBody {
-  id: string;
-  name: string;
-  short_name: string;
-  industry: string;
+  is_active: boolean;
 }
 
 export function QualificationDialog({
@@ -70,22 +53,27 @@ export function QualificationDialog({
   
   // Lookup data
   const [employees, setEmployees] = useState<Employee[]>([]);
-  const [educationLevels, setEducationLevels] = useState<EducationLevel[]>([]);
-  const [qualificationTypes, setQualificationTypes] = useState<QualificationType[]>([]);
-  const [fieldsOfStudy, setFieldsOfStudy] = useState<FieldOfStudy[]>([]);
-  const [accreditingBodies, setAccreditingBodies] = useState<AccreditingBody[]>([]);
+  const [educationLevels, setEducationLevels] = useState<LookupValue[]>([]);
+  const [qualificationTypes, setQualificationTypes] = useState<LookupValue[]>([]);
+  const [fieldsOfStudy, setFieldsOfStudy] = useState<LookupValue[]>([]);
+  const [institutionNames, setInstitutionNames] = useState<LookupValue[]>([]);
+  const [certificationTypes, setCertificationTypes] = useState<LookupValue[]>([]);
+  const [certificationNames, setCertificationNames] = useState<LookupValue[]>([]);
+  const [accreditingBodies, setAccreditingBodies] = useState<LookupValue[]>([]);
   
   // Form data
   const [formData, setFormData] = useState({
     employee_id: employeeId || "",
     name: "",
-    education_level_id: "",
-    qualification_type_id: "",
-    field_of_study_id: "",
+    education_level: "",
+    qualification_type: "",
+    field_of_study: "",
     specialization: "",
     institution_name: "",
-    accrediting_body_id: "",
-    accrediting_body_name: "",
+    certification_type: "",
+    certification_name: "",
+    accrediting_body: "",
+    accrediting_body_manual: "",
     license_number: "",
     country: "",
     start_date: undefined as Date | undefined,
@@ -104,19 +92,40 @@ export function QualificationDialog({
 
   const fetchLookupData = async () => {
     try {
-      const [employeesRes, levelsRes, typesRes, fieldsRes, bodiesRes] = await Promise.all([
+      const [employeesRes, lookupRes] = await Promise.all([
         supabase.from("profiles").select("id, full_name, company_id").eq("is_active", true).order("full_name"),
-        supabase.from("education_levels").select("*").eq("is_active", true).order("display_order"),
-        supabase.from("qualification_types").select("*").eq("is_active", true).order("display_order"),
-        supabase.from("fields_of_study").select("*").eq("is_active", true).order("name"),
-        supabase.from("accrediting_bodies").select("*").eq("is_active", true).order("name"),
+        supabase.from("lookup_values").select("id, code, name, description, display_order, is_active, category")
+          .eq("is_active", true)
+          .in("category", [
+            "education_level", 
+            "qualification_type", 
+            "field_of_study", 
+            "institution_name",
+            "certification_type",
+            "certification_name",
+            "accrediting_body"
+          ] as any)
+          .order("display_order"),
       ]);
 
       if (employeesRes.data) setEmployees(employeesRes.data);
-      if (levelsRes.data) setEducationLevels(levelsRes.data);
-      if (typesRes.data) setQualificationTypes(typesRes.data);
-      if (fieldsRes.data) setFieldsOfStudy(fieldsRes.data);
-      if (bodiesRes.data) setAccreditingBodies(bodiesRes.data);
+      
+      if (lookupRes.data) {
+        const grouped = lookupRes.data.reduce((acc, item) => {
+          const cat = (item as any).category as string;
+          if (!acc[cat]) acc[cat] = [];
+          acc[cat].push(item as LookupValue);
+          return acc;
+        }, {} as Record<string, LookupValue[]>);
+        
+        setEducationLevels(grouped["education_level"] || []);
+        setQualificationTypes(grouped["qualification_type"] || []);
+        setFieldsOfStudy(grouped["field_of_study"] || []);
+        setInstitutionNames(grouped["institution_name"] || []);
+        setCertificationTypes(grouped["certification_type"] || []);
+        setCertificationNames(grouped["certification_name"] || []);
+        setAccreditingBodies(grouped["accrediting_body"] || []);
+      }
     } catch (error) {
       console.error("Error fetching lookup data:", error);
     }
@@ -141,13 +150,13 @@ export function QualificationDialog({
         company_id: employee.company_id,
         record_type: recordType,
         name: formData.name,
-        education_level_id: formData.education_level_id || null,
-        qualification_type_id: formData.qualification_type_id || null,
-        field_of_study_id: formData.field_of_study_id || null,
+        education_level: formData.education_level || null,
+        qualification_type: formData.qualification_type || null,
+        field_of_study: formData.field_of_study || null,
         specialization: formData.specialization || null,
         institution_name: formData.institution_name || null,
-        accrediting_body_id: formData.accrediting_body_id || null,
-        accrediting_body_name: formData.accrediting_body_name || null,
+        certification_type: formData.certification_type || null,
+        accrediting_body: formData.accrediting_body || formData.accrediting_body_manual || null,
         license_number: formData.license_number || null,
         country: formData.country || null,
         start_date: formData.start_date?.toISOString().split("T")[0] || null,
@@ -178,13 +187,15 @@ export function QualificationDialog({
     setFormData({
       employee_id: employeeId || "",
       name: "",
-      education_level_id: "",
-      qualification_type_id: "",
-      field_of_study_id: "",
+      education_level: "",
+      qualification_type: "",
+      field_of_study: "",
       specialization: "",
       institution_name: "",
-      accrediting_body_id: "",
-      accrediting_body_name: "",
+      certification_type: "",
+      certification_name: "",
+      accrediting_body: "",
+      accrediting_body_manual: "",
       license_number: "",
       country: "",
       start_date: undefined,
@@ -196,11 +207,6 @@ export function QualificationDialog({
     });
     setRecordType("academic");
   };
-
-  const filteredQualificationTypes = qualificationTypes.filter((qt) => {
-    if (recordType === "academic") return qt.record_type === "academic";
-    return ["certification", "license", "membership", "participation"].includes(qt.record_type);
-  });
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -251,15 +257,15 @@ export function QualificationDialog({
                 <div>
                   <Label>Education Level</Label>
                   <Select
-                    value={formData.education_level_id}
-                    onValueChange={(v) => setFormData({ ...formData, education_level_id: v })}
+                    value={formData.education_level}
+                    onValueChange={(v) => setFormData({ ...formData, education_level: v })}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Select level" />
                     </SelectTrigger>
                     <SelectContent>
                       {educationLevels.map((level) => (
-                        <SelectItem key={level.id} value={level.id}>{level.name}</SelectItem>
+                        <SelectItem key={level.id} value={level.name}>{level.name}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
@@ -267,15 +273,15 @@ export function QualificationDialog({
                 <div>
                   <Label>Qualification Type</Label>
                   <Select
-                    value={formData.qualification_type_id}
-                    onValueChange={(v) => setFormData({ ...formData, qualification_type_id: v })}
+                    value={formData.qualification_type}
+                    onValueChange={(v) => setFormData({ ...formData, qualification_type: v })}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Select type" />
                     </SelectTrigger>
                     <SelectContent>
-                      {filteredQualificationTypes.map((type) => (
-                        <SelectItem key={type.id} value={type.id}>{type.name}</SelectItem>
+                      {qualificationTypes.map((type) => (
+                        <SelectItem key={type.id} value={type.name}>{type.name}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
@@ -291,15 +297,15 @@ export function QualificationDialog({
                 <div>
                   <Label>Field of Study</Label>
                   <Select
-                    value={formData.field_of_study_id}
-                    onValueChange={(v) => setFormData({ ...formData, field_of_study_id: v })}
+                    value={formData.field_of_study}
+                    onValueChange={(v) => setFormData({ ...formData, field_of_study: v })}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Select field" />
                     </SelectTrigger>
                     <SelectContent>
                       {fieldsOfStudy.map((field) => (
-                        <SelectItem key={field.id} value={field.id}>{field.name}</SelectItem>
+                        <SelectItem key={field.id} value={field.name}>{field.name}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
@@ -314,11 +320,19 @@ export function QualificationDialog({
                 </div>
                 <div className="col-span-2">
                   <Label>Institution Name</Label>
-                  <Input
+                  <Select
                     value={formData.institution_name}
-                    onChange={(e) => setFormData({ ...formData, institution_name: e.target.value })}
-                    placeholder="e.g., University of Technology"
-                  />
+                    onValueChange={(v) => setFormData({ ...formData, institution_name: v })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select or type institution" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {institutionNames.map((inst) => (
+                        <SelectItem key={inst.id} value={inst.name}>{inst.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div>
                   <Label>Country</Label>
@@ -359,17 +373,17 @@ export function QualificationDialog({
             <TabsContent value="certification" className="space-y-4 mt-0">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label>Type</Label>
+                  <Label>Certification Type</Label>
                   <Select
-                    value={formData.qualification_type_id}
-                    onValueChange={(v) => setFormData({ ...formData, qualification_type_id: v })}
+                    value={formData.certification_type}
+                    onValueChange={(v) => setFormData({ ...formData, certification_type: v })}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Select type" />
                     </SelectTrigger>
                     <SelectContent>
-                      {filteredQualificationTypes.map((type) => (
-                        <SelectItem key={type.id} value={type.id}>{type.name}</SelectItem>
+                      {certificationTypes.map((type) => (
+                        <SelectItem key={type.id} value={type.name}>{type.name}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
@@ -384,25 +398,33 @@ export function QualificationDialog({
                 </div>
                 <div className="col-span-2">
                   <Label>Certification/License Name *</Label>
-                  <Input
+                  <Select
                     value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    placeholder="e.g., Project Management Professional (PMP)"
-                  />
+                    onValueChange={(v) => setFormData({ ...formData, name: v })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select or enter name" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {certificationNames.map((cert) => (
+                        <SelectItem key={cert.id} value={cert.name}>{cert.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div>
                   <Label>Certifying/Accrediting Body</Label>
                   <Select
-                    value={formData.accrediting_body_id}
-                    onValueChange={(v) => setFormData({ ...formData, accrediting_body_id: v })}
+                    value={formData.accrediting_body}
+                    onValueChange={(v) => setFormData({ ...formData, accrediting_body: v })}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Select body" />
                     </SelectTrigger>
                     <SelectContent>
                       {accreditingBodies.map((body) => (
-                        <SelectItem key={body.id} value={body.id}>
-                          {body.short_name || body.name}
+                        <SelectItem key={body.id} value={body.name}>
+                          {body.name}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -411,8 +433,8 @@ export function QualificationDialog({
                 <div>
                   <Label>Or Enter Manually</Label>
                   <Input
-                    value={formData.accrediting_body_name}
-                    onChange={(e) => setFormData({ ...formData, accrediting_body_name: e.target.value })}
+                    value={formData.accrediting_body_manual}
+                    onChange={(e) => setFormData({ ...formData, accrediting_body_manual: e.target.value })}
                     placeholder="Enter body name if not in list"
                   />
                 </div>
