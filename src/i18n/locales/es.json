@@ -704,6 +704,8 @@
       "pointRange": "Rango de Puntos",
       "entryPoint": "Punto de Entrada",
       "salaryRange": "Rango Salarial",
+      "paySpine": "Escala Salarial",
+      "payElements": "Elementos de Pago",
       "availablePoints": "Puntos Disponibles",
       "dialog": {
         "createTitle": "Agregar Compensación",

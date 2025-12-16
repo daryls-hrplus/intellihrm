@@ -5457,6 +5457,8 @@
       "pointRange": "Point Range",
       "entryPoint": "Entry Point",
       "salaryRange": "Salary Range",
+      "paySpine": "Pay Spine",
+      "payElements": "Pay Elements",
       "availablePoints": "Available Points",
       "dialog": {
         "createTitle": "Add Compensation",

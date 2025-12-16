@@ -704,6 +704,8 @@
       "pointRange": "نطاق النقاط",
       "entryPoint": "نقطة الدخول",
       "salaryRange": "نطاق الراتب",
+      "paySpine": "سلم الرواتب",
+      "payElements": "عناصر الدفع",
       "availablePoints": "النقاط المتاحة",
       "dialog": {
         "createTitle": "إضافة تعويض",
