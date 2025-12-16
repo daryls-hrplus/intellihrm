@@ -1882,6 +1882,92 @@
       "lms": {
         "title": "LMS Management",
         "description": "Manage courses and learning content"
+      },
+      "passwordPolicies": {
+        "title": "Password Policies",
+        "description": "Configure enterprise password security requirements"
+      }
+    },
+    "passwordPolicies": {
+      "title": "Password Policies",
+      "subtitle": "Configure enterprise password security requirements",
+      "saveChanges": "Save Changes",
+      "saving": "Saving...",
+      "saved": "Password policy saved successfully",
+      "saveFailed": "Failed to save password policy",
+      "loadFailed": "Failed to load password policy",
+      "noPolicyFound": "No password policy found. Please contact support.",
+      "lengthRequirements": {
+        "title": "Length Requirements",
+        "description": "Set minimum and maximum password length",
+        "minLength": "Minimum Length",
+        "maxLength": "Maximum Length",
+        "recommendedMin": "Recommended: 12+",
+        "recommendedMax": "Recommended: 128"
+      },
+      "complexityRules": {
+        "title": "Complexity Rules",
+        "description": "Require specific character types in passwords",
+        "requireUppercase": "Require Uppercase Letters",
+        "uppercaseHint": "A-Z",
+        "requireLowercase": "Require Lowercase Letters",
+        "lowercaseHint": "a-z",
+        "requireNumbers": "Require Numbers",
+        "numbersHint": "0-9",
+        "requireSpecialChars": "Require Special Characters"
+      },
+      "passwordHistory": {
+        "title": "Password History",
+        "description": "Prevent reuse of recent passwords",
+        "rememberLastN": "Remember Last N Passwords",
+        "cannotReuse": "Users cannot reuse their last {{count}} passwords",
+        "industryStandard": "Industry standard recommends remembering at least 12 previous passwords."
+      },
+      "passwordExpiration": {
+        "title": "Password Expiration",
+        "description": "Force periodic password changes with advance warnings",
+        "expiresAfterDays": "Password Expires After (Days)",
+        "noExpiration": "Set to 0 for no expiration",
+        "warningDays": "Warning Days Before Expiry",
+        "warningHint": "Users will see daily popup reminders starting {{days}} days before expiry"
+      },
+      "sessionTimeout": {
+        "title": "Session Timeout",
+        "description": "Auto-logout after period of inactivity",
+        "timeoutMinutes": "Timeout After (Minutes)",
+        "timeoutHint": "Users will be logged out after {{minutes}} minutes of inactivity"
+      },
+      "additionalSecurity": {
+        "title": "Additional Security",
+        "description": "First login requirements and MFA enforcement",
+        "requireFirstLoginChange": "Require Password Change on First Login",
+        "firstLoginHint": "New users must change their temporary password",
+        "mfaLevel": "MFA Enforcement Level",
+        "mfaOptional": "Optional",
+        "mfaOptionalDesc": "Users can choose to enable MFA",
+        "mfaRequiredAdmins": "Required for Admins",
+        "mfaRequiredAdminsDesc": "Admins must use MFA",
+        "mfaRequiredAll": "Required for All",
+        "mfaRequiredAllDesc": "All users must use MFA"
+      },
+      "summary": {
+        "title": "Current Policy Summary",
+        "minLength": "Min Length",
+        "maxLength": "Max Length",
+        "characters": "characters",
+        "complexity": "Complexity",
+        "types": "types required",
+        "history": "History",
+        "passwords": "passwords",
+        "expiry": "Expiry",
+        "days": "days",
+        "never": "Never",
+        "timeout": "Timeout",
+        "minutes": "minutes",
+        "mfa": "MFA",
+        "firstLogin": "First Login",
+        "changeRequired": "Change Required",
+        "noChange": "No Change Required"
       }
     },
     "users": {

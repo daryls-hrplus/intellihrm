@@ -45,24 +45,6 @@ interface PasswordPolicy {
   is_active: boolean;
 }
 
-const defaultPolicy: Omit<PasswordPolicy, 'id'> = {
-  company_id: null,
-  min_password_length: 12,
-  max_password_length: 128,
-  require_uppercase: true,
-  require_lowercase: true,
-  require_numbers: true,
-  require_special_chars: true,
-  special_chars_allowed: '!@#$%^&*()_+-=[]{}|;:,.<>?',
-  password_history_count: 12,
-  password_expiry_days: 90,
-  expiry_warning_days: 14,
-  session_timeout_minutes: 30,
-  require_change_on_first_login: true,
-  mfa_enforcement_level: 'optional',
-  is_active: true,
-};
-
 export default function PasswordPoliciesPage() {
   const { t } = useTranslation();
   const { user } = useAuth();
@@ -91,7 +73,7 @@ export default function PasswordPoliciesPage() {
       }
     } catch (error) {
       console.error('Error fetching password policy:', error);
-      toast.error('Failed to load password policy');
+      toast.error(t('admin.passwordPolicies.loadFailed'));
     } finally {
       setIsLoading(false);
     }
@@ -123,10 +105,10 @@ export default function PasswordPoliciesPage() {
         .eq('id', policy.id);
 
       if (error) throw error;
-      toast.success('Password policy saved successfully');
+      toast.success(t('admin.passwordPolicies.saved'));
     } catch (error) {
       console.error('Error saving password policy:', error);
-      toast.error('Failed to save password policy');
+      toast.error(t('admin.passwordPolicies.saveFailed'));
     } finally {
       setIsSaving(false);
     }
@@ -154,12 +136,19 @@ export default function PasswordPoliciesPage() {
         <Alert variant="destructive">
           <AlertTriangle className="h-4 w-4" />
           <AlertDescription>
-            No password policy found. Please contact support.
+            {t('admin.passwordPolicies.noPolicyFound')}
           </AlertDescription>
         </Alert>
       </AppLayout>
     );
   }
+
+  const complexityCount = [
+    policy.require_uppercase,
+    policy.require_lowercase,
+    policy.require_numbers,
+    policy.require_special_chars,
+  ].filter(Boolean).length;
 
   return (
     <AppLayout>
@@ -171,9 +160,9 @@ export default function PasswordPoliciesPage() {
               <KeyRound className="h-5 w-5 text-primary" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold tracking-tight">Password Policies</h1>
+              <h1 className="text-2xl font-bold tracking-tight">{t('admin.passwordPolicies.title')}</h1>
               <p className="text-muted-foreground">
-                Configure enterprise password security requirements
+                {t('admin.passwordPolicies.subtitle')}
               </p>
             </div>
           </div>
@@ -183,7 +172,7 @@ export default function PasswordPoliciesPage() {
             ) : (
               <Save className="h-4 w-4 mr-2" />
             )}
-            Save Changes
+            {t('admin.passwordPolicies.saveChanges')}
           </Button>
         </div>
 
@@ -193,16 +182,16 @@ export default function PasswordPoliciesPage() {
             <CardHeader>
               <div className="flex items-center gap-2">
                 <Lock className="h-5 w-5 text-primary" />
-                <CardTitle className="text-lg">Length Requirements</CardTitle>
+                <CardTitle className="text-lg">{t('admin.passwordPolicies.lengthRequirements.title')}</CardTitle>
               </div>
               <CardDescription>
-                Set minimum and maximum password length
+                {t('admin.passwordPolicies.lengthRequirements.description')}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="min-length">Minimum Length</Label>
+                  <Label htmlFor="min-length">{t('admin.passwordPolicies.lengthRequirements.minLength')}</Label>
                   <Input
                     id="min-length"
                     type="number"
@@ -211,10 +200,10 @@ export default function PasswordPoliciesPage() {
                     value={policy.min_password_length}
                     onChange={(e) => updatePolicy({ min_password_length: parseInt(e.target.value) || 8 })}
                   />
-                  <p className="text-xs text-muted-foreground">Recommended: 12+</p>
+                  <p className="text-xs text-muted-foreground">{t('admin.passwordPolicies.lengthRequirements.recommendedMin')}</p>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="max-length">Maximum Length</Label>
+                  <Label htmlFor="max-length">{t('admin.passwordPolicies.lengthRequirements.maxLength')}</Label>
                   <Input
                     id="max-length"
                     type="number"
@@ -223,7 +212,7 @@ export default function PasswordPoliciesPage() {
                     value={policy.max_password_length}
                     onChange={(e) => updatePolicy({ max_password_length: parseInt(e.target.value) || 128 })}
                   />
-                  <p className="text-xs text-muted-foreground">Recommended: 128</p>
+                  <p className="text-xs text-muted-foreground">{t('admin.passwordPolicies.lengthRequirements.recommendedMax')}</p>
                 </div>
               </div>
             </CardContent>
@@ -234,17 +223,17 @@ export default function PasswordPoliciesPage() {
             <CardHeader>
               <div className="flex items-center gap-2">
                 <Shield className="h-5 w-5 text-primary" />
-                <CardTitle className="text-lg">Complexity Rules</CardTitle>
+                <CardTitle className="text-lg">{t('admin.passwordPolicies.complexityRules.title')}</CardTitle>
               </div>
               <CardDescription>
-                Require specific character types in passwords
+                {t('admin.passwordPolicies.complexityRules.description')}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
-                  <Label>Require Uppercase Letters</Label>
-                  <p className="text-xs text-muted-foreground">A-Z</p>
+                  <Label>{t('admin.passwordPolicies.complexityRules.requireUppercase')}</Label>
+                  <p className="text-xs text-muted-foreground">{t('admin.passwordPolicies.complexityRules.uppercaseHint')}</p>
                 </div>
                 <Switch
                   checked={policy.require_uppercase}
@@ -254,8 +243,8 @@ export default function PasswordPoliciesPage() {
               <Separator />
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
-                  <Label>Require Lowercase Letters</Label>
-                  <p className="text-xs text-muted-foreground">a-z</p>
+                  <Label>{t('admin.passwordPolicies.complexityRules.requireLowercase')}</Label>
+                  <p className="text-xs text-muted-foreground">{t('admin.passwordPolicies.complexityRules.lowercaseHint')}</p>
                 </div>
                 <Switch
                   checked={policy.require_lowercase}
@@ -265,8 +254,8 @@ export default function PasswordPoliciesPage() {
               <Separator />
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
-                  <Label>Require Numbers</Label>
-                  <p className="text-xs text-muted-foreground">0-9</p>
+                  <Label>{t('admin.passwordPolicies.complexityRules.requireNumbers')}</Label>
+                  <p className="text-xs text-muted-foreground">{t('admin.passwordPolicies.complexityRules.numbersHint')}</p>
                 </div>
                 <Switch
                   checked={policy.require_numbers}
@@ -276,7 +265,7 @@ export default function PasswordPoliciesPage() {
               <Separator />
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
-                  <Label>Require Special Characters</Label>
+                  <Label>{t('admin.passwordPolicies.complexityRules.requireSpecialChars')}</Label>
                   <p className="text-xs text-muted-foreground truncate max-w-[200px]">
                     {policy.special_chars_allowed}
                   </p>
@@ -294,15 +283,15 @@ export default function PasswordPoliciesPage() {
             <CardHeader>
               <div className="flex items-center gap-2">
                 <History className="h-5 w-5 text-primary" />
-                <CardTitle className="text-lg">Password History</CardTitle>
+                <CardTitle className="text-lg">{t('admin.passwordPolicies.passwordHistory.title')}</CardTitle>
               </div>
               <CardDescription>
-                Prevent reuse of recent passwords
+                {t('admin.passwordPolicies.passwordHistory.description')}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="history-count">Remember Last N Passwords</Label>
+                <Label htmlFor="history-count">{t('admin.passwordPolicies.passwordHistory.rememberLastN', { defaultValue: 'Remember Last N Passwords' })}</Label>
                 <Input
                   id="history-count"
                   type="number"
@@ -312,13 +301,13 @@ export default function PasswordPoliciesPage() {
                   onChange={(e) => updatePolicy({ password_history_count: parseInt(e.target.value) || 0 })}
                 />
                 <p className="text-xs text-muted-foreground">
-                  Users cannot reuse their last {policy.password_history_count} passwords
+                  {t('admin.passwordPolicies.passwordHistory.cannotReuse', { count: policy.password_history_count })}
                 </p>
               </div>
               <Alert>
                 <Info className="h-4 w-4" />
                 <AlertDescription>
-                  Industry standard recommends remembering at least 12 previous passwords.
+                  {t('admin.passwordPolicies.passwordHistory.industryStandard')}
                 </AlertDescription>
               </Alert>
             </CardContent>
@@ -329,15 +318,15 @@ export default function PasswordPoliciesPage() {
             <CardHeader>
               <div className="flex items-center gap-2">
                 <Clock className="h-5 w-5 text-primary" />
-                <CardTitle className="text-lg">Password Expiration</CardTitle>
+                <CardTitle className="text-lg">{t('admin.passwordPolicies.passwordExpiration.title')}</CardTitle>
               </div>
               <CardDescription>
-                Force periodic password changes with advance warnings
+                {t('admin.passwordPolicies.passwordExpiration.description')}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="expiry-days">Password Expires After (Days)</Label>
+                <Label htmlFor="expiry-days">{t('admin.passwordPolicies.passwordExpiration.expiresAfterDays')}</Label>
                 <Input
                   id="expiry-days"
                   type="number"
@@ -347,12 +336,12 @@ export default function PasswordPoliciesPage() {
                   onChange={(e) => updatePolicy({ password_expiry_days: parseInt(e.target.value) || null })}
                 />
                 <p className="text-xs text-muted-foreground">
-                  Set to 0 for no expiration
+                  {t('admin.passwordPolicies.passwordExpiration.noExpiration')}
                 </p>
               </div>
               <Separator />
               <div className="space-y-2">
-                <Label htmlFor="warning-days">Warning Days Before Expiry</Label>
+                <Label htmlFor="warning-days">{t('admin.passwordPolicies.passwordExpiration.warningDays')}</Label>
                 <Input
                   id="warning-days"
                   type="number"
@@ -362,7 +351,7 @@ export default function PasswordPoliciesPage() {
                   onChange={(e) => updatePolicy({ expiry_warning_days: parseInt(e.target.value) || 14 })}
                 />
                 <p className="text-xs text-muted-foreground">
-                  Users will see daily popup reminders starting {policy.expiry_warning_days} days before expiry
+                  {t('admin.passwordPolicies.passwordExpiration.warningHint', { days: policy.expiry_warning_days })}
                 </p>
               </div>
             </CardContent>
@@ -373,15 +362,15 @@ export default function PasswordPoliciesPage() {
             <CardHeader>
               <div className="flex items-center gap-2">
                 <Clock className="h-5 w-5 text-primary" />
-                <CardTitle className="text-lg">Session Timeout</CardTitle>
+                <CardTitle className="text-lg">{t('admin.passwordPolicies.sessionTimeout.title')}</CardTitle>
               </div>
               <CardDescription>
-                Auto-logout after period of inactivity
+                {t('admin.passwordPolicies.sessionTimeout.description')}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="session-timeout">Timeout After (Minutes)</Label>
+                <Label htmlFor="session-timeout">{t('admin.passwordPolicies.sessionTimeout.timeoutMinutes')}</Label>
                 <Input
                   id="session-timeout"
                   type="number"
@@ -391,7 +380,7 @@ export default function PasswordPoliciesPage() {
                   onChange={(e) => updatePolicy({ session_timeout_minutes: parseInt(e.target.value) || 30 })}
                 />
                 <p className="text-xs text-muted-foreground">
-                  Users will be logged out after {policy.session_timeout_minutes} minutes of inactivity
+                  {t('admin.passwordPolicies.sessionTimeout.timeoutHint', { minutes: policy.session_timeout_minutes })}
                 </p>
               </div>
             </CardContent>
@@ -402,18 +391,18 @@ export default function PasswordPoliciesPage() {
             <CardHeader>
               <div className="flex items-center gap-2">
                 <Fingerprint className="h-5 w-5 text-primary" />
-                <CardTitle className="text-lg">Additional Security</CardTitle>
+                <CardTitle className="text-lg">{t('admin.passwordPolicies.additionalSecurity.title')}</CardTitle>
               </div>
               <CardDescription>
-                First login requirements and MFA enforcement
+                {t('admin.passwordPolicies.additionalSecurity.description')}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
-                  <Label>Require Password Change on First Login</Label>
+                  <Label>{t('admin.passwordPolicies.additionalSecurity.requireFirstLoginChange')}</Label>
                   <p className="text-xs text-muted-foreground">
-                    New users must change their temporary password
+                    {t('admin.passwordPolicies.additionalSecurity.firstLoginHint')}
                   </p>
                 </div>
                 <Switch
@@ -423,7 +412,7 @@ export default function PasswordPoliciesPage() {
               </div>
               <Separator />
               <div className="space-y-2">
-                <Label htmlFor="mfa-level">MFA Enforcement Level</Label>
+                <Label htmlFor="mfa-level">{t('admin.passwordPolicies.additionalSecurity.mfaLevel')}</Label>
                 <Select
                   value={policy.mfa_enforcement_level}
                   onValueChange={(value) => updatePolicy({ mfa_enforcement_level: value })}
@@ -434,20 +423,20 @@ export default function PasswordPoliciesPage() {
                   <SelectContent>
                     <SelectItem value="optional">
                       <div className="flex items-center gap-2">
-                        <Badge variant="secondary">Optional</Badge>
-                        <span>Users can choose to enable MFA</span>
+                        <Badge variant="secondary">{t('admin.passwordPolicies.additionalSecurity.mfaOptional')}</Badge>
+                        <span>{t('admin.passwordPolicies.additionalSecurity.mfaOptionalDesc')}</span>
                       </div>
                     </SelectItem>
                     <SelectItem value="required_admins">
                       <div className="flex items-center gap-2">
-                        <Badge variant="default">Required for Admins</Badge>
-                        <span>Admins must use MFA</span>
+                        <Badge variant="default">{t('admin.passwordPolicies.additionalSecurity.mfaRequiredAdmins')}</Badge>
+                        <span>{t('admin.passwordPolicies.additionalSecurity.mfaRequiredAdminsDesc')}</span>
                       </div>
                     </SelectItem>
                     <SelectItem value="required_all">
                       <div className="flex items-center gap-2">
-                        <Badge variant="destructive">Required for All</Badge>
-                        <span>All users must use MFA</span>
+                        <Badge variant="destructive">{t('admin.passwordPolicies.additionalSecurity.mfaRequiredAll')}</Badge>
+                        <span>{t('admin.passwordPolicies.additionalSecurity.mfaRequiredAllDesc')}</span>
                       </div>
                     </SelectItem>
                   </SelectContent>
@@ -460,36 +449,49 @@ export default function PasswordPoliciesPage() {
         {/* Policy Summary */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg">Current Policy Summary</CardTitle>
+            <CardTitle className="text-lg">{t('admin.passwordPolicies.summary.title')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div className="text-center p-3 rounded-lg bg-muted/50">
-                <p className="text-2xl font-bold text-primary">{policy.min_password_length}</p>
-                <p className="text-xs text-muted-foreground">Min Length</p>
+              <div className="space-y-1">
+                <p className="text-sm text-muted-foreground">{t('admin.passwordPolicies.summary.minLength')}</p>
+                <p className="text-2xl font-bold">{policy.min_password_length}</p>
+                <p className="text-xs text-muted-foreground">{t('admin.passwordPolicies.summary.characters')}</p>
               </div>
-              <div className="text-center p-3 rounded-lg bg-muted/50">
-                <p className="text-2xl font-bold text-primary">{policy.password_history_count}</p>
-                <p className="text-xs text-muted-foreground">History Count</p>
+              <div className="space-y-1">
+                <p className="text-sm text-muted-foreground">{t('admin.passwordPolicies.summary.complexity')}</p>
+                <p className="text-2xl font-bold">{complexityCount}/4</p>
+                <p className="text-xs text-muted-foreground">{t('admin.passwordPolicies.summary.types')}</p>
               </div>
-              <div className="text-center p-3 rounded-lg bg-muted/50">
-                <p className="text-2xl font-bold text-primary">{policy.password_expiry_days || '∞'}</p>
-                <p className="text-xs text-muted-foreground">Expiry Days</p>
+              <div className="space-y-1">
+                <p className="text-sm text-muted-foreground">{t('admin.passwordPolicies.summary.history')}</p>
+                <p className="text-2xl font-bold">{policy.password_history_count}</p>
+                <p className="text-xs text-muted-foreground">{t('admin.passwordPolicies.summary.passwords')}</p>
               </div>
-              <div className="text-center p-3 rounded-lg bg-muted/50">
-                <p className="text-2xl font-bold text-primary">{policy.session_timeout_minutes}</p>
-                <p className="text-xs text-muted-foreground">Session Timeout (min)</p>
+              <div className="space-y-1">
+                <p className="text-sm text-muted-foreground">{t('admin.passwordPolicies.summary.expiry')}</p>
+                <p className="text-2xl font-bold">{policy.password_expiry_days || t('admin.passwordPolicies.summary.never')}</p>
+                <p className="text-xs text-muted-foreground">{policy.password_expiry_days ? t('admin.passwordPolicies.summary.days') : ''}</p>
               </div>
-            </div>
-            <div className="flex flex-wrap gap-2 mt-4">
-              {policy.require_uppercase && <Badge>Uppercase Required</Badge>}
-              {policy.require_lowercase && <Badge>Lowercase Required</Badge>}
-              {policy.require_numbers && <Badge>Numbers Required</Badge>}
-              {policy.require_special_chars && <Badge>Special Chars Required</Badge>}
-              {policy.require_change_on_first_login && <Badge variant="secondary">First Login Change</Badge>}
-              <Badge variant={policy.mfa_enforcement_level === 'required_all' ? 'destructive' : 'outline'}>
-                MFA: {policy.mfa_enforcement_level.replace('_', ' ')}
-              </Badge>
+              <div className="space-y-1">
+                <p className="text-sm text-muted-foreground">{t('admin.passwordPolicies.summary.timeout')}</p>
+                <p className="text-2xl font-bold">{policy.session_timeout_minutes}</p>
+                <p className="text-xs text-muted-foreground">{t('admin.passwordPolicies.summary.minutes')}</p>
+              </div>
+              <div className="space-y-1">
+                <p className="text-sm text-muted-foreground">{t('admin.passwordPolicies.summary.mfa')}</p>
+                <Badge variant={policy.mfa_enforcement_level === 'required_all' ? 'destructive' : policy.mfa_enforcement_level === 'required_admins' ? 'default' : 'secondary'}>
+                  {policy.mfa_enforcement_level === 'required_all' ? t('admin.passwordPolicies.additionalSecurity.mfaRequiredAll') : 
+                   policy.mfa_enforcement_level === 'required_admins' ? t('admin.passwordPolicies.additionalSecurity.mfaRequiredAdmins') : 
+                   t('admin.passwordPolicies.additionalSecurity.mfaOptional')}
+                </Badge>
+              </div>
+              <div className="space-y-1">
+                <p className="text-sm text-muted-foreground">{t('admin.passwordPolicies.summary.firstLogin')}</p>
+                <Badge variant={policy.require_change_on_first_login ? 'default' : 'secondary'}>
+                  {policy.require_change_on_first_login ? t('admin.passwordPolicies.summary.changeRequired') : t('admin.passwordPolicies.summary.noChange')}
+                </Badge>
+              </div>
             </div>
           </CardContent>
         </Card>

@@ -795,5 +795,43 @@
     "MyExpenseClaims": {
       "myClaims": "Mis reclamaciones"
     }
+  },
+  "admin": {
+    "passwordPolicies": {
+      "title": "Políticas de Contraseña",
+      "subtitle": "Configurar requisitos de seguridad de contraseñas empresariales",
+      "saveChanges": "Guardar Cambios",
+      "saved": "Política de contraseña guardada exitosamente",
+      "lengthRequirements": {
+        "title": "Requisitos de Longitud",
+        "description": "Establecer longitud mínima y máxima de contraseña",
+        "minLength": "Longitud Mínima",
+        "maxLength": "Longitud Máxima"
+      },
+      "complexityRules": {
+        "title": "Reglas de Complejidad",
+        "description": "Requerir tipos específicos de caracteres en contraseñas",
+        "requireUppercase": "Requerir Letras Mayúsculas",
+        "requireLowercase": "Requerir Letras Minúsculas",
+        "requireNumbers": "Requerir Números",
+        "requireSpecialChars": "Requerir Caracteres Especiales"
+      },
+      "passwordHistory": {
+        "title": "Historial de Contraseñas",
+        "description": "Evitar reutilización de contraseñas recientes"
+      },
+      "passwordExpiration": {
+        "title": "Expiración de Contraseña",
+        "description": "Forzar cambios periódicos de contraseña con advertencias anticipadas"
+      },
+      "sessionTimeout": {
+        "title": "Tiempo de Sesión",
+        "description": "Cerrar sesión automáticamente después de inactividad"
+      },
+      "additionalSecurity": {
+        "title": "Seguridad Adicional",
+        "description": "Requisitos de primer inicio de sesión y aplicación de MFA"
+      }
+    }
   }
 }
