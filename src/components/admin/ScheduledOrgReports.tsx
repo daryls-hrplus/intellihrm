@@ -480,14 +480,14 @@ export function ScheduledOrgReports({
                 <div className="space-y-2">
                   <Label htmlFor="company_id">Company (optional)</Label>
                   <Select
-                    value={formData.company_id}
-                    onValueChange={(value) => setFormData({ ...formData, company_id: value, department_id: "" })}
+                    value={formData.company_id || "__all__"}
+                    onValueChange={(value) => setFormData({ ...formData, company_id: value === "__all__" ? "" : value, department_id: "" })}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="All Companies" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">All Companies</SelectItem>
+                      <SelectItem value="__all__">All Companies</SelectItem>
                       {companies.map(company => (
                         <SelectItem key={company.id} value={company.id}>
                           {company.name}
@@ -499,14 +499,14 @@ export function ScheduledOrgReports({
                 <div className="space-y-2">
                   <Label htmlFor="department_id">Department (optional)</Label>
                   <Select
-                    value={formData.department_id}
-                    onValueChange={(value) => setFormData({ ...formData, department_id: value })}
+                    value={formData.department_id || "__all__"}
+                    onValueChange={(value) => setFormData({ ...formData, department_id: value === "__all__" ? "" : value })}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="All Departments" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">All Departments</SelectItem>
+                      <SelectItem value="__all__">All Departments</SelectItem>
                       {filteredDepartments.map(dept => (
                         <SelectItem key={dept.id} value={dept.id}>
                           {dept.name}
