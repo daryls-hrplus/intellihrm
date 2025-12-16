@@ -15,13 +15,13 @@ export function IntranetButton() {
 
       // Subscribe to real-time updates
       const channel = supabase
-        .channel("intranet-announcements-changes")
+        .channel("company-announcements-changes")
         .on(
           "postgres_changes",
           {
             event: "*",
             schema: "public",
-            table: "intranet_announcements",
+            table: "company_announcements",
           },
           () => {
             fetchUnreadCount();
@@ -36,15 +36,18 @@ export function IntranetButton() {
   }, [user]);
 
   const fetchUnreadCount = async () => {
-    // Get announcements from the last 7 days that the user can see
+    // Get active announcements from the last 7 days
     const sevenDaysAgo = new Date();
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+    const now = new Date().toISOString();
 
     const { count, error } = await supabase
-      .from("intranet_announcements")
+      .from("company_announcements")
       .select("*", { count: "exact", head: true })
-      .eq("is_published", true)
-      .gte("created_at", sevenDaysAgo.toISOString());
+      .eq("is_active", true)
+      .gte("created_at", sevenDaysAgo.toISOString())
+      .or(`publish_at.is.null,publish_at.lte.${now}`)
+      .or(`expire_at.is.null,expire_at.gte.${now}`);
 
     if (!error && count !== null) {
       setUnreadCount(count);
