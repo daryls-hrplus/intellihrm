@@ -41,26 +41,37 @@ export default function PayrollDashboardPage() {
       // Fetch payroll runs summary (company-wide)
       const { data: payrollRuns } = await supabase
         .from('payroll_runs')
-        .select('total_gross_pay, total_net_pay, employee_count, status, pay_period_id, created_at')
+        .select('total_gross_pay, total_net_pay, employee_count, status, pay_period_id, pay_group_id, created_at')
         .order('created_at', { ascending: false });
 
       const totalPayroll = payrollRuns?.reduce((sum, r) => sum + (r.total_gross_pay || 0), 0) || 0;
-      const pendingApprovals = payrollRuns?.filter(r => ['calculated', 'pending_approval'].includes(r.status)).length || 0;
 
       // Get the most recent payroll run to determine current period
       let currentPeriodLabel = "-";
       let currentPeriodEmployees = 0;
+      let pendingApprovals = 0;
       const latestRun = payrollRuns?.[0];
       
       if (latestRun) {
         // Current period is based on when payroll was run (created_at)
         currentPeriodLabel = format(new Date(latestRun.created_at), 'MMM yyyy');
         
-        // Count employees from all runs in the same pay period as the latest run
         if (latestRun.pay_period_id) {
-          currentPeriodEmployees = payrollRuns
-            ?.filter(r => r.pay_period_id === latestRun.pay_period_id && ['draft', 'calculating', 'calculated', 'pending_approval', 'approved', 'processing', 'paid'].includes(r.status))
-            .reduce((sum, r) => sum + (r.employee_count || 0), 0) || 0;
+          // Get runs in the current pay period
+          const currentPeriodRuns = payrollRuns?.filter(r => r.pay_period_id === latestRun.pay_period_id) || [];
+          
+          // Count employees from all runs in the current pay period
+          currentPeriodEmployees = currentPeriodRuns
+            .filter(r => ['draft', 'calculating', 'calculated', 'pending_approval', 'approved', 'processing', 'paid'].includes(r.status))
+            .reduce((sum, r) => sum + (r.employee_count || 0), 0);
+          
+          // Count unique pay groups with runs that are calculated but not yet approved
+          const pendingPayGroups = new Set(
+            currentPeriodRuns
+              .filter(r => ['calculated', 'pending_approval'].includes(r.status) && r.pay_group_id)
+              .map(r => r.pay_group_id)
+          );
+          pendingApprovals = pendingPayGroups.size;
         }
       }
 
