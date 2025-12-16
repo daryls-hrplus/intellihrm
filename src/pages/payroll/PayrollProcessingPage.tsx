@@ -68,8 +68,11 @@ export default function PayrollProcessingPage() {
   const [payrollRuns, setPayrollRuns] = useState<ExtendedPayrollRun[]>([]);
   const [selectedRun, setSelectedRun] = useState<ExtendedPayrollRun | null>(null);
   const [employeePayroll, setEmployeePayroll] = useState<EmployeePayroll[]>([]);
+  const [expandedRunId, setExpandedRunId] = useState<string | null>(null);
+  const [expandedEmployees, setExpandedEmployees] = useState<EmployeePayroll[]>([]);
+  const [selectedEmployee, setSelectedEmployee] = useState<EmployeePayroll | null>(null);
+  const [employeeDetailOpen, setEmployeeDetailOpen] = useState(false);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
-  const [detailDialogOpen, setDetailDialogOpen] = useState(false);
   const [recalcConfirmOpen, setRecalcConfirmOpen] = useState(false);
   const [reopenConfirmOpen, setReopenConfirmOpen] = useState(false);
   const [runToRecalc, setRunToRecalc] = useState<ExtendedPayrollRun | null>(null);
@@ -243,11 +246,21 @@ export default function PayrollProcessingPage() {
     }
   };
 
-  const viewRunDetails = async (run: ExtendedPayrollRun) => {
-    setSelectedRun(run);
-    const empPayroll = await fetchEmployeePayroll(run.id);
-    setEmployeePayroll(empPayroll);
-    setDetailDialogOpen(true);
+  const toggleRunExpand = async (run: ExtendedPayrollRun) => {
+    if (expandedRunId === run.id) {
+      setExpandedRunId(null);
+      setExpandedEmployees([]);
+    } else {
+      setExpandedRunId(run.id);
+      setSelectedRun(run);
+      const empPayroll = await fetchEmployeePayroll(run.id);
+      setExpandedEmployees(empPayroll);
+    }
+  };
+
+  const viewEmployeeDetails = (emp: EmployeePayroll) => {
+    setSelectedEmployee(emp);
+    setEmployeeDetailOpen(true);
   };
 
   const getStatusColor = (status: string) => {
@@ -418,109 +431,166 @@ export default function PayrollProcessingPage() {
               </TableHeader>
               <TableBody>
                 {payrollRuns.map((run) => (
-                  <TableRow key={run.id}>
-                    <TableCell className="font-medium">
-                      <div className="flex items-center gap-2">
-                        {run.run_number}
-                        {run.is_locked && (
-                          <Lock className="h-3 w-3 text-warning" />
-                        )}
-                      </div>
-                    </TableCell>
-                    <TableCell className="capitalize">{run.run_type.replace('_', ' ')}</TableCell>
-                    <TableCell>
-                      {run.pay_period && (
-                        <span className="text-sm">
-                          {format(parseISO(run.pay_period.period_start), "MMM d")} - {format(parseISO(run.pay_period.period_end), "MMM d, yyyy")}
-                        </span>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      <Button
-                        variant="link"
-                        className="p-0 h-auto font-normal text-primary underline-offset-4 hover:underline"
-                        onClick={() => viewRunDetails(run)}
-                      >
-                        {run.employee_count}
-                      </Button>
-                    </TableCell>
-                    <TableCell>{formatCurrency(run.total_gross_pay, run.currency)}</TableCell>
-                    <TableCell>{formatCurrency(run.total_net_pay, run.currency)}</TableCell>
-                    <TableCell className="text-xs text-muted-foreground">
-                      {run.calculation_started_at ? format(parseISO(run.calculation_started_at), "MMM d HH:mm") : '-'}
-                    </TableCell>
-                    <TableCell className="text-xs text-muted-foreground">
-                      {run.calculated_at ? format(parseISO(run.calculated_at), "MMM d HH:mm") : '-'}
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex flex-col gap-1">
-                        <Badge className={getStatusColor(run.status)}>
-                          {run.status.replace('_', ' ').charAt(0).toUpperCase() + run.status.slice(1).replace('_', ' ')}
-                        </Badge>
-                        {run.recalculation_requested_by && !run.recalculation_approved_by && (
-                          <Badge variant="outline" className="text-xs">
-                            <AlertTriangle className="h-3 w-3 mr-1" />
-                            {t("payroll.processing.recalcPending")}
-                          </Badge>
-                        )}
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex justify-end gap-1">
-                        <Button variant="ghost" size="sm" onClick={() => viewRunDetails(run)} title="View Details">
-                          <Eye className="h-4 w-4" />
+                  <>
+                    <TableRow key={run.id}>
+                      <TableCell className="font-medium">
+                        <Button
+                          variant="link"
+                          className="p-0 h-auto font-medium text-primary underline-offset-4 hover:underline flex items-center gap-2"
+                          onClick={() => toggleRunExpand(run)}
+                        >
+                          {run.run_number}
+                          {run.is_locked && (
+                            <Lock className="h-3 w-3 text-warning" />
+                          )}
                         </Button>
-                        {run.status === 'draft' && (
-                          <Button variant="ghost" size="sm" onClick={() => handleCalculate(run)} title="Calculate" disabled={isLoading}>
-                            <Play className="h-4 w-4" />
-                          </Button>
+                      </TableCell>
+                      <TableCell className="capitalize">{run.run_type.replace('_', ' ')}</TableCell>
+                      <TableCell>
+                        {run.pay_period && (
+                          <span className="text-sm">
+                            {format(parseISO(run.pay_period.period_start), "MMM d")} - {format(parseISO(run.pay_period.period_end), "MMM d, yyyy")}
+                          </span>
                         )}
-                        {(run.status === 'calculating' || run.status === 'failed') && (
-                          <Button variant="ghost" size="sm" onClick={() => handleRecalculate(run)} title="Retry Calculation" disabled={isLoading}>
-                            <RefreshCw className="h-4 w-4" />
+                      </TableCell>
+                      <TableCell>{run.employee_count}</TableCell>
+                      <TableCell>{formatCurrency(run.total_gross_pay, run.currency)}</TableCell>
+                      <TableCell>{formatCurrency(run.total_net_pay, run.currency)}</TableCell>
+                      <TableCell className="text-xs text-muted-foreground">
+                        {run.calculation_started_at ? format(parseISO(run.calculation_started_at), "MMM d HH:mm") : '-'}
+                      </TableCell>
+                      <TableCell className="text-xs text-muted-foreground">
+                        {run.calculated_at ? format(parseISO(run.calculated_at), "MMM d HH:mm") : '-'}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex flex-col gap-1">
+                          <Badge className={getStatusColor(run.status)}>
+                            {run.status.replace('_', ' ').charAt(0).toUpperCase() + run.status.slice(1).replace('_', ' ')}
+                          </Badge>
+                          {run.recalculation_requested_by && !run.recalculation_approved_by && (
+                            <Badge variant="outline" className="text-xs">
+                              <AlertTriangle className="h-3 w-3 mr-1" />
+                              {t("payroll.processing.recalcPending")}
+                            </Badge>
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex justify-end gap-1">
+                          <Button variant="ghost" size="sm" onClick={() => toggleRunExpand(run)} title="View Employees">
+                            <Eye className="h-4 w-4" />
                           </Button>
-                        )}
-                        {run.status === 'calculated' && (
-                          <>
-                            <Button variant="ghost" size="sm" onClick={() => handleRecalculate(run)} title="Recalculate" disabled={isLoading}>
+                          {run.status === 'draft' && (
+                            <Button variant="ghost" size="sm" onClick={() => handleCalculate(run)} title="Calculate" disabled={isLoading}>
+                              <Play className="h-4 w-4" />
+                            </Button>
+                          )}
+                          {(run.status === 'calculating' || run.status === 'failed') && (
+                            <Button variant="ghost" size="sm" onClick={() => handleRecalculate(run)} title="Retry Calculation" disabled={isLoading}>
                               <RefreshCw className="h-4 w-4" />
                             </Button>
-                            <Button variant="ghost" size="sm" onClick={() => handleApprove(run)} title="Approve" disabled={isLoading}>
-                              <CheckCircle className="h-4 w-4" />
-                            </Button>
-                          </>
-                        )}
-                        {run.status === 'approved' && (
-                          <>
-                            <Button variant="ghost" size="sm" onClick={() => handleRecalculate(run)} title="Request Recalculation" disabled={isLoading}>
-                              <RefreshCw className="h-4 w-4" />
-                            </Button>
-                            <Button variant="ghost" size="sm" onClick={() => handleGeneratePayslips(run)} title="Generate Payslips" disabled={isLoading}>
-                              <FileText className="h-4 w-4" />
-                            </Button>
-                            <Button variant="ghost" size="sm" onClick={() => handleGenerateBankFile(run)} title="Generate Bank File" disabled={isLoading}>
-                              <Download className="h-4 w-4" />
-                            </Button>
-                            <Button variant="ghost" size="sm" onClick={() => handleProcessPayment(run)} title="Process Payment" disabled={isLoading}>
-                              <DollarSign className="h-4 w-4" />
-                            </Button>
+                          )}
+                          {run.status === 'calculated' && (
+                            <>
+                              <Button variant="ghost" size="sm" onClick={() => handleRecalculate(run)} title="Recalculate" disabled={isLoading}>
+                                <RefreshCw className="h-4 w-4" />
+                              </Button>
+                              <Button variant="ghost" size="sm" onClick={() => handleApprove(run)} title="Approve" disabled={isLoading}>
+                                <CheckCircle className="h-4 w-4" />
+                              </Button>
+                            </>
+                          )}
+                          {run.status === 'approved' && (
+                            <>
+                              <Button variant="ghost" size="sm" onClick={() => handleRecalculate(run)} title="Request Recalculation" disabled={isLoading}>
+                                <RefreshCw className="h-4 w-4" />
+                              </Button>
+                              <Button variant="ghost" size="sm" onClick={() => handleGeneratePayslips(run)} title="Generate Payslips" disabled={isLoading}>
+                                <FileText className="h-4 w-4" />
+                              </Button>
+                              <Button variant="ghost" size="sm" onClick={() => handleGenerateBankFile(run)} title="Generate Bank File" disabled={isLoading}>
+                                <Download className="h-4 w-4" />
+                              </Button>
+                              <Button variant="ghost" size="sm" onClick={() => handleProcessPayment(run)} title="Process Payment" disabled={isLoading}>
+                                <DollarSign className="h-4 w-4" />
+                              </Button>
+                              <Button variant="ghost" size="sm" onClick={() => handleReopen(run)} title="Reopen for Changes" disabled={isLoading}>
+                                <Unlock className="h-4 w-4" />
+                              </Button>
+                            </>
+                          )}
+                          {run.status === 'paid' && canApproveSupervisor && (
                             <Button variant="ghost" size="sm" onClick={() => handleReopen(run)} title="Reopen for Changes" disabled={isLoading}>
                               <Unlock className="h-4 w-4" />
                             </Button>
-                          </>
-                        )}
-                        {run.status === 'paid' && canApproveSupervisor && (
-                          <Button variant="ghost" size="sm" onClick={() => handleReopen(run)} title="Reopen for Changes" disabled={isLoading}>
-                            <Unlock className="h-4 w-4" />
-                          </Button>
-                        )}
-                      </div>
-                    </TableCell>
-                  </TableRow>
+                          )}
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                    {expandedRunId === run.id && (
+                      <TableRow className="bg-muted/30">
+                        <TableCell colSpan={10} className="p-0">
+                          <div className="p-4 border-l-4 border-primary">
+                            <div className="flex items-center justify-between mb-3">
+                              <h4 className="font-medium text-sm">{t("payroll.processing.employeesInRun", { count: expandedEmployees.length })}</h4>
+                              {selectedRun && (
+                                <div className="flex gap-4 text-sm">
+                                  <span>{t("payroll.processing.grossPay")}: <strong>{formatCurrency(selectedRun.total_gross_pay)}</strong></span>
+                                  <span>{t("payroll.processing.netPay")}: <strong>{formatCurrency(selectedRun.total_net_pay)}</strong></span>
+                                </div>
+                              )}
+                            </div>
+                            <Table>
+                              <TableHeader>
+                                <TableRow>
+                                  <TableHead>{t("payroll.processing.employee")}</TableHead>
+                                  <TableHead>{t("payroll.processing.hours")}</TableHead>
+                                  <TableHead>{t("payroll.processing.grossPay")}</TableHead>
+                                  <TableHead>{t("payroll.processing.taxes")}</TableHead>
+                                  <TableHead>{t("payroll.processing.deductions")}</TableHead>
+                                  <TableHead>{t("payroll.processing.netPay")}</TableHead>
+                                  <TableHead>{t("common.status")}</TableHead>
+                                </TableRow>
+                              </TableHeader>
+                              <TableBody>
+                                {expandedEmployees.map((emp) => (
+                                  <TableRow key={emp.id} className="cursor-pointer hover:bg-muted/50" onClick={() => viewEmployeeDetails(emp)}>
+                                    <TableCell>
+                                      <div>
+                                        <p className="font-medium text-primary hover:underline">{emp.employee?.full_name}</p>
+                                        <p className="text-sm text-muted-foreground">{emp.employee?.email}</p>
+                                      </div>
+                                    </TableCell>
+                                    <TableCell>{emp.regular_hours}</TableCell>
+                                    <TableCell>{formatCurrency(emp.gross_pay)}</TableCell>
+                                    <TableCell>{formatCurrency(emp.tax_deductions)}</TableCell>
+                                    <TableCell>{formatCurrency(emp.total_deductions - emp.tax_deductions)}</TableCell>
+                                    <TableCell className="font-medium">{formatCurrency(emp.net_pay)}</TableCell>
+                                    <TableCell>
+                                      <Badge className={getStatusColor(emp.status)}>
+                                        {emp.status.charAt(0).toUpperCase() + emp.status.slice(1)}
+                                      </Badge>
+                                    </TableCell>
+                                  </TableRow>
+                                ))}
+                                {expandedEmployees.length === 0 && (
+                                  <TableRow>
+                                    <TableCell colSpan={7} className="text-center py-4 text-muted-foreground">
+                                      {t("payroll.processing.noEmployeeRecords")}
+                                    </TableCell>
+                                  </TableRow>
+                                )}
+                              </TableBody>
+                            </Table>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </>
                 ))}
                 {payrollRuns.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
+                    <TableCell colSpan={10} className="text-center py-8 text-muted-foreground">
                       {t("payroll.processing.noPayrollRuns")}
                     </TableCell>
                   </TableRow>
@@ -595,75 +665,73 @@ export default function PayrollProcessingPage() {
           </DialogContent>
         </Dialog>
 
-        {/* Run Details Dialog */}
-        <Dialog open={detailDialogOpen} onOpenChange={setDetailDialogOpen}>
-          <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+        {/* Employee Pay Details Dialog */}
+        <Dialog open={employeeDetailOpen} onOpenChange={setEmployeeDetailOpen}>
+          <DialogContent className="max-w-lg">
             <DialogHeader>
-              <DialogTitle>{t("payroll.processing.runDetailsTitle", { runNumber: selectedRun?.run_number })}</DialogTitle>
+              <DialogTitle>{t("payroll.processing.employeePayDetails")}</DialogTitle>
             </DialogHeader>
-            {selectedRun && (
+            {selectedEmployee && (
               <div className="space-y-4">
-                <div className="grid grid-cols-4 gap-4">
+                <div className="border-b pb-3">
+                  <p className="font-semibold text-lg">{selectedEmployee.employee?.full_name}</p>
+                  <p className="text-sm text-muted-foreground">{selectedEmployee.employee?.email}</p>
+                </div>
+                
+                <div className="grid grid-cols-2 gap-4">
                   <div className="bg-muted p-3 rounded-lg">
-                    <p className="text-sm text-muted-foreground">{t("payroll.processing.grossPay")}</p>
-                    <p className="text-lg font-semibold">{formatCurrency(selectedRun.total_gross_pay)}</p>
+                    <p className="text-sm text-muted-foreground">{t("payroll.processing.regularHours")}</p>
+                    <p className="text-lg font-semibold">{selectedEmployee.regular_hours}</p>
                   </div>
                   <div className="bg-muted p-3 rounded-lg">
-                    <p className="text-sm text-muted-foreground">{t("payroll.processing.deductions")}</p>
-                    <p className="text-lg font-semibold">{formatCurrency(selectedRun.total_deductions)}</p>
-                  </div>
-                  <div className="bg-muted p-3 rounded-lg">
-                    <p className="text-sm text-muted-foreground">{t("payroll.processing.taxes")}</p>
-                    <p className="text-lg font-semibold">{formatCurrency(selectedRun.total_taxes)}</p>
-                  </div>
-                  <div className="bg-muted p-3 rounded-lg">
-                    <p className="text-sm text-muted-foreground">{t("payroll.processing.netPay")}</p>
-                    <p className="text-lg font-semibold">{formatCurrency(selectedRun.total_net_pay)}</p>
+                    <p className="text-sm text-muted-foreground">{t("payroll.processing.overtimeHours")}</p>
+                    <p className="text-lg font-semibold">{selectedEmployee.overtime_hours}</p>
                   </div>
                 </div>
 
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>{t("payroll.processing.employee")}</TableHead>
-                      <TableHead>{t("payroll.processing.hours")}</TableHead>
-                      <TableHead>{t("payroll.processing.grossPay")}</TableHead>
-                      <TableHead>{t("payroll.processing.taxes")}</TableHead>
-                      <TableHead>{t("payroll.processing.deductions")}</TableHead>
-                      <TableHead>{t("payroll.processing.netPay")}</TableHead>
-                      <TableHead>{t("common.status")}</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {employeePayroll.map((emp) => (
-                      <TableRow key={emp.id}>
-                        <TableCell>
-                          <div>
-                            <p className="font-medium">{emp.employee?.full_name}</p>
-                            <p className="text-sm text-muted-foreground">{emp.employee?.email}</p>
-                          </div>
-                        </TableCell>
-                        <TableCell>{emp.regular_hours}</TableCell>
-                        <TableCell>{formatCurrency(emp.gross_pay)}</TableCell>
-                        <TableCell>{formatCurrency(emp.tax_deductions)}</TableCell>
-                        <TableCell>{formatCurrency(emp.total_deductions - emp.tax_deductions)}</TableCell>
-                        <TableCell className="font-medium">{formatCurrency(emp.net_pay)}</TableCell>
-                        <TableCell>
-                          <Badge className={getStatusColor(emp.status)}>
-                            {emp.status.charAt(0).toUpperCase() + emp.status.slice(1)}
-                          </Badge>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                    {employeePayroll.length === 0 && (
-                      <TableRow>
-                        <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
-                          {t("payroll.processing.noEmployeeRecords")}
-                        </TableCell>
-                      </TableRow>
-                    )}
-                  </TableBody>
-                </Table>
+                <div className="space-y-2">
+                  <div className="flex justify-between py-2 border-b">
+                    <span className="text-muted-foreground">{t("payroll.processing.regularPay")}</span>
+                    <span className="font-medium">{formatCurrency(selectedEmployee.regular_pay)}</span>
+                  </div>
+                  <div className="flex justify-between py-2 border-b">
+                    <span className="text-muted-foreground">{t("payroll.processing.overtimePay")}</span>
+                    <span className="font-medium">{formatCurrency(selectedEmployee.overtime_pay)}</span>
+                  </div>
+                  <div className="flex justify-between py-2 border-b">
+                    <span className="text-muted-foreground">{t("payroll.processing.bonusPay")}</span>
+                    <span className="font-medium">{formatCurrency(selectedEmployee.bonus_pay)}</span>
+                  </div>
+                  <div className="flex justify-between py-2 border-b">
+                    <span className="text-muted-foreground">{t("payroll.processing.otherEarnings")}</span>
+                    <span className="font-medium">{formatCurrency(selectedEmployee.other_earnings)}</span>
+                  </div>
+                  <div className="flex justify-between py-2 border-b bg-primary/5 px-2 rounded">
+                    <span className="font-medium">{t("payroll.processing.grossPay")}</span>
+                    <span className="font-semibold">{formatCurrency(selectedEmployee.gross_pay)}</span>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <div className="flex justify-between py-2 border-b">
+                    <span className="text-muted-foreground">{t("payroll.processing.taxes")}</span>
+                    <span className="font-medium text-destructive">-{formatCurrency(selectedEmployee.tax_deductions)}</span>
+                  </div>
+                  <div className="flex justify-between py-2 border-b">
+                    <span className="text-muted-foreground">{t("payroll.processing.otherDeductions")}</span>
+                    <span className="font-medium text-destructive">-{formatCurrency(selectedEmployee.total_deductions - selectedEmployee.tax_deductions)}</span>
+                  </div>
+                  <div className="flex justify-between py-2 bg-success/10 px-2 rounded">
+                    <span className="font-semibold">{t("payroll.processing.netPay")}</span>
+                    <span className="font-bold text-success">{formatCurrency(selectedEmployee.net_pay)}</span>
+                  </div>
+                </div>
+
+                <div className="pt-2">
+                  <Badge className={getStatusColor(selectedEmployee.status)}>
+                    {selectedEmployee.status.charAt(0).toUpperCase() + selectedEmployee.status.slice(1)}
+                  </Badge>
+                </div>
               </div>
             )}
           </DialogContent>
