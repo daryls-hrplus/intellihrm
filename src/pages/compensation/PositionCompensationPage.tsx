@@ -50,6 +50,16 @@ interface Position {
   min_spinal_point?: number;
   max_spinal_point?: number;
   entry_spinal_point?: number;
+  salary_grade_id?: string;
+  salary_grade?: {
+    id: string;
+    name: string;
+    code: string;
+    min_salary: number;
+    mid_salary: number;
+    max_salary: number;
+    currency: string;
+  };
 }
 
 interface PaySpine {
@@ -154,7 +164,14 @@ export default function PositionCompensationPage() {
       const deptIds = deptData.map((d) => d.id);
       const { data: posData } = await supabase
         .from("positions")
-        .select("id, title, code, department:departments(name), compensation_model, pay_spine_id, min_spinal_point, max_spinal_point, entry_spinal_point")
+        .select(`
+          id, title, code, 
+          department:departments(name), 
+          compensation_model, 
+          pay_spine_id, min_spinal_point, max_spinal_point, entry_spinal_point,
+          salary_grade_id,
+          salary_grade:salary_grades(id, name, code, min_salary, mid_salary, max_salary, currency)
+        `)
         .in("department_id", deptIds)
         .eq("is_active", true)
         .order("title");
@@ -352,8 +369,8 @@ export default function PositionCompensationPage() {
 
         {selectedPositionId && selectedPosition && (
           <>
-            {/* Compensation Model Badge */}
-            <div className="flex items-center gap-2">
+            {/* Compensation Model Badge with Grade/Spine Info */}
+            <div className="flex items-center gap-2 flex-wrap">
               <span className="text-sm text-muted-foreground">{t("compensation.positionCompensation.compensationModel")}:</span>
               <Badge variant={
                 selectedPosition.compensation_model === 'spinal_point' ? 'default' :
@@ -363,7 +380,65 @@ export default function PositionCompensationPage() {
                 {selectedPosition.compensation_model === 'spinal_point' && t("compensation.positionCompensation.spinalPoint")}
                 {selectedPosition.compensation_model === 'hybrid' && t("compensation.positionCompensation.hybrid")}
               </Badge>
+              
+              {/* Show Salary Grade name and range for salary_grade model */}
+              {selectedPosition.compensation_model === 'salary_grade' && selectedPosition.salary_grade && (
+                <>
+                  <span className="text-muted-foreground">|</span>
+                  <span className="text-sm font-medium">
+                    {selectedPosition.salary_grade.name} ({selectedPosition.salary_grade.code})
+                  </span>
+                  <Badge variant="outline" className="font-mono">
+                    {formatCurrency(selectedPosition.salary_grade.min_salary, selectedPosition.salary_grade.currency)} - {formatCurrency(selectedPosition.salary_grade.max_salary, selectedPosition.salary_grade.currency)}
+                  </Badge>
+                </>
+              )}
+              
+              {/* Show Pay Spine name and range for spinal_point model */}
+              {selectedPosition.compensation_model === 'spinal_point' && paySpine && spinalPoints.length > 0 && (
+                <>
+                  <span className="text-muted-foreground">|</span>
+                  <span className="text-sm font-medium">
+                    {paySpine.name} ({paySpine.code})
+                  </span>
+                  <Badge variant="outline" className="font-mono">
+                    {formatCurrency(spinalPoints[0].annual_salary, paySpine.currency)} - {formatCurrency(spinalPoints[spinalPoints.length - 1].annual_salary, paySpine.currency)}
+                  </Badge>
+                </>
+              )}
             </div>
+
+            {/* Salary Grade Info Card - show for salary_grade or hybrid */}
+            {(selectedPosition.compensation_model === 'salary_grade' || selectedPosition.compensation_model === 'hybrid') && selectedPosition.salary_grade && (
+              <Card className="border-info/20 bg-info/5">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-base flex items-center gap-2">
+                    <Wallet className="h-4 w-4" />
+                    {t("compensation.positionCompensation.salaryGradeBase")}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                    <div>
+                      <p className="text-sm text-muted-foreground">{t("compensation.positionCompensation.grade")}</p>
+                      <p className="font-medium">{selectedPosition.salary_grade.name} ({selectedPosition.salary_grade.code})</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground">{t("compensation.positionCompensation.minSalary")}</p>
+                      <p className="font-medium">{formatCurrency(selectedPosition.salary_grade.min_salary, selectedPosition.salary_grade.currency)}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground">{t("compensation.positionCompensation.midSalary")}</p>
+                      <p className="font-medium">{formatCurrency(selectedPosition.salary_grade.mid_salary, selectedPosition.salary_grade.currency)}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground">{t("compensation.positionCompensation.maxSalary")}</p>
+                      <p className="font-medium">{formatCurrency(selectedPosition.salary_grade.max_salary, selectedPosition.salary_grade.currency)}</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
 
             {/* Spinal Point Info Card - show for spinal_point or hybrid */}
             {(selectedPosition.compensation_model === 'spinal_point' || selectedPosition.compensation_model === 'hybrid') && paySpine && (
