@@ -432,6 +432,7 @@
     "sectionDeleted": "Section deleted successfully",
     "orgChangesReport": "Org Changes Report",
     "trackOrgChanges": "Track and analyze organizational structure changes over time",
+    "scheduleReport": "Schedule Report",
     "cannotDeleteWithSections": "Cannot delete department with sections. Remove sections first.",
     "noDivision": "No Division",
     "division": "Division",
