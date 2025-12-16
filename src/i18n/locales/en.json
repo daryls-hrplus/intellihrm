@@ -430,6 +430,8 @@
     "sectionCreated": "Section created successfully",
     "departmentDeleted": "Department deleted successfully",
     "sectionDeleted": "Section deleted successfully",
+    "orgChangesReport": "Org Changes Report",
+    "trackOrgChanges": "Track and analyze organizational structure changes over time",
     "cannotDeleteWithSections": "Cannot delete department with sections. Remove sections first.",
     "noDivision": "No Division",
     "division": "Division",
