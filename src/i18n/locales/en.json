@@ -5142,17 +5142,38 @@
         "amount": "Amount",
         "description": "Description",
         "descriptionPlaceholder": "Details about this expense",
+        "receipt": "Receipt/Document (Optional)",
+        "uploadReceipt": "Upload Receipt",
+        "fileHint": "Images or PDF, max 5MB",
         "cancel": "Cancel",
         "add": "Add Item",
         "adding": "Adding..."
       },
+      "receipt": "Receipt",
       "statuses": {
         "draft": "Draft",
         "submitted": "Submitted",
         "pending_approval": "Pending Approval",
         "approved": "Approved",
         "rejected": "Rejected",
-        "paid": "Paid"
+        "paid": "Paid",
+        "pending_payment": "Pending Payment"
+      },
+      "toast": {
+        "success": "Success",
+        "error": "Error",
+        "claimCreated": "Expense claim created",
+        "createFailed": "Failed to create claim",
+        "itemAdded": "Expense item added",
+        "addFailed": "Failed to add item",
+        "itemRemoved": "Item removed",
+        "deleteFailed": "Failed to delete item",
+        "submitted": "Claim submitted for approval",
+        "submitFailed": "Failed to submit claim",
+        "fillRequired": "Please fill in required fields",
+        "addItem": "Add at least one expense item",
+        "invalidFileType": "Only images and PDFs are allowed",
+        "fileTooLarge": "File size must be less than 5MB"
       }
     }
   },
