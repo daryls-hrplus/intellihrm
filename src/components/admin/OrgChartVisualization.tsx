@@ -307,50 +307,35 @@ export function OrgChartVisualization({ companyId }: OrgChartVisualizationProps)
       const chartContent = element.querySelector('.flex.flex-col.items-center') as HTMLElement;
       const targetElement = chartContent || element;
       
-      // Get the bounding rect of actual content
-      const contentRect = targetElement.getBoundingClientRect();
-      
       const canvas = await html2canvas(targetElement, {
-        scale: 2,
+        scale: 1,
         useCORS: true,
         allowTaint: true,
         backgroundColor: "#ffffff",
-        width: contentRect.width,
-        height: contentRect.height,
       });
 
-      // Use JPEG with compression for smaller file size
       const imgData = canvas.toDataURL("image/jpeg", 0.85);
       
-      // Determine orientation based on content aspect ratio
-      const contentAspect = canvas.width / canvas.height;
-      const isLandscape = contentAspect > 1.2; // Use landscape if content is notably wider
-      
       const pdf = new jsPDF({
-        orientation: isLandscape ? "landscape" : "portrait",
+        orientation: "portrait",
         unit: "mm",
         format: "a4",
       });
 
       const pageWidth = pdf.internal.pageSize.getWidth();
-      const pageHeight = pdf.internal.pageSize.getHeight();
-      const margin = 15;
+      const margin = 20;
       
-      const availableWidth = pageWidth - margin * 2;
-      const availableHeight = pageHeight - margin * 2;
+      // Convert pixels to mm (assuming 96 DPI) and shrink to 60% of original size
+      const pxToMm = 0.264583;
+      const shrinkFactor = 0.6;
       
-      // Scale to fill the page appropriately
-      const scaleX = availableWidth / (canvas.width / 2); // Divide by scale factor
-      const scaleY = availableHeight / (canvas.height / 2);
-      const scale = Math.min(scaleX, scaleY, 1.5); // Cap at 1.5x to prevent over-enlargement
+      const imgWidthMm = canvas.width * pxToMm * shrinkFactor;
+      const imgHeightMm = canvas.height * pxToMm * shrinkFactor;
       
-      const finalWidth = (canvas.width / 2) * scale;
-      const finalHeight = (canvas.height / 2) * scale;
-      
-      const xOffset = margin + (availableWidth - finalWidth) / 2;
-      const yOffset = margin + (availableHeight - finalHeight) / 2;
+      // Center horizontally
+      const xOffset = (pageWidth - imgWidthMm) / 2;
 
-      pdf.addImage(imgData, "JPEG", xOffset, yOffset, finalWidth, finalHeight);
+      pdf.addImage(imgData, "JPEG", xOffset, margin, imgWidthMm, imgHeightMm);
       pdf.save(`${title.toLowerCase().replace(/\s+/g, "-")}-${format(new Date(), "yyyy-MM-dd")}.pdf`);
 
       toast.success("PDF exported successfully", { id: "pdf-export" });
