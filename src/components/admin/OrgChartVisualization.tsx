@@ -306,16 +306,18 @@ export function OrgChartVisualization({ companyId }: OrgChartVisualizationProps)
       // Find the actual chart content (the inner flex container with nodes)
       const chartContent = element.querySelector('.flex.flex-col.items-center') as HTMLElement;
       const targetElement = chartContent || element;
-      
+
+      // Higher capture resolution (keeps PDF output size small via shrinkFactor below)
       const canvas = await html2canvas(targetElement, {
-        scale: 2,
+        scale: 3,
         useCORS: true,
         allowTaint: true,
         backgroundColor: "#ffffff",
       });
 
-      const imgData = canvas.toDataURL("image/jpeg", 0.85);
-      
+      // Use PNG to avoid JPEG compression artifacts (sharper text)
+      const imgData = canvas.toDataURL("image/png");
+
       const pdf = new jsPDF({
         orientation: "portrait",
         unit: "mm",
@@ -324,18 +326,18 @@ export function OrgChartVisualization({ companyId }: OrgChartVisualizationProps)
 
       const pageWidth = pdf.internal.pageSize.getWidth();
       const margin = 20;
-      
-      // Convert pixels to mm (assuming 96 DPI) and shrink to 60% of original size
+
+      // Convert pixels to mm (assuming 96 DPI) and shrink to desired output size
       const pxToMm = 0.264583;
       const shrinkFactor = 0.6;
-      
+
       const imgWidthMm = canvas.width * pxToMm * shrinkFactor;
       const imgHeightMm = canvas.height * pxToMm * shrinkFactor;
-      
+
       // Center horizontally
       const xOffset = (pageWidth - imgWidthMm) / 2;
 
-      pdf.addImage(imgData, "JPEG", xOffset, margin, imgWidthMm, imgHeightMm);
+      pdf.addImage(imgData, "PNG", xOffset, margin, imgWidthMm, imgHeightMm, undefined, "FAST");
       pdf.save(`${title.toLowerCase().replace(/\s+/g, "-")}-${format(new Date(), "yyyy-MM-dd")}.pdf`);
 
       toast.success("PDF exported successfully", { id: "pdf-export" });
