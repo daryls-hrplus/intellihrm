@@ -193,6 +193,14 @@ export default function PayrollDashboardPage() {
       color: "bg-accent/10 text-accent-foreground",
       tabCode: "gl_interface",
     },
+    {
+      title: t("payroll.modules.expenseClaims.title", "Expense Claims"),
+      description: t("payroll.modules.expenseClaims.description", "Approve expense claims for payment in payroll"),
+      icon: Receipt,
+      href: "/payroll/expense-claims",
+      color: "bg-orange-500/10 text-orange-600",
+      tabCode: "expense_claims",
+    },
   ].filter(f => hasTabAccess("payroll", f.tabCode));
 
   const statItems = [
