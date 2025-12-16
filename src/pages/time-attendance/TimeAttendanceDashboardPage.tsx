@@ -2,17 +2,17 @@ import { useTranslation } from "react-i18next";
 import { useState, useEffect } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ModuleReportsButton } from "@/components/reports/ModuleReportsButton";
 import { ModuleBIButton } from "@/components/bi/ModuleBIButton";
 import { LeaveCompanyFilter } from "@/components/leave/LeaveCompanyFilter";
 import { useGranularPermissions } from "@/hooks/useGranularPermissions";
+import { DraggableModuleCards, ModuleCardItem } from "@/components/ui/DraggableModuleCards";
 import { 
   Clock, 
   Calendar, 
   Timer, 
   UserCheck,
-  ArrowRight,
   Users,
   AlertCircle,
   TrendingUp,
@@ -22,14 +22,12 @@ import {
   MapPin,
   Briefcase,
 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { format } from "date-fns";
 
 export default function TimeAttendanceDashboardPage() {
   const { t } = useTranslation();
-  const navigate = useNavigate();
   const { profile } = useAuth();
   const { hasTabAccess } = useGranularPermissions();
   const [selectedCompanyId, setSelectedCompanyId] = useState<string>("all");
@@ -269,31 +267,10 @@ export default function TimeAttendanceDashboardPage() {
         </div>
 
         {/* Features */}
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          {features.map((feature) => {
-            const Icon = feature.icon;
-            return (
-              <Card
-                key={feature.title}
-                className="group cursor-pointer transition-all hover:shadow-md"
-                onClick={() => navigate(feature.href)}
-              >
-                <CardHeader className="pb-2">
-                  <div className={`mb-2 flex h-10 w-10 items-center justify-center rounded-lg ${feature.color}`}>
-                    <Icon className="h-5 w-5" />
-                  </div>
-                  <CardTitle className="flex items-center justify-between text-base">
-                    {feature.title}
-                    <ArrowRight className="h-4 w-4 opacity-0 transition-opacity group-hover:opacity-100" />
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <CardDescription>{feature.description}</CardDescription>
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
+        <DraggableModuleCards 
+          modules={features as ModuleCardItem[]} 
+          preferenceKey="time-attendance-dashboard-order"
+        />
 
         {/* Today's Activity */}
         <Card>

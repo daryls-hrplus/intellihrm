@@ -27,7 +27,7 @@ export function useDraggableOrderWithPersistence<T>({
       }
 
       try {
-        const { data, error } = await supabase
+        const { data, error } = await (supabase as any)
           .from("user_preferences")
           .select("preference_value")
           .eq("user_id", user.id)
@@ -87,7 +87,7 @@ export function useDraggableOrderWithPersistence<T>({
     const orderIds = newItems.map(getItemId);
     
     try {
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from("user_preferences")
         .upsert({
           user_id: user.id,
@@ -112,7 +112,7 @@ export function useDraggableOrderWithPersistence<T>({
     if (!user?.id) return;
 
     try {
-      await supabase
+      await (supabase as any)
         .from("user_preferences")
         .delete()
         .eq("user_id", user.id)
