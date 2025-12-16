@@ -13,12 +13,10 @@ const bodySchema = z.object({
   company_id: z.string().uuid().nullable().optional(),
 });
 
-function randomPassword(length = 14) {
-  const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789!@#$%";
-  const bytes = crypto.getRandomValues(new Uint8Array(length));
-  return Array.from(bytes)
-    .map((b) => alphabet[b % alphabet.length])
-    .join("");
+function randomPassword() {
+  // Keep this conservative to avoid any password-policy edge cases
+  const base = crypto.randomUUID().replaceAll("-", "").slice(0, 12);
+  return `Tmp${base}A1`;
 }
 
 const handler = async (req: Request): Promise<Response> => {
@@ -117,10 +115,16 @@ const handler = async (req: Request): Promise<Response> => {
     });
 
     if (createError || !authData?.user) {
-      return new Response(JSON.stringify({ error: createError?.message || "Failed to create user" }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      console.error("create-employee: createUser failed", createError);
+      return new Response(
+        JSON.stringify({
+          error: createError?.message || "Failed to create user",
+        }),
+        {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        },
+      );
     }
 
     const userId = authData.user.id;
