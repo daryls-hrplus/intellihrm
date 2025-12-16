@@ -2670,7 +2670,16 @@
       "recalculate": "Recalculate",
       "reopenPayrollRun": "Reopen Payroll Run",
       "reopenWarning": "This will unlock employees for data changes and reset the payroll run to draft status. All calculations will be deleted and must be re-run. This action should only be used for corrections.",
-      "reopenForChanges": "Reopen for Changes"
+      "reopenForChanges": "Reopen for Changes",
+      "employeesInRun": "Employees in Run ({{count}})",
+      "employeePayDetails": "Employee Pay Details",
+      "regularHours": "Regular Hours",
+      "overtimeHours": "Overtime Hours",
+      "regularPay": "Regular Pay",
+      "overtimePay": "Overtime Pay",
+      "bonusPay": "Bonus Pay",
+      "otherEarnings": "Other Earnings",
+      "otherDeductions": "Other Deductions"
     },
     "reports": {
       "title": "Payroll Reports",
