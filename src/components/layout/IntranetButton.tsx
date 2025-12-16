@@ -13,8 +13,8 @@ export function IntranetButton() {
     if (user) {
       fetchUnreadCount();
 
-      // Subscribe to real-time updates
-      const channel = supabase
+      // Subscribe to real-time updates for both tables
+      const companyChannel = supabase
         .channel("company-announcements-changes")
         .on(
           "postgres_changes",
@@ -29,19 +29,36 @@ export function IntranetButton() {
         )
         .subscribe();
 
+      const intranetChannel = supabase
+        .channel("intranet-announcements-changes")
+        .on(
+          "postgres_changes",
+          {
+            event: "*",
+            schema: "public",
+            table: "intranet_announcements",
+          },
+          () => {
+            fetchUnreadCount();
+          }
+        )
+        .subscribe();
+
       return () => {
-        supabase.removeChannel(channel);
+        supabase.removeChannel(companyChannel);
+        supabase.removeChannel(intranetChannel);
       };
     }
   }, [user]);
 
   const fetchUnreadCount = async () => {
-    // Get active announcements from the last 7 days
+    // Get announcements from the last 7 days from both tables
     const sevenDaysAgo = new Date();
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
     const now = new Date().toISOString();
 
-    const { count, error } = await supabase
+    // Query company_announcements
+    const { count: companyCount, error: companyError } = await supabase
       .from("company_announcements")
       .select("*", { count: "exact", head: true })
       .eq("is_active", true)
@@ -49,9 +66,15 @@ export function IntranetButton() {
       .or(`publish_at.is.null,publish_at.lte.${now}`)
       .or(`expire_at.is.null,expire_at.gte.${now}`);
 
-    if (!error && count !== null) {
-      setUnreadCount(count);
-    }
+    // Query intranet_announcements
+    const { count: intranetCount, error: intranetError } = await supabase
+      .from("intranet_announcements")
+      .select("*", { count: "exact", head: true })
+      .eq("is_published", true)
+      .gte("created_at", sevenDaysAgo.toISOString());
+
+    const total = (companyCount || 0) + (intranetCount || 0);
+    setUnreadCount(total);
   };
 
   return (
