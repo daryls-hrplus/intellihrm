@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
+import { useTranslation } from "react-i18next";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Button } from "@/components/ui/button";
@@ -31,6 +32,7 @@ interface Announcement {
 }
 
 export default function CompanyAnnouncementsPage() {
+  const { t } = useTranslation();
   const { user, profile } = useAuth();
   const { toast } = useToast();
   
@@ -159,8 +161,8 @@ export default function CompanyAnnouncementsPage() {
   };
 
   const breadcrumbItems = [
-    { label: "Admin & Security", href: "/admin" },
-    { label: "Company Announcements" },
+    { label: t("navigation.hrHub"), href: "/hr-hub" },
+    { label: t("hrHub.announcements") },
   ];
 
   return (
