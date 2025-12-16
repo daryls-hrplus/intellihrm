@@ -269,7 +269,7 @@ export default function AdminDashboardPage() {
   const [stats, setStats] = useState<Stats>({ totalUsers: 0, totalCompanies: 0, totalGroups: 0, admins: 0 });
   const [piiAlertStats, setPiiAlertStats] = useState<PiiAlertStats>({ total: 0, emailsSent: 0, last24Hours: 0, recentAlerts: [] });
   const [isLoading, setIsLoading] = useState(true);
-  const [isPiiAlertsOpen, setIsPiiAlertsOpen] = useState(true);
+  const [isPiiAlertsOpen, setIsPiiAlertsOpen] = useState(false);
 
   const adminModules = getAdminModules(t).filter(module => hasTabAccess("admin", module.tabCode));
 
