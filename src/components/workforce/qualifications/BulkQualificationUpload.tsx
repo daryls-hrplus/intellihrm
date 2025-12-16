@@ -100,90 +100,124 @@ export function BulkQualificationUpload({ open, onOpenChange, onSuccess }: BulkQ
   };
 
   const downloadTemplate = () => {
-    // Create instructions sheet content
-    const instructions = [
-      "QUALIFICATIONS BULK UPLOAD TEMPLATE - INSTRUCTIONS",
-      "",
-      "HOW TO USE THIS TEMPLATE:",
-      "1. Fill in employee qualifications starting from row 2 (after the header row in the DATA sheet)",
-      "2. Use the reference data provided in the sheets below to fill in the correct values",
-      "3. Save the file as CSV (UTF-8) format before uploading",
-      "",
-      "FIELD DESCRIPTIONS:",
-      "- employee_email (REQUIRED): Employee's email address - must match exactly as registered in the system",
-      "- record_type (REQUIRED): One of: academic, certification, license, membership, participation",
-      "- qualification_name (REQUIRED): Name/title of the qualification (e.g., 'Bachelor of Science in Computer Science')",
-      "- qualification_type_code: Code from the Qualification Types reference (optional but recommended)",
-      "- education_level_code: For academic qualifications, use code from Education Levels reference",
-      "- institution_name: Name of the institution that awarded the qualification",
-      "- accrediting_body_code: Code from Accrediting Bodies reference (optional)",
-      "- date_awarded: Date qualification was awarded (YYYY-MM-DD format)",
-      "- issued_date: Date credential was issued (YYYY-MM-DD format) - for certifications/licenses",
-      "- expiry_date: Expiration date (YYYY-MM-DD format) - leave blank if no expiry",
-      "- status: One of: active, completed, ongoing, in_progress, expired, revoked",
-      "- grade: Grade or GPA achieved (optional)",
-      "- credential_number: Certificate/license number (optional)",
-      "",
-      "NOTES:",
-      "- Dates must be in YYYY-MM-DD format (e.g., 2024-06-15)",
-      "- Leave optional fields blank if not applicable",
-      "- Each row represents one qualification record",
-      "",
-      "---REFERENCE: EMPLOYEES---",
-      "email,full_name",
+    // Create clean CSV template with headers as columns
+    const headers = [
+      "employee_email",
+      "record_type",
+      "qualification_name",
+      "qualification_type_code",
+      "education_level_code",
+      "institution_name",
+      "accrediting_body_code",
+      "date_awarded",
+      "issued_date",
+      "expiry_date",
+      "status",
+      "grade",
+      "credential_number"
     ];
 
-    // Add employee reference data
-    employees.forEach(emp => {
-      instructions.push(`${emp.email},${emp.full_name}`);
-    });
-
-    instructions.push("");
-    instructions.push("---REFERENCE: QUALIFICATION TYPES---");
-    instructions.push("code,name,record_type");
-    qualificationTypes.forEach(qt => {
-      instructions.push(`${qt.code},${qt.name},${qt.record_type}`);
-    });
-
-    instructions.push("");
-    instructions.push("---REFERENCE: EDUCATION LEVELS---");
-    instructions.push("code,name");
-    educationLevels.forEach(el => {
-      instructions.push(`${el.code},${el.name}`);
-    });
-
-    instructions.push("");
-    instructions.push("---REFERENCE: ACCREDITING BODIES---");
-    instructions.push("code,name");
-    accreditingBodies.forEach(ab => {
-      instructions.push(`${ab.code},${ab.name}`);
-    });
-
-    instructions.push("");
-    instructions.push("---REFERENCE: RECORD TYPES---");
-    instructions.push("academic,certification,license,membership,participation");
-
-    instructions.push("");
-    instructions.push("---REFERENCE: STATUS VALUES---");
-    instructions.push("active,completed,ongoing,in_progress,expired,revoked");
-
-    instructions.push("");
-    instructions.push("===DATA STARTS HERE (DELETE ABOVE LINES BEFORE UPLOAD)===");
-    instructions.push("employee_email,record_type,qualification_name,qualification_type_code,education_level_code,institution_name,accrediting_body_code,date_awarded,issued_date,expiry_date,status,grade,credential_number");
-    
-    // Add sample row
+    // Add sample row for reference
     const sampleEmployee = employees[0];
     const sampleType = qualificationTypes.find(t => t.record_type === "academic");
     const sampleLevel = educationLevels[0];
-    if (sampleEmployee) {
-      instructions.push(`${sampleEmployee.email},academic,Bachelor of Science in Computer Science,${sampleType?.code || ""},${sampleLevel?.code || ""},Sample University,,2024-06-15,,,,3.5,`);
-    }
+    
+    const sampleRow = sampleEmployee ? [
+      sampleEmployee.email,
+      "academic",
+      "Bachelor of Science in Computer Science",
+      sampleType?.code || "",
+      sampleLevel?.code || "",
+      "Sample University",
+      "",
+      "2024-06-15",
+      "",
+      "",
+      "completed",
+      "3.5",
+      ""
+    ] : [];
 
-    const csvContent = instructions.join("\n");
+    const csvLines = [headers.join(",")];
+    if (sampleRow.length > 0) {
+      csvLines.push(sampleRow.join(","));
+    }
+    // Add empty rows for data entry
+    csvLines.push(""); // Empty row for user to fill
+
+    const csvContent = csvLines.join("\n");
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
     const link = document.createElement("a");
     link.href = URL.createObjectURL(blob);
-    link.download = "qualifications_upload_template.csv";
+    link.download = "qualifications_template.csv";
+    link.click();
+  };
+
+  const downloadReference = () => {
+    // Create reference document with all lookup data
+    const lines = [
+      "QUALIFICATIONS BULK UPLOAD - REFERENCE GUIDE",
+      "============================================",
+      "",
+      "HOW TO USE THE TEMPLATE:",
+      "1. Open the qualifications_template.csv file",
+      "2. Fill in one qualification per row using the reference data below",
+      "3. Save the file and upload it",
+      "",
+      "FIELD DESCRIPTIONS:",
+      "-----------------------------------------",
+      "employee_email (REQUIRED): Must match exactly as registered in system",
+      "record_type (REQUIRED): academic | certification | license | membership | participation",
+      "qualification_name (REQUIRED): Full name of the qualification",
+      "qualification_type_code: Code from QUALIFICATION TYPES below",
+      "education_level_code: Code from EDUCATION LEVELS below (for academic)",
+      "institution_name: Name of awarding institution",
+      "accrediting_body_code: Code from ACCREDITING BODIES below",
+      "date_awarded: YYYY-MM-DD format (e.g., 2024-06-15)",
+      "issued_date: YYYY-MM-DD format - for certifications/licenses",
+      "expiry_date: YYYY-MM-DD format - leave blank if no expiry",
+      "status: active | completed | ongoing | in_progress | expired | revoked",
+      "grade: Grade or GPA (optional)",
+      "credential_number: Certificate/license number (optional)",
+      "",
+      "============================================",
+      "EMPLOYEES (email | full_name)",
+      "============================================",
+    ];
+
+    employees.forEach(emp => {
+      lines.push(`${emp.email} | ${emp.full_name}`);
+    });
+
+    lines.push("");
+    lines.push("============================================");
+    lines.push("QUALIFICATION TYPES (code | name | record_type)");
+    lines.push("============================================");
+    qualificationTypes.forEach(qt => {
+      lines.push(`${qt.code} | ${qt.name} | ${qt.record_type}`);
+    });
+
+    lines.push("");
+    lines.push("============================================");
+    lines.push("EDUCATION LEVELS (code | name)");
+    lines.push("============================================");
+    educationLevels.forEach(el => {
+      lines.push(`${el.code} | ${el.name}`);
+    });
+
+    lines.push("");
+    lines.push("============================================");
+    lines.push("ACCREDITING BODIES (code | name)");
+    lines.push("============================================");
+    accreditingBodies.forEach(ab => {
+      lines.push(`${ab.code} | ${ab.name}`);
+    });
+
+    const content = lines.join("\n");
+    const blob = new Blob([content], { type: "text/plain;charset=utf-8;" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = "qualifications_reference_guide.txt";
     link.click();
   };
 
@@ -395,21 +429,24 @@ export function BulkQualificationUpload({ open, onOpenChange, onSuccess }: BulkQ
                 <div>
                   <p className="font-medium">Instructions:</p>
                   <ol className="list-decimal list-inside space-y-1 text-muted-foreground mt-1">
-                    <li>Download the template using the button below</li>
-                    <li>The template includes reference data for employees, qualification types, education levels, and accrediting bodies</li>
-                    <li>Fill in your qualification data following the instructions in the template</li>
-                    <li>Delete the instruction lines and keep only the header row and data rows</li>
-                    <li>Save as CSV (UTF-8) and upload</li>
+                    <li>Download the CSV template (column headers in first row)</li>
+                    <li>Download the Reference Guide for valid codes and employee emails</li>
+                    <li>Fill in one qualification per row using reference data</li>
+                    <li>Save as CSV and upload</li>
                   </ol>
                 </div>
               </div>
             </div>
 
-            {/* Download Template */}
-            <div className="flex items-center gap-4">
+            {/* Download Buttons */}
+            <div className="flex flex-wrap items-center gap-3">
               <Button variant="outline" onClick={downloadTemplate}>
                 <Download className="h-4 w-4 mr-2" />
-                Download Template
+                Download Template (CSV)
+              </Button>
+              <Button variant="outline" onClick={downloadReference}>
+                <FileSpreadsheet className="h-4 w-4 mr-2" />
+                Download Reference Guide
               </Button>
               <div className="relative">
                 <Input
