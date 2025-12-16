@@ -27,6 +27,12 @@ i18n
       fr: { translation: frTranslations },
     },
     fallbackLng: 'en',
+
+    // Ensure regional variants like "en-US" resolve to supported base languages ("en")
+    supportedLngs: supportedLanguages.map((l) => l.code),
+    nonExplicitSupportedLngs: true,
+    load: 'languageOnly',
+
     debug: false,
     interpolation: {
       escapeValue: false,
