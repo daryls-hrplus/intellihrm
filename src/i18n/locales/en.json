@@ -246,6 +246,9 @@
     "selectCompany": "Select company",
     "asOf": "As of",
     "showingAsOf": "Showing departments as of",
+    "viewOrgchart": "View Orgchart",
+    "viewOrgHierarchy": "View and explore the organizational hierarchy",
+    "noCompaniesFound": "No companies found",
     "modules": {
       "companyGroups": {
         "title": "Company Groups",
