@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useRef, useCallback } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -33,14 +33,12 @@ import {
   Equal,
   FileDown,
   MoreVertical,
-  Printer,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
-import html2canvas from "html2canvas";
-import jsPDF from "jspdf";
+import { renderOrgChartToPdf } from "@/utils/orgChartPdfRenderer";
 
 interface Position {
   id: string;
@@ -292,60 +290,6 @@ export function OrgChartVisualization({ companyId }: OrgChartVisualizationProps)
     return email[0].toUpperCase();
   };
 
-  // PDF Export function
-  const exportToPdf = useCallback(async (elementId: string, title: string) => {
-    const element = document.getElementById(elementId);
-    if (!element) {
-      toast.error("Could not find element to export");
-      return;
-    }
-
-    toast.loading("Generating PDF...", { id: "pdf-export" });
-
-    try {
-      // Find the actual chart content (the inner flex container with nodes)
-      const chartContent = element.querySelector('.flex.flex-col.items-center') as HTMLElement;
-      const targetElement = chartContent || element;
-
-      // Higher capture resolution (keeps PDF output size small via shrinkFactor below)
-      const canvas = await html2canvas(targetElement, {
-        scale: 3,
-        useCORS: true,
-        allowTaint: true,
-        backgroundColor: "#ffffff",
-      });
-
-      // Use PNG to avoid JPEG compression artifacts (sharper text)
-      const imgData = canvas.toDataURL("image/png");
-
-      const pdf = new jsPDF({
-        orientation: "portrait",
-        unit: "mm",
-        format: "a4",
-      });
-
-      const pageWidth = pdf.internal.pageSize.getWidth();
-      const margin = 20;
-
-      // Convert pixels to mm (assuming 96 DPI) and shrink to desired output size
-      const pxToMm = 0.264583;
-      const shrinkFactor = 0.6;
-
-      const imgWidthMm = canvas.width * pxToMm * shrinkFactor;
-      const imgHeightMm = canvas.height * pxToMm * shrinkFactor;
-
-      // Center horizontally
-      const xOffset = (pageWidth - imgWidthMm) / 2;
-
-      pdf.addImage(imgData, "PNG", xOffset, margin, imgWidthMm, imgHeightMm, undefined, "FAST");
-      pdf.save(`${title.toLowerCase().replace(/\s+/g, "-")}-${format(new Date(), "yyyy-MM-dd")}.pdf`);
-
-      toast.success("PDF exported successfully", { id: "pdf-export" });
-    } catch (error) {
-      console.error("Error exporting PDF:", error);
-      toast.error("Failed to export PDF", { id: "pdf-export" });
-    }
-  }, []);
 
   // Comparison summary
   const comparisonSummary = useMemo(() => {
@@ -365,24 +309,14 @@ export function OrgChartVisualization({ companyId }: OrgChartVisualizationProps)
     const isExpanded = expandedNodes.has(node.id);
     const hasChildren = node.children.length > 0;
     const isAdded = node.changeStatus === "added";
-    const cardId = `position-card-${node.id}`;
 
     const handleExportPdf = () => {
-      // First expand all children for complete export
-      const getAllChildIds = (n: PositionNode): string[] => {
-        return [n.id, ...n.children.flatMap(getAllChildIds)];
-      };
-      const allIds = getAllChildIds(node);
-      setExpandedNodes(prev => new Set([...prev, ...allIds]));
-      
-      // Wait for render then export
-      setTimeout(() => {
-        exportToPdf(cardId, `${node.title}-org-chart`);
-      }, 100);
+      // Export this subtree using the org chart renderer
+      renderOrgChartToPdf([node], `${node.title}-org-chart`);
     };
 
     return (
-      <div id={cardId} className="relative">
+      <div className="relative">
         {/* Connector line from parent */}
         {level > 0 && (
           <div className="absolute -top-4 left-6 w-px h-4 bg-border print:hidden" />
@@ -603,6 +537,15 @@ export function OrgChartVisualization({ companyId }: OrgChartVisualizationProps)
             </Button>
             <Button variant="outline" size="sm" onClick={collapseAll}>
               Collapse All
+            </Button>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => renderOrgChartToPdf(orgTree, "Organization Chart")}
+              disabled={orgTree.length === 0}
+            >
+              <FileDown className="h-4 w-4 mr-2" />
+              Export PDF
             </Button>
           </div>
         </div>
