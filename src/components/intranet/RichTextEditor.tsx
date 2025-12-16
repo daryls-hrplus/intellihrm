@@ -1,4 +1,4 @@
-import { useRef, useCallback, useState } from "react";
+import { useRef, useCallback, useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -37,6 +37,22 @@ export function RichTextEditor({ value, onChange, placeholder }: RichTextEditorP
   const [isUploading, setIsUploading] = useState(false);
   const [linkUrl, setLinkUrl] = useState("");
   const [linkPopoverOpen, setLinkPopoverOpen] = useState(false);
+  const isInitializedRef = useRef(false);
+
+  // Set initial value only once
+  useEffect(() => {
+    if (editorRef.current && !isInitializedRef.current) {
+      editorRef.current.innerHTML = value || "";
+      isInitializedRef.current = true;
+    }
+  }, [value]);
+
+  // Reset when value is cleared externally (e.g., form reset)
+  useEffect(() => {
+    if (editorRef.current && value === "" && isInitializedRef.current) {
+      editorRef.current.innerHTML = "";
+    }
+  }, [value]);
 
   const execCommand = useCallback((command: string, value?: string) => {
     document.execCommand(command, false, value);
@@ -206,7 +222,6 @@ export function RichTextEditor({ value, onChange, placeholder }: RichTextEditorP
         contentEditable
         className="min-h-[200px] p-4 focus:outline-none prose prose-sm max-w-none dark:prose-invert [&_img]:max-w-full [&_img]:h-auto [&_img]:rounded"
         onInput={handleInput}
-        dangerouslySetInnerHTML={{ __html: value }}
         data-placeholder={placeholder}
         style={{
           minHeight: "200px",
