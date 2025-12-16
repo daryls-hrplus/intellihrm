@@ -230,7 +230,7 @@ export default function PayrollProcessingPage() {
     const primaryConfig = bankConfigs.find(c => c.is_primary) || bankConfigs[0];
     
     if (!primaryConfig) {
-      toast.error("Please configure a bank file first");
+      toast.error(t("payroll.processing.configureBankFirst"));
       return;
     }
     
@@ -477,50 +477,50 @@ export default function PayrollProcessingPage() {
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-1">
-                          <Button variant="ghost" size="sm" onClick={() => toggleRunExpand(run)} title="View Employees">
+                          <Button variant="ghost" size="sm" onClick={() => toggleRunExpand(run)} title={t("payroll.processing.viewEmployees")}>
                             <Eye className="h-4 w-4" />
                           </Button>
                           {run.status === 'draft' && (
-                            <Button variant="ghost" size="sm" onClick={() => handleCalculate(run)} title="Calculate" disabled={isLoading}>
+                            <Button variant="ghost" size="sm" onClick={() => handleCalculate(run)} title={t("payroll.processing.calculate")} disabled={isLoading}>
                               <Play className="h-4 w-4" />
                             </Button>
                           )}
                           {(run.status === 'calculating' || run.status === 'failed') && (
-                            <Button variant="ghost" size="sm" onClick={() => handleRecalculate(run)} title="Retry Calculation" disabled={isLoading}>
+                            <Button variant="ghost" size="sm" onClick={() => handleRecalculate(run)} title={t("payroll.processing.retryCalculation")} disabled={isLoading}>
                               <RefreshCw className="h-4 w-4" />
                             </Button>
                           )}
                           {run.status === 'calculated' && (
                             <>
-                              <Button variant="ghost" size="sm" onClick={() => handleRecalculate(run)} title="Recalculate" disabled={isLoading}>
+                              <Button variant="ghost" size="sm" onClick={() => handleRecalculate(run)} title={t("payroll.processing.recalculate")} disabled={isLoading}>
                                 <RefreshCw className="h-4 w-4" />
                               </Button>
-                              <Button variant="ghost" size="sm" onClick={() => handleApprove(run)} title="Approve" disabled={isLoading}>
+                              <Button variant="ghost" size="sm" onClick={() => handleApprove(run)} title={t("payroll.processing.approve")} disabled={isLoading}>
                                 <CheckCircle className="h-4 w-4" />
                               </Button>
                             </>
                           )}
                           {run.status === 'approved' && (
                             <>
-                              <Button variant="ghost" size="sm" onClick={() => handleRecalculate(run)} title="Request Recalculation" disabled={isLoading}>
+                              <Button variant="ghost" size="sm" onClick={() => handleRecalculate(run)} title={t("payroll.processing.requestRecalculation")} disabled={isLoading}>
                                 <RefreshCw className="h-4 w-4" />
                               </Button>
-                              <Button variant="ghost" size="sm" onClick={() => handleGeneratePayslips(run)} title="Generate Payslips" disabled={isLoading}>
+                              <Button variant="ghost" size="sm" onClick={() => handleGeneratePayslips(run)} title={t("payroll.processing.generatePayslips")} disabled={isLoading}>
                                 <FileText className="h-4 w-4" />
                               </Button>
-                              <Button variant="ghost" size="sm" onClick={() => handleGenerateBankFile(run)} title="Generate Bank File" disabled={isLoading}>
+                              <Button variant="ghost" size="sm" onClick={() => handleGenerateBankFile(run)} title={t("payroll.processing.generateBankFile")} disabled={isLoading}>
                                 <Download className="h-4 w-4" />
                               </Button>
-                              <Button variant="ghost" size="sm" onClick={() => handleProcessPayment(run)} title="Process Payment" disabled={isLoading}>
+                              <Button variant="ghost" size="sm" onClick={() => handleProcessPayment(run)} title={t("payroll.processing.processPayment")} disabled={isLoading}>
                                 <DollarSign className="h-4 w-4" />
                               </Button>
-                              <Button variant="ghost" size="sm" onClick={() => handleReopen(run)} title="Reopen for Changes" disabled={isLoading}>
+                              <Button variant="ghost" size="sm" onClick={() => handleReopen(run)} title={t("payroll.processing.reopenForChanges")} disabled={isLoading}>
                                 <Unlock className="h-4 w-4" />
                               </Button>
                             </>
                           )}
                           {run.status === 'paid' && canApproveSupervisor && (
-                            <Button variant="ghost" size="sm" onClick={() => handleReopen(run)} title="Reopen for Changes" disabled={isLoading}>
+                            <Button variant="ghost" size="sm" onClick={() => handleReopen(run)} title={t("payroll.processing.reopenForChanges")} disabled={isLoading}>
                               <Unlock className="h-4 w-4" />
                             </Button>
                           )}
