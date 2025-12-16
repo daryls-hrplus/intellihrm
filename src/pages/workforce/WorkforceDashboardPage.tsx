@@ -24,6 +24,7 @@ import {
   ClipboardList,
   Rocket,
   UserMinus,
+  GraduationCap,
 } from "lucide-react";
 
 interface Stats {
@@ -166,6 +167,14 @@ export default function WorkforceDashboardPage() {
       icon: UserMinus,
       color: "bg-red-500/10 text-red-500",
       tabCode: "offboarding",
+    },
+    {
+      title: t("workforce.modules.qualifications.title", "Qualifications"),
+      description: t("workforce.modules.qualifications.description", "Manage academic qualifications and professional certifications"),
+      href: "/workforce/qualifications",
+      icon: GraduationCap,
+      color: "bg-sky-500/10 text-sky-500",
+      tabCode: "qualifications",
     },
     {
       title: t("workforce.modules.analytics.title"),

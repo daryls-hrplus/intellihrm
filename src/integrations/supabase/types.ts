@@ -94,6 +94,48 @@ export type Database = {
         }
         Relationships: []
       }
+      accrediting_bodies: {
+        Row: {
+          body_type: string | null
+          code: string | null
+          country: string | null
+          created_at: string | null
+          id: string
+          industry: string | null
+          is_active: boolean | null
+          name: string
+          short_name: string | null
+          updated_at: string | null
+          website: string | null
+        }
+        Insert: {
+          body_type?: string | null
+          code?: string | null
+          country?: string | null
+          created_at?: string | null
+          id?: string
+          industry?: string | null
+          is_active?: boolean | null
+          name: string
+          short_name?: string | null
+          updated_at?: string | null
+          website?: string | null
+        }
+        Update: {
+          body_type?: string | null
+          code?: string | null
+          country?: string | null
+          created_at?: string | null
+          id?: string
+          industry?: string | null
+          is_active?: boolean | null
+          name?: string
+          short_name?: string | null
+          updated_at?: string | null
+          website?: string | null
+        }
+        Relationships: []
+      }
       ai_budget_tiers: {
         Row: {
           company_id: string | null
@@ -3800,6 +3842,59 @@ export type Database = {
           },
         ]
       }
+      company_qualification_settings: {
+        Row: {
+          allow_document_upload: boolean | null
+          allow_employee_self_entry: boolean | null
+          allowed_document_types: string[] | null
+          auto_expire_certifications: boolean | null
+          company_id: string
+          created_at: string | null
+          expiry_reminder_days: number[] | null
+          id: string
+          max_document_size_mb: number | null
+          require_verification: boolean | null
+          updated_at: string | null
+          verification_sla_days: number | null
+        }
+        Insert: {
+          allow_document_upload?: boolean | null
+          allow_employee_self_entry?: boolean | null
+          allowed_document_types?: string[] | null
+          auto_expire_certifications?: boolean | null
+          company_id: string
+          created_at?: string | null
+          expiry_reminder_days?: number[] | null
+          id?: string
+          max_document_size_mb?: number | null
+          require_verification?: boolean | null
+          updated_at?: string | null
+          verification_sla_days?: number | null
+        }
+        Update: {
+          allow_document_upload?: boolean | null
+          allow_employee_self_entry?: boolean | null
+          allowed_document_types?: string[] | null
+          auto_expire_certifications?: boolean | null
+          company_id?: string
+          created_at?: string | null
+          expiry_reminder_days?: number[] | null
+          id?: string
+          max_document_size_mb?: number | null
+          require_verification?: boolean | null
+          updated_at?: string | null
+          verification_sla_days?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_qualification_settings_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: true
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       company_subscriptions: {
         Row: {
           active_employee_count: number
@@ -4973,6 +5068,42 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      education_levels: {
+        Row: {
+          code: string
+          created_at: string | null
+          description: string | null
+          display_order: number | null
+          id: string
+          is_active: boolean | null
+          isced_level: number | null
+          name: string
+          updated_at: string | null
+        }
+        Insert: {
+          code: string
+          created_at?: string | null
+          description?: string | null
+          display_order?: number | null
+          id?: string
+          is_active?: boolean | null
+          isced_level?: number | null
+          name: string
+          updated_at?: string | null
+        }
+        Update: {
+          code?: string
+          created_at?: string | null
+          description?: string | null
+          display_order?: number | null
+          id?: string
+          is_active?: boolean | null
+          isced_level?: number | null
+          name?: string
+          updated_at?: string | null
+        }
+        Relationships: []
       }
       employee_addresses: {
         Row: {
@@ -6848,6 +6979,203 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      employee_qualifications: {
+        Row: {
+          accrediting_body_id: string | null
+          accrediting_body_name: string | null
+          campus_location: string | null
+          comments: string | null
+          company_id: string
+          country: string | null
+          created_at: string | null
+          created_by: string | null
+          date_awarded: string | null
+          description: string | null
+          document_name: string | null
+          document_type: string | null
+          document_url: string | null
+          education_level_id: string | null
+          employee_id: string
+          end_date: string | null
+          expiry_date: string | null
+          field_of_study_id: string | null
+          id: string
+          institution_id: string | null
+          institution_name: string | null
+          is_primary: boolean | null
+          issued_date: string | null
+          license_number: string | null
+          linked_competency_ids: string[] | null
+          minor: string | null
+          name: string
+          qualification_type_id: string | null
+          record_type: string
+          renewal_date: string | null
+          specialization: string | null
+          start_date: string | null
+          status: string
+          updated_at: string | null
+          updated_by: string | null
+          verification_date: string | null
+          verification_notes: string | null
+          verification_status: string | null
+          verified_by: string | null
+        }
+        Insert: {
+          accrediting_body_id?: string | null
+          accrediting_body_name?: string | null
+          campus_location?: string | null
+          comments?: string | null
+          company_id: string
+          country?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          date_awarded?: string | null
+          description?: string | null
+          document_name?: string | null
+          document_type?: string | null
+          document_url?: string | null
+          education_level_id?: string | null
+          employee_id: string
+          end_date?: string | null
+          expiry_date?: string | null
+          field_of_study_id?: string | null
+          id?: string
+          institution_id?: string | null
+          institution_name?: string | null
+          is_primary?: boolean | null
+          issued_date?: string | null
+          license_number?: string | null
+          linked_competency_ids?: string[] | null
+          minor?: string | null
+          name: string
+          qualification_type_id?: string | null
+          record_type: string
+          renewal_date?: string | null
+          specialization?: string | null
+          start_date?: string | null
+          status?: string
+          updated_at?: string | null
+          updated_by?: string | null
+          verification_date?: string | null
+          verification_notes?: string | null
+          verification_status?: string | null
+          verified_by?: string | null
+        }
+        Update: {
+          accrediting_body_id?: string | null
+          accrediting_body_name?: string | null
+          campus_location?: string | null
+          comments?: string | null
+          company_id?: string
+          country?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          date_awarded?: string | null
+          description?: string | null
+          document_name?: string | null
+          document_type?: string | null
+          document_url?: string | null
+          education_level_id?: string | null
+          employee_id?: string
+          end_date?: string | null
+          expiry_date?: string | null
+          field_of_study_id?: string | null
+          id?: string
+          institution_id?: string | null
+          institution_name?: string | null
+          is_primary?: boolean | null
+          issued_date?: string | null
+          license_number?: string | null
+          linked_competency_ids?: string[] | null
+          minor?: string | null
+          name?: string
+          qualification_type_id?: string | null
+          record_type?: string
+          renewal_date?: string | null
+          specialization?: string | null
+          start_date?: string | null
+          status?: string
+          updated_at?: string | null
+          updated_by?: string | null
+          verification_date?: string | null
+          verification_notes?: string | null
+          verification_status?: string | null
+          verified_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "employee_qualifications_accrediting_body_id_fkey"
+            columns: ["accrediting_body_id"]
+            isOneToOne: false
+            referencedRelation: "accrediting_bodies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_qualifications_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_qualifications_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_qualifications_education_level_id_fkey"
+            columns: ["education_level_id"]
+            isOneToOne: false
+            referencedRelation: "education_levels"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_qualifications_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_qualifications_field_of_study_id_fkey"
+            columns: ["field_of_study_id"]
+            isOneToOne: false
+            referencedRelation: "fields_of_study"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_qualifications_institution_id_fkey"
+            columns: ["institution_id"]
+            isOneToOne: false
+            referencedRelation: "institutions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_qualifications_qualification_type_id_fkey"
+            columns: ["qualification_type_id"]
+            isOneToOne: false
+            referencedRelation: "qualification_types"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_qualifications_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_qualifications_verified_by_fkey"
+            columns: ["verified_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       employee_recertifications: {
         Row: {
@@ -9340,6 +9668,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      fields_of_study: {
+        Row: {
+          category: string | null
+          code: string
+          created_at: string | null
+          description: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          updated_at: string | null
+        }
+        Insert: {
+          category?: string | null
+          code: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          updated_at?: string | null
+        }
+        Update: {
+          category?: string | null
+          code?: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          updated_at?: string | null
+        }
+        Relationships: []
       }
       flight_risk_assessments: {
         Row: {
@@ -14324,6 +14685,54 @@ export type Database = {
           },
         ]
       }
+      institutions: {
+        Row: {
+          accreditation_body: string | null
+          city: string | null
+          code: string | null
+          country: string
+          created_at: string | null
+          id: string
+          institution_type: string | null
+          is_accredited: boolean | null
+          is_active: boolean | null
+          name: string
+          short_name: string | null
+          updated_at: string | null
+          website: string | null
+        }
+        Insert: {
+          accreditation_body?: string | null
+          city?: string | null
+          code?: string | null
+          country: string
+          created_at?: string | null
+          id?: string
+          institution_type?: string | null
+          is_accredited?: boolean | null
+          is_active?: boolean | null
+          name: string
+          short_name?: string | null
+          updated_at?: string | null
+          website?: string | null
+        }
+        Update: {
+          accreditation_body?: string | null
+          city?: string | null
+          code?: string | null
+          country?: string
+          created_at?: string | null
+          id?: string
+          institution_type?: string | null
+          is_accredited?: boolean | null
+          is_active?: boolean | null
+          name?: string
+          short_name?: string | null
+          updated_at?: string | null
+          website?: string | null
+        }
+        Relationships: []
+      }
       interview_feedback: {
         Row: {
           created_at: string
@@ -15484,6 +15893,109 @@ export type Database = {
             columns: ["requisition_id"]
             isOneToOne: false
             referencedRelation: "job_requisitions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      job_qualification_requirements: {
+        Row: {
+          accrediting_body_id: string | null
+          company_id: string
+          created_at: string | null
+          education_level_id: string | null
+          end_date: string | null
+          field_of_study_id: string | null
+          id: string
+          is_mandatory: boolean | null
+          is_preferred: boolean | null
+          job_id: string
+          min_education_level_order: number | null
+          notes: string | null
+          qualification_type_id: string | null
+          requirement_type: string
+          specific_qualification_name: string | null
+          start_date: string
+          updated_at: string | null
+        }
+        Insert: {
+          accrediting_body_id?: string | null
+          company_id: string
+          created_at?: string | null
+          education_level_id?: string | null
+          end_date?: string | null
+          field_of_study_id?: string | null
+          id?: string
+          is_mandatory?: boolean | null
+          is_preferred?: boolean | null
+          job_id: string
+          min_education_level_order?: number | null
+          notes?: string | null
+          qualification_type_id?: string | null
+          requirement_type: string
+          specific_qualification_name?: string | null
+          start_date?: string
+          updated_at?: string | null
+        }
+        Update: {
+          accrediting_body_id?: string | null
+          company_id?: string
+          created_at?: string | null
+          education_level_id?: string | null
+          end_date?: string | null
+          field_of_study_id?: string | null
+          id?: string
+          is_mandatory?: boolean | null
+          is_preferred?: boolean | null
+          job_id?: string
+          min_education_level_order?: number | null
+          notes?: string | null
+          qualification_type_id?: string | null
+          requirement_type?: string
+          specific_qualification_name?: string | null
+          start_date?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "job_qualification_requirements_accrediting_body_id_fkey"
+            columns: ["accrediting_body_id"]
+            isOneToOne: false
+            referencedRelation: "accrediting_bodies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "job_qualification_requirements_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "job_qualification_requirements_education_level_id_fkey"
+            columns: ["education_level_id"]
+            isOneToOne: false
+            referencedRelation: "education_levels"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "job_qualification_requirements_field_of_study_id_fkey"
+            columns: ["field_of_study_id"]
+            isOneToOne: false
+            referencedRelation: "fields_of_study"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "job_qualification_requirements_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "job_qualification_requirements_qualification_type_id_fkey"
+            columns: ["qualification_type_id"]
+            isOneToOne: false
+            referencedRelation: "qualification_types"
             referencedColumns: ["id"]
           },
         ]
@@ -23661,6 +24173,166 @@ export type Database = {
           {
             foreignKeyName: "punch_import_batches_imported_by_fkey"
             columns: ["imported_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      qualification_renewals: {
+        Row: {
+          created_at: string | null
+          currency: string | null
+          id: string
+          new_expiry_date: string
+          notes: string | null
+          previous_expiry_date: string | null
+          qualification_id: string
+          renewal_cost: number | null
+          renewal_date: string
+          renewed_by: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          currency?: string | null
+          id?: string
+          new_expiry_date: string
+          notes?: string | null
+          previous_expiry_date?: string | null
+          qualification_id: string
+          renewal_cost?: number | null
+          renewal_date: string
+          renewed_by?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          currency?: string | null
+          id?: string
+          new_expiry_date?: string
+          notes?: string | null
+          previous_expiry_date?: string | null
+          qualification_id?: string
+          renewal_cost?: number | null
+          renewal_date?: string
+          renewed_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "qualification_renewals_qualification_id_fkey"
+            columns: ["qualification_id"]
+            isOneToOne: false
+            referencedRelation: "employee_qualifications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "qualification_renewals_renewed_by_fkey"
+            columns: ["renewed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      qualification_types: {
+        Row: {
+          code: string
+          created_at: string | null
+          description: string | null
+          display_order: number | null
+          id: string
+          is_active: boolean | null
+          name: string
+          record_type: string
+          requires_expiry: boolean | null
+          updated_at: string | null
+        }
+        Insert: {
+          code: string
+          created_at?: string | null
+          description?: string | null
+          display_order?: number | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          record_type: string
+          requires_expiry?: boolean | null
+          updated_at?: string | null
+        }
+        Update: {
+          code?: string
+          created_at?: string | null
+          description?: string | null
+          display_order?: number | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          record_type?: string
+          requires_expiry?: boolean | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      qualification_verification_requests: {
+        Row: {
+          assigned_to: string | null
+          completed_at: string | null
+          created_at: string | null
+          due_date: string | null
+          id: string
+          notes: string | null
+          priority: string | null
+          qualification_id: string
+          rejection_reason: string | null
+          requested_by: string | null
+          status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          assigned_to?: string | null
+          completed_at?: string | null
+          created_at?: string | null
+          due_date?: string | null
+          id?: string
+          notes?: string | null
+          priority?: string | null
+          qualification_id: string
+          rejection_reason?: string | null
+          requested_by?: string | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          assigned_to?: string | null
+          completed_at?: string | null
+          created_at?: string | null
+          due_date?: string | null
+          id?: string
+          notes?: string | null
+          priority?: string | null
+          qualification_id?: string
+          rejection_reason?: string | null
+          requested_by?: string | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "qualification_verification_requests_assigned_to_fkey"
+            columns: ["assigned_to"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "qualification_verification_requests_qualification_id_fkey"
+            columns: ["qualification_id"]
+            isOneToOne: false
+            referencedRelation: "employee_qualifications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "qualification_verification_requests_requested_by_fkey"
+            columns: ["requested_by"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
