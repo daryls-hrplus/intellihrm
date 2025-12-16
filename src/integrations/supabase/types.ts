@@ -30573,6 +30573,13 @@ export type Database = {
         | "pay_element_type"
         | "proration_method"
         | "payment_frequency"
+        | "education_level"
+        | "qualification_type"
+        | "field_of_study"
+        | "institution_name"
+        | "certification_type"
+        | "certification_name"
+        | "accrediting_body"
       message_status: "sent" | "delivered" | "read"
       workflow_action:
         | "approve"
@@ -30770,6 +30777,13 @@ export const Constants = {
         "pay_element_type",
         "proration_method",
         "payment_frequency",
+        "education_level",
+        "qualification_type",
+        "field_of_study",
+        "institution_name",
+        "certification_type",
+        "certification_name",
+        "accrediting_body",
       ],
       message_status: ["sent", "delivered", "read"],
       workflow_action: [
