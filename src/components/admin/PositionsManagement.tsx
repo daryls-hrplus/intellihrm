@@ -131,6 +131,13 @@ interface SpinalPoint {
   annual_salary: number;
 }
 
+interface PayGroup {
+  id: string;
+  name: string;
+  code: string;
+  pay_frequency: string;
+}
+
 interface PositionsManagementProps {
   companyId: string;
 }
@@ -145,6 +152,7 @@ export function PositionsManagement({ companyId }: PositionsManagementProps) {
 
   const [paySpines, setPaySpines] = useState<PaySpine[]>([]);
   const [spinalPoints, setSpinalPoints] = useState<SpinalPoint[]>([]);
+  const [payGroups, setPayGroups] = useState<PayGroup[]>([]);
   const [expandedAssignments, setExpandedAssignments] = useState<Set<string>>(new Set());
 
   // Position dialog state
@@ -183,6 +191,11 @@ export function PositionsManagement({ companyId }: PositionsManagementProps) {
   const [assignCompFrequency, setAssignCompFrequency] = useState("monthly");
   const [assignIsActive, setAssignIsActive] = useState(true);
   const [assignSpinalPointId, setAssignSpinalPointId] = useState("");
+  
+  // Pay group assignment state
+  const [assignPayGroupId, setAssignPayGroupId] = useState("");
+  const [assignPayGroupStartDate, setAssignPayGroupStartDate] = useState("");
+  const [assignPayGroupEndDate, setAssignPayGroupEndDate] = useState("");
 
   useEffect(() => {
     if (companyId) {
@@ -280,6 +293,18 @@ export function PositionsManagement({ companyId }: PositionsManagementProps) {
         if (!pointsError && pointsData) {
           setSpinalPoints(pointsData);
         }
+      }
+
+      // Fetch pay groups for this company
+      const { data: payGroupData, error: payGroupError } = await supabase
+        .from("pay_groups")
+        .select("id, name, code, pay_frequency")
+        .eq("company_id", companyId)
+        .eq("is_active", true)
+        .order("name");
+
+      if (!payGroupError && payGroupData) {
+        setPayGroups(payGroupData);
       }
 
     } catch (error) {
@@ -421,10 +446,13 @@ export function PositionsManagement({ companyId }: PositionsManagementProps) {
     setAssignCompFrequency("monthly");
     setAssignIsActive(true);
     setAssignSpinalPointId("");
+    setAssignPayGroupId("");
+    setAssignPayGroupStartDate(new Date().toISOString().split("T")[0]);
+    setAssignPayGroupEndDate("");
     setAssignDialogOpen(true);
   };
 
-  const openEditAssignment = (assignment: EmployeePosition) => {
+  const openEditAssignment = async (assignment: EmployeePosition) => {
     setEditingAssignment(assignment);
     setAssignPositionId(assignment.position_id);
     setAssignEmployeeId(assignment.employee_id);
@@ -436,6 +464,26 @@ export function PositionsManagement({ companyId }: PositionsManagementProps) {
     setAssignCompFrequency(assignment.compensation_frequency);
     setAssignIsActive(assignment.is_active);
     setAssignSpinalPointId(assignment.spinal_point_id || "");
+    
+    // Fetch current pay group assignment for this employee
+    const { data: payGroupData } = await supabase
+      .from("employee_pay_groups")
+      .select("pay_group_id, start_date, end_date")
+      .eq("employee_id", assignment.employee_id)
+      .order("start_date", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    
+    if (payGroupData) {
+      setAssignPayGroupId(payGroupData.pay_group_id || "");
+      setAssignPayGroupStartDate(payGroupData.start_date || "");
+      setAssignPayGroupEndDate(payGroupData.end_date || "");
+    } else {
+      setAssignPayGroupId("");
+      setAssignPayGroupStartDate(assignment.start_date);
+      setAssignPayGroupEndDate("");
+    }
+    
     setAssignDialogOpen(true);
   };
 
@@ -488,6 +536,39 @@ export function PositionsManagement({ companyId }: PositionsManagementProps) {
           .insert(data);
         if (error) throw error;
         toast.success("Employee assigned to position");
+      }
+
+      // Save pay group assignment if selected
+      if (assignPayGroupId && assignPayGroupStartDate) {
+        const selectedPayGroup = payGroups.find(pg => pg.id === assignPayGroupId);
+        const payGroupData = {
+          employee_id: assignEmployeeId,
+          pay_group_id: assignPayGroupId,
+          pay_group_name: selectedPayGroup?.name || "",
+          pay_frequency: selectedPayGroup?.pay_frequency || "monthly",
+          payment_method: "bank_transfer",
+          start_date: assignPayGroupStartDate,
+          end_date: assignPayGroupEndDate || null,
+        };
+
+        // Check if there's an existing pay group assignment for this employee
+        const { data: existingPayGroup } = await supabase
+          .from("employee_pay_groups")
+          .select("id")
+          .eq("employee_id", assignEmployeeId)
+          .eq("pay_group_id", assignPayGroupId)
+          .maybeSingle();
+
+        if (existingPayGroup) {
+          await supabase
+            .from("employee_pay_groups")
+            .update(payGroupData)
+            .eq("id", existingPayGroup.id);
+        } else {
+          await supabase
+            .from("employee_pay_groups")
+            .insert(payGroupData);
+        }
       }
 
       setAssignDialogOpen(false);
@@ -1029,6 +1110,48 @@ export function PositionsManagement({ companyId }: PositionsManagementProps) {
               }
               return null;
             })()}
+
+            {/* Pay Group Assignment */}
+            <div className="border-t pt-4 mt-4">
+              <h4 className="text-sm font-medium mb-3">Pay Group Assignment</h4>
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label>Pay Group</Label>
+                  <Select value={assignPayGroupId} onValueChange={setAssignPayGroupId}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select pay group" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {payGroups.map((pg) => (
+                        <SelectItem key={pg.id} value={pg.id}>
+                          {pg.name} ({pg.code}) - {pg.pay_frequency}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                {assignPayGroupId && (
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label>Pay Group Start Date *</Label>
+                      <Input
+                        type="date"
+                        value={assignPayGroupStartDate}
+                        onChange={(e) => setAssignPayGroupStartDate(e.target.value)}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Pay Group End Date</Label>
+                      <Input
+                        type="date"
+                        value={assignPayGroupEndDate}
+                        onChange={(e) => setAssignPayGroupEndDate(e.target.value)}
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
 
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
