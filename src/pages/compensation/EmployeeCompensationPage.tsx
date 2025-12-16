@@ -90,7 +90,7 @@ export default function EmployeeCompensationPage() {
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [payElements, setPayElements] = useState<PayElement[]>([]);
   const [positions, setPositions] = useState<Position[]>([]);
-  const [employeePositions, setEmployeePositions] = useState<{position_id: string; position: Position}[]>([]);
+  const [employeePositions, setEmployeePositions] = useState<{position_id: string; is_primary: boolean; position: Position}[]>([]);
   const [compensationItems, setCompensationItems] = useState<EmployeeCompensation[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
@@ -183,32 +183,47 @@ export default function EmployeeCompensationPage() {
     setIsLoading(false);
   };
 
-  const loadEmployeePositions = async (employeeId: string) => {
+  const loadEmployeePositions = async (employeeId: string, setDefault: boolean = true) => {
     const { data } = await supabase
       .from("employee_positions")
       .select(`
         position_id,
+        is_primary,
         position:positions!employee_positions_position_id_fkey(id, title, code)
       `)
       .eq("employee_id", employeeId)
       .eq("is_active", true);
     
-    if (data) {
-      setEmployeePositions(data as {position_id: string; position: Position}[]);
+    if (data && data.length > 0) {
+      const positions = data as {position_id: string; is_primary: boolean; position: Position}[];
+      setEmployeePositions(positions);
+      
+      // Auto-select primary position as default
+      if (setDefault) {
+        const primaryPosition = positions.find(p => p.is_primary);
+        if (primaryPosition) {
+          setFormPositionId(primaryPosition.position_id);
+        } else {
+          setFormPositionId(positions[0].position_id);
+        }
+      }
     } else {
       setEmployeePositions([]);
+      if (setDefault) {
+        setFormPositionId("");
+      }
     }
   };
 
   // Load positions when employee changes in form
   useEffect(() => {
-    if (formEmployeeId) {
+    if (formEmployeeId && dialogOpen) {
       loadEmployeePositions(formEmployeeId);
-    } else {
+    } else if (!formEmployeeId) {
       setEmployeePositions([]);
       setFormPositionId("");
     }
-  }, [formEmployeeId]);
+  }, [formEmployeeId, dialogOpen]);
 
   const filteredItems = compensationItems.filter((item) => {
     if (!searchTerm) return true;
@@ -240,7 +255,7 @@ export default function EmployeeCompensationPage() {
   const openEdit = async (item: EmployeeCompensation) => {
     setEditing(item);
     setFormEmployeeId(item.employee_id);
-    await loadEmployeePositions(item.employee_id);
+    await loadEmployeePositions(item.employee_id, false);
     setFormPositionId(item.position_id || "");
     setFormPayElementId(item.pay_element_id);
     setFormAmount(item.amount.toString());
@@ -519,22 +534,27 @@ export default function EmployeeCompensationPage() {
                 </Select>
               </div>
 
-              {employeePositions.length > 0 && (
+              {formEmployeeId && (
                 <div className="space-y-2">
                   <Label>{t("compensation.employeeCompensation.position")}</Label>
                   <Select value={formPositionId} onValueChange={setFormPositionId}>
                     <SelectTrigger>
-                      <SelectValue placeholder={t("compensation.employeeCompensation.dialog.selectPosition")} />
+                      <SelectValue placeholder={employeePositions.length === 0 ? t("compensation.employeeCompensation.dialog.noPositionsAssigned") : t("compensation.employeeCompensation.dialog.selectPosition")} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">
-                        {t("compensation.employeeCompensation.dialog.noPosition")}
-                      </SelectItem>
-                      {employeePositions.map((ep) => (
-                        <SelectItem key={ep.position_id} value={ep.position_id}>
-                          {ep.position?.title} ({ep.position?.code})
+                      {employeePositions.length === 0 ? (
+                        <SelectItem value="" disabled>
+                          {t("compensation.employeeCompensation.dialog.noPositionsAssigned")}
                         </SelectItem>
-                      ))}
+                      ) : (
+                        <>
+                          {employeePositions.map((ep) => (
+                            <SelectItem key={ep.position_id} value={ep.position_id}>
+                              {ep.position?.title} ({ep.position?.code}) {ep.is_primary && "★"}
+                            </SelectItem>
+                          ))}
+                        </>
+                      )}
                     </SelectContent>
                   </Select>
                 </div>

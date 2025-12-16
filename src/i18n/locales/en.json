@@ -5371,6 +5371,7 @@
         "selectEmployee": "Select employee",
         "selectPosition": "Select position",
         "noPosition": "No specific position",
+        "noPositionsAssigned": "No positions assigned to employee",
         "selectPayElement": "Select pay element",
         "isOverride": "This is an override to position compensation",
         "overrideReason": "Override Reason",
