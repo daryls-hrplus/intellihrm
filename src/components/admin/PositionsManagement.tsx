@@ -62,6 +62,7 @@ interface Position {
   start_date: string;
   end_date: string | null;
   compensation_model: string;
+  salary_grade_id: string | null;
   pay_spine_id: string | null;
   min_spinal_point: number | null;
   max_spinal_point: number | null;
@@ -73,6 +74,14 @@ interface Position {
   reports_to?: {
     title: string;
     code: string;
+  } | null;
+  salary_grade?: {
+    id: string;
+    name: string;
+    code: string;
+    min_salary: number;
+    max_salary: number;
+    currency: string;
   } | null;
 }
 
@@ -146,6 +155,16 @@ interface PayGroup {
   pay_frequency: string;
 }
 
+interface SalaryGrade {
+  id: string;
+  name: string;
+  code: string;
+  min_salary: number;
+  mid_salary: number;
+  max_salary: number;
+  currency: string;
+}
+
 interface PositionsManagementProps {
   companyId: string;
 }
@@ -161,6 +180,7 @@ export function PositionsManagement({ companyId }: PositionsManagementProps) {
   const [paySpines, setPaySpines] = useState<PaySpine[]>([]);
   const [spinalPoints, setSpinalPoints] = useState<SpinalPoint[]>([]);
   const [payGroups, setPayGroups] = useState<PayGroup[]>([]);
+  const [salaryGrades, setSalaryGrades] = useState<SalaryGrade[]>([]);
   const [expandedAssignments, setExpandedAssignments] = useState<Set<string>>(new Set());
 
   // Position dialog state
@@ -179,6 +199,7 @@ export function PositionsManagement({ companyId }: PositionsManagementProps) {
   const [formStartDate, setFormStartDate] = useState(new Date().toISOString().split("T")[0]);
   const [formEndDate, setFormEndDate] = useState("");
   const [formCompensationModel, setFormCompensationModel] = useState("salary_grade");
+  const [formSalaryGradeId, setFormSalaryGradeId] = useState("");
   const [formPaySpineId, setFormPaySpineId] = useState("");
   const [formMinSpinalPoint, setFormMinSpinalPoint] = useState("");
   const [formMaxSpinalPoint, setFormMaxSpinalPoint] = useState("");
@@ -233,7 +254,8 @@ export function PositionsManagement({ companyId }: PositionsManagementProps) {
           .from("positions")
           .select(`
             *,
-            department:departments(name, code)
+            department:departments(name, code),
+            salary_grade:salary_grades(id, name, code, min_salary, max_salary, currency)
           `)
           .in("department_id", deptIds)
           .order("title");
@@ -316,6 +338,17 @@ export function PositionsManagement({ companyId }: PositionsManagementProps) {
         setPayGroups(payGroupData);
       }
 
+      // Fetch salary grades for this company
+      const { data: gradeData, error: gradeError } = await supabase
+        .from("salary_grades")
+        .select("id, name, code, min_salary, mid_salary, max_salary, currency")
+        .eq("company_id", companyId)
+        .eq("is_active", true)
+        .order("name");
+
+      if (!gradeError && gradeData) {
+        setSalaryGrades(gradeData);
+      }
     } catch (error) {
       console.error("Error fetching data:", error);
       toast.error("Failed to load positions data");
@@ -352,6 +385,7 @@ export function PositionsManagement({ companyId }: PositionsManagementProps) {
     setFormStartDate(new Date().toISOString().split("T")[0]);
     setFormEndDate("");
     setFormCompensationModel("salary_grade");
+    setFormSalaryGradeId("");
     setFormPaySpineId("");
     setFormMinSpinalPoint("");
     setFormMaxSpinalPoint("");
@@ -371,6 +405,7 @@ export function PositionsManagement({ companyId }: PositionsManagementProps) {
     setFormStartDate(position.start_date);
     setFormEndDate(position.end_date || "");
     setFormCompensationModel(position.compensation_model || "salary_grade");
+    setFormSalaryGradeId(position.salary_grade_id || "");
     setFormPaySpineId(position.pay_spine_id || "");
     setFormMinSpinalPoint(position.min_spinal_point?.toString() || "");
     setFormMaxSpinalPoint(position.max_spinal_point?.toString() || "");
@@ -397,10 +432,11 @@ export function PositionsManagement({ companyId }: PositionsManagementProps) {
         start_date: formStartDate,
         end_date: formEndDate || null,
         compensation_model: formCompensationModel,
-        pay_spine_id: formCompensationModel !== 'salary_grade' && formPaySpineId ? formPaySpineId : null,
-        min_spinal_point: formCompensationModel !== 'salary_grade' && formMinSpinalPoint ? parseInt(formMinSpinalPoint) : null,
-        max_spinal_point: formCompensationModel !== 'salary_grade' && formMaxSpinalPoint ? parseInt(formMaxSpinalPoint) : null,
-        entry_spinal_point: formCompensationModel !== 'salary_grade' && formEntrySpinalPoint ? parseInt(formEntrySpinalPoint) : null,
+        salary_grade_id: (formCompensationModel === 'salary_grade' || formCompensationModel === 'hybrid') && formSalaryGradeId ? formSalaryGradeId : null,
+        pay_spine_id: (formCompensationModel === 'spinal_point' || formCompensationModel === 'hybrid') && formPaySpineId ? formPaySpineId : null,
+        min_spinal_point: (formCompensationModel === 'spinal_point' || formCompensationModel === 'hybrid') && formMinSpinalPoint ? parseInt(formMinSpinalPoint) : null,
+        max_spinal_point: (formCompensationModel === 'spinal_point' || formCompensationModel === 'hybrid') && formMaxSpinalPoint ? parseInt(formMaxSpinalPoint) : null,
+        entry_spinal_point: (formCompensationModel === 'spinal_point' || formCompensationModel === 'hybrid') && formEntrySpinalPoint ? parseInt(formEntrySpinalPoint) : null,
       };
 
       if (editingPosition) {
@@ -920,7 +956,33 @@ export function PositionsManagement({ companyId }: PositionsManagementProps) {
               </Select>
             </div>
 
-            {/* Spinal Point Configuration - shown when spinal_point or hybrid */}
+            {/* Salary Grade Configuration - shown when salary_grade or hybrid */}
+            {(formCompensationModel === 'salary_grade' || formCompensationModel === 'hybrid') && (
+              <div className="space-y-2">
+                <Label>Salary Grade</Label>
+                <Select value={formSalaryGradeId} onValueChange={setFormSalaryGradeId}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select salary grade" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {salaryGrades.map((grade) => (
+                      <SelectItem key={grade.id} value={grade.id}>
+                        {grade.name} ({grade.code}) - {grade.currency} {grade.min_salary.toLocaleString()} - {grade.max_salary.toLocaleString()}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {formSalaryGradeId && (
+                  <p className="text-xs text-muted-foreground">
+                    {(() => {
+                      const grade = salaryGrades.find(g => g.id === formSalaryGradeId);
+                      return grade ? `Pay range: ${grade.currency} ${grade.min_salary.toLocaleString()} - ${grade.max_salary.toLocaleString()}` : '';
+                    })()}
+                  </p>
+                )}
+              </div>
+            )}
+
             {(formCompensationModel === 'spinal_point' || formCompensationModel === 'hybrid') && (
               <>
                 <div className="space-y-2">
