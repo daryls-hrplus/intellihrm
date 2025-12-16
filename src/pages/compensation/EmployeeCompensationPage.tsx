@@ -55,11 +55,18 @@ interface PayElement {
   name: string;
 }
 
+interface Position {
+  id: string;
+  title: string;
+  code: string;
+}
+
 interface EmployeeCompensation {
   id: string;
   company_id: string;
   employee_id: string;
   pay_element_id: string;
+  position_id: string | null;
   amount: number;
   currency: string;
   frequency: string;
@@ -71,6 +78,7 @@ interface EmployeeCompensation {
   is_active: boolean;
   employee?: Employee;
   pay_element?: PayElement;
+  position?: Position;
 }
 
 export default function EmployeeCompensationPage() {
@@ -81,6 +89,8 @@ export default function EmployeeCompensationPage() {
   const [selectedCompanyId, setSelectedCompanyId] = useState<string>("");
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [payElements, setPayElements] = useState<PayElement[]>([]);
+  const [positions, setPositions] = useState<Position[]>([]);
+  const [employeePositions, setEmployeePositions] = useState<{position_id: string; position: Position}[]>([]);
   const [compensationItems, setCompensationItems] = useState<EmployeeCompensation[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
@@ -90,6 +100,7 @@ export default function EmployeeCompensationPage() {
 
   // Form state
   const [formEmployeeId, setFormEmployeeId] = useState("");
+  const [formPositionId, setFormPositionId] = useState("");
   const [formPayElementId, setFormPayElementId] = useState("");
   const [formAmount, setFormAmount] = useState("");
   const [formCurrency, setFormCurrency] = useState("USD");
@@ -158,7 +169,8 @@ export default function EmployeeCompensationPage() {
       .select(`
         *,
         employee:profiles!employee_compensation_employee_id_fkey(id, full_name, email),
-        pay_element:pay_elements!employee_compensation_pay_element_id_fkey(id, code, name)
+        pay_element:pay_elements!employee_compensation_pay_element_id_fkey(id, code, name),
+        position:positions!employee_compensation_position_id_fkey(id, title, code)
       `)
       .eq("company_id", selectedCompanyId)
       .order("created_at", { ascending: false });
@@ -170,6 +182,33 @@ export default function EmployeeCompensationPage() {
     }
     setIsLoading(false);
   };
+
+  const loadEmployeePositions = async (employeeId: string) => {
+    const { data } = await supabase
+      .from("employee_positions")
+      .select(`
+        position_id,
+        position:positions!employee_positions_position_id_fkey(id, title, code)
+      `)
+      .eq("employee_id", employeeId)
+      .eq("is_active", true);
+    
+    if (data) {
+      setEmployeePositions(data as {position_id: string; position: Position}[]);
+    } else {
+      setEmployeePositions([]);
+    }
+  };
+
+  // Load positions when employee changes in form
+  useEffect(() => {
+    if (formEmployeeId) {
+      loadEmployeePositions(formEmployeeId);
+    } else {
+      setEmployeePositions([]);
+      setFormPositionId("");
+    }
+  }, [formEmployeeId]);
 
   const filteredItems = compensationItems.filter((item) => {
     if (!searchTerm) return true;
@@ -183,6 +222,7 @@ export default function EmployeeCompensationPage() {
   const openCreate = () => {
     setEditing(null);
     setFormEmployeeId("");
+    setFormPositionId("");
     setFormPayElementId("");
     setFormAmount("");
     setFormCurrency("USD");
@@ -193,12 +233,15 @@ export default function EmployeeCompensationPage() {
     setFormStartDate(new Date().toISOString().split("T")[0]);
     setFormEndDate("");
     setFormIsActive(true);
+    setEmployeePositions([]);
     setDialogOpen(true);
   };
 
-  const openEdit = (item: EmployeeCompensation) => {
+  const openEdit = async (item: EmployeeCompensation) => {
     setEditing(item);
     setFormEmployeeId(item.employee_id);
+    await loadEmployeePositions(item.employee_id);
+    setFormPositionId(item.position_id || "");
     setFormPayElementId(item.pay_element_id);
     setFormAmount(item.amount.toString());
     setFormCurrency(item.currency);
@@ -222,6 +265,7 @@ export default function EmployeeCompensationPage() {
     const data = {
       company_id: selectedCompanyId,
       employee_id: formEmployeeId,
+      position_id: formPositionId || null,
       pay_element_id: formPayElementId,
       amount: parseFloat(formAmount),
       currency: formCurrency,
@@ -362,6 +406,7 @@ export default function EmployeeCompensationPage() {
                 <TableHeader>
                   <TableRow>
                     <TableHead>{t("compensation.employeeCompensation.employee")}</TableHead>
+                    <TableHead>{t("compensation.employeeCompensation.position")}</TableHead>
                     <TableHead>{t("compensation.employeeCompensation.payElement")}</TableHead>
                     <TableHead className="text-right">{t("compensation.employeeCompensation.amount")}</TableHead>
                     <TableHead>{t("compensation.employeeCompensation.frequencyLabel")}</TableHead>
@@ -382,6 +427,16 @@ export default function EmployeeCompensationPage() {
                             {item.employee?.email}
                           </div>
                         </div>
+                      </TableCell>
+                      <TableCell>
+                        {item.position ? (
+                          <div>
+                            <div className="font-medium">{item.position.title}</div>
+                            <div className="text-xs text-muted-foreground">{item.position.code}</div>
+                          </div>
+                        ) : (
+                          <span className="text-muted-foreground">—</span>
+                        )}
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">
@@ -463,6 +518,27 @@ export default function EmployeeCompensationPage() {
                   </SelectContent>
                 </Select>
               </div>
+
+              {employeePositions.length > 0 && (
+                <div className="space-y-2">
+                  <Label>{t("compensation.employeeCompensation.position")}</Label>
+                  <Select value={formPositionId} onValueChange={setFormPositionId}>
+                    <SelectTrigger>
+                      <SelectValue placeholder={t("compensation.employeeCompensation.dialog.selectPosition")} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="">
+                        {t("compensation.employeeCompensation.dialog.noPosition")}
+                      </SelectItem>
+                      {employeePositions.map((ep) => (
+                        <SelectItem key={ep.position_id} value={ep.position_id}>
+                          {ep.position?.title} ({ep.position?.code})
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
 
               <div className="space-y-2">
                 <Label>{t("compensation.employeeCompensation.payElement")} *</Label>
