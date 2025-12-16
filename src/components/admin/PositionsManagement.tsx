@@ -44,7 +44,9 @@ import {
   ChevronRight,
   Users,
   ArrowUpRight,
+  DollarSign,
 } from "lucide-react";
+import { EmployeePositionCompensationDrilldown } from "@/components/workforce/EmployeePositionCompensationDrilldown";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -143,6 +145,7 @@ export function PositionsManagement({ companyId }: PositionsManagementProps) {
 
   const [paySpines, setPaySpines] = useState<PaySpine[]>([]);
   const [spinalPoints, setSpinalPoints] = useState<SpinalPoint[]>([]);
+  const [expandedAssignments, setExpandedAssignments] = useState<Set<string>>(new Set());
 
   // Position dialog state
   const [positionDialogOpen, setPositionDialogOpen] = useState(false);
@@ -673,63 +676,88 @@ export function PositionsManagement({ companyId }: PositionsManagementProps) {
                                 {assignments.length > 0 && (
                                   <div className="mt-3 border-t pt-3">
                                     <p className="text-sm font-medium mb-2">Assigned Employees:</p>
-                                    <Table>
+                                <Table>
                                       <TableHeader>
                                         <TableRow>
+                                          <TableHead className="w-[40px]"></TableHead>
                                           <TableHead>Employee</TableHead>
                                           <TableHead>Start Date</TableHead>
-                                          <TableHead>Compensation</TableHead>
                                           <TableHead>Primary</TableHead>
                                           <TableHead>Status</TableHead>
                                           <TableHead className="w-[80px]">Actions</TableHead>
                                         </TableRow>
                                       </TableHeader>
                                       <TableBody>
-                                        {assignments.map((assignment) => (
-                                          <TableRow key={assignment.id}>
-                                            <TableCell>
-                                              <div>
-                                                <p className="font-medium">{assignment.employee?.full_name}</p>
-                                                <p className="text-xs text-muted-foreground">{assignment.employee?.email}</p>
-                                              </div>
-                                            </TableCell>
-                                            <TableCell>{assignment.start_date}</TableCell>
-                                            <TableCell>
-                                              {assignment.compensation_amount 
-                                                ? `${assignment.compensation_currency} ${assignment.compensation_amount.toLocaleString()} / ${assignment.compensation_frequency}`
-                                                : "-"
-                                              }
-                                            </TableCell>
-                                            <TableCell>
-                                              {assignment.is_primary && <Badge>Primary</Badge>}
-                                            </TableCell>
-                                            <TableCell>
-                                              <Badge variant={assignment.is_active ? "default" : "secondary"}>
-                                                {assignment.is_active ? "Active" : "Inactive"}
-                                              </Badge>
-                                            </TableCell>
-                                            <TableCell>
-                                              <div className="flex items-center gap-1">
-                                                <Button
-                                                  size="icon"
-                                                  variant="ghost"
-                                                  className="h-7 w-7"
-                                                  onClick={() => openEditAssignment(assignment)}
-                                                >
-                                                  <Pencil className="h-3 w-3" />
-                                                </Button>
-                                                <Button
-                                                  size="icon"
-                                                  variant="ghost"
-                                                  className="h-7 w-7 text-destructive"
-                                                  onClick={() => handleDeleteAssignment(assignment.id)}
-                                                >
-                                                  <Trash2 className="h-3 w-3" />
-                                                </Button>
-                                              </div>
-                                            </TableCell>
-                                          </TableRow>
-                                        ))}
+                                        {assignments.map((assignment) => {
+                                          const isExpanded = expandedAssignments.has(assignment.id);
+                                          return (
+                                            <>
+                                              <TableRow key={assignment.id} className="cursor-pointer" onClick={() => {
+                                                setExpandedAssignments(prev => {
+                                                  const next = new Set(prev);
+                                                  if (next.has(assignment.id)) next.delete(assignment.id);
+                                                  else next.add(assignment.id);
+                                                  return next;
+                                                });
+                                              }}>
+                                                <TableCell className="p-2">
+                                                  <Button variant="ghost" size="icon" className="h-6 w-6">
+                                                    {isExpanded ? (
+                                                      <ChevronDown className="h-4 w-4" />
+                                                    ) : (
+                                                      <DollarSign className="h-4 w-4 text-muted-foreground" />
+                                                    )}
+                                                  </Button>
+                                                </TableCell>
+                                                <TableCell>
+                                                  <div>
+                                                    <p className="font-medium">{assignment.employee?.full_name}</p>
+                                                    <p className="text-xs text-muted-foreground">{assignment.employee?.email}</p>
+                                                  </div>
+                                                </TableCell>
+                                                <TableCell>{assignment.start_date}</TableCell>
+                                                <TableCell>
+                                                  {assignment.is_primary && <Badge>Primary</Badge>}
+                                                </TableCell>
+                                                <TableCell>
+                                                  <Badge variant={assignment.is_active ? "default" : "secondary"}>
+                                                    {assignment.is_active ? "Active" : "Inactive"}
+                                                  </Badge>
+                                                </TableCell>
+                                                <TableCell>
+                                                  <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
+                                                    <Button
+                                                      size="icon"
+                                                      variant="ghost"
+                                                      className="h-7 w-7"
+                                                      onClick={() => openEditAssignment(assignment)}
+                                                    >
+                                                      <Pencil className="h-3 w-3" />
+                                                    </Button>
+                                                    <Button
+                                                      size="icon"
+                                                      variant="ghost"
+                                                      className="h-7 w-7 text-destructive"
+                                                      onClick={() => handleDeleteAssignment(assignment.id)}
+                                                    >
+                                                      <Trash2 className="h-3 w-3" />
+                                                    </Button>
+                                                  </div>
+                                                </TableCell>
+                                              </TableRow>
+                                              {isExpanded && (
+                                                <TableRow key={`${assignment.id}-expanded`}>
+                                                  <TableCell colSpan={6} className="p-0">
+                                                    <EmployeePositionCompensationDrilldown
+                                                      employeeId={assignment.employee_id}
+                                                      positionId={assignment.position_id}
+                                                    />
+                                                  </TableCell>
+                                                </TableRow>
+                                              )}
+                                            </>
+                                          );
+                                        })}
                                       </TableBody>
                                     </Table>
                                   </div>
