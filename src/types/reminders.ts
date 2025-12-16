@@ -20,6 +20,7 @@ export interface ReminderRule {
   name: string;
   description: string | null;
   days_before: number;
+  reminder_intervals: number[] | null;
   send_to_employee: boolean;
   send_to_manager: boolean;
   send_to_hr: boolean;

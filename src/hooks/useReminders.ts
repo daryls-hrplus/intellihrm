@@ -54,6 +54,7 @@ export function useReminders() {
         name: rule.name!,
         description: rule.description,
         days_before: rule.days_before,
+        reminder_intervals: rule.reminder_intervals,
         send_to_employee: rule.send_to_employee,
         send_to_manager: rule.send_to_manager,
         send_to_hr: rule.send_to_hr,
