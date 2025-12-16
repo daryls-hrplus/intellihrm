@@ -82,37 +82,109 @@ interface LookupValueForm {
   end_date: string;
 }
 
-const CATEGORY_LABELS: Record<LookupCategory, string> = {
-  employee_status: "Employee Statuses",
-  termination_reason: "Termination Reasons",
-  employee_type: "Employee Types",
-  employment_action: "Employment Actions",
-  leave_type: "Leave Types",
-  contract_type: "Contract Types",
-  qualification_type: "Qualification Types",
-  education_level: "Education Levels",
-  field_of_study: "Fields of Study",
-  institution_name: "Institution Names",
-  certification_type: "Certification Types",
-  certification_name: "Certification/License Names",
-  accrediting_body: "Certifying/Accrediting Bodies",
+interface LookupCategoryConfig {
+  label: string;
+  description: string;
+  module: string;
+}
+
+// Grouped by module, alphabetically ordered within each module
+const CATEGORY_CONFIG: Record<LookupCategory, LookupCategoryConfig> = {
+  // Leave Management
+  leave_type: {
+    label: "Leave Types",
+    description: "Types of leave available to employees",
+    module: "Leave Management",
+  },
+  // Qualifications
+  accrediting_body: {
+    label: "Certifying/Accrediting Bodies",
+    description: "Organizations that issue certifications and accreditations",
+    module: "Qualifications",
+  },
+  certification_name: {
+    label: "Certification/License Names",
+    description: "Names of certifications and licenses",
+    module: "Qualifications",
+  },
+  certification_type: {
+    label: "Certification Types",
+    description: "Types of professional certifications",
+    module: "Qualifications",
+  },
+  education_level: {
+    label: "Education Levels",
+    description: "Levels of educational attainment",
+    module: "Qualifications",
+  },
+  field_of_study: {
+    label: "Fields of Study",
+    description: "Academic and professional fields of study",
+    module: "Qualifications",
+  },
+  institution_name: {
+    label: "Institution Names",
+    description: "Names of educational institutions",
+    module: "Qualifications",
+  },
+  qualification_type: {
+    label: "Qualification Types",
+    description: "Types of qualifications (academic, professional, etc.)",
+    module: "Qualifications",
+  },
+  // Workforce
+  contract_type: {
+    label: "Contract Types",
+    description: "Types of employment contracts",
+    module: "Workforce",
+  },
+  employee_status: {
+    label: "Employee Statuses",
+    description: "Define the various employment statuses an employee can have",
+    module: "Workforce",
+  },
+  employee_type: {
+    label: "Employee Types",
+    description: "Types of employment arrangements",
+    module: "Workforce",
+  },
+  employment_action: {
+    label: "Employment Actions",
+    description: "Actions that can be taken on employee records",
+    module: "Workforce",
+  },
+  termination_reason: {
+    label: "Termination Reasons",
+    description: "Reasons for employment termination",
+    module: "Workforce",
+  },
 };
 
-const CATEGORY_DESCRIPTIONS: Record<LookupCategory, string> = {
-  employee_status: "Define the various employment statuses an employee can have",
-  termination_reason: "Reasons for employment termination",
-  employee_type: "Types of employment arrangements",
-  employment_action: "Actions that can be taken on employee records",
-  leave_type: "Types of leave available to employees",
-  contract_type: "Types of employment contracts",
-  qualification_type: "Types of qualifications (academic, professional, etc.)",
-  education_level: "Levels of educational attainment",
-  field_of_study: "Academic and professional fields of study",
-  institution_name: "Names of educational institutions",
-  certification_type: "Types of professional certifications",
-  certification_name: "Names of certifications and licenses",
-  accrediting_body: "Organizations that issue certifications and accreditations",
+// Get categories grouped by module, sorted alphabetically
+const getGroupedCategories = () => {
+  const modules: Record<string, LookupCategory[]> = {};
+  
+  Object.entries(CATEGORY_CONFIG).forEach(([key, config]) => {
+    if (!modules[config.module]) {
+      modules[config.module] = [];
+    }
+    modules[config.module].push(key as LookupCategory);
+  });
+  
+  // Sort categories alphabetically within each module
+  Object.keys(modules).forEach(module => {
+    modules[module].sort((a, b) => 
+      CATEGORY_CONFIG[a].label.localeCompare(CATEGORY_CONFIG[b].label)
+    );
+  });
+  
+  // Return modules sorted alphabetically
+  return Object.keys(modules)
+    .sort()
+    .map(module => ({ module, categories: modules[module] }));
 };
+
+const groupedCategories = getGroupedCategories();
 
 const defaultFormValues: LookupValueForm = {
   code: "",
@@ -139,7 +211,7 @@ export function LookupValuesManagement() {
       const { data, error } = await supabase
         .from("lookup_values")
         .select("*")
-        .eq("category", activeCategory)
+        .eq("category", activeCategory as any)
         .order("display_order", { ascending: true });
 
       if (error) throw error;
@@ -152,7 +224,7 @@ export function LookupValuesManagement() {
       const { data, error } = await supabase
         .from("lookup_values")
         .insert([{
-          category: activeCategory,
+          category: activeCategory as any,
           code: values.code.toUpperCase().replace(/\s+/g, "_"),
           name: values.name,
           description: values.description || null,
@@ -312,21 +384,30 @@ export function LookupValuesManagement() {
   return (
     <div className="space-y-6">
       <Tabs value={activeCategory} onValueChange={(v) => setActiveCategory(v as LookupCategory)}>
-        <TabsList className="flex flex-wrap h-auto gap-1">
-          {Object.entries(CATEGORY_LABELS).map(([key, label]) => (
-            <TabsTrigger key={key} value={key} className="text-xs sm:text-sm">
-              {label}
-            </TabsTrigger>
+        <div className="space-y-4">
+          {groupedCategories.map(({ module, categories }) => (
+            <div key={module}>
+              <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">
+                {module}
+              </h4>
+              <TabsList className="flex flex-wrap h-auto gap-1">
+                {categories.map((key) => (
+                  <TabsTrigger key={key} value={key} className="text-xs sm:text-sm">
+                    {CATEGORY_CONFIG[key].label}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+            </div>
           ))}
-        </TabsList>
+        </div>
 
-        {Object.keys(CATEGORY_LABELS).map((category) => (
+        {Object.keys(CATEGORY_CONFIG).map((category) => (
           <TabsContent key={category} value={category} className="mt-6">
             <div className="flex items-center justify-between mb-4">
               <div>
-                <h3 className="text-lg font-semibold">{CATEGORY_LABELS[category as LookupCategory]}</h3>
+                <h3 className="text-lg font-semibold">{CATEGORY_CONFIG[category as LookupCategory].label}</h3>
                 <p className="text-sm text-muted-foreground">
-                  {CATEGORY_DESCRIPTIONS[category as LookupCategory]}
+                  {CATEGORY_CONFIG[category as LookupCategory].description}
                 </p>
               </div>
               <Button onClick={() => handleOpenDialog()}>
@@ -426,7 +507,7 @@ export function LookupValuesManagement() {
             <DialogDescription>
               {editingValue 
                 ? "Update the lookup value details below"
-                : `Add a new value to ${CATEGORY_LABELS[activeCategory]}`
+                : `Add a new value to ${CATEGORY_CONFIG[activeCategory].label}`
               }
             </DialogDescription>
           </DialogHeader>
