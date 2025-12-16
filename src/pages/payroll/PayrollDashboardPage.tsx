@@ -178,7 +178,7 @@ export default function PayrollDashboardPage() {
   const statItems = [
     { label: t("payroll.stats.currentPeriod"), value: stats.currentPeriod, icon: CalendarCheck },
     { label: t("payroll.stats.totalPayroll"), value: stats.totalPayroll, icon: DollarSign },
-    { label: t("payroll.stats.employeesPaid"), value: stats.employeesPaid, icon: Users },
+    { label: t("payroll.stats.paidProcessing", "Paid/Processing"), value: stats.employeesPaid, icon: Users },
     { label: t("payroll.stats.pendingApprovals"), value: stats.pendingApprovals, icon: Clock },
   ];
 
