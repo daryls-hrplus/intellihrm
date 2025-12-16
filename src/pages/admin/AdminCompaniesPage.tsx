@@ -26,6 +26,7 @@ import {
   Building,
 } from "lucide-react";
 import { CompanyBranchLocations } from "@/components/admin/CompanyBranchLocations";
+import { CountrySelect } from "@/components/ui/country-select";
 
 interface Company {
   id: string;
@@ -991,17 +992,12 @@ export default function AdminCompaniesPage() {
 
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-foreground">Country</label>
-                  <select
-                    name="country"
+                  <CountrySelect
                     value={formData.country}
-                    onChange={handleChange}
-                    className="h-10 w-full rounded-lg border border-input bg-background px-3 text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-                  >
-                    <option value="">Select country</option>
-                    {statutoryCountries.map((country) => (
-                      <option key={country} value={country}>{country}</option>
-                    ))}
-                  </select>
+                    onChange={(value) => setFormData({ ...formData, country: value })}
+                    valueType="name"
+                    placeholder="Select country"
+                  />
                 </div>
 
                 <div className="space-y-2">
