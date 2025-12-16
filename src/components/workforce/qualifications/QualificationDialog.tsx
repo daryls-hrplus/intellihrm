@@ -11,7 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { CountrySelect } from "@/components/ui/country-select";
-import { CalendarIcon, Loader2, GraduationCap, Award } from "lucide-react";
+import { CalendarIcon, Loader2, GraduationCap, Award, Upload, FileText, X } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
@@ -51,6 +51,7 @@ export function QualificationDialog({
   const { user } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [recordType, setRecordType] = useState<"academic" | "certification">("academic");
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   
   // Lookup data
   const [employees, setEmployees] = useState<Employee[]>([]);
@@ -132,6 +133,17 @@ export function QualificationDialog({
     }
   };
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 10 * 1024 * 1024) {
+        toast.error("File size must be less than 10MB");
+        return;
+      }
+      setSelectedFile(file);
+    }
+  };
+
   const handleSubmit = async () => {
     if (!formData.employee_id || !formData.name) {
       toast.error("Please fill in required fields");
@@ -144,6 +156,32 @@ export function QualificationDialog({
       if (!employee) {
         toast.error("Employee not found");
         return;
+      }
+
+      // Upload document if selected
+      let documentUrl = null;
+      let documentName = null;
+      let documentSize = null;
+      let documentMimeType = null;
+
+      if (selectedFile) {
+        const fileExt = selectedFile.name.split(".").pop();
+        const filePath = `qualifications/${formData.employee_id}/${Date.now()}.${fileExt}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from("employee-documents")
+          .upload(filePath, selectedFile);
+
+        if (uploadError) throw uploadError;
+
+        const { data: urlData } = supabase.storage
+          .from("employee-documents")
+          .getPublicUrl(filePath);
+
+        documentUrl = urlData.publicUrl;
+        documentName = selectedFile.name;
+        documentSize = selectedFile.size;
+        documentMimeType = selectedFile.type;
       }
 
       const { error } = await supabase.from("employee_qualifications").insert({
@@ -169,6 +207,10 @@ export function QualificationDialog({
         status: recordType === "academic" ? "completed" : "active",
         verification_status: "pending",
         created_by: user?.id || null,
+        document_url: documentUrl,
+        document_name: documentName,
+        document_size: documentSize,
+        document_mime_type: documentMimeType,
       });
 
       if (error) throw error;
@@ -207,6 +249,7 @@ export function QualificationDialog({
       comments: "",
     });
     setRecordType("academic");
+    setSelectedFile(null);
   };
 
   return (
@@ -501,6 +544,49 @@ export function QualificationDialog({
                 </div>
               </div>
             </TabsContent>
+
+            {/* Document Upload */}
+            <div>
+              <Label>Supporting Document</Label>
+              <div className="border-2 border-dashed rounded-lg p-4 mt-1">
+                <input
+                  type="file"
+                  id="qual-file-upload"
+                  className="hidden"
+                  onChange={handleFileChange}
+                  accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                />
+                {selectedFile ? (
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <FileText className="h-5 w-5 text-muted-foreground" />
+                      <span className="text-sm">{selectedFile.name}</span>
+                      <span className="text-xs text-muted-foreground">
+                        ({(selectedFile.size / 1024).toFixed(1)} KB)
+                      </span>
+                    </div>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setSelectedFile(null)}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ) : (
+                  <label htmlFor="qual-file-upload" className="cursor-pointer flex items-center justify-center gap-2">
+                    <Upload className="h-5 w-5 text-muted-foreground" />
+                    <span className="text-sm text-muted-foreground">
+                      Click to upload document (PDF, DOC, JPG, PNG - max 10MB)
+                    </span>
+                  </label>
+                )}
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">
+                Upload certificate, diploma, or license document. This will also appear in the Documents tab.
+              </p>
+            </div>
 
             {/* Comments */}
             <div>

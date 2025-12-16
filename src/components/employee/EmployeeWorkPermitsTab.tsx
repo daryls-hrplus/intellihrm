@@ -10,8 +10,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { Plus, Pencil, Trash2, FileCheck, AlertCircle } from "lucide-react";
+import { Plus, Pencil, Trash2, FileCheck, AlertCircle, Upload, FileText, X, Download } from "lucide-react";
 import { format, isBefore } from "date-fns";
+import { CountrySelect } from "@/components/ui/country-select";
 
 interface WorkPermit {
   id: string;
@@ -23,6 +24,8 @@ interface WorkPermit {
   status: string;
   sponsoring_company: string | null;
   notes: string | null;
+  document_url: string | null;
+  document_name: string | null;
 }
 
 interface WorkPermitFormData {
@@ -45,6 +48,8 @@ export function EmployeeWorkPermitsTab({ employeeId }: EmployeeWorkPermitsTabPro
   const [isLoading, setIsLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingPermit, setEditingPermit] = useState<WorkPermit | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [uploading, setUploading] = useState(false);
 
   const form = useForm<WorkPermitFormData>({
     defaultValues: {
@@ -79,12 +84,54 @@ export function EmployeeWorkPermitsTab({ employeeId }: EmployeeWorkPermitsTabPro
     fetchPermits();
   }, [employeeId]);
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 10 * 1024 * 1024) {
+        toast.error("File size must be less than 10MB");
+        return;
+      }
+      setSelectedFile(file);
+    }
+  };
+
   const handleSubmit = async (data: WorkPermitFormData) => {
+    setUploading(true);
     try {
+      let documentUrl = editingPermit?.document_url || null;
+      let documentName = editingPermit?.document_name || null;
+      let documentSize = null;
+      let documentMimeType = null;
+
+      // Upload document if selected
+      if (selectedFile) {
+        const fileExt = selectedFile.name.split(".").pop();
+        const filePath = `work-permits/${employeeId}/${Date.now()}.${fileExt}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from("employee-documents")
+          .upload(filePath, selectedFile);
+
+        if (uploadError) throw uploadError;
+
+        const { data: urlData } = supabase.storage
+          .from("employee-documents")
+          .getPublicUrl(filePath);
+
+        documentUrl = urlData.publicUrl;
+        documentName = selectedFile.name;
+        documentSize = selectedFile.size;
+        documentMimeType = selectedFile.type;
+      }
+
       const payload = {
         ...data,
         sponsoring_company: data.sponsoring_company || null,
         notes: data.notes || null,
+        document_url: documentUrl,
+        document_name: documentName,
+        document_size: documentSize,
+        document_mime_type: documentMimeType,
       };
 
       if (editingPermit) {
@@ -107,15 +154,19 @@ export function EmployeeWorkPermitsTab({ employeeId }: EmployeeWorkPermitsTabPro
 
       setDialogOpen(false);
       setEditingPermit(null);
+      setSelectedFile(null);
       form.reset();
       fetchPermits();
     } catch (error) {
       toast.error("Failed to save work permit");
+    } finally {
+      setUploading(false);
     }
   };
 
   const handleEdit = (permit: WorkPermit) => {
     setEditingPermit(permit);
+    setSelectedFile(null);
     form.reset({
       permit_type: permit.permit_type,
       permit_number: permit.permit_number,
@@ -141,6 +192,7 @@ export function EmployeeWorkPermitsTab({ employeeId }: EmployeeWorkPermitsTabPro
 
   const openNewDialog = () => {
     setEditingPermit(null);
+    setSelectedFile(null);
     form.reset();
     setDialogOpen(true);
   };
@@ -222,7 +274,12 @@ export function EmployeeWorkPermitsTab({ employeeId }: EmployeeWorkPermitsTabPro
                     <FormItem>
                       <FormLabel>Issuing Country</FormLabel>
                       <FormControl>
-                        <Input {...field} />
+                        <CountrySelect
+                          value={field.value}
+                          onChange={field.onChange}
+                          valueType="name"
+                          placeholder="Select country"
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -297,6 +354,54 @@ export function EmployeeWorkPermitsTab({ employeeId }: EmployeeWorkPermitsTabPro
                   />
                 </div>
 
+                {/* Document Upload */}
+                <div className="space-y-2">
+                  <FormLabel>Supporting Document</FormLabel>
+                  <div className="border-2 border-dashed rounded-lg p-4">
+                    <input
+                      type="file"
+                      id="permit-file-upload"
+                      className="hidden"
+                      onChange={handleFileChange}
+                      accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                    />
+                    {selectedFile ? (
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <FileText className="h-5 w-5 text-muted-foreground" />
+                          <span className="text-sm">{selectedFile.name}</span>
+                          <span className="text-xs text-muted-foreground">
+                            ({(selectedFile.size / 1024).toFixed(1)} KB)
+                          </span>
+                        </div>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setSelectedFile(null)}
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    ) : (
+                      <label htmlFor="permit-file-upload" className="cursor-pointer flex items-center justify-center gap-2">
+                        <Upload className="h-5 w-5 text-muted-foreground" />
+                        <span className="text-sm text-muted-foreground">
+                          Click to upload (PDF, DOC, JPG, PNG - max 10MB)
+                        </span>
+                      </label>
+                    )}
+                  </div>
+                  {editingPermit?.document_url && !selectedFile && (
+                    <p className="text-xs text-muted-foreground">
+                      Current document: {editingPermit.document_name}
+                    </p>
+                  )}
+                  <p className="text-xs text-muted-foreground">
+                    Upload work permit document. This will also appear in the Documents tab.
+                  </p>
+                </div>
+
                 <FormField
                   control={form.control}
                   name="notes"
@@ -314,7 +419,9 @@ export function EmployeeWorkPermitsTab({ employeeId }: EmployeeWorkPermitsTabPro
                   <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
                     Cancel
                   </Button>
-                  <Button type="submit">Save</Button>
+                  <Button type="submit" disabled={uploading}>
+                    {uploading ? "Saving..." : "Save"}
+                  </Button>
                 </div>
               </form>
             </Form>
@@ -347,6 +454,13 @@ export function EmployeeWorkPermitsTab({ employeeId }: EmployeeWorkPermitsTabPro
                     )}
                   </div>
                   <div className="flex gap-1">
+                    {permit.document_url && (
+                      <Button variant="ghost" size="icon" asChild>
+                        <a href={permit.document_url} target="_blank" rel="noopener noreferrer">
+                          <Download className="h-4 w-4" />
+                        </a>
+                      </Button>
+                    )}
                     <Button variant="ghost" size="icon" onClick={() => handleEdit(permit)}>
                       <Pencil className="h-4 w-4" />
                     </Button>
@@ -375,6 +489,11 @@ export function EmployeeWorkPermitsTab({ employeeId }: EmployeeWorkPermitsTabPro
                   {permit.sponsoring_company && (
                     <div className="col-span-2">
                       <span className="text-muted-foreground">Sponsor:</span> {permit.sponsoring_company}
+                    </div>
+                  )}
+                  {permit.document_name && (
+                    <div className="col-span-2">
+                      <span className="text-muted-foreground">Document:</span> {permit.document_name}
                     </div>
                   )}
                 </div>
