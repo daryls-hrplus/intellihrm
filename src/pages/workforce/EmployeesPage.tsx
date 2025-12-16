@@ -53,6 +53,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { EmployeeEditDialog } from "@/components/employee/EmployeeEditDialog";
+import { AddEmployeeDialog } from "@/components/employee/AddEmployeeDialog";
 
 interface Employee {
   id: string;
@@ -84,6 +85,7 @@ export default function EmployeesPage() {
   const [employeeToDelete, setEmployeeToDelete] = useState<Employee | null>(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [employeeToEdit, setEmployeeToEdit] = useState<Employee | null>(null);
+  const [addDialogOpen, setAddDialogOpen] = useState(false);
   const navigate = useNavigate();
   const { logView, logAction } = useAuditLog();
   const { canViewPii, maskPii } = usePiiVisibility();
@@ -304,10 +306,10 @@ export default function EmployeesPage() {
               {t("workforce.manageWorkforce")}
             </p>
           </div>
-          <button className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground shadow-sm transition-all hover:bg-primary/90">
-            <Plus className="h-4 w-4" />
+          <Button onClick={() => setAddDialogOpen(true)}>
+            <Plus className="h-4 w-4 mr-2" />
             {t("workforce.addEmployee")}
-          </button>
+          </Button>
         </div>
 
         {/* Filters */}
@@ -583,6 +585,13 @@ export default function EmployeesPage() {
           onOpenChange={setEditDialogOpen}
           employee={employeeToEdit}
           onSuccess={handleEditSuccess}
+        />
+
+        {/* Add Employee Dialog */}
+        <AddEmployeeDialog
+          open={addDialogOpen}
+          onOpenChange={setAddDialogOpen}
+          onSuccess={fetchEmployees}
         />
       </div>
     </AppLayout>
