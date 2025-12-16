@@ -19,7 +19,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { useAuditLog } from "@/hooks/useAuditLog";
 import { toast } from "sonner";
-import { Loader2, Copy } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { useLanguage } from "@/hooks/useLanguage";
 import { z } from "zod";
 
@@ -49,7 +49,6 @@ export function AddEmployeeDialog({ open, onOpenChange, onSuccess }: AddEmployee
   const [companyId, setCompanyId] = useState("");
   const [companies, setCompanies] = useState<Company[]>([]);
   const [saving, setSaving] = useState(false);
-  const [tempPassword, setTempPassword] = useState<string | null>(null);
   const { logAction } = useAuditLog();
 
   useEffect(() => {
@@ -58,7 +57,6 @@ export function AddEmployeeDialog({ open, onOpenChange, onSuccess }: AddEmployee
       setFullName("");
       setEmail("");
       setCompanyId("");
-      setTempPassword(null);
     }
   }, [open]);
 
@@ -75,16 +73,6 @@ export function AddEmployeeDialog({ open, onOpenChange, onSuccess }: AddEmployee
     () => ({ fullName, email, companyId }),
     [fullName, email, companyId],
   );
-
-  const handleCopyPassword = async () => {
-    if (!tempPassword) return;
-    try {
-      await navigator.clipboard.writeText(tempPassword);
-      toast.success(t("workforce.addEmployeeDialog.passwordCopied", "Temporary password copied"));
-    } catch {
-      toast.error(t("workforce.addEmployeeDialog.passwordCopyFailed", "Couldn't copy password"));
-    }
-  };
 
   const handleSave = async () => {
     const parsed = formSchema.safeParse(formValues);
@@ -115,8 +103,6 @@ export function AddEmployeeDialog({ open, onOpenChange, onSuccess }: AddEmployee
         return;
       }
 
-      setTempPassword(data.temporary_password || null);
-
       await logAction({
         action: "CREATE",
         entityType: "employee",
@@ -129,8 +115,9 @@ export function AddEmployeeDialog({ open, onOpenChange, onSuccess }: AddEmployee
         },
       });
 
-      onSuccess?.();
       toast.success(t("workforce.addEmployeeDialog.success", "Employee added successfully"));
+      onSuccess?.();
+      onOpenChange(false);
     } catch (e: any) {
       console.error("Error adding employee:", e);
       toast.error(t("workforce.addEmployeeDialog.error", "Failed to add employee"));
@@ -154,7 +141,6 @@ export function AddEmployeeDialog({ open, onOpenChange, onSuccess }: AddEmployee
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
               placeholder={t("workforce.addEmployeeDialog.fullNamePlaceholder", "Enter full name")}
-              disabled={!!tempPassword}
             />
           </div>
 
@@ -166,13 +152,12 @@ export function AddEmployeeDialog({ open, onOpenChange, onSuccess }: AddEmployee
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder={t("workforce.addEmployeeDialog.emailPlaceholder", "Enter email address")}
-              disabled={!!tempPassword}
             />
           </div>
 
           <div className="grid gap-2">
             <Label htmlFor="company">{t("workforce.addEmployeeDialog.company", "Company")}</Label>
-            <Select value={companyId} onValueChange={setCompanyId} disabled={!!tempPassword}>
+            <Select value={companyId} onValueChange={setCompanyId}>
               <SelectTrigger id="company">
                 <SelectValue placeholder={t("workforce.addEmployeeDialog.selectCompany", "Select company (optional)")} />
               </SelectTrigger>
@@ -185,38 +170,16 @@ export function AddEmployeeDialog({ open, onOpenChange, onSuccess }: AddEmployee
               </SelectContent>
             </Select>
           </div>
-
-          {tempPassword && (
-            <div className="rounded-lg border border-border bg-muted/40 p-4">
-              <div className="grid gap-2">
-                <Label htmlFor="tempPassword">{t("workforce.addEmployeeDialog.tempPassword", "Temporary Password")}</Label>
-                <div className="flex items-center gap-2">
-                  <Input id="tempPassword" value={tempPassword} readOnly />
-                  <Button type="button" variant="outline" size="icon" onClick={handleCopyPassword}>
-                    <Copy className="h-4 w-4" />
-                  </Button>
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  {t(
-                    "workforce.addEmployeeDialog.tempPasswordHelp",
-                    "Share this password securely with the employee. They should change it after first login.",
-                  )}
-                </p>
-              </div>
-            </div>
-          )}
         </div>
 
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
-            {t("common.close", "Close")}
+            {t("common.cancel", "Cancel")}
           </Button>
-          {!tempPassword && (
-            <Button onClick={handleSave} disabled={saving}>
-              {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {t("workforce.addEmployeeDialog.add", "Add Employee")}
-            </Button>
-          )}
+          <Button onClick={handleSave} disabled={saving}>
+            {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            {t("workforce.addEmployeeDialog.add", "Add Employee")}
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
