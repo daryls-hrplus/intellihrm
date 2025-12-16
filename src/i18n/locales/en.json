@@ -2679,7 +2679,15 @@
       "overtimePay": "Overtime Pay",
       "bonusPay": "Bonus Pay",
       "otherEarnings": "Other Earnings",
-      "otherDeductions": "Other Deductions"
+      "otherDeductions": "Other Deductions",
+      "viewEmployees": "View Employees",
+      "calculate": "Calculate",
+      "retryCalculation": "Retry Calculation",
+      "approve": "Approve",
+      "requestRecalculation": "Request Recalculation",
+      "generatePayslips": "Generate Payslips",
+      "generateBankFile": "Generate Bank File",
+      "processPayment": "Process Payment"
     },
     "reports": {
       "title": "Payroll Reports",
