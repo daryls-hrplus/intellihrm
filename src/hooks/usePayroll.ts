@@ -1130,16 +1130,26 @@ export function usePayroll() {
   };
 
   // Payslips
-  const fetchPayslips = async (employeeId?: string, companyId?: string) => {
+  const fetchPayslips = async (employeeId?: string, companyId?: string, onlyPaid: boolean = true) => {
     setIsLoading(true);
     try {
+      // First get payslips with employee_payroll join to check payroll run status
       let query = supabase
         .from("payslips")
-        .select(`*, employee:profiles!payslips_employee_id_fkey(full_name, email)`)
+        .select(`
+          *,
+          employee:profiles!payslips_employee_id_fkey(full_name, email),
+          employee_payroll!inner(payroll_run_id, payroll_runs!inner(status))
+        `)
         .order("pay_date", { ascending: false });
       
       if (employeeId) {
         query = query.eq("employee_id", employeeId);
+      }
+      
+      // For ESS, only show payslips from paid payroll runs
+      if (onlyPaid) {
+        query = query.eq("employee_payroll.payroll_runs.status", "paid");
       }
       
       const { data, error } = await query;
@@ -1163,6 +1173,20 @@ export function usePayroll() {
         .eq("payroll_run_id", payrollRunId);
       
       if (fetchError) throw fetchError;
+      
+      // Delete existing payslips for this payroll run to prevent duplicates
+      const employeePayrollIds = empPayrolls?.map(ep => ep.id) || [];
+      if (employeePayrollIds.length > 0) {
+        const { error: deleteError } = await supabase
+          .from("payslips")
+          .delete()
+          .in("employee_payroll_id", employeePayrollIds);
+        
+        if (deleteError) {
+          console.error("Error deleting existing payslips:", deleteError);
+          // Continue anyway - insert might still work
+        }
+      }
       
       const payslips: Partial<Payslip>[] = [];
       
