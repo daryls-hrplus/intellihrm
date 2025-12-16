@@ -5031,6 +5031,36 @@ export type Database = {
           },
         ]
       }
+      document_categories: {
+        Row: {
+          code: string
+          created_at: string
+          description: string | null
+          display_order: number | null
+          id: string
+          is_active: boolean | null
+          name: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          description?: string | null
+          display_order?: number | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          description?: string | null
+          display_order?: number | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+        }
+        Relationships: []
+      }
       document_chunks: {
         Row: {
           chunk_index: number
@@ -5066,6 +5096,50 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "policy_documents"
             referencedColumns: ["id"]
+          },
+        ]
+      }
+      document_types: {
+        Row: {
+          category_code: string
+          code: string
+          created_at: string
+          description: string | null
+          display_order: number | null
+          id: string
+          is_active: boolean | null
+          managed_by_module: string | null
+          name: string
+        }
+        Insert: {
+          category_code: string
+          code: string
+          created_at?: string
+          description?: string | null
+          display_order?: number | null
+          id?: string
+          is_active?: boolean | null
+          managed_by_module?: string | null
+          name: string
+        }
+        Update: {
+          category_code?: string
+          code?: string
+          created_at?: string
+          description?: string | null
+          display_order?: number | null
+          id?: string
+          is_active?: boolean | null
+          managed_by_module?: string | null
+          name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "document_types_category_code_fkey"
+            columns: ["category_code"]
+            isOneToOne: false
+            referencedRelation: "document_categories"
+            referencedColumns: ["code"]
           },
         ]
       }
@@ -5917,6 +5991,8 @@ export type Database = {
       }
       employee_documents: {
         Row: {
+          category: string | null
+          company_id: string | null
           created_at: string
           document_name: string
           document_type: string
@@ -5925,12 +6001,20 @@ export type Database = {
           file_size: number | null
           file_url: string
           id: string
+          is_reference: boolean | null
+          issue_date: string | null
+          issuing_authority: string | null
           mime_type: string | null
           notes: string | null
+          source_module: string | null
+          source_record_id: string | null
+          status: string | null
           updated_at: string
           uploaded_by: string | null
         }
         Insert: {
+          category?: string | null
+          company_id?: string | null
           created_at?: string
           document_name: string
           document_type: string
@@ -5939,12 +6023,20 @@ export type Database = {
           file_size?: number | null
           file_url: string
           id?: string
+          is_reference?: boolean | null
+          issue_date?: string | null
+          issuing_authority?: string | null
           mime_type?: string | null
           notes?: string | null
+          source_module?: string | null
+          source_record_id?: string | null
+          status?: string | null
           updated_at?: string
           uploaded_by?: string | null
         }
         Update: {
+          category?: string | null
+          company_id?: string | null
           created_at?: string
           document_name?: string
           document_type?: string
@@ -5953,12 +6045,25 @@ export type Database = {
           file_size?: number | null
           file_url?: string
           id?: string
+          is_reference?: boolean | null
+          issue_date?: string | null
+          issuing_authority?: string | null
           mime_type?: string | null
           notes?: string | null
+          source_module?: string | null
+          source_record_id?: string | null
+          status?: string | null
           updated_at?: string
           uploaded_by?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "employee_documents_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "employee_documents_employee_id_fkey"
             columns: ["employee_id"]
@@ -6994,7 +7099,9 @@ export type Database = {
           created_by: string | null
           date_awarded: string | null
           description: string | null
+          document_mime_type: string | null
           document_name: string | null
+          document_size: number | null
           document_type: string | null
           document_url: string | null
           education_level: string | null
@@ -7040,7 +7147,9 @@ export type Database = {
           created_by?: string | null
           date_awarded?: string | null
           description?: string | null
+          document_mime_type?: string | null
           document_name?: string | null
+          document_size?: number | null
           document_type?: string | null
           document_url?: string | null
           education_level?: string | null
@@ -7086,7 +7195,9 @@ export type Database = {
           created_by?: string | null
           date_awarded?: string | null
           description?: string | null
+          document_mime_type?: string | null
           document_name?: string | null
+          document_size?: number | null
           document_type?: string | null
           document_url?: string | null
           education_level?: string | null
@@ -8236,6 +8347,10 @@ export type Database = {
       employee_work_permits: {
         Row: {
           created_at: string
+          document_mime_type: string | null
+          document_name: string | null
+          document_size: number | null
+          document_url: string | null
           employee_id: string
           expiry_date: string
           id: string
@@ -8250,6 +8365,10 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          document_mime_type?: string | null
+          document_name?: string | null
+          document_size?: number | null
+          document_url?: string | null
           employee_id: string
           expiry_date: string
           id?: string
@@ -8264,6 +8383,10 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          document_mime_type?: string | null
+          document_name?: string | null
+          document_size?: number | null
+          document_url?: string | null
           employee_id?: string
           expiry_date?: string
           id?: string
