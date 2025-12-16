@@ -5369,6 +5369,7 @@
         "editTitle": "Edit Employee Compensation",
         "description": "Add individual compensation items for this employee",
         "selectEmployee": "Select employee",
+        "selectEmployeeFirst": "Select employee first",
         "selectPosition": "Select position",
         "noPosition": "No specific position",
         "noPositionsAssigned": "No positions assigned to employee",

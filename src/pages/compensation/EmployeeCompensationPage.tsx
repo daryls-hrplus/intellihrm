@@ -534,31 +534,31 @@ export default function EmployeeCompensationPage() {
                 </Select>
               </div>
 
-              {formEmployeeId && (
-                <div className="space-y-2">
-                  <Label>{t("compensation.employeeCompensation.position")}</Label>
-                  <Select value={formPositionId} onValueChange={setFormPositionId}>
-                    <SelectTrigger>
-                      <SelectValue placeholder={employeePositions.length === 0 ? t("compensation.employeeCompensation.dialog.noPositionsAssigned") : t("compensation.employeeCompensation.dialog.selectPosition")} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {employeePositions.length === 0 ? (
-                        <SelectItem value="" disabled>
-                          {t("compensation.employeeCompensation.dialog.noPositionsAssigned")}
-                        </SelectItem>
-                      ) : (
-                        <>
-                          {employeePositions.map((ep) => (
-                            <SelectItem key={ep.position_id} value={ep.position_id}>
-                              {ep.position?.title} ({ep.position?.code}) {ep.is_primary && "★"}
-                            </SelectItem>
-                          ))}
-                        </>
-                      )}
-                    </SelectContent>
-                  </Select>
-                </div>
-              )}
+              <div className="space-y-2">
+                <Label>{t("compensation.employeeCompensation.position")}</Label>
+                <Select 
+                  value={formPositionId} 
+                  onValueChange={setFormPositionId}
+                  disabled={!formEmployeeId || employeePositions.length === 0}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder={
+                      !formEmployeeId 
+                        ? t("compensation.employeeCompensation.dialog.selectEmployeeFirst")
+                        : employeePositions.length === 0 
+                          ? t("compensation.employeeCompensation.dialog.noPositionsAssigned") 
+                          : t("compensation.employeeCompensation.dialog.selectPosition")
+                    } />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {employeePositions.map((ep) => (
+                      <SelectItem key={ep.position_id} value={ep.position_id}>
+                        {ep.position?.title} ({ep.position?.code}) {ep.is_primary && "★"}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
 
               <div className="space-y-2">
                 <Label>{t("compensation.employeeCompensation.payElement")} *</Label>
