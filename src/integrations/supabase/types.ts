@@ -22729,11 +22729,15 @@ export type Database = {
           date_format: string | null
           department_id: string | null
           email: string
+          failed_login_attempts: number | null
+          force_password_change: boolean | null
           full_name: string | null
           id: string
           invitation_status: string | null
           invited_at: string | null
           is_active: boolean | null
+          last_login_at: string | null
+          locked_until: string | null
           preferred_language: string | null
           section_id: string | null
           time_format: string | null
@@ -22747,11 +22751,15 @@ export type Database = {
           date_format?: string | null
           department_id?: string | null
           email: string
+          failed_login_attempts?: number | null
+          force_password_change?: boolean | null
           full_name?: string | null
           id: string
           invitation_status?: string | null
           invited_at?: string | null
           is_active?: boolean | null
+          last_login_at?: string | null
+          locked_until?: string | null
           preferred_language?: string | null
           section_id?: string | null
           time_format?: string | null
@@ -22765,11 +22773,15 @@ export type Database = {
           date_format?: string | null
           department_id?: string | null
           email?: string
+          failed_login_attempts?: number | null
+          force_password_change?: boolean | null
           full_name?: string | null
           id?: string
           invitation_status?: string | null
           invited_at?: string | null
           is_active?: boolean | null
+          last_login_at?: string | null
+          locked_until?: string | null
           preferred_language?: string | null
           section_id?: string | null
           time_format?: string | null
