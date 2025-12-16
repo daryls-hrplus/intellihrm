@@ -308,7 +308,7 @@ export function OrgChartVisualization({ companyId }: OrgChartVisualizationProps)
       const targetElement = chartContent || element;
       
       const canvas = await html2canvas(targetElement, {
-        scale: 1,
+        scale: 2,
         useCORS: true,
         allowTaint: true,
         backgroundColor: "#ffffff",
