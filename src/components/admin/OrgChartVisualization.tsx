@@ -304,20 +304,48 @@ export function OrgChartVisualization({ companyId }: OrgChartVisualizationProps)
 
     try {
       const canvas = await html2canvas(element, {
-        scale: 2,
+        scale: 1.5,
         useCORS: true,
         allowTaint: true,
         backgroundColor: "#ffffff",
       });
 
-      const imgData = canvas.toDataURL("image/png");
+      // Use JPEG with compression for smaller file size
+      const imgData = canvas.toDataURL("image/jpeg", 0.8);
+      
+      // Use standard A4 page size and fit content
+      const isLandscape = canvas.width > canvas.height;
       const pdf = new jsPDF({
-        orientation: canvas.width > canvas.height ? "landscape" : "portrait",
-        unit: "px",
-        format: [canvas.width, canvas.height],
+        orientation: isLandscape ? "landscape" : "portrait",
+        unit: "mm",
+        format: "a4",
       });
 
-      pdf.addImage(imgData, "PNG", 0, 0, canvas.width, canvas.height);
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
+      const margin = 10;
+      
+      const availableWidth = pageWidth - margin * 2;
+      const availableHeight = pageHeight - margin * 2;
+      
+      const imgAspect = canvas.width / canvas.height;
+      const pageAspect = availableWidth / availableHeight;
+      
+      let finalWidth: number;
+      let finalHeight: number;
+      
+      if (imgAspect > pageAspect) {
+        finalWidth = availableWidth;
+        finalHeight = availableWidth / imgAspect;
+      } else {
+        finalHeight = availableHeight;
+        finalWidth = availableHeight * imgAspect;
+      }
+      
+      const xOffset = margin + (availableWidth - finalWidth) / 2;
+      const yOffset = margin + (availableHeight - finalHeight) / 2;
+
+      pdf.addImage(imgData, "JPEG", xOffset, yOffset, finalWidth, finalHeight);
       pdf.save(`${title.toLowerCase().replace(/\s+/g, "-")}-${format(new Date(), "yyyy-MM-dd")}.pdf`);
 
       toast.success("PDF exported successfully", { id: "pdf-export" });
