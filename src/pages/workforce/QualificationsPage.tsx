@@ -205,8 +205,8 @@ export default function QualificationsPage() {
               <GraduationCap className="h-5 w-5 text-primary" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold tracking-tight">{t("workforce.modules.qualifications.title")}</h1>
-              <p className="text-muted-foreground">{t("workforce.modules.qualifications.description")}</p>
+              <h1 className="text-2xl font-bold tracking-tight">Qualifications</h1>
+              <p className="text-muted-foreground">Manage academic qualifications and professional certifications</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
