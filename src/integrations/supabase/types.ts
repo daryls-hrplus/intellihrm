@@ -21657,6 +21657,126 @@ export type Database = {
           },
         ]
       }
+      payslip_templates: {
+        Row: {
+          accent_color: string | null
+          company_address: string | null
+          company_email: string | null
+          company_id: string
+          company_logo_url: string | null
+          company_name_override: string | null
+          company_phone: string | null
+          company_registration_number: string | null
+          company_website: string | null
+          confidentiality_notice: string | null
+          created_at: string
+          created_by: string | null
+          footer_text: string | null
+          header_text: string | null
+          id: string
+          is_active: boolean | null
+          is_default: boolean | null
+          primary_color: string | null
+          secondary_color: string | null
+          show_bank_details: boolean | null
+          show_company_address: boolean | null
+          show_company_logo: boolean | null
+          show_department: boolean | null
+          show_employee_address: boolean | null
+          show_employee_id: boolean | null
+          show_position: boolean | null
+          show_statutory_breakdown: boolean | null
+          show_tax_breakdown: boolean | null
+          show_ytd_totals: boolean | null
+          template_name: string
+          template_style: string
+          updated_at: string
+        }
+        Insert: {
+          accent_color?: string | null
+          company_address?: string | null
+          company_email?: string | null
+          company_id: string
+          company_logo_url?: string | null
+          company_name_override?: string | null
+          company_phone?: string | null
+          company_registration_number?: string | null
+          company_website?: string | null
+          confidentiality_notice?: string | null
+          created_at?: string
+          created_by?: string | null
+          footer_text?: string | null
+          header_text?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_default?: boolean | null
+          primary_color?: string | null
+          secondary_color?: string | null
+          show_bank_details?: boolean | null
+          show_company_address?: boolean | null
+          show_company_logo?: boolean | null
+          show_department?: boolean | null
+          show_employee_address?: boolean | null
+          show_employee_id?: boolean | null
+          show_position?: boolean | null
+          show_statutory_breakdown?: boolean | null
+          show_tax_breakdown?: boolean | null
+          show_ytd_totals?: boolean | null
+          template_name?: string
+          template_style?: string
+          updated_at?: string
+        }
+        Update: {
+          accent_color?: string | null
+          company_address?: string | null
+          company_email?: string | null
+          company_id?: string
+          company_logo_url?: string | null
+          company_name_override?: string | null
+          company_phone?: string | null
+          company_registration_number?: string | null
+          company_website?: string | null
+          confidentiality_notice?: string | null
+          created_at?: string
+          created_by?: string | null
+          footer_text?: string | null
+          header_text?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_default?: boolean | null
+          primary_color?: string | null
+          secondary_color?: string | null
+          show_bank_details?: boolean | null
+          show_company_address?: boolean | null
+          show_company_logo?: boolean | null
+          show_department?: boolean | null
+          show_employee_address?: boolean | null
+          show_employee_id?: boolean | null
+          show_position?: boolean | null
+          show_statutory_breakdown?: boolean | null
+          show_tax_breakdown?: boolean | null
+          show_ytd_totals?: boolean | null
+          template_name?: string
+          template_style?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payslip_templates_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payslip_templates_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       payslips: {
         Row: {
           created_at: string

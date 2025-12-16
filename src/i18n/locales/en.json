@@ -2555,7 +2555,47 @@
       "salaryOvertime": {
         "title": "Salary & Overtime",
         "description": "Track work records, allowances, deductions and simulate pay"
+      },
+      "templates": {
+        "title": "Payslip Templates",
+        "description": "Configure payslip appearance and branding"
       }
+    },
+    "templates": {
+      "title": "Payslip Templates",
+      "subtitle": "Configure payslip design and company branding",
+      "savedTemplates": "Saved Templates",
+      "noTemplates": "No templates created yet",
+      "editTemplate": "Edit Template",
+      "createTemplate": "Create Template",
+      "setDefault": "Set Default",
+      "branding": "Branding",
+      "content": "Content",
+      "preview": "Preview",
+      "templateName": "Template Name",
+      "style": "Style",
+      "companyLogo": "Company Logo",
+      "companyNameOverride": "Company Name Override",
+      "leaveBlankDefault": "Leave blank to use company name",
+      "companyAddress": "Company Address",
+      "primaryColor": "Primary Color",
+      "secondaryColor": "Secondary Color",
+      "accentColor": "Accent Color",
+      "displayOptions": "Display Options",
+      "showCompanyLogo": "Show Company Logo",
+      "showCompanyAddress": "Show Company Address",
+      "showEmployeeId": "Show Employee ID",
+      "showDepartment": "Show Department",
+      "showPosition": "Show Position",
+      "payDetails": "Pay Details",
+      "showYtdTotals": "Show YTD Totals",
+      "showTaxBreakdown": "Show Tax Breakdown",
+      "showStatutoryBreakdown": "Show Statutory Breakdown",
+      "showBankDetails": "Show Bank Details",
+      "headerText": "Header Text",
+      "headerTextPlaceholder": "Optional header message",
+      "footerText": "Footer Text",
+      "confidentialityNotice": "Confidentiality Notice"
     },
     "payGroups": {
       "title": "Pay Groups",
