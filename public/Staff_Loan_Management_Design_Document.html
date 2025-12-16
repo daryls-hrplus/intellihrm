@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Staff Loan Management Module - Design Document</title>
+  <style>
+    body { font-family: Calibri, Arial, sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; line-height: 1.6; }
+    h1 { text-align: center; color: #333; border-bottom: 2px solid #333; padding-bottom: 10px; }
+    h2 { color: #444; margin-top: 30px; border-bottom: 1px solid #ddd; padding-bottom: 5px; }
+    h3 { color: #555; margin-top: 20px; }
+    table { border-collapse: collapse; width: 100%; margin: 15px 0; }
+    th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
+    th { background: #f5f5f5; font-weight: bold; }
+    ul { margin: 10px 0; }
+    li { margin: 5px 0; }
+    .phase { margin: 10px 0; }
+    .phase strong { color: #333; }
+    .footer { text-align: right; font-style: italic; color: #666; margin-top: 40px; border-top: 1px solid #ddd; padding-top: 10px; }
+  </style>
+</head>
+<body>
+
+<h1>Staff Loan Management Module</h1>
+<h1 style="font-size: 1.2em; border: none;">Design Document</h1>
+
+<h2>Executive Summary</h2>
+<p>A multi-territory staff loan management system for 8 Caribbean locations (Bahamas, Barbados, Bermuda, BVI, Cayman, Guyana, Jamaica, Trinidad) with varying loan types, disbursement mechanisms, and repayment policies.</p>
+
+<h2>Core Loan Types Identified</h2>
+<table>
+  <tr><th>Loan Type</th><th>Territories</th><th>Interest</th><th>Typical Volume</th></tr>
+  <tr><td>New Hire Loans</td><td>Bahamas, Bermuda, Cayman</td><td>Interest-free</td><td>25-120/year</td></tr>
+  <tr><td>Relocation Loans</td><td>Bahamas, Barbados, Bermuda, BVI, Cayman</td><td>Interest-free</td><td>Varies</td></tr>
+  <tr><td>Staff Loans (Emergency)</td><td>All territories</td><td>Interest-free (9.75% Jamaica)</td><td>1-58/year</td></tr>
+  <tr><td>Salary Advance</td><td>All territories</td><td>Interest-free</td><td>2-7/year</td></tr>
+  <tr><td>Medical Loans</td><td>Jamaica, Trinidad, Guyana</td><td>Interest-free</td><td>1-3/year</td></tr>
+  <tr><td>Educational Loans</td><td>Jamaica</td><td>Interest-free</td><td>82/year</td></tr>
+  <tr><td>Car Lease Loans</td><td>Trinidad</td><td>Interest-free</td><td>30/year</td></tr>
+  <tr><td>Recharges</td><td>Barbados, Trinidad, Bermuda</td><td>Interest-free</td><td>20-26/year</td></tr>
+</table>
+
+<h2>Functional Requirements</h2>
+
+<h3>1. Loan Configuration (Admin)</h3>
+<ul>
+  <li>Define loan types per company/territory</li>
+  <li>Configure interest rates (fixed, variable, bank O/D rate)</li>
+  <li>Set maximum loan amounts by employee level</li>
+  <li>Define repayment periods and schedules</li>
+  <li>Configure eligibility rules (e.g., managers+ for car lease)</li>
+</ul>
+
+<h3>2. Loan Application & Approval</h3>
+<ul>
+  <li>Employee loan request form</li>
+  <li>Configurable approval workflow (HC → Finance → Partner)</li>
+  <li>Document attachment support</li>
+  <li>Eligibility validation against rules</li>
+</ul>
+
+<h3>3. Disbursement Methods</h3>
+<ul>
+  <li><strong>Direct Deposit (EFT)</strong> - Primary method</li>
+  <li><strong>Cheque Generation</strong> - For new hires without bank accounts</li>
+  <li><strong>Petty Cash</strong> - For small amounts (Trinidad, Barbados)</li>
+  <li><strong>Third-Party Payment</strong> - Car leases, medical, vendors</li>
+  <li><strong>Off-Cycle Payroll</strong> - Salary advances</li>
+</ul>
+
+<h3>4. Repayment Tracking</h3>
+<ul>
+  <li><strong>Salary Deduction</strong> - Automatic payroll integration</li>
+  <li><strong>Direct Deposit by Staff</strong> - Manual payment tracking</li>
+  <li><strong>Over Counter</strong> - Cash payments</li>
+  <li>Configurable repayment schedules (monthly, per pay cycle)</li>
+</ul>
+
+<h3>5. Car Lease Management (Trinidad-specific)</h3>
+<ul>
+  <li>Vehicle quotation tracking</li>
+  <li>Lessor invoice management</li>
+  <li>Benefit-in-Kind (BIK) tax calculation (25%)</li>
+  <li>48-60 month lease tracking</li>
+</ul>
+
+<h3>6. Recharge Management</h3>
+<ul>
+  <li>DHL charges tracking</li>
+  <li>Cell phone charges</li>
+  <li>Credit card personal expenses</li>
+  <li>Insurance recharges</li>
+</ul>
+
+<h3>7. Reporting</h3>
+<ul>
+  <li>Outstanding loans by territory</li>
+  <li>Repayment schedule reports</li>
+  <li>Deduction lists for payroll</li>
+  <li>Loan aging analysis</li>
+</ul>
+
+<h2>Data Model</h2>
+
+<h3>Primary Tables:</h3>
+
+<p><strong>loan_types</strong> - Loan type configuration per company</p>
+<ul>
+  <li>id, company_id, name, code</li>
+  <li>has_interest, interest_rate, interest_type</li>
+  <li>max_repayment_months, eligibility_criteria</li>
+  <li>third_party_payment, start_date, end_date</li>
+</ul>
+
+<p><strong>staff_loans</strong> - Individual loan records</p>
+<ul>
+  <li>id, employee_id, loan_type_id, company_id</li>
+  <li>principal_amount, interest_rate, total_amount</li>
+  <li>disbursement_date, disbursement_method, status</li>
+  <li>approved_by, workflow_instance_id</li>
+</ul>
+
+<p><strong>loan_repayments</strong> - Repayment schedule and tracking</p>
+<ul>
+  <li>id, staff_loan_id, amount, due_date, paid_date</li>
+  <li>payment_method, status, payroll_run_id</li>
+</ul>
+
+<p><strong>car_leases</strong> - Car lease specific data (Trinidad)</p>
+<ul>
+  <li>id, staff_loan_id, employee_id, vehicle_details</li>
+  <li>lessor_vendor_id, monthly_lease_amount</li>
+  <li>bik_amount, tax_amount, lease_months</li>
+</ul>
+
+<p><strong>loan_recharges</strong> - Recharge tracking</p>
+<ul>
+  <li>id, employee_id, company_id, recharge_type</li>
+  <li>amount, incurred_date, status</li>
+</ul>
+
+<h2>Integration Points</h2>
+<ol>
+  <li><strong>Payroll Module</strong> - Salary deductions, off-cycle payments</li>
+  <li><strong>Accounts Payable</strong> - Third-party payments, vendor disbursements</li>
+  <li><strong>Workflow Engine</strong> - Approval routing</li>
+  <li><strong>GL Interface</strong> - Journal entries, cost center allocation</li>
+  <li><strong>Employee Self-Service</strong> - Loan requests, balance viewing</li>
+</ol>
+
+<h2>Development Estimate</h2>
+<table>
+  <tr><th>Component</th><th>Effort (Days)</th></tr>
+  <tr><td>Database Schema & Migrations</td><td>2</td></tr>
+  <tr><td>Loan Types Configuration (Admin)</td><td>3</td></tr>
+  <tr><td>Loan Application & Workflow</td><td>4</td></tr>
+  <tr><td>Disbursement Processing</td><td>3</td></tr>
+  <tr><td>Repayment Tracking & Payroll Integration</td><td>4</td></tr>
+  <tr><td>Car Lease Management</td><td>3</td></tr>
+  <tr><td>Recharge Management</td><td>2</td></tr>
+  <tr><td>Reporting & Analytics</td><td>3</td></tr>
+  <tr><td>Employee Self-Service Portal</td><td>2</td></tr>
+  <tr><td>Manager Self-Service</td><td>1</td></tr>
+  <tr><td>Multi-territory Configuration</td><td>2</td></tr>
+  <tr><td>Testing & Refinement</td><td>3</td></tr>
+  <tr><td><strong>Total</strong></td><td><strong>32 days (~6-7 weeks)</strong></td></tr>
+</table>
+
+<h2>Phased Delivery Recommendation</h2>
+<div class="phase"><strong>Phase 1 (2 weeks):</strong> Core loan types, application, approval workflow, basic disbursement</div>
+<div class="phase"><strong>Phase 2 (2 weeks):</strong> Payroll integration, repayment tracking, salary deductions</div>
+<div class="phase"><strong>Phase 3 (1.5 weeks):</strong> Car lease, recharges, third-party payments</div>
+<div class="phase"><strong>Phase 4 (1 week):</strong> Reporting, analytics, refinements</div>
+
+<h2>Territory-Specific Requirements</h2>
+
+<h3>Bahamas</h3>
+<ul>
+  <li>New hire loan: $6,000, 12-month repayment</li>
+  <li>Relocation: $700 flat</li>
+  <li>Disbursement: EFT or manual cheque</li>
+</ul>
+
+<h3>Barbados</h3>
+<ul>
+  <li>Salary advance: 2 per fiscal year limit</li>
+  <li>Includes: cell phone, credit cards, DHL, courier services</li>
+  <li>Nectar points cash-out tracking</li>
+</ul>
+
+<h3>Bermuda</h3>
+<ul>
+  <li>New hire loan: $4,000, 8-month repayment ($500/month)</li>
+  <li>Relocation: $2,000 (managers), more for directors</li>
+  <li>Petty cash for initial $500</li>
+</ul>
+
+<h3>Cayman</h3>
+<ul>
+  <li>New hire loan: $4,000-$6,000 (employee choice), 12-month repayment</li>
+  <li>Staff help loans: emergency funds</li>
+  <li>High volume: 50 new hire loans/year</li>
+</ul>
+
+<h3>Jamaica</h3>
+<ul>
+  <li>Staff loans: 9.75% interest (bank O/D rate)</li>
+  <li>Educational loans (ACCA/CPA): 82/year, 6-month repayment</li>
+  <li>Medical loans: interest-free</li>
+  <li>Bank loan and NHA deductions via payroll</li>
+</ul>
+
+<h3>Trinidad</h3>
+<ul>
+  <li>Car lease program: Managers+ only, 48-60 months</li>
+  <li>BIK calculation: 50% of lease (net of VAT) at 25% tax</li>
+  <li>Recharges: roaming, insurance, DHL, credit card</li>
+</ul>
+
+<div class="footer">Document generated: December 16, 2024</div>
+
+</body>
+</html>
