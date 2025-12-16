@@ -133,10 +133,8 @@ function drawNode(pdf: jsPDF, layout: LayoutNode, offsetX: number, offsetY: numb
   if (node.department) {
     pdf.setFontSize(5);
     pdf.setTextColor(80, 80, 80);
-    const deptText = node.department.name.length > 15 
-      ? node.department.name.substring(0, 15) + "..." 
-      : node.department.name;
-    pdf.text(deptText, x + width / 2, currentY, { align: "center" });
+    const deptLines = pdf.splitTextToSize(node.department.name, width - PADDING * 2);
+    pdf.text(deptLines[0] || node.department.name, x + width / 2, currentY, { align: "center" });
     currentY += 3;
   }
 
@@ -152,9 +150,12 @@ function drawNode(pdf: jsPDF, layout: LayoutNode, offsetX: number, offsetY: numb
     pdf.setTextColor(50, 50, 50);
     node.employees.forEach((emp) => {
       const name = emp.employee?.full_name || emp.employee?.email || "Unknown";
-      const displayName = name.length > 12 ? name.substring(0, 12) + "..." : name;
       const isPrimary = emp.is_primary ? " •" : "";
-      pdf.text(displayName + isPrimary, x + width / 2, currentY, { align: "center" });
+      const fullText = name + isPrimary;
+      // Use splitTextToSize to get text that fits, allowing more characters
+      const maxWidth = width - PADDING * 2;
+      const fittedText = pdf.splitTextToSize(fullText, maxWidth);
+      pdf.text(fittedText[0] || fullText, x + width / 2, currentY, { align: "center" });
       currentY += EMPLOYEE_LINE_HEIGHT;
     });
   }
