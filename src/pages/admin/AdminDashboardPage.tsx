@@ -224,6 +224,14 @@ const getAdminModules = (t: (key: string) => string) => [
     tabCode: "sso-settings",
   },
   {
+    title: "Password Policies",
+    description: "Configure enterprise password security requirements",
+    href: "/admin/password-policies",
+    icon: Lock,
+    color: "bg-amber-500/10 text-amber-600",
+    tabCode: "password-policies",
+  },
+  {
     title: t("admin.modules.territories.title"),
     description: t("admin.modules.territories.description"),
     href: "/admin/territories",
