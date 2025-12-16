@@ -1,7 +1,7 @@
 import { useTranslation } from "react-i18next";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
-import { NavLink } from "@/components/NavLink";
+import { DraggableModuleCards, ModuleCardItem } from "@/components/ui/DraggableModuleCards";
 import {
   User,
   Calendar,
@@ -31,13 +31,14 @@ import {
 export default function EmployeeSelfServicePage() {
   const { t } = useTranslation();
 
-  const essModules = [
+  const essModules: ModuleCardItem[] = [
     {
       title: t("ess.modules.profile.title"),
       description: t("ess.modules.profile.description"),
       href: "/profile",
       icon: User,
       color: "bg-blue-500/10 text-blue-600",
+      tabCode: "ess-profile",
     },
     {
       title: t("ess.modules.approvals.title"),
@@ -45,6 +46,7 @@ export default function EmployeeSelfServicePage() {
       href: "/workflow/approvals",
       icon: CheckSquare,
       color: "bg-violet-500/10 text-violet-600",
+      tabCode: "ess-approvals",
     },
     {
       title: t("ess.modules.delegates.title"),
@@ -52,6 +54,7 @@ export default function EmployeeSelfServicePage() {
       href: "/workflow/delegates",
       icon: UserCheck,
       color: "bg-fuchsia-500/10 text-fuchsia-600",
+      tabCode: "ess-delegates",
     },
     {
       title: t("ess.modules.leave.title"),
@@ -59,6 +62,7 @@ export default function EmployeeSelfServicePage() {
       href: "/ess/leave",
       icon: Calendar,
       color: "bg-green-500/10 text-green-600",
+      tabCode: "ess-leave",
     },
     {
       title: t("ess.modules.documents.title"),
@@ -66,6 +70,7 @@ export default function EmployeeSelfServicePage() {
       href: "/ess/documents",
       icon: FileText,
       color: "bg-purple-500/10 text-purple-600",
+      tabCode: "ess-documents",
     },
     {
       title: t("ess.modules.timeAttendance.title"),
@@ -73,6 +78,7 @@ export default function EmployeeSelfServicePage() {
       href: "/ess/time-attendance",
       icon: Clock,
       color: "bg-orange-500/10 text-orange-600",
+      tabCode: "ess-time-attendance",
     },
     {
       title: t("ess.modules.payslips.title"),
@@ -80,6 +86,7 @@ export default function EmployeeSelfServicePage() {
       href: "/ess/payslips",
       icon: CreditCard,
       color: "bg-emerald-500/10 text-emerald-600",
+      tabCode: "ess-payslips",
     },
     {
       title: t("ess.modules.expenses.title", "Expense Claims"),
@@ -87,6 +94,7 @@ export default function EmployeeSelfServicePage() {
       href: "/ess/expenses",
       icon: Receipt,
       color: "bg-orange-500/10 text-orange-600",
+      tabCode: "ess-expenses",
     },
     {
       title: t("ess.modules.training.title"),
@@ -94,6 +102,7 @@ export default function EmployeeSelfServicePage() {
       href: "/ess/training",
       icon: GraduationCap,
       color: "bg-indigo-500/10 text-indigo-600",
+      tabCode: "ess-training",
     },
     {
       title: t("ess.modules.goals.title"),
@@ -101,6 +110,7 @@ export default function EmployeeSelfServicePage() {
       href: "/ess/goals",
       icon: Target,
       color: "bg-pink-500/10 text-pink-600",
+      tabCode: "ess-goals",
     },
     {
       title: t("ess.modules.tickets.title"),
@@ -108,6 +118,7 @@ export default function EmployeeSelfServicePage() {
       href: "/help/tickets/new",
       icon: TicketPlus,
       color: "bg-red-500/10 text-red-600",
+      tabCode: "ess-tickets",
     },
     {
       title: t("ess.modules.letters.title"),
@@ -115,6 +126,7 @@ export default function EmployeeSelfServicePage() {
       href: "/ess/letters",
       icon: FileSignature,
       color: "bg-cyan-500/10 text-cyan-600",
+      tabCode: "ess-letters",
     },
     {
       title: t("ess.modules.onboarding.title"),
@@ -122,6 +134,7 @@ export default function EmployeeSelfServicePage() {
       href: "/ess/onboarding",
       icon: Rocket,
       color: "bg-teal-500/10 text-teal-600",
+      tabCode: "ess-onboarding",
     },
     {
       title: t("ess.modules.offboarding.title"),
@@ -129,6 +142,7 @@ export default function EmployeeSelfServicePage() {
       href: "/ess/offboarding",
       icon: UserMinus,
       color: "bg-red-500/10 text-red-600",
+      tabCode: "ess-offboarding",
     },
     {
       title: t("ess.modules.property.title"),
@@ -136,6 +150,7 @@ export default function EmployeeSelfServicePage() {
       href: "/ess/property",
       icon: Package,
       color: "bg-slate-500/10 text-slate-600",
+      tabCode: "ess-property",
     },
     {
       title: t("ess.modules.relations.title"),
@@ -143,6 +158,7 @@ export default function EmployeeSelfServicePage() {
       href: "/ess/relations",
       icon: Heart,
       color: "bg-rose-500/10 text-rose-600",
+      tabCode: "ess-relations",
     },
     {
       title: t("ess.modules.benefits.title"),
@@ -150,6 +166,7 @@ export default function EmployeeSelfServicePage() {
       href: "/ess/benefits",
       icon: Shield,
       color: "bg-emerald-500/10 text-emerald-600",
+      tabCode: "ess-benefits",
     },
     {
       title: t("ess.modules.hse.title"),
@@ -157,6 +174,7 @@ export default function EmployeeSelfServicePage() {
       href: "/ess/hse",
       icon: HardHat,
       color: "bg-yellow-500/10 text-yellow-600",
+      tabCode: "ess-hse",
     },
     {
       title: t("ess.modules.jobs.title"),
@@ -164,6 +182,7 @@ export default function EmployeeSelfServicePage() {
       href: "/ess/jobs",
       icon: Briefcase,
       color: "bg-blue-500/10 text-blue-600",
+      tabCode: "ess-jobs",
     },
     {
       title: t("ess.modules.compensation.title"),
@@ -171,6 +190,7 @@ export default function EmployeeSelfServicePage() {
       href: "/ess/compensation",
       icon: DollarSign,
       color: "bg-emerald-500/10 text-emerald-600",
+      tabCode: "ess-compensation",
     },
     {
       title: t("ess.modules.feedback.title"),
@@ -178,6 +198,7 @@ export default function EmployeeSelfServicePage() {
       href: "/ess/feedback",
       icon: MessageCircle,
       color: "bg-violet-500/10 text-violet-600",
+      tabCode: "ess-feedback",
     },
     {
       title: t("ess.modules.recognition.title"),
@@ -185,6 +206,7 @@ export default function EmployeeSelfServicePage() {
       href: "/ess/recognition",
       icon: Award,
       color: "bg-amber-500/10 text-amber-600",
+      tabCode: "ess-recognition",
     },
     {
       title: t("ess.modules.reminders.title"),
@@ -192,6 +214,7 @@ export default function EmployeeSelfServicePage() {
       href: "/ess/reminders",
       icon: Bell,
       color: "bg-rose-500/10 text-rose-600",
+      tabCode: "ess-reminders",
     },
     {
       title: t("ess.modules.notifications.title"),
@@ -199,6 +222,7 @@ export default function EmployeeSelfServicePage() {
       href: "/profile/notifications",
       icon: Bell,
       color: "bg-amber-500/10 text-amber-600",
+      tabCode: "ess-notifications",
     },
   ];
 
@@ -218,24 +242,10 @@ export default function EmployeeSelfServicePage() {
           </p>
         </div>
 
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {essModules.map((module) => {
-            const Icon = module.icon;
-            return (
-              <NavLink
-                key={module.href}
-                to={module.href}
-                className="group rounded-xl border bg-card p-6 transition-all hover:border-primary/50 hover:shadow-lg"
-              >
-                <div className={`mb-4 inline-flex rounded-lg p-3 ${module.color}`}>
-                  <Icon className="h-6 w-6" />
-                </div>
-                <h3 className="font-semibold group-hover:text-primary">{module.title}</h3>
-                <p className="mt-1 text-sm text-muted-foreground">{module.description}</p>
-              </NavLink>
-            );
-          })}
-        </div>
+        <DraggableModuleCards 
+          modules={essModules} 
+          preferenceKey="ess-dashboard-order" 
+        />
       </div>
     </AppLayout>
   );
