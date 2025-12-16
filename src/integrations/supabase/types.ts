@@ -6982,9 +6982,11 @@ export type Database = {
       }
       employee_qualifications: {
         Row: {
+          accrediting_body: string | null
           accrediting_body_id: string | null
           accrediting_body_name: string | null
           campus_location: string | null
+          certification_type: string | null
           comments: string | null
           company_id: string
           country: string | null
@@ -6995,10 +6997,12 @@ export type Database = {
           document_name: string | null
           document_type: string | null
           document_url: string | null
+          education_level: string | null
           education_level_id: string | null
           employee_id: string
           end_date: string | null
           expiry_date: string | null
+          field_of_study: string | null
           field_of_study_id: string | null
           id: string
           institution_id: string | null
@@ -7009,6 +7013,7 @@ export type Database = {
           linked_competency_ids: string[] | null
           minor: string | null
           name: string
+          qualification_type: string | null
           qualification_type_id: string | null
           record_type: string
           renewal_date: string | null
@@ -7023,9 +7028,11 @@ export type Database = {
           verified_by: string | null
         }
         Insert: {
+          accrediting_body?: string | null
           accrediting_body_id?: string | null
           accrediting_body_name?: string | null
           campus_location?: string | null
+          certification_type?: string | null
           comments?: string | null
           company_id: string
           country?: string | null
@@ -7036,10 +7043,12 @@ export type Database = {
           document_name?: string | null
           document_type?: string | null
           document_url?: string | null
+          education_level?: string | null
           education_level_id?: string | null
           employee_id: string
           end_date?: string | null
           expiry_date?: string | null
+          field_of_study?: string | null
           field_of_study_id?: string | null
           id?: string
           institution_id?: string | null
@@ -7050,6 +7059,7 @@ export type Database = {
           linked_competency_ids?: string[] | null
           minor?: string | null
           name: string
+          qualification_type?: string | null
           qualification_type_id?: string | null
           record_type: string
           renewal_date?: string | null
@@ -7064,9 +7074,11 @@ export type Database = {
           verified_by?: string | null
         }
         Update: {
+          accrediting_body?: string | null
           accrediting_body_id?: string | null
           accrediting_body_name?: string | null
           campus_location?: string | null
+          certification_type?: string | null
           comments?: string | null
           company_id?: string
           country?: string | null
@@ -7077,10 +7089,12 @@ export type Database = {
           document_name?: string | null
           document_type?: string | null
           document_url?: string | null
+          education_level?: string | null
           education_level_id?: string | null
           employee_id?: string
           end_date?: string | null
           expiry_date?: string | null
+          field_of_study?: string | null
           field_of_study_id?: string | null
           id?: string
           institution_id?: string | null
@@ -7091,6 +7105,7 @@ export type Database = {
           linked_competency_ids?: string[] | null
           minor?: string | null
           name?: string
+          qualification_type?: string | null
           qualification_type_id?: string | null
           record_type?: string
           renewal_date?: string | null
