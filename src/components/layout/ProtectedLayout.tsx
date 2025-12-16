@@ -2,7 +2,7 @@ import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useMenuPermissions } from "@/hooks/useMenuPermissions";
 import { Loader2 } from "lucide-react";
-import { AppSidebar } from "./AppSidebar";
+import { DraggableSidebar } from "./DraggableSidebar";
 import { AppHeader } from "./AppHeader";
 import { RealtimeNotifications } from "./RealtimeNotifications";
 
@@ -29,7 +29,7 @@ export function ProtectedLayout() {
   return (
     <div className="min-h-screen bg-background">
       <RealtimeNotifications />
-      <AppSidebar />
+      <DraggableSidebar />
       <main className="lg:pl-64 transition-all duration-300">
         <div className="min-h-screen p-4 lg:p-8">
           <AppHeader />
