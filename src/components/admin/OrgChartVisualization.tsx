@@ -303,18 +303,29 @@ export function OrgChartVisualization({ companyId }: OrgChartVisualizationProps)
     toast.loading("Generating PDF...", { id: "pdf-export" });
 
     try {
-      const canvas = await html2canvas(element, {
-        scale: 1.5,
+      // Find the actual chart content (the inner flex container with nodes)
+      const chartContent = element.querySelector('.flex.flex-col.items-center') as HTMLElement;
+      const targetElement = chartContent || element;
+      
+      // Get the bounding rect of actual content
+      const contentRect = targetElement.getBoundingClientRect();
+      
+      const canvas = await html2canvas(targetElement, {
+        scale: 2,
         useCORS: true,
         allowTaint: true,
         backgroundColor: "#ffffff",
+        width: contentRect.width,
+        height: contentRect.height,
       });
 
       // Use JPEG with compression for smaller file size
-      const imgData = canvas.toDataURL("image/jpeg", 0.8);
+      const imgData = canvas.toDataURL("image/jpeg", 0.85);
       
-      // Use standard A4 page size and fit content
-      const isLandscape = canvas.width > canvas.height;
+      // Determine orientation based on content aspect ratio
+      const contentAspect = canvas.width / canvas.height;
+      const isLandscape = contentAspect > 1.2; // Use landscape if content is notably wider
+      
       const pdf = new jsPDF({
         orientation: isLandscape ? "landscape" : "portrait",
         unit: "mm",
@@ -323,24 +334,18 @@ export function OrgChartVisualization({ companyId }: OrgChartVisualizationProps)
 
       const pageWidth = pdf.internal.pageSize.getWidth();
       const pageHeight = pdf.internal.pageSize.getHeight();
-      const margin = 10;
+      const margin = 15;
       
       const availableWidth = pageWidth - margin * 2;
       const availableHeight = pageHeight - margin * 2;
       
-      const imgAspect = canvas.width / canvas.height;
-      const pageAspect = availableWidth / availableHeight;
+      // Scale to fill the page appropriately
+      const scaleX = availableWidth / (canvas.width / 2); // Divide by scale factor
+      const scaleY = availableHeight / (canvas.height / 2);
+      const scale = Math.min(scaleX, scaleY, 1.5); // Cap at 1.5x to prevent over-enlargement
       
-      let finalWidth: number;
-      let finalHeight: number;
-      
-      if (imgAspect > pageAspect) {
-        finalWidth = availableWidth;
-        finalHeight = availableWidth / imgAspect;
-      } else {
-        finalHeight = availableHeight;
-        finalWidth = availableHeight * imgAspect;
-      }
+      const finalWidth = (canvas.width / 2) * scale;
+      const finalHeight = (canvas.height / 2) * scale;
       
       const xOffset = margin + (availableWidth - finalWidth) / 2;
       const yOffset = margin + (availableHeight - finalHeight) / 2;
