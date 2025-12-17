@@ -21,6 +21,7 @@ const ROUTE_MODULE_MAP: Record<string, string> = {
   "/hse": "hse",
   "/employee-relations": "employee_relations",
   "/property": "property",
+  "/enablement": "enablement",
   "/admin": "admin",
   "/profile": "profile",
 };
