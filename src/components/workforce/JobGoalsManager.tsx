@@ -22,6 +22,7 @@ import {
 import { Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
+import { getTodayString, formatDateForDisplay } from "@/utils/dateUtils";
 import { useAuditLog } from "@/hooks/useAuditLog";
 
 interface JobGoal {
@@ -48,7 +49,7 @@ export function JobGoalsManager({ jobId, companyId }: JobGoalsManagerProps) {
     goal_name: "",
     goal_description: "",
     weighting: 0,
-    start_date: format(new Date(), "yyyy-MM-dd"),
+    start_date: getTodayString(),
     end_date: "",
     notes: "",
   });
@@ -154,7 +155,7 @@ export function JobGoalsManager({ jobId, companyId }: JobGoalsManagerProps) {
       goal_name: "",
       goal_description: "",
       weighting: 0,
-      start_date: format(new Date(), "yyyy-MM-dd"),
+      start_date: getTodayString(),
       end_date: "",
       notes: "",
     });

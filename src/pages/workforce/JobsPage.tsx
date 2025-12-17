@@ -59,6 +59,7 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { NavLink } from "react-router-dom";
 import { format } from "date-fns";
+import { getTodayString } from "@/utils/dateUtils";
 import { JobCompetenciesManager } from "@/components/workforce/JobCompetenciesManager";
 import { JobResponsibilitiesManager } from "@/components/workforce/JobResponsibilitiesManager";
 import { JobGoalsManager } from "@/components/workforce/JobGoalsManager";
@@ -117,7 +118,7 @@ const emptyForm = {
   job_class: "",
   standard_hours: "",
   standard_work_period: "",
-  start_date: format(new Date(), "yyyy-MM-dd"),
+  start_date: getTodayString(),
   end_date: "",
   is_active: true,
 };
@@ -394,7 +395,7 @@ export default function JobsPage() {
           job_class: selectedJob.job_class,
           standard_hours: selectedJob.standard_hours,
           standard_work_period: selectedJob.standard_work_period,
-          start_date: format(new Date(), "yyyy-MM-dd"),
+          start_date: getTodayString(),
           end_date: null,
           is_active: true,
         }])
@@ -421,7 +422,7 @@ export default function JobsPage() {
             weighting: c.weighting,
             is_required: c.is_required,
             notes: c.notes,
-            start_date: format(new Date(), "yyyy-MM-dd"),
+            start_date: getTodayString(),
             end_date: null,
           }));
           await supabase.from("job_competencies").insert(newCompetencies);
@@ -442,7 +443,7 @@ export default function JobsPage() {
             responsibility_id: r.responsibility_id,
             weighting: r.weighting,
             notes: r.notes,
-            start_date: format(new Date(), "yyyy-MM-dd"),
+            start_date: getTodayString(),
             end_date: null,
           }));
           await supabase.from("job_responsibilities").insert(newResponsibilities);
@@ -463,7 +464,7 @@ export default function JobsPage() {
             goal_name: g.goal_name,
             weighting: g.weighting,
             notes: g.notes,
-            start_date: format(new Date(), "yyyy-MM-dd"),
+            start_date: getTodayString(),
             end_date: null,
           }));
           await supabase.from("job_goals").insert(newGoals);

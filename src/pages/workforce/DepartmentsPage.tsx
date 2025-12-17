@@ -37,6 +37,7 @@ import {
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import { format } from "date-fns";
+import { parseLocalDate, formatDateForDisplay, getTodayString } from "@/utils/dateUtils";
 import { useTranslation } from "react-i18next";
 
 interface Company {
@@ -90,7 +91,7 @@ export default function DepartmentsPage() {
   const [departments, setDepartments] = useState<Department[]>([]);
   const [expandedDepts, setExpandedDepts] = useState<Set<string>>(new Set());
   const [isLoading, setIsLoading] = useState(true);
-  const [asOfDate, setAsOfDate] = useState<string>(format(new Date(), "yyyy-MM-dd"));
+  const [asOfDate, setAsOfDate] = useState<string>(getTodayString());
 
   // Dialog states
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -107,7 +108,7 @@ export default function DepartmentsPage() {
     description: "",
     is_active: true,
     company_division_id: "",
-    start_date: format(new Date(), "yyyy-MM-dd"),
+    start_date: getTodayString(),
     end_date: "",
   });
 
@@ -203,7 +204,7 @@ export default function DepartmentsPage() {
       description: "",
       is_active: true,
       company_division_id: "",
-      start_date: format(new Date(), "yyyy-MM-dd"),
+      start_date: getTodayString(),
       end_date: "",
     });
     setDialogOpen(true);
@@ -391,7 +392,7 @@ export default function DepartmentsPage() {
   };
 
   const formatDateDisplay = (date: string) => {
-    return format(new Date(date), "MMM d, yyyy");
+    return formatDateForDisplay(date, "MMM d, yyyy");
   };
 
   return (
@@ -450,9 +451,9 @@ export default function DepartmentsPage() {
           </div>
         </div>
 
-        {asOfDate !== format(new Date(), "yyyy-MM-dd") && (
+        {asOfDate !== getTodayString() && (
           <div className="rounded-lg border border-info/30 bg-info/10 px-4 py-2 text-sm text-info-foreground">
-            {t("workforce.showingAsOf")} <strong>{format(new Date(asOfDate), "MMMM d, yyyy")}</strong>
+            {t("workforce.showingAsOf")} <strong>{formatDateForDisplay(asOfDate, "MMMM d, yyyy")}</strong>
           </div>
         )}
 

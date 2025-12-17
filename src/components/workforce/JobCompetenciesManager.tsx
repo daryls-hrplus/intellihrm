@@ -30,6 +30,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Plus, Trash2, Loader2, Award } from "lucide-react";
 import { format } from "date-fns";
+import { getTodayString, formatDateForDisplay } from "@/utils/dateUtils";
 
 interface JobCompetency {
   id: string;
@@ -90,7 +91,7 @@ export function JobCompetenciesManager({ jobId, companyId }: JobCompetenciesMana
     weighting: "10",
     is_required: true,
     notes: "",
-    start_date: format(new Date(), "yyyy-MM-dd"),
+    start_date: getTodayString(),
     end_date: "",
   });
 
@@ -165,7 +166,7 @@ export function JobCompetenciesManager({ jobId, companyId }: JobCompetenciesMana
       weighting: "10",
       is_required: true,
       notes: "",
-      start_date: format(new Date(), "yyyy-MM-dd"),
+      start_date: getTodayString(),
       end_date: "",
     });
     setDialogOpen(true);
@@ -348,9 +349,9 @@ export function JobCompetenciesManager({ jobId, companyId }: JobCompetenciesMana
                   <TableCell>
                     <Badge variant="outline">{jc.weighting}%</Badge>
                   </TableCell>
-                  <TableCell>{format(new Date(jc.start_date), "MMM d, yyyy")}</TableCell>
+                  <TableCell>{formatDateForDisplay(jc.start_date)}</TableCell>
                   <TableCell>
-                    {jc.end_date ? format(new Date(jc.end_date), "MMM d, yyyy") : "—"}
+                    {jc.end_date ? formatDateForDisplay(jc.end_date) : "—"}
                   </TableCell>
                   <TableCell>
                     <Badge variant={jc.is_required ? "default" : "secondary"}>
