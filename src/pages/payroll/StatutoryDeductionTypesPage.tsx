@@ -12,11 +12,13 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Switch } from "@/components/ui/switch";
 import { supabase } from "@/integrations/supabase/client";
-import { Plus, Edit, Trash2, FileText, Search } from "lucide-react";
+import { Plus, Edit, Trash2, FileText, Search, Sparkles, BookOpen } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { CountrySelect } from "@/components/ui/country-select";
 import { getCountryName, countries } from "@/lib/countries";
+import { StatutoryDocumentUpload } from "@/components/payroll/StatutoryDocumentUpload";
+import { ComprehensiveStatutoryDocumentation } from "@/components/payroll/ComprehensiveStatutoryDocumentation";
 
 interface StatutoryDeductionType {
   id: string;
@@ -30,6 +32,11 @@ interface StatutoryDeductionType {
   is_active: boolean;
   created_at: string;
   updated_at: string;
+  reference_document_url?: string | null;
+  ai_calculation_rules?: any;
+  ai_sample_document?: string | null;
+  ai_dependencies?: any;
+  ai_analyzed_at?: string | null;
 }
 
 const STATUTORY_TYPES = [
@@ -53,6 +60,9 @@ export default function StatutoryDeductionTypesPage() {
   const [editing, setEditing] = useState<StatutoryDeductionType | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [countryFilter, setCountryFilter] = useState<string>("all");
+  const [aiDialogOpen, setAiDialogOpen] = useState(false);
+  const [selectedStatutory, setSelectedStatutory] = useState<StatutoryDeductionType | null>(null);
+  const [comprehensiveDocOpen, setComprehensiveDocOpen] = useState(false);
 
   const [form, setForm] = useState({
     country: "",
@@ -185,7 +195,14 @@ export default function StatutoryDeductionTypesPage() {
     return STATUTORY_TYPES.find((t) => t.value === type)?.label || type;
   };
 
-  // getCountryName is imported from @/lib/countries
+  const openAiDialog = (item: StatutoryDeductionType) => {
+    setSelectedStatutory(item);
+    setAiDialogOpen(true);
+  };
+
+  const countryStatutories = countryFilter !== "all" 
+    ? items.filter((i) => i.country === countryFilter)
+    : items;
 
   return (
     <AppLayout>
@@ -209,10 +226,18 @@ export default function StatutoryDeductionTypesPage() {
               </p>
             </div>
           </div>
-          <Button onClick={() => { resetForm(); setDialogOpen(true); }}>
-            <Plus className="h-4 w-4 mr-2" />
-            Add Statutory Type
-          </Button>
+          <div className="flex items-center gap-2">
+            {countryFilter !== "all" && (
+              <Button variant="outline" onClick={() => setComprehensiveDocOpen(true)}>
+                <BookOpen className="h-4 w-4 mr-2" />
+                Country Documentation
+              </Button>
+            )}
+            <Button onClick={() => { resetForm(); setDialogOpen(true); }}>
+              <Plus className="h-4 w-4 mr-2" />
+              Add Statutory Type
+            </Button>
+          </div>
         </div>
 
         {/* Filters */}
@@ -292,6 +317,14 @@ export default function StatutoryDeductionTypesPage() {
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-2">
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            onClick={() => openAiDialog(item)}
+                            title="AI Analysis"
+                          >
+                            <Sparkles className={`h-4 w-4 ${item.ai_analyzed_at ? "text-primary" : ""}`} />
+                          </Button>
                           <Button variant="ghost" size="sm" onClick={() => openEdit(item)}>
                             <Edit className="h-4 w-4" />
                           </Button>
@@ -410,6 +443,22 @@ export default function StatutoryDeductionTypesPage() {
             </DialogFooter>
           </DialogContent>
         </Dialog>
+
+        {/* AI Analysis Dialog */}
+        <StatutoryDocumentUpload
+          open={aiDialogOpen}
+          onOpenChange={setAiDialogOpen}
+          statutory={selectedStatutory}
+          onAnalysisComplete={loadData}
+        />
+
+        {/* Comprehensive Documentation Dialog */}
+        <ComprehensiveStatutoryDocumentation
+          open={comprehensiveDocOpen}
+          onOpenChange={setComprehensiveDocOpen}
+          country={countryFilter !== "all" ? countryFilter : ""}
+          statutories={countryStatutories}
+        />
       </div>
     </AppLayout>
   );
