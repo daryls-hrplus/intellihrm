@@ -112,7 +112,8 @@ export function RegularDeductionsSection({
       .insert(inserts);
 
     if (error) {
-      toast.error("Failed to apply deductions");
+      console.error("Failed to apply deductions:", error);
+      toast.error(`Failed to apply deductions: ${error.message}`);
       setIsApplying(false);
       return;
     }
