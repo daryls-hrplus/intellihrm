@@ -243,6 +243,14 @@ export default function PayrollDashboardPage() {
       color: "bg-emerald-500/10 text-emerald-600",
       tabCode: "tax_allowances",
     },
+    {
+      title: t("payroll.modules.bankFileBuilder.title", "Bank File Builder"),
+      description: t("payroll.modules.bankFileBuilder.description", "AI-powered bank file configuration and generation"),
+      icon: FileSpreadsheet,
+      href: "/payroll/bank-file-builder",
+      color: "bg-indigo-500/10 text-indigo-600",
+      tabCode: "bank_file_builder",
+    },
   ].filter(f => hasTabAccess("payroll", f.tabCode));
 
   const statItems = [
