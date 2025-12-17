@@ -14,7 +14,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { format } from "date-fns";
+import { formatDateForDisplay } from "@/utils/dateUtils";
 import { Plus, FileText, Download, Trash2, Globe, Lock } from "lucide-react";
 
 interface CompanyDocument {
@@ -222,7 +222,7 @@ export default function CompanyDocumentsPage() {
                           </Badge>
                         )}
                       </TableCell>
-                      <TableCell>{format(new Date(doc.created_at), "MMM d, yyyy")}</TableCell>
+                      <TableCell>{formatDateForDisplay(doc.created_at, "MMM d, yyyy")}</TableCell>
                       <TableCell>
                         <div className="flex gap-2">
                           <Button size="sm" variant="ghost" asChild>

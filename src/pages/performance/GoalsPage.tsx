@@ -46,7 +46,8 @@ import { GoalProgressDialog } from "@/components/performance/GoalProgressDialog"
 import { GoalCommentsDialog } from "@/components/performance/GoalCommentsDialog";
 import { useAuditLog } from "@/hooks/useAuditLog";
 import { useLanguage } from "@/hooks/useLanguage";
-import { format, isPast } from "date-fns";
+import { isPast } from "date-fns";
+import { formatDateForDisplay, getTodayString } from "@/utils/dateUtils";
 
 type GoalStatus = 'draft' | 'active' | 'in_progress' | 'completed' | 'cancelled' | 'overdue';
 type GoalType = 'okr_objective' | 'okr_key_result' | 'smart_goal';
@@ -284,7 +285,7 @@ export default function GoalsPage() {
       Status: goal.status,
       Progress: `${goal.progress_percentage}%`,
       Weight: `${goal.weighting}%`,
-      "Due Date": goal.due_date ? format(new Date(goal.due_date), "yyyy-MM-dd") : "",
+      "Due Date": goal.due_date ? formatDateForDisplay(goal.due_date, "yyyy-MM-dd") : "",
       Owner: goal.employee?.full_name || "",
     }));
 
@@ -296,7 +297,7 @@ export default function GoalsPage() {
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `goals-${format(new Date(), "yyyy-MM-dd")}.csv`;
+    a.download = `goals-${getTodayString()}.csv`;
     a.click();
     window.URL.revokeObjectURL(url);
     toast.success("Goals exported successfully");

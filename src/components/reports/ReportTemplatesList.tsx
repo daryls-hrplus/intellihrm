@@ -17,7 +17,7 @@ import {
   FileText, Plus, Search, MoreHorizontal, 
   Play, Edit, Trash2, Copy, Globe, Building 
 } from 'lucide-react';
-import { format } from 'date-fns';
+import { formatDateForDisplay } from '@/utils/dateUtils';
 import { useReportWriter, ReportTemplate } from '@/hooks/useReportWriter';
 import { ReportWriterDialog } from './ReportWriterDialog';
 import { ReportRunnerDialog } from './ReportRunnerDialog';
@@ -163,7 +163,7 @@ export function ReportTemplatesList({
                     )}
                   </TableCell>
                   <TableCell className="text-sm text-muted-foreground">
-                    {format(new Date(template.created_at), 'PP')}
+                    {formatDateForDisplay(template.created_at, 'PP')}
                   </TableCell>
                   <TableCell>
                     <DropdownMenu>

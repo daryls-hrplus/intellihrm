@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { supabase } from "@/integrations/supabase/client";
-import { getTodayString } from "@/utils/dateUtils";
+import { getTodayString, formatDateForDisplay } from "@/utils/dateUtils";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -497,7 +497,7 @@ export function EmployeeReferencesTab({ employeeId }: EmployeeReferencesTabProps
                   {reference.reference_date && (
                     <div>
                       <span className="text-muted-foreground">Reference Date:</span>{" "}
-                      {format(new Date(reference.reference_date), "MMM d, yyyy")}
+                      {formatDateForDisplay(reference.reference_date, "MMM d, yyyy")}
                     </div>
                   )}
                 </div>

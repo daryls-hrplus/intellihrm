@@ -14,6 +14,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { format, parseISO, differenceInHours } from "date-fns";
+import { getTodayString, formatDateForDisplay } from "@/utils/dateUtils";
 import { 
   Clock, 
   Plus,
@@ -64,7 +65,7 @@ export default function OvertimeManagementPage() {
 
   const [newRequest, setNewRequest] = useState({
     employee_id: "",
-    request_date: format(new Date(), 'yyyy-MM-dd'),
+    request_date: getTodayString(),
     planned_start: "",
     planned_end: "",
     overtime_type: "regular",
@@ -183,7 +184,7 @@ export default function OvertimeManagementPage() {
       setCreateDialogOpen(false);
       setNewRequest({
         employee_id: "",
-        request_date: format(new Date(), 'yyyy-MM-dd'),
+        request_date: getTodayString(),
         planned_start: "",
         planned_end: "",
         overtime_type: "regular",
@@ -498,7 +499,7 @@ export default function OvertimeManagementPage() {
                 ) : requests.map((request) => (
                   <TableRow key={request.id}>
                     <TableCell className="font-medium">{request.profile?.full_name}</TableCell>
-                    <TableCell>{format(parseISO(request.request_date), 'MMM d, yyyy')}</TableCell>
+                    <TableCell>{formatDateForDisplay(request.request_date, 'MMM d, yyyy')}</TableCell>
                     <TableCell>
                       {format(parseISO(request.planned_start), 'HH:mm')} - {format(parseISO(request.planned_end), 'HH:mm')}
                     </TableCell>

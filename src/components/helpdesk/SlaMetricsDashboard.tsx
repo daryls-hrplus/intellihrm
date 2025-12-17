@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell, Legend } from 'recharts';
 import { format, subDays, startOfDay, differenceInHours, parseISO } from 'date-fns';
+import { getTodayString } from '@/utils/dateUtils';
 import { AlertTriangle, CheckCircle, Clock, TrendingUp, TrendingDown, Target, Timer, XCircle, Download, FileText } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
@@ -255,7 +256,7 @@ export function SlaMetricsDashboard() {
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
-    link.download = `sla-report-${format(new Date(), 'yyyy-MM-dd')}.csv`;
+    link.download = `sla-report-${getTodayString()}.csv`;
     link.click();
     toast.success('CSV report downloaded');
   };
@@ -377,7 +378,7 @@ export function SlaMetricsDashboard() {
       doc.text(`Page ${i} of ${pageCount}`, pageWidth / 2, 290, { align: 'center' });
     }
 
-    doc.save(`sla-report-${format(new Date(), 'yyyy-MM-dd')}.pdf`);
+    doc.save(`sla-report-${getTodayString()}.pdf`);
     toast.success('PDF report downloaded');
   };
 

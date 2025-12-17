@@ -14,8 +14,8 @@ import { Badge } from "@/components/ui/badge";
 import { Plus, Pencil, Trash2, Loader2, Receipt, Search, Users } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { format } from "date-fns";
 import { useTranslation } from "react-i18next";
+import { getTodayString, formatDateForDisplay } from "@/utils/dateUtils";
 
 interface TaxAllowance {
   id: string;
@@ -66,7 +66,7 @@ export default function TaxAllowancesPage() {
     instances_count: 1,
     amount_per_instance: 0,
     annual_limit: "",
-    effective_date: format(new Date(), "yyyy-MM-dd"),
+    effective_date: getTodayString(),
     end_date: "",
     is_active: true,
     notes: "",
@@ -138,7 +138,7 @@ export default function TaxAllowancesPage() {
       instances_count: 1,
       amount_per_instance: 0,
       annual_limit: "",
-      effective_date: format(new Date(), "yyyy-MM-dd"),
+      effective_date: getTodayString(),
       end_date: "",
       is_active: true,
       notes: "",
@@ -394,7 +394,7 @@ export default function TaxAllowancesPage() {
                           <span className="text-xs text-muted-foreground ml-1">(capped)</span>
                         )}
                       </TableCell>
-                      <TableCell>{format(new Date(allowance.effective_date), "MMM d, yyyy")}</TableCell>
+                      <TableCell>{formatDateForDisplay(allowance.effective_date, "MMM d, yyyy")}</TableCell>
                       <TableCell>
                         <Badge variant={allowance.is_active ? "default" : "secondary"}>
                           {allowance.is_active ? t("common.active", "Active") : t("common.inactive", "Inactive")}
