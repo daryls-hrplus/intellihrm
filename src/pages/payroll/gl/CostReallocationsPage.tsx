@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AppLayout } from '@/components/layout/AppLayout';
+import { getTodayString } from '@/utils/dateUtils';
 import { Breadcrumbs } from '@/components/ui/breadcrumbs';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -66,7 +67,7 @@ const CostReallocationsPage = () => {
     description: '',
     source_cost_center_id: '',
     allocation_method: 'percentage',
-    effective_date: new Date().toISOString().split('T')[0],
+    effective_date: getTodayString(),
     end_date: ''
   });
 
@@ -271,7 +272,7 @@ const CostReallocationsPage = () => {
       description: '',
       source_cost_center_id: '',
       allocation_method: 'percentage',
-      effective_date: new Date().toISOString().split('T')[0],
+      effective_date: getTodayString(),
       end_date: ''
     });
   };

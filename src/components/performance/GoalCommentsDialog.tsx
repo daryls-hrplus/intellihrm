@@ -19,8 +19,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Send, Trash2 } from "lucide-react";
-import { format } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
+import { formatDateForDisplay } from "@/utils/dateUtils";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 
@@ -218,7 +218,7 @@ export function GoalCommentsDialog({
                           </div>
                           <div className="flex items-center gap-1">
                             <span className="text-xs text-muted-foreground">
-                              {format(new Date(comment.created_at), "MMM d, h:mm a")}
+                              {formatDateForDisplay(comment.created_at, "MMM d, h:mm a")}
                             </span>
                             {comment.user_id === user?.id && (
                               <Button

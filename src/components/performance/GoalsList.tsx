@@ -18,8 +18,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { MoreVertical, Edit, Trash2, TrendingUp, CheckCircle, MessageSquare } from "lucide-react";
-import { format } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
+import { getTodayString, formatDateForDisplay } from "@/utils/dateUtils";
 import { toast } from "sonner";
 import { useAuditLog } from "@/hooks/useAuditLog";
 import { GoalProgressDialog } from "./GoalProgressDialog";
@@ -111,7 +111,7 @@ export function GoalsList({ goals, onEdit, onRefresh }: GoalsListProps) {
         .update({
           status: "completed",
           progress_percentage: 100,
-          completed_date: new Date().toISOString().split("T")[0],
+          completed_date: getTodayString(),
         })
         .eq("id", goal.id);
 
@@ -198,7 +198,7 @@ export function GoalsList({ goals, onEdit, onRefresh }: GoalsListProps) {
                   <TableCell>{goal.weighting}%</TableCell>
                   <TableCell>
                     {goal.due_date
-                      ? format(new Date(goal.due_date), "MMM d, yyyy")
+                      ? formatDateForDisplay(goal.due_date, "MMM d, yyyy")
                       : "-"}
                   </TableCell>
                   <TableCell>

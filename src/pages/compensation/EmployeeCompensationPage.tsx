@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
+import { getTodayString } from "@/utils/dateUtils";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -171,7 +172,7 @@ export default function EmployeeCompensationPage() {
   const [formIsOverride, setFormIsOverride] = useState(false);
   const [formOverrideReason, setFormOverrideReason] = useState("");
   const [formNotes, setFormNotes] = useState("");
-  const [formStartDate, setFormStartDate] = useState(new Date().toISOString().split("T")[0]);
+  const [formStartDate, setFormStartDate] = useState(getTodayString());
   const [formEndDate, setFormEndDate] = useState("");
   const [formIsActive, setFormIsActive] = useState(true);
 
@@ -452,7 +453,7 @@ export default function EmployeeCompensationPage() {
     setFormIsOverride(false);
     setFormOverrideReason("");
     setFormNotes("");
-    setFormStartDate(new Date().toISOString().split("T")[0]);
+    setFormStartDate(getTodayString());
     setFormEndDate("");
     setFormIsActive(true);
     setEmployeePositions([]);

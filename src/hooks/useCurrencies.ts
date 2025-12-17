@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { getTodayString } from "@/utils/dateUtils";
 
 export interface Currency {
   id: string;
@@ -56,7 +57,7 @@ export function useExchangeRate(
       if (!fromCurrencyId || !toCurrencyId) return null;
       if (fromCurrencyId === toCurrencyId) return 1;
 
-      const targetDate = rateDate || new Date().toISOString().split("T")[0];
+      const targetDate = rateDate || getTodayString();
       
       const { data, error } = await supabase
         .from("exchange_rates")

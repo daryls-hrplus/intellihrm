@@ -12,7 +12,7 @@ import { usePropertyManagement } from "@/hooks/usePropertyManagement";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Plus, Tags, Loader2 } from "lucide-react";
-import { format } from "date-fns";
+import { formatDateForDisplay } from "@/utils/dateUtils";
 import { useLanguage } from "@/hooks/useLanguage";
 
 interface Props {
@@ -183,7 +183,7 @@ const PropertyCategoriesTab = ({ companyId }: Props) => {
                     </Badge>
                   </TableCell>
                   <TableCell className="text-muted-foreground">
-                    {format(new Date(category.created_at), "PP")}
+                    {formatDateForDisplay(category.created_at, "PP")}
                   </TableCell>
                 </TableRow>
               ))}

@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { format } from "date-fns";
+import { formatDateForDisplay } from "@/utils/dateUtils";
 import { Scale, Plus, AlertTriangle, CheckCircle, Info, ChevronRight, Building2 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -183,7 +183,7 @@ export default function PayEquityPage() {
                       <TableRow key={analysis.id} className="cursor-pointer hover:bg-muted/50">
                         <TableCell className="font-medium">{analysis.name}</TableCell>
                         <TableCell>{getAnalysisTypeBadge(analysis.analysis_type)}</TableCell>
-                        <TableCell>{format(new Date(analysis.analysis_date), "MMM d, yyyy")}</TableCell>
+                        <TableCell>{formatDateForDisplay(analysis.analysis_date, "MMM d, yyyy")}</TableCell>
                         <TableCell>{analysis.methodology || "-"}</TableCell>
                         <TableCell>{getStatusBadge(analysis.status)}</TableCell>
                       </TableRow>

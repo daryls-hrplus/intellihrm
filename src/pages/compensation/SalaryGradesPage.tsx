@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
+import { getTodayString } from "@/utils/dateUtils";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -68,7 +69,7 @@ export default function SalaryGradesPage() {
   const [formMaxSalary, setFormMaxSalary] = useState("");
   const [formCurrency, setFormCurrency] = useState("USD");
   const [formIsActive, setFormIsActive] = useState(true);
-  const [formStartDate, setFormStartDate] = useState(new Date().toISOString().split("T")[0]);
+  const [formStartDate, setFormStartDate] = useState(getTodayString());
   const [formEndDate, setFormEndDate] = useState("");
 
   useEffect(() => {
@@ -109,7 +110,7 @@ export default function SalaryGradesPage() {
     setFormMaxSalary("");
     setFormCurrency("USD");
     setFormIsActive(true);
-    setFormStartDate(new Date().toISOString().split("T")[0]);
+    setFormStartDate(getTodayString());
     setFormEndDate("");
     setDialogOpen(true);
   };
@@ -124,7 +125,7 @@ export default function SalaryGradesPage() {
     setFormMaxSalary(grade.max_salary?.toString() || "");
     setFormCurrency(grade.currency);
     setFormIsActive(grade.is_active);
-    setFormStartDate(grade.start_date || new Date().toISOString().split("T")[0]);
+    setFormStartDate(grade.start_date || getTodayString());
     setFormEndDate(grade.end_date || "");
     setDialogOpen(true);
   };
