@@ -719,6 +719,22 @@
         "notesPlaceholder": "Notes optionnelles"
       }
     },
+    "employeeCompensation": {
+      "title": "Rémunération des Employés",
+      "subtitle": "Gérer les ajustements de paie individuels",
+      "selectEmployee": "Sélectionner Employé",
+      "selectEmployeeFirst": "Sélectionnez un employé pour voir sa rémunération",
+      "salaryRange": "Plage Salariale",
+      "paySpineRange": "Plage de Grille",
+      "totalPackageRange": "Package Total",
+      "forPosition": "Pour Poste",
+      "compensationModel": {
+        "salaryGrade": "Grade Salarial",
+        "paySpine": "Grille Salariale",
+        "hybrid": "Hybride",
+        "none": "Non Configuré"
+      }
+    },
     "spinalPoints": {
       "paySpine": "Grille Salariale"
     }

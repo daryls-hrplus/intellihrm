@@ -61,6 +61,46 @@ interface Position {
   code: string;
 }
 
+interface SalaryGrade {
+  id: string;
+  name: string;
+  code: string;
+  min_salary: number;
+  mid_salary: number;
+  max_salary: number;
+  currency: string;
+}
+
+interface SpinalPoint {
+  id: string;
+  point_number: number;
+  annual_salary: number;
+}
+
+interface PaySpine {
+  id: string;
+  name: string;
+  code: string;
+  currency: string;
+}
+
+interface PositionWithCompensation {
+  id: string;
+  title: string;
+  code: string;
+  compensation_model: string | null;
+  salary_grade_id: string | null;
+  pay_spine_id: string | null;
+  salary_grade?: SalaryGrade | null;
+}
+
+interface PositionCompensationItem {
+  id: string;
+  amount: number;
+  currency: string;
+  pay_element?: { name: string };
+}
+
 interface EmployeeCompensation {
   id: string;
   company_id: string;
@@ -87,6 +127,7 @@ export default function EmployeeCompensationPage() {
 
   const [companies, setCompanies] = useState<Company[]>([]);
   const [selectedCompanyId, setSelectedCompanyId] = useState<string>("");
+  const [selectedEmployeeId, setSelectedEmployeeId] = useState<string>("");
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [payElements, setPayElements] = useState<PayElement[]>([]);
   const [positions, setPositions] = useState<Position[]>([]);
@@ -97,6 +138,12 @@ export default function EmployeeCompensationPage() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<EmployeeCompensation | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
+
+  // Position compensation info for selected employee
+  const [employeePrimaryPosition, setEmployeePrimaryPosition] = useState<PositionWithCompensation | null>(null);
+  const [positionCompensationItems, setPositionCompensationItems] = useState<PositionCompensationItem[]>([]);
+  const [paySpine, setPaySpine] = useState<PaySpine | null>(null);
+  const [spinalPoints, setSpinalPoints] = useState<SpinalPoint[]>([]);
 
   // Form state
   const [formEmployeeId, setFormEmployeeId] = useState("");
@@ -120,9 +167,24 @@ export default function EmployeeCompensationPage() {
     if (selectedCompanyId) {
       loadEmployees();
       loadPayElements();
-      loadCompensationItems();
+      setSelectedEmployeeId("");
+      setEmployeePrimaryPosition(null);
+      setPositionCompensationItems([]);
     }
   }, [selectedCompanyId]);
+
+  useEffect(() => {
+    if (selectedCompanyId && selectedEmployeeId) {
+      loadCompensationItems();
+      loadEmployeePrimaryPosition();
+    } else if (selectedCompanyId) {
+      setCompensationItems([]);
+      setEmployeePrimaryPosition(null);
+      setPositionCompensationItems([]);
+      setPaySpine(null);
+      setSpinalPoints([]);
+    }
+  }, [selectedCompanyId, selectedEmployeeId]);
 
   const loadCompanies = async () => {
     const { data } = await supabase
@@ -163,6 +225,8 @@ export default function EmployeeCompensationPage() {
   };
 
   const loadCompensationItems = async () => {
+    if (!selectedEmployeeId) return;
+    
     setIsLoading(true);
     const { data, error } = await supabase
       .from("employee_compensation")
@@ -173,6 +237,7 @@ export default function EmployeeCompensationPage() {
         position:positions!employee_compensation_position_id_fkey(id, title, code)
       `)
       .eq("company_id", selectedCompanyId)
+      .eq("employee_id", selectedEmployeeId)
       .order("created_at", { ascending: false });
 
     if (error) {
@@ -181,6 +246,69 @@ export default function EmployeeCompensationPage() {
       setCompensationItems((data as EmployeeCompensation[]) || []);
     }
     setIsLoading(false);
+  };
+
+  const loadEmployeePrimaryPosition = async () => {
+    if (!selectedEmployeeId) return;
+
+    // Get primary position for employee
+    const { data: positionData } = await supabase
+      .from("employee_positions")
+      .select(`
+        position_id,
+        position:positions!employee_positions_position_id_fkey(
+          id, title, code, compensation_model, salary_grade_id, pay_spine_id,
+          salary_grade:salary_grades!positions_salary_grade_id_fkey(id, name, code, min_salary, mid_salary, max_salary, currency)
+        )
+      `)
+      .eq("employee_id", selectedEmployeeId)
+      .eq("is_primary", true)
+      .eq("is_active", true)
+      .single();
+
+    if (positionData?.position) {
+      const pos = positionData.position as unknown as PositionWithCompensation;
+      setEmployeePrimaryPosition(pos);
+
+      // Load position compensation items
+      const { data: compData } = await supabase
+        .from("position_compensation")
+        .select(`
+          id, amount, currency,
+          pay_element:pay_elements!position_compensation_pay_element_id_fkey(name)
+        `)
+        .eq("position_id", pos.id)
+        .eq("is_active", true);
+
+      setPositionCompensationItems((compData as unknown as PositionCompensationItem[]) || []);
+
+      // Load pay spine and points if applicable
+      if (pos.pay_spine_id && (pos.compensation_model === 'spinal_point' || pos.compensation_model === 'hybrid')) {
+        const { data: spineData } = await supabase
+          .from("pay_spines")
+          .select("id, name, code, currency")
+          .eq("id", pos.pay_spine_id)
+          .single();
+
+        if (spineData) {
+          setPaySpine(spineData);
+          const { data: pointsData } = await supabase
+            .from("spinal_points")
+            .select("id, point_number, annual_salary")
+            .eq("pay_spine_id", spineData.id)
+            .order("point_number");
+          setSpinalPoints(pointsData || []);
+        }
+      } else {
+        setPaySpine(null);
+        setSpinalPoints([]);
+      }
+    } else {
+      setEmployeePrimaryPosition(null);
+      setPositionCompensationItems([]);
+      setPaySpine(null);
+      setSpinalPoints([]);
+    }
   };
 
   const loadEmployeePositions = async (employeeId: string, setDefault: boolean = true) => {
@@ -374,7 +502,7 @@ export default function EmployeeCompensationPage() {
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-3">
             <Select value={selectedCompanyId} onValueChange={setSelectedCompanyId}>
               <SelectTrigger className="w-[200px]">
                 <SelectValue placeholder={t("common.selectCompany")} />
@@ -387,12 +515,125 @@ export default function EmployeeCompensationPage() {
                 ))}
               </SelectContent>
             </Select>
-            <Button onClick={openCreate}>
+            <Select 
+              value={selectedEmployeeId} 
+              onValueChange={setSelectedEmployeeId}
+              disabled={!selectedCompanyId || employees.length === 0}
+            >
+              <SelectTrigger className="w-[250px]">
+                <SelectValue placeholder={t("compensation.employeeCompensation.selectEmployee")} />
+              </SelectTrigger>
+              <SelectContent>
+                {employees.map((e) => (
+                  <SelectItem key={e.id} value={e.id}>
+                    {e.full_name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Button onClick={openCreate} disabled={!selectedEmployeeId}>
               <Plus className="h-4 w-4 mr-2" />
               {t("compensation.employeeCompensation.add")}
             </Button>
           </div>
         </div>
+
+        {/* Position Compensation Info */}
+        {selectedEmployeeId && employeePrimaryPosition && (
+          <Card className="bg-muted/30">
+            <CardContent className="p-4">
+              <div className="space-y-3">
+                {/* Compensation Model */}
+                <div className="flex items-center gap-2">
+                  <Badge variant="secondary" className="text-sm">
+                    {employeePrimaryPosition.compensation_model === 'salary_grade' 
+                      ? t("compensation.employeeCompensation.compensationModel.salaryGrade")
+                      : employeePrimaryPosition.compensation_model === 'spinal_point'
+                        ? t("compensation.employeeCompensation.compensationModel.paySpine")
+                        : employeePrimaryPosition.compensation_model === 'hybrid'
+                          ? t("compensation.employeeCompensation.compensationModel.hybrid")
+                          : t("compensation.employeeCompensation.compensationModel.none")}
+                  </Badge>
+                  <span className="text-sm text-muted-foreground">
+                    {t("compensation.employeeCompensation.forPosition")}: {employeePrimaryPosition.title} ({employeePrimaryPosition.code})
+                  </span>
+                </div>
+
+                {/* Salary Range Line */}
+                {(employeePrimaryPosition.compensation_model === 'salary_grade' || employeePrimaryPosition.compensation_model === 'hybrid') && employeePrimaryPosition.salary_grade && (
+                  <div className="flex items-center gap-4">
+                    <span className="text-sm font-medium w-32">{t("compensation.employeeCompensation.salaryRange")}:</span>
+                    <span className="text-sm">
+                      {employeePrimaryPosition.salary_grade.name} ({employeePrimaryPosition.salary_grade.code}): {formatAmount(employeePrimaryPosition.salary_grade.min_salary, employeePrimaryPosition.salary_grade.currency)} - {formatAmount(employeePrimaryPosition.salary_grade.max_salary, employeePrimaryPosition.salary_grade.currency)}
+                    </span>
+                  </div>
+                )}
+                {(employeePrimaryPosition.compensation_model === 'spinal_point' || employeePrimaryPosition.compensation_model === 'hybrid') && paySpine && spinalPoints.length > 0 && (
+                  <div className="flex items-center gap-4">
+                    <span className="text-sm font-medium w-32">{t("compensation.employeeCompensation.paySpineRange")}:</span>
+                    <span className="text-sm">
+                      {paySpine.name} ({paySpine.code}): {formatAmount(spinalPoints[0].annual_salary, paySpine.currency)} - {formatAmount(spinalPoints[spinalPoints.length - 1].annual_salary, paySpine.currency)}
+                    </span>
+                  </div>
+                )}
+
+                {/* Total Position Compensation Range Line */}
+                {(() => {
+                  const additionalComp = positionCompensationItems.reduce((sum, item) => sum + item.amount, 0);
+                  const currency = employeePrimaryPosition.salary_grade?.currency || paySpine?.currency || "USD";
+                  
+                  if (employeePrimaryPosition.compensation_model === 'salary_grade' && employeePrimaryPosition.salary_grade) {
+                    const minTotal = employeePrimaryPosition.salary_grade.min_salary + additionalComp;
+                    const maxTotal = employeePrimaryPosition.salary_grade.max_salary + additionalComp;
+                    return (
+                      <div className="flex items-center gap-4">
+                        <span className="text-sm font-medium w-32">{t("compensation.employeeCompensation.totalPackageRange")}:</span>
+                        <span className="text-sm font-semibold">
+                          {formatAmount(minTotal, currency)} - {formatAmount(maxTotal, currency)}
+                        </span>
+                      </div>
+                    );
+                  }
+                  if (employeePrimaryPosition.compensation_model === 'spinal_point' && spinalPoints.length > 0 && paySpine) {
+                    const minTotal = spinalPoints[0].annual_salary + additionalComp;
+                    const maxTotal = spinalPoints[spinalPoints.length - 1].annual_salary + additionalComp;
+                    return (
+                      <div className="flex items-center gap-4">
+                        <span className="text-sm font-medium w-32">{t("compensation.employeeCompensation.totalPackageRange")}:</span>
+                        <span className="text-sm font-semibold">
+                          {formatAmount(minTotal, paySpine.currency)} - {formatAmount(maxTotal, paySpine.currency)}
+                        </span>
+                      </div>
+                    );
+                  }
+                  if (employeePrimaryPosition.compensation_model === 'hybrid') {
+                    return (
+                      <div className="space-y-1">
+                        {employeePrimaryPosition.salary_grade && (
+                          <div className="flex items-center gap-4">
+                            <span className="text-sm font-medium w-32">{t("compensation.employeeCompensation.totalPackageRange")} ({t("compensation.positionCompensation.salaryGrade")}):</span>
+                            <span className="text-sm font-semibold">
+                              {formatAmount(employeePrimaryPosition.salary_grade.min_salary + additionalComp, employeePrimaryPosition.salary_grade.currency)} - {formatAmount(employeePrimaryPosition.salary_grade.max_salary + additionalComp, employeePrimaryPosition.salary_grade.currency)}
+                            </span>
+                          </div>
+                        )}
+                        {spinalPoints.length > 0 && paySpine && (
+                          <div className="flex items-center gap-4">
+                            <span className="text-sm font-medium w-32">{t("compensation.employeeCompensation.totalPackageRange")} ({t("compensation.positionCompensation.paySpine")}):</span>
+                            <span className="text-sm font-semibold">
+                              {formatAmount(spinalPoints[0].annual_salary + additionalComp, paySpine.currency)} - {formatAmount(spinalPoints[spinalPoints.length - 1].annual_salary + additionalComp, paySpine.currency)}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  }
+                  return null;
+                })()}
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         <Card>
           <CardContent className="p-4">
@@ -408,7 +649,11 @@ export default function EmployeeCompensationPage() {
               </div>
             </div>
 
-            {isLoading ? (
+            {!selectedEmployeeId ? (
+              <div className="text-center py-12 text-muted-foreground">
+                {t("compensation.employeeCompensation.selectEmployeeFirst")}
+              </div>
+            ) : isLoading ? (
               <div className="flex justify-center py-12">
                 <Loader2 className="h-8 w-8 animate-spin text-primary" />
               </div>

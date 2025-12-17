@@ -719,6 +719,22 @@
         "notesPlaceholder": "Notas opcionales"
       }
     },
+    "employeeCompensation": {
+      "title": "Compensación de Empleados",
+      "subtitle": "Gestionar ajustes de pago individuales",
+      "selectEmployee": "Seleccionar Empleado",
+      "selectEmployeeFirst": "Seleccione un empleado para ver su compensación",
+      "salaryRange": "Rango Salarial",
+      "paySpineRange": "Rango de Escala",
+      "totalPackageRange": "Paquete Total",
+      "forPosition": "Para Puesto",
+      "compensationModel": {
+        "salaryGrade": "Grado Salarial",
+        "paySpine": "Escala Salarial",
+        "hybrid": "Híbrido",
+        "none": "No Configurado"
+      }
+    },
     "spinalPoints": {
       "paySpine": "Escala Salarial"
     }
