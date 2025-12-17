@@ -14,7 +14,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { Plus, Search, Users, Calendar, CheckCircle, Clock } from "lucide-react";
 import { useState } from "react";
-import { format } from "date-fns";
+import { formatDateForDisplay } from "@/utils/dateUtils";
 
 export default function HSEToolboxTalksPage() {
   const { t } = useLanguage();
@@ -130,7 +130,7 @@ export default function HSEToolboxTalksPage() {
                     <TableRow key={mtg.id}>
                       <TableCell className="font-medium">{mtg.title}</TableCell>
                       <TableCell>{mtg.topic || "-"}</TableCell>
-                      <TableCell>{mtg.scheduled_date ? format(new Date(mtg.scheduled_date), "MMM dd, yyyy") : "-"}</TableCell>
+                      <TableCell>{mtg.scheduled_date ? formatDateForDisplay(mtg.scheduled_date, "MMM dd, yyyy") : "-"}</TableCell>
                       <TableCell>{mtg.duration_minutes ? `${mtg.duration_minutes} min` : "-"}</TableCell>
                       <TableCell>{getStatusBadge(mtg.status)}</TableCell>
                       <TableCell><Button variant="ghost" size="sm">{t("common.view")}</Button></TableCell>

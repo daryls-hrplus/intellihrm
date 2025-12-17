@@ -15,7 +15,7 @@ import { Plus, Trash2, Loader2, Users, UserPlus } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
-import { format } from "date-fns";
+import { getTodayString, formatDateForDisplay } from "@/utils/dateUtils";
 import type { WorkflowCategory, WorkflowTemplate } from "@/hooks/useWorkflow";
 
 interface WorkflowDelegate {
@@ -59,7 +59,7 @@ export default function MyDelegatesPage() {
     delegate_id: "",
     category: "" as WorkflowCategory | "",
     template_id: "",
-    start_date: format(new Date(), "yyyy-MM-dd"),
+    start_date: getTodayString(),
     end_date: "",
     reason: "",
   });
@@ -133,7 +133,7 @@ export default function MyDelegatesPage() {
         delegate_id: "",
         category: "",
         template_id: "",
-        start_date: format(new Date(), "yyyy-MM-dd"),
+        start_date: getTodayString(),
         end_date: "",
         reason: "",
       });
@@ -268,10 +268,10 @@ export default function MyDelegatesPage() {
                           </TableCell>
                           <TableCell>
                             <div className="text-sm">
-                              <p>{format(new Date(delegation.start_date), "MMM d, yyyy")}</p>
+                              <p>{formatDateForDisplay(delegation.start_date, "MMM d, yyyy")}</p>
                               {delegation.end_date && (
                                 <p className="text-muted-foreground">
-                                  to {format(new Date(delegation.end_date), "MMM d, yyyy")}
+                                  to {formatDateForDisplay(delegation.end_date, "MMM d, yyyy")}
                                 </p>
                               )}
                             </div>
@@ -360,10 +360,10 @@ export default function MyDelegatesPage() {
                           </TableCell>
                           <TableCell>
                             <div className="text-sm">
-                              <p>{format(new Date(delegation.start_date), "MMM d, yyyy")}</p>
+                              <p>{formatDateForDisplay(delegation.start_date, "MMM d, yyyy")}</p>
                               {delegation.end_date && (
                                 <p className="text-muted-foreground">
-                                  to {format(new Date(delegation.end_date), "MMM d, yyyy")}
+                                  to {formatDateForDisplay(delegation.end_date, "MMM d, yyyy")}
                                 </p>
                               )}
                             </div>

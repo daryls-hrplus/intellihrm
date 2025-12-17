@@ -42,7 +42,8 @@ import {
   Clock,
   FileText,
 } from "lucide-react";
-import { format, isPast, isBefore, addDays } from "date-fns";
+import { isPast, isBefore, addDays } from "date-fns";
+import { getTodayString, formatDateForDisplay, parseLocalDate } from "@/utils/dateUtils";
 import { NavLink } from "react-router-dom";
 import { toast } from "sonner";
 
@@ -181,7 +182,7 @@ export default function HSECompliancePage() {
     setAuditFormData({
       company_id: companyId,
       requirement_id: requirement?.id,
-      audit_date: format(new Date(), "yyyy-MM-dd"),
+      audit_date: getTodayString(),
       audit_type: "internal",
       status: "pending",
     });
@@ -395,9 +396,9 @@ export default function HSECompliancePage() {
                           <TableCell>
                             {req.expiry_date ? (
                               <span
-                                className={isPast(new Date(req.expiry_date)) ? "text-destructive" : ""}
+                              className={parseLocalDate(req.expiry_date) && isPast(parseLocalDate(req.expiry_date)!) ? "text-destructive" : ""}
                               >
-                                {format(new Date(req.expiry_date), "MMM d, yyyy")}
+                                {formatDateForDisplay(req.expiry_date, "MMM d, yyyy")}
                               </span>
                             ) : (
                               "-"
@@ -464,7 +465,7 @@ export default function HSECompliancePage() {
                             {auditTypes.find((t) => t.value === audit.audit_type)?.label}
                           </TableCell>
                           <TableCell>
-                            {format(new Date(audit.audit_date as string), "MMM d, yyyy")}
+                            {formatDateForDisplay(audit.audit_date as string, "MMM d, yyyy")}
                           </TableCell>
                           <TableCell>{(audit.auditor_name as string) || "-"}</TableCell>
                           <TableCell>
@@ -475,7 +476,7 @@ export default function HSECompliancePage() {
                           </TableCell>
                           <TableCell>
                             {audit.due_date
-                              ? format(new Date(audit.due_date as string), "MMM d, yyyy")
+                              ? formatDateForDisplay(audit.due_date as string, "MMM d, yyyy")
                               : "-"}
                           </TableCell>
                         </TableRow>
