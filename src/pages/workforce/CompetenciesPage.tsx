@@ -44,6 +44,7 @@ import { Plus, Pencil, Trash2, Target, ChevronDown, ChevronRight, Layers, Chevro
 import { toast } from "sonner";
 import { useAuditLog } from "@/hooks/useAuditLog";
 import { NavLink } from "react-router-dom";
+import { getTodayString } from "@/utils/dateUtils";
 
 interface Company {
   id: string;
@@ -91,7 +92,7 @@ const emptyForm = {
   category: "technical",
   proficiency_levels: [] as string[],
   is_active: true,
-  start_date: new Date().toISOString().split("T")[0],
+  start_date: getTodayString(),
   end_date: "",
 };
 

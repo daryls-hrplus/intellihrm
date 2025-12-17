@@ -11,7 +11,8 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { format, startOfMonth, endOfMonth, parseISO } from "date-fns";
+import { format, startOfMonth, endOfMonth } from "date-fns";
+import { formatDateForDisplay } from "@/utils/dateUtils";
 import { 
   ClipboardList, 
   Calendar as CalendarIcon,
@@ -368,7 +369,7 @@ export default function AttendanceRecordsPage() {
                         {record.profile?.full_name || 'Unknown'}
                       </TableCell>
                       <TableCell>
-                        {format(parseISO(record.work_date), 'MMM d, yyyy')}
+                        {formatDateForDisplay(record.work_date, 'MMM d, yyyy')}
                       </TableCell>
                       <TableCell>
                         {record.scheduled_start && record.scheduled_end ? (

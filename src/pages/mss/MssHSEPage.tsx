@@ -9,7 +9,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useHSE } from "@/hooks/useHSE";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { format } from "date-fns";
+import { formatDateForDisplay } from '@/utils/dateUtils';
 import { useLanguage } from "@/hooks/useLanguage";
 
 export default function MssHSEPage() {
@@ -194,7 +194,7 @@ export default function MssHSEPage() {
                           </TableCell>
                           <TableCell>{incident.title}</TableCell>
                           <TableCell>
-                            {format(new Date(incident.incident_date), "PP")}
+                            {formatDateForDisplay(incident.incident_date, "PP")}
                           </TableCell>
                           <TableCell>
                             {(incident.reporter as any)?.full_name || "Unknown"}
@@ -261,14 +261,14 @@ export default function MssHSEPage() {
                               {(record.training as any)?.title || "Training"}
                             </TableCell>
                             <TableCell>
-                              {format(new Date(record.training_date), "PP")}
+                              {formatDateForDisplay(record.training_date, "PP")}
                             </TableCell>
                             <TableCell>
                               {record.score ? `${record.score}%` : "-"}
                             </TableCell>
                             <TableCell>
                               {record.expiry_date
-                                ? format(new Date(record.expiry_date), "PP")
+                                ? formatDateForDisplay(record.expiry_date, "PP")
                                 : t('mss.teamHSE.noExpiry')}
                             </TableCell>
                             <TableCell>

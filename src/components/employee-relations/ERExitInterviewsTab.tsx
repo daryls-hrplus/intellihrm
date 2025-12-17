@@ -13,7 +13,7 @@ import { Slider } from "@/components/ui/slider";
 import { Plus, Search, Loader2, LogOut, Eye, Star } from 'lucide-react';
 import { useEmployeeRelations, ERExitInterview } from '@/hooks/useEmployeeRelations';
 import { useAuth } from '@/contexts/AuthContext';
-import { format } from 'date-fns';
+import { getTodayString, formatDateForDisplay } from '@/utils/dateUtils';
 
 const DEPARTURE_REASONS = ['resignation', 'retirement', 'termination', 'layoff', 'other'];
 const STATUSES = ['scheduled', 'completed', 'cancelled'];
@@ -33,7 +33,7 @@ export function ERExitInterviewsTab({ companyId }: ERExitInterviewsTabProps) {
   
   const [formData, setFormData] = useState({
     employee_id: '',
-    interview_date: new Date().toISOString().split('T')[0],
+    interview_date: getTodayString(),
     departure_reason: '',
     last_working_date: '',
   });
@@ -71,7 +71,7 @@ export function ERExitInterviewsTab({ companyId }: ERExitInterviewsTabProps) {
     setIsDialogOpen(false);
     setFormData({
       employee_id: '',
-      interview_date: new Date().toISOString().split('T')[0],
+      interview_date: getTodayString(),
       departure_reason: '',
       last_working_date: '',
     });
@@ -225,8 +225,8 @@ export function ERExitInterviewsTab({ companyId }: ERExitInterviewsTabProps) {
                       <p className="text-xs text-muted-foreground">{interview.employee?.email}</p>
                     </div>
                   </TableCell>
-                  <TableCell>{format(new Date(interview.interview_date), 'PP')}</TableCell>
-                  <TableCell>{interview.last_working_date ? format(new Date(interview.last_working_date), 'PP') : '-'}</TableCell>
+                  <TableCell>{formatDateForDisplay(interview.interview_date, 'PP')}</TableCell>
+                  <TableCell>{interview.last_working_date ? formatDateForDisplay(interview.last_working_date, 'PP') : '-'}</TableCell>
                   <TableCell className="capitalize">
                     {interview.departure_reason ? t(`employeeRelationsModule.exitInterviews.reasons.${interview.departure_reason}`, { defaultValue: interview.departure_reason }) : '-'}
                   </TableCell>

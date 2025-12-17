@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Plus, Check, X } from "lucide-react";
 import { toast } from "sonner";
-import { format } from "date-fns";
+import { formatDateForDisplay } from "@/utils/dateUtils";
 
 interface TrainingRequestsTabProps {
   companyId: string;
@@ -256,8 +256,8 @@ export function TrainingRequestsTab({ companyId }: TrainingRequestsTabProps) {
                 <TableCell>{req.training_name}</TableCell>
                 <TableCell className="capitalize">{req.request_type}</TableCell>
                 <TableCell>
-                  {req.start_date && format(new Date(req.start_date), "MMM d, yyyy")}
-                  {req.end_date && ` - ${format(new Date(req.end_date), "MMM d, yyyy")}`}
+                  {req.start_date && formatDateForDisplay(req.start_date, "MMM d, yyyy")}
+                  {req.end_date && ` - ${formatDateForDisplay(req.end_date, "MMM d, yyyy")}`}
                 </TableCell>
                 <TableCell>{req.estimated_cost ? `${req.currency} ${req.estimated_cost.toLocaleString()}` : "-"}</TableCell>
                 <TableCell>{getStatusBadge(req.status)}</TableCell>

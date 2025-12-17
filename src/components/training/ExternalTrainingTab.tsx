@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Plus, FileText } from "lucide-react";
 import { toast } from "sonner";
-import { format } from "date-fns";
+import { formatDateForDisplay } from "@/utils/dateUtils";
 
 interface ExternalTrainingTabProps {
   companyId: string;
@@ -237,7 +237,7 @@ export function ExternalTrainingTab({ companyId }: ExternalTrainingTabProps) {
                 <TableCell>{rec.training_name}</TableCell>
                 <TableCell className="capitalize">{rec.training_type?.replace("_", " ")}</TableCell>
                 <TableCell>{rec.provider_name || "-"}</TableCell>
-                <TableCell>{format(new Date(rec.start_date), "MMM d, yyyy")}</TableCell>
+                <TableCell>{formatDateForDisplay(rec.start_date, "MMM d, yyyy")}</TableCell>
                 <TableCell>{rec.duration_hours || "-"}</TableCell>
                 <TableCell>{rec.actual_cost ? `${rec.currency} ${rec.actual_cost.toLocaleString()}` : "-"}</TableCell>
                 <TableCell>

@@ -14,6 +14,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { Plus, Pencil, Receipt, Check, X } from "lucide-react";
+import { getTodayString } from "@/utils/dateUtils";
 
 interface BenefitClaim {
   id: string;
@@ -63,8 +64,8 @@ export default function BenefitClaimsPage() {
   
   const [formData, setFormData] = useState({
     enrollment_id: "",
-    claim_date: new Date().toISOString().split('T')[0],
-    service_date: new Date().toISOString().split('T')[0],
+    claim_date: getTodayString(),
+    service_date: getTodayString(),
     claim_type: "medical",
     description: "",
     amount_claimed: 0,
@@ -213,8 +214,8 @@ export default function BenefitClaimsPage() {
     setEditingClaim(null);
     setFormData({
       enrollment_id: enrollments[0]?.id || "",
-      claim_date: new Date().toISOString().split('T')[0],
-      service_date: new Date().toISOString().split('T')[0],
+      claim_date: getTodayString(),
+      service_date: getTodayString(),
       claim_type: "medical",
       description: "",
       amount_claimed: 0,

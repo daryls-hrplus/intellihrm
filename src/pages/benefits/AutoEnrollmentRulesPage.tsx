@@ -16,6 +16,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { Plus, Pencil, Trash2, Building2, Settings } from "lucide-react";
+import { getTodayString } from "@/utils/dateUtils";
 import { useAuditLog } from "@/hooks/useAuditLog";
 
 export default function AutoEnrollmentRulesPage() {
@@ -33,7 +34,7 @@ export default function AutoEnrollmentRulesPage() {
     description: "",
     plan_id: "",
     is_active: true,
-    start_date: new Date().toISOString().split("T")[0],
+    start_date: getTodayString(),
     end_date: "",
     criteria: {
       min_tenure_days: 0,
@@ -193,7 +194,7 @@ export default function AutoEnrollmentRulesPage() {
       description: "",
       plan_id: "",
       is_active: true,
-      start_date: new Date().toISOString().split("T")[0],
+      start_date: getTodayString(),
       end_date: "",
       criteria: { min_tenure_days: 0, job_levels: [], departments: [], employment_types: [] }
     });
