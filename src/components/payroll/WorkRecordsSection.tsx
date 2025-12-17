@@ -11,7 +11,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Plus, Clock, ChevronDown, ChevronRight, Trash2 } from "lucide-react";
-import { format } from "date-fns";
+import { formatDateForDisplay } from "@/utils/dateUtils";
 
 interface WorkRecordsSectionProps {
   companyId: string;
@@ -360,7 +360,7 @@ export function WorkRecordsSection({ companyId, employeeId, payPeriodId }: WorkR
                           <ChevronRight className="h-4 w-4" />
                         )}
                         <span className="font-medium">
-                          {format(new Date(record.work_date), 'EEE, MMM d, yyyy')}
+                          {formatDateForDisplay(record.work_date, 'EEE, MMM d, yyyy')}
                         </span>
                         <Badge className={getDayTypeBadge(record.day_type)}>
                           {record.day_type.replace('_', ' ')}

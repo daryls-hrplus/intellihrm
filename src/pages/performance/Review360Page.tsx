@@ -42,7 +42,7 @@ import { CycleParticipantsManager } from "@/components/performance/CycleParticip
 import { CycleQuestionsManager } from "@/components/performance/CycleQuestionsManager";
 import { PeerNominationManager } from "@/components/performance/PeerNominationManager";
 import { useLanguage } from "@/hooks/useLanguage";
-import { format } from "date-fns";
+import { formatDateForDisplay } from "@/utils/dateUtils";
 
 interface ReviewCycle {
   id: string;
@@ -648,7 +648,7 @@ export default function Review360Page() {
                               <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
                                 <span className="flex items-center gap-1">
                                   <Calendar className="h-4 w-4" />
-                                  {format(new Date(cycle.start_date), "MMM d")} - {format(new Date(cycle.end_date), "MMM d, yyyy")}
+                                  {formatDateForDisplay(cycle.start_date, "MMM d")} - {formatDateForDisplay(cycle.end_date, "MMM d, yyyy")}
                                 </span>
                                 <span className="flex items-center gap-1">
                                   <Users className="h-4 w-4" />
@@ -743,7 +743,7 @@ export default function Review360Page() {
                               <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
                                 <span className="flex items-center gap-1">
                                   <Calendar className="h-4 w-4" />
-                                  {format(new Date(cycle.start_date), "MMM d")} - {format(new Date(cycle.end_date), "MMM d, yyyy")}
+                                  {formatDateForDisplay(cycle.start_date, "MMM d")} - {formatDateForDisplay(cycle.end_date, "MMM d, yyyy")}
                                 </span>
                                 <span className="flex items-center gap-1">
                                   <Users className="h-4 w-4" />
@@ -820,7 +820,7 @@ export default function Review360Page() {
                               <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
                                 <span className="flex items-center gap-1">
                                   <Calendar className="h-4 w-4" />
-                                  {format(new Date(cycle.start_date), "MMM d")} - {format(new Date(cycle.end_date), "MMM d, yyyy")}
+                                  {formatDateForDisplay(cycle.start_date, "MMM d")} - {formatDateForDisplay(cycle.end_date, "MMM d, yyyy")}
                                 </span>
                                 <span className="flex items-center gap-1">
                                   <Users className="h-4 w-4" />
