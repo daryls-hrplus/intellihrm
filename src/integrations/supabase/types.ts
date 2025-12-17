@@ -27895,6 +27895,74 @@ export type Database = {
           },
         ]
       }
+      statutory_reporting_documents: {
+        Row: {
+          ai_analysis: Json | null
+          created_at: string
+          created_by: string | null
+          document_name: string
+          end_date: string | null
+          extraction_notes: string | null
+          extraction_status: string | null
+          file_name: string | null
+          file_path: string | null
+          file_type: string | null
+          id: string
+          is_active: boolean | null
+          reporting_interval: string
+          required_data_structures: Json | null
+          start_date: string
+          statutory_deduction_type_id: string
+          updated_at: string
+        }
+        Insert: {
+          ai_analysis?: Json | null
+          created_at?: string
+          created_by?: string | null
+          document_name: string
+          end_date?: string | null
+          extraction_notes?: string | null
+          extraction_status?: string | null
+          file_name?: string | null
+          file_path?: string | null
+          file_type?: string | null
+          id?: string
+          is_active?: boolean | null
+          reporting_interval: string
+          required_data_structures?: Json | null
+          start_date?: string
+          statutory_deduction_type_id: string
+          updated_at?: string
+        }
+        Update: {
+          ai_analysis?: Json | null
+          created_at?: string
+          created_by?: string | null
+          document_name?: string
+          end_date?: string | null
+          extraction_notes?: string | null
+          extraction_status?: string | null
+          file_name?: string | null
+          file_path?: string | null
+          file_type?: string | null
+          id?: string
+          is_active?: boolean | null
+          reporting_interval?: string
+          required_data_structures?: Json | null
+          start_date?: string
+          statutory_deduction_type_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "statutory_reporting_documents_statutory_deduction_type_id_fkey"
+            columns: ["statutory_deduction_type_id"]
+            isOneToOne: false
+            referencedRelation: "statutory_deduction_types"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       subscription_changes: {
         Row: {
           change_type: string
