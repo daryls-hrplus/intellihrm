@@ -1,5 +1,8 @@
 project_id = "hmdewkkytchwrenqagkw"
 
+[functions.design-payroll-report]
+verify_jwt = false
+
 [functions.weekly-permissions-report]
 verify_jwt = false
 

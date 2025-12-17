@@ -7,9 +7,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { usePayroll } from "@/hooks/usePayroll";
 import { PayrollFilters, usePayrollFilters } from "@/components/payroll/PayrollFilters";
-import { FileSpreadsheet, TrendingUp, DollarSign, Users, Calendar, Download } from "lucide-react";
+import { FileSpreadsheet, TrendingUp, DollarSign, Users, Calendar, Download, Sparkles, LayoutGrid } from "lucide-react";
 import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from "recharts";
 import { useTranslation } from "react-i18next";
+import { AIReportBuilder } from "@/components/payroll/AIReportBuilder";
 
 export default function PayrollReportsPage() {
   const { t } = useTranslation();
@@ -164,10 +165,18 @@ export default function PayrollReportsPage() {
         </div>
 
         <Tabs defaultValue="trends">
-          <TabsList>
+          <TabsList className="flex-wrap h-auto">
             <TabsTrigger value="trends">{t("payroll.reports.payrollTrendsTab")}</TabsTrigger>
             <TabsTrigger value="breakdown">{t("payroll.reports.costBreakdownTab")}</TabsTrigger>
             <TabsTrigger value="comparison">{t("payroll.reports.monthlyComparisonTab")}</TabsTrigger>
+            <TabsTrigger value="ai-banded" className="gap-1">
+              <Sparkles className="h-3 w-3" />
+              AI Banded Reports
+            </TabsTrigger>
+            <TabsTrigger value="ai-bi" className="gap-1">
+              <LayoutGrid className="h-3 w-3" />
+              AI BI Reports
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="trends" className="space-y-4">
@@ -313,6 +322,40 @@ export default function PayrollReportsPage() {
                     </BarChart>
                   </ResponsiveContainer>
                 </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="ai-banded" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Sparkles className="h-5 w-5 text-primary" />
+                  AI Banded Reports
+                </CardTitle>
+                <CardDescription>
+                  Create custom banded reports with AI assistance. Upload a layout, iterate with AI, and generate reports.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <AIReportBuilder reportType="banded" companyId={selectedCompanyId} />
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="ai-bi" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <LayoutGrid className="h-5 w-5 text-primary" />
+                  AI BI Reports
+                </CardTitle>
+                <CardDescription>
+                  Create business intelligence reports with charts and KPIs using AI assistance.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <AIReportBuilder reportType="bi" companyId={selectedCompanyId} />
               </CardContent>
             </Card>
           </TabsContent>
