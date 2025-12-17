@@ -6,6 +6,12 @@ import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Calculator, RefreshCw } from "lucide-react";
+import { 
+  calculateProrationFactor, 
+  applyProration, 
+  getProrationMethodCode,
+  type ProrationResult 
+} from "@/utils/payroll/prorationCalculator";
 
 interface PayrollSimulatorProps {
   companyId: string;
@@ -32,6 +38,14 @@ interface SimulationResult {
     hourly_rate: number;
     currency: string;
     frequency: string;
+  };
+  proration?: {
+    isProrated: boolean;
+    factor: number;
+    daysWorked: number;
+    totalDays: number;
+    method: string;
+    fullPeriodSalary: number;
   };
   earnings: {
     regular_hours: number;
@@ -192,6 +206,8 @@ export function PayrollSimulator({ companyId, employeeId, payPeriodId }: Payroll
           compensation_amount,
           compensation_currency,
           compensation_frequency,
+          start_date,
+          end_date,
           positions (title)
         `)
         .eq('employee_id', employeeId)
@@ -201,6 +217,14 @@ export function PayrollSimulator({ companyId, employeeId, payPeriodId }: Payroll
 
       if (positionError) throw positionError;
 
+      // Get employee start/end dates for proration
+      const employeeStartDate = positionData?.start_date 
+        ? new Date(positionData.start_date) 
+        : null;
+      const employeeEndDate = positionData?.end_date
+        ? new Date(positionData.end_date)
+        : null;
+
       // Fetch employee compensation (overrides position compensation when present)
       const { data: employeeComp, error: employeeCompError } = await supabase
         .from('employee_compensation')
@@ -208,7 +232,11 @@ export function PayrollSimulator({ companyId, employeeId, payPeriodId }: Payroll
           amount,
           currency,
           frequency,
-          pay_elements (name, code)
+          pay_elements (
+            name, 
+            code,
+            proration_method:lookup_values!pay_elements_proration_method_id_fkey(code, name)
+          )
         `)
         .eq('employee_id', employeeId)
         .eq('is_active', true);
@@ -285,6 +313,23 @@ export function PayrollSimulator({ companyId, employeeId, payPeriodId }: Payroll
         ? (baseSalaryItem.currency || positionData?.compensation_currency || 'USD')
         : (positionData?.compensation_currency || 'USD');
 
+      // Get proration method from base salary pay element
+      const baseProrationMethodCode = getProrationMethodCode(
+        (baseSalaryItem?.pay_elements as any)?.proration_method?.code
+      );
+
+      // Calculate proration factor for base salary
+      let prorationResult: ProrationResult | null = null;
+      if (payPeriod?.period_start && payPeriod?.period_end) {
+        prorationResult = calculateProrationFactor({
+          periodStart: new Date(payPeriod.period_start),
+          periodEnd: new Date(payPeriod.period_end),
+          employeeStartDate,
+          employeeEndDate,
+          prorationMethod: baseProrationMethodCode,
+        });
+      }
+
       // Use default standard hours until positions/jobs standard hours are wired here
       const standardHours = 40;
 
@@ -327,6 +372,12 @@ export function PayrollSimulator({ companyId, employeeId, payPeriodId }: Payroll
             periodBaseSalary = annualSalary / 24;
             break;
         }
+      }
+
+      // Apply proration to base salary if applicable
+      const fullPeriodBaseSalary = periodBaseSalary;
+      if (prorationResult && prorationResult.isProrated) {
+        periodBaseSalary = applyProration(periodBaseSalary, prorationResult);
       }
 
       // Calculate totals from work records
@@ -448,6 +499,14 @@ export function PayrollSimulator({ companyId, employeeId, payPeriodId }: Payroll
           currency: baseCompCurrency,
           frequency: payFrequency
         },
+        proration: prorationResult ? {
+          isProrated: prorationResult.isProrated,
+          factor: prorationResult.factor,
+          daysWorked: prorationResult.daysWorked,
+          totalDays: prorationResult.totalDays,
+          method: baseProrationMethodCode,
+          fullPeriodSalary: fullPeriodBaseSalary
+        } : undefined,
         earnings: {
           regular_hours: regularHours,
           overtime_hours: overtimeHours,
@@ -541,7 +600,7 @@ export function PayrollSimulator({ companyId, employeeId, payPeriodId }: Payroll
           </p>
         </div>
       ) : (
-        <div className="p-4 bg-muted/50 rounded-lg">
+        <div className="p-4 bg-muted/50 rounded-lg space-y-4">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
             <div>
               <p className="text-muted-foreground">Base Salary</p>
@@ -560,6 +619,33 @@ export function PayrollSimulator({ companyId, employeeId, payPeriodId }: Payroll
               <p className="font-semibold capitalize">{result.salary.frequency}</p>
             </div>
           </div>
+          
+          {/* Proration Info */}
+          {result.proration?.isProrated && (
+            <div className="p-3 bg-amber-500/10 border border-amber-500/20 rounded-lg">
+              <p className="text-sm font-medium text-amber-700 dark:text-amber-400 mb-2">
+                ⚡ Mid-Period Proration Applied
+              </p>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
+                <div>
+                  <p className="text-muted-foreground">Full Period Salary</p>
+                  <p className="font-medium">{result.salary.currency} {formatCurrency(result.proration.fullPeriodSalary)}</p>
+                </div>
+                <div>
+                  <p className="text-muted-foreground">Days Worked</p>
+                  <p className="font-medium">{result.proration.daysWorked} / {result.proration.totalDays}</p>
+                </div>
+                <div>
+                  <p className="text-muted-foreground">Proration Factor</p>
+                  <p className="font-medium">{(result.proration.factor * 100).toFixed(1)}%</p>
+                </div>
+                <div>
+                  <p className="text-muted-foreground">Method</p>
+                  <p className="font-medium capitalize">{result.proration.method.replace('_', ' ').toLowerCase()}</p>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       )}
 
