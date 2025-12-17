@@ -222,7 +222,23 @@
     "accessRequests": "Access Requests",
     "pendingRequests": "Pending Requests",
     "reviewRequests": "Review Requests",
-    "requestsAwaiting": "{{count}} request(s) awaiting review"
+    "requestsAwaiting": "{{count}} request(s) awaiting review",
+    "virtualClock": "Time Clock"
+  },
+  "virtualClock": {
+    "title": "Virtual Time Clock",
+    "clockedIn": "Clocked In",
+    "clockedOut": "Not Clocked In",
+    "clockedInSince": "Clocked in since",
+    "workingFor": "Working for",
+    "clockIn": "Clock In",
+    "clockOut": "Clock Out",
+    "capturePhoto": "Capture Photo",
+    "captureLocation": "Capture Location",
+    "viewDetails": "View Full Details",
+    "clockInPhoto": "Clock In Photo",
+    "clockOutPhoto": "Clock Out Photo",
+    "capturePhotoDescription": "Take a photo for verification"
   },
   "dashboard": {
     "welcomeBack": "Welcome back, {{name}}",

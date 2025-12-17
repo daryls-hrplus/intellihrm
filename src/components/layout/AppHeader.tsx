@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { NavLink } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { UserPlus, MessageSquare, HelpCircle, Newspaper } from "lucide-react";
+import { VirtualClock } from "./VirtualClock";
 import { Button } from "@/components/ui/button";
 import {
   Popover,
@@ -205,6 +206,16 @@ export function AppHeader() {
       
       {/* Language Switcher */}
       <LanguageSwitcher />
+      
+      {/* Virtual Clock */}
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <div>
+            <VirtualClock />
+          </div>
+        </TooltipTrigger>
+        <TooltipContent>{t('navigation.virtualClock')}</TooltipContent>
+      </Tooltip>
       
       {/* Intranet Button */}
       <Tooltip>
