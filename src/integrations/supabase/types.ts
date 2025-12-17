@@ -27584,14 +27584,55 @@ export type Database = {
           },
         ]
       }
+      statutory_country_documentation: {
+        Row: {
+          comprehensive_document: string | null
+          country: string
+          dependency_map: Json | null
+          generated_at: string | null
+          generated_by: string | null
+          id: string
+          state_province: string | null
+          statutory_summary: Json | null
+          updated_at: string | null
+        }
+        Insert: {
+          comprehensive_document?: string | null
+          country: string
+          dependency_map?: Json | null
+          generated_at?: string | null
+          generated_by?: string | null
+          id?: string
+          state_province?: string | null
+          statutory_summary?: Json | null
+          updated_at?: string | null
+        }
+        Update: {
+          comprehensive_document?: string | null
+          country?: string
+          dependency_map?: Json | null
+          generated_at?: string | null
+          generated_by?: string | null
+          id?: string
+          state_province?: string | null
+          statutory_summary?: Json | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       statutory_deduction_types: {
         Row: {
+          ai_analyzed_at: string | null
+          ai_calculation_rules: Json | null
+          ai_dependencies: Json | null
+          ai_sample_document: string | null
           country: string
           created_at: string
           description: string | null
           end_date: string | null
           id: string
           is_active: boolean
+          reference_document_url: string | null
           start_date: string
           statutory_code: string
           statutory_name: string
@@ -27599,12 +27640,17 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          ai_analyzed_at?: string | null
+          ai_calculation_rules?: Json | null
+          ai_dependencies?: Json | null
+          ai_sample_document?: string | null
           country: string
           created_at?: string
           description?: string | null
           end_date?: string | null
           id?: string
           is_active?: boolean
+          reference_document_url?: string | null
           start_date?: string
           statutory_code: string
           statutory_name: string
@@ -27612,12 +27658,17 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          ai_analyzed_at?: string | null
+          ai_calculation_rules?: Json | null
+          ai_dependencies?: Json | null
+          ai_sample_document?: string | null
           country?: string
           created_at?: string
           description?: string | null
           end_date?: string | null
           id?: string
           is_active?: boolean
+          reference_document_url?: string | null
           start_date?: string
           statutory_code?: string
           statutory_name?: string
