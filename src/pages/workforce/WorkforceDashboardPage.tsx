@@ -200,7 +200,7 @@ export default function WorkforceDashboardPage() {
   // Build grouped sections
   const sections: ModuleSection[] = [
     {
-      titleKey: "workforce.groups.organizationSetup",
+      titleKey: "Organization Setup",
       items: filterByAccess([
         allModules.companyGroups,
         allModules.companies,
@@ -209,7 +209,7 @@ export default function WorkforceDashboardPage() {
       ]),
     },
     {
-      titleKey: "workforce.groups.jobArchitecture",
+      titleKey: "Job Architecture",
       items: filterByAccess([
         allModules.jobFamilies,
         allModules.jobs,
@@ -219,7 +219,7 @@ export default function WorkforceDashboardPage() {
       ]),
     },
     {
-      titleKey: "workforce.groups.employeeManagement",
+      titleKey: "Employee Management",
       items: filterByAccess([
         allModules.employees,
         allModules.assignments,
@@ -228,14 +228,14 @@ export default function WorkforceDashboardPage() {
       ]),
     },
     {
-      titleKey: "workforce.groups.employeeLifecycle",
+      titleKey: "Employee Lifecycle",
       items: filterByAccess([
         allModules.onboarding,
         allModules.offboarding,
       ]),
     },
     {
-      titleKey: "workforce.groups.analyticsPlanning",
+      titleKey: "Analytics & Planning",
       items: filterByAccess([
         allModules.orgChanges,
         allModules.forecasting,
