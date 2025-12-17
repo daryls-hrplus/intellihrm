@@ -6,72 +6,131 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// PII fields that should be masked if user doesn't have PII access
+const PII_FIELDS = [
+  'email', 'phone', 'mobile', 'address', 'ssn', 'national_id', 'passport_number',
+  'bank_account', 'bank_routing', 'personal_email', 'emergency_contact_phone',
+  'date_of_birth', 'dob', 'home_address', 'mailing_address', 'personal_phone'
+];
+
+// Function to mask PII in data
+function maskPiiInData(data: any[], canViewPii: boolean): any[] {
+  if (canViewPii || !data) return data;
+  
+  return data.map(row => {
+    const maskedRow = { ...row };
+    for (const key of Object.keys(maskedRow)) {
+      const lowerKey = key.toLowerCase();
+      if (PII_FIELDS.some(piiField => lowerKey.includes(piiField))) {
+        maskedRow[key] = '***REDACTED***';
+      }
+      // Handle nested objects (e.g., profiles relation)
+      if (typeof maskedRow[key] === 'object' && maskedRow[key] !== null) {
+        if (Array.isArray(maskedRow[key])) {
+          maskedRow[key] = maskPiiInData(maskedRow[key], false);
+        } else {
+          maskedRow[key] = maskPiiInObject(maskedRow[key]);
+        }
+      }
+    }
+    return maskedRow;
+  });
+}
+
+function maskPiiInObject(obj: Record<string, any>): Record<string, any> {
+  const masked = { ...obj };
+  for (const key of Object.keys(masked)) {
+    const lowerKey = key.toLowerCase();
+    if (PII_FIELDS.some(piiField => lowerKey.includes(piiField))) {
+      masked[key] = '***REDACTED***';
+    }
+    if (typeof masked[key] === 'object' && masked[key] !== null && !Array.isArray(masked[key])) {
+      masked[key] = maskPiiInObject(masked[key]);
+    }
+  }
+  return masked;
+}
+
 // Module-specific data source configurations
-const moduleDataSources: Record<string, { table: string; fields: string; description: string }> = {
+const moduleDataSources: Record<string, { table: string; fields: string; description: string; companyField?: string; departmentField?: string }> = {
   workforce: {
     table: 'profiles',
     fields: '*, departments(*), positions(*)',
-    description: 'Employee workforce data including departments, positions, and employee information'
+    description: 'Employee workforce data including departments, positions, and employee information',
+    companyField: 'company_id',
+    departmentField: 'department_id'
   },
   leave: {
     table: 'leave_requests',
-    fields: '*, leave_types(*), profiles!leave_requests_employee_id_fkey(first_name, last_name, employee_id)',
-    description: 'Leave request data including types, durations, and approval status'
+    fields: '*, leave_types(*), profiles!leave_requests_employee_id_fkey(first_name, last_name, employee_id, company_id, department_id)',
+    description: 'Leave request data including types, durations, and approval status',
+    companyField: 'company_id'
   },
   compensation: {
     table: 'employee_compensation',
-    fields: '*, pay_elements(*), profiles(*)',
-    description: 'Compensation data including salaries, allowances, and pay elements'
+    fields: '*, pay_elements(*), profiles(first_name, last_name, employee_id, company_id, department_id)',
+    description: 'Compensation data including salaries, allowances, and pay elements',
+    companyField: 'company_id'
   },
   benefits: {
     table: 'benefit_enrollments',
-    fields: '*, benefit_plans(*), profiles(*)',
-    description: 'Benefit enrollment data including plans and employee participation'
+    fields: '*, benefit_plans(*), profiles(first_name, last_name, employee_id, company_id, department_id)',
+    description: 'Benefit enrollment data including plans and employee participation',
+    companyField: 'company_id'
   },
   training: {
     table: 'training_enrollments',
-    fields: '*, training_courses(*), profiles(*)',
-    description: 'Training enrollment and completion data'
+    fields: '*, training_courses(*), profiles(first_name, last_name, employee_id, company_id, department_id)',
+    description: 'Training enrollment and completion data',
+    companyField: 'company_id'
   },
   succession: {
     table: 'succession_plans',
-    fields: '*, positions(*), profiles(*)',
-    description: 'Succession planning data including key positions and successors'
+    fields: '*, positions(*), profiles(first_name, last_name, employee_id, company_id, department_id)',
+    description: 'Succession planning data including key positions and successors',
+    companyField: 'company_id'
   },
   recruitment: {
     table: 'applications',
-    fields: '*, candidates(*), job_requisitions(*)',
+    fields: '*, candidates(*), job_requisitions(*, companies(id, name))',
     description: 'Recruitment data including applications, candidates, and job requisitions'
   },
   hse: {
     table: 'hse_incidents',
     fields: '*',
-    description: 'Health and safety incident reports and risk assessments'
+    description: 'Health and safety incident reports and risk assessments',
+    companyField: 'company_id',
+    departmentField: 'department_id'
   },
   'employee-relations': {
     table: 'er_cases',
     fields: '*',
-    description: 'Employee relations cases, disciplinary actions, and recognition'
+    description: 'Employee relations cases, disciplinary actions, and recognition',
+    companyField: 'company_id'
   },
   property: {
     table: 'asset_assignments',
-    fields: '*, company_assets(*), profiles(*)',
-    description: 'Company property and asset assignment data'
+    fields: '*, company_assets(*), profiles(first_name, last_name, employee_id, company_id, department_id)',
+    description: 'Company property and asset assignment data',
+    companyField: 'company_id'
   },
   attendance: {
     table: 'time_clock_entries',
-    fields: '*, profiles(*)',
-    description: 'Time and attendance records including clock-in/out data'
+    fields: '*, profiles(first_name, last_name, employee_id, company_id, department_id)',
+    description: 'Time and attendance records including clock-in/out data',
+    companyField: 'company_id'
   },
   performance: {
     table: 'appraisal_participants',
-    fields: '*, appraisal_cycles(*), profiles(*)',
-    description: 'Performance appraisal and evaluation data'
+    fields: '*, appraisal_cycles(*), profiles(first_name, last_name, employee_id, company_id, department_id)',
+    description: 'Performance appraisal and evaluation data',
+    companyField: 'company_id'
   },
   payroll: {
     table: 'payroll_records',
-    fields: '*, profiles(first_name, last_name, employee_id), payroll_runs(period_start, period_end, status)',
-    description: 'Payroll records including earnings, deductions, and pay period data'
+    fields: '*, profiles(first_name, last_name, employee_id, company_id, department_id), payroll_runs(period_start, period_end, status, company_id)',
+    description: 'Payroll records including earnings, deductions, and pay period data',
+    companyField: 'company_id'
   }
 };
 
@@ -81,7 +140,16 @@ serve(async (req) => {
   }
 
   try {
-    const { action, reportId, layoutContent, reportName, reportType, userFeedback, filters, companyId, moduleName } = await req.json();
+    const { 
+      action, reportId, layoutContent, reportName, reportType, userFeedback, 
+      filters, companyId, moduleName,
+      // Permission context from frontend
+      userId,
+      accessibleCompanyIds,
+      accessibleDepartmentIds,
+      canViewPii,
+      isAdmin
+    } = await req.json();
     
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {
@@ -94,6 +162,66 @@ serve(async (req) => {
 
     const moduleConfig = moduleDataSources[moduleName] || moduleDataSources.workforce;
     const moduleDisplayName = moduleName.charAt(0).toUpperCase() + moduleName.slice(1).replace(/-/g, ' ');
+
+    // Helper function to apply permission filters to queries
+    const applyPermissionFilters = (query: any) => {
+      // Admins with no specific restrictions get full access
+      if (isAdmin && (!accessibleCompanyIds || accessibleCompanyIds.length === 0)) {
+        // Apply single company filter if provided
+        if (companyId && moduleConfig.companyField) {
+          query = query.eq(moduleConfig.companyField, companyId);
+        }
+        return query;
+      }
+
+      // Apply company filter based on user's accessible companies
+      if (moduleConfig.companyField) {
+        if (accessibleCompanyIds && accessibleCompanyIds.length > 0) {
+          // Filter to accessible companies, and optionally the selected company
+          const companyFilter = companyId 
+            ? accessibleCompanyIds.filter((id: string) => id === companyId)
+            : accessibleCompanyIds;
+          
+          if (companyFilter.length === 0) {
+            // User doesn't have access to selected company
+            throw new Error("Access denied: You don't have permission to access this company's data");
+          }
+          query = query.in(moduleConfig.companyField, companyFilter);
+        } else if (companyId) {
+          query = query.eq(moduleConfig.companyField, companyId);
+        }
+      }
+
+      // Apply department filter if module supports it and user has department restrictions
+      if (moduleConfig.departmentField && accessibleDepartmentIds && accessibleDepartmentIds.length > 0) {
+        query = query.in(moduleConfig.departmentField, accessibleDepartmentIds);
+      }
+
+      return query;
+    };
+
+    // Log data access for audit
+    const logDataAccess = async (recordCount: number) => {
+      if (userId) {
+        try {
+          await supabase.from('audit_logs').insert({
+            user_id: userId,
+            action: 'VIEW',
+            entity_type: `ai_report_${moduleName}`,
+            entity_id: reportId,
+            metadata: {
+              action: action,
+              record_count: recordCount,
+              pii_accessed: canViewPii,
+              company_id: companyId,
+              filters: filters
+            }
+          });
+        } catch (e) {
+          console.error("Failed to log audit:", e);
+        }
+      }
+    };
 
     if (action === 'analyze_layout') {
       const systemPrompt = `You are a ${moduleDisplayName} report designer AI. Analyze the provided layout document and extract:
@@ -231,6 +359,7 @@ Return a JSON object with the updated structure.`;
         throw new Error("Report not found");
       }
 
+      // Note: Simulation uses fake data, but we still respect PII masking preference
       const systemPrompt = `You are a ${moduleDisplayName} report generator. Generate realistic sample data for a report preview.
 Based on the report structure, create sample data that demonstrates how the report will look.
 
@@ -241,6 +370,8 @@ Report Type: ${report.report_type}
 Module: ${moduleDisplayName}
 Data Source: ${moduleConfig.description}
 Filters: ${JSON.stringify(filters || report.filter_configuration, null, 2)}
+
+${!canViewPii ? 'IMPORTANT: The user does not have PII access. Replace all personal identifiable information (email, phone, address, SSN, bank details, date of birth) with "***REDACTED***" in the sample data.' : ''}
 
 Generate:
 1. Sample data rows with realistic values for ${moduleDisplayName}
@@ -304,13 +435,11 @@ Return a JSON with:
 
       const appliedFilters = filters || report.filter_configuration;
       
-      // Dynamic query based on module
+      // Dynamic query based on module with permission filtering
       let query = supabase.from(moduleConfig.table).select(moduleConfig.fields);
       
-      // Apply company filter if the table has company_id
-      if (['leave', 'compensation', 'benefits', 'training', 'succession', 'hse', 'employee-relations', 'property', 'attendance', 'performance', 'payroll'].includes(moduleName)) {
-        query = query.eq('company_id', companyId);
-      }
+      // Apply permission-based filters
+      query = applyPermissionFilters(query);
 
       if (appliedFilters.startDate) {
         query = query.gte('created_at', appliedFilters.startDate);
@@ -326,6 +455,12 @@ Return a JSON with:
         throw new Error(`Failed to fetch ${moduleName} data`);
       }
 
+      // Apply PII masking if user doesn't have PII access
+      const processedData = maskPiiInData(moduleData || [], canViewPii === true);
+
+      // Log data access for audit
+      await logDataAccess(processedData.length);
+
       const systemPrompt = `You are a ${moduleDisplayName} report generator. Transform real data into the defined report structure.
 
 Report Structure:
@@ -333,6 +468,8 @@ ${JSON.stringify(report.report_structure, null, 2)}
 
 Report Type: ${report.report_type}
 Module: ${moduleDisplayName}
+
+${!canViewPii ? 'Note: PII fields have been redacted for this user. Display them as "***REDACTED***" in the report.' : ''}
 
 Process the provided data and generate:
 1. Properly formatted data rows following the structure
@@ -356,7 +493,7 @@ Return a JSON with:
           model: "google/gemini-2.5-flash",
           messages: [
             { role: "system", content: systemPrompt },
-            { role: "user", content: `Real ${moduleDisplayName} data (${moduleData?.length || 0} records):\n${JSON.stringify(moduleData?.slice(0, 50), null, 2)}` }
+            { role: "user", content: `Real ${moduleDisplayName} data (${processedData?.length || 0} records):\n${JSON.stringify(processedData?.slice(0, 50), null, 2)}` }
           ],
           response_format: { type: "json_object" }
         }),
@@ -377,7 +514,8 @@ Return a JSON with:
           data_sources: [{
             table: moduleConfig.table,
             filters: appliedFilters,
-            recordCount: moduleData?.length || 0
+            recordCount: processedData?.length || 0,
+            piiMasked: !canViewPii
           }]
         })
         .eq('id', reportId);
@@ -385,7 +523,8 @@ Return a JSON with:
       return new Response(JSON.stringify({ 
         success: true, 
         reportData: processedReport,
-        recordCount: moduleData?.length || 0,
+        recordCount: processedData?.length || 0,
+        piiMasked: !canViewPii,
         message: `Report generated with real ${moduleDisplayName} data.`
       }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -407,9 +546,8 @@ Return a JSON with:
       
       let query = supabase.from(moduleConfig.table).select(moduleConfig.fields);
       
-      if (['leave', 'compensation', 'benefits', 'training', 'succession', 'hse', 'employee-relations', 'property', 'attendance', 'performance', 'payroll'].includes(moduleName)) {
-        query = query.eq('company_id', companyId);
-      }
+      // Apply permission-based filters
+      query = applyPermissionFilters(query);
 
       if (appliedFilters.startDate) {
         query = query.gte('created_at', appliedFilters.startDate);
@@ -424,12 +562,20 @@ Return a JSON with:
         throw new Error(`Failed to fetch ${moduleName} data`);
       }
 
+      // Apply PII masking if user doesn't have PII access
+      const processedData = maskPiiInData(moduleData || [], canViewPii === true);
+
+      // Log data access for audit
+      await logDataAccess(processedData.length);
+
       const systemPrompt = `Transform ${moduleDisplayName} data into the saved report structure.
 
 Report Structure:
 ${JSON.stringify(report.report_structure, null, 2)}
 
 Report Type: ${report.report_type}
+
+${!canViewPii ? 'Note: PII fields have been redacted. Display as "***REDACTED***".' : ''}
 
 Return formatted report data with totals and chart data if applicable.`;
 
@@ -443,7 +589,7 @@ Return formatted report data with totals and chart data if applicable.`;
           model: "google/gemini-2.5-flash",
           messages: [
             { role: "system", content: systemPrompt },
-            { role: "user", content: `${moduleDisplayName} data:\n${JSON.stringify(moduleData?.slice(0, 50), null, 2)}` }
+            { role: "user", content: `${moduleDisplayName} data:\n${JSON.stringify(processedData?.slice(0, 50), null, 2)}` }
           ],
           response_format: { type: "json_object" }
         }),
@@ -464,7 +610,8 @@ Return formatted report data with totals and chart data if applicable.`;
       return new Response(JSON.stringify({ 
         success: true, 
         reportData: reportOutput,
-        recordCount: moduleData?.length || 0,
+        recordCount: processedData?.length || 0,
+        piiMasked: !canViewPii,
         message: "Report generated successfully."
       }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },

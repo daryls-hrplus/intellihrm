@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,10 +14,11 @@ import { toast } from "sonner";
 import { 
   Plus, Upload, Sparkles, RefreshCw, Database, Save, Play, 
   FileSpreadsheet, Download, Printer, Trash2, MessageSquare,
-  Check, Clock, AlertCircle, Loader2
+  Check, Clock, AlertCircle, Loader2, ShieldAlert
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { format } from "date-fns";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface AIReport {
   id: string;
@@ -43,6 +44,7 @@ interface AIModuleReportBuilderProps {
 
 export function AIModuleReportBuilder({ reportType, moduleName, companyId }: AIModuleReportBuilderProps) {
   const { t } = useTranslation();
+  const { user, roles } = useAuth();
   const [reports, setReports] = useState<AIReport[]>([]);
   const [selectedReport, setSelectedReport] = useState<AIReport | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -51,6 +53,7 @@ export function AIModuleReportBuilder({ reportType, moduleName, companyId }: AIM
   const [showIterateDialog, setShowIterateDialog] = useState(false);
   const [showFilterDialog, setShowFilterDialog] = useState(false);
   const [showPreviewDialog, setShowPreviewDialog] = useState(false);
+  const [piiMasked, setPiiMasked] = useState(false);
   
   const [newReportName, setNewReportName] = useState("");
   const [layoutContent, setLayoutContent] = useState("");
@@ -61,6 +64,61 @@ export function AIModuleReportBuilder({ reportType, moduleName, companyId }: AIM
   const [filterEndDate, setFilterEndDate] = useState("");
   
   const [previewData, setPreviewData] = useState<unknown>(null);
+  
+  // Permission state
+  const [userPermissions, setUserPermissions] = useState<{
+    accessibleCompanyIds: string[];
+    accessibleDepartmentIds: string[];
+    canViewPii: boolean;
+    isAdmin: boolean;
+  }>({
+    accessibleCompanyIds: [],
+    accessibleDepartmentIds: [],
+    canViewPii: false,
+    isAdmin: false
+  });
+
+  // Fetch user permissions on mount
+  useEffect(() => {
+    const fetchPermissions = async () => {
+      if (!user?.id) return;
+
+      try {
+        // Check if user is admin
+        const isAdmin = roles.includes('admin');
+        
+        // Fetch user's role permissions for PII access
+        const { data: userRolesData } = await supabase
+          .from('user_roles')
+          .select('role_id')
+          .eq('user_id', user.id);
+        
+        // Check PII access from roles table
+        let canViewPii = isAdmin;
+        if (userRolesData && userRolesData.length > 0) {
+          const roleIds = userRolesData.map(ur => ur.role_id).filter(Boolean);
+          if (roleIds.length > 0) {
+            const { data: rolesData } = await supabase
+              .from('roles')
+              .select('can_view_pii')
+              .in('id', roleIds);
+            canViewPii = canViewPii || (rolesData?.some(r => r.can_view_pii) ?? false);
+          }
+        }
+
+        setUserPermissions({
+          accessibleCompanyIds: [], // Will use companyId prop for filtering
+          accessibleDepartmentIds: [],
+          canViewPii,
+          isAdmin
+        });
+      } catch (error) {
+        console.error("Error fetching user permissions:", error);
+      }
+    };
+
+    fetchPermissions();
+  }, [user?.id, roles]);
 
   useEffect(() => {
     loadReports();
@@ -82,6 +140,15 @@ export function AIModuleReportBuilder({ reportType, moduleName, companyId }: AIM
 
     setReports((data || []) as unknown as AIReport[]);
   };
+
+  // Build permission context for edge function calls
+  const permissionContext = useMemo(() => ({
+    userId: user?.id,
+    accessibleCompanyIds: userPermissions.accessibleCompanyIds,
+    accessibleDepartmentIds: userPermissions.accessibleDepartmentIds,
+    canViewPii: userPermissions.canViewPii,
+    isAdmin: userPermissions.isAdmin
+  }), [user?.id, userPermissions]);
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -117,7 +184,8 @@ export function AIModuleReportBuilder({ reportType, moduleName, companyId }: AIM
           reportName: newReportName,
           reportType,
           moduleName,
-          companyId
+          companyId,
+          ...permissionContext
         }
       });
 
@@ -168,7 +236,8 @@ export function AIModuleReportBuilder({ reportType, moduleName, companyId }: AIM
           reportId: selectedReport.id,
           userFeedback: iterationFeedback,
           moduleName,
-          companyId
+          companyId,
+          ...permissionContext
         }
       });
 
@@ -195,7 +264,8 @@ export function AIModuleReportBuilder({ reportType, moduleName, companyId }: AIM
           reportId: report.id,
           filters: { startDate: filterStartDate, endDate: filterEndDate },
           moduleName,
-          companyId
+          companyId,
+          ...permissionContext
         }
       });
 
@@ -222,13 +292,15 @@ export function AIModuleReportBuilder({ reportType, moduleName, companyId }: AIM
           reportId: report.id,
           filters: { startDate: filterStartDate, endDate: filterEndDate },
           moduleName,
-          companyId
+          companyId,
+          ...permissionContext
         }
       });
 
       if (error) throw error;
 
       setPreviewData(data.reportData);
+      setPiiMasked(data.piiMasked === true);
       setShowPreviewDialog(true);
       toast.success(`Report generated with ${data.recordCount} records`);
       loadReports();
@@ -264,13 +336,15 @@ export function AIModuleReportBuilder({ reportType, moduleName, companyId }: AIM
           reportId: report.id,
           filters: { startDate: filterStartDate, endDate: filterEndDate },
           moduleName,
-          companyId
+          companyId,
+          ...permissionContext
         }
       });
 
       if (error) throw error;
 
       setPreviewData(data.reportData);
+      setPiiMasked(data.piiMasked === true);
       setShowPreviewDialog(true);
       toast.success(`Report generated with ${data.recordCount} records`);
     } catch (error) {
