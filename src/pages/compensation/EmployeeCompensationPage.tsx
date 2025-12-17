@@ -103,7 +103,14 @@ interface PositionCompensationItem {
   id: string;
   amount: number;
   currency: string;
+  frequency_id?: string;
   pay_element?: { name: string };
+}
+
+interface LookupValue {
+  id: string;
+  code: string;
+  name: string;
 }
 
 interface EmployeeCompensation {
@@ -151,6 +158,7 @@ export default function EmployeeCompensationPage() {
   const [positionCompensationItems, setPositionCompensationItems] = useState<PositionCompensationItem[]>([]);
   const [paySpine, setPaySpine] = useState<PaySpine | null>(null);
   const [spinalPoints, setSpinalPoints] = useState<SpinalPoint[]>([]);
+  const [frequencies, setFrequencies] = useState<LookupValue[]>([]);
 
   // Form state
   const [formEmployeeId, setFormEmployeeId] = useState("");
@@ -205,6 +213,14 @@ export default function EmployeeCompensationPage() {
   }, [selectedCompanyId, selectedEmployeeId]);
 
   const loadCompanies = async () => {
+    // Load frequencies
+    const { data: freqData } = await supabase
+      .from("lookup_values")
+      .select("id, code, name")
+      .eq("category", "payment_frequency")
+      .eq("is_active", true);
+    setFrequencies(freqData || []);
+
     const { data } = await supabase
       .from("companies")
       .select("id, name, code")
@@ -333,7 +349,7 @@ export default function EmployeeCompensationPage() {
       const { data: compData } = await supabase
         .from("position_compensation")
         .select(`
-          id, amount, currency,
+          id, amount, currency, frequency_id,
           pay_element:pay_elements!position_compensation_pay_element_id_fkey(name)
         `)
         .eq("position_id", pos.id)
@@ -526,6 +542,43 @@ export default function EmployeeCompensationPage() {
       style: "currency",
       currency: currency,
     }).format(amount);
+  };
+
+  // Get annualization multiplier based on frequency
+  const getAnnualMultiplier = (frequencyId: string | null | undefined): number => {
+    if (!frequencyId) return 1;
+    const freq = frequencies.find((f) => f.id === frequencyId);
+    if (!freq) return 1;
+    
+    const code = freq.code?.toLowerCase() || freq.name?.toLowerCase() || "";
+    
+    if (code.includes("annual") || code.includes("yearly")) return 1;
+    if (code.includes("monthly")) return 12;
+    if (code.includes("semi-monthly") || code.includes("semimonthly")) return 24;
+    if (code.includes("bi-weekly") || code.includes("biweekly") || code.includes("fortnightly")) return 26;
+    if (code.includes("weekly")) return 52;
+    if (code.includes("daily")) return 260;
+    if (code.includes("hourly")) return 2080;
+    if (code.includes("quarterly")) return 4;
+    
+    return 1;
+  };
+
+  // Get annual multiplier based on frequency string (for employee compensation)
+  const getAnnualMultiplierByFrequency = (frequency: string): number => {
+    const code = frequency?.toLowerCase() || "";
+    
+    if (code.includes("annual") || code.includes("yearly")) return 1;
+    if (code.includes("monthly")) return 12;
+    if (code.includes("semi-monthly") || code.includes("semimonthly")) return 24;
+    if (code.includes("bi-weekly") || code.includes("biweekly") || code.includes("fortnightly")) return 26;
+    if (code.includes("weekly")) return 52;
+    if (code.includes("daily")) return 260;
+    if (code.includes("hourly")) return 2080;
+    if (code.includes("quarterly")) return 4;
+    if (code.includes("one-time")) return 1;
+    
+    return 1;
   };
 
   // Check if compensation amount is within position salary range
@@ -740,7 +793,7 @@ export default function EmployeeCompensationPage() {
 
                 {/* Total Position Compensation Range Line */}
                 {(() => {
-                  const additionalComp = positionCompensationItems.reduce((sum, item) => sum + item.amount, 0);
+                  const additionalComp = positionCompensationItems.reduce((sum, item) => sum + (item.amount * getAnnualMultiplier(item.frequency_id)), 0);
                   const currency = employeePrimaryPosition.salary_grade?.currency || paySpine?.currency || "USD";
                   
                   if (employeePrimaryPosition.compensation_model === 'salary_grade' && employeePrimaryPosition.salary_grade) {
