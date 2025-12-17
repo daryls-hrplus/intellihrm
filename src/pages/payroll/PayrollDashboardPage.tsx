@@ -235,6 +235,14 @@ export default function PayrollDashboardPage() {
       color: "bg-slate-500/10 text-slate-600",
       tabCode: "archive_settings",
     },
+    {
+      title: t("payroll.modules.taxAllowances.title", "Tax Allowances"),
+      description: t("payroll.modules.taxAllowances.description", "Manage non-taxable allowances for employees"),
+      icon: Receipt,
+      href: "/payroll/tax-allowances",
+      color: "bg-emerald-500/10 text-emerald-600",
+      tabCode: "tax_allowances",
+    },
   ].filter(f => hasTabAccess("payroll", f.tabCode));
 
   const statItems = [

@@ -29,6 +29,7 @@ import { EmployeeEmergencyContactsTab } from "@/components/employee/EmployeeEmer
 import { EmployeePayGroupTab } from "@/components/employee/EmployeePayGroupTab";
 import { EmployeeBranchLocationsTab } from "@/components/employee/EmployeeBranchLocationsTab";
 import { EmployeeCompetenciesTab } from "@/components/employee/EmployeeCompetenciesTab";
+import { EmployeeTaxAllowancesTab } from "@/components/employee/EmployeeTaxAllowancesTab";
 import { EmployeeEditDialog } from "@/components/employee/EmployeeEditDialog";
 
 import {
@@ -58,6 +59,7 @@ import {
   AlertTriangle,
   DollarSign,
   Sparkles,
+  Receipt,
   Pencil,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -297,6 +299,7 @@ export default function EmployeeProfilePage() {
             <TabsTrigger value="memberships"><Heart className="h-4 w-4 mr-1" />{t("workforce.profile.tabs.memberships")}</TabsTrigger>
             <TabsTrigger value="paygroup"><DollarSign className="h-4 w-4 mr-1" />{t("workforce.profile.tabs.payGroup")}</TabsTrigger>
             <TabsTrigger value="references"><UserCheck className="h-4 w-4 mr-1" />{t("workforce.profile.tabs.references")}</TabsTrigger>
+            <TabsTrigger value="tax_allowances"><Receipt className="h-4 w-4 mr-1" />{t("workforce.profile.tabs.taxAllowances", "Tax Allowances")}</TabsTrigger>
             <TabsTrigger value="work_permits"><FileCheck className="h-4 w-4 mr-1" />{t("workforce.profile.tabs.workPermits")}</TabsTrigger>
           </TabsList>
 
@@ -358,6 +361,10 @@ export default function EmployeeProfilePage() {
 
           <TabsContent value="memberships" className="mt-6">
             <EmployeeMembershipsTab employeeId={employee.id} />
+          </TabsContent>
+
+          <TabsContent value="tax_allowances" className="mt-6">
+            <EmployeeTaxAllowancesTab employeeId={employee.id} />
           </TabsContent>
 
           <TabsContent value="overview" className="mt-6">
