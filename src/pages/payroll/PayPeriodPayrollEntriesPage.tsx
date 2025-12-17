@@ -11,6 +11,7 @@ import { format, parseISO } from "date-fns";
 import { WorkRecordsSection } from "@/components/payroll/WorkRecordsSection";
 import { AllowancesSection } from "@/components/payroll/AllowancesSection";
 import { DeductionsSection } from "@/components/payroll/DeductionsSection";
+import { RegularDeductionsSection } from "@/components/payroll/RegularDeductionsSection";
 import { PayrollSimulator } from "@/components/payroll/PayrollSimulator";
 import { SalarySummarySection } from "@/components/payroll/SalarySummarySection";
 import { useTranslation } from "react-i18next";
@@ -41,7 +42,7 @@ interface Employee {
   full_name: string;
 }
 
-export default function SalaryOvertimePage() {
+export default function PayPeriodPayrollEntriesPage() {
   const { t } = useTranslation();
   const [companies, setCompanies] = useState<Company[]>([]);
   const [payGroups, setPayGroups] = useState<PayGroup[]>([]);
@@ -54,6 +55,7 @@ export default function SalaryOvertimePage() {
   const [selectedEmployee, setSelectedEmployee] = useState<string>("");
   
   const [showSimulator, setShowSimulator] = useState(false);
+  const [deductionsKey, setDeductionsKey] = useState(0);
 
   useEffect(() => {
     loadCompanies();
@@ -129,13 +131,18 @@ export default function SalaryOvertimePage() {
     setEmployees(data || []);
   };
 
+  const handleRegularDeductionsApplied = () => {
+    // Refresh the deductions section
+    setDeductionsKey(prev => prev + 1);
+  };
+
   return (
     <AppLayout>
       <div className="space-y-6">
         <Breadcrumbs
           items={[
             { label: t("navigation.payroll"), href: "/payroll" },
-            { label: t("payroll.salaryOvertime.title") },
+            { label: "Pay Period Payroll Entries" },
           ]}
         />
 
@@ -144,8 +151,8 @@ export default function SalaryOvertimePage() {
             <FileText className="h-6 w-6 text-primary" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold tracking-tight">{t("payroll.salaryOvertime.title")}</h1>
-            <p className="text-muted-foreground">{t("payroll.salaryOvertime.subtitle")}</p>
+            <h1 className="text-2xl font-bold tracking-tight">Pay Period Payroll Entries</h1>
+            <p className="text-muted-foreground">Manage compensation, allowances, and deductions for a pay period</p>
           </div>
         </div>
 
@@ -269,8 +276,17 @@ export default function SalaryOvertimePage() {
             payPeriodId={selectedPayPeriod}
           />
 
-          {/* Deductions Section */}
+          {/* Regular Deductions Section - Pull from employee setup */}
+          <RegularDeductionsSection 
+            companyId={selectedCompany}
+            employeeId={selectedEmployee}
+            payPeriodId={selectedPayPeriod}
+            onApplyDeductions={handleRegularDeductionsApplied}
+          />
+
+          {/* Period-Specific Deductions Section */}
           <DeductionsSection 
+            key={deductionsKey}
             companyId={selectedCompany}
             employeeId={selectedEmployee}
             payPeriodId={selectedPayPeriod}

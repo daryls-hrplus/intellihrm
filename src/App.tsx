@@ -249,7 +249,8 @@ import PayrollReportsPage from "./pages/payroll/PayrollReportsPage";
 import YearEndProcessingPage from "./pages/payroll/YearEndProcessingPage";
 import StatutoryDeductionTypesPage from "./pages/payroll/StatutoryDeductionTypesPage";
 import PayslipsPage from "./pages/payroll/PayslipsPage";
-import SalaryOvertimePage from "./pages/payroll/SalaryOvertimePage";
+import PayPeriodPayrollEntriesPage from "./pages/payroll/PayPeriodPayrollEntriesPage";
+import EmployeeRegularDeductionsPage from "./pages/payroll/EmployeeRegularDeductionsPage";
 import LeavePaymentConfigPage from "./pages/payroll/LeavePaymentConfigPage";
 import LeaveBalanceBuyoutPage from "./pages/payroll/LeaveBalanceBuyoutPage";
 import PayslipTemplateConfigPage from "./pages/payroll/PayslipTemplateConfigPage";
@@ -1563,7 +1564,15 @@ const App = () => (
               path="/payroll/salary-overtime"
               element={
                 <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="payroll">
-                  <SalaryOvertimePage />
+                  <PayPeriodPayrollEntriesPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/payroll/regular-deductions"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="payroll">
+                  <EmployeeRegularDeductionsPage />
                 </ProtectedRoute>
               }
             />
