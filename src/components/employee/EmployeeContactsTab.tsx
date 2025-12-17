@@ -13,7 +13,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Plus, Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
-import { format } from "date-fns";
+import { getTodayString, formatDateForDisplay } from "@/utils/dateUtils";
 
 interface EmployeeContactsTabProps {
   employeeId: string;
@@ -36,7 +36,7 @@ export function EmployeeContactsTab({ employeeId }: EmployeeContactsTabProps) {
     contact_type: "",
     contact_value: "",
     is_primary: false,
-    start_date: new Date().toISOString().split('T')[0],
+      start_date: getTodayString(),
     end_date: "",
     notes: "",
   });
@@ -101,7 +101,7 @@ export function EmployeeContactsTab({ employeeId }: EmployeeContactsTabProps) {
       contact_type: "",
       contact_value: "",
       is_primary: false,
-      start_date: new Date().toISOString().split('T')[0],
+      start_date: getTodayString(),
       end_date: "",
       notes: "",
     });
@@ -151,8 +151,8 @@ export function EmployeeContactsTab({ employeeId }: EmployeeContactsTabProps) {
                   <TableCell className="capitalize">{item.contact_type}</TableCell>
                   <TableCell>{item.contact_value}</TableCell>
                   <TableCell>{item.is_primary ? <Badge>Primary</Badge> : "-"}</TableCell>
-                  <TableCell>{format(new Date(item.start_date), "PP")}</TableCell>
-                  <TableCell>{item.end_date ? format(new Date(item.end_date), "PP") : "-"}</TableCell>
+                  <TableCell>{formatDateForDisplay(item.start_date, "PP")}</TableCell>
+                  <TableCell>{item.end_date ? formatDateForDisplay(item.end_date, "PP") : "-"}</TableCell>
                   <TableCell>
                     <div className="flex gap-1">
                       <Button variant="ghost" size="sm" onClick={() => handleEdit(item)}><Pencil className="h-4 w-4" /></Button>

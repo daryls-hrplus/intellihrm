@@ -16,7 +16,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { format, isBefore, isAfter } from "date-fns";
+import { isBefore, isAfter } from "date-fns";
+import { formatDateForDisplay, parseLocalDate } from "@/utils/dateUtils";
 import { Plus, UserCheck, Calendar, Trash2 } from "lucide-react";
 
 interface Delegation {
@@ -100,7 +101,7 @@ export default function ApprovalDelegationsPage() {
       return;
     }
 
-    if (new Date(formData.end_date) < new Date(formData.start_date)) {
+    if (parseLocalDate(formData.end_date)! < parseLocalDate(formData.start_date)!) {
       toast({ title: "Error", description: "End date must be after start date", variant: "destructive" });
       return;
     }
@@ -145,12 +146,12 @@ export default function ApprovalDelegationsPage() {
 
   const getDelegationStatus = (delegation: Delegation) => {
     const today = new Date();
-    const start = new Date(delegation.start_date);
-    const end = new Date(delegation.end_date);
+    const start = parseLocalDate(delegation.start_date);
+    const end = parseLocalDate(delegation.end_date);
 
     if (!delegation.is_active) return { label: "Inactive", color: "bg-muted text-muted-foreground" };
-    if (isBefore(today, start)) return { label: "Scheduled", color: "bg-blue-500/20 text-blue-700" };
-    if (isAfter(today, end)) return { label: "Expired", color: "bg-red-500/20 text-red-700" };
+    if (start && isBefore(today, start)) return { label: "Scheduled", color: "bg-blue-500/20 text-blue-700" };
+    if (end && isAfter(today, end)) return { label: "Expired", color: "bg-red-500/20 text-red-700" };
     return { label: "Active", color: "bg-green-500/20 text-green-700" };
   };
 
@@ -209,7 +210,7 @@ export default function ApprovalDelegationsPage() {
                         <TableCell>
                           <div className="flex items-center gap-1 text-sm">
                             <Calendar className="h-4 w-4" />
-                            {format(new Date(del.start_date), "MMM d")} - {format(new Date(del.end_date), "MMM d, yyyy")}
+                            {formatDateForDisplay(del.start_date, "MMM d")} - {formatDateForDisplay(del.end_date, "MMM d, yyyy")}
                           </div>
                         </TableCell>
                         <TableCell className="max-w-[200px] truncate">{del.reason || "-"}</TableCell>

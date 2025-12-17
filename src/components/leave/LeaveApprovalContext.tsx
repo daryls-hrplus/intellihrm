@@ -14,7 +14,8 @@ import {
   History,
   Loader2
 } from "lucide-react";
-import { format, parseISO, isWithinInterval, startOfYear, endOfYear } from "date-fns";
+import { format, isWithinInterval, startOfYear, endOfYear } from "date-fns";
+import { formatDateForDisplay, parseLocalDate } from "@/utils/dateUtils";
 
 interface LeaveApprovalContextProps {
   employeeId: string;
@@ -168,15 +169,15 @@ export function LeaveApprovalContext({
 
             if (overlaps) {
               // Filter for actual overlaps
-              const requestStart = parseISO(startDate);
-              const requestEnd = parseISO(endDate);
+              const requestStart = parseLocalDate(startDate);
+              const requestEnd = parseLocalDate(endDate);
               
               const filteredOverlaps = overlaps
                 .filter((o) => {
-                  const oStart = parseISO(o.start_date);
-                  const oEnd = parseISO(o.end_date);
+                  const oStart = parseLocalDate(o.start_date);
+                  const oEnd = parseLocalDate(o.end_date);
                   // Check if date ranges overlap
-                  return (oStart <= requestEnd && oEnd >= requestStart);
+                  return (oStart && oEnd && requestStart && requestEnd && oStart <= requestEnd && oEnd >= requestStart);
                 })
                 .map((o) => ({
                   id: o.id,
@@ -332,9 +333,9 @@ export function LeaveApprovalContext({
                     </div>
                     <div className="flex items-center gap-2">
                       <span className="text-muted-foreground">
-                        {format(parseISO(request.start_date), "MMM d")}
+                        {formatDateForDisplay(request.start_date, "MMM d")}
                         {request.start_date !== request.end_date && (
-                          <> - {format(parseISO(request.end_date), "MMM d")}</>
+                          <> - {formatDateForDisplay(request.end_date, "MMM d")}</>
                         )}
                       </span>
                       <Badge 
@@ -369,9 +370,9 @@ export function LeaveApprovalContext({
                       </div>
                       <div className="flex items-center gap-2">
                         <span className="text-muted-foreground">
-                          {format(parseISO(overlap.start_date), "MMM d")}
+                          {formatDateForDisplay(overlap.start_date, "MMM d")}
                           {overlap.start_date !== overlap.end_date && (
-                            <> - {format(parseISO(overlap.end_date), "MMM d")}</>
+                            <> - {formatDateForDisplay(overlap.end_date, "MMM d")}</>
                           )}
                         </span>
                         <Badge variant="outline" className="text-[10px] h-5">

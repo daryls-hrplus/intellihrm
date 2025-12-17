@@ -11,6 +11,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Plus, Pencil, Trash2, Upload, Download } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
+import { getTodayString } from "@/utils/dateUtils";
 
 interface EmployeeCertificatesTabProps {
   employeeId: string;
@@ -40,7 +41,7 @@ export function EmployeeCertificatesTab({ employeeId }: EmployeeCertificatesTabP
     certificate_number: "",
     issue_date: "",
     expiry_date: "",
-    start_date: new Date().toISOString().split('T')[0],
+    start_date: getTodayString(),
     end_date: "",
     file_url: "",
     file_name: "",
@@ -141,7 +142,7 @@ export function EmployeeCertificatesTab({ employeeId }: EmployeeCertificatesTabP
       certificate_number: "",
       issue_date: "",
       expiry_date: "",
-      start_date: new Date().toISOString().split('T')[0],
+      start_date: getTodayString(),
       end_date: "",
       file_url: "",
       file_name: "",

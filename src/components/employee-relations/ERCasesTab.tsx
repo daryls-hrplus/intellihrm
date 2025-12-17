@@ -13,6 +13,7 @@ import { Plus, Search, Loader2, Eye, AlertCircle } from 'lucide-react';
 import { useEmployeeRelations, ERCase } from '@/hooks/useEmployeeRelations';
 import { useAuth } from '@/contexts/AuthContext';
 import { format } from 'date-fns';
+import { getTodayString } from '@/utils/dateUtils';
 
 const CASE_TYPES = ['grievance', 'complaint', 'investigation', 'harassment', 'discrimination', 'conflict'];
 const CATEGORIES = ['workplace_safety', 'harassment', 'discrimination', 'policy_violation', 'manager_conflict', 'peer_conflict', 'compensation', 'other'];
@@ -76,7 +77,7 @@ export function ERCasesTab({ companyId }: ERCasesTabProps) {
   const handleStatusChange = async (caseId: string, newStatus: string) => {
     const updates: Partial<ERCase> = { status: newStatus };
     if (newStatus === 'resolved' || newStatus === 'closed') {
-      updates.actual_resolution_date = new Date().toISOString().split('T')[0];
+      updates.actual_resolution_date = getTodayString();
     }
     await updateCase.mutateAsync({ id: caseId, ...updates });
   };

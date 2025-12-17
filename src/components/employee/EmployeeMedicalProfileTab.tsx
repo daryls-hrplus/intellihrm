@@ -10,7 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Pencil, Plus } from "lucide-react";
 import { toast } from "sonner";
-import { format } from "date-fns";
+import { formatDateForDisplay, getTodayString } from "@/utils/dateUtils";
 
 interface EmployeeMedicalProfileTabProps {
   employeeId: string;
@@ -45,7 +45,7 @@ export function EmployeeMedicalProfileTab({ employeeId }: EmployeeMedicalProfile
     doctor_phone: "",
     insurance_provider: "",
     insurance_policy_number: "",
-    start_date: new Date().toISOString().split('T')[0],
+    start_date: getTodayString(),
     end_date: "",
   });
 
@@ -126,7 +126,7 @@ export function EmployeeMedicalProfileTab({ employeeId }: EmployeeMedicalProfile
         doctor_phone: "",
         insurance_provider: "",
         insurance_policy_number: "",
-        start_date: new Date().toISOString().split('T')[0],
+        start_date: getTodayString(),
         end_date: "",
       });
     }
@@ -152,8 +152,8 @@ export function EmployeeMedicalProfileTab({ employeeId }: EmployeeMedicalProfile
               <h4 className="font-medium mb-3">Basic Information</h4>
               <dl className="space-y-2 text-sm">
                 <div className="flex justify-between"><dt className="text-muted-foreground">Blood Type:</dt><dd>{profile.blood_type || "-"}</dd></div>
-                <div className="flex justify-between"><dt className="text-muted-foreground">Start Date:</dt><dd>{format(new Date(profile.start_date), "PP")}</dd></div>
-                <div className="flex justify-between"><dt className="text-muted-foreground">End Date:</dt><dd>{profile.end_date ? format(new Date(profile.end_date), "PP") : "-"}</dd></div>
+                <div className="flex justify-between"><dt className="text-muted-foreground">Start Date:</dt><dd>{formatDateForDisplay(profile.start_date, "PP")}</dd></div>
+                <div className="flex justify-between"><dt className="text-muted-foreground">End Date:</dt><dd>{profile.end_date ? formatDateForDisplay(profile.end_date, "PP") : "-"}</dd></div>
               </dl>
             </div>
             <div>

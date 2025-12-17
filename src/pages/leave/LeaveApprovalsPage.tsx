@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Textarea } from "@/components/ui/textarea";
 import { CalendarCheck, CheckCircle, XCircle, Clock, Eye } from "lucide-react";
-import { format } from "date-fns";
+import { formatDateForDisplay } from "@/utils/dateUtils";
 import {
   Table,
   TableBody,
@@ -153,9 +153,9 @@ export default function LeaveApprovalsPage() {
                       </div>
                     </TableCell>
                     <TableCell>
-                      {format(new Date(request.start_date), "MMM d")}
+                      {formatDateForDisplay(request.start_date, "MMM d")}
                       {request.start_date !== request.end_date && (
-                        <> - {format(new Date(request.end_date), "MMM d, yyyy")}</>
+                        <> - {formatDateForDisplay(request.end_date, "MMM d, yyyy")}</>
                       )}
                     </TableCell>
                     <TableCell>
@@ -164,7 +164,7 @@ export default function LeaveApprovalsPage() {
                     <TableCell>{getStatusBadge(request.status)}</TableCell>
                     <TableCell className="text-muted-foreground">
                       {request.submitted_at 
-                        ? format(new Date(request.submitted_at), "MMM d, yyyy")
+                        ? formatDateForDisplay(request.submitted_at, "MMM d, yyyy")
                         : "-"
                       }
                     </TableCell>
@@ -239,9 +239,9 @@ export default function LeaveApprovalsPage() {
                 <div className="flex justify-between">
                   <span className="text-sm text-muted-foreground">{t("leave.approvals.dates")}</span>
                   <span className="font-medium">
-                    {selectedRequest?.start_date && format(new Date(selectedRequest.start_date), "MMM d")}
+                    {selectedRequest?.start_date && formatDateForDisplay(selectedRequest.start_date, "MMM d")}
                     {selectedRequest?.start_date !== selectedRequest?.end_date && (
-                      <> - {selectedRequest?.end_date && format(new Date(selectedRequest.end_date), "MMM d, yyyy")}</>
+                      <> - {selectedRequest?.end_date && formatDateForDisplay(selectedRequest.end_date, "MMM d, yyyy")}</>
                     )}
                   </span>
                 </div>
@@ -310,9 +310,9 @@ export default function LeaveApprovalsPage() {
                 <div className="flex justify-between">
                   <span className="text-sm text-muted-foreground">{t("leave.approvals.dates")}</span>
                   <span className="font-medium">
-                    {selectedRequest?.start_date && format(new Date(selectedRequest.start_date), "MMM d, yyyy")}
+                    {selectedRequest?.start_date && formatDateForDisplay(selectedRequest.start_date, "MMM d, yyyy")}
                     {selectedRequest?.start_date !== selectedRequest?.end_date && (
-                      <> - {selectedRequest?.end_date && format(new Date(selectedRequest.end_date), "MMM d, yyyy")}</>
+                      <> - {selectedRequest?.end_date && formatDateForDisplay(selectedRequest.end_date, "MMM d, yyyy")}</>
                     )}
                   </span>
                 </div>

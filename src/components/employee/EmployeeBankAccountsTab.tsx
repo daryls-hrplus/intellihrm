@@ -11,6 +11,7 @@ import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { Plus, Pencil, Trash2, Building2 } from "lucide-react";
+import { getTodayString } from "@/utils/dateUtils";
 
 interface BankAccount {
   id: string;
@@ -70,7 +71,7 @@ export function EmployeeBankAccountsTab({ employeeId }: EmployeeBankAccountsTabP
       account_type: "checking",
       is_primary: false,
       currency: "USD",
-      effective_date: new Date().toISOString().split("T")[0],
+      effective_date: getTodayString(),
       end_date: "",
     },
   });
@@ -192,7 +193,7 @@ export function EmployeeBankAccountsTab({ employeeId }: EmployeeBankAccountsTabP
       account_type: "checking",
       is_primary: accounts.length === 0,
       currency: "USD",
-      effective_date: new Date().toISOString().split("T")[0],
+      effective_date: getTodayString(),
       end_date: "",
     });
     setDialogOpen(true);

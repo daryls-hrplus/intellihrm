@@ -39,7 +39,7 @@ import {
 import { toast } from "sonner";
 import { Plus, Pencil, Trash2, Loader2, Upload } from "lucide-react";
 import { BulkLookupValuesUpload } from "./BulkLookupValuesUpload";
-import { format } from "date-fns";
+import { formatDateForDisplay, parseLocalDate, getTodayString } from "@/utils/dateUtils";
 import { useAuditLog } from "@/hooks/useAuditLog";
 
 type LookupCategory = 
@@ -214,7 +214,7 @@ const defaultFormValues: LookupValueForm = {
   display_order: 0,
   is_default: false,
   is_active: true,
-  start_date: format(new Date(), "yyyy-MM-dd"),
+  start_date: getTodayString(),
   end_date: "",
 };
 
@@ -396,9 +396,9 @@ export function LookupValuesManagement() {
 
   const isValid = (value: LookupValue) => {
     const today = new Date();
-    const startDate = new Date(value.start_date);
-    const endDate = value.end_date ? new Date(value.end_date) : null;
-    return value.is_active && startDate <= today && (!endDate || endDate >= today);
+    const startDate = parseLocalDate(value.start_date);
+    const endDate = value.end_date ? parseLocalDate(value.end_date) : null;
+    return value.is_active && startDate && startDate <= today && (!endDate || endDate >= today);
   };
 
   const isSaving = createMutation.isPending || updateMutation.isPending;
@@ -497,10 +497,10 @@ export function LookupValuesManagement() {
                             )}
                           </TableCell>
                           <TableCell className="text-xs">
-                            <div>{format(new Date(value.start_date), "MMM d, yyyy")}</div>
+                            <div>{formatDateForDisplay(value.start_date)}</div>
                             {value.end_date && (
                               <div className="text-muted-foreground">
-                                to {format(new Date(value.end_date), "MMM d, yyyy")}
+                                to {formatDateForDisplay(value.end_date)}
                               </div>
                             )}
                           </TableCell>

@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { usePropertyManagement } from "@/hooks/usePropertyManagement";
 import { Plus, Wrench, Loader2, Check } from "lucide-react";
 import { format } from "date-fns";
+import { getTodayString } from "@/utils/dateUtils";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/hooks/useLanguage";
 
@@ -40,7 +41,7 @@ const PropertyMaintenanceTab = ({ companyId }: Props) => {
     setFormData({ property_id: "", maintenance_type: "repair", title: "", description: "", vendor: "", cost: "", currency: "USD", scheduled_date: "", performed_by: "", notes: "" });
   };
 
-  const handleComplete = async (id: string) => { await updateMaintenance.mutateAsync({ id, status: "completed", completed_date: new Date().toISOString().split("T")[0] }); };
+  const handleComplete = async (id: string) => { await updateMaintenance.mutateAsync({ id, status: "completed", completed_date: getTodayString() }); };
 
   const getStatusColor = (status: string) => {
     switch (status) {

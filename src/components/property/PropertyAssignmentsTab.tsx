@@ -13,6 +13,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Plus, Users, Loader2, RotateCcw } from "lucide-react";
 import { format } from "date-fns";
+import { getTodayString } from "@/utils/dateUtils";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/hooks/useLanguage";
 
@@ -34,7 +35,7 @@ const PropertyAssignmentsTab = ({ companyId }: Props) => {
   const [formData, setFormData] = useState({
     property_id: "",
     employee_id: "",
-    assigned_date: new Date().toISOString().split("T")[0],
+    assigned_date: getTodayString(),
     expected_return_date: "",
     condition_at_assignment: "good",
     notes: "",
@@ -62,7 +63,7 @@ const PropertyAssignmentsTab = ({ companyId }: Props) => {
       condition_at_assignment: formData.condition_at_assignment, notes: formData.notes || null, status: "active",
     });
     setIsDialogOpen(false);
-    setFormData({ property_id: "", employee_id: "", assigned_date: new Date().toISOString().split("T")[0], expected_return_date: "", condition_at_assignment: "good", notes: "" });
+    setFormData({ property_id: "", employee_id: "", assigned_date: getTodayString(), expected_return_date: "", condition_at_assignment: "good", notes: "" });
   };
 
   const handleReturn = async () => {

@@ -13,6 +13,7 @@ import { Plus, Search, Loader2, Scale, CheckCircle } from 'lucide-react';
 import { useEmployeeRelations } from '@/hooks/useEmployeeRelations';
 import { useAuth } from '@/contexts/AuthContext';
 import { format } from 'date-fns';
+import { getTodayString } from '@/utils/dateUtils';
 
 const ACTION_TYPES = ['verbal_warning', 'written_warning', 'final_warning', 'suspension', 'demotion', 'termination'];
 const SEVERITIES = ['minor', 'moderate', 'major', 'severe'];
@@ -34,7 +35,7 @@ export function ERDisciplinaryTab({ companyId }: ERDisciplinaryTabProps) {
     severity: 'minor',
     reason: '',
     description: '',
-    effective_date: new Date().toISOString().split('T')[0],
+    effective_date: getTodayString(),
     expiry_date: '',
   });
 
@@ -61,7 +62,7 @@ export function ERDisciplinaryTab({ companyId }: ERDisciplinaryTabProps) {
       severity: 'minor',
       reason: '',
       description: '',
-      effective_date: new Date().toISOString().split('T')[0],
+      effective_date: getTodayString(),
       expiry_date: '',
     });
   };

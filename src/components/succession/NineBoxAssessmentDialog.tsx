@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { NineBoxAssessment } from '@/hooks/useSuccession';
 import { supabase } from '@/integrations/supabase/client';
 import { Loader2 } from 'lucide-react';
+import { getTodayString } from '@/utils/dateUtils';
 
 interface NineBoxAssessmentDialogProps {
   open: boolean;
@@ -44,7 +45,7 @@ export function NineBoxAssessmentDialog({
     potential_notes: '',
     overall_notes: '',
     assessment_period: '',
-    assessment_date: new Date().toISOString().split('T')[0],
+    assessment_date: getTodayString(),
   });
 
   useEffect(() => {
@@ -74,7 +75,7 @@ export function NineBoxAssessmentDialog({
         potential_notes: '',
         overall_notes: '',
         assessment_period: '',
-        assessment_date: new Date().toISOString().split('T')[0],
+        assessment_date: getTodayString(),
       });
     }
   }, [assessment]);

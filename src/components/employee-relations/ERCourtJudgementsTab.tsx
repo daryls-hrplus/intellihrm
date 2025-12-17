@@ -15,6 +15,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Plus, Gavel, Search, Loader2, ExternalLink, FileText } from 'lucide-react';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
+import { getTodayString } from '@/utils/dateUtils';
 
 interface ERCourtJudgementsTabProps {
   companyId: string;
@@ -37,7 +38,7 @@ export function ERCourtJudgementsTab({ companyId }: ERCourtJudgementsTabProps) {
     case_number: '',
     case_name: '',
     court_name: '',
-    judgement_date: new Date().toISOString().split('T')[0],
+    judgement_date: getTodayString(),
     plaintiff: '',
     defendant: '',
     judge_name: '',
@@ -92,7 +93,7 @@ export function ERCourtJudgementsTab({ companyId }: ERCourtJudgementsTabProps) {
       case_number: '',
       case_name: '',
       court_name: '',
-      judgement_date: new Date().toISOString().split('T')[0],
+      judgement_date: getTodayString(),
       plaintiff: '',
       defendant: '',
       judge_name: '',

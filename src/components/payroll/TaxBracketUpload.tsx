@@ -13,6 +13,7 @@ import { Switch } from "@/components/ui/switch";
 import { Upload, Sparkles, FileText, CheckCircle, AlertCircle, Loader2, Download } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { getTodayString } from "@/utils/dateUtils";
 
 interface ExtractedBracket {
   band_name: string;
@@ -45,7 +46,7 @@ export function TaxBracketUpload({
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [effectiveDate, setEffectiveDate] = useState(new Date().toISOString().split('T')[0]);
+  const [effectiveDate, setEffectiveDate] = useState(getTodayString());
   const [endDate, setEndDate] = useState<string>("");
   const [extractedBrackets, setExtractedBrackets] = useState<ExtractedBracket[]>([]);
   const [selectedBrackets, setSelectedBrackets] = useState<Set<number>>(new Set());
