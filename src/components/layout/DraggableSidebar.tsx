@@ -93,10 +93,10 @@ interface SortableNavItemProps {
   isActive: boolean;
   isCollapsed: boolean;
   onNavigate: () => void;
-  isDragging?: boolean;
+  canEdit: boolean;
 }
 
-function SortableNavItem({ item, isActive, isCollapsed, onNavigate, isDragging }: SortableNavItemProps) {
+function SortableNavItem({ item, isActive, isCollapsed, onNavigate, canEdit }: SortableNavItemProps) {
   const { t } = useTranslation();
   const {
     attributes,
@@ -105,7 +105,7 @@ function SortableNavItem({ item, isActive, isCollapsed, onNavigate, isDragging }
     transform,
     transition,
     isDragging: isCurrentDragging,
-  } = useSortable({ id: item.moduleCode });
+  } = useSortable({ id: item.moduleCode, disabled: !canEdit });
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -137,14 +137,16 @@ function SortableNavItem({ item, isActive, isCollapsed, onNavigate, isDragging }
         {!isCollapsed && (
           <>
             <span className="flex-1">{t(item.title)}</span>
-            <button
-              {...attributes}
-              {...listeners}
-              className="opacity-0 group-hover:opacity-100 p-1 hover:bg-sidebar-accent/50 rounded cursor-grab active:cursor-grabbing"
-              onClick={(e) => e.preventDefault()}
-            >
-              <GripVertical className="h-4 w-4 text-sidebar-foreground/60" />
-            </button>
+            {canEdit && (
+              <button
+                {...attributes}
+                {...listeners}
+                className="opacity-0 group-hover:opacity-100 p-1 hover:bg-sidebar-accent/50 rounded cursor-grab active:cursor-grabbing"
+                onClick={(e) => e.preventDefault()}
+              >
+                <GripVertical className="h-4 w-4 text-sidebar-foreground/60" />
+              </button>
+            )}
           </>
         )}
       </NavLink>
@@ -175,7 +177,7 @@ export function DraggableSidebar() {
 
   const getItemId = useCallback((item: NavItem) => item.moduleCode, []);
 
-  const { orderedItems, updateOrder, resetOrder } = useDraggableOrderWithPersistence({
+  const { orderedItems, updateOrder, resetOrder, canEdit } = useDraggableOrderWithPersistence({
     items: filteredNavItems,
     preferenceKey: "sidebar-menu-order",
     getItemId,
@@ -341,11 +343,12 @@ export function DraggableSidebar() {
                   isActive={isActiveRoute(item.href)}
                   isCollapsed={isCollapsed}
                   onNavigate={() => setIsMobileOpen(false)}
+                  canEdit={canEdit}
                 />
               ))}
               
-              {/* Reset button */}
-              {!isCollapsed && (
+              {/* Reset button - only for admins */}
+              {!isCollapsed && canEdit && (
                 <Button
                   variant="ghost"
                   size="sm"
