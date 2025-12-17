@@ -16,7 +16,7 @@ import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { format } from "date-fns";
+import { getTodayString, formatDateForDisplay } from "@/utils/dateUtils";
 import { 
   Calendar, 
   Plus,
@@ -84,13 +84,13 @@ export default function SchedulesPage() {
     break_duration_minutes: 60,
     work_days: ['monday', 'tuesday', 'wednesday', 'thursday', 'friday'],
     is_overnight: false,
-    start_date: format(new Date(), 'yyyy-MM-dd')
+    start_date: getTodayString()
   });
 
   const [newAssignment, setNewAssignment] = useState({
     employee_id: "",
     schedule_id: "",
-    start_date: format(new Date(), 'yyyy-MM-dd'),
+    start_date: getTodayString(),
     is_primary: true,
     notes: ""
   });
@@ -198,7 +198,7 @@ export default function SchedulesPage() {
         break_duration_minutes: 60,
         work_days: ['monday', 'tuesday', 'wednesday', 'thursday', 'friday'],
         is_overnight: false,
-        start_date: format(new Date(), 'yyyy-MM-dd')
+        start_date: getTodayString()
       });
       loadSchedules();
     }
@@ -223,7 +223,7 @@ export default function SchedulesPage() {
       setNewAssignment({
         employee_id: "",
         schedule_id: "",
-        start_date: format(new Date(), 'yyyy-MM-dd'),
+        start_date: getTodayString(),
         is_primary: true,
         notes: ""
       });
@@ -633,10 +633,10 @@ export default function SchedulesPage() {
                               {assignment.schedule?.name || 'Unknown'}
                             </Badge>
                           </TableCell>
-                          <TableCell>{format(new Date(assignment.start_date), 'MMM d, yyyy')}</TableCell>
+                          <TableCell>{formatDateForDisplay(assignment.start_date, 'MMM d, yyyy')}</TableCell>
                           <TableCell>
                             {assignment.end_date 
-                              ? format(new Date(assignment.end_date), 'MMM d, yyyy')
+                              ? formatDateForDisplay(assignment.end_date, 'MMM d, yyyy')
                               : <span className="text-muted-foreground">Ongoing</span>
                             }
                           </TableCell>

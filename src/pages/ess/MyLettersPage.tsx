@@ -16,6 +16,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { format } from "date-fns";
+import { formatDateForDisplay } from "@/utils/dateUtils";
 import { useLanguage } from "@/hooks/useLanguage";
 
 interface LetterTemplate {
@@ -100,7 +101,7 @@ export default function MyLettersPage() {
       const initialValues: Record<string, string> = {};
       template.available_variables.forEach((v) => {
         if (v === "employee_name") initialValues[v] = profile?.full_name || "";
-        else if (v === "current_date") initialValues[v] = format(new Date(), "MMMM d, yyyy");
+        else if (v === "current_date") initialValues[v] = formatDateForDisplay(new Date().toISOString(), "MMMM d, yyyy");
         else if (v === "company_name") initialValues[v] = "";
         else initialValues[v] = "";
       });
@@ -385,7 +386,7 @@ export default function MyLettersPage() {
                 {viewLetter && getStatusBadge(viewLetter.status)}
               </DialogTitle>
               <DialogDescription>
-                {viewLetter?.letter_number} • {viewLetter && format(new Date(viewLetter.created_at), "PPP")}
+                {viewLetter?.letter_number} • {viewLetter && formatDateForDisplay(viewLetter.created_at, "PPP")}
               </DialogDescription>
             </DialogHeader>
             <ScrollArea className="h-[60vh]">
@@ -451,7 +452,7 @@ function LettersList({
                 <div>
                   <h3 className="font-medium">{letter.letter_templates?.name}</h3>
                   <p className="text-sm text-muted-foreground">
-                    {letter.letter_number} • {format(new Date(letter.created_at), "PPP")}
+                    {letter.letter_number} • {formatDateForDisplay(letter.created_at, "PPP")}
                   </p>
                 </div>
               </div>

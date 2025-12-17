@@ -34,7 +34,7 @@ import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { CountrySelect } from "@/components/ui/country-select";
 import { toast } from "sonner";
 import { Plus, Pencil, Trash2, Building2, Globe, Phone, Mail } from "lucide-react";
-import { format } from "date-fns";
+import { getTodayString } from "@/utils/dateUtils";
 
 const providerTypes = [
   { value: "insurance", label: "Insurance" },
@@ -343,7 +343,7 @@ export default function BenefitProvidersPage() {
                       type="date"
                       defaultValue={
                         editingProvider?.start_date ||
-                        format(new Date(), "yyyy-MM-dd")
+                        getTodayString()
                       }
                       required
                     />
