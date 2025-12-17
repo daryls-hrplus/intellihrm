@@ -67,7 +67,7 @@ export default function EmployeeRegularDeductionsPage() {
     employee_id: '',
     deduction_name: '',
     deduction_code: '',
-    deduction_type: 'fixed',
+    deduction_type: 'voluntary',
     amount: '',
     currency: 'USD',
     is_pretax: false,
@@ -154,7 +154,7 @@ export default function EmployeeRegularDeductionsPage() {
       employee_id: selectedEmployee || '',
       deduction_name: '',
       deduction_code: '',
-      deduction_type: 'fixed',
+      deduction_type: 'voluntary',
       amount: '',
       currency: 'USD',
       is_pretax: false,
@@ -424,7 +424,12 @@ export default function EmployeeRegularDeductionsPage() {
                       </TableCell>
                       <TableCell>
                         <div>
-                          <div className="font-medium">{deduction.deduction_name}</div>
+                          <div className="font-medium flex items-center gap-2">
+                            {deduction.deduction_name}
+                            <Badge variant="outline" className="text-xs capitalize">
+                              {deduction.deduction_type}
+                            </Badge>
+                          </div>
                           {deduction.institution_name && (
                             <div className="text-xs text-muted-foreground">{deduction.institution_name}</div>
                           )}
@@ -515,6 +520,25 @@ export default function EmployeeRegularDeductionsPage() {
                     placeholder="e.g., MORTGAGE"
                   />
                 </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Deduction Type *</Label>
+                <Select 
+                  value={formData.deduction_type} 
+                  onValueChange={(v) => setFormData({ ...formData, deduction_type: v })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="loan">Loan (e.g., Mortgage, Car Loan)</SelectItem>
+                    <SelectItem value="voluntary">Voluntary (e.g., Savings, Union Dues)</SelectItem>
+                    <SelectItem value="garnishment">Garnishment (e.g., Court Order)</SelectItem>
+                    <SelectItem value="statutory">Statutory (e.g., Legal Requirement)</SelectItem>
+                    <SelectItem value="other">Other</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
