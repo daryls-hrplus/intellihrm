@@ -348,15 +348,15 @@ export default function EmployeeRegularDeductionsPage() {
               <div className="space-y-2">
                 <Label>Employee (Optional)</Label>
                 <Select 
-                  value={selectedEmployee} 
-                  onValueChange={setSelectedEmployee}
+                  value={selectedEmployee || "all"} 
+                  onValueChange={(v) => setSelectedEmployee(v === "all" ? "" : v)}
                   disabled={!selectedCompany}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="All employees" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All employees</SelectItem>
+                    <SelectItem value="all">All employees</SelectItem>
                     {employees.map((emp) => (
                       <SelectItem key={emp.id} value={emp.id}>
                         {emp.full_name || 'N/A'}
