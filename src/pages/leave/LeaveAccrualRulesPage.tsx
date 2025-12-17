@@ -47,7 +47,8 @@ import { useQueryClient } from "@tanstack/react-query";
 export default function LeaveAccrualRulesPage() {
   const queryClient = useQueryClient();
   const { t } = useLanguage();
-  const { company } = useAuth();
+  const { company, isAdmin, hasRole } = useAuth();
+  const isAdminOrHR = isAdmin || hasRole('hr_manager');
   const { selectedCompanyId, setSelectedCompanyId } = useLeaveCompanyFilter();
   const { leaveTypes, accrualRules, loadingAccrualRules, createAccrualRule } = useLeaveManagement(selectedCompanyId);
   const [isOpen, setIsOpen] = useState(false);
@@ -157,6 +158,7 @@ export default function LeaveAccrualRulesPage() {
                 companyId={selectedCompanyId}
                 leaveTypes={leaveTypes.map(lt => ({ id: lt.id, name: lt.name }))}
                 onRulesImported={() => queryClient.invalidateQueries({ queryKey: ['leave-accrual-rules'] })}
+                isAdmin={isAdminOrHR}
               />
             )}
             <DropdownMenu>
