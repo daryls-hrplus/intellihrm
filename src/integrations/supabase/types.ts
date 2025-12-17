@@ -1862,6 +1862,7 @@ export type Database = {
           employee_contribution: number | null
           employee_contribution_type: string
           employee_id: string
+          employee_policy_number: string | null
           employer_contribution: number | null
           employer_contribution_type: string
           enrollment_date: string
@@ -1885,6 +1886,7 @@ export type Database = {
           employee_contribution?: number | null
           employee_contribution_type?: string
           employee_id: string
+          employee_policy_number?: string | null
           employer_contribution?: number | null
           employer_contribution_type?: string
           enrollment_date?: string
@@ -1908,6 +1910,7 @@ export type Database = {
           employee_contribution?: number | null
           employee_contribution_type?: string
           employee_id?: string
+          employee_policy_number?: string | null
           employer_contribution?: number | null
           employer_contribution_type?: string
           enrollment_date?: string

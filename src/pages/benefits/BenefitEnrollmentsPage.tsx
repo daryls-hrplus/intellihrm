@@ -82,6 +82,7 @@ export default function BenefitEnrollmentsPage() {
     employee_contribution_type: "amount",
     employer_contribution: 0,
     employer_contribution_type: "amount",
+    employee_policy_number: "",
     notes: "",
   });
 
@@ -224,6 +225,7 @@ export default function BenefitEnrollmentsPage() {
       employee_contribution_type: "amount",
       employer_contribution: defaultPlan?.employer_contribution || 0,
       employer_contribution_type: "amount",
+      employee_policy_number: "",
       notes: "",
     });
     setDialogOpen(true);
@@ -244,6 +246,7 @@ export default function BenefitEnrollmentsPage() {
       employee_contribution_type: (enr as any).employee_contribution_type || "amount",
       employer_contribution: enr.employer_contribution || 0,
       employer_contribution_type: (enr as any).employer_contribution_type || "amount",
+      employee_policy_number: (enr as any).employee_policy_number || "",
       notes: enr.notes || "",
     });
     setDialogOpen(true);
@@ -475,6 +478,14 @@ export default function BenefitEnrollmentsPage() {
                   </Select>
                 </div>
               </div>
+            </div>
+            <div className="space-y-2">
+              <Label>Employee Policy Number</Label>
+              <Input 
+                value={formData.employee_policy_number} 
+                onChange={e => setFormData({...formData, employee_policy_number: e.target.value})} 
+                placeholder="Enter policy number assigned to employee"
+              />
             </div>
             <div className="space-y-2">
               <Label>Notes</Label>
