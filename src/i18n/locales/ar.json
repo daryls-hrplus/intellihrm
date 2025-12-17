@@ -769,7 +769,8 @@
         "isOverride": "هذا استثناء لتعويض المنصب",
         "overrideReason": "سبب الاستثناء",
         "overrideReasonPlaceholder": "سبب الاستثناء..."
-      }
+      },
+      "outOfRange": "المبلغ خارج نطاق المنصب: {{min}} - {{max}}"
     },
     "spinalPoints": {
       "paySpine": "سلم الرواتب"

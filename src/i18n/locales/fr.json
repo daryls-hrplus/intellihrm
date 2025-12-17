@@ -733,7 +733,8 @@
         "paySpine": "Grille Salariale",
         "hybrid": "Hybride",
         "none": "Non Configuré"
-      }
+      },
+      "outOfRange": "Montant hors plage du poste: {{min}} - {{max}}"
     },
     "spinalPoints": {
       "paySpine": "Grille Salariale"

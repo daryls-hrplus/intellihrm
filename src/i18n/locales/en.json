@@ -5522,7 +5522,8 @@
         "isOverride": "This is an override to position compensation",
         "overrideReason": "Override Reason",
         "overrideReasonPlaceholder": "Reason for override..."
-      }
+      },
+      "outOfRange": "Amount outside position range: {{min}} - {{max}}"
     },
     "meritCycles": {
       "title": "Merit Cycles",

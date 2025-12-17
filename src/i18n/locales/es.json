@@ -733,7 +733,8 @@
         "paySpine": "Escala Salarial",
         "hybrid": "Híbrido",
         "none": "No Configurado"
-      }
+      },
+      "outOfRange": "Monto fuera del rango del puesto: {{min}} - {{max}}"
     },
     "spinalPoints": {
       "paySpine": "Escala Salarial"
