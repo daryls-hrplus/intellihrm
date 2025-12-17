@@ -25,7 +25,7 @@ import { DepartmentFilter, useDepartmentFilter } from "@/components/filters/Depa
 import { useLanguage } from "@/hooks/useLanguage";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { format } from "date-fns";
+import { formatDateForDisplay } from "@/utils/dateUtils";
 import { Skeleton } from "@/components/ui/skeleton";
 import { 
   FlaskConical, 
@@ -293,7 +293,7 @@ export default function HSEChemicalsPage() {
                     ) : (
                       exposures?.map((exp) => (
                         <TableRow key={exp.id}>
-                          <TableCell>{exp.exposure_date ? format(new Date(exp.exposure_date), "MMM d, yyyy") : "-"}</TableCell>
+                          <TableCell>{exp.exposure_date ? formatDateForDisplay(exp.exposure_date, "MMM d, yyyy") : "-"}</TableCell>
                           <TableCell className="font-medium">-</TableCell>
                           <TableCell>{exp.exposure_type || "-"}</TableCell>
                           <TableCell>{exp.duration_minutes ? `${exp.duration_minutes} min` : "-"}</TableCell>

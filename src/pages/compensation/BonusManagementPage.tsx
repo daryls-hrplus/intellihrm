@@ -9,7 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { format } from "date-fns";
+import { formatDateForDisplay } from "@/utils/dateUtils";
 import { Gift, Plus, DollarSign, Award, Users, Calendar } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useTranslation } from "react-i18next";
@@ -277,7 +277,7 @@ export default function BonusManagementPage() {
                           <TableRow key={award.id}>
                             <TableCell className="font-medium">{award.employee?.full_name}</TableCell>
                             <TableCell>{getBonusTypeBadge(award.bonus_type)}</TableCell>
-                            <TableCell>{format(new Date(award.award_date), "MMM d, yyyy")}</TableCell>
+                            <TableCell>{formatDateForDisplay(award.award_date, "MMM d, yyyy")}</TableCell>
                             <TableCell className="text-right">${award.final_amount?.toLocaleString()}</TableCell>
                             <TableCell>{getStatusBadge(award.status)}</TableCell>
                           </TableRow>

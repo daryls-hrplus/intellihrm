@@ -12,7 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Plus, Edit, Gift, Users, DollarSign } from 'lucide-react';
-import { format } from 'date-fns';
+import { formatDateForDisplay } from '@/utils/dateUtils';
 
 interface ReferralProgramTabProps {
   companyId: string;
@@ -271,7 +271,7 @@ export function ReferralProgramTab({ companyId }: ReferralProgramTabProps) {
                       <TableCell>
                         <Badge variant={getStatusColor(ref.status)}>{ref.status}</Badge>
                       </TableCell>
-                      <TableCell>{format(new Date(ref.created_at), 'MMM d, yyyy')}</TableCell>
+                      <TableCell>{formatDateForDisplay(ref.created_at, 'MMM d, yyyy')}</TableCell>
                       <TableCell>
                         <Select value={ref.status} onValueChange={(v) => handleUpdateStatus(ref.id, v)}>
                           <SelectTrigger className="w-32">

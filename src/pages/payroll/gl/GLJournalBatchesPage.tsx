@@ -12,7 +12,7 @@ import { Search, ChevronDown, ChevronRight, Download, FileText, RotateCcw } from
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { PayrollFilters, usePayrollFilters } from '@/components/payroll/PayrollFilters';
-import { format } from 'date-fns';
+import { formatDateForDisplay } from '@/utils/dateUtils';
 
 interface JournalBatch {
   id: string;
@@ -260,7 +260,7 @@ const GLJournalBatchesPage = () => {
                                 {getStatusBadge(batch.status)}
                               </div>
                               <div className="text-sm text-muted-foreground">
-                                {format(new Date(batch.batch_date), 'MMM dd, yyyy')}
+                                {formatDateForDisplay(batch.batch_date, 'MMM dd, yyyy')}
                                 {batch.description && ` • ${batch.description}`}
                               </div>
                             </div>
