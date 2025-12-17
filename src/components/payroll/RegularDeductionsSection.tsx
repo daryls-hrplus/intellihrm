@@ -20,6 +20,7 @@ interface RegularDeduction {
   id: string;
   deduction_name: string;
   deduction_code: string | null;
+  deduction_type: string;
   amount: number;
   currency: string;
   is_pretax: boolean;
@@ -100,7 +101,7 @@ export function RegularDeductionsSection({
       pay_period_id: payPeriodId,
       deduction_name: d.deduction_name,
       deduction_code: d.deduction_code,
-      deduction_type: 'voluntary',
+      deduction_type: d.deduction_type || 'other',
       amount: d.amount,
       currency: d.currency,
       is_pretax: d.is_pretax,
