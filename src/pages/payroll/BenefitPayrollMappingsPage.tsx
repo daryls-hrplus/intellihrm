@@ -41,7 +41,7 @@ import {
   Link as LinkIcon,
 } from "lucide-react";
 import { toast } from "sonner";
-import { format } from "date-fns";
+import { getTodayString, formatDateForDisplay } from "@/utils/dateUtils";
 
 interface BenefitPlan {
   id: string;
@@ -88,7 +88,7 @@ export default function BenefitPayrollMappingsPage() {
     mapping_type: "deduction",
     is_active: true,
     notes: "",
-    start_date: format(new Date(), "yyyy-MM-dd"),
+    start_date: getTodayString(),
     end_date: "",
   });
 
@@ -160,7 +160,7 @@ export default function BenefitPayrollMappingsPage() {
         mapping_type: "deduction",
         is_active: true,
         notes: "",
-        start_date: format(new Date(), "yyyy-MM-dd"),
+        start_date: getTodayString(),
         end_date: "",
       });
     }
@@ -332,9 +332,9 @@ export default function BenefitPayrollMappingsPage() {
                         {mapping.is_active ? t("common.active", "Active") : t("common.inactive", "Inactive")}
                       </Badge>
                     </TableCell>
-                    <TableCell>{format(new Date(mapping.start_date), "MMM d, yyyy")}</TableCell>
+                    <TableCell>{formatDateForDisplay(mapping.start_date, "MMM d, yyyy")}</TableCell>
                     <TableCell>
-                      {mapping.end_date ? format(new Date(mapping.end_date), "MMM d, yyyy") : "-"}
+                      {mapping.end_date ? formatDateForDisplay(mapping.end_date, "MMM d, yyyy") : "-"}
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">

@@ -1,4 +1,4 @@
-import { format } from "date-fns";
+import { formatDateForDisplay } from "@/utils/dateUtils";
 import { PayslipTemplate } from "@/hooks/usePayslipTemplates";
 import { Payslip } from "@/hooks/usePayroll";
 import { Separator } from "@/components/ui/separator";
@@ -136,12 +136,12 @@ export function PayslipDocument({
         <div className={`p-3 rounded ${style.section}`}>
           <p className="text-muted-foreground">Pay Period</p>
           <p className="font-medium">
-            {format(new Date(payslip.pay_period_start), "MMM d, yyyy")} - {format(new Date(payslip.pay_period_end), "MMM d, yyyy")}
+            {formatDateForDisplay(payslip.pay_period_start, "MMM d, yyyy")} - {formatDateForDisplay(payslip.pay_period_end, "MMM d, yyyy")}
           </p>
         </div>
         <div className={`p-3 rounded ${style.section}`}>
           <p className="text-muted-foreground">Pay Date</p>
-          <p className="font-medium">{format(new Date(payslip.pay_date), "MMMM d, yyyy")}</p>
+          <p className="font-medium">{formatDateForDisplay(payslip.pay_date, "MMMM d, yyyy")}</p>
         </div>
       </div>
 
