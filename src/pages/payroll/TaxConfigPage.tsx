@@ -16,6 +16,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Plus, Edit, Trash2, Receipt, Globe } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
+import { TaxBracketUpload } from "@/components/payroll/TaxBracketUpload";
 
 interface StatutoryDeductionType {
   id: string;
@@ -365,10 +366,18 @@ export default function TaxConfigPage() {
                     ))}
                   </TabsList>
                   {selectedTypeId && (
-                    <Button onClick={() => { resetForm(); setDialogOpen(true); }}>
-                      <Plus className="h-4 w-4 mr-2" />
-                      Add Band
-                    </Button>
+                    <div className="flex items-center gap-2">
+                      <TaxBracketUpload
+                        statutoryTypeId={selectedTypeId}
+                        statutoryTypeName={getSelectedTypeName()}
+                        country={selectedCountry}
+                        onBracketsImported={loadRateBands}
+                      />
+                      <Button onClick={() => { resetForm(); setDialogOpen(true); }}>
+                        <Plus className="h-4 w-4 mr-2" />
+                        Add Band
+                      </Button>
+                    </div>
                   )}
                 </div>
 

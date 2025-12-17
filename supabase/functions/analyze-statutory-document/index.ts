@@ -21,7 +21,99 @@ serve(async (req) => {
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    const { action, statutoryId, documentContent, country, stateProvince, allStatutories } = await req.json();
+    const { action, statutoryId, documentContent, documentName, country, stateProvince, allStatutories, statutoryType, analysisType, effectiveDate } = await req.json();
+
+    // Handle tax bracket extraction from documents
+    if (analysisType === "extract_brackets") {
+      const systemPrompt = `You are an expert tax and payroll analyst. Extract tax brackets/rate bands from the provided document for ${statutoryType} in ${country}.
+
+Return structured tax brackets that can be directly imported into a payroll system. For each bracket, determine:
+- band_name: descriptive name for the bracket (e.g., "0% Band", "Basic Rate", "Higher Rate")
+- min_amount: minimum income/salary threshold (number)
+- max_amount: maximum income/salary threshold (number or null if unlimited)
+- employee_rate: rate as decimal (e.g., 0.25 for 25%, null if fixed amount)
+- employer_rate: employer contribution rate as decimal (null if not applicable)
+- fixed_amount: fixed deduction amount if not percentage-based (null otherwise)
+- calculation_method: "percentage", "fixed", or "per_monday"
+- pay_frequency: "weekly", "monthly", "fortnightly", etc.
+- min_age: minimum age for this bracket to apply (null if no age restriction)
+- max_age: maximum age for this bracket to apply (null if no age restriction)
+- notes: any special conditions or notes
+
+Also provide:
+- warnings: any issues or uncertainties in the extraction
+- assumptions: any assumptions made during extraction`;
+
+      const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${LOVABLE_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: "google/gemini-2.5-flash",
+          messages: [
+            { role: "system", content: systemPrompt },
+            { role: "user", content: `Extract tax brackets from this document (${documentName || 'uploaded file'}):\n\n${documentContent}` },
+          ],
+          response_format: {
+            type: "json_schema",
+            json_schema: {
+              name: "tax_brackets_extraction",
+              schema: {
+                type: "object",
+                properties: {
+                  brackets: {
+                    type: "array",
+                    items: {
+                      type: "object",
+                      properties: {
+                        band_name: { type: "string" },
+                        min_amount: { type: "number" },
+                        max_amount: { type: ["number", "null"] },
+                        employee_rate: { type: ["number", "null"] },
+                        employer_rate: { type: ["number", "null"] },
+                        fixed_amount: { type: ["number", "null"] },
+                        calculation_method: { type: "string" },
+                        pay_frequency: { type: "string" },
+                        min_age: { type: ["number", "null"] },
+                        max_age: { type: ["number", "null"] },
+                        notes: { type: "string" },
+                      },
+                      required: ["band_name", "min_amount", "calculation_method"],
+                    },
+                  },
+                  notes: { type: "string" },
+                  warnings: { type: "array", items: { type: "string" } },
+                  assumptions: { type: "array", items: { type: "string" } },
+                },
+                required: ["brackets"],
+              },
+            },
+          },
+        }),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error("AI API error:", errorText);
+        throw new Error(`AI bracket extraction failed: ${response.status}`);
+      }
+
+      const aiData = await response.json();
+      const extraction = JSON.parse(aiData.choices[0].message.content);
+
+      return new Response(
+        JSON.stringify({
+          success: true,
+          brackets: extraction.brackets || [],
+          notes: extraction.notes || "",
+          warnings: extraction.warnings || [],
+          assumptions: extraction.assumptions || [],
+        }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
 
     if (action === "analyze_document") {
       // Analyze uploaded document and extract calculation rules
