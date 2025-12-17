@@ -1057,10 +1057,10 @@ export default function AdminUsersPage() {
             </div>
             <div className="space-y-2">
               <Label>Company</Label>
-              <Select value={editCompanyId} onValueChange={(v) => { setEditCompanyId(v); setEditDepartmentId(""); setEditSectionId(""); }}>
+              <Select value={editCompanyId || "__none__"} onValueChange={(v) => { setEditCompanyId(v === "__none__" ? "" : v); setEditDepartmentId(""); setEditSectionId(""); }}>
                 <SelectTrigger><SelectValue placeholder="Select company" /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">None</SelectItem>
+                  <SelectItem value="__none__">None</SelectItem>
                   {companies.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
                 </SelectContent>
               </Select>
@@ -1068,10 +1068,10 @@ export default function AdminUsersPage() {
             {editCompanyId && filteredDepartments.length > 0 && (
               <div className="space-y-2">
                 <Label>Department</Label>
-                <Select value={editDepartmentId} onValueChange={(v) => { setEditDepartmentId(v); setEditSectionId(""); }}>
+                <Select value={editDepartmentId || "__none__"} onValueChange={(v) => { setEditDepartmentId(v === "__none__" ? "" : v); setEditSectionId(""); }}>
                   <SelectTrigger><SelectValue placeholder="Select department" /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">None</SelectItem>
+                    <SelectItem value="__none__">None</SelectItem>
                     {filteredDepartments.map((d) => <SelectItem key={d.id} value={d.id}>{d.name}</SelectItem>)}
                   </SelectContent>
                 </Select>
@@ -1080,10 +1080,10 @@ export default function AdminUsersPage() {
             {editDepartmentId && filteredSections.length > 0 && (
               <div className="space-y-2">
                 <Label>Section</Label>
-                <Select value={editSectionId} onValueChange={setEditSectionId}>
+                <Select value={editSectionId || "__none__"} onValueChange={(v) => setEditSectionId(v === "__none__" ? "" : v)}>
                   <SelectTrigger><SelectValue placeholder="Select section" /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">None</SelectItem>
+                    <SelectItem value="__none__">None</SelectItem>
                     {filteredSections.map((s) => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}
                   </SelectContent>
                 </Select>
