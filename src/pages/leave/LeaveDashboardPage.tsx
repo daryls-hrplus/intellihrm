@@ -195,7 +195,7 @@ export default function LeaveDashboardPage() {
   // Build grouped sections
   const sections: ModuleSection[] = [
     {
-      titleKey: "leave.groups.selfService",
+      titleKey: "Self-Service",
       items: filterByAccess([
         allModules.myLeave,
         allModules.applyLeave,
@@ -203,14 +203,14 @@ export default function LeaveDashboardPage() {
       ]),
     },
     {
-      titleKey: "leave.groups.approvalsProcessing",
+      titleKey: "Approvals & Processing",
       items: filterByAccess([
         allModules.approvals,
         allModules.balanceAdjustments,
       ]),
     },
     {
-      titleKey: "leave.groups.leaveConfiguration",
+      titleKey: "Leave Configuration",
       items: filterByAccess([
         allModules.types,
         allModules.accrualRules,
@@ -220,14 +220,14 @@ export default function LeaveDashboardPage() {
       ]),
     },
     {
-      titleKey: "leave.groups.timeBanking",
+      titleKey: "Time Banking",
       items: filterByAccess([
         allModules.compensatoryTime,
         allModules.balanceRecalculation,
       ]),
     },
     {
-      titleKey: "leave.groups.analytics",
+      titleKey: "Analytics",
       items: filterByAccess([
         allModules.analytics,
       ]),

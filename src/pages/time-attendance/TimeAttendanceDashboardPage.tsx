@@ -218,7 +218,7 @@ export default function TimeAttendanceDashboardPage() {
   // Build grouped sections
   const sections: ModuleSection[] = [
     {
-      titleKey: "timeAttendance.groups.dailyOperations",
+      titleKey: "Daily Operations",
       items: filterByAccess([
         allModules.tracking,
         allModules.records,
@@ -227,7 +227,7 @@ export default function TimeAttendanceDashboardPage() {
       ]),
     },
     {
-      titleKey: "timeAttendance.groups.scheduling",
+      titleKey: "Scheduling",
       items: filterByAccess([
         allModules.schedules,
         allModules.shifts,
@@ -235,14 +235,14 @@ export default function TimeAttendanceDashboardPage() {
       ]),
     },
     {
-      titleKey: "timeAttendance.groups.projectTime",
+      titleKey: "Project Time",
       items: filterByAccess([
         allModules.projects,
         allModules.timesheetApprovals,
       ]),
     },
     {
-      titleKey: "timeAttendance.groups.configuration",
+      titleKey: "Configuration",
       items: filterByAccess([
         allModules.policies,
         allModules.devices,
@@ -251,7 +251,7 @@ export default function TimeAttendanceDashboardPage() {
       ]),
     },
     {
-      titleKey: "timeAttendance.groups.analytics",
+      titleKey: "Analytics",
       items: filterByAccess([
         allModules.analytics,
       ]),
