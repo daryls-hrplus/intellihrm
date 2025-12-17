@@ -13,6 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { Plus, Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
+import { getTodayString } from "@/utils/dateUtils";
 
 interface EmployeeMembershipsTabProps {
   employeeId: string;
@@ -36,7 +37,7 @@ export function EmployeeMembershipsTab({ employeeId }: EmployeeMembershipsTabPro
     organization_name: "",
     membership_type: "",
     membership_number: "",
-    start_date: new Date().toISOString().split('T')[0],
+    start_date: getTodayString(),
     end_date: "",
     status: "active",
     notes: "",
@@ -103,7 +104,7 @@ export function EmployeeMembershipsTab({ employeeId }: EmployeeMembershipsTabPro
       organization_name: "",
       membership_type: "",
       membership_number: "",
-      start_date: new Date().toISOString().split('T')[0],
+      start_date: getTodayString(),
       end_date: "",
       status: "active",
       notes: "",

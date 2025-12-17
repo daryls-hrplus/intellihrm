@@ -21,6 +21,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { useAuditLog } from "@/hooks/useAuditLog";
+import { getTodayString } from "@/utils/dateUtils";
 
 type GoalStatus = 'draft' | 'active' | 'in_progress' | 'completed' | 'cancelled' | 'overdue';
 type GoalType = 'okr_objective' | 'okr_key_result' | 'smart_goal';
@@ -107,7 +108,7 @@ export function GoalDialog({
     goal_source: "self_created",
     status: "draft",
     category: "",
-    start_date: new Date().toISOString().split("T")[0],
+    start_date: getTodayString(),
     due_date: "",
     weighting: "10",
     target_value: "",
@@ -224,7 +225,7 @@ export function GoalDialog({
         goal_source: "self_created",
         status: "draft",
         category: "",
-        start_date: new Date().toISOString().split("T")[0],
+        start_date: getTodayString(),
         due_date: "",
         weighting: "10",
         target_value: "",

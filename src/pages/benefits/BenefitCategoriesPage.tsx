@@ -13,6 +13,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { Plus, Pencil, Trash2, FolderOpen } from "lucide-react";
+import { getTodayString } from "@/utils/dateUtils";
 import { useTranslation } from "react-i18next";
 
 interface BenefitCategory {
@@ -57,7 +58,7 @@ export default function BenefitCategoriesPage() {
     description: "",
     category_type: "health",
     is_active: true,
-    start_date: new Date().toISOString().split('T')[0],
+    start_date: getTodayString(),
     end_date: "",
   });
 
@@ -146,7 +147,7 @@ export default function BenefitCategoriesPage() {
       description: "",
       category_type: "health",
       is_active: true,
-      start_date: new Date().toISOString().split('T')[0],
+      start_date: getTodayString(),
       end_date: "",
     });
     setDialogOpen(true);

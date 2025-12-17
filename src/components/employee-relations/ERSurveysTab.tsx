@@ -13,7 +13,7 @@ import { Switch } from "@/components/ui/switch";
 import { Plus, Search, Loader2, MessageSquare, Play, Square } from 'lucide-react';
 import { useEmployeeRelations } from '@/hooks/useEmployeeRelations';
 import { useAuth } from '@/contexts/AuthContext';
-import { format } from 'date-fns';
+import { getTodayString, formatDateForDisplay } from '@/utils/dateUtils';
 
 const SURVEY_TYPES = ['engagement', 'satisfaction', 'pulse', 'feedback', 'climate'];
 
@@ -32,7 +32,7 @@ export function ERSurveysTab({ companyId }: ERSurveysTabProps) {
     title: '',
     description: '',
     survey_type: 'engagement',
-    start_date: new Date().toISOString().split('T')[0],
+    start_date: getTodayString(),
     end_date: '',
     is_anonymous: true,
   });
@@ -57,7 +57,7 @@ export function ERSurveysTab({ companyId }: ERSurveysTabProps) {
       title: '',
       description: '',
       survey_type: 'engagement',
-      start_date: new Date().toISOString().split('T')[0],
+      start_date: getTodayString(),
       end_date: '',
       is_anonymous: true,
     });
@@ -234,8 +234,8 @@ export function ERSurveysTab({ companyId }: ERSurveysTabProps) {
                   </TableCell>
                   <TableCell>
                     <div className="text-sm">
-                      <p>{format(new Date(survey.start_date), 'PP')}</p>
-                      <p className="text-muted-foreground">{t('common.to')} {format(new Date(survey.end_date), 'PP')}</p>
+                      <p>{formatDateForDisplay(survey.start_date, 'PP')}</p>
+                      <p className="text-muted-foreground">{t('common.to')} {formatDateForDisplay(survey.end_date, 'PP')}</p>
                     </div>
                   </TableCell>
                   <TableCell>

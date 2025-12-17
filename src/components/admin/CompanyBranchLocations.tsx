@@ -21,6 +21,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { getTodayString } from "@/utils/dateUtils";
 
 interface BranchLocation {
   id: string;
@@ -59,7 +60,7 @@ const emptyFormData = {
   email: "",
   is_headquarters: false,
   is_active: true,
-  start_date: new Date().toISOString().split("T")[0],
+  start_date: getTodayString(),
   end_date: "",
 };
 

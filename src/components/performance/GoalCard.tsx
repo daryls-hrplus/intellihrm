@@ -24,7 +24,7 @@ import {
   Building2,
   Users,
 } from "lucide-react";
-import { format } from "date-fns";
+import { getTodayString, formatDateForDisplay } from "@/utils/dateUtils";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useAuditLog } from "@/hooks/useAuditLog";
@@ -127,7 +127,7 @@ export function GoalCard({ goal, onEdit, onRefresh }: GoalCardProps) {
         .update({
           status: "completed",
           progress_percentage: 100,
-          completed_date: new Date().toISOString().split("T")[0],
+          completed_date: getTodayString(),
         })
         .eq("id", goal.id);
 
@@ -233,7 +233,7 @@ export function GoalCard({ goal, onEdit, onRefresh }: GoalCardProps) {
               {goal.due_date && (
                 <div className="flex items-center gap-1">
                   <Calendar className="h-3 w-3" />
-                  <span>Due {format(new Date(goal.due_date), "MMM d, yyyy")}</span>
+                  <span>Due {formatDateForDisplay(goal.due_date)}</span>
                 </div>
               )}
               <div className="flex items-center gap-1">

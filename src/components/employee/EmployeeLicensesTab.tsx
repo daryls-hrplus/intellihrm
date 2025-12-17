@@ -11,7 +11,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { Plus, Pencil, Trash2, Award, AlertCircle } from "lucide-react";
-import { format, isBefore } from "date-fns";
+import { isBefore } from "date-fns";
+import { getTodayString, parseLocalDate, formatDateForDisplay } from "@/utils/dateUtils";
 
 interface License {
   id: string;
@@ -58,7 +59,7 @@ export function EmployeeLicensesTab({ employeeId }: EmployeeLicensesTabProps) {
       expiry_date: "",
       status: "active",
       notes: "",
-      start_date: new Date().toISOString().split("T")[0],
+      start_date: getTodayString(),
       end_date: "",
     },
   });
@@ -130,7 +131,7 @@ export function EmployeeLicensesTab({ employeeId }: EmployeeLicensesTabProps) {
       expiry_date: license.expiry_date || "",
       status: license.status,
       notes: license.notes || "",
-      start_date: license.start_date || new Date().toISOString().split("T")[0],
+      start_date: license.start_date || getTodayString(),
       end_date: license.end_date || "",
     });
     setDialogOpen(true);
@@ -157,7 +158,7 @@ export function EmployeeLicensesTab({ employeeId }: EmployeeLicensesTabProps) {
       expiry_date: "",
       status: "active",
       notes: "",
-      start_date: new Date().toISOString().split("T")[0],
+      start_date: getTodayString(),
       end_date: "",
     });
     setDialogOpen(true);
@@ -165,7 +166,8 @@ export function EmployeeLicensesTab({ employeeId }: EmployeeLicensesTabProps) {
 
   const isExpired = (date: string | null) => {
     if (!date) return false;
-    return isBefore(new Date(date), new Date());
+    const parsedDate = parseLocalDate(date);
+    return parsedDate ? isBefore(parsedDate, new Date()) : false;
   };
 
   return (
@@ -406,12 +408,12 @@ export function EmployeeLicensesTab({ employeeId }: EmployeeLicensesTabProps) {
                   </div>
                   <div>
                     <span className="text-muted-foreground">Issued:</span>{" "}
-                    {format(new Date(license.issue_date), "MMM d, yyyy")}
+                    {formatDateForDisplay(license.issue_date)}
                   </div>
                   {license.expiry_date && (
                     <div>
                       <span className="text-muted-foreground">Expires:</span>{" "}
-                      {format(new Date(license.expiry_date), "MMM d, yyyy")}
+                      {formatDateForDisplay(license.expiry_date)}
                     </div>
                   )}
                 </div>

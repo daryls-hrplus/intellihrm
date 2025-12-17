@@ -13,6 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { Plus, Pencil, Trash2, Baby } from "lucide-react";
 import { format, differenceInYears } from "date-fns";
+import { getTodayString } from "@/utils/dateUtils";
 
 interface Dependent {
   id: string;
@@ -62,7 +63,7 @@ export function EmployeeDependentsTab({ employeeId }: EmployeeDependentsTabProps
       is_disabled: false,
       is_student: false,
       notes: "",
-      start_date: new Date().toISOString().split("T")[0],
+      start_date: getTodayString(),
       end_date: "",
     },
   });
@@ -137,7 +138,7 @@ export function EmployeeDependentsTab({ employeeId }: EmployeeDependentsTabProps
       is_disabled: dependent.is_disabled,
       is_student: dependent.is_student,
       notes: dependent.notes || "",
-      start_date: dependent.start_date || new Date().toISOString().split("T")[0],
+      start_date: dependent.start_date || getTodayString(),
       end_date: dependent.end_date || "",
     });
     setDialogOpen(true);
@@ -165,7 +166,7 @@ export function EmployeeDependentsTab({ employeeId }: EmployeeDependentsTabProps
       is_disabled: false,
       is_student: false,
       notes: "",
-      start_date: new Date().toISOString().split("T")[0],
+      start_date: getTodayString(),
       end_date: "",
     });
     setDialogOpen(true);
