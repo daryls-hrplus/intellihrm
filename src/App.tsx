@@ -1634,6 +1634,14 @@ const App = () => (
               }
             />
             <Route
+              path="/payroll/tax-allowances"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="payroll">
+                  <TaxAllowancesPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
               path="/payroll/gl"
               element={
                 <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="payroll">

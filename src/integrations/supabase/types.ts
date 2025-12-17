@@ -8218,6 +8218,81 @@ export type Database = {
           },
         ]
       }
+      employee_tax_allowances: {
+        Row: {
+          allowance_code: string | null
+          allowance_name: string
+          amount_per_instance: number
+          annual_limit: number | null
+          company_id: string
+          created_at: string
+          created_by: string | null
+          description: string | null
+          effective_date: string
+          employee_id: string
+          end_date: string | null
+          id: string
+          instances_count: number
+          is_active: boolean
+          notes: string | null
+          supporting_documents: Json | null
+          updated_at: string
+        }
+        Insert: {
+          allowance_code?: string | null
+          allowance_name: string
+          amount_per_instance?: number
+          annual_limit?: number | null
+          company_id: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          effective_date?: string
+          employee_id: string
+          end_date?: string | null
+          id?: string
+          instances_count?: number
+          is_active?: boolean
+          notes?: string | null
+          supporting_documents?: Json | null
+          updated_at?: string
+        }
+        Update: {
+          allowance_code?: string | null
+          allowance_name?: string
+          amount_per_instance?: number
+          annual_limit?: number | null
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          effective_date?: string
+          employee_id?: string
+          end_date?: string | null
+          id?: string
+          instances_count?: number
+          is_active?: boolean
+          notes?: string | null
+          supporting_documents?: Json | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "employee_tax_allowances_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_tax_allowances_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       employee_tax_elections: {
         Row: {
           additional_withholding: number | null
