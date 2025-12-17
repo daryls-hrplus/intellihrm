@@ -40,6 +40,7 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import jsPDF from "jspdf";
 import { cn } from "@/lib/utils";
+import { getTodayString } from "@/utils/dateUtils";
 
 const COLORS = ["#3b82f6", "#22c55e", "#f59e0b", "#ef4444", "#8b5cf6", "#ec4899", "#06b6d4", "#84cc16"];
 
@@ -212,7 +213,7 @@ export default function TicketAnalytics() {
   };
 
   const exportToCSV = () => {
-    const reportDate = format(new Date(), "yyyy-MM-dd");
+    const reportDate = getTodayString();
     
     // Summary metrics
     let csvContent = "Ticket Analytics Report\n";
@@ -356,7 +357,7 @@ export default function TicketAnalytics() {
       yPos += 6;
     });
     
-    doc.save(`ticket-analytics-${format(new Date(), "yyyy-MM-dd")}.pdf`);
+    doc.save(`ticket-analytics-${getTodayString()}.pdf`);
     toast.success("PDF report downloaded successfully");
   };
 

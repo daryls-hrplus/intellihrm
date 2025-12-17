@@ -21,7 +21,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Upload, FileText, AlertCircle, CheckCircle2, Download, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { format } from "date-fns";
+import { getTodayString } from "@/utils/dateUtils";
 
 interface Employee {
   id: string;
@@ -88,7 +88,7 @@ export function BulkAssignmentUpload({
       [
         "john.doe@example.com",
         "POS-001",
-        format(new Date(), "yyyy-MM-dd"),
+        getTodayString(),
         "",
         "true",
         "5000",
@@ -99,7 +99,7 @@ export function BulkAssignmentUpload({
       [
         "jane.smith@example.com",
         "POS-002",
-        format(new Date(), "yyyy-MM-dd"),
+        getTodayString(),
         "",
         "false",
         "6000",

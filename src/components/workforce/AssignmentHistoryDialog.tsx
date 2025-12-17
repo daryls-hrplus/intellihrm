@@ -52,6 +52,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { format, startOfDay, endOfDay } from "date-fns";
 import { cn } from "@/lib/utils";
+import { formatDateForDisplay, toDateString } from "@/utils/dateUtils";
 
 interface HistoryEntry {
   id: string;
