@@ -17,6 +17,7 @@ import { Plus, Edit, Trash2, Receipt, Globe } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { TaxBracketUpload } from "@/components/payroll/TaxBracketUpload";
+import { getTodayString } from "@/utils/dateUtils";
 
 interface StatutoryDeductionType {
   id: string;
@@ -73,7 +74,7 @@ export default function TaxConfigPage() {
     fixed_amount: null as number | null,
     earnings_class: "",
     is_active: true,
-    start_date: new Date().toISOString().split('T')[0],
+    start_date: getTodayString(),
     end_date: null as string | null,
     notes: "",
     display_order: 0,
@@ -169,7 +170,7 @@ export default function TaxConfigPage() {
       fixed_amount: null,
       earnings_class: "",
       is_active: true,
-      start_date: new Date().toISOString().split('T')[0],
+      start_date: getTodayString(),
       end_date: null,
       notes: "",
       display_order: currentTypeBands.length,

@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Plus, Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
-import { format } from "date-fns";
+import { formatDateForDisplay } from "@/utils/dateUtils";
 
 interface EmployeePayGroupTabProps {
   employeeId: string;
@@ -168,8 +168,8 @@ export function EmployeePayGroupTab({ employeeId }: EmployeePayGroupTabProps) {
                   <TableCell>{item.pay_group_name}</TableCell>
                   <TableCell>{formatFrequency(item.pay_frequency)}</TableCell>
                   <TableCell>{formatMethod(item.payment_method)}</TableCell>
-                  <TableCell>{format(new Date(item.start_date), "PP")}</TableCell>
-                  <TableCell>{item.end_date ? format(new Date(item.end_date), "PP") : "-"}</TableCell>
+                  <TableCell>{formatDateForDisplay(item.start_date, "PP")}</TableCell>
+                  <TableCell>{item.end_date ? formatDateForDisplay(item.end_date, "PP") : "-"}</TableCell>
                   <TableCell>
                     <div className="flex gap-1">
                       <Button variant="ghost" size="sm" onClick={() => handleEdit(item)}><Pencil className="h-4 w-4" /></Button>

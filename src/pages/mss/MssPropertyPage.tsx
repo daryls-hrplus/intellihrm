@@ -25,7 +25,7 @@ import {
 import { usePropertyManagement } from '@/hooks/usePropertyManagement';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
-import { format } from 'date-fns';
+import { formatDateForDisplay } from '@/utils/dateUtils';
 import { toast } from 'sonner';
 
 const CONDITIONS = ['excellent', 'good', 'fair', 'poor', 'damaged'];
@@ -361,7 +361,7 @@ export default function MssPropertyPage() {
                             </div>
                           </TableCell>
                           <TableCell>{assignment.property?.category?.name || '-'}</TableCell>
-                          <TableCell>{format(new Date(assignment.assigned_date), 'PP')}</TableCell>
+                          <TableCell>{formatDateForDisplay(assignment.assigned_date, 'PP')}</TableCell>
                           <TableCell className="capitalize">{assignment.condition_at_assignment}</TableCell>
                         </TableRow>
                       ))}
@@ -418,7 +418,7 @@ export default function MssPropertyPage() {
                           <TableCell className="capitalize">{request.request_type}</TableCell>
                           <TableCell className="capitalize">{request.priority}</TableCell>
                           <TableCell className="text-muted-foreground">
-                            {format(new Date(request.created_at), 'PP')}
+                            {formatDateForDisplay(request.created_at, 'PP')}
                           </TableCell>
                           <TableCell>
                             <div className="flex items-center gap-1">

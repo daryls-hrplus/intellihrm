@@ -14,6 +14,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { Plus, Pencil, Trash2, FileText } from "lucide-react";
+import { getTodayString } from "@/utils/dateUtils";
 
 interface BenefitPlan {
   id: string;
@@ -95,7 +96,7 @@ export default function BenefitPlansPage() {
     currency: "USD",
     waiting_period_days: 0,
     is_active: true,
-    start_date: new Date().toISOString().split('T')[0],
+    start_date: getTodayString(),
     end_date: "",
   });
 
@@ -207,7 +208,7 @@ export default function BenefitPlansPage() {
       currency: "USD",
       waiting_period_days: 0,
       is_active: true,
-      start_date: new Date().toISOString().split('T')[0],
+      start_date: getTodayString(),
       end_date: "",
     });
     setDialogOpen(true);

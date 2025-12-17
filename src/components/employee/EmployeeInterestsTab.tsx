@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Plus, Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
-import { format } from "date-fns";
+import { getTodayString, formatDateForDisplay } from "@/utils/dateUtils";
 
 interface EmployeeInterestsTabProps {
   employeeId: string;
@@ -34,7 +34,7 @@ export function EmployeeInterestsTab({ employeeId }: EmployeeInterestsTabProps) 
     interest_name: "",
     category: "",
     proficiency_level: "",
-    start_date: new Date().toISOString().split('T')[0],
+    start_date: getTodayString(),
     end_date: "",
     notes: "",
   });
@@ -99,7 +99,7 @@ export function EmployeeInterestsTab({ employeeId }: EmployeeInterestsTabProps) 
       interest_name: "",
       category: "",
       proficiency_level: "",
-      start_date: new Date().toISOString().split('T')[0],
+      start_date: getTodayString(),
       end_date: "",
       notes: "",
     });
@@ -149,8 +149,8 @@ export function EmployeeInterestsTab({ employeeId }: EmployeeInterestsTabProps) 
                   <TableCell>{item.interest_name}</TableCell>
                   <TableCell>{item.category || "-"}</TableCell>
                   <TableCell>{item.proficiency_level || "-"}</TableCell>
-                  <TableCell>{format(new Date(item.start_date), "PP")}</TableCell>
-                  <TableCell>{item.end_date ? format(new Date(item.end_date), "PP") : "-"}</TableCell>
+                <TableCell>{formatDateForDisplay(item.start_date, "PP")}</TableCell>
+                  <TableCell>{item.end_date ? formatDateForDisplay(item.end_date, "PP") : "-"}</TableCell>
                   <TableCell>
                     <div className="flex gap-1">
                       <Button variant="ghost" size="sm" onClick={() => handleEdit(item)}><Pencil className="h-4 w-4" /></Button>

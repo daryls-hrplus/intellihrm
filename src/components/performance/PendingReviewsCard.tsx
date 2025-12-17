@@ -5,7 +5,8 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Clock, ArrowRight } from "lucide-react";
 import { FeedbackFormDialog } from "@/components/performance/FeedbackFormDialog";
-import { format, differenceInDays } from "date-fns";
+import { differenceInDays } from "date-fns";
+import { formatDateForDisplay, parseLocalDate } from "@/utils/dateUtils";
 
 interface PendingReview {
   id: string;
@@ -48,7 +49,7 @@ export function PendingReviewsCard({ review, onComplete }: PendingReviewsCardPro
   };
 
   const daysUntilDeadline = review.deadline
-    ? differenceInDays(new Date(review.deadline), new Date())
+    ? differenceInDays(parseLocalDate(review.deadline) || new Date(), new Date())
     : null;
 
   return (
@@ -75,7 +76,7 @@ export function PendingReviewsCard({ review, onComplete }: PendingReviewsCardPro
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Clock className="h-4 w-4" />
               <span>
-                Due: {format(new Date(review.deadline), "MMM d, yyyy")}
+                Due: {formatDateForDisplay(review.deadline, "MMM d, yyyy")}
                 {daysUntilDeadline !== null && (
                   <span
                     className={

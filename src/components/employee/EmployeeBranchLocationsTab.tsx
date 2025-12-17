@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
-import { format } from "date-fns";
+import { formatDateForDisplay } from "@/utils/dateUtils";
 import {
   Building,
   Plus,
@@ -342,9 +342,9 @@ export function EmployeeBranchLocationsTab({ employeeId }: EmployeeBranchLocatio
                       )}
                     </div>
                     <div className="mt-1 text-xs text-muted-foreground">
-                      {format(new Date(assignment.start_date), "MMM d, yyyy")}
+                      {formatDateForDisplay(assignment.start_date, "MMM d, yyyy")}
                       {assignment.end_date
-                        ? ` - ${format(new Date(assignment.end_date), "MMM d, yyyy")}`
+                        ? ` - ${formatDateForDisplay(assignment.end_date, "MMM d, yyyy")}`
                         : " - Present"}
                     </div>
                   </div>

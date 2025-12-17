@@ -14,6 +14,7 @@ import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { getTodayString, formatDateForDisplay } from "@/utils/dateUtils";
 import { format } from "date-fns";
 import { FaceCaptureDialog } from "@/components/time-attendance/FaceCaptureDialog";
 import { useTranslation } from "react-i18next";
@@ -117,7 +118,7 @@ const [locationForm, setLocationForm] = useState({
     requires_geofence: true,
     allow_clock_outside: false,
     requires_face_capture: false,
-    start_date: format(new Date(), 'yyyy-MM-dd'),
+    start_date: getTodayString(),
     end_date: ""
   });
   
@@ -134,7 +135,7 @@ const [locationForm, setLocationForm] = useState({
     employee_id: "",
     geofence_id: "",
     is_primary: true,
-    effective_date: format(new Date(), 'yyyy-MM-dd'),
+    effective_date: getTodayString(),
     end_date: "",
     notes: ""
   });
@@ -323,7 +324,7 @@ const resetLocationForm = () => {
       requires_geofence: true,
       allow_clock_outside: false,
       requires_face_capture: false,
-      start_date: format(new Date(), 'yyyy-MM-dd'),
+      start_date: getTodayString(),
       end_date: ""
     });
   };
@@ -469,7 +470,7 @@ const openEditLocation = (location: GeofenceLocation) => {
       employee_id: "",
       geofence_id: "",
       is_primary: true,
-      effective_date: format(new Date(), 'yyyy-MM-dd'),
+      effective_date: getTodayString(),
       end_date: "",
       notes: ""
     });
@@ -957,9 +958,9 @@ const openEditLocation = (location: GeofenceLocation) => {
                           <TableCell>
                             {assignment.geofence?.name} ({assignment.geofence?.code})
                           </TableCell>
-                          <TableCell>{format(new Date(assignment.effective_date), 'MMM d, yyyy')}</TableCell>
+                          <TableCell>{formatDateForDisplay(assignment.effective_date, 'MMM d, yyyy')}</TableCell>
                           <TableCell>
-                            {assignment.end_date ? format(new Date(assignment.end_date), 'MMM d, yyyy') : '-'}
+                            {assignment.end_date ? formatDateForDisplay(assignment.end_date, 'MMM d, yyyy') : '-'}
                           </TableCell>
                           <TableCell>
                             {assignment.is_primary && <Badge className="bg-primary/20 text-primary">{t("timeAttendance.geofencing.primary")}</Badge>}
@@ -1042,7 +1043,7 @@ const openEditLocation = (location: GeofenceLocation) => {
                             <div>
                               <p className="font-medium text-sm">{enrollment.profile?.full_name || t("timeAttendance.geofencing.unknown")}</p>
                               <p className="text-xs text-muted-foreground">
-                                {t("timeAttendance.geofencing.enrolled")} {format(new Date(enrollment.enrolled_at), 'MMM d, yyyy')}
+                                {t("timeAttendance.geofencing.enrolled")} {formatDateForDisplay(enrollment.enrolled_at, 'MMM d, yyyy')}
                               </p>
                             </div>
                             <Button 

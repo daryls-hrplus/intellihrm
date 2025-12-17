@@ -13,7 +13,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Plus, Building2, Users, FileText, Search, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
-import { format } from 'date-fns';
+import { getTodayString, formatDateForDisplay } from '@/utils/dateUtils';
 
 interface ERUnionsTabProps {
   companyId: string;
@@ -37,7 +37,7 @@ export function ERUnionsTab({ companyId }: ERUnionsTabProps) {
     contact_phone: '',
     address: '',
     website: '',
-    start_date: new Date().toISOString().split('T')[0],
+    start_date: getTodayString(),
   });
 
   const [agreementForm, setAgreementForm] = useState({
@@ -45,7 +45,7 @@ export function ERUnionsTab({ companyId }: ERUnionsTabProps) {
     title: '',
     agreement_number: '',
     description: '',
-    effective_date: new Date().toISOString().split('T')[0],
+    effective_date: getTodayString(),
     expiry_date: '',
     wage_provisions: '',
     benefits_provisions: '',
@@ -476,8 +476,8 @@ export function ERUnionsTab({ companyId }: ERUnionsTabProps) {
                       <TableCell className="font-mono">{agreement.agreement_number || '-'}</TableCell>
                       <TableCell>{agreement.unions?.name}</TableCell>
                       <TableCell>{agreement.title}</TableCell>
-                      <TableCell>{format(new Date(agreement.effective_date), 'PP')}</TableCell>
-                      <TableCell>{agreement.expiry_date ? format(new Date(agreement.expiry_date), 'PP') : '-'}</TableCell>
+                      <TableCell>{formatDateForDisplay(agreement.effective_date, 'PP')}</TableCell>
+                      <TableCell>{agreement.expiry_date ? formatDateForDisplay(agreement.expiry_date, 'PP') : '-'}</TableCell>
                       <TableCell>
                         <Badge variant={agreement.status === 'active' ? 'default' : 'secondary'}>
                           {agreement.status}
@@ -513,7 +513,7 @@ export function ERUnionsTab({ companyId }: ERUnionsTabProps) {
                       <TableCell>{membership.profiles?.full_name}</TableCell>
                       <TableCell>{membership.unions?.name}</TableCell>
                       <TableCell className="font-mono">{membership.membership_number || '-'}</TableCell>
-                      <TableCell>{format(new Date(membership.join_date), 'PP')}</TableCell>
+                      <TableCell>{formatDateForDisplay(membership.join_date, 'PP')}</TableCell>
                       <TableCell>
                         <Badge variant={membership.status === 'active' ? 'default' : 'secondary'}>
                           {membership.status}

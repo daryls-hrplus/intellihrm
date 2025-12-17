@@ -37,6 +37,7 @@ import {
   TrendingUp,
 } from "lucide-react";
 import { InterviewScorecardsTab } from "@/components/recruitment/InterviewScorecardsTab";
+import { formatDateForDisplay } from "@/utils/dateUtils";
 import { CandidatePipelineTab } from "@/components/recruitment/CandidatePipelineTab";
 import { ReferralProgramTab } from "@/components/recruitment/ReferralProgramTab";
 import { OfferManagementTab } from "@/components/recruitment/OfferManagementTab";
@@ -713,7 +714,7 @@ export default function RecruitmentFullPage() {
                         {req.target_hire_date && (
                           <span className="flex items-center gap-1">
                             <Calendar className="h-3 w-3" />
-                            Target: {format(new Date(req.target_hire_date), "PP")}
+                            Target: {formatDateForDisplay(req.target_hire_date, "PP")}
                           </span>
                         )}
                       </div>
@@ -871,7 +872,7 @@ export default function RecruitmentFullPage() {
                         <TableCell>
                           <Badge variant="outline">{candidate.source}</Badge>
                         </TableCell>
-                        <TableCell>{format(new Date(candidate.created_at), "PP")}</TableCell>
+                        <TableCell>{formatDateForDisplay(candidate.created_at, "PP")}</TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
@@ -922,7 +923,7 @@ export default function RecruitmentFullPage() {
                         <TableCell>
                           <Badge variant="outline">{app.source}</Badge>
                         </TableCell>
-                        <TableCell>{format(new Date(app.applied_at), "PP")}</TableCell>
+                        <TableCell>{formatDateForDisplay(app.applied_at, "PP")}</TableCell>
                         <TableCell>
                           <div className="flex items-center gap-1">
                             {app.stage !== "hired" && app.stage !== "rejected" && (

@@ -34,7 +34,7 @@ import { Plus, Pencil, Trash2, Globe, Loader2 } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { format } from "date-fns";
+import { formatDateForDisplay } from "@/utils/dateUtils";
 
 interface Territory {
   id: string;
@@ -439,9 +439,9 @@ export default function TerritoriesPage() {
                         </Badge>
                       </TableCell>
                       <TableCell className="text-sm text-muted-foreground">
-                        {format(new Date(territory.start_date), "MMM d, yyyy")}
+                        {formatDateForDisplay(territory.start_date, "MMM d, yyyy")}
                         {territory.end_date && (
-                          <> - {format(new Date(territory.end_date), "MMM d, yyyy")}</>
+                          <> - {formatDateForDisplay(territory.end_date, "MMM d, yyyy")}</>
                         )}
                       </TableCell>
                       <TableCell className="text-right">

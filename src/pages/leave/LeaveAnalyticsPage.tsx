@@ -16,6 +16,7 @@ import {
   CalendarDays, AlertTriangle, CheckCircle, XCircle, Loader2
 } from "lucide-react";
 import { format, startOfYear, endOfYear, parseISO, getMonth, subYears } from "date-fns";
+import { formatDateForDisplay } from "@/utils/dateUtils";
 import { useLanguage } from "@/hooks/useLanguage";
 import { AIModuleReportBuilder } from "@/components/shared/AIModuleReportBuilder";
 
@@ -314,7 +315,7 @@ export default function LeaveAnalyticsPage() {
       .sort((a, b) => b[1] - a[1])
       .slice(0, 10)
       .map(([date, count]) => ({
-        date: format(parseISO(date), "MMM d, yyyy"),
+        date: formatDateForDisplay(date, "MMM d, yyyy"),
         requests: count,
       }));
 

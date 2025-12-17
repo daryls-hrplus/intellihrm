@@ -12,7 +12,7 @@ import { Switch } from "@/components/ui/switch";
 import { Plus, Search, Loader2, Award, Star, Trophy } from 'lucide-react';
 import { useEmployeeRelations } from '@/hooks/useEmployeeRelations';
 import { useAuth } from '@/contexts/AuthContext';
-import { format } from 'date-fns';
+import { getTodayString, formatDateForDisplay } from '@/utils/dateUtils';
 
 const RECOGNITION_TYPES = ['award', 'appreciation', 'milestone', 'peer_recognition', 'spot_bonus'];
 const CATEGORIES = ['performance', 'innovation', 'teamwork', 'customer_service', 'safety', 'leadership', 'other'];
@@ -34,7 +34,7 @@ export function ERRecognitionTab({ companyId }: ERRecognitionTabProps) {
     category: '',
     title: '',
     description: '',
-    award_date: new Date().toISOString().split('T')[0],
+    award_date: getTodayString(),
     monetary_value: '',
     is_public: true,
   });
@@ -63,7 +63,7 @@ export function ERRecognitionTab({ companyId }: ERRecognitionTabProps) {
       category: '',
       title: '',
       description: '',
-      award_date: new Date().toISOString().split('T')[0],
+      award_date: getTodayString(),
       monetary_value: '',
       is_public: true,
     });
@@ -249,7 +249,7 @@ export function ERRecognitionTab({ companyId }: ERRecognitionTabProps) {
                     <p className="text-sm text-muted-foreground line-clamp-2 mb-2">{recognition.description}</p>
                   )}
                   <div className="flex items-center justify-between text-xs text-muted-foreground">
-                    <span>{format(new Date(recognition.award_date), 'PP')}</span>
+                    <span>{formatDateForDisplay(recognition.award_date, 'PP')}</span>
                     {recognition.category && (
                       <Badge variant="secondary" className="text-xs">
                         {t(`employeeRelationsModule.recognition.categories.${recognition.category}`, { defaultValue: recognition.category.replace(/_/g, ' ') })}

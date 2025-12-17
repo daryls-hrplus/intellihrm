@@ -16,6 +16,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { format, startOfWeek, endOfWeek, parseISO } from "date-fns";
+import { formatDateForDisplay } from "@/utils/dateUtils";
 import { Send, Clock, CheckCircle, FileText, Loader2 } from "lucide-react";
 
 interface TimesheetSubmission {
@@ -262,7 +263,7 @@ export default function TimesheetApprovalsPage() {
                     <TableRow><TableCell colSpan={5} className="text-center text-muted-foreground">{t("timeAttendance.timesheets.noSubmissions")}</TableCell></TableRow>
                   ) : mySubmissions.map((s) => (
                     <TableRow key={s.id}>
-                      <TableCell>{format(parseISO(s.period_start), "MMM d")} - {format(parseISO(s.period_end), "MMM d, yyyy")}</TableCell>
+                      <TableCell>{formatDateForDisplay(s.period_start, "MMM d")} - {formatDateForDisplay(s.period_end, "MMM d, yyyy")}</TableCell>
                       <TableCell>{s.total_hours}h</TableCell>
                       <TableCell><Badge className={statusColors[s.status]}>{s.status.replace("_", " ")}</Badge></TableCell>
                       <TableCell>{s.submitted_at ? format(parseISO(s.submitted_at), "MMM d, HH:mm") : "-"}</TableCell>
@@ -293,7 +294,7 @@ export default function TimesheetApprovalsPage() {
                   ) : pendingApprovals.map((s) => (
                     <TableRow key={s.id}>
                       <TableCell>{s.employee?.full_name || t("timeAttendance.timesheets.unknown")}</TableCell>
-                      <TableCell>{format(parseISO(s.period_start), "MMM d")} - {format(parseISO(s.period_end), "MMM d, yyyy")}</TableCell>
+                      <TableCell>{formatDateForDisplay(s.period_start, "MMM d")} - {formatDateForDisplay(s.period_end, "MMM d, yyyy")}</TableCell>
                       <TableCell>{s.total_hours}h</TableCell>
                       <TableCell>{s.submitted_at ? format(parseISO(s.submitted_at), "MMM d, HH:mm") : "-"}</TableCell>
                       <TableCell className="space-x-2">
@@ -341,7 +342,7 @@ export default function TimesheetApprovalsPage() {
           <DialogHeader>
             <DialogTitle>
               {t("timeAttendance.timesheets.timesheetEntries")}
-              {viewingSubmission && <span className="text-muted-foreground font-normal ml-2">({format(parseISO(viewingSubmission.period_start), "MMM d")} - {format(parseISO(viewingSubmission.period_end), "MMM d, yyyy")})</span>}
+              {viewingSubmission && <span className="text-muted-foreground font-normal ml-2">({formatDateForDisplay(viewingSubmission.period_start, "MMM d")} - {formatDateForDisplay(viewingSubmission.period_end, "MMM d, yyyy")})</span>}
             </DialogTitle>
           </DialogHeader>
           <div className="max-h-96 overflow-auto">
