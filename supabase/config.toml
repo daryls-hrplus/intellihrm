@@ -3,6 +3,9 @@ project_id = "hmdewkkytchwrenqagkw"
 [functions.design-payroll-report]
 verify_jwt = false
 
+[functions.design-module-report]
+verify_jwt = false
+
 [functions.analyze-payslip-template]
 verify_jwt = false
 

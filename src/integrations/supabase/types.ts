@@ -277,6 +277,74 @@ export type Database = {
           },
         ]
       }
+      ai_module_reports: {
+        Row: {
+          ai_analysis: Json | null
+          company_id: string | null
+          created_at: string
+          created_by: string | null
+          data_sources: Json | null
+          filter_configuration: Json | null
+          id: string
+          iteration_history: Json | null
+          last_generated_at: string | null
+          layout_document_content: string | null
+          layout_document_name: string | null
+          module_name: string
+          report_name: string
+          report_structure: Json | null
+          report_type: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          ai_analysis?: Json | null
+          company_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          data_sources?: Json | null
+          filter_configuration?: Json | null
+          id?: string
+          iteration_history?: Json | null
+          last_generated_at?: string | null
+          layout_document_content?: string | null
+          layout_document_name?: string | null
+          module_name: string
+          report_name: string
+          report_structure?: Json | null
+          report_type: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          ai_analysis?: Json | null
+          company_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          data_sources?: Json | null
+          filter_configuration?: Json | null
+          id?: string
+          iteration_history?: Json | null
+          last_generated_at?: string | null
+          layout_document_content?: string | null
+          layout_document_name?: string | null
+          module_name?: string
+          report_name?: string
+          report_structure?: Json | null
+          report_type?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_module_reports_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ai_payroll_reports: {
         Row: {
           ai_analysis: Json | null
