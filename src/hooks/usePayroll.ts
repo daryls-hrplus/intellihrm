@@ -1,6 +1,12 @@
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { 
+  calculateProrationFactor, 
+  applyProration, 
+  getProrationMethodCode,
+  type ProrationMethod 
+} from "@/utils/payroll/prorationCalculator";
 
 export interface PayPeriodSchedule {
   id: string;
@@ -677,10 +683,32 @@ export function usePayroll() {
       let totalEmployerTaxes = 0;
       
       for (const emp of companyEmployees) {
+        // Get employee position start/end dates for proration
+        const { data: positionInfo } = await supabase
+          .from("employee_positions")
+          .select("start_date, end_date")
+          .eq("id", emp.id)
+          .single();
+        
+        // Use position start_date as hire date and end_date as termination date
+        const employeeStartDate = positionInfo?.start_date 
+          ? new Date(positionInfo.start_date) 
+          : null;
+        const employeeEndDate = positionInfo?.end_date
+          ? new Date(positionInfo.end_date)
+          : null;
+        
         // First check employee_compensation (overrides position compensation)
         const { data: employeeComp } = await supabase
           .from("employee_compensation")
-          .select(`*, pay_elements(name, code)`)
+          .select(`
+            *, 
+            pay_elements(
+              name, 
+              code, 
+              proration_method:lookup_values!pay_elements_proration_method_id_fkey(code, name)
+            )
+          `)
           .eq("employee_id", emp.employee_id)
           .eq("is_active", true);
         
@@ -688,26 +716,62 @@ export function usePayroll() {
         let regularPay = 0;
         
         if (employeeComp && employeeComp.length > 0) {
-          // Use employee compensation
+          // Use employee compensation with proration
           for (const comp of employeeComp) {
-            grossPay += comp.amount || 0;
+            const prorationMethodCode = getProrationMethodCode(
+              (comp.pay_elements as any)?.proration_method?.code
+            );
+            
+            // Calculate proration factor for this pay element
+            const prorationResult = calculateProrationFactor({
+              periodStart: new Date(payPeriod?.period_start || new Date()),
+              periodEnd: new Date(payPeriod?.period_end || new Date()),
+              employeeStartDate,
+              employeeEndDate,
+              prorationMethod: prorationMethodCode,
+            });
+            
+            const proratedAmount = applyProration(comp.amount || 0, prorationResult);
+            grossPay += proratedAmount;
+            
             // Base salary (SAL code) goes to regular_pay
             if ((comp.pay_elements as any)?.code?.toUpperCase() === 'SAL') {
-              regularPay += comp.amount || 0;
+              regularPay += proratedAmount;
             }
           }
         } else {
-          // Fall back to position compensation
+          // Fall back to position compensation with proration
           const { data: positionComp } = await supabase
             .from("position_compensation")
-            .select(`*, pay_element:pay_elements(*)`)
+            .select(`
+              *, 
+              pay_element:pay_elements(
+                *,
+                proration_method:lookup_values!pay_elements_proration_method_id_fkey(code, name)
+              )
+            `)
             .eq("position_id", emp.position_id)
             .eq("is_active", true);
           
           for (const comp of positionComp || []) {
-            grossPay += comp.amount || 0;
+            const prorationMethodCode = getProrationMethodCode(
+              comp.pay_element?.proration_method?.code
+            );
+            
+            // Calculate proration factor for this pay element
+            const prorationResult = calculateProrationFactor({
+              periodStart: new Date(payPeriod?.period_start || new Date()),
+              periodEnd: new Date(payPeriod?.period_end || new Date()),
+              employeeStartDate,
+              employeeEndDate,
+              prorationMethod: prorationMethodCode,
+            });
+            
+            const proratedAmount = applyProration(comp.amount || 0, prorationResult);
+            grossPay += proratedAmount;
+            
             if (comp.pay_element?.element_type_id) {
-              regularPay += comp.amount || 0;
+              regularPay += proratedAmount;
             }
           }
         }
