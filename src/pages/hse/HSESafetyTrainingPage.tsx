@@ -44,6 +44,7 @@ import {
   AlertTriangle,
 } from "lucide-react";
 import { format, addMonths, isPast } from "date-fns";
+import { getTodayString, toDateString } from "@/utils/dateUtils";
 import { NavLink } from "react-router-dom";
 import { toast } from "sonner";
 
@@ -138,7 +139,7 @@ export default function HSESafetyTrainingPage() {
         training_type: "induction",
         is_mandatory: false,
         is_active: true,
-        start_date: format(new Date(), "yyyy-MM-dd"),
+        start_date: getTodayString(),
       });
     }
     setDialogOpen(true);
@@ -154,10 +155,10 @@ export default function HSESafetyTrainingPage() {
     setRecordFormData({
       company_id: companyId,
       training_id: training?.id,
-      training_date: format(new Date(), "yyyy-MM-dd"),
+      training_date: getTodayString(),
       status: "scheduled",
       expiry_date: training?.frequency_months
-        ? format(addMonths(new Date(), training.frequency_months), "yyyy-MM-dd")
+        ? toDateString(addMonths(new Date(), training.frequency_months))
         : undefined,
     });
     setRecordDialogOpen(true);

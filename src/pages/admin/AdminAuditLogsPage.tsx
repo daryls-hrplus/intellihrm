@@ -31,6 +31,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
+import { formatDateForDisplay, getTodayString } from "@/utils/dateUtils";
 import { Json } from "@/integrations/supabase/types";
 import {
   Search,
@@ -485,7 +486,7 @@ export default function AdminAuditLogsPage() {
                     return (
                       <TableRow key={log.id}>
                         <TableCell className="whitespace-nowrap">
-                          {format(new Date(log.created_at), 'MMM d, yyyy HH:mm:ss')}
+                          {formatDateForDisplay(log.created_at, 'MMM d, yyyy HH:mm:ss')}
                         </TableCell>
                         <TableCell>
                           <div className="flex flex-col">
@@ -567,7 +568,7 @@ export default function AdminAuditLogsPage() {
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label className="text-sm font-medium text-muted-foreground">Timestamp</label>
-                      <p>{format(new Date(selectedLog.created_at), 'PPpp')}</p>
+                      <p>{formatDateForDisplay(selectedLog.created_at, 'PPpp')}</p>
                     </div>
                     <div>
                       <label className="text-sm font-medium text-muted-foreground">User</label>
