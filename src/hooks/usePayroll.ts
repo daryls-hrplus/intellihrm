@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { getTodayString, toDateString } from "@/utils/dateUtils";
 import { 
   calculateProrationFactor, 
   applyProration, 
@@ -429,10 +430,10 @@ export function usePayroll() {
         periods.push({
           company_id: companyId,
           schedule_id: scheduleId,
-          period_start: currentStart.toISOString().split('T')[0],
-          period_end: periodEnd.toISOString().split('T')[0],
-          pay_date: payDate.toISOString().split('T')[0],
-          cutoff_date: new Date(payDate.getTime() - (schedule.cutoff_days_before_pay || 3) * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+          period_start: toDateString(currentStart),
+          period_end: toDateString(periodEnd),
+          pay_date: toDateString(payDate),
+          cutoff_date: toDateString(new Date(payDate.getTime() - (schedule.cutoff_days_before_pay || 3) * 24 * 60 * 60 * 1000)),
           status: 'open',
         });
         
@@ -619,12 +620,13 @@ export function usePayroll() {
       const mondayCount = payPeriod?.monday_count || 4;
       
       // Get statutory deduction types for this country
+      const today = getTodayString();
       const { data: statutoryTypes } = await supabase
         .from('statutory_deduction_types')
         .select('*')
         .eq('country', countryCode)
-        .lte('start_date', new Date().toISOString().split('T')[0])
-        .or(`end_date.is.null,end_date.gte.${new Date().toISOString().split('T')[0]}`);
+        .lte('start_date', today)
+        .or(`end_date.is.null,end_date.gte.${today}`);
       
       // Get statutory rate bands
       const { data: rateBands } = await supabase
@@ -652,13 +654,13 @@ export function usePayroll() {
       // If a pay group is provided, prefer explicit employee-to-pay-group assignments
       let companyEmployees = baseCompanyEmployees;
       if (payGroupId) {
-        const today = new Date().toISOString().split("T")[0];
+        const todayStr = getTodayString();
         const { data: payGroupEmployees, error: payGroupErr } = await supabase
           .from("employee_pay_groups")
           .select("employee_id")
           .eq("pay_group_id", payGroupId)
-          .lte("start_date", today)
-          .or(`end_date.is.null,end_date.gte.${today}`);
+          .lte("start_date", todayStr)
+          .or(`end_date.is.null,end_date.gte.${todayStr}`);
 
         if (payGroupErr) throw payGroupErr;
 
@@ -820,8 +822,8 @@ export function usePayroll() {
           `)
           .eq("employee_id", emp.employee_id)
           .eq("status", "active")
-          .lte("effective_date", payPeriod?.period_end || new Date().toISOString().split('T')[0])
-          .or(`termination_date.is.null,termination_date.gte.${payPeriod?.period_start || new Date().toISOString().split('T')[0]}`);
+          .lte("effective_date", payPeriod?.period_end || getTodayString())
+          .or(`termination_date.is.null,termination_date.gte.${payPeriod?.period_start || getTodayString()}`);
         
         // Check if benefit plans have payroll mappings (only process mapped benefits)
         if (benefitEnrollments && benefitEnrollments.length > 0) {
@@ -833,8 +835,8 @@ export function usePayroll() {
             .in("benefit_plan_id", planIds)
             .eq("company_id", companyId)
             .eq("is_active", true)
-            .lte("start_date", payPeriod?.period_end || new Date().toISOString().split('T')[0])
-            .or(`end_date.is.null,end_date.gte.${payPeriod?.period_start || new Date().toISOString().split('T')[0]}`);
+            .lte("start_date", payPeriod?.period_end || getTodayString())
+            .or(`end_date.is.null,end_date.gte.${payPeriod?.period_start || getTodayString()}`);
           
           const mappedPlanIds = new Set((benefitMappings || []).map((m: any) => m.benefit_plan_id));
           
@@ -1445,7 +1447,7 @@ export function usePayroll() {
         company_id: companyId,
         payroll_run_id: payrollRunId,
         bank_config_id: bankConfigId,
-        file_name: `payroll_${new Date().toISOString().split('T')[0]}.csv`,
+        file_name: `payroll_${getTodayString()}.csv`,
         file_content: csvContent,
         file_format: 'csv',
         total_amount: totalAmount,

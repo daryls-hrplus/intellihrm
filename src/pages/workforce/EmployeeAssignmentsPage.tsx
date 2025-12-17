@@ -55,7 +55,7 @@ import {
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { format } from "date-fns";
+import { getTodayString, formatDateForDisplay } from "@/utils/dateUtils";
 import { useAuth } from "@/contexts/AuthContext";
 import { BulkAssignmentUpload } from "@/components/workforce/BulkAssignmentUpload";
 import { AssignmentHistoryDialog } from "@/components/workforce/AssignmentHistoryDialog";
@@ -146,7 +146,7 @@ export default function EmployeeAssignmentsPage() {
   // Form state
   const [formEmployeeId, setFormEmployeeId] = useState("");
   const [formPositionId, setFormPositionId] = useState("");
-  const [formStartDate, setFormStartDate] = useState(format(new Date(), "yyyy-MM-dd"));
+  const [formStartDate, setFormStartDate] = useState(getTodayString());
   const [formEndDate, setFormEndDate] = useState("");
   const [formIsPrimary, setFormIsPrimary] = useState(false);
   const [formCompAmount, setFormCompAmount] = useState("");
@@ -240,7 +240,7 @@ export default function EmployeeAssignmentsPage() {
     setEditingAssignment(null);
     setFormEmployeeId("");
     setFormPositionId("");
-    setFormStartDate(format(new Date(), "yyyy-MM-dd"));
+    setFormStartDate(getTodayString());
     setFormEndDate("");
     setFormIsPrimary(false);
     setFormCompAmount("");
@@ -354,7 +354,7 @@ export default function EmployeeAssignmentsPage() {
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
     const link = document.createElement("a");
     link.href = URL.createObjectURL(blob);
-    link.download = `employee-assignments-${format(new Date(), "yyyy-MM-dd")}.csv`;
+    link.download = `employee-assignments-${getTodayString()}.csv`;
     link.click();
     toast.success(t("workforce.csvExported"));
   };
@@ -540,9 +540,9 @@ export default function EmployeeAssignmentsPage() {
                         </TableCell>
                         <TableCell>{assignment.position?.department?.name}</TableCell>
                         <TableCell>{assignment.position?.department?.company?.name}</TableCell>
-                        <TableCell>{format(new Date(assignment.start_date), "MMM d, yyyy")}</TableCell>
+                        <TableCell>{formatDateForDisplay(assignment.start_date, "MMM d, yyyy")}</TableCell>
                         <TableCell>
-                          {assignment.end_date ? format(new Date(assignment.end_date), "MMM d, yyyy") : "-"}
+                          {assignment.end_date ? formatDateForDisplay(assignment.end_date, "MMM d, yyyy") : "-"}
                         </TableCell>
                         <TableCell>
                           <Badge variant={assignment.is_active ? "default" : "secondary"}>

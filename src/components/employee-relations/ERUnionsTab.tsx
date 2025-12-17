@@ -138,7 +138,7 @@ export function ERUnionsTab({ companyId }: ERUnionsTabProps) {
       contact_phone: '',
       address: '',
       website: '',
-      start_date: new Date().toISOString().split('T')[0],
+      start_date: getTodayString(),
     });
   };
 
@@ -148,7 +148,7 @@ export function ERUnionsTab({ companyId }: ERUnionsTabProps) {
       title: '',
       agreement_number: '',
       description: '',
-      effective_date: new Date().toISOString().split('T')[0],
+      effective_date: getTodayString(),
       expiry_date: '',
       wage_provisions: '',
       benefits_provisions: '',

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useAuditLog } from '@/hooks/useAuditLog';
+import { toDateString } from '@/utils/dateUtils';
 
 export interface OffboardingTemplate {
   id: string;
@@ -366,7 +367,7 @@ export function useOffboarding() {
         description: task.description,
         task_type: task.task_type,
         is_required: task.is_required,
-        due_date: new Date(lastDate.getTime() - task.due_days_before * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+        due_date: toDateString(new Date(lastDate.getTime() - task.due_days_before * 24 * 60 * 60 * 1000)),
         assigned_to_type: task.assigned_to_type,
         assigned_to_id: task.assigned_to_type === 'employee' ? instance.employee_id :
                         task.assigned_to_type === 'manager' ? instance.manager_id : null,
@@ -389,7 +390,7 @@ export function useOffboarding() {
           description: `Return this equipment before your last working day`,
           task_type: 'equipment' as const,
           is_required: true,
-          due_date: new Date(lastDate.getTime() - 2 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+          due_date: toDateString(new Date(lastDate.getTime() - 2 * 24 * 60 * 60 * 1000)),
           assigned_to_type: 'employee' as const,
           assigned_to_id: instance.employee_id!,
           display_order: 1000 + index,

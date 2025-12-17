@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { format } from "date-fns";
 import { CalendarIcon, Loader2 } from "lucide-react";
+import { formatDateForDisplay, toDateString } from "@/utils/dateUtils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -293,7 +293,7 @@ export function TransactionFormDialog({
                     >
                       <CalendarIcon className="mr-2 h-4 w-4" />
                       {formData.probation_end_date
-                        ? format(new Date(formData.probation_end_date), "PPP")
+                        ? formatDateForDisplay(formData.probation_end_date, "PPP")
                         : "Select date"}
                     </Button>
                   </PopoverTrigger>
@@ -304,7 +304,7 @@ export function TransactionFormDialog({
                       onSelect={(date) =>
                         setFormData({
                           ...formData,
-                          probation_end_date: date?.toISOString().split("T")[0],
+                          probation_end_date: date ? toDateString(date) : undefined,
                         })
                       }
                     />
@@ -386,7 +386,7 @@ export function TransactionFormDialog({
                 >
                   <CalendarIcon className="mr-2 h-4 w-4" />
                   {formData.confirmation_date
-                    ? format(new Date(formData.confirmation_date), "PPP")
+                    ? formatDateForDisplay(formData.confirmation_date, "PPP")
                     : "Select date"}
                 </Button>
               </PopoverTrigger>
@@ -397,7 +397,7 @@ export function TransactionFormDialog({
                   onSelect={(date) =>
                     setFormData({
                       ...formData,
-                      confirmation_date: date?.toISOString().split("T")[0],
+                      confirmation_date: date ? toDateString(date) : undefined,
                     })
                   }
                 />
@@ -417,7 +417,7 @@ export function TransactionFormDialog({
                     <Button variant="outline" className="w-full justify-start text-left font-normal">
                       <CalendarIcon className="mr-2 h-4 w-4" />
                       {formData.original_probation_end_date
-                        ? format(new Date(formData.original_probation_end_date), "PPP")
+                        ? formatDateForDisplay(formData.original_probation_end_date, "PPP")
                         : "Select date"}
                     </Button>
                   </PopoverTrigger>
@@ -428,7 +428,7 @@ export function TransactionFormDialog({
                       onSelect={(date) =>
                         setFormData({
                           ...formData,
-                          original_probation_end_date: date?.toISOString().split("T")[0],
+                          original_probation_end_date: date ? toDateString(date) : undefined,
                         })
                       }
                     />
@@ -442,7 +442,7 @@ export function TransactionFormDialog({
                     <Button variant="outline" className="w-full justify-start text-left font-normal">
                       <CalendarIcon className="mr-2 h-4 w-4" />
                       {formData.new_probation_end_date
-                        ? format(new Date(formData.new_probation_end_date), "PPP")
+                        ? formatDateForDisplay(formData.new_probation_end_date, "PPP")
                         : "Select date"}
                     </Button>
                   </PopoverTrigger>
@@ -453,7 +453,7 @@ export function TransactionFormDialog({
                       onSelect={(date) =>
                         setFormData({
                           ...formData,
-                          new_probation_end_date: date?.toISOString().split("T")[0],
+                          new_probation_end_date: date ? toDateString(date) : undefined,
                         })
                       }
                     />
@@ -523,7 +523,7 @@ export function TransactionFormDialog({
                     <Button variant="outline" className="w-full justify-start text-left font-normal">
                       <CalendarIcon className="mr-2 h-4 w-4" />
                       {formData.acting_start_date
-                        ? format(new Date(formData.acting_start_date), "PPP")
+                        ? formatDateForDisplay(formData.acting_start_date, "PPP")
                         : "Select date"}
                     </Button>
                   </PopoverTrigger>
@@ -534,7 +534,7 @@ export function TransactionFormDialog({
                       onSelect={(date) =>
                         setFormData({
                           ...formData,
-                          acting_start_date: date?.toISOString().split("T")[0],
+                          acting_start_date: date ? toDateString(date) : undefined,
                         })
                       }
                     />
@@ -548,7 +548,7 @@ export function TransactionFormDialog({
                     <Button variant="outline" className="w-full justify-start text-left font-normal">
                       <CalendarIcon className="mr-2 h-4 w-4" />
                       {formData.acting_end_date
-                        ? format(new Date(formData.acting_end_date), "PPP")
+                        ? formatDateForDisplay(formData.acting_end_date, "PPP")
                         : "Select date"}
                     </Button>
                   </PopoverTrigger>
@@ -559,7 +559,7 @@ export function TransactionFormDialog({
                       onSelect={(date) =>
                         setFormData({
                           ...formData,
-                          acting_end_date: date?.toISOString().split("T")[0],
+                          acting_end_date: date ? toDateString(date) : undefined,
                         })
                       }
                     />
@@ -837,7 +837,7 @@ export function TransactionFormDialog({
                     <Button variant="outline" className="w-full justify-start text-left font-normal">
                       <CalendarIcon className="mr-2 h-4 w-4" />
                       {formData.last_working_date
-                        ? format(new Date(formData.last_working_date), "PPP")
+                        ? formatDateForDisplay(formData.last_working_date, "PPP")
                         : "Select date"}
                     </Button>
                   </PopoverTrigger>
@@ -848,7 +848,7 @@ export function TransactionFormDialog({
                       onSelect={(date) =>
                         setFormData({
                           ...formData,
-                          last_working_date: date?.toISOString().split("T")[0],
+                          last_working_date: date ? toDateString(date) : undefined,
                         })
                       }
                     />
@@ -919,7 +919,7 @@ export function TransactionFormDialog({
                 >
                   <CalendarIcon className="mr-2 h-4 w-4" />
                   {formData.effective_date
-                    ? format(new Date(formData.effective_date), "PPP")
+                    ? formatDateForDisplay(formData.effective_date, "PPP")
                     : "Select date"}
                 </Button>
               </PopoverTrigger>
@@ -930,7 +930,7 @@ export function TransactionFormDialog({
                   onSelect={(date) =>
                     setFormData({
                       ...formData,
-                      effective_date: date?.toISOString().split("T")[0],
+                      effective_date: date ? toDateString(date) : undefined,
                     })
                   }
                 />
