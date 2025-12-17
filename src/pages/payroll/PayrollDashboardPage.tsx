@@ -171,6 +171,14 @@ export default function PayrollDashboardPage() {
       tabCode: "regular_deductions",
     },
     {
+      title: t("compensation.modules.payElements.title", "Pay Elements"),
+      description: t("compensation.modules.payElements.description", "Define and manage pay element types"),
+      icon: DollarSign,
+      href: "/payroll/pay-elements",
+      color: "bg-success/10 text-success",
+      tabCode: "pay_elements",
+    },
+    {
       title: t("payroll.modules.leavePaymentConfig.title", "Leave Payment Config"),
       description: t("payroll.modules.leavePaymentConfig.description", "Configure leave payment rules and payroll mappings"),
       icon: Settings,
