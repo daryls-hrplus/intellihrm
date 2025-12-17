@@ -33,6 +33,7 @@ import {
   Clock,
   Wallet,
   Briefcase,
+  BookOpen,
 } from "lucide-react";
 
 interface NavItem {
@@ -64,6 +65,7 @@ const navItems: NavItem[] = [
   { title: "navigation.employeeRelations", href: "/employee-relations", icon: Heart, moduleCode: "employee_relations", hrOnly: true },
   { title: "navigation.property", href: "/property", icon: Package, moduleCode: "property" },
   { title: "navigation.help", href: "/help", icon: HelpCircle, moduleCode: "help" },
+  { title: "navigation.enablement", href: "/enablement", icon: BookOpen, moduleCode: "enablement", adminOnly: true },
   { title: "navigation.admin", href: "/admin", icon: Settings, moduleCode: "admin", adminOnly: true },
 ];
 
