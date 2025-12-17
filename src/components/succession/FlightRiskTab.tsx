@@ -11,7 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Plus, Edit, AlertTriangle, User } from "lucide-react";
 import { toast } from "sonner";
-import { format } from "date-fns";
+import { getTodayString, formatDateForDisplay } from "@/utils/dateUtils";
 
 interface FlightRiskTabProps {
   companyId: string;
@@ -59,7 +59,7 @@ export function FlightRiskTab({ companyId }: FlightRiskTabProps) {
     risk_level: 'medium',
     risk_factors: [] as string[],
     retention_actions: '',
-    assessment_date: format(new Date(), 'yyyy-MM-dd'),
+    assessment_date: getTodayString(),
     next_review_date: '',
     notes: ''
   });
@@ -145,7 +145,7 @@ export function FlightRiskTab({ companyId }: FlightRiskTabProps) {
       risk_level: 'medium',
       risk_factors: [],
       retention_actions: '',
-      assessment_date: format(new Date(), 'yyyy-MM-dd'),
+      assessment_date: getTodayString(),
       next_review_date: '',
       notes: ''
     });

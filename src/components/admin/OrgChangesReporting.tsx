@@ -52,6 +52,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { format, eachMonthOfInterval, parseISO, startOfMonth, endOfMonth, subMonths, subYears, isWithinInterval } from "date-fns";
 import jsPDF from "jspdf";
+import { getTodayString, toDateString } from "@/utils/dateUtils";
 import {
   LineChart,
   Line,
@@ -130,8 +131,8 @@ export function OrgChangesReporting({ companyId, onScheduleClick }: OrgChangesRe
   const [employeePositions, setEmployeePositions] = useState<EmployeePosition[]>([]);
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [startDate, setStartDate] = useState<string>(() => format(subMonths(new Date(), 11), "yyyy-MM-dd"));
-  const [endDate, setEndDate] = useState<string>(() => format(new Date(), "yyyy-MM-dd"));
+  const [startDate, setStartDate] = useState<string>(() => toDateString(subMonths(new Date(), 11)));
+  const [endDate, setEndDate] = useState<string>(() => getTodayString());
   const [showYoY, setShowYoY] = useState(false);
   const [drillDown, setDrillDown] = useState<DrillDownData | null>(null);
 
@@ -725,7 +726,7 @@ export function OrgChangesReporting({ companyId, onScheduleClick }: OrgChangesRe
 
   // Department breakdown for pie chart
   const departmentBreakdown = useMemo(() => {
-    const today = format(new Date(), "yyyy-MM-dd");
+    const today = getTodayString();
     const deptCounts: Record<string, number> = {};
 
     filteredPositions
@@ -769,7 +770,7 @@ export function OrgChangesReporting({ companyId, onScheduleClick }: OrgChangesRe
     const a = document.createElement("a");
     a.href = url;
     const deptSuffix = selectedDepartmentId === "all" ? "" : `-${selectedDeptName.replace(/\s+/g, '-').toLowerCase()}`;
-    a.download = `org-changes-report${deptSuffix}-${format(new Date(), "yyyy-MM-dd")}.csv`;
+    a.download = `org-changes-report${deptSuffix}-${getTodayString()}.csv`;
     a.click();
     URL.revokeObjectURL(url);
     toast.success("Report exported successfully");

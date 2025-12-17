@@ -19,7 +19,8 @@ import {
   RefreshCw,
   AlertTriangle,
 } from "lucide-react";
-import { format, differenceInDays, isPast } from "date-fns";
+import { differenceInDays, isPast } from "date-fns";
+import { formatDateForDisplay } from "@/utils/dateUtils";
 
 type GoalStatus = 'draft' | 'active' | 'in_progress' | 'completed' | 'cancelled' | 'overdue';
 
@@ -158,7 +159,7 @@ export function TeamGoalCard({
                   ) : daysUntilDue !== null && daysUntilDue <= 7 ? (
                     <span className="text-warning">{daysUntilDue} days left</span>
                   ) : (
-                    <span>Due: {format(new Date(goal.due_date), "MMM d, yyyy")}</span>
+                    <span>Due: {formatDateForDisplay(goal.due_date, "MMM d, yyyy")}</span>
                   )}
                 </div>
               )}

@@ -4,6 +4,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2, TrendingUp } from "lucide-react";
 import { format, subDays, startOfDay, eachDayOfInterval } from "date-fns";
+import { toDateString } from "@/utils/dateUtils";
 import {
   AreaChart,
   Area,
@@ -93,7 +94,7 @@ export function AccessRequestsAnalytics() {
 
       // Aggregate requests by day and status
       (requests || []).forEach((req) => {
-        const dayKey = format(new Date(req.created_at), "yyyy-MM-dd");
+        const dayKey = toDateString(new Date(req.created_at));
         if (statsMap[dayKey]) {
           const status = req.status as keyof DailyStats;
           if (status in statsMap[dayKey] && status !== "date" && status !== "total") {

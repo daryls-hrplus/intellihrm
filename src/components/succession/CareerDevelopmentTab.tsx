@@ -13,7 +13,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Plus, Edit, Trash2, Target, BookOpen, ChevronDown, ChevronRight, User } from "lucide-react";
 import { toast } from "sonner";
-import { format } from "date-fns";
+import { getTodayString, formatDateForDisplay } from "@/utils/dateUtils";
 
 interface CareerDevelopmentTabProps {
   companyId: string;
@@ -77,7 +77,7 @@ export function CareerDevelopmentTab({ companyId }: CareerDevelopmentTabProps) {
     title: '',
     description: '',
     status: 'draft',
-    start_date: format(new Date(), 'yyyy-MM-dd'),
+    start_date: getTodayString(),
     target_completion_date: ''
   });
 
@@ -255,7 +255,7 @@ export function CareerDevelopmentTab({ companyId }: CareerDevelopmentTabProps) {
       title: '',
       description: '',
       status: 'draft',
-      start_date: format(new Date(), 'yyyy-MM-dd'),
+      start_date: getTodayString(),
       target_completion_date: ''
     });
     setEditingIdp(null);
