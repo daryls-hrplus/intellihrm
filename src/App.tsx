@@ -168,6 +168,8 @@ import TrainingNeedsPage from "./pages/training/TrainingNeedsPage";
 import TrainingAnalyticsPage from "./pages/training/TrainingAnalyticsPage";
 import VirtualClassroomPage from "./pages/training/VirtualClassroomPage";
 import ContentAuthoringPage from "./pages/training/ContentAuthoringPage";
+import EmployeeLearningPage from "./pages/training/EmployeeLearningPage";
+import EmployeeCertificationsPage from "./pages/training/EmployeeCertificationsPage";
 
 // Succession pages
 import SuccessionDashboardPage from "./pages/succession/SuccessionDashboardPage";
@@ -2115,6 +2117,22 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <CertificationsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/training/employee-learning"
+              element={
+                <ProtectedRoute>
+                  <EmployeeLearningPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/training/employee-certifications"
+              element={
+                <ProtectedRoute>
+                  <EmployeeCertificationsPage />
                 </ProtectedRoute>
               }
             />

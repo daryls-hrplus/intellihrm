@@ -106,7 +106,8 @@ export default function TrainingDashboardPage() {
 
   const allModules = {
     catalog: { title: t("training.modules.courseCatalog.title"), description: t("training.modules.courseCatalog.description"), href: "/training/catalog", icon: BookOpen, color: "bg-primary/10 text-primary", tabCode: "catalog" },
-    myLearning: { title: t("training.modules.myLearning.title"), description: t("training.modules.myLearning.description"), href: "/training/my-learning", icon: GraduationCap, color: "bg-success/10 text-success", tabCode: "my-learning" },
+    employeeLearning: { title: t("training.modules.employeeLearning.title"), description: t("training.modules.employeeLearning.description"), href: "/training/employee-learning", icon: GraduationCap, color: "bg-success/10 text-success", tabCode: "employee-learning" },
+    employeeCertifications: { title: t("training.modules.employeeCertifications.title"), description: t("training.modules.employeeCertifications.description"), href: "/training/employee-certifications", icon: Award, color: "bg-warning/10 text-warning", tabCode: "employee-certifications" },
     learningPaths: { title: t("training.modules.learningPaths.title"), description: t("training.modules.learningPaths.description"), href: "/training/learning-paths", icon: Route, color: "bg-info/10 text-info", tabCode: "learning-paths" },
     gapAnalysis: { title: t("training.modules.gapAnalysis.title"), description: t("training.modules.gapAnalysis.description"), href: "/training/gap-analysis", icon: Target, color: "bg-secondary/10 text-secondary-foreground", tabCode: "gap-analysis" },
     virtualClassroom: { title: t("training.modules.virtualClassroom.title"), description: t("training.modules.virtualClassroom.description"), href: "/training/virtual-classroom", icon: Monitor, color: "bg-info/10 text-info", tabCode: "virtual-classroom" },
@@ -121,7 +122,6 @@ export default function TrainingDashboardPage() {
     needs: { title: t("training.modules.needs.title"), description: t("training.modules.needs.description"), href: "/training/needs", icon: TrendingUp, color: "bg-accent/10 text-accent-foreground", tabCode: "needs" },
     contentAuthoring: { title: t("training.modules.contentAuthoring.title"), description: t("training.modules.contentAuthoring.description"), href: "/training/content-authoring", icon: PenTool, color: "bg-primary/10 text-primary", tabCode: "content-authoring" },
     liveSessions: { title: t("training.modules.liveSessions.title"), description: t("training.modules.liveSessions.description"), href: "/training/sessions", icon: Video, color: "bg-muted text-muted-foreground", tabCode: "sessions" },
-    certifications: { title: t("training.modules.certifications.title"), description: t("training.modules.certifications.description"), href: "/training/certifications", icon: Award, color: "bg-warning/10 text-warning", tabCode: "certifications" },
     calendar: { title: t("training.modules.calendar.title"), description: t("training.modules.calendar.description"), href: "/training/calendar", icon: Calendar, color: "bg-destructive/10 text-destructive", tabCode: "calendar" },
     analytics: { title: t("training.modules.analytics.title"), description: t("training.modules.analytics.description"), href: "/training/analytics", icon: BarChart3, color: "bg-primary/10 text-primary", tabCode: "analytics" },
     lms: { title: t("training.modules.lms.title"), description: t("training.modules.lms.description"), href: "/admin/lms", icon: Settings, color: "bg-muted text-muted-foreground", tabCode: "lms" },
@@ -137,7 +137,7 @@ export default function TrainingDashboardPage() {
     },
     {
       titleKey: "Learning & Development",
-      items: filterByAccess([allModules.catalog, allModules.myLearning, allModules.learningPaths, allModules.certifications]),
+      items: filterByAccess([allModules.catalog, allModules.employeeLearning, allModules.employeeCertifications, allModules.learningPaths]),
     },
     {
       titleKey: "Planning & Assessment",
