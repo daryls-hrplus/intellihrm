@@ -6515,6 +6515,28 @@
         "startCourse": "Start Course",
         "reviewCourse": "Review Course"
       },
+      "employeeLearning": {
+        "title": "Employee Learning",
+        "description": "View employee course enrollments and progress",
+        "searchPlaceholder": "Search employees...",
+        "allStatuses": "All Statuses",
+        "enrolled": "Enrolled",
+        "inProgress": "In Progress",
+        "completed": "Completed",
+        "noEnrollments": "No enrollments found",
+        "adjustFilters": "Try adjusting your search or filters"
+      },
+      "employeeCertifications": {
+        "title": "Employee Certifications",
+        "description": "View and manage employee certificates",
+        "searchPlaceholder": "Search employees...",
+        "allStatuses": "All Statuses",
+        "active": "Active",
+        "expired": "Expired",
+        "expiringSoon": "Expiring Soon",
+        "noCertifications": "No certifications found",
+        "adjustFilters": "Try adjusting your search or filters"
+      },
       "learningPaths": {
         "title": "Learning Paths",
         "description": "Structured course sequences"
