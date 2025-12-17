@@ -681,6 +681,7 @@ export function usePayroll() {
       let totalDeductions = 0;
       let totalTaxes = 0;
       let totalEmployerTaxes = 0;
+      let totalEmployerBenefits = 0;
       
       for (const emp of companyEmployees) {
         // Get employee position start/end dates for proration
@@ -795,6 +796,76 @@ export function usePayroll() {
         
         const totalPeriodDeductions = (periodDeductions || []).reduce((sum: number, d: any) => sum + (d.amount || 0), 0);
         
+        // Calculate benefit deductions from active enrollments
+        let benefitDeductions = 0;
+        let employerBenefits = 0;
+        
+        const { data: benefitEnrollments } = await supabase
+          .from("benefit_enrollments")
+          .select(`
+            id,
+            plan_id,
+            employee_contribution,
+            employee_contribution_type,
+            employer_contribution,
+            employer_contribution_type,
+            benefit_plan:benefit_plans!benefit_enrollments_plan_id_fkey(
+              id,
+              name,
+              employee_contribution,
+              employee_contribution_type,
+              employer_contribution,
+              employer_contribution_type
+            )
+          `)
+          .eq("employee_id", emp.employee_id)
+          .eq("status", "active")
+          .lte("effective_date", payPeriod?.period_end || new Date().toISOString().split('T')[0])
+          .or(`termination_date.is.null,termination_date.gte.${payPeriod?.period_start || new Date().toISOString().split('T')[0]}`);
+        
+        // Check if benefit plans have payroll mappings (only process mapped benefits)
+        if (benefitEnrollments && benefitEnrollments.length > 0) {
+          const planIds = benefitEnrollments.map((e: any) => e.plan_id);
+          
+          const { data: benefitMappings } = await supabase
+            .from("benefit_payroll_mappings")
+            .select("benefit_plan_id, mapping_type, pay_element_id")
+            .in("benefit_plan_id", planIds)
+            .eq("company_id", companyId)
+            .eq("is_active", true)
+            .lte("start_date", payPeriod?.period_end || new Date().toISOString().split('T')[0])
+            .or(`end_date.is.null,end_date.gte.${payPeriod?.period_start || new Date().toISOString().split('T')[0]}`);
+          
+          const mappedPlanIds = new Set((benefitMappings || []).map((m: any) => m.benefit_plan_id));
+          
+          for (const enrollment of benefitEnrollments) {
+            // Only process benefits that have payroll mappings
+            if (!mappedPlanIds.has(enrollment.plan_id)) continue;
+            
+            const plan = enrollment.benefit_plan as any;
+            
+            // Use enrollment-level contribution if set, otherwise fall back to plan defaults
+            const empContribType = enrollment.employee_contribution_type || plan?.employee_contribution_type || 'fixed';
+            const empContribValue = enrollment.employee_contribution ?? plan?.employee_contribution ?? 0;
+            const erContribType = enrollment.employer_contribution_type || plan?.employer_contribution_type || 'fixed';
+            const erContribValue = enrollment.employer_contribution ?? plan?.employer_contribution ?? 0;
+            
+            // Calculate employee contribution
+            if (empContribType === 'percentage') {
+              benefitDeductions += grossPay * (empContribValue / 100);
+            } else {
+              benefitDeductions += empContribValue;
+            }
+            
+            // Calculate employer contribution
+            if (erContribType === 'percentage') {
+              employerBenefits += grossPay * (erContribValue / 100);
+            } else {
+              employerBenefits += erContribValue;
+            }
+          }
+        }
+        
         // Calculate statutory deductions based on company's country
         let taxDeductions = 0;
         let employerTaxes = 0;
@@ -828,8 +899,9 @@ export function usePayroll() {
           }
         }
         
-        const totalDed = taxDeductions + totalPeriodDeductions;
+        const totalDed = taxDeductions + totalPeriodDeductions + benefitDeductions;
         const netPay = grossPay - totalDed;
+        const totalEmployerCost = grossPay + employerTaxes + employerBenefits;
         
         employeePayrolls.push({
           payroll_run_id: payrollRunId,
@@ -842,10 +914,12 @@ export function usePayroll() {
           regular_pay: regularPay,
           total_deductions: totalDed,
           tax_deductions: taxDeductions,
-          benefit_deductions: 0,
+          benefit_deductions: benefitDeductions,
           other_deductions: totalPeriodDeductions,
           net_pay: netPay,
           employer_taxes: employerTaxes,
+          employer_benefits: employerBenefits,
+          total_employer_cost: totalEmployerCost,
           currency: currency,
         });
         
@@ -854,6 +928,7 @@ export function usePayroll() {
         totalDeductions += totalDed;
         totalTaxes += taxDeductions;
         totalEmployerTaxes += employerTaxes;
+        totalEmployerBenefits += employerBenefits;
       }
       
       // Insert employee payroll records
@@ -872,6 +947,7 @@ export function usePayroll() {
         total_deductions: totalDeductions,
         total_taxes: totalTaxes,
         total_employer_taxes: totalEmployerTaxes,
+        total_employer_contributions: totalEmployerBenefits,
         employee_count: employeePayrolls.length,
         currency: currency,
         calculated_at: new Date().toISOString(),
