@@ -477,6 +477,69 @@ export default function EmployeeCompensationPage() {
     setDialogOpen(true);
   };
 
+  // Check if payroll payments exist for an employee + pay element within a date range
+  const checkForPayrollPayments = async (
+    employeeId: string,
+    payElementId: string,
+    startDate: string,
+    endDate: string | null
+  ): Promise<{ hasPaidPayroll: boolean; paidPeriods: { start: string; end: string }[] }> => {
+    // Query for paid payroll line items that overlap with the compensation date range
+    const { data, error } = await supabase
+      .from("payroll_line_items")
+      .select(`
+        id,
+        employee_payroll:employee_payroll_id (
+          id,
+          employee_id,
+          payroll_run:payroll_run_id (
+            id,
+            status,
+            pay_period:pay_period_id (
+              period_start,
+              period_end
+            )
+          )
+        )
+      `)
+      .eq("pay_element_id", payElementId);
+
+    if (error || !data) {
+      console.error("Error checking payroll payments:", error);
+      return { hasPaidPayroll: false, paidPeriods: [] };
+    }
+
+    const paidPeriods: { start: string; end: string }[] = [];
+    const compStart = new Date(startDate);
+    const compEnd = endDate ? new Date(endDate) : null;
+
+    for (const item of data) {
+      const empPayroll = item.employee_payroll as any;
+      if (!empPayroll || empPayroll.employee_id !== employeeId) continue;
+      
+      const payrollRun = empPayroll.payroll_run as any;
+      if (!payrollRun || payrollRun.status !== "paid") continue;
+      
+      const payPeriod = payrollRun.pay_period as any;
+      if (!payPeriod) continue;
+
+      const periodStart = new Date(payPeriod.period_start);
+      const periodEnd = new Date(payPeriod.period_end);
+
+      // Check if pay period overlaps with compensation date range
+      const overlaps = periodEnd >= compStart && (compEnd === null || periodStart <= compEnd);
+      
+      if (overlaps) {
+        paidPeriods.push({
+          start: payPeriod.period_start,
+          end: payPeriod.period_end
+        });
+      }
+    }
+
+    return { hasPaidPayroll: paidPeriods.length > 0, paidPeriods };
+  };
+
   const handleSave = async () => {
     if (!formEmployeeId || !formPayElementId || !formAmount) {
       toast.error(t("compensation.employeeCompensation.validation.required"));
@@ -484,6 +547,43 @@ export default function EmployeeCompensationPage() {
     }
 
     setIsProcessing(true);
+
+    // If editing, check if date range changes would exclude paid periods
+    if (editing) {
+      const { hasPaidPayroll, paidPeriods } = await checkForPayrollPayments(
+        editing.employee_id,
+        editing.pay_element_id,
+        editing.start_date,
+        editing.end_date
+      );
+
+      if (hasPaidPayroll) {
+        // Check if the new date range would exclude any paid periods
+        const newStart = new Date(formStartDate);
+        const newEnd = formEndDate ? new Date(formEndDate) : null;
+
+        for (const period of paidPeriods) {
+          const periodStart = new Date(period.start);
+          const periodEnd = new Date(period.end);
+
+          // Check if the paid period is now outside the new date range
+          const excludedByNewStart = periodEnd < newStart;
+          const excludedByNewEnd = newEnd !== null && periodStart > newEnd;
+
+          if (excludedByNewStart || excludedByNewEnd) {
+            toast.error(
+              t("compensation.employeeCompensation.cannotChangeDatesWithPayments", 
+                "Cannot change dates to exclude periods with existing payroll payments. Paid period: {{start}} to {{end}}",
+                { start: period.start, end: period.end }
+              )
+            );
+            setIsProcessing(false);
+            return;
+          }
+        }
+      }
+    }
+
     const data = {
       company_id: selectedCompanyId,
       employee_id: formEmployeeId,
@@ -526,6 +626,28 @@ export default function EmployeeCompensationPage() {
   };
 
   const handleDelete = async (id: string) => {
+    // Find the compensation item to check for payments
+    const item = compensationItems.find(c => c.id === id);
+    if (!item) return;
+
+    // Check for payroll payments before allowing deletion
+    const { hasPaidPayroll, paidPeriods } = await checkForPayrollPayments(
+      item.employee_id,
+      item.pay_element_id,
+      item.start_date,
+      item.end_date
+    );
+
+    if (hasPaidPayroll) {
+      toast.error(
+        t("compensation.employeeCompensation.cannotDeleteWithPayments",
+          "Cannot delete this compensation record. Payroll has been processed for this pay element. Paid periods: {{periods}}",
+          { periods: paidPeriods.map(p => `${p.start} to ${p.end}`).join(", ") }
+        )
+      );
+      return;
+    }
+
     if (!confirm(t("compensation.employeeCompensation.deleteConfirm"))) return;
     
     const { error } = await supabase
