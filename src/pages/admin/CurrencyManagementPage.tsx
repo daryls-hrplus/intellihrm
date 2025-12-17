@@ -16,7 +16,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 import { Plus, Edit2, Trash2, DollarSign, ArrowRightLeft, Building2, Globe } from "lucide-react";
-import { format } from "date-fns";
+import { getTodayString, formatDateForDisplay } from "@/utils/dateUtils";
 
 interface Currency {
   id: string;
@@ -64,7 +64,7 @@ export default function CurrencyManagementPage() {
     from_currency_id: "",
     to_currency_id: "",
     rate: "",
-    rate_date: format(new Date(), "yyyy-MM-dd"),
+    rate_date: getTodayString(),
     source: "manual",
     notes: ""
   });
@@ -235,7 +235,7 @@ export default function CurrencyManagementPage() {
         from_currency_id: "",
         to_currency_id: "",
         rate: "",
-        rate_date: format(new Date(), "yyyy-MM-dd"),
+        rate_date: getTodayString(),
         source: "manual",
         notes: ""
       });
@@ -443,7 +443,7 @@ export default function CurrencyManagementPage() {
                             {rate.to_currency?.code} ({rate.to_currency?.symbol})
                           </TableCell>
                           <TableCell>{rate.rate}</TableCell>
-                          <TableCell>{format(new Date(rate.rate_date), "MMM d, yyyy")}</TableCell>
+                          <TableCell>{formatDateForDisplay(rate.rate_date, "MMM d, yyyy")}</TableCell>
                           <TableCell>
                             <Badge variant="outline">{rate.source || "manual"}</Badge>
                           </TableCell>

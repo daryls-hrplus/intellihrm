@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } from "recharts";
 import { format, subDays, eachDayOfInterval, parseISO } from "date-fns";
+import { getTodayString } from "@/utils/dateUtils";
 import { BarChart3, Loader2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { AIModuleReportBuilder } from "@/components/shared/AIModuleReportBuilder";
@@ -36,7 +37,7 @@ export default function AttendanceAnalyticsPage() {
   const loadAnalytics = async () => {
     setIsLoading(true);
     const startDate = format(subDays(new Date(), parseInt(period)), "yyyy-MM-dd");
-    const endDate = format(new Date(), "yyyy-MM-dd");
+    const endDate = getTodayString();
 
     const { data: entries } = await supabase
       .from("time_clock_entries")

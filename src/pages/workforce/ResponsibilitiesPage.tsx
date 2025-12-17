@@ -51,7 +51,7 @@ import {
   ChevronLeft,
 } from "lucide-react";
 import { NavLink } from "react-router-dom";
-import { format } from "date-fns";
+import { getTodayString } from "@/utils/dateUtils";
 import { useLanguage } from "@/hooks/useLanguage";
 
 interface Responsibility {
@@ -78,7 +78,7 @@ const emptyForm = {
   code: "",
   description: "",
   company_id: "",
-  start_date: format(new Date(), "yyyy-MM-dd"),
+  start_date: getTodayString(),
   end_date: "",
   is_active: true,
 };

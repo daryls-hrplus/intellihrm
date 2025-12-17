@@ -1,5 +1,6 @@
 import { useState, useMemo } from "react";
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, addMonths, subMonths, setYear, getYear, isWithinInterval, parseISO } from "date-fns";
+import { formatDateForDisplay } from "@/utils/dateUtils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -232,9 +233,9 @@ export function LeaveCalendar({ leaveRequests }: LeaveCalendarProps) {
                       <div>
                         <p className="text-sm font-medium">{leave.leave_type?.name || "Leave"}</p>
                         <p className="text-xs text-muted-foreground">
-                          {format(parseISO(leave.start_date), "MMM d")}
+                          {formatDateForDisplay(leave.start_date, "MMM d")}
                           {leave.start_date !== leave.end_date && (
-                            <> - {format(parseISO(leave.end_date), "MMM d")}</>
+                            <> - {formatDateForDisplay(leave.end_date, "MMM d")}</>
                           )}
                           {" "}({leave.duration} {leave.leave_type?.accrual_unit || "days"})
                         </p>
