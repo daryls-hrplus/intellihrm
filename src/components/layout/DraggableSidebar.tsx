@@ -53,9 +53,7 @@ import {
   Briefcase,
   BookOpen,
   GripVertical,
-  RotateCcw,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
 
 interface NavItem {
   title: string;
@@ -179,7 +177,7 @@ export function DraggableSidebar() {
 
   const getItemId = useCallback((item: NavItem) => item.moduleCode, []);
 
-  const { orderedItems, updateOrder, resetOrder, canEdit } = useDraggableOrderWithPersistence({
+  const { orderedItems, updateOrder, canEdit } = useDraggableOrderWithPersistence({
     items: filteredNavItems,
     preferenceKey: "sidebar-menu-order",
     getItemId,
@@ -348,19 +346,6 @@ export function DraggableSidebar() {
                   canEdit={canEdit}
                 />
               ))}
-              
-              {/* Reset button - only for admins */}
-              {!isCollapsed && canEdit && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={resetOrder}
-                  className="w-full mt-2 text-sidebar-foreground/60 hover:text-sidebar-foreground hover:bg-sidebar-accent"
-                >
-                  <RotateCcw className="h-4 w-4 mr-2" />
-                  {t("common.resetOrder")}
-                </Button>
-              )}
             </nav>
           </SortableContext>
         </DndContext>
