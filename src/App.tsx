@@ -2899,6 +2899,24 @@ const App = () => (
               }
             />
 
+            {/* Enablement Module Routes */}
+            <Route
+              path="/enablement"
+              element={
+                <ProtectedRoute requiredRoles={["admin"]}>
+                  <EnablementDashboardPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/enablement/docs-generator"
+              element={
+                <ProtectedRoute requiredRoles={["admin"]}>
+                  <ApplicationDocsGeneratorPage />
+                </ProtectedRoute>
+              }
+            />
+
             {/* Catch-all */}
             <Route path="*" element={<NotFound />} />
             </Route>
