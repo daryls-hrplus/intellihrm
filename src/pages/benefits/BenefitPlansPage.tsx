@@ -88,7 +88,9 @@ export default function BenefitPlansPage() {
     provider_id: "",
     enrollment_type: "open",
     employee_contribution: 0,
+    employee_contribution_type: "amount",
     employer_contribution: 0,
+    employer_contribution_type: "amount",
     contribution_frequency: "monthly",
     currency: "USD",
     waiting_period_days: 0,
@@ -198,7 +200,9 @@ export default function BenefitPlansPage() {
       provider_id: "",
       enrollment_type: "open",
       employee_contribution: 0,
+      employee_contribution_type: "amount",
       employer_contribution: 0,
+      employer_contribution_type: "amount",
       contribution_frequency: "monthly",
       currency: "USD",
       waiting_period_days: 0,
@@ -220,7 +224,9 @@ export default function BenefitPlansPage() {
       provider_id: plan.provider_id || "",
       enrollment_type: plan.enrollment_type,
       employee_contribution: plan.employee_contribution,
+      employee_contribution_type: (plan as any).employee_contribution_type || "amount",
       employer_contribution: plan.employer_contribution,
+      employer_contribution_type: (plan as any).employer_contribution_type || "amount",
       contribution_frequency: plan.contribution_frequency,
       currency: plan.currency,
       waiting_period_days: plan.waiting_period_days,
@@ -390,21 +396,53 @@ export default function BenefitPlansPage() {
               <Label>{t("common.description")}</Label>
               <Textarea value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} />
             </div>
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label>{t("benefits.enrollments.employeeOnly")} {t("common.amount")}</Label>
-                <Input type="number" value={formData.employee_contribution} onChange={e => setFormData({...formData, employee_contribution: parseFloat(e.target.value) || 0})} />
+                <Label>{t("benefits.plans.employeeContrib")}</Label>
+                <div className="flex gap-2">
+                  <Input 
+                    type="number" 
+                    value={formData.employee_contribution} 
+                    onChange={e => setFormData({...formData, employee_contribution: parseFloat(e.target.value) || 0})} 
+                    className="flex-1"
+                  />
+                  <Select value={formData.employee_contribution_type} onValueChange={v => setFormData({...formData, employee_contribution_type: v})}>
+                    <SelectTrigger className="w-[100px]">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="amount">{formData.currency || "$"}</SelectItem>
+                      <SelectItem value="percentage">%</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
               <div className="space-y-2">
                 <Label>{t("benefits.plans.employerContrib")}</Label>
-                <Input type="number" value={formData.employer_contribution} onChange={e => setFormData({...formData, employer_contribution: parseFloat(e.target.value) || 0})} />
+                <div className="flex gap-2">
+                  <Input 
+                    type="number" 
+                    value={formData.employer_contribution} 
+                    onChange={e => setFormData({...formData, employer_contribution: parseFloat(e.target.value) || 0})} 
+                    className="flex-1"
+                  />
+                  <Select value={formData.employer_contribution_type} onValueChange={v => setFormData({...formData, employer_contribution_type: v})}>
+                    <SelectTrigger className="w-[100px]">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="amount">{formData.currency || "$"}</SelectItem>
+                      <SelectItem value="percentage">%</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
+            </div>
+            <div className="grid grid-cols-3 gap-4">
               <div className="space-y-2">
                 <Label>{t("common.currency")}</Label>
                 <Input value={formData.currency} onChange={e => setFormData({...formData, currency: e.target.value})} />
               </div>
-            </div>
-            <div className="grid grid-cols-3 gap-4">
               <div className="space-y-2">
                 <Label>{t("benefits.plans.contributionFrequency")}</Label>
                 <Select value={formData.contribution_frequency} onValueChange={v => setFormData({...formData, contribution_frequency: v})}>
