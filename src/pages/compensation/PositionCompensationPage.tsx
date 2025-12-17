@@ -302,9 +302,29 @@ export default function PositionCompensationPage() {
     }).format(value);
   };
 
+  // Get annualization multiplier based on frequency
+  const getAnnualMultiplier = (frequencyId: string | null | undefined): number => {
+    if (!frequencyId) return 1;
+    const freq = frequencies.find((f) => f.id === frequencyId);
+    if (!freq) return 1;
+    
+    const code = freq.code?.toLowerCase() || freq.name?.toLowerCase() || "";
+    
+    if (code.includes("annual") || code.includes("yearly")) return 1;
+    if (code.includes("monthly")) return 12;
+    if (code.includes("semi-monthly") || code.includes("semimonthly")) return 24;
+    if (code.includes("bi-weekly") || code.includes("biweekly") || code.includes("fortnightly")) return 26;
+    if (code.includes("weekly")) return 52;
+    if (code.includes("daily")) return 260; // Approximate working days
+    if (code.includes("hourly")) return 2080; // 40 hours * 52 weeks
+    if (code.includes("quarterly")) return 4;
+    
+    return 1; // Default to annual if unknown
+  };
+
   const totalCompensation = compensation
     .filter((c) => c.is_active && !c.end_date)
-    .reduce((sum, c) => sum + c.amount, 0);
+    .reduce((sum, c) => sum + (c.amount * getAnnualMultiplier(c.frequency_id)), 0);
 
   const selectedPosition = positions.find((p) => p.id === selectedPositionId);
 
