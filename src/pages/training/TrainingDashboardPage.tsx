@@ -132,16 +132,20 @@ export default function TrainingDashboardPage() {
 
   const sections: ModuleSection[] = [
     {
-      titleKey: "Learning",
-      items: filterByAccess([allModules.catalog, allModules.myLearning, allModules.learningPaths, allModules.gapAnalysis, allModules.virtualClassroom, allModules.liveSessions, allModules.certifications]),
+      titleKey: "Course Development & Delivery",
+      items: filterByAccess([allModules.contentAuthoring, allModules.virtualClassroom, allModules.liveSessions, allModules.courseCompetencies, allModules.lms]),
     },
     {
-      titleKey: "Management",
-      items: filterByAccess([allModules.requests, allModules.external, allModules.evaluations, allModules.calendar]),
+      titleKey: "Learning & Development",
+      items: filterByAccess([allModules.catalog, allModules.myLearning, allModules.learningPaths, allModules.certifications]),
     },
     {
-      titleKey: "Administration",
-      items: filterByAccess([allModules.budgets, allModules.instructors, allModules.compliance, allModules.courseCompetencies, allModules.recertification, allModules.needs, allModules.contentAuthoring, allModules.lms]),
+      titleKey: "Planning & Assessment",
+      items: filterByAccess([allModules.needs, allModules.gapAnalysis, allModules.evaluations, allModules.compliance, allModules.recertification]),
+    },
+    {
+      titleKey: "Operations",
+      items: filterByAccess([allModules.requests, allModules.external, allModules.instructors, allModules.budgets, allModules.calendar]),
     },
     {
       titleKey: "Analytics",
