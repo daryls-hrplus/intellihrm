@@ -477,13 +477,14 @@ export default function EmployeeCompensationPage() {
     setDialogOpen(true);
   };
 
-  // Check if payroll payments exist for an employee + pay element within a date range
+  // Check if payroll payments exist for an employee + pay element + position within a date range
   const checkForPayrollPayments = async (
     employeeId: string,
     payElementId: string,
+    positionId: string | null,
     startDate: string,
     endDate: string | null
-  ): Promise<{ hasPaidPayroll: boolean; paidPeriods: { start: string; end: string }[] }> => {
+  ): Promise<{ hasPaidPayroll: boolean; paidPeriods: { start: string; end: string; positionId: string | null }[] }> => {
     // Query for paid payroll line items that overlap with the compensation date range
     const { data, error } = await supabase
       .from("payroll_line_items")
@@ -492,6 +493,7 @@ export default function EmployeeCompensationPage() {
         employee_payroll:employee_payroll_id (
           id,
           employee_id,
+          employee_position_id,
           payroll_run:payroll_run_id (
             id,
             status,
@@ -509,13 +511,16 @@ export default function EmployeeCompensationPage() {
       return { hasPaidPayroll: false, paidPeriods: [] };
     }
 
-    const paidPeriods: { start: string; end: string }[] = [];
+    const paidPeriods: { start: string; end: string; positionId: string | null }[] = [];
     const compStart = new Date(startDate);
     const compEnd = endDate ? new Date(endDate) : null;
 
     for (const item of data) {
       const empPayroll = item.employee_payroll as any;
       if (!empPayroll || empPayroll.employee_id !== employeeId) continue;
+      
+      // If position_id is specified on compensation, only match that position's payroll
+      if (positionId && empPayroll.employee_position_id !== positionId) continue;
       
       const payrollRun = empPayroll.payroll_run as any;
       if (!payrollRun || payrollRun.status !== "paid") continue;
@@ -532,7 +537,8 @@ export default function EmployeeCompensationPage() {
       if (overlaps) {
         paidPeriods.push({
           start: payPeriod.period_start,
-          end: payPeriod.period_end
+          end: payPeriod.period_end,
+          positionId: empPayroll.employee_position_id
         });
       }
     }
@@ -553,6 +559,7 @@ export default function EmployeeCompensationPage() {
       const { hasPaidPayroll, paidPeriods } = await checkForPayrollPayments(
         editing.employee_id,
         editing.pay_element_id,
+        editing.position_id,
         editing.start_date,
         editing.end_date
       );
@@ -634,6 +641,7 @@ export default function EmployeeCompensationPage() {
     const { hasPaidPayroll, paidPeriods } = await checkForPayrollPayments(
       item.employee_id,
       item.pay_element_id,
+      item.position_id,
       item.start_date,
       item.end_date
     );
