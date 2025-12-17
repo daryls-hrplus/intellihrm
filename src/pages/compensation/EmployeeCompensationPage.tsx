@@ -566,7 +566,7 @@ export default function EmployeeCompensationPage() {
             <Select 
               value={selectedEmployeeId} 
               onValueChange={setSelectedEmployeeId}
-              disabled={!selectedCompanyId || employees.length === 0}
+              disabled={!selectedCompanyId}
             >
               <SelectTrigger className="w-[250px]">
                 <SelectValue placeholder={t("compensation.employeeCompensation.selectEmployee")} />
