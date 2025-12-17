@@ -58,6 +58,7 @@ interface PayElement {
   id: string;
   code: string;
   name: string;
+  element_type?: { code: string; name: string };
 }
 
 interface Position {
@@ -289,13 +290,16 @@ export default function EmployeeCompensationPage() {
   const loadPayElements = async () => {
     const { data } = await supabase
       .from("pay_elements")
-      .select("id, code, name")
+      .select(`
+        id, code, name,
+        element_type:lookup_values!pay_elements_element_type_id_fkey(code, name)
+      `)
       .eq("company_id", selectedCompanyId)
       .eq("is_active", true)
       .order("display_order");
 
     if (data) {
-      setPayElements(data);
+      setPayElements(data as PayElement[]);
     }
   };
 
@@ -581,9 +585,18 @@ export default function EmployeeCompensationPage() {
     return 1;
   };
 
-  // Check if compensation amount is within position salary range
-  const isAmountOutOfRange = (amount: number, frequency: string): { outOfRange: boolean; message: string } => {
+  // Check if compensation amount is within position salary range (only for base salary types)
+  const isAmountOutOfRange = (amount: number, frequency: string, payElementId: string): { outOfRange: boolean; message: string } => {
     if (!employeePrimaryPosition) {
+      return { outOfRange: false, message: "" };
+    }
+
+    // Only check base salary elements against salary range
+    const payElement = payElements.find(pe => pe.id === payElementId);
+    const elementTypeCode = payElement?.element_type?.code?.toLowerCase() || "";
+    const isBaseSalary = elementTypeCode.includes("base") || elementTypeCode.includes("basic") || elementTypeCode.includes("salary");
+    
+    if (!isBaseSalary) {
       return { outOfRange: false, message: "" };
     }
 
@@ -925,7 +938,7 @@ export default function EmployeeCompensationPage() {
                       </TableCell>
                       <TableCell className="text-right font-mono">
                         {(() => {
-                          const rangeCheck = isAmountOutOfRange(item.amount, item.frequency);
+                          const rangeCheck = isAmountOutOfRange(item.amount, item.frequency, item.pay_element_id);
                           return (
                             <div className="flex items-center justify-end gap-2">
                               {rangeCheck.outOfRange && (
