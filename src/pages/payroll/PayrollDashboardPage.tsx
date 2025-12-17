@@ -155,7 +155,7 @@ export default function PayrollDashboardPage() {
       tabCode: "year_end",
     },
     {
-      title: t("payroll.modules.salaryOvertime.title"),
+      title: "Pay Period Payroll Entries",
       description: "Manage compensation entries for pay periods",
       icon: Clock,
       href: "/payroll/salary-overtime",
