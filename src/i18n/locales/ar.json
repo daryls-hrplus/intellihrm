@@ -1,4 +1,113 @@
 {
+  "training": {
+    "groups": {
+      "learning": "التعلم",
+      "management": "الإدارة",
+      "administration": "الإدارة",
+      "analytics": "التحليلات"
+    }
+  },
+  "succession": {
+    "groups": {
+      "talentAssessment": "تقييم المواهب",
+      "successionPlanning": "تخطيط التعاقب",
+      "careerDevelopment": "التطوير الوظيفي",
+      "analytics": "التحليلات"
+    }
+  },
+  "recruitment": {
+    "groups": {
+      "requisitions": "طلبات التوظيف",
+      "candidates": "المرشحون",
+      "hiringProcess": "عملية التوظيف",
+      "analytics": "التحليلات"
+    }
+  },
+  "hse": {
+    "groups": {
+      "incidentManagement": "إدارة الحوادث",
+      "riskCompliance": "المخاطر والامتثال",
+      "trainingPrograms": "برامج التدريب",
+      "analytics": "التحليلات"
+    }
+  },
+  "employeeRelations": {
+    "groups": {
+      "caseManagement": "إدارة القضايا",
+      "recognition": "التقدير",
+      "engagement": "المشاركة",
+      "analytics": "التحليلات"
+    }
+  },
+  "property": {
+    "groups": {
+      "assetManagement": "إدارة الأصول",
+      "inventory": "المخزون",
+      "requests": "الطلبات",
+      "analytics": "التحليلات"
+    }
+  },
+  "ess": {
+    "groups": {
+      "personal": "شخصي",
+      "timeLeave": "الوقت والإجازات",
+      "payBenefits": "الراتب والمزايا",
+      "careerDevelopment": "المسار الوظيفي والتطوير",
+      "workplaceResources": "موارد مكان العمل",
+      "support": "الدعم"
+    }
+  },
+  "mss": {
+    "groups": {
+      "teamManagement": "إدارة الفريق",
+      "approvalsWorkflow": "الموافقات وسير العمل",
+      "performanceDevelopment": "الأداء والتطوير",
+      "teamResources": "موارد الفريق",
+      "analyticsSupport": "التحليلات والدعم"
+    }
+  },
+  "compensation": {
+    "groups": {
+      "payStructure": "هيكل الرواتب",
+      "employeePay": "رواتب الموظفين",
+      "incentives": "الحوافز",
+      "analyticsBenchmarking": "التحليلات والمقارنة"
+    }
+  },
+  "benefits": {
+    "groups": {
+      "coreBenefits": "المزايا الأساسية",
+      "analyticsReporting": "التحليلات والتقارير",
+      "administration": "الإدارة",
+      "compliance": "الامتثال"
+    }
+  },
+  "performance": {
+    "groups": {
+      "evaluations": "التقييمات",
+      "goalManagement": "إدارة الأهداف",
+      "development": "التطوير",
+      "analytics": "التحليلات"
+    }
+  },
+  "payroll": {
+    "groups": {
+      "processing": "المعالجة",
+      "configuration": "التهيئة",
+      "integration": "التكامل",
+      "analytics": "التحليلات"
+    }
+  },
+  "admin": {
+    "groups": {
+      "organization": "المنظمة",
+      "usersAccess": "المستخدمون والوصول",
+      "security": "الأمان",
+      "systemConfig": "تهيئة النظام",
+      "documentation": "التوثيق",
+      "billing": "الفواتير"
+    }
+  },
   "common": {
     "loading": "جاري التحميل...",
     "save": "حفظ",
