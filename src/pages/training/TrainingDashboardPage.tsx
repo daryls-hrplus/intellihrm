@@ -128,19 +128,19 @@ export default function TrainingDashboardPage() {
 
   const sections: ModuleSection[] = [
     {
-      titleKey: "training.groups.learning",
+      titleKey: "Learning",
       items: filterByAccess([allModules.catalog, allModules.myLearning, allModules.learningPaths, allModules.gapAnalysis, allModules.liveSessions, allModules.certifications]),
     },
     {
-      titleKey: "training.groups.management",
+      titleKey: "Management",
       items: filterByAccess([allModules.requests, allModules.external, allModules.evaluations, allModules.calendar]),
     },
     {
-      titleKey: "training.groups.administration",
+      titleKey: "Administration",
       items: filterByAccess([allModules.budgets, allModules.instructors, allModules.compliance, allModules.courseCompetencies, allModules.recertification, allModules.needs, allModules.lms]),
     },
     {
-      titleKey: "training.groups.analytics",
+      titleKey: "Analytics",
       items: filterByAccess([allModules.analytics]),
     },
   ];

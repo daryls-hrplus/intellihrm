@@ -64,19 +64,19 @@ export default function CompensationDashboardPage() {
 
   const sections: ModuleSection[] = [
     {
-      titleKey: "compensation.groups.payStructure",
+      titleKey: "Pay Structure",
       items: filterByAccess([allModules.payElements, allModules.salaryGrades, allModules.spinalPoints]),
     },
     {
-      titleKey: "compensation.groups.employeePay",
+      titleKey: "Employee Pay",
       items: filterByAccess([allModules.positionCompensation, allModules.employeeCompensation, allModules.history]),
     },
     {
-      titleKey: "compensation.groups.incentives",
+      titleKey: "Incentives",
       items: filterByAccess([allModules.meritCycles, allModules.bonus, allModules.equity]),
     },
     {
-      titleKey: "compensation.groups.analyticsBenchmarking",
+      titleKey: "Analytics & Benchmarking",
       items: filterByAccess([allModules.marketBenchmarking, allModules.compaRatio, allModules.payEquity, allModules.totalRewards, allModules.budgets, allModules.analytics]),
     },
   ];

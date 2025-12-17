@@ -42,19 +42,19 @@ export default function PerformanceDashboardPage() {
 
   const sections: ModuleSection[] = [
     {
-      titleKey: "performance.groups.evaluations",
+      titleKey: "Evaluations",
       items: filterByAccess([allModules.appraisals, allModules.feedback360]),
     },
     {
-      titleKey: "performance.groups.goalManagement",
+      titleKey: "Goal Management",
       items: filterByAccess([allModules.goals]),
     },
     {
-      titleKey: "performance.groups.development",
+      titleKey: "Development",
       items: filterByAccess([allModules.pips, allModules.feedback, allModules.recognition]),
     },
     {
-      titleKey: "performance.groups.analytics",
+      titleKey: "Analytics",
       items: filterByAccess([allModules.analytics]),
     },
   ];

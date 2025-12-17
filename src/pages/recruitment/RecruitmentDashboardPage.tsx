@@ -53,19 +53,19 @@ export default function RecruitmentDashboardPage() {
 
   const sections: ModuleSection[] = [
     {
-      titleKey: "recruitment.groups.coreRecruitment",
+      titleKey: "Core Recruitment",
       items: filterByAccess([allModules.requisitions, allModules.candidates, allModules.applications, allModules.pipeline]),
     },
     {
-      titleKey: "recruitment.groups.evaluation",
+      titleKey: "Evaluation",
       items: filterByAccess([allModules.scorecards, allModules.assessments, allModules.panels]),
     },
     {
-      titleKey: "recruitment.groups.configuration",
+      titleKey: "Configuration",
       items: filterByAccess([allModules.offers, allModules.referrals, allModules.templates, allModules.sources, allModules.jobBoards]),
     },
     {
-      titleKey: "recruitment.groups.analytics",
+      titleKey: "Analytics",
       items: filterByAccess([allModules.analytics]),
     },
   ];

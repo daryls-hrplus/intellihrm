@@ -64,23 +64,23 @@ export default function ManagerSelfServicePage() {
 
   const sections: ModuleSection[] = [
     {
-      titleKey: "mss.groups.teamManagement",
+      titleKey: "Team Management",
       items: filterByAccess([allModules.team, allModules.onboarding, allModules.offboarding, allModules.recruitment]),
     },
     {
-      titleKey: "mss.groups.approvalsWorkflow",
+      titleKey: "Approvals & Workflow",
       items: filterByAccess([allModules.approvals, allModules.delegates, allModules.leave, allModules.timeAttendance]),
     },
     {
-      titleKey: "mss.groups.performanceDevelopment",
+      titleKey: "Performance & Development",
       items: filterByAccess([allModules.appraisals, allModules.goals, allModules.feedback360, allModules.pips, allModules.feedback, allModules.recognition, allModules.training, allModules.succession]),
     },
     {
-      titleKey: "mss.groups.teamResources",
+      titleKey: "Team Resources",
       items: filterByAccess([allModules.property, allModules.relations, allModules.benefits, allModules.hse, allModules.compensation]),
     },
     {
-      titleKey: "mss.groups.analyticsSupport",
+      titleKey: "Analytics & Support",
       items: filterByAccess([allModules.analytics, allModules.reminders, allModules.tickets]),
     },
   ];

@@ -83,23 +83,23 @@ export default function HSEDashboardPage() {
 
   const sections: ModuleSection[] = [
     {
-      titleKey: "hse.groups.incidentManagement",
+      titleKey: "Incident Management",
       items: filterByAccess([allModules.incidents, allModules.nearMiss, allModules.safetyObservations]),
     },
     {
-      titleKey: "hse.groups.trainingCompliance",
+      titleKey: "Training & Compliance",
       items: filterByAccess([allModules.safetyTraining, allModules.compliance, allModules.toolboxTalks]),
     },
     {
-      titleKey: "hse.groups.riskPrevention",
+      titleKey: "Risk Prevention",
       items: filterByAccess([allModules.riskAssessment, allModules.inspections, allModules.ppe, allModules.chemicals, allModules.loto]),
     },
     {
-      titleKey: "hse.groups.emergencyResponse",
+      titleKey: "Emergency Response",
       items: filterByAccess([allModules.emergencyResponse, allModules.firstAid, allModules.workersComp, allModules.permitToWork]),
     },
     {
-      titleKey: "hse.groups.configurationReporting",
+      titleKey: "Configuration & Reporting",
       items: filterByAccess([allModules.policies, allModules.oshaReporting, allModules.ergonomics, allModules.analytics]),
     },
   ];
