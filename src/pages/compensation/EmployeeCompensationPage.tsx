@@ -127,7 +127,9 @@ export default function EmployeeCompensationPage() {
 
   const [companies, setCompanies] = useState<Company[]>([]);
   const [selectedCompanyId, setSelectedCompanyId] = useState<string>("");
+  const [selectedDepartmentId, setSelectedDepartmentId] = useState<string>("");
   const [selectedEmployeeId, setSelectedEmployeeId] = useState<string>("");
+  const [departments, setDepartments] = useState<{id: string; name: string; code: string}[]>([]);
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [payElements, setPayElements] = useState<PayElement[]>([]);
   const [positions, setPositions] = useState<Position[]>([]);
@@ -165,13 +167,24 @@ export default function EmployeeCompensationPage() {
 
   useEffect(() => {
     if (selectedCompanyId) {
-      loadEmployees();
+      loadDepartments();
       loadPayElements();
+      setSelectedDepartmentId("");
       setSelectedEmployeeId("");
+      setEmployees([]);
       setEmployeePrimaryPosition(null);
       setPositionCompensationItems([]);
     }
   }, [selectedCompanyId]);
+
+  useEffect(() => {
+    if (selectedCompanyId) {
+      loadEmployees();
+      setSelectedEmployeeId("");
+      setEmployeePrimaryPosition(null);
+      setPositionCompensationItems([]);
+    }
+  }, [selectedCompanyId, selectedDepartmentId]);
 
   useEffect(() => {
     if (selectedCompanyId && selectedEmployeeId) {
@@ -199,12 +212,30 @@ export default function EmployeeCompensationPage() {
     }
   };
 
-  const loadEmployees = async () => {
+  const loadDepartments = async () => {
     const { data } = await supabase
+      .from("departments")
+      .select("id, name, code")
+      .eq("company_id", selectedCompanyId)
+      .eq("is_active", true)
+      .order("name");
+
+    if (data) {
+      setDepartments(data);
+    }
+  };
+
+  const loadEmployees = async () => {
+    let query = supabase
       .from("profiles")
       .select("id, full_name, email")
-      .eq("company_id", selectedCompanyId)
-      .order("full_name");
+      .eq("company_id", selectedCompanyId);
+    
+    if (selectedDepartmentId) {
+      query = query.eq("department_id", selectedDepartmentId);
+    }
+    
+    const { data } = await query.order("full_name");
 
     if (data) {
       setEmployees(data);
@@ -511,6 +542,23 @@ export default function EmployeeCompensationPage() {
                 {companies.map((c) => (
                   <SelectItem key={c.id} value={c.id}>
                     {c.name} ({c.code})
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select 
+              value={selectedDepartmentId} 
+              onValueChange={setSelectedDepartmentId}
+              disabled={!selectedCompanyId}
+            >
+              <SelectTrigger className="w-[200px]">
+                <SelectValue placeholder={t("common.allDepartments")} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">{t("common.allDepartments")}</SelectItem>
+                {departments.map((d) => (
+                  <SelectItem key={d.id} value={d.id}>
+                    {d.name} ({d.code})
                   </SelectItem>
                 ))}
               </SelectContent>
