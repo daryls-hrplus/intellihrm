@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { format, startOfYear, endOfYear, parseISO, getMonth, subYears } from "date-fns";
 import { useLanguage } from "@/hooks/useLanguage";
+import { AIModuleReportBuilder } from "@/components/shared/AIModuleReportBuilder";
 
 interface Company {
   id: string;
@@ -478,11 +479,13 @@ export default function LeaveAnalyticsPage() {
             </div>
 
             <Tabs defaultValue="overview" className="space-y-4">
-              <TabsList>
+              <TabsList className="flex-wrap">
                 <TabsTrigger value="overview">{t("leave.analytics.overview")}</TabsTrigger>
                 <TabsTrigger value="trends">{t("leave.analytics.trends")}</TabsTrigger>
                 <TabsTrigger value="distribution">{t("leave.analytics.distribution")}</TabsTrigger>
                 <TabsTrigger value="comparison">{t("leave.analytics.yearComparison")}</TabsTrigger>
+                <TabsTrigger value="ai-banded">AI Banded Reports</TabsTrigger>
+                <TabsTrigger value="ai-bi">AI BI Reports</TabsTrigger>
               </TabsList>
 
               <TabsContent value="overview" className="space-y-4">
@@ -742,6 +745,14 @@ export default function LeaveAnalyticsPage() {
                     );
                   })()}
                 </div>
+              </TabsContent>
+
+              <TabsContent value="ai-banded">
+                <AIModuleReportBuilder reportType="banded" moduleName="leave" companyId={selectedCompanyId} />
+              </TabsContent>
+
+              <TabsContent value="ai-bi">
+                <AIModuleReportBuilder reportType="bi" moduleName="leave" companyId={selectedCompanyId} />
               </TabsContent>
             </Tabs>
           </>
