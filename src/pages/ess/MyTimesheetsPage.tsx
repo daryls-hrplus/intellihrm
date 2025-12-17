@@ -14,6 +14,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { format, startOfWeek, endOfWeek, addDays } from "date-fns";
+import { getTodayString, formatDateForDisplay } from "@/utils/dateUtils";
 import { Plus, Clock, Send, FileText } from "lucide-react";
 
 interface TimesheetEntry {
@@ -42,7 +43,7 @@ export default function MyTimesheetsPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   const [formData, setFormData] = useState({
-    entry_date: format(new Date(), "yyyy-MM-dd"),
+    entry_date: getTodayString(),
     hours_worked: "",
     description: "",
     project_id: "",
@@ -109,7 +110,7 @@ export default function MyTimesheetsPage() {
 
       toast({ title: "Success", description: "Time entry added" });
       setDialogOpen(false);
-      setFormData({ entry_date: format(new Date(), "yyyy-MM-dd"), hours_worked: "", description: "", project_id: "" });
+      setFormData({ entry_date: getTodayString(), hours_worked: "", description: "", project_id: "" });
       loadData();
     } catch (error) {
       toast({ title: "Error", description: "Failed to add time entry", variant: "destructive" });
@@ -243,7 +244,7 @@ export default function MyTimesheetsPage() {
                 <TableBody>
                   {entries.map((entry) => (
                     <TableRow key={entry.id}>
-                      <TableCell>{format(new Date(entry.entry_date), "EEE, MMM d")}</TableCell>
+                      <TableCell>{formatDateForDisplay(entry.entry_date, "EEE, MMM d")}</TableCell>
                       <TableCell className="font-medium">{entry.hours_worked}</TableCell>
                       <TableCell>{entry.project?.name || "-"}</TableCell>
                       <TableCell className="max-w-[200px] truncate">{entry.description || "-"}</TableCell>

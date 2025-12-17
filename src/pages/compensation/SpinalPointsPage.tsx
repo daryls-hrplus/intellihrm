@@ -38,7 +38,7 @@ import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import { Plus, Pencil, Trash2, ChevronDown, ChevronRight, Loader2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { format } from "date-fns";
+import { getTodayString } from "@/utils/dateUtils";
 
 interface Company {
   id: string;
@@ -85,7 +85,7 @@ export default function SpinalPointsPage() {
     name: "",
     code: "",
     description: "",
-    effective_date: format(new Date(), "yyyy-MM-dd"),
+    effective_date: getTodayString(),
     end_date: "",
     currency: "GBP",
     is_active: true,
@@ -99,7 +99,7 @@ export default function SpinalPointsPage() {
     point_number: "",
     annual_salary: "",
     hourly_rate: "",
-    effective_date: format(new Date(), "yyyy-MM-dd"),
+    effective_date: getTodayString(),
     end_date: "",
     notes: "",
   });
@@ -192,7 +192,7 @@ export default function SpinalPointsPage() {
         name: "",
         code: "",
         description: "",
-        effective_date: format(new Date(), "yyyy-MM-dd"),
+        effective_date: getTodayString(),
         end_date: "",
         currency: "GBP",
         is_active: true,
@@ -223,7 +223,7 @@ export default function SpinalPointsPage() {
         point_number: nextPoint.toString(),
         annual_salary: "",
         hourly_rate: "",
-        effective_date: format(new Date(), "yyyy-MM-dd"),
+        effective_date: getTodayString(),
         end_date: "",
         notes: "",
       });

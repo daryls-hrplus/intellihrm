@@ -12,8 +12,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Plus, Search, Loader2, Eye, AlertCircle } from 'lucide-react';
 import { useEmployeeRelations, ERCase } from '@/hooks/useEmployeeRelations';
 import { useAuth } from '@/contexts/AuthContext';
-import { format } from 'date-fns';
-import { getTodayString } from '@/utils/dateUtils';
+import { getTodayString, formatDateForDisplay } from '@/utils/dateUtils';
 
 const CASE_TYPES = ['grievance', 'complaint', 'investigation', 'harassment', 'discrimination', 'conflict'];
 const CATEGORIES = ['workplace_safety', 'harassment', 'discrimination', 'policy_violation', 'manager_conflict', 'peer_conflict', 'compensation', 'other'];
@@ -293,7 +292,7 @@ export function ERCasesTab({ companyId }: ERCasesTabProps) {
                       </SelectContent>
                     </Select>
                   </TableCell>
-                  <TableCell className="text-muted-foreground">{format(new Date(c.reported_date), 'PP')}</TableCell>
+                  <TableCell className="text-muted-foreground">{formatDateForDisplay(c.reported_date, 'PP')}</TableCell>
                   <TableCell>
                     <Button
                       variant="ghost"
@@ -348,11 +347,11 @@ export function ERCasesTab({ companyId }: ERCasesTabProps) {
                   </div>
                   <div>
                     <Label className="text-muted-foreground">{t('employeeRelationsModule.cases.reportedDate')}</Label>
-                    <p>{format(new Date(selectedCase.reported_date), 'PPP')}</p>
+                    <p>{formatDateForDisplay(selectedCase.reported_date, 'PPP')}</p>
                   </div>
                   <div>
                     <Label className="text-muted-foreground">{t('employeeRelationsModule.cases.targetResolutionDate')}</Label>
-                    <p>{selectedCase.target_resolution_date ? format(new Date(selectedCase.target_resolution_date), 'PPP') : '-'}</p>
+                    <p>{selectedCase.target_resolution_date ? formatDateForDisplay(selectedCase.target_resolution_date, 'PPP') : '-'}</p>
                   </div>
                 </div>
                 {selectedCase.description && (
