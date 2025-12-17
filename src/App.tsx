@@ -96,6 +96,7 @@ import LeaveDashboardPage from "./pages/leave/LeaveDashboardPage";
 import LeaveTypesPage from "./pages/leave/LeaveTypesPage";
 import LeaveAccrualRulesPage from "./pages/leave/LeaveAccrualRulesPage";
 import LeaveRolloverRulesPage from "./pages/leave/LeaveRolloverRulesPage";
+import LeaveScheduleConfigPage from "./pages/leave/LeaveScheduleConfigPage";
 import MyLeavePage from "./pages/leave/MyLeavePage";
 import ApplyLeavePage from "./pages/leave/ApplyLeavePage";
 import LeaveApprovalsPage from "./pages/leave/LeaveApprovalsPage";
@@ -1430,6 +1431,14 @@ const App = () => (
               element={
                 <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
                   <LeaveAccrualRulesPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/leave/schedule-config"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
+                  <LeaveScheduleConfigPage />
                 </ProtectedRoute>
               }
             />
