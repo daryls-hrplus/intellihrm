@@ -7,6 +7,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useLanguage } from "@/hooks/useLanguage";
 import { useGranularPermissions } from "@/hooks/useGranularPermissions";
+import { GroupedModuleCards, ModuleSection } from "@/components/ui/GroupedModuleCards";
 import {
   Target,
   ClipboardCheck,
@@ -20,73 +21,44 @@ import {
   BarChart3,
   Award,
 } from "lucide-react";
-import { DraggableModuleCards, ModuleCardItem } from "@/components/ui/DraggableModuleCards";
 
 export default function PerformanceDashboardPage() {
   const { t } = useLanguage();
   const { user } = useAuth();
   const { hasTabAccess } = useGranularPermissions();
 
-  const performanceModules = [
-    {
-      title: t('performance.modules.appraisals'),
-      description: t('performance.modules.appraisalsDesc'),
-      href: "/performance/appraisals",
-      icon: ClipboardCheck,
-      color: "bg-primary/10 text-primary",
-      tabCode: "appraisals",
-    },
-    {
-      title: t('performance.modules.feedback360'),
-      description: t('performance.modules.feedback360Desc'),
-      href: "/performance/360",
-      icon: MessageSquare,
-      color: "bg-sky-500/10 text-sky-600",
-      tabCode: "360",
-    },
-    {
-      title: t('performance.modules.goals'),
-      description: t('performance.modules.goalsDesc'),
-      href: "/performance/goals",
-      icon: Flag,
-      color: "bg-emerald-500/10 text-emerald-600",
-      tabCode: "goals",
-    },
-    {
-      title: t('performance.modules.improvementPlans'),
-      description: t('performance.modules.improvementPlansDesc'),
-      href: "/performance/pips",
-      icon: AlertTriangle,
-      color: "bg-amber-500/10 text-amber-600",
-      tabCode: "pips",
-    },
-    {
-      title: t('performance.modules.continuousFeedback'),
-      description: t('performance.modules.continuousFeedbackDesc'),
-      href: "/performance/feedback",
-      icon: MessageCircle,
-      color: "bg-violet-500/10 text-violet-600",
-      tabCode: "feedback",
-    },
-    {
-      title: t('performance.modules.recognitionAwards'),
-      description: t('performance.modules.recognitionAwardsDesc'),
-      href: "/performance/recognition",
-      icon: Award,
-      color: "bg-rose-500/10 text-rose-600",
-      tabCode: "recognition",
-    },
-    {
-      title: t('performance.modules.analytics'),
-      description: t('performance.modules.analyticsDesc'),
-      href: "/performance/analytics",
-      icon: BarChart3,
-      color: "bg-muted text-muted-foreground",
-      tabCode: "analytics",
-    },
-  ].filter(m => hasTabAccess("performance", m.tabCode));
+  const allModules = {
+    appraisals: { title: t('performance.modules.appraisals'), description: t('performance.modules.appraisalsDesc'), href: "/performance/appraisals", icon: ClipboardCheck, color: "bg-primary/10 text-primary", tabCode: "appraisals" },
+    feedback360: { title: t('performance.modules.feedback360'), description: t('performance.modules.feedback360Desc'), href: "/performance/360", icon: MessageSquare, color: "bg-sky-500/10 text-sky-600", tabCode: "360" },
+    goals: { title: t('performance.modules.goals'), description: t('performance.modules.goalsDesc'), href: "/performance/goals", icon: Flag, color: "bg-emerald-500/10 text-emerald-600", tabCode: "goals" },
+    pips: { title: t('performance.modules.improvementPlans'), description: t('performance.modules.improvementPlansDesc'), href: "/performance/pips", icon: AlertTriangle, color: "bg-amber-500/10 text-amber-600", tabCode: "pips" },
+    feedback: { title: t('performance.modules.continuousFeedback'), description: t('performance.modules.continuousFeedbackDesc'), href: "/performance/feedback", icon: MessageCircle, color: "bg-violet-500/10 text-violet-600", tabCode: "feedback" },
+    recognition: { title: t('performance.modules.recognitionAwards'), description: t('performance.modules.recognitionAwardsDesc'), href: "/performance/recognition", icon: Award, color: "bg-rose-500/10 text-rose-600", tabCode: "recognition" },
+    analytics: { title: t('performance.modules.analytics'), description: t('performance.modules.analyticsDesc'), href: "/performance/analytics", icon: BarChart3, color: "bg-muted text-muted-foreground", tabCode: "analytics" },
+  };
 
-  // Fetch goals data
+  const filterByAccess = (modules: typeof allModules[keyof typeof allModules][]) =>
+    modules.filter(m => hasTabAccess("performance", m.tabCode));
+
+  const sections: ModuleSection[] = [
+    {
+      titleKey: "performance.groups.evaluations",
+      items: filterByAccess([allModules.appraisals, allModules.feedback360]),
+    },
+    {
+      titleKey: "performance.groups.goalManagement",
+      items: filterByAccess([allModules.goals]),
+    },
+    {
+      titleKey: "performance.groups.development",
+      items: filterByAccess([allModules.pips, allModules.feedback, allModules.recognition]),
+    },
+    {
+      titleKey: "performance.groups.analytics",
+      items: filterByAccess([allModules.analytics]),
+    },
+  ];
+
   const { data: goals = [], isLoading: goalsLoading } = useQuery({
     queryKey: ["performance-goals-stats"],
     queryFn: async () => {
@@ -99,7 +71,6 @@ export default function PerformanceDashboardPage() {
     enabled: !!user,
   });
 
-  // Fetch pending appraisal reviews
   const { data: appraisals = [], isLoading: appraisalsLoading } = useQuery({
     queryKey: ["appraisal-participants-stats"],
     queryFn: async () => {
@@ -114,12 +85,10 @@ export default function PerformanceDashboardPage() {
 
   const isLoading = goalsLoading || appraisalsLoading;
 
-  // Calculate stats
   const activeGoals = goals.filter(g => g.status === 'active' || g.status === 'draft').length;
   const completedGoals = goals.filter(g => g.status === 'completed').length;
   const pendingReviews = appraisals.filter(a => a.status === 'pending' || a.status === 'in_progress').length;
   
-  // Calculate average rating from completed appraisals
   const completedAppraisals = appraisals.filter(a => a.status === 'completed' && a.overall_score != null);
   const avgRating = completedAppraisals.length > 0 
     ? (completedAppraisals.reduce((sum, a) => sum + (a.overall_score || 0), 0) / completedAppraisals.length).toFixed(1)
@@ -185,10 +154,7 @@ export default function PerformanceDashboardPage() {
           })}
         </div>
 
-        <DraggableModuleCards 
-          modules={performanceModules} 
-          preferenceKey="performance_dashboard_order" 
-        />
+        <GroupedModuleCards sections={sections} />
       </div>
     </AppLayout>
   );

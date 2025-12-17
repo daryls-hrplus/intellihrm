@@ -8,7 +8,7 @@ import { useGranularPermissions } from "@/hooks/useGranularPermissions";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { NavLink } from "react-router-dom";
+import { GroupedModuleCards, ModuleSection } from "@/components/ui/GroupedModuleCards";
 import {
   Heart,
   AlertTriangle,
@@ -20,7 +20,6 @@ import {
   MessageSquare,
   Building2,
   Gavel,
-  ChevronRight,
   Loader2,
   Users,
   FileText,
@@ -41,7 +40,6 @@ export default function EmployeeRelationsDashboardPage() {
   const [stats, setStats] = useState<Stats>({ openCases: 0, pendingGrievances: 0, recognitionsThisMonth: 0, activeUnions: 0 });
   const [isLoadingStats, setIsLoadingStats] = useState(true);
 
-  // Fetch companies for filter
   const { data: companies = [] } = useQuery({
     queryKey: ["companies"],
     queryFn: async () => {
@@ -55,7 +53,6 @@ export default function EmployeeRelationsDashboardPage() {
     },
   });
 
-  // Fetch departments based on selected company
   const { data: departments = [] } = useQuery({
     queryKey: ["departments", selectedCompanyId],
     queryFn: async () => {
@@ -71,19 +68,16 @@ export default function EmployeeRelationsDashboardPage() {
     enabled: !!selectedCompanyId,
   });
 
-  // Set default company
   useEffect(() => {
     if (companies.length > 0 && !selectedCompanyId) {
       setSelectedCompanyId(companies[0].id);
     }
   }, [companies, selectedCompanyId]);
 
-  // Reset department when company changes
   useEffect(() => {
     setSelectedDepartmentId("all");
   }, [selectedCompanyId]);
 
-  // Fetch stats
   useEffect(() => {
     const fetchStats = async () => {
       if (!selectedCompanyId) return;
@@ -114,88 +108,40 @@ export default function EmployeeRelationsDashboardPage() {
     fetchStats();
   }, [selectedCompanyId]);
 
-  const erModules = [
+  const allModules = {
+    analytics: { title: t("employeeRelationsModule.analytics.title"), description: t("employeeRelationsModule.analytics.description"), href: `/employee-relations/analytics?company=${selectedCompanyId}&department=${selectedDepartmentId}`, icon: BarChart3, color: "bg-violet-500/10 text-violet-500", tabCode: "analytics" },
+    cases: { title: t("employeeRelationsModule.cases.title"), description: t("employeeRelationsModule.cases.description"), href: `/employee-relations/cases?company=${selectedCompanyId}&department=${selectedDepartmentId}`, icon: AlertTriangle, color: "bg-warning/10 text-warning", tabCode: "cases" },
+    disciplinary: { title: t("employeeRelationsModule.disciplinary.title"), description: t("employeeRelationsModule.disciplinary.description"), href: `/employee-relations/disciplinary?company=${selectedCompanyId}&department=${selectedDepartmentId}`, icon: Scale, color: "bg-destructive/10 text-destructive", tabCode: "disciplinary" },
+    grievances: { title: t("employeeRelationsModule.grievances.title"), description: t("employeeRelationsModule.grievances.description"), href: `/employee-relations/grievances?company=${selectedCompanyId}&department=${selectedDepartmentId}`, icon: FileText, color: "bg-orange-500/10 text-orange-500", tabCode: "grievances" },
+    recognition: { title: t("employeeRelationsModule.recognition.title"), description: t("employeeRelationsModule.recognition.description"), href: `/employee-relations/recognition?company=${selectedCompanyId}&department=${selectedDepartmentId}`, icon: Award, color: "bg-amber-500/10 text-amber-500", tabCode: "recognition" },
+    surveys: { title: t("employeeRelationsModule.surveys.title"), description: t("employeeRelationsModule.surveys.description"), href: `/employee-relations/surveys?company=${selectedCompanyId}&department=${selectedDepartmentId}`, icon: MessageSquare, color: "bg-info/10 text-info", tabCode: "surveys" },
+    wellness: { title: t("employeeRelationsModule.wellness.title"), description: t("employeeRelationsModule.wellness.description"), href: `/employee-relations/wellness?company=${selectedCompanyId}&department=${selectedDepartmentId}`, icon: Activity, color: "bg-success/10 text-success", tabCode: "wellness" },
+    exitInterviews: { title: t("employeeRelationsModule.exitInterviews.title"), description: t("employeeRelationsModule.exitInterviews.description"), href: `/employee-relations/exit-interviews?company=${selectedCompanyId}&department=${selectedDepartmentId}`, icon: DoorOpen, color: "bg-cyan-500/10 text-cyan-500", tabCode: "exit-interviews" },
+    unions: { title: t("employeeRelationsModule.unions.title"), description: t("employeeRelationsModule.unions.description"), href: `/employee-relations/unions?company=${selectedCompanyId}&department=${selectedDepartmentId}`, icon: Building2, color: "bg-primary/10 text-primary", tabCode: "unions" },
+    courtJudgements: { title: t("employeeRelationsModule.courtJudgements.title"), description: t("employeeRelationsModule.courtJudgements.description"), href: `/employee-relations/court-judgements?company=${selectedCompanyId}&department=${selectedDepartmentId}`, icon: Gavel, color: "bg-rose-500/10 text-rose-500", tabCode: "court-judgements" },
+  };
+
+  const filterByAccess = (modules: typeof allModules[keyof typeof allModules][]) =>
+    modules.filter(m => hasTabAccess("employee_relations", m.tabCode));
+
+  const sections: ModuleSection[] = [
     {
-      title: t("employeeRelationsModule.analytics.title"),
-      description: t("employeeRelationsModule.analytics.description"),
-      href: `/employee-relations/analytics?company=${selectedCompanyId}&department=${selectedDepartmentId}`,
-      icon: BarChart3,
-      color: "bg-violet-500/10 text-violet-500",
-      tabCode: "analytics",
+      titleKey: "employeeRelations.groups.casesDisciplinary",
+      items: filterByAccess([allModules.cases, allModules.disciplinary, allModules.grievances]),
     },
     {
-      title: t("employeeRelationsModule.cases.title"),
-      description: t("employeeRelationsModule.cases.description"),
-      href: `/employee-relations/cases?company=${selectedCompanyId}&department=${selectedDepartmentId}`,
-      icon: AlertTriangle,
-      color: "bg-warning/10 text-warning",
-      tabCode: "cases",
+      titleKey: "employeeRelations.groups.recognitionEngagement",
+      items: filterByAccess([allModules.recognition, allModules.surveys, allModules.wellness]),
     },
     {
-      title: t("employeeRelationsModule.disciplinary.title"),
-      description: t("employeeRelationsModule.disciplinary.description"),
-      href: `/employee-relations/disciplinary?company=${selectedCompanyId}&department=${selectedDepartmentId}`,
-      icon: Scale,
-      color: "bg-destructive/10 text-destructive",
-      tabCode: "disciplinary",
+      titleKey: "employeeRelations.groups.exitLegal",
+      items: filterByAccess([allModules.exitInterviews, allModules.unions, allModules.courtJudgements]),
     },
     {
-      title: t("employeeRelationsModule.recognition.title"),
-      description: t("employeeRelationsModule.recognition.description"),
-      href: `/employee-relations/recognition?company=${selectedCompanyId}&department=${selectedDepartmentId}`,
-      icon: Award,
-      color: "bg-amber-500/10 text-amber-500",
-      tabCode: "recognition",
+      titleKey: "employeeRelations.groups.analytics",
+      items: filterByAccess([allModules.analytics]),
     },
-    {
-      title: t("employeeRelationsModule.exitInterviews.title"),
-      description: t("employeeRelationsModule.exitInterviews.description"),
-      href: `/employee-relations/exit-interviews?company=${selectedCompanyId}&department=${selectedDepartmentId}`,
-      icon: DoorOpen,
-      color: "bg-cyan-500/10 text-cyan-500",
-      tabCode: "exit-interviews",
-    },
-    {
-      title: t("employeeRelationsModule.surveys.title"),
-      description: t("employeeRelationsModule.surveys.description"),
-      href: `/employee-relations/surveys?company=${selectedCompanyId}&department=${selectedDepartmentId}`,
-      icon: MessageSquare,
-      color: "bg-info/10 text-info",
-      tabCode: "surveys",
-    },
-    {
-      title: t("employeeRelationsModule.wellness.title"),
-      description: t("employeeRelationsModule.wellness.description"),
-      href: `/employee-relations/wellness?company=${selectedCompanyId}&department=${selectedDepartmentId}`,
-      icon: Activity,
-      color: "bg-success/10 text-success",
-      tabCode: "wellness",
-    },
-    {
-      title: t("employeeRelationsModule.unions.title"),
-      description: t("employeeRelationsModule.unions.description"),
-      href: `/employee-relations/unions?company=${selectedCompanyId}&department=${selectedDepartmentId}`,
-      icon: Building2,
-      color: "bg-primary/10 text-primary",
-      tabCode: "unions",
-    },
-    {
-      title: t("employeeRelationsModule.grievances.title"),
-      description: t("employeeRelationsModule.grievances.description"),
-      href: `/employee-relations/grievances?company=${selectedCompanyId}&department=${selectedDepartmentId}`,
-      icon: FileText,
-      color: "bg-orange-500/10 text-orange-500",
-      tabCode: "grievances",
-    },
-    {
-      title: t("employeeRelationsModule.courtJudgements.title"),
-      description: t("employeeRelationsModule.courtJudgements.description"),
-      href: `/employee-relations/court-judgements?company=${selectedCompanyId}&department=${selectedDepartmentId}`,
-      icon: Gavel,
-      color: "bg-rose-500/10 text-rose-500",
-      tabCode: "court-judgements",
-    },
-  ].filter(module => hasTabAccess("employee_relations", module.tabCode));
+  ];
 
   const statCards = [
     { label: t("employeeRelationsModule.stats.openCases"), value: stats.openCases, icon: AlertTriangle, color: "bg-warning/10 text-warning" },
@@ -286,33 +232,7 @@ export default function EmployeeRelationsDashboardPage() {
           })}
         </div>
 
-        {/* Module Cards */}
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {erModules.map((module, index) => {
-            const Icon = module.icon;
-            return (
-              <NavLink
-                key={module.href}
-                to={module.href}
-                className="group rounded-xl border border-border bg-card p-6 shadow-card transition-all hover:shadow-card-hover hover:border-primary/20 animate-slide-up"
-                style={{ animationDelay: `${(index + 4) * 50}ms` }}
-              >
-                <div className="flex items-start justify-between">
-                  <div className={`rounded-lg p-3 ${module.color}`}>
-                    <Icon className="h-6 w-6" />
-                  </div>
-                  <ChevronRight className="h-5 w-5 text-muted-foreground opacity-0 transition-all group-hover:opacity-100 group-hover:translate-x-1" />
-                </div>
-                <h3 className="mt-4 font-semibold text-card-foreground">
-                  {module.title}
-                </h3>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  {module.description}
-                </p>
-              </NavLink>
-            );
-          })}
-        </div>
+        <GroupedModuleCards sections={sections} />
       </div>
     </AppLayout>
   );
