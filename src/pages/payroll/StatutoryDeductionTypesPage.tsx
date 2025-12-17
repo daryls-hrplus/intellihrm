@@ -12,13 +12,14 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Switch } from "@/components/ui/switch";
 import { supabase } from "@/integrations/supabase/client";
-import { Plus, Edit, Trash2, FileText, Search, Sparkles, BookOpen } from "lucide-react";
+import { Plus, Edit, Trash2, FileText, Search, Sparkles, BookOpen, FileStack } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { CountrySelect } from "@/components/ui/country-select";
 import { getCountryName, countries } from "@/lib/countries";
 import { StatutoryDocumentUpload } from "@/components/payroll/StatutoryDocumentUpload";
 import { ComprehensiveStatutoryDocumentation } from "@/components/payroll/ComprehensiveStatutoryDocumentation";
+import { StatutoryReportingDocuments } from "@/components/payroll/StatutoryReportingDocuments";
 
 interface StatutoryDeductionType {
   id: string;
@@ -63,6 +64,7 @@ export default function StatutoryDeductionTypesPage() {
   const [aiDialogOpen, setAiDialogOpen] = useState(false);
   const [selectedStatutory, setSelectedStatutory] = useState<StatutoryDeductionType | null>(null);
   const [comprehensiveDocOpen, setComprehensiveDocOpen] = useState(false);
+  const [reportingDocsOpen, setReportingDocsOpen] = useState(false);
 
   const [form, setForm] = useState({
     country: "",
@@ -200,6 +202,11 @@ export default function StatutoryDeductionTypesPage() {
     setAiDialogOpen(true);
   };
 
+  const openReportingDocs = (item: StatutoryDeductionType) => {
+    setSelectedStatutory(item);
+    setReportingDocsOpen(true);
+  };
+
   const countryStatutories = countryFilter !== "all" 
     ? items.filter((i) => i.country === countryFilter)
     : items;
@@ -317,6 +324,14 @@ export default function StatutoryDeductionTypesPage() {
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-2">
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            onClick={() => openReportingDocs(item)}
+                            title="Reporting Documents"
+                          >
+                            <FileStack className="h-4 w-4" />
+                          </Button>
                           <Button 
                             variant="ghost" 
                             size="sm" 
@@ -459,6 +474,17 @@ export default function StatutoryDeductionTypesPage() {
           country={countryFilter !== "all" ? countryFilter : ""}
           statutories={countryStatutories}
         />
+
+        {/* Reporting Documents Dialog */}
+        {selectedStatutory && (
+          <StatutoryReportingDocuments
+            open={reportingDocsOpen}
+            onOpenChange={setReportingDocsOpen}
+            statutoryTypeId={selectedStatutory.id}
+            statutoryName={selectedStatutory.statutory_name}
+            countryCode={selectedStatutory.country}
+          />
+        )}
       </div>
     </AppLayout>
   );
