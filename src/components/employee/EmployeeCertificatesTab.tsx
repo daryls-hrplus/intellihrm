@@ -10,8 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Plus, Pencil, Trash2, Upload, Download } from "lucide-react";
 import { toast } from "sonner";
-import { format } from "date-fns";
-import { getTodayString } from "@/utils/dateUtils";
+import { getTodayString, formatDateForDisplay } from "@/utils/dateUtils";
 
 interface EmployeeCertificatesTabProps {
   employeeId: string;
@@ -197,8 +196,8 @@ export function EmployeeCertificatesTab({ employeeId }: EmployeeCertificatesTabP
                 <TableRow key={cert.id}>
                   <TableCell>{cert.certificate_name}</TableCell>
                   <TableCell>{cert.issuing_organization}</TableCell>
-                  <TableCell>{format(new Date(cert.issue_date), "PP")}</TableCell>
-                  <TableCell>{cert.expiry_date ? format(new Date(cert.expiry_date), "PP") : "-"}</TableCell>
+                  <TableCell>{formatDateForDisplay(cert.issue_date, "PP")}</TableCell>
+                  <TableCell>{cert.expiry_date ? formatDateForDisplay(cert.expiry_date, "PP") : "-"}</TableCell>
                   <TableCell>
                     {cert.file_url ? (
                       <a href={cert.file_url} target="_blank" rel="noopener noreferrer">

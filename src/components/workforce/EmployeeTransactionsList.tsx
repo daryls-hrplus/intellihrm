@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { format } from "date-fns";
+import { formatDateForDisplay } from "@/utils/dateUtils";
 import { Plus, Filter, Eye, Edit, Trash2, PlayCircle, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -218,7 +218,7 @@ export function EmployeeTransactionsList({
                       "N/A"}
                   </TableCell>
                   <TableCell>
-                    {format(new Date(transaction.effective_date), "MMM d, yyyy")}
+                    {formatDateForDisplay(transaction.effective_date, "MMM d, yyyy")}
                   </TableCell>
                   <TableCell>
                     <Badge className={statusColors[transaction.status]}>
@@ -226,7 +226,7 @@ export function EmployeeTransactionsList({
                     </Badge>
                   </TableCell>
                   <TableCell>
-                    {format(new Date(transaction.created_at), "MMM d, yyyy")}
+                    {formatDateForDisplay(transaction.created_at, "MMM d, yyyy")}
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-1">

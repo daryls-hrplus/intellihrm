@@ -17,7 +17,7 @@ import {
   ChevronRight,
   Eye
 } from "lucide-react";
-import { format } from "date-fns";
+import { formatDateForDisplay } from "@/utils/dateUtils";
 
 interface Announcement {
   id: string;
@@ -180,7 +180,7 @@ export default function IntranetDashboardPage() {
                             {getAnnouncementTypeBadge(announcement.announcement_type)}
                             <span className="text-sm text-muted-foreground">
                               <Calendar className="h-3 w-3 inline mr-1" />
-                              {format(new Date(announcement.published_at), "MMM d, yyyy")}
+                              {formatDateForDisplay(announcement.published_at, "MMM d, yyyy")}
                             </span>
                           </div>
                           <h3 className="text-lg font-semibold mb-2">{announcement.title}</h3>
@@ -286,7 +286,7 @@ export default function IntranetDashboardPage() {
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-1 text-sm text-muted-foreground">
                           <Calendar className="h-3 w-3" />
-                          {post.published_at && format(new Date(post.published_at), "MMM d, yyyy")}
+                          {post.published_at && formatDateForDisplay(post.published_at, "MMM d, yyyy")}
                           <span className="flex items-center gap-1">
                             <Eye className="h-3 w-3" />
                             {post.view_count} views

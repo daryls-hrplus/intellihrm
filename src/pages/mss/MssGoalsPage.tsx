@@ -28,6 +28,7 @@ import { TeamGoalsFilters } from "@/components/mss/TeamGoalsFilters";
 import { TeamGoalCard } from "@/components/mss/TeamGoalCard";
 import { SendReminderDialog } from "@/components/mss/SendReminderDialog";
 import { format, isPast } from "date-fns";
+import { formatDateForDisplay, getTodayString } from "@/utils/dateUtils";
 import { toast } from "sonner";
 import { useLanguage } from "@/hooks/useLanguage";
 
@@ -268,7 +269,7 @@ const statusColors: Record<GoalStatus, string> = {
       Status: goal.status,
       Progress: `${goal.progress_percentage}%`,
       Weight: `${goal.weighting}%`,
-      "Due Date": goal.due_date ? format(new Date(goal.due_date), "yyyy-MM-dd") : "",
+      "Due Date": goal.due_date ? formatDateForDisplay(goal.due_date, "yyyy-MM-dd") : "",
       Category: goal.category || "",
     }));
 
@@ -280,7 +281,7 @@ const statusColors: Record<GoalStatus, string> = {
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `team-goals-${format(new Date(), "yyyy-MM-dd")}.csv`;
+    a.download = `team-goals-${getTodayString()}.csv`;
     a.click();
     window.URL.revokeObjectURL(url);
     toast.success("Goals exported successfully");
@@ -603,7 +604,7 @@ const statusColors: Record<GoalStatus, string> = {
                           {goal.due_date && (
                             <div className="flex items-center gap-2">
                               <Calendar className="h-4 w-4" />
-                              Due: {format(new Date(goal.due_date), "MMM d, yyyy")}
+                              Due: {formatDateForDisplay(goal.due_date, "MMM d, yyyy")}
                             </div>
                           )}
                         </div>
