@@ -13,8 +13,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { usePayslipTemplates, PayslipTemplate } from "@/hooks/usePayslipTemplates";
 import { PayslipDocument } from "@/components/payroll/PayslipDocument";
 import { usePayrollFilters } from "@/components/payroll/PayrollFilters";
-import { FileText, Palette, Eye, Settings2, Upload, Save, Star, Trash2 } from "lucide-react";
+import { FileText, Palette, Eye, Settings2, Upload, Save, Star, Trash2, Sparkles, MessageSquare, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 export default function PayslipTemplateConfigPage() {
   const { t } = useTranslation();
@@ -30,6 +31,10 @@ export default function PayslipTemplateConfigPage() {
 
   const [templates, setTemplates] = useState<PayslipTemplate[]>([]);
   const [selectedTemplate, setSelectedTemplate] = useState<PayslipTemplate | null>(null);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [layoutFileName, setLayoutFileName] = useState("");
+  const [layoutContent, setLayoutContent] = useState("");
+  const [aiFeedback, setAiFeedback] = useState("");
   const [formData, setFormData] = useState<Partial<PayslipTemplate>>({
     template_name: "Default Template",
     template_style: "classic",
@@ -132,6 +137,96 @@ export default function PayslipTemplateConfigPage() {
     if (!selectedTemplate || !selectedCompanyId) return;
     await setDefaultTemplate(selectedCompanyId, selectedTemplate.id);
     loadTemplates();
+  };
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setLayoutFileName(file.name);
+    
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const content = event.target?.result as string;
+      setLayoutContent(content);
+    };
+    
+    if (file.type.includes('text') || file.name.endsWith('.csv') || file.name.endsWith('.txt')) {
+      reader.readAsText(file);
+    } else if (file.type.includes('image')) {
+      reader.readAsDataURL(file);
+    } else {
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const analyzeLayoutWithAI = async () => {
+    if (!layoutContent) {
+      toast.error("Please upload a payslip layout first");
+      return;
+    }
+
+    setIsAnalyzing(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('analyze-payslip-template', {
+        body: {
+          layoutContent,
+          layoutFileName,
+          userFeedback: aiFeedback || null,
+          currentSettings: aiFeedback ? formData : null
+        }
+      });
+
+      if (error) throw error;
+
+      if (data?.settings) {
+        setFormData(prev => ({
+          ...prev,
+          ...data.settings
+        }));
+        toast.success("AI has generated template settings. Review in Branding and Content tabs.");
+      }
+    } catch (error) {
+      console.error("Error analyzing layout:", error);
+      toast.error("Failed to analyze layout");
+    } finally {
+      setIsAnalyzing(false);
+    }
+  };
+
+  const iterateWithAI = async () => {
+    if (!aiFeedback) {
+      toast.error("Please provide feedback for the AI");
+      return;
+    }
+
+    setIsAnalyzing(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('analyze-payslip-template', {
+        body: {
+          layoutContent: layoutContent || null,
+          layoutFileName,
+          userFeedback: aiFeedback,
+          currentSettings: formData
+        }
+      });
+
+      if (error) throw error;
+
+      if (data?.settings) {
+        setFormData(prev => ({
+          ...prev,
+          ...data.settings
+        }));
+        setAiFeedback("");
+        toast.success("Settings updated based on your feedback");
+      }
+    } catch (error) {
+      console.error("Error iterating with AI:", error);
+      toast.error("Failed to apply feedback");
+    } finally {
+      setIsAnalyzing(false);
+    }
   };
 
   // Mock payslip for preview
@@ -272,8 +367,12 @@ export default function PayslipTemplateConfigPage() {
               </div>
             </CardHeader>
             <CardContent>
-              <Tabs defaultValue="branding">
+              <Tabs defaultValue="ai-design">
                 <TabsList className="mb-4">
+                  <TabsTrigger value="ai-design">
+                    <Sparkles className="h-4 w-4 mr-1" />
+                    AI Design
+                  </TabsTrigger>
                   <TabsTrigger value="branding">
                     <Palette className="h-4 w-4 mr-1" />
                     {t("payroll.templates.branding")}
@@ -287,6 +386,100 @@ export default function PayslipTemplateConfigPage() {
                     {t("payroll.templates.preview")}
                   </TabsTrigger>
                 </TabsList>
+
+                <TabsContent value="ai-design" className="space-y-4">
+                  <div className="space-y-4">
+                    <div>
+                      <Label className="text-base font-medium">Upload Payslip Layout</Label>
+                      <p className="text-sm text-muted-foreground mb-3">
+                        Upload an image or document showing how you want your payslip to look. AI will analyze it and generate template settings.
+                      </p>
+                      <div className="border-2 border-dashed rounded-lg p-6 text-center">
+                        <Upload className="h-10 w-10 mx-auto text-muted-foreground mb-3" />
+                        <p className="text-sm text-muted-foreground mb-3">
+                          Supported: Images (PNG, JPG), PDF, Excel, or text files
+                        </p>
+                        <input
+                          type="file"
+                          accept=".png,.jpg,.jpeg,.pdf,.xlsx,.xls,.csv,.txt"
+                          onChange={handleFileUpload}
+                          className="hidden"
+                          id="layout-upload"
+                        />
+                        <label htmlFor="layout-upload">
+                          <Button variant="outline" asChild>
+                            <span>Choose File</span>
+                          </Button>
+                        </label>
+                        {layoutFileName && (
+                          <p className="mt-3 text-sm text-success font-medium">{layoutFileName}</p>
+                        )}
+                      </div>
+                    </div>
+
+                    {layoutContent && (
+                      <Button 
+                        onClick={analyzeLayoutWithAI} 
+                        disabled={isAnalyzing}
+                        className="w-full"
+                      >
+                        {isAnalyzing ? (
+                          <>
+                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                            Analyzing Layout...
+                          </>
+                        ) : (
+                          <>
+                            <Sparkles className="h-4 w-4 mr-2" />
+                            Analyze Layout with AI
+                          </>
+                        )}
+                      </Button>
+                    )}
+
+                    <div className="border-t pt-4">
+                      <Label className="text-base font-medium">Iterate with AI</Label>
+                      <p className="text-sm text-muted-foreground mb-3">
+                        Provide feedback to refine the template settings. Tell AI what to change.
+                      </p>
+                      <Textarea
+                        value={aiFeedback}
+                        onChange={(e) => setAiFeedback(e.target.value)}
+                        placeholder="e.g., 'Make the colors more corporate blue', 'Add more spacing', 'Hide the bank details section'"
+                        rows={3}
+                      />
+                      <Button 
+                        onClick={iterateWithAI} 
+                        disabled={isAnalyzing || !aiFeedback}
+                        variant="outline"
+                        className="mt-3"
+                      >
+                        {isAnalyzing ? (
+                          <>
+                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                            Applying...
+                          </>
+                        ) : (
+                          <>
+                            <MessageSquare className="h-4 w-4 mr-2" />
+                            Apply Feedback
+                          </>
+                        )}
+                      </Button>
+                    </div>
+
+                    <div className="bg-muted/50 rounded-lg p-4">
+                      <h4 className="font-medium mb-2">Tips for Best Results</h4>
+                      <ul className="text-sm text-muted-foreground space-y-1">
+                        <li>• Upload a clear image or scan of your desired payslip layout</li>
+                        <li>• Include examples of colors, logos, and text formatting you want</li>
+                        <li>• After analysis, review Branding and Content tabs to fine-tune</li>
+                        <li>• Use the Preview tab to see how the template will look</li>
+                        <li>• Click Save when satisfied to use this template</li>
+                      </ul>
+                    </div>
+                  </div>
+                </TabsContent>
 
                 <TabsContent value="branding" className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
