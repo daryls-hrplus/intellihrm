@@ -1,5 +1,6 @@
 import jsPDF from "jspdf";
 import { format } from "date-fns";
+import { getTodayString } from "@/utils/dateUtils";
 
 interface EmployeeData {
   id: string;
@@ -281,5 +282,5 @@ export function renderOrgChartToPdf(trees: OrgNode[], title: string): void {
   });
 
   // Save PDF
-  pdf.save(`${title.toLowerCase().replace(/\s+/g, "-")}-${format(new Date(), "yyyy-MM-dd")}.pdf`);
+  pdf.save(`${title.toLowerCase().replace(/\s+/g, "-")}-${getTodayString()}.pdf`);
 }

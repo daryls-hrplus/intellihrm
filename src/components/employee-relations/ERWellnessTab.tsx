@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Plus, Search, Loader2, Heart, Users, Calendar, DollarSign } from 'lucide-react';
 import { useEmployeeRelations } from '@/hooks/useEmployeeRelations';
 import { useAuth } from '@/contexts/AuthContext';
-import { format } from 'date-fns';
+import { getTodayString, formatDateForDisplay } from '@/utils/dateUtils';
 
 const PROGRAM_TYPES = ['mental_health', 'physical_fitness', 'nutrition', 'stress_management', 'work_life_balance', 'financial_wellness'];
 const STATUSES = ['active', 'inactive', 'upcoming'];
@@ -31,7 +31,7 @@ export function ERWellnessTab({ companyId }: ERWellnessTabProps) {
     name: '',
     description: '',
     program_type: 'mental_health',
-    start_date: new Date().toISOString().split('T')[0],
+    start_date: getTodayString(),
     end_date: '',
     max_participants: '',
     budget: '',
@@ -59,7 +59,7 @@ export function ERWellnessTab({ companyId }: ERWellnessTabProps) {
       name: '',
       description: '',
       program_type: 'mental_health',
-      start_date: new Date().toISOString().split('T')[0],
+      start_date: getTodayString(),
       end_date: '',
       max_participants: '',
       budget: '',
@@ -237,8 +237,8 @@ export function ERWellnessTab({ companyId }: ERWellnessTabProps) {
                   <div className="space-y-2 text-sm">
                     <div className="flex items-center gap-2 text-muted-foreground">
                       <Calendar className="h-4 w-4" />
-                      <span>{format(new Date(program.start_date), 'PP')}</span>
-                      {program.end_date && <span>- {format(new Date(program.end_date), 'PP')}</span>}
+                      <span>{formatDateForDisplay(program.start_date, 'PP')}</span>
+                      {program.end_date && <span>- {formatDateForDisplay(program.end_date, 'PP')}</span>}
                     </div>
                     {program.max_participants && (
                       <div className="flex items-center gap-2 text-muted-foreground">

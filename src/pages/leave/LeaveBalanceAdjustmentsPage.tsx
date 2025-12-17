@@ -43,6 +43,7 @@ import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { useLanguage } from "@/hooks/useLanguage";
+import { formatDateForDisplay, toDateString } from "@/utils/dateUtils";
 
 interface Employee {
   id: string;
@@ -251,7 +252,7 @@ export default function LeaveBalanceAdjustmentsPage() {
         adjustment_type: formData.adjustment_type,
         amount: adjustmentAmount,
         reason: formData.reason,
-        effective_date: format(formData.effective_date, "yyyy-MM-dd"),
+        effective_date: toDateString(formData.effective_date),
         adjusted_by: user?.id,
       });
 
@@ -524,7 +525,7 @@ export default function LeaveBalanceAdjustmentsPage() {
                     <TableCell className="max-w-[200px] truncate" title={adj.reason}>
                       {adj.reason}
                     </TableCell>
-                    <TableCell>{format(new Date(adj.effective_date), "MMM d, yyyy")}</TableCell>
+                    <TableCell>{formatDateForDisplay(adj.effective_date, "MMM d, yyyy")}</TableCell>
                     <TableCell>{adj.adjuster?.full_name || "System"}</TableCell>
                   </TableRow>
                 ))

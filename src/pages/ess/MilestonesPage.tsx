@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { format, isSameMonth, addMonths, startOfMonth, endOfMonth } from "date-fns";
 import { Cake, Award, Calendar, PartyPopper } from "lucide-react";
+import { formatDateForDisplay } from "@/utils/dateUtils";
 
 interface Milestone {
   id: string;
@@ -116,7 +117,7 @@ export default function MilestonesPage() {
                     </Badge>
                   </div>
                   <p className="text-sm text-muted-foreground">
-                    {format(new Date(milestone.milestone_date), "EEEE, MMMM d")}
+                    {formatDateForDisplay(milestone.milestone_date, "EEEE, MMMM d")}
                     {milestone.years_of_service && ` • ${milestone.years_of_service} years`}
                   </p>
                   {milestone.title && (

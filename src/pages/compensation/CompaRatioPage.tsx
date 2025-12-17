@@ -10,10 +10,10 @@ import { Progress } from "@/components/ui/progress";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { format } from "date-fns";
 import { Target, RefreshCw, Search, TrendingUp, TrendingDown, Minus, ChevronRight, Building2 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useTranslation } from "react-i18next";
+import { formatDateForDisplay } from "@/utils/dateUtils";
 
 export default function CompaRatioPage() {
   const { t } = useTranslation();
@@ -190,7 +190,7 @@ export default function CompaRatioPage() {
                     filteredSnapshots.map((snapshot: any) => (
                       <TableRow key={snapshot.id}>
                         <TableCell className="font-medium">{snapshot.employee?.full_name}</TableCell>
-                        <TableCell>{format(new Date(snapshot.snapshot_date), "MMM d, yyyy")}</TableCell>
+                        <TableCell>{formatDateForDisplay(snapshot.snapshot_date, "MMM d, yyyy")}</TableCell>
                         <TableCell className="text-right">${snapshot.current_salary?.toLocaleString()}</TableCell>
                         <TableCell className="text-right">${snapshot.grade_midpoint?.toLocaleString() || "-"}</TableCell>
                         <TableCell className="text-right">
