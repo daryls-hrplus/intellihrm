@@ -31,7 +31,7 @@ import {
 } from "lucide-react";
 import { LeaveCompanyFilter } from "@/components/leave/LeaveCompanyFilter";
 
-type ScheduleType = 'daily_accrual' | 'monthly_accrual' | 'year_end_rollover';
+type ScheduleType = 'daily_accrual' | 'monthly_accrual' | 'year_end_rollover' | 'new_employee_entitlement';
 
 interface ScheduleConfig {
   id: string;
@@ -69,6 +69,7 @@ const SCHEDULE_TYPES: { value: ScheduleType; label: string; description: string 
   { value: 'daily_accrual', label: 'Daily Accrual', description: 'Calculate leave accruals daily' },
   { value: 'monthly_accrual', label: 'Monthly Accrual', description: 'Calculate leave accruals monthly' },
   { value: 'year_end_rollover', label: 'Year-End Rollover', description: 'Process leave balance rollover at year end' },
+  { value: 'new_employee_entitlement', label: 'New Employee Entitlement', description: 'Generate initial leave entitlements for new employees' },
 ];
 
 export default function LeaveScheduleConfigPage() {

@@ -9,7 +9,7 @@ const corsHeaders = {
 interface ScheduleConfig {
   id: string;
   company_id: string;
-  schedule_type: 'daily_accrual' | 'monthly_accrual' | 'year_end_rollover';
+  schedule_type: 'daily_accrual' | 'monthly_accrual' | 'year_end_rollover' | 'new_employee_entitlement';
   is_enabled: boolean;
   run_time: string;
   run_day_of_month: number | null;
@@ -90,6 +90,9 @@ serve(async (req) => {
             break;
           case 'year_end_rollover':
             result = await processYearEndRollover(supabase, schedule);
+            break;
+          case 'new_employee_entitlement':
+            result = await processNewEmployeeEntitlement(supabase, schedule);
             break;
         }
 
@@ -407,6 +410,116 @@ async function processYearEndRollover(supabase: any, schedule: ScheduleConfig) {
   };
 }
 
+async function processNewEmployeeEntitlement(supabase: any, schedule: ScheduleConfig) {
+  console.log(`Processing new employee entitlements for company ${schedule.company_id}`);
+  
+  const currentYear = new Date().getFullYear();
+  const today = new Date();
+  
+  // Get active employees
+  const { data: employees, error: empError } = await supabase
+    .from('profiles')
+    .select('id, full_name, hire_date')
+    .eq('company_id', schedule.company_id)
+    .eq('is_active', true);
+
+  if (empError) throw new Error(`Failed to fetch employees: ${empError.message}`);
+
+  // Get all leave types for the company
+  const { data: leaveTypes, error: ltError } = await supabase
+    .from('leave_types')
+    .select('id, name, default_days, max_balance')
+    .eq('company_id', schedule.company_id)
+    .eq('is_active', true);
+
+  if (ltError) throw new Error(`Failed to fetch leave types: ${ltError.message}`);
+
+  // Get accrual rules (for annual entitlement)
+  const { data: accrualRules, error: rulesError } = await supabase
+    .from('leave_accrual_rules')
+    .select('*')
+    .eq('company_id', schedule.company_id)
+    .eq('is_active', true)
+    .eq('accrual_frequency', 'annually');
+
+  if (rulesError) throw new Error(`Failed to fetch accrual rules: ${rulesError.message}`);
+
+  let recordsCreated = 0;
+  let recordsUpdated = 0;
+  const newEmployees: string[] = [];
+
+  for (const employee of (employees || [])) {
+    const yearsOfService = calculateYearsOfService(employee.hire_date);
+    
+    for (const leaveType of (leaveTypes || [])) {
+      // Check if balance already exists for this year
+      const { data: existingBalance } = await supabase
+        .from('leave_balances')
+        .select('id')
+        .eq('employee_id', employee.id)
+        .eq('leave_type_id', leaveType.id)
+        .eq('year', currentYear)
+        .single();
+
+      if (existingBalance) continue; // Already has balance, skip
+
+      // Find applicable accrual rule
+      const applicableRule = (accrualRules || []).find((rule: any) => 
+        rule.leave_type_id === leaveType.id &&
+        yearsOfService >= rule.years_of_service_min &&
+        (!rule.years_of_service_max || yearsOfService <= rule.years_of_service_max)
+      );
+
+      // Determine annual entitlement
+      let annualEntitlement = applicableRule?.accrual_amount || leaveType.default_days || 0;
+      
+      // Pro-rate if hired this year
+      let prorationFactor = 1;
+      const hireDate = new Date(employee.hire_date);
+      if (hireDate.getFullYear() === currentYear) {
+        const startOfYear = new Date(currentYear, 0, 1);
+        const endOfYear = new Date(currentYear, 11, 31);
+        const totalDaysInYear = Math.ceil((endOfYear.getTime() - startOfYear.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+        const daysRemaining = Math.ceil((endOfYear.getTime() - hireDate.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+        prorationFactor = daysRemaining / totalDaysInYear;
+      }
+
+      const proratedEntitlement = Math.round(annualEntitlement * prorationFactor * 100) / 100;
+
+      if (proratedEntitlement > 0) {
+        await supabase
+          .from('leave_balances')
+          .insert({
+            employee_id: employee.id,
+            company_id: schedule.company_id,
+            leave_type_id: leaveType.id,
+            balance: proratedEntitlement,
+            used: 0,
+            pending: 0,
+            carried_over: 0,
+            year: currentYear
+          });
+        recordsCreated++;
+        
+        if (!newEmployees.includes(employee.full_name)) {
+          newEmployees.push(employee.full_name);
+        }
+      }
+    }
+  }
+
+  return {
+    employeesProcessed: employees?.length || 0,
+    recordsCreated,
+    recordsUpdated,
+    details: { 
+      leaveTypesProcessed: leaveTypes?.length || 0,
+      newEmployeesWithEntitlements: newEmployees,
+      rulesApplied: accrualRules?.length || 0
+    }
+  };
+}
+
 function calculateYearsOfService(hireDate: string): number {
   if (!hireDate) return 0;
   const hire = new Date(hireDate);
@@ -460,7 +573,8 @@ async function sendNotification(supabase: any, schedule: ScheduleConfig, status:
   const typeLabels: Record<string, string> = {
     'daily_accrual': 'Daily Leave Accrual',
     'monthly_accrual': 'Monthly Leave Accrual',
-    'year_end_rollover': 'Year-End Leave Rollover'
+    'year_end_rollover': 'Year-End Leave Rollover',
+    'new_employee_entitlement': 'New Employee Entitlement'
   };
 
   const title = status === 'success' 
