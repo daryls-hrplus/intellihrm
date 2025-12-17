@@ -719,6 +719,58 @@
         "notesPlaceholder": "ملاحظات اختيارية"
       }
     },
+    "employeeCompensation": {
+      "title": "تعويضات الموظفين",
+      "subtitle": "إدارة تعديلات الأجور الفردية للموظفين",
+      "add": "إضافة تعويض",
+      "employee": "الموظف",
+      "position": "المنصب",
+      "payElement": "عنصر الدفع",
+      "amount": "المبلغ",
+      "currency": "العملة",
+      "frequencyLabel": "التكرار",
+      "effectiveDates": "تواريخ السريان",
+      "override": "استثناء",
+      "searchPlaceholder": "البحث بالموظف أو عنصر الدفع...",
+      "noItems": "لم يتم العثور على عناصر تعويض",
+      "deleteConfirm": "هل أنت متأكد من حذف عنصر التعويض هذا؟",
+      "selectEmployee": "اختر الموظف",
+      "selectEmployeeFirst": "يرجى اختيار موظف لعرض تعويضاته",
+      "salaryRange": "نطاق الراتب",
+      "paySpineRange": "نطاق سلم الرواتب",
+      "totalPackageRange": "إجمالي الحزمة",
+      "forPosition": "للمنصب",
+      "compensationModel": {
+        "salaryGrade": "درجة الراتب",
+        "paySpine": "سلم الرواتب",
+        "hybrid": "هجين",
+        "none": "غير مكون"
+      },
+      "validation": {
+        "required": "الموظف وعنصر الدفع والمبلغ مطلوبة"
+      },
+      "frequency": {
+        "monthly": "شهري",
+        "annual": "سنوي",
+        "weekly": "أسبوعي",
+        "biWeekly": "نصف شهري",
+        "oneTime": "مرة واحدة"
+      },
+      "dialog": {
+        "createTitle": "إضافة تعويض موظف",
+        "editTitle": "تعديل تعويض موظف",
+        "description": "إضافة عناصر تعويض فردية لهذا الموظف",
+        "selectEmployee": "اختر الموظف",
+        "selectEmployeeFirst": "اختر الموظف أولاً",
+        "selectPosition": "اختر المنصب",
+        "noPosition": "بدون منصب محدد",
+        "noPositionsAssigned": "لا توجد مناصب معينة للموظف",
+        "selectPayElement": "اختر عنصر الدفع",
+        "isOverride": "هذا استثناء لتعويض المنصب",
+        "overrideReason": "سبب الاستثناء",
+        "overrideReasonPlaceholder": "سبب الاستثناء..."
+      }
+    },
     "spinalPoints": {
       "paySpine": "سلم الرواتب"
     }

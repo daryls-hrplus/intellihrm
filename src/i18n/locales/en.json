@@ -5487,6 +5487,18 @@
       "searchPlaceholder": "Search by employee or pay element...",
       "noItems": "No employee compensation items found",
       "deleteConfirm": "Are you sure you want to delete this compensation item?",
+      "selectEmployee": "Select Employee",
+      "selectEmployeeFirst": "Please select an employee to view their compensation",
+      "salaryRange": "Salary Range",
+      "paySpineRange": "Pay Spine Range",
+      "totalPackageRange": "Total Package",
+      "forPosition": "For Position",
+      "compensationModel": {
+        "salaryGrade": "Salary Grade",
+        "paySpine": "Pay Spine",
+        "hybrid": "Hybrid",
+        "none": "Not Configured"
+      },
       "validation": {
         "required": "Employee, pay element, and amount are required"
       },
