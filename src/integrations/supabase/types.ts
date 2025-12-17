@@ -2110,7 +2110,9 @@ export type Database = {
           currency: string | null
           description: string | null
           employee_contribution: number | null
+          employee_contribution_type: string
           employer_contribution: number | null
+          employer_contribution_type: string
           end_date: string | null
           enrollment_type: string
           id: string
@@ -2135,7 +2137,9 @@ export type Database = {
           currency?: string | null
           description?: string | null
           employee_contribution?: number | null
+          employee_contribution_type?: string
           employer_contribution?: number | null
+          employer_contribution_type?: string
           end_date?: string | null
           enrollment_type?: string
           id?: string
@@ -2160,7 +2164,9 @@ export type Database = {
           currency?: string | null
           description?: string | null
           employee_contribution?: number | null
+          employee_contribution_type?: string
           employer_contribution?: number | null
+          employer_contribution_type?: string
           end_date?: string | null
           enrollment_type?: string
           id?: string
