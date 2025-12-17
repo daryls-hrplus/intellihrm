@@ -12,7 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/hooks/use-toast";
 import { Plus, Edit, Trash2, Upload, FileText, Check, X, DollarSign } from "lucide-react";
-import { format } from "date-fns";
+import { getTodayString, formatDateForDisplay } from "@/utils/dateUtils";
 import { useCurrencies, formatCurrency } from "@/hooks/useCurrencies";
 
 interface LeaveBuyout {
@@ -86,8 +86,8 @@ export default function LeaveBalanceBuyoutPage() {
     buyout_rate: "1",
     daily_rate_amount: "",
     currency_id: "",
-    agreement_date: format(new Date(), "yyyy-MM-dd"),
-    transaction_date: format(new Date(), "yyyy-MM-dd"),
+    agreement_date: getTodayString(),
+    transaction_date: getTodayString(),
     pay_group_id: "",
     pay_period_id: "",
     agreement_document_url: "",
@@ -211,7 +211,7 @@ export default function LeaveBalanceBuyoutPage() {
       .from("pay_periods")
       .select("id, period_number, period_start, period_end")
       .eq("pay_group_id", payGroupId)
-      .gte("period_end", format(new Date(), "yyyy-MM-dd"))
+      .gte("period_end", getTodayString())
       .order("period_start");
     if (!error && data) setPayPeriods(data as PayPeriod[]);
   };
@@ -369,8 +369,8 @@ export default function LeaveBalanceBuyoutPage() {
       buyout_rate: "1",
       daily_rate_amount: "",
       currency_id: "",
-      agreement_date: format(new Date(), "yyyy-MM-dd"),
-      transaction_date: format(new Date(), "yyyy-MM-dd"),
+      agreement_date: getTodayString(),
+      transaction_date: getTodayString(),
       pay_group_id: "",
       pay_period_id: "",
       agreement_document_url: "",
@@ -450,8 +450,8 @@ export default function LeaveBalanceBuyoutPage() {
                     <TableCell>
                       {buyout.currency?.symbol || "$"}{buyout.total_buyout_amount.toLocaleString()}
                     </TableCell>
-                    <TableCell>{format(new Date(buyout.agreement_date), "MMM dd, yyyy")}</TableCell>
-                    <TableCell>{format(new Date(buyout.transaction_date), "MMM dd, yyyy")}</TableCell>
+                    <TableCell>{formatDateForDisplay(buyout.agreement_date, "MMM dd, yyyy")}</TableCell>
+                    <TableCell>{formatDateForDisplay(buyout.transaction_date, "MMM dd, yyyy")}</TableCell>
                     <TableCell>
                       {buyout.pay_period ? (
                         <span className="text-sm">
@@ -631,7 +631,7 @@ export default function LeaveBalanceBuyoutPage() {
                 <SelectContent>
                   {payPeriods.map(pp => (
                     <SelectItem key={pp.id} value={pp.id}>
-                      {pp.period_number} ({format(new Date(pp.period_start), "MMM dd")} - {format(new Date(pp.period_end), "MMM dd")})
+                      {pp.period_number} ({formatDateForDisplay(pp.period_start, "MMM dd")} - {formatDateForDisplay(pp.period_end, "MMM dd")})
                     </SelectItem>
                   ))}
                 </SelectContent>

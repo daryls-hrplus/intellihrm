@@ -29,7 +29,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Plus, Trash2, Loader2, Award } from "lucide-react";
-import { format } from "date-fns";
+import { getTodayString, formatDateForDisplay } from "@/utils/dateUtils";
 import { useAuditLog } from "@/hooks/useAuditLog";
 
 interface EmployeeCompetency {
@@ -90,7 +90,7 @@ export function EmployeeCompetenciesTab({ employeeId }: EmployeeCompetenciesTabP
     weighting: "10",
     proficiency_date: "",
     notes: "",
-    start_date: format(new Date(), "yyyy-MM-dd"),
+    start_date: getTodayString(),
     end_date: "",
   });
 
@@ -164,7 +164,7 @@ export function EmployeeCompetenciesTab({ employeeId }: EmployeeCompetenciesTabP
       weighting: "10",
       proficiency_date: "",
       notes: "",
-      start_date: format(new Date(), "yyyy-MM-dd"),
+      start_date: getTodayString(),
       end_date: "",
     });
     setDialogOpen(true);
@@ -347,12 +347,12 @@ export function EmployeeCompetenciesTab({ employeeId }: EmployeeCompetenciesTabP
                     </TableCell>
                     <TableCell>
                       {ec.proficiency_date
-                        ? format(new Date(ec.proficiency_date), "MMM d, yyyy")
+                        ? formatDateForDisplay(ec.proficiency_date, "MMM d, yyyy")
                         : "—"}
                     </TableCell>
-                    <TableCell>{format(new Date(ec.start_date), "MMM d, yyyy")}</TableCell>
+                    <TableCell>{formatDateForDisplay(ec.start_date, "MMM d, yyyy")}</TableCell>
                     <TableCell>
-                      {ec.end_date ? format(new Date(ec.end_date), "MMM d, yyyy") : "—"}
+                      {ec.end_date ? formatDateForDisplay(ec.end_date, "MMM d, yyyy") : "—"}
                     </TableCell>
                     <TableCell>
                       <Button

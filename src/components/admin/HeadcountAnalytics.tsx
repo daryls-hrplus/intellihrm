@@ -27,6 +27,7 @@ import {
   Legend,
 } from "recharts";
 import { format, subMonths, startOfMonth, endOfMonth } from "date-fns";
+import { getTodayString } from "@/utils/dateUtils";
 
 interface HeadcountAnalyticsProps {
   companyId: string;
@@ -65,7 +66,7 @@ export function HeadcountAnalytics({ companyId }: HeadcountAnalyticsProps) {
   // Export to CSV
   const exportToCSV = (type: "summary" | "monthly" | "department" | "all") => {
     let csvContent = "";
-    const date = format(new Date(), "yyyy-MM-dd");
+    const date = getTodayString();
 
     if (type === "summary" || type === "all") {
       csvContent += "HEADCOUNT SUMMARY REPORT\n";

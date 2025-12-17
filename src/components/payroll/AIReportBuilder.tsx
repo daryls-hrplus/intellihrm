@@ -18,7 +18,7 @@ import {
   Check, Clock, AlertCircle, Loader2
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { format } from "date-fns";
+import { getTodayString, formatDateForDisplay } from "@/utils/dateUtils";
 
 interface AIReport {
   id: string;
@@ -330,7 +330,7 @@ export function AIReportBuilder({ reportType, companyId }: AIReportBuilderProps)
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `${selectedReport?.report_name || 'report'}_${format(new Date(), 'yyyy-MM-dd')}.csv`;
+    a.download = `${selectedReport?.report_name || 'report'}_${getTodayString()}.csv`;
     a.click();
     URL.revokeObjectURL(url);
     toast.success("Report exported to Excel");
@@ -462,7 +462,7 @@ export function AIReportBuilder({ reportType, companyId }: AIReportBuilderProps)
                         <div>
                           <p className="font-medium">{report.report_name}</p>
                           <p className="text-xs text-muted-foreground">
-                            {format(new Date(report.created_at), 'MMM d, yyyy')}
+                            {formatDateForDisplay(report.created_at, 'MMM d, yyyy')}
                           </p>
                         </div>
                         {getStatusBadge(report.status)}
@@ -513,7 +513,7 @@ export function AIReportBuilder({ reportType, companyId }: AIReportBuilderProps)
                     <ScrollArea className="h-20">
                       {selectedReport.iteration_history.map((iter, idx) => (
                         <p key={idx} className="text-xs text-muted-foreground">
-                          {format(new Date(iter.timestamp), 'MMM d, HH:mm')}: {iter.feedback.substring(0, 50)}...
+                          {formatDateForDisplay(iter.timestamp, 'MMM d, HH:mm')}: {iter.feedback.substring(0, 50)}...
                         </p>
                       ))}
                     </ScrollArea>

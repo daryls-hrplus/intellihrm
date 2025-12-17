@@ -13,7 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { format } from "date-fns";
+import { getTodayString, formatDateForDisplay } from "@/utils/dateUtils";
 import { Plus, Receipt, DollarSign, Clock, CheckCircle, Send, Trash2, Upload, FileText, ExternalLink, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
@@ -67,7 +67,7 @@ export default function MyExpenseClaimsPage() {
   
   const [claimForm, setClaimForm] = useState({ description: "" });
   const [itemForm, setItemForm] = useState({
-    expense_date: format(new Date(), "yyyy-MM-dd"),
+    expense_date: getTodayString(),
     category: "",
     description: "",
     amount: "",
@@ -214,7 +214,7 @@ export default function MyExpenseClaimsPage() {
 
       toast({ title: t('ess.myExpenseClaims.toast.success'), description: t('ess.myExpenseClaims.toast.itemAdded') });
       setItemDialogOpen(false);
-      setItemForm({ expense_date: format(new Date(), "yyyy-MM-dd"), category: "", description: "", amount: "" });
+      setItemForm({ expense_date: getTodayString(), category: "", description: "", amount: "" });
       setSelectedFile(null);
       setReceiptUrl("");
       loadClaimItems(selectedClaim.id);
@@ -364,7 +364,7 @@ export default function MyExpenseClaimsPage() {
                         onClick={() => setSelectedClaim(claim)}
                       >
                         <TableCell className="font-medium">{claim.claim_number}</TableCell>
-                        <TableCell>{format(new Date(claim.claim_date), "MMM d, yyyy")}</TableCell>
+                        <TableCell>{formatDateForDisplay(claim.claim_date, "MMM d, yyyy")}</TableCell>
                         <TableCell>${claim.total_amount.toFixed(2)}</TableCell>
                         <TableCell>{getStatusBadge(claim.status)}</TableCell>
                       </TableRow>
@@ -412,7 +412,7 @@ export default function MyExpenseClaimsPage() {
                     <TableBody>
                       {claimItems.map((item) => (
                         <TableRow key={item.id}>
-                          <TableCell>{format(new Date(item.expense_date), "MMM d")}</TableCell>
+                          <TableCell>{formatDateForDisplay(item.expense_date, "MMM d")}</TableCell>
                           <TableCell>{item.category}</TableCell>
                           <TableCell>${item.amount.toFixed(2)}</TableCell>
                           <TableCell>

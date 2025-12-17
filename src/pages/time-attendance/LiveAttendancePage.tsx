@@ -8,6 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { format, parseISO, differenceInMinutes } from "date-fns";
+import { getTodayString } from "@/utils/dateUtils";
 import { Activity, UserCheck, UserX, Clock, Loader2, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTranslation } from "react-i18next";
@@ -44,7 +45,7 @@ export default function LiveAttendancePage() {
 
   const loadEntries = async () => {
     setIsLoading(true);
-    const today = format(new Date(), "yyyy-MM-dd");
+    const today = getTodayString();
     const { data } = await supabase
       .from("time_clock_entries")
       .select("id, employee_id, clock_in, clock_out, status, employee:profiles!time_clock_entries_employee_id_fkey(full_name, avatar_url)")

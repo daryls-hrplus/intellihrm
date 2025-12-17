@@ -29,7 +29,8 @@ import {
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { format, isPast, differenceInDays } from "date-fns";
+import { isPast, differenceInDays } from "date-fns";
+import { getTodayString, formatDateForDisplay } from "@/utils/dateUtils";
 import { GoalProgressDialog } from "@/components/performance/GoalProgressDialog";
 import { GoalCommentsDialog } from "@/components/performance/GoalCommentsDialog";
 import { ContactManagerDialog } from "@/components/performance/ContactManagerDialog";
@@ -166,7 +167,7 @@ export default function MyGoalsPage() {
       Status: goal.status,
       Progress: `${goal.progress_percentage}%`,
       Weight: goal.weighting ? `${goal.weighting}%` : "",
-      "Due Date": goal.due_date ? format(new Date(goal.due_date), "yyyy-MM-dd") : "",
+      "Due Date": goal.due_date ? formatDateForDisplay(goal.due_date, "yyyy-MM-dd") : "",
     }));
 
     const headers = Object.keys(data[0] || {}).join(",");
@@ -177,7 +178,7 @@ export default function MyGoalsPage() {
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `my-goals-${format(new Date(), "yyyy-MM-dd")}.csv`;
+    a.download = `my-goals-${getTodayString()}.csv`;
     a.click();
     window.URL.revokeObjectURL(url);
     toast.success("Goals exported successfully");
@@ -384,7 +385,7 @@ export default function MyGoalsPage() {
                               ) : daysUntilDue !== null && daysUntilDue <= 7 ? (
                                 <span className="text-warning">{daysUntilDue} days left</span>
                               ) : (
-                                `Due: ${format(new Date(goal.due_date), "MMM d, yyyy")}`
+                                `Due: ${formatDateForDisplay(goal.due_date, "MMM d, yyyy")}`
                               )}
                             </span>
                           )}
