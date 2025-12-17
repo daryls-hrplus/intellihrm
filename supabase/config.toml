@@ -98,3 +98,6 @@ verify_jwt = false
 
 [functions.analyze-statutory-report]
 verify_jwt = false
+
+[functions.execute-bi-query]
+verify_jwt = false
