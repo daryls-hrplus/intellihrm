@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useTranslation } from "react-i18next";
 import { useGranularPermissions } from "@/hooks/useGranularPermissions";
+import { GroupedModuleCards, ModuleSection } from "@/components/ui/GroupedModuleCards";
 import {
   Select,
   SelectContent,
@@ -32,163 +33,17 @@ import {
   Building2,
   Loader2,
 } from "lucide-react";
-import { DraggableModuleCards, ModuleCardItem } from "@/components/ui/DraggableModuleCards";
 
 interface Company {
   id: string;
   name: string;
 }
 
-const getBenefitsModules = (t: any) => [
-  {
-    title: t("benefits.modules.categories.title"),
-    description: t("benefits.modules.categories.description"),
-    href: "/benefits/categories",
-    icon: Gift,
-    color: "bg-primary/10 text-primary",
-    tabCode: "categories",
-  },
-  {
-    title: t("benefits.modules.plans.title"),
-    description: t("benefits.modules.plans.description"),
-    href: "/benefits/plans",
-    icon: Shield,
-    color: "bg-success/10 text-success",
-    tabCode: "plans",
-  },
-  {
-    title: t("benefits.modules.providers.title"),
-    description: t("benefits.modules.providers.description"),
-    href: "/benefits/providers",
-    icon: Building2,
-    color: "bg-info/10 text-info",
-    tabCode: "providers",
-  },
-  {
-    title: t("benefits.modules.enrollments.title"),
-    description: t("benefits.modules.enrollments.description"),
-    href: "/benefits/enrollments",
-    icon: Heart,
-    color: "bg-accent/10 text-accent-foreground",
-    tabCode: "enrollments",
-  },
-  {
-    title: t("benefits.modules.claims.title"),
-    description: t("benefits.modules.claims.description"),
-    href: "/benefits/claims",
-    icon: Stethoscope,
-    color: "bg-warning/10 text-warning",
-    tabCode: "claims",
-  },
-];
-
-const getAnalyticsModules = (t: any) => [
-  {
-    title: t("benefits.modules.analytics.title"),
-    description: t("benefits.modules.analytics.description"),
-    href: "/benefits/analytics",
-    icon: BarChart3,
-    color: "bg-primary/10 text-primary",
-    tabCode: "analytics",
-  },
-  {
-    title: t("benefits.modules.costProjections.title"),
-    description: t("benefits.modules.costProjections.description"),
-    href: "/benefits/cost-projections",
-    icon: TrendingUp,
-    color: "bg-success/10 text-success",
-    tabCode: "cost_projections",
-  },
-  {
-    title: t("benefits.modules.comparison.title"),
-    description: t("benefits.modules.comparison.description"),
-    href: "/benefits/compare",
-    icon: Scale,
-    color: "bg-info/10 text-info",
-    tabCode: "compare",
-  },
-  {
-    title: t("benefits.modules.calculator.title"),
-    description: t("benefits.modules.calculator.description"),
-    href: "/benefits/calculator",
-    icon: Calculator,
-    color: "bg-warning/10 text-warning",
-    tabCode: "calculator",
-  },
-];
-
-const getAdministrationModules = (t: any) => [
-  {
-    title: t("benefits.modules.autoEnrollment.title"),
-    description: t("benefits.modules.autoEnrollment.description"),
-    href: "/benefits/auto-enrollment",
-    icon: Settings,
-    color: "bg-primary/10 text-primary",
-    tabCode: "auto_enrollment",
-  },
-  {
-    title: t("benefits.modules.lifeEvents.title"),
-    description: t("benefits.modules.lifeEvents.description"),
-    href: "/benefits/life-events",
-    icon: Calendar,
-    color: "bg-success/10 text-success",
-    tabCode: "life_events",
-  },
-  {
-    title: t("benefits.modules.waitingPeriods.title"),
-    description: t("benefits.modules.waitingPeriods.description"),
-    href: "/benefits/waiting-periods",
-    icon: Clock,
-    color: "bg-info/10 text-info",
-    tabCode: "waiting_periods",
-  },
-  {
-    title: t("benefits.modules.openEnrollment.title"),
-    description: t("benefits.modules.openEnrollment.description"),
-    href: "/benefits/open-enrollment",
-    icon: CalendarCheck,
-    color: "bg-warning/10 text-warning",
-    tabCode: "open_enrollment",
-  },
-];
-
-const getComplianceModules = (t: any) => [
-  {
-    title: t("benefits.modules.eligibilityAudit.title"),
-    description: t("benefits.modules.eligibilityAudit.description"),
-    href: "/benefits/eligibility-audit",
-    icon: FileCheck,
-    color: "bg-primary/10 text-primary",
-    tabCode: "eligibility_audit",
-  },
-  {
-    title: t("benefits.modules.complianceReports.title"),
-    description: t("benefits.modules.complianceReports.description"),
-    href: "/benefits/compliance",
-    icon: FileText,
-    color: "bg-success/10 text-success",
-    tabCode: "compliance",
-  },
-];
-
 interface DashboardStats {
   activePlans: number;
   enrolledUsers: number;
   healthPlans: number;
   pendingClaims: number;
-}
-
-function ModuleSection({ title, modules, preferenceKey }: { title: string; modules: ModuleCardItem[]; preferenceKey: string }) {
-  return (
-    <div className="space-y-4">
-      <h2 className="text-lg font-semibold text-foreground">{title}</h2>
-      <DraggableModuleCards 
-        modules={modules} 
-        preferenceKey={preferenceKey} 
-        showResetButton={false}
-      />
-    </div>
-  );
 }
 
 export default function BenefitsDashboardPage() {
@@ -204,7 +59,6 @@ export default function BenefitsDashboardPage() {
   });
   const [loading, setLoading] = useState(true);
 
-  // Fetch companies on mount
   useEffect(() => {
     const fetchCompanies = async () => {
       const { data } = await supabase
@@ -217,14 +71,12 @@ export default function BenefitsDashboardPage() {
     fetchCompanies();
   }, []);
 
-  // Fetch stats when company selection changes
   useEffect(() => {
     const fetchStats = async () => {
       setLoading(true);
       try {
         const companyFilter = selectedCompanyId !== "all" ? selectedCompanyId : null;
 
-        // Fetch active plans count
         let plansQuery = supabase
           .from("benefit_plans")
           .select("*", { count: "exact", head: true })
@@ -234,8 +86,6 @@ export default function BenefitsDashboardPage() {
         }
         const { count: activePlansCount } = await plansQuery;
 
-        // Fetch active enrollments count (unique employees)
-        // Need to join with plans to filter by company
         let enrollmentsQuery = supabase
           .from("benefit_enrollments")
           .select("employee_id, plan_id, benefit_plans!inner(company_id)")
@@ -251,7 +101,6 @@ export default function BenefitsDashboardPage() {
         }
         const uniqueEnrolledUsers = new Set(filteredEnrollments.map((e: any) => e.employee_id)).size;
 
-        // Fetch health plans count (plans with health-related categories)
         let categoriesQuery = supabase
           .from("benefit_categories")
           .select("id")
@@ -276,7 +125,6 @@ export default function BenefitsDashboardPage() {
           healthPlansCount = count || 0;
         }
 
-        // Fetch pending claims count - need to filter through enrollments and plans
         const { data: allClaims } = await supabase
           .from("benefit_claims")
           .select("id, enrollment_id, benefit_enrollments!inner(plan_id, benefit_plans!inner(company_id))")
@@ -306,17 +154,52 @@ export default function BenefitsDashboardPage() {
     fetchStats();
   }, [selectedCompanyId]);
 
+  const allModules = {
+    categories: { title: t("benefits.modules.categories.title"), description: t("benefits.modules.categories.description"), href: "/benefits/categories", icon: Gift, color: "bg-primary/10 text-primary", tabCode: "categories" },
+    plans: { title: t("benefits.modules.plans.title"), description: t("benefits.modules.plans.description"), href: "/benefits/plans", icon: Shield, color: "bg-success/10 text-success", tabCode: "plans" },
+    providers: { title: t("benefits.modules.providers.title"), description: t("benefits.modules.providers.description"), href: "/benefits/providers", icon: Building2, color: "bg-info/10 text-info", tabCode: "providers" },
+    enrollments: { title: t("benefits.modules.enrollments.title"), description: t("benefits.modules.enrollments.description"), href: "/benefits/enrollments", icon: Heart, color: "bg-accent/10 text-accent-foreground", tabCode: "enrollments" },
+    claims: { title: t("benefits.modules.claims.title"), description: t("benefits.modules.claims.description"), href: "/benefits/claims", icon: Stethoscope, color: "bg-warning/10 text-warning", tabCode: "claims" },
+    analytics: { title: t("benefits.modules.analytics.title"), description: t("benefits.modules.analytics.description"), href: "/benefits/analytics", icon: BarChart3, color: "bg-primary/10 text-primary", tabCode: "analytics" },
+    costProjections: { title: t("benefits.modules.costProjections.title"), description: t("benefits.modules.costProjections.description"), href: "/benefits/cost-projections", icon: TrendingUp, color: "bg-success/10 text-success", tabCode: "cost_projections" },
+    comparison: { title: t("benefits.modules.comparison.title"), description: t("benefits.modules.comparison.description"), href: "/benefits/compare", icon: Scale, color: "bg-info/10 text-info", tabCode: "compare" },
+    calculator: { title: t("benefits.modules.calculator.title"), description: t("benefits.modules.calculator.description"), href: "/benefits/calculator", icon: Calculator, color: "bg-warning/10 text-warning", tabCode: "calculator" },
+    autoEnrollment: { title: t("benefits.modules.autoEnrollment.title"), description: t("benefits.modules.autoEnrollment.description"), href: "/benefits/auto-enrollment", icon: Settings, color: "bg-primary/10 text-primary", tabCode: "auto_enrollment" },
+    lifeEvents: { title: t("benefits.modules.lifeEvents.title"), description: t("benefits.modules.lifeEvents.description"), href: "/benefits/life-events", icon: Calendar, color: "bg-success/10 text-success", tabCode: "life_events" },
+    waitingPeriods: { title: t("benefits.modules.waitingPeriods.title"), description: t("benefits.modules.waitingPeriods.description"), href: "/benefits/waiting-periods", icon: Clock, color: "bg-info/10 text-info", tabCode: "waiting_periods" },
+    openEnrollment: { title: t("benefits.modules.openEnrollment.title"), description: t("benefits.modules.openEnrollment.description"), href: "/benefits/open-enrollment", icon: CalendarCheck, color: "bg-warning/10 text-warning", tabCode: "open_enrollment" },
+    eligibilityAudit: { title: t("benefits.modules.eligibilityAudit.title"), description: t("benefits.modules.eligibilityAudit.description"), href: "/benefits/eligibility-audit", icon: FileCheck, color: "bg-primary/10 text-primary", tabCode: "eligibility_audit" },
+    compliance: { title: t("benefits.modules.complianceReports.title"), description: t("benefits.modules.complianceReports.description"), href: "/benefits/compliance", icon: FileText, color: "bg-success/10 text-success", tabCode: "compliance" },
+  };
+
+  const filterByAccess = (modules: typeof allModules[keyof typeof allModules][]) =>
+    modules.filter(m => hasTabAccess("benefits", m.tabCode));
+
+  const sections: ModuleSection[] = [
+    {
+      titleKey: "benefits.groups.coreBenefits",
+      items: filterByAccess([allModules.categories, allModules.plans, allModules.providers, allModules.enrollments, allModules.claims]),
+    },
+    {
+      titleKey: "benefits.groups.analyticsReporting",
+      items: filterByAccess([allModules.analytics, allModules.costProjections, allModules.comparison, allModules.calculator]),
+    },
+    {
+      titleKey: "benefits.groups.administration",
+      items: filterByAccess([allModules.autoEnrollment, allModules.lifeEvents, allModules.waitingPeriods, allModules.openEnrollment]),
+    },
+    {
+      titleKey: "benefits.groups.compliance",
+      items: filterByAccess([allModules.eligibilityAudit, allModules.compliance]),
+    },
+  ];
+
   const statCards = [
     { label: t("benefits.activePlans"), value: stats.activePlans, icon: CheckCircle, color: "bg-success/10 text-success" },
     { label: t("benefits.enrolledUsers"), value: stats.enrolledUsers, icon: Users, color: "bg-primary/10 text-primary" },
     { label: t("benefits.healthPlans"), value: stats.healthPlans, icon: Stethoscope, color: "bg-info/10 text-info" },
     { label: t("benefits.pendingClaims"), value: stats.pendingClaims, icon: FileText, color: "bg-warning/10 text-warning" },
   ];
-
-  const benefitsModules = getBenefitsModules(t).filter(m => hasTabAccess("benefits", m.tabCode));
-  const analyticsModules = getAnalyticsModules(t).filter(m => hasTabAccess("benefits", m.tabCode));
-  const administrationModules = getAdministrationModules(t).filter(m => hasTabAccess("benefits", m.tabCode));
-  const complianceModules = getComplianceModules(t).filter(m => hasTabAccess("benefits", m.tabCode));
 
   return (
     <AppLayout>
@@ -389,10 +272,7 @@ export default function BenefitsDashboardPage() {
           })}
         </div>
 
-        <ModuleSection title={t("benefits.sections.coreBenefits")} modules={benefitsModules} preferenceKey="benefits_core_order" />
-        <ModuleSection title={t("benefits.sections.analyticsReporting")} modules={analyticsModules} preferenceKey="benefits_analytics_order" />
-        <ModuleSection title={t("benefits.sections.administration")} modules={administrationModules} preferenceKey="benefits_admin_order" />
-        <ModuleSection title={t("benefits.sections.compliance")} modules={complianceModules} preferenceKey="benefits_compliance_order" />
+        <GroupedModuleCards sections={sections} />
       </div>
     </AppLayout>
   );

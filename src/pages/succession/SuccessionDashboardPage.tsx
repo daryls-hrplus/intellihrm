@@ -7,9 +7,9 @@ import { useGranularPermissions } from "@/hooks/useGranularPermissions";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useSuccession, NineBoxAssessment } from "@/hooks/useSuccession";
 import { supabase } from "@/integrations/supabase/client";
+import { GroupedModuleCards, ModuleSection } from "@/components/ui/GroupedModuleCards";
 import { TrendingUp, Grid3X3, Users, Target, AlertTriangle, BarChart3, BookOpen, Route, UserCheck, TrendingDown, Layers } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
-import { DraggableModuleCards, ModuleCardItem } from "@/components/ui/DraggableModuleCards";
 
 interface Company {
   id: string;
@@ -90,95 +90,47 @@ export default function SuccessionDashboardPage() {
     return acc + ((pool as any).member_count || 0);
   }, 0);
 
+  const allModules = {
+    nineBox: { title: t("succession.tabs.nineBox"), description: t("succession.nineBox.description"), href: "/succession/nine-box", icon: Grid3X3, color: "bg-primary/10 text-primary", tabCode: "nine-box" },
+    talentPools: { title: t("succession.tabs.talentPools"), description: t("succession.talentPools.description"), href: "/succession/talent-pools", icon: Users, color: "bg-info/10 text-info", tabCode: "talent-pools" },
+    plans: { title: t("succession.tabs.successionPlans"), description: t("succession.successionPlans.description"), href: "/succession/plans", icon: Target, color: "bg-success/10 text-success", tabCode: "plans" },
+    keyPositions: { title: t("succession.tabs.keyPositions"), description: t("succession.keyPositions.description"), href: "/succession/key-positions", icon: AlertTriangle, color: "bg-destructive/10 text-destructive", tabCode: "key-positions" },
+    careerDevelopment: { title: t("succession.tabs.careerDevelopment"), description: t("succession.careerDevelopment.description"), href: "/succession/career-development", icon: BookOpen, color: "bg-warning/10 text-warning", tabCode: "career-development" },
+    careerPaths: { title: t("succession.tabs.careerPaths"), description: t("succession.careerPaths.description"), href: "/succession/career-paths", icon: Route, color: "bg-secondary/50 text-secondary-foreground", tabCode: "career-paths" },
+    mentorship: { title: t("succession.tabs.mentorship"), description: t("succession.mentorship.description"), href: "/succession/mentorship", icon: UserCheck, color: "bg-accent/50 text-accent-foreground", tabCode: "mentorship" },
+    flightRisk: { title: t("succession.tabs.flightRisk"), description: t("succession.flightRisk.description"), href: "/succession/flight-risk", icon: TrendingDown, color: "bg-destructive/10 text-destructive", tabCode: "flight-risk" },
+    benchStrength: { title: t("succession.tabs.benchStrength"), description: t("succession.benchStrength.description"), href: "/succession/bench-strength", icon: Layers, color: "bg-primary/10 text-primary", tabCode: "bench-strength" },
+    analytics: { title: t("succession.tabs.analytics"), description: t("succession.analytics.description"), href: "/succession/analytics", icon: BarChart3, color: "bg-info/10 text-info", tabCode: "analytics" },
+  };
+
+  const filterByAccess = (modules: typeof allModules[keyof typeof allModules][]) =>
+    modules.filter(m => hasTabAccess("succession", m.tabCode));
+
+  const sections: ModuleSection[] = [
+    {
+      titleKey: "succession.groups.talentAssessment",
+      items: filterByAccess([allModules.nineBox, allModules.talentPools]),
+    },
+    {
+      titleKey: "succession.groups.planning",
+      items: filterByAccess([allModules.plans, allModules.keyPositions]),
+    },
+    {
+      titleKey: "succession.groups.development",
+      items: filterByAccess([allModules.careerDevelopment, allModules.careerPaths, allModules.mentorship]),
+    },
+    {
+      titleKey: "succession.groups.riskAnalytics",
+      items: filterByAccess([allModules.flightRisk, allModules.benchStrength, allModules.analytics]),
+    },
+  ];
+
   const statCards = [
     { label: t("succession.stats.highPotentials"), value: highPotentials, icon: TrendingUp, color: "bg-warning/10 text-warning" },
     { label: t("succession.stats.criticalRoles"), value: criticalRoles, icon: AlertTriangle, color: "bg-destructive/10 text-destructive" },
     { label: t("succession.stats.readyNow"), value: readyNow, icon: Target, color: "bg-success/10 text-success" },
     { label: t("succession.stats.inTalentPools"), value: inTalentPools, icon: Users, color: "bg-info/10 text-info" },
   ];
-
-  const successionModules: ModuleCardItem[] = [
-    {
-      title: t("succession.tabs.nineBox"),
-      description: t("succession.nineBox.description"),
-      href: "/succession/nine-box",
-      icon: Grid3X3,
-      color: "bg-primary/10 text-primary",
-      tabCode: "nine-box",
-    },
-    {
-      title: t("succession.tabs.talentPools"),
-      description: t("succession.talentPools.description"),
-      href: "/succession/talent-pools",
-      icon: Users,
-      color: "bg-info/10 text-info",
-      tabCode: "talent-pools",
-    },
-    {
-      title: t("succession.tabs.successionPlans"),
-      description: t("succession.successionPlans.description"),
-      href: "/succession/plans",
-      icon: Target,
-      color: "bg-success/10 text-success",
-      tabCode: "plans",
-    },
-    {
-      title: t("succession.tabs.keyPositions"),
-      description: t("succession.keyPositions.description"),
-      href: "/succession/key-positions",
-      icon: AlertTriangle,
-      color: "bg-destructive/10 text-destructive",
-      tabCode: "key-positions",
-    },
-    {
-      title: t("succession.tabs.careerDevelopment"),
-      description: t("succession.careerDevelopment.description"),
-      href: "/succession/career-development",
-      icon: BookOpen,
-      color: "bg-warning/10 text-warning",
-      tabCode: "career-development",
-    },
-    {
-      title: t("succession.tabs.careerPaths"),
-      description: t("succession.careerPaths.description"),
-      href: "/succession/career-paths",
-      icon: Route,
-      color: "bg-secondary/50 text-secondary-foreground",
-      tabCode: "career-paths",
-    },
-    {
-      title: t("succession.tabs.mentorship"),
-      description: t("succession.mentorship.description"),
-      href: "/succession/mentorship",
-      icon: UserCheck,
-      color: "bg-accent/50 text-accent-foreground",
-      tabCode: "mentorship",
-    },
-    {
-      title: t("succession.tabs.flightRisk"),
-      description: t("succession.flightRisk.description"),
-      href: "/succession/flight-risk",
-      icon: TrendingDown,
-      color: "bg-destructive/10 text-destructive",
-      tabCode: "flight-risk",
-    },
-    {
-      title: t("succession.tabs.benchStrength"),
-      description: t("succession.benchStrength.description"),
-      href: "/succession/bench-strength",
-      icon: Layers,
-      color: "bg-primary/10 text-primary",
-      tabCode: "bench-strength",
-    },
-    {
-      title: t("succession.tabs.analytics"),
-      description: t("succession.analytics.description"),
-      href: "/succession/analytics",
-      icon: BarChart3,
-      color: "bg-info/10 text-info",
-      tabCode: "analytics",
-    },
-  ].filter(module => hasTabAccess("succession", module.tabCode));
 
   return (
     <AppLayout>
@@ -241,10 +193,7 @@ export default function SuccessionDashboardPage() {
           })}
         </div>
 
-        <DraggableModuleCards 
-          modules={successionModules} 
-          preferenceKey="succession_dashboard_order" 
-        />
+        <GroupedModuleCards sections={sections} />
       </div>
     </AppLayout>
   );

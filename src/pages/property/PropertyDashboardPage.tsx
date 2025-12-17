@@ -6,7 +6,7 @@ import { useGranularPermissions } from "@/hooks/useGranularPermissions";
 import { LeaveCompanyFilter, useLeaveCompanyFilter } from "@/components/leave/LeaveCompanyFilter";
 import { DepartmentFilter, useDepartmentFilter } from "@/components/filters/DepartmentFilter";
 import { useLanguage } from "@/hooks/useLanguage";
-import { NavLink } from "react-router-dom";
+import { GroupedModuleCards, ModuleSection } from "@/components/ui/GroupedModuleCards";
 import {
   Package,
   Laptop,
@@ -18,7 +18,6 @@ import {
   Clock,
   AlertTriangle,
   BarChart3,
-  ChevronRight,
 } from "lucide-react";
 
 export default function PropertyDashboardPage() {
@@ -38,63 +37,43 @@ export default function PropertyDashboardPage() {
   const pendingRequests = requests?.filter(req => req.status === 'pending').length || 0;
   const maintenanceDue = maintenance?.filter(m => m.status === 'scheduled').length || 0;
 
+  const allModules = {
+    analytics: { title: t("companyProperty.tabs.analytics"), description: t("companyProperty.modules.analyticsDesc", "View property analytics and insights"), href: "/property/analytics", icon: BarChart3, color: "bg-chart-1/10 text-chart-1", tabCode: "analytics" },
+    assets: { title: t("companyProperty.tabs.assets"), description: t("companyProperty.modules.assetsDesc", "Manage company assets and inventory"), href: "/property/assets", icon: Laptop, color: "bg-chart-2/10 text-chart-2", tabCode: "assets" },
+    categories: { title: t("companyProperty.tabs.categories"), description: t("companyProperty.modules.categoriesDesc", "Organize assets by category"), href: "/property/categories", icon: FolderOpen, color: "bg-primary/10 text-primary", tabCode: "categories" },
+    assignments: { title: t("companyProperty.tabs.assignments"), description: t("companyProperty.modules.assignmentsDesc", "Track asset assignments to employees"), href: "/property/assignments", icon: Users, color: "bg-chart-3/10 text-chart-3", tabCode: "assignments" },
+    requests: { title: t("companyProperty.tabs.requests"), description: t("companyProperty.modules.requestsDesc", "Handle property requests from employees"), href: "/property/requests", icon: Clipboard, color: "bg-chart-4/10 text-chart-4", tabCode: "requests" },
+    maintenance: { title: t("companyProperty.tabs.maintenance"), description: t("companyProperty.modules.maintenanceDesc", "Schedule and track maintenance tasks"), href: "/property/maintenance", icon: Wrench, color: "bg-chart-5/10 text-chart-5", tabCode: "maintenance" },
+  };
+
+  const filterByAccess = (modules: typeof allModules[keyof typeof allModules][]) =>
+    modules.filter(m => hasTabAccess("property", m.tabCode));
+
+  const sections: ModuleSection[] = [
+    {
+      titleKey: "property.groups.inventory",
+      items: filterByAccess([allModules.assets, allModules.categories]),
+    },
+    {
+      titleKey: "property.groups.allocation",
+      items: filterByAccess([allModules.assignments, allModules.requests]),
+    },
+    {
+      titleKey: "property.groups.maintenance",
+      items: filterByAccess([allModules.maintenance]),
+    },
+    {
+      titleKey: "property.groups.analytics",
+      items: filterByAccess([allModules.analytics]),
+    },
+  ];
+
   const statCards = [
     { label: t("companyProperty.stats.totalAssets"), value: totalAssets, icon: Package, color: "bg-primary/10 text-primary" },
     { label: t("companyProperty.stats.assigned"), value: assignedAssets, icon: CheckCircle, color: "bg-success/10 text-success" },
     { label: t("companyProperty.stats.pendingRequests"), value: pendingRequests, icon: Clock, color: "bg-warning/10 text-warning" },
     { label: t("companyProperty.stats.maintenanceDue"), value: maintenanceDue, icon: AlertTriangle, color: "bg-destructive/10 text-destructive" },
   ];
-
-  const propertyModules = [
-    {
-      title: t("companyProperty.tabs.analytics"),
-      description: t("companyProperty.modules.analyticsDesc", "View property analytics and insights"),
-      href: "/property/analytics",
-      icon: BarChart3,
-      color: "text-chart-1",
-      tabCode: "analytics",
-    },
-    {
-      title: t("companyProperty.tabs.assets"),
-      description: t("companyProperty.modules.assetsDesc", "Manage company assets and inventory"),
-      href: "/property/assets",
-      icon: Laptop,
-      color: "text-chart-2",
-      tabCode: "assets",
-    },
-    {
-      title: t("companyProperty.tabs.assignments"),
-      description: t("companyProperty.modules.assignmentsDesc", "Track asset assignments to employees"),
-      href: "/property/assignments",
-      icon: Users,
-      color: "text-chart-3",
-      tabCode: "assignments",
-    },
-    {
-      title: t("companyProperty.tabs.requests"),
-      description: t("companyProperty.modules.requestsDesc", "Handle property requests from employees"),
-      href: "/property/requests",
-      icon: Clipboard,
-      color: "text-chart-4",
-      tabCode: "requests",
-    },
-    {
-      title: t("companyProperty.tabs.maintenance"),
-      description: t("companyProperty.modules.maintenanceDesc", "Schedule and track maintenance tasks"),
-      href: "/property/maintenance",
-      icon: Wrench,
-      color: "text-chart-5",
-      tabCode: "maintenance",
-    },
-    {
-      title: t("companyProperty.tabs.categories"),
-      description: t("companyProperty.modules.categoriesDesc", "Organize assets by category"),
-      href: "/property/categories",
-      icon: FolderOpen,
-      color: "text-primary",
-      tabCode: "categories",
-    },
-  ].filter(module => hasTabAccess("property", module.tabCode));
 
   return (
     <AppLayout>
@@ -154,32 +133,7 @@ export default function PropertyDashboardPage() {
           })}
         </div>
 
-        {/* Module Navigation Cards */}
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {propertyModules.map((module) => {
-            const Icon = module.icon;
-            return (
-              <NavLink
-                key={module.href}
-                to={module.href}
-                className="group rounded-xl border border-border bg-card p-6 shadow-card transition-all hover:shadow-lg hover:border-primary/50"
-              >
-                <div className="flex items-start justify-between">
-                  <div className={`rounded-lg p-3 bg-muted ${module.color}`}>
-                    <Icon className="h-6 w-6" />
-                  </div>
-                  <ChevronRight className="h-5 w-5 text-muted-foreground transition-transform group-hover:translate-x-1" />
-                </div>
-                <h3 className="mt-4 text-lg font-semibold text-card-foreground">
-                  {module.title}
-                </h3>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  {module.description}
-                </p>
-              </NavLink>
-            );
-          })}
-        </div>
+        <GroupedModuleCards sections={sections} />
       </div>
     </AppLayout>
   );

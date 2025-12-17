@@ -12,6 +12,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { useTranslation } from "react-i18next";
+import { GroupedModuleCards, ModuleSection } from "@/components/ui/GroupedModuleCards";
 import {
   DollarSign,
   Wallet,
@@ -32,7 +33,6 @@ import {
   CalendarIcon,
   ListOrdered,
 } from "lucide-react";
-import { DraggableModuleCards, ModuleCardItem } from "@/components/ui/DraggableModuleCards";
 
 export default function CompensationDashboardPage() {
   const { t } = useTranslation();
@@ -41,23 +41,45 @@ export default function CompensationDashboardPage() {
   const [asOfDate, setAsOfDate] = useState<Date>(new Date());
   const stats = useCompensationStats(selectedCompanyId, asOfDate);
 
-  const compensationModules = [
-    { title: t("compensation.modules.payElements.title"), description: t("compensation.modules.payElements.description"), href: "/compensation/pay-elements", icon: Coins, color: "bg-primary/10 text-primary", tabCode: "pay_elements" },
-    { title: t("compensation.modules.salaryGrades.title"), description: t("compensation.modules.salaryGrades.description"), href: "/compensation/salary-grades", icon: Layers, color: "bg-emerald-500/10 text-emerald-600", tabCode: "salary_grades" },
-    { title: t("compensation.modules.spinalPoints.title"), description: t("compensation.modules.spinalPoints.description"), href: "/compensation/spinal-points", icon: ListOrdered, color: "bg-slate-500/10 text-slate-600", tabCode: "spinal_points" },
-    { title: t("compensation.modules.positionCompensation.title"), description: t("compensation.modules.positionCompensation.description"), href: "/compensation/position-compensation", icon: Wallet, color: "bg-sky-500/10 text-sky-600", tabCode: "position_compensation" },
-    { title: t("compensation.modules.employeeCompensation.title"), description: t("compensation.modules.employeeCompensation.description"), href: "/compensation/employee-compensation", icon: Users, color: "bg-blue-500/10 text-blue-600", tabCode: "employee_compensation" },
-    { title: t("compensation.modules.history.title"), description: t("compensation.modules.history.description"), href: "/compensation/history", icon: History, color: "bg-violet-500/10 text-violet-600", tabCode: "history" },
-    { title: t("compensation.modules.meritCycles.title"), description: t("compensation.modules.meritCycles.description"), href: "/compensation/merit-cycles", icon: Award, color: "bg-amber-500/10 text-amber-600", tabCode: "merit_cycles" },
-    { title: t("compensation.modules.bonus.title"), description: t("compensation.modules.bonus.description"), href: "/compensation/bonus", icon: Gift, color: "bg-rose-500/10 text-rose-600", tabCode: "bonus" },
-    { title: t("compensation.modules.marketBenchmarking.title"), description: t("compensation.modules.marketBenchmarking.description"), href: "/compensation/market-benchmarking", icon: BarChart3, color: "bg-indigo-500/10 text-indigo-600", tabCode: "market_benchmarking" },
-    { title: t("compensation.modules.compaRatio.title"), description: t("compensation.modules.compaRatio.description"), href: "/compensation/compa-ratio", icon: Target, color: "bg-teal-500/10 text-teal-600", tabCode: "compa_ratio" },
-    { title: t("compensation.modules.payEquity.title"), description: t("compensation.modules.payEquity.description"), href: "/compensation/pay-equity", icon: Scale, color: "bg-pink-500/10 text-pink-600", tabCode: "pay_equity" },
-    { title: t("compensation.modules.totalRewards.title"), description: t("compensation.modules.totalRewards.description"), href: "/compensation/total-rewards", icon: Receipt, color: "bg-cyan-500/10 text-cyan-600", tabCode: "total_rewards" },
-    { title: t("compensation.modules.budgets.title"), description: t("compensation.modules.budgets.description"), href: "/compensation/budgets", icon: PiggyBank, color: "bg-orange-500/10 text-orange-600", tabCode: "budgets" },
-    { title: t("compensation.modules.equity.title"), description: t("compensation.modules.equity.description"), href: "/compensation/equity", icon: Gem, color: "bg-fuchsia-500/10 text-fuchsia-600", tabCode: "equity" },
-    { title: t("compensation.modules.analytics.title"), description: t("compensation.modules.analytics.description"), href: "/compensation/analytics", icon: TrendingUp, color: "bg-lime-500/10 text-lime-600", tabCode: "analytics" },
-  ].filter(m => hasTabAccess("compensation", m.tabCode));
+  const allModules = {
+    payElements: { title: t("compensation.modules.payElements.title"), description: t("compensation.modules.payElements.description"), href: "/compensation/pay-elements", icon: Coins, color: "bg-primary/10 text-primary", tabCode: "pay_elements" },
+    salaryGrades: { title: t("compensation.modules.salaryGrades.title"), description: t("compensation.modules.salaryGrades.description"), href: "/compensation/salary-grades", icon: Layers, color: "bg-emerald-500/10 text-emerald-600", tabCode: "salary_grades" },
+    spinalPoints: { title: t("compensation.modules.spinalPoints.title"), description: t("compensation.modules.spinalPoints.description"), href: "/compensation/spinal-points", icon: ListOrdered, color: "bg-slate-500/10 text-slate-600", tabCode: "spinal_points" },
+    positionCompensation: { title: t("compensation.modules.positionCompensation.title"), description: t("compensation.modules.positionCompensation.description"), href: "/compensation/position-compensation", icon: Wallet, color: "bg-sky-500/10 text-sky-600", tabCode: "position_compensation" },
+    employeeCompensation: { title: t("compensation.modules.employeeCompensation.title"), description: t("compensation.modules.employeeCompensation.description"), href: "/compensation/employee-compensation", icon: Users, color: "bg-blue-500/10 text-blue-600", tabCode: "employee_compensation" },
+    history: { title: t("compensation.modules.history.title"), description: t("compensation.modules.history.description"), href: "/compensation/history", icon: History, color: "bg-violet-500/10 text-violet-600", tabCode: "history" },
+    meritCycles: { title: t("compensation.modules.meritCycles.title"), description: t("compensation.modules.meritCycles.description"), href: "/compensation/merit-cycles", icon: Award, color: "bg-amber-500/10 text-amber-600", tabCode: "merit_cycles" },
+    bonus: { title: t("compensation.modules.bonus.title"), description: t("compensation.modules.bonus.description"), href: "/compensation/bonus", icon: Gift, color: "bg-rose-500/10 text-rose-600", tabCode: "bonus" },
+    marketBenchmarking: { title: t("compensation.modules.marketBenchmarking.title"), description: t("compensation.modules.marketBenchmarking.description"), href: "/compensation/market-benchmarking", icon: BarChart3, color: "bg-indigo-500/10 text-indigo-600", tabCode: "market_benchmarking" },
+    compaRatio: { title: t("compensation.modules.compaRatio.title"), description: t("compensation.modules.compaRatio.description"), href: "/compensation/compa-ratio", icon: Target, color: "bg-teal-500/10 text-teal-600", tabCode: "compa_ratio" },
+    payEquity: { title: t("compensation.modules.payEquity.title"), description: t("compensation.modules.payEquity.description"), href: "/compensation/pay-equity", icon: Scale, color: "bg-pink-500/10 text-pink-600", tabCode: "pay_equity" },
+    totalRewards: { title: t("compensation.modules.totalRewards.title"), description: t("compensation.modules.totalRewards.description"), href: "/compensation/total-rewards", icon: Receipt, color: "bg-cyan-500/10 text-cyan-600", tabCode: "total_rewards" },
+    budgets: { title: t("compensation.modules.budgets.title"), description: t("compensation.modules.budgets.description"), href: "/compensation/budgets", icon: PiggyBank, color: "bg-orange-500/10 text-orange-600", tabCode: "budgets" },
+    equity: { title: t("compensation.modules.equity.title"), description: t("compensation.modules.equity.description"), href: "/compensation/equity", icon: Gem, color: "bg-fuchsia-500/10 text-fuchsia-600", tabCode: "equity" },
+    analytics: { title: t("compensation.modules.analytics.title"), description: t("compensation.modules.analytics.description"), href: "/compensation/analytics", icon: TrendingUp, color: "bg-lime-500/10 text-lime-600", tabCode: "analytics" },
+  };
+
+  const filterByAccess = (modules: typeof allModules[keyof typeof allModules][]) =>
+    modules.filter(m => hasTabAccess("compensation", m.tabCode));
+
+  const sections: ModuleSection[] = [
+    {
+      titleKey: "compensation.groups.payStructure",
+      items: filterByAccess([allModules.payElements, allModules.salaryGrades, allModules.spinalPoints]),
+    },
+    {
+      titleKey: "compensation.groups.employeePay",
+      items: filterByAccess([allModules.positionCompensation, allModules.employeeCompensation, allModules.history]),
+    },
+    {
+      titleKey: "compensation.groups.incentives",
+      items: filterByAccess([allModules.meritCycles, allModules.bonus, allModules.equity]),
+    },
+    {
+      titleKey: "compensation.groups.analyticsBenchmarking",
+      items: filterByAccess([allModules.marketBenchmarking, allModules.compaRatio, allModules.payEquity, allModules.totalRewards, allModules.budgets, allModules.analytics]),
+    },
+  ];
 
   function formatCurrency(value: number): string {
     if (value >= 1000000) {
@@ -160,10 +182,7 @@ export default function CompensationDashboardPage() {
           })}
         </div>
 
-        <DraggableModuleCards 
-          modules={compensationModules} 
-          preferenceKey="compensation_dashboard_order" 
-        />
+        <GroupedModuleCards sections={sections} />
       </div>
     </AppLayout>
   );

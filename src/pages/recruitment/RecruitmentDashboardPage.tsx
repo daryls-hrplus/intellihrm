@@ -1,5 +1,4 @@
 import { AppLayout } from "@/components/layout/AppLayout";
-import { NavLink } from "react-router-dom";
 import { ModuleReportsButton } from "@/components/reports/ModuleReportsButton";
 import { ModuleBIButton } from "@/components/bi/ModuleBIButton";
 import { useLanguage } from "@/hooks/useLanguage";
@@ -9,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { startOfMonth, startOfDay, endOfDay } from "date-fns";
 import { LeaveCompanyFilter, useLeaveCompanyFilter } from "@/components/leave/LeaveCompanyFilter";
 import { DepartmentFilter, useDepartmentFilter } from "@/components/filters/DepartmentFilter";
+import { GroupedModuleCards, ModuleSection } from "@/components/ui/GroupedModuleCards";
 import {
   UserPlus,
   Briefcase,
@@ -25,7 +25,6 @@ import {
   TrendingUp,
   Settings,
 } from "lucide-react";
-import { DraggableModuleCards, ModuleCardItem } from "@/components/ui/DraggableModuleCards";
 
 export default function RecruitmentDashboardPage() {
   const { t } = useLanguage();
@@ -33,114 +32,44 @@ export default function RecruitmentDashboardPage() {
   const { selectedCompanyId, setSelectedCompanyId } = useLeaveCompanyFilter();
   const { selectedDepartmentId, setSelectedDepartmentId } = useDepartmentFilter();
 
-  const recruitmentModules = [
-    {
-      title: t("recruitment.tabs.requisitions"),
-      description: t("recruitment.modules.management.description"),
-      href: "/recruitment/requisitions",
-      icon: Briefcase,
-      color: "bg-primary/10 text-primary",
-      tabCode: "requisitions",
-    },
-    {
-      title: t("recruitment.tabs.candidates"),
-      description: t("recruitment.modules.candidates.description"),
-      href: "/recruitment/candidates",
-      icon: Users,
-      color: "bg-success/10 text-success",
-      tabCode: "candidates",
-    },
-    {
-      title: t("recruitment.tabs.applications"),
-      description: t("recruitment.modules.applications.description"),
-      href: "/recruitment/applications",
-      icon: FileText,
-      color: "bg-info/10 text-info",
-      tabCode: "applications",
-    },
-    {
-      title: t("recruitment.tabs.pipeline"),
-      description: "Visual pipeline view of candidates",
-      href: "/recruitment/pipeline",
-      icon: Calendar,
-      color: "bg-purple-500/10 text-purple-600",
-      tabCode: "pipeline",
-    },
-    {
-      title: t("recruitment.tabs.scorecards"),
-      description: "Interview scorecards and evaluation",
-      href: "/recruitment/scorecards",
-      icon: ClipboardList,
-      color: "bg-orange-500/10 text-orange-600",
-      tabCode: "scorecards",
-    },
-    {
-      title: t("recruitment.tabs.offers"),
-      description: "Job offers and offer letters",
-      href: "/recruitment/offers",
-      icon: Award,
-      color: "bg-green-500/10 text-green-600",
-      tabCode: "offers",
-    },
-    {
-      title: t("recruitment.tabs.referrals"),
-      description: "Employee referral programs",
-      href: "/recruitment/referrals",
-      icon: UserPlus,
-      color: "bg-cyan-500/10 text-cyan-600",
-      tabCode: "referrals",
-    },
-    {
-      title: t("recruitment.tabs.assessments"),
-      description: "Candidate assessments and tests",
-      href: "/recruitment/assessments",
-      icon: FlaskConical,
-      color: "bg-violet-500/10 text-violet-600",
-      tabCode: "assessments",
-    },
-    {
-      title: t("recruitment.tabs.panels"),
-      description: "Interview panels and interviewers",
-      href: "/recruitment/panels",
-      icon: UsersRound,
-      color: "bg-pink-500/10 text-pink-600",
-      tabCode: "panels",
-    },
-    {
-      title: t("recruitment.tabs.templates"),
-      description: "Recruitment email templates",
-      href: "/recruitment/email-templates",
-      icon: Mail,
-      color: "bg-blue-500/10 text-blue-600",
-      tabCode: "email-templates",
-    },
-    {
-      title: t("recruitment.tabs.sources"),
-      description: "Source effectiveness analysis",
-      href: "/recruitment/sources",
-      icon: TrendingUp,
-      color: "bg-amber-500/10 text-amber-600",
-      tabCode: "sources",
-    },
-    {
-      title: t("recruitment.tabs.jobBoards"),
-      description: "Job board integrations",
-      href: "/recruitment/job-boards",
-      icon: Settings,
-      color: "bg-slate-500/10 text-slate-600",
-      tabCode: "job-boards",
-    },
-    {
-      title: t("recruitment.modules.analytics.title"),
-      description: t("recruitment.modules.analytics.description"),
-      href: "/recruitment/analytics",
-      icon: BarChart3,
-      color: "bg-chart-3/10 text-chart-3",
-      tabCode: "analytics",
-    },
-  ].filter(module => hasTabAccess("recruitment", module.tabCode));
+  const allModules = {
+    requisitions: { title: t("recruitment.tabs.requisitions"), description: t("recruitment.modules.management.description"), href: "/recruitment/requisitions", icon: Briefcase, color: "bg-primary/10 text-primary", tabCode: "requisitions" },
+    candidates: { title: t("recruitment.tabs.candidates"), description: t("recruitment.modules.candidates.description"), href: "/recruitment/candidates", icon: Users, color: "bg-success/10 text-success", tabCode: "candidates" },
+    applications: { title: t("recruitment.tabs.applications"), description: t("recruitment.modules.applications.description"), href: "/recruitment/applications", icon: FileText, color: "bg-info/10 text-info", tabCode: "applications" },
+    pipeline: { title: t("recruitment.tabs.pipeline"), description: "Visual pipeline view of candidates", href: "/recruitment/pipeline", icon: Calendar, color: "bg-purple-500/10 text-purple-600", tabCode: "pipeline" },
+    scorecards: { title: t("recruitment.tabs.scorecards"), description: "Interview scorecards and evaluation", href: "/recruitment/scorecards", icon: ClipboardList, color: "bg-orange-500/10 text-orange-600", tabCode: "scorecards" },
+    offers: { title: t("recruitment.tabs.offers"), description: "Job offers and offer letters", href: "/recruitment/offers", icon: Award, color: "bg-green-500/10 text-green-600", tabCode: "offers" },
+    referrals: { title: t("recruitment.tabs.referrals"), description: "Employee referral programs", href: "/recruitment/referrals", icon: UserPlus, color: "bg-cyan-500/10 text-cyan-600", tabCode: "referrals" },
+    assessments: { title: t("recruitment.tabs.assessments"), description: "Candidate assessments and tests", href: "/recruitment/assessments", icon: FlaskConical, color: "bg-violet-500/10 text-violet-600", tabCode: "assessments" },
+    panels: { title: t("recruitment.tabs.panels"), description: "Interview panels and interviewers", href: "/recruitment/panels", icon: UsersRound, color: "bg-pink-500/10 text-pink-600", tabCode: "panels" },
+    templates: { title: t("recruitment.tabs.templates"), description: "Recruitment email templates", href: "/recruitment/email-templates", icon: Mail, color: "bg-blue-500/10 text-blue-600", tabCode: "email-templates" },
+    sources: { title: t("recruitment.tabs.sources"), description: "Source effectiveness analysis", href: "/recruitment/sources", icon: TrendingUp, color: "bg-amber-500/10 text-amber-600", tabCode: "sources" },
+    jobBoards: { title: t("recruitment.tabs.jobBoards"), description: "Job board integrations", href: "/recruitment/job-boards", icon: Settings, color: "bg-slate-500/10 text-slate-600", tabCode: "job-boards" },
+    analytics: { title: t("recruitment.modules.analytics.title"), description: t("recruitment.modules.analytics.description"), href: "/recruitment/analytics", icon: BarChart3, color: "bg-chart-3/10 text-chart-3", tabCode: "analytics" },
+  };
 
-  // Fetch open positions count
+  const filterByAccess = (modules: typeof allModules[keyof typeof allModules][]) =>
+    modules.filter(m => hasTabAccess("recruitment", m.tabCode));
+
+  const sections: ModuleSection[] = [
+    {
+      titleKey: "recruitment.groups.coreRecruitment",
+      items: filterByAccess([allModules.requisitions, allModules.candidates, allModules.applications, allModules.pipeline]),
+    },
+    {
+      titleKey: "recruitment.groups.evaluation",
+      items: filterByAccess([allModules.scorecards, allModules.assessments, allModules.panels]),
+    },
+    {
+      titleKey: "recruitment.groups.configuration",
+      items: filterByAccess([allModules.offers, allModules.referrals, allModules.templates, allModules.sources, allModules.jobBoards]),
+    },
+    {
+      titleKey: "recruitment.groups.analytics",
+      items: filterByAccess([allModules.analytics]),
+    },
+  ];
+
   const { data: openPositions = 0 } = useQuery({
     queryKey: ["recruitment-stats-open-positions", selectedCompanyId],
     queryFn: async () => {
@@ -156,7 +85,6 @@ export default function RecruitmentDashboardPage() {
     },
   });
 
-  // Fetch total candidates count (candidates table doesn't have company_id, so we can't filter)
   const { data: totalCandidates = 0 } = useQuery({
     queryKey: ["recruitment-stats-candidates"],
     queryFn: async () => {
@@ -167,12 +95,10 @@ export default function RecruitmentDashboardPage() {
     },
   });
 
-  // Fetch interviews scheduled for today
   const { data: interviewsToday = 0 } = useQuery({
     queryKey: ["recruitment-stats-interviews-today", selectedCompanyId],
     queryFn: async () => {
       const today = new Date();
-      // interview_schedules doesn't have company_id directly, would need to join
       const { count } = await supabase
         .from("interview_schedules")
         .select("*", { count: "exact", head: true })
@@ -183,12 +109,10 @@ export default function RecruitmentDashboardPage() {
     },
   });
 
-  // Fetch hired this month count
   const { data: hiredThisMonth = 0 } = useQuery({
     queryKey: ["recruitment-stats-hired-month", selectedCompanyId],
     queryFn: async () => {
       const monthStart = startOfMonth(new Date());
-      // applications doesn't have company_id directly
       const { count } = await supabase
         .from("applications")
         .select("*", { count: "exact", head: true })
@@ -199,10 +123,10 @@ export default function RecruitmentDashboardPage() {
   });
 
   const statCards = [
-    { label: t("recruitment.stats.openPositions"), value: openPositions, icon: Briefcase, color: "bg-primary/10 text-primary", href: "/recruitment/manage?tab=requisitions" },
-    { label: t("recruitment.stats.totalCandidates"), value: totalCandidates, icon: Users, color: "bg-info/10 text-info", href: "/recruitment/manage?tab=candidates" },
-    { label: t("recruitment.stats.interviewsToday"), value: interviewsToday, icon: Calendar, color: "bg-warning/10 text-warning", href: "/recruitment/manage?tab=applications" },
-    { label: t("recruitment.stats.hiredThisMonth"), value: hiredThisMonth, icon: CheckCircle, color: "bg-success/10 text-success", href: "/recruitment/manage?tab=applications" },
+    { label: t("recruitment.stats.openPositions"), value: openPositions, icon: Briefcase, color: "bg-primary/10 text-primary" },
+    { label: t("recruitment.stats.totalCandidates"), value: totalCandidates, icon: Users, color: "bg-info/10 text-info" },
+    { label: t("recruitment.stats.interviewsToday"), value: interviewsToday, icon: Calendar, color: "bg-warning/10 text-warning" },
+    { label: t("recruitment.stats.hiredThisMonth"), value: hiredThisMonth, icon: CheckCircle, color: "bg-success/10 text-success" },
   ];
 
   return (
@@ -244,10 +168,9 @@ export default function RecruitmentDashboardPage() {
           {statCards.map((stat, index) => {
             const Icon = stat.icon;
             return (
-              <NavLink
+              <div
                 key={stat.label}
-                to={stat.href}
-                className="rounded-xl border border-border bg-card p-5 shadow-card transition-all hover:shadow-card-hover hover:border-primary/20"
+                className="rounded-xl border border-border bg-card p-5 shadow-card"
                 style={{ animationDelay: `${index * 50}ms` }}
               >
                 <div className="flex items-center justify-between">
@@ -259,15 +182,12 @@ export default function RecruitmentDashboardPage() {
                     <Icon className="h-5 w-5" />
                   </div>
                 </div>
-              </NavLink>
+              </div>
             );
           })}
         </div>
 
-        <DraggableModuleCards 
-          modules={recruitmentModules} 
-          preferenceKey="recruitment_dashboard_order" 
-        />
+        <GroupedModuleCards sections={sections} />
       </div>
     </AppLayout>
   );
