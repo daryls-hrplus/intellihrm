@@ -11,7 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { Plus, Pencil, Trash2, ShieldCheck, CheckCircle, XCircle, Clock } from "lucide-react";
-import { format } from "date-fns";
+import { getTodayString, formatDateForDisplay } from "@/utils/dateUtils";
 
 interface BackgroundCheck {
   id: string;
@@ -54,14 +54,14 @@ export function EmployeeBackgroundChecksTab({ employeeId }: EmployeeBackgroundCh
     defaultValues: {
       check_type: "criminal",
       provider: "",
-      requested_date: new Date().toISOString().split("T")[0],
+      requested_date: getTodayString(),
       completed_date: "",
       status: "pending",
       result: "",
       reference_number: "",
       expiry_date: "",
       notes: "",
-      start_date: new Date().toISOString().split("T")[0],
+      start_date: getTodayString(),
       end_date: "",
     },
   });
@@ -137,7 +137,7 @@ export function EmployeeBackgroundChecksTab({ employeeId }: EmployeeBackgroundCh
       reference_number: check.reference_number || "",
       expiry_date: check.expiry_date || "",
       notes: check.notes || "",
-      start_date: check.start_date || new Date().toISOString().split("T")[0],
+      start_date: check.start_date || getTodayString(),
       end_date: check.end_date || "",
     });
     setDialogOpen(true);
@@ -158,14 +158,14 @@ export function EmployeeBackgroundChecksTab({ employeeId }: EmployeeBackgroundCh
     form.reset({
       check_type: "criminal",
       provider: "",
-      requested_date: new Date().toISOString().split("T")[0],
+      requested_date: getTodayString(),
       completed_date: "",
       status: "pending",
       result: "",
       reference_number: "",
       expiry_date: "",
       notes: "",
-      start_date: new Date().toISOString().split("T")[0],
+      start_date: getTodayString(),
       end_date: "",
     });
     setDialogOpen(true);
@@ -451,12 +451,12 @@ export function EmployeeBackgroundChecksTab({ employeeId }: EmployeeBackgroundCh
                 <div className="grid grid-cols-2 gap-2 text-sm">
                   <div>
                     <span className="text-muted-foreground">Requested:</span>{" "}
-                    {format(new Date(check.requested_date), "MMM d, yyyy")}
+                    {formatDateForDisplay(check.requested_date)}
                   </div>
                   {check.completed_date && (
                     <div>
                       <span className="text-muted-foreground">Completed:</span>{" "}
-                      {format(new Date(check.completed_date), "MMM d, yyyy")}
+                      {formatDateForDisplay(check.completed_date)}
                     </div>
                   )}
                   {check.provider && (

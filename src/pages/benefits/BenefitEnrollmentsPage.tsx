@@ -14,6 +14,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { Plus, Pencil, Check, X, UserCheck } from "lucide-react";
+import { getTodayString } from "@/utils/dateUtils";
 
 interface BenefitEnrollment {
   id: string;
@@ -72,8 +73,8 @@ export default function BenefitEnrollmentsPage() {
   const [formData, setFormData] = useState({
     employee_id: "",
     plan_id: "",
-    enrollment_date: new Date().toISOString().split('T')[0],
-    effective_date: new Date().toISOString().split('T')[0],
+    enrollment_date: getTodayString(),
+    effective_date: getTodayString(),
     termination_date: "",
     status: "pending",
     enrollment_source: "open",
@@ -215,8 +216,8 @@ export default function BenefitEnrollmentsPage() {
     setFormData({
       employee_id: employees[0]?.id || "",
       plan_id: defaultPlan?.id || "",
-      enrollment_date: new Date().toISOString().split('T')[0],
-      effective_date: new Date().toISOString().split('T')[0],
+      enrollment_date: getTodayString(),
+      effective_date: getTodayString(),
       termination_date: "",
       status: "pending",
       enrollment_source: "open",

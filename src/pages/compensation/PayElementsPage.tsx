@@ -35,6 +35,7 @@ import { Coins, Plus, Pencil, Trash2, Loader2 } from "lucide-react";
 import { useCompensation, PayElement, LookupValue } from "@/hooks/useCompensation";
 import { supabase } from "@/integrations/supabase/client";
 import { useTranslation } from "react-i18next";
+import { getTodayString } from "@/utils/dateUtils";
 
 interface Company {
   id: string;
@@ -72,7 +73,7 @@ export default function PayElementsPage() {
   const [formIsPensionable, setFormIsPensionable] = useState(false);
   const [formIsActive, setFormIsActive] = useState(true);
   const [formDisplayOrder, setFormDisplayOrder] = useState("0");
-  const [formStartDate, setFormStartDate] = useState(new Date().toISOString().split("T")[0]);
+  const [formStartDate, setFormStartDate] = useState(getTodayString());
   const [formEndDate, setFormEndDate] = useState("");
 
   useEffect(() => {
@@ -121,7 +122,7 @@ export default function PayElementsPage() {
     setFormIsPensionable(false);
     setFormIsActive(true);
     setFormDisplayOrder("0");
-    setFormStartDate(new Date().toISOString().split("T")[0]);
+    setFormStartDate(getTodayString());
     setFormEndDate("");
     setDialogOpen(true);
   };
@@ -137,7 +138,7 @@ export default function PayElementsPage() {
     setFormIsPensionable(element.is_pensionable);
     setFormIsActive(element.is_active);
     setFormDisplayOrder(element.display_order.toString());
-    setFormStartDate(element.start_date || new Date().toISOString().split("T")[0]);
+    setFormStartDate(element.start_date || getTodayString());
     setFormEndDate(element.end_date || "");
     setDialogOpen(true);
   };

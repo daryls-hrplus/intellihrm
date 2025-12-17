@@ -41,7 +41,7 @@ import {
   ChevronDown,
   ChevronRight,
 } from "lucide-react";
-import { format } from "date-fns";
+import { getTodayString, formatDateForDisplay } from "@/utils/dateUtils";
 import { NavLink } from "react-router-dom";
 
 const riskLevels = [
@@ -130,7 +130,7 @@ export default function HSERiskAssessmentPage() {
       setFormData({
         company_id: companyId,
         status: "draft",
-        assessment_date: format(new Date(), "yyyy-MM-dd"),
+        assessment_date: getTodayString(),
       });
     }
     setDialogOpen(true);
@@ -305,11 +305,11 @@ export default function HSERiskAssessmentPage() {
                           {getRiskBadge(assessment.overall_risk_level)}
                         </TableCell>
                         <TableCell onClick={() => handleOpenDialog(assessment)}>
-                          {format(new Date(assessment.assessment_date), "MMM d, yyyy")}
+                          {formatDateForDisplay(assessment.assessment_date)}
                         </TableCell>
                         <TableCell onClick={() => handleOpenDialog(assessment)}>
                           {assessment.review_date
-                            ? format(new Date(assessment.review_date), "MMM d, yyyy")
+                            ? formatDateForDisplay(assessment.review_date)
                             : "-"}
                         </TableCell>
                         <TableCell onClick={() => handleOpenDialog(assessment)}>

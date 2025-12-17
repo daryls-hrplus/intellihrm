@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
+import { getTodayString } from "@/utils/dateUtils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -395,7 +396,7 @@ export default function AdminAccessRequestsPage() {
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
-      link.download = `access-requests-${new Date().toISOString().split("T")[0]}.csv`;
+      link.download = `access-requests-${getTodayString()}.csv`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);

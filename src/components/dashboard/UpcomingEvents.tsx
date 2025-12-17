@@ -4,7 +4,8 @@ import { Calendar, Users, GraduationCap, PartyPopper, Megaphone, Loader2 } from 
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { format, isToday, isTomorrow, parseISO } from "date-fns";
+import { format, isToday, isTomorrow } from "date-fns";
+import { getTodayString, parseLocalDate } from "@/utils/dateUtils";
 
 const EVENT_ICONS: Record<string, { icon: React.ElementType; color: string }> = {
   meeting: { icon: Users, color: "bg-primary/10 text-primary border-primary/20" },
@@ -22,7 +23,7 @@ export function UpcomingEvents() {
   const { data: events, isLoading } = useQuery({
     queryKey: ["upcoming-events", company?.id],
     queryFn: async () => {
-      const today = new Date().toISOString().split("T")[0];
+      const today = getTodayString();
       
       // Fetch calendar events
       const { data: calendarEvents, error: calendarError } = await supabase
@@ -76,7 +77,7 @@ export function UpcomingEvents() {
   });
 
   const formatEventDate = (dateStr: string, time: string | null, allDay: boolean) => {
-    const date = parseISO(dateStr);
+    const date = parseLocalDate(dateStr);
     
     if (isToday(date)) {
       return time && !allDay ? `Today, ${time}` : "Today";

@@ -11,6 +11,7 @@ import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { Plus, Pencil, Trash2, Users } from "lucide-react";
+import { getTodayString } from "@/utils/dateUtils";
 
 interface Beneficiary {
   id: string;
@@ -62,7 +63,7 @@ export function EmployeeBeneficiariesTab({ employeeId }: EmployeeBeneficiariesTa
       percentage: 100,
       is_primary: false,
       beneficiary_type: "primary",
-      effective_date: new Date().toISOString().split("T")[0],
+      effective_date: getTodayString(),
       end_date: "",
     },
   });
@@ -172,7 +173,7 @@ export function EmployeeBeneficiariesTab({ employeeId }: EmployeeBeneficiariesTa
       percentage: 100,
       is_primary: beneficiaries.length === 0,
       beneficiary_type: "primary",
-      effective_date: new Date().toISOString().split("T")[0],
+      effective_date: getTodayString(),
       end_date: "",
     });
     setDialogOpen(true);

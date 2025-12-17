@@ -13,6 +13,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
+import { getTodayString } from "@/utils/dateUtils";
 import { 
   Activity, 
   TrendingUp, 
@@ -284,7 +285,7 @@ export function MonteCarloSimulation({ scenarios, currentHeadcount }: MonteCarlo
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    link.download = `monte-carlo-simulation-${new Date().toISOString().split("T")[0]}.csv`;
+    link.download = `monte-carlo-simulation-${getTodayString()}.csv`;
     link.click();
     URL.revokeObjectURL(url);
     toast.success("CSV exported successfully");
