@@ -16,6 +16,7 @@ import {
   AlertTriangle, Shield, TrendingUp, Users, CheckCircle, Clock, 
   BarChart3, Activity, HeartPulse, HardHat 
 } from "lucide-react";
+import { AIModuleReportBuilder } from "@/components/shared/AIModuleReportBuilder";
 
 const COLORS = ["#10b981", "#f59e0b", "#ef4444", "#6366f1", "#8b5cf6", "#ec4899"];
 
@@ -189,6 +190,8 @@ export default function HSEAnalyticsPage() {
             <TabsTrigger value="incidents">{t("hseModule.analytics.tabs.incidents")}</TabsTrigger>
             <TabsTrigger value="training">{t("hseModule.analytics.tabs.training")}</TabsTrigger>
             <TabsTrigger value="observations">{t("hseModule.analytics.tabs.observations")}</TabsTrigger>
+            <TabsTrigger value="ai-banded">{t("reports.aiBandedReports")}</TabsTrigger>
+            <TabsTrigger value="ai-bi">{t("reports.aiBIReports")}</TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="space-y-4">
@@ -412,6 +415,14 @@ export default function HSEAnalyticsPage() {
                 </CardContent>
               </Card>
             </div>
+          </TabsContent>
+
+          <TabsContent value="ai-banded">
+            <AIModuleReportBuilder moduleName="hse" reportType="banded" companyId={selectedCompanyId !== "all" ? selectedCompanyId : undefined} />
+          </TabsContent>
+
+          <TabsContent value="ai-bi">
+            <AIModuleReportBuilder moduleName="hse" reportType="bi" companyId={selectedCompanyId !== "all" ? selectedCompanyId : undefined} />
           </TabsContent>
         </Tabs>
       </div>

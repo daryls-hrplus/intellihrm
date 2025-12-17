@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { BarChart3, DollarSign, TrendingUp, Users, Award, Target, ChevronRight, Building2 } from "lucide-react";
@@ -9,6 +10,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useState } from "react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 import { useTranslation } from "react-i18next";
+import { AIModuleReportBuilder } from "@/components/shared/AIModuleReportBuilder";
 
 const COLORS = ["hsl(var(--primary))", "hsl(var(--chart-2))", "hsl(var(--chart-3))", "hsl(var(--chart-4))", "hsl(var(--chart-5))"];
 
@@ -129,11 +131,29 @@ export default function CompensationAnalyticsPage() {
           <Card><CardContent className="pt-6"><div className="flex items-center gap-4"><div className="rounded-lg bg-amber-500/10 p-3"><Users className="h-5 w-5 text-amber-600" /></div><div><p className="text-sm text-muted-foreground">{t("compensation.analytics.salaryChanges")}</p>{isLoading ? <Skeleton className="h-8 w-24" /> : <p className="text-2xl font-bold">{history.length}</p>}</div></div></CardContent></Card>
         </div>
 
-        <div className="grid gap-6 lg:grid-cols-2">
-          <Card><CardHeader><CardTitle>{t("compensation.analytics.salaryChangesByType")}</CardTitle></CardHeader><CardContent>{isLoading ? <Skeleton className="h-[300px] w-full" /> : <ResponsiveContainer width="100%" height={300}><BarChart data={changeTypeData}><CartesianGrid strokeDasharray="3 3" className="stroke-muted" /><XAxis dataKey="name" className="text-xs" /><YAxis className="text-xs" /><Tooltip /><Bar dataKey="count" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} /></BarChart></ResponsiveContainer>}</CardContent></Card>
-          <Card><CardHeader><CardTitle>{t("compensation.analytics.bonusDistribution")}</CardTitle></CardHeader><CardContent>{isLoading ? <Skeleton className="h-[300px] w-full" /> : <ResponsiveContainer width="100%" height={300}><PieChart><Pie data={bonusTypeData} cx="50%" cy="50%" labelLine={false} label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`} outerRadius={100} fill="#8884d8" dataKey="value">{bonusTypeData.map((entry: any, index: number) => <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />)}</Pie><Tooltip formatter={(value: number) => `$${value.toLocaleString()}`} /></PieChart></ResponsiveContainer>}</CardContent></Card>
-          <Card className="lg:col-span-2"><CardHeader><CardTitle>{t("compensation.analytics.compaRatioDistribution")}</CardTitle></CardHeader><CardContent>{isLoading ? <Skeleton className="h-[300px] w-full" /> : <ResponsiveContainer width="100%" height={300}><BarChart data={compaDistribution}><CartesianGrid strokeDasharray="3 3" className="stroke-muted" /><XAxis dataKey="name" className="text-xs" /><YAxis className="text-xs" /><Tooltip /><Bar dataKey="value" fill="hsl(var(--chart-2))" radius={[4, 4, 0, 0]} /></BarChart></ResponsiveContainer>}</CardContent></Card>
-        </div>
+        <Tabs defaultValue="charts" className="space-y-4">
+          <TabsList>
+            <TabsTrigger value="charts">{t("common.charts")}</TabsTrigger>
+            <TabsTrigger value="ai-banded">{t("reports.aiBandedReports")}</TabsTrigger>
+            <TabsTrigger value="ai-bi">{t("reports.aiBIReports")}</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="charts">
+            <div className="grid gap-6 lg:grid-cols-2">
+              <Card><CardHeader><CardTitle>{t("compensation.analytics.salaryChangesByType")}</CardTitle></CardHeader><CardContent>{isLoading ? <Skeleton className="h-[300px] w-full" /> : <ResponsiveContainer width="100%" height={300}><BarChart data={changeTypeData}><CartesianGrid strokeDasharray="3 3" className="stroke-muted" /><XAxis dataKey="name" className="text-xs" /><YAxis className="text-xs" /><Tooltip /><Bar dataKey="count" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} /></BarChart></ResponsiveContainer>}</CardContent></Card>
+              <Card><CardHeader><CardTitle>{t("compensation.analytics.bonusDistribution")}</CardTitle></CardHeader><CardContent>{isLoading ? <Skeleton className="h-[300px] w-full" /> : <ResponsiveContainer width="100%" height={300}><PieChart><Pie data={bonusTypeData} cx="50%" cy="50%" labelLine={false} label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`} outerRadius={100} fill="#8884d8" dataKey="value">{bonusTypeData.map((entry: any, index: number) => <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />)}</Pie><Tooltip formatter={(value: number) => `$${value.toLocaleString()}`} /></PieChart></ResponsiveContainer>}</CardContent></Card>
+              <Card className="lg:col-span-2"><CardHeader><CardTitle>{t("compensation.analytics.compaRatioDistribution")}</CardTitle></CardHeader><CardContent>{isLoading ? <Skeleton className="h-[300px] w-full" /> : <ResponsiveContainer width="100%" height={300}><BarChart data={compaDistribution}><CartesianGrid strokeDasharray="3 3" className="stroke-muted" /><XAxis dataKey="name" className="text-xs" /><YAxis className="text-xs" /><Tooltip /><Bar dataKey="value" fill="hsl(var(--chart-2))" radius={[4, 4, 0, 0]} /></BarChart></ResponsiveContainer>}</CardContent></Card>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="ai-banded">
+            <AIModuleReportBuilder moduleName="compensation" reportType="banded" companyId={companyFilter !== "all" ? companyFilter : undefined} />
+          </TabsContent>
+
+          <TabsContent value="ai-bi">
+            <AIModuleReportBuilder moduleName="compensation" reportType="bi" companyId={companyFilter !== "all" ? companyFilter : undefined} />
+          </TabsContent>
+        </Tabs>
       </div>
     </AppLayout>
   );

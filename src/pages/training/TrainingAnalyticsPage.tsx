@@ -4,9 +4,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/hooks/useLanguage";
 import { TrainingAnalytics } from "@/components/training/TrainingAnalytics";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BarChart3, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { NavLink } from "react-router-dom";
+import { AIModuleReportBuilder } from "@/components/shared/AIModuleReportBuilder";
 
 export default function TrainingAnalyticsPage() {
   const { user } = useAuth();
@@ -45,7 +47,26 @@ export default function TrainingAnalyticsPage() {
             </div>
           </div>
         </div>
-        {companyId && <TrainingAnalytics companyId={companyId} />}
+        
+        <Tabs defaultValue="charts" className="space-y-4">
+          <TabsList>
+            <TabsTrigger value="charts">{t("common.charts")}</TabsTrigger>
+            <TabsTrigger value="ai-banded">{t("reports.aiBandedReports")}</TabsTrigger>
+            <TabsTrigger value="ai-bi">{t("reports.aiBIReports")}</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="charts">
+            {companyId && <TrainingAnalytics companyId={companyId} />}
+          </TabsContent>
+
+          <TabsContent value="ai-banded">
+            <AIModuleReportBuilder moduleName="training" reportType="banded" companyId={companyId || undefined} />
+          </TabsContent>
+
+          <TabsContent value="ai-bi">
+            <AIModuleReportBuilder moduleName="training" reportType="bi" companyId={companyId || undefined} />
+          </TabsContent>
+        </Tabs>
       </div>
     </AppLayout>
   );

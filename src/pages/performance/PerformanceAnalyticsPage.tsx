@@ -4,9 +4,11 @@ import { ModuleBIButton } from "@/components/bi/ModuleBIButton";
 import { PerformanceAnalyticsDashboard } from "@/components/performance/PerformanceAnalyticsDashboard";
 import { LeaveCompanyFilter, useLeaveCompanyFilter } from "@/components/leave/LeaveCompanyFilter";
 import { DepartmentFilter, useDepartmentFilter } from "@/components/filters/DepartmentFilter";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BarChart3, ChevronLeft } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { useLanguage } from "@/hooks/useLanguage";
+import { AIModuleReportBuilder } from "@/components/shared/AIModuleReportBuilder";
 
 export default function PerformanceAnalyticsPage() {
   const { t } = useLanguage();
@@ -55,7 +57,25 @@ export default function PerformanceAnalyticsPage() {
           </div>
         </div>
 
-        {selectedCompanyId && <PerformanceAnalyticsDashboard companyId={selectedCompanyId} />}
+        <Tabs defaultValue="charts" className="space-y-4">
+          <TabsList>
+            <TabsTrigger value="charts">{t("common.charts")}</TabsTrigger>
+            <TabsTrigger value="ai-banded">{t("reports.aiBandedReports")}</TabsTrigger>
+            <TabsTrigger value="ai-bi">{t("reports.aiBIReports")}</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="charts">
+            {selectedCompanyId && <PerformanceAnalyticsDashboard companyId={selectedCompanyId} />}
+          </TabsContent>
+
+          <TabsContent value="ai-banded">
+            <AIModuleReportBuilder moduleName="performance" reportType="banded" companyId={selectedCompanyId !== "all" ? selectedCompanyId : undefined} />
+          </TabsContent>
+
+          <TabsContent value="ai-bi">
+            <AIModuleReportBuilder moduleName="performance" reportType="bi" companyId={selectedCompanyId !== "all" ? selectedCompanyId : undefined} />
+          </TabsContent>
+        </Tabs>
       </div>
     </AppLayout>
   );

@@ -2,11 +2,13 @@ import { useState, useEffect } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/hooks/useLanguage";
 import { supabase } from "@/integrations/supabase/client";
 import { Building2, Loader2 } from "lucide-react";
 import { RecruitmentAnalytics } from "@/components/recruitment/RecruitmentAnalytics";
+import { AIModuleReportBuilder } from "@/components/shared/AIModuleReportBuilder";
 
 interface Company {
   id: string;
@@ -127,22 +129,40 @@ export default function RecruitmentAnalyticsPage() {
           </div>
         </div>
 
-        {!selectedCompanyId ? (
-          <div className="flex items-center justify-center py-20 text-muted-foreground">
-            {t("succession.dashboard.selectCompany")}
-          </div>
-        ) : isLoading ? (
-          <div className="flex items-center justify-center py-20">
-            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-          </div>
-        ) : (
-          <RecruitmentAnalytics
-            requisitions={requisitions}
-            candidates={candidates}
-            applications={applications}
-            isLoading={isLoading}
-          />
-        )}
+        <Tabs defaultValue="charts" className="space-y-4">
+          <TabsList>
+            <TabsTrigger value="charts">{t("common.charts")}</TabsTrigger>
+            <TabsTrigger value="ai-banded">{t("reports.aiBandedReports")}</TabsTrigger>
+            <TabsTrigger value="ai-bi">{t("reports.aiBIReports")}</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="charts">
+            {!selectedCompanyId ? (
+              <div className="flex items-center justify-center py-20 text-muted-foreground">
+                {t("succession.dashboard.selectCompany")}
+              </div>
+            ) : isLoading ? (
+              <div className="flex items-center justify-center py-20">
+                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+              </div>
+            ) : (
+              <RecruitmentAnalytics
+                requisitions={requisitions}
+                candidates={candidates}
+                applications={applications}
+                isLoading={isLoading}
+              />
+            )}
+          </TabsContent>
+
+          <TabsContent value="ai-banded">
+            <AIModuleReportBuilder moduleName="recruitment" reportType="banded" companyId={selectedCompanyId || undefined} />
+          </TabsContent>
+
+          <TabsContent value="ai-bi">
+            <AIModuleReportBuilder moduleName="recruitment" reportType="bi" companyId={selectedCompanyId || undefined} />
+          </TabsContent>
+        </Tabs>
       </div>
     </AppLayout>
   );
