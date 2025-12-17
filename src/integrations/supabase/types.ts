@@ -6740,6 +6740,141 @@ export type Database = {
           },
         ]
       }
+      employee_payroll_archive: {
+        Row: {
+          archived_at: string | null
+          bank_file_generated: boolean | null
+          benefit_deductions: number | null
+          bonus_pay: number | null
+          calculation_details: Json | null
+          commission_pay: number | null
+          created_at: string
+          currency: string
+          employee_id: string
+          employee_position_id: string | null
+          employer_benefits: number | null
+          employer_retirement: number | null
+          employer_taxes: number | null
+          garnishment_deductions: number | null
+          gross_pay: number | null
+          holiday_hours: number | null
+          id: string
+          net_pay: number | null
+          notes: string | null
+          other_deductions: number | null
+          other_earnings: number | null
+          other_hours: number | null
+          overtime_hours: number | null
+          overtime_pay: number | null
+          pay_period_id: string
+          payroll_run_id: string
+          payslip_document_id: string | null
+          payslip_generated: boolean | null
+          payslip_generated_at: string | null
+          regular_hours: number | null
+          regular_pay: number | null
+          retirement_deductions: number | null
+          sick_hours: number | null
+          status: string
+          tax_deductions: number | null
+          total_deductions: number | null
+          total_employer_cost: number | null
+          updated_at: string
+          vacation_hours: number | null
+          ytd_gross_pay: number | null
+          ytd_net_pay: number | null
+          ytd_taxes: number | null
+        }
+        Insert: {
+          archived_at?: string | null
+          bank_file_generated?: boolean | null
+          benefit_deductions?: number | null
+          bonus_pay?: number | null
+          calculation_details?: Json | null
+          commission_pay?: number | null
+          created_at?: string
+          currency?: string
+          employee_id: string
+          employee_position_id?: string | null
+          employer_benefits?: number | null
+          employer_retirement?: number | null
+          employer_taxes?: number | null
+          garnishment_deductions?: number | null
+          gross_pay?: number | null
+          holiday_hours?: number | null
+          id?: string
+          net_pay?: number | null
+          notes?: string | null
+          other_deductions?: number | null
+          other_earnings?: number | null
+          other_hours?: number | null
+          overtime_hours?: number | null
+          overtime_pay?: number | null
+          pay_period_id: string
+          payroll_run_id: string
+          payslip_document_id?: string | null
+          payslip_generated?: boolean | null
+          payslip_generated_at?: string | null
+          regular_hours?: number | null
+          regular_pay?: number | null
+          retirement_deductions?: number | null
+          sick_hours?: number | null
+          status?: string
+          tax_deductions?: number | null
+          total_deductions?: number | null
+          total_employer_cost?: number | null
+          updated_at?: string
+          vacation_hours?: number | null
+          ytd_gross_pay?: number | null
+          ytd_net_pay?: number | null
+          ytd_taxes?: number | null
+        }
+        Update: {
+          archived_at?: string | null
+          bank_file_generated?: boolean | null
+          benefit_deductions?: number | null
+          bonus_pay?: number | null
+          calculation_details?: Json | null
+          commission_pay?: number | null
+          created_at?: string
+          currency?: string
+          employee_id?: string
+          employee_position_id?: string | null
+          employer_benefits?: number | null
+          employer_retirement?: number | null
+          employer_taxes?: number | null
+          garnishment_deductions?: number | null
+          gross_pay?: number | null
+          holiday_hours?: number | null
+          id?: string
+          net_pay?: number | null
+          notes?: string | null
+          other_deductions?: number | null
+          other_earnings?: number | null
+          other_hours?: number | null
+          overtime_hours?: number | null
+          overtime_pay?: number | null
+          pay_period_id?: string
+          payroll_run_id?: string
+          payslip_document_id?: string | null
+          payslip_generated?: boolean | null
+          payslip_generated_at?: string | null
+          regular_hours?: number | null
+          regular_pay?: number | null
+          retirement_deductions?: number | null
+          sick_hours?: number | null
+          status?: string
+          tax_deductions?: number | null
+          total_deductions?: number | null
+          total_employer_cost?: number | null
+          updated_at?: string
+          vacation_hours?: number | null
+          ytd_gross_pay?: number | null
+          ytd_net_pay?: number | null
+          ytd_taxes?: number | null
+        }
+        Relationships: []
+      }
       employee_period_allowances: {
         Row: {
           allowance_code: string | null
@@ -21578,6 +21713,44 @@ export type Database = {
           },
         ]
       }
+      payroll_archive_settings: {
+        Row: {
+          archive_after_months: number
+          auto_archive_enabled: boolean | null
+          company_id: string | null
+          created_at: string | null
+          id: string
+          last_archive_run: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          archive_after_months?: number
+          auto_archive_enabled?: boolean | null
+          company_id?: string | null
+          created_at?: string | null
+          id?: string
+          last_archive_run?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          archive_after_months?: number
+          auto_archive_enabled?: boolean | null
+          company_id?: string | null
+          created_at?: string | null
+          id?: string
+          last_archive_run?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payroll_archive_settings_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: true
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       payroll_audit_log: {
         Row: {
           action: string
@@ -21972,6 +22145,72 @@ export type Database = {
           },
         ]
       }
+      payroll_line_items_archive: {
+        Row: {
+          amount: number
+          archived_at: string | null
+          calculation_basis: string | null
+          code: string
+          created_at: string
+          employee_payroll_id: string
+          hours: number | null
+          id: string
+          is_pensionable: boolean | null
+          is_taxable: boolean | null
+          line_type: string
+          name: string
+          notes: string | null
+          pay_element_id: string | null
+          rate: number | null
+          sort_order: number | null
+          tax_category: string | null
+          units: number | null
+          ytd_amount: number | null
+        }
+        Insert: {
+          amount: number
+          archived_at?: string | null
+          calculation_basis?: string | null
+          code: string
+          created_at?: string
+          employee_payroll_id: string
+          hours?: number | null
+          id?: string
+          is_pensionable?: boolean | null
+          is_taxable?: boolean | null
+          line_type: string
+          name: string
+          notes?: string | null
+          pay_element_id?: string | null
+          rate?: number | null
+          sort_order?: number | null
+          tax_category?: string | null
+          units?: number | null
+          ytd_amount?: number | null
+        }
+        Update: {
+          amount?: number
+          archived_at?: string | null
+          calculation_basis?: string | null
+          code?: string
+          created_at?: string
+          employee_payroll_id?: string
+          hours?: number | null
+          id?: string
+          is_pensionable?: boolean | null
+          is_taxable?: boolean | null
+          line_type?: string
+          name?: string
+          notes?: string | null
+          pay_element_id?: string | null
+          rate?: number | null
+          sort_order?: number | null
+          tax_category?: string | null
+          units?: number | null
+          ytd_amount?: number | null
+        }
+        Relationships: []
+      }
       payroll_rules: {
         Row: {
           break_deduction_minutes: number | null
@@ -22239,6 +22478,141 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      payroll_runs_archive: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          archived_at: string | null
+          base_currency_id: string | null
+          calculated_at: string | null
+          calculated_by: string | null
+          calculation_started_at: string | null
+          company_id: string
+          created_at: string
+          created_by: string | null
+          currency: string
+          employee_count: number | null
+          exchange_rate_date: string | null
+          exchange_rate_to_base: number | null
+          id: string
+          is_locked: boolean | null
+          local_currency_id: string | null
+          locked_at: string | null
+          locked_by: string | null
+          notes: string | null
+          paid_at: string | null
+          paid_by: string | null
+          pay_group_id: string | null
+          pay_period_id: string
+          recalculation_approved_at: string | null
+          recalculation_approved_by: string | null
+          recalculation_requested_by: string | null
+          run_number: string
+          run_type: string
+          status: string
+          total_deductions: number | null
+          total_employer_contributions: number | null
+          total_employer_taxes: number | null
+          total_gross_pay: number | null
+          total_gross_pay_base: number | null
+          total_net_pay: number | null
+          total_net_pay_base: number | null
+          total_taxes: number | null
+          unlocked_at: string | null
+          unlocked_by: string | null
+          updated_at: string
+          workflow_instance_id: string | null
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          archived_at?: string | null
+          base_currency_id?: string | null
+          calculated_at?: string | null
+          calculated_by?: string | null
+          calculation_started_at?: string | null
+          company_id: string
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          employee_count?: number | null
+          exchange_rate_date?: string | null
+          exchange_rate_to_base?: number | null
+          id?: string
+          is_locked?: boolean | null
+          local_currency_id?: string | null
+          locked_at?: string | null
+          locked_by?: string | null
+          notes?: string | null
+          paid_at?: string | null
+          paid_by?: string | null
+          pay_group_id?: string | null
+          pay_period_id: string
+          recalculation_approved_at?: string | null
+          recalculation_approved_by?: string | null
+          recalculation_requested_by?: string | null
+          run_number: string
+          run_type?: string
+          status?: string
+          total_deductions?: number | null
+          total_employer_contributions?: number | null
+          total_employer_taxes?: number | null
+          total_gross_pay?: number | null
+          total_gross_pay_base?: number | null
+          total_net_pay?: number | null
+          total_net_pay_base?: number | null
+          total_taxes?: number | null
+          unlocked_at?: string | null
+          unlocked_by?: string | null
+          updated_at?: string
+          workflow_instance_id?: string | null
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          archived_at?: string | null
+          base_currency_id?: string | null
+          calculated_at?: string | null
+          calculated_by?: string | null
+          calculation_started_at?: string | null
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          employee_count?: number | null
+          exchange_rate_date?: string | null
+          exchange_rate_to_base?: number | null
+          id?: string
+          is_locked?: boolean | null
+          local_currency_id?: string | null
+          locked_at?: string | null
+          locked_by?: string | null
+          notes?: string | null
+          paid_at?: string | null
+          paid_by?: string | null
+          pay_group_id?: string | null
+          pay_period_id?: string
+          recalculation_approved_at?: string | null
+          recalculation_approved_by?: string | null
+          recalculation_requested_by?: string | null
+          run_number?: string
+          run_type?: string
+          status?: string
+          total_deductions?: number | null
+          total_employer_contributions?: number | null
+          total_employer_taxes?: number | null
+          total_gross_pay?: number | null
+          total_gross_pay_base?: number | null
+          total_net_pay?: number | null
+          total_net_pay_base?: number | null
+          total_taxes?: number | null
+          unlocked_at?: string | null
+          unlocked_by?: string | null
+          updated_at?: string
+          workflow_instance_id?: string | null
+        }
+        Relationships: []
       }
       payroll_tax_brackets: {
         Row: {
@@ -30424,6 +30798,10 @@ export type Database = {
           p_time: string
         }
         Returns: string
+      }
+      archive_payroll_data: {
+        Args: { p_archive_before_date: string; p_company_id: string }
+        Returns: Json
       }
       calculate_distance_meters: {
         Args: { lat1: number; lat2: number; lon1: number; lon2: number }
