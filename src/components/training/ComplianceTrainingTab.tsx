@@ -12,7 +12,8 @@ import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Plus, Pencil, AlertTriangle, CheckCircle, Clock } from "lucide-react";
 import { toast } from "sonner";
-import { format, differenceInDays } from "date-fns";
+import { differenceInDays } from "date-fns";
+import { formatDateForDisplay } from "@/utils/dateUtils";
 
 interface ComplianceTrainingTabProps {
   companyId: string;
@@ -322,9 +323,9 @@ export function ComplianceTrainingTab({ companyId }: ComplianceTrainingTabProps)
                   <TableRow key={a.id}>
                     <TableCell>{a.employee?.full_name}</TableCell>
                     <TableCell>{a.compliance?.name}</TableCell>
-                    <TableCell>{format(new Date(a.due_date), "MMM d, yyyy")}</TableCell>
+                    <TableCell>{formatDateForDisplay(a.due_date, "MMM d, yyyy")}</TableCell>
                     <TableCell>{getStatusBadge(a.status, a.due_date)}</TableCell>
-                    <TableCell>{a.completed_at ? format(new Date(a.completed_at), "MMM d, yyyy") : "-"}</TableCell>
+                    <TableCell>{a.completed_at ? formatDateForDisplay(a.completed_at, "MMM d, yyyy") : "-"}</TableCell>
                   </TableRow>
                 ))}
                 {assignments.length === 0 && (

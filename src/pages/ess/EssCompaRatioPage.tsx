@@ -6,9 +6,9 @@ import { Progress } from "@/components/ui/progress";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { format } from "date-fns";
 import { Target, ChevronRight, TrendingUp, TrendingDown, Minus, DollarSign } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { formatDateForDisplay } from "@/utils/dateUtils";
 
 export default function EssCompaRatioPage() {
   const { user } = useAuth();
@@ -145,7 +145,7 @@ export default function EssCompaRatioPage() {
                     )}
 
                     <p className="text-xs text-muted-foreground">
-                      Last updated: {format(new Date(latestSnapshot.snapshot_date), "MMM d, yyyy")}
+                      Last updated: {formatDateForDisplay(latestSnapshot.snapshot_date, "MMM d, yyyy")}
                     </p>
                   </div>
                 </div>

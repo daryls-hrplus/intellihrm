@@ -43,7 +43,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
-import { format } from "date-fns";
+import { formatDateForDisplay } from "@/utils/dateUtils";
 
 // Helper to send email notifications
 const sendHeadcountNotification = async (params: {
@@ -823,7 +823,7 @@ function RequestCard({ request, signatures, history, canApprove, onApprove, onRe
             </span>
           </div>
           <span className="text-muted-foreground">
-            {format(new Date(request.created_at), "MMM d, yyyy")}
+            {formatDateForDisplay(request.created_at, "MMM d, yyyy")}
           </span>
         </div>
 
@@ -873,7 +873,7 @@ function RequestCard({ request, signatures, history, canApprove, onApprove, onRe
                           {item.old_status ? `${item.old_status} → ${item.new_status}` : item.new_status}
                         </Badge>
                         <span className="text-xs text-muted-foreground">
-                          {format(new Date(item.created_at), "MMM d, yyyy 'at' h:mm a")}
+                          {formatDateForDisplay(item.created_at, "MMM d, yyyy 'at' h:mm a")}
                         </span>
                       </div>
                       {item.changer && (
@@ -943,7 +943,7 @@ function RequestCard({ request, signatures, history, canApprove, onApprove, onRe
         {request.reviewer && (
           <div className="text-sm text-muted-foreground border-t pt-3">
             Reviewed by {request.reviewer.full_name || request.reviewer.email} on{" "}
-            {request.reviewed_at && format(new Date(request.reviewed_at), "MMM d, yyyy 'at' h:mm a")}
+            {request.reviewed_at && formatDateForDisplay(request.reviewed_at, "MMM d, yyyy 'at' h:mm a")}
             {request.review_notes && (
               <p className="mt-1 italic">"{request.review_notes}"</p>
             )}

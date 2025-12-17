@@ -9,9 +9,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { usePropertyManagement } from "@/hooks/usePropertyManagement";
 import { ClipboardList, Loader2, Check, X } from "lucide-react";
-import { format } from "date-fns";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/hooks/useLanguage";
+import { formatDateForDisplay } from "@/utils/dateUtils";
 
 interface Props { companyId?: string; }
 
@@ -89,7 +89,7 @@ const PropertyRequestsTab = ({ companyId }: Props) => {
                       <TableCell>{request.category?.name || "-"}</TableCell>
                       <TableCell><Badge variant="outline" className={getPriorityColor(request.priority)}>{t(`companyProperty.requests.priorities.${request.priority}`) || request.priority}</Badge></TableCell>
                       <TableCell><Badge variant="outline" className={getStatusColor(request.status)}>{t(`companyProperty.requests.statuses.${request.status}`) || request.status}</Badge></TableCell>
-                      <TableCell className="text-muted-foreground">{format(new Date(request.created_at), "PP")}</TableCell>
+                      <TableCell className="text-muted-foreground">{formatDateForDisplay(request.created_at, "PP")}</TableCell>
                       <TableCell>
                         {request.status === "pending" && (
                           <div className="flex items-center gap-1">
@@ -97,7 +97,7 @@ const PropertyRequestsTab = ({ companyId }: Props) => {
                             <Button variant="outline" size="sm" className="gap-1 text-destructive hover:text-destructive" onClick={() => { setSelectedRequest(request.id); setReviewAction("rejected"); setIsReviewDialogOpen(true); }}><X className="h-3 w-3" /></Button>
                           </div>
                         )}
-                        {request.status !== "pending" && request.reviewed_at && <span className="text-xs text-muted-foreground">{format(new Date(request.reviewed_at), "PP")}</span>}
+                        {request.status !== "pending" && request.reviewed_at && <span className="text-xs text-muted-foreground">{formatDateForDisplay(request.reviewed_at, "PP")}</span>}
                       </TableCell>
                     </TableRow>
                   ))}

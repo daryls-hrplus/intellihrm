@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import type { Json } from '@/integrations/supabase/types';
+import { getTodayString } from '@/utils/dateUtils';
 
 export interface ReportTemplate {
   id: string;
@@ -403,7 +404,7 @@ export function useReportWriter() {
       if (result?.success) {
         toast.success(`Report generated with ${result.rowCount} rows`);
         
-        const fileName = `${template.name || 'report'}_${new Date().toISOString().split('T')[0]}`;
+        const fileName = `${template.name || 'report'}_${getTodayString()}`;
         
         // Use field labels from edge function response if available
         const reportFieldLabels = result.fieldLabels || fieldLabels;
