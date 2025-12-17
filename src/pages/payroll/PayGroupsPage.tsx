@@ -14,7 +14,7 @@ import { Switch } from "@/components/ui/switch";
 import { Plus, Pencil, Trash2, Users, ArrowLeft, ShieldCheck } from "lucide-react";
 import { PayrollCalendarGenerator } from "@/components/payroll/PayrollCalendarGenerator";
 import { toast } from "sonner";
-import { format } from "date-fns";
+import { formatDateForDisplay } from "@/utils/dateUtils";
 import { useNavigate } from "react-router-dom";
 import { PayrollFilters, usePayrollFilters } from "@/components/payroll/PayrollFilters";
 import { useTranslation } from "react-i18next";
@@ -230,7 +230,7 @@ export default function PayGroupsPage() {
                         {pg.is_active ? t("common.active") : t("common.inactive")}
                       </Badge>
                     </TableCell>
-                    <TableCell>{format(new Date(pg.start_date), "PP")}</TableCell>
+                    <TableCell>{formatDateForDisplay(pg.start_date, "PP")}</TableCell>
                     <TableCell>
                       <div className="flex gap-1">
                         <PayrollCalendarGenerator

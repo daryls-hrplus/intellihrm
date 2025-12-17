@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { getTodayString } from "@/utils/dateUtils";
 
 export interface StatutoryDeduction {
   id: string;
@@ -44,12 +45,13 @@ export async function fetchStatutoryDeductionsForCountry(countryCode: string): P
   types: StatutoryDeduction[];
   bands: StatutoryRateBand[];
 }> {
+  const today = getTodayString();
   const { data: types } = await supabase
     .from('statutory_deduction_types')
     .select('*')
     .eq('country', countryCode)
-    .lte('start_date', new Date().toISOString().split('T')[0])
-    .or(`end_date.is.null,end_date.gte.${new Date().toISOString().split('T')[0]}`);
+    .lte('start_date', today)
+    .or(`end_date.is.null,end_date.gte.${today}`);
 
   const { data: bands } = await supabase
     .from('statutory_rate_bands')

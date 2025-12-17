@@ -24,6 +24,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 import { useLanguage } from '@/hooks/useLanguage';
+import { formatDateForDisplay } from '@/utils/dateUtils';
 
 const REQUEST_TYPES = ['new', 'replacement', 'upgrade', 'repair'];
 const PRIORITIES = ['low', 'medium', 'high', 'urgent'];
@@ -298,7 +299,7 @@ export default function MyPropertyPage() {
                             </div>
                           </TableCell>
                           <TableCell>{assignment.property?.category?.name || '-'}</TableCell>
-                          <TableCell>{format(new Date(assignment.assigned_date), 'PP')}</TableCell>
+                          <TableCell>{formatDateForDisplay(assignment.assigned_date, 'PP')}</TableCell>
                           <TableCell>{assignment.condition_at_assignment}</TableCell>
                           <TableCell>
                             <Button
@@ -368,7 +369,7 @@ export default function MyPropertyPage() {
                             </Badge>
                           </TableCell>
                           <TableCell className="text-muted-foreground">
-                            {format(new Date(request.created_at), 'PP')}
+                            {formatDateForDisplay(request.created_at, 'PP')}
                           </TableCell>
                         </TableRow>
                       ))}

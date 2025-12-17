@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
+import { getTodayString } from "@/utils/dateUtils";
 import {
   Select,
   SelectContent,
@@ -380,7 +381,7 @@ export default function CompetencyGapAnalysisPage() {
           competency_levels (name, level_order)
         `)
         .eq("job_id", employeePosition.position.job_id)
-        .or("end_date.is.null,end_date.gte." + new Date().toISOString().split("T")[0]);
+        .or("end_date.is.null,end_date.gte." + getTodayString());
 
       if (jobCompError) throw jobCompError;
 
@@ -406,7 +407,7 @@ export default function CompetencyGapAnalysisPage() {
           competency_levels (name, level_order)
         `)
         .eq("employee_id", employeePosition.employee_id)
-        .or("end_date.is.null,end_date.gte." + new Date().toISOString().split("T")[0]);
+        .or("end_date.is.null,end_date.gte." + getTodayString());
 
       if (empCompError) throw empCompError;
 

@@ -15,6 +15,7 @@ import { format } from 'date-fns';
 import type { EmployeeReminder, ReminderEventType } from '@/types/reminders';
 import { PRIORITY_OPTIONS, NOTIFICATION_METHODS, REMINDER_STATUS, REMINDER_CATEGORIES } from '@/types/reminders';
 import { supabase } from '@/integrations/supabase/client';
+import { formatDateForDisplay } from '@/utils/dateUtils';
 
 interface EmployeeRemindersListProps {
   companyId: string;
@@ -497,8 +498,8 @@ export function EmployeeRemindersList({
                       )}
                     </div>
                   </TableCell>
-                  <TableCell>{format(new Date(reminder.event_date), 'MMM dd, yyyy')}</TableCell>
-                  <TableCell>{format(new Date(reminder.reminder_date), 'MMM dd, yyyy')}</TableCell>
+                  <TableCell>{formatDateForDisplay(reminder.event_date, 'MMM dd, yyyy')}</TableCell>
+                  <TableCell>{formatDateForDisplay(reminder.reminder_date, 'MMM dd, yyyy')}</TableCell>
                   <TableCell>{getPriorityBadge(reminder.priority)}</TableCell>
                   <TableCell>{getStatusBadge(reminder.status)}</TableCell>
                   <TableCell>

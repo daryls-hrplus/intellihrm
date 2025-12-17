@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { Json } from "@/integrations/supabase/types";
+import { getTodayString } from "@/utils/dateUtils";
 
 interface StatutoryReportingDocument {
   id: string;
@@ -70,7 +71,7 @@ export function StatutoryReportingDocuments({
   const [form, setForm] = useState({
     document_name: "",
     reporting_interval: "monthly",
-    start_date: new Date().toISOString().split("T")[0],
+    start_date: getTodayString(),
     end_date: "",
   });
 
@@ -126,7 +127,7 @@ export function StatutoryReportingDocuments({
       setForm({
         document_name: "",
         reporting_interval: "monthly",
-        start_date: new Date().toISOString().split("T")[0],
+        start_date: getTodayString(),
         end_date: "",
       });
       loadDocuments();

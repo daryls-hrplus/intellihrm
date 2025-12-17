@@ -11,7 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Plus, Edit, Eye, Send, FileCheck, DollarSign, Clock, CheckCircle } from 'lucide-react';
-import { format } from 'date-fns';
+import { formatDateForDisplay } from '@/utils/dateUtils';
 
 interface OfferManagementTabProps {
   companyId: string;
@@ -316,7 +316,7 @@ export function OfferManagementTab({ companyId }: OfferManagementTabProps) {
                   <TableCell>
                     <Badge variant={getStatusColor(offer.status)}>{offer.status}</Badge>
                   </TableCell>
-                  <TableCell>{offer.start_date ? format(new Date(offer.start_date), 'MMM d, yyyy') : '-'}</TableCell>
+                  <TableCell>{offer.start_date ? formatDateForDisplay(offer.start_date, 'MMM d, yyyy') : '-'}</TableCell>
                   <TableCell>
                     <Select value={offer.status} onValueChange={(v) => handleUpdateStatus(offer.id, v)}>
                       <SelectTrigger className="w-36">
