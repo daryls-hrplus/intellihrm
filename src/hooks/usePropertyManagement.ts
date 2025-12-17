@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { getTodayString } from "@/utils/dateUtils";
 
 export interface PropertyCategory {
   id: string;
@@ -346,7 +347,7 @@ export const usePropertyManagement = (companyId?: string) => {
         .from("property_assignments")
         .update({
           status: "returned",
-          actual_return_date: new Date().toISOString().split("T")[0],
+          actual_return_date: getTodayString(),
           condition_at_return,
           notes,
         })

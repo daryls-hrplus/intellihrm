@@ -64,7 +64,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
-import { format } from "date-fns";
+import { formatDateForDisplay } from "@/utils/dateUtils";
 
 interface PolicyCategory {
   id: string;
@@ -491,7 +491,7 @@ export default function AdminPolicyDocumentsPage() {
                           </TableCell>
                           <TableCell>{getStatusBadge(doc.processing_status)}</TableCell>
                           <TableCell>{doc.chunk_count}</TableCell>
-                          <TableCell>{format(new Date(doc.created_at), "MMM d, yyyy")}</TableCell>
+                          <TableCell>{formatDateForDisplay(doc.created_at, "MMM d, yyyy")}</TableCell>
                           <TableCell className="text-right">
                             <div className="flex items-center justify-end gap-2">
                               <Button

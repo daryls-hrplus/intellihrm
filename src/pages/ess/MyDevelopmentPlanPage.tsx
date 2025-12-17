@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { supabase } from "@/integrations/supabase/client";
+import { getTodayString } from "@/utils/dateUtils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -97,7 +98,7 @@ export default function MyDevelopmentPlanPage() {
       .update({ 
         progress_percentage: newProgress,
         status: newStatus,
-        completion_date: newProgress >= 100 ? new Date().toISOString().split('T')[0] : null
+        completion_date: newProgress >= 100 ? getTodayString() : null
       })
       .eq('id', selectedGoal.id);
 
@@ -113,7 +114,7 @@ export default function MyDevelopmentPlanPage() {
     const { error } = await (supabase.from('idp_activities') as any)
       .update({ 
         status,
-        completion_date: status === 'completed' ? new Date().toISOString().split('T')[0] : null
+        completion_date: status === 'completed' ? getTodayString() : null
       })
       .eq('id', activityId);
 

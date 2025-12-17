@@ -33,7 +33,7 @@ import {
   ListChecks,
   ClipboardList,
 } from "lucide-react";
-import { format } from "date-fns";
+import { getTodayString } from "@/utils/dateUtils";
 
 interface BulkJobDataImportProps {
   open: boolean;
@@ -229,7 +229,7 @@ export function BulkJobDataImport({
             goal_name: row.data.goal_name,
             weighting: row.data.weighting ? Number(row.data.weighting) : 10,
             notes: row.data.notes || null,
-            start_date: row.data.start_date || format(new Date(), "yyyy-MM-dd"),
+            start_date: row.data.start_date || getTodayString(),
             end_date: row.data.end_date || null,
           });
 
@@ -278,7 +278,7 @@ export function BulkJobDataImport({
             weighting: row.data.weighting ? Number(row.data.weighting) : 10,
             is_required: row.data.is_required?.toLowerCase() === "true",
             notes: row.data.notes || null,
-            start_date: row.data.start_date || format(new Date(), "yyyy-MM-dd"),
+            start_date: row.data.start_date || getTodayString(),
             end_date: row.data.end_date || null,
           });
 
@@ -312,7 +312,7 @@ export function BulkJobDataImport({
             responsibility_id: responsibilityId,
             weighting: row.data.weighting ? Number(row.data.weighting) : 10,
             notes: row.data.notes || null,
-            start_date: row.data.start_date || format(new Date(), "yyyy-MM-dd"),
+            start_date: row.data.start_date || getTodayString(),
             end_date: row.data.end_date || null,
           });
 

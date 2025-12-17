@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { supabase } from "@/integrations/supabase/client";
+import { getTodayString } from "@/utils/dateUtils";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -67,7 +68,7 @@ export function EmployeeReferencesTab({ employeeId }: EmployeeReferencesTabProps
       status: "pending",
       feedback: "",
       notes: "",
-      start_date: new Date().toISOString().split("T")[0],
+      start_date: getTodayString(),
       end_date: "",
     },
   });
@@ -147,7 +148,7 @@ export function EmployeeReferencesTab({ employeeId }: EmployeeReferencesTabProps
       status: reference.status,
       feedback: reference.feedback || "",
       notes: reference.notes || "",
-      start_date: reference.start_date || new Date().toISOString().split("T")[0],
+      start_date: reference.start_date || getTodayString(),
       end_date: reference.end_date || "",
     });
     setDialogOpen(true);
@@ -177,7 +178,7 @@ export function EmployeeReferencesTab({ employeeId }: EmployeeReferencesTabProps
       status: "pending",
       feedback: "",
       notes: "",
-      start_date: new Date().toISOString().split("T")[0],
+      start_date: getTodayString(),
       end_date: "",
     });
     setDialogOpen(true);

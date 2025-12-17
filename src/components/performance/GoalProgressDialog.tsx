@@ -12,6 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Slider } from "@/components/ui/slider";
 import { Progress } from "@/components/ui/progress";
 import { supabase } from "@/integrations/supabase/client";
+import { getTodayString } from "@/utils/dateUtils";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { useAuditLog } from "@/hooks/useAuditLog";
@@ -58,7 +59,7 @@ export function GoalProgressDialog({
           progress_percentage: progress,
           current_value: goal.target_value ? parseFloat(currentValue) : null,
           status: progress === 100 ? "completed" : progress > 0 ? "in_progress" : "active",
-          completed_date: progress === 100 ? new Date().toISOString().split("T")[0] : null,
+          completed_date: progress === 100 ? getTodayString() : null,
         })
         .eq("id", goal.id);
 
