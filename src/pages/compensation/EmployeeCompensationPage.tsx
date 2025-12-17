@@ -31,6 +31,11 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { User, Plus, Pencil, Trash2, Loader2, Search, AlertCircle, DollarSign } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useTranslation } from "react-i18next";
@@ -523,6 +528,91 @@ export default function EmployeeCompensationPage() {
     }).format(amount);
   };
 
+  // Check if compensation amount is within position salary range
+  const isAmountOutOfRange = (amount: number, frequency: string): { outOfRange: boolean; message: string } => {
+    if (!employeePrimaryPosition) {
+      return { outOfRange: false, message: "" };
+    }
+
+    // Convert amount to annual for comparison
+    let annualAmount = amount;
+    switch (frequency?.toLowerCase()) {
+      case "monthly":
+        annualAmount = amount * 12;
+        break;
+      case "weekly":
+        annualAmount = amount * 52;
+        break;
+      case "bi-weekly":
+        annualAmount = amount * 26;
+        break;
+      case "one-time":
+        // One-time payments don't apply to salary range
+        return { outOfRange: false, message: "" };
+    }
+
+    const model = employeePrimaryPosition.compensation_model;
+    
+    if (model === "salary_grade" && employeePrimaryPosition.salary_grade) {
+      const { min_salary, max_salary } = employeePrimaryPosition.salary_grade;
+      if (annualAmount < min_salary || annualAmount > max_salary) {
+        return {
+          outOfRange: true,
+          message: t("compensation.employeeCompensation.outOfRange", {
+            min: formatAmount(min_salary, employeePrimaryPosition.salary_grade.currency),
+            max: formatAmount(max_salary, employeePrimaryPosition.salary_grade.currency)
+          })
+        };
+      }
+    }
+
+    if (model === "spinal_point" && spinalPoints.length > 0 && paySpine) {
+      const minSalary = spinalPoints[0].annual_salary;
+      const maxSalary = spinalPoints[spinalPoints.length - 1].annual_salary;
+      if (annualAmount < minSalary || annualAmount > maxSalary) {
+        return {
+          outOfRange: true,
+          message: t("compensation.employeeCompensation.outOfRange", {
+            min: formatAmount(minSalary, paySpine.currency),
+            max: formatAmount(maxSalary, paySpine.currency)
+          })
+        };
+      }
+    }
+
+    if (model === "hybrid") {
+      // Check against salary grade if available
+      if (employeePrimaryPosition.salary_grade) {
+        const { min_salary, max_salary } = employeePrimaryPosition.salary_grade;
+        if (annualAmount < min_salary || annualAmount > max_salary) {
+          return {
+            outOfRange: true,
+            message: t("compensation.employeeCompensation.outOfRange", {
+              min: formatAmount(min_salary, employeePrimaryPosition.salary_grade.currency),
+              max: formatAmount(max_salary, employeePrimaryPosition.salary_grade.currency)
+            })
+          };
+        }
+      }
+      // Also check against pay spine if available
+      if (spinalPoints.length > 0 && paySpine) {
+        const minSalary = spinalPoints[0].annual_salary;
+        const maxSalary = spinalPoints[spinalPoints.length - 1].annual_salary;
+        if (annualAmount < minSalary || annualAmount > maxSalary) {
+          return {
+            outOfRange: true,
+            message: t("compensation.employeeCompensation.outOfRange", {
+              min: formatAmount(minSalary, paySpine.currency),
+              max: formatAmount(maxSalary, paySpine.currency)
+            })
+          };
+        }
+      }
+    }
+
+    return { outOfRange: false, message: "" };
+  };
+
   const frequencyOptions = [
     { value: "monthly", label: t("compensation.employeeCompensation.frequency.monthly") },
     { value: "annual", label: t("compensation.employeeCompensation.frequency.annual") },
@@ -781,7 +871,28 @@ export default function EmployeeCompensationPage() {
                         </div>
                       </TableCell>
                       <TableCell className="text-right font-mono">
-                        {formatAmount(item.amount, item.currency)}
+                        {(() => {
+                          const rangeCheck = isAmountOutOfRange(item.amount, item.frequency);
+                          return (
+                            <div className="flex items-center justify-end gap-2">
+                              {rangeCheck.outOfRange && (
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <div className="flex items-center justify-center w-5 h-5 rounded-full bg-destructive/20 border-2 border-destructive cursor-help">
+                                      <AlertCircle className="h-3 w-3 text-destructive" />
+                                    </div>
+                                  </TooltipTrigger>
+                                  <TooltipContent>
+                                    <p>{rangeCheck.message}</p>
+                                  </TooltipContent>
+                                </Tooltip>
+                              )}
+                              <span className={rangeCheck.outOfRange ? "text-destructive font-semibold" : ""}>
+                                {formatAmount(item.amount, item.currency)}
+                              </span>
+                            </div>
+                          );
+                        })()}
                       </TableCell>
                       <TableCell className="capitalize">{item.frequency}</TableCell>
                       <TableCell>
