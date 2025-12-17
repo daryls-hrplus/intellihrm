@@ -18,12 +18,16 @@ import {
   Video,
   Copy,
   Download,
-  Save
+  Save,
+  Layout,
+  FileCheck
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { APPLICATION_MODULES, getModuleByCode, getFeatureByCode } from "@/lib/applicationMetadata";
+import { DocumentTemplateConfig, DocumentTemplate, DEFAULT_TEMPLATES } from "@/components/enablement/DocumentTemplateConfig";
+import { ConfluenceStylePreview, GeneratedDocument } from "@/components/enablement/ConfluenceStylePreview";
 
-type ContentType = 'module_overview' | 'feature_tutorial' | 'video_storyboard' | 'quick_reference' | 'kb_article';
+type ContentType = 'module_overview' | 'feature_tutorial' | 'video_storyboard' | 'quick_reference' | 'kb_article' | 'training_guide' | 'sop';
 
 interface GeneratedContent {
   type: ContentType;
@@ -35,11 +39,13 @@ export default function ApplicationDocsGeneratorPage() {
   const { t } = useTranslation();
   const [selectedModule, setSelectedModule] = useState<string>("");
   const [selectedFeature, setSelectedFeature] = useState<string>("");
-  const [contentType, setContentType] = useState<ContentType>("module_overview");
+  const [contentType, setContentType] = useState<ContentType>("training_guide");
   const [targetRoles, setTargetRoles] = useState<string[]>([]);
   const [customInstructions, setCustomInstructions] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedContent, setGeneratedContent] = useState<GeneratedContent | null>(null);
+  const [selectedTemplate, setSelectedTemplate] = useState<DocumentTemplate | null>(DEFAULT_TEMPLATES[0]);
+  const [showTemplateConfig, setShowTemplateConfig] = useState(false);
 
   const availableRoles = ["admin", "hr_manager", "employee"];
 
@@ -67,7 +73,9 @@ export default function ApplicationDocsGeneratorPage() {
         feature_tutorial: 'generate_feature_tutorial',
         video_storyboard: 'generate_video_storyboard',
         quick_reference: 'generate_quick_reference',
-        kb_article: 'generate_kb_article'
+        kb_article: 'generate_kb_article',
+        training_guide: 'generate_training_guide',
+        sop: 'generate_sop'
       };
 
       const payload: any = {
@@ -75,7 +83,8 @@ export default function ApplicationDocsGeneratorPage() {
         moduleCode: selectedModule,
         moduleName: module?.name,
         targetRoles: targetRoles.length > 0 ? targetRoles : undefined,
-        customInstructions: customInstructions || undefined
+        customInstructions: customInstructions || undefined,
+        template: selectedTemplate
       };
 
       if (feature) {
@@ -408,6 +417,12 @@ export default function ApplicationDocsGeneratorPage() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="training_guide">
+                    <div className="flex items-center gap-2">
+                      <BookOpen className="h-4 w-4" />
+                      Training Guide (Industry Standard)
+                    </div>
+                  </SelectItem>
                   <SelectItem value="module_overview">
                     <div className="flex items-center gap-2">
                       <BookOpen className="h-4 w-4" />
@@ -420,6 +435,12 @@ export default function ApplicationDocsGeneratorPage() {
                       Feature Tutorial
                     </div>
                   </SelectItem>
+                  <SelectItem value="sop">
+                    <div className="flex items-center gap-2">
+                      <FileCheck className="h-4 w-4" />
+                      Standard Operating Procedure
+                    </div>
+                  </SelectItem>
                   <SelectItem value="video_storyboard">
                     <div className="flex items-center gap-2">
                       <Video className="h-4 w-4" />
@@ -430,6 +451,22 @@ export default function ApplicationDocsGeneratorPage() {
                   <SelectItem value="kb_article">Knowledge Base Article</SelectItem>
                 </SelectContent>
               </Select>
+              
+              {/* Template Configuration Toggle */}
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="mt-2"
+                onClick={() => setShowTemplateConfig(!showTemplateConfig)}
+              >
+                <Layout className="h-4 w-4 mr-2" />
+                {showTemplateConfig ? 'Hide' : 'Configure'} Template
+              </Button>
+              {selectedTemplate && (
+                <Badge variant="secondary" className="mt-1">
+                  Template: {selectedTemplate.name}
+                </Badge>
+              )}
             </div>
 
             <div className="space-y-2">
