@@ -19,6 +19,7 @@ import {
   Settings,
   BookOpen,
   Palette,
+  Archive,
 } from "lucide-react";
 import { DraggableModuleCards, ModuleCardItem } from "@/components/ui/DraggableModuleCards";
 import { useNavigate } from "react-router-dom";
@@ -200,6 +201,14 @@ export default function PayrollDashboardPage() {
       href: "/payroll/expense-claims",
       color: "bg-orange-500/10 text-orange-600",
       tabCode: "expense_claims",
+    },
+    {
+      title: t("payroll.modules.archiveSettings.title", "Archive Settings"),
+      description: t("payroll.modules.archiveSettings.description", "Configure payroll data retention and archiving"),
+      icon: Archive,
+      href: "/payroll/archive-settings",
+      color: "bg-slate-500/10 text-slate-600",
+      tabCode: "archive_settings",
     },
   ].filter(f => hasTabAccess("payroll", f.tabCode));
 
