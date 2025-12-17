@@ -42,6 +42,7 @@ import {
   ArrowUpCircle,
   Fingerprint,
   KeyRound,
+  Sparkles,
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 
@@ -79,6 +80,7 @@ const getAdminModuleSections = (t: (key: string) => string, hasTabAccess: (modul
       { title: "Implementation Handbook", description: "Step-by-step guide for configuring all modules", href: "/admin/implementation-handbook", icon: BookOpen, color: "bg-rose-500/10 text-rose-600", tabCode: "implementation-handbook" },
       { title: "Features Brochure", description: "Marketing summary of HRplus Cerebra capabilities", href: "/admin/features-brochure", icon: FileSpreadsheet, color: "bg-blue-500/10 text-blue-600", tabCode: "features-brochure" },
       { title: "Modules Brochure", description: "Comprehensive guide to all modules and features", href: "/admin/modules-brochure", icon: Layers, color: "bg-green-500/10 text-green-600", tabCode: "modules-brochure" },
+      { title: "Enablement Center", description: "AI-powered documentation and training content generation", href: "/enablement", icon: Sparkles, color: "bg-gradient-to-r from-purple-500/10 to-pink-500/10 text-purple-600", tabCode: "enablement" },
     ],
     billing: [
       { title: "Subscriptions", description: "Manage company subscriptions and billing", href: "/admin/subscriptions", icon: CreditCard, color: "bg-emerald-500/10 text-emerald-600", tabCode: "subscriptions" },
