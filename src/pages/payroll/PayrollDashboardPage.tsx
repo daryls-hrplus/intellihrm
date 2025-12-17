@@ -6,6 +6,7 @@ import { ModuleReportsButton } from "@/components/reports/ModuleReportsButton";
 import { ModuleBIButton } from "@/components/bi/ModuleBIButton";
 import { useGranularPermissions } from "@/hooks/useGranularPermissions";
 import { supabase } from "@/integrations/supabase/client";
+import { GroupedModuleCards, ModuleSection } from "@/components/ui/GroupedModuleCards";
 import { 
   Wallet, 
   Calculator, 
@@ -22,7 +23,6 @@ import {
   Archive,
   Link as LinkIcon,
 } from "lucide-react";
-import { DraggableModuleCards, ModuleCardItem } from "@/components/ui/DraggableModuleCards";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { format } from "date-fns";
@@ -41,7 +41,6 @@ export default function PayrollDashboardPage() {
 
   useEffect(() => {
     const fetchStats = async () => {
-      // Fetch payroll runs summary (company-wide)
       const { data: payrollRuns } = await supabase
         .from('payroll_runs')
         .select('total_gross_pay, total_net_pay, employee_count, status, pay_period_id, pay_group_id, created_at')
@@ -49,26 +48,21 @@ export default function PayrollDashboardPage() {
 
       const totalPayroll = payrollRuns?.reduce((sum, r) => sum + (r.total_gross_pay || 0), 0) || 0;
 
-      // Get the most recent payroll run to determine current period
       let currentPeriodLabel = "-";
       let currentPeriodEmployees = 0;
       let pendingApprovals = 0;
       const latestRun = payrollRuns?.[0];
       
       if (latestRun) {
-        // Current period is based on when payroll was run (created_at)
         currentPeriodLabel = format(new Date(latestRun.created_at), 'MMM yyyy');
         
         if (latestRun.pay_period_id) {
-          // Get runs in the current pay period
           const currentPeriodRuns = payrollRuns?.filter(r => r.pay_period_id === latestRun.pay_period_id) || [];
           
-          // Count employees from all runs in the current pay period
           currentPeriodEmployees = currentPeriodRuns
             .filter(r => ['draft', 'calculating', 'calculated', 'pending_approval', 'approved', 'processing', 'paid'].includes(r.status))
             .reduce((sum, r) => sum + (r.employee_count || 0), 0);
           
-          // Count unique pay groups with runs that are calculated but not yet approved
           const pendingPayGroups = new Set(
             currentPeriodRuns
               .filter(r => ['calculated', 'pending_approval'].includes(r.status) && r.pay_group_id)
@@ -98,160 +92,49 @@ export default function PayrollDashboardPage() {
     fetchStats();
   }, []);
 
-  const features = [
+  const allModules = {
+    payGroups: { title: t("payroll.modules.payGroups.title"), description: t("payroll.modules.payGroups.description"), icon: Users, href: "/payroll/pay-groups", color: "bg-primary/10 text-primary", tabCode: "pay_groups" },
+    processing: { title: t("payroll.modules.processing.title"), description: t("payroll.modules.processing.description"), icon: Calculator, href: "/payroll/processing", color: "bg-success/10 text-success", tabCode: "processing" },
+    payPeriods: { title: t("payroll.modules.payPeriods.title"), description: t("payroll.modules.payPeriods.description"), icon: CalendarCheck, href: "/payroll/pay-periods", color: "bg-warning/10 text-warning", tabCode: "pay_periods" },
+    reports: { title: t("payroll.modules.reports.title"), description: t("payroll.modules.reports.description"), icon: FileSpreadsheet, href: "/payroll/reports", color: "bg-secondary/10 text-secondary-foreground", tabCode: "reports" },
+    taxConfig: { title: t("payroll.modules.taxConfig.title"), description: t("payroll.modules.taxConfig.description"), icon: Receipt, href: "/payroll/tax-config", color: "bg-muted text-muted-foreground", tabCode: "tax_config" },
+    statutoryTypes: { title: t("payroll.modules.statutoryTypes.title", "Statutory Deduction Types"), description: t("payroll.modules.statutoryTypes.description", "Manage country-level statutory deductions"), icon: FileSpreadsheet, href: "/payroll/statutory-deduction-types", color: "bg-warning/10 text-warning", tabCode: "statutory_types" },
+    yearEnd: { title: t("payroll.modules.yearEnd.title"), description: t("payroll.modules.yearEnd.description"), icon: FileSpreadsheet, href: "/payroll/year-end", color: "bg-destructive/10 text-destructive", tabCode: "year_end" },
+    salaryOvertime: { title: "Pay Period Payroll Entries", description: "Manage compensation entries for pay periods", icon: Clock, href: "/payroll/salary-overtime", color: "bg-accent/10 text-accent-foreground", tabCode: "salary_overtime" },
+    regularDeductions: { title: "Regular Deductions", description: "Manage recurring employee deductions", icon: Clock, href: "/payroll/regular-deductions", color: "bg-destructive/10 text-destructive", tabCode: "regular_deductions" },
+    payElements: { title: t("compensation.modules.payElements.title", "Pay Elements"), description: t("compensation.modules.payElements.description", "Define and manage pay element types"), icon: DollarSign, href: "/payroll/pay-elements", color: "bg-success/10 text-success", tabCode: "pay_elements" },
+    benefitMapping: { title: t("payroll.modules.benefitMapping.title", "Benefit Payroll Mappings"), description: t("payroll.modules.benefitMapping.description", "Map benefit plans to pay element codes"), icon: LinkIcon, href: "/payroll/benefit-mappings", color: "bg-cyan-500/10 text-cyan-600", tabCode: "benefit_mappings" },
+    leavePaymentConfig: { title: t("payroll.modules.leavePaymentConfig.title", "Leave Payment Config"), description: t("payroll.modules.leavePaymentConfig.description", "Configure leave payment rules and payroll mappings"), icon: Settings, href: "/payroll/leave-payment-config", color: "bg-primary/10 text-primary", tabCode: "leave_payment_config" },
+    leaveBuyout: { title: t("payroll.modules.leaveBuyout.title", "Leave Buyout"), description: t("payroll.modules.leaveBuyout.description", "Manage leave balance buyout agreements"), icon: DollarSign, href: "/payroll/leave-buyout", color: "bg-success/10 text-success", tabCode: "leave_buyout" },
+    templates: { title: t("payroll.modules.templates.title"), description: t("payroll.modules.templates.description"), icon: Palette, href: "/payroll/templates", color: "bg-purple-500/10 text-purple-600", tabCode: "templates" },
+    glInterface: { title: t("payroll.modules.glInterface.title", "GL Interface"), description: t("payroll.modules.glInterface.description", "General ledger integration, cost centers, and journal entries"), icon: BookOpen, href: "/payroll/gl", color: "bg-accent/10 text-accent-foreground", tabCode: "gl_interface" },
+    expenseClaims: { title: t("payroll.modules.expenseClaims.title", "Expense Claims"), description: t("payroll.modules.expenseClaims.description", "Approve expense claims for payment in payroll"), icon: Receipt, href: "/payroll/expense-claims", color: "bg-orange-500/10 text-orange-600", tabCode: "expense_claims" },
+    archiveSettings: { title: t("payroll.modules.archiveSettings.title", "Archive Settings"), description: t("payroll.modules.archiveSettings.description", "Configure payroll data retention and archiving"), icon: Archive, href: "/payroll/archive-settings", color: "bg-slate-500/10 text-slate-600", tabCode: "archive_settings" },
+    taxAllowances: { title: t("payroll.modules.taxAllowances.title", "Tax Allowances"), description: t("payroll.modules.taxAllowances.description", "Manage non-taxable allowances for employees"), icon: Receipt, href: "/payroll/tax-allowances", color: "bg-emerald-500/10 text-emerald-600", tabCode: "tax_allowances" },
+    bankFileBuilder: { title: t("payroll.modules.bankFileBuilder.title", "Bank File Builder"), description: t("payroll.modules.bankFileBuilder.description", "AI-powered bank file configuration and generation"), icon: FileSpreadsheet, href: "/payroll/bank-file-builder", color: "bg-indigo-500/10 text-indigo-600", tabCode: "bank_file_builder" },
+  };
+
+  const filterByAccess = (modules: typeof allModules[keyof typeof allModules][]) =>
+    modules.filter(m => hasTabAccess("payroll", m.tabCode));
+
+  const sections: ModuleSection[] = [
     {
-      title: t("payroll.modules.payGroups.title"),
-      description: t("payroll.modules.payGroups.description"),
-      icon: Users,
-      href: "/payroll/pay-groups",
-      color: "bg-primary/10 text-primary",
-      tabCode: "pay_groups",
+      titleKey: "payroll.groups.processing",
+      items: filterByAccess([allModules.processing, allModules.payPeriods, allModules.salaryOvertime, allModules.regularDeductions, allModules.expenseClaims]),
     },
     {
-      title: t("payroll.modules.processing.title"),
-      description: t("payroll.modules.processing.description"),
-      icon: Calculator,
-      href: "/payroll/processing",
-      color: "bg-success/10 text-success",
-      tabCode: "processing",
+      titleKey: "payroll.groups.configuration",
+      items: filterByAccess([allModules.payGroups, allModules.payElements, allModules.taxConfig, allModules.statutoryTypes, allModules.taxAllowances, allModules.templates]),
     },
     {
-      title: t("payroll.modules.payPeriods.title"),
-      description: t("payroll.modules.payPeriods.description"),
-      icon: CalendarCheck,
-      href: "/payroll/pay-periods",
-      color: "bg-warning/10 text-warning",
-      tabCode: "pay_periods",
+      titleKey: "payroll.groups.integration",
+      items: filterByAccess([allModules.benefitMapping, allModules.leavePaymentConfig, allModules.leaveBuyout, allModules.glInterface, allModules.bankFileBuilder]),
     },
     {
-      title: t("payroll.modules.reports.title"),
-      description: t("payroll.modules.reports.description"),
-      icon: FileSpreadsheet,
-      href: "/payroll/reports",
-      color: "bg-secondary/10 text-secondary-foreground",
-      tabCode: "reports",
+      titleKey: "payroll.groups.analytics",
+      items: filterByAccess([allModules.reports, allModules.yearEnd, allModules.archiveSettings]),
     },
-    {
-      title: t("payroll.modules.taxConfig.title"),
-      description: t("payroll.modules.taxConfig.description"),
-      icon: Receipt,
-      href: "/payroll/tax-config",
-      color: "bg-muted text-muted-foreground",
-      tabCode: "tax_config",
-    },
-    {
-      title: t("payroll.modules.statutoryTypes.title", "Statutory Deduction Types"),
-      description: t("payroll.modules.statutoryTypes.description", "Manage country-level statutory deductions"),
-      icon: FileSpreadsheet,
-      href: "/payroll/statutory-deduction-types",
-      color: "bg-warning/10 text-warning",
-      tabCode: "statutory_types",
-    },
-    {
-      title: t("payroll.modules.yearEnd.title"),
-      description: t("payroll.modules.yearEnd.description"),
-      icon: FileSpreadsheet,
-      href: "/payroll/year-end",
-      color: "bg-destructive/10 text-destructive",
-      tabCode: "year_end",
-    },
-    {
-      title: "Pay Period Payroll Entries",
-      description: "Manage compensation entries for pay periods",
-      icon: Clock,
-      href: "/payroll/salary-overtime",
-      color: "bg-accent/10 text-accent-foreground",
-      tabCode: "salary_overtime",
-    },
-    {
-      title: "Regular Deductions",
-      description: "Manage recurring employee deductions",
-      icon: Clock,
-      href: "/payroll/regular-deductions",
-      color: "bg-destructive/10 text-destructive",
-      tabCode: "regular_deductions",
-    },
-    {
-      title: t("compensation.modules.payElements.title", "Pay Elements"),
-      description: t("compensation.modules.payElements.description", "Define and manage pay element types"),
-      icon: DollarSign,
-      href: "/payroll/pay-elements",
-      color: "bg-success/10 text-success",
-      tabCode: "pay_elements",
-    },
-    {
-      title: t("payroll.modules.benefitMapping.title", "Benefit Payroll Mappings"),
-      description: t("payroll.modules.benefitMapping.description", "Map benefit plans to pay element codes"),
-      icon: LinkIcon,
-      href: "/payroll/benefit-mappings",
-      color: "bg-cyan-500/10 text-cyan-600",
-      tabCode: "benefit_mappings",
-    },
-    {
-      title: t("payroll.modules.leavePaymentConfig.title", "Leave Payment Config"),
-      description: t("payroll.modules.leavePaymentConfig.description", "Configure leave payment rules and payroll mappings"),
-      icon: Settings,
-      href: "/payroll/leave-payment-config",
-      color: "bg-primary/10 text-primary",
-      tabCode: "leave_payment_config",
-    },
-    {
-      title: t("payroll.modules.leaveBuyout.title", "Leave Buyout"),
-      description: t("payroll.modules.leaveBuyout.description", "Manage leave balance buyout agreements"),
-      icon: DollarSign,
-      href: "/payroll/leave-buyout",
-      color: "bg-success/10 text-success",
-      tabCode: "leave_buyout",
-    },
-    {
-      title: t("payroll.modules.templates.title"),
-      description: t("payroll.modules.templates.description"),
-      icon: Palette,
-      href: "/payroll/templates",
-      color: "bg-purple-500/10 text-purple-600",
-      tabCode: "templates",
-    },
-    {
-      title: t("payroll.modules.glInterface.title", "GL Interface"),
-      description: t("payroll.modules.glInterface.description", "General ledger integration, cost centers, and journal entries"),
-      icon: BookOpen,
-      href: "/payroll/gl",
-      color: "bg-accent/10 text-accent-foreground",
-      tabCode: "gl_interface",
-    },
-    {
-      title: t("payroll.modules.expenseClaims.title", "Expense Claims"),
-      description: t("payroll.modules.expenseClaims.description", "Approve expense claims for payment in payroll"),
-      icon: Receipt,
-      href: "/payroll/expense-claims",
-      color: "bg-orange-500/10 text-orange-600",
-      tabCode: "expense_claims",
-    },
-    {
-      title: t("payroll.modules.archiveSettings.title", "Archive Settings"),
-      description: t("payroll.modules.archiveSettings.description", "Configure payroll data retention and archiving"),
-      icon: Archive,
-      href: "/payroll/archive-settings",
-      color: "bg-slate-500/10 text-slate-600",
-      tabCode: "archive_settings",
-    },
-    {
-      title: t("payroll.modules.taxAllowances.title", "Tax Allowances"),
-      description: t("payroll.modules.taxAllowances.description", "Manage non-taxable allowances for employees"),
-      icon: Receipt,
-      href: "/payroll/tax-allowances",
-      color: "bg-emerald-500/10 text-emerald-600",
-      tabCode: "tax_allowances",
-    },
-    {
-      title: t("payroll.modules.bankFileBuilder.title", "Bank File Builder"),
-      description: t("payroll.modules.bankFileBuilder.description", "AI-powered bank file configuration and generation"),
-      icon: FileSpreadsheet,
-      href: "/payroll/bank-file-builder",
-      color: "bg-indigo-500/10 text-indigo-600",
-      tabCode: "bank_file_builder",
-    },
-  ].filter(f => hasTabAccess("payroll", f.tabCode));
+  ];
 
   const statItems = [
     { label: t("payroll.stats.currentPeriod"), value: stats.currentPeriod, icon: CalendarCheck },
@@ -305,11 +188,7 @@ export default function PayrollDashboardPage() {
           })}
         </div>
 
-        {/* Features */}
-        <DraggableModuleCards 
-          modules={features} 
-          preferenceKey="payroll_dashboard_order" 
-        />
+        <GroupedModuleCards sections={sections} />
 
         {/* Quick Actions */}
         <Card>

@@ -8,6 +8,7 @@ import { ModuleReportsButton } from "@/components/reports/ModuleReportsButton";
 import { ModuleBIButton } from "@/components/bi/ModuleBIButton";
 import { LeaveCompanyFilter, useLeaveCompanyFilter } from "@/components/leave/LeaveCompanyFilter";
 import { DepartmentFilter, useDepartmentFilter } from "@/components/filters/DepartmentFilter";
+import { GroupedModuleCards, ModuleSection } from "@/components/ui/GroupedModuleCards";
 import {
   GraduationCap,
   BookOpen,
@@ -31,144 +32,6 @@ import {
   TrendingUp,
   BarChart3,
 } from "lucide-react";
-import { DraggableModuleCards, ModuleCardItem } from "@/components/ui/DraggableModuleCards";
-
-const trainingModules = [
-  {
-    title: "Course Catalog",
-    description: "Browse available training courses",
-    href: "/training/catalog",
-    icon: BookOpen,
-    color: "bg-primary/10 text-primary",
-  },
-  {
-    title: "My Learning",
-    description: "Your enrolled courses and progress",
-    href: "/training/my-learning",
-    icon: GraduationCap,
-    color: "bg-success/10 text-success",
-  },
-  {
-    title: "Learning Paths",
-    description: "Structured course sequences",
-    href: "/training/learning-paths",
-    icon: Route,
-    color: "bg-info/10 text-info",
-  },
-  {
-    title: "Competency Gap Analysis",
-    description: "Compare skills with job requirements",
-    href: "/training/gap-analysis",
-    icon: Target,
-    color: "bg-secondary/10 text-secondary-foreground",
-  },
-  {
-    title: "Training Requests",
-    description: "Submit and track training requests",
-    href: "/training/requests",
-    icon: FileText,
-    color: "bg-warning/10 text-warning",
-  },
-  {
-    title: "External Training",
-    description: "Track external training records",
-    href: "/training/external",
-    icon: ExternalLink,
-    color: "bg-accent/10 text-accent-foreground",
-  },
-  {
-    title: "Training Budgets",
-    description: "Manage training budgets",
-    href: "/training/budgets",
-    icon: DollarSign,
-    color: "bg-success/10 text-success",
-    adminOnly: true,
-  },
-  {
-    title: "Instructors",
-    description: "Manage course instructors",
-    href: "/training/instructors",
-    icon: Users,
-    color: "bg-primary/10 text-primary",
-    adminOnly: true,
-  },
-  {
-    title: "Training Evaluations",
-    description: "Course feedback and evaluations",
-    href: "/training/evaluations",
-    icon: ClipboardCheck,
-    color: "bg-info/10 text-info",
-  },
-  {
-    title: "Compliance Training",
-    description: "Mandatory training tracking",
-    href: "/training/compliance",
-    icon: Shield,
-    color: "bg-destructive/10 text-destructive",
-    adminOnly: true,
-  },
-  {
-    title: "Course Competencies",
-    description: "Map courses to competencies",
-    href: "/training/course-competencies",
-    icon: Link,
-    color: "bg-warning/10 text-warning",
-    adminOnly: true,
-  },
-  {
-    title: "Recertification",
-    description: "Track recertification requirements",
-    href: "/training/recertification",
-    icon: RefreshCw,
-    color: "bg-secondary/10 text-secondary-foreground",
-    adminOnly: true,
-  },
-  {
-    title: "Training Needs",
-    description: "Analyze training needs",
-    href: "/training/needs",
-    icon: TrendingUp,
-    color: "bg-accent/10 text-accent-foreground",
-    adminOnly: true,
-  },
-  {
-    title: "Live Sessions",
-    description: "Upcoming webinars and workshops",
-    href: "/training/sessions",
-    icon: Video,
-    color: "bg-muted text-muted-foreground",
-  },
-  {
-    title: "Certifications",
-    description: "Track your certifications",
-    href: "/training/certifications",
-    icon: Award,
-    color: "bg-warning/10 text-warning",
-  },
-  {
-    title: "Training Calendar",
-    description: "Schedule and upcoming events",
-    href: "/training/calendar",
-    icon: Calendar,
-    color: "bg-destructive/10 text-destructive",
-  },
-  {
-    title: "Training Analytics",
-    description: "Insights and metrics",
-    href: "/training/analytics",
-    icon: BarChart3,
-    color: "bg-primary/10 text-primary",
-    adminOnly: true,
-  },
-  {
-    title: "LMS Management",
-    description: "Create and manage courses (Admin)",
-    href: "/admin/lms",
-    icon: Settings,
-    color: "bg-muted text-muted-foreground",
-    adminOnly: true,
-  },
-];
 
 interface Stats {
   coursesAvailable: number;
@@ -239,160 +102,48 @@ export default function TrainingDashboardPage() {
     { label: t("training.stats.certifications"), value: stats.certifications, icon: Award, color: "bg-info/10 text-info" },
   ];
 
-  const trainingModulesTranslated = [
+  const allModules = {
+    catalog: { title: t("training.modules.courseCatalog.title"), description: t("training.modules.courseCatalog.description"), href: "/training/catalog", icon: BookOpen, color: "bg-primary/10 text-primary", tabCode: "catalog" },
+    myLearning: { title: t("training.modules.myLearning.title"), description: t("training.modules.myLearning.description"), href: "/training/my-learning", icon: GraduationCap, color: "bg-success/10 text-success", tabCode: "my-learning" },
+    learningPaths: { title: t("training.modules.learningPaths.title"), description: t("training.modules.learningPaths.description"), href: "/training/learning-paths", icon: Route, color: "bg-info/10 text-info", tabCode: "learning-paths" },
+    gapAnalysis: { title: t("training.modules.gapAnalysis.title"), description: t("training.modules.gapAnalysis.description"), href: "/training/gap-analysis", icon: Target, color: "bg-secondary/10 text-secondary-foreground", tabCode: "gap-analysis" },
+    requests: { title: t("training.modules.requests.title"), description: t("training.modules.requests.description"), href: "/training/requests", icon: FileText, color: "bg-warning/10 text-warning", tabCode: "requests" },
+    external: { title: t("training.modules.external.title"), description: t("training.modules.external.description"), href: "/training/external", icon: ExternalLink, color: "bg-accent/10 text-accent-foreground", tabCode: "external" },
+    budgets: { title: t("training.modules.budgets.title"), description: t("training.modules.budgets.description"), href: "/training/budgets", icon: DollarSign, color: "bg-success/10 text-success", tabCode: "budgets" },
+    instructors: { title: t("training.modules.instructors.title"), description: t("training.modules.instructors.description"), href: "/training/instructors", icon: Users, color: "bg-primary/10 text-primary", tabCode: "instructors" },
+    evaluations: { title: t("training.modules.evaluations.title"), description: t("training.modules.evaluations.description"), href: "/training/evaluations", icon: ClipboardCheck, color: "bg-info/10 text-info", tabCode: "evaluations" },
+    compliance: { title: t("training.modules.compliance.title"), description: t("training.modules.compliance.description"), href: "/training/compliance", icon: Shield, color: "bg-destructive/10 text-destructive", tabCode: "compliance" },
+    courseCompetencies: { title: t("training.modules.courseCompetencies.title"), description: t("training.modules.courseCompetencies.description"), href: "/training/course-competencies", icon: Link, color: "bg-warning/10 text-warning", tabCode: "course-competencies" },
+    recertification: { title: t("training.modules.recertification.title"), description: t("training.modules.recertification.description"), href: "/training/recertification", icon: RefreshCw, color: "bg-secondary/10 text-secondary-foreground", tabCode: "recertification" },
+    needs: { title: t("training.modules.needs.title"), description: t("training.modules.needs.description"), href: "/training/needs", icon: TrendingUp, color: "bg-accent/10 text-accent-foreground", tabCode: "needs" },
+    liveSessions: { title: t("training.modules.liveSessions.title"), description: t("training.modules.liveSessions.description"), href: "/training/sessions", icon: Video, color: "bg-muted text-muted-foreground", tabCode: "sessions" },
+    certifications: { title: t("training.modules.certifications.title"), description: t("training.modules.certifications.description"), href: "/training/certifications", icon: Award, color: "bg-warning/10 text-warning", tabCode: "certifications" },
+    calendar: { title: t("training.modules.calendar.title"), description: t("training.modules.calendar.description"), href: "/training/calendar", icon: Calendar, color: "bg-destructive/10 text-destructive", tabCode: "calendar" },
+    analytics: { title: t("training.modules.analytics.title"), description: t("training.modules.analytics.description"), href: "/training/analytics", icon: BarChart3, color: "bg-primary/10 text-primary", tabCode: "analytics" },
+    lms: { title: t("training.modules.lms.title"), description: t("training.modules.lms.description"), href: "/admin/lms", icon: Settings, color: "bg-muted text-muted-foreground", tabCode: "lms" },
+  };
+
+  const filterByAccess = (modules: typeof allModules[keyof typeof allModules][]) =>
+    modules.filter(m => hasTabAccess("training", m.tabCode));
+
+  const sections: ModuleSection[] = [
     {
-      title: t("training.modules.courseCatalog.title"),
-      description: t("training.modules.courseCatalog.description"),
-      href: "/training/catalog",
-      icon: BookOpen,
-      color: "bg-primary/10 text-primary",
-      tabCode: "catalog",
+      titleKey: "training.groups.learning",
+      items: filterByAccess([allModules.catalog, allModules.myLearning, allModules.learningPaths, allModules.gapAnalysis, allModules.liveSessions, allModules.certifications]),
     },
     {
-      title: t("training.modules.myLearning.title"),
-      description: t("training.modules.myLearning.description"),
-      href: "/training/my-learning",
-      icon: GraduationCap,
-      color: "bg-success/10 text-success",
-      tabCode: "my-learning",
+      titleKey: "training.groups.management",
+      items: filterByAccess([allModules.requests, allModules.external, allModules.evaluations, allModules.calendar]),
     },
     {
-      title: t("training.modules.learningPaths.title"),
-      description: t("training.modules.learningPaths.description"),
-      href: "/training/learning-paths",
-      icon: Route,
-      color: "bg-info/10 text-info",
-      tabCode: "learning-paths",
+      titleKey: "training.groups.administration",
+      items: filterByAccess([allModules.budgets, allModules.instructors, allModules.compliance, allModules.courseCompetencies, allModules.recertification, allModules.needs, allModules.lms]),
     },
     {
-      title: t("training.modules.gapAnalysis.title"),
-      description: t("training.modules.gapAnalysis.description"),
-      href: "/training/gap-analysis",
-      icon: Target,
-      color: "bg-secondary/10 text-secondary-foreground",
-      tabCode: "gap-analysis",
+      titleKey: "training.groups.analytics",
+      items: filterByAccess([allModules.analytics]),
     },
-    {
-      title: t("training.modules.requests.title"),
-      description: t("training.modules.requests.description"),
-      href: "/training/requests",
-      icon: FileText,
-      color: "bg-warning/10 text-warning",
-      tabCode: "requests",
-    },
-    {
-      title: t("training.modules.external.title"),
-      description: t("training.modules.external.description"),
-      href: "/training/external",
-      icon: ExternalLink,
-      color: "bg-accent/10 text-accent-foreground",
-      tabCode: "external",
-    },
-    {
-      title: t("training.modules.budgets.title"),
-      description: t("training.modules.budgets.description"),
-      href: "/training/budgets",
-      icon: DollarSign,
-      color: "bg-success/10 text-success",
-      adminOnly: true,
-      tabCode: "budgets",
-    },
-    {
-      title: t("training.modules.instructors.title"),
-      description: t("training.modules.instructors.description"),
-      href: "/training/instructors",
-      icon: Users,
-      color: "bg-primary/10 text-primary",
-      adminOnly: true,
-      tabCode: "instructors",
-    },
-    {
-      title: t("training.modules.evaluations.title"),
-      description: t("training.modules.evaluations.description"),
-      href: "/training/evaluations",
-      icon: ClipboardCheck,
-      color: "bg-info/10 text-info",
-      tabCode: "evaluations",
-    },
-    {
-      title: t("training.modules.compliance.title"),
-      description: t("training.modules.compliance.description"),
-      href: "/training/compliance",
-      icon: Shield,
-      color: "bg-destructive/10 text-destructive",
-      adminOnly: true,
-      tabCode: "compliance",
-    },
-    {
-      title: t("training.modules.courseCompetencies.title"),
-      description: t("training.modules.courseCompetencies.description"),
-      href: "/training/course-competencies",
-      icon: Link,
-      color: "bg-warning/10 text-warning",
-      adminOnly: true,
-      tabCode: "course-competencies",
-    },
-    {
-      title: t("training.modules.recertification.title"),
-      description: t("training.modules.recertification.description"),
-      href: "/training/recertification",
-      icon: RefreshCw,
-      color: "bg-secondary/10 text-secondary-foreground",
-      adminOnly: true,
-      tabCode: "recertification",
-    },
-    {
-      title: t("training.modules.needs.title"),
-      description: t("training.modules.needs.description"),
-      href: "/training/needs",
-      icon: TrendingUp,
-      color: "bg-accent/10 text-accent-foreground",
-      adminOnly: true,
-      tabCode: "needs",
-    },
-    {
-      title: t("training.modules.liveSessions.title"),
-      description: t("training.modules.liveSessions.description"),
-      href: "/training/sessions",
-      icon: Video,
-      color: "bg-muted text-muted-foreground",
-      tabCode: "sessions",
-    },
-    {
-      title: t("training.modules.certifications.title"),
-      description: t("training.modules.certifications.description"),
-      href: "/training/certifications",
-      icon: Award,
-      color: "bg-warning/10 text-warning",
-      tabCode: "certifications",
-    },
-    {
-      title: t("training.modules.calendar.title"),
-      description: t("training.modules.calendar.description"),
-      href: "/training/calendar",
-      icon: Calendar,
-      color: "bg-destructive/10 text-destructive",
-      tabCode: "calendar",
-    },
-    {
-      title: t("training.modules.analytics.title"),
-      description: t("training.modules.analytics.description"),
-      href: "/training/analytics",
-      icon: BarChart3,
-      color: "bg-primary/10 text-primary",
-      adminOnly: true,
-      tabCode: "analytics",
-    },
-    {
-      title: t("training.modules.lms.title"),
-      description: t("training.modules.lms.description"),
-      href: "/admin/lms",
-      icon: Settings,
-      color: "bg-muted text-muted-foreground",
-      adminOnly: true,
-      tabCode: "lms",
-    },
-  ].filter(module => hasTabAccess("training", module.tabCode));
+  ];
 
   return (
     <AppLayout>
@@ -454,10 +205,7 @@ export default function TrainingDashboardPage() {
           })}
         </div>
 
-        <DraggableModuleCards 
-          modules={trainingModulesTranslated} 
-          preferenceKey="training_dashboard_order" 
-        />
+        <GroupedModuleCards sections={sections} />
       </div>
     </AppLayout>
   );
