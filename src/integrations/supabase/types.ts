@@ -7672,6 +7672,132 @@ export type Database = {
           },
         ]
       }
+      employee_regular_deductions: {
+        Row: {
+          amount: number
+          amount_deducted: number
+          auto_stopped_at: string | null
+          company_id: string
+          completed_cycles: number
+          created_at: string
+          created_by: string | null
+          currency: string
+          deduction_code: string | null
+          deduction_name: string
+          deduction_type: string
+          employee_id: string
+          end_date: string | null
+          frequency: string
+          goal_amount: number | null
+          id: string
+          institution_name: string | null
+          is_active: boolean
+          is_pretax: boolean
+          notes: string | null
+          pay_element_id: string | null
+          reference_number: string | null
+          start_date: string
+          stop_reason: string | null
+          total_cycles: number | null
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          amount: number
+          amount_deducted?: number
+          auto_stopped_at?: string | null
+          company_id: string
+          completed_cycles?: number
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          deduction_code?: string | null
+          deduction_name: string
+          deduction_type?: string
+          employee_id: string
+          end_date?: string | null
+          frequency?: string
+          goal_amount?: number | null
+          id?: string
+          institution_name?: string | null
+          is_active?: boolean
+          is_pretax?: boolean
+          notes?: string | null
+          pay_element_id?: string | null
+          reference_number?: string | null
+          start_date?: string
+          stop_reason?: string | null
+          total_cycles?: number | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          amount?: number
+          amount_deducted?: number
+          auto_stopped_at?: string | null
+          company_id?: string
+          completed_cycles?: number
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          deduction_code?: string | null
+          deduction_name?: string
+          deduction_type?: string
+          employee_id?: string
+          end_date?: string | null
+          frequency?: string
+          goal_amount?: number | null
+          id?: string
+          institution_name?: string | null
+          is_active?: boolean
+          is_pretax?: boolean
+          notes?: string | null
+          pay_element_id?: string | null
+          reference_number?: string | null
+          start_date?: string
+          stop_reason?: string | null
+          total_cycles?: number | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "employee_regular_deductions_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_regular_deductions_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_regular_deductions_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_regular_deductions_pay_element_id_fkey"
+            columns: ["pay_element_id"]
+            isOneToOne: false
+            referencedRelation: "pay_elements"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_regular_deductions_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       employee_reminder_preferences: {
         Row: {
           created_at: string

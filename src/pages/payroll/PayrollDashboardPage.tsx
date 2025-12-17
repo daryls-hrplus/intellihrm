@@ -156,11 +156,19 @@ export default function PayrollDashboardPage() {
     },
     {
       title: t("payroll.modules.salaryOvertime.title"),
-      description: t("payroll.modules.salaryOvertime.description"),
+      description: "Manage compensation entries for pay periods",
       icon: Clock,
       href: "/payroll/salary-overtime",
       color: "bg-accent/10 text-accent-foreground",
       tabCode: "salary_overtime",
+    },
+    {
+      title: "Regular Deductions",
+      description: "Manage recurring employee deductions",
+      icon: Clock,
+      href: "/payroll/regular-deductions",
+      color: "bg-destructive/10 text-destructive",
+      tabCode: "regular_deductions",
     },
     {
       title: t("payroll.modules.leavePaymentConfig.title", "Leave Payment Config"),
