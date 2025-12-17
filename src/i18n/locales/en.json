@@ -6604,6 +6604,99 @@
       "lms": {
         "title": "LMS Management",
         "description": "Create and manage courses (Admin)"
+      },
+      "virtualClassroom": {
+        "title": "Virtual Classroom",
+        "description": "Integrate with Zoom, Teams, and webinar platforms"
+      },
+      "contentAuthoring": {
+        "title": "Content Authoring",
+        "description": "Create and manage training content"
+      }
+    },
+    "virtualClassroom": {
+      "createSession": "Create Session",
+      "searchSessions": "Search sessions...",
+      "upcomingAndLive": "Upcoming & Live Sessions",
+      "pastSessions": "Past Sessions",
+      "instructor": "Instructor",
+      "registered": "registered",
+      "attended": "attended",
+      "register": "Register",
+      "joinNow": "Join Now",
+      "addToCalendar": "Add to Calendar",
+      "watchRecording": "Watch Recording",
+      "downloadMaterials": "Download Materials",
+      "recordingAvailable": "Recording Available",
+      "noSessions": "No sessions found",
+      "noSessionsDesc": "Create a new session or check back later.",
+      "noRecordings": "No recordings available",
+      "noRecordingsDesc": "Completed sessions with recordings will appear here.",
+      "connected": "Connected",
+      "notConnected": "Not Connected",
+      "active": "Active",
+      "inactive": "Inactive",
+      "configure": "Configure",
+      "connect": "Connect",
+      "stats": {
+        "upcoming": "Upcoming Sessions",
+        "liveNow": "Live Now",
+        "recordings": "Recordings",
+        "integrations": "Integrations"
+      },
+      "tabs": {
+        "sessions": "Sessions",
+        "recordings": "Recordings",
+        "integrations": "Integrations"
+      },
+      "status": {
+        "scheduled": "Scheduled",
+        "live": "Live",
+        "completed": "Completed",
+        "cancelled": "Cancelled"
+      }
+    },
+    "contentAuthoring": {
+      "createContent": "Create Content",
+      "aiAssist": "AI Assist",
+      "searchContent": "Search content...",
+      "searchMedia": "Search media...",
+      "uploadMedia": "Upload Media",
+      "by": "By",
+      "modified": "Modified",
+      "views": "views",
+      "preview": "Preview",
+      "duplicate": "Duplicate",
+      "useTemplate": "Use Template",
+      "mediaLibrary": "Media Library",
+      "mediaLibraryDesc": "Upload and manage images, videos, and documents for your training content.",
+      "uploadFirst": "Upload Your First File",
+      "noContent": "No content found",
+      "noContentDesc": "Create your first training content to get started.",
+      "stats": {
+        "totalContent": "Total Content",
+        "published": "Published",
+        "drafts": "Drafts",
+        "inReview": "In Review"
+      },
+      "tabs": {
+        "myContent": "My Content",
+        "templates": "Templates",
+        "mediaLibrary": "Media Library"
+      },
+      "types": {
+        "course": "Course",
+        "module": "Module",
+        "quiz": "Quiz",
+        "video": "Video",
+        "document": "Document",
+        "scorm": "SCORM"
+      },
+      "status": {
+        "draft": "Draft",
+        "review": "In Review",
+        "published": "Published",
+        "archived": "Archived"
       }
     }
   },

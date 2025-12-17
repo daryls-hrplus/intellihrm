@@ -166,6 +166,8 @@ import CourseCompetenciesPage from "./pages/training/CourseCompetenciesPage";
 import RecertificationPage from "./pages/training/RecertificationPage";
 import TrainingNeedsPage from "./pages/training/TrainingNeedsPage";
 import TrainingAnalyticsPage from "./pages/training/TrainingAnalyticsPage";
+import VirtualClassroomPage from "./pages/training/VirtualClassroomPage";
+import ContentAuthoringPage from "./pages/training/ContentAuthoringPage";
 
 // Succession pages
 import SuccessionDashboardPage from "./pages/succession/SuccessionDashboardPage";
@@ -2225,6 +2227,22 @@ const App = () => (
               element={
                 <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
                   <TrainingAnalyticsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/training/virtual-classroom"
+              element={
+                <ProtectedRoute>
+                  <VirtualClassroomPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/training/content-authoring"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
+                  <ContentAuthoringPage />
                 </ProtectedRoute>
               }
             />
