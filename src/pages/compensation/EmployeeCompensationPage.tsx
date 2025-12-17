@@ -226,19 +226,42 @@ export default function EmployeeCompensationPage() {
   };
 
   const loadEmployees = async () => {
-    let query = supabase
-      .from("profiles")
-      .select("id, full_name, email")
-      .eq("company_id", selectedCompanyId);
-    
     if (selectedDepartmentId) {
-      query = query.eq("department_id", selectedDepartmentId);
-    }
-    
-    const { data } = await query.order("full_name");
+      // Filter by department through position assignments
+      const { data } = await supabase
+        .from("employee_positions")
+        .select(`
+          employee_id,
+          profiles!inner(id, full_name, email, company_id),
+          positions!inner(department_id)
+        `)
+        .eq("profiles.company_id", selectedCompanyId)
+        .eq("positions.department_id", selectedDepartmentId)
+        .eq("is_primary", true);
 
-    if (data) {
-      setEmployees(data);
+      if (data) {
+        const employees = data.map(ep => ({
+          id: (ep.profiles as any).id,
+          full_name: (ep.profiles as any).full_name,
+          email: (ep.profiles as any).email
+        }));
+        // Remove duplicates
+        const uniqueEmployees = employees.filter((emp, index, self) =>
+          index === self.findIndex(e => e.id === emp.id)
+        );
+        setEmployees(uniqueEmployees);
+      }
+    } else {
+      // No department filter - get all employees for company
+      const { data } = await supabase
+        .from("profiles")
+        .select("id, full_name, email")
+        .eq("company_id", selectedCompanyId)
+        .order("full_name");
+
+      if (data) {
+        setEmployees(data);
+      }
     }
   };
 
