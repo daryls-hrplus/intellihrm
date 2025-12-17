@@ -41,7 +41,7 @@ import {
   Users,
   Activity,
 } from "lucide-react";
-import { format } from "date-fns";
+import { getTodayString, formatDateForDisplay } from "@/utils/dateUtils";
 import { NavLink } from "react-router-dom";
 
 const incidentTypes = [
@@ -115,7 +115,7 @@ export default function HSEIncidentsPage() {
         incident_type: "near_miss",
         severity: "low",
         status: "reported",
-        incident_date: format(new Date(), "yyyy-MM-dd"),
+        incident_date: getTodayString(),
       });
     }
     setDialogOpen(true);
@@ -319,7 +319,7 @@ export default function HSEIncidentsPage() {
                         {incidentTypes.find((t) => t.value === incident.incident_type)?.label}
                       </TableCell>
                       <TableCell>{getSeverityBadge(incident.severity)}</TableCell>
-                      <TableCell>{format(new Date(incident.incident_date), "MMM d, yyyy")}</TableCell>
+                      <TableCell>{formatDateForDisplay(incident.incident_date, "MMM d, yyyy")}</TableCell>
                       <TableCell>{incident.location || "-"}</TableCell>
                       <TableCell>{getStatusBadge(incident.status)}</TableCell>
                       <TableCell>{incident.reporter?.full_name || "-"}</TableCell>

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { CalendarIcon, Loader2 } from "lucide-react";
-import { formatDateForDisplay, toDateString } from "@/utils/dateUtils";
+import { formatDateForDisplay, toDateString, getTodayString } from "@/utils/dateUtils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -94,7 +94,7 @@ export function TransactionFormDialog({
 
   // Form state
   const [formData, setFormData] = useState<Partial<EmployeeTransaction>>({
-    effective_date: new Date().toISOString().split("T")[0],
+    effective_date: getTodayString(),
     status: "draft",
     requires_workflow: false,
     notes: "",
@@ -112,7 +112,7 @@ export function TransactionFormDialog({
       setFormData(existingTransaction);
     } else {
       setFormData({
-        effective_date: new Date().toISOString().split("T")[0],
+        effective_date: getTodayString(),
         status: "draft",
         requires_workflow: false,
         notes: "",
