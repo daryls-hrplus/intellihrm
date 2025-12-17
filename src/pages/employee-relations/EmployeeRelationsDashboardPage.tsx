@@ -126,19 +126,19 @@ export default function EmployeeRelationsDashboardPage() {
 
   const sections: ModuleSection[] = [
     {
-      titleKey: "employeeRelations.groups.casesDisciplinary",
+      titleKey: "Cases & Disciplinary",
       items: filterByAccess([allModules.cases, allModules.disciplinary, allModules.grievances]),
     },
     {
-      titleKey: "employeeRelations.groups.recognitionEngagement",
+      titleKey: "Recognition & Engagement",
       items: filterByAccess([allModules.recognition, allModules.surveys, allModules.wellness]),
     },
     {
-      titleKey: "employeeRelations.groups.exitLegal",
+      titleKey: "Exit & Legal",
       items: filterByAccess([allModules.exitInterviews, allModules.unions, allModules.courtJudgements]),
     },
     {
-      titleKey: "employeeRelations.groups.analytics",
+      titleKey: "Analytics",
       items: filterByAccess([allModules.analytics]),
     },
   ];

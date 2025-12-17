@@ -119,19 +119,19 @@ export default function PayrollDashboardPage() {
 
   const sections: ModuleSection[] = [
     {
-      titleKey: "payroll.groups.processing",
+      titleKey: "Processing",
       items: filterByAccess([allModules.processing, allModules.payPeriods, allModules.salaryOvertime, allModules.regularDeductions, allModules.expenseClaims]),
     },
     {
-      titleKey: "payroll.groups.configuration",
+      titleKey: "Configuration",
       items: filterByAccess([allModules.payGroups, allModules.payElements, allModules.taxConfig, allModules.statutoryTypes, allModules.taxAllowances, allModules.templates]),
     },
     {
-      titleKey: "payroll.groups.integration",
+      titleKey: "Integration",
       items: filterByAccess([allModules.benefitMapping, allModules.leavePaymentConfig, allModules.leaveBuyout, allModules.glInterface, allModules.bankFileBuilder]),
     },
     {
-      titleKey: "payroll.groups.analytics",
+      titleKey: "Reporting & Analytics",
       items: filterByAccess([allModules.reports, allModules.yearEnd, allModules.archiveSettings]),
     },
   ];

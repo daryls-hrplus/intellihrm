@@ -177,19 +177,19 @@ export default function BenefitsDashboardPage() {
 
   const sections: ModuleSection[] = [
     {
-      titleKey: "benefits.groups.coreBenefits",
+      titleKey: "Core Benefits",
       items: filterByAccess([allModules.categories, allModules.plans, allModules.providers, allModules.enrollments, allModules.claims]),
     },
     {
-      titleKey: "benefits.groups.analyticsReporting",
+      titleKey: "Analytics & Reporting",
       items: filterByAccess([allModules.analytics, allModules.costProjections, allModules.comparison, allModules.calculator]),
     },
     {
-      titleKey: "benefits.groups.administration",
+      titleKey: "Administration",
       items: filterByAccess([allModules.autoEnrollment, allModules.lifeEvents, allModules.waitingPeriods, allModules.openEnrollment]),
     },
     {
-      titleKey: "benefits.groups.compliance",
+      titleKey: "Compliance",
       items: filterByAccess([allModules.eligibilityAudit, allModules.compliance]),
     },
   ];

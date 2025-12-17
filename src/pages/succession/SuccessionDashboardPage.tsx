@@ -108,19 +108,19 @@ export default function SuccessionDashboardPage() {
 
   const sections: ModuleSection[] = [
     {
-      titleKey: "succession.groups.talentAssessment",
+      titleKey: "Talent Assessment",
       items: filterByAccess([allModules.nineBox, allModules.talentPools]),
     },
     {
-      titleKey: "succession.groups.planning",
+      titleKey: "Succession Planning",
       items: filterByAccess([allModules.plans, allModules.keyPositions]),
     },
     {
-      titleKey: "succession.groups.development",
+      titleKey: "Career Development",
       items: filterByAccess([allModules.careerDevelopment, allModules.careerPaths, allModules.mentorship]),
     },
     {
-      titleKey: "succession.groups.riskAnalytics",
+      titleKey: "Risk & Analytics",
       items: filterByAccess([allModules.flightRisk, allModules.benchStrength, allModules.analytics]),
     },
   ];

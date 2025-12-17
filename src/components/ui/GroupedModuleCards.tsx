@@ -1,5 +1,4 @@
 import { useNavigate } from "react-router-dom";
-import { useLanguage } from "@/hooks/useLanguage";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { LucideIcon } from "lucide-react";
 
@@ -23,7 +22,6 @@ interface GroupedModuleCardsProps {
 
 export function GroupedModuleCards({ sections }: GroupedModuleCardsProps) {
   const navigate = useNavigate();
-  const { t } = useLanguage();
 
   // Filter out empty sections
   const nonEmptySections = sections.filter(section => section.items.length > 0);
@@ -33,7 +31,7 @@ export function GroupedModuleCards({ sections }: GroupedModuleCardsProps) {
       {nonEmptySections.map((section) => (
         <Card key={section.titleKey} className="overflow-hidden">
           <CardHeader className="pb-3 bg-muted/30">
-            <CardTitle className="text-lg font-semibold">{t(section.titleKey)}</CardTitle>
+            <CardTitle className="text-lg font-semibold">{section.titleKey}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-2 pt-4">
             {section.items.map((item) => (

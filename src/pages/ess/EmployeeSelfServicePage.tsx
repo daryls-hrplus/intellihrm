@@ -65,27 +65,27 @@ export default function EmployeeSelfServicePage() {
 
   const sections: ModuleSection[] = [
     {
-      titleKey: "ess.groups.personal",
+      titleKey: "Personal",
       items: filterByAccess([allModules.profile, allModules.documents, allModules.letters, allModules.jobs]),
     },
     {
-      titleKey: "ess.groups.timeLeave",
+      titleKey: "Time & Leave",
       items: filterByAccess([allModules.leave, allModules.timeAttendance]),
     },
     {
-      titleKey: "ess.groups.payBenefits",
+      titleKey: "Pay & Benefits",
       items: filterByAccess([allModules.payslips, allModules.compensation, allModules.benefits, allModules.expenses]),
     },
     {
-      titleKey: "ess.groups.careerDevelopment",
+      titleKey: "Career & Development",
       items: filterByAccess([allModules.training, allModules.goals, allModules.feedback, allModules.recognition, allModules.onboarding, allModules.offboarding]),
     },
     {
-      titleKey: "ess.groups.workplaceResources",
+      titleKey: "Workplace Resources",
       items: filterByAccess([allModules.property, allModules.relations, allModules.hse]),
     },
     {
-      titleKey: "ess.groups.support",
+      titleKey: "Support",
       items: filterByAccess([allModules.approvals, allModules.delegates, allModules.tickets, allModules.reminders, allModules.notifications]),
     },
   ];

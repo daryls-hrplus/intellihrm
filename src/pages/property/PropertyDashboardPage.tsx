@@ -51,19 +51,19 @@ export default function PropertyDashboardPage() {
 
   const sections: ModuleSection[] = [
     {
-      titleKey: "property.groups.inventory",
+      titleKey: "Inventory",
       items: filterByAccess([allModules.assets, allModules.categories]),
     },
     {
-      titleKey: "property.groups.allocation",
+      titleKey: "Allocation",
       items: filterByAccess([allModules.assignments, allModules.requests]),
     },
     {
-      titleKey: "property.groups.maintenance",
+      titleKey: "Maintenance",
       items: filterByAccess([allModules.maintenance]),
     },
     {
-      titleKey: "property.groups.analytics",
+      titleKey: "Analytics",
       items: filterByAccess([allModules.analytics]),
     },
   ];

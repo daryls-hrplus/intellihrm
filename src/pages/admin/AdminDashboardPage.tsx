@@ -91,12 +91,12 @@ const getAdminModuleSections = (t: (key: string) => string, hasTabAccess: (modul
     items.filter(item => hasTabAccess("admin", item.tabCode || ""));
 
   return [
-    { titleKey: "admin.groups.organization", items: filterByPermission(allModules.organization) },
-    { titleKey: "admin.groups.usersAccess", items: filterByPermission(allModules.usersAccess) },
-    { titleKey: "admin.groups.security", items: filterByPermission(allModules.security) },
-    { titleKey: "admin.groups.systemConfig", items: filterByPermission(allModules.systemConfig) },
-    { titleKey: "admin.groups.documentation", items: filterByPermission(allModules.documentation) },
-    { titleKey: "admin.groups.billing", items: filterByPermission(allModules.billing) },
+    { titleKey: "Organization", items: filterByPermission(allModules.organization) },
+    { titleKey: "Users & Access", items: filterByPermission(allModules.usersAccess) },
+    { titleKey: "Security", items: filterByPermission(allModules.security) },
+    { titleKey: "System Configuration", items: filterByPermission(allModules.systemConfig) },
+    { titleKey: "Documentation", items: filterByPermission(allModules.documentation) },
+    { titleKey: "Billing", items: filterByPermission(allModules.billing) },
   ];
 };
 
