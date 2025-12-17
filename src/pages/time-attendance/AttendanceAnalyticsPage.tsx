@@ -10,6 +10,7 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 import { format, subDays, eachDayOfInterval, parseISO } from "date-fns";
 import { BarChart3, Loader2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { AIModuleReportBuilder } from "@/components/shared/AIModuleReportBuilder";
 
 const COLORS = ["hsl(var(--primary))", "hsl(var(--destructive))", "hsl(var(--warning))", "hsl(var(--success))"];
 
@@ -138,6 +139,8 @@ export default function AttendanceAnalyticsPage() {
             <TabsTrigger value="trends">{t("timeAttendance.analytics.dailyTrends")}</TabsTrigger>
             <TabsTrigger value="distribution">{t("timeAttendance.analytics.statusDistribution")}</TabsTrigger>
             <TabsTrigger value="hourly">{t("timeAttendance.analytics.hourlyPatterns")}</TabsTrigger>
+            <TabsTrigger value="ai-banded">{t("reports.aiBandedReports")}</TabsTrigger>
+            <TabsTrigger value="ai-bi">{t("reports.aiBIReports")}</TabsTrigger>
           </TabsList>
 
           <TabsContent value="trends">
@@ -190,6 +193,14 @@ export default function AttendanceAnalyticsPage() {
                 </ResponsiveContainer>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="ai-banded">
+            <AIModuleReportBuilder moduleName="attendance" reportType="banded" companyId={profile?.company_id || undefined} />
+          </TabsContent>
+
+          <TabsContent value="ai-bi">
+            <AIModuleReportBuilder moduleName="attendance" reportType="bi" companyId={profile?.company_id || undefined} />
           </TabsContent>
         </Tabs>
       </div>

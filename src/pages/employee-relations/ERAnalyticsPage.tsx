@@ -4,10 +4,12 @@ import { useTranslation } from "react-i18next";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { ERAnalytics } from "@/components/employee-relations/ERAnalytics";
 import { BarChart3 } from "lucide-react";
+import { AIModuleReportBuilder } from "@/components/shared/AIModuleReportBuilder";
 
 export default function ERAnalyticsPage() {
   const { t } = useTranslation();
@@ -76,7 +78,25 @@ export default function ERAnalyticsPage() {
             </Select>
           </div>
         </div>
-        {selectedCompanyId && <ERAnalytics companyId={selectedCompanyId} />}
+        <Tabs defaultValue="charts" className="space-y-4">
+          <TabsList>
+            <TabsTrigger value="charts">{t("common.charts")}</TabsTrigger>
+            <TabsTrigger value="ai-banded">{t("reports.aiBandedReports")}</TabsTrigger>
+            <TabsTrigger value="ai-bi">{t("reports.aiBIReports")}</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="charts">
+            {selectedCompanyId && <ERAnalytics companyId={selectedCompanyId} />}
+          </TabsContent>
+
+          <TabsContent value="ai-banded">
+            <AIModuleReportBuilder moduleName="employee-relations" reportType="banded" companyId={selectedCompanyId || undefined} />
+          </TabsContent>
+
+          <TabsContent value="ai-bi">
+            <AIModuleReportBuilder moduleName="employee-relations" reportType="bi" companyId={selectedCompanyId || undefined} />
+          </TabsContent>
+        </Tabs>
       </div>
     </AppLayout>
   );

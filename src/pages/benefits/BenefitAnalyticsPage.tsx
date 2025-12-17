@@ -10,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, PieChart, Pie, Cell, LineChart, Line, ResponsiveContainer, Legend } from "recharts";
 import { TrendingUp, Users, DollarSign, FileText, Building2 } from "lucide-react";
+import { AIModuleReportBuilder } from "@/components/shared/AIModuleReportBuilder";
 
 const COLORS = ['hsl(var(--primary))', 'hsl(var(--secondary))', 'hsl(var(--accent))', 'hsl(142, 76%, 36%)', 'hsl(38, 92%, 50%)', 'hsl(0, 84%, 60%)'];
 
@@ -227,6 +228,8 @@ export default function BenefitAnalyticsPage() {
             <TabsTrigger value="costs">Cost Analysis</TabsTrigger>
             <TabsTrigger value="distribution">Plan Distribution</TabsTrigger>
             <TabsTrigger value="claims">Claims Analytics</TabsTrigger>
+            <TabsTrigger value="ai-banded">AI Banded Reports</TabsTrigger>
+            <TabsTrigger value="ai-bi">AI BI Reports</TabsTrigger>
           </TabsList>
 
           <TabsContent value="enrollments">
@@ -347,6 +350,14 @@ export default function BenefitAnalyticsPage() {
                 </CardContent>
               </Card>
             </div>
+          </TabsContent>
+
+          <TabsContent value="ai-banded">
+            <AIModuleReportBuilder moduleName="benefits" reportType="banded" companyId={selectedCompany !== "all" ? selectedCompany : undefined} />
+          </TabsContent>
+
+          <TabsContent value="ai-bi">
+            <AIModuleReportBuilder moduleName="benefits" reportType="bi" companyId={selectedCompany !== "all" ? selectedCompany : undefined} />
           </TabsContent>
         </Tabs>
       </div>
