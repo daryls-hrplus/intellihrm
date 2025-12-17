@@ -7,7 +7,7 @@ import { ModuleReportsButton } from "@/components/reports/ModuleReportsButton";
 import { ModuleBIButton } from "@/components/bi/ModuleBIButton";
 import { LeaveCompanyFilter } from "@/components/leave/LeaveCompanyFilter";
 import { useGranularPermissions } from "@/hooks/useGranularPermissions";
-import { DraggableModuleCards, ModuleCardItem } from "@/components/ui/DraggableModuleCards";
+import { GroupedModuleCards, GroupedModuleItem, ModuleSection } from "@/components/ui/GroupedModuleCards";
 import { 
   Clock, 
   Calendar, 
@@ -48,13 +48,11 @@ export default function TimeAttendanceDashboardPage() {
       const companyFilter = selectedCompanyId !== "all" ? selectedCompanyId : profile.company_id;
 
       try {
-        // Get total employees
         const { count: totalStaff } = await supabase
           .from('profiles')
           .select('id', { count: 'exact', head: true })
           .eq('company_id', companyFilter);
 
-        // Get employees who clocked in today
         const { data: clockedInToday } = await supabase
           .from('time_clock_entries')
           .select('employee_id')
@@ -64,7 +62,6 @@ export default function TimeAttendanceDashboardPage() {
 
         const presentToday = new Set((clockedInToday || []).map(e => e.employee_id)).size;
 
-        // Get employees on leave today
         const leaveResult = await (supabase as any)
           .from('leave_requests')
           .select('id', { count: 'exact', head: true })
@@ -74,7 +71,6 @@ export default function TimeAttendanceDashboardPage() {
           .gte('end_date', today);
         const onLeave = leaveResult.count as number | null;
 
-        // Calculate absent (total - present - on leave)
         const absent = Math.max(0, (totalStaff || 0) - presentToday - (onLeave || 0));
 
         setStats({
@@ -93,8 +89,10 @@ export default function TimeAttendanceDashboardPage() {
     fetchStats();
   }, [profile?.company_id, selectedCompanyId]);
 
-  const features = [
-    {
+  // Define all modules
+  const allModules = {
+    // Daily Operations
+    tracking: {
       title: t("timeAttendance.modules.timeTracking.title"),
       description: t("timeAttendance.modules.timeTracking.description"),
       icon: Timer,
@@ -102,7 +100,7 @@ export default function TimeAttendanceDashboardPage() {
       color: "bg-primary/10 text-primary",
       tabCode: "tracking",
     },
-    {
+    records: {
       title: t("timeAttendance.modules.records.title"),
       description: t("timeAttendance.modules.records.description"),
       icon: ClipboardList,
@@ -110,79 +108,7 @@ export default function TimeAttendanceDashboardPage() {
       color: "bg-success/10 text-success",
       tabCode: "records",
     },
-    {
-      title: t("timeAttendance.modules.schedules.title"),
-      description: t("timeAttendance.modules.schedules.description"),
-      icon: Calendar,
-      href: "/time-attendance/schedules",
-      color: "bg-warning/10 text-warning",
-      tabCode: "schedules",
-    },
-    {
-      title: t("timeAttendance.modules.overtime.title"),
-      description: t("timeAttendance.modules.overtime.description"),
-      icon: Clock,
-      href: "/time-attendance/overtime",
-      color: "bg-secondary/10 text-secondary-foreground",
-      tabCode: "overtime",
-    },
-    {
-      title: t("timeAttendance.modules.shifts.title"),
-      description: t("timeAttendance.modules.shifts.description"),
-      icon: Sun,
-      href: "/time-attendance/shifts",
-      color: "bg-orange-500/10 text-orange-600",
-      tabCode: "shifts",
-    },
-    {
-      title: t("timeAttendance.modules.geofencing.title"),
-      description: t("timeAttendance.modules.geofencing.description"),
-      icon: MapPin,
-      href: "/time-attendance/geofencing",
-      color: "bg-teal-500/10 text-teal-600",
-      tabCode: "geofencing",
-    },
-    {
-      title: t("timeAttendance.modules.projects.title"),
-      description: t("timeAttendance.modules.projects.description"),
-      icon: Briefcase,
-      href: "/time-attendance/projects",
-      color: "bg-violet-500/10 text-violet-600",
-      tabCode: "projects",
-    },
-    {
-      title: t("timeAttendance.modules.timesheetApprovals.title"),
-      description: t("timeAttendance.modules.timesheetApprovals.description"),
-      icon: ClipboardList,
-      href: "/time-attendance/timesheet-approvals",
-      color: "bg-indigo-500/10 text-indigo-600",
-      tabCode: "timesheet_approvals",
-    },
-    {
-      title: t("timeAttendance.modules.devices.title"),
-      description: t("timeAttendance.modules.devices.description"),
-      icon: Settings,
-      href: "/time-attendance/devices",
-      color: "bg-slate-500/10 text-slate-600",
-      tabCode: "devices",
-    },
-    {
-      title: t("timeAttendance.modules.policies.title"),
-      description: t("timeAttendance.modules.policies.description"),
-      icon: Settings,
-      href: "/time-attendance/policies",
-      color: "bg-amber-500/10 text-amber-600",
-      tabCode: "policies",
-    },
-    {
-      title: t("timeAttendance.modules.exceptions.title"),
-      description: t("timeAttendance.modules.exceptions.description"),
-      icon: AlertCircle,
-      href: "/time-attendance/exceptions",
-      color: "bg-red-500/10 text-red-600",
-      tabCode: "exceptions",
-    },
-    {
+    live: {
       title: t("timeAttendance.modules.live.title"),
       description: t("timeAttendance.modules.live.description"),
       icon: UserCheck,
@@ -190,7 +116,82 @@ export default function TimeAttendanceDashboardPage() {
       color: "bg-green-500/10 text-green-600",
       tabCode: "live",
     },
-    {
+    exceptions: {
+      title: t("timeAttendance.modules.exceptions.title"),
+      description: t("timeAttendance.modules.exceptions.description"),
+      icon: AlertCircle,
+      href: "/time-attendance/exceptions",
+      color: "bg-red-500/10 text-red-600",
+      tabCode: "exceptions",
+    },
+    // Scheduling
+    schedules: {
+      title: t("timeAttendance.modules.schedules.title"),
+      description: t("timeAttendance.modules.schedules.description"),
+      icon: Calendar,
+      href: "/time-attendance/schedules",
+      color: "bg-warning/10 text-warning",
+      tabCode: "schedules",
+    },
+    shifts: {
+      title: t("timeAttendance.modules.shifts.title"),
+      description: t("timeAttendance.modules.shifts.description"),
+      icon: Sun,
+      href: "/time-attendance/shifts",
+      color: "bg-orange-500/10 text-orange-600",
+      tabCode: "shifts",
+    },
+    overtime: {
+      title: t("timeAttendance.modules.overtime.title"),
+      description: t("timeAttendance.modules.overtime.description"),
+      icon: Clock,
+      href: "/time-attendance/overtime",
+      color: "bg-secondary/10 text-secondary-foreground",
+      tabCode: "overtime",
+    },
+    // Project Time
+    projects: {
+      title: t("timeAttendance.modules.projects.title"),
+      description: t("timeAttendance.modules.projects.description"),
+      icon: Briefcase,
+      href: "/time-attendance/projects",
+      color: "bg-violet-500/10 text-violet-600",
+      tabCode: "projects",
+    },
+    timesheetApprovals: {
+      title: t("timeAttendance.modules.timesheetApprovals.title"),
+      description: t("timeAttendance.modules.timesheetApprovals.description"),
+      icon: ClipboardList,
+      href: "/time-attendance/timesheet-approvals",
+      color: "bg-indigo-500/10 text-indigo-600",
+      tabCode: "timesheet_approvals",
+    },
+    // Configuration
+    policies: {
+      title: t("timeAttendance.modules.policies.title"),
+      description: t("timeAttendance.modules.policies.description"),
+      icon: Settings,
+      href: "/time-attendance/policies",
+      color: "bg-amber-500/10 text-amber-600",
+      tabCode: "policies",
+    },
+    devices: {
+      title: t("timeAttendance.modules.devices.title"),
+      description: t("timeAttendance.modules.devices.description"),
+      icon: Settings,
+      href: "/time-attendance/devices",
+      color: "bg-slate-500/10 text-slate-600",
+      tabCode: "devices",
+    },
+    geofencing: {
+      title: t("timeAttendance.modules.geofencing.title"),
+      description: t("timeAttendance.modules.geofencing.description"),
+      icon: MapPin,
+      href: "/time-attendance/geofencing",
+      color: "bg-teal-500/10 text-teal-600",
+      tabCode: "geofencing",
+    },
+    import: {
       title: t("timeAttendance.modules.import.title"),
       description: t("timeAttendance.modules.import.description"),
       icon: ClipboardList,
@@ -198,7 +199,8 @@ export default function TimeAttendanceDashboardPage() {
       color: "bg-cyan-500/10 text-cyan-600",
       tabCode: "import",
     },
-    {
+    // Analytics
+    analytics: {
       title: t("timeAttendance.modules.analytics.title"),
       description: t("timeAttendance.modules.analytics.description"),
       icon: TrendingUp,
@@ -206,7 +208,55 @@ export default function TimeAttendanceDashboardPage() {
       color: "bg-purple-500/10 text-purple-600",
       tabCode: "analytics",
     },
-  ].filter(f => hasTabAccess("time_attendance", f.tabCode));
+  };
+
+  // Filter by permissions
+  const filterByAccess = (modules: GroupedModuleItem[]): GroupedModuleItem[] => {
+    return modules.filter(m => hasTabAccess("time_attendance", m.tabCode || ""));
+  };
+
+  // Build grouped sections
+  const sections: ModuleSection[] = [
+    {
+      titleKey: "timeAttendance.groups.dailyOperations",
+      items: filterByAccess([
+        allModules.tracking,
+        allModules.records,
+        allModules.live,
+        allModules.exceptions,
+      ]),
+    },
+    {
+      titleKey: "timeAttendance.groups.scheduling",
+      items: filterByAccess([
+        allModules.schedules,
+        allModules.shifts,
+        allModules.overtime,
+      ]),
+    },
+    {
+      titleKey: "timeAttendance.groups.projectTime",
+      items: filterByAccess([
+        allModules.projects,
+        allModules.timesheetApprovals,
+      ]),
+    },
+    {
+      titleKey: "timeAttendance.groups.configuration",
+      items: filterByAccess([
+        allModules.policies,
+        allModules.devices,
+        allModules.geofencing,
+        allModules.import,
+      ]),
+    },
+    {
+      titleKey: "timeAttendance.groups.analytics",
+      items: filterByAccess([
+        allModules.analytics,
+      ]),
+    },
+  ];
 
   const statCards = [
     { label: t("timeAttendance.stats.presentToday"), value: stats.presentToday, icon: UserCheck, color: "text-success" },
@@ -266,26 +316,8 @@ export default function TimeAttendanceDashboardPage() {
           })}
         </div>
 
-        {/* Features */}
-        <DraggableModuleCards 
-          modules={features as ModuleCardItem[]} 
-          preferenceKey="time-attendance-dashboard-order"
-        />
-
-        {/* Today's Activity */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <TrendingUp className="h-5 w-5" />
-              {t("timeAttendance.todayOverview")}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-center py-8 text-muted-foreground">
-              {t("timeAttendance.clickFeatureToStart")}
-            </div>
-          </CardContent>
-        </Card>
+        {/* Grouped Modules */}
+        <GroupedModuleCards sections={sections} />
       </div>
     </AppLayout>
   );

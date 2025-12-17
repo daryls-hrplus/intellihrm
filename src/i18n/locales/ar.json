@@ -221,6 +221,13 @@
     "confirmDeleteDepartment": "هل أنت متأكد من حذف هذا القسم؟",
     "confirmDeleteSection": "هل أنت متأكد من حذف هذه الوحدة؟",
     "deleteWarning": "لا يمكن التراجع عن هذا الإجراء.",
+    "groups": {
+      "organizationSetup": "إعداد المؤسسة",
+      "jobArchitecture": "هيكل الوظائف",
+      "employeeManagement": "إدارة الموظفين",
+      "employeeLifecycle": "دورة حياة الموظف",
+      "analyticsPlanning": "التحليلات والتخطيط"
+    },
     "modules": {
       "employees": {
         "title": "الموظفون",
@@ -793,7 +800,14 @@
     }
   },
   "ess": {
-    "modules": {
+      "groups": {
+        "selfService": "الخدمة الذاتية",
+        "approvalsProcessing": "الموافقات والمعالجة",
+        "leaveConfiguration": "تكوين الإجازات",
+        "timeBanking": "بنك الوقت",
+        "analytics": "التحليلات"
+      },
+      "modules": {
       "expenses": {
         "title": "مطالبات المصروفات",
         "description": "تقديم وتتبع تعويضات المصروفات"

@@ -7,7 +7,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/hooks/useLanguage";
 import { useGranularPermissions } from "@/hooks/useGranularPermissions";
 import { supabase } from "@/integrations/supabase/client";
-import { DraggableModuleCards, ModuleCardItem } from "@/components/ui/DraggableModuleCards";
+import { GroupedModuleCards, GroupedModuleItem, ModuleSection } from "@/components/ui/GroupedModuleCards";
 import {
   Select,
   SelectContent,
@@ -37,119 +37,11 @@ interface Company {
   code: string;
 }
 
-const getLeaveModules = (t: (key: string) => string) => [
-  {
-    title: t("leave.modules.myLeave"),
-    description: t("leave.modules.myLeaveDesc"),
-    href: "/leave/my-leave",
-    icon: Calendar,
-    color: "bg-primary/10 text-primary",
-    tabCode: "my_leave",
-  },
-  {
-    title: t("leave.modules.applyLeave"),
-    description: t("leave.modules.applyLeaveDesc"),
-    href: "/leave/apply",
-    icon: CalendarPlus,
-    color: "bg-success/10 text-success",
-    tabCode: "apply",
-  },
-  {
-    title: t("leave.modules.approvals"),
-    description: t("leave.modules.approvalsDesc"),
-    href: "/leave/approvals",
-    icon: CalendarCheck,
-    color: "bg-warning/10 text-warning",
-    tabCode: "approvals",
-  },
-  {
-    title: t("leave.modules.types"),
-    description: t("leave.modules.typesDesc"),
-    href: "/leave/types",
-    icon: Settings,
-    color: "bg-info/10 text-info",
-    tabCode: "types",
-  },
-  {
-    title: t("leave.modules.accrualRules"),
-    description: t("leave.modules.accrualRulesDesc"),
-    href: "/leave/accrual-rules",
-    icon: TrendingUp,
-    color: "bg-primary/10 text-primary",
-    tabCode: "accrual_rules",
-  },
-  {
-    title: t("leave.modules.rolloverRules"),
-    description: t("leave.modules.rolloverRulesDesc"),
-    href: "/leave/rollover-rules",
-    icon: RotateCcw,
-    color: "bg-secondary/10 text-secondary-foreground",
-    tabCode: "rollover_rules",
-  },
-  {
-    title: t("leave.modules.holidays"),
-    description: t("leave.modules.holidaysDesc"),
-    href: "/leave/holidays",
-    icon: PartyPopper,
-    color: "bg-destructive/10 text-destructive",
-    tabCode: "holidays",
-  },
-  {
-    title: t("leave.modules.teamCalendar"),
-    description: t("leave.modules.teamCalendarDesc"),
-    href: "/leave/calendar",
-    icon: Calendar,
-    color: "bg-cyan-500/10 text-cyan-600",
-    tabCode: "calendar",
-  },
-  {
-    title: t("leave.modules.balanceAdjustments"),
-    description: t("leave.modules.balanceAdjustmentsDesc"),
-    href: "/leave/balance-adjustments",
-    icon: Settings,
-    color: "bg-slate-500/10 text-slate-600",
-    tabCode: "balance_adjustments",
-  },
-  {
-    title: t("leave.modules.balanceRecalculation"),
-    description: t("leave.modules.balanceRecalculationDesc"),
-    href: "/leave/balance-recalculation",
-    icon: Calculator,
-    color: "bg-accent text-accent-foreground",
-    tabCode: "balance_recalculation",
-  },
-  {
-    title: t("leave.modules.analytics"),
-    description: t("leave.modules.analyticsDesc"),
-    href: "/leave/analytics",
-    icon: BarChart3,
-    color: "bg-violet-500/10 text-violet-600",
-    tabCode: "analytics",
-  },
-  {
-    title: t("leave.modules.compensatoryTime"),
-    description: t("leave.modules.compensatoryTimeDesc"),
-    href: "/leave/compensatory-time",
-    icon: Timer,
-    color: "bg-info/10 text-info",
-    tabCode: "compensatory_time",
-  },
-  {
-    title: t("leave.modules.compTimePolicies"),
-    description: t("leave.modules.compTimePoliciesDesc"),
-    href: "/leave/comp-time-policies",
-    icon: Settings,
-    color: "bg-muted text-muted-foreground",
-    tabCode: "comp_time_policies",
-  },
-];
-
 export default function LeaveDashboardPage() {
   const { t } = useLanguage();
   const { company, isAdmin, hasRole } = useAuth();
   const { hasTabAccess } = useGranularPermissions();
   const isAdminOrHR = isAdmin || hasRole("hr_manager");
-  const leaveModules = getLeaveModules(t);
   
   // Company filter state
   const [companies, setCompanies] = useState<Company[]>([]);
@@ -176,11 +68,171 @@ export default function LeaveDashboardPage() {
     }
   }, [company?.id, selectedCompanyId]);
 
-  const { leaveBalances, allLeaveRequests, loadingBalances, loadingAllRequests } = useLeaveManagement(selectedCompanyId || company?.id);
+  const { leaveBalances, allLeaveRequests } = useLeaveManagement(selectedCompanyId || company?.id);
   
   const pendingCount = allLeaveRequests.filter(r => r.status === "pending").length;
   const approvedThisYear = allLeaveRequests.filter(r => r.status === "approved").length;
   const totalBalance = leaveBalances.reduce((sum, b) => sum + (b.current_balance || 0), 0);
+
+  // Define all modules
+  const allModules = {
+    // Self-Service
+    myLeave: {
+      title: t("leave.modules.myLeave"),
+      description: t("leave.modules.myLeaveDesc"),
+      href: "/leave/my-leave",
+      icon: Calendar,
+      color: "bg-primary/10 text-primary",
+      tabCode: "my_leave",
+    },
+    applyLeave: {
+      title: t("leave.modules.applyLeave"),
+      description: t("leave.modules.applyLeaveDesc"),
+      href: "/leave/apply",
+      icon: CalendarPlus,
+      color: "bg-success/10 text-success",
+      tabCode: "apply",
+    },
+    teamCalendar: {
+      title: t("leave.modules.teamCalendar"),
+      description: t("leave.modules.teamCalendarDesc"),
+      href: "/leave/calendar",
+      icon: Calendar,
+      color: "bg-cyan-500/10 text-cyan-600",
+      tabCode: "calendar",
+    },
+    // Approvals & Processing
+    approvals: {
+      title: t("leave.modules.approvals"),
+      description: t("leave.modules.approvalsDesc"),
+      href: "/leave/approvals",
+      icon: CalendarCheck,
+      color: "bg-warning/10 text-warning",
+      tabCode: "approvals",
+    },
+    balanceAdjustments: {
+      title: t("leave.modules.balanceAdjustments"),
+      description: t("leave.modules.balanceAdjustmentsDesc"),
+      href: "/leave/balance-adjustments",
+      icon: Settings,
+      color: "bg-slate-500/10 text-slate-600",
+      tabCode: "balance_adjustments",
+    },
+    // Leave Configuration
+    types: {
+      title: t("leave.modules.types"),
+      description: t("leave.modules.typesDesc"),
+      href: "/leave/types",
+      icon: Settings,
+      color: "bg-info/10 text-info",
+      tabCode: "types",
+    },
+    accrualRules: {
+      title: t("leave.modules.accrualRules"),
+      description: t("leave.modules.accrualRulesDesc"),
+      href: "/leave/accrual-rules",
+      icon: TrendingUp,
+      color: "bg-primary/10 text-primary",
+      tabCode: "accrual_rules",
+    },
+    rolloverRules: {
+      title: t("leave.modules.rolloverRules"),
+      description: t("leave.modules.rolloverRulesDesc"),
+      href: "/leave/rollover-rules",
+      icon: RotateCcw,
+      color: "bg-secondary/10 text-secondary-foreground",
+      tabCode: "rollover_rules",
+    },
+    holidays: {
+      title: t("leave.modules.holidays"),
+      description: t("leave.modules.holidaysDesc"),
+      href: "/leave/holidays",
+      icon: PartyPopper,
+      color: "bg-destructive/10 text-destructive",
+      tabCode: "holidays",
+    },
+    compTimePolicies: {
+      title: t("leave.modules.compTimePolicies"),
+      description: t("leave.modules.compTimePoliciesDesc"),
+      href: "/leave/comp-time-policies",
+      icon: Settings,
+      color: "bg-muted text-muted-foreground",
+      tabCode: "comp_time_policies",
+    },
+    // Time Banking
+    compensatoryTime: {
+      title: t("leave.modules.compensatoryTime"),
+      description: t("leave.modules.compensatoryTimeDesc"),
+      href: "/leave/compensatory-time",
+      icon: Timer,
+      color: "bg-info/10 text-info",
+      tabCode: "compensatory_time",
+    },
+    balanceRecalculation: {
+      title: t("leave.modules.balanceRecalculation"),
+      description: t("leave.modules.balanceRecalculationDesc"),
+      href: "/leave/balance-recalculation",
+      icon: Calculator,
+      color: "bg-accent text-accent-foreground",
+      tabCode: "balance_recalculation",
+    },
+    // Analytics
+    analytics: {
+      title: t("leave.modules.analytics"),
+      description: t("leave.modules.analyticsDesc"),
+      href: "/leave/analytics",
+      icon: BarChart3,
+      color: "bg-violet-500/10 text-violet-600",
+      tabCode: "analytics",
+    },
+  };
+
+  // Filter by permissions
+  const filterByAccess = (modules: GroupedModuleItem[]): GroupedModuleItem[] => {
+    return modules.filter(m => hasTabAccess("leave", m.tabCode || ""));
+  };
+
+  // Build grouped sections
+  const sections: ModuleSection[] = [
+    {
+      titleKey: "leave.groups.selfService",
+      items: filterByAccess([
+        allModules.myLeave,
+        allModules.applyLeave,
+        allModules.teamCalendar,
+      ]),
+    },
+    {
+      titleKey: "leave.groups.approvalsProcessing",
+      items: filterByAccess([
+        allModules.approvals,
+        allModules.balanceAdjustments,
+      ]),
+    },
+    {
+      titleKey: "leave.groups.leaveConfiguration",
+      items: filterByAccess([
+        allModules.types,
+        allModules.accrualRules,
+        allModules.rolloverRules,
+        allModules.holidays,
+        allModules.compTimePolicies,
+      ]),
+    },
+    {
+      titleKey: "leave.groups.timeBanking",
+      items: filterByAccess([
+        allModules.compensatoryTime,
+        allModules.balanceRecalculation,
+      ]),
+    },
+    {
+      titleKey: "leave.groups.analytics",
+      items: filterByAccess([
+        allModules.analytics,
+      ]),
+    },
+  ];
 
   const statCards = [
     { label: t("leave.stats.availableDays"), value: totalBalance.toFixed(1), icon: Calendar, color: "bg-primary/10 text-primary" },
@@ -188,8 +240,6 @@ export default function LeaveDashboardPage() {
     { label: t("leave.stats.approvedThisYear"), value: approvedThisYear, icon: CheckCircle, color: "bg-success/10 text-success" },
     { label: t("leave.stats.leaveTypes"), value: leaveBalances.length, icon: CalendarCheck, color: "bg-info/10 text-info" },
   ];
-
-  const filteredModules = leaveModules.filter(m => hasTabAccess("leave", m.tabCode));
 
   return (
     <AppLayout>
@@ -255,10 +305,7 @@ export default function LeaveDashboardPage() {
           })}
         </div>
 
-        <DraggableModuleCards 
-          modules={filteredModules as ModuleCardItem[]} 
-          preferenceKey="leave-dashboard-order"
-        />
+        <GroupedModuleCards sections={sections} />
       </div>
     </AppLayout>
   );

@@ -221,6 +221,13 @@
     "confirmDeleteDepartment": "Êtes-vous sûr de vouloir supprimer ce département?",
     "confirmDeleteSection": "Êtes-vous sûr de vouloir supprimer cette section?",
     "deleteWarning": "Cette action ne peut pas être annulée.",
+    "groups": {
+      "organizationSetup": "Configuration Organisationnelle",
+      "jobArchitecture": "Architecture des Postes",
+      "employeeManagement": "Gestion des Employés",
+      "employeeLifecycle": "Cycle de Vie de l'Employé",
+      "analyticsPlanning": "Analyses et Planification"
+    },
     "modules": {
       "employees": {
         "title": "Employés",
@@ -757,6 +764,13 @@
     }
   },
   "ess": {
+    "groups": {
+      "selfService": "Libre-Service",
+      "approvalsProcessing": "Approbations et Traitement",
+      "leaveConfiguration": "Configuration des Congés",
+      "timeBanking": "Banque de Temps",
+      "analytics": "Analyses"
+    },
     "modules": {
       "expenses": {
         "title": "Notes de Frais",
