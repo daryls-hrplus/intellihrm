@@ -1215,14 +1215,7 @@
   "mss": {
     "title": "Manager Self Service",
     "subtitle": "Manage your team and direct reports",
-      "groups": {
-        "dailyOperations": "Daily Operations",
-        "scheduling": "Scheduling",
-        "projectTime": "Project Time",
-        "configuration": "Configuration",
-        "analytics": "Analytics"
-      },
-      "modules": {
+    "modules": {
       "team": {
         "title": "My Team",
         "description": "View and manage your direct reports"
@@ -2147,6 +2140,13 @@
   "timeAttendance": {
     "title": "Time & Attendance",
     "subtitle": "Track work hours, manage schedules, and monitor attendance",
+    "groups": {
+      "dailyOperations": "Daily Operations",
+      "scheduling": "Scheduling",
+      "projectTime": "Project Time",
+      "configuration": "Configuration",
+      "analytics": "Analytics"
+    },
     "stats": {
       "presentToday": "Present Today",
       "absent": "Absent",

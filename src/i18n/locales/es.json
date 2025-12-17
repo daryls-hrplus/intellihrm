@@ -889,5 +889,14 @@
         "description": "Requisitos de primer inicio de sesión y aplicación de MFA"
       }
     }
+  },
+  "timeAttendance": {
+    "groups": {
+      "dailyOperations": "Operaciones Diarias",
+      "scheduling": "Programación",
+      "projectTime": "Tiempo de Proyecto",
+      "configuration": "Configuración",
+      "analytics": "Análisis"
+    }
   }
 }

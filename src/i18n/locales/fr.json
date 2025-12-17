@@ -889,5 +889,14 @@
         "description": "Exigences de première connexion et application MFA"
       }
     }
+  },
+  "timeAttendance": {
+    "groups": {
+      "dailyOperations": "Opérations Quotidiennes",
+      "scheduling": "Planification",
+      "projectTime": "Temps de Projet",
+      "configuration": "Configuration",
+      "analytics": "Analytique"
+    }
   }
 }

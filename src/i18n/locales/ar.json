@@ -925,5 +925,14 @@
         "description": "متطلبات تسجيل الدخول الأول وتطبيق المصادقة الثنائية"
       }
     }
+  },
+  "timeAttendance": {
+    "groups": {
+      "dailyOperations": "العمليات اليومية",
+      "scheduling": "الجدولة",
+      "projectTime": "وقت المشروع",
+      "configuration": "التهيئة",
+      "analytics": "التحليلات"
+    }
   }
 }
