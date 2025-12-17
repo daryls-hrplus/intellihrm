@@ -31,7 +31,7 @@ import {
   Unlock,
   AlertTriangle,
 } from "lucide-react";
-import { format, parseISO } from "date-fns";
+import { formatDateForDisplay } from "@/utils/dateUtils";
 
 interface ExtendedPayrollRun extends PayrollRun {
   calculation_started_at?: string | null;
@@ -449,7 +449,7 @@ export default function PayrollProcessingPage() {
                       <TableCell>
                         {run.pay_period && (
                           <span className="text-sm">
-                            {format(parseISO(run.pay_period.period_start), "MMM d")} - {format(parseISO(run.pay_period.period_end), "MMM d, yyyy")}
+                            {formatDateForDisplay(run.pay_period.period_start, "MMM d")} - {formatDateForDisplay(run.pay_period.period_end, "MMM d, yyyy")}
                           </span>
                         )}
                       </TableCell>
@@ -457,10 +457,10 @@ export default function PayrollProcessingPage() {
                       <TableCell>{formatCurrency(run.total_gross_pay, run.currency)}</TableCell>
                       <TableCell>{formatCurrency(run.total_net_pay, run.currency)}</TableCell>
                       <TableCell className="text-xs text-muted-foreground">
-                        {run.calculation_started_at ? format(parseISO(run.calculation_started_at), "MMM d HH:mm") : '-'}
+                        {run.calculation_started_at ? formatDateForDisplay(run.calculation_started_at, "MMM d HH:mm") : '-'}
                       </TableCell>
                       <TableCell className="text-xs text-muted-foreground">
-                        {run.calculated_at ? format(parseISO(run.calculated_at), "MMM d HH:mm") : '-'}
+                        {run.calculated_at ? formatDateForDisplay(run.calculated_at, "MMM d HH:mm") : '-'}
                       </TableCell>
                       <TableCell>
                         <div className="flex flex-col gap-1">
@@ -621,7 +621,7 @@ export default function PayrollProcessingPage() {
                   <SelectContent>
                     {periods.filter(p => p.status === 'open').map((period) => (
                       <SelectItem key={period.id} value={period.id}>
-                        {period.period_number} ({format(parseISO(period.period_start), "MMM d")} - {format(parseISO(period.period_end), "MMM d")})
+                        {period.period_number} ({formatDateForDisplay(period.period_start, "MMM d")} - {formatDateForDisplay(period.period_end, "MMM d")})
                       </SelectItem>
                     ))}
                   </SelectContent>

@@ -4,6 +4,7 @@ import { useLeaveManagement } from "@/hooks/useLeaveManagement";
 import { useAuth } from "@/contexts/AuthContext";
 import { LeaveCompanyFilter, useLeaveCompanyFilter } from "@/components/leave/LeaveCompanyFilter";
 import { supabase } from "@/integrations/supabase/client";
+import { getTodayString } from "@/utils/dateUtils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -75,7 +76,7 @@ export default function LeaveBalanceRecalculationPage() {
   const [scope, setScope] = useState<'single' | 'department' | 'all'>('single');
   const [calculationType, setCalculationType] = useState<'current_year' | 'from_hire_date' | 'custom_range'>('current_year');
   const [periodStart, setPeriodStart] = useState("");
-  const [periodEnd, setPeriodEnd] = useState(new Date().toISOString().split('T')[0]);
+  const [periodEnd, setPeriodEnd] = useState(getTodayString());
   const [isRecalculating, setIsRecalculating] = useState(false);
   const [history, setHistory] = useState<RecalculationHistory[]>([]);
   const [loadingHistory, setLoadingHistory] = useState(false);

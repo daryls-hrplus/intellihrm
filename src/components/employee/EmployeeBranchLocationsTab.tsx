@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
-import { formatDateForDisplay } from "@/utils/dateUtils";
+import { formatDateForDisplay, getTodayString, parseLocalDate } from "@/utils/dateUtils";
 import {
   Building,
   Plus,
@@ -75,7 +75,7 @@ interface EmployeeBranchLocationsTabProps {
 const emptyFormData = {
   branch_location_id: "",
   is_primary: false,
-  start_date: new Date().toISOString().split("T")[0],
+  start_date: getTodayString(),
   end_date: "",
   notes: "",
 };
@@ -254,7 +254,7 @@ export function EmployeeBranchLocationsTab({ employeeId }: EmployeeBranchLocatio
   };
 
   const isActive = (assignment: EmployeeBranchLocation) => {
-    const today = new Date().toISOString().split("T")[0];
+    const today = getTodayString();
     return assignment.start_date <= today && (!assignment.end_date || assignment.end_date >= today);
   };
 
