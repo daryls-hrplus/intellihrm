@@ -272,6 +272,13 @@
     "viewOrgchart": "View Orgchart",
     "viewOrgHierarchy": "View and explore the organizational hierarchy",
     "noCompaniesFound": "No companies found",
+    "groups": {
+      "organizationSetup": "Organization Setup",
+      "jobArchitecture": "Job Architecture",
+      "employeeManagement": "Employee Management",
+      "employeeLifecycle": "Employee Lifecycle",
+      "analyticsPlanning": "Analytics & Planning"
+    },
     "modules": {
       "companyGroups": {
         "title": "Company Groups",
@@ -780,6 +787,13 @@
       "approvedThisYear": "Approved This Year",
       "leaveTypes": "Leave Types"
     },
+    "groups": {
+      "selfService": "Self-Service",
+      "approvalsProcessing": "Approvals & Processing",
+      "leaveConfiguration": "Leave Configuration",
+      "timeBanking": "Time Banking",
+      "analytics": "Analytics"
+    },
     "modules": {
       "myLeave": "My Leave",
       "myLeaveDesc": "View balances and request history",
@@ -1201,7 +1215,14 @@
   "mss": {
     "title": "Manager Self Service",
     "subtitle": "Manage your team and direct reports",
-    "modules": {
+      "groups": {
+        "dailyOperations": "Daily Operations",
+        "scheduling": "Scheduling",
+        "projectTime": "Project Time",
+        "configuration": "Configuration",
+        "analytics": "Analytics"
+      },
+      "modules": {
       "team": {
         "title": "My Team",
         "description": "View and manage your direct reports"

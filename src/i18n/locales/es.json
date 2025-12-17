@@ -221,6 +221,13 @@
     "confirmDeleteDepartment": "¿Estás seguro de eliminar este departamento?",
     "confirmDeleteSection": "¿Estás seguro de eliminar esta sección?",
     "deleteWarning": "Esta acción no se puede deshacer.",
+    "groups": {
+      "organizationSetup": "Configuración Organizacional",
+      "jobArchitecture": "Arquitectura de Puestos",
+      "employeeManagement": "Gestión de Empleados",
+      "employeeLifecycle": "Ciclo de Vida del Empleado",
+      "analyticsPlanning": "Análisis y Planificación"
+    },
     "modules": {
       "employees": {
         "title": "Empleados",
@@ -757,6 +764,13 @@
     }
   },
   "ess": {
+    "groups": {
+      "selfService": "Autoservicio",
+      "approvalsProcessing": "Aprobaciones y Procesamiento",
+      "leaveConfiguration": "Configuración de Permisos",
+      "timeBanking": "Banco de Tiempo",
+      "analytics": "Análisis"
+    },
     "modules": {
       "expenses": {
         "title": "Reclamaciones de Gastos",
