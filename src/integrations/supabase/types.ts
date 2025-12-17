@@ -18040,6 +18040,128 @@ export type Database = {
           },
         ]
       }
+      leave_schedule_config: {
+        Row: {
+          company_id: string
+          created_at: string
+          id: string
+          is_enabled: boolean
+          last_run_at: string | null
+          last_run_message: string | null
+          last_run_status: string | null
+          next_run_at: string | null
+          notify_on_completion: boolean
+          notify_on_failure: boolean
+          run_day_of_month: number | null
+          run_time: string
+          schedule_type: string
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          id?: string
+          is_enabled?: boolean
+          last_run_at?: string | null
+          last_run_message?: string | null
+          last_run_status?: string | null
+          next_run_at?: string | null
+          notify_on_completion?: boolean
+          notify_on_failure?: boolean
+          run_day_of_month?: number | null
+          run_time?: string
+          schedule_type: string
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          id?: string
+          is_enabled?: boolean
+          last_run_at?: string | null
+          last_run_message?: string | null
+          last_run_status?: string | null
+          next_run_at?: string | null
+          notify_on_completion?: boolean
+          notify_on_failure?: boolean
+          run_day_of_month?: number | null
+          run_time?: string
+          schedule_type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "leave_schedule_config_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      leave_schedule_runs: {
+        Row: {
+          company_id: string
+          completed_at: string | null
+          config_id: string
+          created_at: string
+          details: Json | null
+          employees_processed: number | null
+          error_message: string | null
+          id: string
+          records_created: number | null
+          records_updated: number | null
+          schedule_type: string
+          started_at: string
+          status: string
+        }
+        Insert: {
+          company_id: string
+          completed_at?: string | null
+          config_id: string
+          created_at?: string
+          details?: Json | null
+          employees_processed?: number | null
+          error_message?: string | null
+          id?: string
+          records_created?: number | null
+          records_updated?: number | null
+          schedule_type: string
+          started_at?: string
+          status?: string
+        }
+        Update: {
+          company_id?: string
+          completed_at?: string | null
+          config_id?: string
+          created_at?: string
+          details?: Json | null
+          employees_processed?: number | null
+          error_message?: string | null
+          id?: string
+          records_created?: number | null
+          records_updated?: number | null
+          schedule_type?: string
+          started_at?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "leave_schedule_runs_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leave_schedule_runs_config_id_fkey"
+            columns: ["config_id"]
+            isOneToOne: false
+            referencedRelation: "leave_schedule_config"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       leave_types: {
         Row: {
           accrual_unit: string
