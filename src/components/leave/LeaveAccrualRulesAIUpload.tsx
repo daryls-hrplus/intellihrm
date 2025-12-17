@@ -12,7 +12,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Switch } from "@/components/ui/switch";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Upload, Sparkles, FileText, CheckCircle, AlertCircle, Loader2, Settings, ShieldAlert, Plus } from "lucide-react";
+import { Upload, Sparkles, FileText, CheckCircle, AlertCircle, Loader2, Settings, ShieldAlert, Plus, Calculator, TrendingUp, User } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useLanguage } from "@/hooks/useLanguage";
@@ -48,6 +48,33 @@ interface NewLeaveType {
   reason: string;
 }
 
+interface MonthlyBreakdown {
+  month: string;
+  accrued: number;
+  used: number;
+  balance: number;
+}
+
+interface SpreadsheetSimulation {
+  scenario: string;
+  employeeName?: string;
+  employeeType?: string;
+  hireDate?: string;
+  yearsOfService: number;
+  leaveType: string;
+  accrualFrequency?: string;
+  baseAccrualRate?: number;
+  annualEntitlement?: number;
+  monthlyBreakdown?: MonthlyBreakdown[];
+  prorationApplied?: boolean;
+  prorationReason?: string;
+  ruleApplied?: string;
+  complexity?: "simple" | "moderate" | "complex";
+  edgeCaseType?: string;
+  notes?: string;
+  accrualAmount?: string; // Legacy field
+}
+
 interface LeaveAccrualRulesAIUploadProps {
   companyId: string;
   leaveTypes: Array<{ id: string; name: string }>;
@@ -76,6 +103,8 @@ export function LeaveAccrualRulesAIUpload({
   const [newLeaveTypesNeeded, setNewLeaveTypesNeeded] = useState<NewLeaveType[]>([]);
   const [selectedSchemaChanges, setSelectedSchemaChanges] = useState<Set<number>>(new Set());
   const [selectedNewLeaveTypes, setSelectedNewLeaveTypes] = useState<Set<number>>(new Set());
+  const [simulations, setSimulations] = useState<SpreadsheetSimulation[]>([]);
+  const [selectedSimulation, setSelectedSimulation] = useState<SpreadsheetSimulation | null>(null);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -89,6 +118,8 @@ export function LeaveAccrualRulesAIUpload({
       setNewLeaveTypesNeeded([]);
       setSelectedSchemaChanges(new Set());
       setSelectedNewLeaveTypes(new Set());
+      setSimulations([]);
+      setSelectedSimulation(null);
     }
   };
 
@@ -134,6 +165,10 @@ export function LeaveAccrualRulesAIUpload({
 
       if (data.newLeaveTypesNeeded && Array.isArray(data.newLeaveTypesNeeded)) {
         setNewLeaveTypesNeeded(data.newLeaveTypesNeeded);
+      }
+
+      if (data.spreadsheetExamples && Array.isArray(data.spreadsheetExamples)) {
+        setSimulations(data.spreadsheetExamples);
       }
       
       setRawExtraction(data);
@@ -265,6 +300,8 @@ export function LeaveAccrualRulesAIUpload({
     setNewLeaveTypesNeeded([]);
     setSelectedSchemaChanges(new Set());
     setSelectedNewLeaveTypes(new Set());
+    setSimulations([]);
+    setSelectedSimulation(null);
   };
 
   const frequencyLabels: Record<string, string> = {
@@ -300,16 +337,19 @@ export function LeaveAccrualRulesAIUpload({
           </DialogHeader>
 
           <Tabs defaultValue="upload" className="flex-1 overflow-hidden flex flex-col">
-            <TabsList className="grid w-full grid-cols-4">
+            <TabsList className="grid w-full grid-cols-5">
               <TabsTrigger value="upload">1. Upload</TabsTrigger>
               <TabsTrigger value="schema" disabled={!hasSchemaIssues}>
-                2. Schema Changes {hasSchemaIssues && <Badge variant="destructive" className="ml-1 h-5 px-1">{schemaChanges.length + newLeaveTypesNeeded.length}</Badge>}
+                2. Schema {hasSchemaIssues && <Badge variant="destructive" className="ml-1 h-5 px-1">{schemaChanges.length + newLeaveTypesNeeded.length}</Badge>}
               </TabsTrigger>
               <TabsTrigger value="review" disabled={extractedRules.length === 0}>
-                3. Review Rules
+                3. Review
+              </TabsTrigger>
+              <TabsTrigger value="simulation" disabled={simulations.length === 0}>
+                4. Simulation {simulations.length > 0 && <Badge variant="secondary" className="ml-1 h-5 px-1">{simulations.length}</Badge>}
               </TabsTrigger>
               <TabsTrigger value="notes" disabled={!rawExtraction}>
-                4. Notes
+                5. Notes
               </TabsTrigger>
             </TabsList>
 
@@ -626,6 +666,179 @@ export function LeaveAccrualRulesAIUpload({
               )}
             </TabsContent>
 
+            {/* Simulation Tab - Spreadsheet Simulation */}
+            <TabsContent value="simulation" className="flex-1 overflow-hidden flex flex-col p-1">
+              {simulations.length > 0 && (
+                <div className="flex flex-col h-full gap-4">
+                  <Card className="flex-1 overflow-hidden flex flex-col">
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-base flex items-center gap-2">
+                        <Calculator className="h-4 w-4" />
+                        Accrual Simulation Examples
+                      </CardTitle>
+                      <CardDescription>
+                        AI-generated scenarios demonstrating how accrual rules apply to different employee situations
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="flex-1 overflow-hidden p-0">
+                      <div className="flex h-full">
+                        {/* Scenario List */}
+                        <ScrollArea className="w-1/3 border-r">
+                          <div className="p-2 space-y-2">
+                            {simulations.map((sim, index) => (
+                              <div
+                                key={index}
+                                onClick={() => setSelectedSimulation(sim)}
+                                className={`p-3 rounded-lg cursor-pointer border transition-colors ${
+                                  selectedSimulation === sim 
+                                    ? "bg-primary/10 border-primary" 
+                                    : "hover:bg-muted border-transparent"
+                                }`}
+                              >
+                                <div className="flex items-center justify-between mb-1">
+                                  <span className="font-medium text-sm">{sim.scenario}</span>
+                                  {sim.complexity && (
+                                    <Badge 
+                                      variant={sim.complexity === "complex" ? "destructive" : sim.complexity === "moderate" ? "default" : "secondary"}
+                                      className="text-xs"
+                                    >
+                                      {sim.complexity}
+                                    </Badge>
+                                  )}
+                                </div>
+                                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                  {sim.employeeName && (
+                                    <span className="flex items-center gap-1">
+                                      <User className="h-3 w-3" />
+                                      {sim.employeeName}
+                                    </span>
+                                  )}
+                                  <Badge variant="outline" className="text-xs">{sim.leaveType}</Badge>
+                                </div>
+                                {sim.edgeCaseType && (
+                                  <Badge variant="secondary" className="text-xs mt-1">
+                                    {sim.edgeCaseType}
+                                  </Badge>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        </ScrollArea>
+
+                        {/* Simulation Detail */}
+                        <div className="flex-1 overflow-auto p-4">
+                          {selectedSimulation ? (
+                            <div className="space-y-4">
+                              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                <div className="p-3 bg-muted/50 rounded-lg">
+                                  <Label className="text-xs text-muted-foreground">Employee Type</Label>
+                                  <p className="font-medium">{selectedSimulation.employeeType || "Standard"}</p>
+                                </div>
+                                <div className="p-3 bg-muted/50 rounded-lg">
+                                  <Label className="text-xs text-muted-foreground">Years of Service</Label>
+                                  <p className="font-medium">{selectedSimulation.yearsOfService} years</p>
+                                </div>
+                                <div className="p-3 bg-muted/50 rounded-lg">
+                                  <Label className="text-xs text-muted-foreground">Annual Entitlement</Label>
+                                  <p className="font-medium">{selectedSimulation.annualEntitlement || selectedSimulation.accrualAmount || "N/A"} days</p>
+                                </div>
+                                <div className="p-3 bg-muted/50 rounded-lg">
+                                  <Label className="text-xs text-muted-foreground">Accrual Frequency</Label>
+                                  <p className="font-medium">{selectedSimulation.accrualFrequency || "Monthly"}</p>
+                                </div>
+                              </div>
+
+                              {selectedSimulation.ruleApplied && (
+                                <Alert>
+                                  <TrendingUp className="h-4 w-4" />
+                                  <AlertTitle>Rule Applied</AlertTitle>
+                                  <AlertDescription>{selectedSimulation.ruleApplied}</AlertDescription>
+                                </Alert>
+                              )}
+
+                              {selectedSimulation.prorationApplied && (
+                                <Alert variant="default">
+                                  <AlertCircle className="h-4 w-4" />
+                                  <AlertTitle>Proration Applied</AlertTitle>
+                                  <AlertDescription>{selectedSimulation.prorationReason || "Pro-rated based on hire date"}</AlertDescription>
+                                </Alert>
+                              )}
+
+                              {/* Monthly Breakdown Table */}
+                              {selectedSimulation.monthlyBreakdown && selectedSimulation.monthlyBreakdown.length > 0 && (
+                                <div className="space-y-2">
+                                  <Label className="flex items-center gap-2">
+                                    <Calculator className="h-4 w-4" />
+                                    Monthly Accrual Projection
+                                  </Label>
+                                  <ScrollArea className="h-[200px] border rounded-lg">
+                                    <Table>
+                                      <TableHeader>
+                                        <TableRow>
+                                          <TableHead>Month</TableHead>
+                                          <TableHead className="text-right">Accrued</TableHead>
+                                          <TableHead className="text-right">Used</TableHead>
+                                          <TableHead className="text-right">Balance</TableHead>
+                                        </TableRow>
+                                      </TableHeader>
+                                      <TableBody>
+                                        {selectedSimulation.monthlyBreakdown.map((month, i) => (
+                                          <TableRow key={i}>
+                                            <TableCell className="font-medium">{month.month}</TableCell>
+                                            <TableCell className="text-right text-green-600">+{month.accrued}</TableCell>
+                                            <TableCell className="text-right text-red-600">{month.used > 0 ? `-${month.used}` : "-"}</TableCell>
+                                            <TableCell className="text-right font-semibold">{month.balance}</TableCell>
+                                          </TableRow>
+                                        ))}
+                                      </TableBody>
+                                    </Table>
+                                  </ScrollArea>
+                                </div>
+                              )}
+
+                              {selectedSimulation.notes && (
+                                <div className="space-y-1">
+                                  <Label className="text-xs text-muted-foreground">Notes</Label>
+                                  <p className="text-sm bg-muted/50 p-2 rounded">{selectedSimulation.notes}</p>
+                                </div>
+                              )}
+                            </div>
+                          ) : (
+                            <div className="h-full flex items-center justify-center text-muted-foreground">
+                              <div className="text-center">
+                                <Calculator className="h-12 w-12 mx-auto mb-2 opacity-50" />
+                                <p>Select a scenario to view simulation details</p>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Summary Stats */}
+                  <Card>
+                    <CardContent className="p-4">
+                      <div className="grid grid-cols-3 gap-4 text-center">
+                        <div>
+                          <p className="text-2xl font-bold">{simulations.filter(s => s.complexity === "simple").length}</p>
+                          <p className="text-xs text-muted-foreground">Simple Cases</p>
+                        </div>
+                        <div>
+                          <p className="text-2xl font-bold">{simulations.filter(s => s.complexity === "moderate").length}</p>
+                          <p className="text-xs text-muted-foreground">Moderate Cases</p>
+                        </div>
+                        <div>
+                          <p className="text-2xl font-bold">{simulations.filter(s => s.complexity === "complex").length}</p>
+                          <p className="text-xs text-muted-foreground">Complex Cases</p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              )}
+            </TabsContent>
+
             <TabsContent value="notes" className="flex-1 overflow-auto p-1">
               {rawExtraction && (
                 <Card>
@@ -666,36 +879,6 @@ export function LeaveAccrualRulesAIUpload({
                             <li key={i}>• {a}</li>
                           ))}
                         </ul>
-                      </div>
-                    )}
-
-                    {rawExtraction.spreadsheetExamples && rawExtraction.spreadsheetExamples.length > 0 && (
-                      <div className="space-y-2">
-                        <Label>Example Calculations</Label>
-                        <ScrollArea className="h-[200px] border rounded-lg">
-                          <Table>
-                            <TableHeader>
-                              <TableRow>
-                                <TableHead>Scenario</TableHead>
-                                <TableHead>Employee</TableHead>
-                                <TableHead>Years</TableHead>
-                                <TableHead className="text-right">Accrual</TableHead>
-                                <TableHead>Notes</TableHead>
-                              </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                              {rawExtraction.spreadsheetExamples.map((ex: any, i: number) => (
-                                <TableRow key={i}>
-                                  <TableCell className="font-medium">{ex.scenario}</TableCell>
-                                  <TableCell>{ex.employeeType || '-'}</TableCell>
-                                  <TableCell>{ex.yearsOfService}</TableCell>
-                                  <TableCell className="text-right">{ex.accrualAmount}</TableCell>
-                                  <TableCell className="text-xs text-muted-foreground">{ex.notes}</TableCell>
-                                </TableRow>
-                              ))}
-                            </TableBody>
-                          </Table>
-                        </ScrollArea>
                       </div>
                     )}
                   </CardContent>
