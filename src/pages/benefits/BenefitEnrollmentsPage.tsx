@@ -79,7 +79,9 @@ export default function BenefitEnrollmentsPage() {
     enrollment_source: "open",
     coverage_level: "employee",
     employee_contribution: 0,
+    employee_contribution_type: "amount",
     employer_contribution: 0,
+    employer_contribution_type: "amount",
     notes: "",
   });
 
@@ -219,7 +221,9 @@ export default function BenefitEnrollmentsPage() {
       enrollment_source: "open",
       coverage_level: "employee",
       employee_contribution: defaultPlan?.employee_contribution || 0,
+      employee_contribution_type: "amount",
       employer_contribution: defaultPlan?.employer_contribution || 0,
+      employer_contribution_type: "amount",
       notes: "",
     });
     setDialogOpen(true);
@@ -237,7 +241,9 @@ export default function BenefitEnrollmentsPage() {
       enrollment_source: enr.enrollment_source,
       coverage_level: enr.coverage_level,
       employee_contribution: enr.employee_contribution || 0,
+      employee_contribution_type: (enr as any).employee_contribution_type || "amount",
       employer_contribution: enr.employer_contribution || 0,
+      employer_contribution_type: (enr as any).employer_contribution_type || "amount",
       notes: enr.notes || "",
     });
     setDialogOpen(true);
@@ -431,11 +437,43 @@ export default function BenefitEnrollmentsPage() {
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>Employee Contribution</Label>
-                <Input type="number" value={formData.employee_contribution} onChange={e => setFormData({...formData, employee_contribution: parseFloat(e.target.value) || 0})} />
+                <div className="flex gap-2">
+                  <Input 
+                    type="number" 
+                    value={formData.employee_contribution} 
+                    onChange={e => setFormData({...formData, employee_contribution: parseFloat(e.target.value) || 0})} 
+                    className="flex-1"
+                  />
+                  <Select value={formData.employee_contribution_type} onValueChange={v => setFormData({...formData, employee_contribution_type: v})}>
+                    <SelectTrigger className="w-[100px]">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="amount">$</SelectItem>
+                      <SelectItem value="percentage">%</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
               <div className="space-y-2">
                 <Label>Employer Contribution</Label>
-                <Input type="number" value={formData.employer_contribution} onChange={e => setFormData({...formData, employer_contribution: parseFloat(e.target.value) || 0})} />
+                <div className="flex gap-2">
+                  <Input 
+                    type="number" 
+                    value={formData.employer_contribution} 
+                    onChange={e => setFormData({...formData, employer_contribution: parseFloat(e.target.value) || 0})} 
+                    className="flex-1"
+                  />
+                  <Select value={formData.employer_contribution_type} onValueChange={v => setFormData({...formData, employer_contribution_type: v})}>
+                    <SelectTrigger className="w-[100px]">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="amount">$</SelectItem>
+                      <SelectItem value="percentage">%</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
             </div>
             <div className="space-y-2">
