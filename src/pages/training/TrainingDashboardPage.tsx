@@ -31,6 +31,8 @@ import {
   RefreshCw,
   TrendingUp,
   BarChart3,
+  Monitor,
+  PenTool,
 } from "lucide-react";
 
 interface Stats {
@@ -107,6 +109,7 @@ export default function TrainingDashboardPage() {
     myLearning: { title: t("training.modules.myLearning.title"), description: t("training.modules.myLearning.description"), href: "/training/my-learning", icon: GraduationCap, color: "bg-success/10 text-success", tabCode: "my-learning" },
     learningPaths: { title: t("training.modules.learningPaths.title"), description: t("training.modules.learningPaths.description"), href: "/training/learning-paths", icon: Route, color: "bg-info/10 text-info", tabCode: "learning-paths" },
     gapAnalysis: { title: t("training.modules.gapAnalysis.title"), description: t("training.modules.gapAnalysis.description"), href: "/training/gap-analysis", icon: Target, color: "bg-secondary/10 text-secondary-foreground", tabCode: "gap-analysis" },
+    virtualClassroom: { title: t("training.modules.virtualClassroom.title"), description: t("training.modules.virtualClassroom.description"), href: "/training/virtual-classroom", icon: Monitor, color: "bg-info/10 text-info", tabCode: "virtual-classroom" },
     requests: { title: t("training.modules.requests.title"), description: t("training.modules.requests.description"), href: "/training/requests", icon: FileText, color: "bg-warning/10 text-warning", tabCode: "requests" },
     external: { title: t("training.modules.external.title"), description: t("training.modules.external.description"), href: "/training/external", icon: ExternalLink, color: "bg-accent/10 text-accent-foreground", tabCode: "external" },
     budgets: { title: t("training.modules.budgets.title"), description: t("training.modules.budgets.description"), href: "/training/budgets", icon: DollarSign, color: "bg-success/10 text-success", tabCode: "budgets" },
@@ -116,6 +119,7 @@ export default function TrainingDashboardPage() {
     courseCompetencies: { title: t("training.modules.courseCompetencies.title"), description: t("training.modules.courseCompetencies.description"), href: "/training/course-competencies", icon: Link, color: "bg-warning/10 text-warning", tabCode: "course-competencies" },
     recertification: { title: t("training.modules.recertification.title"), description: t("training.modules.recertification.description"), href: "/training/recertification", icon: RefreshCw, color: "bg-secondary/10 text-secondary-foreground", tabCode: "recertification" },
     needs: { title: t("training.modules.needs.title"), description: t("training.modules.needs.description"), href: "/training/needs", icon: TrendingUp, color: "bg-accent/10 text-accent-foreground", tabCode: "needs" },
+    contentAuthoring: { title: t("training.modules.contentAuthoring.title"), description: t("training.modules.contentAuthoring.description"), href: "/training/content-authoring", icon: PenTool, color: "bg-primary/10 text-primary", tabCode: "content-authoring" },
     liveSessions: { title: t("training.modules.liveSessions.title"), description: t("training.modules.liveSessions.description"), href: "/training/sessions", icon: Video, color: "bg-muted text-muted-foreground", tabCode: "sessions" },
     certifications: { title: t("training.modules.certifications.title"), description: t("training.modules.certifications.description"), href: "/training/certifications", icon: Award, color: "bg-warning/10 text-warning", tabCode: "certifications" },
     calendar: { title: t("training.modules.calendar.title"), description: t("training.modules.calendar.description"), href: "/training/calendar", icon: Calendar, color: "bg-destructive/10 text-destructive", tabCode: "calendar" },
@@ -129,7 +133,7 @@ export default function TrainingDashboardPage() {
   const sections: ModuleSection[] = [
     {
       titleKey: "Learning",
-      items: filterByAccess([allModules.catalog, allModules.myLearning, allModules.learningPaths, allModules.gapAnalysis, allModules.liveSessions, allModules.certifications]),
+      items: filterByAccess([allModules.catalog, allModules.myLearning, allModules.learningPaths, allModules.gapAnalysis, allModules.virtualClassroom, allModules.liveSessions, allModules.certifications]),
     },
     {
       titleKey: "Management",
@@ -137,7 +141,7 @@ export default function TrainingDashboardPage() {
     },
     {
       titleKey: "Administration",
-      items: filterByAccess([allModules.budgets, allModules.instructors, allModules.compliance, allModules.courseCompetencies, allModules.recertification, allModules.needs, allModules.lms]),
+      items: filterByAccess([allModules.budgets, allModules.instructors, allModules.compliance, allModules.courseCompetencies, allModules.recertification, allModules.needs, allModules.contentAuthoring, allModules.lms]),
     },
     {
       titleKey: "Analytics",
