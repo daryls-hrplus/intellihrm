@@ -33,6 +33,7 @@ import {
 import { Wallet, Plus, Pencil, Trash2, Loader2, Briefcase } from "lucide-react";
 import { useCompensation, PayElement, PositionCompensation, LookupValue } from "@/hooks/useCompensation";
 import { supabase } from "@/integrations/supabase/client";
+import { getTodayString } from "@/utils/dateUtils";
 
 interface Company {
   id: string;
@@ -105,7 +106,7 @@ export default function PositionCompensationPage() {
   const [formAmount, setFormAmount] = useState("");
   const [formCurrency, setFormCurrency] = useState("USD");
   const [formFrequencyId, setFormFrequencyId] = useState("");
-  const [formEffectiveDate, setFormEffectiveDate] = useState(new Date().toISOString().split("T")[0]);
+  const [formEffectiveDate, setFormEffectiveDate] = useState(getTodayString());
   const [formEndDate, setFormEndDate] = useState("");
   const [formNotes, setFormNotes] = useState("");
 
@@ -240,7 +241,7 @@ export default function PositionCompensationPage() {
     setFormAmount("");
     setFormCurrency("USD");
     setFormFrequencyId("");
-    setFormEffectiveDate(new Date().toISOString().split("T")[0]);
+    setFormEffectiveDate(getTodayString());
     setFormEndDate("");
     setFormNotes("");
     setDialogOpen(true);

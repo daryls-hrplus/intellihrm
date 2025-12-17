@@ -24,7 +24,7 @@ import {
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { format } from "date-fns";
+import { getTodayString } from "@/utils/dateUtils";
 
 export default function TimeAttendanceDashboardPage() {
   const { t } = useTranslation();
@@ -44,7 +44,7 @@ export default function TimeAttendanceDashboardPage() {
       if (!profile?.company_id) return;
       
       setIsLoading(true);
-      const today = format(new Date(), 'yyyy-MM-dd');
+      const today = getTodayString();
       const companyFilter = selectedCompanyId !== "all" ? selectedCompanyId : profile.company_id;
 
       try {

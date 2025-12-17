@@ -34,7 +34,7 @@ import { Plus, Pencil, Trash2, Globe, Loader2 } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { formatDateForDisplay } from "@/utils/dateUtils";
+import { formatDateForDisplay, getTodayString } from "@/utils/dateUtils";
 
 interface Territory {
   id: string;
@@ -69,7 +69,7 @@ const initialFormData: TerritoryFormData = {
   region_type: "geographic",
   parent_territory_id: "",
   is_active: true,
-  start_date: new Date().toISOString().split("T")[0],
+  start_date: getTodayString(),
   end_date: "",
 };
 

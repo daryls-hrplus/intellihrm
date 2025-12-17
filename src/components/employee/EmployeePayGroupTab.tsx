@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Plus, Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
-import { formatDateForDisplay } from "@/utils/dateUtils";
+import { formatDateForDisplay, getTodayString } from "@/utils/dateUtils";
 
 interface EmployeePayGroupTabProps {
   employeeId: string;
@@ -34,7 +34,7 @@ export function EmployeePayGroupTab({ employeeId }: EmployeePayGroupTabProps) {
     pay_group_name: "",
     pay_frequency: "",
     payment_method: "bank_transfer",
-    start_date: new Date().toISOString().split('T')[0],
+    start_date: getTodayString(),
     end_date: "",
     notes: "",
   });
@@ -99,7 +99,7 @@ export function EmployeePayGroupTab({ employeeId }: EmployeePayGroupTabProps) {
       pay_group_name: "",
       pay_frequency: "",
       payment_method: "bank_transfer",
-      start_date: new Date().toISOString().split('T')[0],
+      start_date: getTodayString(),
       end_date: "",
       notes: "",
     });

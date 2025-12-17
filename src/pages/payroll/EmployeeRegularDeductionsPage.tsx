@@ -14,7 +14,7 @@ import { Plus, Trash2, Pencil, Repeat, Search, Target, Calendar } from "lucide-r
 import { useTranslation } from "react-i18next";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
-import { formatDateForDisplay } from "@/utils/dateUtils";
+import { formatDateForDisplay, getTodayString } from "@/utils/dateUtils";
 
 interface Company {
   id: string;
@@ -74,7 +74,7 @@ export default function EmployeeRegularDeductionsPage() {
     total_cycles: '',
     goal_amount: '',
     frequency: 'monthly',
-    start_date: new Date().toISOString().split('T')[0],
+    start_date: getTodayString(),
     end_date: '',
     reference_number: '',
     institution_name: '',
@@ -161,7 +161,7 @@ export default function EmployeeRegularDeductionsPage() {
       total_cycles: '',
       goal_amount: '',
       frequency: 'monthly',
-      start_date: new Date().toISOString().split('T')[0],
+      start_date: getTodayString(),
       end_date: '',
       reference_number: '',
       institution_name: '',

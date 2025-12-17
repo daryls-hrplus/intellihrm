@@ -14,7 +14,7 @@ import { Switch } from "@/components/ui/switch";
 import { Plus, Pencil, Trash2, Users, ArrowLeft, ShieldCheck } from "lucide-react";
 import { PayrollCalendarGenerator } from "@/components/payroll/PayrollCalendarGenerator";
 import { toast } from "sonner";
-import { formatDateForDisplay } from "@/utils/dateUtils";
+import { formatDateForDisplay, getTodayString } from "@/utils/dateUtils";
 import { useNavigate } from "react-router-dom";
 import { PayrollFilters, usePayrollFilters } from "@/components/payroll/PayrollFilters";
 import { useTranslation } from "react-i18next";
@@ -44,7 +44,7 @@ export default function PayGroupsPage() {
     pay_frequency: "monthly",
     is_active: true,
     uses_national_insurance: false,
-    start_date: new Date().toISOString().split("T")[0],
+    start_date: getTodayString(),
     end_date: "",
   });
 
@@ -121,7 +121,7 @@ export default function PayGroupsPage() {
       pay_frequency: "monthly",
       is_active: true,
       uses_national_insurance: false,
-      start_date: new Date().toISOString().split("T")[0],
+      start_date: getTodayString(),
       end_date: "",
     });
   };

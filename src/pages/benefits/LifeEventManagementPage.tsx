@@ -16,6 +16,8 @@ import { toast } from "sonner";
 import { Plus, Building2, Calendar, Check, X } from "lucide-react";
 import { useAuditLog } from "@/hooks/useAuditLog";
 import { useTranslation } from "react-i18next";
+import { getTodayString, toDateString, parseLocalDate } from "@/utils/dateUtils";
+import { addDays } from "date-fns";
 
 const LIFE_EVENT_TYPES = [
   { value: "marriage", label: "Marriage" },
@@ -42,7 +44,7 @@ export default function LifeEventManagementPage() {
   const [formData, setFormData] = useState({
     employee_id: "",
     event_type: "",
-    event_date: new Date().toISOString().split("T")[0],
+    event_date: getTodayString(),
     description: "",
     enrollment_window_start: "",
     enrollment_window_end: ""
@@ -106,9 +108,9 @@ export default function LifeEventManagementPage() {
 
     try {
       // Calculate enrollment window (typically 30 days from event)
-      const eventDate = new Date(formData.event_date);
+      const eventDate = parseLocalDate(formData.event_date);
       const windowStart = formData.enrollment_window_start || formData.event_date;
-      const windowEnd = formData.enrollment_window_end || new Date(eventDate.setDate(eventDate.getDate() + 30)).toISOString().split("T")[0];
+      const windowEnd = formData.enrollment_window_end || (eventDate ? toDateString(addDays(eventDate, 30)) : getTodayString());
 
       const { error } = await supabase
         .from("benefit_life_events")
@@ -173,7 +175,7 @@ export default function LifeEventManagementPage() {
     setFormData({
       employee_id: "",
       event_type: "",
-      event_date: new Date().toISOString().split("T")[0],
+      event_date: getTodayString(),
       description: "",
       enrollment_window_start: "",
       enrollment_window_end: ""

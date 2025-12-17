@@ -26,6 +26,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
+import { getTodayString } from '@/utils/dateUtils';
 
 const RECOGNITION_TYPES = ['spot_award', 'peer_recognition', 'team_achievement', 'service_milestone', 'innovation', 'customer_service', 'leadership', 'other'];
 const RECOGNITION_CATEGORIES = ['excellence', 'teamwork', 'innovation', 'customer_focus', 'leadership', 'integrity', 'other'];
@@ -96,7 +97,7 @@ export default function MssEmployeeRelationsPage() {
       description: recognitionForm.description || undefined,
       is_public: recognitionForm.is_public,
       monetary_value: recognitionForm.monetary_value ? parseFloat(recognitionForm.monetary_value) : undefined,
-      award_date: new Date().toISOString().split('T')[0],
+      award_date: getTodayString(),
     });
 
     setIsRecognitionDialogOpen(false);
