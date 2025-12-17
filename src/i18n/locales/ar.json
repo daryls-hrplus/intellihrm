@@ -118,7 +118,23 @@
     "accessRequests": "طلبات الوصول",
     "pendingRequests": "الطلبات المعلقة",
     "reviewRequests": "مراجعة الطلبات",
-    "requestsAwaiting": "{{count}} طلب(ات) بانتظار المراجعة"
+    "requestsAwaiting": "{{count}} طلب(ات) بانتظار المراجعة",
+    "virtualClock": "ساعة الحضور"
+  },
+  "virtualClock": {
+    "title": "ساعة الحضور الافتراضية",
+    "clockedIn": "مسجل حضور",
+    "clockedOut": "غير مسجل",
+    "clockedInSince": "مسجل منذ",
+    "workingFor": "مدة العمل",
+    "clockIn": "تسجيل الحضور",
+    "clockOut": "تسجيل الانصراف",
+    "capturePhoto": "التقاط صورة",
+    "captureLocation": "تسجيل الموقع",
+    "viewDetails": "عرض التفاصيل الكاملة",
+    "clockInPhoto": "صورة الحضور",
+    "clockOutPhoto": "صورة الانصراف",
+    "capturePhotoDescription": "التقط صورة للتحقق"
   },
   "workforce": {
     "title": "إدارة القوى العاملة",

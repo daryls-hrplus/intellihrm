@@ -118,7 +118,23 @@
     "accessRequests": "Demandes d'Accès",
     "pendingRequests": "Demandes en Attente",
     "reviewRequests": "Examiner les Demandes",
-    "requestsAwaiting": "{{count}} demande(s) en attente de révision"
+    "requestsAwaiting": "{{count}} demande(s) en attente de révision",
+    "virtualClock": "Horloge de Temps"
+  },
+  "virtualClock": {
+    "title": "Horloge de Temps Virtuelle",
+    "clockedIn": "Pointage Effectué",
+    "clockedOut": "Non Pointé",
+    "clockedInSince": "Pointé depuis",
+    "workingFor": "Temps de travail",
+    "clockIn": "Pointer l'Entrée",
+    "clockOut": "Pointer la Sortie",
+    "capturePhoto": "Capturer Photo",
+    "captureLocation": "Capturer Position",
+    "viewDetails": "Voir Tous les Détails",
+    "clockInPhoto": "Photo d'Entrée",
+    "clockOutPhoto": "Photo de Sortie",
+    "capturePhotoDescription": "Prenez une photo pour vérification"
   },
   "workforce": {
     "title": "Gestion du Personnel",
