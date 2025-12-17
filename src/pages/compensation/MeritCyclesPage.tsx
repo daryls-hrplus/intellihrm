@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { format } from "date-fns";
+import { formatDateForDisplay } from "@/utils/dateUtils";
 import { Award, Plus, Calendar, DollarSign, Users } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useTranslation } from "react-i18next";
@@ -190,7 +190,7 @@ export default function MeritCyclesPage() {
                         <TableCell className="font-medium">{cycle.name}</TableCell>
                         <TableCell>{cycle.fiscal_year}</TableCell>
                         <TableCell>
-                          {format(new Date(cycle.start_date), "MMM d")} - {format(new Date(cycle.end_date), "MMM d, yyyy")}
+                          {formatDateForDisplay(cycle.start_date, "MMM d")} - {formatDateForDisplay(cycle.end_date, "MMM d, yyyy")}
                         </TableCell>
                         <TableCell>${(cycle.total_budget || 0).toLocaleString()}</TableCell>
                         <TableCell>

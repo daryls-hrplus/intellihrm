@@ -36,6 +36,7 @@ import { useOnboarding, OnboardingInstance, OnboardingTask } from '@/hooks/useOn
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { format, isPast, differenceInDays } from 'date-fns';
+import { formatDateForDisplay } from '@/utils/dateUtils';
 
 export default function AdminOnboardingDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -228,7 +229,7 @@ export default function AdminOnboardingDetailPage() {
                     <Calendar className="h-4 w-4 text-muted-foreground" />
                     <div>
                       <p className="text-sm text-muted-foreground">Started</p>
-                      <p className="font-medium">{format(new Date(instance.start_date), 'MMM d, yyyy')}</p>
+                      <p className="font-medium">{formatDateForDisplay(instance.start_date, 'MMM d, yyyy')}</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-2">

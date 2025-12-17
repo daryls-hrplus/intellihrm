@@ -44,7 +44,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { format } from "date-fns";
+import { getTodayString, formatDateForDisplay } from "@/utils/dateUtils";
 
 interface Company {
   id: string;
@@ -89,7 +89,7 @@ const emptyForm = {
   company_division_id: "",
   department_id: "",
   is_active: true,
-  start_date: format(new Date(), "yyyy-MM-dd"),
+  start_date: getTodayString(),
   end_date: "",
 };
 
@@ -402,9 +402,9 @@ export default function JobFamiliesPage() {
                           {jf.company_divisions?.name || "-"}
                         </TableCell>
                         <TableCell>{jf.departments?.name || "-"}</TableCell>
-                        <TableCell>{format(new Date(jf.start_date), "MMM d, yyyy")}</TableCell>
+                        <TableCell>{formatDateForDisplay(jf.start_date, "MMM d, yyyy")}</TableCell>
                         <TableCell>
-                          {jf.end_date ? format(new Date(jf.end_date), "MMM d, yyyy") : "-"}
+                          {jf.end_date ? formatDateForDisplay(jf.end_date, "MMM d, yyyy") : "-"}
                         </TableCell>
                         <TableCell>
                           <span
