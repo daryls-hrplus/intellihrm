@@ -3,14 +3,16 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Switch } from "@/components/ui/switch";
-import { Upload, Sparkles, FileText, CheckCircle, AlertCircle, Loader2 } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Upload, Sparkles, FileText, CheckCircle, AlertCircle, Loader2, Settings, ShieldAlert, Plus } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useLanguage } from "@/hooks/useLanguage";
@@ -29,16 +31,35 @@ interface ExtractedAccrualRule {
   notes: string;
 }
 
+interface SchemaChange {
+  fieldName: string;
+  fieldType: string;
+  description: string;
+  reason: string;
+  documentExcerpt?: string;
+  suggestedValues?: string[];
+  impact: "required" | "recommended" | "optional";
+  affectedRules?: string[];
+}
+
+interface NewLeaveType {
+  name: string;
+  description?: string;
+  reason: string;
+}
+
 interface LeaveAccrualRulesAIUploadProps {
   companyId: string;
   leaveTypes: Array<{ id: string; name: string }>;
   onRulesImported: () => void;
+  isAdmin?: boolean;
 }
 
 export function LeaveAccrualRulesAIUpload({ 
   companyId,
   leaveTypes,
-  onRulesImported 
+  onRulesImported,
+  isAdmin = false 
 }: LeaveAccrualRulesAIUploadProps) {
   const { t } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
@@ -51,6 +72,10 @@ export function LeaveAccrualRulesAIUpload({
   const [selectedRules, setSelectedRules] = useState<Set<number>>(new Set());
   const [analysisNotes, setAnalysisNotes] = useState("");
   const [rawExtraction, setRawExtraction] = useState<any>(null);
+  const [schemaChanges, setSchemaChanges] = useState<SchemaChange[]>([]);
+  const [newLeaveTypesNeeded, setNewLeaveTypesNeeded] = useState<NewLeaveType[]>([]);
+  const [selectedSchemaChanges, setSelectedSchemaChanges] = useState<Set<number>>(new Set());
+  const [selectedNewLeaveTypes, setSelectedNewLeaveTypes] = useState<Set<number>>(new Set());
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -60,6 +85,10 @@ export function LeaveAccrualRulesAIUpload({
       setSelectedRules(new Set());
       setAnalysisNotes("");
       setRawExtraction(null);
+      setSchemaChanges([]);
+      setNewLeaveTypesNeeded([]);
+      setSelectedSchemaChanges(new Set());
+      setSelectedNewLeaveTypes(new Set());
     }
   };
 
@@ -97,6 +126,14 @@ export function LeaveAccrualRulesAIUpload({
       
       if (data.notes) {
         setAnalysisNotes(data.notes);
+      }
+
+      if (data.schemaChangesSuggested && Array.isArray(data.schemaChangesSuggested)) {
+        setSchemaChanges(data.schemaChangesSuggested);
+      }
+
+      if (data.newLeaveTypesNeeded && Array.isArray(data.newLeaveTypesNeeded)) {
+        setNewLeaveTypesNeeded(data.newLeaveTypesNeeded);
       }
       
       setRawExtraction(data);
@@ -136,6 +173,32 @@ export function LeaveAccrualRulesAIUpload({
     return match?.id || null;
   };
 
+  const createNewLeaveTypes = async () => {
+    if (selectedNewLeaveTypes.size === 0) return;
+
+    const typesToCreate = newLeaveTypesNeeded.filter((_, i) => selectedNewLeaveTypes.has(i));
+    
+    for (const newType of typesToCreate) {
+      const code = newType.name.toUpperCase().replace(/\s+/g, '_').substring(0, 20);
+      const { error } = await supabase
+        .from('leave_types')
+        .insert({
+          company_id: companyId,
+          code: code,
+          name: newType.name,
+          description: newType.description || newType.reason,
+          is_active: true,
+        });
+
+      if (error) {
+        console.error('Error creating leave type:', error);
+        toast.error(`Failed to create leave type: ${newType.name}`);
+      }
+    }
+
+    toast.success(`Created ${typesToCreate.length} new leave types`);
+  };
+
   const importSelectedRules = async () => {
     if (selectedRules.size === 0) {
       toast.error("Please select at least one rule to import");
@@ -144,6 +207,11 @@ export function LeaveAccrualRulesAIUpload({
 
     setIsImporting(true);
     try {
+      // Create new leave types first if selected
+      if (selectedNewLeaveTypes.size > 0) {
+        await createNewLeaveTypes();
+      }
+
       const rulesToImport = extractedRules
         .filter((_, i) => selectedRules.has(i))
         .map((rule) => {
@@ -193,6 +261,10 @@ export function LeaveAccrualRulesAIUpload({
     setSelectedRules(new Set());
     setAnalysisNotes("");
     setRawExtraction(null);
+    setSchemaChanges([]);
+    setNewLeaveTypesNeeded([]);
+    setSelectedSchemaChanges(new Set());
+    setSelectedNewLeaveTypes(new Set());
   };
 
   const frequencyLabels: Record<string, string> = {
@@ -202,6 +274,14 @@ export function LeaveAccrualRulesAIUpload({
     bi_weekly: t("leave.accrualRules.biWeekly"),
     weekly: t("leave.accrualRules.weekly"),
   };
+
+  const impactColors: Record<string, string> = {
+    required: "destructive",
+    recommended: "default",
+    optional: "secondary",
+  };
+
+  const hasSchemaIssues = schemaChanges.length > 0 || newLeaveTypesNeeded.length > 0;
 
   return (
     <>
@@ -220,13 +300,16 @@ export function LeaveAccrualRulesAIUpload({
           </DialogHeader>
 
           <Tabs defaultValue="upload" className="flex-1 overflow-hidden flex flex-col">
-            <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="upload">1. Upload Document</TabsTrigger>
+            <TabsList className="grid w-full grid-cols-4">
+              <TabsTrigger value="upload">1. Upload</TabsTrigger>
+              <TabsTrigger value="schema" disabled={!hasSchemaIssues}>
+                2. Schema Changes {hasSchemaIssues && <Badge variant="destructive" className="ml-1 h-5 px-1">{schemaChanges.length + newLeaveTypesNeeded.length}</Badge>}
+              </TabsTrigger>
               <TabsTrigger value="review" disabled={extractedRules.length === 0}>
-                2. Review Rules
+                3. Review Rules
               </TabsTrigger>
               <TabsTrigger value="notes" disabled={!rawExtraction}>
-                3. Analysis Notes
+                4. Notes
               </TabsTrigger>
             </TabsList>
 
@@ -238,7 +321,7 @@ export function LeaveAccrualRulesAIUpload({
                 <CardContent className="space-y-4">
                   <p className="text-sm text-muted-foreground">
                     Upload a PDF, spreadsheet (CSV/Excel), or document containing leave accrual policies.
-                    The AI will extract accrual rules including frequency, amounts, and eligibility criteria.
+                    The AI will extract accrual rules and detect if schema changes are needed.
                   </p>
 
                   <div className="grid gap-4 md:grid-cols-2">
@@ -284,9 +367,6 @@ export function LeaveAccrualRulesAIUpload({
                         <Badge key={lt.id} variant="secondary">{lt.name}</Badge>
                       ))}
                     </div>
-                    <p className="text-xs text-muted-foreground mt-2">
-                      The AI will match extracted rules to these leave types. Create missing types before importing.
-                    </p>
                   </div>
 
                   <Button 
@@ -308,6 +388,167 @@ export function LeaveAccrualRulesAIUpload({
                   </Button>
                 </CardContent>
               </Card>
+            </TabsContent>
+
+            {/* Schema Changes Tab - Admin Only */}
+            <TabsContent value="schema" className="flex-1 overflow-auto space-y-4 p-1">
+              {hasSchemaIssues && (
+                <div className="space-y-4">
+                  {!isAdmin && (
+                    <Alert variant="destructive">
+                      <ShieldAlert className="h-4 w-4" />
+                      <AlertTitle>Admin Access Required</AlertTitle>
+                      <AlertDescription>
+                        The uploaded document contains rules that require system configuration changes. 
+                        Please contact a System Admin or HR Admin to review and approve these changes.
+                      </AlertDescription>
+                    </Alert>
+                  )}
+
+                  {/* New Leave Types Needed */}
+                  {newLeaveTypesNeeded.length > 0 && (
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="text-base flex items-center gap-2">
+                          <Plus className="h-4 w-4" />
+                          New Leave Types Required ({newLeaveTypesNeeded.length})
+                        </CardTitle>
+                        <CardDescription>
+                          The document references leave types that don't exist in the system.
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <Table>
+                          <TableHeader>
+                            <TableRow>
+                              <TableHead className="w-12">Create</TableHead>
+                              <TableHead>Leave Type Name</TableHead>
+                              <TableHead>Reason</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {newLeaveTypesNeeded.map((lt, index) => (
+                              <TableRow key={index}>
+                                <TableCell>
+                                  <Switch
+                                    checked={selectedNewLeaveTypes.has(index)}
+                                    onCheckedChange={() => {
+                                      const newSelected = new Set(selectedNewLeaveTypes);
+                                      if (newSelected.has(index)) {
+                                        newSelected.delete(index);
+                                      } else {
+                                        newSelected.add(index);
+                                      }
+                                      setSelectedNewLeaveTypes(newSelected);
+                                    }}
+                                    disabled={!isAdmin}
+                                  />
+                                </TableCell>
+                                <TableCell className="font-medium">{lt.name}</TableCell>
+                                <TableCell className="text-sm text-muted-foreground">{lt.reason}</TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      </CardContent>
+                    </Card>
+                  )}
+
+                  {/* Schema Changes Suggested */}
+                  {schemaChanges.length > 0 && (
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="text-base flex items-center gap-2">
+                          <Settings className="h-4 w-4" />
+                          Interface Changes Suggested ({schemaChanges.length})
+                        </CardTitle>
+                        <CardDescription>
+                          The document contains rules that cannot be fully captured by the current system fields.
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <Accordion type="multiple" className="w-full">
+                          {schemaChanges.map((change, index) => (
+                            <AccordionItem key={index} value={`change-${index}`}>
+                              <AccordionTrigger className="hover:no-underline">
+                                <div className="flex items-center gap-2 text-left">
+                                  <Switch
+                                    checked={selectedSchemaChanges.has(index)}
+                                    onCheckedChange={(checked) => {
+                                      const newSelected = new Set(selectedSchemaChanges);
+                                      if (checked) {
+                                        newSelected.add(index);
+                                      } else {
+                                        newSelected.delete(index);
+                                      }
+                                      setSelectedSchemaChanges(newSelected);
+                                    }}
+                                    disabled={!isAdmin}
+                                    onClick={(e) => e.stopPropagation()}
+                                  />
+                                  <Badge variant={impactColors[change.impact] as any}>
+                                    {change.impact}
+                                  </Badge>
+                                  <span className="font-medium">{change.fieldName}</span>
+                                  <span className="text-sm text-muted-foreground">({change.fieldType})</span>
+                                </div>
+                              </AccordionTrigger>
+                              <AccordionContent className="space-y-3 pl-12">
+                                <div>
+                                  <Label className="text-xs text-muted-foreground">Description</Label>
+                                  <p className="text-sm">{change.description}</p>
+                                </div>
+                                <div>
+                                  <Label className="text-xs text-muted-foreground">Reason</Label>
+                                  <p className="text-sm">{change.reason}</p>
+                                </div>
+                                {change.documentExcerpt && (
+                                  <div>
+                                    <Label className="text-xs text-muted-foreground">Document Reference</Label>
+                                    <p className="text-sm italic bg-muted/50 p-2 rounded">"{change.documentExcerpt}"</p>
+                                  </div>
+                                )}
+                                {change.suggestedValues && change.suggestedValues.length > 0 && (
+                                  <div>
+                                    <Label className="text-xs text-muted-foreground">Suggested Values</Label>
+                                    <div className="flex flex-wrap gap-1 mt-1">
+                                      {change.suggestedValues.map((v, i) => (
+                                        <Badge key={i} variant="outline">{v}</Badge>
+                                      ))}
+                                    </div>
+                                  </div>
+                                )}
+                                {change.affectedRules && change.affectedRules.length > 0 && (
+                                  <div>
+                                    <Label className="text-xs text-muted-foreground">Affected Rules</Label>
+                                    <ul className="text-sm list-disc list-inside">
+                                      {change.affectedRules.map((r, i) => (
+                                        <li key={i}>{r}</li>
+                                      ))}
+                                    </ul>
+                                  </div>
+                                )}
+                              </AccordionContent>
+                            </AccordionItem>
+                          ))}
+                        </Accordion>
+
+                        {isAdmin && selectedSchemaChanges.size > 0 && (
+                          <Alert className="mt-4">
+                            <AlertCircle className="h-4 w-4" />
+                            <AlertTitle>Schema Changes Selected</AlertTitle>
+                            <AlertDescription>
+                              You have selected {selectedSchemaChanges.size} schema change(s). 
+                              These changes would require database migration. Please contact the development team 
+                              to implement these changes before importing rules that depend on them.
+                            </AlertDescription>
+                          </Alert>
+                        )}
+                      </CardContent>
+                    </Card>
+                  )}
+                </div>
+              )}
             </TabsContent>
 
             <TabsContent value="review" className="flex-1 overflow-hidden flex flex-col p-1">
@@ -480,6 +721,7 @@ export function LeaveAccrualRulesAIUpload({
                 <>
                   <CheckCircle className="h-4 w-4 mr-2" />
                   Import {selectedRules.size} Rules
+                  {selectedNewLeaveTypes.size > 0 && ` + ${selectedNewLeaveTypes.size} Types`}
                 </>
               )}
             </Button>

@@ -29,23 +29,27 @@ serve(async (req) => {
 
 Available leave types in the system: ${leaveTypes?.join(", ") || "Annual Leave, Sick Leave, Personal Leave"}
 
-For each accrual rule found, extract:
-- name: descriptive name for the rule (e.g., "Annual Leave - 0-5 Years Service")
-- description: brief description of the rule
-- leave_type_name: the type of leave this rule applies to (match to available types above)
-- accrual_frequency: "daily", "weekly", "bi_weekly", "monthly", or "annually"
-- accrual_amount: number of days/hours accrued per frequency period
-- years_of_service_min: minimum years of service for this rule to apply
-- years_of_service_max: maximum years (null if unlimited)
-- employee_status: status requirement (null if any status)
-- employee_type: type requirement like "full_time", "part_time" (null if any)
-- priority: priority order when multiple rules could apply (higher = higher priority)
-- notes: any special conditions
+CURRENT SYSTEM FIELDS for accrual rules:
+- name, description, leave_type_name
+- accrual_frequency: "daily", "weekly", "bi_weekly", "monthly", "annually"
+- accrual_amount: number of days/hours per frequency
+- years_of_service_min, years_of_service_max
+- employee_status, employee_type
+- priority
 
-Also provide:
-- spreadsheetExamples: example calculations showing different scenarios
-- warnings: any issues or uncertainties
-- assumptions: any assumptions made`;
+For each accrual rule found, extract fields that match the above.
+
+CRITICAL: Also analyze if the document contains rules/conditions that CANNOT be captured by the current fields. Examples:
+- Gender-based accrual (e.g., maternity leave accrual only for female employees)
+- Age-based accrual variations
+- Department/location-specific rules
+- Job grade/level-based accrual
+- Pro-rating rules for part-time based on hours worked
+- Cap/maximum accrual limits
+- Accrual start conditions (e.g., after probation)
+- Carry-over/rollover rules embedded in accrual
+
+If such rules exist, include them in "schemaChangesSuggested".`;
 
       const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
         method: "POST",
@@ -86,6 +90,35 @@ Also provide:
                       required: ["name", "leave_type_name", "accrual_frequency", "accrual_amount"],
                     },
                   },
+                  schemaChangesSuggested: {
+                    type: "array",
+                    items: {
+                      type: "object",
+                      properties: {
+                        fieldName: { type: "string" },
+                        fieldType: { type: "string" },
+                        description: { type: "string" },
+                        reason: { type: "string" },
+                        documentExcerpt: { type: "string" },
+                        suggestedValues: { type: "array", items: { type: "string" } },
+                        impact: { type: "string", enum: ["required", "recommended", "optional"] },
+                        affectedRules: { type: "array", items: { type: "string" } },
+                      },
+                      required: ["fieldName", "fieldType", "description", "reason", "impact"],
+                    },
+                  },
+                  newLeaveTypesNeeded: {
+                    type: "array",
+                    items: {
+                      type: "object",
+                      properties: {
+                        name: { type: "string" },
+                        description: { type: "string" },
+                        reason: { type: "string" },
+                      },
+                      required: ["name", "reason"],
+                    },
+                  },
                   spreadsheetExamples: {
                     type: "array",
                     items: {
@@ -124,6 +157,8 @@ Also provide:
         JSON.stringify({
           success: true,
           rules: extraction.rules || [],
+          schemaChangesSuggested: extraction.schemaChangesSuggested || [],
+          newLeaveTypesNeeded: extraction.newLeaveTypesNeeded || [],
           spreadsheetExamples: extraction.spreadsheetExamples || [],
           notes: extraction.notes || "",
           warnings: extraction.warnings || [],
