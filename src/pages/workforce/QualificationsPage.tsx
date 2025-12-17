@@ -18,7 +18,7 @@ import { QualificationDialog } from "@/components/workforce/qualifications/Quali
 import { VerificationDialog } from "@/components/workforce/qualifications/VerificationDialog";
 import { QualificationAnalytics } from "@/components/workforce/qualifications/QualificationAnalytics";
 import { BulkQualificationUpload } from "@/components/workforce/qualifications/BulkQualificationUpload";
-import { format } from "date-fns";
+import { formatDateForDisplay } from "@/utils/dateUtils";
 
 interface Company {
   id: string;
@@ -375,9 +375,9 @@ export default function QualificationsPage() {
                           </TableCell>
                           <TableCell>
                             {q.date_awarded 
-                              ? format(new Date(q.date_awarded), "MMM d, yyyy")
+                              ? formatDateForDisplay(q.date_awarded, "MMM d, yyyy")
                               : q.issued_date 
-                                ? format(new Date(q.issued_date), "MMM d, yyyy")
+                                ? formatDateForDisplay(q.issued_date, "MMM d, yyyy")
                                 : "-"
                             }
                           </TableCell>
@@ -442,7 +442,7 @@ export default function QualificationsPage() {
                             <TableCell>{q.profiles?.full_name || "Unknown"}</TableCell>
                             <TableCell>{q.name}</TableCell>
                             <TableCell className="capitalize">{q.record_type}</TableCell>
-                            <TableCell>{format(new Date(q.created_at), "MMM d, yyyy")}</TableCell>
+                            <TableCell>{formatDateForDisplay(q.created_at, "MMM d, yyyy")}</TableCell>
                             <TableCell className="text-right">
                               <Button size="sm" onClick={() => handleVerify(q)}>
                                 Review & Verify

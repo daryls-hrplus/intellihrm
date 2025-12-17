@@ -14,7 +14,7 @@ import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { format } from "date-fns";
+import { getTodayString, formatDateForDisplay } from "@/utils/dateUtils";
 import { useTranslation } from "react-i18next";
 import { 
   Briefcase, 
@@ -133,7 +133,7 @@ export default function ProjectTimeTrackingPage() {
   const [timeEntryForm, setTimeEntryForm] = useState({
     project_id: "",
     task_id: "",
-    entry_date: format(new Date(), 'yyyy-MM-dd'),
+    entry_date: getTodayString(),
     hours: "",
     description: "",
     billable: true
@@ -370,7 +370,7 @@ const loadTimeEntries = async () => {
 
     toast.success("Time entry created");
     setTimeEntryDialogOpen(false);
-    setTimeEntryForm({ project_id: "", task_id: "", entry_date: format(new Date(), 'yyyy-MM-dd'), hours: "", description: "", billable: true });
+    setTimeEntryForm({ project_id: "", task_id: "", entry_date: getTodayString(), hours: "", description: "", billable: true });
     loadTimeEntries();
   };
 
@@ -652,7 +652,7 @@ const loadTimeEntries = async () => {
                     ) : (
                       timeEntries.map((entry) => (
                         <TableRow key={entry.id}>
-                          <TableCell>{format(new Date(entry.entry_date), 'MMM d, yyyy')}</TableCell>
+                          <TableCell>{formatDateForDisplay(entry.entry_date, 'MMM d, yyyy')}</TableCell>
                           <TableCell className="font-medium">{entry.project?.name}</TableCell>
                           <TableCell>{entry.task?.name || '-'}</TableCell>
                           <TableCell>{entry.hours}h</TableCell>
