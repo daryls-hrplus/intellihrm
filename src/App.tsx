@@ -256,6 +256,7 @@ import LeaveBalanceBuyoutPage from "./pages/payroll/LeaveBalanceBuyoutPage";
 import PayslipTemplateConfigPage from "./pages/payroll/PayslipTemplateConfigPage";
 import PayrollExpenseClaimsPage from "./pages/payroll/PayrollExpenseClaimsPage";
 import PayrollArchiveSettingsPage from "./pages/payroll/PayrollArchiveSettingsPage";
+import BenefitPayrollMappingsPage from "./pages/payroll/BenefitPayrollMappingsPage";
 
 import GLDashboardPage from "./pages/payroll/gl/GLDashboardPage";
 import GLAccountsPage from "./pages/payroll/gl/GLAccountsPage";
@@ -1589,6 +1590,14 @@ const App = () => (
               element={
                 <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="payroll">
                   <LeavePaymentConfigPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/payroll/benefit-mappings"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="payroll">
+                  <BenefitPayrollMappingsPage />
                 </ProtectedRoute>
               }
             />

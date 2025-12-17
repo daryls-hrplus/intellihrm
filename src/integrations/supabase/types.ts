@@ -2025,6 +2025,73 @@ export type Database = {
           },
         ]
       }
+      benefit_payroll_mappings: {
+        Row: {
+          benefit_plan_id: string
+          company_id: string
+          created_at: string
+          created_by: string | null
+          end_date: string | null
+          id: string
+          is_active: boolean
+          mapping_type: string
+          notes: string | null
+          pay_element_id: string
+          start_date: string
+          updated_at: string
+        }
+        Insert: {
+          benefit_plan_id: string
+          company_id: string
+          created_at?: string
+          created_by?: string | null
+          end_date?: string | null
+          id?: string
+          is_active?: boolean
+          mapping_type?: string
+          notes?: string | null
+          pay_element_id: string
+          start_date?: string
+          updated_at?: string
+        }
+        Update: {
+          benefit_plan_id?: string
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          end_date?: string | null
+          id?: string
+          is_active?: boolean
+          mapping_type?: string
+          notes?: string | null
+          pay_element_id?: string
+          start_date?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "benefit_payroll_mappings_benefit_plan_id_fkey"
+            columns: ["benefit_plan_id"]
+            isOneToOne: false
+            referencedRelation: "benefit_plans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "benefit_payroll_mappings_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "benefit_payroll_mappings_pay_element_id_fkey"
+            columns: ["pay_element_id"]
+            isOneToOne: false
+            referencedRelation: "pay_elements"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       benefit_plans: {
         Row: {
           auto_enrollment_criteria: Json | null
