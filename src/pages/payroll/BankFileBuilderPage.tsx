@@ -1,3 +1,4 @@
+// AI Bank File Builder Page
 import { useState } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
