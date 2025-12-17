@@ -11,7 +11,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { Plus, Pencil, Trash2, FileCheck, AlertCircle, Upload, FileText, X, Download } from "lucide-react";
-import { format, isBefore } from "date-fns";
+import { isBefore } from "date-fns";
+import { formatDateForDisplay } from "@/utils/dateUtils";
 import { CountrySelect } from "@/components/ui/country-select";
 
 interface WorkPermit {
@@ -480,11 +481,11 @@ export function EmployeeWorkPermitsTab({ employeeId }: EmployeeWorkPermitsTabPro
                   </div>
                   <div>
                     <span className="text-muted-foreground">Issued:</span>{" "}
-                    {format(new Date(permit.issue_date), "MMM d, yyyy")}
+                    {formatDateForDisplay(permit.issue_date, "MMM d, yyyy")}
                   </div>
                   <div>
                     <span className="text-muted-foreground">Expires:</span>{" "}
-                    {format(new Date(permit.expiry_date), "MMM d, yyyy")}
+                    {formatDateForDisplay(permit.expiry_date, "MMM d, yyyy")}
                   </div>
                   {permit.sponsoring_company && (
                     <div className="col-span-2">

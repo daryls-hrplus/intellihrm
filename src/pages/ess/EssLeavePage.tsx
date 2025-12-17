@@ -26,6 +26,7 @@ import {
   Send
 } from "lucide-react";
 import { format, differenceInDays, startOfYear } from "date-fns";
+import { formatDateForDisplay } from "@/utils/dateUtils";
 import {
   Table,
   TableBody,
@@ -378,9 +379,9 @@ export default function EssLeavePage() {
                           </div>
                         </TableCell>
                         <TableCell>
-                          {format(new Date(request.start_date), "MMM d, yyyy")}
+                          {formatDateForDisplay(request.start_date, "MMM d, yyyy")}
                           {request.start_date !== request.end_date && (
-                            <> - {format(new Date(request.end_date), "MMM d, yyyy")}</>
+                            <> - {formatDateForDisplay(request.end_date, "MMM d, yyyy")}</>
                           )}
                         </TableCell>
                         <TableCell>
@@ -389,7 +390,7 @@ export default function EssLeavePage() {
                         <TableCell>{getStatusBadge(request.status)}</TableCell>
                         <TableCell className="text-muted-foreground">
                           {request.submitted_at 
-                            ? format(new Date(request.submitted_at), "MMM d, yyyy")
+                            ? formatDateForDisplay(request.submitted_at, "MMM d, yyyy")
                             : "-"
                           }
                         </TableCell>
