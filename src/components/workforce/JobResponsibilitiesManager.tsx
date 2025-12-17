@@ -30,6 +30,7 @@ import { Plus, Trash2, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { format } from "date-fns";
+import { getTodayString, formatDateForDisplay } from "@/utils/dateUtils";
 
 interface JobResponsibility {
   id: string;
@@ -75,7 +76,7 @@ export function JobResponsibilitiesManager({ jobId, companyId }: JobResponsibili
     responsibility_id: "",
     weighting: 0,
     notes: "",
-    start_date: format(new Date(), "yyyy-MM-dd"),
+    start_date: getTodayString(),
     end_date: "",
   });
 
@@ -136,7 +137,7 @@ export function JobResponsibilitiesManager({ jobId, companyId }: JobResponsibili
       responsibility_id: "",
       weighting: 0,
       notes: "",
-      start_date: format(new Date(), "yyyy-MM-dd"),
+      start_date: getTodayString(),
       end_date: "",
     });
     setDialogOpen(true);
@@ -294,9 +295,9 @@ export function JobResponsibilitiesManager({ jobId, companyId }: JobResponsibili
               <TableRow key={jr.id}>
                 <TableCell className="font-medium">{jr.responsibility_name}</TableCell>
                 <TableCell>{jr.weighting}%</TableCell>
-                <TableCell>{format(new Date(jr.start_date), "MMM d, yyyy")}</TableCell>
+                <TableCell>{formatDateForDisplay(jr.start_date)}</TableCell>
                 <TableCell>
-                  {jr.end_date ? format(new Date(jr.end_date), "MMM d, yyyy") : "—"}
+                  {jr.end_date ? formatDateForDisplay(jr.end_date) : "—"}
                 </TableCell>
                 <TableCell className="text-muted-foreground">{jr.notes || "-"}</TableCell>
                 <TableCell>

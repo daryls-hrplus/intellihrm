@@ -11,6 +11,7 @@ import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { Plus, Pencil, Trash2, MapPin } from "lucide-react";
+import { getTodayString } from "@/utils/dateUtils";
 
 interface Address {
   id: string;
@@ -59,7 +60,7 @@ export function EmployeeAddressesTab({ employeeId }: EmployeeAddressesTabProps) 
       state: "",
       postal_code: "",
       country: "USA",
-      effective_date: new Date().toISOString().split("T")[0],
+      effective_date: getTodayString(),
       end_date: "",
     },
   });
@@ -168,7 +169,7 @@ export function EmployeeAddressesTab({ employeeId }: EmployeeAddressesTabProps) 
       state: "",
       postal_code: "",
       country: "USA",
-      effective_date: new Date().toISOString().split("T")[0],
+      effective_date: getTodayString(),
       end_date: "",
     });
     setDialogOpen(true);

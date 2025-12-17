@@ -49,6 +49,7 @@ import {
 import { EmployeePositionCompensationDrilldown } from "@/components/workforce/EmployeePositionCompensationDrilldown";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { getTodayString } from "@/utils/dateUtils";
 
 interface Position {
   id: string;
@@ -196,7 +197,7 @@ export function PositionsManagement({ companyId }: PositionsManagementProps) {
   const [formReportsTo, setFormReportsTo] = useState("");
   const [formIsActive, setFormIsActive] = useState(true);
   const [formAuthorizedHeadcount, setFormAuthorizedHeadcount] = useState("1");
-  const [formStartDate, setFormStartDate] = useState(new Date().toISOString().split("T")[0]);
+  const [formStartDate, setFormStartDate] = useState(getTodayString());
   const [formEndDate, setFormEndDate] = useState("");
   const [formCompensationModel, setFormCompensationModel] = useState("salary_grade");
   const [formSalaryGradeId, setFormSalaryGradeId] = useState("");
@@ -382,7 +383,7 @@ export function PositionsManagement({ companyId }: PositionsManagementProps) {
     setFormReportsTo("");
     setFormIsActive(true);
     setFormAuthorizedHeadcount("1");
-    setFormStartDate(new Date().toISOString().split("T")[0]);
+    setFormStartDate(getTodayString());
     setFormEndDate("");
     setFormCompensationModel("salary_grade");
     setFormSalaryGradeId("");
@@ -483,7 +484,7 @@ export function PositionsManagement({ companyId }: PositionsManagementProps) {
     setEditingAssignment(null);
     setAssignPositionId(positionId);
     setAssignEmployeeId("");
-    setAssignStartDate(new Date().toISOString().split("T")[0]);
+    setAssignStartDate(getTodayString());
     setAssignEndDate("");
     setAssignIsPrimary(false);
     setAssignCompAmount("");
@@ -492,7 +493,7 @@ export function PositionsManagement({ companyId }: PositionsManagementProps) {
     setAssignIsActive(true);
     setAssignSpinalPointId("");
     setAssignPayGroupId("");
-    setAssignPayGroupStartDate(new Date().toISOString().split("T")[0]);
+    setAssignPayGroupStartDate(getTodayString());
     setAssignPayGroupEndDate("");
     setAssignDialogOpen(true);
   };
