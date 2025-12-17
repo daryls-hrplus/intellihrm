@@ -100,7 +100,7 @@ export function RegularDeductionsSection({
       pay_period_id: payPeriodId,
       deduction_name: d.deduction_name,
       deduction_code: d.deduction_code,
-      deduction_type: 'regular',
+      deduction_type: 'voluntary',
       amount: d.amount,
       currency: d.currency,
       is_pretax: d.is_pretax,
