@@ -11,7 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Plus, Users, Calendar, MessageSquare, ThumbsUp, ThumbsDown, Clock } from 'lucide-react';
-import { format } from 'date-fns';
+import { formatDateForDisplay } from "@/utils/dateUtils";
 
 interface InterviewPanelsTabProps {
   companyId: string;
@@ -261,7 +261,7 @@ export function InterviewPanelsTab({ companyId }: InterviewPanelsTabProps) {
                     {panel.scheduled_at ? (
                       <div className="flex items-center gap-1">
                         <Calendar className="h-4 w-4 text-muted-foreground" />
-                        {format(new Date(panel.scheduled_at), 'MMM d, h:mm a')}
+                        {formatDateForDisplay(panel.scheduled_at, 'MMM d, h:mm a')}
                       </div>
                     ) : '-'}
                   </TableCell>

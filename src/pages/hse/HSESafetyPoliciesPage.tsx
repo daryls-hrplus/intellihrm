@@ -42,7 +42,7 @@ import {
   Eye,
   Users,
 } from "lucide-react";
-import { format } from "date-fns";
+import { getTodayString, formatDateForDisplay } from "@/utils/dateUtils";
 import { NavLink } from "react-router-dom";
 import { toast } from "sonner";
 
@@ -148,7 +148,7 @@ export default function HSESafetyPoliciesPage() {
         status: "draft",
         is_active: true,
         acknowledgment_required: false,
-        effective_date: format(new Date(), "yyyy-MM-dd"),
+        effective_date: getTodayString(),
         version: "1.0",
       });
     }
@@ -322,7 +322,7 @@ export default function HSESafetyPoliciesPage() {
                       </TableCell>
                       <TableCell>{policy.version}</TableCell>
                       <TableCell>
-                        {format(new Date(policy.effective_date), "MMM d, yyyy")}
+                        {formatDateForDisplay(policy.effective_date, "MMM d, yyyy")}
                       </TableCell>
                       <TableCell>{getStatusBadge(policy.status)}</TableCell>
                       <TableCell>
@@ -536,12 +536,12 @@ export default function HSESafetyPoliciesPage() {
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div>
                     <span className="text-muted-foreground">Effective Date:</span>{" "}
-                    {format(new Date(selectedPolicy.effective_date), "MMM d, yyyy")}
+                    {formatDateForDisplay(selectedPolicy.effective_date, "MMM d, yyyy")}
                   </div>
                   {selectedPolicy.review_date && (
                     <div>
                       <span className="text-muted-foreground">Review Date:</span>{" "}
-                      {format(new Date(selectedPolicy.review_date), "MMM d, yyyy")}
+                      {formatDateForDisplay(selectedPolicy.review_date, "MMM d, yyyy")}
                     </div>
                   )}
                   {selectedPolicy.owner && (

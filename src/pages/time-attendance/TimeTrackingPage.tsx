@@ -13,6 +13,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { format, differenceInMinutes } from "date-fns";
+import { getTodayString, formatDateForDisplay } from "@/utils/dateUtils";
 import { useTranslation } from "react-i18next";
 import { 
   Clock, 
@@ -160,8 +161,8 @@ export default function TimeTrackingPage() {
       .eq('employee_id', user.user.id)
       .eq('company_id', selectedCompany)
       .eq('is_primary', true)
-      .lte('effective_date', format(new Date(), 'yyyy-MM-dd'))
-      .or('end_date.is.null,end_date.gte.' + format(new Date(), 'yyyy-MM-dd'))
+      .lte('effective_date', getTodayString())
+      .or('end_date.is.null,end_date.gte.' + getTodayString())
       .single();
     
     if (data?.shift) {
@@ -199,7 +200,7 @@ export default function TimeTrackingPage() {
   };
 
   const loadTimeEntries = async () => {
-    const today = format(new Date(), 'yyyy-MM-dd');
+    const today = getTodayString();
     const { data, error } = await supabase
       .from('time_clock_entries')
       .select(`

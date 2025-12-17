@@ -13,7 +13,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { Plus, Search, Eye, ThumbsUp, ThumbsDown, AlertTriangle } from "lucide-react";
 import { useState } from "react";
-import { format } from "date-fns";
+import { formatDateForDisplay } from "@/utils/dateUtils";
 
 export default function HSESafetyObservationsPage() {
   const { t } = useLanguage();
@@ -127,7 +127,7 @@ export default function HSESafetyObservationsPage() {
                   filteredObservations?.map((obs) => (
                     <TableRow key={obs.id}>
                       <TableCell className="font-medium">{obs.observation_number}</TableCell>
-                      <TableCell>{obs.observation_date ? format(new Date(obs.observation_date), "MMM dd, yyyy") : "-"}</TableCell>
+                      <TableCell>{obs.observation_date ? formatDateForDisplay(obs.observation_date, "MMM dd, yyyy") : "-"}</TableCell>
                       <TableCell>{getTypeBadge(obs.observation_type)}</TableCell>
                       <TableCell>{obs.category || "-"}</TableCell>
                       <TableCell className="max-w-xs truncate">{obs.description || "-"}</TableCell>
