@@ -500,11 +500,35 @@ export default function PositionCompensationPage() {
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">
-                      {selectedPosition.compensation_model === 'spinal_point' 
-                        ? t("compensation.positionCompensation.additionalElements")
-                        : t("compensation.positionCompensation.totalPackage")}
+                      {t("compensation.positionCompensation.totalPackage")}
                     </p>
-                    <p className="text-2xl font-bold">{formatCurrency(totalCompensation, "USD")}</p>
+                    {/* Show range based on compensation model */}
+                    {selectedPosition.compensation_model === 'salary_grade' && selectedPosition.salary_grade ? (
+                      <p className="text-2xl font-bold">
+                        {formatCurrency(selectedPosition.salary_grade.min_salary + totalCompensation, selectedPosition.salary_grade.currency)} - {formatCurrency(selectedPosition.salary_grade.max_salary + totalCompensation, selectedPosition.salary_grade.currency)}
+                      </p>
+                    ) : selectedPosition.compensation_model === 'spinal_point' && spinalPoints.length > 0 && paySpine ? (
+                      <p className="text-2xl font-bold">
+                        {formatCurrency(spinalPoints[0].annual_salary + totalCompensation, paySpine.currency)} - {formatCurrency(spinalPoints[spinalPoints.length - 1].annual_salary + totalCompensation, paySpine.currency)}
+                      </p>
+                    ) : selectedPosition.compensation_model === 'hybrid' ? (
+                      <div className="space-y-1">
+                        {selectedPosition.salary_grade && (
+                          <p className="text-lg font-bold">
+                            <span className="text-sm text-muted-foreground mr-2">{t("compensation.positionCompensation.salaryGrade")}:</span>
+                            {formatCurrency(selectedPosition.salary_grade.min_salary + totalCompensation, selectedPosition.salary_grade.currency)} - {formatCurrency(selectedPosition.salary_grade.max_salary + totalCompensation, selectedPosition.salary_grade.currency)}
+                          </p>
+                        )}
+                        {spinalPoints.length > 0 && paySpine && (
+                          <p className="text-lg font-bold">
+                            <span className="text-sm text-muted-foreground mr-2">{t("compensation.positionCompensation.paySpine")}:</span>
+                            {formatCurrency(spinalPoints[0].annual_salary + totalCompensation, paySpine.currency)} - {formatCurrency(spinalPoints[spinalPoints.length - 1].annual_salary + totalCompensation, paySpine.currency)}
+                          </p>
+                        )}
+                      </div>
+                    ) : (
+                      <p className="text-2xl font-bold">{formatCurrency(totalCompensation, "USD")}</p>
+                    )}
                   </div>
                 </CardContent>
               </Card>
