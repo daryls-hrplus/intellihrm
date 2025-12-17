@@ -51,7 +51,7 @@ import {
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
-import { format } from "date-fns";
+import { formatDateForDisplay } from "@/utils/dateUtils";
 import { RichTextEditor } from "@/components/intranet/RichTextEditor";
 
 interface Announcement {
@@ -650,7 +650,7 @@ export default function IntranetAdminPage() {
                           {getDepartmentNames(item.target_departments)}
                         </Badge>
                         <span className="text-sm text-muted-foreground">
-                          {format(new Date(item.created_at), "MMM d, yyyy")}
+                          {formatDateForDisplay(item.created_at, "MMM d, yyyy")}
                         </span>
                       </div>
                       <h3 className="font-medium">{item.title}</h3>
@@ -873,7 +873,7 @@ export default function IntranetAdminPage() {
                           {item.is_published ? "Published" : "Draft"}
                         </Badge>
                         <span className="text-sm text-muted-foreground">
-                          {format(new Date(item.created_at), "MMM d, yyyy")}
+                          {formatDateForDisplay(item.created_at, "MMM d, yyyy")}
                         </span>
                         <span className="text-sm text-muted-foreground">
                           <Eye className="h-3 w-3 inline mr-1" />

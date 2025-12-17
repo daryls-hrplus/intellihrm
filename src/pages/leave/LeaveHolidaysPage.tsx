@@ -42,6 +42,7 @@ import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Textarea } from "@/components/ui/textarea";
 import { Plus, CalendarDays, PartyPopper, Globe, Building2, Filter } from "lucide-react";
 import { format } from "date-fns";
+import { formatDateForDisplay, toDateString } from "@/utils/dateUtils";
 import { cn } from "@/lib/utils";
 
 // Common countries list - can be extended or pulled from lookup values
@@ -124,7 +125,7 @@ export default function LeaveHolidaysPage() {
     await createCountryHoliday.mutateAsync({
       country: countryFormData.country,
       name: countryFormData.name,
-      holiday_date: format(countryFormData.holiday_date, "yyyy-MM-dd"),
+      holiday_date: toDateString(countryFormData.holiday_date),
       is_recurring: countryFormData.is_recurring,
       is_half_day: countryFormData.is_half_day,
       description: countryFormData.description || null,
@@ -139,7 +140,7 @@ export default function LeaveHolidaysPage() {
     await createHoliday.mutateAsync({
       company_id: selectedCompanyId,
       name: companyFormData.name,
-      holiday_date: format(companyFormData.holiday_date, "yyyy-MM-dd"),
+      holiday_date: toDateString(companyFormData.holiday_date),
       is_recurring: companyFormData.is_recurring,
       is_half_day: companyFormData.is_half_day,
       applies_to_all: companyFormData.applies_to_all,
@@ -478,7 +479,7 @@ export default function LeaveHolidaysPage() {
                           <Badge variant="outline">{getCountryName(holiday.country)}</Badge>
                         </TableCell>
                         <TableCell className="font-medium">{holiday.name}</TableCell>
-                        <TableCell>{format(new Date(holiday.holiday_date), "EEEE, MMMM d, yyyy")}</TableCell>
+                        <TableCell>{formatDateForDisplay(holiday.holiday_date, "EEEE, MMMM d, yyyy")}</TableCell>
                         <TableCell>
                           <Badge variant={holiday.is_half_day ? "secondary" : "default"}>
                             {holiday.is_half_day ? "Half Day" : "Full Day"}
@@ -532,7 +533,7 @@ export default function LeaveHolidaysPage() {
                     holidays.map((holiday) => (
                       <TableRow key={holiday.id}>
                         <TableCell className="font-medium">{holiday.name}</TableCell>
-                        <TableCell>{format(new Date(holiday.holiday_date), "EEEE, MMMM d, yyyy")}</TableCell>
+                        <TableCell>{formatDateForDisplay(holiday.holiday_date, "EEEE, MMMM d, yyyy")}</TableCell>
                         <TableCell>
                           <Badge variant={holiday.is_half_day ? "secondary" : "default"}>
                             {holiday.is_half_day ? "Half Day" : "Full Day"}

@@ -38,7 +38,8 @@ import {
   Star,
   Users,
 } from "lucide-react";
-import { format, formatDistanceToNow, differenceInHours, isPast, addHours } from "date-fns";
+import { formatDistanceToNow, differenceInHours, isPast, addHours } from "date-fns";
+import { formatDateForDisplay } from "@/utils/dateUtils";
 
 const statusColors: Record<string, string> = {
   open: "bg-blue-500/10 text-blue-600 border-blue-200",
@@ -581,7 +582,7 @@ export default function AdminHelpdeskPage() {
                     </div>
                     <div>
                       <span className="text-muted-foreground">Created:</span>
-                      <p className="font-medium">{format(new Date(selectedTicket.created_at), "PPp")}</p>
+                      <p className="font-medium">{formatDateForDisplay(selectedTicket.created_at, "PPp")}</p>
                     </div>
                     <div>
                       <span className="text-muted-foreground">Status:</span>
@@ -686,7 +687,7 @@ export default function AdminHelpdeskPage() {
                         >
                           <div className="flex justify-between text-xs text-muted-foreground mb-1">
                             <span className="font-medium">{comment.author?.full_name}</span>
-                            <span>{format(new Date(comment.created_at), "PPp")}</span>
+                            <span>{formatDateForDisplay(comment.created_at, "PPp")}</span>
                           </div>
                           <p className="text-sm">{comment.content}</p>
                           {comment.is_internal && (

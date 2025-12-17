@@ -13,7 +13,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { Search, MapPin, Building2, Clock, DollarSign, Briefcase, CheckCircle, Send } from "lucide-react";
-import { format } from "date-fns";
+import { formatDateForDisplay } from "@/utils/dateUtils";
 
 interface JobRequisition {
   id: string;
@@ -357,7 +357,7 @@ export default function EssJobOpeningsPage() {
 
                   {selectedJob.posted_date && (
                     <p className="text-sm text-muted-foreground">
-                      Posted: {format(new Date(selectedJob.posted_date), "MMMM d, yyyy")}
+                      Posted: {formatDateForDisplay(selectedJob.posted_date, "MMMM d, yyyy")}
                     </p>
                   )}
 

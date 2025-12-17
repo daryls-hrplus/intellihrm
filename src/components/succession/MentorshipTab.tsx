@@ -12,7 +12,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Plus, Edit, Trash2, Users, Calendar, UserPlus } from "lucide-react";
 import { toast } from "sonner";
-import { format } from "date-fns";
+import { getTodayString } from "@/utils/dateUtils";
 
 interface MentorshipTabProps {
   companyId: string;
@@ -59,7 +59,7 @@ export function MentorshipTab({ companyId }: MentorshipTabProps) {
     name: '',
     description: '',
     program_type: 'succession',
-    start_date: format(new Date(), 'yyyy-MM-dd'),
+    start_date: getTodayString(),
     end_date: '',
     is_active: true
   });
@@ -68,7 +68,7 @@ export function MentorshipTab({ companyId }: MentorshipTabProps) {
     program_id: '',
     mentor_id: '',
     mentee_id: '',
-    start_date: format(new Date(), 'yyyy-MM-dd'),
+    start_date: getTodayString(),
     goals: ''
   });
 
@@ -180,12 +180,12 @@ export function MentorshipTab({ companyId }: MentorshipTabProps) {
   };
 
   const resetProgramForm = () => {
-    setProgramForm({ name: '', description: '', program_type: 'succession', start_date: format(new Date(), 'yyyy-MM-dd'), end_date: '', is_active: true });
+    setProgramForm({ name: '', description: '', program_type: 'succession', start_date: getTodayString(), end_date: '', is_active: true });
     setEditingProgram(null);
   };
 
   const resetPairingForm = () => {
-    setPairingForm({ program_id: selectedProgramId, mentor_id: '', mentee_id: '', start_date: format(new Date(), 'yyyy-MM-dd'), goals: '' });
+    setPairingForm({ program_id: selectedProgramId, mentor_id: '', mentee_id: '', start_date: getTodayString(), goals: '' });
   };
 
   const openEditProgram = (p: Program) => {
