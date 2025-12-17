@@ -214,7 +214,12 @@ export function RegularDeductionsSection({
                     </TableCell>
                     <TableCell>
                       <div>
-                        <div className="font-medium">{deduction.deduction_name}</div>
+                        <div className="font-medium flex items-center gap-2">
+                          {deduction.deduction_name}
+                          <Badge variant="outline" className="text-xs capitalize">
+                            {deduction.deduction_type}
+                          </Badge>
+                        </div>
                         {deduction.institution_name && (
                           <div className="text-xs text-muted-foreground">{deduction.institution_name}</div>
                         )}
