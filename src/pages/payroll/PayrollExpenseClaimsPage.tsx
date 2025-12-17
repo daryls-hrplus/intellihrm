@@ -11,7 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { formatDateForDisplay } from "@/utils/dateUtils";
+import { formatDateForDisplay, getTodayString } from "@/utils/dateUtils";
 import { Receipt, DollarSign, CheckCircle, Eye, FileText, ExternalLink } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
@@ -155,7 +155,7 @@ export default function PayrollExpenseClaimsPage() {
         pay_groups:pay_group_id(name)
       `)
       .in("pay_group_id", payGroupIds)
-      .gte("cycle_end_date", new Date().toISOString().split("T")[0])
+      .gte("cycle_end_date", getTodayString())
       .order("cycle_start_date", { ascending: true })
       .limit(20);
 

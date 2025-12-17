@@ -15,7 +15,7 @@ import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { format } from "date-fns";
+import { getTodayString, formatDateForDisplay } from "@/utils/dateUtils";
 import { 
   Clock, 
   Plus, 
@@ -125,7 +125,7 @@ export default function ShiftManagementPage() {
     is_overnight: false,
     color: "#3b82f6",
     is_active: true,
-    start_date: format(new Date(), 'yyyy-MM-dd'),
+    start_date: getTodayString(),
     end_date: ""
   });
   
@@ -174,7 +174,7 @@ export default function ShiftManagementPage() {
   const [assignmentForm, setAssignmentForm] = useState({
     employee_id: "",
     shift_id: "",
-    effective_date: format(new Date(), 'yyyy-MM-dd'),
+    effective_date: getTodayString(),
     end_date: "",
     is_primary: true,
     rotation_pattern: "",
@@ -351,7 +351,7 @@ export default function ShiftManagementPage() {
       is_overnight: false,
       color: "#3b82f6",
       is_active: true,
-      start_date: format(new Date(), 'yyyy-MM-dd'),
+      start_date: getTodayString(),
       end_date: ""
     });
   };
@@ -583,7 +583,7 @@ export default function ShiftManagementPage() {
     setAssignmentForm({
       employee_id: "",
       shift_id: "",
-      effective_date: format(new Date(), 'yyyy-MM-dd'),
+      effective_date: getTodayString(),
       end_date: "",
       is_primary: true,
       rotation_pattern: "",
@@ -1358,8 +1358,8 @@ export default function ShiftManagementPage() {
                         <TableCell>
                           {assignment.shift?.name} ({assignment.shift?.code})
                         </TableCell>
-                        <TableCell>{format(new Date(assignment.effective_date), 'MMM d, yyyy')}</TableCell>
-                        <TableCell>{assignment.end_date ? format(new Date(assignment.end_date), 'MMM d, yyyy') : '-'}</TableCell>
+                        <TableCell>{formatDateForDisplay(assignment.effective_date, 'MMM d, yyyy')}</TableCell>
+                        <TableCell>{assignment.end_date ? formatDateForDisplay(assignment.end_date, 'MMM d, yyyy') : '-'}</TableCell>
                         <TableCell>
                           {assignment.is_primary && (
                             <Badge className="bg-primary/20 text-primary">{t("timeAttendance.schedules.primary")}</Badge>

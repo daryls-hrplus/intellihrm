@@ -25,7 +25,7 @@ import {
 import { usePropertyManagement } from '@/hooks/usePropertyManagement';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
-import { formatDateForDisplay } from '@/utils/dateUtils';
+import { formatDateForDisplay, getTodayString } from '@/utils/dateUtils';
 import { toast } from 'sonner';
 
 const CONDITIONS = ['excellent', 'good', 'fair', 'poor', 'damaged'];
@@ -43,7 +43,7 @@ export default function MssPropertyPage() {
   const [assignForm, setAssignForm] = useState({
     property_id: '',
     employee_id: '',
-    assigned_date: new Date().toISOString().split('T')[0],
+    assigned_date: getTodayString(),
     condition_at_assignment: 'good',
     notes: '',
   });
@@ -111,7 +111,7 @@ export default function MssPropertyPage() {
     setAssignForm({
       property_id: '',
       employee_id: '',
-      assigned_date: new Date().toISOString().split('T')[0],
+      assigned_date: getTodayString(),
       condition_at_assignment: 'good',
       notes: '',
     });
