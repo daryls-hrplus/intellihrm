@@ -12,7 +12,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Switch } from "@/components/ui/switch";
 import { supabase } from "@/integrations/supabase/client";
-import { Plus, Edit, Trash2, FileText, Search, Sparkles, BookOpen, FileStack } from "lucide-react";
+import { Plus, Edit, Trash2, FileText, Search, Sparkles, BookOpen, FileStack, Printer } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { CountrySelect } from "@/components/ui/country-select";
@@ -20,6 +20,7 @@ import { getCountryName, countries } from "@/lib/countries";
 import { StatutoryDocumentUpload } from "@/components/payroll/StatutoryDocumentUpload";
 import { ComprehensiveStatutoryDocumentation } from "@/components/payroll/ComprehensiveStatutoryDocumentation";
 import { StatutoryReportingDocuments } from "@/components/payroll/StatutoryReportingDocuments";
+import { StatutoryReportPrint } from "@/components/payroll/StatutoryReportPrint";
 
 interface StatutoryDeductionType {
   id: string;
@@ -65,6 +66,7 @@ export default function StatutoryDeductionTypesPage() {
   const [selectedStatutory, setSelectedStatutory] = useState<StatutoryDeductionType | null>(null);
   const [comprehensiveDocOpen, setComprehensiveDocOpen] = useState(false);
   const [reportingDocsOpen, setReportingDocsOpen] = useState(false);
+  const [printReportOpen, setPrintReportOpen] = useState(false);
 
   const [form, setForm] = useState({
     country: "",
@@ -327,6 +329,17 @@ export default function StatutoryDeductionTypesPage() {
                           <Button 
                             variant="ghost" 
                             size="sm" 
+                            onClick={() => {
+                              setSelectedStatutory(item);
+                              setPrintReportOpen(true);
+                            }}
+                            title="Print Report"
+                          >
+                            <Printer className="h-4 w-4" />
+                          </Button>
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
                             onClick={() => openReportingDocs(item)}
                             title="Reporting Documents"
                           >
@@ -482,6 +495,18 @@ export default function StatutoryDeductionTypesPage() {
             onOpenChange={setReportingDocsOpen}
             statutoryTypeId={selectedStatutory.id}
             statutoryName={selectedStatutory.statutory_name}
+            countryCode={selectedStatutory.country}
+          />
+        )}
+
+        {/* Print Report Dialog */}
+        {selectedStatutory && (
+          <StatutoryReportPrint
+            open={printReportOpen}
+            onOpenChange={setPrintReportOpen}
+            statutoryTypeId={selectedStatutory.id}
+            statutoryName={selectedStatutory.statutory_name}
+            statutoryCode={selectedStatutory.statutory_code}
             countryCode={selectedStatutory.country}
           />
         )}
