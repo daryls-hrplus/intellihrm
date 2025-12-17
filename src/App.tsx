@@ -52,6 +52,10 @@ import SSOSettingsPage from "./pages/admin/SSOSettingsPage";
 import PasswordPoliciesPage from "./pages/admin/PasswordPoliciesPage";
 import StaffLoanDesignDocumentPage from "./pages/documents/StaffLoanDesignDocumentPage";
 
+// Enablement pages
+import EnablementDashboardPage from "./pages/enablement/EnablementDashboardPage";
+import ApplicationDocsGeneratorPage from "./pages/enablement/ApplicationDocsGeneratorPage";
+
 // Subscription pages
 import SubscriptionPage from "./pages/subscription/SubscriptionPage";
 import UpgradePage from "./pages/subscription/UpgradePage";
