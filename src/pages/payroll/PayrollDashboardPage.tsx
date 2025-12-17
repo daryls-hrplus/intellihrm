@@ -22,6 +22,7 @@ import {
   Palette,
   Archive,
   Link as LinkIcon,
+  PartyPopper,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
@@ -112,6 +113,7 @@ export default function PayrollDashboardPage() {
     archiveSettings: { title: t("payroll.modules.archiveSettings.title", "Archive Settings"), description: t("payroll.modules.archiveSettings.description", "Configure payroll data retention and archiving"), icon: Archive, href: "/payroll/archive-settings", color: "bg-slate-500/10 text-slate-600", tabCode: "archive_settings" },
     taxAllowances: { title: t("payroll.modules.taxAllowances.title", "Tax Allowances"), description: t("payroll.modules.taxAllowances.description", "Manage non-taxable allowances for employees"), icon: Receipt, href: "/payroll/tax-allowances", color: "bg-emerald-500/10 text-emerald-600", tabCode: "tax_allowances" },
     bankFileBuilder: { title: t("payroll.modules.bankFileBuilder.title", "Bank File Builder"), description: t("payroll.modules.bankFileBuilder.description", "AI-powered bank file configuration and generation"), icon: FileSpreadsheet, href: "/payroll/bank-file-builder", color: "bg-indigo-500/10 text-indigo-600", tabCode: "bank_file_builder" },
+    holidays: { title: t("leave.holidays.title", "Holidays Calendar"), description: t("leave.holidays.subtitle", "Manage country and company holidays"), icon: PartyPopper, href: "/payroll/holidays", color: "bg-pink-500/10 text-pink-600", tabCode: "holidays" },
   };
 
   const filterByAccess = (modules: typeof allModules[keyof typeof allModules][]) =>
@@ -124,7 +126,7 @@ export default function PayrollDashboardPage() {
     },
     {
       titleKey: "Configuration",
-      items: filterByAccess([allModules.payGroups, allModules.payElements, allModules.taxConfig, allModules.statutoryTypes, allModules.taxAllowances, allModules.templates]),
+      items: filterByAccess([allModules.payGroups, allModules.payElements, allModules.taxConfig, allModules.statutoryTypes, allModules.taxAllowances, allModules.templates, allModules.holidays]),
     },
     {
       titleKey: "Integration",

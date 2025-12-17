@@ -268,6 +268,7 @@ import PayslipTemplateConfigPage from "./pages/payroll/PayslipTemplateConfigPage
 import PayrollExpenseClaimsPage from "./pages/payroll/PayrollExpenseClaimsPage";
 import PayrollArchiveSettingsPage from "./pages/payroll/PayrollArchiveSettingsPage";
 import BenefitPayrollMappingsPage from "./pages/payroll/BenefitPayrollMappingsPage";
+import PayrollHolidaysPage from "./pages/payroll/PayrollHolidaysPage";
 
 import GLDashboardPage from "./pages/payroll/gl/GLDashboardPage";
 import GLAccountsPage from "./pages/payroll/gl/GLAccountsPage";
@@ -1593,6 +1594,14 @@ const App = () => (
               element={
                 <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="payroll">
                   <EmployeeRegularDeductionsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/payroll/holidays"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="payroll">
+                  <PayrollHolidaysPage />
                 </ProtectedRoute>
               }
             />
