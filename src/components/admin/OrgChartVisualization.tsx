@@ -38,6 +38,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
+import { getTodayString, formatDateForDisplay, toDateString } from "@/utils/dateUtils";
 import { renderOrgChartToPdf } from "@/utils/orgChartPdfRenderer";
 
 interface Position {
@@ -100,12 +101,12 @@ export function OrgChartVisualization({ companyId }: OrgChartVisualizationProps)
   const [selectedDepartment, setSelectedDepartment] = useState<string>("all");
   const [expandedNodes, setExpandedNodes] = useState<Set<string>>(new Set());
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [asOfDate, setAsOfDate] = useState<string>(format(new Date(), "yyyy-MM-dd"));
+  const [asOfDate, setAsOfDate] = useState<string>(getTodayString());
   const [comparisonMode, setComparisonMode] = useState(false);
   const [compareDate, setCompareDate] = useState<string>(() => {
     const date = new Date();
     date.setMonth(date.getMonth() - 1);
-    return format(date, "yyyy-MM-dd");
+    return toDateString(date);
   });
 
   useEffect(() => {
@@ -571,7 +572,7 @@ export function OrgChartVisualization({ companyId }: OrgChartVisualizationProps)
       {/* Comparison Summary */}
       {comparisonMode && comparisonSummary && (
         <div className="flex items-center gap-4 rounded-lg border bg-muted/50 px-4 py-3">
-          <span className="text-sm font-medium">Changes from {format(new Date(compareDate), "MMM d, yyyy")} to {format(new Date(asOfDate), "MMM d, yyyy")}:</span>
+          <span className="text-sm font-medium">Changes from {formatDateForDisplay(compareDate, "MMM d, yyyy")} to {formatDateForDisplay(asOfDate, "MMM d, yyyy")}:</span>
           <div className="flex items-center gap-4">
             <Badge variant="default" className="bg-green-500">
               <Plus className="h-3 w-3 mr-1" />
@@ -589,9 +590,9 @@ export function OrgChartVisualization({ companyId }: OrgChartVisualizationProps)
         </div>
       )}
 
-      {!comparisonMode && asOfDate !== format(new Date(), "yyyy-MM-dd") && (
+      {!comparisonMode && asOfDate !== getTodayString() && (
         <div className="rounded-lg border border-info/30 bg-info/10 px-4 py-2 text-sm text-info-foreground">
-          Showing organization structure as of <strong>{format(new Date(asOfDate), "MMMM d, yyyy")}</strong>
+          Showing organization structure as of <strong>{formatDateForDisplay(asOfDate, "MMMM d, yyyy")}</strong>
         </div>
       )}
 

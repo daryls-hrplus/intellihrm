@@ -45,6 +45,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { format, subMonths } from "date-fns";
+import { formatDateForDisplay } from "@/utils/dateUtils";
 
 interface Company {
   id: string;
@@ -375,7 +376,7 @@ export default function PayrollArchiveSettingsPage() {
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
                     <Calendar className="h-4 w-4" />
                     {t("payroll.archive.lastRun", "Last archive run: {{date}}", 
-                      { date: format(new Date(settings.last_archive_run), "MMM dd, yyyy HH:mm") }
+                      { date: formatDateForDisplay(settings.last_archive_run, "MMM dd, yyyy HH:mm") }
                     )}
                   </div>
                 )}
@@ -503,8 +504,8 @@ export default function PayrollArchiveSettingsPage() {
                     {archivePreview.oldest_run_date && archivePreview.newest_run_date && (
                       <p className="text-sm text-muted-foreground">
                         {t("payroll.archive.dateRange", "Date range: {{oldest}} to {{newest}}", {
-                          oldest: format(new Date(archivePreview.oldest_run_date), "MMM dd, yyyy"),
-                          newest: format(new Date(archivePreview.newest_run_date), "MMM dd, yyyy"),
+                          oldest: formatDateForDisplay(archivePreview.oldest_run_date, "MMM dd, yyyy"),
+                          newest: formatDateForDisplay(archivePreview.newest_run_date, "MMM dd, yyyy"),
                         })}
                       </p>
                     )}

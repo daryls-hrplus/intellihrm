@@ -12,8 +12,7 @@ import { usePropertyManagement } from "@/hooks/usePropertyManagement";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Plus, Users, Loader2, RotateCcw } from "lucide-react";
-import { format } from "date-fns";
-import { getTodayString } from "@/utils/dateUtils";
+import { getTodayString, formatDateForDisplay } from "@/utils/dateUtils";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/hooks/useLanguage";
 
@@ -151,13 +150,13 @@ const PropertyAssignmentsTab = ({ companyId }: Props) => {
                     <TableRow key={assignment.id}>
                       <TableCell><div><p className="font-medium">{assignment.property?.name}</p><p className="text-xs text-muted-foreground font-mono">{assignment.property?.asset_tag}</p></div></TableCell>
                       <TableCell><div><p className="font-medium">{assignment.employee?.full_name}</p><p className="text-xs text-muted-foreground">{assignment.employee?.email}</p></div></TableCell>
-                      <TableCell>{format(new Date(assignment.assigned_date), "PP")}</TableCell>
-                      <TableCell>{assignment.expected_return_date ? format(new Date(assignment.expected_return_date), "PP") : "-"}</TableCell>
+                      <TableCell>{formatDateForDisplay(assignment.assigned_date, "PP")}</TableCell>
+                      <TableCell>{assignment.expected_return_date ? formatDateForDisplay(assignment.expected_return_date, "PP") : "-"}</TableCell>
                       <TableCell>{assignment.condition_at_assignment || "-"}</TableCell>
                       <TableCell><Badge variant="outline" className={getStatusColor(assignment.status)}>{assignment.status}</Badge></TableCell>
                       <TableCell>
                         {assignment.status === "active" && (<Button variant="outline" size="sm" className="gap-1" onClick={() => { setSelectedAssignment(assignment.id); setIsReturnDialogOpen(true); }}><RotateCcw className="h-3 w-3" />{t("companyProperty.assignments.return")}</Button>)}
-                        {assignment.status === "returned" && assignment.actual_return_date && (<span className="text-xs text-muted-foreground">{t("companyProperty.assignments.returned")} {format(new Date(assignment.actual_return_date), "PP")}</span>)}
+                        {assignment.status === "returned" && assignment.actual_return_date && (<span className="text-xs text-muted-foreground">{t("companyProperty.assignments.returned")} {formatDateForDisplay(assignment.actual_return_date, "PP")}</span>)}
                       </TableCell>
                     </TableRow>
                   ))}
