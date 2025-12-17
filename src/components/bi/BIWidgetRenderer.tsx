@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { BarChart, Bar, LineChart, Line, PieChart, Pie, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Cell } from 'recharts';
 import { Edit, Trash2, Loader2, TrendingUp, TrendingDown, Hash } from 'lucide-react';
 import { BIWidget, useBITool } from '@/hooks/useBITool';
+import { useUserPermissionContext } from '@/hooks/useUserPermissionContext';
 
 interface BIWidgetRendererProps {
   widget: BIWidget;
@@ -16,19 +17,22 @@ const COLORS = ['hsl(var(--primary))', 'hsl(var(--secondary))', 'hsl(var(--accen
 
 export function BIWidgetRenderer({ widget, onEdit, onDelete, isDesignMode = false }: BIWidgetRendererProps) {
   const { executeWidgetQuery } = useBITool();
+  const permissionContext = useUserPermissionContext();
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     loadData();
-  }, [widget]);
+  }, [widget, permissionContext.isLoading]);
 
   const loadData = async () => {
+    if (permissionContext.isLoading) return;
+    
     setLoading(true);
     setError(null);
     try {
-      const result = await executeWidgetQuery(widget);
+      const result = await executeWidgetQuery(widget, permissionContext);
       setData(result || []);
     } catch (err: any) {
       setError(err.message || 'Failed to load data');

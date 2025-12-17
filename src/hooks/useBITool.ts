@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import type { Json } from '@/integrations/supabase/types';
+import { useUserPermissionContext, PermissionContext } from './useUserPermissionContext';
 
 export interface BIDashboard {
   id: string;
@@ -446,14 +447,28 @@ export function useBITool() {
     }
   };
 
-  const executeWidgetQuery = async (widget: BIWidget): Promise<Record<string, unknown>[]> => {
+  const executeWidgetQuery = async (
+    widget: BIWidget, 
+    permissionContext?: PermissionContext
+  ): Promise<Record<string, unknown>[]> => {
     try {
       if (widget.custom_sql) {
-        const { data, error } = await supabase.rpc('execute_report_sql', {
-          sql_query: widget.custom_sql.replace(/;\s*$/, '').trim()
+        // Use edge function for secure query execution with permission filtering
+        const { data, error } = await supabase.functions.invoke('execute-bi-query', {
+          body: {
+            sql: widget.custom_sql.replace(/;\s*$/, '').trim(),
+            permissionContext: permissionContext ? {
+              userId: permissionContext.userId,
+              isAdmin: permissionContext.isAdmin,
+              canViewPii: permissionContext.canViewPii,
+              accessibleCompanyIds: permissionContext.accessibleCompanyIds,
+              accessibleDepartmentIds: permissionContext.accessibleDepartmentIds
+            } : null
+          }
         });
+        
         if (error) throw error;
-        return (data || []) as Record<string, unknown>[];
+        return (data?.data || []) as Record<string, unknown>[];
       }
       // Return empty for now - complex queries need custom SQL
       return [];

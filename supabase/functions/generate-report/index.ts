@@ -34,13 +34,39 @@ interface DataSourceField {
   type: string;
 }
 
+// PII fields that should be masked for users without PII access
+const PII_FIELDS = [
+  'email', 'phone', 'mobile', 'address', 'ssn', 'social_security',
+  'national_id', 'passport', 'driver_license', 'bank_account',
+  'bank_routing', 'iban', 'swift', 'personal_email', 'home_phone',
+  'emergency_contact_phone', 'emergency_contact_email', 'date_of_birth',
+  'birthdate', 'birth_date'
+];
+
+function maskPiiInResults(
+  data: Record<string, unknown>[], 
+  canViewPii: boolean
+): Record<string, unknown>[] {
+  if (canViewPii) return data;
+  
+  return data.map(row => {
+    const maskedRow: Record<string, unknown> = {};
+    for (const [key, value] of Object.entries(row)) {
+      const lowerKey = key.toLowerCase();
+      const isPiiField = PII_FIELDS.some(pii => lowerKey.includes(pii));
+      maskedRow[key] = isPiiField && value ? '***MASKED***' : value;
+    }
+    return maskedRow;
+  });
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const { reportId } = await req.json();
+    const { reportId, permissionContext } = await req.json();
 
     if (!reportId) {
       return new Response(
@@ -52,6 +78,26 @@ serve(async (req) => {
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+    // Verify user authentication
+    const authHeader = req.headers.get('Authorization');
+    let userId: string | null = null;
+    let isAdmin = false;
+    let canViewPii = false;
+    let accessibleCompanyIds: string[] = [];
+
+    if (authHeader) {
+      const token = authHeader.replace('Bearer ', '');
+      const { data: { user } } = await supabase.auth.getUser(token);
+      userId = user?.id || null;
+    }
+
+    // Use permission context from request if provided
+    if (permissionContext) {
+      isAdmin = permissionContext.isAdmin || false;
+      canViewPii = permissionContext.canViewPii || false;
+      accessibleCompanyIds = permissionContext.accessibleCompanyIds || [];
+    }
 
     // Get the generated report record
     const { data: report, error: reportError } = await supabase
