@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { Plus, Trash2, FileText, Download, Upload, AlertCircle, Filter, ExternalLink, Eye, Pencil, Archive } from "lucide-react";
+import { Plus, Trash2, FileText, Download, Upload, AlertCircle, Filter, ExternalLink, Eye, Pencil, Archive, Clock, CheckCircle, XCircle } from "lucide-react";
 import { format, isBefore, addDays, differenceInDays } from "date-fns";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -72,6 +72,9 @@ export function EmployeeDocumentsTab({ employeeId }: EmployeeDocumentsTabProps) 
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [editingDocument, setEditingDocument] = useState<Document | null>(null);
   
+  // Qualification verification statuses
+  const [qualificationStatuses, setQualificationStatuses] = useState<Record<string, string>>({});
+  
   // Lookup data
   const [categories, setCategories] = useState<DocumentCategory[]>([]);
   const [documentTypes, setDocumentTypes] = useState<DocumentType[]>([]);
@@ -131,6 +134,26 @@ export function EmployeeDocumentsTab({ employeeId }: EmployeeDocumentsTabProps) 
       toast.error("Failed to load documents");
     } else {
       setDocuments(data || []);
+      
+      // Fetch verification statuses for qualification documents
+      const qualificationDocIds = (data || [])
+        .filter(doc => doc.source_module === 'qualifications' && doc.source_record_id)
+        .map(doc => doc.source_record_id);
+      
+      if (qualificationDocIds.length > 0) {
+        const { data: qualifications } = await supabase
+          .from("employee_qualifications")
+          .select("id, verification_status")
+          .in("id", qualificationDocIds);
+        
+        if (qualifications) {
+          const statusMap: Record<string, string> = {};
+          qualifications.forEach(q => {
+            statusMap[q.id] = q.verification_status || 'pending';
+          });
+          setQualificationStatuses(statusMap);
+        }
+      }
     }
     setIsLoading(false);
   };
@@ -370,6 +393,21 @@ export function EmployeeDocumentsTab({ employeeId }: EmployeeDocumentsTabProps) 
       }
     }
     return <Badge variant="default">Active</Badge>;
+  };
+
+  const getVerificationBadge = (doc: Document) => {
+    if (doc.source_module !== 'qualifications' || !doc.source_record_id) {
+      return null;
+    }
+    const status = qualificationStatuses[doc.source_record_id] || 'pending';
+    switch (status) {
+      case 'verified':
+        return <Badge className="bg-success/10 text-success"><CheckCircle className="h-3 w-3 mr-1" />Verified</Badge>;
+      case 'rejected':
+        return <Badge className="bg-destructive/10 text-destructive"><XCircle className="h-3 w-3 mr-1" />Rejected</Badge>;
+      default:
+        return <Badge variant="outline" className="border-warning text-warning"><Clock className="h-3 w-3 mr-1" />Pending Verification</Badge>;
+    }
   };
 
   const getCategoryName = (code: string | null) => {
@@ -666,6 +704,7 @@ export function EmployeeDocumentsTab({ employeeId }: EmployeeDocumentsTabProps) 
                 <TableHead>Expiry Date</TableHead>
                 <TableHead>Issuing Authority</TableHead>
                 <TableHead>Status</TableHead>
+                <TableHead>Verification</TableHead>
                 <TableHead>Source</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
@@ -685,6 +724,7 @@ export function EmployeeDocumentsTab({ employeeId }: EmployeeDocumentsTabProps) 
                   <TableCell>{doc.expiry_date ? format(new Date(doc.expiry_date), "MMM d, yyyy") : "-"}</TableCell>
                   <TableCell>{doc.issuing_authority || "-"}</TableCell>
                   <TableCell>{getStatusBadge(doc)}</TableCell>
+                  <TableCell>{getVerificationBadge(doc) || "-"}</TableCell>
                   <TableCell>
                     <Badge variant={doc.is_reference ? "secondary" : "outline"}>
                       {doc.source_module || "Documents"}
