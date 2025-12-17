@@ -5322,6 +5322,12 @@
     "pendingReviews": "Pending Reviews",
     "avgSalary": "Avg. Salary",
     "asOfDate": "As of date",
+    "groups": {
+      "payStructure": "Pay Structure",
+      "employeePay": "Employee Pay",
+      "incentives": "Incentives",
+      "analyticsBenchmarking": "Analytics & Benchmarking"
+    },
     "modules": {
       "payElements": {
         "title": "Pay Elements",
@@ -5789,7 +5795,7 @@
     "healthPlans": "Health Plans",
     "pendingClaims": "Pending Claims",
     "allCompanies": "All Companies",
-    "sections": {
+    "groups": {
       "coreBenefits": "Core Benefits",
       "analyticsReporting": "Analytics & Reporting",
       "administration": "Administration",
@@ -6235,6 +6241,12 @@
     "dashboard": {
       "title": "Performance",
       "subtitle": "Performance management and feedback"
+    },
+    "groups": {
+      "evaluations": "Evaluations",
+      "goalManagement": "Goal Management",
+      "development": "Development",
+      "analytics": "Analytics"
     },
     "modules": {
       "appraisals": "Appraisals",
