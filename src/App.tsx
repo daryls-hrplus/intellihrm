@@ -241,6 +241,7 @@ import PropertyMaintenancePage from "./pages/property/PropertyMaintenancePage";
 import PropertyCategoriesPage from "./pages/property/PropertyCategoriesPage";
 // Payroll pages
 import PayrollDashboardPage from "./pages/payroll/PayrollDashboardPage";
+import TaxAllowancesPage from "./pages/payroll/TaxAllowancesPage";
 import PayGroupsPage from "./pages/payroll/PayGroupsPage";
 import PayPeriodsPage from "./pages/payroll/PayPeriodsPage";
 import PayrollProcessingPage from "./pages/payroll/PayrollProcessingPage";
