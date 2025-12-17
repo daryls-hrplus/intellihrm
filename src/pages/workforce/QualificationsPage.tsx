@@ -11,7 +11,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   Plus, Search, GraduationCap, Award, FileCheck, Loader2,
-  CheckCircle, XCircle, Clock, Filter, Building2, ChevronRight, Upload
+  CheckCircle, XCircle, Clock, Filter, Building2, ChevronRight, Upload, FileText, ExternalLink
 } from "lucide-react";
 import { toast } from "sonner";
 import { QualificationDialog } from "@/components/workforce/qualifications/QualificationDialog";
@@ -38,6 +38,8 @@ interface Qualification {
   expiry_date?: string;
   institution_name?: string;
   accrediting_body_name?: string;
+  document_url?: string;
+  document_name?: string;
   created_at: string;
   profiles?: { full_name: string; email: string };
 }
@@ -389,6 +391,17 @@ export default function QualificationsPage() {
                           </TableCell>
                           <TableCell className="text-right">
                             <div className="flex items-center justify-end gap-2">
+                              {q.document_url && (
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => window.open(q.document_url, '_blank')}
+                                  title={q.document_name || "View Document"}
+                                >
+                                  <FileText className="h-4 w-4 mr-1" />
+                                  View
+                                </Button>
+                              )}
                               {q.verification_status === "pending" && (
                                 <Button
                                   variant="outline"
@@ -444,9 +457,22 @@ export default function QualificationsPage() {
                             <TableCell className="capitalize">{q.record_type}</TableCell>
                             <TableCell>{formatDateForDisplay(q.created_at, "MMM d, yyyy")}</TableCell>
                             <TableCell className="text-right">
-                              <Button size="sm" onClick={() => handleVerify(q)}>
-                                Review & Verify
-                              </Button>
+                              <div className="flex items-center justify-end gap-2">
+                                {q.document_url && (
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => window.open(q.document_url, '_blank')}
+                                    title={q.document_name || "View Document"}
+                                  >
+                                    <FileText className="h-4 w-4 mr-1" />
+                                    View
+                                  </Button>
+                                )}
+                                <Button size="sm" onClick={() => handleVerify(q)}>
+                                  Review & Verify
+                                </Button>
+                              </div>
                             </TableCell>
                           </TableRow>
                         ))}
