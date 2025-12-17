@@ -1,4 +1,113 @@
 {
+  "training": {
+    "groups": {
+      "learning": "Aprendizaje",
+      "management": "Gestión",
+      "administration": "Administración",
+      "analytics": "Analítica"
+    }
+  },
+  "succession": {
+    "groups": {
+      "talentAssessment": "Evaluación de Talento",
+      "successionPlanning": "Planificación de Sucesión",
+      "careerDevelopment": "Desarrollo de Carrera",
+      "analytics": "Analítica"
+    }
+  },
+  "recruitment": {
+    "groups": {
+      "requisitions": "Requisiciones",
+      "candidates": "Candidatos",
+      "hiringProcess": "Proceso de Contratación",
+      "analytics": "Analítica"
+    }
+  },
+  "hse": {
+    "groups": {
+      "incidentManagement": "Gestión de Incidentes",
+      "riskCompliance": "Riesgo y Cumplimiento",
+      "trainingPrograms": "Programas de Capacitación",
+      "analytics": "Analítica"
+    }
+  },
+  "employeeRelations": {
+    "groups": {
+      "caseManagement": "Gestión de Casos",
+      "recognition": "Reconocimiento",
+      "engagement": "Compromiso",
+      "analytics": "Analítica"
+    }
+  },
+  "property": {
+    "groups": {
+      "assetManagement": "Gestión de Activos",
+      "inventory": "Inventario",
+      "requests": "Solicitudes",
+      "analytics": "Analítica"
+    }
+  },
+  "ess": {
+    "groups": {
+      "personal": "Personal",
+      "timeLeave": "Tiempo y Licencias",
+      "payBenefits": "Pago y Beneficios",
+      "careerDevelopment": "Carrera y Desarrollo",
+      "workplaceResources": "Recursos del Lugar de Trabajo",
+      "support": "Soporte"
+    }
+  },
+  "mss": {
+    "groups": {
+      "teamManagement": "Gestión de Equipo",
+      "approvalsWorkflow": "Aprobaciones y Flujo de Trabajo",
+      "performanceDevelopment": "Desempeño y Desarrollo",
+      "teamResources": "Recursos del Equipo",
+      "analyticsSupport": "Analítica y Soporte"
+    }
+  },
+  "compensation": {
+    "groups": {
+      "payStructure": "Estructura Salarial",
+      "employeePay": "Pago de Empleados",
+      "incentives": "Incentivos",
+      "analyticsBenchmarking": "Analítica y Comparación"
+    }
+  },
+  "benefits": {
+    "groups": {
+      "coreBenefits": "Beneficios Principales",
+      "analyticsReporting": "Analítica y Reportes",
+      "administration": "Administración",
+      "compliance": "Cumplimiento"
+    }
+  },
+  "performance": {
+    "groups": {
+      "evaluations": "Evaluaciones",
+      "goalManagement": "Gestión de Objetivos",
+      "development": "Desarrollo",
+      "analytics": "Analítica"
+    }
+  },
+  "payroll": {
+    "groups": {
+      "processing": "Procesamiento",
+      "configuration": "Configuración",
+      "integration": "Integración",
+      "analytics": "Analítica"
+    }
+  },
+  "admin": {
+    "groups": {
+      "organization": "Organización",
+      "usersAccess": "Usuarios y Acceso",
+      "security": "Seguridad",
+      "systemConfig": "Configuración del Sistema",
+      "documentation": "Documentación",
+      "billing": "Facturación"
+    }
+  },
   "common": {
     "loading": "Cargando...",
     "save": "Guardar",

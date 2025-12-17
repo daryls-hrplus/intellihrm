@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { NavLink } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -8,8 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { AccessRequestsAnalytics } from "@/components/admin/AccessRequestsAnalytics";
 import { useTranslation } from "react-i18next";
-import { DraggableModuleGrid, DraggableModule } from "@/components/ui/DraggableModuleGrid";
-import { useDraggableOrder } from "@/hooks/useDraggableOrder";
+import { GroupedModuleCards, ModuleSection, GroupedModuleItem } from "@/components/ui/GroupedModuleCards";
 import {
   Building,
   Building2,
@@ -46,209 +45,60 @@ import {
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 
-const getAdminModules = (t: (key: string) => string) => [
-  {
-    title: t("admin.modules.companyGroups.title"),
-    description: t("admin.modules.companyGroups.description"),
-    href: "/admin/company-groups",
-    icon: Building,
-    color: "bg-primary/10 text-primary",
-    tabCode: "company-groups",
-  },
-  {
-    title: t("admin.modules.companies.title"),
-    description: t("admin.modules.companies.description"),
-    href: "/admin/companies",
-    icon: Building2,
-    color: "bg-info/10 text-info",
-    tabCode: "companies",
-  },
-  {
-    title: t("admin.modules.users.title"),
-    description: t("admin.modules.users.description"),
-    href: "/admin/users",
-    icon: Users,
-    color: "bg-success/10 text-success",
-    tabCode: "users",
-  },
-  {
-    title: t("admin.modules.roles.title"),
-    description: t("admin.modules.roles.description"),
-    href: "/admin/roles",
-    icon: Shield,
-    color: "bg-warning/10 text-warning",
-    tabCode: "roles",
-  },
-  {
-    title: t("admin.modules.auditLogs.title"),
-    description: t("admin.modules.auditLogs.description"),
-    href: "/admin/audit-logs",
-    icon: FileText,
-    color: "bg-secondary/10 text-secondary-foreground",
-    tabCode: "audit-logs",
-  },
-  {
-    title: t("admin.modules.aiUsage.title"),
-    description: t("admin.modules.aiUsage.description"),
-    href: "/admin/ai-usage",
-    icon: Bot,
-    color: "bg-purple-500/10 text-purple-600",
-    tabCode: "ai-usage",
-  },
-  {
-    title: t("admin.modules.piiAccess.title"),
-    description: t("admin.modules.piiAccess.description"),
-    href: "/admin/pii-access",
-    icon: Eye,
-    color: "bg-amber-500/10 text-amber-600",
-    tabCode: "pii-access",
-  },
-  {
-    title: t("admin.modules.settings.title"),
-    description: t("admin.modules.settings.description"),
-    href: "/admin/settings",
-    icon: Cog,
-    color: "bg-slate-500/10 text-slate-600",
-    tabCode: "settings",
-  },
-  {
-    title: t("admin.modules.permissions.title"),
-    description: t("admin.modules.permissions.description"),
-    href: "/admin/permissions",
-    icon: Grid3X3,
-    color: "bg-violet-500/10 text-violet-600",
-    tabCode: "permissions",
-  },
-  {
-    title: t("admin.modules.accessRequests.title"),
-    description: t("admin.modules.accessRequests.description"),
-    href: "/admin/access-requests",
-    icon: ClipboardList,
-    color: "bg-emerald-500/10 text-emerald-600",
-    tabCode: "access-requests",
-  },
-  {
-    title: t("admin.modules.autoApproval.title"),
-    description: t("admin.modules.autoApproval.description"),
-    href: "/admin/auto-approval",
-    icon: Zap,
-    color: "bg-orange-500/10 text-orange-600",
-    tabCode: "auto-approval",
-  },
-  {
-    title: t("admin.modules.bulkImport.title"),
-    description: t("admin.modules.bulkImport.description"),
-    href: "/admin/bulk-import",
-    icon: Upload,
-    color: "bg-cyan-500/10 text-cyan-600",
-    tabCode: "bulk-import",
-  },
-  {
-    title: "Color Scheme",
-    description: "Customize the application's color theme with live preview",
-    href: "/admin/color-scheme",
-    icon: Palette,
-    color: "bg-gradient-to-r from-pink-500/10 to-violet-500/10 text-violet-600",
-    tabCode: "color-scheme",
-  },
-  {
-    title: "Company Tags",
-    description: "Group companies with tags for scoped admin access",
-    href: "/admin/company-tags",
-    icon: Tag,
-    color: "bg-teal-500/10 text-teal-600",
-    tabCode: "company-tags",
-  },
-  {
-    title: "Granular Permissions",
-    description: "Configure module, tab, and action-level permissions",
-    href: "/admin/granular-permissions",
-    icon: Lock,
-    color: "bg-indigo-500/10 text-indigo-600",
-    tabCode: "granular-permissions",
-  },
-  {
-    title: "Implementation Handbook",
-    description: "Step-by-step guide for configuring all modules",
-    href: "/admin/implementation-handbook",
-    icon: BookOpen,
-    color: "bg-rose-500/10 text-rose-600",
-    tabCode: "implementation-handbook",
-  },
-  {
-    title: "Features Brochure",
-    description: "Marketing summary of HRplus Cerebra capabilities",
-    href: "/admin/features-brochure",
-    icon: FileSpreadsheet,
-    color: "bg-blue-500/10 text-blue-600",
-    tabCode: "features-brochure",
-  },
-  {
-    title: "Modules Brochure",
-    description: "Comprehensive guide to all modules and features",
-    href: "/admin/modules-brochure",
-    icon: Layers,
-    color: "bg-green-500/10 text-green-600",
-    tabCode: "modules-brochure",
-  },
-  {
-    title: "Subscriptions",
-    description: "Manage company subscriptions and billing",
-    href: "/admin/subscriptions",
-    icon: CreditCard,
-    color: "bg-emerald-500/10 text-emerald-600",
-    tabCode: "subscriptions",
-  },
-  {
-    title: "Upgrade Plan",
-    description: "Add or remove modules from your subscription",
-    href: "/subscription/upgrade",
-    icon: ArrowUpCircle,
-    color: "bg-gradient-to-r from-amber-500/10 to-orange-500/10 text-orange-600",
-    tabCode: "upgrade",
-  },
-  {
-    title: "MFA Settings",
-    description: "Configure multi-factor authentication requirements",
-    href: "/admin/mfa-settings",
-    icon: Fingerprint,
-    color: "bg-red-500/10 text-red-600",
-    tabCode: "mfa-settings",
-  },
-  {
-    title: "SSO Settings",
-    description: "Configure Single Sign-On providers and domain mappings",
-    href: "/admin/sso-settings",
-    icon: KeyRound,
-    color: "bg-sky-500/10 text-sky-600",
-    tabCode: "sso-settings",
-  },
-  {
-    title: "Password Policies",
-    description: "Configure enterprise password security requirements",
-    href: "/admin/password-policies",
-    icon: Lock,
-    color: "bg-amber-500/10 text-amber-600",
-    tabCode: "password-policies",
-  },
-  {
-    title: t("admin.modules.territories.title"),
-    description: t("admin.modules.territories.description"),
-    href: "/admin/territories",
-    icon: Globe,
-    color: "bg-destructive/10 text-destructive",
-    tabCode: "territories",
-  },
-  {
-    title: t("admin.modules.languages.title"),
-    description: t("admin.modules.languages.description"),
-    href: "/admin/languages",
-    icon: Languages,
-    color: "bg-accent/10 text-accent-foreground",
-    tabCode: "languages",
-  },
-];
+const getAdminModuleSections = (t: (key: string) => string, hasTabAccess: (module: string, tab: string) => boolean): ModuleSection[] => {
+  const allModules: Record<string, GroupedModuleItem[]> = {
+    organization: [
+      { title: t("admin.modules.companyGroups.title"), description: t("admin.modules.companyGroups.description"), href: "/admin/company-groups", icon: Building, color: "bg-primary/10 text-primary", tabCode: "company-groups" },
+      { title: t("admin.modules.companies.title"), description: t("admin.modules.companies.description"), href: "/admin/companies", icon: Building2, color: "bg-info/10 text-info", tabCode: "companies" },
+      { title: t("admin.modules.territories.title"), description: t("admin.modules.territories.description"), href: "/admin/territories", icon: Globe, color: "bg-destructive/10 text-destructive", tabCode: "territories" },
+      { title: "Company Tags", description: "Group companies with tags for scoped admin access", href: "/admin/company-tags", icon: Tag, color: "bg-teal-500/10 text-teal-600", tabCode: "company-tags" },
+    ],
+    usersAccess: [
+      { title: t("admin.modules.users.title"), description: t("admin.modules.users.description"), href: "/admin/users", icon: Users, color: "bg-success/10 text-success", tabCode: "users" },
+      { title: t("admin.modules.roles.title"), description: t("admin.modules.roles.description"), href: "/admin/roles", icon: Shield, color: "bg-warning/10 text-warning", tabCode: "roles" },
+      { title: t("admin.modules.permissions.title"), description: t("admin.modules.permissions.description"), href: "/admin/permissions", icon: Grid3X3, color: "bg-violet-500/10 text-violet-600", tabCode: "permissions" },
+      { title: "Granular Permissions", description: "Configure module, tab, and action-level permissions", href: "/admin/granular-permissions", icon: Lock, color: "bg-indigo-500/10 text-indigo-600", tabCode: "granular-permissions" },
+      { title: t("admin.modules.accessRequests.title"), description: t("admin.modules.accessRequests.description"), href: "/admin/access-requests", icon: ClipboardList, color: "bg-emerald-500/10 text-emerald-600", tabCode: "access-requests" },
+      { title: t("admin.modules.autoApproval.title"), description: t("admin.modules.autoApproval.description"), href: "/admin/auto-approval", icon: Zap, color: "bg-orange-500/10 text-orange-600", tabCode: "auto-approval" },
+    ],
+    security: [
+      { title: t("admin.modules.auditLogs.title"), description: t("admin.modules.auditLogs.description"), href: "/admin/audit-logs", icon: FileText, color: "bg-secondary/10 text-secondary-foreground", tabCode: "audit-logs" },
+      { title: t("admin.modules.piiAccess.title"), description: t("admin.modules.piiAccess.description"), href: "/admin/pii-access", icon: Eye, color: "bg-amber-500/10 text-amber-600", tabCode: "pii-access" },
+      { title: "MFA Settings", description: "Configure multi-factor authentication requirements", href: "/admin/mfa-settings", icon: Fingerprint, color: "bg-red-500/10 text-red-600", tabCode: "mfa-settings" },
+      { title: "SSO Settings", description: "Configure Single Sign-On providers and domain mappings", href: "/admin/sso-settings", icon: KeyRound, color: "bg-sky-500/10 text-sky-600", tabCode: "sso-settings" },
+      { title: "Password Policies", description: "Configure enterprise password security requirements", href: "/admin/password-policies", icon: Lock, color: "bg-amber-500/10 text-amber-600", tabCode: "password-policies" },
+    ],
+    systemConfig: [
+      { title: t("admin.modules.settings.title"), description: t("admin.modules.settings.description"), href: "/admin/settings", icon: Cog, color: "bg-slate-500/10 text-slate-600", tabCode: "settings" },
+      { title: t("admin.modules.aiUsage.title"), description: t("admin.modules.aiUsage.description"), href: "/admin/ai-usage", icon: Bot, color: "bg-purple-500/10 text-purple-600", tabCode: "ai-usage" },
+      { title: "Color Scheme", description: "Customize the application's color theme with live preview", href: "/admin/color-scheme", icon: Palette, color: "bg-gradient-to-r from-pink-500/10 to-violet-500/10 text-violet-600", tabCode: "color-scheme" },
+      { title: t("admin.modules.languages.title"), description: t("admin.modules.languages.description"), href: "/admin/languages", icon: Languages, color: "bg-accent/10 text-accent-foreground", tabCode: "languages" },
+      { title: t("admin.modules.bulkImport.title"), description: t("admin.modules.bulkImport.description"), href: "/admin/bulk-import", icon: Upload, color: "bg-cyan-500/10 text-cyan-600", tabCode: "bulk-import" },
+    ],
+    documentation: [
+      { title: "Implementation Handbook", description: "Step-by-step guide for configuring all modules", href: "/admin/implementation-handbook", icon: BookOpen, color: "bg-rose-500/10 text-rose-600", tabCode: "implementation-handbook" },
+      { title: "Features Brochure", description: "Marketing summary of HRplus Cerebra capabilities", href: "/admin/features-brochure", icon: FileSpreadsheet, color: "bg-blue-500/10 text-blue-600", tabCode: "features-brochure" },
+      { title: "Modules Brochure", description: "Comprehensive guide to all modules and features", href: "/admin/modules-brochure", icon: Layers, color: "bg-green-500/10 text-green-600", tabCode: "modules-brochure" },
+    ],
+    billing: [
+      { title: "Subscriptions", description: "Manage company subscriptions and billing", href: "/admin/subscriptions", icon: CreditCard, color: "bg-emerald-500/10 text-emerald-600", tabCode: "subscriptions" },
+      { title: "Upgrade Plan", description: "Add or remove modules from your subscription", href: "/subscription/upgrade", icon: ArrowUpCircle, color: "bg-gradient-to-r from-amber-500/10 to-orange-500/10 text-orange-600", tabCode: "upgrade" },
+    ],
+  };
 
+  // Filter modules by permission
+  const filterByPermission = (items: GroupedModuleItem[]) =>
+    items.filter(item => hasTabAccess("admin", item.tabCode || ""));
+
+  return [
+    { titleKey: "admin.groups.organization", items: filterByPermission(allModules.organization) },
+    { titleKey: "admin.groups.usersAccess", items: filterByPermission(allModules.usersAccess) },
+    { titleKey: "admin.groups.security", items: filterByPermission(allModules.security) },
+    { titleKey: "admin.groups.systemConfig", items: filterByPermission(allModules.systemConfig) },
+    { titleKey: "admin.groups.documentation", items: filterByPermission(allModules.documentation) },
+    { titleKey: "admin.groups.billing", items: filterByPermission(allModules.billing) },
+  ];
+};
 
 interface Stats {
   totalUsers: number;
@@ -281,15 +131,7 @@ export default function AdminDashboardPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isPiiAlertsOpen, setIsPiiAlertsOpen] = useState(false);
 
-  const adminModulesFiltered = getAdminModules(t).filter(module => hasTabAccess("admin", module.tabCode)) as DraggableModule[];
-  
-  const getModuleId = useCallback((module: DraggableModule) => module.tabCode, []);
-  
-  const { orderedItems: adminModules, updateOrder, resetOrder } = useDraggableOrder({
-    items: adminModulesFiltered,
-    storageKey: "admin-dashboard-module-order",
-    getItemId: getModuleId,
-  });
+  const adminSections = getAdminModuleSections(t, hasTabAccess);
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -481,11 +323,7 @@ export default function AdminDashboardPage() {
         {/* Access Request Analytics */}
         <AccessRequestsAnalytics />
 
-        <DraggableModuleGrid
-          modules={adminModules}
-          onReorder={updateOrder}
-          onReset={resetOrder}
-        />
+        <GroupedModuleCards sections={adminSections} />
       </div>
     </AppLayout>
   );

@@ -1,4 +1,81 @@
 {
+  "training": {
+    "groups": {
+      "learning": "Learning",
+      "management": "Management",
+      "administration": "Administration",
+      "analytics": "Analytics"
+    }
+  },
+  "succession": {
+    "groups": {
+      "talentAssessment": "Talent Assessment",
+      "successionPlanning": "Succession Planning",
+      "careerDevelopment": "Career Development",
+      "analytics": "Analytics"
+    }
+  },
+  "recruitment": {
+    "groups": {
+      "requisitions": "Requisitions",
+      "candidates": "Candidates",
+      "hiringProcess": "Hiring Process",
+      "analytics": "Analytics"
+    }
+  },
+  "hse": {
+    "groups": {
+      "incidentManagement": "Incident Management",
+      "riskCompliance": "Risk & Compliance",
+      "trainingPrograms": "Training Programs",
+      "analytics": "Analytics"
+    }
+  },
+  "employeeRelations": {
+    "groups": {
+      "caseManagement": "Case Management",
+      "recognition": "Recognition",
+      "engagement": "Engagement",
+      "analytics": "Analytics"
+    }
+  },
+  "property": {
+    "groups": {
+      "assetManagement": "Asset Management",
+      "inventory": "Inventory",
+      "requests": "Requests",
+      "analytics": "Analytics"
+    }
+  },
+  "ess": {
+    "groups": {
+      "personal": "Personal",
+      "timeLeave": "Time & Leave",
+      "payBenefits": "Pay & Benefits",
+      "careerDevelopment": "Career & Development",
+      "workplaceResources": "Workplace Resources",
+      "support": "Support"
+    }
+  },
+  "mss": {
+    "groups": {
+      "teamManagement": "Team Management",
+      "approvalsWorkflow": "Approvals & Workflow",
+      "performanceDevelopment": "Performance & Development",
+      "teamResources": "Team Resources",
+      "analyticsSupport": "Analytics & Support"
+    }
+  },
+  "admin": {
+    "groups": {
+      "organization": "Organization",
+      "usersAccess": "Users & Access",
+      "security": "Security",
+      "systemConfig": "System Configuration",
+      "documentation": "Documentation",
+      "billing": "Billing"
+    }
+  },
   "common": {
     "loading": "Loading...",
     "save": "Save",
