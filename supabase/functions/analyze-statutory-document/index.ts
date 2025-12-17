@@ -35,7 +35,8 @@ Return a JSON object with:
 - calculationRules: array of rules with {type, description, formula, conditions, parameters}
 - dependencies: array of {dependsOn, relationship, description}
 - exemptions: array of exemption conditions
-- sampleCalculations: array of example calculations showing how rules apply`;
+- sampleCalculations: array of example calculations showing how rules apply
+- spreadsheetExamples: array of detailed spreadsheet rows showing different complexity scenarios`;
 
       const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
         method: "POST",
@@ -93,8 +94,26 @@ Return a JSON object with:
                       },
                     },
                   },
+                  spreadsheetExamples: {
+                    type: "array",
+                    items: {
+                      type: "object",
+                      properties: {
+                        scenarioName: { type: "string" },
+                        employeeName: { type: "string" },
+                        age: { type: "number" },
+                        grossSalary: { type: "number" },
+                        taxableIncome: { type: "number" },
+                        rateApplied: { type: "string" },
+                        deductionAmount: { type: "number" },
+                        netAfterDeduction: { type: "number" },
+                        exemptionApplied: { type: "string" },
+                        notes: { type: "string" },
+                      },
+                    },
+                  },
                 },
-                required: ["calculationRules", "dependencies", "exemptions", "sampleCalculations"],
+                required: ["calculationRules", "dependencies", "exemptions", "sampleCalculations", "spreadsheetExamples"],
               },
             },
           },
@@ -141,6 +160,7 @@ Rules: ${JSON.stringify(analysis)}`;
             ai_calculation_rules: analysis.calculationRules,
             ai_sample_document: sampleDocument,
             ai_dependencies: analysis.dependencies,
+            ai_spreadsheet_examples: analysis.spreadsheetExamples,
             ai_analyzed_at: new Date().toISOString(),
           })
           .eq("id", statutoryId);

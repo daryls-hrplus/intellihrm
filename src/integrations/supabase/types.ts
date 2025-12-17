@@ -27626,6 +27626,7 @@ export type Database = {
           ai_calculation_rules: Json | null
           ai_dependencies: Json | null
           ai_sample_document: string | null
+          ai_spreadsheet_examples: Json | null
           country: string
           created_at: string
           description: string | null
@@ -27644,6 +27645,7 @@ export type Database = {
           ai_calculation_rules?: Json | null
           ai_dependencies?: Json | null
           ai_sample_document?: string | null
+          ai_spreadsheet_examples?: Json | null
           country: string
           created_at?: string
           description?: string | null
@@ -27662,6 +27664,7 @@ export type Database = {
           ai_calculation_rules?: Json | null
           ai_dependencies?: Json | null
           ai_sample_document?: string | null
+          ai_spreadsheet_examples?: Json | null
           country?: string
           created_at?: string
           description?: string | null
