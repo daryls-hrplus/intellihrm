@@ -6,6 +6,7 @@ import { useLanguage } from "@/hooks/useLanguage";
 import { LeaveCompanyFilter, useLeaveCompanyFilter } from "@/components/leave/LeaveCompanyFilter";
 import { LeaveAccrualRulesAIUpload } from "@/components/leave/LeaveAccrualRulesAIUpload";
 import { supabase } from "@/integrations/supabase/client";
+import { getTodayString, formatDateForDisplay } from "@/utils/dateUtils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -64,7 +65,7 @@ export default function LeaveAccrualRulesPage() {
     employee_status: "",
     employee_type: "",
     priority: 0,
-    start_date: new Date().toISOString().split('T')[0],
+    start_date: getTodayString(),
     end_date: "" as string,
   });
 
@@ -80,7 +81,7 @@ export default function LeaveAccrualRulesPage() {
       employee_status: "",
       employee_type: "",
       priority: 0,
-      start_date: new Date().toISOString().split('T')[0],
+      start_date: getTodayString(),
       end_date: "",
     });
   };
@@ -403,7 +404,7 @@ export default function LeaveAccrualRulesPage() {
                     </TableCell>
                     <TableCell>
                       <span className="text-sm">
-                        {new Date(rule.start_date).toLocaleDateString()} - {rule.end_date ? new Date(rule.end_date).toLocaleDateString() : t("leave.accrualRules.noEnd")}
+                        {formatDateForDisplay(rule.start_date)} - {rule.end_date ? formatDateForDisplay(rule.end_date) : t("leave.accrualRules.noEnd")}
                       </span>
                     </TableCell>
                     <TableCell>{rule.priority}</TableCell>

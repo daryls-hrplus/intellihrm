@@ -59,7 +59,7 @@ import { useOffboarding, OffboardingTemplate, OffboardingTemplateTask, Offboardi
 import { OffboardingAnalytics } from '@/components/admin/OffboardingAnalytics';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { format } from 'date-fns';
+import { getTodayString, formatDateForDisplay } from '@/utils/dateUtils';
 
 export default function OffboardingPage() {
   const { t } = useLanguage();
@@ -97,7 +97,7 @@ export default function OffboardingPage() {
     description: '',
     company_id: '',
     is_active: true,
-    start_date: new Date().toISOString().split('T')[0],
+    start_date: getTodayString(),
     end_date: '',
   });
 
@@ -298,7 +298,7 @@ export default function OffboardingPage() {
       description: '',
       company_id: '',
       is_active: true,
-      start_date: new Date().toISOString().split('T')[0],
+      start_date: getTodayString(),
       end_date: '',
     });
   };
@@ -498,7 +498,7 @@ export default function OffboardingPage() {
                         </div>
                         <div>
                           <p className="text-sm text-muted-foreground">{t('workforce.offboarding.lastWorkingDate')}</p>
-                          <p className="font-medium">{format(new Date(instance.last_working_date), 'MMM dd, yyyy')}</p>
+                          <p className="font-medium">{formatDateForDisplay(instance.last_working_date, 'MMM dd, yyyy')}</p>
                         </div>
                         <div>
                           <p className="text-sm text-muted-foreground">{t('common.reason')}</p>

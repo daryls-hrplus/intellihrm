@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
+import { getTodayString, formatDateForDisplay } from "@/utils/dateUtils";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -136,7 +137,7 @@ export default function EligibilityAuditPage() {
         .update({
           verification_status: status,
           verified_by: user?.id,
-          verification_date: new Date().toISOString().split("T")[0]
+          verification_date: getTodayString()
         })
         .eq("id", audit.id);
 
@@ -292,7 +293,7 @@ export default function EligibilityAuditPage() {
                       <TableCell>
                         {AUDIT_TYPES.find(t => t.value === audit.audit_type)?.label || audit.audit_type}
                       </TableCell>
-                      <TableCell>{new Date(audit.created_at).toLocaleDateString()}</TableCell>
+                      <TableCell>{formatDateForDisplay(audit.created_at)}</TableCell>
                       <TableCell>
                         <Badge variant={getStatusVariant(audit.verification_status)}>
                           {audit.verification_status}

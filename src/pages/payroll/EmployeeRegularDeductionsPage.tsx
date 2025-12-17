@@ -14,7 +14,7 @@ import { Plus, Trash2, Pencil, Repeat, Search, Target, Calendar } from "lucide-r
 import { useTranslation } from "react-i18next";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
-import { format } from "date-fns";
+import { formatDateForDisplay } from "@/utils/dateUtils";
 
 interface Company {
   id: string;
@@ -445,7 +445,7 @@ export default function EmployeeRegularDeductionsPage() {
                         </div>
                       </TableCell>
                       <TableCell>{getStatusBadge(deduction)}</TableCell>
-                      <TableCell>{format(new Date(deduction.start_date), 'MMM d, yyyy')}</TableCell>
+                      <TableCell>{formatDateForDisplay(deduction.start_date, 'MMM d, yyyy')}</TableCell>
                       <TableCell>
                         <div className="flex gap-1">
                           <Button variant="ghost" size="sm" onClick={() => handleEdit(deduction)}>

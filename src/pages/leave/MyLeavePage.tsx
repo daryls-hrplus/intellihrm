@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Calendar, CalendarPlus, Clock, CheckCircle, XCircle, AlertCircle } from "lucide-react";
-import { format } from "date-fns";
+import { formatDateForDisplay } from "@/utils/dateUtils";
 import { NavLink } from "react-router-dom";
 import {
   Table,
@@ -165,9 +165,9 @@ export default function MyLeavePage() {
                         </div>
                       </TableCell>
                       <TableCell>
-                        {format(new Date(request.start_date), "MMM d, yyyy")}
+                        {formatDateForDisplay(request.start_date, "MMM d, yyyy")}
                         {request.start_date !== request.end_date && (
-                          <> - {format(new Date(request.end_date), "MMM d, yyyy")}</>
+                          <> - {formatDateForDisplay(request.end_date, "MMM d, yyyy")}</>
                         )}
                       </TableCell>
                       <TableCell>
@@ -176,7 +176,7 @@ export default function MyLeavePage() {
                       <TableCell>{getStatusBadge(request.status)}</TableCell>
                       <TableCell className="text-muted-foreground">
                         {request.submitted_at 
-                          ? format(new Date(request.submitted_at), "MMM d, yyyy")
+                          ? formatDateForDisplay(request.submitted_at, "MMM d, yyyy")
                           : "-"
                         }
                       </TableCell>

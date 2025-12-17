@@ -55,7 +55,7 @@ import { OnboardingAnalytics } from '@/components/admin/OnboardingAnalytics';
 import { useOnboarding, OnboardingTemplate, OnboardingTemplateTask, OnboardingInstance } from '@/hooks/useOnboarding';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { format } from 'date-fns';
+import { getTodayString, formatDateForDisplay } from '@/utils/dateUtils';
 
 export default function AdminOnboardingPage() {
   const { t } = useTranslation();
@@ -105,7 +105,7 @@ export default function AdminOnboardingPage() {
     company_id: '',
     job_id: '',
     is_active: true,
-    start_date: new Date().toISOString().split('T')[0],
+    start_date: getTodayString(),
     end_date: '',
   });
 
@@ -140,7 +140,7 @@ export default function AdminOnboardingPage() {
     company_id: '',
     buddy_id: '',
     manager_id: '',
-    start_date: new Date().toISOString().split('T')[0],
+    start_date: getTodayString(),
     target_completion_date: '',
     notes: '',
   });
@@ -326,7 +326,7 @@ export default function AdminOnboardingPage() {
       company_id: '',
       job_id: '',
       is_active: true,
-      start_date: new Date().toISOString().split('T')[0],
+      start_date: getTodayString(),
       end_date: '',
     });
   };
@@ -350,7 +350,7 @@ export default function AdminOnboardingPage() {
       company_id: '',
       buddy_id: '',
       manager_id: '',
-      start_date: new Date().toISOString().split('T')[0],
+      start_date: getTodayString(),
       target_completion_date: '',
       notes: '',
     });
@@ -541,7 +541,7 @@ export default function AdminOnboardingPage() {
                         </div>
                         <div>
                           <p className="text-sm text-muted-foreground">Start Date</p>
-                          <p className="font-medium">{format(new Date(instance.start_date), 'MMM d, yyyy')}</p>
+                          <p className="font-medium">{formatDateForDisplay(instance.start_date, 'MMM d, yyyy')}</p>
                         </div>
                         <div>
                           <p className="text-sm text-muted-foreground">Manager</p>

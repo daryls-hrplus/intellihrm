@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useAuditLog } from '@/hooks/useAuditLog';
+import { toDateString, getTodayString } from '@/utils/dateUtils';
 
 export interface OnboardingTemplate {
   id: string;
@@ -373,7 +374,7 @@ export function useOnboarding() {
         description: task.description,
         task_type: task.task_type,
         is_required: task.is_required,
-        due_date: new Date(startDate.getTime() + task.due_days * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+        due_date: toDateString(new Date(startDate.getTime() + task.due_days * 24 * 60 * 60 * 1000)),
         assigned_to_type: task.assigned_to_type,
         assigned_to_id: task.assigned_to_type === 'employee' ? instance.employee_id :
                         task.assigned_to_type === 'manager' ? instance.manager_id :
@@ -394,7 +395,7 @@ export function useOnboarding() {
           description: 'Set up and assign all necessary equipment for the new employee',
           task_type: 'equipment',
           is_required: true,
-          due_date: new Date(startDate.getTime() - 1 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // Day before start
+          due_date: toDateString(new Date(startDate.getTime() - 1 * 24 * 60 * 60 * 1000)), // Day before start
           assigned_to_type: 'hr',
           assigned_to_id: null,
           training_course_id: null,
@@ -511,7 +512,7 @@ export function useOnboarding() {
             .from('onboarding_instances')
             .update({ 
               status: 'completed', 
-              actual_completion_date: new Date().toISOString().split('T')[0] 
+              actual_completion_date: getTodayString() 
             })
             .eq('id', instance.instance_id);
         }

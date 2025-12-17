@@ -42,6 +42,7 @@ import {
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { getTodayString } from "@/utils/dateUtils";
 
 interface GovernanceBody {
   id: string;
@@ -271,7 +272,7 @@ export function GovernanceManagement({ companyId }: GovernanceManagementProps) {
     setEditingMember(null);
     setMemberEmployeeId("");
     setMemberRole("member");
-    setMemberStartDate(new Date().toISOString().split("T")[0]);
+    setMemberStartDate(getTodayString());
     setMemberEndDate("");
     setMemberIsActive(true);
     setMemberDialogOpen(true);

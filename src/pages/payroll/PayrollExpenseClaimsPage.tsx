@@ -11,7 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { format } from "date-fns";
+import { formatDateForDisplay } from "@/utils/dateUtils";
 import { Receipt, DollarSign, CheckCircle, Eye, FileText, ExternalLink } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
@@ -307,7 +307,7 @@ export default function PayrollExpenseClaimsPage() {
                           </div>
                         </TableCell>
                         <TableCell className="font-mono text-sm">{claim.claim_number}</TableCell>
-                        <TableCell>{format(new Date(claim.claim_date), "MMM d, yyyy")}</TableCell>
+                        <TableCell>{formatDateForDisplay(claim.claim_date, "MMM d, yyyy")}</TableCell>
                         <TableCell className="font-semibold">${claim.total_amount.toFixed(2)}</TableCell>
                         <TableCell>
                           <Button
@@ -364,7 +364,7 @@ export default function PayrollExpenseClaimsPage() {
                     <TableBody>
                       {claimItems.map((item) => (
                         <TableRow key={item.id}>
-                          <TableCell>{format(new Date(item.expense_date), "MMM d")}</TableCell>
+                          <TableCell>{formatDateForDisplay(item.expense_date, "MMM d")}</TableCell>
                           <TableCell>
                             <div>
                               <div>{item.category}</div>
@@ -419,7 +419,7 @@ export default function PayrollExpenseClaimsPage() {
                   <SelectContent>
                     {payPeriods.map((pp) => (
                       <SelectItem key={pp.id} value={pp.id}>
-                        {pp.pay_groups?.name} - {pp.period_name} ({format(new Date(pp.cycle_start_date), "MMM d")} - {format(new Date(pp.cycle_end_date), "MMM d")})
+                        {pp.pay_groups?.name} - {pp.period_name} ({formatDateForDisplay(pp.cycle_start_date, "MMM d")} - {formatDateForDisplay(pp.cycle_end_date, "MMM d")})
                       </SelectItem>
                     ))}
                   </SelectContent>
