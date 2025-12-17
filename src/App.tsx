@@ -1577,6 +1577,14 @@ const App = () => (
               }
             />
             <Route
+              path="/payroll/pay-elements"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="payroll">
+                  <PayElementsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
               path="/payroll/leave-payment-config"
               element={
                 <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="payroll">
