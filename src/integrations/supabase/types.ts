@@ -563,6 +563,116 @@ export type Database = {
           },
         ]
       }
+      application_features: {
+        Row: {
+          created_at: string
+          description: string | null
+          display_order: number | null
+          feature_code: string
+          feature_name: string
+          i18n_key: string | null
+          id: string
+          is_active: boolean | null
+          module_id: string
+          role_requirements: string[] | null
+          route_path: string | null
+          ui_elements: Json | null
+          updated_at: string
+          workflow_steps: Json | null
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          display_order?: number | null
+          feature_code: string
+          feature_name: string
+          i18n_key?: string | null
+          id?: string
+          is_active?: boolean | null
+          module_id: string
+          role_requirements?: string[] | null
+          route_path?: string | null
+          ui_elements?: Json | null
+          updated_at?: string
+          workflow_steps?: Json | null
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          display_order?: number | null
+          feature_code?: string
+          feature_name?: string
+          i18n_key?: string | null
+          id?: string
+          is_active?: boolean | null
+          module_id?: string
+          role_requirements?: string[] | null
+          route_path?: string | null
+          ui_elements?: Json | null
+          updated_at?: string
+          workflow_steps?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "application_features_module_id_fkey"
+            columns: ["module_id"]
+            isOneToOne: false
+            referencedRelation: "application_modules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      application_modules: {
+        Row: {
+          created_at: string
+          description: string | null
+          display_order: number | null
+          features: Json | null
+          i18n_key: string | null
+          icon_name: string | null
+          id: string
+          is_active: boolean | null
+          module_code: string
+          module_name: string
+          parent_module_code: string | null
+          role_requirements: string[] | null
+          route_path: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          display_order?: number | null
+          features?: Json | null
+          i18n_key?: string | null
+          icon_name?: string | null
+          id?: string
+          is_active?: boolean | null
+          module_code: string
+          module_name: string
+          parent_module_code?: string | null
+          role_requirements?: string[] | null
+          route_path: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          display_order?: number | null
+          features?: Json | null
+          i18n_key?: string | null
+          icon_name?: string | null
+          id?: string
+          is_active?: boolean | null
+          module_code?: string
+          module_name?: string
+          parent_module_code?: string | null
+          role_requirements?: string[] | null
+          route_path?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       applications: {
         Row: {
           application_number: string | null
@@ -9062,6 +9172,228 @@ export type Database = {
             columns: ["position_id"]
             isOneToOne: false
             referencedRelation: "positions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      enablement_exports: {
+        Row: {
+          branding_config: Json | null
+          client_company_id: string | null
+          completed_at: string | null
+          created_at: string
+          error_message: string | null
+          export_name: string
+          export_type: string
+          export_url: string | null
+          file_size_bytes: number | null
+          generated_by: string | null
+          id: string
+          included_tutorials: string[] | null
+          status: string | null
+        }
+        Insert: {
+          branding_config?: Json | null
+          client_company_id?: string | null
+          completed_at?: string | null
+          created_at?: string
+          error_message?: string | null
+          export_name: string
+          export_type: string
+          export_url?: string | null
+          file_size_bytes?: number | null
+          generated_by?: string | null
+          id?: string
+          included_tutorials?: string[] | null
+          status?: string | null
+        }
+        Update: {
+          branding_config?: Json | null
+          client_company_id?: string | null
+          completed_at?: string | null
+          created_at?: string
+          error_message?: string | null
+          export_name?: string
+          export_type?: string
+          export_url?: string | null
+          file_size_bytes?: number | null
+          generated_by?: string | null
+          id?: string
+          included_tutorials?: string[] | null
+          status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "enablement_exports_client_company_id_fkey"
+            columns: ["client_company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      enablement_screenshots: {
+        Row: {
+          annotated_url: string | null
+          annotations: Json | null
+          capture_metadata: Json | null
+          captured_by: string | null
+          client_company_id: string | null
+          created_at: string
+          description: string | null
+          feature_id: string | null
+          id: string
+          is_client_specific: boolean | null
+          route_path: string | null
+          screenshot_url: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          annotated_url?: string | null
+          annotations?: Json | null
+          capture_metadata?: Json | null
+          captured_by?: string | null
+          client_company_id?: string | null
+          created_at?: string
+          description?: string | null
+          feature_id?: string | null
+          id?: string
+          is_client_specific?: boolean | null
+          route_path?: string | null
+          screenshot_url?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          annotated_url?: string | null
+          annotations?: Json | null
+          capture_metadata?: Json | null
+          captured_by?: string | null
+          client_company_id?: string | null
+          created_at?: string
+          description?: string | null
+          feature_id?: string | null
+          id?: string
+          is_client_specific?: boolean | null
+          route_path?: string | null
+          screenshot_url?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "enablement_screenshots_client_company_id_fkey"
+            columns: ["client_company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "enablement_screenshots_feature_id_fkey"
+            columns: ["feature_id"]
+            isOneToOne: false
+            referencedRelation: "application_features"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      enablement_tutorials: {
+        Row: {
+          client_company_id: string | null
+          content: Json
+          content_type: string
+          created_at: string
+          created_by: string | null
+          description: string | null
+          estimated_duration_minutes: number | null
+          feature_id: string | null
+          id: string
+          is_client_specific: boolean | null
+          kb_article_id: string | null
+          module_id: string | null
+          narration_script: string | null
+          published_at: string | null
+          published_by: string | null
+          published_to: string[] | null
+          screenshots: string[] | null
+          sop_document_id: string | null
+          status: string | null
+          target_roles: string[] | null
+          title: string
+          training_course_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          client_company_id?: string | null
+          content?: Json
+          content_type?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          estimated_duration_minutes?: number | null
+          feature_id?: string | null
+          id?: string
+          is_client_specific?: boolean | null
+          kb_article_id?: string | null
+          module_id?: string | null
+          narration_script?: string | null
+          published_at?: string | null
+          published_by?: string | null
+          published_to?: string[] | null
+          screenshots?: string[] | null
+          sop_document_id?: string | null
+          status?: string | null
+          target_roles?: string[] | null
+          title: string
+          training_course_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          client_company_id?: string | null
+          content?: Json
+          content_type?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          estimated_duration_minutes?: number | null
+          feature_id?: string | null
+          id?: string
+          is_client_specific?: boolean | null
+          kb_article_id?: string | null
+          module_id?: string | null
+          narration_script?: string | null
+          published_at?: string | null
+          published_by?: string | null
+          published_to?: string[] | null
+          screenshots?: string[] | null
+          sop_document_id?: string | null
+          status?: string | null
+          target_roles?: string[] | null
+          title?: string
+          training_course_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "enablement_tutorials_client_company_id_fkey"
+            columns: ["client_company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "enablement_tutorials_feature_id_fkey"
+            columns: ["feature_id"]
+            isOneToOne: false
+            referencedRelation: "application_features"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "enablement_tutorials_module_id_fkey"
+            columns: ["module_id"]
+            isOneToOne: false
+            referencedRelation: "application_modules"
             referencedColumns: ["id"]
           },
         ]
