@@ -8,8 +8,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { supabase } from "@/integrations/supabase/client";
-import { Upload, Sparkles, FileText, Loader2, CheckCircle, AlertCircle } from "lucide-react";
+import { Upload, Sparkles, FileText, Loader2, CheckCircle, AlertCircle, TableIcon } from "lucide-react";
 import { toast } from "sonner";
 import { markdownToHtml } from "@/lib/utils/markdown";
 
@@ -24,9 +25,23 @@ interface StatutoryDocumentUploadProps {
     ai_calculation_rules?: any;
     ai_sample_document?: string;
     ai_dependencies?: any[];
+    ai_spreadsheet_examples?: any[];
     ai_analyzed_at?: string;
   } | null;
   onAnalysisComplete: () => void;
+}
+
+interface SpreadsheetExample {
+  scenarioName: string;
+  employeeName: string;
+  age: number;
+  grossSalary: number;
+  taxableIncome: number;
+  rateApplied: string;
+  deductionAmount: number;
+  netAfterDeduction: number;
+  exemptionApplied: string;
+  notes: string;
 }
 
 interface AnalysisResult {
@@ -49,6 +64,7 @@ interface AnalysisResult {
     calculation: string;
     result: string;
   }>;
+  spreadsheetExamples: SpreadsheetExample[];
 }
 
 export function StatutoryDocumentUpload({
@@ -61,6 +77,7 @@ export function StatutoryDocumentUpload({
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
   const [sampleDocument, setSampleDocument] = useState<string>("");
+  const [spreadsheetExamples, setSpreadsheetExamples] = useState<SpreadsheetExample[]>([]);
   const [activeTab, setActiveTab] = useState("upload");
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -101,6 +118,7 @@ export function StatutoryDocumentUpload({
 
       setAnalysisResult(data.analysis);
       setSampleDocument(data.sampleDocument);
+      setSpreadsheetExamples(data.analysis.spreadsheetExamples || []);
       setActiveTab("results");
       toast.success("Document analyzed successfully");
       onAnalysisComplete();
@@ -115,6 +133,7 @@ export function StatutoryDocumentUpload({
   const existingRules = statutory?.ai_calculation_rules;
   const existingDocument = statutory?.ai_sample_document;
   const existingDependencies = statutory?.ai_dependencies;
+  const existingSpreadsheet = statutory?.ai_spreadsheet_examples;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -127,10 +146,11 @@ export function StatutoryDocumentUpload({
         </DialogHeader>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="upload">Upload Document</TabsTrigger>
-            <TabsTrigger value="results">Analysis Results</TabsTrigger>
-            <TabsTrigger value="sample">Sample Document</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-4">
+            <TabsTrigger value="upload">Upload</TabsTrigger>
+            <TabsTrigger value="results">Analysis</TabsTrigger>
+            <TabsTrigger value="spreadsheet">Spreadsheet</TabsTrigger>
+            <TabsTrigger value="sample">Document</TabsTrigger>
           </TabsList>
 
           <TabsContent value="upload" className="space-y-4">
@@ -297,6 +317,101 @@ export function StatutoryDocumentUpload({
                   <FileText className="h-12 w-12 mb-4 opacity-50" />
                   <p>No analysis results yet</p>
                   <p className="text-sm">Upload a document and run analysis</p>
+                </div>
+              )}
+            </ScrollArea>
+          </TabsContent>
+
+          <TabsContent value="spreadsheet" className="space-y-4">
+            <ScrollArea className="h-[500px]">
+              {((spreadsheetExamples?.length || 0) > 0 || (existingSpreadsheet?.length || 0) > 0) ? (
+                <div className="space-y-4 pr-4">
+                  <Card>
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-sm flex items-center gap-2">
+                        <TableIcon className="h-4 w-4 text-primary" />
+                        Simulated Calculation Examples
+                      </CardTitle>
+                      <p className="text-xs text-muted-foreground">
+                        Examples showing different complexity scenarios including age-based exemptions
+                      </p>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="overflow-x-auto">
+                        <Table>
+                          <TableHeader>
+                            <TableRow>
+                              <TableHead className="min-w-[120px]">Scenario</TableHead>
+                              <TableHead>Employee</TableHead>
+                              <TableHead className="text-right">Age</TableHead>
+                              <TableHead className="text-right">Gross Salary</TableHead>
+                              <TableHead className="text-right">Taxable Income</TableHead>
+                              <TableHead>Rate Applied</TableHead>
+                              <TableHead className="text-right">Deduction</TableHead>
+                              <TableHead className="text-right">Net After</TableHead>
+                              <TableHead>Exemption</TableHead>
+                              <TableHead className="min-w-[150px]">Notes</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {(spreadsheetExamples?.length > 0 ? spreadsheetExamples : existingSpreadsheet || []).map((row: SpreadsheetExample, idx: number) => (
+                              <TableRow key={idx} className={row.exemptionApplied && row.exemptionApplied !== "None" ? "bg-yellow-500/10" : ""}>
+                                <TableCell className="font-medium text-xs">{row.scenarioName}</TableCell>
+                                <TableCell className="text-xs">{row.employeeName}</TableCell>
+                                <TableCell className="text-right text-xs">{row.age}</TableCell>
+                                <TableCell className="text-right text-xs font-mono">
+                                  {typeof row.grossSalary === 'number' ? row.grossSalary.toLocaleString() : row.grossSalary}
+                                </TableCell>
+                                <TableCell className="text-right text-xs font-mono">
+                                  {typeof row.taxableIncome === 'number' ? row.taxableIncome.toLocaleString() : row.taxableIncome}
+                                </TableCell>
+                                <TableCell className="text-xs">
+                                  <Badge variant="outline" className="text-xs">{row.rateApplied}</Badge>
+                                </TableCell>
+                                <TableCell className="text-right text-xs font-mono text-red-600">
+                                  {typeof row.deductionAmount === 'number' ? row.deductionAmount.toLocaleString() : row.deductionAmount}
+                                </TableCell>
+                                <TableCell className="text-right text-xs font-mono text-green-600">
+                                  {typeof row.netAfterDeduction === 'number' ? row.netAfterDeduction.toLocaleString() : row.netAfterDeduction}
+                                </TableCell>
+                                <TableCell className="text-xs">
+                                  {row.exemptionApplied && row.exemptionApplied !== "None" ? (
+                                    <Badge variant="secondary" className="text-xs bg-yellow-500/20">{row.exemptionApplied}</Badge>
+                                  ) : (
+                                    <span className="text-muted-foreground">-</span>
+                                  )}
+                                </TableCell>
+                                <TableCell className="text-xs text-muted-foreground">{row.notes}</TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card>
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-sm">Complexity Scenarios Explained</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-2 text-sm">
+                      <div className="p-2 bg-muted rounded">
+                        <strong>Age-Based Exemptions:</strong> Some deductions only apply to employees within certain age ranges (e.g., under 60, over 16).
+                      </div>
+                      <div className="p-2 bg-muted rounded">
+                        <strong>Income Thresholds:</strong> Different rates may apply based on income bands or salary ceilings.
+                      </div>
+                      <div className="p-2 bg-muted rounded">
+                        <strong>Dependency Interactions:</strong> Some deductions are calculated after others (e.g., tax calculated on income after pension deduction).
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              ) : (
+                <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
+                  <TableIcon className="h-12 w-12 mb-4 opacity-50" />
+                  <p>No spreadsheet examples generated yet</p>
+                  <p className="text-sm">Run analysis to generate calculation examples</p>
                 </div>
               )}
             </ScrollArea>
