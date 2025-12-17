@@ -4,6 +4,7 @@ import { useLeaveManagement, LeaveAccrualRule } from "@/hooks/useLeaveManagement
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/hooks/useLanguage";
 import { LeaveCompanyFilter, useLeaveCompanyFilter } from "@/components/leave/LeaveCompanyFilter";
+import { LeaveAccrualRulesAIUpload } from "@/components/leave/LeaveAccrualRulesAIUpload";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -41,8 +42,10 @@ import { Badge } from "@/components/ui/badge";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Plus, TrendingUp, Play, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
+import { useQueryClient } from "@tanstack/react-query";
 
 export default function LeaveAccrualRulesPage() {
+  const queryClient = useQueryClient();
   const { t } = useLanguage();
   const { company } = useAuth();
   const { selectedCompanyId, setSelectedCompanyId } = useLeaveCompanyFilter();
@@ -149,6 +152,13 @@ export default function LeaveAccrualRulesPage() {
               selectedCompanyId={selectedCompanyId} 
               onCompanyChange={setSelectedCompanyId} 
             />
+            {selectedCompanyId && (
+              <LeaveAccrualRulesAIUpload
+                companyId={selectedCompanyId}
+                leaveTypes={leaveTypes.map(lt => ({ id: lt.id, name: lt.name }))}
+                onRulesImported={() => queryClient.invalidateQueries({ queryKey: ['leave-accrual-rules'] })}
+              />
+            )}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" disabled={isRunningAccrual}>

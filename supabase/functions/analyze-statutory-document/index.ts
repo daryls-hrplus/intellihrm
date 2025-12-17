@@ -21,7 +21,117 @@ serve(async (req) => {
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    const { action, statutoryId, documentContent, documentName, country, stateProvince, allStatutories, statutoryType, analysisType, effectiveDate } = await req.json();
+    const { action, statutoryId, documentContent, documentName, country, stateProvince, allStatutories, statutoryType, analysisType, effectiveDate, leaveTypes } = await req.json();
+
+    // Handle leave accrual rules extraction
+    if (analysisType === "extract_leave_accrual_rules") {
+      const systemPrompt = `You are an expert HR and leave policy analyst. Extract leave accrual rules from the provided document.
+
+Available leave types in the system: ${leaveTypes?.join(", ") || "Annual Leave, Sick Leave, Personal Leave"}
+
+For each accrual rule found, extract:
+- name: descriptive name for the rule (e.g., "Annual Leave - 0-5 Years Service")
+- description: brief description of the rule
+- leave_type_name: the type of leave this rule applies to (match to available types above)
+- accrual_frequency: "daily", "weekly", "bi_weekly", "monthly", or "annually"
+- accrual_amount: number of days/hours accrued per frequency period
+- years_of_service_min: minimum years of service for this rule to apply
+- years_of_service_max: maximum years (null if unlimited)
+- employee_status: status requirement (null if any status)
+- employee_type: type requirement like "full_time", "part_time" (null if any)
+- priority: priority order when multiple rules could apply (higher = higher priority)
+- notes: any special conditions
+
+Also provide:
+- spreadsheetExamples: example calculations showing different scenarios
+- warnings: any issues or uncertainties
+- assumptions: any assumptions made`;
+
+      const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${LOVABLE_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: "google/gemini-2.5-flash",
+          messages: [
+            { role: "system", content: systemPrompt },
+            { role: "user", content: `Extract leave accrual rules from this document (${documentName || 'uploaded file'}):\n\n${documentContent}` },
+          ],
+          response_format: {
+            type: "json_schema",
+            json_schema: {
+              name: "leave_accrual_rules_extraction",
+              schema: {
+                type: "object",
+                properties: {
+                  rules: {
+                    type: "array",
+                    items: {
+                      type: "object",
+                      properties: {
+                        name: { type: "string" },
+                        description: { type: "string" },
+                        leave_type_name: { type: "string" },
+                        accrual_frequency: { type: "string", enum: ["daily", "weekly", "bi_weekly", "monthly", "annually"] },
+                        accrual_amount: { type: "number" },
+                        years_of_service_min: { type: "number" },
+                        years_of_service_max: { type: ["number", "null"] },
+                        employee_status: { type: ["string", "null"] },
+                        employee_type: { type: ["string", "null"] },
+                        priority: { type: "number" },
+                        notes: { type: "string" },
+                      },
+                      required: ["name", "leave_type_name", "accrual_frequency", "accrual_amount"],
+                    },
+                  },
+                  spreadsheetExamples: {
+                    type: "array",
+                    items: {
+                      type: "object",
+                      properties: {
+                        scenario: { type: "string" },
+                        employeeType: { type: "string" },
+                        yearsOfService: { type: "number" },
+                        leaveType: { type: "string" },
+                        accrualAmount: { type: "string" },
+                        notes: { type: "string" },
+                      },
+                    },
+                  },
+                  notes: { type: "string" },
+                  warnings: { type: "array", items: { type: "string" } },
+                  assumptions: { type: "array", items: { type: "string" } },
+                },
+                required: ["rules"],
+              },
+            },
+          },
+        }),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error("AI API error:", errorText);
+        throw new Error(`AI leave rules extraction failed: ${response.status}`);
+      }
+
+      const aiData = await response.json();
+      const extraction = JSON.parse(aiData.choices[0].message.content);
+
+      return new Response(
+        JSON.stringify({
+          success: true,
+          rules: extraction.rules || [],
+          spreadsheetExamples: extraction.spreadsheetExamples || [],
+          notes: extraction.notes || "",
+          warnings: extraction.warnings || [],
+          assumptions: extraction.assumptions || [],
+        }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
 
     // Handle tax bracket extraction from documents
     if (analysisType === "extract_brackets") {
