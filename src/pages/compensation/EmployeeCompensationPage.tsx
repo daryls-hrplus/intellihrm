@@ -547,15 +547,15 @@ export default function EmployeeCompensationPage() {
               </SelectContent>
             </Select>
             <Select 
-              value={selectedDepartmentId} 
-              onValueChange={setSelectedDepartmentId}
+              value={selectedDepartmentId || "all"} 
+              onValueChange={(value) => setSelectedDepartmentId(value === "all" ? "" : value)}
               disabled={!selectedCompanyId}
             >
               <SelectTrigger className="w-[200px]">
                 <SelectValue placeholder={t("common.allDepartments")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">{t("common.allDepartments")}</SelectItem>
+                <SelectItem value="all">{t("common.allDepartments")}</SelectItem>
                 {departments.map((d) => (
                   <SelectItem key={d.id} value={d.id}>
                     {d.name} ({d.code})
