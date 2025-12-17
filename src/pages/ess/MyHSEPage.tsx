@@ -16,6 +16,7 @@ import { useHSE } from "@/hooks/useHSE";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { useLanguage } from "@/hooks/useLanguage";
+import { getTodayString, formatDateForDisplay } from "@/utils/dateUtils";
 
 export default function MyHSEPage() {
   const { t } = useLanguage();
@@ -47,7 +48,7 @@ export default function MyHSEPage() {
         ...newIncident,
         reported_by: user.id,
         company_id: user.user_metadata?.company_id || "",
-        incident_date: new Date().toISOString().split("T")[0],
+        incident_date: getTodayString(),
         incident_time: new Date().toTimeString().slice(0, 5),
         status: "reported",
       });

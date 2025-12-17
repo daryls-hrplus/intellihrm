@@ -21,6 +21,7 @@ import { StatutoryDocumentUpload } from "@/components/payroll/StatutoryDocumentU
 import { ComprehensiveStatutoryDocumentation } from "@/components/payroll/ComprehensiveStatutoryDocumentation";
 import { StatutoryReportingDocuments } from "@/components/payroll/StatutoryReportingDocuments";
 import { StatutoryReportPrint } from "@/components/payroll/StatutoryReportPrint";
+import { getTodayString } from "@/utils/dateUtils";
 
 interface StatutoryDeductionType {
   id: string;
@@ -74,7 +75,7 @@ export default function StatutoryDeductionTypesPage() {
     statutory_code: "",
     statutory_name: "",
     description: "",
-    start_date: new Date().toISOString().split("T")[0],
+    start_date: getTodayString(),
     end_date: "",
     is_active: true,
   });
@@ -165,7 +166,7 @@ export default function StatutoryDeductionTypesPage() {
       statutory_code: "",
       statutory_name: "",
       description: "",
-      start_date: new Date().toISOString().split("T")[0],
+      start_date: getTodayString(),
       end_date: "",
       is_active: true,
     });

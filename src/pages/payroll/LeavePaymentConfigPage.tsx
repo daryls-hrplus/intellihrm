@@ -16,6 +16,7 @@ import { Badge } from '@/components/ui/badge';
 import { Plus, Edit, Trash2, Settings, ArrowLeft, ChevronDown, ChevronRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { getTodayString } from '@/utils/dateUtils';
 
 interface LeaveType {
   id: string;
@@ -90,7 +91,7 @@ const LeavePaymentConfigPage: React.FC = () => {
     name: '',
     code: '',
     description: '',
-    start_date: new Date().toISOString().split('T')[0],
+    start_date: getTodayString(),
     end_date: '',
     is_active: true
   });
@@ -117,7 +118,7 @@ const LeavePaymentConfigPage: React.FC = () => {
     pay_element_id: '',
     payroll_code: '',
     description: '',
-    start_date: new Date().toISOString().split('T')[0],
+    start_date: getTodayString(),
     end_date: '',
     is_active: true
   });
@@ -267,7 +268,7 @@ const LeavePaymentConfigPage: React.FC = () => {
       name: '',
       code: '',
       description: '',
-      start_date: new Date().toISOString().split('T')[0],
+      start_date: getTodayString(),
       end_date: '',
       is_active: true
     });
@@ -424,7 +425,7 @@ const LeavePaymentConfigPage: React.FC = () => {
       pay_element_id: '',
       payroll_code: '',
       description: '',
-      start_date: new Date().toISOString().split('T')[0],
+      start_date: getTodayString(),
       end_date: '',
       is_active: true
     });

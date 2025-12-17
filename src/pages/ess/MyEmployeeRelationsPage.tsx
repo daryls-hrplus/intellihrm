@@ -25,9 +25,9 @@ import {
 } from 'lucide-react';
 import { useEmployeeRelations } from '@/hooks/useEmployeeRelations';
 import { useAuth } from '@/contexts/AuthContext';
-import { format } from 'date-fns';
 import { toast } from 'sonner';
 import { Json } from '@/integrations/supabase/types';
+import { getTodayString, formatDateForDisplay } from '@/utils/dateUtils';
 
 const CASE_TYPES = ['grievance', 'complaint', 'harassment', 'discrimination', 'workplace_safety', 'other'];
 const SEVERITIES = ['low', 'medium', 'high', 'critical'];
@@ -85,7 +85,7 @@ export default function MyEmployeeRelationsPage() {
       case_type: grievanceForm.case_type,
       severity: grievanceForm.severity,
       is_confidential: grievanceForm.is_confidential,
-      reported_date: new Date().toISOString().split('T')[0],
+      reported_date: getTodayString(),
       status: 'open',
     });
 
@@ -334,7 +334,7 @@ export default function MyEmployeeRelationsPage() {
                               )}
                               <div className="mt-3 flex items-center justify-between text-xs text-muted-foreground">
                                 <span>From: {rec.awarder?.full_name || 'Anonymous'}</span>
-                                <span>{format(new Date(rec.award_date), 'PP')}</span>
+                                <span>{formatDateForDisplay(rec.award_date, 'PP')}</span>
                               </div>
                               {rec.monetary_value && (
                                 <Badge variant="secondary" className="mt-2">
@@ -388,7 +388,7 @@ export default function MyEmployeeRelationsPage() {
                             </Badge>
                           </TableCell>
                           <TableCell className="text-muted-foreground">
-                            {format(new Date(c.reported_date), 'PP')}
+                            {formatDateForDisplay(c.reported_date, 'PP')}
                           </TableCell>
                         </TableRow>
                       ))}
@@ -423,7 +423,7 @@ export default function MyEmployeeRelationsPage() {
                           )}
                           <div className="mt-3 flex items-center justify-between">
                             <span className="text-xs text-muted-foreground">
-                              Ends: {format(new Date(survey.end_date), 'PP')}
+                              Ends: {formatDateForDisplay(survey.end_date, 'PP')}
                             </span>
                             <Button size="sm">Take Survey</Button>
                           </div>

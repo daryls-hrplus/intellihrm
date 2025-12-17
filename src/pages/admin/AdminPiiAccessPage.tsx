@@ -4,6 +4,7 @@ import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useAuditLog } from "@/hooks/useAuditLog";
+import { getTodayString } from "@/utils/dateUtils";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -234,7 +235,7 @@ export default function AdminPiiAccessPage() {
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
-      link.download = `pii-access-report-${new Date().toISOString().split("T")[0]}.csv`;
+      link.download = `pii-access-report-${getTodayString()}.csv`;
       link.click();
       URL.revokeObjectURL(url);
 

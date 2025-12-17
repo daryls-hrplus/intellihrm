@@ -16,6 +16,7 @@ import { Upload, Sparkles, FileText, CheckCircle, AlertCircle, Loader2, Settings
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useLanguage } from "@/hooks/useLanguage";
+import { getTodayString } from "@/utils/dateUtils";
 
 interface ExtractedAccrualRule {
   name: string;
@@ -93,7 +94,7 @@ export function LeaveAccrualRulesAIUpload({
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [effectiveDate, setEffectiveDate] = useState(new Date().toISOString().split('T')[0]);
+  const [effectiveDate, setEffectiveDate] = useState(getTodayString());
   const [endDate, setEndDate] = useState<string>("");
   const [extractedRules, setExtractedRules] = useState<ExtractedAccrualRule[]>([]);
   const [selectedRules, setSelectedRules] = useState<Set<number>>(new Set());

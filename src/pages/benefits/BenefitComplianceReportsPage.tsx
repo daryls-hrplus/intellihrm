@@ -12,6 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { Building2, Download, FileText, Shield, AlertTriangle, CheckCircle } from "lucide-react";
 import { useAuditLog } from "@/hooks/useAuditLog";
+import { getTodayString } from "@/utils/dateUtils";
 
 export default function BenefitComplianceReportsPage() {
   const { t } = useTranslation();
@@ -84,7 +85,7 @@ export default function BenefitComplianceReportsPage() {
       const uncoveredEmployees = (employees || []).filter((e: any) => !enrolledIds.has(e.id));
 
       // Check for expired enrollments
-      const today = new Date().toISOString().split("T")[0];
+      const today = getTodayString();
       const expiredEnrollments = companyEnrollments.filter(
         (e: any) => e.termination_date && e.termination_date < today
       );
@@ -180,7 +181,7 @@ export default function BenefitComplianceReportsPage() {
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `benefit_${reportType}_report_${company?.name || "company"}_${new Date().toISOString().split("T")[0]}.csv`;
+      a.download = `benefit_${reportType}_report_${company?.name || "company"}_${getTodayString()}.csv`;
       a.click();
       URL.revokeObjectURL(url);
 
