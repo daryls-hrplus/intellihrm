@@ -20,6 +20,7 @@ import {
   BookOpen,
   Palette,
   Archive,
+  Link as LinkIcon,
 } from "lucide-react";
 import { DraggableModuleCards, ModuleCardItem } from "@/components/ui/DraggableModuleCards";
 import { useNavigate } from "react-router-dom";
@@ -177,6 +178,14 @@ export default function PayrollDashboardPage() {
       href: "/payroll/pay-elements",
       color: "bg-success/10 text-success",
       tabCode: "pay_elements",
+    },
+    {
+      title: t("payroll.modules.benefitMapping.title", "Benefit Payroll Mappings"),
+      description: t("payroll.modules.benefitMapping.description", "Map benefit plans to pay element codes"),
+      icon: LinkIcon,
+      href: "/payroll/benefit-mappings",
+      color: "bg-cyan-500/10 text-cyan-600",
+      tabCode: "benefit_mappings",
     },
     {
       title: t("payroll.modules.leavePaymentConfig.title", "Leave Payment Config"),
