@@ -14,12 +14,13 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Separator } from "@/components/ui/separator";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { Plus, Upload, Download, Pencil, Trash2, FileSpreadsheet, AlertCircle, CheckCircle2, Building2, Calendar, History } from "lucide-react";
+import { Plus, Upload, Pencil, Trash2, FileSpreadsheet, AlertCircle, Building2, History, Globe } from "lucide-react";
 import { format } from "date-fns";
 import { useNavigate } from "react-router-dom";
+import { useCountryStatutories, StatutoryType } from "@/hooks/useCountryStatutories";
+import { DynamicStatutoryFields } from "@/components/payroll/DynamicStatutoryFields";
 
 interface Company {
   id: string;
@@ -43,14 +44,6 @@ interface OpeningBalance {
   ytd_gross_earnings: number;
   ytd_taxable_income: number;
   ytd_non_taxable_income: number;
-  ytd_income_tax: number;
-  ytd_nis: number;
-  ytd_nht: number;
-  ytd_education_tax: number;
-  ytd_employer_nis: number;
-  ytd_employer_nht: number;
-  ytd_employer_education_tax: number;
-  ytd_employer_heart: number;
   ytd_other_statutory: Record<string, number>;
   import_source: string;
   notes: string | null;
@@ -63,8 +56,6 @@ interface OpeningBalance {
 }
 
 interface OpeningBalanceDetail {
-  id: string;
-  opening_balance_id: string;
   pay_element_type: string;
   pay_element_code: string;
   pay_element_name: string;
@@ -72,7 +63,7 @@ interface OpeningBalanceDetail {
   ytd_taxable_amount: number;
   ytd_employer_amount: number;
   currency: string;
-  notes: string | null;
+  notes: string;
 }
 
 interface ImportResult {
@@ -102,7 +93,10 @@ const OpeningBalancesPage: React.FC = () => {
   const [selectedTaxYear, setSelectedTaxYear] = useState<number>(currentYear);
   const [isLoading, setIsLoading] = useState(false);
   
-  // Form state
+  // Country-specific statutory hook
+  const { company: selectedCompany, statutoryTypes, isLoading: loadingStatutories } = useCountryStatutories(selectedCompanyId || null);
+  
+  // Form state - use a flexible structure for statutory values
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [formData, setFormData] = useState({
@@ -114,21 +108,14 @@ const OpeningBalancesPage: React.FC = () => {
     ytd_gross_earnings: 0,
     ytd_taxable_income: 0,
     ytd_non_taxable_income: 0,
-    ytd_income_tax: 0,
-    ytd_nis: 0,
-    ytd_nht: 0,
-    ytd_education_tax: 0,
-    ytd_employer_nis: 0,
-    ytd_employer_nht: 0,
-    ytd_employer_education_tax: 0,
-    ytd_employer_heart: 0,
     notes: ""
   });
+  const [statutoryValues, setStatutoryValues] = useState<Record<string, number>>({});
   
   // Pay element details state
-  const [payElementDetails, setPayElementDetails] = useState<Omit<OpeningBalanceDetail, 'id' | 'opening_balance_id'>[]>([]);
+  const [payElementDetails, setPayElementDetails] = useState<OpeningBalanceDetail[]>([]);
   const [showAddElement, setShowAddElement] = useState(false);
-  const [newElement, setNewElement] = useState({
+  const [newElement, setNewElement] = useState<OpeningBalanceDetail>({
     pay_element_type: "earning",
     pay_element_code: "",
     pay_element_name: "",
@@ -185,6 +172,7 @@ const OpeningBalancesPage: React.FC = () => {
       .eq("status", "active");
     
     if (!error && data) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       setEmployees(data.map((d: any) => ({
         id: d.id,
         first_name: d.full_name?.split(" ")[0] || "",
@@ -212,9 +200,11 @@ const OpeningBalancesPage: React.FC = () => {
         .select("id, full_name, employee_id")
         .in("id", employeeIds);
       
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const empMap = new Map((empData as any[])?.map(e => [e.id, e]) || []);
       
       const enriched = data.map(d => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const emp = empMap.get(d.employee_id) as any;
         return {
           ...d,
@@ -255,21 +245,66 @@ const OpeningBalancesPage: React.FC = () => {
       ytd_gross_earnings: 0,
       ytd_taxable_income: 0,
       ytd_non_taxable_income: 0,
-      ytd_income_tax: 0,
-      ytd_nis: 0,
-      ytd_nht: 0,
-      ytd_education_tax: 0,
-      ytd_employer_nis: 0,
-      ytd_employer_nht: 0,
-      ytd_employer_education_tax: 0,
-      ytd_employer_heart: 0,
       notes: ""
     });
+    setStatutoryValues({});
     setPayElementDetails([]);
     setEditingId(null);
   };
 
-  const handleEdit = async (balance: OpeningBalance) => {
+  // Convert DB record to statutory values map
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const dbToStatutoryValues = (record: any): Record<string, number> => {
+    const values: Record<string, number> = {};
+    // Map known columns
+    if (record.ytd_income_tax) values["ytd_paye"] = record.ytd_income_tax;
+    if (record.ytd_nis) values["ytd_nis"] = record.ytd_nis;
+    if (record.ytd_nht) values["ytd_nht"] = record.ytd_nht;
+    if (record.ytd_education_tax) values["ytd_education_tax"] = record.ytd_education_tax;
+    if (record.ytd_employer_nis) values["ytd_employer_nis"] = record.ytd_employer_nis;
+    if (record.ytd_employer_nht) values["ytd_employer_nht"] = record.ytd_employer_nht;
+    if (record.ytd_employer_education_tax) values["ytd_employer_education_tax"] = record.ytd_employer_education_tax;
+    if (record.ytd_employer_heart) values["ytd_employer_heart"] = record.ytd_employer_heart;
+    // Add other statutory from jsonb
+    if (record.ytd_other_statutory) {
+      Object.entries(record.ytd_other_statutory).forEach(([k, v]) => {
+        values[k] = v as number;
+      });
+    }
+    return values;
+  };
+
+  // Convert statutory values map back to DB format
+  const statutoryValuesToDb = (values: Record<string, number>) => {
+    const legacyFields: Record<string, number> = {};
+    const otherStatutory: Record<string, number> = {};
+    
+    // Map to legacy columns where applicable
+    const legacyMapping: Record<string, string> = {
+      "ytd_paye": "ytd_income_tax",
+      "ytd_nis": "ytd_nis",
+      "ytd_nht": "ytd_nht",
+      "ytd_education_tax": "ytd_education_tax",
+      "ytd_employer_nis": "ytd_employer_nis",
+      "ytd_employer_nht": "ytd_employer_nht",
+      "ytd_employer_education_tax": "ytd_employer_education_tax",
+      "ytd_employer_heart": "ytd_employer_heart",
+    };
+    
+    Object.entries(values).forEach(([key, value]) => {
+      const legacyKey = legacyMapping[key];
+      if (legacyKey) {
+        legacyFields[legacyKey] = value;
+      } else {
+        otherStatutory[key] = value;
+      }
+    });
+    
+    return { legacyFields, otherStatutory };
+  };
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const handleEdit = async (balance: any) => {
     setFormData({
       employee_id: balance.employee_id,
       tax_year: balance.tax_year,
@@ -279,16 +314,10 @@ const OpeningBalancesPage: React.FC = () => {
       ytd_gross_earnings: balance.ytd_gross_earnings,
       ytd_taxable_income: balance.ytd_taxable_income,
       ytd_non_taxable_income: balance.ytd_non_taxable_income,
-      ytd_income_tax: balance.ytd_income_tax,
-      ytd_nis: balance.ytd_nis,
-      ytd_nht: balance.ytd_nht,
-      ytd_education_tax: balance.ytd_education_tax,
-      ytd_employer_nis: balance.ytd_employer_nis,
-      ytd_employer_nht: balance.ytd_employer_nht,
-      ytd_employer_education_tax: balance.ytd_employer_education_tax,
-      ytd_employer_heart: balance.ytd_employer_heart,
       notes: balance.notes || ""
     });
+    
+    setStatutoryValues(dbToStatutoryValues(balance));
     
     // Load pay element details
     const { data: details } = await supabase
@@ -304,13 +333,21 @@ const OpeningBalancesPage: React.FC = () => {
         ytd_amount: d.ytd_amount,
         ytd_taxable_amount: d.ytd_taxable_amount || 0,
         ytd_employer_amount: d.ytd_employer_amount || 0,
-        currency: d.currency || "JMD",
+        currency: d.currency || "USD",
         notes: d.notes || ""
       })));
     }
     
     setEditingId(balance.id);
     setShowForm(true);
+  };
+
+  const handleStatutoryChange = (code: string, value: number, isEmployer: boolean = false) => {
+    const fieldKey = isEmployer ? `ytd_employer_${code.toLowerCase()}` : `ytd_${code.toLowerCase()}`;
+    setStatutoryValues(prev => ({
+      ...prev,
+      [fieldKey]: value
+    }));
   };
 
   const handleSave = async () => {
@@ -320,6 +357,8 @@ const OpeningBalancesPage: React.FC = () => {
     }
     
     setIsLoading(true);
+    
+    const { legacyFields, otherStatutory } = statutoryValuesToDb(statutoryValues);
     
     const payload = {
       company_id: selectedCompanyId,
@@ -331,14 +370,8 @@ const OpeningBalancesPage: React.FC = () => {
       ytd_gross_earnings: formData.ytd_gross_earnings,
       ytd_taxable_income: formData.ytd_taxable_income,
       ytd_non_taxable_income: formData.ytd_non_taxable_income,
-      ytd_income_tax: formData.ytd_income_tax,
-      ytd_nis: formData.ytd_nis,
-      ytd_nht: formData.ytd_nht,
-      ytd_education_tax: formData.ytd_education_tax,
-      ytd_employer_nis: formData.ytd_employer_nis,
-      ytd_employer_nht: formData.ytd_employer_nht,
-      ytd_employer_education_tax: formData.ytd_employer_education_tax,
-      ytd_employer_heart: formData.ytd_employer_heart,
+      ...legacyFields,
+      ytd_other_statutory: otherStatutory,
       notes: formData.notes || null,
       import_source: "manual"
     };
@@ -379,13 +412,11 @@ const OpeningBalancesPage: React.FC = () => {
     
     // Save pay element details
     if (balanceId && payElementDetails.length > 0) {
-      // Delete existing details first
       await supabase
         .from("employee_opening_balance_details")
         .delete()
         .eq("opening_balance_id", balanceId);
       
-      // Insert new details
       const detailsPayload = payElementDetails.map(d => ({
         opening_balance_id: balanceId,
         ...d
@@ -439,7 +470,7 @@ const OpeningBalancesPage: React.FC = () => {
       ytd_amount: 0,
       ytd_taxable_amount: 0,
       ytd_employer_amount: 0,
-      currency: "JMD",
+      currency: "USD",
       notes: ""
     });
     setShowAddElement(false);
@@ -450,7 +481,7 @@ const OpeningBalancesPage: React.FC = () => {
   };
 
   const downloadTemplate = () => {
-    const headers = [
+    const baseHeaders = [
       "employee_id",
       "tax_year",
       "effective_date",
@@ -458,17 +489,19 @@ const OpeningBalancesPage: React.FC = () => {
       "previous_employer_tax_number",
       "ytd_gross_earnings",
       "ytd_taxable_income",
-      "ytd_non_taxable_income",
-      "ytd_income_tax",
-      "ytd_nis",
-      "ytd_nht",
-      "ytd_education_tax",
-      "ytd_employer_nis",
-      "ytd_employer_nht",
-      "ytd_employer_education_tax",
-      "ytd_employer_heart",
-      "notes"
+      "ytd_non_taxable_income"
     ];
+    
+    // Add country-specific statutory headers
+    const statHeaders: string[] = [];
+    statutoryTypes.forEach(stat => {
+      statHeaders.push(`ytd_${stat.statutory_code.toLowerCase()}`);
+      if (stat.has_employer_contribution) {
+        statHeaders.push(`ytd_employer_${stat.statutory_code.toLowerCase()}`);
+      }
+    });
+    
+    const headers = [...baseHeaders, ...statHeaders, "notes"];
     
     const sampleRow = [
       "EMP001",
@@ -479,14 +512,7 @@ const OpeningBalancesPage: React.FC = () => {
       "500000.00",
       "450000.00",
       "50000.00",
-      "75000.00",
-      "25000.00",
-      "10000.00",
-      "15000.00",
-      "25000.00",
-      "15000.00",
-      "20000.00",
-      "15000.00",
+      ...statHeaders.map(() => "10000.00"),
       "Imported from previous employer"
     ];
     
@@ -495,7 +521,7 @@ const OpeningBalancesPage: React.FC = () => {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `opening_balances_template_${currentYear}.csv`;
+    a.download = `opening_balances_template_${selectedCompany?.country || "XX"}_${currentYear}.csv`;
     a.click();
     URL.revokeObjectURL(url);
   };
@@ -513,7 +539,6 @@ const OpeningBalancesPage: React.FC = () => {
       const lines = text.split("\n").filter(line => line.trim());
       const headers = lines[0].split(",").map(h => h.trim().toLowerCase());
       
-      // Create import record
       const { data: importRecord, error: importError } = await supabase
         .from("opening_balance_imports")
         .insert({
@@ -541,13 +566,22 @@ const OpeningBalancesPage: React.FC = () => {
           row[h] = values[idx] || "";
         });
         
-        // Find employee by employee_id
         const emp = employees.find(e => e.employee_id === row.employee_id);
         if (!emp) {
           errors.push({ row: i + 1, error: `Employee ${row.employee_id} not found` });
           failed++;
           continue;
         }
+        
+        // Build statutory values from CSV
+        const statValues: Record<string, number> = {};
+        headers.forEach(h => {
+          if (h.startsWith("ytd_") && !["ytd_gross_earnings", "ytd_taxable_income", "ytd_non_taxable_income"].includes(h)) {
+            statValues[h] = parseFloat(row[h]) || 0;
+          }
+        });
+        
+        const { legacyFields, otherStatutory } = statutoryValuesToDb(statValues);
         
         const { error } = await supabase
           .from("employee_opening_balances")
@@ -561,14 +595,8 @@ const OpeningBalancesPage: React.FC = () => {
             ytd_gross_earnings: parseFloat(row.ytd_gross_earnings) || 0,
             ytd_taxable_income: parseFloat(row.ytd_taxable_income) || 0,
             ytd_non_taxable_income: parseFloat(row.ytd_non_taxable_income) || 0,
-            ytd_income_tax: parseFloat(row.ytd_income_tax) || 0,
-            ytd_nis: parseFloat(row.ytd_nis) || 0,
-            ytd_nht: parseFloat(row.ytd_nht) || 0,
-            ytd_education_tax: parseFloat(row.ytd_education_tax) || 0,
-            ytd_employer_nis: parseFloat(row.ytd_employer_nis) || 0,
-            ytd_employer_nht: parseFloat(row.ytd_employer_nht) || 0,
-            ytd_employer_education_tax: parseFloat(row.ytd_employer_education_tax) || 0,
-            ytd_employer_heart: parseFloat(row.ytd_employer_heart) || 0,
+            ...legacyFields,
+            ytd_other_statutory: otherStatutory,
             notes: row.notes || null,
             import_source: "csv_import",
             import_batch_id: importRecord.id
@@ -582,7 +610,6 @@ const OpeningBalancesPage: React.FC = () => {
         }
       }
       
-      // Update import record
       await supabase
         .from("opening_balance_imports")
         .update({
@@ -613,11 +640,30 @@ const OpeningBalancesPage: React.FC = () => {
   };
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat("en-JM", {
+    const currency = selectedCompany?.country === "TT" ? "TTD" : "JMD";
+    return new Intl.NumberFormat("en-US", {
       style: "currency",
-      currency: "JMD",
+      currency,
       minimumFractionDigits: 2
     }).format(amount);
+  };
+
+  // Get summary statutory value for display
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const getStatutorySummary = (balance: any): number => {
+    let total = 0;
+    total += balance.ytd_income_tax || 0;
+    total += balance.ytd_nis || 0;
+    total += balance.ytd_nht || 0;
+    total += balance.ytd_education_tax || 0;
+    if (balance.ytd_other_statutory) {
+      Object.values(balance.ytd_other_statutory).forEach((v) => {
+        if (typeof v === 'number' && !v.toString().includes('employer')) {
+          total += v;
+        }
+      });
+    }
+    return total;
   };
 
   const breadcrumbItems = [
@@ -642,11 +688,11 @@ const OpeningBalancesPage: React.FC = () => {
               <History className="w-4 h-4 mr-2" />
               Full Payroll Import
             </Button>
-            <Button variant="outline" onClick={() => setShowImport(true)}>
+            <Button variant="outline" onClick={() => setShowImport(true)} disabled={!selectedCompanyId}>
               <Upload className="w-4 h-4 mr-2" />
               Import CSV
             </Button>
-            <Button onClick={() => { resetForm(); setShowForm(true); }}>
+            <Button onClick={() => { resetForm(); setShowForm(true); }} disabled={!selectedCompanyId}>
               <Plus className="w-4 h-4 mr-2" />
               Add Balance
             </Button>
@@ -683,145 +729,160 @@ const OpeningBalancesPage: React.FC = () => {
                   </SelectContent>
                 </Select>
               </div>
+              {selectedCompany && (
+                <div className="flex items-end">
+                  <Badge variant="outline" className="gap-1">
+                    <Globe className="w-3 h-3" />
+                    {selectedCompany.country} - {statutoryTypes.length} statutory types
+                  </Badge>
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>
         
-        {/* Opening Balances Table */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Employee Opening Balances</CardTitle>
-            <CardDescription>
-              YTD brought forward amounts for tax year {selectedTaxYear}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            {isLoading ? (
-              <div className="flex justify-center py-8">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
-              </div>
-            ) : openingBalances.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground">
-                <FileSpreadsheet className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                <p>No opening balances found for {selectedTaxYear}</p>
-                <p className="text-sm">Add balances manually or import from CSV</p>
-              </div>
-            ) : (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Employee</TableHead>
-                    <TableHead>Effective Date</TableHead>
-                    <TableHead>Previous Employer</TableHead>
-                    <TableHead className="text-right">YTD Gross</TableHead>
-                    <TableHead className="text-right">YTD Tax</TableHead>
-                    <TableHead className="text-right">YTD NIS</TableHead>
-                    <TableHead>Source</TableHead>
-                    <TableHead className="w-[100px]">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {openingBalances.map((balance) => (
-                    <TableRow key={balance.id}>
-                      <TableCell>
-                        <div>
-                          <div className="font-medium">
-                            {balance.profiles?.first_name} {balance.profiles?.last_name}
-                          </div>
-                          <div className="text-xs text-muted-foreground">
-                            {balance.profiles?.employee_id}
-                          </div>
-                        </div>
-                      </TableCell>
-                      <TableCell>{format(new Date(balance.effective_date), "MMM d, yyyy")}</TableCell>
-                      <TableCell>
-                        {balance.previous_employer_name ? (
-                          <div>
-                            <div className="text-sm">{balance.previous_employer_name}</div>
-                            {balance.previous_employer_tax_number && (
-                              <div className="text-xs text-muted-foreground">
-                                Tax #: {balance.previous_employer_tax_number}
-                              </div>
-                            )}
-                          </div>
-                        ) : (
-                          <span className="text-muted-foreground">—</span>
-                        )}
-                      </TableCell>
-                      <TableCell className="text-right font-mono">
-                        {formatCurrency(balance.ytd_gross_earnings)}
-                      </TableCell>
-                      <TableCell className="text-right font-mono">
-                        {formatCurrency(balance.ytd_income_tax)}
-                      </TableCell>
-                      <TableCell className="text-right font-mono">
-                        {formatCurrency(balance.ytd_nis)}
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant={balance.import_source === "csv_import" ? "secondary" : "outline"}>
-                          {balance.import_source === "csv_import" ? "Import" : "Manual"}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex gap-1">
-                          <Button size="icon" variant="ghost" onClick={() => handleEdit(balance)}>
-                            <Pencil className="w-4 h-4" />
-                          </Button>
-                          <Button size="icon" variant="ghost" onClick={() => handleDelete(balance.id)}>
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            )}
-          </CardContent>
-        </Card>
-        
-        {/* Import History */}
-        {importHistory.length > 0 && (
+        {!selectedCompanyId ? (
           <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Recent Imports</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>File</TableHead>
-                    <TableHead>Type</TableHead>
-                    <TableHead>Tax Year</TableHead>
-                    <TableHead>Records</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Date</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {importHistory.map((imp) => (
-                    <TableRow key={imp.id}>
-                      <TableCell className="font-medium">{imp.file_name}</TableCell>
-                      <TableCell>{imp.import_type}</TableCell>
-                      <TableCell>{imp.tax_year}</TableCell>
-                      <TableCell>
-                        <span className="text-green-600">{imp.successful_records}</span>
-                        {imp.failed_records > 0 && (
-                          <span className="text-red-600"> / {imp.failed_records} failed</span>
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant={imp.status === "completed" ? "default" : imp.status === "failed" ? "destructive" : "secondary"}>
-                          {imp.status}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>{format(new Date(imp.created_at), "MMM d, yyyy HH:mm")}</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+            <CardContent className="py-12 text-center text-muted-foreground">
+              <Building2 className="w-12 h-12 mx-auto mb-4 opacity-50" />
+              <p>Select a company to view and manage opening balances</p>
             </CardContent>
           </Card>
+        ) : (
+          <>
+            {/* Opening Balances Table */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Employee Opening Balances</CardTitle>
+                <CardDescription>
+                  YTD brought forward amounts for tax year {selectedTaxYear}
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {isLoading ? (
+                  <div className="flex justify-center py-8">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+                  </div>
+                ) : openingBalances.length === 0 ? (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <FileSpreadsheet className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                    <p>No opening balances found for {selectedTaxYear}</p>
+                    <p className="text-sm">Add balances manually or import from CSV</p>
+                  </div>
+                ) : (
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Employee</TableHead>
+                        <TableHead>Effective Date</TableHead>
+                        <TableHead>Previous Employer</TableHead>
+                        <TableHead className="text-right">YTD Gross</TableHead>
+                        <TableHead className="text-right">YTD Statutory</TableHead>
+                        <TableHead>Source</TableHead>
+                        <TableHead className="w-[100px]">Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {openingBalances.map((balance) => (
+                        <TableRow key={balance.id}>
+                          <TableCell>
+                            <div>
+                              <div className="font-medium">
+                                {balance.profiles?.first_name} {balance.profiles?.last_name}
+                              </div>
+                              <div className="text-xs text-muted-foreground">
+                                {balance.profiles?.employee_id}
+                              </div>
+                            </div>
+                          </TableCell>
+                          <TableCell>{format(new Date(balance.effective_date), "MMM d, yyyy")}</TableCell>
+                          <TableCell>
+                            {balance.previous_employer_name ? (
+                              <div>
+                                <div className="text-sm">{balance.previous_employer_name}</div>
+                                {balance.previous_employer_tax_number && (
+                                  <div className="text-xs text-muted-foreground">
+                                    Tax #: {balance.previous_employer_tax_number}
+                                  </div>
+                                )}
+                              </div>
+                            ) : (
+                              <span className="text-muted-foreground">—</span>
+                            )}
+                          </TableCell>
+                          <TableCell className="text-right font-mono">
+                            {formatCurrency(balance.ytd_gross_earnings)}
+                          </TableCell>
+                          <TableCell className="text-right font-mono">
+                            {formatCurrency(getStatutorySummary(balance))}
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant={balance.import_source === "csv_import" ? "secondary" : "outline"}>
+                              {balance.import_source === "csv_import" ? "Import" : "Manual"}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex gap-1">
+                              <Button size="icon" variant="ghost" onClick={() => handleEdit(balance)}>
+                                <Pencil className="w-4 h-4" />
+                              </Button>
+                              <Button size="icon" variant="ghost" onClick={() => handleDelete(balance.id)}>
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                )}
+              </CardContent>
+            </Card>
+            
+            {/* Import History */}
+            {importHistory.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">Recent Imports</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>File</TableHead>
+                        <TableHead>Type</TableHead>
+                        <TableHead>Tax Year</TableHead>
+                        <TableHead>Records</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead>Date</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {importHistory.map((imp) => (
+                        <TableRow key={imp.id}>
+                          <TableCell className="font-medium">{imp.file_name}</TableCell>
+                          <TableCell>{imp.import_type}</TableCell>
+                          <TableCell>{imp.tax_year}</TableCell>
+                          <TableCell>
+                            <span className="text-green-600">{imp.successful_records}</span>
+                            {imp.failed_records > 0 && (
+                              <span className="text-red-600"> / {imp.failed_records} failed</span>
+                            )}
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant={imp.status === "completed" ? "default" : imp.status === "failed" ? "destructive" : "secondary"}>
+                              {imp.status}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>{format(new Date(imp.created_at), "MMM d, yyyy HH:mm")}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </CardContent>
+              </Card>
+            )}
+          </>
         )}
         
         {/* Add/Edit Form Dialog */}
@@ -833,6 +894,12 @@ const OpeningBalancesPage: React.FC = () => {
               </DialogTitle>
               <DialogDescription>
                 Enter brought forward YTD amounts for an employee joining mid-year
+                {selectedCompany && (
+                  <Badge variant="outline" className="ml-2">
+                    <Globe className="w-3 h-3 mr-1" />
+                    {selectedCompany.country}
+                  </Badge>
+                )}
               </DialogDescription>
             </DialogHeader>
             
@@ -964,89 +1031,22 @@ const OpeningBalancesPage: React.FC = () => {
                 <Alert>
                   <AlertCircle className="h-4 w-4" />
                   <AlertDescription>
-                    Enter the YTD statutory deductions from the employee's previous employer. These will be included in tax calculations.
+                    Enter the YTD statutory deductions from the employee's previous employer. 
+                    Fields shown are based on {selectedCompany?.country || "country"} regulations.
                   </AlertDescription>
                 </Alert>
                 
-                <div className="space-y-4">
-                  <div>
-                    <Label className="text-base font-semibold">Employee Deductions</Label>
-                    <div className="grid grid-cols-2 gap-4 mt-2">
-                      <div>
-                        <Label>Income Tax (PAYE)</Label>
-                        <Input 
-                          type="number"
-                          value={formData.ytd_income_tax}
-                          onChange={(e) => setFormData({ ...formData, ytd_income_tax: parseFloat(e.target.value) || 0 })}
-                        />
-                      </div>
-                      <div>
-                        <Label>NIS (Employee)</Label>
-                        <Input 
-                          type="number"
-                          value={formData.ytd_nis}
-                          onChange={(e) => setFormData({ ...formData, ytd_nis: parseFloat(e.target.value) || 0 })}
-                        />
-                      </div>
-                      <div>
-                        <Label>NHT (Employee)</Label>
-                        <Input 
-                          type="number"
-                          value={formData.ytd_nht}
-                          onChange={(e) => setFormData({ ...formData, ytd_nht: parseFloat(e.target.value) || 0 })}
-                        />
-                      </div>
-                      <div>
-                        <Label>Education Tax</Label>
-                        <Input 
-                          type="number"
-                          value={formData.ytd_education_tax}
-                          onChange={(e) => setFormData({ ...formData, ytd_education_tax: parseFloat(e.target.value) || 0 })}
-                        />
-                      </div>
-                    </div>
+                {loadingStatutories ? (
+                  <div className="flex justify-center py-8">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
                   </div>
-                  
-                  <Separator />
-                  
-                  <div>
-                    <Label className="text-base font-semibold">Employer Contributions</Label>
-                    <div className="grid grid-cols-2 gap-4 mt-2">
-                      <div>
-                        <Label>NIS (Employer)</Label>
-                        <Input 
-                          type="number"
-                          value={formData.ytd_employer_nis}
-                          onChange={(e) => setFormData({ ...formData, ytd_employer_nis: parseFloat(e.target.value) || 0 })}
-                        />
-                      </div>
-                      <div>
-                        <Label>NHT (Employer)</Label>
-                        <Input 
-                          type="number"
-                          value={formData.ytd_employer_nht}
-                          onChange={(e) => setFormData({ ...formData, ytd_employer_nht: parseFloat(e.target.value) || 0 })}
-                        />
-                      </div>
-                      <div>
-                        <Label>Education Tax (Employer)</Label>
-                        <Input 
-                          type="number"
-                          value={formData.ytd_employer_education_tax}
-                          onChange={(e) => setFormData({ ...formData, ytd_employer_education_tax: parseFloat(e.target.value) || 0 })}
-                        />
-                      </div>
-                      <div>
-                        <Label>HEART/NSTA</Label>
-                        <Input 
-                          type="number"
-                          value={formData.ytd_employer_heart}
-                          onChange={(e) => setFormData({ ...formData, ytd_employer_heart: parseFloat(e.target.value) || 0 })}
-                        />
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                ) : (
+                  <DynamicStatutoryFields
+                    statutoryTypes={statutoryTypes}
+                    values={statutoryValues}
+                    onChange={handleStatutoryChange}
+                  />
+                )}
               </TabsContent>
               
               <TabsContent value="elements" className="space-y-4 mt-4">
@@ -1111,40 +1111,40 @@ const OpeningBalancesPage: React.FC = () => {
                       <DialogTitle>Add Pay Element</DialogTitle>
                     </DialogHeader>
                     <div className="space-y-4">
+                      <div>
+                        <Label>Element Type</Label>
+                        <Select 
+                          value={newElement.pay_element_type} 
+                          onValueChange={(v) => setNewElement({ ...newElement, pay_element_type: v })}
+                        >
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="earning">Earning</SelectItem>
+                            <SelectItem value="deduction">Deduction</SelectItem>
+                            <SelectItem value="benefit">Benefit</SelectItem>
+                            <SelectItem value="allowance">Allowance</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
                       <div className="grid grid-cols-2 gap-4">
                         <div>
-                          <Label>Element Type</Label>
-                          <Select 
-                            value={newElement.pay_element_type}
-                            onValueChange={(v) => setNewElement({ ...newElement, pay_element_type: v })}
-                          >
-                            <SelectTrigger>
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="earning">Earning</SelectItem>
-                              <SelectItem value="allowance">Allowance</SelectItem>
-                              <SelectItem value="deduction">Deduction</SelectItem>
-                              <SelectItem value="benefit">Benefit</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                        <div>
-                          <Label>Element Code *</Label>
+                          <Label>Element Code</Label>
                           <Input 
                             value={newElement.pay_element_code}
                             onChange={(e) => setNewElement({ ...newElement, pay_element_code: e.target.value })}
-                            placeholder="e.g., TRAVEL_ALW"
+                            placeholder="OT_PAY"
                           />
                         </div>
-                      </div>
-                      <div>
-                        <Label>Element Name *</Label>
-                        <Input 
-                          value={newElement.pay_element_name}
-                          onChange={(e) => setNewElement({ ...newElement, pay_element_name: e.target.value })}
-                          placeholder="e.g., Travel Allowance"
-                        />
+                        <div>
+                          <Label>Element Name</Label>
+                          <Input 
+                            value={newElement.pay_element_name}
+                            onChange={(e) => setNewElement({ ...newElement, pay_element_name: e.target.value })}
+                            placeholder="Overtime Pay"
+                          />
+                        </div>
                       </div>
                       <div className="grid grid-cols-2 gap-4">
                         <div>
@@ -1174,12 +1174,10 @@ const OpeningBalancesPage: React.FC = () => {
               </TabsContent>
             </Tabs>
             
-            <DialogFooter className="mt-6">
-              <Button variant="outline" onClick={() => { setShowForm(false); resetForm(); }}>
-                Cancel
-              </Button>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowForm(false)}>Cancel</Button>
               <Button onClick={handleSave} disabled={isLoading}>
-                {isLoading ? "Saving..." : (editingId ? "Update" : "Create")}
+                {isLoading ? "Saving..." : editingId ? "Update" : "Create"}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -1187,91 +1185,63 @@ const OpeningBalancesPage: React.FC = () => {
         
         {/* Import Dialog */}
         <Dialog open={showImport} onOpenChange={setShowImport}>
-          <DialogContent className="max-w-xl">
+          <DialogContent>
             <DialogHeader>
               <DialogTitle>Import Opening Balances</DialogTitle>
               <DialogDescription>
-                Upload a CSV file with brought forward balances for multiple employees
+                Upload a CSV file with opening balance data for {selectedCompany?.name}
+                {selectedCompany && (
+                  <Badge variant="outline" className="ml-2">
+                    <Globe className="w-3 h-3 mr-1" />
+                    {selectedCompany.country}
+                  </Badge>
+                )}
               </DialogDescription>
             </DialogHeader>
-            
             <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label>Import Type</Label>
-                  <Select value={importType} onValueChange={setImportType}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="full">Full (Statutory + Earnings)</SelectItem>
-                      <SelectItem value="statutory">Statutory Only</SelectItem>
-                      <SelectItem value="earnings">Earnings Only</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Label>Tax Year</Label>
-                  <Select value={importTaxYear.toString()} onValueChange={(v) => setImportTaxYear(parseInt(v))}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {taxYears.map(y => (
-                        <SelectItem key={y} value={y.toString()}>{y}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+              <div>
+                <Label>Import Type</Label>
+                <Select value={importType} onValueChange={setImportType}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="full">Full Import (Replace existing)</SelectItem>
+                    <SelectItem value="update">Update (Merge with existing)</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
-              
-              <div className="border-2 border-dashed rounded-lg p-6 text-center">
-                <input
-                  ref={fileInputRef}
-                  type="file"
+              <div>
+                <Label>Tax Year</Label>
+                <Select value={importTaxYear.toString()} onValueChange={(v) => setImportTaxYear(parseInt(v))}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {taxYears.map(y => (
+                      <SelectItem key={y} value={y.toString()}>{y}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>CSV File</Label>
+                <Input 
+                  type="file" 
                   accept=".csv"
-                  className="hidden"
                   onChange={(e) => setImportFile(e.target.files?.[0] || null)}
+                  ref={fileInputRef}
                 />
-                {importFile ? (
-                  <div className="flex items-center justify-center gap-2">
-                    <CheckCircle2 className="w-5 h-5 text-green-600" />
-                    <span>{importFile.name}</span>
-                    <Button size="sm" variant="ghost" onClick={() => setImportFile(null)}>
-                      Change
-                    </Button>
-                  </div>
-                ) : (
-                  <>
-                    <Upload className="w-8 h-8 mx-auto mb-2 text-muted-foreground" />
-                    <p className="text-muted-foreground mb-2">
-                      Click to select or drag and drop a CSV file
-                    </p>
-                    <Button variant="outline" onClick={() => fileInputRef.current?.click()}>
-                      Select File
-                    </Button>
-                  </>
-                )}
+                <p className="text-xs text-muted-foreground mt-1">
+                  Template includes {statutoryTypes.length} statutory columns for {selectedCompany?.country}
+                </p>
               </div>
-              
-              <Alert>
-                <AlertCircle className="h-4 w-4" />
-                <AlertDescription>
-                  <div className="flex justify-between items-center">
-                    <span>Need the template? Download and fill it in with your data.</span>
-                    <Button size="sm" variant="link" onClick={downloadTemplate}>
-                      <Download className="w-4 h-4 mr-1" />
-                      Download Template
-                    </Button>
-                  </div>
-                </AlertDescription>
-              </Alert>
-            </div>
-            
-            <DialogFooter>
-              <Button variant="outline" onClick={() => { setShowImport(false); setImportFile(null); }}>
-                Cancel
+              <Button variant="outline" onClick={downloadTemplate} className="w-full">
+                Download Template
               </Button>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowImport(false)}>Cancel</Button>
               <Button onClick={handleImport} disabled={!importFile || isImporting}>
                 {isImporting ? "Importing..." : "Import"}
               </Button>
