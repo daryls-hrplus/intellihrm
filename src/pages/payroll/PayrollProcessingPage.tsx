@@ -1,4 +1,5 @@
-import { useState, useEffect, Fragment } from "react";
+import { useState, useEffect, Fragment, useRef } from "react";
+import { createRoot } from "react-dom/client";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -11,6 +12,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogD
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { usePayroll, PayrollRun, PayPeriod, EmployeePayroll } from "@/hooks/usePayroll";
 import { PayrollFilters, usePayrollFilters } from "@/components/payroll/PayrollFilters";
+import { usePayslipTemplates, PayslipTemplate } from "@/hooks/usePayslipTemplates";
+import { PayslipDocument } from "@/components/payroll/PayslipDocument";
 import { supabase } from "@/integrations/supabase/client";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "@/contexts/AuthContext";
@@ -65,6 +68,10 @@ export default function PayrollProcessingPage() {
     fetchBankFileConfig,
   } = usePayroll();
 
+  const { fetchDefaultTemplate } = usePayslipTemplates();
+  const [payslipTemplate, setPayslipTemplate] = useState<PayslipTemplate | null>(null);
+  const [companyInfo, setCompanyInfo] = useState<{ name: string; address?: string; logo_url?: string } | null>(null);
+
   const [periods, setPeriods] = useState<PayPeriod[]>([]);
   const [payrollRuns, setPayrollRuns] = useState<ExtendedPayrollRun[]>([]);
   const [selectedRun, setSelectedRun] = useState<ExtendedPayrollRun | null>(null);
@@ -93,6 +100,24 @@ export default function PayrollProcessingPage() {
   // Reset pay group when company changes
   useEffect(() => {
     setSelectedPayGroupId("all");
+  }, [selectedCompanyId]);
+
+  // Fetch payslip template and company info when company changes
+  useEffect(() => {
+    const loadTemplateAndCompany = async () => {
+      if (!selectedCompanyId) return;
+      
+      const [template, companyData] = await Promise.all([
+        fetchDefaultTemplate(selectedCompanyId),
+        supabase.from('companies').select('name, address, logo_url').eq('id', selectedCompanyId).single()
+      ]);
+      
+      setPayslipTemplate(template);
+      if (companyData.data) {
+        setCompanyInfo(companyData.data);
+      }
+    };
+    loadTemplateAndCompany();
   }, [selectedCompanyId]);
 
   useEffect(() => {
@@ -705,39 +730,153 @@ export default function PayrollProcessingPage() {
                 size="sm"
                 className="ml-auto mr-8"
                 onClick={() => {
-                  const printContent = document.getElementById('payslip-print-content');
-                  if (!printContent) return;
-                  const printWindow = window.open('', '_blank');
-                  if (!printWindow) return;
-                  printWindow.document.write(`
-                    <html>
-                      <head>
-                        <title>Payslip - ${selectedEmployee?.employee?.full_name}</title>
-                        <style>
-                          body { font-family: Arial, sans-serif; padding: 20px; max-width: 800px; margin: 0 auto; }
-                          h2 { margin-bottom: 5px; }
-                          .section { margin-bottom: 20px; }
-                          .section-title { font-weight: bold; font-size: 12px; text-transform: uppercase; color: #666; margin-bottom: 8px; border-bottom: 1px solid #eee; padding-bottom: 4px; }
-                          .row { display: flex; justify-content: space-between; padding: 4px 0; }
-                          .row.total { border-top: 1px solid #333; margin-top: 8px; padding-top: 8px; font-weight: bold; }
-                          .label { color: #555; }
-                          .value { font-weight: 500; }
-                          .deduction { color: #c00; }
-                          .net { font-size: 18px; color: #090; }
-                          .header { border-bottom: 2px solid #333; padding-bottom: 10px; margin-bottom: 20px; }
-                          .meta { color: #666; font-size: 14px; }
-                          @media print { body { padding: 0; } }
-                        </style>
-                      </head>
-                      <body>
-                        ${printContent.innerHTML}
-                      </body>
-                    </html>
-                  `);
-                  printWindow.document.close();
-                  printWindow.focus();
-                  printWindow.print();
-                  printWindow.close();
+                  if (!selectedEmployee) return;
+                  
+                  // Get the current expanded run for pay period info
+                  const currentRun = payrollRuns.find(r => r.id === expandedRunId);
+                  const payPeriod = currentRun?.pay_period;
+                  
+                  // Build a payslip object from employee payroll data
+                  const payslipData = {
+                    id: selectedEmployee.id,
+                    employee_payroll_id: selectedEmployee.id,
+                    employee_id: selectedEmployee.employee_id,
+                    payslip_number: `PS-${selectedEmployee.id.slice(0, 8).toUpperCase()}`,
+                    pay_period_start: payPeriod?.period_start || new Date().toISOString(),
+                    pay_period_end: payPeriod?.period_end || new Date().toISOString(),
+                    pay_date: payPeriod?.pay_date || new Date().toISOString(),
+                    gross_pay: selectedEmployee.gross_pay,
+                    net_pay: selectedEmployee.net_pay,
+                    total_deductions: selectedEmployee.total_deductions,
+                    currency: selectedEmployee.currency || 'USD',
+                    pdf_url: null,
+                    pdf_generated_at: null,
+                    is_viewable: true,
+                    viewed_at: null,
+                    downloaded_at: null,
+                    created_at: new Date().toISOString(),
+                    updated_at: new Date().toISOString(),
+                  };
+                  
+                  // Build line items from calculation_details
+                  const calcDetails = selectedEmployee.calculation_details as any;
+                  const lineItems = {
+                    earnings: (calcDetails?.earnings || []).map((e: any) => ({ name: e.name, amount: e.amount })),
+                    deductions: (calcDetails?.deductions || []).map((d: any) => ({ name: d.name, amount: d.amount })),
+                    taxes: (calcDetails?.statutory || []).map((t: any) => ({ name: t.name, amount: t.amount })),
+                    employer: (calcDetails?.employer_contributions || []).map((c: any) => ({ name: c.name, amount: c.amount })),
+                  };
+                  
+                  // Create a container for React rendering
+                  const container = document.createElement('div');
+                  const root = createRoot(container);
+                  root.render(
+                    <PayslipDocument
+                      payslip={payslipData}
+                      template={payslipTemplate}
+                      employee={{
+                        full_name: selectedEmployee.employee?.full_name || '',
+                        email: selectedEmployee.employee?.email || '',
+                        position: selectedEmployee.position?.title,
+                      }}
+                      company={companyInfo || undefined}
+                      lineItems={lineItems}
+                    />
+                  );
+                  
+                  // Wait for React to render, then print
+                  setTimeout(() => {
+                    const printWindow = window.open('', '_blank');
+                    if (!printWindow) {
+                      root.unmount();
+                      return;
+                    }
+                    
+                    const template = payslipTemplate;
+                    const primaryColor = template?.primary_color || '#1e40af';
+                    const accentColor = template?.accent_color || '#059669';
+                    
+                    printWindow.document.write(`
+                      <!DOCTYPE html>
+                      <html>
+                        <head>
+                          <title>Payslip - ${selectedEmployee.employee?.full_name}</title>
+                          <style>
+                            * { box-sizing: border-box; margin: 0; padding: 0; }
+                            body { font-family: 'Segoe UI', Arial, sans-serif; padding: 20px; max-width: 800px; margin: 0 auto; background: white; color: #333; }
+                            #payslip-document { padding: 24px; }
+                            .bg-white { background: white; }
+                            .bg-muted\\/50, .bg-muted\\/30 { background: #f8fafc; }
+                            .bg-muted { background: #f1f5f9; }
+                            .bg-card\\/50 { background: rgba(255,255,255,0.5); }
+                            .bg-primary\\/5 { background: rgba(30,64,175,0.05); }
+                            .border { border: 1px solid #e2e8f0; }
+                            .border-b { border-bottom: 1px solid #e2e8f0; }
+                            .border-t { border-top: 1px solid #e2e8f0; }
+                            .border-border { border-color: #e2e8f0; }
+                            .rounded-lg { border-radius: 8px; }
+                            .rounded-md, .rounded { border-radius: 6px; }
+                            .rounded-t-lg { border-radius: 8px 8px 0 0; }
+                            .shadow-sm { box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+                            .p-3 { padding: 12px; }
+                            .p-4 { padding: 16px; }
+                            .p-6 { padding: 24px; }
+                            .pt-4 { padding-top: 16px; }
+                            .pb-3 { padding-bottom: 12px; }
+                            .mb-2 { margin-bottom: 8px; }
+                            .mb-3 { margin-bottom: 12px; }
+                            .mt-2 { margin-top: 8px; }
+                            .ml-2 { margin-left: 8px; }
+                            .my-2 { margin-top: 8px; margin-bottom: 8px; }
+                            .gap-4 { gap: 16px; }
+                            .gap-x-8 { column-gap: 32px; }
+                            .gap-y-1 { row-gap: 4px; }
+                            .space-y-2 > * + * { margin-top: 8px; }
+                            .space-y-6 > * + * { margin-top: 24px; }
+                            .grid { display: grid; }
+                            .grid-cols-2 { grid-template-columns: repeat(2, 1fr); }
+                            .grid-cols-3 { grid-template-columns: repeat(3, 1fr); }
+                            .flex { display: flex; }
+                            .justify-between { justify-content: space-between; }
+                            .items-start { align-items: flex-start; }
+                            .items-center { align-items: center; }
+                            .text-right { text-align: right; }
+                            .text-center { text-align: center; }
+                            .text-xs { font-size: 12px; }
+                            .text-sm { font-size: 14px; }
+                            .text-lg { font-size: 18px; }
+                            .text-xl { font-size: 20px; }
+                            .text-2xl { font-size: 24px; }
+                            .font-medium { font-weight: 500; }
+                            .font-semibold { font-weight: 600; }
+                            .font-bold { font-weight: 700; }
+                            .text-muted-foreground { color: #64748b; }
+                            .text-destructive { color: #dc2626; }
+                            .whitespace-pre-line { white-space: pre-line; }
+                            .object-contain { object-fit: contain; }
+                            .h-16 { height: 64px; }
+                            .w-auto { width: auto; }
+                            hr, [data-orientation="horizontal"] { border: none; border-top: 1px solid #e2e8f0; margin: 8px 0; }
+                            img { max-width: 100%; }
+                            @media print { 
+                              body { padding: 0; } 
+                              @page { margin: 1cm; }
+                            }
+                          </style>
+                        </head>
+                        <body>
+                          ${container.innerHTML}
+                        </body>
+                      </html>
+                    `);
+                    printWindow.document.close();
+                    printWindow.focus();
+                    setTimeout(() => {
+                      printWindow.print();
+                      printWindow.close();
+                      root.unmount();
+                    }, 100);
+                  }, 100);
                 }}
               >
                 <Printer className="h-4 w-4 mr-2" />
