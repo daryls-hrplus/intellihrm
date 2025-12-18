@@ -30,6 +30,7 @@ interface RegularDeduction {
   amount_deducted: number;
   frequency: string;
   institution_name: string | null;
+  account_number: string | null;
   is_active: boolean;
 }
 
@@ -105,7 +106,9 @@ export function RegularDeductionsSection({
       amount: d.amount,
       currency: d.currency,
       is_pretax: d.is_pretax,
-      notes: d.institution_name ? `From: ${d.institution_name}` : 'Regular deduction'
+      institution_name: d.institution_name || null,
+      account_number: d.account_number || null,
+      notes: 'Regular deduction'
     }));
 
     const { error } = await supabase
