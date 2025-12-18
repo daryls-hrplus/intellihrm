@@ -278,6 +278,7 @@ import PayrollArchiveSettingsPage from "./pages/payroll/PayrollArchiveSettingsPa
 import BenefitPayrollMappingsPage from "./pages/payroll/BenefitPayrollMappingsPage";
 import PayrollHolidaysPage from "./pages/payroll/PayrollHolidaysPage";
 import OpeningBalancesPage from "./pages/payroll/OpeningBalancesPage";
+import HistoricalPayrollImportPage from "./pages/payroll/HistoricalPayrollImportPage";
 import GLDashboardPage from "./pages/payroll/gl/GLDashboardPage";
 import GLAccountsPage from "./pages/payroll/gl/GLAccountsPage";
 import CostCenterSegmentsPage from "./pages/payroll/gl/CostCenterSegmentsPage";
@@ -1618,6 +1619,14 @@ const App = () => (
               element={
                 <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="payroll">
                   <OpeningBalancesPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/payroll/historical-import"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="payroll">
+                  <HistoricalPayrollImportPage />
                 </ProtectedRoute>
               }
             />
