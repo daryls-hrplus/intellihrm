@@ -58,6 +58,7 @@ import ApplicationDocsGeneratorPage from "./pages/enablement/ApplicationDocsGene
 import FeatureCatalogPage from "./pages/enablement/FeatureCatalogPage";
 import TemplateLibraryPage from "./pages/enablement/TemplateLibraryPage";
 import EnablementAnalyticsPage from "./pages/enablement/EnablementAnalyticsPage";
+import SCORMGeneratorPage from "./pages/enablement/SCORMGeneratorPage";
 
 // Subscription pages
 import SubscriptionPage from "./pages/subscription/SubscriptionPage";
@@ -2953,6 +2954,14 @@ const App = () => (
               element={
                 <ProtectedRoute requiredRoles={["admin"]}>
                   <EnablementAnalyticsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/enablement/scorm-generator"
+              element={
+                <ProtectedRoute requiredRoles={["admin"]}>
+                  <SCORMGeneratorPage />
                 </ProtectedRoute>
               }
             />
