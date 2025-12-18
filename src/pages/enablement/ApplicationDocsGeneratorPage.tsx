@@ -457,15 +457,35 @@ export default function ApplicationDocsGeneratorPage() {
               </Select>
               
               {/* Template Configuration Toggle */}
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="mt-2"
-                onClick={() => setShowTemplateConfig(!showTemplateConfig)}
-              >
-                <Layout className="h-4 w-4 mr-2" />
-                {showTemplateConfig ? 'Hide' : 'Configure'} Template
-              </Button>
+              <div className="flex gap-2 mt-2">
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => setShowTemplateConfig(!showTemplateConfig)}
+                >
+                  <Layout className="h-4 w-4 mr-2" />
+                  {showTemplateConfig ? 'Hide' : 'Configure'} Template
+                </Button>
+                <Sheet open={showTemplateLibrary} onOpenChange={setShowTemplateLibrary}>
+                  <SheetTrigger asChild>
+                    <Button variant="outline" size="sm">
+                      <Library className="h-4 w-4 mr-2" />
+                      Template Library
+                    </Button>
+                  </SheetTrigger>
+                  <SheetContent side="right" className="w-full sm:max-w-3xl overflow-y-auto">
+                    <TemplateLibrary
+                      selectedTemplate={selectedTemplate}
+                      onTemplateSelect={(template) => {
+                        setSelectedTemplate(template);
+                        setShowTemplateLibrary(false);
+                        toast.success(`Template "${template.name}" applied`);
+                      }}
+                      onClose={() => setShowTemplateLibrary(false)}
+                    />
+                  </SheetContent>
+                </Sheet>
+              </div>
               {selectedTemplate && (
                 <Badge variant="secondary" className="mt-1">
                   Template: {selectedTemplate.name}
