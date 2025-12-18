@@ -21,7 +21,9 @@ import {
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Plus, Sparkles, Clock, FileText, Video, BookOpen } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Plus, Clock, FileText, Video, BookOpen, Sparkles, PlusCircle, RefreshCw } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import type { WorkflowColumn } from "@/types/enablement";
@@ -71,11 +73,11 @@ export function AddContentItemDialog({ releaseId, onSuccess }: AddContentItemDia
   const [open, setOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [existingFeatures, setExistingFeatures] = useState<ExistingFeature[]>([]);
-  const [isNewFeature, setIsNewFeature] = useState(false);
+  const [featureMode, setFeatureMode] = useState<"new" | "existing" | null>(null);
+  const [selectedExistingFeatures, setSelectedExistingFeatures] = useState<string[]>([]);
   
   const [formData, setFormData] = useState({
     module_code: "",
-    feature_code: "",
     feature_name: "",
     priority: "medium" as string,
     estimated_hours: "",
@@ -106,11 +108,6 @@ export function AddContentItemDialog({ releaseId, onSuccess }: AddContentItemDia
     fetchFeatures();
   }, [formData.module_code]);
 
-  // Filter features based on selected module
-  const filteredFeatures = useMemo(() => {
-    return existingFeatures.filter(f => f.module_code === formData.module_code);
-  }, [existingFeatures, formData.module_code]);
-
   // Calculate estimated hours based on content types
   const calculatedHours = useMemo(() => {
     if (formData.estimated_hours) return parseFloat(formData.estimated_hours);
@@ -124,20 +121,24 @@ export function AddContentItemDialog({ releaseId, onSuccess }: AddContentItemDia
     setFormData({ 
       ...formData, 
       module_code: value, 
-      feature_code: "",
       feature_name: "" 
     });
-    setIsNewFeature(false);
+    setFeatureMode(null);
+    setSelectedExistingFeatures([]);
   };
 
-  const handleFeatureSelect = (featureCode: string) => {
-    if (featureCode === "__new__") {
-      setIsNewFeature(true);
-      setFormData({ ...formData, feature_code: "", feature_name: "" });
-    } else {
-      setIsNewFeature(false);
-      setFormData({ ...formData, feature_code: featureCode });
-    }
+  const handleFeatureModeChange = (mode: "new" | "existing") => {
+    setFeatureMode(mode);
+    setFormData({ ...formData, feature_name: "" });
+    setSelectedExistingFeatures([]);
+  };
+
+  const toggleExistingFeature = (featureCode: string) => {
+    setSelectedExistingFeatures(prev => 
+      prev.includes(featureCode)
+        ? prev.filter(f => f !== featureCode)
+        : [...prev, featureCode]
+    );
   };
 
   const toggleContentType = (typeId: string) => {
@@ -152,44 +153,55 @@ export function AddContentItemDialog({ releaseId, onSuccess }: AddContentItemDia
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    const featureCode = isNewFeature ? formData.feature_name : formData.feature_code;
-    
-    if (!featureCode || !formData.module_code) {
-      toast.error("Module and feature are required");
+    if (!formData.module_code) {
+      toast.error("Module is required");
+      return;
+    }
+
+    if (featureMode === "new" && !formData.feature_name) {
+      toast.error("Feature name is required");
+      return;
+    }
+
+    if (featureMode === "existing" && selectedExistingFeatures.length === 0) {
+      toast.error("Please select at least one feature");
       return;
     }
 
     setIsSubmitting(true);
     try {
-      const { error } = await supabase.from("enablement_content_status").insert({
-        feature_code: featureCode.toUpperCase().replace(/\s+/g, "_"),
-        module_code: formData.module_code,
-        release_id: releaseId || null,
-        workflow_status: "backlog" as WorkflowColumn,
-        priority: formData.priority,
-        estimated_hours: calculatedHours || null,
-        time_estimate_notes: formData.time_estimate_notes || null,
-        documentation_status: formData.content_types.includes("documentation") ? "not_started" : "na",
-        scorm_lite_status: formData.content_types.includes("scorm") ? "not_started" : "na",
-        rise_course_status: "na",
-        video_status: formData.content_types.includes("video") ? "not_started" : "na",
-        dap_guide_status: formData.content_types.includes("dap") ? "not_started" : "na",
-      });
+      // Determine features to create content for
+      const featuresToCreate = featureMode === "new" 
+        ? [formData.feature_name.toUpperCase().replace(/\s+/g, "_")]
+        : selectedExistingFeatures;
 
-      if (error) throw error;
+      // Create content items for each feature
+      for (const featureCode of featuresToCreate) {
+        const { error } = await supabase.from("enablement_content_status").insert({
+          feature_code: featureCode,
+          module_code: formData.module_code,
+          release_id: releaseId || null,
+          workflow_status: "backlog" as WorkflowColumn,
+          priority: formData.priority,
+          estimated_hours: calculatedHours || null,
+          time_estimate_notes: formData.time_estimate_notes || null,
+          documentation_status: formData.content_types.includes("documentation") ? "not_started" : "na",
+          scorm_lite_status: formData.content_types.includes("scorm") ? "not_started" : "na",
+          rise_course_status: "na",
+          video_status: formData.content_types.includes("video") ? "not_started" : "na",
+          dap_guide_status: formData.content_types.includes("dap") ? "not_started" : "na",
+        });
 
-      toast.success("Content item added to backlog");
+        if (error) throw error;
+      }
+
+      const message = featuresToCreate.length > 1 
+        ? `${featuresToCreate.length} content items added to backlog`
+        : "Content item added to backlog";
+      
+      toast.success(message);
       setOpen(false);
-      setFormData({
-        module_code: "",
-        feature_code: "",
-        feature_name: "",
-        priority: "medium",
-        estimated_hours: "",
-        time_estimate_notes: "",
-        content_types: [],
-      });
-      setIsNewFeature(false);
+      resetForm();
       onSuccess?.();
     } catch (error) {
       console.error("Error adding content item:", error);
@@ -199,17 +211,36 @@ export function AddContentItemDialog({ releaseId, onSuccess }: AddContentItemDia
     }
   };
 
+  const resetForm = () => {
+    setFormData({
+      module_code: "",
+      feature_name: "",
+      priority: "medium",
+      estimated_hours: "",
+      time_estimate_notes: "",
+      content_types: [],
+    });
+    setFeatureMode(null);
+    setSelectedExistingFeatures([]);
+  };
+
   const selectedModule = MODULES.find(m => m.code === formData.module_code);
+  const hasValidFeature = featureMode === "new" 
+    ? formData.feature_name.trim().length > 0 
+    : selectedExistingFeatures.length > 0;
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={(isOpen) => {
+      setOpen(isOpen);
+      if (!isOpen) resetForm();
+    }}>
       <DialogTrigger asChild>
         <Button>
           <Plus className="h-4 w-4 mr-2" />
           Add Content Item
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-lg">
+      <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Add New Content Item</DialogTitle>
           <DialogDescription>
@@ -240,60 +271,90 @@ export function AddContentItemDialog({ releaseId, onSuccess }: AddContentItemDia
             </Select>
           </div>
 
-          {/* Step 2: Feature Selection (only shown after module selected) */}
+          {/* Step 2: Feature Mode Selection */}
           {formData.module_code && (
-            <div className="space-y-2">
+            <div className="space-y-3">
               <Label className="flex items-center gap-2">
                 <Badge variant="outline" className="text-xs">Step 2</Badge>
-                Select or Create Feature *
+                Feature Selection *
               </Label>
               
-              {!isNewFeature ? (
-                <div className="space-y-2">
-                  <Select 
-                    value={formData.feature_code} 
-                    onValueChange={handleFeatureSelect}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select existing feature or create new..." />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="__new__">
-                        <span className="flex items-center gap-2">
-                          <Plus className="h-4 w-4" />
-                          Create new feature
-                        </span>
-                      </SelectItem>
-                      {filteredFeatures.length > 0 && (
-                        <>
-                          <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground">
-                            Existing {selectedModule?.label} Features
-                          </div>
-                          {filteredFeatures.map((feature) => (
-                            <SelectItem key={feature.feature_code} value={feature.feature_code}>
-                              {feature.feature_code}
-                            </SelectItem>
-                          ))}
-                        </>
-                      )}
-                    </SelectContent>
-                  </Select>
-                </div>
-              ) : (
-                <div className="space-y-2">
+              <div className="grid grid-cols-2 gap-3">
+                <Button
+                  type="button"
+                  variant={featureMode === "new" ? "default" : "outline"}
+                  className="h-auto py-4 flex flex-col items-center gap-2"
+                  onClick={() => handleFeatureModeChange("new")}
+                >
+                  <PlusCircle className="h-5 w-5" />
+                  <span className="font-medium">Create New Feature</span>
+                  <span className="text-xs opacity-70">Add a new feature</span>
+                </Button>
+                <Button
+                  type="button"
+                  variant={featureMode === "existing" ? "default" : "outline"}
+                  className="h-auto py-4 flex flex-col items-center gap-2"
+                  onClick={() => handleFeatureModeChange("existing")}
+                  disabled={existingFeatures.length === 0}
+                >
+                  <RefreshCw className="h-5 w-5" />
+                  <span className="font-medium">Update Existing</span>
+                  <span className="text-xs opacity-70">
+                    {existingFeatures.length > 0 
+                      ? `${existingFeatures.length} feature(s) available`
+                      : "No existing features"}
+                  </span>
+                </Button>
+              </div>
+
+              {/* New Feature Input */}
+              {featureMode === "new" && (
+                <div className="space-y-2 pt-2">
+                  <Label>New Feature Name *</Label>
                   <Input
                     value={formData.feature_name}
                     onChange={(e) => setFormData({ ...formData, feature_name: e.target.value })}
                     placeholder="e.g., Leave Request Approval Flow"
+                    autoFocus
                   />
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setIsNewFeature(false)}
-                  >
-                    ← Back to existing features
-                  </Button>
+                  <p className="text-xs text-muted-foreground">
+                    Will be converted to: {formData.feature_name ? formData.feature_name.toUpperCase().replace(/\s+/g, "_") : "FEATURE_CODE"}
+                  </p>
+                </div>
+              )}
+
+              {/* Existing Features Multi-Select */}
+              {featureMode === "existing" && existingFeatures.length > 0 && (
+                <div className="space-y-2 pt-2">
+                  <Label>Select Feature(s) to Update *</Label>
+                  <ScrollArea className="h-[150px] border rounded-md p-3">
+                    <div className="space-y-2">
+                      {existingFeatures.map((feature) => (
+                        <div 
+                          key={feature.feature_code}
+                          className="flex items-center space-x-3 p-2 rounded hover:bg-muted cursor-pointer"
+                          onClick={() => toggleExistingFeature(feature.feature_code)}
+                        >
+                          <Checkbox
+                            id={feature.feature_code}
+                            checked={selectedExistingFeatures.includes(feature.feature_code)}
+                            onCheckedChange={() => toggleExistingFeature(feature.feature_code)}
+                          />
+                          <label 
+                            htmlFor={feature.feature_code}
+                            className="text-sm font-medium cursor-pointer flex-1"
+                          >
+                            {feature.feature_code}
+                          </label>
+                        </div>
+                      ))}
+                    </div>
+                  </ScrollArea>
+                  {selectedExistingFeatures.length > 0 && (
+                    <p className="text-xs text-muted-foreground">
+                      {selectedExistingFeatures.length} feature(s) selected
+                    </p>
+                  )}
                 </div>
               )}
             </div>
@@ -301,8 +362,8 @@ export function AddContentItemDialog({ releaseId, onSuccess }: AddContentItemDia
 
           <Separator />
 
-          {/* Content Configuration */}
-          {formData.module_code && (formData.feature_code || formData.feature_name) && (
+          {/* Content Configuration - Only show when feature is selected */}
+          {formData.module_code && hasValidFeature && (
             <>
               {/* Content Types */}
               <div className="space-y-2">
@@ -389,9 +450,11 @@ export function AddContentItemDialog({ releaseId, onSuccess }: AddContentItemDia
             </Button>
             <Button 
               type="submit" 
-              disabled={isSubmitting || !formData.module_code || (!formData.feature_code && !formData.feature_name)}
+              disabled={isSubmitting || !formData.module_code || !hasValidFeature}
             >
-              {isSubmitting ? "Adding..." : "Add to Backlog"}
+              {isSubmitting ? "Adding..." : featureMode === "existing" && selectedExistingFeatures.length > 1 
+                ? `Add ${selectedExistingFeatures.length} Items` 
+                : "Add to Backlog"}
             </Button>
           </div>
         </form>
