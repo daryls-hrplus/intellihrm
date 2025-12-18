@@ -74,7 +74,16 @@ const WORKFLOW_STAGES: WorkflowStage[] = [
     navLink: "/enablement?tab=workflow",
   },
   {
-    id: "in_progress",
+    id: "planning",
+    label: "Planning",
+    icon: ClipboardList,
+    color: "text-purple-600",
+    bgColor: "bg-purple-100 dark:bg-purple-900/30",
+    description: "Scope definition & requirements",
+    navLink: "/enablement?tab=workflow",
+  },
+  {
+    id: "development",
     label: "Development",
     icon: Code,
     color: "text-blue-600",
@@ -136,9 +145,11 @@ export function ReleaseWorkflowDashboard() {
   const stageStats = useMemo(() => {
     const stats: Record<WorkflowColumn, { count: number; hours: number; items: EnablementContentStatus[] }> = {
       backlog: { count: 0, hours: 0, items: [] },
-      in_progress: { count: 0, hours: 0, items: [] },
+      planning: { count: 0, hours: 0, items: [] },
+      development: { count: 0, hours: 0, items: [] },
       review: { count: 0, hours: 0, items: [] },
       published: { count: 0, hours: 0, items: [] },
+      maintenance: { count: 0, hours: 0, items: [] },
       archived: { count: 0, hours: 0, items: [] },
     };
 
@@ -159,7 +170,7 @@ export function ReleaseWorkflowDashboard() {
   const totalStats = useMemo(() => {
     const total = contentItems.length;
     const completed = stageStats.published.count;
-    const inProgress = stageStats.in_progress.count + stageStats.review.count;
+    const inProgress = stageStats.planning.count + stageStats.development.count + stageStats.review.count;
     const pending = stageStats.backlog.count;
     const totalHours = Object.values(stageStats).reduce((sum, s) => sum + s.hours, 0);
     const completedHours = stageStats.published.hours;

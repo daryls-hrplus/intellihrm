@@ -63,7 +63,7 @@ export default function EnablementHubPage() {
 
   const stats = {
     total: totalFeatures,
-    inProgress: contentItems.filter((i) => i.workflow_status === "in_progress").length,
+    inProgress: contentItems.filter((i) => i.workflow_status === "development" || i.workflow_status === "planning").length,
     inReview: contentItems.filter((i) => i.workflow_status === "review").length,
     published: contentItems.filter((i) => i.workflow_status === "published").length,
     critical: contentItems.filter((i) => i.priority === "critical").length,

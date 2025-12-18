@@ -35,7 +35,7 @@ export default function EnablementAnalyticsPage() {
   }, [user]);
 
   const completedContent = contentItems.filter(c => c.workflow_status === 'published').length;
-  const inProgressContent = contentItems.filter(c => c.workflow_status === 'in_progress' || c.workflow_status === 'review').length;
+  const inProgressContent = contentItems.filter(c => c.workflow_status === 'development' || c.workflow_status === 'review' || c.workflow_status === 'planning').length;
   const pendingContent = contentItems.filter(c => c.workflow_status === 'backlog').length;
 
   return (

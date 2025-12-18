@@ -148,7 +148,7 @@ export function useEnablementContentStatus(releaseId?: string) {
       workflow_status: column,
     };
 
-    if (column === "in_progress" && !contentItems.find((i) => i.id === id)?.started_at) {
+    if (column === "development" && !contentItems.find((i) => i.id === id)?.started_at) {
       updates.started_at = new Date().toISOString();
     }
     if (column === "published") {
