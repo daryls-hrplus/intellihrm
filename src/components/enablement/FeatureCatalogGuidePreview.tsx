@@ -179,58 +179,101 @@ export function FeatureCatalogGuidePreview({ open, onOpenChange }: FeatureCatalo
   };
 
   const handleDownloadPDF = async () => {
-    if (!previewRef.current) return;
-    
     setIsGenerating(true);
     try {
-      // Get all sections that should be on separate pages
-      const sections = previewRef.current.querySelectorAll('[data-pdf-section]');
       const pdf = new jsPDF('p', 'mm', 'a4');
       const pageWidth = 210;
       const pageHeight = 297;
-      const margin = 10;
+      const margin = 15;
       const contentWidth = pageWidth - (margin * 2);
-      const contentHeight = pageHeight - (margin * 2) - 15; // Leave room for page number
       let currentPage = 1;
       
       const addPageNumber = () => {
         if (includePageNumbers) {
           pdf.setFontSize(10);
           pdf.setTextColor(128, 128, 128);
-          pdf.text(`Page ${currentPage}`, pageWidth / 2, pageHeight - 8, { align: 'center' });
+          pdf.text(`Page ${currentPage}`, pageWidth / 2, pageHeight - 10, { align: 'center' });
         }
       };
 
+      // Create a temporary container for rendering
+      const tempContainer = document.createElement('div');
+      tempContainer.style.position = 'absolute';
+      tempContainer.style.left = '-9999px';
+      tempContainer.style.top = '0';
+      tempContainer.style.width = '800px';
+      tempContainer.style.backgroundColor = '#ffffff';
+      document.body.appendChild(tempContainer);
+
+      // Define sections to render
+      const sections: { id: string; render: () => string }[] = [
+        { id: 'cover', render: () => renderCoverHTML() },
+        { id: 'toc', render: () => renderTOCHTML() },
+      ];
+      
+      if (currentTemplate.includeExecutiveSummary) {
+        sections.push({ id: 'executive', render: () => renderExecutiveSummaryHTML() });
+      }
+      
+      if (currentTemplate.includeModules) {
+        FEATURE_REGISTRY.forEach((module, idx) => {
+          sections.push({ id: `module-${module.code}`, render: () => renderModuleHTML(module, idx === 0) });
+        });
+      }
+      
+      if (currentTemplate.includeCapabilities) {
+        sections.push({ id: 'capabilities', render: () => renderCapabilitiesHTML() });
+      }
+      
+      if (currentTemplate.includeMatrix) {
+        FEATURE_REGISTRY.forEach((module, idx) => {
+          const hasFeatures = FEATURE_CAPABILITIES.some(fc => 
+            module.groups.some(g => g.features.some(f => f.code === fc.featureCode))
+          );
+          if (hasFeatures) {
+            sections.push({ id: `matrix-${module.code}`, render: () => renderMatrixModuleHTML(module, idx === 0) });
+          }
+        });
+      }
+
       for (let i = 0; i < sections.length; i++) {
-        const section = sections[i] as HTMLElement;
+        const section = sections[i];
+        tempContainer.innerHTML = section.render();
         
-        const canvas = await html2canvas(section, {
+        // Wait for render
+        await new Promise(resolve => setTimeout(resolve, 100));
+        
+        const canvas = await html2canvas(tempContainer, {
           scale: 2,
           useCORS: true,
           logging: false,
-          backgroundColor: '#ffffff',
-          width: section.scrollWidth,
-          height: section.scrollHeight
+          backgroundColor: '#ffffff'
         });
         
         const imgData = canvas.toDataURL('image/png');
         const imgHeight = (canvas.height * contentWidth) / canvas.width;
         
-        // If image is taller than one page, split it
-        if (imgHeight > contentHeight) {
-          let heightLeft = imgHeight;
-          let sourceY = 0;
+        if (i > 0) {
+          pdf.addPage();
+          currentPage++;
+        }
+        
+        // Handle content that's taller than one page
+        if (imgHeight > pageHeight - (margin * 2) - 15) {
+          let yOffset = 0;
+          let remainingHeight = imgHeight;
+          const maxContentHeight = pageHeight - (margin * 2) - 15;
           
-          while (heightLeft > 0) {
-            if (currentPage > 1 || sourceY > 0) {
+          while (remainingHeight > 0) {
+            if (yOffset > 0) {
               pdf.addPage();
               currentPage++;
             }
             
-            const sliceHeight = Math.min(contentHeight, heightLeft);
+            const sliceHeight = Math.min(maxContentHeight, remainingHeight);
+            const sourceY = (yOffset / imgHeight) * canvas.height;
             const sourceHeight = (sliceHeight / imgHeight) * canvas.height;
             
-            // Create a canvas slice
             const sliceCanvas = document.createElement('canvas');
             sliceCanvas.width = canvas.width;
             sliceCanvas.height = sourceHeight;
@@ -242,25 +285,231 @@ export function FeatureCatalogGuidePreview({ open, onOpenChange }: FeatureCatalo
             }
             
             addPageNumber();
-            sourceY += sourceHeight;
-            heightLeft -= sliceHeight;
+            yOffset += sliceHeight;
+            remainingHeight -= sliceHeight;
           }
         } else {
-          if (i > 0) {
-            pdf.addPage();
-            currentPage++;
-          }
           pdf.addImage(imgData, 'PNG', margin, margin, contentWidth, imgHeight);
           addPageNumber();
         }
       }
       
+      document.body.removeChild(tempContainer);
       pdf.save(`${customTitle.replace(/\s+/g, '-')}.pdf`);
     } catch (error) {
       console.error('Error generating PDF:', error);
     } finally {
       setIsGenerating(false);
     }
+  };
+
+  // HTML render functions for PDF generation
+  const renderCoverHTML = () => `
+    <div style="background: linear-gradient(135deg, ${primaryColor} 0%, ${secondaryColor} 100%); color: white; padding: 80px 40px; text-align: center; min-height: 600px; display: flex; flex-direction: column; justify-content: center;">
+      <h1 style="font-size: 42px; font-weight: 700; margin-bottom: 16px;">${customTitle}</h1>
+      <p style="font-size: 20px; opacity: 0.9; margin-bottom: 8px;">${customSubtitle}</p>
+      ${companyName ? `<p style="font-size: 14px; opacity: 0.8; margin-top: 8px;">by ${companyName}</p>` : ''}
+      ${includeDate ? `<p style="font-size: 14px; opacity: 0.7; margin-top: 16px;">Generated: ${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>` : ''}
+      <div style="display: flex; justify-content: center; gap: 60px; margin-top: 60px;">
+        <div style="text-align: center;"><div style="font-size: 42px; font-weight: 700;">${totalModules}</div><div style="font-size: 12px; opacity: 0.8; text-transform: uppercase; letter-spacing: 1px;">Modules</div></div>
+        <div style="text-align: center;"><div style="font-size: 42px; font-weight: 700;">${totalFeatures}</div><div style="font-size: 12px; opacity: 0.8; text-transform: uppercase; letter-spacing: 1px;">Features</div></div>
+        <div style="text-align: center;"><div style="font-size: 42px; font-weight: 700;">${aiPoweredCount}</div><div style="font-size: 12px; opacity: 0.8; text-transform: uppercase; letter-spacing: 1px;">AI-Powered</div></div>
+        <div style="text-align: center;"><div style="font-size: 42px; font-weight: 700;">${uniqueCount}</div><div style="font-size: 12px; opacity: 0.8; text-transform: uppercase; letter-spacing: 1px;">Differentiators</div></div>
+      </div>
+    </div>
+  `;
+
+  const renderTOCHTML = () => {
+    let pageNum = 3;
+    let tocItems = `
+      <div style="display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px dashed #e2e8f0;"><span style="font-weight: 500;">Cover Page</span><span style="color: #64748b;">1</span></div>
+      <div style="display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px dashed #e2e8f0;"><span style="font-weight: 500;">Table of Contents</span><span style="color: #64748b;">2</span></div>
+    `;
+    
+    if (currentTemplate.includeExecutiveSummary) {
+      tocItems += `<div style="display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px dashed #e2e8f0;"><span style="font-weight: 500;">Executive Summary</span><span style="color: #64748b;">${pageNum++}</span></div>`;
+    }
+    
+    if (currentTemplate.includeModules) {
+      tocItems += `<div style="display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px dashed #e2e8f0;"><span style="font-weight: 600;">Module Reference</span><span style="color: #64748b;">${pageNum}</span></div>`;
+      FEATURE_REGISTRY.forEach((module) => {
+        tocItems += `<div style="display: flex; justify-content: space-between; padding: 8px 0 8px 24px; border-bottom: 1px dotted #f1f5f9;"><span style="color: #475569; font-size: 14px;">${module.name}</span><span style="color: #94a3b8; font-size: 12px;">${pageNum++}</span></div>`;
+      });
+    }
+    
+    if (currentTemplate.includeCapabilities) {
+      tocItems += `<div style="display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px dashed #e2e8f0;"><span style="font-weight: 500;">Platform Capabilities</span><span style="color: #64748b;">${pageNum++}</span></div>`;
+    }
+    
+    if (currentTemplate.includeMatrix) {
+      tocItems += `<div style="display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px dashed #e2e8f0;"><span style="font-weight: 500;">Capability Matrix</span><span style="color: #64748b;">${pageNum}</span></div>`;
+    }
+    
+    return `
+      <div style="padding: 40px; background: white; font-family: system-ui, -apple-system, sans-serif;">
+        <h2 style="font-size: 28px; font-weight: 700; margin-bottom: 24px; padding-bottom: 12px; border-bottom: 3px solid ${primaryColor};">Table of Contents</h2>
+        <div>${tocItems}</div>
+      </div>
+    `;
+  };
+
+  const renderExecutiveSummaryHTML = () => `
+    <div style="padding: 40px; background: white; font-family: system-ui, -apple-system, sans-serif;">
+      <h2 style="font-size: 28px; font-weight: 700; margin-bottom: 8px; padding-bottom: 12px; border-bottom: 3px solid ${primaryColor};">Executive Summary</h2>
+      <p style="color: #64748b; margin-bottom: 24px;">Platform Overview for Decision Makers</p>
+      <div style="margin-bottom: 32px;">
+        <p style="font-size: 16px; line-height: 1.7; margin-bottom: 16px; color: #1e293b;">
+          HRplus Cerebra is an enterprise-grade Human Resource Management System designed to transform workforce management 
+          through intelligent automation and AI-powered insights. Purpose-built for the Caribbean, Africa, and global expansion, 
+          the platform delivers deep regional compliance alongside sophisticated cross-module orchestration.
+        </p>
+        <p style="font-size: 16px; line-height: 1.7; color: #1e293b;">
+          With <strong>${aiPoweredCount} AI-powered features</strong> and <strong>${uniqueCount} market differentiators</strong>, 
+          HRplus Cerebra goes beyond traditional HRIS solutions to deliver predictive insights, prescriptive recommendations, 
+          and automated actions across the entire employee lifecycle.
+        </p>
+      </div>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+        <div style="background: #faf5ff; border-radius: 8px; padding: 20px; border-left: 4px solid #a855f7;">
+          <div style="font-weight: 600; color: #581c87; margin-bottom: 8px;">🧠 AI-First Architecture</div>
+          <p style="font-size: 14px; color: #7e22ce;">Predictive analytics, intelligent automation, and prescriptive guidance embedded across all modules.</p>
+        </div>
+        <div style="background: #fffbeb; border-radius: 8px; padding: 20px; border-left: 4px solid #f59e0b;">
+          <div style="font-weight: 600; color: #78350f; margin-bottom: 8px;">⭐ Market Differentiators</div>
+          <p style="font-size: 14px; color: #b45309;">Unique capabilities not found in competing solutions like Workday, SAP, or Oracle HCM.</p>
+        </div>
+      </div>
+    </div>
+  `;
+
+  const renderModuleHTML = (module: typeof FEATURE_REGISTRY[0], isFirst: boolean) => {
+    const enrichment = MODULE_ENRICHMENTS[module.code];
+    const moduleFeatureCount = module.groups.reduce((acc, g) => acc + g.features.length, 0);
+    
+    let featuresHTML = '';
+    module.groups.forEach(group => {
+      featuresHTML += `<div style="margin-bottom: 16px;">
+        <h4 style="font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: #1e293b; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+          <span style="width: 6px; height: 6px; border-radius: 50%; background: ${primaryColor};"></span>${group.groupName}
+        </h4>
+        <ul style="list-style: none; padding: 0; margin: 0;">
+          ${group.features.map(feature => {
+            const featureEnrichment = FEATURE_ENRICHMENTS[feature.code];
+            return `<li style="background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; margin-bottom: 8px;">
+              <div style="font-weight: 500; color: #1e293b; margin-bottom: 4px;">✓ ${feature.name}</div>
+              <p style="font-size: 13px; color: #64748b; margin: 0;">${featureEnrichment?.detailedDescription || feature.description}</p>
+              ${featureEnrichment?.businessBenefit ? `<p style="font-size: 12px; color: ${accentColor}; margin: 4px 0 0 0;"><strong>Value:</strong> ${featureEnrichment.businessBenefit}</p>` : ''}
+            </li>`;
+          }).join('')}
+        </ul>
+      </div>`;
+    });
+    
+    return `
+      <div style="padding: 40px; background: white; font-family: system-ui, -apple-system, sans-serif;">
+        ${isFirst ? `<h2 style="font-size: 28px; font-weight: 700; margin-bottom: 8px; padding-bottom: 12px; border-bottom: 3px solid ${primaryColor};">Module Reference</h2><p style="color: #64748b; margin-bottom: 24px;">Complete Feature Inventory by Module</p>` : ''}
+        <div style="background: #f8fafc; border-radius: 8px; padding: 24px; border-left: 4px solid ${primaryColor};">
+          <div style="display: flex; align-items: start; gap: 16px; margin-bottom: 16px;">
+            <div style="background: ${primaryColor}20; padding: 12px; border-radius: 8px;">
+              <span style="font-size: 24px;">📦</span>
+            </div>
+            <div>
+              <h3 style="font-size: 20px; font-weight: 600; color: #1e293b; margin: 0 0 4px 0;">${module.name} <span style="background: ${primaryColor}20; color: ${primaryColor}; font-size: 12px; padding: 2px 8px; border-radius: 12px; margin-left: 8px;">${moduleFeatureCount} Features</span></h3>
+              <p style="font-size: 14px; color: #64748b; margin: 0;">${module.description}</p>
+            </div>
+          </div>
+          ${enrichment ? `
+            <div style="background: white; border-radius: 8px; padding: 16px; border: 1px solid #e2e8f0; margin-bottom: 16px;">
+              <p style="font-size: 14px; color: #475569; margin: 0 0 12px 0;">${enrichment.businessContext}</p>
+              <div style="margin-bottom: 12px;">
+                <strong style="font-size: 13px; color: #1e293b;">Key Benefits:</strong>
+                <ul style="margin: 8px 0 0 0; padding-left: 20px;">${enrichment.keyBenefits.slice(0, 4).map(b => `<li style="font-size: 13px; color: #64748b; margin-bottom: 4px;">${b}</li>`).join('')}</ul>
+              </div>
+              <div style="font-size: 13px; color: #64748b; margin-bottom: 8px;"><strong>Target Users:</strong> ${enrichment.targetUsers.join(', ')}</div>
+              <div style="background: ${primaryColor}10; padding: 12px; border-radius: 6px;"><strong style="color: ${primaryColor};">Strategic Value:</strong> <span style="color: ${primaryColor};">${enrichment.strategicValue}</span></div>
+            </div>
+          ` : ''}
+          ${featuresHTML}
+        </div>
+      </div>
+    `;
+  };
+
+  const renderCapabilitiesHTML = () => {
+    const capsHTML = PLATFORM_CAPABILITIES.map(cap => `
+      <div style="background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%); border-radius: 12px; padding: 24px; margin-bottom: 16px; border: 1px solid #e2e8f0;">
+        <div style="display: flex; align-items: start; gap: 16px;">
+          <div style="background: white; padding: 12px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);"><span style="font-size: 24px;">🎯</span></div>
+          <div>
+            <h3 style="font-size: 18px; font-weight: 600; margin: 0 0 8px 0;">${cap.name}</h3>
+            <p style="font-size: 14px; color: #64748b; margin: 0 0 12px 0;">${cap.description}</p>
+            <div style="font-size: 14px; margin-bottom: 8px;"><span style="color: ${accentColor}; font-weight: 500;">Business Value:</span> ${cap.businessValue}</div>
+            <div style="font-size: 14px; margin-bottom: 8px;"><span style="color: ${secondaryColor}; font-weight: 500;">Competitive Edge:</span> ${cap.competitorGap}</div>
+            <div style="font-size: 14px;"><span style="color: ${primaryColor}; font-weight: 500;">Industry Impact:</span> ${cap.industryImpact}</div>
+          </div>
+        </div>
+      </div>
+    `).join('');
+    
+    return `
+      <div style="padding: 40px; background: white; font-family: system-ui, -apple-system, sans-serif;">
+        <h2 style="font-size: 28px; font-weight: 700; margin-bottom: 8px; padding-bottom: 12px; border-bottom: 3px solid ${primaryColor};">Platform Capabilities</h2>
+        <p style="color: #64748b; margin-bottom: 24px;">AI-Powered Features & Competitive Advantages</p>
+        ${capsHTML}
+      </div>
+    `;
+  };
+
+  const renderMatrixModuleHTML = (module: typeof FEATURE_REGISTRY[0], isFirst: boolean) => {
+    const moduleFeatures = FEATURE_CAPABILITIES.filter(fc => 
+      module.groups.some(g => g.features.some(f => f.code === fc.featureCode))
+    ).map(fc => {
+      let featureName = fc.featureCode;
+      let groupName = '';
+      for (const group of module.groups) {
+        const feat = group.features.find(f => f.code === fc.featureCode);
+        if (feat) { featureName = feat.name; groupName = group.groupName; break; }
+      }
+      return { ...fc, featureName, groupName };
+    });
+    
+    if (moduleFeatures.length === 0) return '';
+    
+    const rowsHTML = moduleFeatures.map(fc => `
+      <tr style="border-bottom: 1px solid #e2e8f0;">
+        <td style="padding: 8px; border: 1px solid #e2e8f0;"><div style="font-weight: 500;">${fc.featureName}</div><div style="font-size: 11px; color: #94a3b8;">${fc.groupName}</div></td>
+        <td style="padding: 8px; text-align: center; border: 1px solid #e2e8f0;"><span style="background: ${fc.differentiatorLevel === 'unique' ? '#f3e8ff' : fc.differentiatorLevel === 'advanced' ? '#dbeafe' : '#f1f5f9'}; color: ${fc.differentiatorLevel === 'unique' ? '#7c3aed' : fc.differentiatorLevel === 'advanced' ? '#2563eb' : '#64748b'}; padding: 2px 8px; border-radius: 4px; font-size: 11px;">${fc.differentiatorLevel === 'unique' ? 'Unique' : fc.differentiatorLevel === 'advanced' ? 'Advanced' : 'Core'}</span></td>
+        <td style="padding: 8px; text-align: center; border: 1px solid #e2e8f0;">${fc.capabilities.includes('ai-powered') ? '✓' : '—'}</td>
+        <td style="padding: 8px; text-align: center; border: 1px solid #e2e8f0;">${fc.capabilities.includes('predictive-analytics') ? '✓' : '—'}</td>
+        <td style="padding: 8px; text-align: center; border: 1px solid #e2e8f0;">${fc.capabilities.includes('intelligent-automation') ? '✓' : '—'}</td>
+        <td style="padding: 8px; text-align: center; border: 1px solid #e2e8f0;">${fc.capabilities.includes('real-time-processing') ? '✓' : '—'}</td>
+        <td style="padding: 8px; text-align: center; border: 1px solid #e2e8f0;">${fc.capabilities.includes('self-service') ? '✓' : '—'}</td>
+      </tr>
+    `).join('');
+    
+    return `
+      <div style="padding: 40px; background: white; font-family: system-ui, -apple-system, sans-serif;">
+        ${isFirst ? `<h2 style="font-size: 28px; font-weight: 700; margin-bottom: 8px; padding-bottom: 12px; border-bottom: 3px solid ${primaryColor};">Capability Matrix</h2><p style="color: #64748b; margin-bottom: 24px;">Feature-by-Feature Capability Mapping by Module</p>` : ''}
+        <h3 style="font-size: 18px; font-weight: 600; color: ${primaryColor}; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+          <span style="width: 8px; height: 8px; border-radius: 50%; background: ${primaryColor};"></span>${module.name}
+          <span style="border: 1px solid #e2e8f0; padding: 2px 8px; border-radius: 4px; font-size: 12px; color: #64748b;">${moduleFeatures.length} features</span>
+        </h3>
+        <table style="width: 100%; border-collapse: collapse; font-size: 12px;">
+          <thead>
+            <tr style="background: #f1f5f9;">
+              <th style="padding: 10px 8px; text-align: left; border: 1px solid #e2e8f0; font-weight: 600;">Feature</th>
+              <th style="padding: 10px 8px; text-align: center; border: 1px solid #e2e8f0; font-weight: 600;">Level</th>
+              <th style="padding: 10px 8px; text-align: center; border: 1px solid #e2e8f0; font-weight: 600;">AI</th>
+              <th style="padding: 10px 8px; text-align: center; border: 1px solid #e2e8f0; font-weight: 600;">Predictive</th>
+              <th style="padding: 10px 8px; text-align: center; border: 1px solid #e2e8f0; font-weight: 600;">Automation</th>
+              <th style="padding: 10px 8px; text-align: center; border: 1px solid #e2e8f0; font-weight: 600;">Real-Time</th>
+              <th style="padding: 10px 8px; text-align: center; border: 1px solid #e2e8f0; font-weight: 600;">Self-Service</th>
+            </tr>
+          </thead>
+          <tbody>${rowsHTML}</tbody>
+        </table>
+      </div>
+    `;
   };
 
   const renderGuideContent = () => (
