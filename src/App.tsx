@@ -57,6 +57,7 @@ import EnablementHubPage from "./pages/enablement/EnablementHubPage";
 import ApplicationDocsGeneratorPage from "./pages/enablement/ApplicationDocsGeneratorPage";
 import FeatureCatalogPage from "./pages/enablement/FeatureCatalogPage";
 import TemplateLibraryPage from "./pages/enablement/TemplateLibraryPage";
+import EnablementAnalyticsPage from "./pages/enablement/EnablementAnalyticsPage";
 
 // Subscription pages
 import SubscriptionPage from "./pages/subscription/SubscriptionPage";
@@ -2944,6 +2945,14 @@ const App = () => (
               element={
                 <ProtectedRoute requiredRoles={["admin"]}>
                   <TemplateLibraryPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/enablement/analytics"
+              element={
+                <ProtectedRoute requiredRoles={["admin"]}>
+                  <EnablementAnalyticsPage />
                 </ProtectedRoute>
               }
             />
