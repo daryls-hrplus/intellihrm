@@ -45,6 +45,8 @@ import { marked } from "marked";
 import {
   GapAnalysisRenderer,
   ChangeReportRenderer,
+  ChangeDetectionRenderer,
+  FAQRenderer,
   IntegrationAnalysisRenderer,
   GenericResultsRenderer,
 } from "@/components/enablement/AIToolsResultsRenderer";
@@ -721,8 +723,12 @@ export default function EnablementAIToolsPage() {
                   </div>
                   {activeTab === "gap-analysis" && results.gaps ? (
                     <GapAnalysisRenderer data={results} />
-                  ) : activeTab === "change-report" && results.changes ? (
+                  ) : activeTab === "change-report" && (results.changes || results.changesByDate) ? (
                     <ChangeReportRenderer data={results} />
+                  ) : activeTab === "change-detection" && (results.changedFeatures || results.analysis) ? (
+                    <ChangeDetectionRenderer data={results} />
+                  ) : activeTab === "faq-generator" && (results.faqs || results.message) ? (
+                    <FAQRenderer data={results} />
                   ) : activeTab === "integration-analysis" && results.suggestions ? (
                     <IntegrationAnalysisRenderer data={results} />
                   ) : (
