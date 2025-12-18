@@ -27,12 +27,14 @@ import {
   Upload,
   MessageSquare,
   Palette,
-  LayoutTemplate
+  LayoutTemplate,
+  Eye
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { DocumentTemplate, DEFAULT_TEMPLATES } from "./DocumentTemplateConfig";
 import { TemplateReferenceUploader } from "./TemplateReferenceUploader";
 import { TemplateInstructionsManager } from "./TemplateInstructionsManager";
+import { TemplatePreviewDialog } from "./TemplatePreviewDialog";
 
 interface SavedTemplate {
   id: string;
@@ -68,6 +70,8 @@ export function TemplateLibrary({
   const [saveTemplateDescription, setSaveTemplateDescription] = useState("");
   const [saveTemplateCategory, setSaveTemplateCategory] = useState("custom");
   const [editingTemplate, setEditingTemplate] = useState<SavedTemplate | null>(null);
+  const [previewTemplate, setPreviewTemplate] = useState<DocumentTemplate | null>(null);
+  const [showPreviewDialog, setShowPreviewDialog] = useState(false);
   
   const queryClient = useQueryClient();
 
@@ -286,30 +290,51 @@ export function TemplateLibrary({
                 {filteredSystemTemplates.map((template) => (
                   <div
                     key={template.id}
-                    className={`p-4 border rounded-lg cursor-pointer transition-all ${
+                    className={`p-4 border rounded-lg transition-all ${
                       selectedTemplate?.id === template.id
                         ? 'border-primary bg-primary/5'
                         : 'hover:border-muted-foreground/50'
                     }`}
-                    onClick={() => onTemplateSelect(template)}
                   >
                     <div className="flex items-start justify-between">
-                      <div className="flex items-start gap-3">
+                      <div className="flex items-start gap-3 flex-1">
                         <div className="p-2 bg-muted rounded-lg">
                           {getCategoryIcon(template.type)}
                         </div>
-                        <div>
+                        <div className="flex-1">
                           <h4 className="font-medium">{template.name}</h4>
                           <p className="text-sm text-muted-foreground">{template.description}</p>
+                          <Badge variant="secondary" className="mt-2 text-xs">
+                            Industry Standard
+                          </Badge>
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
-                        {selectedTemplate?.id === template.id && (
-                          <Check className="h-4 w-4 text-primary" />
-                        )}
-                        <Badge variant="outline">
-                          {template.type.replace('_', ' ')}
-                        </Badge>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => {
+                            setPreviewTemplate(template);
+                            setShowPreviewDialog(true);
+                          }}
+                        >
+                          <Eye className="h-4 w-4 mr-1" />
+                          Preview
+                        </Button>
+                        <Button
+                          variant={selectedTemplate?.id === template.id ? "default" : "outline"}
+                          size="sm"
+                          onClick={() => onTemplateSelect(template)}
+                        >
+                          {selectedTemplate?.id === template.id ? (
+                            <>
+                              <Check className="h-4 w-4 mr-1" />
+                              Selected
+                            </>
+                          ) : (
+                            "Use"
+                          )}
+                        </Button>
                       </div>
                     </div>
                   </div>
@@ -478,6 +503,17 @@ export function TemplateLibrary({
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Template Preview Dialog */}
+      <TemplatePreviewDialog
+        open={showPreviewDialog}
+        onOpenChange={setShowPreviewDialog}
+        template={previewTemplate}
+        onSelect={(template) => {
+          onTemplateSelect(template);
+          toast.success(`Template "${template.name}" selected`);
+        }}
+      />
     </Card>
   );
 }
