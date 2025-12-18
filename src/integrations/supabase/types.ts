@@ -9176,6 +9176,65 @@ export type Database = {
           },
         ]
       }
+      enablement_document_templates: {
+        Row: {
+          branding_config: Json
+          category: string
+          company_id: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          formatting_config: Json
+          id: string
+          is_active: boolean | null
+          is_system_default: boolean | null
+          layout_config: Json
+          name: string
+          sections_config: Json
+          updated_at: string
+        }
+        Insert: {
+          branding_config?: Json
+          category?: string
+          company_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          formatting_config?: Json
+          id?: string
+          is_active?: boolean | null
+          is_system_default?: boolean | null
+          layout_config?: Json
+          name: string
+          sections_config?: Json
+          updated_at?: string
+        }
+        Update: {
+          branding_config?: Json
+          category?: string
+          company_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          formatting_config?: Json
+          id?: string
+          is_active?: boolean | null
+          is_system_default?: boolean | null
+          layout_config?: Json
+          name?: string
+          sections_config?: Json
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "enablement_document_templates_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       enablement_exports: {
         Row: {
           branding_config: Json | null
@@ -9294,6 +9353,123 @@ export type Database = {
             columns: ["feature_id"]
             isOneToOne: false
             referencedRelation: "application_features"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      enablement_template_instructions: {
+        Row: {
+          company_id: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+          instruction_key: string
+          instruction_type: string
+          instruction_value: string
+          is_active: boolean | null
+          priority_order: number | null
+          template_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          company_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          instruction_key: string
+          instruction_type: string
+          instruction_value: string
+          is_active?: boolean | null
+          priority_order?: number | null
+          template_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          instruction_key?: string
+          instruction_type?: string
+          instruction_value?: string
+          is_active?: boolean | null
+          priority_order?: number | null
+          template_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "enablement_template_instructions_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "enablement_template_instructions_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "enablement_document_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      enablement_template_reference_docs: {
+        Row: {
+          company_id: string | null
+          created_at: string
+          created_by: string | null
+          document_name: string
+          document_type: string
+          extracted_content: string | null
+          extracted_styles: Json | null
+          file_size: number | null
+          id: string
+          storage_path: string | null
+          template_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          company_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          document_name: string
+          document_type?: string
+          extracted_content?: string | null
+          extracted_styles?: Json | null
+          file_size?: number | null
+          id?: string
+          storage_path?: string | null
+          template_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          document_name?: string
+          document_type?: string
+          extracted_content?: string | null
+          extracted_styles?: Json | null
+          file_size?: number | null
+          id?: string
+          storage_path?: string | null
+          template_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "enablement_template_reference_docs_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "enablement_template_reference_docs_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "enablement_document_templates"
             referencedColumns: ["id"]
           },
         ]

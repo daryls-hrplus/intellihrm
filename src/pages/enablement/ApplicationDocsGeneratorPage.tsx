@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { toast } from "sonner";
 import { 
   Sparkles, 
@@ -20,12 +21,14 @@ import {
   Download,
   Save,
   Layout,
-  FileCheck
+  FileCheck,
+  Library
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { APPLICATION_MODULES, getModuleByCode, getFeatureByCode } from "@/lib/applicationMetadata";
 import { DocumentTemplateConfig, DocumentTemplate, DEFAULT_TEMPLATES } from "@/components/enablement/DocumentTemplateConfig";
 import { ConfluenceStylePreview, GeneratedDocument } from "@/components/enablement/ConfluenceStylePreview";
+import { TemplateLibrary } from "@/components/enablement/TemplateLibrary";
 
 type ContentType = 'module_overview' | 'feature_tutorial' | 'video_storyboard' | 'quick_reference' | 'kb_article' | 'training_guide' | 'sop';
 
@@ -46,6 +49,7 @@ export default function ApplicationDocsGeneratorPage() {
   const [generatedContent, setGeneratedContent] = useState<GeneratedContent | null>(null);
   const [selectedTemplate, setSelectedTemplate] = useState<DocumentTemplate | null>(DEFAULT_TEMPLATES[0]);
   const [showTemplateConfig, setShowTemplateConfig] = useState(false);
+  const [showTemplateLibrary, setShowTemplateLibrary] = useState(false);
 
   const availableRoles = ["admin", "hr_manager", "employee"];
 
