@@ -379,53 +379,145 @@ export function TemplateLibrary({
                 </div>
               ) : (
                 <div className="grid gap-3">
-                  {filteredSavedTemplates.map((template) => (
-                    <div
-                      key={template.id}
-                      className={`p-4 border rounded-lg transition-all ${
-                        workingTemplate?.id === template.id
-                          ? 'border-primary bg-primary/5'
-                          : 'hover:border-muted-foreground/50'
-                      }`}
-                    >
-                      <div className="flex items-start justify-between">
-                        <div 
-                          className="flex items-start gap-3 flex-1 cursor-pointer"
-                          onClick={() => handleSelectSavedTemplate(template)}
-                        >
-                          <div className="p-2 bg-muted rounded-lg">
-                            {getCategoryIcon(template.category)}
+                  {filteredSavedTemplates.map((template) => {
+                    const branding = template.branding_config as DocumentTemplate['branding'];
+                    return (
+                      <div
+                        key={template.id}
+                        className={`p-4 border rounded-lg transition-all ${
+                          workingTemplate?.id === template.id
+                            ? 'border-primary bg-primary/5'
+                            : 'hover:border-muted-foreground/50'
+                        }`}
+                      >
+                        <div className="flex items-start gap-4">
+                          {/* Template Preview Thumbnail */}
+                          <div className="w-32 h-24 border rounded-lg overflow-hidden flex-shrink-0 bg-background">
+                            {/* Header with branding */}
+                            <div 
+                              className="h-6 flex items-center gap-1 px-2"
+                              style={{ backgroundColor: (branding?.primaryColor || '#1e40af') + '20' }}
+                            >
+                              {branding?.logoUrl ? (
+                                <img src={branding.logoUrl} alt="" className="h-3 object-contain" />
+                              ) : (
+                                <div 
+                                  className="w-3 h-3 rounded-sm"
+                                  style={{ backgroundColor: branding?.primaryColor || '#1e40af' }}
+                                />
+                              )}
+                              <span 
+                                className="text-[8px] font-medium truncate"
+                                style={{ color: branding?.primaryColor || '#1e40af' }}
+                              >
+                                {branding?.companyName || 'Company'}
+                              </span>
+                            </div>
+                            {/* Content preview */}
+                            <div className="p-1.5 space-y-1">
+                              <div 
+                                className="h-1.5 rounded-full w-3/4"
+                                style={{ backgroundColor: branding?.primaryColor || '#1e40af' }}
+                              />
+                              <div className="h-1 bg-muted rounded-full w-full" />
+                              <div className="h-1 bg-muted rounded-full w-5/6" />
+                              <div 
+                                className="h-2 rounded-sm mt-1"
+                                style={{ 
+                                  backgroundColor: (branding?.secondaryColor || '#6b7280') + '20',
+                                  borderLeft: `2px solid ${branding?.secondaryColor || '#6b7280'}`
+                                }}
+                              />
+                            </div>
                           </div>
-                          <div>
-                            <h4 className="font-medium">{template.name}</h4>
-                            <p className="text-sm text-muted-foreground">{template.description}</p>
-                            <p className="text-xs text-muted-foreground mt-1">
-                              Updated {new Date(template.updated_at).toLocaleDateString()}
-                            </p>
+
+                          {/* Template Info */}
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-start justify-between gap-2">
+                              <div className="flex-1 min-w-0">
+                                <h4 className="font-medium truncate">{template.name}</h4>
+                                <p className="text-sm text-muted-foreground line-clamp-2">{template.description}</p>
+                                <div className="flex items-center gap-2 mt-2">
+                                  <Badge variant="outline" className="text-xs">
+                                    {template.category.replace('_', ' ')}
+                                  </Badge>
+                                  {/* Color swatches */}
+                                  <div className="flex items-center gap-1">
+                                    <div 
+                                      className="w-4 h-4 rounded-full border"
+                                      style={{ backgroundColor: branding?.primaryColor || '#1e40af' }}
+                                      title="Primary color"
+                                    />
+                                    <div 
+                                      className="w-4 h-4 rounded-full border"
+                                      style={{ backgroundColor: branding?.secondaryColor || '#6b7280' }}
+                                      title="Secondary color"
+                                    />
+                                  </div>
+                                  <span className="text-xs text-muted-foreground">
+                                    {new Date(template.updated_at).toLocaleDateString()}
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
                           </div>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Badge variant="outline">
-                            {template.category.replace('_', ' ')}
-                          </Badge>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => handleCloneTemplate(template)}
-                          >
-                            <Copy className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => deleteTemplateMutation.mutate(template.id)}
-                          >
-                            <Trash2 className="h-4 w-4 text-destructive" />
-                          </Button>
+
+                          {/* Actions */}
+                          <div className="flex items-center gap-2 flex-shrink-0">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => {
+                                const docTemplate: DocumentTemplate = {
+                                  id: template.id,
+                                  name: template.name,
+                                  description: template.description || "",
+                                  type: template.category as DocumentTemplate['type'],
+                                  layout: template.layout_config as unknown as DocumentTemplate['layout'],
+                                  sections: template.sections_config as unknown as DocumentTemplate['sections'],
+                                  formatting: template.formatting_config as unknown as DocumentTemplate['formatting'],
+                                  branding: branding
+                                };
+                                setPreviewTemplate(docTemplate);
+                                setShowPreviewDialog(true);
+                              }}
+                            >
+                              <Eye className="h-4 w-4 mr-1" />
+                              Preview
+                            </Button>
+                            <Button
+                              variant={workingTemplate?.id === template.id ? "default" : "outline"}
+                              size="sm"
+                              onClick={() => handleSelectSavedTemplate(template)}
+                            >
+                              {workingTemplate?.id === template.id ? (
+                                <>
+                                  <Check className="h-4 w-4 mr-1" />
+                                  Selected
+                                </>
+                              ) : (
+                                "Use"
+                              )}
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => handleCloneTemplate(template)}
+                            >
+                              <Copy className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => deleteTemplateMutation.mutate(template.id)}
+                            >
+                              <Trash2 className="h-4 w-4 text-destructive" />
+                            </Button>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
             </ScrollArea>
