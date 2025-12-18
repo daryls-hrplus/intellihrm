@@ -183,30 +183,76 @@ export function FeatureCatalogGuidePreview({ open, onOpenChange }: FeatureCatalo
     
     setIsGenerating(true);
     try {
-      const canvas = await html2canvas(previewRef.current, {
-        scale: 2,
-        useCORS: true,
-        logging: false,
-        backgroundColor: '#ffffff'
-      });
-      
-      const imgWidth = 210; // A4 width in mm
-      const pageHeight = 297; // A4 height in mm
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
-      let heightLeft = imgHeight;
-      let position = 0;
-      
+      // Get all sections that should be on separate pages
+      const sections = previewRef.current.querySelectorAll('[data-pdf-section]');
       const pdf = new jsPDF('p', 'mm', 'a4');
-      const imgData = canvas.toDataURL('image/png');
+      const pageWidth = 210;
+      const pageHeight = 297;
+      const margin = 10;
+      const contentWidth = pageWidth - (margin * 2);
+      const contentHeight = pageHeight - (margin * 2) - 15; // Leave room for page number
+      let currentPage = 1;
       
-      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-      heightLeft -= pageHeight;
-      
-      while (heightLeft > 0) {
-        position = heightLeft - imgHeight;
-        pdf.addPage();
-        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-        heightLeft -= pageHeight;
+      const addPageNumber = () => {
+        if (includePageNumbers) {
+          pdf.setFontSize(10);
+          pdf.setTextColor(128, 128, 128);
+          pdf.text(`Page ${currentPage}`, pageWidth / 2, pageHeight - 8, { align: 'center' });
+        }
+      };
+
+      for (let i = 0; i < sections.length; i++) {
+        const section = sections[i] as HTMLElement;
+        
+        const canvas = await html2canvas(section, {
+          scale: 2,
+          useCORS: true,
+          logging: false,
+          backgroundColor: '#ffffff',
+          width: section.scrollWidth,
+          height: section.scrollHeight
+        });
+        
+        const imgData = canvas.toDataURL('image/png');
+        const imgHeight = (canvas.height * contentWidth) / canvas.width;
+        
+        // If image is taller than one page, split it
+        if (imgHeight > contentHeight) {
+          let heightLeft = imgHeight;
+          let sourceY = 0;
+          
+          while (heightLeft > 0) {
+            if (currentPage > 1 || sourceY > 0) {
+              pdf.addPage();
+              currentPage++;
+            }
+            
+            const sliceHeight = Math.min(contentHeight, heightLeft);
+            const sourceHeight = (sliceHeight / imgHeight) * canvas.height;
+            
+            // Create a canvas slice
+            const sliceCanvas = document.createElement('canvas');
+            sliceCanvas.width = canvas.width;
+            sliceCanvas.height = sourceHeight;
+            const ctx = sliceCanvas.getContext('2d');
+            if (ctx) {
+              ctx.drawImage(canvas, 0, sourceY, canvas.width, sourceHeight, 0, 0, canvas.width, sourceHeight);
+              const sliceData = sliceCanvas.toDataURL('image/png');
+              pdf.addImage(sliceData, 'PNG', margin, margin, contentWidth, sliceHeight);
+            }
+            
+            addPageNumber();
+            sourceY += sourceHeight;
+            heightLeft -= sliceHeight;
+          }
+        } else {
+          if (i > 0) {
+            pdf.addPage();
+            currentPage++;
+          }
+          pdf.addImage(imgData, 'PNG', margin, margin, contentWidth, imgHeight);
+          addPageNumber();
+        }
       }
       
       pdf.save(`${customTitle.replace(/\s+/g, '-')}.pdf`);
@@ -221,6 +267,7 @@ export function FeatureCatalogGuidePreview({ open, onOpenChange }: FeatureCatalo
     <div ref={previewRef} className="bg-white text-black">
       {/* Cover Page */}
       <div 
+        data-pdf-section
         className="guide-cover text-white p-16 text-center min-h-[600px] flex flex-col justify-center"
         style={{ background: `linear-gradient(135deg, ${primaryColor} 0%, ${secondaryColor} 100%)` }}
       >
@@ -254,9 +301,56 @@ export function FeatureCatalogGuidePreview({ open, onOpenChange }: FeatureCatalo
         </div>
       </div>
 
+      {/* Table of Contents */}
+      <div data-pdf-section className="p-8 min-h-[400px] bg-white">
+        <h2 className="text-2xl font-bold mb-6 pb-2" style={{ borderBottom: `3px solid ${primaryColor}` }}>Table of Contents</h2>
+        <div className="space-y-3">
+          <div className="flex items-center justify-between py-2 border-b border-dashed border-slate-200">
+            <span className="font-medium">Cover Page</span>
+            <span className="text-sm text-muted-foreground">1</span>
+          </div>
+          <div className="flex items-center justify-between py-2 border-b border-dashed border-slate-200">
+            <span className="font-medium">Table of Contents</span>
+            <span className="text-sm text-muted-foreground">2</span>
+          </div>
+          {currentTemplate.includeExecutiveSummary && (
+            <div className="flex items-center justify-between py-2 border-b border-dashed border-slate-200">
+              <span className="font-medium">Executive Summary</span>
+              <span className="text-sm text-muted-foreground">3</span>
+            </div>
+          )}
+          {currentTemplate.includeModules && (
+            <>
+              <div className="flex items-center justify-between py-2 border-b border-dashed border-slate-200">
+                <span className="font-medium">Module Reference</span>
+                <span className="text-sm text-muted-foreground">{currentTemplate.includeExecutiveSummary ? 4 : 3}</span>
+              </div>
+              {FEATURE_REGISTRY.map((module, idx) => (
+                <div key={module.code} className="flex items-center justify-between py-1.5 pl-6 border-b border-dotted border-slate-100">
+                  <span className="text-sm text-slate-600">{module.name}</span>
+                  <span className="text-xs text-muted-foreground">—</span>
+                </div>
+              ))}
+            </>
+          )}
+          {currentTemplate.includeCapabilities && (
+            <div className="flex items-center justify-between py-2 border-b border-dashed border-slate-200">
+              <span className="font-medium">Platform Capabilities</span>
+              <span className="text-sm text-muted-foreground">—</span>
+            </div>
+          )}
+          {currentTemplate.includeMatrix && (
+            <div className="flex items-center justify-between py-2 border-b border-dashed border-slate-200">
+              <span className="font-medium">Capability Matrix</span>
+              <span className="text-sm text-muted-foreground">—</span>
+            </div>
+          )}
+        </div>
+      </div>
+
       {/* Executive Summary */}
       {currentTemplate.includeExecutiveSummary && (
-        <div className="guide-section p-8 border-b">
+        <div data-pdf-section className="guide-section p-8 bg-white">
           <h2 className="section-title text-2xl font-bold pb-2 mb-2" style={{ borderBottom: `3px solid ${primaryColor}` }}>Executive Summary</h2>
           <p className="section-subtitle text-muted-foreground mb-6">Platform Overview for Decision Makers</p>
           
@@ -294,128 +388,134 @@ export function FeatureCatalogGuidePreview({ open, onOpenChange }: FeatureCatalo
 
       {/* Module Browser Section */}
       {currentTemplate.includeModules && (
-        <div className="guide-section p-8 border-b">
-          <h2 className="section-title text-2xl font-bold pb-2 mb-2" style={{ borderBottom: `3px solid ${primaryColor}` }}>Module Reference</h2>
-          <p className="section-subtitle text-muted-foreground mb-6">Complete Feature Inventory by Module</p>
-          
-          {FEATURE_REGISTRY.map((module) => {
+        <>
+          {FEATURE_REGISTRY.map((module, moduleIndex) => {
             const ModuleIcon = getIcon(module.icon);
             const enrichment = MODULE_ENRICHMENTS[module.code];
             const moduleFeatureCount = module.groups.reduce((acc, g) => acc + g.features.length, 0);
             
             return (
-              <div key={module.code} className="module-card bg-slate-50 rounded-lg p-6 mb-8" style={{ borderLeft: `4px solid ${primaryColor}` }}>
-                {/* Module Header */}
-                <div className="flex items-start gap-4 mb-4">
-                  <div className="p-3 rounded-lg shrink-0" style={{ backgroundColor: `${primaryColor}20` }}>
-                    <ModuleIcon className="h-6 w-6" style={{ color: primaryColor }} />
-                  </div>
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-1">
-                      <h3 className="module-name text-xl font-semibold">{module.name}</h3>
-                      <Badge style={{ backgroundColor: `${primaryColor}20`, color: primaryColor }}>{moduleFeatureCount} Features</Badge>
-                    </div>
-                    <p className="text-sm text-muted-foreground">{module.description}</p>
-                  </div>
-                </div>
-
-                {/* Business Context */}
-                {enrichment && (
-                  <div className="mb-6 p-4 bg-white rounded-lg border">
-                    <p className="text-sm leading-relaxed text-slate-700">{enrichment.businessContext}</p>
-                    
-                    {/* Key Benefits */}
-                    <div className="mt-4">
-                      <h4 className="text-sm font-semibold text-slate-900 mb-2">Key Benefits:</h4>
-                      <ul className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                        {enrichment.keyBenefits.slice(0, 4).map((benefit, idx) => (
-                          <li key={idx} className="flex items-start gap-2 text-sm">
-                            <Check className="h-4 w-4 text-green-500 mt-0.5 shrink-0" />
-                            <span className="text-slate-600">{benefit}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-
-                    {/* Target Users & Strategic Value */}
-                    <div className="mt-4 flex flex-wrap gap-4 text-sm">
-                      <div>
-                        <span className="font-medium text-slate-700">Target Users: </span>
-                        <span className="text-slate-600">{enrichment.targetUsers.join(", ")}</span>
-                      </div>
-                    </div>
-                    
-                    <div className="mt-2 p-3 rounded-lg" style={{ backgroundColor: `${primaryColor}10` }}>
-                      <p className="text-sm" style={{ color: primaryColor }}>
-                        <span className="font-semibold">Strategic Value: </span>
-                        {enrichment.strategicValue}
-                      </p>
-                    </div>
-                  </div>
+              <div key={module.code} data-pdf-section className="p-8 bg-white">
+                {moduleIndex === 0 && (
+                  <>
+                    <h2 className="section-title text-2xl font-bold pb-2 mb-2" style={{ borderBottom: `3px solid ${primaryColor}` }}>Module Reference</h2>
+                    <p className="section-subtitle text-muted-foreground mb-6">Complete Feature Inventory by Module</p>
+                  </>
                 )}
                 
-                {/* Feature Groups */}
-                {module.groups.map((group) => (
-                  <div key={group.groupCode} className="mb-4">
-                    <h4 className="text-sm font-semibold text-slate-900 uppercase tracking-wide mb-3 flex items-center gap-2">
-                      <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: primaryColor }}></div>
-                      {group.groupName}
-                    </h4>
-                    <ul className="feature-list space-y-2">
-                      {group.features.map((feature) => {
-                        const featureCaps = FEATURE_CAPABILITIES.find(f => f.featureCode === feature.code);
-                        const featureEnrichment = FEATURE_ENRICHMENTS[feature.code];
-                        return (
-                          <li key={feature.code} className="feature-item bg-white rounded-lg p-3 border">
-                            <div className="flex items-start gap-2">
-                              <Check className="h-4 w-4 mt-1 shrink-0" style={{ color: accentColor }} />
-                              <div className="flex-1">
-                                <div className="flex items-center gap-2 mb-1">
-                                  <span className="feature-name font-medium text-slate-900">{feature.name}</span>
-                                  {featureCaps?.capabilities.includes('ai-powered') && (
-                                    <Badge className="text-[10px]" style={{ backgroundColor: `${primaryColor}20`, color: primaryColor }}>AI-Powered</Badge>
-                                  )}
-                                  {featureCaps?.differentiatorLevel === 'unique' && (
-                                    <Badge className="badge-unique bg-amber-100 text-amber-700 text-[10px]">Unique</Badge>
-                                  )}
-                                  {featureCaps?.differentiatorLevel === 'advanced' && (
-                                    <Badge className="badge-advanced bg-blue-100 text-blue-700 text-[10px]">Advanced</Badge>
+                <div className="module-card bg-slate-50 rounded-lg p-6 mb-4" style={{ borderLeft: `4px solid ${primaryColor}` }}>
+                  {/* Module Header */}
+                  <div className="flex items-start gap-4 mb-4">
+                    <div className="p-3 rounded-lg shrink-0" style={{ backgroundColor: `${primaryColor}20` }}>
+                      <ModuleIcon className="h-6 w-6" style={{ color: primaryColor }} />
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-3 mb-1">
+                        <h3 className="module-name text-xl font-semibold">{module.name}</h3>
+                        <Badge style={{ backgroundColor: `${primaryColor}20`, color: primaryColor }}>{moduleFeatureCount} Features</Badge>
+                      </div>
+                      <p className="text-sm text-muted-foreground">{module.description}</p>
+                    </div>
+                  </div>
+
+                  {/* Business Context */}
+                  {enrichment && (
+                    <div className="mb-6 p-4 bg-white rounded-lg border">
+                      <p className="text-sm leading-relaxed text-slate-700">{enrichment.businessContext}</p>
+                      
+                      {/* Key Benefits */}
+                      <div className="mt-4">
+                        <h4 className="text-sm font-semibold text-slate-900 mb-2">Key Benefits:</h4>
+                        <ul className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                          {enrichment.keyBenefits.slice(0, 4).map((benefit, idx) => (
+                            <li key={idx} className="flex items-start gap-2 text-sm">
+                              <Check className="h-4 w-4 text-green-500 mt-0.5 shrink-0" />
+                              <span className="text-slate-600">{benefit}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+
+                      {/* Target Users & Strategic Value */}
+                      <div className="mt-4 flex flex-wrap gap-4 text-sm">
+                        <div>
+                          <span className="font-medium text-slate-700">Target Users: </span>
+                          <span className="text-slate-600">{enrichment.targetUsers.join(", ")}</span>
+                        </div>
+                      </div>
+                      
+                      <div className="mt-2 p-3 rounded-lg" style={{ backgroundColor: `${primaryColor}10` }}>
+                        <p className="text-sm" style={{ color: primaryColor }}>
+                          <span className="font-semibold">Strategic Value: </span>
+                          {enrichment.strategicValue}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {/* Feature Groups */}
+                  {module.groups.map((group) => (
+                    <div key={group.groupCode} className="mb-4">
+                      <h4 className="text-sm font-semibold text-slate-900 uppercase tracking-wide mb-3 flex items-center gap-2">
+                        <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: primaryColor }}></div>
+                        {group.groupName}
+                      </h4>
+                      <ul className="feature-list space-y-2">
+                        {group.features.map((feature) => {
+                          const featureCaps = FEATURE_CAPABILITIES.find(f => f.featureCode === feature.code);
+                          const featureEnrichment = FEATURE_ENRICHMENTS[feature.code];
+                          return (
+                            <li key={feature.code} className="feature-item bg-white rounded-lg p-3 border">
+                              <div className="flex items-start gap-2">
+                                <Check className="h-4 w-4 mt-1 shrink-0" style={{ color: accentColor }} />
+                                <div className="flex-1">
+                                  <div className="flex items-center gap-2 mb-1">
+                                    <span className="feature-name font-medium text-slate-900">{feature.name}</span>
+                                    {featureCaps?.capabilities.includes('ai-powered') && (
+                                      <Badge className="text-[10px]" style={{ backgroundColor: `${primaryColor}20`, color: primaryColor }}>AI-Powered</Badge>
+                                    )}
+                                    {featureCaps?.differentiatorLevel === 'unique' && (
+                                      <Badge className="badge-unique bg-amber-100 text-amber-700 text-[10px]">Unique</Badge>
+                                    )}
+                                    {featureCaps?.differentiatorLevel === 'advanced' && (
+                                      <Badge className="badge-advanced bg-blue-100 text-blue-700 text-[10px]">Advanced</Badge>
+                                    )}
+                                  </div>
+                                  <p className="feature-desc text-sm text-slate-600">
+                                    {featureEnrichment?.detailedDescription || feature.description}
+                                  </p>
+                                  {featureEnrichment?.businessBenefit && (
+                                    <p className="text-xs mt-1" style={{ color: accentColor }}>
+                                      <span className="font-medium">Value: </span>{featureEnrichment.businessBenefit}
+                                    </p>
                                   )}
                                 </div>
-                                <p className="feature-desc text-sm text-slate-600">
-                                  {featureEnrichment?.detailedDescription || feature.description}
-                                </p>
-                                {featureEnrichment?.businessBenefit && (
-                                  <p className="text-xs mt-1" style={{ color: accentColor }}>
-                                    <span className="font-medium">Value: </span>{featureEnrichment.businessBenefit}
-                                  </p>
-                                )}
                               </div>
-                            </div>
-                          </li>
-                        );
-                      })}
-                    </ul>
-                  </div>
-                ))}
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    </div>
+                  ))}
 
-                {/* Integration Points */}
-                {enrichment?.integrationPoints && enrichment.integrationPoints.length > 0 && (
-                  <div className="mt-4 pt-4 border-t border-slate-200">
-                    <span className="text-xs font-medium text-slate-500">Integrates with: </span>
-                    <span className="text-xs text-slate-600">{enrichment.integrationPoints.join(" • ")}</span>
-                  </div>
-                )}
+                  {/* Integration Points */}
+                  {enrichment?.integrationPoints && enrichment.integrationPoints.length > 0 && (
+                    <div className="mt-4 pt-4 border-t border-slate-200">
+                      <span className="text-xs font-medium text-slate-500">Integrates with: </span>
+                      <span className="text-xs text-slate-600">{enrichment.integrationPoints.join(" • ")}</span>
+                    </div>
+                  )}
+                </div>
               </div>
             );
           })}
-        </div>
+        </>
       )}
 
       {/* Capabilities Section */}
       {currentTemplate.includeCapabilities && (
-        <div className="guide-section p-8 border-b">
-          <h2 className="section-title text-2xl font-bold border-b-2 border-purple-600 pb-2 mb-2">Platform Capabilities</h2>
+        <div data-pdf-section className="p-8 bg-white">
+          <h2 className="section-title text-2xl font-bold pb-2 mb-2" style={{ borderBottom: `3px solid ${primaryColor}` }}>Platform Capabilities</h2>
           <p className="section-subtitle text-muted-foreground mb-6">AI-Powered Features & Competitive Advantages</p>
           
           {PLATFORM_CAPABILITIES.map((capability) => {
@@ -424,7 +524,7 @@ export function FeatureCatalogGuidePreview({ open, onOpenChange }: FeatureCatalo
               <div key={capability.code} className="capability-card bg-gradient-to-br from-slate-50 to-slate-100 rounded-xl p-6 mb-4 border">
                 <div className="flex items-start gap-4">
                   <div className="p-3 bg-white rounded-lg shadow-sm">
-                    <CapIcon className="h-6 w-6 text-purple-600" />
+                    <CapIcon className="h-6 w-6" style={{ color: primaryColor }} />
                   </div>
                   <div className="flex-1">
                     <h3 className="capability-name text-lg font-semibold mb-2">{capability.name}</h3>
@@ -432,15 +532,15 @@ export function FeatureCatalogGuidePreview({ open, onOpenChange }: FeatureCatalo
                     
                     <div className="space-y-2">
                       <div className="capability-value">
-                        <span className="font-medium text-green-700">Business Value:</span>{' '}
+                        <span className="font-medium" style={{ color: accentColor }}>Business Value:</span>{' '}
                         <span className="text-slate-700">{capability.businessValue}</span>
                       </div>
                       <div className="capability-value">
-                        <span className="font-medium text-blue-700">Competitive Edge:</span>{' '}
+                        <span className="font-medium" style={{ color: secondaryColor }}>Competitive Edge:</span>{' '}
                         <span className="text-slate-700">{capability.competitorGap}</span>
                       </div>
                       <div className="capability-value">
-                        <span className="font-medium text-purple-700">Industry Impact:</span>{' '}
+                        <span className="font-medium" style={{ color: primaryColor }}>Industry Impact:</span>{' '}
                         <span className="text-slate-700">{capability.industryImpact}</span>
                       </div>
                     </div>
@@ -454,11 +554,8 @@ export function FeatureCatalogGuidePreview({ open, onOpenChange }: FeatureCatalo
 
       {/* Matrix Section - Organized by Module */}
       {currentTemplate.includeMatrix && (
-        <div className="guide-section p-8">
-          <h2 className="section-title text-2xl font-bold border-b-2 border-purple-600 pb-2 mb-2">Capability Matrix</h2>
-          <p className="section-subtitle text-muted-foreground mb-6">Feature-by-Feature Capability Mapping by Module</p>
-          
-          {FEATURE_REGISTRY.map((module) => {
+        <>
+          {FEATURE_REGISTRY.map((module, moduleIndex) => {
             // Get features for this module that have capabilities defined
             const moduleFeatures = FEATURE_CAPABILITIES.filter(fc => {
               for (const group of module.groups) {
@@ -484,9 +581,16 @@ export function FeatureCatalogGuidePreview({ open, onOpenChange }: FeatureCatalo
             if (moduleFeatures.length === 0) return null;
 
             return (
-              <div key={module.code} className="mb-8">
-                <h3 className="text-lg font-semibold text-purple-700 mb-3 flex items-center gap-2">
-                  <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+              <div key={module.code} data-pdf-section className="p-8 bg-white">
+                {moduleIndex === 0 && (
+                  <>
+                    <h2 className="section-title text-2xl font-bold pb-2 mb-2" style={{ borderBottom: `3px solid ${primaryColor}` }}>Capability Matrix</h2>
+                    <p className="section-subtitle text-muted-foreground mb-6">Feature-by-Feature Capability Mapping by Module</p>
+                  </>
+                )}
+                
+                <h3 className="text-lg font-semibold mb-3 flex items-center gap-2" style={{ color: primaryColor }}>
+                  <div className="w-2 h-2 rounded-full" style={{ backgroundColor: primaryColor }}></div>
                   {module.name}
                   <Badge variant="outline" className="text-xs">{moduleFeatures.length} features</Badge>
                 </h3>
@@ -534,7 +638,7 @@ export function FeatureCatalogGuidePreview({ open, onOpenChange }: FeatureCatalo
               </div>
             );
           })}
-        </div>
+        </>
       )}
 
       {/* Footer */}
