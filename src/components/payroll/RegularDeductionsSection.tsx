@@ -93,27 +93,78 @@ export function RegularDeductionsSection({
     }
 
     setIsApplying(true);
-    const selectedDeductions = deductions.filter(d => selectedIds.includes(d.id));
-    
-    // Insert selected deductions into employee_period_deductions
-    const inserts = selectedDeductions.map(d => ({
+
+    const selectedDeductions = deductions.filter((d) => selectedIds.includes(d.id));
+
+    // Load existing deductions for this employee + pay period to prevent duplicates
+    const { data: existingRows, error: existingError } = await supabase
+      .from("employee_period_deductions")
+      .select("deduction_name,institution_name,account_number")
+      .eq("employee_id", employeeId)
+      .eq("pay_period_id", payPeriodId);
+
+    if (existingError) {
+      console.error("Failed to load existing period deductions:", existingError);
+      toast.error("Failed to validate duplicates for this pay period");
+      setIsApplying(false);
+      return;
+    }
+
+    const normalizeInstitution = (v: string | null | undefined) => (v || "").trim().toLowerCase();
+    const normalizeAccount = (v: string | null | undefined) => (v || "").trim();
+
+    const existing = (existingRows || []).map((r) => ({
+      name: (r.deduction_name || "").trim().toLowerCase(),
+      institution: normalizeInstitution(r.institution_name),
+      account: normalizeAccount(r.account_number),
+    }));
+
+    const isDuplicate = (d: RegularDeduction) => {
+      const newName = (d.deduction_name || "").trim().toLowerCase();
+      const newInstitution = normalizeInstitution(d.institution_name);
+      const newAccount = normalizeAccount(d.account_number);
+
+      return existing.some((e) => {
+        if (e.name !== newName) return false;
+
+        // If both have institution/account info, only duplicate when institution+account match
+        if (newInstitution && newAccount && e.institution && e.account) {
+          return e.institution === newInstitution && e.account === newAccount;
+        }
+
+        // Same name without a clearly different institution/account is treated as duplicate
+        return true;
+      });
+    };
+
+    const duplicates = selectedDeductions.filter(isDuplicate);
+    const toInsert = selectedDeductions.filter((d) => !isDuplicate(d));
+
+    if (toInsert.length === 0) {
+      toast.error(
+        "Nothing applied. The selected deductions already exist for this pay period (or need different institution/account to add again).",
+      );
+      setIsApplying(false);
+      return;
+    }
+
+    // Insert non-duplicate deductions into employee_period_deductions
+    const inserts = toInsert.map((d) => ({
       company_id: companyId,
       employee_id: employeeId,
       pay_period_id: payPeriodId,
       deduction_name: d.deduction_name,
       deduction_code: d.deduction_code,
-      deduction_type: d.deduction_type || 'other',
+      deduction_type: d.deduction_type || "other",
       amount: d.amount,
       currency: d.currency,
       is_pretax: d.is_pretax,
       institution_name: d.institution_name || null,
       account_number: d.account_number || null,
-      notes: 'Regular deduction'
+      notes: "Regular deduction",
     }));
 
-    const { error } = await supabase
-      .from('employee_period_deductions')
-      .insert(inserts);
+    const { error } = await supabase.from("employee_period_deductions").insert(inserts);
 
     if (error) {
       console.error("Failed to apply deductions:", error);
@@ -122,7 +173,14 @@ export function RegularDeductionsSection({
       return;
     }
 
-    toast.success(`${selectedDeductions.length} deduction(s) applied to this pay period`);
+    if (duplicates.length > 0) {
+      toast.success(
+        `${toInsert.length} deduction(s) applied. ${duplicates.length} skipped (already exists for same institution/account).`,
+      );
+    } else {
+      toast.success(`${toInsert.length} deduction(s) applied to this pay period`);
+    }
+
     setIsApplying(false);
     onApplyDeductions?.(selectedIds);
   };
@@ -223,8 +281,12 @@ export function RegularDeductionsSection({
                             {deduction.deduction_type}
                           </Badge>
                         </div>
-                        {deduction.institution_name && (
-                          <div className="text-xs text-muted-foreground">{deduction.institution_name}</div>
+                        {(deduction.institution_name || deduction.account_number) && (
+                          <div className="text-xs text-muted-foreground">
+                            {deduction.institution_name}
+                            {deduction.institution_name && deduction.account_number && " • "}
+                            {deduction.account_number && `Acct: ${deduction.account_number}`}
+                          </div>
                         )}
                       </div>
                     </TableCell>
