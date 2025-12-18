@@ -59,6 +59,19 @@ interface EnablementRequest {
   clientCompanyName?: string;
   customInstructions?: string;
   template?: DocumentTemplate;
+  // Template Library integration
+  referenceDocuments?: Array<{
+    fileName: string;
+    extractedPatterns?: string;
+    content?: string;
+  }>;
+  templateInstructions?: {
+    tone?: string;
+    audience?: string;
+    formattingRules?: string[];
+    terminology?: string[];
+    customText?: string;
+  };
 }
 
 function buildIndustryStandardPrompt(request: EnablementRequest): { systemPrompt: string; userPrompt: string } {
@@ -82,6 +95,30 @@ function buildIndustryStandardPrompt(request: EnablementRequest): { systemPrompt
     includeVersionInfo: true,
     includeRelatedDocs: true,
   };
+
+  // Build reference document context
+  let referenceContext = '';
+  if (request.referenceDocuments && request.referenceDocuments.length > 0) {
+    referenceContext = `\n\n## Reference Documents Context
+The following reference documents provide formatting patterns and style guidelines to follow:
+${request.referenceDocuments.map(doc => `
+### ${doc.fileName}
+${doc.extractedPatterns || 'No patterns extracted'}
+${doc.content ? `\nContent Preview:\n${doc.content.substring(0, 500)}...` : ''}
+`).join('\n')}`;
+  }
+
+  // Build template instructions context
+  let instructionsContext = '';
+  if (request.templateInstructions) {
+    const instr = request.templateInstructions;
+    instructionsContext = `\n\n## Custom Instructions
+${instr.tone ? `**Tone & Voice:** ${instr.tone}` : ''}
+${instr.audience ? `**Target Audience:** ${instr.audience}` : ''}
+${instr.formattingRules && instr.formattingRules.length > 0 ? `**Formatting Rules:**\n${instr.formattingRules.map(r => `- ${r}`).join('\n')}` : ''}
+${instr.terminology && instr.terminology.length > 0 ? `**Terminology:**\n${instr.terminology.map(t => `- ${t}`).join('\n')}` : ''}
+${instr.customText ? `**Additional Instructions:**\n${instr.customText}` : ''}`;
+  }
 
   const systemPrompt = `You are an expert technical documentation writer specializing in enterprise software training materials. You follow industry standards for documentation including:
 
@@ -123,7 +160,7 @@ Include Table of Contents: ${layoutOptions.includeTableOfContents}
 Include Prerequisites: ${layoutOptions.includePrerequisites}
 Include Role Indicators: ${layoutOptions.includeRoleIndicators}
 Include Version Info: ${layoutOptions.includeVersionInfo}
-Include Related Docs: ${layoutOptions.includeRelatedDocs}`;
+Include Related Docs: ${layoutOptions.includeRelatedDocs}${referenceContext}${instructionsContext}`;
 
   return { systemPrompt, userPrompt: '' };
 }
