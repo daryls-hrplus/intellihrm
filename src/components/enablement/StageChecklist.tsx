@@ -251,9 +251,9 @@ function ChecklistItem({ item, isCompleted, onToggle, onNavigate, disabled, comp
             </Badge>
           )}
         </div>
-        {!compact && item.task_description && (
+        {!compact && item.description && (
           <p className="text-xs text-muted-foreground mt-0.5">
-            {item.task_description}
+            {item.description}
           </p>
         )}
       </div>
