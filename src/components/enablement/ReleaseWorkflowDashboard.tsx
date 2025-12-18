@@ -21,6 +21,12 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
   ClipboardList,
   Code,
   FileCheck,
@@ -43,6 +49,7 @@ import {
   Target,
 } from "lucide-react";
 import { useEnablementReleases, useEnablementContentStatus } from "@/hooks/useEnablementData";
+import { StageChecklist } from "@/components/enablement/StageChecklist";
 import type { EnablementContentStatus, EnablementRelease, WorkflowColumn } from "@/types/enablement";
 import { format, differenceInDays, parseISO } from "date-fns";
 
@@ -115,6 +122,7 @@ export function ReleaseWorkflowDashboard() {
   const navigate = useNavigate();
   const { releases, isLoading: releasesLoading } = useEnablementReleases();
   const [selectedReleaseId, setSelectedReleaseId] = useState<string>("all");
+  const [selectedItem, setSelectedItem] = useState<EnablementContentStatus | null>(null);
   
   const { contentItems, isLoading: contentLoading } = useEnablementContentStatus(
     selectedReleaseId !== "all" ? selectedReleaseId : undefined
@@ -412,7 +420,7 @@ export function ReleaseWorkflowDashboard() {
                           <div
                             key={item.id}
                             className="flex items-center justify-between p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors cursor-pointer"
-                            onClick={() => navigate(`/enablement?tab=workflow`)}
+                            onClick={() => setSelectedItem(item)}
                           >
                             <div className="flex items-center gap-3">
                               <div className={`w-2 h-8 rounded-full ${getPriorityColor(item.priority)}`} />
@@ -514,6 +522,28 @@ export function ReleaseWorkflowDashboard() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Item Checklist Dialog */}
+      <Dialog open={!!selectedItem} onOpenChange={() => setSelectedItem(null)}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <CheckCircle2 className="h-5 w-5" />
+              {selectedItem?.feature_code} - Stage Checklist
+            </DialogTitle>
+          </DialogHeader>
+          {selectedItem && (
+            <StageChecklist
+              contentStatusId={selectedItem.id}
+              stage={selectedItem.workflow_status as "backlog" | "in_progress" | "review" | "published"}
+              onNavigate={(path) => {
+                setSelectedItem(null);
+                navigate(path);
+              }}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

@@ -18,10 +18,13 @@ import {
   Calendar,
   Sparkles,
   GripVertical,
+  CheckSquare,
+  Timer,
 } from "lucide-react";
 import type { EnablementContentStatus } from "@/types/enablement";
 import { cn } from "@/lib/utils";
 import { formatDistanceToNow } from "date-fns";
+import { useEnablementChecklists, useContentChecklistProgress } from "@/hooks/useEnablementChecklists";
 
 interface ContentItemCardProps {
   item: EnablementContentStatus;
@@ -51,6 +54,11 @@ export function ContentItemCard({ item, isDragging }: ContentItemCardProps) {
     isDragging: isSortableDragging,
   } = useSortable({ id: item.id });
 
+  // Fetch checklist data for this item's current stage
+  const { checklists } = useEnablementChecklists(item.workflow_status);
+  const { progress, getCompletionStats } = useContentChecklistProgress(item.id);
+  const checklistStats = getCompletionStats(checklists);
+
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
@@ -66,6 +74,9 @@ export function ContentItemCard({ item, isDragging }: ContentItemCardProps) {
   ];
   const completed = statuses.filter((s) => s === "complete").length;
   const completionPercent = Math.round((completed / statuses.length) * 100);
+
+  // Get estimated hours
+  const estimatedHours = (item as any).estimated_hours || (item as any).ai_estimated_hours || 4;
 
   const ToolIcon = item.recommended_tool
     ? TOOL_ICONS[item.recommended_tool]
@@ -163,6 +174,34 @@ export function ContentItemCard({ item, isDragging }: ContentItemCardProps) {
             <span>{completionPercent}%</span>
           </div>
           <Progress value={completionPercent} className="h-1.5" />
+        </div>
+
+        {/* Checklist Progress & Time Estimate */}
+        <div className="flex items-center justify-between text-xs">
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className="flex items-center gap-1 text-muted-foreground cursor-default">
+                  <CheckSquare className={cn(
+                    "h-3 w-3",
+                    checklistStats.allRequiredComplete ? "text-green-500" : "text-muted-foreground"
+                  )} />
+                  <span>{checklistStats.completed}/{checklistStats.total}</span>
+                </div>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Stage checklist: {checklistStats.completed} of {checklistStats.total} tasks complete</p>
+                {!checklistStats.allRequiredComplete && checklistStats.requiredTotal > 0 && (
+                  <p className="text-amber-400">{checklistStats.requiredTotal - checklistStats.requiredCompleted} required tasks remaining</p>
+                )}
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+
+          <div className="flex items-center gap-1 text-muted-foreground">
+            <Timer className="h-3 w-3" />
+            <span>{estimatedHours}h</span>
+          </div>
         </div>
 
         {/* Due Date */}
