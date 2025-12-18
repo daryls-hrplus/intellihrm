@@ -7,8 +7,9 @@ export interface StageChecklistItem {
   stage: string;
   task_order: number;
   task_name: string;
-  task_description: string | null;
+  description: string | null;
   is_required: boolean;
+  navigation_link: string | null;
 }
 
 export interface ChecklistProgress {
@@ -18,7 +19,6 @@ export interface ChecklistProgress {
   is_completed: boolean;
   completed_at: string | null;
   completed_by: string | null;
-  notes: string | null;
 }
 
 export function useEnablementChecklists(stage?: string) {
@@ -29,7 +29,7 @@ export function useEnablementChecklists(stage?: string) {
     setIsLoading(true);
     try {
       let query = supabase
-        .from("enablement_stage_checklists")
+        .from("enablement_checklists")
         .select("*")
         .order("task_order", { ascending: true });
 
@@ -69,7 +69,7 @@ export function useContentChecklistProgress(contentStatusId?: string) {
     setIsLoading(true);
     try {
       const { data, error } = await supabase
-        .from("enablement_content_checklist_progress")
+        .from("enablement_checklist_progress")
         .select("*")
         .eq("content_status_id", contentStatusId);
 
@@ -94,7 +94,7 @@ export function useContentChecklistProgress(contentStatusId?: string) {
 
       if (existingProgress) {
         const { error } = await supabase
-          .from("enablement_content_checklist_progress")
+          .from("enablement_checklist_progress")
           .update({
             is_completed: !currentlyCompleted,
             completed_at: !currentlyCompleted ? new Date().toISOString() : null,
@@ -105,7 +105,7 @@ export function useContentChecklistProgress(contentStatusId?: string) {
         if (error) throw error;
       } else {
         const { error } = await supabase
-          .from("enablement_content_checklist_progress")
+          .from("enablement_checklist_progress")
           .insert({
             content_status_id: contentStatusId,
             checklist_item_id: checklistItemId,
