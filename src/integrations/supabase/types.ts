@@ -9176,6 +9176,125 @@ export type Database = {
           },
         ]
       }
+      enablement_content_status: {
+        Row: {
+          ai_change_impact: string | null
+          assigned_to: string | null
+          completed_at: string | null
+          complexity_score: number | null
+          created_at: string | null
+          dap_guide_status: string | null
+          documentation_status: string | null
+          due_date: string | null
+          feature_code: string
+          id: string
+          module_code: string
+          priority: string | null
+          recommended_tool: string | null
+          release_id: string | null
+          rise_course_status: string | null
+          scorm_lite_status: string | null
+          started_at: string | null
+          updated_at: string | null
+          video_status: string | null
+          workflow_status: string | null
+        }
+        Insert: {
+          ai_change_impact?: string | null
+          assigned_to?: string | null
+          completed_at?: string | null
+          complexity_score?: number | null
+          created_at?: string | null
+          dap_guide_status?: string | null
+          documentation_status?: string | null
+          due_date?: string | null
+          feature_code: string
+          id?: string
+          module_code: string
+          priority?: string | null
+          recommended_tool?: string | null
+          release_id?: string | null
+          rise_course_status?: string | null
+          scorm_lite_status?: string | null
+          started_at?: string | null
+          updated_at?: string | null
+          video_status?: string | null
+          workflow_status?: string | null
+        }
+        Update: {
+          ai_change_impact?: string | null
+          assigned_to?: string | null
+          completed_at?: string | null
+          complexity_score?: number | null
+          created_at?: string | null
+          dap_guide_status?: string | null
+          documentation_status?: string | null
+          due_date?: string | null
+          feature_code?: string
+          id?: string
+          module_code?: string
+          priority?: string | null
+          recommended_tool?: string | null
+          release_id?: string | null
+          rise_course_status?: string | null
+          scorm_lite_status?: string | null
+          started_at?: string | null
+          updated_at?: string | null
+          video_status?: string | null
+          workflow_status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "enablement_content_status_release_id_fkey"
+            columns: ["release_id"]
+            isOneToOne: false
+            referencedRelation: "enablement_releases"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      enablement_dap_guides: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          feature_code: string
+          guide_name: string | null
+          guide_type: string | null
+          id: string
+          is_active: boolean | null
+          module_code: string
+          trigger_url: string | null
+          updated_at: string | null
+          userguiding_guide_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          feature_code: string
+          guide_name?: string | null
+          guide_type?: string | null
+          id?: string
+          is_active?: boolean | null
+          module_code: string
+          trigger_url?: string | null
+          updated_at?: string | null
+          userguiding_guide_id: string
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          feature_code?: string
+          guide_name?: string | null
+          guide_type?: string | null
+          id?: string
+          is_active?: boolean | null
+          module_code?: string
+          trigger_url?: string | null
+          updated_at?: string | null
+          userguiding_guide_id?: string
+        }
+        Relationships: []
+      }
       enablement_document_templates: {
         Row: {
           branding_config: Json
@@ -9287,6 +9406,204 @@ export type Database = {
             columns: ["client_company_id"]
             isOneToOne: false
             referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      enablement_feature_changes: {
+        Row: {
+          acknowledged_at: string | null
+          acknowledged_by: string | null
+          change_description: string | null
+          change_severity: string | null
+          change_type: string | null
+          detected_at: string | null
+          feature_code: string
+          id: string
+          module_code: string
+          release_id: string | null
+          requires_content_update: boolean | null
+        }
+        Insert: {
+          acknowledged_at?: string | null
+          acknowledged_by?: string | null
+          change_description?: string | null
+          change_severity?: string | null
+          change_type?: string | null
+          detected_at?: string | null
+          feature_code: string
+          id?: string
+          module_code: string
+          release_id?: string | null
+          requires_content_update?: boolean | null
+        }
+        Update: {
+          acknowledged_at?: string | null
+          acknowledged_by?: string | null
+          change_description?: string | null
+          change_severity?: string | null
+          change_type?: string | null
+          detected_at?: string | null
+          feature_code?: string
+          id?: string
+          module_code?: string
+          release_id?: string | null
+          requires_content_update?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "enablement_feature_changes_release_id_fkey"
+            columns: ["release_id"]
+            isOneToOne: false
+            referencedRelation: "enablement_releases"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      enablement_releases: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          feature_count: number | null
+          id: string
+          preview_start_date: string | null
+          release_date: string | null
+          release_name: string | null
+          release_notes: string | null
+          status: string | null
+          updated_at: string | null
+          version_number: string
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          feature_count?: number | null
+          id?: string
+          preview_start_date?: string | null
+          release_date?: string | null
+          release_name?: string | null
+          release_notes?: string | null
+          status?: string | null
+          updated_at?: string | null
+          version_number: string
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          feature_count?: number | null
+          id?: string
+          preview_start_date?: string | null
+          release_date?: string | null
+          release_name?: string | null
+          release_notes?: string | null
+          status?: string | null
+          updated_at?: string | null
+          version_number?: string
+        }
+        Relationships: []
+      }
+      enablement_rise_templates: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          exercise_types: string[] | null
+          id: string
+          is_default: boolean | null
+          lesson_structure: Json | null
+          name: string
+          section_patterns: Json | null
+          source_document_id: string | null
+          timing_guidelines: Json | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          exercise_types?: string[] | null
+          id?: string
+          is_default?: boolean | null
+          lesson_structure?: Json | null
+          name: string
+          section_patterns?: Json | null
+          source_document_id?: string | null
+          timing_guidelines?: Json | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          exercise_types?: string[] | null
+          id?: string
+          is_default?: boolean | null
+          lesson_structure?: Json | null
+          name?: string
+          section_patterns?: Json | null
+          source_document_id?: string | null
+          timing_guidelines?: Json | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "enablement_rise_templates_source_document_id_fkey"
+            columns: ["source_document_id"]
+            isOneToOne: false
+            referencedRelation: "enablement_template_reference_docs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      enablement_scorm_packages: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          duration_minutes: number | null
+          feature_code: string
+          id: string
+          manifest_xml: string | null
+          module_code: string
+          package_type: string | null
+          package_url: string | null
+          quiz_questions: Json | null
+          release_id: string | null
+          scorm_version: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          duration_minutes?: number | null
+          feature_code: string
+          id?: string
+          manifest_xml?: string | null
+          module_code: string
+          package_type?: string | null
+          package_url?: string | null
+          quiz_questions?: Json | null
+          release_id?: string | null
+          scorm_version?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          duration_minutes?: number | null
+          feature_code?: string
+          id?: string
+          manifest_xml?: string | null
+          module_code?: string
+          package_type?: string | null
+          package_url?: string | null
+          quiz_questions?: Json | null
+          release_id?: string | null
+          scorm_version?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "enablement_scorm_packages_release_id_fkey"
+            columns: ["release_id"]
+            isOneToOne: false
+            referencedRelation: "enablement_releases"
             referencedColumns: ["id"]
           },
         ]
@@ -9573,6 +9890,57 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      enablement_video_library: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          duration_seconds: number | null
+          embed_code: string | null
+          feature_code: string
+          id: string
+          is_active: boolean | null
+          module_code: string
+          thumbnail_url: string | null
+          title: string
+          updated_at: string | null
+          video_provider: string
+          video_url: string
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          duration_seconds?: number | null
+          embed_code?: string | null
+          feature_code: string
+          id?: string
+          is_active?: boolean | null
+          module_code: string
+          thumbnail_url?: string | null
+          title: string
+          updated_at?: string | null
+          video_provider: string
+          video_url: string
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          duration_seconds?: number | null
+          embed_code?: string | null
+          feature_code?: string
+          id?: string
+          is_active?: boolean | null
+          module_code?: string
+          thumbnail_url?: string | null
+          title?: string
+          updated_at?: string | null
+          video_provider?: string
+          video_url?: string
+        }
+        Relationships: []
       }
       equity_grants: {
         Row: {
