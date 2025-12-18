@@ -20,13 +20,12 @@ import {
   Copy,
   Download,
   Save,
-  Layout,
   FileCheck,
   Library
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { APPLICATION_MODULES, getModuleByCode, getFeatureByCode } from "@/lib/applicationMetadata";
-import { DocumentTemplateConfig, DocumentTemplate, DEFAULT_TEMPLATES } from "@/components/enablement/DocumentTemplateConfig";
+import { DocumentTemplate, DEFAULT_TEMPLATES } from "@/components/enablement/DocumentTemplateConfig";
 import { ConfluenceStylePreview, GeneratedDocument } from "@/components/enablement/ConfluenceStylePreview";
 import { TemplateLibrary } from "@/components/enablement/TemplateLibrary";
 
@@ -48,7 +47,6 @@ export default function ApplicationDocsGeneratorPage() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedContent, setGeneratedContent] = useState<GeneratedContent | null>(null);
   const [selectedTemplate, setSelectedTemplate] = useState<DocumentTemplate | null>(DEFAULT_TEMPLATES[0]);
-  const [showTemplateConfig, setShowTemplateConfig] = useState(false);
   const [showTemplateLibrary, setShowTemplateLibrary] = useState(false);
 
   const availableRoles = ["admin", "hr_manager", "employee"];
@@ -456,40 +454,36 @@ export default function ApplicationDocsGeneratorPage() {
                 </SelectContent>
               </Select>
               
-              {/* Template Configuration Toggle */}
-              <div className="flex gap-2 mt-2">
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={() => setShowTemplateConfig(!showTemplateConfig)}
-                >
-                  <Layout className="h-4 w-4 mr-2" />
-                  {showTemplateConfig ? 'Hide' : 'Configure'} Template
-                </Button>
-                <Sheet open={showTemplateLibrary} onOpenChange={setShowTemplateLibrary}>
-                  <SheetTrigger asChild>
-                    <Button variant="outline" size="sm">
-                      <Library className="h-4 w-4 mr-2" />
-                      Template Library
-                    </Button>
-                  </SheetTrigger>
-                  <SheetContent side="right" className="w-full sm:max-w-3xl overflow-y-auto">
-                    <TemplateLibrary
-                      selectedTemplate={selectedTemplate}
-                      onTemplateSelect={(template) => {
-                        setSelectedTemplate(template);
-                        setShowTemplateLibrary(false);
-                        toast.success(`Template "${template.name}" applied`);
-                      }}
-                      onClose={() => setShowTemplateLibrary(false)}
-                    />
-                  </SheetContent>
-                </Sheet>
-              </div>
+              {/* Template Library */}
+              <Sheet open={showTemplateLibrary} onOpenChange={setShowTemplateLibrary}>
+                <SheetTrigger asChild>
+                  <Button variant="outline" size="sm" className="mt-2">
+                    <Library className="h-4 w-4 mr-2" />
+                    {selectedTemplate ? selectedTemplate.name : 'Select Template'}
+                  </Button>
+                </SheetTrigger>
+                <SheetContent side="right" className="w-full sm:max-w-3xl overflow-y-auto">
+                  <TemplateLibrary
+                    selectedTemplate={selectedTemplate}
+                    onTemplateSelect={(template) => {
+                      setSelectedTemplate(template);
+                      setShowTemplateLibrary(false);
+                      toast.success(`Template "${template.name}" applied`);
+                    }}
+                    onClose={() => setShowTemplateLibrary(false)}
+                  />
+                </SheetContent>
+              </Sheet>
               {selectedTemplate && (
-                <Badge variant="secondary" className="mt-1">
-                  Template: {selectedTemplate.name}
-                </Badge>
+                <div className="flex items-center gap-2 mt-2">
+                  <div 
+                    className="w-4 h-4 rounded-full border"
+                    style={{ backgroundColor: selectedTemplate.branding.primaryColor }}
+                  />
+                  <span className="text-xs text-muted-foreground">
+                    {selectedTemplate.branding.companyName || 'No branding set'}
+                  </span>
+                </div>
               )}
             </div>
 
