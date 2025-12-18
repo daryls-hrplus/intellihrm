@@ -562,12 +562,10 @@ export function TemplateLibrary({
 
           {/* Branding Tab */}
           <TabsContent value="branding" className="mt-4">
-            <ScrollArea className="h-[400px]">
-              <TemplateStylingEditor
-                template={workingTemplate}
-                onTemplateUpdate={setWorkingTemplate}
-              />
-            </ScrollArea>
+            <TemplateStylingEditor
+              template={workingTemplate}
+              onTemplateUpdate={setWorkingTemplate}
+            />
           </TabsContent>
 
           {/* AI Context Tab */}

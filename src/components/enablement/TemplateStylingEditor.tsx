@@ -1,5 +1,4 @@
 import { useState, useRef } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -7,6 +6,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import {
   Image,
@@ -15,39 +16,91 @@ import {
   Type,
   X,
   RefreshCw,
-  Eye
+  Eye,
+  Building2,
+  FileText,
+  Check,
+  Sparkles
 } from "lucide-react";
 import { DocumentTemplate } from "./DocumentTemplateConfig";
+import { TemplateLivePreview } from "./TemplateLivePreview";
 
 interface TemplateStylingEditorProps {
   template: DocumentTemplate | null;
   onTemplateUpdate: (template: DocumentTemplate) => void;
 }
 
-const COLOR_PRESETS = [
-  { name: "Corporate Blue", value: "#1e40af" },
-  { name: "Professional Teal", value: "#0d9488" },
-  { name: "Enterprise Purple", value: "#7c3aed" },
-  { name: "Executive Green", value: "#16a34a" },
-  { name: "Modern Red", value: "#dc2626" },
-  { name: "Classic Black", value: "#18181b" },
-  { name: "Warm Orange", value: "#ea580c" },
-  { name: "Royal Indigo", value: "#4f46e5" },
+// Professional theme presets - Workday-style
+const THEME_PRESETS = [
+  {
+    id: "enterprise-blue",
+    name: "Enterprise Blue",
+    description: "Professional corporate look",
+    primaryColor: "#1e40af",
+    secondaryColor: "#3b82f6",
+    headingFont: "Inter, sans-serif",
+    bodyFont: "Inter, sans-serif"
+  },
+  {
+    id: "modern-teal",
+    name: "Modern Teal",
+    description: "Fresh, contemporary style",
+    primaryColor: "#0d9488",
+    secondaryColor: "#14b8a6",
+    headingFont: "Inter, sans-serif",
+    bodyFont: "Open Sans, sans-serif"
+  },
+  {
+    id: "executive-purple",
+    name: "Executive Purple",
+    description: "Sophisticated and elegant",
+    primaryColor: "#7c3aed",
+    secondaryColor: "#a78bfa",
+    headingFont: "Playfair Display, serif",
+    bodyFont: "Lato, sans-serif"
+  },
+  {
+    id: "classic-navy",
+    name: "Classic Navy",
+    description: "Traditional business style",
+    primaryColor: "#1e3a5f",
+    secondaryColor: "#64748b",
+    headingFont: "Georgia, serif",
+    bodyFont: "Arial, sans-serif"
+  },
+  {
+    id: "vibrant-orange",
+    name: "Vibrant Orange",
+    description: "Energetic and engaging",
+    primaryColor: "#ea580c",
+    secondaryColor: "#f97316",
+    headingFont: "Montserrat, sans-serif",
+    bodyFont: "Roboto, sans-serif"
+  },
+  {
+    id: "minimal-dark",
+    name: "Minimal Dark",
+    description: "Clean and modern",
+    primaryColor: "#18181b",
+    secondaryColor: "#52525b",
+    headingFont: "Inter, sans-serif",
+    bodyFont: "Inter, sans-serif"
+  }
 ];
 
 const FONT_OPTIONS = {
   heading: [
-    { name: "Inter (Modern)", value: "Inter, sans-serif" },
+    { name: "Inter (Modern Sans)", value: "Inter, sans-serif" },
     { name: "Arial (Classic)", value: "Arial, sans-serif" },
-    { name: "Georgia (Elegant)", value: "Georgia, serif" },
-    { name: "Roboto (Clean)", value: "Roboto, sans-serif" },
-    { name: "Montserrat (Bold)", value: "Montserrat, sans-serif" },
-    { name: "Playfair Display (Sophisticated)", value: "Playfair Display, serif" },
+    { name: "Georgia (Traditional Serif)", value: "Georgia, serif" },
+    { name: "Roboto (Clean Sans)", value: "Roboto, sans-serif" },
+    { name: "Montserrat (Bold Sans)", value: "Montserrat, sans-serif" },
+    { name: "Playfair Display (Elegant Serif)", value: "Playfair Display, serif" },
   ],
   body: [
     { name: "Inter (Modern)", value: "Inter, sans-serif" },
     { name: "Arial (Classic)", value: "Arial, sans-serif" },
-    { name: "Georgia (Elegant)", value: "Georgia, serif" },
+    { name: "Georgia (Traditional)", value: "Georgia, serif" },
     { name: "Roboto (Clean)", value: "Roboto, sans-serif" },
     { name: "Open Sans (Readable)", value: "Open Sans, sans-serif" },
     { name: "Lato (Friendly)", value: "Lato, sans-serif" },
@@ -63,6 +116,7 @@ export function TemplateStylingEditor({
   const [bodyFont, setBodyFont] = useState("Inter, sans-serif");
   const [showHeaderLogo, setShowHeaderLogo] = useState(true);
   const [showFooterLogo, setShowFooterLogo] = useState(false);
+  const [selectedPreset, setSelectedPreset] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   if (!template) {
@@ -84,6 +138,17 @@ export function TemplateStylingEditor({
         ...updates,
       }
     });
+  };
+
+  const applyThemePreset = (preset: typeof THEME_PRESETS[0]) => {
+    setSelectedPreset(preset.id);
+    setHeadingFont(preset.headingFont);
+    setBodyFont(preset.bodyFont);
+    updateBranding({
+      primaryColor: preset.primaryColor,
+      secondaryColor: preset.secondaryColor
+    });
+    toast.success(`Applied "${preset.name}" theme`);
   };
 
   const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -118,367 +183,337 @@ export function TemplateStylingEditor({
     }
   };
 
-  const handlePrimaryColorChange = (color: string) => {
-    updateBranding({ primaryColor: color });
-  };
-
-  const handleSecondaryColorChange = (color: string) => {
-    updateBranding({ secondaryColor: color });
-  };
-
   return (
-    <div className="space-y-6">
-      {/* Current Template Info */}
-      <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg">
-        <Palette className="h-5 w-5 text-primary" />
-        <div>
-          <p className="font-medium text-sm">Styling: {template.name}</p>
-          <p className="text-xs text-muted-foreground">Customize branding and visual appearance</p>
-        </div>
-      </div>
-
-      {/* Logo Upload */}
-      <div className="space-y-3">
-        <Label className="flex items-center gap-2">
-          <Image className="h-4 w-4" />
-          Company Logo
-        </Label>
-        
-        <div className="flex items-start gap-4">
-          {logoPreview ? (
-            <div className="relative">
-              <div className="w-32 h-20 border rounded-lg overflow-hidden bg-muted flex items-center justify-center">
-                <img 
-                  src={logoPreview} 
-                  alt="Logo preview" 
-                  className="max-w-full max-h-full object-contain"
-                />
+    <div className="grid grid-cols-2 gap-6">
+      {/* Configuration Panel */}
+      <div>
+        <h3 className="font-semibold mb-3 flex items-center gap-2">
+          <Palette className="h-4 w-4" />
+          Branding & Style
+        </h3>
+        <ScrollArea className="h-[500px] pr-4">
+          <div className="space-y-6">
+            {/* Theme Presets */}
+            <div className="space-y-3">
+              <div className="flex items-center gap-2">
+                <Sparkles className="h-5 w-5 text-primary" />
+                <div>
+                  <h4 className="font-semibold text-sm">Quick Start Themes</h4>
+                  <p className="text-xs text-muted-foreground">Apply a complete brand theme instantly</p>
+                </div>
               </div>
+              <div className="grid grid-cols-2 gap-2">
+                {THEME_PRESETS.map((preset) => (
+                  <button
+                    key={preset.id}
+                    onClick={() => applyThemePreset(preset)}
+                    className={`relative p-3 rounded-lg border text-left transition-all ${
+                      selectedPreset === preset.id
+                        ? 'border-primary bg-primary/5 ring-2 ring-primary/20'
+                        : 'hover:border-muted-foreground/50 hover:bg-muted/30'
+                    }`}
+                  >
+                    {selectedPreset === preset.id && (
+                      <div className="absolute top-2 right-2">
+                        <Check className="h-4 w-4 text-primary" />
+                      </div>
+                    )}
+                    <div className="flex items-center gap-2 mb-2">
+                      <div 
+                        className="w-5 h-5 rounded-full border"
+                        style={{ backgroundColor: preset.primaryColor }}
+                      />
+                      <div 
+                        className="w-5 h-5 rounded-full border"
+                        style={{ backgroundColor: preset.secondaryColor }}
+                      />
+                    </div>
+                    <p className="font-medium text-sm">{preset.name}</p>
+                    <p className="text-xs text-muted-foreground">{preset.description}</p>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <Separator />
+
+            {/* Company Identity */}
+            <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                <Building2 className="h-5 w-5 text-primary" />
+                <div>
+                  <h4 className="font-semibold text-sm">Company Identity</h4>
+                  <p className="text-xs text-muted-foreground">Add your logo and company details</p>
+                </div>
+              </div>
+              
+              {/* Logo Upload */}
+              <div className="p-3 rounded-lg border bg-muted/30 space-y-3">
+                <Label className="text-sm font-medium">Company Logo</Label>
+                <div className="flex items-start gap-4">
+                  {logoPreview ? (
+                    <div className="relative">
+                      <div className="w-24 h-16 border rounded-lg overflow-hidden bg-background flex items-center justify-center">
+                        <img 
+                          src={logoPreview} 
+                          alt="Logo preview" 
+                          className="max-w-full max-h-full object-contain"
+                        />
+                      </div>
+                      <Button
+                        variant="destructive"
+                        size="icon"
+                        className="absolute -top-2 -right-2 h-5 w-5"
+                        onClick={removeLogo}
+                      >
+                        <X className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  ) : (
+                    <div 
+                      className="w-24 h-16 border-2 border-dashed rounded-lg flex flex-col items-center justify-center cursor-pointer hover:border-primary/50 transition-colors bg-background"
+                      onClick={() => fileInputRef.current?.click()}
+                    >
+                      <Upload className="h-4 w-4 text-muted-foreground mb-1" />
+                      <span className="text-[10px] text-muted-foreground">Upload</span>
+                    </div>
+                  )}
+                  
+                  <div className="flex-1 space-y-2">
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/*"
+                      onChange={handleLogoUpload}
+                      className="hidden"
+                    />
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => fileInputRef.current?.click()}
+                      className="w-full"
+                    >
+                      <Upload className="h-4 w-4 mr-2" />
+                      {logoPreview ? "Change" : "Upload"}
+                    </Button>
+                    <p className="text-[10px] text-muted-foreground">
+                      PNG, JPG, SVG • Max 2MB
+                    </p>
+                  </div>
+                </div>
+
+                {logoPreview && (
+                  <div className="flex gap-4 pt-1">
+                    <div className="flex items-center gap-2">
+                      <Switch 
+                        id="header-logo"
+                        checked={showHeaderLogo}
+                        onCheckedChange={setShowHeaderLogo}
+                      />
+                      <Label htmlFor="header-logo" className="text-xs">Header</Label>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Switch 
+                        id="footer-logo"
+                        checked={showFooterLogo}
+                        onCheckedChange={setShowFooterLogo}
+                      />
+                      <Label htmlFor="footer-logo" className="text-xs">Footer</Label>
+                    </div>
+                  </div>
+                )}
+              </div>
+              
+              {/* Company Name */}
+              <div className="p-3 rounded-lg border bg-muted/30 space-y-2">
+                <Label className="text-sm font-medium">Company Name</Label>
+                <Input
+                  placeholder="Enter your company name"
+                  value={template.branding.companyName || ""}
+                  onChange={(e) => updateBranding({ companyName: e.target.value })}
+                  className="bg-background"
+                />
+                <p className="text-[10px] text-muted-foreground">Appears in document header</p>
+              </div>
+              
+              {/* Footer Text */}
+              <div className="p-3 rounded-lg border bg-muted/30 space-y-2">
+                <Label className="text-sm font-medium">Document Footer</Label>
+                <Textarea
+                  placeholder="e.g., Confidential - Internal Use Only"
+                  value={template.branding.footerText || ""}
+                  onChange={(e) => updateBranding({ footerText: e.target.value })}
+                  rows={2}
+                  className="bg-background"
+                />
+                <p className="text-[10px] text-muted-foreground">Legal text, copyright, or disclaimers</p>
+              </div>
+            </div>
+
+            <Separator />
+
+            {/* Custom Colors */}
+            <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                <Palette className="h-5 w-5 text-primary" />
+                <div>
+                  <h4 className="font-semibold text-sm">Custom Colors</h4>
+                  <p className="text-xs text-muted-foreground">Fine-tune your brand colors</p>
+                </div>
+              </div>
+              
+              {/* Primary Color */}
+              <div className="p-3 rounded-lg border bg-muted/30 space-y-2">
+                <div className="flex items-center justify-between">
+                  <Label className="text-sm font-medium">Primary Color</Label>
+                  <Badge variant="outline" className="text-xs font-mono">
+                    {template.branding.primaryColor}
+                  </Badge>
+                </div>
+                <p className="text-[10px] text-muted-foreground">Used for headings, accents, and key elements</p>
+                <div className="flex items-center gap-3">
+                  <input
+                    type="color"
+                    value={template.branding.primaryColor}
+                    onChange={(e) => {
+                      setSelectedPreset(null);
+                      updateBranding({ primaryColor: e.target.value });
+                    }}
+                    className="w-12 h-10 rounded border cursor-pointer bg-background"
+                  />
+                  <Input
+                    value={template.branding.primaryColor}
+                    onChange={(e) => {
+                      setSelectedPreset(null);
+                      updateBranding({ primaryColor: e.target.value });
+                    }}
+                    placeholder="#000000"
+                    className="flex-1 font-mono text-sm bg-background"
+                  />
+                </div>
+              </div>
+
+              {/* Secondary Color */}
+              <div className="p-3 rounded-lg border bg-muted/30 space-y-2">
+                <div className="flex items-center justify-between">
+                  <Label className="text-sm font-medium">Secondary Color</Label>
+                  <Badge variant="outline" className="text-xs font-mono">
+                    {template.branding.secondaryColor || "#6b7280"}
+                  </Badge>
+                </div>
+                <p className="text-[10px] text-muted-foreground">Used for callouts, highlights, and accents</p>
+                <div className="flex items-center gap-3">
+                  <input
+                    type="color"
+                    value={template.branding.secondaryColor || "#6b7280"}
+                    onChange={(e) => {
+                      setSelectedPreset(null);
+                      updateBranding({ secondaryColor: e.target.value });
+                    }}
+                    className="w-12 h-10 rounded border cursor-pointer bg-background"
+                  />
+                  <Input
+                    value={template.branding.secondaryColor || "#6b7280"}
+                    onChange={(e) => {
+                      setSelectedPreset(null);
+                      updateBranding({ secondaryColor: e.target.value });
+                    }}
+                    placeholder="#6b7280"
+                    className="flex-1 font-mono text-sm bg-background"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <Separator />
+
+            {/* Typography */}
+            <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                <Type className="h-5 w-5 text-primary" />
+                <div>
+                  <h4 className="font-semibold text-sm">Typography</h4>
+                  <p className="text-xs text-muted-foreground">Choose fonts for your documents</p>
+                </div>
+              </div>
+              
+              <div className="p-3 rounded-lg border bg-muted/30 space-y-2">
+                <Label className="text-sm font-medium">Heading Font</Label>
+                <p className="text-[10px] text-muted-foreground">Used for titles and section headers</p>
+                <Select value={headingFont} onValueChange={(v) => {
+                  setSelectedPreset(null);
+                  setHeadingFont(v);
+                }}>
+                  <SelectTrigger className="bg-background">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="bg-background">
+                    {FONT_OPTIONS.heading.map((font) => (
+                      <SelectItem key={font.value} value={font.value}>
+                        <span style={{ fontFamily: font.value }}>{font.name}</span>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div className="p-3 rounded-lg border bg-muted/30 space-y-2">
+                <Label className="text-sm font-medium">Body Font</Label>
+                <p className="text-[10px] text-muted-foreground">Used for paragraphs and content</p>
+                <Select value={bodyFont} onValueChange={(v) => {
+                  setSelectedPreset(null);
+                  setBodyFont(v);
+                }}>
+                  <SelectTrigger className="bg-background">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="bg-background">
+                    {FONT_OPTIONS.body.map((font) => (
+                      <SelectItem key={font.value} value={font.value}>
+                        <span style={{ fontFamily: font.value }}>{font.name}</span>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            {/* Reset Button */}
+            <div className="pt-2">
               <Button
-                variant="destructive"
-                size="icon"
-                className="absolute -top-2 -right-2 h-6 w-6"
-                onClick={removeLogo}
+                variant="outline"
+                size="sm"
+                className="w-full"
+                onClick={() => {
+                  setSelectedPreset("enterprise-blue");
+                  setHeadingFont("Inter, sans-serif");
+                  setBodyFont("Inter, sans-serif");
+                  updateBranding({
+                    primaryColor: "#1e40af",
+                    secondaryColor: "#3b82f6",
+                    logoUrl: undefined,
+                    companyName: "",
+                    footerText: ""
+                  });
+                  setLogoPreview(null);
+                  toast.success("Reset to defaults");
+                }}
               >
-                <X className="h-3 w-3" />
+                <RefreshCw className="h-4 w-4 mr-2" />
+                Reset to Defaults
               </Button>
             </div>
-          ) : (
-            <div 
-              className="w-32 h-20 border-2 border-dashed rounded-lg flex flex-col items-center justify-center cursor-pointer hover:border-primary/50 transition-colors"
-              onClick={() => fileInputRef.current?.click()}
-            >
-              <Upload className="h-5 w-5 text-muted-foreground mb-1" />
-              <span className="text-xs text-muted-foreground">Upload Logo</span>
-            </div>
-          )}
-          
-          <div className="flex-1 space-y-2">
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              onChange={handleLogoUpload}
-              className="hidden"
-            />
-            <Button 
-              variant="outline" 
-              size="sm"
-              onClick={() => fileInputRef.current?.click()}
-            >
-              <Upload className="h-4 w-4 mr-2" />
-              {logoPreview ? "Change Logo" : "Upload Logo"}
-            </Button>
-            <p className="text-xs text-muted-foreground">
-              PNG, JPG, or SVG. Max 2MB. Recommended: 200x80px
-            </p>
           </div>
-        </div>
-
-        {/* Logo Placement Options */}
-        {logoPreview && (
-          <div className="flex gap-6 pt-2">
-            <div className="flex items-center gap-2">
-              <Switch 
-                id="header-logo"
-                checked={showHeaderLogo}
-                onCheckedChange={setShowHeaderLogo}
-              />
-              <Label htmlFor="header-logo" className="text-sm">Show in header</Label>
-            </div>
-            <div className="flex items-center gap-2">
-              <Switch 
-                id="footer-logo"
-                checked={showFooterLogo}
-                onCheckedChange={setShowFooterLogo}
-              />
-              <Label htmlFor="footer-logo" className="text-sm">Show in footer</Label>
-            </div>
-          </div>
-        )}
+        </ScrollArea>
       </div>
-
-      <Separator />
-
-      {/* Company Details */}
-      <div className="space-y-4">
-        <Label className="flex items-center gap-2">
-          <Type className="h-4 w-4" />
-          Company Details
-        </Label>
-        
-        <div className="grid gap-4">
-          <div className="space-y-2">
-            <Label htmlFor="company-name" className="text-sm">Company Name</Label>
-            <Input
-              id="company-name"
-              placeholder="Enter company name"
-              value={template.branding.companyName || ""}
-              onChange={(e) => updateBranding({ companyName: e.target.value })}
-            />
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="footer-text" className="text-sm">Footer Text</Label>
-            <Textarea
-              id="footer-text"
-              placeholder="e.g., Confidential - Internal Use Only"
-              value={template.branding.footerText || ""}
-              onChange={(e) => updateBranding({ footerText: e.target.value })}
-              rows={2}
-            />
-          </div>
-        </div>
-      </div>
-
-      <Separator />
-
-      {/* Color Scheme */}
-      <div className="space-y-4">
-        <Label className="flex items-center gap-2">
-          <Palette className="h-4 w-4" />
-          Brand Colors
-        </Label>
-        
-        {/* Primary Color */}
-        <div className="space-y-3">
-          <Label className="text-sm font-medium">Primary Color</Label>
-          <div className="grid grid-cols-4 gap-2">
-            {COLOR_PRESETS.map((preset) => (
-              <button
-                key={preset.value}
-                className={`flex flex-col items-center gap-1 p-2 rounded-lg border transition-all ${
-                  template.branding.primaryColor === preset.value 
-                    ? 'border-primary bg-primary/5' 
-                    : 'border-muted hover:border-muted-foreground/50'
-                }`}
-                onClick={() => handlePrimaryColorChange(preset.value)}
-              >
-                <div 
-                  className="w-8 h-8 rounded-full border"
-                  style={{ backgroundColor: preset.value }}
-                />
-                <span className="text-xs text-center">{preset.name}</span>
-              </button>
-            ))}
-          </div>
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2">
-              <Label htmlFor="custom-primary-color" className="text-sm">Custom:</Label>
-              <input
-                type="color"
-                id="custom-primary-color"
-                value={template.branding.primaryColor}
-                onChange={(e) => handlePrimaryColorChange(e.target.value)}
-                className="w-10 h-10 rounded border cursor-pointer"
-              />
-            </div>
-            <Input
-              value={template.branding.primaryColor}
-              onChange={(e) => handlePrimaryColorChange(e.target.value)}
-              placeholder="#000000"
-              className="w-28 font-mono text-sm"
-            />
-          </div>
-        </div>
-
-        {/* Secondary Color */}
-        <div className="space-y-3">
-          <Label className="text-sm font-medium">Secondary Color</Label>
-          <div className="grid grid-cols-4 gap-2">
-            {COLOR_PRESETS.map((preset) => (
-              <button
-                key={preset.value}
-                className={`flex flex-col items-center gap-1 p-2 rounded-lg border transition-all ${
-                  template.branding.secondaryColor === preset.value 
-                    ? 'border-primary bg-primary/5' 
-                    : 'border-muted hover:border-muted-foreground/50'
-                }`}
-                onClick={() => handleSecondaryColorChange(preset.value)}
-              >
-                <div 
-                  className="w-8 h-8 rounded-full border"
-                  style={{ backgroundColor: preset.value }}
-                />
-                <span className="text-xs text-center">{preset.name}</span>
-              </button>
-            ))}
-          </div>
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2">
-              <Label htmlFor="custom-secondary-color" className="text-sm">Custom:</Label>
-              <input
-                type="color"
-                id="custom-secondary-color"
-                value={template.branding.secondaryColor || "#6b7280"}
-                onChange={(e) => handleSecondaryColorChange(e.target.value)}
-                className="w-10 h-10 rounded border cursor-pointer"
-              />
-            </div>
-            <Input
-              value={template.branding.secondaryColor || "#6b7280"}
-              onChange={(e) => handleSecondaryColorChange(e.target.value)}
-              placeholder="#6b7280"
-              className="w-28 font-mono text-sm"
-            />
-          </div>
-        </div>
-      </div>
-
-      <Separator />
-
-      {/* Typography */}
-      <div className="space-y-4">
-        <Label className="flex items-center gap-2">
-          <Type className="h-4 w-4" />
-          Typography
-        </Label>
-        
-        <div className="grid gap-4">
-          <div className="space-y-2">
-            <Label htmlFor="heading-font" className="text-sm">Heading Font</Label>
-            <Select value={headingFont} onValueChange={setHeadingFont}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {FONT_OPTIONS.heading.map((font) => (
-                  <SelectItem key={font.value} value={font.value}>
-                    <span style={{ fontFamily: font.value }}>{font.name}</span>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="body-font" className="text-sm">Body Font</Label>
-            <Select value={bodyFont} onValueChange={setBodyFont}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {FONT_OPTIONS.body.map((font) => (
-                  <SelectItem key={font.value} value={font.value}>
-                    <span style={{ fontFamily: font.value }}>{font.name}</span>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
-      </div>
-
-      <Separator />
-
-      {/* Preview Card */}
-      <div className="space-y-3">
-        <Label className="flex items-center gap-2">
+      
+      {/* Live Preview Panel */}
+      <div>
+        <h3 className="font-semibold mb-3 flex items-center gap-2">
           <Eye className="h-4 w-4" />
           Live Preview
-        </Label>
-        
-        <div className="border rounded-lg overflow-hidden">
-          {/* Header Preview */}
-          <div 
-            className="p-3 flex items-center gap-3"
-            style={{ backgroundColor: template.branding.primaryColor + '15' }}
-          >
-            {logoPreview && showHeaderLogo && (
-              <img src={logoPreview} alt="Logo" className="h-8 object-contain" />
-            )}
-            <div>
-              <div 
-                className="font-semibold text-sm"
-                style={{ color: template.branding.primaryColor, fontFamily: headingFont }}
-              >
-                {template.branding.companyName || "Company Name"}
-              </div>
-              <div className="text-xs text-muted-foreground" style={{ fontFamily: bodyFont }}>
-                Document Title
-              </div>
-            </div>
-          </div>
-          
-          {/* Content Preview */}
-          <div className="p-4 space-y-3 bg-background">
-            <div 
-              className="font-semibold"
-              style={{ color: template.branding.primaryColor, fontFamily: headingFont }}
-            >
-              Section Heading
-            </div>
-            <p className="text-sm text-muted-foreground" style={{ fontFamily: bodyFont }}>
-              This is sample body text that demonstrates how your documentation 
-              will appear with the selected fonts and colors.
-            </p>
-            <div 
-              className="p-2 rounded text-sm"
-              style={{ 
-                backgroundColor: (template.branding.secondaryColor || "#6b7280") + '15',
-                borderLeft: `3px solid ${template.branding.secondaryColor || "#6b7280"}`,
-                fontFamily: bodyFont
-              }}
-            >
-              This is a callout styled with your secondary color.
-            </div>
-          </div>
-          
-          {/* Footer Preview */}
-          {template.branding.footerText && (
-            <div className="p-2 border-t bg-muted/30 flex items-center justify-between">
-              {logoPreview && showFooterLogo && (
-                <img src={logoPreview} alt="Logo" className="h-5 object-contain" />
-              )}
-              <span className="text-xs text-muted-foreground" style={{ fontFamily: bodyFont }}>
-                {template.branding.footerText}
-              </span>
-              <span className="text-xs text-muted-foreground">Page 1</span>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Reset Button */}
-      <div className="flex justify-end">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => {
-            updateBranding({
-              primaryColor: "#1e40af",
-              secondaryColor: "#6b7280",
-              logoUrl: undefined,
-              companyName: "",
-              footerText: ""
-            });
-            setLogoPreview(null);
-            toast.success("Styling reset to defaults");
-          }}
-        >
-          <RefreshCw className="h-4 w-4 mr-2" />
-          Reset to Defaults
-        </Button>
+        </h3>
+        <TemplateLivePreview template={template} />
       </div>
     </div>
   );
