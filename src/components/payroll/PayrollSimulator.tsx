@@ -25,6 +25,18 @@ interface StatutoryDeduction {
   employee_amount: number;
   employer_amount: number;
   calculation_method: string;
+  ytd_info?: {
+    ytd_taxable_before: number;
+    ytd_taxable_after: number;
+    ytd_tax_before: number;
+    ytd_tax_after: number;
+  };
+}
+
+interface OpeningBalances {
+  ytd_taxable_income: number;
+  ytd_income_tax: number;
+  ytd_gross_earnings: number;
 }
 
 interface SimulationResult {
@@ -100,7 +112,8 @@ export function PayrollSimulator({ companyId, employeeId, payPeriodId }: Payroll
     rateBands: StatutoryRateBand[],
     mondayCount: number,
     employeeAge: number | null,
-    payFrequency: string
+    payFrequency: string,
+    openingBalances: OpeningBalances | null
   ): StatutoryDeduction[] => {
     const deductions: StatutoryDeduction[] = [];
 
@@ -115,49 +128,65 @@ export function PayrollSimulator({ companyId, employeeId, payPeriodId }: Payroll
       let employeeAmount = 0;
       let employerAmount = 0;
       let method = 'percentage';
+      let ytdInfo: StatutoryDeduction['ytd_info'] = undefined;
 
-      // Find applicable band based on income
-      for (const band of bands) {
-        // Check age restrictions
-        if (employeeAge !== null) {
-          if (band.min_age !== null && employeeAge < band.min_age) continue;
-          if (band.max_age !== null && employeeAge > band.max_age) continue;
-        }
+      // For income_tax (PAYE), use cumulative calculation if opening balances exist
+      if (statType.statutory_type === 'income_tax' && openingBalances) {
+        const ytdTaxableBefore = openingBalances.ytd_taxable_income || 0;
+        const ytdTaxPaid = openingBalances.ytd_income_tax || 0;
+        const ytdTaxableAfter = ytdTaxableBefore + taxableIncome;
 
-        // Check if income falls within this band
-        const minAmount = band.min_amount || 0;
-        const maxAmount = band.max_amount;
+        // Calculate total tax due on cumulative earnings
+        const totalTaxDue = calculateCumulativeTax(ytdTaxableAfter, bands, payFrequency);
         
-        if (taxableIncome < minAmount) continue;
-        if (maxAmount !== null && taxableIncome > maxAmount) continue;
+        // Current period tax = Total tax due - Tax already paid
+        employeeAmount = Math.max(0, totalTaxDue - ytdTaxPaid);
+        method = 'cumulative';
 
-        method = band.calculation_method || 'percentage';
-
-        if (method === 'per_monday') {
-          // Per-monday calculation (e.g., NIS, Health Surcharge)
-          employeeAmount = (band.per_monday_amount || 0) * mondayCount;
-          employerAmount = (band.employer_per_monday_amount || 0) * mondayCount;
-        } else if (method === 'fixed') {
-          // Fixed amount
-          employeeAmount = band.per_monday_amount || 0;
-          employerAmount = band.employer_per_monday_amount || 0;
-        } else {
-          // Percentage-based calculation (e.g., PAYE)
-          const rate = band.employee_rate || 0;
-          const employerRate = band.employer_rate || 0;
-          
-          // For income tax, calculate on the amount above the threshold
-          if (statType.statutory_type === 'income_tax') {
-            const taxableAboveThreshold = Math.max(0, taxableIncome - minAmount);
-            employeeAmount = taxableAboveThreshold * rate;
-          } else {
-            employeeAmount = taxableIncome * rate;
+        ytdInfo = {
+          ytd_taxable_before: ytdTaxableBefore,
+          ytd_taxable_after: ytdTaxableAfter,
+          ytd_tax_before: ytdTaxPaid,
+          ytd_tax_after: ytdTaxPaid + employeeAmount
+        };
+      } else {
+        // Non-cumulative calculation for other statutory types
+        for (const band of bands) {
+          // Check age restrictions
+          if (employeeAge !== null) {
+            if (band.min_age !== null && employeeAge < band.min_age) continue;
+            if (band.max_age !== null && employeeAge > band.max_age) continue;
           }
-          employerAmount = taxableIncome * employerRate;
-        }
 
-        // Found matching band, break
-        break;
+          // Check if income falls within this band
+          const minAmount = band.min_amount || 0;
+          const maxAmount = band.max_amount;
+          
+          if (taxableIncome < minAmount) continue;
+          if (maxAmount !== null && taxableIncome > maxAmount) continue;
+
+          method = band.calculation_method || 'percentage';
+
+          if (method === 'per_monday') {
+            // Per-monday calculation (e.g., NIS, Health Surcharge)
+            employeeAmount = (band.per_monday_amount || 0) * mondayCount;
+            employerAmount = (band.employer_per_monday_amount || 0) * mondayCount;
+          } else if (method === 'fixed') {
+            // Fixed amount
+            employeeAmount = band.per_monday_amount || 0;
+            employerAmount = band.employer_per_monday_amount || 0;
+          } else {
+            // Percentage-based calculation
+            const rate = band.employee_rate || 0;
+            const employerRate = band.employer_rate || 0;
+            
+            employeeAmount = taxableIncome * rate;
+            employerAmount = taxableIncome * employerRate;
+          }
+
+          // Found matching band, break
+          break;
+        }
       }
 
       if (employeeAmount > 0 || employerAmount > 0) {
@@ -166,12 +195,51 @@ export function PayrollSimulator({ companyId, employeeId, payPeriodId }: Payroll
           code: statType.statutory_code,
           employee_amount: employeeAmount,
           employer_amount: employerAmount,
-          calculation_method: method
+          calculation_method: method,
+          ytd_info: ytdInfo
         });
       }
     }
 
     return deductions;
+  };
+
+  // Calculate cumulative tax using progressive tax bands
+  const calculateCumulativeTax = (
+    cumulativeTaxableIncome: number,
+    bands: StatutoryRateBand[],
+    payFrequency: string
+  ): number => {
+    let totalTax = 0;
+    let remainingIncome = cumulativeTaxableIncome;
+
+    // Sort bands by min_amount to ensure proper progressive calculation
+    const sortedBands = [...bands].sort((a, b) => (a.min_amount || 0) - (b.min_amount || 0));
+
+    for (let i = 0; i < sortedBands.length; i++) {
+      const band = sortedBands[i];
+      const minAmount = band.min_amount || 0;
+      const maxAmount = band.max_amount;
+      const rate = band.employee_rate || 0;
+
+      if (remainingIncome <= 0) break;
+      if (cumulativeTaxableIncome < minAmount) continue;
+
+      // Calculate the taxable amount in this band
+      let bandTaxable: number;
+      if (maxAmount !== null) {
+        // Amount in this band is from minAmount to min(income, maxAmount)
+        const bandTop = Math.min(cumulativeTaxableIncome, maxAmount);
+        bandTaxable = Math.max(0, bandTop - minAmount);
+      } else {
+        // Top band - everything above minAmount
+        bandTaxable = Math.max(0, cumulativeTaxableIncome - minAmount);
+      }
+
+      totalTax += bandTaxable * rate;
+    }
+
+    return totalTax;
   };
 
   const runSimulation = async () => {
@@ -292,6 +360,22 @@ export function PayrollSimulator({ companyId, employeeId, payPeriodId }: Payroll
         .select('*')
         .in('statutory_type_id', statutoryTypeIds.length > 0 ? statutoryTypeIds : ['00000000-0000-0000-0000-000000000000'])
         .eq('is_active', true);
+
+      // Fetch opening balances for cumulative PAYE calculation
+      const currentYear = new Date().getFullYear();
+      const { data: openingBalanceData } = await supabase
+        .from('employee_opening_balances')
+        .select('ytd_taxable_income, ytd_income_tax, ytd_gross_earnings')
+        .eq('employee_id', employeeId)
+        .eq('company_id', companyId)
+        .eq('tax_year', currentYear)
+        .maybeSingle();
+
+      const openingBalances: OpeningBalances | null = openingBalanceData ? {
+        ytd_taxable_income: openingBalanceData.ytd_taxable_income || 0,
+        ytd_income_tax: openingBalanceData.ytd_income_tax || 0,
+        ytd_gross_earnings: openingBalanceData.ytd_gross_earnings || 0
+      } : null;
 
       // Determine pay frequency for this simulation
       const payFrequency = (payPeriod?.pay_groups as any)?.pay_frequency || 'monthly';
@@ -467,7 +551,8 @@ export function PayrollSimulator({ companyId, employeeId, payPeriodId }: Payroll
         rateBands || [],
         mondayCount,
         employeeAge,
-        payFrequency
+        payFrequency,
+        openingBalances
       );
 
       const totalStatutory = statutoryDeductions.reduce((sum, d) => sum + d.employee_amount, 0);
@@ -725,14 +810,25 @@ export function PayrollSimulator({ companyId, employeeId, payPeriodId }: Payroll
                   </TableRow>
                   {result.deductions.statutory.map((d, idx) => (
                     <TableRow key={idx}>
-                      <TableCell className="pl-6 flex items-center gap-2">
-                        {d.name}
-                        <Badge variant="outline" className="text-xs">{d.code}</Badge>
-                        {d.calculation_method === 'per_monday' && (
-                          <Badge variant="secondary" className="text-xs">Per Monday</Badge>
+                      <TableCell className="pl-6">
+                        <div className="flex items-center gap-2">
+                          {d.name}
+                          <Badge variant="outline" className="text-xs">{d.code}</Badge>
+                          {d.calculation_method === 'per_monday' && (
+                            <Badge variant="secondary" className="text-xs">Per Monday</Badge>
+                          )}
+                          {d.calculation_method === 'cumulative' && (
+                            <Badge variant="secondary" className="text-xs">Cumulative</Badge>
+                          )}
+                        </div>
+                        {d.ytd_info && (
+                          <div className="text-xs text-muted-foreground mt-1">
+                            YTD Taxable: {result.salary.currency} {formatCurrency(d.ytd_info.ytd_taxable_before)} → {result.salary.currency} {formatCurrency(d.ytd_info.ytd_taxable_after)} | 
+                            YTD Tax: {result.salary.currency} {formatCurrency(d.ytd_info.ytd_tax_before)} → {result.salary.currency} {formatCurrency(d.ytd_info.ytd_tax_after)}
+                          </div>
                         )}
                       </TableCell>
-                      <TableCell className="text-right text-destructive">-{result.salary.currency} {formatCurrency(d.employee_amount)}</TableCell>
+                      <TableCell className="text-right text-destructive align-top">-{result.salary.currency} {formatCurrency(d.employee_amount)}</TableCell>
                     </TableRow>
                   ))}
                 </>
