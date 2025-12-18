@@ -20,9 +20,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { 
   Upload, Download, FileSpreadsheet, AlertCircle, CheckCircle2, 
   XCircle, Clock, Play, History, Trash2, Eye, FileText,
-  Calendar, Users, DollarSign, AlertTriangle
+  Calendar, Users, DollarSign, AlertTriangle, Building2, Globe
 } from "lucide-react";
 import { format, parseISO } from "date-fns";
+import { useCountryStatutories, usePayGroups } from "@/hooks/useCountryStatutories";
 
 interface Company {
   id: string;
@@ -95,10 +96,13 @@ const HistoricalPayrollImportPage: React.FC = () => {
   
   const [companies, setCompanies] = useState<Company[]>([]);
   const [selectedCompanyId, setSelectedCompanyId] = useState<string>("");
-  const [payGroups, setPayGroups] = useState<PayGroup[]>([]);
   const [selectedPayGroupId, setSelectedPayGroupId] = useState<string>("");
   const [imports, setImports] = useState<HistoricalImport[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  
+  // Country-specific statutory hook
+  const { company: selectedCompany, statutoryTypes, isLoading: loadingStatutories } = useCountryStatutories(selectedCompanyId || null);
+  const { payGroups, isLoading: loadingPayGroups } = usePayGroups(selectedCompanyId || null);
   
   // Import wizard state
   const [showWizard, setShowWizard] = useState(false);
@@ -120,10 +124,14 @@ const HistoricalPayrollImportPage: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    if (selectedCompanyId) {
-      loadPayGroups();
+    if (selectedCompanyId && selectedPayGroupId) {
       loadImports();
     }
+  }, [selectedCompanyId, selectedPayGroupId]);
+
+  // Reset pay group when company changes
+  useEffect(() => {
+    setSelectedPayGroupId("");
   }, [selectedCompanyId]);
 
   const loadCompanies = async () => {
@@ -141,23 +149,8 @@ const HistoricalPayrollImportPage: React.FC = () => {
     }
   };
 
-  const loadPayGroups = async () => {
-    if (!selectedCompanyId) return;
-    
-    const { data, error } = await (supabase as any)
-      .from("pay_groups")
-      .select("id, name, code")
-      .eq("company_id", selectedCompanyId)
-      .eq("is_active", true)
-      .order("name");
-    
-    if (!error && data) {
-      setPayGroups(data);
-    }
-  };
-
   const loadImports = async () => {
-    if (!selectedCompanyId) return;
+    if (!selectedCompanyId || !selectedPayGroupId) return;
     setIsLoading(true);
     
     const { data, error } = await (supabase as any)
@@ -604,7 +597,7 @@ const HistoricalPayrollImportPage: React.FC = () => {
               Import complete historical payroll runs from previous systems
             </p>
           </div>
-          <Button onClick={() => setShowWizard(true)}>
+          <Button onClick={() => setShowWizard(true)} disabled={!selectedCompanyId || !selectedPayGroupId}>
             <Upload className="w-4 h-4 mr-2" />
             Import Historical Data
           </Button>
@@ -613,11 +606,12 @@ const HistoricalPayrollImportPage: React.FC = () => {
         {/* Filters */}
         <Card>
           <CardContent className="pt-6">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div>
-                <Label>Company</Label>
+                <Label>Company *</Label>
                 <Select value={selectedCompanyId} onValueChange={setSelectedCompanyId}>
                   <SelectTrigger>
+                    <Building2 className="w-4 h-4 mr-2" />
                     <SelectValue placeholder="Select company" />
                   </SelectTrigger>
                   <SelectContent>
@@ -627,6 +621,34 @@ const HistoricalPayrollImportPage: React.FC = () => {
                   </SelectContent>
                 </Select>
               </div>
+              <div>
+                <Label>Pay Group *</Label>
+                <Select 
+                  value={selectedPayGroupId} 
+                  onValueChange={setSelectedPayGroupId}
+                  disabled={!selectedCompanyId || loadingPayGroups}
+                >
+                  <SelectTrigger>
+                    <Users className="w-4 h-4 mr-2" />
+                    <SelectValue placeholder={loadingPayGroups ? "Loading..." : "Select pay group"} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {payGroups.map(pg => (
+                      <SelectItem key={pg.id} value={pg.id}>
+                        {pg.name} ({pg.code})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              {selectedCompany && (
+                <div className="flex items-end">
+                  <Badge variant="outline" className="gap-1">
+                    <Globe className="w-3 h-3" />
+                    {selectedCompany.country} - {statutoryTypes.length} statutory types
+                  </Badge>
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>
