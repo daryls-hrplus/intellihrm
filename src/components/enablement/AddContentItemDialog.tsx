@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import {
   Dialog,
@@ -27,11 +27,29 @@ import { Plus, Clock, FileText, Video, BookOpen, Sparkles, PlusCircle, RefreshCw
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import type { WorkflowColumn } from "@/types/enablement";
+import { FEATURE_REGISTRY, FeatureDefinition } from "@/lib/featureRegistry";
 
 interface AddContentItemDialogProps {
   releaseId?: string;
   onSuccess?: () => void;
 }
+
+// Map dialog module codes to feature registry codes
+const MODULE_CODE_MAP: Record<string, string> = {
+  "WORKFORCE": "workforce",
+  "LEAVE": "leave",
+  "PAYROLL": "payroll",
+  "TIME_ATTENDANCE": "time_attendance",
+  "BENEFITS": "benefits",
+  "TRAINING": "training",
+  "PERFORMANCE": "performance",
+  "SUCCESSION": "succession",
+  "RECRUITMENT": "recruitment",
+  "HSE": "hse",
+  "EMPLOYEE_RELATIONS": "employee_relations",
+  "PROPERTY": "property",
+  "ADMIN": "admin",
+};
 
 const MODULES = [
   { code: "WORKFORCE", label: "Workforce Management", icon: "👥" },
@@ -63,16 +81,17 @@ const CONTENT_TYPES = [
   { id: "dap", label: "DAP Guide", icon: Sparkles, defaultHours: 1 },
 ];
 
-interface ExistingFeature {
-  feature_code: string;
-  module_code: string;
+interface CatalogFeature {
+  code: string;
+  name: string;
+  description: string;
+  groupName: string;
 }
 
 export function AddContentItemDialog({ releaseId, onSuccess }: AddContentItemDialogProps) {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [existingFeatures, setExistingFeatures] = useState<ExistingFeature[]>([]);
   const [featureMode, setFeatureMode] = useState<"new" | "existing" | null>(null);
   const [selectedExistingFeatures, setSelectedExistingFeatures] = useState<string[]>([]);
   
@@ -85,27 +104,25 @@ export function AddContentItemDialog({ releaseId, onSuccess }: AddContentItemDia
     content_types: [] as string[],
   });
 
-  // Fetch existing features when module changes
-  useEffect(() => {
-    const fetchFeatures = async () => {
-      if (!formData.module_code) {
-        setExistingFeatures([]);
-        return;
-      }
-
-      const { data, error } = await supabase
-        .from("enablement_content_status")
-        .select("feature_code, module_code")
-        .eq("module_code", formData.module_code);
-
-      if (!error && data) {
-        // Get unique features
-        const unique = Array.from(new Map(data.map(f => [f.feature_code, f])).values());
-        setExistingFeatures(unique);
-      }
-    };
-
-    fetchFeatures();
+  // Get features from FEATURE_REGISTRY for the selected module
+  const catalogFeatures = useMemo((): CatalogFeature[] => {
+    if (!formData.module_code) return [];
+    
+    const registryCode = MODULE_CODE_MAP[formData.module_code];
+    if (!registryCode) return [];
+    
+    const module = FEATURE_REGISTRY.find(m => m.code === registryCode);
+    if (!module) return [];
+    
+    // Flatten all features from all groups
+    return module.groups.flatMap(group => 
+      group.features.map(feature => ({
+        code: feature.code.toUpperCase(),
+        name: feature.name,
+        description: feature.description,
+        groupName: group.groupName
+      }))
+    );
   }, [formData.module_code]);
 
   // Calculate estimated hours based on content types
@@ -295,14 +312,14 @@ export function AddContentItemDialog({ releaseId, onSuccess }: AddContentItemDia
                   variant={featureMode === "existing" ? "default" : "outline"}
                   className="h-auto py-4 flex flex-col items-center gap-2"
                   onClick={() => handleFeatureModeChange("existing")}
-                  disabled={existingFeatures.length === 0}
+                  disabled={catalogFeatures.length === 0}
                 >
                   <RefreshCw className="h-5 w-5" />
                   <span className="font-medium">Update Existing</span>
                   <span className="text-xs opacity-70">
-                    {existingFeatures.length > 0 
-                      ? `${existingFeatures.length} feature(s) available`
-                      : "No existing features"}
+                    {catalogFeatures.length > 0 
+                      ? `${catalogFeatures.length} feature(s) available`
+                      : "No features in catalog"}
                   </span>
                 </Button>
               </div>
@@ -323,29 +340,35 @@ export function AddContentItemDialog({ releaseId, onSuccess }: AddContentItemDia
                 </div>
               )}
 
-              {/* Existing Features Multi-Select */}
-              {featureMode === "existing" && existingFeatures.length > 0 && (
+              {/* Catalog Features Multi-Select */}
+              {featureMode === "existing" && catalogFeatures.length > 0 && (
                 <div className="space-y-2 pt-2">
                   <Label>Select Feature(s) to Update *</Label>
-                  <ScrollArea className="h-[150px] border rounded-md p-3">
-                    <div className="space-y-2">
-                      {existingFeatures.map((feature) => (
+                  <ScrollArea className="h-[200px] border rounded-md p-3">
+                    <div className="space-y-1">
+                      {catalogFeatures.map((feature) => (
                         <div 
-                          key={feature.feature_code}
-                          className="flex items-center space-x-3 p-2 rounded hover:bg-muted cursor-pointer"
-                          onClick={() => toggleExistingFeature(feature.feature_code)}
+                          key={feature.code}
+                          className="flex items-start space-x-3 p-2 rounded hover:bg-muted cursor-pointer"
+                          onClick={() => toggleExistingFeature(feature.code)}
                         >
                           <Checkbox
-                            id={feature.feature_code}
-                            checked={selectedExistingFeatures.includes(feature.feature_code)}
-                            onCheckedChange={() => toggleExistingFeature(feature.feature_code)}
+                            id={feature.code}
+                            checked={selectedExistingFeatures.includes(feature.code)}
+                            onCheckedChange={() => toggleExistingFeature(feature.code)}
+                            className="mt-0.5"
                           />
-                          <label 
-                            htmlFor={feature.feature_code}
-                            className="text-sm font-medium cursor-pointer flex-1"
-                          >
-                            {feature.feature_code}
-                          </label>
+                          <div className="flex-1 min-w-0">
+                            <label 
+                              htmlFor={feature.code}
+                              className="text-sm font-medium cursor-pointer block"
+                            >
+                              {feature.name}
+                            </label>
+                            <p className="text-xs text-muted-foreground truncate">
+                              {feature.groupName} • {feature.code}
+                            </p>
+                          </div>
                         </div>
                       ))}
                     </div>
