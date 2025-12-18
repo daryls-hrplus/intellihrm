@@ -8005,6 +8005,7 @@ export type Database = {
       }
       employee_regular_deductions: {
         Row: {
+          account_number: string | null
           amount: number
           amount_deducted: number
           auto_stopped_at: string | null
@@ -8034,6 +8035,7 @@ export type Database = {
           updated_by: string | null
         }
         Insert: {
+          account_number?: string | null
           amount: number
           amount_deducted?: number
           auto_stopped_at?: string | null
@@ -8063,6 +8065,7 @@ export type Database = {
           updated_by?: string | null
         }
         Update: {
+          account_number?: string | null
           amount?: number
           amount_deducted?: number
           auto_stopped_at?: string | null
