@@ -9218,6 +9218,97 @@ export type Database = {
         }
         Relationships: []
       }
+      enablement_checklist_progress: {
+        Row: {
+          checklist_item_id: string
+          completed_at: string | null
+          completed_by: string | null
+          content_status_id: string
+          created_at: string
+          id: string
+          is_completed: boolean
+          updated_at: string
+        }
+        Insert: {
+          checklist_item_id: string
+          completed_at?: string | null
+          completed_by?: string | null
+          content_status_id: string
+          created_at?: string
+          id?: string
+          is_completed?: boolean
+          updated_at?: string
+        }
+        Update: {
+          checklist_item_id?: string
+          completed_at?: string | null
+          completed_by?: string | null
+          content_status_id?: string
+          created_at?: string
+          id?: string
+          is_completed?: boolean
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "enablement_checklist_progress_checklist_item_id_fkey"
+            columns: ["checklist_item_id"]
+            isOneToOne: false
+            referencedRelation: "enablement_checklists"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "enablement_checklist_progress_completed_by_fkey"
+            columns: ["completed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "enablement_checklist_progress_content_status_id_fkey"
+            columns: ["content_status_id"]
+            isOneToOne: false
+            referencedRelation: "enablement_content_status"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      enablement_checklists: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          is_required: boolean
+          navigation_link: string | null
+          stage: string
+          task_name: string
+          task_order: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_required?: boolean
+          navigation_link?: string | null
+          stage: string
+          task_name: string
+          task_order?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_required?: boolean
+          navigation_link?: string | null
+          stage?: string
+          task_name?: string
+          task_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       enablement_content_checklist_progress: {
         Row: {
           checklist_item_id: string
