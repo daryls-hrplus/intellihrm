@@ -1,3 +1,4 @@
+import { useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { AppLayout } from "@/components/layout/AppLayout";
@@ -7,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
+import { PrintableGuide } from "@/components/enablement/PrintableGuide";
 import {
   ArrowLeft,
   BookOpen,
@@ -25,11 +27,22 @@ import {
   BarChart3,
   Clock,
   Rocket,
+  Printer,
 } from "lucide-react";
 
 export default function EnablementGuidePage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const printRef = useRef<HTMLDivElement>(null);
+  const [isPrinting, setIsPrinting] = useState(false);
+
+  const handlePrint = () => {
+    setIsPrinting(true);
+    setTimeout(() => {
+      window.print();
+      setIsPrinting(false);
+    }, 100);
+  };
 
   return (
     <AppLayout>
@@ -41,22 +54,28 @@ export default function EnablementGuidePage() {
           ]}
         />
 
-        <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" onClick={() => navigate("/enablement")}>
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight flex items-center gap-3">
-              <BookOpen className="h-8 w-8 text-primary" />
-              Enablement Hub User Guide
-            </h1>
-            <p className="text-muted-foreground mt-1">
-              Best practices for content generation aligned with industry standards
-            </p>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <Button variant="ghost" size="icon" onClick={() => navigate("/enablement")}>
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
+            <div>
+              <h1 className="text-3xl font-bold tracking-tight flex items-center gap-3">
+                <BookOpen className="h-8 w-8 text-primary" />
+                Enablement Hub User Guide
+              </h1>
+              <p className="text-muted-foreground mt-1">
+                Best practices for content generation aligned with industry standards
+              </p>
+            </div>
           </div>
+          <Button onClick={handlePrint} className="gap-2">
+            <Printer className="h-4 w-4" />
+            Print Guide
+          </Button>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 print:hidden">
           {/* Table of Contents */}
           <Card className="lg:col-span-1 lg:sticky lg:top-6 lg:self-start">
             <CardHeader>
@@ -328,7 +347,7 @@ export default function EnablementGuidePage() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <p className="text-sm text-muted-foreground">
-                  The Enablement Hub includes 8 AI-powered tools to automate various aspects of
+                  The Enablement Hub includes 12 AI-powered tools to automate various aspects of
                   content development. Access them from the{" "}
                   <strong>AI Automation Tools</strong> page.
                 </p>
@@ -345,6 +364,8 @@ export default function EnablementGuidePage() {
                     { name: "Voice-Over Script Generator", desc: "Video narration scripts" },
                     { name: "Content Effectiveness Scorer", desc: "Quality analysis" },
                     { name: "Compliance Impact Detector", desc: "Regulatory change alerts" },
+                    { name: "Cross-Module Integration", desc: "Suggest module integrations" },
+                    { name: "Guide Sync Checker", desc: "Auto-update guide on changes" },
                   ].map((tool) => (
                     <div
                       key={tool.name}
@@ -398,9 +419,9 @@ export default function EnablementGuidePage() {
                     <div>
                       <h4 className="font-semibold text-amber-600">Pro Tip</h4>
                       <p className="text-sm mt-1">
-                        Use the <strong>Auto-Release Notes Generator</strong> to automatically
-                        create professional release notes from your feature changes. Simply click
-                        "Generate Release Notes" in the Release Manager.
+                        Use the Release Manager to track content status across releases. The
+                        dashboard shows progress for each release with clear visibility into
+                        what's pending, in progress, and published.
                       </p>
                     </div>
                   </div>
@@ -428,7 +449,7 @@ export default function EnablementGuidePage() {
                     {
                       title: "Use AI as a Starting Point",
                       description:
-                        "AI-generated content should be reviewed and refined by subject matter experts, not published directly.",
+                        "AI-generated content should be reviewed and refined by subject matter experts.",
                       type: "do",
                     },
                     {
@@ -446,13 +467,13 @@ export default function EnablementGuidePage() {
                     {
                       title: "Don't Skip Review",
                       description:
-                        "Always move content through the review workflow before publishing, even AI-generated content.",
+                        "Always move content through the review workflow before publishing.",
                       type: "dont",
                     },
                     {
                       title: "Don't Forget Updates",
                       description:
-                        "Run Change Detection regularly to identify documentation that needs updating after product changes.",
+                        "Run Change Detection regularly to identify documentation that needs updating.",
                       type: "dont",
                     },
                   ].map((practice, idx) => (
@@ -465,9 +486,9 @@ export default function EnablementGuidePage() {
                       }`}
                     >
                       {practice.type === "do" ? (
-                        <CheckCircle2 className="h-5 w-5 text-green-600 shrink-0" />
+                        <CheckCircle2 className="h-5 w-5 text-green-600 shrink-0 mt-0.5" />
                       ) : (
-                        <AlertTriangle className="h-5 w-5 text-red-600 shrink-0" />
+                        <AlertTriangle className="h-5 w-5 text-red-600 shrink-0 mt-0.5" />
                       )}
                       <div>
                         <h4 className="font-semibold">{practice.title}</h4>
@@ -492,48 +513,77 @@ export default function EnablementGuidePage() {
               <CardContent>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   {[
-                    { metric: "Coverage %", target: "> 90%", desc: "Features with documentation" },
-                    { metric: "Time to Publish", target: "< 5 days", desc: "From backlog to published" },
-                    { metric: "Content Score", target: "> 80", desc: "AI quality score average" },
-                    { metric: "Update Lag", target: "< 7 days", desc: "Time to update after changes" },
+                    {
+                      metric: "Coverage %",
+                      target: "> 90%",
+                      description: "Features with documentation",
+                    },
+                    {
+                      metric: "Time to Publish",
+                      target: "< 5 days",
+                      description: "From backlog to published",
+                    },
+                    {
+                      metric: "Content Score",
+                      target: "> 80",
+                      description: "AI quality score average",
+                    },
+                    {
+                      metric: "Update Lag",
+                      target: "< 7 days",
+                      description: "Time to update after changes",
+                    },
                   ].map((item) => (
-                    <div key={item.metric} className="p-4 rounded-lg border text-center">
-                      <p className="text-2xl font-bold text-primary">{item.target}</p>
-                      <p className="font-medium text-sm mt-1">{item.metric}</p>
-                      <p className="text-xs text-muted-foreground">{item.desc}</p>
+                    <div
+                      key={item.metric}
+                      className="p-4 rounded-lg border bg-card text-center"
+                    >
+                      <p className="text-sm text-muted-foreground">{item.metric}</p>
+                      <p className="text-2xl font-bold text-primary mt-1">{item.target}</p>
+                      <p className="text-xs text-muted-foreground mt-1">{item.description}</p>
                     </div>
                   ))}
                 </div>
-              </CardContent>
-            </Card>
 
-            {/* Quick Actions */}
-            <Card className="bg-primary/5 border-primary/20">
-              <CardContent className="p-6">
-                <h3 className="font-semibold mb-4">Quick Actions</h3>
-                <div className="flex flex-wrap gap-3">
-                  <Button onClick={() => navigate("/enablement")}>
-                    <Workflow className="h-4 w-4 mr-2" />
-                    Go to Dashboard
-                  </Button>
-                  <Button variant="outline" onClick={() => navigate("/enablement/ai-tools")}>
-                    <Sparkles className="h-4 w-4 mr-2" />
-                    AI Tools
-                  </Button>
-                  <Button variant="outline" onClick={() => navigate("/enablement/docs-generator")}>
-                    <FileText className="h-4 w-4 mr-2" />
-                    Generate Docs
-                  </Button>
-                  <Button variant="outline" onClick={() => navigate("/enablement?tab=workflow")}>
-                    <Clock className="h-4 w-4 mr-2" />
-                    Workflow Board
-                  </Button>
+                <div className="mt-6 p-4 rounded-lg bg-muted/50 border">
+                  <div className="flex gap-2">
+                    <Clock className="h-5 w-5 text-muted-foreground shrink-0" />
+                    <div>
+                      <h4 className="font-semibold">Tracking Progress</h4>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        Use the Analytics Dashboard to monitor these metrics across releases.
+                        Set up alerts for metrics falling below targets to maintain content
+                        quality.
+                      </p>
+                    </div>
+                  </div>
                 </div>
               </CardContent>
             </Card>
           </div>
         </div>
+
+        {/* Printable Version (hidden on screen, shown on print) */}
+        <div className="hidden print:block">
+          <PrintableGuide ref={printRef} />
+        </div>
       </div>
+
+      {/* Print styles */}
+      <style>{`
+        @media print {
+          .print\\:hidden {
+            display: none !important;
+          }
+          .print\\:block {
+            display: block !important;
+          }
+          body {
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+          }
+        }
+      `}</style>
     </AppLayout>
   );
 }

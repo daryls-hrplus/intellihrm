@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import {
   AlertTriangle,
   CheckCircle2,
@@ -18,6 +19,17 @@ import {
   AlertCircle,
   Zap,
   Link2,
+  Calendar,
+  RefreshCw,
+  MessageSquare,
+  HelpCircle,
+  Clock,
+  User,
+  Settings,
+  Database,
+  Code,
+  Plus,
+  Edit,
 } from "lucide-react";
 
 interface GapAnalysisResult {
@@ -51,22 +63,52 @@ interface GapAnalysisResult {
 }
 
 interface ChangeReportResult {
-  dateRange: { startDate: string; endDate: string };
-  summary: {
-    totalChanges: number;
-    featureChanges: number;
-    moduleChanges: number;
-    workflowChanges: number;
-    roleChanges: number;
-    lookupChanges: number;
+  dateRange?: { start: string; end: string };
+  summary?: {
+    ui: number;
+    backend: number;
+    database: number;
+    edge_function: number;
+    total: number;
   };
-  changes: {
-    features: any[];
-    modules: any[];
-    workflows: any[];
-    roles: any[];
-    lookups: any[];
+  changesByDate?: Record<string, any[]>;
+  changes?: any[];
+}
+
+interface ChangeDetectionResult {
+  changedFeatures?: Array<{
+    feature_code: string;
+    feature_name: string;
+    module_code: string;
+    module_name: string;
+    updated_at: string;
+    hasContent: boolean;
+  }>;
+  analysis?: {
+    changes?: Array<{
+      feature_code: string;
+      change_type: string;
+      severity: string;
+      suggested_updates: string[];
+      estimated_effort: string;
+    }>;
+    summary?: string;
+    priority_order?: string[];
   };
+}
+
+interface FAQResult {
+  faqs?: Array<{
+    question: string;
+    answer: string;
+    category: string;
+    keywords?: string[];
+    ticket_count?: number;
+    priority?: string;
+  }>;
+  ticketCount?: number;
+  source?: string;
+  message?: string;
 }
 
 interface IntegrationAnalysisResult {
@@ -97,10 +139,25 @@ const priorityColors: Record<string, string> = {
   low: "bg-green-500/10 text-green-600 border-green-500/30",
 };
 
+const changeTypeIcons: Record<string, React.ReactNode> = {
+  Created: <Plus className="h-4 w-4 text-green-500" />,
+  Updated: <Edit className="h-4 w-4 text-blue-500" />,
+  new_feature: <Plus className="h-4 w-4 text-green-500" />,
+  ui_change: <Settings className="h-4 w-4 text-purple-500" />,
+  workflow_change: <RefreshCw className="h-4 w-4 text-amber-500" />,
+  enhancement: <TrendingUp className="h-4 w-4 text-cyan-500" />,
+};
+
+const categoryIcons: Record<string, React.ReactNode> = {
+  ui: <Settings className="h-4 w-4 text-purple-500" />,
+  backend: <Code className="h-4 w-4 text-blue-500" />,
+  database: <Database className="h-4 w-4 text-green-500" />,
+  edge_function: <Zap className="h-4 w-4 text-amber-500" />,
+};
+
 export function GapAnalysisRenderer({ data }: { data: GapAnalysisResult }) {
   const { gaps, recommendations } = data;
 
-  // Group by module
   const moduleGroups = gaps.reduce((acc, gap) => {
     const key = gap.module_name || "Unknown";
     if (!acc[key]) acc[key] = [];
@@ -115,7 +172,6 @@ export function GapAnalysisRenderer({ data }: { data: GapAnalysisResult }) {
 
   return (
     <div className="space-y-6">
-      {/* Summary Cards */}
       <div className="grid grid-cols-4 gap-4">
         <Card className="border-red-500/30 bg-red-500/5">
           <CardContent className="p-4 text-center">
@@ -147,7 +203,6 @@ export function GapAnalysisRenderer({ data }: { data: GapAnalysisResult }) {
         </Card>
       </div>
 
-      {/* AI Recommendations */}
       {recommendations && (
         <Card className="border-primary/30 bg-primary/5">
           <CardHeader className="pb-3">
@@ -160,7 +215,6 @@ export function GapAnalysisRenderer({ data }: { data: GapAnalysisResult }) {
             {recommendations.summary && (
               <p className="text-sm text-muted-foreground">{recommendations.summary}</p>
             )}
-
             {recommendations.priorities && recommendations.priorities.length > 0 && (
               <div>
                 <h4 className="font-medium mb-2 text-sm">Priority Features</h4>
@@ -186,7 +240,6 @@ export function GapAnalysisRenderer({ data }: { data: GapAnalysisResult }) {
                 </div>
               </div>
             )}
-
             <div className="grid grid-cols-2 gap-4">
               {recommendations.quick_wins && recommendations.quick_wins.length > 0 && (
                 <div className="p-3 rounded-lg bg-green-500/10 border border-green-500/20">
@@ -202,7 +255,6 @@ export function GapAnalysisRenderer({ data }: { data: GapAnalysisResult }) {
                   </ul>
                 </div>
               )}
-
               {recommendations.high_impact && recommendations.high_impact.length > 0 && (
                 <div className="p-3 rounded-lg bg-blue-500/10 border border-blue-500/20">
                   <h4 className="font-medium text-sm text-blue-600 mb-2 flex items-center gap-1">
@@ -222,7 +274,6 @@ export function GapAnalysisRenderer({ data }: { data: GapAnalysisResult }) {
         </Card>
       )}
 
-      {/* Features by Module */}
       <Card>
         <CardHeader className="pb-3">
           <CardTitle className="text-lg">Features by Module</CardTitle>
@@ -254,9 +305,7 @@ export function GapAnalysisRenderer({ data }: { data: GapAnalysisResult }) {
                             <div
                               key={type}
                               className={`p-1.5 rounded ${
-                                hasIt
-                                  ? "bg-green-500/10 text-green-600"
-                                  : "bg-muted text-muted-foreground"
+                                hasIt ? "bg-green-500/10 text-green-600" : "bg-muted text-muted-foreground"
                               }`}
                               title={type}
                             >
@@ -279,122 +328,410 @@ export function GapAnalysisRenderer({ data }: { data: GapAnalysisResult }) {
 }
 
 export function ChangeReportRenderer({ data }: { data: ChangeReportResult }) {
-  const { dateRange, summary, changes } = data;
+  const { dateRange, summary, changesByDate, changes } = data;
+
+  const formatDate = (dateStr: string) => {
+    try {
+      return new Date(dateStr).toLocaleDateString("en-US", {
+        weekday: "short",
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      });
+    } catch {
+      return dateStr;
+    }
+  };
+
+  const sortedDates = changesByDate
+    ? Object.keys(changesByDate).sort((a, b) => new Date(b).getTime() - new Date(a).getTime())
+    : [];
 
   return (
     <div className="space-y-6">
       {/* Header */}
-      <Card className="bg-primary/5 border-primary/20">
-        <CardContent className="p-4">
+      <Card className="bg-gradient-to-r from-primary/10 to-primary/5 border-primary/20">
+        <CardContent className="p-6">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="font-semibold">Application Change Report</h3>
-              <p className="text-sm text-muted-foreground">
-                {dateRange.startDate} to {dateRange.endDate}
-              </p>
+              <h3 className="text-xl font-semibold flex items-center gap-2">
+                <Calendar className="h-5 w-5 text-primary" />
+                Application Change Report
+              </h3>
+              {dateRange && (
+                <p className="text-sm text-muted-foreground mt-1">
+                  {formatDate(dateRange.start)} — {formatDate(dateRange.end)}
+                </p>
+              )}
             </div>
             <div className="text-right">
-              <p className="text-2xl font-bold text-primary">{summary.totalChanges}</p>
-              <p className="text-xs text-muted-foreground">Total Changes</p>
+              <p className="text-4xl font-bold text-primary">{summary?.total || changes?.length || 0}</p>
+              <p className="text-sm text-muted-foreground">Total Changes</p>
             </div>
           </div>
         </CardContent>
       </Card>
 
-      {/* Summary */}
-      <div className="grid grid-cols-5 gap-4">
-        {[
-          { label: "Features", count: summary.featureChanges, color: "text-blue-600" },
-          { label: "Modules", count: summary.moduleChanges, color: "text-purple-600" },
-          { label: "Workflows", count: summary.workflowChanges, color: "text-amber-600" },
-          { label: "Roles", count: summary.roleChanges, color: "text-green-600" },
-          { label: "Lookups", count: summary.lookupChanges, color: "text-pink-600" },
-        ].map((item) => (
-          <Card key={item.label}>
-            <CardContent className="p-4 text-center">
-              <p className={`text-xl font-bold ${item.color}`}>{item.count}</p>
-              <p className="text-xs text-muted-foreground">{item.label}</p>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-
-      {/* Changes Detail */}
-      <ScrollArea className="h-[400px]">
-        <div className="space-y-4">
-          {changes.features && changes.features.length > 0 && (
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm flex items-center gap-2">
-                  <FileText className="h-4 w-4 text-blue-500" />
-                  Feature Changes ({changes.features.length})
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  {changes.features.map((f: any, idx: number) => (
-                    <div key={idx} className="flex items-center justify-between p-2 rounded bg-muted/50">
-                      <div>
-                        <p className="font-medium text-sm">{f.feature_name || f.feature_code}</p>
-                        <p className="text-xs text-muted-foreground">{f.feature_code}</p>
-                      </div>
-                      <Badge variant="outline" className="text-xs">
-                        {new Date(f.updated_at).toLocaleDateString()}
-                      </Badge>
-                    </div>
-                  ))}
+      {/* Category Summary */}
+      {summary && (
+        <div className="grid grid-cols-4 gap-4">
+          {[
+            { label: "UI Changes", count: summary.ui, icon: categoryIcons.ui, color: "text-purple-600 bg-purple-500/10 border-purple-500/30" },
+            { label: "Backend", count: summary.backend, icon: categoryIcons.backend, color: "text-blue-600 bg-blue-500/10 border-blue-500/30" },
+            { label: "Database", count: summary.database, icon: categoryIcons.database, color: "text-green-600 bg-green-500/10 border-green-500/30" },
+            { label: "Edge Functions", count: summary.edge_function, icon: categoryIcons.edge_function, color: "text-amber-600 bg-amber-500/10 border-amber-500/30" },
+          ].map((item) => (
+            <Card key={item.label} className={`border ${item.color.split(" ").slice(2).join(" ")}`}>
+              <CardContent className="p-4">
+                <div className="flex items-center gap-3">
+                  <div className={`p-2 rounded-lg ${item.color.split(" ").slice(1, 2).join(" ")}`}>
+                    {item.icon}
+                  </div>
+                  <div>
+                    <p className={`text-2xl font-bold ${item.color.split(" ")[0]}`}>{item.count}</p>
+                    <p className="text-xs text-muted-foreground">{item.label}</p>
+                  </div>
                 </div>
               </CardContent>
             </Card>
-          )}
-
-          {changes.modules && changes.modules.length > 0 && (
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm flex items-center gap-2">
-                  <Package className="h-4 w-4 text-purple-500" />
-                  Module Changes ({changes.modules.length})
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  {changes.modules.map((m: any, idx: number) => (
-                    <div key={idx} className="flex items-center justify-between p-2 rounded bg-muted/50">
-                      <p className="font-medium text-sm">{m.module_name}</p>
-                      <Badge variant="outline" className="text-xs">
-                        {new Date(m.updated_at).toLocaleDateString()}
-                      </Badge>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
-          {changes.workflows && changes.workflows.length > 0 && (
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm flex items-center gap-2">
-                  <TrendingUp className="h-4 w-4 text-amber-500" />
-                  Workflow Changes ({changes.workflows.length})
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  {changes.workflows.map((w: any, idx: number) => (
-                    <div key={idx} className="flex items-center justify-between p-2 rounded bg-muted/50">
-                      <p className="font-medium text-sm">{w.name}</p>
-                      <Badge variant="outline" className="text-xs">
-                        {new Date(w.updated_at).toLocaleDateString()}
-                      </Badge>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          )}
+          ))}
         </div>
-      </ScrollArea>
+      )}
+
+      {/* Timeline View */}
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-lg flex items-center gap-2">
+            <Clock className="h-5 w-5" />
+            Changes Timeline
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <ScrollArea className="h-[450px]">
+            {sortedDates.length > 0 ? (
+              <Accordion type="multiple" className="space-y-2" defaultValue={sortedDates.slice(0, 3)}>
+                {sortedDates.map((date) => {
+                  const dayChanges = changesByDate![date];
+                  return (
+                    <AccordionItem key={date} value={date} className="border rounded-lg px-4">
+                      <AccordionTrigger className="hover:no-underline py-3">
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 rounded-full bg-primary/10">
+                            <Calendar className="h-4 w-4 text-primary" />
+                          </div>
+                          <div className="text-left">
+                            <p className="font-semibold">{formatDate(date)}</p>
+                            <p className="text-xs text-muted-foreground">{dayChanges.length} changes</p>
+                          </div>
+                        </div>
+                      </AccordionTrigger>
+                      <AccordionContent className="pt-2 pb-4">
+                        <div className="space-y-2 pl-10">
+                          {dayChanges.map((change: any, idx: number) => (
+                            <div
+                              key={idx}
+                              className="flex items-start gap-3 p-3 rounded-lg bg-muted/50 border"
+                            >
+                              <div className="shrink-0 mt-0.5">
+                                {changeTypeIcons[change.changeType] || <Edit className="h-4 w-4 text-muted-foreground" />}
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2 flex-wrap">
+                                  <p className="font-medium text-sm">{change.entityName}</p>
+                                  <Badge variant="outline" className="text-xs">
+                                    {change.entityType}
+                                  </Badge>
+                                  <Badge
+                                    variant="secondary"
+                                    className={`text-xs ${
+                                      change.changeType === "Created"
+                                        ? "bg-green-500/10 text-green-600"
+                                        : "bg-blue-500/10 text-blue-600"
+                                    }`}
+                                  >
+                                    {change.changeType}
+                                  </Badge>
+                                </div>
+                                {change.details && (
+                                  <p className="text-xs text-muted-foreground mt-1">{change.details}</p>
+                                )}
+                              </div>
+                              <div className="shrink-0">
+                                {categoryIcons[change.category] || <Settings className="h-4 w-4 text-muted-foreground" />}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </AccordionContent>
+                    </AccordionItem>
+                  );
+                })}
+              </Accordion>
+            ) : changes && changes.length > 0 ? (
+              <div className="space-y-2">
+                {changes.map((change: any, idx: number) => (
+                  <div key={idx} className="flex items-start gap-3 p-3 rounded-lg bg-muted/50 border">
+                    <div className="shrink-0 mt-0.5">
+                      {changeTypeIcons[change.changeType] || <Edit className="h-4 w-4 text-muted-foreground" />}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <p className="font-medium text-sm">{change.entityName}</p>
+                        <Badge variant="outline" className="text-xs">{change.entityType}</Badge>
+                      </div>
+                      {change.details && (
+                        <p className="text-xs text-muted-foreground mt-1">{change.details}</p>
+                      )}
+                    </div>
+                    <Badge variant="secondary" className="text-xs shrink-0">
+                      {formatDate(change.changedAt)}
+                    </Badge>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-12 text-muted-foreground">
+                <Calendar className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                <p>No changes found in the selected date range.</p>
+              </div>
+            )}
+          </ScrollArea>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
+export function ChangeDetectionRenderer({ data }: { data: ChangeDetectionResult }) {
+  const { changedFeatures, analysis } = data;
+
+  const groupedByModule = changedFeatures?.reduce((acc, f) => {
+    const key = f.module_name || "Unknown";
+    if (!acc[key]) acc[key] = [];
+    acc[key].push(f);
+    return acc;
+  }, {} as Record<string, typeof changedFeatures>);
+
+  return (
+    <div className="space-y-6">
+      {/* Summary */}
+      <Card className="bg-gradient-to-r from-amber-500/10 to-orange-500/5 border-amber-500/20">
+        <CardContent className="p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-xl font-semibold flex items-center gap-2">
+                <RefreshCw className="h-5 w-5 text-amber-600" />
+                Change Detection Results
+              </h3>
+              <p className="text-sm text-muted-foreground mt-1">
+                Features requiring documentation updates
+              </p>
+            </div>
+            <div className="text-right">
+              <p className="text-4xl font-bold text-amber-600">{changedFeatures?.length || 0}</p>
+              <p className="text-sm text-muted-foreground">Features Changed</p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* AI Analysis */}
+      {analysis?.summary && (
+        <Card className="border-primary/30 bg-primary/5">
+          <CardContent className="p-4">
+            <div className="flex items-start gap-3">
+              <Lightbulb className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+              <div>
+                <h4 className="font-medium">AI Analysis</h4>
+                <p className="text-sm text-muted-foreground mt-1">{analysis.summary}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Detailed Changes from AI */}
+      {analysis?.changes && analysis.changes.length > 0 && (
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-lg flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-amber-500" />
+              Documentation Updates Needed
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {analysis.changes.map((change, idx) => (
+                <div key={idx} className="p-4 rounded-lg border bg-card">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <p className="font-medium">{change.feature_code}</p>
+                        <Badge className={priorityColors[change.severity] || "bg-muted"}>
+                          {change.severity}
+                        </Badge>
+                        <Badge variant="outline">{change.change_type?.replace("_", " ")}</Badge>
+                      </div>
+                      {change.suggested_updates && change.suggested_updates.length > 0 && (
+                        <ul className="mt-2 space-y-1">
+                          {change.suggested_updates.map((update, uIdx) => (
+                            <li key={uIdx} className="text-sm text-muted-foreground flex items-start gap-2">
+                              <ArrowRight className="h-3 w-3 mt-1 shrink-0" />
+                              {update}
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                    </div>
+                    <Badge variant="secondary" className="shrink-0">
+                      Effort: {change.estimated_effort}
+                    </Badge>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Features by Module */}
+      {groupedByModule && Object.keys(groupedByModule).length > 0 && (
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-lg">Changed Features by Module</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ScrollArea className="h-[300px]">
+              <Accordion type="multiple" className="space-y-2">
+                {Object.entries(groupedByModule).map(([moduleName, features]) => (
+                  <AccordionItem key={moduleName} value={moduleName} className="border rounded-lg px-4">
+                    <AccordionTrigger className="hover:no-underline py-3">
+                      <div className="flex items-center gap-2">
+                        <Package className="h-4 w-4 text-muted-foreground" />
+                        <span className="font-medium">{moduleName}</span>
+                        <Badge variant="secondary" className="ml-2">{features?.length}</Badge>
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent className="pt-2 pb-4">
+                      <div className="space-y-2">
+                        {features?.map((f, idx) => (
+                          <div key={idx} className="flex items-center justify-between p-3 rounded bg-muted/50">
+                            <div>
+                              <p className="font-medium text-sm">{f.feature_name}</p>
+                              <p className="text-xs text-muted-foreground">{f.feature_code}</p>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              {!f.hasContent && (
+                                <Badge variant="destructive" className="text-xs">No Docs</Badge>
+                              )}
+                              <Badge variant="outline" className="text-xs">
+                                {new Date(f.updated_at).toLocaleDateString()}
+                              </Badge>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </AccordionContent>
+                  </AccordionItem>
+                ))}
+              </Accordion>
+            </ScrollArea>
+          </CardContent>
+        </Card>
+      )}
+    </div>
+  );
+}
+
+export function FAQRenderer({ data }: { data: FAQResult }) {
+  const { faqs, ticketCount, source, message } = data;
+
+  if (message && (!faqs || faqs.length === 0)) {
+    return (
+      <Card className="border-amber-500/30 bg-amber-500/5">
+        <CardContent className="p-6 text-center">
+          <MessageSquare className="h-12 w-12 mx-auto mb-4 text-amber-500 opacity-50" />
+          <p className="text-muted-foreground">{message}</p>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      {/* Summary */}
+      <Card className="bg-gradient-to-r from-purple-500/10 to-pink-500/5 border-purple-500/20">
+        <CardContent className="p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-xl font-semibold flex items-center gap-2">
+                <HelpCircle className="h-5 w-5 text-purple-600" />
+                Generated FAQ Entries
+              </h3>
+              <p className="text-sm text-muted-foreground mt-1">
+                {source === "sample" ? "Generated from sample data" : `Analyzed from ${ticketCount || 0} support tickets`}
+              </p>
+            </div>
+            <div className="text-right">
+              <p className="text-4xl font-bold text-purple-600">{faqs?.length || 0}</p>
+              <p className="text-sm text-muted-foreground">FAQs Created</p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* FAQ List */}
+      <Card>
+        <CardContent className="p-0">
+          <ScrollArea className="h-[450px]">
+            <Accordion type="single" collapsible className="px-4">
+              {faqs?.map((faq, idx) => (
+                <AccordionItem key={idx} value={`faq-${idx}`}>
+                  <AccordionTrigger className="hover:no-underline py-4">
+                    <div className="flex items-start gap-3 text-left">
+                      <div className="p-2 rounded-full bg-purple-500/10 shrink-0">
+                        <MessageSquare className="h-4 w-4 text-purple-600" />
+                      </div>
+                      <div className="flex-1">
+                        <p className="font-medium">{faq.question}</p>
+                        <div className="flex items-center gap-2 mt-1">
+                          {faq.category && (
+                            <Badge variant="outline" className="text-xs">{faq.category}</Badge>
+                          )}
+                          {faq.priority && (
+                            <Badge className={`text-xs ${priorityColors[faq.priority] || "bg-muted"}`}>
+                              {faq.priority}
+                            </Badge>
+                          )}
+                          {faq.ticket_count && (
+                            <span className="text-xs text-muted-foreground">
+                              {faq.ticket_count} related tickets
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </AccordionTrigger>
+                  <AccordionContent className="pl-12 pb-4">
+                    <div className="p-4 rounded-lg bg-muted/50 border">
+                      <p className="text-sm whitespace-pre-wrap">{faq.answer}</p>
+                      {faq.keywords && faq.keywords.length > 0 && (
+                        <div className="flex flex-wrap gap-1 mt-3 pt-3 border-t">
+                          {faq.keywords.map((kw, kwIdx) => (
+                            <Badge key={kwIdx} variant="secondary" className="text-xs">
+                              {kw}
+                            </Badge>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
+              ))}
+            </Accordion>
+          </ScrollArea>
+        </CardContent>
+      </Card>
     </div>
   );
 }
@@ -404,7 +741,6 @@ export function IntegrationAnalysisRenderer({ data }: { data: IntegrationAnalysi
 
   return (
     <div className="space-y-6">
-      {/* Recommendations Summary */}
       {recommendations && (
         <Card className="bg-primary/5 border-primary/20">
           <CardContent className="p-4">
@@ -419,7 +755,6 @@ export function IntegrationAnalysisRenderer({ data }: { data: IntegrationAnalysi
         </Card>
       )}
 
-      {/* Integration Suggestions */}
       <Card>
         <CardHeader className="pb-3">
           <CardTitle className="text-lg flex items-center gap-2">
@@ -454,7 +789,6 @@ export function IntegrationAnalysisRenderer({ data }: { data: IntegrationAnalysi
         </CardContent>
       </Card>
 
-      {/* Dependencies */}
       {crossModuleDependencies && crossModuleDependencies.length > 0 && (
         <Card>
           <CardHeader className="pb-3">
@@ -481,7 +815,6 @@ export function IntegrationAnalysisRenderer({ data }: { data: IntegrationAnalysi
 }
 
 export function GenericResultsRenderer({ data }: { data: any }) {
-  // For results that have markdown content
   if (data.content && typeof data.content === "string") {
     return (
       <div className="prose prose-sm dark:prose-invert max-w-none">
@@ -490,7 +823,6 @@ export function GenericResultsRenderer({ data }: { data: any }) {
     );
   }
 
-  // For structured results with a summary
   if (data.summary || data.analysis) {
     return (
       <div className="space-y-4">
@@ -515,7 +847,6 @@ export function GenericResultsRenderer({ data }: { data: any }) {
     );
   }
 
-  // Fallback to formatted JSON
   return (
     <Card>
       <CardContent className="p-4">
