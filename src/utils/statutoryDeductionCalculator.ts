@@ -107,7 +107,7 @@ function calculateCumulativeTax(
   for (const band of taxBands) {
     const bandMin = band.min_amount || 0;
     const bandMax = band.max_amount || Infinity;
-    const rate = (band.employee_rate || 0) / 100;
+    const rate = (band.employee_rate || 0);
 
     // Calculate income in this band
     const incomeInBand = Math.min(
@@ -180,8 +180,8 @@ export function calculateStatutoryDeductions(
     } else {
       switch (calcMethod) {
         case 'percentage':
-          employeeAmount = grossPay * (applicableBand.employee_rate || 0) / 100;
-          employerAmount = grossPay * (applicableBand.employer_rate || 0) / 100;
+          employeeAmount = grossPay * (applicableBand.employee_rate || 0);
+          employerAmount = grossPay * (applicableBand.employer_rate || 0);
           break;
         case 'per_monday':
           employeeAmount = mondayCount * (applicableBand.per_monday_amount || 0);
