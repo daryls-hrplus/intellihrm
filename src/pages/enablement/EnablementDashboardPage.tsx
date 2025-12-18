@@ -12,7 +12,8 @@ import {
   Sparkles,
   FileCheck,
   Users,
-  Building
+  Building,
+  FolderTree
 } from "lucide-react";
 
 export default function EnablementDashboardPage() {
@@ -20,6 +21,13 @@ export default function EnablementDashboardPage() {
   const navigate = useNavigate();
 
   const tools = [
+    {
+      title: "Feature Catalog",
+      description: "Browse all HRplus Cerebra modules, features, and capabilities in one place.",
+      icon: FolderTree,
+      href: "/enablement/feature-catalog",
+      badge: "Registry"
+    },
     {
       title: "Application Docs Generator",
       description: "Generate module overviews, feature tutorials, and quick reference guides using AI.",
