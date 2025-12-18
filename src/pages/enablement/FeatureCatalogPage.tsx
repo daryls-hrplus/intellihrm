@@ -6,11 +6,13 @@ import {
   getFeatureCount,
   getTotalFeatureCount
 } from "@/lib/featureRegistry";
+import { getFeatureCapabilities, getAIPoweredFeatures, getUniqueFeatures, CAPABILITY_TAG_LABELS } from "@/lib/platformCapabilities";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { 
   ArrowLeft, 
@@ -25,13 +27,19 @@ import {
   ChevronDown,
   Folder,
   FolderOpen,
-  Check
+  Check,
+  Brain,
+  Grid3X3,
+  Star
 } from "lucide-react";
 import * as LucideIcons from "lucide-react";
 import { cn } from "@/lib/utils";
+import { CapabilityBrowser } from "@/components/enablement/CapabilityBrowser";
+import { DifferentiatorMatrix } from "@/components/enablement/DifferentiatorMatrix";
 
 export default function FeatureCatalogPage() {
   const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState("browser");
   const [selectedModule, setSelectedModule] = useState<string>("");
   const [selectedFeature, setSelectedFeature] = useState<string>("");
   const [selectedFeatureData, setSelectedFeatureData] = useState<FeatureDefinition | null>(null);
@@ -44,14 +52,23 @@ export default function FeatureCatalogPage() {
     return Icon || LucideIcons.FileText;
   };
 
-  const handleModuleSelect = (moduleCode: string) => {
-    setSelectedModule(moduleCode);
-  };
-
   const handleFeatureSelect = (moduleCode: string, featureCode: string, feature: FeatureDefinition) => {
     setSelectedModule(moduleCode);
     setSelectedFeature(featureCode);
     setSelectedFeatureData(feature);
+    setActiveTab("browser");
+  };
+
+  const handleFeatureSelectByCode = (featureCode: string) => {
+    for (const module of FEATURE_REGISTRY) {
+      for (const group of module.groups) {
+        const feature = group.features.find(f => f.code === featureCode);
+        if (feature) {
+          handleFeatureSelect(module.code, featureCode, feature);
+          return;
+        }
+      }
+    }
   };
 
   const handleGenerateDocs = () => {
@@ -82,7 +99,6 @@ export default function FeatureCatalogPage() {
     );
   };
 
-  // Filter data based on search
   const filteredData = searchQuery.trim() 
     ? FEATURE_REGISTRY.map(module => ({
         ...module,
@@ -97,10 +113,11 @@ export default function FeatureCatalogPage() {
       })).filter(m => m.groups.length > 0 || m.name.toLowerCase().includes(searchQuery.toLowerCase()))
     : FEATURE_REGISTRY;
 
-  // Calculate statistics
   const totalFeatures = getTotalFeatureCount();
   const totalModules = FEATURE_REGISTRY.length;
   const totalGroups = FEATURE_REGISTRY.reduce((acc, mod) => acc + mod.groups.length, 0);
+  const aiPoweredCount = getAIPoweredFeatures().length;
+  const uniqueCount = getUniqueFeatures().length;
 
   return (
     <div className="space-y-6">
