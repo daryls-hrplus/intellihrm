@@ -64,7 +64,7 @@ const WORKFLOW_STAGES: WorkflowStage[] = [
     color: "text-slate-600",
     bgColor: "bg-slate-100 dark:bg-slate-800",
     description: "Features identified, scope defined",
-    navLink: "/enablement/content-status",
+    navLink: "/enablement?tab=workflow",
   },
   {
     id: "in_progress",
@@ -73,7 +73,7 @@ const WORKFLOW_STAGES: WorkflowStage[] = [
     color: "text-blue-600",
     bgColor: "bg-blue-100 dark:bg-blue-900/30",
     description: "Content creation in progress",
-    navLink: "/enablement/content-status",
+    navLink: "/enablement?tab=workflow",
   },
   {
     id: "review",
@@ -82,7 +82,7 @@ const WORKFLOW_STAGES: WorkflowStage[] = [
     color: "text-amber-600",
     bgColor: "bg-amber-100 dark:bg-amber-900/30",
     description: "Quality review & approval",
-    navLink: "/enablement/content-status",
+    navLink: "/enablement?tab=workflow",
   },
   {
     id: "published",
@@ -91,7 +91,7 @@ const WORKFLOW_STAGES: WorkflowStage[] = [
     color: "text-green-600",
     bgColor: "bg-green-100 dark:bg-green-900/30",
     description: "Live and available",
-    navLink: "/enablement/library",
+    navLink: "/enablement?tab=coverage",
   },
 ];
 
@@ -240,7 +240,7 @@ export function ReleaseWorkflowDashboard() {
         </div>
 
         <div className="flex items-center gap-4">
-          <Button variant="outline" size="sm" onClick={() => navigate("/enablement/releases")}>
+          <Button variant="outline" size="sm" onClick={() => navigate("/enablement?tab=releases")}>
             <Settings className="h-4 w-4 mr-2" />
             Manage Releases
           </Button>
@@ -412,7 +412,7 @@ export function ReleaseWorkflowDashboard() {
                           <div
                             key={item.id}
                             className="flex items-center justify-between p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors cursor-pointer"
-                            onClick={() => navigate(`/enablement/content-status?feature=${item.feature_code}`)}
+                            onClick={() => navigate(`/enablement?tab=workflow`)}
                           >
                             <div className="flex items-center gap-3">
                               <div className={`w-2 h-8 rounded-full ${getPriorityColor(item.priority)}`} />
@@ -482,18 +482,18 @@ export function ReleaseWorkflowDashboard() {
             <Button
               variant="outline"
               className="h-auto py-4 flex flex-col items-center gap-2"
-              onClick={() => navigate("/enablement/content-status")}
+              onClick={() => navigate("/enablement?tab=workflow")}
             >
               <ClipboardList className="h-6 w-6" />
-              <span className="text-sm">Content Status</span>
+              <span className="text-sm">Workflow Board</span>
             </Button>
             <Button
               variant="outline"
               className="h-auto py-4 flex flex-col items-center gap-2"
-              onClick={() => navigate("/enablement/library")}
+              onClick={() => navigate("/enablement?tab=coverage")}
             >
               <FileText className="h-6 w-6" />
-              <span className="text-sm">Content Library</span>
+              <span className="text-sm">Coverage Matrix</span>
             </Button>
             <Button
               variant="outline"
