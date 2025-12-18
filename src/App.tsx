@@ -53,9 +53,10 @@ import PasswordPoliciesPage from "./pages/admin/PasswordPoliciesPage";
 import StaffLoanDesignDocumentPage from "./pages/documents/StaffLoanDesignDocumentPage";
 
 // Enablement pages
-import EnablementDashboardPage from "./pages/enablement/EnablementDashboardPage";
+import EnablementHubPage from "./pages/enablement/EnablementHubPage";
 import ApplicationDocsGeneratorPage from "./pages/enablement/ApplicationDocsGeneratorPage";
 import FeatureCatalogPage from "./pages/enablement/FeatureCatalogPage";
+import TemplateLibraryPage from "./pages/enablement/TemplateLibraryPage";
 
 // Subscription pages
 import SubscriptionPage from "./pages/subscription/SubscriptionPage";
@@ -2918,7 +2919,7 @@ const App = () => (
               path="/enablement"
               element={
                 <ProtectedRoute requiredRoles={["admin"]}>
-                  <EnablementDashboardPage />
+                  <EnablementHubPage />
                 </ProtectedRoute>
               }
             />
@@ -2935,6 +2936,14 @@ const App = () => (
               element={
                 <ProtectedRoute requiredRoles={["admin"]}>
                   <ApplicationDocsGeneratorPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/enablement/template-library"
+              element={
+                <ProtectedRoute requiredRoles={["admin"]}>
+                  <TemplateLibraryPage />
                 </ProtectedRoute>
               }
             />
