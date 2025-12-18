@@ -49,6 +49,28 @@ const SUB_MODULE_HIGHLIGHTS: Record<string, { groups: string[]; label: string }>
   training: { groups: ['course_development'], label: 'LMS Management' },
 };
 
+// Countries where payroll processing is offered with statutory calculation visibility features
+const PAYROLL_COUNTRIES = [
+  { code: 'JM', name: 'Jamaica', region: 'Caribbean' },
+  { code: 'TT', name: 'Trinidad & Tobago', region: 'Caribbean' },
+  { code: 'BB', name: 'Barbados', region: 'Caribbean' },
+  { code: 'GY', name: 'Guyana', region: 'Caribbean' },
+  { code: 'LC', name: 'Saint Lucia', region: 'Caribbean' },
+  { code: 'GD', name: 'Grenada', region: 'Caribbean' },
+  { code: 'VC', name: 'Saint Vincent & the Grenadines', region: 'Caribbean' },
+  { code: 'AG', name: 'Antigua & Barbuda', region: 'Caribbean' },
+  { code: 'KN', name: 'Saint Kitts & Nevis', region: 'Caribbean' },
+  { code: 'DO', name: 'Dominican Republic', region: 'Caribbean' },
+  { code: 'BS', name: 'Bahamas', region: 'Caribbean' },
+  { code: 'BZ', name: 'Belize', region: 'Caribbean' },
+  { code: 'GH', name: 'Ghana', region: 'Africa' },
+  { code: 'NG', name: 'Nigeria', region: 'Africa' },
+  { code: 'KE', name: 'Kenya', region: 'Africa' },
+  { code: 'ZA', name: 'South Africa', region: 'Africa' },
+  { code: 'RW', name: 'Rwanda', region: 'Africa' },
+  { code: 'TZ', name: 'Tanzania', region: 'Africa' },
+];
+
 // Industry-standard module groupings (aligned with Workday, SAP, Oracle HCM marketing)
 const MODULE_GROUPS = {
   core_hr: {
@@ -807,9 +829,7 @@ export function FeatureCatalogGuidePreview({ open, onOpenChange }: FeatureCatalo
       </div>`;
     });
     
-    const subModuleBadge = subModuleInfo ? `<div style="margin-top: 8px;"><span style="background: ${secondaryColor}15; color: ${secondaryColor}; font-size: 11px; padding: 4px 10px; border-radius: 4px;">📌 Sub-Modules: ${subModuleInfo.label}</span></div>` : '';
-    const talentSuiteBadge = isTalentSuite ? `<span style="background: linear-gradient(135deg, ${primaryColor}, ${secondaryColor}); color: white; font-size: 11px; padding: 4px 10px; border-radius: 4px; margin-left: 8px;">🎯 Talent Suite</span>` : '';
-    const categoryBadge = moduleGroup ? `<span style="background: ${moduleGroup.group.color}15; color: ${moduleGroup.group.color}; font-size: 10px; padding: 2px 8px; border-radius: 4px; margin-left: 8px;">${moduleGroup.group.icon} ${moduleGroup.group.name}</span>` : '';
+    const subModuleBadge = subModuleInfo ? `<div style="margin-top: 8px;"><span style="background: ${secondaryColor}15; color: ${secondaryColor}; font-size: 11px; padding: 4px 10px; border-radius: 4px;">⭐ Sub-Modules: ${subModuleInfo.label}</span></div>` : '';
     const integrationsHTML = integrations.length > 0 ? `
       <div style="margin-top: 16px; padding: 12px; background: #fefce8; border-radius: 6px; border-left: 3px solid #eab308;">
         <div style="font-size: 11px; font-weight: 600; color: #854d0e; margin-bottom: 6px;">🔗 Integrates With:</div>
@@ -822,26 +842,45 @@ export function FeatureCatalogGuidePreview({ open, onOpenChange }: FeatureCatalo
       </div>
     ` : '';
     
+    // Payroll countries section
+    const payrollCountriesHTML = module.code === 'payroll' ? `
+      <div style="margin: 16px 0; padding: 16px; background: linear-gradient(135deg, #059669 0%, #10b981 100%); border-radius: 8px; color: white;">
+        <div style="font-size: 14px; font-weight: 600; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+          🌍 Statutory Calculation Visibility - Supported Countries (${PAYROLL_COUNTRIES.length})
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;">
+          ${Object.entries(PAYROLL_COUNTRIES.reduce((acc, c) => { acc[c.region] = acc[c.region] || []; acc[c.region].push(c); return acc; }, {} as Record<string, typeof PAYROLL_COUNTRIES>)).map(([region, countries]) => `
+            <div style="background: rgba(255,255,255,0.15); border-radius: 6px; padding: 12px;">
+              <div style="font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; opacity: 0.9;">${region}</div>
+              <div style="display: flex; flex-wrap: wrap; gap: 4px;">
+                ${countries.map(c => `<span style="background: rgba(255,255,255,0.25); padding: 2px 6px; border-radius: 3px; font-size: 10px;">${c.name}</span>`).join('')}
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    ` : '';
+    
     return `
       <div style="padding: 40px; background: white; font-family: system-ui, -apple-system, sans-serif;">
         ${renderDocumentHeader(pageNum, isFirst ? 'Module Reference' : module.name)}
         ${isFirst ? `<h2 style="font-size: 28px; font-weight: 700; margin-bottom: 8px; padding-bottom: 12px; border-bottom: 3px solid ${primaryColor};">Module Reference</h2><p style="color: #64748b; margin-bottom: 24px;">Complete Feature Inventory by Module</p>` : ''}
-        <div style="background: #f8fafc; border-radius: 8px; padding: 24px; border-left: 4px solid ${isTalentSuite ? secondaryColor : primaryColor}; ${isTalentSuite ? `border: 2px solid ${primaryColor}30;` : ''}">
+        <div style="background: #f8fafc; border-radius: 8px; padding: 24px; border-left: 4px solid ${moduleGroup?.group.color || primaryColor}; ${isTalentSuite ? `border: 2px solid ${primaryColor}30;` : ''}">
           <div style="display: flex; align-items: start; gap: 16px; margin-bottom: 16px;">
-            <div style="background: ${primaryColor}20; padding: 12px; border-radius: 8px;">
-              <span style="font-size: 24px;">📦</span>
+            <div style="background: ${moduleGroup?.group.color || primaryColor}20; padding: 12px; border-radius: 8px;">
+              <span style="font-size: 24px;">${moduleGroup?.group.icon || '📦'}</span>
             </div>
             <div style="flex: 1;">
               <div style="display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 4px;">
                 <h3 style="font-size: 20px; font-weight: 600; color: #1e293b; margin: 0;">${module.name}</h3>
                 <span style="background: ${primaryColor}20; color: ${primaryColor}; font-size: 12px; padding: 2px 8px; border-radius: 12px;">${moduleFeatureCount} Features</span>
-                ${talentSuiteBadge}
-                ${categoryBadge}
+                ${moduleGroup ? `<span style="background: ${moduleGroup.group.color}; color: white; font-size: 11px; padding: 4px 10px; border-radius: 4px; font-weight: 500;">${moduleGroup.group.icon} ${moduleGroup.group.name}</span>` : ''}
               </div>
               <p style="font-size: 14px; color: #64748b; margin: 0;">${module.description}</p>
               ${subModuleBadge}
             </div>
           </div>
+          ${payrollCountriesHTML}
           ${enrichment ? `
             <div style="background: white; border-radius: 8px; padding: 16px; border: 1px solid #e2e8f0; margin-bottom: 16px;">
               <p style="font-size: 14px; color: #475569; margin: 0 0 12px 0;">${enrichment.businessContext}</p>
@@ -1297,7 +1336,7 @@ export function FeatureCatalogGuidePreview({ open, onOpenChange }: FeatureCatalo
             const enrichment = MODULE_ENRICHMENTS[module.code];
             const moduleFeatureCount = module.groups.reduce((acc, g) => acc + g.features.length, 0);
             const subModuleInfo = SUB_MODULE_HIGHLIGHTS[module.code];
-            const isTalentSuite = TALENT_SUITE.modules.includes(module.code);
+            const moduleGroup = getModuleGroup(module.code);
             const integrations = MODULE_INTEGRATIONS[module.code] || [];
             
             return (
@@ -1312,33 +1351,59 @@ export function FeatureCatalogGuidePreview({ open, onOpenChange }: FeatureCatalo
                 <div 
                   className="module-card bg-slate-50 rounded-lg p-6 mb-4" 
                   style={{ 
-                    borderLeft: `4px solid ${isTalentSuite ? secondaryColor : primaryColor}`,
-                    border: isTalentSuite ? `2px solid ${primaryColor}30` : undefined 
+                    borderLeft: `4px solid ${moduleGroup?.group.color || primaryColor}`,
                   }}
                 >
                   {/* Module Header */}
                   <div className="flex items-start gap-4 mb-4">
-                    <div className="p-3 rounded-lg shrink-0" style={{ backgroundColor: `${primaryColor}20` }}>
-                      <ModuleIcon className="h-6 w-6" style={{ color: primaryColor }} />
+                    <div className="p-3 rounded-lg shrink-0" style={{ backgroundColor: `${moduleGroup?.group.color || primaryColor}20` }}>
+                      <span className="text-2xl">{moduleGroup?.group.icon || '📦'}</span>
                     </div>
                     <div className="flex-1">
                       <div className="flex items-center flex-wrap gap-2 mb-1">
                         <h3 className="module-name text-xl font-semibold">{module.name}</h3>
                         <Badge style={{ backgroundColor: `${primaryColor}20`, color: primaryColor }}>{moduleFeatureCount} Features</Badge>
-                        {isTalentSuite && (
-                          <Badge style={{ background: `linear-gradient(135deg, ${primaryColor}, ${secondaryColor})`, color: 'white' }}>🎯 Talent Suite</Badge>
+                        {moduleGroup && (
+                          <Badge style={{ backgroundColor: moduleGroup.group.color, color: 'white' }}>
+                            {moduleGroup.group.icon} {moduleGroup.group.name}
+                          </Badge>
                         )}
                       </div>
                       <p className="text-sm text-muted-foreground">{module.description}</p>
                       {subModuleInfo && (
                         <div className="mt-2">
                           <Badge variant="outline" style={{ borderColor: secondaryColor, color: secondaryColor }}>
-                            📌 Sub-Modules: {subModuleInfo.label}
+                            ⭐ Sub-Modules: {subModuleInfo.label}
                           </Badge>
                         </div>
                       )}
                     </div>
                   </div>
+
+                  {/* Payroll Countries Section */}
+                  {module.code === 'payroll' && (
+                    <div className="mb-4 p-4 rounded-lg text-white" style={{ background: 'linear-gradient(135deg, #059669 0%, #10b981 100%)' }}>
+                      <div className="text-sm font-semibold mb-3 flex items-center gap-2">
+                        🌍 Statutory Calculation Visibility - Supported Countries ({PAYROLL_COUNTRIES.length})
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        {Object.entries(PAYROLL_COUNTRIES.reduce((acc, c) => { 
+                          acc[c.region] = acc[c.region] || []; 
+                          acc[c.region].push(c); 
+                          return acc; 
+                        }, {} as Record<string, typeof PAYROLL_COUNTRIES>)).map(([region, countries]) => (
+                          <div key={region} className="bg-white/15 rounded-md p-3">
+                            <div className="text-xs font-semibold uppercase tracking-wide mb-2 opacity-90">{region}</div>
+                            <div className="flex flex-wrap gap-1">
+                              {countries.map(c => (
+                                <span key={c.code} className="bg-white/25 px-2 py-0.5 rounded text-[10px]">{c.name}</span>
+                              ))}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
 
                   {/* Business Context */}
                   {enrichment && (
