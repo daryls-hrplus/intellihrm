@@ -114,6 +114,7 @@ export default function PayrollDashboardPage() {
     taxAllowances: { title: t("payroll.modules.taxAllowances.title", "Tax Allowances"), description: t("payroll.modules.taxAllowances.description", "Manage non-taxable allowances for employees"), icon: Receipt, href: "/payroll/tax-allowances", color: "bg-emerald-500/10 text-emerald-600", tabCode: "tax_allowances" },
     bankFileBuilder: { title: t("payroll.modules.bankFileBuilder.title", "Bank File Builder"), description: t("payroll.modules.bankFileBuilder.description", "AI-powered bank file configuration and generation"), icon: FileSpreadsheet, href: "/payroll/bank-file-builder", color: "bg-indigo-500/10 text-indigo-600", tabCode: "bank_file_builder" },
     holidays: { title: t("leave.holidays.title", "Holidays Calendar"), description: t("leave.holidays.subtitle", "Manage country and company holidays"), icon: PartyPopper, href: "/payroll/holidays", color: "bg-pink-500/10 text-pink-600", tabCode: "holidays" },
+    openingBalances: { title: "Opening Balances", description: "Import brought forward YTD balances for mid-year employees", icon: FileSpreadsheet, href: "/payroll/opening-balances", color: "bg-teal-500/10 text-teal-600", tabCode: "opening_balances" },
   };
 
   const filterByAccess = (modules: typeof allModules[keyof typeof allModules][]) =>
@@ -126,7 +127,7 @@ export default function PayrollDashboardPage() {
     },
     {
       titleKey: "Configuration",
-      items: filterByAccess([allModules.payGroups, allModules.payElements, allModules.taxConfig, allModules.statutoryTypes, allModules.taxAllowances, allModules.templates, allModules.holidays]),
+      items: filterByAccess([allModules.payGroups, allModules.payElements, allModules.taxConfig, allModules.statutoryTypes, allModules.taxAllowances, allModules.templates, allModules.holidays, allModules.openingBalances]),
     },
     {
       titleKey: "Integration",
