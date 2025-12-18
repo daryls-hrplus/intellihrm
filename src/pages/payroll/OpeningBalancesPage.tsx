@@ -173,23 +173,36 @@ const OpeningBalancesPage: React.FC = () => {
   const loadEmployees = async () => {
     if (!selectedCompanyId || !selectedPayGroupId) return;
     
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data, error } = await (supabase as any)
-      .from("profiles")
-      .select("id, full_name, employee_id, pay_group_id")
-      .eq("company_id", selectedCompanyId)
+    // Get employees who have a position in the selected pay group
+    const { data, error } = await supabase
+      .from("employee_positions")
+      .select(`
+        employee_id,
+        profiles!employee_positions_employee_id_fkey (
+          id,
+          full_name,
+          is_active
+        )
+      `)
       .eq("pay_group_id", selectedPayGroupId)
-      .eq("status", "active");
+      .eq("is_active", true);
     
     if (!error && data) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      setEmployees(data.map((d: any) => ({
-        id: d.id,
-        first_name: d.full_name?.split(" ")[0] || "",
-        last_name: d.full_name?.split(" ").slice(1).join(" ") || "",
-        employee_id: d.employee_id || "",
-        pay_group_id: d.pay_group_id
-      })));
+      const uniqueEmployees = new Map();
+      data.forEach((pos: any) => {
+        if (pos.profiles && pos.profiles.is_active) {
+          uniqueEmployees.set(pos.employee_id, {
+            id: pos.profiles.id,
+            first_name: pos.profiles.full_name?.split(" ")[0] || "",
+            last_name: pos.profiles.full_name?.split(" ").slice(1).join(" ") || "",
+            employee_id: pos.employee_id,
+            pay_group_id: selectedPayGroupId
+          });
+        }
+      });
+      setEmployees(Array.from(uniqueEmployees.values()));
+    } else if (error) {
+      console.error("Error loading employees:", error);
     }
   };
 
@@ -197,15 +210,14 @@ const OpeningBalancesPage: React.FC = () => {
     if (!selectedCompanyId || !selectedPayGroupId) return;
     setIsLoading(true);
     
-    // Get employees in this pay group first
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data: pgEmployees } = await (supabase as any)
-      .from("profiles")
-      .select("id")
-      .eq("company_id", selectedCompanyId)
-      .eq("pay_group_id", selectedPayGroupId);
+    // Get employees in this pay group via employee_positions
+    const { data: pgEmployees } = await supabase
+      .from("employee_positions")
+      .select("employee_id")
+      .eq("pay_group_id", selectedPayGroupId)
+      .eq("is_active", true);
     
-    const employeeIdsInPayGroup = pgEmployees?.map((e: any) => e.id) || [];
+    const employeeIdsInPayGroup = [...new Set(pgEmployees?.map((e: any) => e.employee_id) || [])];
     
     if (employeeIdsInPayGroup.length === 0) {
       setOpeningBalances([]);
