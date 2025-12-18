@@ -16,10 +16,10 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { Plus, Upload, Pencil, Trash2, FileSpreadsheet, AlertCircle, Building2, History, Globe } from "lucide-react";
+import { Plus, Upload, Pencil, Trash2, FileSpreadsheet, AlertCircle, Building2, History, Globe, Users } from "lucide-react";
 import { format } from "date-fns";
 import { useNavigate } from "react-router-dom";
-import { useCountryStatutories, StatutoryType } from "@/hooks/useCountryStatutories";
+import { useCountryStatutories, usePayGroups } from "@/hooks/useCountryStatutories";
 import { DynamicStatutoryFields } from "@/components/payroll/DynamicStatutoryFields";
 
 interface Company {
@@ -32,11 +32,13 @@ interface Employee {
   first_name: string;
   last_name: string;
   employee_id: string;
+  pay_group_id?: string;
 }
 
 interface OpeningBalance {
   id: string;
   employee_id: string;
+  pay_group_id?: string | null;
   tax_year: number;
   effective_date: string;
   previous_employer_name: string | null;
@@ -88,6 +90,7 @@ const OpeningBalancesPage: React.FC = () => {
   
   const [companies, setCompanies] = useState<Company[]>([]);
   const [selectedCompanyId, setSelectedCompanyId] = useState<string>("");
+  const [selectedPayGroupId, setSelectedPayGroupId] = useState<string>("");
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [openingBalances, setOpeningBalances] = useState<OpeningBalance[]>([]);
   const [selectedTaxYear, setSelectedTaxYear] = useState<number>(currentYear);
@@ -95,6 +98,7 @@ const OpeningBalancesPage: React.FC = () => {
   
   // Country-specific statutory hook
   const { company: selectedCompany, statutoryTypes, isLoading: loadingStatutories } = useCountryStatutories(selectedCompanyId || null);
+  const { payGroups, isLoading: loadingPayGroups } = usePayGroups(selectedCompanyId || null);
   
   // Form state - use a flexible structure for statutory values
   const [showForm, setShowForm] = useState(false);
@@ -139,12 +143,17 @@ const OpeningBalancesPage: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    if (selectedCompanyId) {
+    if (selectedCompanyId && selectedPayGroupId) {
       loadEmployees();
       loadOpeningBalances();
       loadImportHistory();
     }
-  }, [selectedCompanyId, selectedTaxYear]);
+  }, [selectedCompanyId, selectedPayGroupId, selectedTaxYear]);
+
+  // Reset pay group when company changes
+  useEffect(() => {
+    setSelectedPayGroupId("");
+  }, [selectedCompanyId]);
 
   const loadCompanies = async () => {
     const { data, error } = await supabase
@@ -162,13 +171,14 @@ const OpeningBalancesPage: React.FC = () => {
   };
 
   const loadEmployees = async () => {
-    if (!selectedCompanyId) return;
+    if (!selectedCompanyId || !selectedPayGroupId) return;
     
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data, error } = await (supabase as any)
       .from("profiles")
-      .select("id, full_name, employee_id")
+      .select("id, full_name, employee_id, pay_group_id")
       .eq("company_id", selectedCompanyId)
+      .eq("pay_group_id", selectedPayGroupId)
       .eq("status", "active");
     
     if (!error && data) {
@@ -177,20 +187,38 @@ const OpeningBalancesPage: React.FC = () => {
         id: d.id,
         first_name: d.full_name?.split(" ")[0] || "",
         last_name: d.full_name?.split(" ").slice(1).join(" ") || "",
-        employee_id: d.employee_id || ""
+        employee_id: d.employee_id || "",
+        pay_group_id: d.pay_group_id
       })));
     }
   };
 
   const loadOpeningBalances = async () => {
-    if (!selectedCompanyId) return;
+    if (!selectedCompanyId || !selectedPayGroupId) return;
     setIsLoading(true);
+    
+    // Get employees in this pay group first
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: pgEmployees } = await (supabase as any)
+      .from("profiles")
+      .select("id")
+      .eq("company_id", selectedCompanyId)
+      .eq("pay_group_id", selectedPayGroupId);
+    
+    const employeeIdsInPayGroup = pgEmployees?.map((e: any) => e.id) || [];
+    
+    if (employeeIdsInPayGroup.length === 0) {
+      setOpeningBalances([]);
+      setIsLoading(false);
+      return;
+    }
     
     const { data, error } = await supabase
       .from("employee_opening_balances")
       .select("*")
       .eq("company_id", selectedCompanyId)
       .eq("tax_year", selectedTaxYear)
+      .in("employee_id", employeeIdsInPayGroup)
       .order("created_at", { ascending: false });
     
     if (!error && data) {
@@ -688,11 +716,11 @@ const OpeningBalancesPage: React.FC = () => {
               <History className="w-4 h-4 mr-2" />
               Full Payroll Import
             </Button>
-            <Button variant="outline" onClick={() => setShowImport(true)} disabled={!selectedCompanyId}>
+            <Button variant="outline" onClick={() => setShowImport(true)} disabled={!selectedCompanyId || !selectedPayGroupId}>
               <Upload className="w-4 h-4 mr-2" />
               Import CSV
             </Button>
-            <Button onClick={() => { resetForm(); setShowForm(true); }} disabled={!selectedCompanyId}>
+            <Button onClick={() => { resetForm(); setShowForm(true); }} disabled={!selectedCompanyId || !selectedPayGroupId}>
               <Plus className="w-4 h-4 mr-2" />
               Add Balance
             </Button>
@@ -702,16 +730,37 @@ const OpeningBalancesPage: React.FC = () => {
         {/* Filters */}
         <Card>
           <CardContent className="pt-6">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div>
-                <Label>Company</Label>
+                <Label>Company *</Label>
                 <Select value={selectedCompanyId} onValueChange={setSelectedCompanyId}>
                   <SelectTrigger>
+                    <Building2 className="w-4 h-4 mr-2" />
                     <SelectValue placeholder="Select company" />
                   </SelectTrigger>
                   <SelectContent>
                     {companies.map(c => (
                       <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>Pay Group *</Label>
+                <Select 
+                  value={selectedPayGroupId} 
+                  onValueChange={setSelectedPayGroupId}
+                  disabled={!selectedCompanyId || loadingPayGroups}
+                >
+                  <SelectTrigger>
+                    <Users className="w-4 h-4 mr-2" />
+                    <SelectValue placeholder={loadingPayGroups ? "Loading..." : "Select pay group"} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {payGroups.map(pg => (
+                      <SelectItem key={pg.id} value={pg.id}>
+                        {pg.name} ({pg.code})
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -741,11 +790,12 @@ const OpeningBalancesPage: React.FC = () => {
           </CardContent>
         </Card>
         
-        {!selectedCompanyId ? (
+        {!selectedCompanyId || !selectedPayGroupId ? (
           <Card>
             <CardContent className="py-12 text-center text-muted-foreground">
-              <Building2 className="w-12 h-12 mx-auto mb-4 opacity-50" />
-              <p>Select a company to view and manage opening balances</p>
+              <Users className="w-12 h-12 mx-auto mb-4 opacity-50" />
+              <p>Select a company and pay group to view and manage opening balances</p>
+              <p className="text-sm mt-2">Pay group is required for payroll security</p>
             </CardContent>
           </Card>
         ) : (
@@ -1189,13 +1239,21 @@ const OpeningBalancesPage: React.FC = () => {
             <DialogHeader>
               <DialogTitle>Import Opening Balances</DialogTitle>
               <DialogDescription>
-                Upload a CSV file with opening balance data for {selectedCompany?.name}
-                {selectedCompany && (
-                  <Badge variant="outline" className="ml-2">
-                    <Globe className="w-3 h-3 mr-1" />
-                    {selectedCompany.country}
-                  </Badge>
-                )}
+                Upload a CSV file with opening balance data
+                <div className="flex gap-2 mt-2">
+                  {selectedCompany && (
+                    <Badge variant="outline" className="gap-1">
+                      <Globe className="w-3 h-3" />
+                      {selectedCompany.country}
+                    </Badge>
+                  )}
+                  {selectedPayGroupId && payGroups.find(pg => pg.id === selectedPayGroupId) && (
+                    <Badge variant="secondary" className="gap-1">
+                      <Users className="w-3 h-3" />
+                      {payGroups.find(pg => pg.id === selectedPayGroupId)?.name}
+                    </Badge>
+                  )}
+                </div>
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4">

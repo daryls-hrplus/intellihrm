@@ -17,6 +17,14 @@ export interface CompanyWithCountry {
   country: string;
 }
 
+export interface PayGroup {
+  id: string;
+  name: string;
+  code: string;
+  pay_frequency: string;
+  company_id: string;
+}
+
 export function useCountryStatutories(companyId: string | null) {
   const [company, setCompany] = useState<CompanyWithCountry | null>(null);
   const [statutoryTypes, setStatutoryTypes] = useState<StatutoryType[]>([]);
@@ -114,3 +122,35 @@ export function useCountryStatutories(companyId: string | null) {
     getStatutoryHeaders,
   };
 }
+
+export function usePayGroups(companyId: string | null) {
+  const [payGroups, setPayGroups] = useState<PayGroup[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    if (!companyId) {
+      setPayGroups([]);
+      return;
+    }
+
+    const loadPayGroups = async () => {
+      setIsLoading(true);
+      const { data, error } = await supabase
+        .from("pay_groups")
+        .select("id, name, code, pay_frequency, company_id")
+        .eq("company_id", companyId)
+        .eq("is_active", true)
+        .order("name");
+
+      if (!error && data) {
+        setPayGroups(data);
+      }
+      setIsLoading(false);
+    };
+
+    loadPayGroups();
+  }, [companyId]);
+
+  return { payGroups, isLoading };
+}
+
