@@ -35,6 +35,11 @@ export interface EnablementContentStatus {
   completed_at: string | null;
   created_at: string;
   updated_at: string;
+  // Time estimate fields
+  estimated_hours: number | null;
+  actual_hours: number | null;
+  ai_estimated_hours: number | null;
+  time_estimate_notes: string | null;
   // Joined fields
   release?: EnablementRelease;
   assignee?: { full_name: string; email: string };

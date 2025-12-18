@@ -9176,9 +9176,53 @@ export type Database = {
           },
         ]
       }
+      enablement_change_tracking: {
+        Row: {
+          change_category: string
+          change_details: Json | null
+          change_type: string
+          changed_at: string
+          created_at: string
+          detected_at: string
+          entity_code: string | null
+          entity_name: string
+          entity_type: string
+          id: string
+          source: string | null
+        }
+        Insert: {
+          change_category: string
+          change_details?: Json | null
+          change_type: string
+          changed_at?: string
+          created_at?: string
+          detected_at?: string
+          entity_code?: string | null
+          entity_name: string
+          entity_type: string
+          id?: string
+          source?: string | null
+        }
+        Update: {
+          change_category?: string
+          change_details?: Json | null
+          change_type?: string
+          changed_at?: string
+          created_at?: string
+          detected_at?: string
+          entity_code?: string | null
+          entity_name?: string
+          entity_type?: string
+          id?: string
+          source?: string | null
+        }
+        Relationships: []
+      }
       enablement_content_status: {
         Row: {
+          actual_hours: number | null
           ai_change_impact: string | null
+          ai_estimated_hours: number | null
           assigned_to: string | null
           completed_at: string | null
           complexity_score: number | null
@@ -9186,6 +9230,7 @@ export type Database = {
           dap_guide_status: string | null
           documentation_status: string | null
           due_date: string | null
+          estimated_hours: number | null
           feature_code: string
           id: string
           module_code: string
@@ -9195,12 +9240,15 @@ export type Database = {
           rise_course_status: string | null
           scorm_lite_status: string | null
           started_at: string | null
+          time_estimate_notes: string | null
           updated_at: string | null
           video_status: string | null
           workflow_status: string | null
         }
         Insert: {
+          actual_hours?: number | null
           ai_change_impact?: string | null
+          ai_estimated_hours?: number | null
           assigned_to?: string | null
           completed_at?: string | null
           complexity_score?: number | null
@@ -9208,6 +9256,7 @@ export type Database = {
           dap_guide_status?: string | null
           documentation_status?: string | null
           due_date?: string | null
+          estimated_hours?: number | null
           feature_code: string
           id?: string
           module_code: string
@@ -9217,12 +9266,15 @@ export type Database = {
           rise_course_status?: string | null
           scorm_lite_status?: string | null
           started_at?: string | null
+          time_estimate_notes?: string | null
           updated_at?: string | null
           video_status?: string | null
           workflow_status?: string | null
         }
         Update: {
+          actual_hours?: number | null
           ai_change_impact?: string | null
+          ai_estimated_hours?: number | null
           assigned_to?: string | null
           completed_at?: string | null
           complexity_score?: number | null
@@ -9230,6 +9282,7 @@ export type Database = {
           dap_guide_status?: string | null
           documentation_status?: string | null
           due_date?: string | null
+          estimated_hours?: number | null
           feature_code?: string
           id?: string
           module_code?: string
@@ -9239,6 +9292,7 @@ export type Database = {
           rise_course_status?: string | null
           scorm_lite_status?: string | null
           started_at?: string | null
+          time_estimate_notes?: string | null
           updated_at?: string | null
           video_status?: string | null
           workflow_status?: string | null
@@ -9471,6 +9525,8 @@ export type Database = {
           release_name: string | null
           release_notes: string | null
           status: string | null
+          target_release_date: string | null
+          total_estimated_hours: number | null
           updated_at: string | null
           version_number: string
         }
@@ -9484,6 +9540,8 @@ export type Database = {
           release_name?: string | null
           release_notes?: string | null
           status?: string | null
+          target_release_date?: string | null
+          total_estimated_hours?: number | null
           updated_at?: string | null
           version_number: string
         }
@@ -9497,6 +9555,8 @@ export type Database = {
           release_name?: string | null
           release_notes?: string | null
           status?: string | null
+          target_release_date?: string | null
+          total_estimated_hours?: number | null
           updated_at?: string | null
           version_number?: string
         }

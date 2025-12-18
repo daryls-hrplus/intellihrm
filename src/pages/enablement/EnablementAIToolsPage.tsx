@@ -44,12 +44,12 @@ import { toast } from "sonner";
 import { marked } from "marked";
 import {
   GapAnalysisRenderer,
-  ChangeReportRenderer,
   ChangeDetectionRenderer,
   FAQRenderer,
   IntegrationAnalysisRenderer,
   GenericResultsRenderer,
 } from "@/components/enablement/AIToolsResultsRenderer";
+import { ChangeReportRenderer } from "@/components/enablement/ChangeReportRenderer";
 
 export default function EnablementAIToolsPage() {
   const { t } = useTranslation();
