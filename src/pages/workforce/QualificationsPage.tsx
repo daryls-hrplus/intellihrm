@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router-dom";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -9,9 +10,27 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { 
   Plus, Search, GraduationCap, Award, FileCheck, Loader2,
-  CheckCircle, XCircle, Clock, Filter, Building2, ChevronRight, Upload, FileText, ExternalLink
+  CheckCircle, XCircle, Clock, Filter, Building2, Upload, FileText, 
+  MoreHorizontal, Pencil, Trash2, User, RefreshCw, ExternalLink
 } from "lucide-react";
 import { toast } from "sonner";
 import { QualificationDialog } from "@/components/workforce/qualifications/QualificationDialog";
@@ -46,6 +65,7 @@ interface Qualification {
 
 export default function QualificationsPage() {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const [companies, setCompanies] = useState<Company[]>([]);
   const [selectedCompanyId, setSelectedCompanyId] = useState<string>("all");
   const [qualifications, setQualifications] = useState<Qualification[]>([]);
@@ -58,6 +78,10 @@ export default function QualificationsPage() {
   const [bulkUploadOpen, setBulkUploadOpen] = useState(false);
   const [verifyDialogOpen, setVerifyDialogOpen] = useState(false);
   const [selectedQualification, setSelectedQualification] = useState<Qualification | null>(null);
+  const [editQualification, setEditQualification] = useState<Qualification | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [qualificationToDelete, setQualificationToDelete] = useState<Qualification | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [stats, setStats] = useState({
     total: 0,
     academic: 0,
@@ -195,6 +219,48 @@ export default function QualificationsPage() {
   const handleVerify = (qualification: Qualification) => {
     setSelectedQualification(qualification);
     setVerifyDialogOpen(true);
+  };
+
+  const handleEdit = (qualification: Qualification) => {
+    setEditQualification(qualification);
+    setDialogOpen(true);
+  };
+
+  const handleDelete = async () => {
+    if (!qualificationToDelete) return;
+    
+    setIsDeleting(true);
+    try {
+      const { error } = await supabase
+        .from("employee_qualifications")
+        .delete()
+        .eq("id", qualificationToDelete.id);
+
+      if (error) throw error;
+
+      toast.success("Qualification deleted successfully");
+      fetchQualifications();
+    } catch (error: any) {
+      console.error("Error deleting qualification:", error);
+      toast.error(error.message || "Failed to delete qualification");
+    } finally {
+      setIsDeleting(false);
+      setDeleteDialogOpen(false);
+      setQualificationToDelete(null);
+    }
+  };
+
+  const confirmDelete = (qualification: Qualification) => {
+    setQualificationToDelete(qualification);
+    setDeleteDialogOpen(true);
+  };
+
+  const isExpiringSoon = (expiryDate?: string) => {
+    if (!expiryDate) return false;
+    const expiry = new Date(expiryDate);
+    const now = new Date();
+    const ninetyDaysFromNow = new Date(now.getTime() + 90 * 24 * 60 * 60 * 1000);
+    return expiry <= ninetyDaysFromNow && expiry >= now;
   };
 
   return (
@@ -390,31 +456,50 @@ export default function QualificationsPage() {
                             {getVerificationBadge(q.verification_status)}
                           </TableCell>
                           <TableCell className="text-right">
-                            <div className="flex items-center justify-end gap-2">
-                              {q.document_url && (
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() => window.open(q.document_url, '_blank')}
-                                  title={q.document_name || "View Document"}
-                                >
-                                  <FileText className="h-4 w-4 mr-1" />
-                                  View
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="sm">
+                                  <MoreHorizontal className="h-4 w-4" />
                                 </Button>
-                              )}
-                              {q.verification_status === "pending" && (
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() => handleVerify(q)}
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end">
+                                <DropdownMenuItem onClick={() => handleEdit(q)}>
+                                  <Pencil className="h-4 w-4 mr-2" />
+                                  Edit
+                                </DropdownMenuItem>
+                                {q.verification_status === "pending" && (
+                                  <DropdownMenuItem onClick={() => handleVerify(q)}>
+                                    <CheckCircle className="h-4 w-4 mr-2" />
+                                    Verify
+                                  </DropdownMenuItem>
+                                )}
+                                {q.document_url && (
+                                  <DropdownMenuItem onClick={() => window.open(q.document_url, '_blank')}>
+                                    <FileText className="h-4 w-4 mr-2" />
+                                    View Document
+                                  </DropdownMenuItem>
+                                )}
+                                {isExpiringSoon(q.expiry_date) && (
+                                  <DropdownMenuItem onClick={() => handleEdit(q)}>
+                                    <RefreshCw className="h-4 w-4 mr-2" />
+                                    Renew
+                                  </DropdownMenuItem>
+                                )}
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem onClick={() => navigate(`/workforce/employees/${q.employee_id}?tab=qualifications`)}>
+                                  <User className="h-4 w-4 mr-2" />
+                                  View Employee Profile
+                                </DropdownMenuItem>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem 
+                                  onClick={() => confirmDelete(q)}
+                                  className="text-destructive focus:text-destructive"
                                 >
-                                  Verify
-                                </Button>
-                              )}
-                              <Button variant="ghost" size="sm">
-                                <ChevronRight className="h-4 w-4" />
-                              </Button>
-                            </div>
+                                  <Trash2 className="h-4 w-4 mr-2" />
+                                  Delete
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
                           </TableCell>
                         </TableRow>
                       ))}
@@ -494,12 +579,17 @@ export default function QualificationsPage() {
 
       <QualificationDialog
         open={dialogOpen}
-        onOpenChange={setDialogOpen}
+        onOpenChange={(open) => {
+          setDialogOpen(open);
+          if (!open) setEditQualification(null);
+        }}
         onSuccess={() => {
           setDialogOpen(false);
+          setEditQualification(null);
           fetchQualifications();
         }}
         companyId={selectedCompanyId === "all" ? undefined : selectedCompanyId}
+        qualification={editQualification}
       />
 
       <VerificationDialog
@@ -518,6 +608,27 @@ export default function QualificationsPage() {
         onOpenChange={setBulkUploadOpen}
         onSuccess={fetchQualifications}
       />
+
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Qualification</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete "{qualificationToDelete?.name}"? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleDelete} 
+              disabled={isDeleting}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {isDeleting ? "Deleting..." : "Delete"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </AppLayout>
   );
 }
