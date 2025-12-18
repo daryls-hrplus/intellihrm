@@ -29374,6 +29374,80 @@ export type Database = {
         }
         Relationships: []
       }
+      statutory_pay_element_mappings: {
+        Row: {
+          company_id: string
+          created_at: string
+          created_by: string | null
+          effective_date: string
+          employee_pay_element_id: string | null
+          employer_pay_element_id: string | null
+          end_date: string | null
+          id: string
+          is_active: boolean
+          notes: string | null
+          statutory_type_id: string
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          created_by?: string | null
+          effective_date?: string
+          employee_pay_element_id?: string | null
+          employer_pay_element_id?: string | null
+          end_date?: string | null
+          id?: string
+          is_active?: boolean
+          notes?: string | null
+          statutory_type_id: string
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          effective_date?: string
+          employee_pay_element_id?: string | null
+          employer_pay_element_id?: string | null
+          end_date?: string | null
+          id?: string
+          is_active?: boolean
+          notes?: string | null
+          statutory_type_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "statutory_pay_element_mappings_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "statutory_pay_element_mappings_employee_pay_element_id_fkey"
+            columns: ["employee_pay_element_id"]
+            isOneToOne: false
+            referencedRelation: "pay_elements"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "statutory_pay_element_mappings_employer_pay_element_id_fkey"
+            columns: ["employer_pay_element_id"]
+            isOneToOne: false
+            referencedRelation: "pay_elements"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "statutory_pay_element_mappings_statutory_type_id_fkey"
+            columns: ["statutory_type_id"]
+            isOneToOne: false
+            referencedRelation: "statutory_deduction_types"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       statutory_rate_bands: {
         Row: {
           band_name: string | null
