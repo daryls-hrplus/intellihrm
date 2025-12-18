@@ -42,6 +42,12 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { marked } from "marked";
+import {
+  GapAnalysisRenderer,
+  ChangeReportRenderer,
+  IntegrationAnalysisRenderer,
+  GenericResultsRenderer,
+} from "@/components/enablement/AIToolsResultsRenderer";
 
 export default function EnablementAIToolsPage() {
   const { t } = useTranslation();
@@ -164,6 +170,14 @@ export default function EnablementAIToolsPage() {
       priority: "Low",
       color: "text-red-500",
     },
+    {
+      id: "integration-analysis",
+      name: "Cross-Module Integration",
+      description: "Analyze and suggest module integrations",
+      icon: Brain,
+      priority: "Medium",
+      color: "text-cyan-500",
+    },
   ];
 
   return (
@@ -219,10 +233,10 @@ export default function EnablementAIToolsPage() {
                         }`}
                       >
                         <div className="flex items-start gap-3">
-                          <Icon className={`h-5 w-5 mt-0.5 ${tool.color}`} />
+                          <Icon className={`h-5 w-5 mt-0.5 shrink-0 ${tool.color}`} />
                           <div className="flex-1 min-w-0">
                             <p className="font-medium text-sm">{tool.name}</p>
-                            <p className="text-xs text-muted-foreground truncate">
+                            <p className="text-xs text-muted-foreground">
                               {tool.description}
                             </p>
                           </div>
@@ -671,16 +685,34 @@ export default function EnablementAIToolsPage() {
                 </div>
               )}
 
-              {/* Compliance Impact Detector */}
-              {activeTab === "compliance-detector" && (
+              {/* Cross-Module Integration Analysis */}
+              {activeTab === "integration-analysis" && (
                 <div className="space-y-6">
                   <div>
                     <h2 className="text-xl font-semibold flex items-center gap-2">
-                      <Shield className="h-5 w-5 text-red-500" />
-                      Compliance Impact Detector
+                      <Brain className="h-5 w-5 text-cyan-500" />
+                      Cross-Module Integration Analysis
                     </h2>
                     <p className="text-muted-foreground mt-1">
-                      Identify compliance-related changes that require documentation updates.
+                      Analyze modules and features to identify integration opportunities and suggest cross-module functionality.
+                    </p>
+                  </div>
+
+                  <Button
+                    onClick={() => runAnalysis("analyze-cross-module-integrations", {})}
+                    disabled={isLoading}
+                  >
+                    {isLoading ? (
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    ) : (
+                      <Brain className="h-4 w-4 mr-2" />
+                    )}
+                    Analyze Integrations
+                  </Button>
+                </div>
+              )}
+
+              {/* Results Display */
                     </p>
                   </div>
 
@@ -705,11 +737,15 @@ export default function EnablementAIToolsPage() {
                     <CheckCircle2 className="h-5 w-5 text-green-500" />
                     <h3 className="font-semibold">Results</h3>
                   </div>
-                  <ScrollArea className="h-[400px] rounded-lg border bg-muted/30 p-4">
-                    <pre className="text-sm whitespace-pre-wrap">
-                      {JSON.stringify(results, null, 2)}
-                    </pre>
-                  </ScrollArea>
+                  {activeTab === "gap-analysis" && results.gaps ? (
+                    <GapAnalysisRenderer data={results} />
+                  ) : activeTab === "change-report" && results.changes ? (
+                    <ChangeReportRenderer data={results} />
+                  ) : activeTab === "integration-analysis" && results.suggestions ? (
+                    <IntegrationAnalysisRenderer data={results} />
+                  ) : (
+                    <GenericResultsRenderer data={results} />
+                  )}
                 </div>
               )}
             </CardContent>
