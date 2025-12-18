@@ -53,7 +53,7 @@ export default function ApplicationDocsGeneratorPage() {
   const availableRoles = ["admin", "hr_manager", "employee"];
 
   const module = selectedModule ? getModuleByCode(selectedModule) : null;
-  const features = module?.features || [];
+  const features: FeatureDefinition[] = module?.groups?.flatMap(g => g.features) || [];
   const feature = selectedFeature ? getFeatureByCode(selectedModule, selectedFeature) : null;
 
   const handleGenerate = async () => {
@@ -501,7 +501,7 @@ export default function ApplicationDocsGeneratorPage() {
                   <SelectValue placeholder="Select a module" />
                 </SelectTrigger>
                 <SelectContent>
-                  {APPLICATION_MODULES.map((mod) => (
+                  {FEATURE_REGISTRY.map((mod) => (
                     <SelectItem key={mod.code} value={mod.code}>
                       {mod.name}
                     </SelectItem>
