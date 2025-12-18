@@ -36,6 +36,8 @@ import { TemplateReferenceUploader } from "./TemplateReferenceUploader";
 import { TemplateInstructionsManager } from "./TemplateInstructionsManager";
 import { TemplatePreviewDialog } from "./TemplatePreviewDialog";
 import { TemplateStylingEditor } from "./TemplateStylingEditor";
+import { TemplateConfigurationPanel } from "./TemplateConfigurationPanel";
+import { TemplateLivePreview } from "./TemplateLivePreview";
 
 interface SavedTemplate {
   id: string;
@@ -525,7 +527,7 @@ export function TemplateLibrary({
             </ScrollArea>
           </TabsContent>
 
-          {/* Configure Tab - Layout, Sections, Formatting */}
+          {/* Configure Tab - Split Layout with Live Preview */}
           <TabsContent value="configure" className="mt-4">
             {!workingTemplate ? (
               <div className="p-8 border-2 border-dashed rounded-lg text-center">
@@ -533,118 +535,28 @@ export function TemplateLibrary({
                 <p className="text-muted-foreground">Select a template first to configure it</p>
               </div>
             ) : (
-              <ScrollArea className="h-[400px] pr-4">
-                <div className="space-y-6">
-                  {/* Layout Options */}
-                  <div className="space-y-3">
-                    <h4 className="font-medium text-sm flex items-center gap-2">
-                      <LayoutTemplate className="h-4 w-4" />
-                      Layout Options
-                    </h4>
-                    <div className="grid grid-cols-2 gap-3">
-                      {Object.entries(workingTemplate.layout).map(([key, value]) => (
-                        <div key={key} className="flex items-center justify-between p-2 border rounded-lg">
-                          <Label htmlFor={key} className="text-sm">
-                            {layoutLabels[key] || key.replace(/([A-Z])/g, ' $1').replace('include', '').trim()}
-                          </Label>
-                          <Switch
-                            id={key}
-                            checked={value}
-                            onCheckedChange={(checked) => 
-                              handleLayoutToggle(key as keyof DocumentTemplate['layout'], checked)
-                            }
-                          />
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  <Separator />
-
-                  {/* Sections */}
-                  <div className="space-y-3">
-                    <h4 className="font-medium text-sm flex items-center gap-2">
-                      <FileText className="h-4 w-4" />
-                      Document Sections
-                    </h4>
-                    <div className="grid grid-cols-2 gap-3">
-                      {Object.entries(workingTemplate.sections).map(([key, value]) => (
-                        <div key={key} className="flex items-center justify-between p-2 border rounded-lg">
-                          <Label htmlFor={`section-${key}`} className="text-sm">
-                            {sectionLabels[key] || key.replace(/([A-Z])/g, ' $1')}
-                          </Label>
-                          <Switch
-                            id={`section-${key}`}
-                            checked={value}
-                            onCheckedChange={(checked) => 
-                              handleSectionToggle(key as keyof DocumentTemplate['sections'], checked)
-                            }
-                          />
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  <Separator />
-
-                  {/* Formatting */}
-                  <div className="space-y-3">
-                    <h4 className="font-medium text-sm">Formatting Options</h4>
-                    <div className="grid gap-4">
-                      <div className="space-y-2">
-                        <Label className="text-sm">Header Style</Label>
-                        <Select
-                          value={workingTemplate.formatting.headerStyle}
-                          onValueChange={(v) => handleFormattingChange('headerStyle', v)}
-                        >
-                          <SelectTrigger>
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="numbered">Numbered (1. 1.1 1.1.1)</SelectItem>
-                            <SelectItem value="plain">Plain Headers</SelectItem>
-                            <SelectItem value="icon">Icon Headers</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label className="text-sm">Callout Style</Label>
-                        <Select
-                          value={workingTemplate.formatting.calloutStyle}
-                          onValueChange={(v) => handleFormattingChange('calloutStyle', v)}
-                        >
-                          <SelectTrigger>
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="confluence">Confluence (Info/Warning panels)</SelectItem>
-                            <SelectItem value="github">GitHub (Blockquote style)</SelectItem>
-                            <SelectItem value="minimal">Minimal (Bordered)</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label className="text-sm">Screenshot Placement</Label>
-                        <Select
-                          value={workingTemplate.formatting.screenshotPlacement}
-                          onValueChange={(v) => handleFormattingChange('screenshotPlacement', v)}
-                        >
-                          <SelectTrigger>
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="inline">Inline with Text</SelectItem>
-                            <SelectItem value="sidebar">Sidebar Layout</SelectItem>
-                            <SelectItem value="annotated">Annotated with Callouts</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
-                  </div>
+              <div className="grid grid-cols-2 gap-6">
+                {/* Configuration Panel */}
+                <div>
+                  <h3 className="font-semibold mb-3 flex items-center gap-2">
+                    <Settings className="h-4 w-4" />
+                    Configure Template
+                  </h3>
+                  <TemplateConfigurationPanel
+                    template={workingTemplate}
+                    onTemplateUpdate={setWorkingTemplate}
+                  />
                 </div>
-              </ScrollArea>
+                
+                {/* Live Preview Panel */}
+                <div>
+                  <h3 className="font-semibold mb-3 flex items-center gap-2">
+                    <Eye className="h-4 w-4" />
+                    Live Preview
+                  </h3>
+                  <TemplateLivePreview template={workingTemplate} />
+                </div>
+              </div>
             )}
           </TabsContent>
 
