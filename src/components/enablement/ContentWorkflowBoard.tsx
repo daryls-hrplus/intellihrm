@@ -51,6 +51,7 @@ import { AddContentItemDialog } from "./AddContentItemDialog";
 
 const WORKFLOW_COLUMNS: { id: WorkflowColumn; label: string; color: string }[] = [
   { id: "backlog", label: "Backlog", color: "bg-muted" },
+  { id: "planning", label: "Planning", color: "bg-purple-500/10" },
   { id: "development", label: "Development", color: "bg-blue-500/10" },
   { id: "review", label: "Review", color: "bg-amber-500/10" },
   { id: "published", label: "Published", color: "bg-green-500/10" },
@@ -91,7 +92,7 @@ export function ContentWorkflowBoard({ releaseId }: ContentWorkflowBoardProps) {
   const itemsByColumn = useMemo(() => {
     const grouped: Record<WorkflowColumn, EnablementContentStatus[]> = {
       backlog: [],
-      planning: [], // Legacy - items here will show in backlog
+      planning: [],
       development: [],
       review: [],
       published: [],
