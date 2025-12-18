@@ -29,6 +29,8 @@ import {
   BarChart3,
   Upload,
   Library,
+  Brain,
+  HelpCircle,
 } from "lucide-react";
 import { ContentWorkflowBoard } from "@/components/enablement/ContentWorkflowBoard";
 import { ReleaseManager } from "@/components/enablement/ReleaseManager";
@@ -68,6 +70,25 @@ export default function EnablementHubPage() {
 
   // Grouped sections following the pattern from other modules
   const sections: ModuleSection[] = useMemo(() => [
+    {
+      titleKey: "AI Automation",
+      items: [
+        {
+          title: "AI Automation Tools",
+          description: "8 AI-powered tools for content automation",
+          href: "/enablement/ai-tools",
+          icon: Brain,
+          color: "bg-primary/10 text-primary",
+        },
+        {
+          title: "User Guide",
+          description: "Best practices and workflow guide (Workday-aligned)",
+          href: "/enablement/guide",
+          icon: HelpCircle,
+          color: "bg-emerald-500/10 text-emerald-500",
+        },
+      ],
+    },
     {
       titleKey: "Content Generation",
       items: [

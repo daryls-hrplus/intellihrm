@@ -61,6 +61,8 @@ import EnablementAnalyticsPage from "./pages/enablement/EnablementAnalyticsPage"
 import SCORMGeneratorPage from "./pages/enablement/SCORMGeneratorPage";
 import ReleaseCalendarPage from "./pages/enablement/ReleaseCalendarPage";
 import EnablementSettingsPage from "./pages/enablement/EnablementSettingsPage";
+import EnablementAIToolsPage from "./pages/enablement/EnablementAIToolsPage";
+import EnablementGuidePage from "./pages/enablement/EnablementGuidePage";
 
 // Subscription pages
 import SubscriptionPage from "./pages/subscription/SubscriptionPage";
@@ -2980,6 +2982,22 @@ const App = () => (
               element={
                 <ProtectedRoute requiredRoles={["admin"]}>
                   <EnablementSettingsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/enablement/ai-tools"
+              element={
+                <ProtectedRoute requiredRoles={["admin"]}>
+                  <EnablementAIToolsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/enablement/guide"
+              element={
+                <ProtectedRoute requiredRoles={["admin"]}>
+                  <EnablementGuidePage />
                 </ProtectedRoute>
               }
             />
