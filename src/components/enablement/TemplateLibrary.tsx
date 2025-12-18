@@ -121,7 +121,8 @@ export function TemplateLibrary({
           layout_config: template.layout_config,
           sections_config: template.sections_config,
           formatting_config: template.formatting_config,
-          branding_config: template.branding_config
+          branding_config: template.branding_config,
+          created_by: user.id
         } as any)
         .select()
         .single();
