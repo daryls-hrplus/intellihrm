@@ -33,19 +33,25 @@ import { cn } from "@/lib/utils";
 
 interface StageChecklistProps {
   contentStatusId?: string;
-  stage: "backlog" | "in_progress" | "review" | "published";
+  stage: "backlog" | "planning" | "development" | "review" | "published" | "maintenance";
   compact?: boolean;
   onNavigate?: (path: string) => void;
 }
 
 const STAGE_CONFIG = {
   backlog: { 
-    label: "Planning", 
+    label: "Backlog", 
     icon: ClipboardList, 
     color: "text-slate-600",
     bgColor: "bg-slate-100 dark:bg-slate-800"
   },
-  in_progress: { 
+  planning: { 
+    label: "Planning", 
+    icon: ClipboardList, 
+    color: "text-purple-600",
+    bgColor: "bg-purple-100 dark:bg-purple-900/30"
+  },
+  development: { 
     label: "Development", 
     icon: Code, 
     color: "text-blue-600",
@@ -62,6 +68,12 @@ const STAGE_CONFIG = {
     icon: Rocket, 
     color: "text-green-600",
     bgColor: "bg-green-100 dark:bg-green-900/30"
+  },
+  maintenance: { 
+    label: "Maintenance", 
+    icon: FileCheck, 
+    color: "text-orange-600",
+    bgColor: "bg-orange-100 dark:bg-orange-900/30"
   },
 };
 
@@ -271,7 +283,9 @@ function ChecklistItem({ item, isCompleted, onToggle, onNavigate, disabled, comp
 
 // All stages checklist panel for overview
 export function AllStagesChecklist({ contentStatusId, onNavigate }: { contentStatusId?: string; onNavigate?: (path: string) => void }) {
-  const stages: Array<"backlog" | "in_progress" | "review" | "published"> = ["backlog", "in_progress", "review", "published"];
+  const stages: Array<"backlog" | "planning" | "development" | "review" | "published" | "maintenance"> = [
+    "backlog", "planning", "development", "review", "published", "maintenance"
+  ];
 
   return (
     <Card>
