@@ -67,12 +67,14 @@ export function ContentCoverageMatrix() {
       feature_name: string;
     }> = [];
 
-    Object.entries(FEATURE_REGISTRY).forEach(([moduleCode, moduleData]) => {
-      Object.entries(moduleData.features).forEach(([featureCode, featureData]) => {
-        features.push({
-          module_code: moduleCode,
-          feature_code: featureCode,
-          feature_name: featureData.name,
+    FEATURE_REGISTRY.forEach((module) => {
+      module.groups.forEach((group) => {
+        group.features.forEach((feature) => {
+          features.push({
+            module_code: module.code,
+            feature_code: feature.code,
+            feature_name: feature.name,
+          });
         });
       });
     });
@@ -145,7 +147,7 @@ export function ContentCoverageMatrix() {
   }, [mergedData]);
 
   const modules = useMemo(() => {
-    return Object.keys(FEATURE_REGISTRY).sort();
+    return FEATURE_REGISTRY.map((m) => m.code).sort();
   }, []);
 
   if (isLoading) {

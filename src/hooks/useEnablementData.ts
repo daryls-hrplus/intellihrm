@@ -42,7 +42,7 @@ export function useEnablementReleases() {
     try {
       const { data, error } = await supabase
         .from("enablement_releases")
-        .insert(release)
+        .insert(release as any)
         .select()
         .single();
 
@@ -162,7 +162,7 @@ export function useEnablementContentStatus(releaseId?: string) {
     try {
       const { data, error } = await supabase
         .from("enablement_content_status")
-        .insert(item)
+        .insert(item as any)
         .select()
         .single();
 
@@ -222,7 +222,7 @@ export function useEnablementVideos(featureCode?: string) {
     try {
       const { data, error } = await supabase
         .from("enablement_video_library")
-        .insert(video)
+        .insert(video as any)
         .select()
         .single();
 
@@ -296,7 +296,7 @@ export function useEnablementDAPGuides(featureCode?: string) {
     try {
       const { data, error } = await supabase
         .from("enablement_dap_guides")
-        .insert(guide)
+        .insert(guide as any)
         .select()
         .single();
 
@@ -367,7 +367,7 @@ export function useEnablementRiseTemplates() {
     try {
       const { data, error } = await supabase
         .from("enablement_rise_templates")
-        .insert(template)
+        .insert(template as any)
         .select()
         .single();
 

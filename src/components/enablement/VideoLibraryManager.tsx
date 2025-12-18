@@ -75,13 +75,15 @@ export function VideoLibraryManager() {
   });
 
   // Get all features for dropdown
-  const featureOptions = Object.entries(FEATURE_REGISTRY).flatMap(([moduleCode, moduleData]) =>
-    Object.entries(moduleData.features).map(([featureCode, featureData]) => ({
-      value: `${moduleCode}:${featureCode}`,
-      label: `${moduleData.name} - ${featureData.name}`,
-      module_code: moduleCode,
-      feature_code: featureCode,
-    }))
+  const featureOptions = FEATURE_REGISTRY.flatMap((module) =>
+    module.groups.flatMap((group) =>
+      group.features.map((feature) => ({
+        value: `${module.code}:${feature.code}`,
+        label: `${module.name} - ${feature.name}`,
+        module_code: module.code,
+        feature_code: feature.code,
+      }))
+    )
   );
 
   const handleFeatureSelect = (value: string) => {
