@@ -388,7 +388,7 @@ export function ReleaseWorkflowDashboard() {
       </Card>
 
       {/* Detailed Work Items by Stage */}
-      <Tabs defaultValue="in_progress" className="space-y-4">
+      <Tabs defaultValue="development" className="space-y-4">
         <TabsList className="grid w-full grid-cols-4">
           {WORKFLOW_STAGES.map(stage => (
             <TabsTrigger key={stage.id} value={stage.id} className="flex items-center gap-2">
@@ -546,7 +546,7 @@ export function ReleaseWorkflowDashboard() {
           {selectedItem && (
             <StageChecklist
               contentStatusId={selectedItem.id}
-              stage={selectedItem.workflow_status as "backlog" | "in_progress" | "review" | "published"}
+              stage={selectedItem.workflow_status as "backlog" | "planning" | "development" | "review" | "published" | "maintenance"}
               onNavigate={(path) => {
                 setSelectedItem(null);
                 navigate(path);
