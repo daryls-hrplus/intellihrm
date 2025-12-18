@@ -141,41 +141,79 @@ export default function FeatureCatalogPage() {
       </div>
 
       {/* Stats */}
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-4 grid-cols-2 md:grid-cols-5">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Modules</CardTitle>
+            <CardTitle className="text-sm font-medium">Modules</CardTitle>
             <Layers className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{totalModules}</div>
-            <p className="text-xs text-muted-foreground">Core system modules</p>
+            <p className="text-xs text-muted-foreground">Core HR modules</p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Feature Groups</CardTitle>
+            <CardTitle className="text-sm font-medium">Groups</CardTitle>
             <FolderTree className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{totalGroups}</div>
-            <p className="text-xs text-muted-foreground">Organized categories</p>
+            <p className="text-xs text-muted-foreground">Feature categories</p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Features</CardTitle>
+            <CardTitle className="text-sm font-medium">Features</CardTitle>
             <BarChart3 className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{totalFeatures}</div>
-            <p className="text-xs text-muted-foreground">Documented capabilities</p>
+            <p className="text-xs text-muted-foreground">Total capabilities</p>
+          </CardContent>
+        </Card>
+        <Card className="border-purple-200 dark:border-purple-800">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium text-purple-700 dark:text-purple-400">AI-Powered</CardTitle>
+            <Brain className="h-4 w-4 text-purple-500" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-purple-600">{aiPoweredCount}</div>
+            <p className="text-xs text-muted-foreground">Intelligent features</p>
+          </CardContent>
+        </Card>
+        <Card className="border-amber-200 dark:border-amber-800">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium text-amber-700 dark:text-amber-400">Differentiators</CardTitle>
+            <Star className="h-4 w-4 text-amber-500" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-amber-600">{uniqueCount}</div>
+            <p className="text-xs text-muted-foreground">Market-unique</p>
           </CardContent>
         </Card>
       </div>
 
-      {/* Main Content - Browser and Detail Panel */}
-      <div className="grid gap-6 lg:grid-cols-2">
+      {/* Tabbed Content */}
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
+        <TabsList className="grid w-full max-w-lg grid-cols-3">
+          <TabsTrigger value="browser" className="gap-2">
+            <FolderTree className="h-4 w-4" />
+            Module Browser
+          </TabsTrigger>
+          <TabsTrigger value="capabilities" className="gap-2">
+            <Brain className="h-4 w-4" />
+            Capabilities
+          </TabsTrigger>
+          <TabsTrigger value="matrix" className="gap-2">
+            <Grid3X3 className="h-4 w-4" />
+            Matrix
+          </TabsTrigger>
+        </TabsList>
+
+        {/* Tab: Module Browser */}
+        <TabsContent value="browser" className="space-y-4">
+          <div className="grid gap-6 lg:grid-cols-2">
         {/* Left: Feature Browser */}
         <Card className="h-full">
           <CardHeader className="pb-3">
@@ -387,7 +425,19 @@ export default function FeatureCatalogPage() {
             </Card>
           )}
         </div>
-      </div>
+          </div>
+        </TabsContent>
+
+        {/* Tab: Capabilities */}
+        <TabsContent value="capabilities">
+          <CapabilityBrowser onFeatureSelect={handleFeatureSelectByCode} />
+        </TabsContent>
+
+        {/* Tab: Matrix */}
+        <TabsContent value="matrix">
+          <DifferentiatorMatrix onFeatureSelect={handleFeatureSelectByCode} />
+        </TabsContent>
+      </Tabs>
 
       {/* Module Overview Table */}
       <Card>
@@ -407,6 +457,7 @@ export default function FeatureCatalogPage() {
                     setSelectedModule(module.code);
                     setSelectedFeature("");
                     setSelectedFeatureData(null);
+                    setActiveTab("browser");
                     if (!expandedModules.includes(module.code)) {
                       setExpandedModules(prev => [...prev, module.code]);
                     }
