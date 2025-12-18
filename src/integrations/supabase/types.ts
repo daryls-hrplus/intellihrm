@@ -13818,6 +13818,81 @@ export type Database = {
           },
         ]
       }
+      historical_payroll_imports: {
+        Row: {
+          company_id: string
+          completed_at: string | null
+          created_at: string
+          errors: Json | null
+          failed_records: number | null
+          file_name: string
+          id: string
+          import_type: string
+          imported_by: string | null
+          period_end_date: string | null
+          period_start_date: string | null
+          started_at: string | null
+          status: string
+          total_entries_created: number | null
+          total_records: number | null
+          total_runs_created: number | null
+          warnings: Json | null
+        }
+        Insert: {
+          company_id: string
+          completed_at?: string | null
+          created_at?: string
+          errors?: Json | null
+          failed_records?: number | null
+          file_name: string
+          id?: string
+          import_type?: string
+          imported_by?: string | null
+          period_end_date?: string | null
+          period_start_date?: string | null
+          started_at?: string | null
+          status?: string
+          total_entries_created?: number | null
+          total_records?: number | null
+          total_runs_created?: number | null
+          warnings?: Json | null
+        }
+        Update: {
+          company_id?: string
+          completed_at?: string | null
+          created_at?: string
+          errors?: Json | null
+          failed_records?: number | null
+          file_name?: string
+          id?: string
+          import_type?: string
+          imported_by?: string | null
+          period_end_date?: string | null
+          period_start_date?: string | null
+          started_at?: string | null
+          status?: string
+          total_entries_created?: number | null
+          total_records?: number | null
+          total_runs_created?: number | null
+          warnings?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "historical_payroll_imports_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "historical_payroll_imports_imported_by_fkey"
+            columns: ["imported_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       hse_chemical_exposures: {
         Row: {
           chemical_id: string
@@ -24177,12 +24252,15 @@ export type Database = {
           employee_count: number | null
           exchange_rate_date: string | null
           exchange_rate_to_base: number | null
+          historical_import_id: string | null
           id: string
+          is_historical: boolean | null
           is_locked: boolean | null
           local_currency_id: string | null
           locked_at: string | null
           locked_by: string | null
           notes: string | null
+          original_run_date: string | null
           paid_at: string | null
           paid_by: string | null
           pay_group_id: string | null
@@ -24220,12 +24298,15 @@ export type Database = {
           employee_count?: number | null
           exchange_rate_date?: string | null
           exchange_rate_to_base?: number | null
+          historical_import_id?: string | null
           id?: string
+          is_historical?: boolean | null
           is_locked?: boolean | null
           local_currency_id?: string | null
           locked_at?: string | null
           locked_by?: string | null
           notes?: string | null
+          original_run_date?: string | null
           paid_at?: string | null
           paid_by?: string | null
           pay_group_id?: string | null
@@ -24263,12 +24344,15 @@ export type Database = {
           employee_count?: number | null
           exchange_rate_date?: string | null
           exchange_rate_to_base?: number | null
+          historical_import_id?: string | null
           id?: string
+          is_historical?: boolean | null
           is_locked?: boolean | null
           local_currency_id?: string | null
           locked_at?: string | null
           locked_by?: string | null
           notes?: string | null
+          original_run_date?: string | null
           paid_at?: string | null
           paid_by?: string | null
           pay_group_id?: string | null
@@ -24326,6 +24410,13 @@ export type Database = {
             columns: ["created_by"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payroll_runs_historical_import_id_fkey"
+            columns: ["historical_import_id"]
+            isOneToOne: false
+            referencedRelation: "historical_payroll_imports"
             referencedColumns: ["id"]
           },
           {

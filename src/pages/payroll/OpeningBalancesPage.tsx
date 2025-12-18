@@ -17,8 +17,9 @@ import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { Plus, Upload, Download, Pencil, Trash2, FileSpreadsheet, AlertCircle, CheckCircle2, Building2, Calendar } from "lucide-react";
+import { Plus, Upload, Download, Pencil, Trash2, FileSpreadsheet, AlertCircle, CheckCircle2, Building2, Calendar, History } from "lucide-react";
 import { format } from "date-fns";
+import { useNavigate } from "react-router-dom";
 
 interface Company {
   id: string;
@@ -91,6 +92,7 @@ const taxYears = Array.from({ length: 5 }, (_, i) => currentYear - i);
 
 const OpeningBalancesPage: React.FC = () => {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
   
   const [companies, setCompanies] = useState<Company[]>([]);
@@ -636,6 +638,10 @@ const OpeningBalancesPage: React.FC = () => {
             </p>
           </div>
           <div className="flex gap-2">
+            <Button variant="outline" onClick={() => navigate('/payroll/historical-import')}>
+              <History className="w-4 h-4 mr-2" />
+              Full Payroll Import
+            </Button>
             <Button variant="outline" onClick={() => setShowImport(true)}>
               <Upload className="w-4 h-4 mr-2" />
               Import CSV
