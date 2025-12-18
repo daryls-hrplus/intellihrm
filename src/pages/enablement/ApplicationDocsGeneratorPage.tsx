@@ -422,7 +422,7 @@ export default function ApplicationDocsGeneratorPage() {
                   <SelectItem value="training_guide">
                     <div className="flex items-center gap-2">
                       <BookOpen className="h-4 w-4" />
-                      Template Library
+                      Training Guide (Industry Standard)
                     </div>
                   </SelectItem>
                   <SelectItem value="module_overview">
@@ -459,7 +459,7 @@ export default function ApplicationDocsGeneratorPage() {
                 <SheetTrigger asChild>
                   <Button variant="outline" size="sm" className="mt-2">
                     <Library className="h-4 w-4 mr-2" />
-                    {selectedTemplate ? selectedTemplate.name : 'Select Template'}
+                    Template Library
                   </Button>
                 </SheetTrigger>
                 <SheetContent side="right" className="w-full sm:max-w-3xl overflow-y-auto">
