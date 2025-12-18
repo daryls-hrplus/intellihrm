@@ -66,20 +66,11 @@ interface WorkflowStage {
 const WORKFLOW_STAGES: WorkflowStage[] = [
   {
     id: "backlog",
-    label: "Planning",
+    label: "Backlog",
     icon: ClipboardList,
     color: "text-slate-600",
     bgColor: "bg-slate-100 dark:bg-slate-800",
-    description: "Features identified, scope defined",
-    navLink: "/enablement?tab=workflow",
-  },
-  {
-    id: "planning",
-    label: "Planning",
-    icon: ClipboardList,
-    color: "text-purple-600",
-    bgColor: "bg-purple-100 dark:bg-purple-900/30",
-    description: "Scope definition & requirements",
+    description: "Features identified and prioritized",
     navLink: "/enablement?tab=workflow",
   },
   {
@@ -108,6 +99,15 @@ const WORKFLOW_STAGES: WorkflowStage[] = [
     bgColor: "bg-green-100 dark:bg-green-900/30",
     description: "Live and available",
     navLink: "/enablement?tab=coverage",
+  },
+  {
+    id: "maintenance",
+    label: "Maintenance",
+    icon: Settings,
+    color: "text-orange-600",
+    bgColor: "bg-orange-100 dark:bg-orange-900/30",
+    description: "Updates and revisions",
+    navLink: "/enablement?tab=workflow",
   },
 ];
 
@@ -145,7 +145,7 @@ export function ReleaseWorkflowDashboard() {
   const stageStats = useMemo(() => {
     const stats: Record<WorkflowColumn, { count: number; hours: number; items: EnablementContentStatus[] }> = {
       backlog: { count: 0, hours: 0, items: [] },
-      planning: { count: 0, hours: 0, items: [] },
+      planning: { count: 0, hours: 0, items: [] }, // Legacy - merged into backlog
       development: { count: 0, hours: 0, items: [] },
       review: { count: 0, hours: 0, items: [] },
       published: { count: 0, hours: 0, items: [] },
@@ -154,13 +154,13 @@ export function ReleaseWorkflowDashboard() {
     };
 
     contentItems.forEach(item => {
-      const stage = item.workflow_status;
-      if (stats[stage]) {
-        stats[stage].count++;
-        // Calculate estimated hours based on content types
+      // Merge planning into backlog
+      const targetStage = item.workflow_status === "planning" ? "backlog" : item.workflow_status;
+      if (stats[targetStage]) {
+        stats[targetStage].count++;
         const hours = calculateItemHours(item);
-        stats[stage].hours += hours;
-        stats[stage].items.push(item);
+        stats[targetStage].hours += hours;
+        stats[targetStage].items.push(item);
       }
     });
 
@@ -169,8 +169,8 @@ export function ReleaseWorkflowDashboard() {
 
   const totalStats = useMemo(() => {
     const total = contentItems.length;
-    const completed = stageStats.published.count;
-    const inProgress = stageStats.planning.count + stageStats.development.count + stageStats.review.count;
+    const completed = stageStats.published.count + stageStats.maintenance.count;
+    const inProgress = stageStats.development.count + stageStats.review.count;
     const pending = stageStats.backlog.count;
     const totalHours = Object.values(stageStats).reduce((sum, s) => sum + s.hours, 0);
     const completedHours = stageStats.published.hours;
@@ -546,7 +546,7 @@ export function ReleaseWorkflowDashboard() {
           {selectedItem && (
             <StageChecklist
               contentStatusId={selectedItem.id}
-              stage={selectedItem.workflow_status as "backlog" | "planning" | "development" | "review" | "published" | "maintenance"}
+              stage={(selectedItem.workflow_status === "planning" ? "backlog" : selectedItem.workflow_status) as "backlog" | "development" | "review" | "published" | "maintenance"}
               onNavigate={(path) => {
                 setSelectedItem(null);
                 navigate(path);
