@@ -1,6 +1,6 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -42,7 +42,9 @@ import { FEATURE_REGISTRY } from "@/lib/featureRegistry";
 export default function EnablementHubPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState("dashboard");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const tabParam = searchParams.get("tab");
+  const [activeTab, setActiveTab] = useState(tabParam || "dashboard");
   const { contentItems } = useEnablementContentStatus();
   const { releases } = useEnablementReleases();
 
@@ -177,20 +179,21 @@ export default function EnablementHubPage() {
     },
   ], []);
 
-  // Handle tab navigation from URL
-  const urlParams = new URLSearchParams(window.location.search);
-  const tabParam = urlParams.get("tab");
-  if (tabParam && tabParam !== activeTab && ["workflow", "releases", "coverage", "videos", "dap", "rise"].includes(tabParam)) {
-    setActiveTab(tabParam);
-  }
+  // Sync tab state with URL
+  useEffect(() => {
+    if (tabParam && tabParam !== activeTab && ["workflow", "releases", "coverage", "videos", "dap", "rise"].includes(tabParam)) {
+      setActiveTab(tabParam);
+    } else if (!tabParam && activeTab !== "dashboard") {
+      setActiveTab("dashboard");
+    }
+  }, [tabParam]);
 
-  const handleCardClick = (href: string) => {
-    if (href.includes("?tab=")) {
-      const tab = href.split("?tab=")[1];
-      setActiveTab(tab);
-      window.history.pushState({}, "", href);
+  const handleTabChange = (tab: string) => {
+    setActiveTab(tab);
+    if (tab === "dashboard") {
+      setSearchParams({});
     } else {
-      navigate(href);
+      setSearchParams({ tab });
     }
   };
 
@@ -221,7 +224,7 @@ export default function EnablementHubPage() {
               <FileText className="h-4 w-4 mr-2" />
               Generate Docs
             </Button>
-            <Button onClick={() => setActiveTab("workflow")}>
+            <Button onClick={() => handleTabChange("workflow")}>
               <Kanban className="h-4 w-4 mr-2" />
               Workflow Board
             </Button>
@@ -314,7 +317,7 @@ export default function EnablementHubPage() {
                     </p>
                   </div>
                 </div>
-                <Button variant="outline" size="sm" onClick={() => setActiveTab("releases")}>
+                <Button variant="outline" size="sm" onClick={() => handleTabChange("releases")}>
                   View Release
                   <ArrowRight className="h-4 w-4 ml-2" />
                 </Button>
@@ -324,7 +327,7 @@ export default function EnablementHubPage() {
         )}
 
         {/* Main Tabs */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+        <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-6">
           <TabsList className="grid w-full grid-cols-7">
             <TabsTrigger value="dashboard" className="gap-2">
               <LayoutDashboard className="h-4 w-4" />
