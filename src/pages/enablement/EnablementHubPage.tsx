@@ -82,7 +82,7 @@ export default function EnablementHubPage() {
         },
         {
           title: "User Guide",
-          description: "Best practices and workflow guide (Workday-aligned)",
+          description: "Best practices and workflow guide (industry-aligned)",
           href: "/enablement/guide",
           icon: HelpCircle,
           color: "bg-emerald-500/10 text-emerald-500",

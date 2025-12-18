@@ -140,3 +140,9 @@ verify_jwt = false
 
 [functions.detect-compliance-impact]
 verify_jwt = false
+
+[functions.generate-all-feature-docs]
+verify_jwt = false
+
+[functions.application-change-report]
+verify_jwt = false
