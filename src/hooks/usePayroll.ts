@@ -725,6 +725,10 @@ export function usePayroll() {
         let grossPay = 0;
         let regularPay = 0;
         
+        // Track itemized earnings for calculation_details
+        const earningsBreakdown: { name: string; code: string; amount: number; type: string }[] = [];
+        const allowancesBreakdown: { name: string; amount: number; is_taxable: boolean }[] = [];
+        
         if (employeeComp && employeeComp.length > 0) {
           // Use employee compensation with proration
           for (const comp of employeeComp) {
@@ -744,8 +748,18 @@ export function usePayroll() {
             const proratedAmount = applyProration(comp.amount || 0, prorationResult);
             grossPay += proratedAmount;
             
+            const payElementName = (comp.pay_elements as any)?.name || 'Compensation';
+            const payElementCode = (comp.pay_elements as any)?.code || 'COMP';
+            
+            earningsBreakdown.push({
+              name: payElementName,
+              code: payElementCode,
+              amount: proratedAmount,
+              type: payElementCode.toUpperCase() === 'SAL' ? 'base_salary' : 'additional'
+            });
+            
             // Base salary (SAL code) goes to regular_pay
-            if ((comp.pay_elements as any)?.code?.toUpperCase() === 'SAL') {
+            if (payElementCode.toUpperCase() === 'SAL') {
               regularPay += proratedAmount;
             }
           }
@@ -780,6 +794,16 @@ export function usePayroll() {
             const proratedAmount = applyProration(comp.amount || 0, prorationResult);
             grossPay += proratedAmount;
             
+            const payElementName = comp.pay_element?.name || 'Compensation';
+            const payElementCode = comp.pay_element?.code || 'COMP';
+            
+            earningsBreakdown.push({
+              name: payElementName,
+              code: payElementCode,
+              amount: proratedAmount,
+              type: comp.pay_element?.element_type_id ? 'base_salary' : 'additional'
+            });
+            
             if (comp.pay_element?.element_type_id) {
               regularPay += proratedAmount;
             }
@@ -789,12 +813,19 @@ export function usePayroll() {
         // Add period allowances
         const { data: allowances } = await supabase
           .from("employee_period_allowances")
-          .select("amount")
+          .select("amount, allowance_name, is_taxable")
           .eq("employee_id", emp.employee_id)
           .eq("pay_period_id", payPeriodId);
         
-        const totalAllowances = (allowances || []).reduce((sum: number, a: any) => sum + (a.amount || 0), 0);
-        grossPay += totalAllowances;
+        for (const a of allowances || []) {
+          const amount = a.amount || 0;
+          grossPay += amount;
+          allowancesBreakdown.push({
+            name: a.allowance_name || 'Allowance',
+            amount,
+            is_taxable: a.is_taxable ?? true
+          });
+        }
         
         // Add period deductions (non-statutory)
         const { data: periodDeductions } = await supabase
@@ -882,10 +913,11 @@ export function usePayroll() {
         // Calculate statutory deductions using shared calculator with cumulative PAYE
         let taxDeductions = 0;
         let employerTaxes = 0;
+        let openingBalances = { ytdTaxableIncome: 0, ytdTaxPaid: 0 };
         
         if (statutoryTypes && statutoryTypes.length > 0 && rateBands) {
           // Fetch opening balances for cumulative PAYE calculation
-          const openingBalances = await fetchOpeningBalances(emp.employee_id, taxYear);
+          openingBalances = await fetchOpeningBalances(emp.employee_id, taxYear);
           
           // Use the shared calculator that handles cumulative PAYE
           const statutoryResult = calculateStatutoryDeductions(
@@ -923,6 +955,32 @@ export function usePayroll() {
           employer_benefits: employerBenefits,
           total_employer_cost: totalEmployerCost,
           currency: currency,
+          calculation_details: {
+            earnings: earningsBreakdown,
+            allowances: allowancesBreakdown,
+            statutory_deductions: statutoryTypes && rateBands ? 
+              calculateStatutoryDeductions(
+                taxableIncome,
+                statutoryTypes as StatutoryDeduction[],
+                rateBands as StatutoryRateBand[],
+                mondayCount,
+                null,
+                openingBalances
+              ).deductions.map(d => ({
+                name: d.name,
+                code: d.code,
+                employee_amount: d.employeeAmount,
+                employer_amount: d.employerAmount,
+                method: d.calculationMethod
+              })) : [],
+            period_deductions: (periodDeductions || []).map((d: any) => ({
+              name: d.deduction_name || 'Deduction',
+              amount: d.amount || 0,
+              is_pretax: d.is_pretax
+            })),
+            taxable_income: taxableIncome,
+            pretax_deductions: totalPretaxDeductions,
+          },
         });
         
         totalGross += grossPay;

@@ -711,34 +711,75 @@ export default function PayrollProcessingPage() {
                     {t("payroll.processing.earnings", "Earnings")}
                   </h4>
                   <div className="bg-muted/30 rounded-lg p-4 space-y-2">
-                    <div className="flex justify-between py-1">
-                      <span className="text-muted-foreground">{t("payroll.processing.regularPay")}</span>
-                      <span className="font-medium">{formatCurrency(selectedEmployee.regular_pay || 0)}</span>
-                    </div>
-                    {(selectedEmployee.overtime_pay || 0) > 0 && (
-                      <div className="flex justify-between py-1">
-                        <span className="text-muted-foreground">{t("payroll.processing.overtimePay")}</span>
-                        <span className="font-medium">{formatCurrency(selectedEmployee.overtime_pay)}</span>
-                      </div>
+                    {/* Itemized earnings from calculation_details */}
+                    {(selectedEmployee.calculation_details as any)?.earnings?.length > 0 ? (
+                      <>
+                        {((selectedEmployee.calculation_details as any)?.earnings || []).map((earning: any, idx: number) => (
+                          <div key={idx} className="flex justify-between py-1">
+                            <span className="text-muted-foreground">
+                              {earning.name}
+                              {earning.type === 'base_salary' && (
+                                <span className="ml-1 text-xs text-primary">(Base)</span>
+                              )}
+                            </span>
+                            <span className="font-medium">{formatCurrency(earning.amount || 0)}</span>
+                          </div>
+                        ))}
+                      </>
+                    ) : (
+                      <>
+                        {/* Fallback to summary fields if no itemized data */}
+                        <div className="flex justify-between py-1">
+                          <span className="text-muted-foreground">{t("payroll.processing.regularPay")}</span>
+                          <span className="font-medium">{formatCurrency(selectedEmployee.regular_pay || 0)}</span>
+                        </div>
+                        {(selectedEmployee.overtime_pay || 0) > 0 && (
+                          <div className="flex justify-between py-1">
+                            <span className="text-muted-foreground">{t("payroll.processing.overtimePay")}</span>
+                            <span className="font-medium">{formatCurrency(selectedEmployee.overtime_pay)}</span>
+                          </div>
+                        )}
+                        {(selectedEmployee.bonus_pay || 0) > 0 && (
+                          <div className="flex justify-between py-1">
+                            <span className="text-muted-foreground">{t("payroll.processing.bonusPay")}</span>
+                            <span className="font-medium">{formatCurrency(selectedEmployee.bonus_pay)}</span>
+                          </div>
+                        )}
+                        {(selectedEmployee.commission_pay || 0) > 0 && (
+                          <div className="flex justify-between py-1">
+                            <span className="text-muted-foreground">{t("payroll.processing.commissionPay", "Commission")}</span>
+                            <span className="font-medium">{formatCurrency(selectedEmployee.commission_pay)}</span>
+                          </div>
+                        )}
+                        {(selectedEmployee.other_earnings || 0) > 0 && (
+                          <div className="flex justify-between py-1">
+                            <span className="text-muted-foreground">{t("payroll.processing.otherEarnings")}</span>
+                            <span className="font-medium">{formatCurrency(selectedEmployee.other_earnings)}</span>
+                          </div>
+                        )}
+                      </>
                     )}
-                    {(selectedEmployee.bonus_pay || 0) > 0 && (
-                      <div className="flex justify-between py-1">
-                        <span className="text-muted-foreground">{t("payroll.processing.bonusPay")}</span>
-                        <span className="font-medium">{formatCurrency(selectedEmployee.bonus_pay)}</span>
-                      </div>
+
+                    {/* Allowances */}
+                    {((selectedEmployee.calculation_details as any)?.allowances || []).length > 0 && (
+                      <>
+                        <div className="border-t border-border mt-2 pt-2">
+                          <p className="text-xs text-muted-foreground mb-1 uppercase">{t("payroll.processing.allowances", "Allowances")}</p>
+                        </div>
+                        {((selectedEmployee.calculation_details as any)?.allowances || []).map((allowance: any, idx: number) => (
+                          <div key={idx} className="flex justify-between py-1">
+                            <span className="text-muted-foreground">
+                              {allowance.name}
+                              {!allowance.is_taxable && (
+                                <span className="ml-1 text-xs text-success">(Non-taxable)</span>
+                              )}
+                            </span>
+                            <span className="font-medium">{formatCurrency(allowance.amount || 0)}</span>
+                          </div>
+                        ))}
+                      </>
                     )}
-                    {(selectedEmployee.commission_pay || 0) > 0 && (
-                      <div className="flex justify-between py-1">
-                        <span className="text-muted-foreground">{t("payroll.processing.commissionPay", "Commission")}</span>
-                        <span className="font-medium">{formatCurrency(selectedEmployee.commission_pay)}</span>
-                      </div>
-                    )}
-                    {(selectedEmployee.other_earnings || 0) > 0 && (
-                      <div className="flex justify-between py-1">
-                        <span className="text-muted-foreground">{t("payroll.processing.otherEarnings")}</span>
-                        <span className="font-medium">{formatCurrency(selectedEmployee.other_earnings)}</span>
-                      </div>
-                    )}
+
                     <div className="flex justify-between py-2 border-t border-border mt-2 pt-2">
                       <span className="font-semibold">{t("payroll.processing.grossPay")}</span>
                       <span className="font-bold text-primary">{formatCurrency(selectedEmployee.gross_pay)}</span>
@@ -752,36 +793,76 @@ export default function PayrollProcessingPage() {
                     {t("payroll.processing.deductions")}
                   </h4>
                   <div className="bg-destructive/5 rounded-lg p-4 space-y-2">
-                    {(selectedEmployee.tax_deductions || 0) > 0 && (
-                      <div className="flex justify-between py-1">
-                        <span className="text-muted-foreground">{t("payroll.processing.statutoryTaxes", "Statutory Taxes")}</span>
-                        <span className="font-medium text-destructive">-{formatCurrency(selectedEmployee.tax_deductions)}</span>
-                      </div>
+                    {/* Itemized statutory deductions from calculation_details */}
+                    {((selectedEmployee.calculation_details as any)?.statutory_deductions || []).length > 0 ? (
+                      <>
+                        <p className="text-xs text-muted-foreground uppercase mb-1">{t("payroll.processing.statutoryTaxes", "Statutory Taxes")}</p>
+                        {((selectedEmployee.calculation_details as any)?.statutory_deductions || []).map((deduction: any, idx: number) => (
+                          <div key={idx} className="flex justify-between py-1">
+                            <span className="text-muted-foreground">{deduction.name}</span>
+                            <span className="font-medium text-destructive">-{formatCurrency(deduction.employee_amount || 0)}</span>
+                          </div>
+                        ))}
+                      </>
+                    ) : (
+                      (selectedEmployee.tax_deductions || 0) > 0 && (
+                        <div className="flex justify-between py-1">
+                          <span className="text-muted-foreground">{t("payroll.processing.statutoryTaxes", "Statutory Taxes")}</span>
+                          <span className="font-medium text-destructive">-{formatCurrency(selectedEmployee.tax_deductions)}</span>
+                        </div>
+                      )
                     )}
-                    {(selectedEmployee.benefit_deductions || 0) > 0 && (
-                      <div className="flex justify-between py-1">
-                        <span className="text-muted-foreground">{t("payroll.processing.benefitDeductions", "Benefits")}</span>
-                        <span className="font-medium text-destructive">-{formatCurrency(selectedEmployee.benefit_deductions)}</span>
-                      </div>
+
+                    {/* Period deductions from calculation_details */}
+                    {((selectedEmployee.calculation_details as any)?.period_deductions || []).length > 0 && (
+                      <>
+                        <div className="border-t border-destructive/20 mt-2 pt-2">
+                          <p className="text-xs text-muted-foreground uppercase mb-1">{t("payroll.processing.otherDeductions")}</p>
+                        </div>
+                        {((selectedEmployee.calculation_details as any)?.period_deductions || []).map((deduction: any, idx: number) => (
+                          <div key={idx} className="flex justify-between py-1">
+                            <span className="text-muted-foreground">
+                              {deduction.name}
+                              {deduction.is_pretax && (
+                                <span className="ml-1 text-xs text-primary">(Pre-tax)</span>
+                              )}
+                            </span>
+                            <span className="font-medium text-destructive">-{formatCurrency(deduction.amount || 0)}</span>
+                          </div>
+                        ))}
+                      </>
                     )}
-                    {(selectedEmployee.retirement_deductions || 0) > 0 && (
-                      <div className="flex justify-between py-1">
-                        <span className="text-muted-foreground">{t("payroll.processing.retirementDeductions", "Retirement")}</span>
-                        <span className="font-medium text-destructive">-{formatCurrency(selectedEmployee.retirement_deductions)}</span>
-                      </div>
+
+                    {/* Fallback to summary fields */}
+                    {!((selectedEmployee.calculation_details as any)?.period_deductions || []).length && (
+                      <>
+                        {(selectedEmployee.benefit_deductions || 0) > 0 && (
+                          <div className="flex justify-between py-1">
+                            <span className="text-muted-foreground">{t("payroll.processing.benefitDeductions", "Benefits")}</span>
+                            <span className="font-medium text-destructive">-{formatCurrency(selectedEmployee.benefit_deductions)}</span>
+                          </div>
+                        )}
+                        {(selectedEmployee.retirement_deductions || 0) > 0 && (
+                          <div className="flex justify-between py-1">
+                            <span className="text-muted-foreground">{t("payroll.processing.retirementDeductions", "Retirement")}</span>
+                            <span className="font-medium text-destructive">-{formatCurrency(selectedEmployee.retirement_deductions)}</span>
+                          </div>
+                        )}
+                        {(selectedEmployee.garnishment_deductions || 0) > 0 && (
+                          <div className="flex justify-between py-1">
+                            <span className="text-muted-foreground">{t("payroll.processing.garnishments", "Garnishments")}</span>
+                            <span className="font-medium text-destructive">-{formatCurrency(selectedEmployee.garnishment_deductions)}</span>
+                          </div>
+                        )}
+                        {(selectedEmployee.other_deductions || 0) > 0 && (
+                          <div className="flex justify-between py-1">
+                            <span className="text-muted-foreground">{t("payroll.processing.otherDeductions")}</span>
+                            <span className="font-medium text-destructive">-{formatCurrency(selectedEmployee.other_deductions)}</span>
+                          </div>
+                        )}
+                      </>
                     )}
-                    {(selectedEmployee.garnishment_deductions || 0) > 0 && (
-                      <div className="flex justify-between py-1">
-                        <span className="text-muted-foreground">{t("payroll.processing.garnishments", "Garnishments")}</span>
-                        <span className="font-medium text-destructive">-{formatCurrency(selectedEmployee.garnishment_deductions)}</span>
-                      </div>
-                    )}
-                    {(selectedEmployee.other_deductions || 0) > 0 && (
-                      <div className="flex justify-between py-1">
-                        <span className="text-muted-foreground">{t("payroll.processing.otherDeductions")}</span>
-                        <span className="font-medium text-destructive">-{formatCurrency(selectedEmployee.other_deductions)}</span>
-                      </div>
-                    )}
+
                     <div className="flex justify-between py-2 border-t border-destructive/20 mt-2 pt-2">
                       <span className="font-semibold">{t("payroll.processing.totalDeductions", "Total Deductions")}</span>
                       <span className="font-bold text-destructive">-{formatCurrency(selectedEmployee.total_deductions)}</span>
