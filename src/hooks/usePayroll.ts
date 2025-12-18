@@ -8,6 +8,12 @@ import {
   getProrationMethodCode,
   type ProrationMethod 
 } from "@/utils/payroll/prorationCalculator";
+import {
+  calculateStatutoryDeductions,
+  fetchOpeningBalances,
+  type StatutoryDeduction,
+  type StatutoryRateBand,
+} from "@/utils/statutoryDeductionCalculator";
 
 export interface PayPeriodSchedule {
   id: string;
@@ -615,9 +621,10 @@ export function usePayroll() {
         .from("pay_periods")
         .select("period_start, period_end, monday_count")
         .eq("id", payPeriodId)
-        .single();
+      .single();
       
       const mondayCount = payPeriod?.monday_count || 4;
+      const taxYear = payPeriod?.period_start ? new Date(payPeriod.period_start).getFullYear() : new Date().getFullYear();
       
       // Get statutory deduction types for this country
       const today = getTodayString();
@@ -868,37 +875,26 @@ export function usePayroll() {
           }
         }
         
-        // Calculate statutory deductions based on company's country
+        // Calculate statutory deductions using shared calculator with cumulative PAYE
         let taxDeductions = 0;
         let employerTaxes = 0;
         
         if (statutoryTypes && statutoryTypes.length > 0 && rateBands) {
-          for (const statType of statutoryTypes) {
-            const applicableBand = rateBands.find((band: any) => 
-              band.statutory_type_id === statType.id &&
-              (band.min_amount === null || grossPay >= band.min_amount) &&
-              (band.max_amount === null || grossPay <= band.max_amount) &&
-              band.is_active
-            );
-
-            if (!applicableBand) continue;
-
-            const calcMethod = (applicableBand as any).calculation_method || 'percentage';
-
-            switch (calcMethod) {
-              case 'percentage':
-                taxDeductions += grossPay * ((applicableBand as any).employee_rate || 0) / 100;
-                employerTaxes += grossPay * ((applicableBand as any).employer_rate || 0) / 100;
-                break;
-              case 'per_monday':
-                taxDeductions += mondayCount * ((applicableBand as any).per_monday_amount || 0);
-                employerTaxes += mondayCount * ((applicableBand as any).employer_per_monday_amount || 0);
-                break;
-              case 'fixed':
-                taxDeductions += (applicableBand as any).fixed_amount || 0;
-                break;
-            }
-          }
+          // Fetch opening balances for cumulative PAYE calculation
+          const openingBalances = await fetchOpeningBalances(emp.employee_id, taxYear);
+          
+          // Use the shared calculator that handles cumulative PAYE
+          const statutoryResult = calculateStatutoryDeductions(
+            grossPay,
+            statutoryTypes as StatutoryDeduction[],
+            rateBands as StatutoryRateBand[],
+            mondayCount,
+            null, // employeeAge - not currently used
+            openingBalances
+          );
+          
+          taxDeductions = statutoryResult.totalEmployeeDeductions;
+          employerTaxes = statutoryResult.totalEmployerContributions;
         }
         
         const totalDed = taxDeductions + totalPeriodDeductions + benefitDeductions;
