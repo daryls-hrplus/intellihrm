@@ -19,25 +19,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "@/components/ui/command";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Plus, Check, ChevronsUpDown, Sparkles, Clock, FileText, Video, BookOpen } from "lucide-react";
+import { Plus, Sparkles, Clock, FileText, Video, BookOpen } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { cn } from "@/lib/utils";
 import type { WorkflowColumn } from "@/types/enablement";
 
 interface AddContentItemDialogProps {
@@ -84,7 +70,6 @@ export function AddContentItemDialog({ releaseId, onSuccess }: AddContentItemDia
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [featurePopoverOpen, setFeaturePopoverOpen] = useState(false);
   const [existingFeatures, setExistingFeatures] = useState<ExistingFeature[]>([]);
   const [isNewFeature, setIsNewFeature] = useState(false);
   
@@ -153,7 +138,6 @@ export function AddContentItemDialog({ releaseId, onSuccess }: AddContentItemDia
       setIsNewFeature(false);
       setFormData({ ...formData, feature_code: featureCode });
     }
-    setFeaturePopoverOpen(false);
   };
 
   const toggleContentType = (typeId: string) => {
@@ -265,53 +249,36 @@ export function AddContentItemDialog({ releaseId, onSuccess }: AddContentItemDia
               </Label>
               
               {!isNewFeature ? (
-                <Popover open={featurePopoverOpen} onOpenChange={setFeaturePopoverOpen}>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      role="combobox"
-                      className="w-full justify-between"
-                    >
-                      {formData.feature_code || "Select existing or create new..."}
-                      <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-[400px] p-0">
-                    <Command>
-                      <CommandInput placeholder="Search features..." />
-                      <CommandList>
-                        <CommandEmpty>No features found.</CommandEmpty>
-                        <CommandGroup heading="Actions">
-                          <CommandItem onSelect={() => handleFeatureSelect("__new__")}>
-                            <Plus className="mr-2 h-4 w-4" />
-                            Create new feature
-                          </CommandItem>
-                        </CommandGroup>
-                        {filteredFeatures.length > 0 && (
-                          <CommandGroup heading={`Existing ${selectedModule?.label} Features`}>
-                            {filteredFeatures.map((feature) => (
-                              <CommandItem
-                                key={feature.feature_code}
-                                value={feature.feature_code}
-                                onSelect={() => handleFeatureSelect(feature.feature_code)}
-                              >
-                                <Check
-                                  className={cn(
-                                    "mr-2 h-4 w-4",
-                                    formData.feature_code === feature.feature_code
-                                      ? "opacity-100"
-                                      : "opacity-0"
-                                  )}
-                                />
-                                {feature.feature_code}
-                              </CommandItem>
-                            ))}
-                          </CommandGroup>
-                        )}
-                      </CommandList>
-                    </Command>
-                  </PopoverContent>
-                </Popover>
+                <div className="space-y-2">
+                  <Select 
+                    value={formData.feature_code} 
+                    onValueChange={handleFeatureSelect}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select existing feature or create new..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="__new__">
+                        <span className="flex items-center gap-2">
+                          <Plus className="h-4 w-4" />
+                          Create new feature
+                        </span>
+                      </SelectItem>
+                      {filteredFeatures.length > 0 && (
+                        <>
+                          <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground">
+                            Existing {selectedModule?.label} Features
+                          </div>
+                          {filteredFeatures.map((feature) => (
+                            <SelectItem key={feature.feature_code} value={feature.feature_code}>
+                              {feature.feature_code}
+                            </SelectItem>
+                          ))}
+                        </>
+                      )}
+                    </SelectContent>
+                  </Select>
+                </div>
               ) : (
                 <div className="space-y-2">
                   <Input

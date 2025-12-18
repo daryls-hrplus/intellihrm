@@ -546,7 +546,7 @@ export function ReleaseWorkflowDashboard() {
           {selectedItem && (
             <StageChecklist
               contentStatusId={selectedItem.id}
-              stage={(selectedItem.workflow_status === "planning" ? "backlog" : selectedItem.workflow_status) as "backlog" | "development" | "review" | "published" | "maintenance"}
+              stage={selectedItem.workflow_status as "backlog" | "planning" | "development" | "review" | "published" | "maintenance"}
               onNavigate={(path) => {
                 setSelectedItem(null);
                 navigate(path);
