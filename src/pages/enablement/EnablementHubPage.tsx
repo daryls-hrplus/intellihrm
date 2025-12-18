@@ -31,6 +31,7 @@ import {
   Library,
   Brain,
   HelpCircle,
+  FolderTree,
 } from "lucide-react";
 import { ContentWorkflowBoard } from "@/components/enablement/ContentWorkflowBoard";
 import { ReleaseManager } from "@/components/enablement/ReleaseManager";
@@ -71,6 +72,18 @@ export default function EnablementHubPage() {
 
   // Grouped sections following the pattern from other modules
   const sections: ModuleSection[] = useMemo(() => [
+    {
+      titleKey: "Feature Repository",
+      items: [
+        {
+          title: "Feature Catalog",
+          description: "Browse all modules, groups, and features with search and details",
+          href: "/enablement/feature-catalog",
+          icon: FolderTree,
+          color: "bg-violet-500/10 text-violet-500",
+        },
+      ],
+    },
     {
       titleKey: "AI Automation",
       items: [
