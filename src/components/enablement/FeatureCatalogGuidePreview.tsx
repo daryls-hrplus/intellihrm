@@ -309,22 +309,52 @@ export function FeatureCatalogGuidePreview({ open, onOpenChange }: FeatureCatalo
     const printWindow = window.open('', '_blank');
     if (!printWindow) return;
 
-    // Generate content directly instead of relying on previewRef
-    let fullContent = renderCoverHTML();
-    fullContent += renderTOCHTML();
+    const totalPages = getTotalPages();
+    let currentPageNum = 1;
+    
+    // Helper to wrap content in a page with header and footer
+    const wrapInPage = (content: string, pageNum: number, sectionTitle: string, isFirstPage = false) => {
+      const header = !isFirstPage ? `
+        <div class="page-header">
+          <div class="header-left">
+            <span class="company-badge">${companyName || 'HRplus Cerebra'}</span>
+            <span class="section-label">${sectionTitle}</span>
+          </div>
+          <div class="header-right">${includeDate ? new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : ''}</div>
+        </div>
+      ` : '';
+      
+      const footer = `
+        <div class="page-footer">
+          <span class="footer-left">© ${new Date().getFullYear()} ${companyName || 'HRplus Cerebra'}. All rights reserved. | CONFIDENTIAL</span>
+          <span class="footer-right">${includePageNumbers ? `Page ${pageNum} of ${totalPages}` : ''}</span>
+        </div>
+      `;
+      
+      return `<div class="page">${header}<div class="page-content">${content}</div>${footer}</div>`;
+    };
+
+    // Generate pages with proper wrapping
+    let allPages = '';
+    
+    // Cover page (page 1)
+    allPages += wrapInPage(renderCoverHTML(), currentPageNum++, 'Cover', true);
+    
+    // TOC (page 2)
+    allPages += wrapInPage(renderTOCHTML(), currentPageNum++, 'Table of Contents');
     
     if (currentTemplate.includeExecutiveSummary) {
-      fullContent += renderExecutiveSummaryHTML();
+      allPages += wrapInPage(renderExecutiveSummaryHTML(), currentPageNum++, 'Executive Summary');
     }
     
     if (currentTemplate.includeModules) {
       getModulesSortedByCategory().forEach((module, idx) => {
-        fullContent += renderModuleHTML(module, idx === 0, idx);
+        allPages += wrapInPage(renderModuleHTML(module, idx === 0, idx), currentPageNum++, `Module: ${module.name}`);
       });
     }
     
     if (currentTemplate.includeCapabilities) {
-      fullContent += renderCapabilitiesHTML();
+      allPages += wrapInPage(renderCapabilitiesHTML(), currentPageNum++, 'Platform Capabilities');
     }
     
     if (currentTemplate.includeMatrix) {
@@ -333,7 +363,7 @@ export function FeatureCatalogGuidePreview({ open, onOpenChange }: FeatureCatalo
           module.groups.some(g => g.features.some(f => f.code === fc.featureCode))
         );
         if (hasFeatures) {
-          fullContent += renderMatrixModuleHTML(module, idx === 0);
+          allPages += wrapInPage(renderMatrixModuleHTML(module, idx === 0), currentPageNum++, `Capability Matrix: ${module.name}`);
         }
       });
     }
@@ -346,44 +376,141 @@ export function FeatureCatalogGuidePreview({ open, onOpenChange }: FeatureCatalo
           <style>
             * { margin: 0; padding: 0; box-sizing: border-box; }
             body { font-family: 'Segoe UI', Arial, sans-serif; color: #1a1a1a; line-height: 1.6; }
-            .guide-cover { page-break-after: always; padding: 60px; text-align: center; min-height: 100vh; display: flex; flex-direction: column; justify-content: center; background: linear-gradient(135deg, ${primaryColor} 0%, ${secondaryColor} 100%); color: white; }
-            .guide-cover h1 { font-size: 48px; font-weight: 700; margin-bottom: 16px; }
-            .guide-cover p { font-size: 20px; opacity: 0.9; }
-            .guide-cover .stats { display: flex; justify-content: center; gap: 40px; margin-top: 60px; }
-            .guide-cover .stat { text-align: center; }
-            .guide-cover .stat-value { font-size: 42px; font-weight: 700; }
-            .guide-cover .stat-label { font-size: 14px; opacity: 0.8; text-transform: uppercase; letter-spacing: 1px; }
-            .guide-section { padding: 40px; page-break-after: always; }
-            .section-title { font-size: 28px; font-weight: 700; color: #1a1a1a; margin-bottom: 8px; border-bottom: 3px solid ${primaryColor}; padding-bottom: 12px; }
-            .section-subtitle { font-size: 16px; color: #666; margin-bottom: 24px; }
-            .module-card { background: #f8f9fa; border-radius: 8px; padding: 20px; margin-bottom: 20px; border-left: 4px solid ${primaryColor}; }
-            .module-name { font-size: 20px; font-weight: 600; color: #1a1a1a; margin-bottom: 8px; }
+            
+            /* Page structure for print */
+            @page {
+              size: A4;
+              margin: 15mm 15mm 20mm 15mm;
+            }
+            
+            .page {
+              page-break-after: always;
+              page-break-inside: avoid;
+              position: relative;
+              min-height: calc(100vh - 35mm);
+            }
+            
+            .page:last-child {
+              page-break-after: auto;
+            }
+            
+            /* Header styles */
+            .page-header {
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              padding: 8px 0 12px 0;
+              margin-bottom: 16px;
+              border-bottom: 2px solid ${primaryColor}15;
+            }
+            
+            .header-left {
+              display: flex;
+              align-items: center;
+              gap: 12px;
+            }
+            
+            .company-badge {
+              background: linear-gradient(135deg, ${primaryColor}, ${secondaryColor});
+              color: white;
+              padding: 4px 12px;
+              border-radius: 4px;
+              font-size: 10px;
+              font-weight: 600;
+            }
+            
+            .section-label {
+              font-size: 10px;
+              color: #64748b;
+            }
+            
+            .header-right {
+              font-size: 9px;
+              color: #94a3b8;
+            }
+            
+            /* Footer styles */
+            .page-footer {
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              padding-top: 12px;
+              margin-top: 24px;
+              border-top: 1px solid #e2e8f0;
+              position: relative;
+              bottom: 0;
+            }
+            
+            .footer-left, .footer-right {
+              font-size: 9px;
+              color: #64748b;
+            }
+            
+            /* Content styles */
+            .page-content {
+              flex: 1;
+            }
+            
+            .guide-cover { 
+              padding: 40px; 
+              text-align: center; 
+              min-height: 500px; 
+              display: flex; 
+              flex-direction: column; 
+              justify-content: center; 
+              background: linear-gradient(135deg, ${primaryColor} 0%, ${secondaryColor} 100%); 
+              color: white; 
+              border-radius: 8px;
+              margin: -20px;
+              margin-bottom: 0;
+            }
+            .guide-cover h1 { font-size: 36px; font-weight: 700; margin-bottom: 12px; }
+            .guide-cover p { font-size: 16px; opacity: 0.9; }
+            .guide-section { padding: 20px 0; }
+            .section-title { font-size: 24px; font-weight: 700; color: #1a1a1a; margin-bottom: 8px; border-bottom: 3px solid ${primaryColor}; padding-bottom: 12px; }
+            .section-subtitle { font-size: 14px; color: #666; margin-bottom: 20px; }
+            .module-card { background: #f8f9fa; border-radius: 8px; padding: 16px; margin-bottom: 16px; border-left: 4px solid ${primaryColor}; page-break-inside: avoid; }
+            .module-name { font-size: 18px; font-weight: 600; color: #1a1a1a; margin-bottom: 6px; }
             .feature-list { list-style: none; padding-left: 0; }
-            .feature-item { padding: 8px 0; border-bottom: 1px solid #eee; display: flex; align-items: center; gap: 8px; }
+            .feature-item { padding: 6px 0; border-bottom: 1px solid #eee; display: flex; align-items: center; gap: 8px; }
             .feature-item:last-child { border-bottom: none; }
-            .feature-name { font-weight: 500; }
-            .feature-desc { font-size: 14px; color: #666; }
-            .capability-card { background: linear-gradient(135deg, #f5f7fa 0%, #e4e8eb 100%); border-radius: 12px; padding: 24px; margin-bottom: 16px; }
-            .capability-name { font-size: 18px; font-weight: 600; color: #1a1a1a; margin-bottom: 8px; }
-            .capability-value { font-size: 14px; color: #333; margin-bottom: 4px; }
-            .badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 500; }
+            .feature-name { font-weight: 500; font-size: 13px; }
+            .feature-desc { font-size: 12px; color: #666; }
+            .capability-card { background: linear-gradient(135deg, #f5f7fa 0%, #e4e8eb 100%); border-radius: 8px; padding: 16px; margin-bottom: 12px; page-break-inside: avoid; }
+            .capability-name { font-size: 16px; font-weight: 600; color: #1a1a1a; margin-bottom: 6px; }
+            .capability-value { font-size: 13px; color: #333; margin-bottom: 4px; }
+            .badge { display: inline-block; padding: 3px 10px; border-radius: 16px; font-size: 11px; font-weight: 500; }
             .badge-ai { background: ${primaryColor}20; color: ${primaryColor}; }
             .badge-unique { background: #fef3c7; color: #d97706; }
             .badge-advanced { background: #dbeafe; color: #2563eb; }
-            .matrix-table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 20px; }
-            .matrix-table th, .matrix-table td { border: 1px solid #e5e7eb; padding: 8px; text-align: left; }
+            .matrix-table { width: 100%; border-collapse: collapse; font-size: 11px; margin-top: 16px; }
+            .matrix-table th, .matrix-table td { border: 1px solid #e5e7eb; padding: 6px; text-align: left; }
             .matrix-table th { background: #f3f4f6; font-weight: 600; }
             .check-mark { color: ${accentColor}; font-weight: bold; }
-            .footer { text-align: center; padding: 20px; font-size: 12px; color: #666; border-top: 1px solid #eee; margin-top: 40px; }
             .brand-primary { color: ${primaryColor}; }
             .brand-bg { background-color: ${primaryColor}; }
+            
             @media print {
-              .guide-section { page-break-after: always; }
-              .no-break { page-break-inside: avoid; }
+              html, body {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+              }
+              .page {
+                page-break-after: always !important;
+              }
+              .page:last-child {
+                page-break-after: auto !important;
+              }
+              .no-break {
+                page-break-inside: avoid !important;
+              }
+              .module-card, .capability-card {
+                page-break-inside: avoid !important;
+              }
             }
           </style>
         </head>
-        <body>${fullContent}</body>
+        <body>${allPages}</body>
       </html>
     `);
     printWindow.document.close();
@@ -619,11 +746,9 @@ export function FeatureCatalogGuidePreview({ open, onOpenChange }: FeatureCatalo
     }
     
     return `
-      <div style="padding: 40px; background: white; font-family: system-ui, -apple-system, sans-serif;">
-        ${renderDocumentHeader(2, 'Table of Contents')}
-        <h2 style="font-size: 28px; font-weight: 700; margin-bottom: 24px; padding-bottom: 12px; border-bottom: 3px solid ${primaryColor};">Table of Contents</h2>
+      <div style="background: white; font-family: system-ui, -apple-system, sans-serif;">
+        <h2 style="font-size: 24px; font-weight: 700; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 3px solid ${primaryColor};">Table of Contents</h2>
         <div>${tocItems}</div>
-        ${renderDocumentFooter(2, totalPages)}
       </div>
     `;
   };
@@ -683,19 +808,17 @@ export function FeatureCatalogGuidePreview({ open, onOpenChange }: FeatureCatalo
     }).join('');
     
     return `
-    <div style="padding: 40px; background: white; font-family: system-ui, -apple-system, sans-serif;">
-      ${renderDocumentHeader(pageNum, 'Executive Summary')}
+    <div style="background: white; font-family: system-ui, -apple-system, sans-serif;">
+      <h2 style="font-size: 24px; font-weight: 700; margin-bottom: 8px; padding-bottom: 12px; border-bottom: 3px solid ${primaryColor};">Executive Summary</h2>
+      <p style="color: #64748b; margin-bottom: 20px;">Platform Overview for Decision Makers</p>
       
-      <h2 style="font-size: 28px; font-weight: 700; margin-bottom: 8px; padding-bottom: 12px; border-bottom: 3px solid ${primaryColor};">Executive Summary</h2>
-      <p style="color: #64748b; margin-bottom: 24px;">Platform Overview for Decision Makers</p>
-      
-      <div style="margin-bottom: 32px;">
-        <p style="font-size: 16px; line-height: 1.7; margin-bottom: 16px; color: #1e293b;">
+      <div style="margin-bottom: 24px;">
+        <p style="font-size: 14px; line-height: 1.7; margin-bottom: 12px; color: #1e293b;">
           HRplus Cerebra is an enterprise-grade Human Resource Management System designed to transform workforce management 
           through intelligent automation and AI-powered insights. Purpose-built for the Caribbean, Africa, and global expansion, 
           the platform delivers deep regional compliance alongside sophisticated cross-module orchestration.
         </p>
-        <p style="font-size: 16px; line-height: 1.7; color: #1e293b;">
+        <p style="font-size: 14px; line-height: 1.7; color: #1e293b;">
           With <strong>${aiPoweredCount} AI-powered features</strong> and <strong>${uniqueCount} market differentiators</strong>, 
           HRplus Cerebra goes beyond traditional HRIS solutions to deliver predictive insights, prescriptive recommendations, 
           and automated actions across the entire employee lifecycle.
@@ -792,8 +915,6 @@ export function FeatureCatalogGuidePreview({ open, onOpenChange }: FeatureCatalo
           <p style="font-size: 14px; color: #b45309; margin: 0;">Unique capabilities not found in competing solutions like Workday, SAP, or Oracle HCM.</p>
         </div>
       </div>
-      
-      ${renderDocumentFooter(pageNum, totalPages)}
     </div>
   `;
   };
@@ -885,40 +1006,38 @@ export function FeatureCatalogGuidePreview({ open, onOpenChange }: FeatureCatalo
     ` : '';
     
     return `
-      <div style="padding: 40px; background: white; font-family: system-ui, -apple-system, sans-serif;">
-        ${renderDocumentHeader(pageNum, isFirst ? 'Module Reference' : module.name)}
-        ${isFirst ? `<h2 style="font-size: 28px; font-weight: 700; margin-bottom: 8px; padding-bottom: 12px; border-bottom: 3px solid ${primaryColor};">Module Reference</h2><p style="color: #64748b; margin-bottom: 24px;">Complete Feature Inventory by Module</p>` : ''}
-        <div style="background: #f8fafc; border-radius: 8px; padding: 24px; border-left: 4px solid ${moduleGroup?.group.color || primaryColor}; ${isTalentSuite ? `border: 2px solid ${primaryColor}30;` : ''}">
-          <div style="display: flex; align-items: start; gap: 16px; margin-bottom: 16px;">
-            <div style="background: ${moduleGroup?.group.color || primaryColor}20; padding: 12px; border-radius: 8px;">
-              <span style="font-size: 24px;">${moduleGroup?.group.icon || '📦'}</span>
+      <div style="background: white; font-family: system-ui, -apple-system, sans-serif;">
+        ${isFirst ? `<h2 style="font-size: 24px; font-weight: 700; margin-bottom: 8px; padding-bottom: 12px; border-bottom: 3px solid ${primaryColor};">Module Reference</h2><p style="color: #64748b; margin-bottom: 20px;">Complete Feature Inventory by Module</p>` : ''}
+        <div style="background: #f8fafc; border-radius: 8px; padding: 20px; border-left: 4px solid ${moduleGroup?.group.color || primaryColor}; ${isTalentSuite ? `border: 2px solid ${primaryColor}30;` : ''}">
+          <div style="display: flex; align-items: start; gap: 12px; margin-bottom: 12px;">
+            <div style="background: ${moduleGroup?.group.color || primaryColor}20; padding: 10px; border-radius: 8px;">
+              <span style="font-size: 20px;">${moduleGroup?.group.icon || '📦'}</span>
             </div>
             <div style="flex: 1;">
-              <div style="display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 4px;">
-                <h3 style="font-size: 20px; font-weight: 600; color: #1e293b; margin: 0;">${module.name}</h3>
-                <span style="background: ${primaryColor}20; color: ${primaryColor}; font-size: 12px; padding: 2px 8px; border-radius: 12px;">${moduleFeatureCount} Features</span>
-                ${moduleGroup ? `<span style="background: ${moduleGroup.group.color}; color: white; font-size: 11px; padding: 4px 10px; border-radius: 4px; font-weight: 500;">${moduleGroup.group.icon} ${moduleGroup.group.name}</span>` : ''}
+              <div style="display: flex; align-items: center; flex-wrap: wrap; gap: 6px; margin-bottom: 4px;">
+                <h3 style="font-size: 18px; font-weight: 600; color: #1e293b; margin: 0;">${module.name}</h3>
+                <span style="background: ${primaryColor}20; color: ${primaryColor}; font-size: 11px; padding: 2px 6px; border-radius: 10px;">${moduleFeatureCount} Features</span>
+                ${moduleGroup ? `<span style="background: ${moduleGroup.group.color}; color: white; font-size: 10px; padding: 3px 8px; border-radius: 4px; font-weight: 500;">${moduleGroup.group.icon} ${moduleGroup.group.name}</span>` : ''}
               </div>
-              <p style="font-size: 14px; color: #64748b; margin: 0;">${module.description}</p>
+              <p style="font-size: 13px; color: #64748b; margin: 0;">${module.description}</p>
               ${subModuleBadge}
             </div>
           </div>
           ${payrollCountriesHTML}
           ${enrichment ? `
-            <div style="background: white; border-radius: 8px; padding: 16px; border: 1px solid #e2e8f0; margin-bottom: 16px;">
-              <p style="font-size: 14px; color: #475569; margin: 0 0 12px 0;">${enrichment.businessContext}</p>
-              <div style="margin-bottom: 12px;">
-                <strong style="font-size: 13px; color: #1e293b;">Key Benefits:</strong>
-                <ul style="margin: 8px 0 0 0; padding-left: 20px;">${enrichment.keyBenefits.slice(0, 4).map(b => `<li style="font-size: 13px; color: #64748b; margin-bottom: 4px;">${b}</li>`).join('')}</ul>
+            <div style="background: white; border-radius: 8px; padding: 12px; border: 1px solid #e2e8f0; margin-bottom: 12px;">
+              <p style="font-size: 13px; color: #475569; margin: 0 0 10px 0;">${enrichment.businessContext}</p>
+              <div style="margin-bottom: 10px;">
+                <strong style="font-size: 12px; color: #1e293b;">Key Benefits:</strong>
+                <ul style="margin: 6px 0 0 0; padding-left: 18px;">${enrichment.keyBenefits.slice(0, 4).map(b => `<li style="font-size: 12px; color: #64748b; margin-bottom: 3px;">${b}</li>`).join('')}</ul>
               </div>
-              <div style="font-size: 13px; color: #64748b; margin-bottom: 8px;"><strong>Target Users:</strong> ${enrichment.targetUsers.join(', ')}</div>
-              <div style="background: ${primaryColor}10; padding: 12px; border-radius: 6px;"><strong style="color: ${primaryColor};">Strategic Value:</strong> <span style="color: ${primaryColor};">${enrichment.strategicValue}</span></div>
+              <div style="font-size: 12px; color: #64748b; margin-bottom: 6px;"><strong>Target Users:</strong> ${enrichment.targetUsers.join(', ')}</div>
+              <div style="background: ${primaryColor}10; padding: 10px; border-radius: 6px;"><strong style="color: ${primaryColor};">Strategic Value:</strong> <span style="color: ${primaryColor};">${enrichment.strategicValue}</span></div>
             </div>
           ` : ''}
           ${featuresHTML}
           ${integrationsHTML}
         </div>
-        ${renderDocumentFooter(pageNum, totalPages)}
       </div>
     `;
   };
@@ -956,39 +1075,37 @@ export function FeatureCatalogGuidePreview({ open, onOpenChange }: FeatureCatalo
     `;
     
     return `
-      <div style="padding: 40px; background: white; font-family: system-ui, -apple-system, sans-serif;">
-        ${renderDocumentHeader(pageNum, 'Platform Capabilities & AI Overview')}
-        
-        <h2 style="font-size: 28px; font-weight: 700; margin-bottom: 8px; padding-bottom: 12px; border-bottom: 3px solid ${primaryColor};">Platform Capabilities & AI Overview</h2>
-        <p style="color: #64748b; margin-bottom: 24px;">AI-Powered Features & Competitive Advantages</p>
+      <div style="background: white; font-family: system-ui, -apple-system, sans-serif;">
+        <h2 style="font-size: 24px; font-weight: 700; margin-bottom: 8px; padding-bottom: 12px; border-bottom: 3px solid ${primaryColor};">Platform Capabilities & AI Overview</h2>
+        <p style="color: #64748b; margin-bottom: 20px;">AI-Powered Features & Competitive Advantages</p>
         
         <!-- AI Capabilities Summary -->
-        <div style="margin-bottom: 24px; padding: 20px; background: linear-gradient(135deg, #7c3aed08 0%, #4f46e508 100%); border-radius: 12px; border: 2px solid #7c3aed30;">
-          <h3 style="font-size: 18px; font-weight: 600; color: #7c3aed; margin-bottom: 16px;">🧠 AI-First Architecture</h3>
-          <p style="font-size: 14px; color: #475569; margin-bottom: 16px;">HRplus Cerebra embeds AI across every module, not as an afterthought but as a core design principle. Our AI capabilities include:</p>
-          <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;">
-            <div style="background: white; padding: 12px; border-radius: 8px; text-align: center;">
-              <div style="font-size: 24px; margin-bottom: 8px;">🔮</div>
-              <div style="font-weight: 600; color: #1e293b; font-size: 13px;">Predictive Analytics</div>
-              <p style="font-size: 11px; color: #64748b; margin: 4px 0 0 0;">Anticipate workforce trends before they happen</p>
+        <div style="margin-bottom: 20px; padding: 16px; background: linear-gradient(135deg, #7c3aed08 0%, #4f46e508 100%); border-radius: 10px; border: 2px solid #7c3aed30;">
+          <h3 style="font-size: 16px; font-weight: 600; color: #7c3aed; margin-bottom: 12px;">🧠 AI-First Architecture</h3>
+          <p style="font-size: 13px; color: #475569; margin-bottom: 12px;">HRplus Cerebra embeds AI across every module, not as an afterthought but as a core design principle.</p>
+          <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;">
+            <div style="background: white; padding: 10px; border-radius: 6px; text-align: center;">
+              <div style="font-size: 20px; margin-bottom: 6px;">🔮</div>
+              <div style="font-weight: 600; color: #1e293b; font-size: 12px;">Predictive Analytics</div>
+              <p style="font-size: 10px; color: #64748b; margin: 4px 0 0 0;">Anticipate workforce trends</p>
             </div>
-            <div style="background: white; padding: 12px; border-radius: 8px; text-align: center;">
-              <div style="font-size: 24px; margin-bottom: 8px;">⚡</div>
-              <div style="font-weight: 600; color: #1e293b; font-size: 13px;">Intelligent Automation</div>
-              <p style="font-size: 11px; color: #64748b; margin: 4px 0 0 0;">Automate routine tasks with smart workflows</p>
+            <div style="background: white; padding: 10px; border-radius: 6px; text-align: center;">
+              <div style="font-size: 20px; margin-bottom: 6px;">⚡</div>
+              <div style="font-weight: 600; color: #1e293b; font-size: 12px;">Intelligent Automation</div>
+              <p style="font-size: 10px; color: #64748b; margin: 4px 0 0 0;">Smart workflow automation</p>
             </div>
-            <div style="background: white; padding: 12px; border-radius: 8px; text-align: center;">
-              <div style="font-size: 24px; margin-bottom: 8px;">💡</div>
-              <div style="font-weight: 600; color: #1e293b; font-size: 13px;">Prescriptive Guidance</div>
-              <p style="font-size: 11px; color: #64748b; margin: 4px 0 0 0;">AI-driven recommendations for better decisions</p>
+            <div style="background: white; padding: 10px; border-radius: 6px; text-align: center;">
+              <div style="font-size: 20px; margin-bottom: 6px;">💡</div>
+              <div style="font-weight: 600; color: #1e293b; font-size: 12px;">Prescriptive Guidance</div>
+              <p style="font-size: 10px; color: #64748b; margin: 4px 0 0 0;">AI-driven recommendations</p>
             </div>
           </div>
         </div>
 
         <!-- Industry-Standard Module Groupings -->
-        <div style="margin-bottom: 24px; padding: 16px; background: #f8fafc; border-radius: 8px; border-left: 4px solid ${primaryColor};">
-          <h3 style="font-size: 16px; font-weight: 600; color: #1e293b; margin-bottom: 12px;">📦 Capability Distribution by Module Category</h3>
-          <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;">
+        <div style="margin-bottom: 20px; padding: 12px; background: #f8fafc; border-radius: 6px; border-left: 4px solid ${primaryColor};">
+          <h3 style="font-size: 14px; font-weight: 600; color: #1e293b; margin-bottom: 10px;">📦 Capability Distribution by Module Category</h3>
+          <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px;">
             ${Object.entries(MODULE_GROUPS).map(([key, group]) => {
               const groupModules = FEATURE_REGISTRY.filter(m => group.modules.includes(m.code));
               const totalFeatures = groupModules.reduce((acc, m) => acc + m.groups.reduce((a, g) => a + g.features.length, 0), 0);
@@ -998,12 +1115,12 @@ export function FeatureCatalogGuidePreview({ open, onOpenChange }: FeatureCatalo
                 }, 0);
               }, 0);
               return `
-                <div style="background: white; padding: 12px; border-radius: 6px; border: 1px solid #e2e8f0;">
-                  <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                <div style="background: white; padding: 10px; border-radius: 4px; border: 1px solid #e2e8f0;">
+                  <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 2px;">
                     <span>${group.icon}</span>
-                    <span style="font-weight: 600; color: ${group.color}; font-size: 13px;">${group.name}</span>
+                    <span style="font-weight: 600; color: ${group.color}; font-size: 12px;">${group.name}</span>
                   </div>
-                  <div style="font-size: 11px; color: #64748b;">${totalFeatures} features | ${aiFeatures} AI-powered</div>
+                  <div style="font-size: 10px; color: #64748b;">${totalFeatures} features | ${aiFeatures} AI-powered</div>
                 </div>
               `;
             }).join('')}
@@ -1011,22 +1128,20 @@ export function FeatureCatalogGuidePreview({ open, onOpenChange }: FeatureCatalo
         </div>
 
         <!-- All Platform Capabilities -->
-        <h3 style="font-size: 18px; font-weight: 600; color: #1e293b; margin-bottom: 16px;">Platform Capabilities</h3>
+        <h3 style="font-size: 16px; font-weight: 600; color: #1e293b; margin-bottom: 12px;">Platform Capabilities</h3>
         ${PLATFORM_CAPABILITIES.map(cap => renderCapabilityCard(cap)).join('')}
 
         <!-- Integration Highlights -->
-        <div style="margin-top: 24px; padding: 20px; background: #fefce8; border-radius: 8px; border-left: 4px solid #eab308;">
-          <h3 style="font-size: 16px; font-weight: 600; color: #854d0e; margin-bottom: 12px;">🔗 Cross-Module Integration</h3>
-          <p style="font-size: 13px; color: #713f12; margin-bottom: 16px;">All modules share a unified data model, enabling seamless data flow and automated workflows across the platform.</p>
-          <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+        <div style="margin-top: 20px; padding: 16px; background: #fefce8; border-radius: 6px; border-left: 4px solid #eab308;">
+          <h3 style="font-size: 14px; font-weight: 600; color: #854d0e; margin-bottom: 10px;">🔗 Cross-Module Integration</h3>
+          <p style="font-size: 12px; color: #713f12; margin-bottom: 12px;">All modules share a unified data model, enabling seamless data flow.</p>
+          <div style="display: flex; flex-wrap: wrap; gap: 6px;">
             ${Object.entries(MODULE_INTEGRATIONS).slice(0, 6).map(([source, targets]) => {
               const sourceModule = FEATURE_REGISTRY.find(m => m.code === source);
-              return sourceModule ? `<span style="background: white; padding: 4px 10px; border-radius: 4px; font-size: 11px; color: #854d0e; border: 1px solid #fde68a;">${sourceModule.name} ↔ ${targets.length} modules</span>` : '';
+              return sourceModule ? `<span style="background: white; padding: 3px 8px; border-radius: 4px; font-size: 10px; color: #854d0e; border: 1px solid #fde68a;">${sourceModule.name} ↔ ${targets.length} modules</span>` : '';
             }).join('')}
           </div>
         </div>
-        
-        ${renderDocumentFooter(pageNum, totalPages)}
       </div>
     `;
   };
