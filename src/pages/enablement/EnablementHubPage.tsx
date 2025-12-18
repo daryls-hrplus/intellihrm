@@ -34,6 +34,7 @@ import {
 } from "lucide-react";
 import { ContentWorkflowBoard } from "@/components/enablement/ContentWorkflowBoard";
 import { ReleaseManager } from "@/components/enablement/ReleaseManager";
+import { ReleaseWorkflowDashboard } from "@/components/enablement/ReleaseWorkflowDashboard";
 import { ContentCoverageMatrix } from "@/components/enablement/ContentCoverageMatrix";
 import { VideoLibraryManager } from "@/components/enablement/VideoLibraryManager";
 import { DAPGuidesManager } from "@/components/enablement/DAPGuidesManager";
@@ -388,7 +389,8 @@ export default function EnablementHubPage() {
             <ContentWorkflowBoard releaseId={activeRelease?.id} />
           </TabsContent>
 
-          <TabsContent value="releases">
+          <TabsContent value="releases" className="space-y-6">
+            <ReleaseWorkflowDashboard />
             <ReleaseManager />
           </TabsContent>
 
