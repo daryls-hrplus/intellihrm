@@ -18,6 +18,46 @@ interface TimeClockEntry {
   clock_out_longitude: number | null;
 }
 
+// Helper function to upload base64 photo to storage
+async function uploadPhotoToStorage(
+  userId: string,
+  base64DataUrl: string,
+  type: 'clock_in' | 'clock_out'
+): Promise<string | null> {
+  try {
+    // Convert base64 to blob
+    const response = await fetch(base64DataUrl);
+    const blob = await response.blob();
+    
+    // Create unique filename
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+    const filename = `${userId}/${type}_${timestamp}.jpg`;
+    
+    // Upload to storage
+    const { error: uploadError } = await supabase.storage
+      .from('timeclock-photos')
+      .upload(filename, blob, {
+        contentType: 'image/jpeg',
+        upsert: false
+      });
+    
+    if (uploadError) {
+      console.error('Error uploading photo:', uploadError);
+      return null;
+    }
+    
+    // Get public URL
+    const { data: { publicUrl } } = supabase.storage
+      .from('timeclock-photos')
+      .getPublicUrl(filename);
+    
+    return publicUrl;
+  } catch (error) {
+    console.error('Error processing photo upload:', error);
+    return null;
+  }
+}
+
 export function useVirtualClock() {
   const { user, profile } = useAuth();
   const [currentEntry, setCurrentEntry] = useState<TimeClockEntry | null>(null);
@@ -76,7 +116,7 @@ export function useVirtualClock() {
 
   // Clock in
   const clockIn = useCallback(async (
-    photoUrl?: string | null,
+    photoDataUrl?: string | null,
     latitude?: number | null,
     longitude?: number | null
   ) => {
@@ -87,13 +127,22 @@ export function useVirtualClock() {
 
     try {
       setIsLoading(true);
+      
+      // Upload photo to storage if provided
+      let photoUrl: string | null = null;
+      if (photoDataUrl && photoDataUrl.startsWith('data:')) {
+        photoUrl = await uploadPhotoToStorage(user.id, photoDataUrl, 'clock_in');
+      } else if (photoDataUrl) {
+        photoUrl = photoDataUrl; // Already a URL
+      }
+      
       const { data, error } = await supabase
         .from('time_clock_entries')
         .insert({
           employee_id: user.id,
           company_id: profile.company_id,
           clock_in: new Date().toISOString(),
-          clock_in_photo_url: photoUrl || null,
+          clock_in_photo_url: photoUrl,
           clock_in_latitude: latitude || null,
           clock_in_longitude: longitude || null,
           clock_in_method: 'virtual',
@@ -116,7 +165,7 @@ export function useVirtualClock() {
 
   // Clock out
   const clockOut = useCallback(async (
-    photoUrl?: string | null,
+    photoDataUrl?: string | null,
     latitude?: number | null,
     longitude?: number | null
   ) => {
@@ -124,6 +173,15 @@ export function useVirtualClock() {
 
     try {
       setIsLoading(true);
+      
+      // Upload photo to storage if provided
+      let photoUrl: string | null = null;
+      if (photoDataUrl && photoDataUrl.startsWith('data:')) {
+        photoUrl = await uploadPhotoToStorage(user.id, photoDataUrl, 'clock_out');
+      } else if (photoDataUrl) {
+        photoUrl = photoDataUrl; // Already a URL
+      }
+      
       const clockOutTime = new Date();
       const clockInTime = new Date(currentEntry.clock_in);
       const totalHours = (clockOutTime.getTime() - clockInTime.getTime()) / (1000 * 60 * 60);
@@ -132,7 +190,7 @@ export function useVirtualClock() {
         .from('time_clock_entries')
         .update({
           clock_out: clockOutTime.toISOString(),
-          clock_out_photo_url: photoUrl || null,
+          clock_out_photo_url: photoUrl,
           clock_out_latitude: latitude || null,
           clock_out_longitude: longitude || null,
           clock_out_method: 'virtual',
