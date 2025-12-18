@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { PrintableGuide } from "@/components/enablement/PrintableGuide";
+import { AllStagesChecklist } from "@/components/enablement/StageChecklist";
 import {
   ArrowLeft,
   BookOpen,
@@ -77,34 +78,39 @@ export default function EnablementGuidePage() {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 print:hidden">
           {/* Table of Contents */}
-          <Card className="lg:col-span-1 lg:sticky lg:top-6 lg:self-start">
-            <CardHeader>
-              <CardTitle className="text-lg">Contents</CardTitle>
-            </CardHeader>
-            <CardContent className="p-0">
-              <ScrollArea className="h-[500px]">
-                <div className="p-4 space-y-1">
-                  {[
-                    { id: "overview", label: "Overview" },
-                    { id: "workflow", label: "Recommended Workflow" },
-                    { id: "content-types", label: "Content Types" },
-                    { id: "ai-tools", label: "AI Automation Tools" },
-                    { id: "release-process", label: "Release Process" },
-                    { id: "best-practices", label: "Best Practices" },
-                    { id: "metrics", label: "Success Metrics" },
-                  ].map((item) => (
-                    <a
-                      key={item.id}
-                      href={`#${item.id}`}
-                      className="block px-3 py-2 rounded-md hover:bg-muted text-sm"
-                    >
-                      {item.label}
-                    </a>
-                  ))}
-                </div>
-              </ScrollArea>
-            </CardContent>
-          </Card>
+          <div className="lg:col-span-1 space-y-6 lg:sticky lg:top-6 lg:self-start">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Contents</CardTitle>
+              </CardHeader>
+              <CardContent className="p-0">
+                <ScrollArea className="h-[300px]">
+                  <div className="p-4 space-y-1">
+                    {[
+                      { id: "overview", label: "Overview" },
+                      { id: "workflow", label: "Recommended Workflow" },
+                      { id: "content-types", label: "Content Types" },
+                      { id: "ai-tools", label: "AI Automation Tools" },
+                      { id: "release-process", label: "Release Process" },
+                      { id: "best-practices", label: "Best Practices" },
+                      { id: "metrics", label: "Success Metrics" },
+                    ].map((item) => (
+                      <a
+                        key={item.id}
+                        href={`#${item.id}`}
+                        className="block px-3 py-2 rounded-md hover:bg-muted text-sm"
+                      >
+                        {item.label}
+                      </a>
+                    ))}
+                  </div>
+                </ScrollArea>
+              </CardContent>
+            </Card>
+
+            {/* Stage Checklists - Interactive checklist panel */}
+            <AllStagesChecklist onNavigate={(path) => navigate(path)} />
+          </div>
 
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-8">
