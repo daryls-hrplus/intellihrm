@@ -712,24 +712,6 @@ export default function EnablementAIToolsPage() {
                 </div>
               )}
 
-              {/* Results Display */
-                    </p>
-                  </div>
-
-                  <Button
-                    onClick={() => runAnalysis("detect-compliance-impact", {})}
-                    disabled={isLoading}
-                  >
-                    {isLoading ? (
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    ) : (
-                      <Shield className="h-4 w-4 mr-2" />
-                    )}
-                    Scan for Compliance Impact
-                  </Button>
-                </div>
-              )}
-
               {/* Results Display */}
               {results && (
                 <div className="mt-8 pt-6 border-t">
