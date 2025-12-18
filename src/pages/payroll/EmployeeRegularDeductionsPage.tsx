@@ -47,6 +47,7 @@ interface RegularDeduction {
   stop_reason: string | null;
   reference_number: string | null;
   institution_name: string | null;
+  account_number: string | null;
   notes: string | null;
   profiles?: { full_name: string };
 }
@@ -78,6 +79,7 @@ export default function EmployeeRegularDeductionsPage() {
     end_date: '',
     reference_number: '',
     institution_name: '',
+    account_number: '',
     notes: ''
   });
 
@@ -165,6 +167,7 @@ export default function EmployeeRegularDeductionsPage() {
       end_date: '',
       reference_number: '',
       institution_name: '',
+      account_number: '',
       notes: ''
     });
     setEditingId(null);
@@ -186,6 +189,7 @@ export default function EmployeeRegularDeductionsPage() {
       end_date: deduction.end_date || '',
       reference_number: deduction.reference_number || '',
       institution_name: deduction.institution_name || '',
+      account_number: deduction.account_number || '',
       notes: deduction.notes || ''
     });
     setEditingId(deduction.id);
@@ -214,6 +218,7 @@ export default function EmployeeRegularDeductionsPage() {
       end_date: formData.end_date || null,
       reference_number: formData.reference_number || null,
       institution_name: formData.institution_name || null,
+      account_number: formData.account_number || null,
       notes: formData.notes || null
     };
 
@@ -430,8 +435,12 @@ export default function EmployeeRegularDeductionsPage() {
                               {deduction.deduction_type}
                             </Badge>
                           </div>
-                          {deduction.institution_name && (
-                            <div className="text-xs text-muted-foreground">{deduction.institution_name}</div>
+                          {(deduction.institution_name || deduction.account_number) && (
+                            <div className="text-xs text-muted-foreground">
+                              {deduction.institution_name}
+                              {deduction.institution_name && deduction.account_number && ' • '}
+                              {deduction.account_number && `Acct: ${deduction.account_number}`}
+                            </div>
                           )}
                         </div>
                       </TableCell>
@@ -541,7 +550,7 @@ export default function EmployeeRegularDeductionsPage() {
                 </Select>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-3 gap-4">
                 <div className="space-y-2">
                   <Label>Institution Name</Label>
                   <Input
@@ -551,11 +560,19 @@ export default function EmployeeRegularDeductionsPage() {
                   />
                 </div>
                 <div className="space-y-2">
+                  <Label>Account Number</Label>
+                  <Input
+                    value={formData.account_number}
+                    onChange={(e) => setFormData({ ...formData, account_number: e.target.value })}
+                    placeholder="e.g., 12345678"
+                  />
+                </div>
+                <div className="space-y-2">
                   <Label>Reference Number</Label>
                   <Input
                     value={formData.reference_number}
                     onChange={(e) => setFormData({ ...formData, reference_number: e.target.value })}
-                    placeholder="e.g., Account #12345"
+                    placeholder="e.g., Loan #ABC123"
                   />
                 </div>
               </div>
