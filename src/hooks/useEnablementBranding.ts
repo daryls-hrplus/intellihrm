@@ -28,7 +28,7 @@ export const useEnablementBranding = () => {
         .from("enablement_document_templates")
         .select("branding_config")
         .eq("name", "Default Brand Colors")
-        .eq("category", "branding")
+        .eq("category", "custom")
         .maybeSingle();
       
       if (error) {
@@ -65,7 +65,7 @@ export const useEnablementBranding = () => {
         .from("enablement_document_templates")
         .select("id")
         .eq("name", "Default Brand Colors")
-        .eq("category", "branding")
+        .eq("category", "custom")
         .maybeSingle();
 
       if (existing) {
@@ -85,7 +85,7 @@ export const useEnablementBranding = () => {
           .from("enablement_document_templates")
           .insert([{
             name: "Default Brand Colors",
-            category: "branding",
+            category: "custom",
             description: "Default brand colors for all enablement templates",
             branding_config: brandingJson,
             is_active: true
