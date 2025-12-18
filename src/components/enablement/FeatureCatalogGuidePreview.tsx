@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -23,7 +23,8 @@ import {
   Building2,
   Layers,
   FolderTree,
-  BarChart3
+  BarChart3,
+  Save
 } from "lucide-react";
 import * as LucideIcons from "lucide-react";
 import { FEATURE_REGISTRY, getTotalFeatureCount } from "@/lib/featureRegistry";
@@ -35,6 +36,8 @@ import {
   getUniqueFeatures 
 } from "@/lib/platformCapabilities";
 import { MODULE_ENRICHMENTS, FEATURE_ENRICHMENTS } from "@/lib/moduleDescriptions";
+import { DETAILED_FEATURE_ENRICHMENTS } from "@/lib/featureEnrichmentsDetailed";
+import { useEnablementBranding } from "@/hooks/useEnablementBranding";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 
@@ -101,11 +104,35 @@ export function FeatureCatalogGuidePreview({ open, onOpenChange }: FeatureCatalo
   const [includePageNumbers, setIncludePageNumbers] = useState(true);
   const [isGenerating, setIsGenerating] = useState(false);
   
-  // Branding options
-  const [primaryColor, setPrimaryColor] = useState("#7c3aed"); // Purple
-  const [secondaryColor, setSecondaryColor] = useState("#4f46e5"); // Indigo
-  const [accentColor, setAccentColor] = useState("#10b981"); // Green
+  // Use persisted branding
+  const { brandColors, isLoading: brandingLoading, saveBrandColors } = useEnablementBranding();
+  
+  // Branding options - initialize from saved values
+  const [primaryColor, setPrimaryColor] = useState("#7c3aed");
+  const [secondaryColor, setSecondaryColor] = useState("#4f46e5");
+  const [accentColor, setAccentColor] = useState("#10b981");
   const [companyName, setCompanyName] = useState("HRplus Cerebra");
+  const [colorsInitialized, setColorsInitialized] = useState(false);
+  
+  // Load saved brand colors when available
+  useEffect(() => {
+    if (brandColors && !colorsInitialized) {
+      setPrimaryColor(brandColors.primaryColor);
+      setSecondaryColor(brandColors.secondaryColor);
+      setAccentColor(brandColors.accentColor);
+      setCompanyName(brandColors.companyName);
+      setColorsInitialized(true);
+    }
+  }, [brandColors, colorsInitialized]);
+  
+  const handleSaveBrandColors = () => {
+    saveBrandColors.mutate({
+      primaryColor,
+      secondaryColor,
+      accentColor,
+      companyName
+    });
+  };
   
   const previewRef = useRef<HTMLDivElement>(null);
 
@@ -388,20 +415,40 @@ export function FeatureCatalogGuidePreview({ open, onOpenChange }: FeatureCatalo
     
     let featuresHTML = '';
     module.groups.forEach(group => {
-      featuresHTML += `<div style="margin-bottom: 16px;">
+      featuresHTML += `<div style="margin-bottom: 20px;">
         <h4 style="font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: #1e293b; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
           <span style="width: 6px; height: 6px; border-radius: 50%; background: ${primaryColor};"></span>${group.groupName}
         </h4>
-        <ul style="list-style: none; padding: 0; margin: 0;">
+        <div style="display: flex; flex-direction: column; gap: 12px;">
           ${group.features.map(feature => {
+            const detailedEnrichment = DETAILED_FEATURE_ENRICHMENTS[feature.code];
             const featureEnrichment = FEATURE_ENRICHMENTS[feature.code];
-            return `<li style="background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; margin-bottom: 8px;">
-              <div style="font-weight: 500; color: #1e293b; margin-bottom: 4px;">✓ ${feature.name}</div>
-              <p style="font-size: 13px; color: #64748b; margin: 0;">${featureEnrichment?.detailedDescription || feature.description}</p>
-              ${featureEnrichment?.businessBenefit ? `<p style="font-size: 12px; color: ${accentColor}; margin: 4px 0 0 0;"><strong>Value:</strong> ${featureEnrichment.businessBenefit}</p>` : ''}
-            </li>`;
+            const description = detailedEnrichment?.detailedDescription || featureEnrichment?.detailedDescription || feature.description;
+            const examples = detailedEnrichment?.examples || [];
+            const keyCapabilities = detailedEnrichment?.keyCapabilities || [];
+            
+            return `<div style="background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px;">
+              <div style="font-weight: 600; color: #1e293b; margin-bottom: 8px; display: flex; align-items: center; gap: 8px;">
+                <span style="color: ${accentColor};">✓</span> ${feature.name}
+              </div>
+              <p style="font-size: 13px; color: #475569; margin: 0 0 12px 0; line-height: 1.6;">${description}</p>
+              ${examples.length > 0 ? `
+                <div style="background: #f8fafc; border-radius: 6px; padding: 12px; margin-bottom: 12px;">
+                  <div style="font-size: 11px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;">Examples:</div>
+                  <ul style="margin: 0; padding-left: 16px; font-size: 12px; color: #475569;">
+                    ${examples.slice(0, 3).map(ex => `<li style="margin-bottom: 4px;">${ex}</li>`).join('')}
+                  </ul>
+                </div>
+              ` : ''}
+              ${keyCapabilities.length > 0 ? `
+                <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+                  ${keyCapabilities.map(cap => `<span style="background: ${primaryColor}15; color: ${primaryColor}; padding: 2px 8px; border-radius: 4px; font-size: 11px;">${cap}</span>`).join('')}
+                </div>
+              ` : ''}
+              ${detailedEnrichment?.businessBenefit ? `<p style="font-size: 12px; color: ${accentColor}; margin: 8px 0 0 0;"><strong>Value:</strong> ${detailedEnrichment.businessBenefit}</p>` : ''}
+            </div>`;
           }).join('')}
-        </ul>
+        </div>
       </div>`;
     });
     
@@ -709,17 +756,22 @@ export function FeatureCatalogGuidePreview({ open, onOpenChange }: FeatureCatalo
                         <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: primaryColor }}></div>
                         {group.groupName}
                       </h4>
-                      <ul className="feature-list space-y-2">
+                      <div className="feature-list space-y-3">
                         {group.features.map((feature) => {
                           const featureCaps = FEATURE_CAPABILITIES.find(f => f.featureCode === feature.code);
+                          const detailedEnrichment = DETAILED_FEATURE_ENRICHMENTS[feature.code];
                           const featureEnrichment = FEATURE_ENRICHMENTS[feature.code];
+                          const description = detailedEnrichment?.detailedDescription || featureEnrichment?.detailedDescription || feature.description;
+                          const examples = detailedEnrichment?.examples || [];
+                          const keyCapabilities = detailedEnrichment?.keyCapabilities || [];
+                          
                           return (
-                            <li key={feature.code} className="feature-item bg-white rounded-lg p-3 border">
+                            <div key={feature.code} className="feature-item bg-white rounded-lg p-4 border">
                               <div className="flex items-start gap-2">
                                 <Check className="h-4 w-4 mt-1 shrink-0" style={{ color: accentColor }} />
                                 <div className="flex-1">
-                                  <div className="flex items-center gap-2 mb-1">
-                                    <span className="feature-name font-medium text-slate-900">{feature.name}</span>
+                                  <div className="flex items-center gap-2 mb-2">
+                                    <span className="feature-name font-semibold text-slate-900">{feature.name}</span>
                                     {featureCaps?.capabilities.includes('ai-powered') && (
                                       <Badge className="text-[10px]" style={{ backgroundColor: `${primaryColor}20`, color: primaryColor }}>AI-Powered</Badge>
                                     )}
@@ -730,20 +782,51 @@ export function FeatureCatalogGuidePreview({ open, onOpenChange }: FeatureCatalo
                                       <Badge className="badge-advanced bg-blue-100 text-blue-700 text-[10px]">Advanced</Badge>
                                     )}
                                   </div>
-                                  <p className="feature-desc text-sm text-slate-600">
-                                    {featureEnrichment?.detailedDescription || feature.description}
+                                  <p className="feature-desc text-sm text-slate-600 leading-relaxed mb-3">
+                                    {description}
                                   </p>
-                                  {featureEnrichment?.businessBenefit && (
-                                    <p className="text-xs mt-1" style={{ color: accentColor }}>
-                                      <span className="font-medium">Value: </span>{featureEnrichment.businessBenefit}
+                                  
+                                  {/* Examples Section */}
+                                  {examples.length > 0 && (
+                                    <div className="bg-slate-50 rounded-lg p-3 mb-3">
+                                      <div className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">Examples:</div>
+                                      <ul className="space-y-1.5">
+                                        {examples.slice(0, 3).map((example, idx) => (
+                                          <li key={idx} className="text-xs text-slate-600 flex items-start gap-2">
+                                            <span className="text-slate-400">•</span>
+                                            <span>{example}</span>
+                                          </li>
+                                        ))}
+                                      </ul>
+                                    </div>
+                                  )}
+                                  
+                                  {/* Key Capabilities */}
+                                  {keyCapabilities.length > 0 && (
+                                    <div className="flex flex-wrap gap-1.5 mb-2">
+                                      {keyCapabilities.map((cap, idx) => (
+                                        <span 
+                                          key={idx}
+                                          className="text-[10px] px-2 py-0.5 rounded"
+                                          style={{ backgroundColor: `${primaryColor}15`, color: primaryColor }}
+                                        >
+                                          {cap}
+                                        </span>
+                                      ))}
+                                    </div>
+                                  )}
+                                  
+                                  {detailedEnrichment?.businessBenefit && (
+                                    <p className="text-xs mt-2" style={{ color: accentColor }}>
+                                      <span className="font-medium">Business Value: </span>{detailedEnrichment.businessBenefit}
                                     </p>
                                   )}
                                 </div>
                               </div>
-                            </li>
+                            </div>
                           );
                         })}
-                      </ul>
+                      </div>
                     </div>
                   ))}
 
@@ -1119,6 +1202,20 @@ export function FeatureCatalogGuidePreview({ open, onOpenChange }: FeatureCatalo
                       </div>
                     </div>
                   </div>
+                  
+                  {/* Save Colors Button */}
+                  <Button 
+                    variant="outline" 
+                    onClick={handleSaveBrandColors}
+                    disabled={saveBrandColors.isPending}
+                    className="w-full gap-2"
+                  >
+                    <Save className="h-4 w-4" />
+                    {saveBrandColors.isPending ? 'Saving...' : 'Save Brand Colors'}
+                  </Button>
+                  <p className="text-xs text-muted-foreground text-center">
+                    Save these colors to use across all templates
+                  </p>
                 </div>
               </div>
             </div>
