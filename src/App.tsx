@@ -55,6 +55,7 @@ import StaffLoanDesignDocumentPage from "./pages/documents/StaffLoanDesignDocume
 // Enablement pages
 import EnablementDashboardPage from "./pages/enablement/EnablementDashboardPage";
 import ApplicationDocsGeneratorPage from "./pages/enablement/ApplicationDocsGeneratorPage";
+import FeatureCatalogPage from "./pages/enablement/FeatureCatalogPage";
 
 // Subscription pages
 import SubscriptionPage from "./pages/subscription/SubscriptionPage";
@@ -2918,6 +2919,14 @@ const App = () => (
               element={
                 <ProtectedRoute requiredRoles={["admin"]}>
                   <EnablementDashboardPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/enablement/feature-catalog"
+              element={
+                <ProtectedRoute requiredRoles={["admin"]}>
+                  <FeatureCatalogPage />
                 </ProtectedRoute>
               }
             />
