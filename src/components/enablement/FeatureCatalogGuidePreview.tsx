@@ -1083,22 +1083,76 @@ export function FeatureCatalogGuidePreview({ open, onOpenChange }: FeatureCatalo
     `;
   };
 
+  // Page break indicator component
+  const PageBreakIndicator = ({ pageNum, totalPages }: { pageNum: number; totalPages: number }) => (
+    <div className="relative my-4">
+      <div className="border-t-2 border-dashed border-orange-400" />
+      <div className="absolute left-1/2 -translate-x-1/2 -top-3 bg-orange-100 text-orange-700 px-3 py-1 rounded-full text-xs font-medium flex items-center gap-2">
+        <span>📄 PAGE BREAK</span>
+        <span className="bg-orange-200 px-2 py-0.5 rounded">Page {pageNum} of {totalPages}</span>
+      </div>
+    </div>
+  );
+
+  // Document header component for preview
+  const PreviewDocumentHeader = ({ pageNum, sectionTitle }: { pageNum: number; sectionTitle: string }) => (
+    <div className="flex justify-between items-center py-3 mb-4 border-b-2" style={{ borderColor: `${primaryColor}20` }}>
+      <div className="flex items-center gap-3">
+        <div 
+          className="text-white px-3 py-1.5 rounded text-xs font-semibold"
+          style={{ background: `linear-gradient(135deg, ${primaryColor}, ${secondaryColor})` }}
+        >
+          {companyName || 'HRplus Cerebra'}
+        </div>
+        <span className="text-xs text-slate-500">{sectionTitle}</span>
+      </div>
+      {includeDate && (
+        <span className="text-[10px] text-slate-400">
+          {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
+        </span>
+      )}
+    </div>
+  );
+
+  // Document footer component for preview
+  const PreviewDocumentFooter = ({ pageNum, totalPages }: { pageNum: number; totalPages: number }) => (
+    <div className="mt-8 pt-4 border-t border-slate-200 flex justify-between items-center">
+      <span className="text-[10px] text-slate-500">
+        © {new Date().getFullYear()} {companyName || 'HRplus Cerebra'}. All rights reserved. | CONFIDENTIAL
+      </span>
+      {includePageNumbers && (
+        <span className="text-[10px] text-slate-500">Page {pageNum} of {totalPages}</span>
+      )}
+    </div>
+  );
+
+  const totalPages = getTotalPages();
+
   const renderGuideContent = () => (
     <div ref={previewRef} className="bg-white text-black">
       {/* Cover Page */}
       <div 
         data-pdf-section
-        className="guide-cover text-white p-16 text-center min-h-[600px] flex flex-col justify-center"
+        className="guide-cover text-white p-16 text-center min-h-[600px] flex flex-col justify-center relative"
         style={{ background: `linear-gradient(135deg, ${primaryColor} 0%, ${secondaryColor} 100%)` }}
       >
+        {/* Classification badge */}
+        <div className="absolute top-4 right-4 bg-white/20 px-4 py-1.5 rounded text-[10px] uppercase tracking-wider">
+          Enterprise Documentation
+        </div>
+        
+        {/* Company logo area */}
+        <div className="mb-8">
+          <div className="inline-block bg-white px-6 py-3 rounded-lg font-bold text-lg" style={{ color: primaryColor }}>
+            {companyName || 'HRplus Cerebra'}
+          </div>
+        </div>
+        
         <h1 className="text-4xl font-bold mb-4">{customTitle}</h1>
         <p className="text-xl opacity-90 mb-2">{customSubtitle}</p>
-        {companyName && (
-          <p className="text-sm opacity-80 mt-2">by {companyName}</p>
-        )}
         {includeDate && (
           <p className="text-sm opacity-70 mt-4">
-            Generated: {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+            Document Version: {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
           </p>
         )}
         <div className="flex justify-center gap-12 mt-12">
@@ -1119,10 +1173,18 @@ export function FeatureCatalogGuidePreview({ open, onOpenChange }: FeatureCatalo
             <div className="text-sm opacity-80 uppercase tracking-wide">Differentiators</div>
           </div>
         </div>
+        
+        {/* Cover footer */}
+        <div className="absolute bottom-4 left-0 right-0 text-center">
+          <p className="text-xs opacity-70">Prepared for Executive Review {includePageNumbers ? `| Page 1 of ${totalPages}` : ''}</p>
+        </div>
       </div>
+
+      <PageBreakIndicator pageNum={2} totalPages={totalPages} />
 
       {/* Table of Contents */}
       <div data-pdf-section className="p-8 min-h-[400px] bg-white">
+        <PreviewDocumentHeader pageNum={2} sectionTitle="Table of Contents" />
         <h2 className="text-2xl font-bold mb-6 pb-2" style={{ borderBottom: `3px solid ${primaryColor}` }}>Table of Contents</h2>
         <div className="space-y-3">
           <div className="flex items-center justify-between py-2 border-b border-dashed border-slate-200">
@@ -1176,11 +1238,15 @@ export function FeatureCatalogGuidePreview({ open, onOpenChange }: FeatureCatalo
             </div>
           )}
         </div>
+        <PreviewDocumentFooter pageNum={2} totalPages={totalPages} />
       </div>
+
+      <PageBreakIndicator pageNum={3} totalPages={totalPages} />
 
       {/* Executive Summary */}
       {currentTemplate.includeExecutiveSummary && (
         <div data-pdf-section className="guide-section p-8 bg-white">
+          <PreviewDocumentHeader pageNum={3} sectionTitle="Executive Summary" />
           <h2 className="section-title text-2xl font-bold pb-2 mb-2" style={{ borderBottom: `3px solid ${primaryColor}` }}>Executive Summary</h2>
           <p className="section-subtitle text-muted-foreground mb-6">Platform Overview for Decision Makers</p>
           
@@ -1358,6 +1424,7 @@ export function FeatureCatalogGuidePreview({ open, onOpenChange }: FeatureCatalo
               <p className="text-sm text-amber-800">Unique capabilities not found in competing solutions like Workday, SAP, or Oracle HCM.</p>
             </div>
           </div>
+          <PreviewDocumentFooter pageNum={3} totalPages={totalPages} />
         </div>
       )}
 
@@ -1371,15 +1438,19 @@ export function FeatureCatalogGuidePreview({ open, onOpenChange }: FeatureCatalo
             const subModuleInfo = SUB_MODULE_HIGHLIGHTS[module.code];
             const moduleGroup = getModuleGroup(module.code);
             const integrations = MODULE_INTEGRATIONS[module.code] || [];
+            const modulePageNum = 4 + moduleIndex;
             
             return (
-              <div key={module.code} data-pdf-section className="p-8 bg-white">
-                {moduleIndex === 0 && (
-                  <>
-                    <h2 className="section-title text-2xl font-bold pb-2 mb-2" style={{ borderBottom: `3px solid ${primaryColor}` }}>Module Reference</h2>
-                    <p className="section-subtitle text-muted-foreground mb-6">Complete Feature Inventory by Module</p>
-                  </>
-                )}
+              <div key={module.code}>
+                <PageBreakIndicator pageNum={modulePageNum} totalPages={totalPages} />
+                <div data-pdf-section className="p-8 bg-white">
+                  <PreviewDocumentHeader pageNum={modulePageNum} sectionTitle={`Module: ${module.name}`} />
+                  {moduleIndex === 0 && (
+                    <>
+                      <h2 className="section-title text-2xl font-bold pb-2 mb-2" style={{ borderBottom: `3px solid ${primaryColor}` }}>Module Reference</h2>
+                      <p className="section-subtitle text-muted-foreground mb-6">Complete Feature Inventory by Module</p>
+                    </>
+                  )}
                 
                 <div 
                   className="module-card bg-slate-50 rounded-lg p-6 mb-4" 
@@ -1562,7 +1633,9 @@ export function FeatureCatalogGuidePreview({ open, onOpenChange }: FeatureCatalo
                     </div>
                   )}
                 </div>
+                <PreviewDocumentFooter pageNum={modulePageNum} totalPages={totalPages} />
               </div>
+            </div>
             );
           })}
         </>
@@ -1570,9 +1643,12 @@ export function FeatureCatalogGuidePreview({ open, onOpenChange }: FeatureCatalo
 
       {/* Capabilities Section */}
       {currentTemplate.includeCapabilities && (
-        <div data-pdf-section className="p-8 bg-white">
-          <h2 className="section-title text-2xl font-bold pb-2 mb-2" style={{ borderBottom: `3px solid ${primaryColor}` }}>Platform Capabilities</h2>
-          <p className="section-subtitle text-muted-foreground mb-6">AI-Powered Features & Competitive Advantages</p>
+        <>
+          <PageBreakIndicator pageNum={4 + (currentTemplate.includeModules ? FEATURE_REGISTRY.length : 0)} totalPages={totalPages} />
+          <div data-pdf-section className="p-8 bg-white">
+            <PreviewDocumentHeader pageNum={4 + (currentTemplate.includeModules ? FEATURE_REGISTRY.length : 0)} sectionTitle="Platform Capabilities" />
+            <h2 className="section-title text-2xl font-bold pb-2 mb-2" style={{ borderBottom: `3px solid ${primaryColor}` }}>Platform Capabilities</h2>
+            <p className="section-subtitle text-muted-foreground mb-6">AI-Powered Features & Competitive Advantages</p>
           
           {PLATFORM_CAPABILITIES.map((capability) => {
             const CapIcon = getIcon(capability.icon);
@@ -1605,7 +1681,9 @@ export function FeatureCatalogGuidePreview({ open, onOpenChange }: FeatureCatalo
               </div>
             );
           })}
-        </div>
+          <PreviewDocumentFooter pageNum={4 + (currentTemplate.includeModules ? FEATURE_REGISTRY.length : 0)} totalPages={totalPages} />
+          </div>
+        </>
       )}
 
       {/* Matrix Section - Organized by Module */}
