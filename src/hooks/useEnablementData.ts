@@ -143,19 +143,75 @@ export function useEnablementContentStatus(releaseId?: string) {
     }
   };
 
-  const moveToColumn = async (id: string, column: WorkflowColumn) => {
+  const moveToColumn = async (id: string, column: WorkflowColumn): Promise<{ success: boolean; error?: string }> => {
+    const item = contentItems.find((i) => i.id === id);
+    if (!item) {
+      return { success: false, error: "Content item not found" };
+    }
+
+    // Check if checklist is complete for the current stage before moving forward
+    const stageOrder = ['backlog', 'planning', 'development', 'review', 'published', 'maintenance'];
+    const currentStageIndex = stageOrder.indexOf(item.workflow_status);
+    const targetStageIndex = stageOrder.indexOf(column);
+    
+    // Only validate checklist when moving forward (not backward)
+    if (targetStageIndex > currentStageIndex) {
+      // Fetch checklist progress for current stage
+      const { data: checklistItems } = await supabase
+        .from('enablement_checklists' as any)
+        .select('id, is_required')
+        .eq('stage', item.workflow_status);
+      
+      const typedChecklistItems = checklistItems as unknown as Array<{ id: string; is_required: boolean }> | null;
+      
+      if (typedChecklistItems && typedChecklistItems.length > 0) {
+        const { data: progress } = await supabase
+          .from('enablement_checklist_progress' as any)
+          .select('checklist_item_id, is_completed')
+          .eq('content_status_id', id);
+        
+        const typedProgress = progress as unknown as Array<{ checklist_item_id: string; is_completed: boolean }> | null;
+        const completedIds = new Set((typedProgress || []).filter(p => p.is_completed).map(p => p.checklist_item_id));
+        const requiredIncomplete = typedChecklistItems.filter(
+          checkItem => checkItem.is_required && !completedIds.has(checkItem.id)
+        );
+        
+        if (requiredIncomplete.length > 0) {
+          return { 
+            success: false, 
+            error: `Cannot move to ${column}. Please complete all required checklist items for the ${item.workflow_status} stage first.`
+          };
+        }
+      }
+    }
+
     const updates: Partial<EnablementContentStatus> = {
       workflow_status: column,
     };
 
-    if (column === "development" && !contentItems.find((i) => i.id === id)?.started_at) {
+    if (column === "development" && !item.started_at) {
       updates.started_at = new Date().toISOString();
     }
     if (column === "published") {
       updates.completed_at = new Date().toISOString();
     }
 
-    await updateContentStatus(id, updates);
+    try {
+      const { error } = await supabase
+        .from("enablement_content_status")
+        .update({ ...updates, updated_at: new Date().toISOString() })
+        .eq("id", id);
+
+      if (error) throw error;
+      
+      setContentItems((prev) =>
+        prev.map((item) => (item.id === id ? { ...item, ...updates } : item))
+      );
+      return { success: true };
+    } catch (error) {
+      console.error("Error updating content status:", error);
+      return { success: false, error: "Failed to update content status" };
+    }
   };
 
   const createContentItem = async (item: Partial<EnablementContentStatus>) => {

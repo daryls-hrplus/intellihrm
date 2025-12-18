@@ -1,4 +1,5 @@
 import { useState, useMemo } from "react";
+import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "react-i18next";
 import {
   DndContext,
@@ -64,6 +65,7 @@ interface ContentWorkflowBoardProps {
 
 export function ContentWorkflowBoard({ releaseId }: ContentWorkflowBoardProps) {
   const { t } = useTranslation();
+  const { toast } = useToast();
   const { contentItems, isLoading, moveToColumn } = useEnablementContentStatus(releaseId);
   const { releases } = useEnablementReleases();
   const [activeId, setActiveId] = useState<string | null>(null);
@@ -133,7 +135,14 @@ export function ContentWorkflowBoard({ releaseId }: ContentWorkflowBoardProps) {
     if (over && active.id !== over.id) {
       const targetColumn = over.id as WorkflowColumn;
       if (WORKFLOW_COLUMNS.some((col) => col.id === targetColumn)) {
-        await moveToColumn(active.id as string, targetColumn);
+        const result = await moveToColumn(active.id as string, targetColumn);
+        if (!result.success && result.error) {
+          toast({
+            title: "Cannot Move Item",
+            description: result.error,
+            variant: "destructive",
+          });
+        }
       }
     }
 
