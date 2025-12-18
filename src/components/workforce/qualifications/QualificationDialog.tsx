@@ -17,12 +17,40 @@ import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 
+interface Qualification {
+  id: string;
+  employee_id: string;
+  company_id: string;
+  record_type: string;
+  name: string;
+  status: string;
+  verification_status: string;
+  education_level?: string;
+  qualification_type?: string;
+  field_of_study?: string;
+  specialization?: string;
+  institution_name?: string;
+  certification_type?: string;
+  accrediting_body_name?: string;
+  license_number?: string;
+  country?: string;
+  date_awarded?: string;
+  issued_date?: string;
+  expiry_date?: string;
+  start_date?: string;
+  end_date?: string;
+  comments?: string;
+  document_url?: string;
+  document_name?: string;
+}
+
 interface QualificationDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSuccess: () => void;
   companyId?: string;
   employeeId?: string;
+  qualification?: Qualification | null;
 }
 
 interface Employee {
@@ -46,12 +74,15 @@ export function QualificationDialog({
   onSuccess,
   companyId,
   employeeId,
+  qualification,
 }: QualificationDialogProps) {
   const { t } = useTranslation();
   const { user } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [recordType, setRecordType] = useState<"academic" | "certification">("academic");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  
+  const isEditMode = !!qualification;
   
   // Lookup data
   const [employees, setEmployees] = useState<Employee[]>([]);
@@ -89,8 +120,35 @@ export function QualificationDialog({
   useEffect(() => {
     if (open) {
       fetchLookupData();
+      if (qualification) {
+        // Populate form with existing qualification data
+        setRecordType(qualification.record_type === "academic" ? "academic" : "certification");
+        setFormData({
+          employee_id: qualification.employee_id,
+          name: qualification.name || "",
+          education_level: qualification.education_level || "",
+          qualification_type: qualification.qualification_type || "",
+          field_of_study: qualification.field_of_study || "",
+          specialization: qualification.specialization || "",
+          institution_name: qualification.institution_name || "",
+          certification_type: qualification.certification_type || "",
+          certification_name: "",
+          accrediting_body: qualification.accrediting_body_name || "",
+          accrediting_body_manual: "",
+          license_number: qualification.license_number || "",
+          country: qualification.country || "",
+          start_date: qualification.start_date ? new Date(qualification.start_date) : undefined,
+          end_date: qualification.end_date ? new Date(qualification.end_date) : undefined,
+          date_awarded: qualification.date_awarded ? new Date(qualification.date_awarded) : undefined,
+          issued_date: qualification.issued_date ? new Date(qualification.issued_date) : undefined,
+          expiry_date: qualification.expiry_date ? new Date(qualification.expiry_date) : undefined,
+          comments: qualification.comments || "",
+        });
+      } else {
+        resetForm();
+      }
     }
-  }, [open]);
+  }, [open, qualification]);
 
   const fetchLookupData = async () => {
     try {
@@ -153,14 +211,14 @@ export function QualificationDialog({
     setIsLoading(true);
     try {
       const employee = employees.find((e) => e.id === formData.employee_id);
-      if (!employee) {
+      if (!employee && !isEditMode) {
         toast.error("Employee not found");
         return;
       }
 
       // Upload document if selected
-      let documentUrl = null;
-      let documentName = null;
+      let documentUrl = qualification?.document_url || null;
+      let documentName = qualification?.document_name || null;
       let documentSize = null;
       let documentMimeType = null;
 
@@ -184,9 +242,9 @@ export function QualificationDialog({
         documentMimeType = selectedFile.type;
       }
 
-      const { error } = await supabase.from("employee_qualifications").insert({
+      const qualificationData = {
         employee_id: formData.employee_id,
-        company_id: employee.company_id,
+        company_id: isEditMode ? qualification!.company_id : employee!.company_id,
         record_type: recordType,
         name: formData.name,
         education_level: formData.education_level || null,
@@ -204,23 +262,39 @@ export function QualificationDialog({
         issued_date: formData.issued_date?.toISOString().split("T")[0] || null,
         expiry_date: formData.expiry_date?.toISOString().split("T")[0] || null,
         comments: formData.comments || null,
-        status: recordType === "academic" ? "completed" : "active",
-        verification_status: "pending",
-        created_by: user?.id || null,
         document_url: documentUrl,
         document_name: documentName,
-        document_size: documentSize,
-        document_mime_type: documentMimeType,
-      });
+        ...(selectedFile && {
+          document_size: documentSize,
+          document_mime_type: documentMimeType,
+        }),
+      };
 
-      if (error) throw error;
+      if (isEditMode) {
+        const { error } = await supabase
+          .from("employee_qualifications")
+          .update(qualificationData)
+          .eq("id", qualification!.id);
 
-      toast.success("Qualification added successfully");
+        if (error) throw error;
+        toast.success("Qualification updated successfully");
+      } else {
+        const { error } = await supabase.from("employee_qualifications").insert({
+          ...qualificationData,
+          status: recordType === "academic" ? "completed" : "active",
+          verification_status: "pending",
+          created_by: user?.id || null,
+        });
+
+        if (error) throw error;
+        toast.success("Qualification added successfully");
+      }
+
       resetForm();
       onSuccess();
     } catch (error: any) {
-      console.error("Error adding qualification:", error);
-      toast.error(error.message || "Failed to add qualification");
+      console.error("Error saving qualification:", error);
+      toast.error(error.message || `Failed to ${isEditMode ? 'update' : 'add'} qualification`);
     } finally {
       setIsLoading(false);
     }
@@ -256,9 +330,12 @@ export function QualificationDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Add Qualification</DialogTitle>
+          <DialogTitle>{isEditMode ? 'Edit Qualification' : 'Add Qualification'}</DialogTitle>
           <DialogDescription>
-            Add an academic qualification or professional certification/license for an employee.
+            {isEditMode 
+              ? 'Update the qualification details below.'
+              : 'Add an academic qualification or professional certification/license for an employee.'
+            }
           </DialogDescription>
         </DialogHeader>
 
@@ -607,7 +684,7 @@ export function QualificationDialog({
           </Button>
           <Button onClick={handleSubmit} disabled={isLoading}>
             {isLoading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-            Add Qualification
+            {isEditMode ? 'Update Qualification' : 'Add Qualification'}
           </Button>
         </DialogFooter>
       </DialogContent>
