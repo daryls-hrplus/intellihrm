@@ -47,8 +47,8 @@ export default function EnablementHubPage() {
   const { releases } = useEnablementReleases();
 
   // Calculate stats
-  const totalFeatures = Object.values(FEATURE_REGISTRY).reduce(
-    (acc, module) => acc + Object.keys(module.features).length,
+  const totalFeatures = FEATURE_REGISTRY.reduce(
+    (acc, module) => acc + module.groups.reduce((gAcc, group) => gAcc + group.features.length, 0),
     0
   );
 
