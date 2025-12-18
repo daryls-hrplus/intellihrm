@@ -35,6 +35,9 @@ import {
   Wand2,
   HelpCircle,
   Brain,
+  Files,
+  GitCompare,
+  Calendar,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -53,6 +56,8 @@ export default function EnablementAIToolsPage() {
   const [contentToAnalyze, setContentToAnalyze] = useState("");
   const [roleCode, setRoleCode] = useState("");
   const [learningGoals, setLearningGoals] = useState("");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
 
   const runAnalysis = async (functionName: string, payload: any) => {
     setIsLoading(true);
@@ -79,6 +84,22 @@ export default function EnablementAIToolsPage() {
   };
 
   const tools = [
+    {
+      id: "generate-all-docs",
+      name: "Generate All Feature Docs",
+      description: "Bulk generate documentation for all features",
+      icon: Files,
+      priority: "High",
+      color: "text-emerald-500",
+    },
+    {
+      id: "change-report",
+      name: "Application Change Report",
+      description: "Track UI and backend changes with dates",
+      icon: GitCompare,
+      priority: "High",
+      color: "text-orange-500",
+    },
     {
       id: "gap-analysis",
       name: "Content Gap Analysis",
@@ -229,6 +250,120 @@ export default function EnablementAIToolsPage() {
           {/* Main Content Area */}
           <Card className="lg:col-span-3">
             <CardContent className="p-6">
+              {/* Generate All Feature Docs */}
+              {activeTab === "generate-all-docs" && (
+                <div className="space-y-6">
+                  <div>
+                    <h2 className="text-xl font-semibold flex items-center gap-2">
+                      <Files className="h-5 w-5 text-emerald-500" />
+                      Generate All Feature Documents
+                    </h2>
+                    <p className="text-muted-foreground mt-1">
+                      Bulk generate documentation for all features in a module. This will create comprehensive docs for each feature.
+                    </p>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label>Filter by Module</Label>
+                      <Select value={moduleFilter} onValueChange={setModuleFilter}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="All modules" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">All Modules</SelectItem>
+                          <SelectItem value="workforce">Workforce</SelectItem>
+                          <SelectItem value="leave">Leave Management</SelectItem>
+                          <SelectItem value="payroll">Payroll</SelectItem>
+                          <SelectItem value="performance">Performance</SelectItem>
+                          <SelectItem value="recruitment">Recruitment</SelectItem>
+                          <SelectItem value="time_attendance">Time & Attendance</SelectItem>
+                          <SelectItem value="benefits">Benefits</SelectItem>
+                          <SelectItem value="training">Training</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
+                  <div className="p-4 rounded-lg bg-amber-500/10 border border-amber-500/20">
+                    <div className="flex gap-2">
+                      <AlertTriangle className="h-5 w-5 text-amber-600 shrink-0" />
+                      <div>
+                        <p className="text-sm font-medium text-amber-600">Bulk Generation Notice</p>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          This will generate documentation for multiple features. The process may take several minutes depending on the number of features.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <Button
+                    onClick={() => runAnalysis("generate-all-feature-docs", { moduleCode: moduleFilter })}
+                    disabled={isLoading}
+                  >
+                    {isLoading ? (
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    ) : (
+                      <Files className="h-4 w-4 mr-2" />
+                    )}
+                    Generate All Documents
+                  </Button>
+                </div>
+              )}
+
+              {/* Application Change Report */}
+              {activeTab === "change-report" && (
+                <div className="space-y-6">
+                  <div>
+                    <h2 className="text-xl font-semibold flex items-center gap-2">
+                      <GitCompare className="h-5 w-5 text-orange-500" />
+                      Application Change Report
+                    </h2>
+                    <p className="text-muted-foreground mt-1">
+                      Generate a dated report of all UI and backend changes to inform release documentation. Tracks features, modules, workflows, roles, and database changes.
+                    </p>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label>Start Date</Label>
+                      <Input
+                        type="date"
+                        value={startDate}
+                        onChange={(e) => setStartDate(e.target.value)}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>End Date</Label>
+                      <Input
+                        type="date"
+                        value={endDate}
+                        onChange={(e) => setEndDate(e.target.value)}
+                      />
+                    </div>
+                  </div>
+
+                  <p className="text-xs text-muted-foreground">
+                    Leave dates empty to scan the last 30 days by default.
+                  </p>
+
+                  <Button
+                    onClick={() => runAnalysis("application-change-report", { 
+                      startDate: startDate || undefined, 
+                      endDate: endDate || undefined 
+                    })}
+                    disabled={isLoading}
+                  >
+                    {isLoading ? (
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    ) : (
+                      <GitCompare className="h-4 w-4 mr-2" />
+                    )}
+                    Generate Change Report
+                  </Button>
+                </div>
+              )}
+
               {/* Gap Analysis */}
               {activeTab === "gap-analysis" && (
                 <div className="space-y-6">

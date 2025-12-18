@@ -51,7 +51,7 @@ export default function EnablementGuidePage() {
               Enablement Hub User Guide
             </h1>
             <p className="text-muted-foreground mt-1">
-              Best practices for content generation aligned with Workday standards
+              Best practices for content generation aligned with industry standards
             </p>
           </div>
         </div>
@@ -100,14 +100,14 @@ export default function EnablementGuidePage() {
               <CardContent className="prose prose-sm dark:prose-invert max-w-none">
                 <p>
                   The Enablement Hub is HRplus Cerebra's central platform for creating, managing, and
-                  distributing training content and documentation. Following <strong>Workday's
-                  proven methodology</strong>, we implement a release-driven content strategy that
+                  distributing training content and documentation. Following <strong>industry-proven
+                  methodology</strong>, we implement a release-driven content strategy that
                   ensures all stakeholders receive timely, accurate enablement materials.
                 </p>
 
                 <div className="grid grid-cols-2 gap-4 not-prose mt-4">
                   <div className="p-4 rounded-lg bg-blue-500/10 border border-blue-500/20">
-                    <h4 className="font-semibold text-blue-600 mb-2">Workday Alignment</h4>
+                    <h4 className="font-semibold text-blue-600 mb-2">Industry Alignment</h4>
                     <ul className="text-sm space-y-1">
                       <li>• Release-based content planning</li>
                       <li>• Role-based learning paths</li>
@@ -136,7 +136,7 @@ export default function EnablementGuidePage() {
                   Recommended Workflow
                 </CardTitle>
                 <CardDescription>
-                  Industry-standard content development lifecycle
+                  Industry-aligned content development lifecycle
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -335,6 +335,8 @@ export default function EnablementGuidePage() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   {[
+                    { name: "Generate All Feature Docs", desc: "Bulk generate documentation" },
+                    { name: "Application Change Report", desc: "Track UI & backend changes" },
                     { name: "Content Gap Analysis", desc: "Identify missing documentation" },
                     { name: "Change Detection", desc: "Track features needing updates" },
                     { name: "Contextual Help Generator", desc: "Create tooltips & walkthroughs" },
@@ -371,7 +373,7 @@ export default function EnablementGuidePage() {
                   <Rocket className="h-5 w-5 text-primary" />
                   Release Process
                 </CardTitle>
-                <CardDescription>Following Workday's release-driven approach</CardDescription>
+                <CardDescription>Following industry release-driven approach</CardDescription>
               </CardHeader>
               <CardContent className="prose prose-sm dark:prose-invert max-w-none">
                 <h4>Release Lifecycle</h4>
