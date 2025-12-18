@@ -7291,6 +7291,7 @@ export type Database = {
       }
       employee_period_deductions: {
         Row: {
+          account_number: string | null
           amount: number
           company_id: string
           created_at: string
@@ -7301,6 +7302,7 @@ export type Database = {
           employee_id: string
           exchange_rate_applied: number | null
           id: string
+          institution_name: string | null
           is_pretax: boolean | null
           notes: string | null
           pay_period_id: string | null
@@ -7309,6 +7311,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          account_number?: string | null
           amount: number
           company_id: string
           created_at?: string
@@ -7319,6 +7322,7 @@ export type Database = {
           employee_id: string
           exchange_rate_applied?: number | null
           id?: string
+          institution_name?: string | null
           is_pretax?: boolean | null
           notes?: string | null
           pay_period_id?: string | null
@@ -7327,6 +7331,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          account_number?: string | null
           amount?: number
           company_id?: string
           created_at?: string
@@ -7337,6 +7342,7 @@ export type Database = {
           employee_id?: string
           exchange_rate_applied?: number | null
           id?: string
+          institution_name?: string | null
           is_pretax?: boolean | null
           notes?: string | null
           pay_period_id?: string | null
