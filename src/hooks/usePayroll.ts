@@ -804,7 +804,11 @@ export function usePayroll() {
           .eq("pay_period_id", payPeriodId);
         
         const totalPeriodDeductions = (periodDeductions || []).reduce((sum: number, d: any) => sum + (d.amount || 0), 0);
-        
+        const totalPretaxDeductions = (periodDeductions || []).reduce(
+          (sum: number, d: any) => sum + (d.is_pretax ? (d.amount || 0) : 0),
+          0
+        );
+        const taxableIncome = Math.max(0, grossPay - totalPretaxDeductions);
         // Calculate benefit deductions from active enrollments
         let benefitDeductions = 0;
         let employerBenefits = 0;
@@ -885,7 +889,7 @@ export function usePayroll() {
           
           // Use the shared calculator that handles cumulative PAYE
           const statutoryResult = calculateStatutoryDeductions(
-            grossPay,
+            taxableIncome,
             statutoryTypes as StatutoryDeduction[],
             rateBands as StatutoryRateBand[],
             mondayCount,
