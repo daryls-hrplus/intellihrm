@@ -81,6 +81,18 @@ export function DifferentiatorMatrix({ onFeatureSelect }: DifferentiatorMatrixPr
       }) as (FeatureCapabilities & { featureName: string; moduleName: string; moduleCode: string; groupName: string })[];
   }, [searchQuery, filterLevel, filterModule]);
 
+  // Group data by module
+  const groupedByModule = useMemo(() => {
+    const groups: Record<string, typeof matrixData> = {};
+    matrixData.forEach(item => {
+      if (!groups[item.moduleName]) {
+        groups[item.moduleName] = [];
+      }
+      groups[item.moduleName].push(item);
+    });
+    return Object.entries(groups).sort(([a], [b]) => a.localeCompare(b));
+  }, [matrixData]);
+
   // Stats
   const stats = useMemo(() => {
     const aiCount = matrixData.filter(f => f.capabilities.includes('ai-powered')).length;
@@ -220,36 +232,51 @@ export function DifferentiatorMatrix({ onFeatureSelect }: DifferentiatorMatrixPr
                 </TooltipProvider>
               </div>
 
-              {/* Data Rows */}
+              {/* Data Rows - Grouped by Module */}
               <ScrollArea className="h-[400px]">
-                {matrixData.map((item) => (
-                  <div 
-                    key={item.featureCode} 
-                    className="flex border-b hover:bg-muted/30 cursor-pointer"
-                    onClick={() => onFeatureSelect?.(item.featureCode)}
-                  >
-                    <div className="w-[200px] p-3 border-r shrink-0 sticky left-0 bg-background z-10">
-                      <div className="font-medium text-sm truncate">{item.featureName}</div>
-                      <div className="text-xs text-muted-foreground truncate">{item.groupName}</div>
+                {groupedByModule.map(([moduleName, features]) => (
+                  <div key={moduleName}>
+                    {/* Module Header */}
+                    <div className="flex border-b bg-primary/5 sticky top-0 z-20">
+                      <div className="w-full p-2 px-3 font-semibold text-sm text-primary flex items-center gap-2">
+                        <Icons.Folder className="h-4 w-4" />
+                        {moduleName}
+                        <Badge variant="secondary" className="text-[10px] ml-auto">
+                          {features.length} features
+                        </Badge>
+                      </div>
                     </div>
-                    <div className="w-[140px] p-3 border-r shrink-0">
-                      <Badge variant="outline" className="text-[10px] whitespace-normal">{item.moduleName}</Badge>
-                    </div>
-                    <div className="w-[90px] p-3 border-r shrink-0">
-                      <DifferentiatorDot level={item.differentiatorLevel} />
-                    </div>
-                    {CAPABILITY_TAGS.map((tag) => (
+                    {/* Module Features */}
+                    {features.map((item) => (
                       <div 
-                        key={tag} 
-                        className="w-[100px] p-2 border-r shrink-0 flex items-center justify-center"
+                        key={item.featureCode} 
+                        className="flex border-b hover:bg-muted/30 cursor-pointer"
+                        onClick={() => onFeatureSelect?.(item.featureCode)}
                       >
-                        {item.capabilities.includes(tag) ? (
-                          <div className={`w-5 h-5 rounded-full ${CAPABILITY_TAG_LABELS[tag]?.color || 'bg-primary'} flex items-center justify-center`}>
-                            <Icons.Check className="h-3 w-3 text-white" />
+                        <div className="w-[200px] p-3 border-r shrink-0 sticky left-0 bg-background z-10">
+                          <div className="font-medium text-sm truncate">{item.featureName}</div>
+                          <div className="text-xs text-muted-foreground truncate">{item.groupName}</div>
+                        </div>
+                        <div className="w-[140px] p-3 border-r shrink-0">
+                          <Badge variant="outline" className="text-[10px] whitespace-normal">{item.moduleName}</Badge>
+                        </div>
+                        <div className="w-[90px] p-3 border-r shrink-0">
+                          <DifferentiatorDot level={item.differentiatorLevel} />
+                        </div>
+                        {CAPABILITY_TAGS.map((tag) => (
+                          <div 
+                            key={tag} 
+                            className="w-[100px] p-2 border-r shrink-0 flex items-center justify-center"
+                          >
+                            {item.capabilities.includes(tag) ? (
+                              <div className={`w-5 h-5 rounded-full ${CAPABILITY_TAG_LABELS[tag]?.color || 'bg-primary'} flex items-center justify-center`}>
+                                <Icons.Check className="h-3 w-3 text-white" />
+                              </div>
+                            ) : (
+                              <div className="w-5 h-5 rounded-full bg-muted" />
+                            )}
                           </div>
-                        ) : (
-                          <div className="w-5 h-5 rounded-full bg-muted" />
-                        )}
+                        ))}
                       </div>
                     ))}
                   </div>
