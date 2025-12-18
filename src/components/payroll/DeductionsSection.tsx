@@ -10,7 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Dialog
 import { Checkbox } from "@/components/ui/checkbox";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Plus, MinusCircle, Trash2, Pencil } from "lucide-react";
+import { Plus, MinusCircle, Trash2, Pencil, Building2 } from "lucide-react";
 
 interface DeductionsSectionProps {
   companyId: string;
@@ -27,6 +27,8 @@ interface Deduction {
   currency: string;
   is_pretax: boolean;
   notes: string | null;
+  institution_name: string | null;
+  account_number: string | null;
 }
 
 export function DeductionsSection({ companyId, employeeId, payPeriodId }: DeductionsSectionProps) {
@@ -42,7 +44,9 @@ export function DeductionsSection({ companyId, employeeId, payPeriodId }: Deduct
     amount: '',
     currency: 'USD',
     is_pretax: false,
-    notes: ''
+    notes: '',
+    institution_name: '',
+    account_number: ''
   });
 
   useEffect(() => {
@@ -75,7 +79,9 @@ export function DeductionsSection({ companyId, employeeId, payPeriodId }: Deduct
       amount: '',
       currency: 'USD',
       is_pretax: false,
-      notes: ''
+      notes: '',
+      institution_name: '',
+      account_number: ''
     });
     setEditingId(null);
   };
@@ -88,15 +94,55 @@ export function DeductionsSection({ companyId, employeeId, payPeriodId }: Deduct
       amount: deduction.amount.toString(),
       currency: deduction.currency,
       is_pretax: deduction.is_pretax,
-      notes: deduction.notes || ''
+      notes: deduction.notes || '',
+      institution_name: deduction.institution_name || '',
+      account_number: deduction.account_number || ''
     });
     setEditingId(deduction.id);
     setIsDialogOpen(true);
   };
 
+  const checkDuplicateDeduction = () => {
+    // Check if deduction with same name already exists
+    const existingDeduction = deductions.find(d => {
+      // Skip current record if editing
+      if (editingId && d.id === editingId) return false;
+      
+      // Check if same deduction name
+      if (d.deduction_name.toLowerCase() !== formData.deduction_name.toLowerCase()) return false;
+      
+      // If institution and account are provided, check if they're different
+      const newInstitution = formData.institution_name.trim().toLowerCase();
+      const newAccount = formData.account_number.trim();
+      const existingInstitution = (d.institution_name || '').trim().toLowerCase();
+      const existingAccount = (d.account_number || '').trim();
+      
+      // If both have institution/account info, allow if different
+      if (newInstitution && newAccount && existingInstitution && existingAccount) {
+        return newInstitution === existingInstitution && newAccount === existingAccount;
+      }
+      
+      // If new entry has no institution/account but existing one does, it's a duplicate
+      // If new entry has institution/account but existing one doesn't, it's a duplicate
+      // Same deduction name without different institution/account is a duplicate
+      return true;
+    });
+    
+    return existingDeduction;
+  };
+
   const handleSave = async () => {
     if (!formData.deduction_name || !formData.amount) {
       toast.error("Please fill in required fields");
+      return;
+    }
+
+    // Check for duplicate deduction
+    const duplicate = checkDuplicateDeduction();
+    if (duplicate) {
+      toast.error(
+        "This deduction already exists for this pay period. To add the same deduction again, please specify a different institution and account number."
+      );
       return;
     }
 
@@ -110,7 +156,9 @@ export function DeductionsSection({ companyId, employeeId, payPeriodId }: Deduct
       amount: parseFloat(formData.amount),
       currency: formData.currency,
       is_pretax: formData.is_pretax,
-      notes: formData.notes || null
+      notes: formData.notes || null,
+      institution_name: formData.institution_name || null,
+      account_number: formData.account_number || null
     };
 
     let error;
@@ -187,7 +235,7 @@ export function DeductionsSection({ companyId, employeeId, payPeriodId }: Deduct
               Add Deduction
             </Button>
           </DialogTrigger>
-          <DialogContent>
+          <DialogContent className="max-w-lg">
             <DialogHeader>
               <DialogTitle>{editingId ? 'Edit Deduction' : 'Add Deduction'}</DialogTitle>
             </DialogHeader>
@@ -257,6 +305,33 @@ export function DeductionsSection({ companyId, employeeId, payPeriodId }: Deduct
                   </Select>
                 </div>
               </div>
+              
+              {/* Institution and Account fields */}
+              <div className="border-t pt-4 mt-4">
+                <div className="flex items-center gap-2 mb-3 text-sm text-muted-foreground">
+                  <Building2 className="h-4 w-4" />
+                  <span>Institution Details (required for duplicate deductions)</span>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Institution Name</Label>
+                    <Input
+                      value={formData.institution_name}
+                      onChange={(e) => setFormData({ ...formData, institution_name: e.target.value })}
+                      placeholder="e.g., First National Bank"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Account Number</Label>
+                    <Input
+                      value={formData.account_number}
+                      onChange={(e) => setFormData({ ...formData, account_number: e.target.value })}
+                      placeholder="e.g., 1234567890"
+                    />
+                  </div>
+                </div>
+              </div>
+
               <div className="flex items-center gap-2">
                 <Checkbox 
                   id="pretax"
@@ -293,6 +368,7 @@ export function DeductionsSection({ companyId, employeeId, payPeriodId }: Deduct
                 <TableHead>Name</TableHead>
                 <TableHead>Code</TableHead>
                 <TableHead>Type</TableHead>
+                <TableHead>Institution / Account</TableHead>
                 <TableHead className="text-right">Amount</TableHead>
                 <TableHead>Pre-tax</TableHead>
                 <TableHead>Notes</TableHead>
@@ -308,6 +384,20 @@ export function DeductionsSection({ companyId, employeeId, payPeriodId }: Deduct
                     <Badge className={getDeductionTypeBadge(deduction.deduction_type)}>
                       {deduction.deduction_type || 'other'}
                     </Badge>
+                  </TableCell>
+                  <TableCell>
+                    {deduction.institution_name || deduction.account_number ? (
+                      <div className="text-sm">
+                        {deduction.institution_name && (
+                          <div className="font-medium">{deduction.institution_name}</div>
+                        )}
+                        {deduction.account_number && (
+                          <div className="text-muted-foreground">Acct: {deduction.account_number}</div>
+                        )}
+                      </div>
+                    ) : (
+                      <span className="text-muted-foreground">-</span>
+                    )}
                   </TableCell>
                   <TableCell className="text-right">
                     {deduction.currency} {deduction.amount.toFixed(2)}
