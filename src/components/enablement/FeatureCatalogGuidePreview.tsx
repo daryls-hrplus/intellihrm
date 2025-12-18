@@ -34,6 +34,7 @@ import {
   getAIPoweredFeatures, 
   getUniqueFeatures 
 } from "@/lib/platformCapabilities";
+import { MODULE_ENRICHMENTS, FEATURE_ENRICHMENTS } from "@/lib/moduleDescriptions";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 
@@ -284,38 +285,97 @@ export function FeatureCatalogGuidePreview({ open, onOpenChange }: FeatureCatalo
           
           {FEATURE_REGISTRY.map((module) => {
             const ModuleIcon = getIcon(module.icon);
+            const enrichment = MODULE_ENRICHMENTS[module.code];
+            const moduleFeatureCount = module.groups.reduce((acc, g) => acc + g.features.length, 0);
+            
             return (
-              <div key={module.code} className="module-card bg-slate-50 rounded-lg p-6 mb-6 border-l-4 border-purple-500">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="p-2 bg-purple-100 rounded-lg">
-                    <ModuleIcon className="h-5 w-5 text-purple-600" />
+              <div key={module.code} className="module-card bg-slate-50 rounded-lg p-6 mb-8 border-l-4 border-purple-500">
+                {/* Module Header */}
+                <div className="flex items-start gap-4 mb-4">
+                  <div className="p-3 bg-purple-100 rounded-lg shrink-0">
+                    <ModuleIcon className="h-6 w-6 text-purple-600" />
                   </div>
-                  <div>
-                    <h3 className="module-name text-xl font-semibold">{module.name}</h3>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-3 mb-1">
+                      <h3 className="module-name text-xl font-semibold">{module.name}</h3>
+                      <Badge className="bg-purple-100 text-purple-700">{moduleFeatureCount} Features</Badge>
+                    </div>
                     <p className="text-sm text-muted-foreground">{module.description}</p>
                   </div>
                 </div>
+
+                {/* Business Context */}
+                {enrichment && (
+                  <div className="mb-6 p-4 bg-white rounded-lg border">
+                    <p className="text-sm leading-relaxed text-slate-700">{enrichment.businessContext}</p>
+                    
+                    {/* Key Benefits */}
+                    <div className="mt-4">
+                      <h4 className="text-sm font-semibold text-slate-900 mb-2">Key Benefits:</h4>
+                      <ul className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                        {enrichment.keyBenefits.slice(0, 4).map((benefit, idx) => (
+                          <li key={idx} className="flex items-start gap-2 text-sm">
+                            <Check className="h-4 w-4 text-green-500 mt-0.5 shrink-0" />
+                            <span className="text-slate-600">{benefit}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+
+                    {/* Target Users & Strategic Value */}
+                    <div className="mt-4 flex flex-wrap gap-4 text-sm">
+                      <div>
+                        <span className="font-medium text-slate-700">Target Users: </span>
+                        <span className="text-slate-600">{enrichment.targetUsers.join(", ")}</span>
+                      </div>
+                    </div>
+                    
+                    <div className="mt-2 p-3 bg-purple-50 rounded-lg">
+                      <p className="text-sm text-purple-800">
+                        <span className="font-semibold">Strategic Value: </span>
+                        {enrichment.strategicValue}
+                      </p>
+                    </div>
+                  </div>
+                )}
                 
+                {/* Feature Groups */}
                 {module.groups.map((group) => (
                   <div key={group.groupCode} className="mb-4">
-                    <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-2">
+                    <h4 className="text-sm font-semibold text-slate-900 uppercase tracking-wide mb-3 flex items-center gap-2">
+                      <div className="w-1.5 h-1.5 bg-purple-500 rounded-full"></div>
                       {group.groupName}
                     </h4>
-                    <ul className="feature-list space-y-1">
+                    <ul className="feature-list space-y-2">
                       {group.features.map((feature) => {
                         const featureCaps = FEATURE_CAPABILITIES.find(f => f.featureCode === feature.code);
+                        const featureEnrichment = FEATURE_ENRICHMENTS[feature.code];
                         return (
-                          <li key={feature.code} className="feature-item flex items-start gap-2 py-2 border-b border-slate-200 last:border-0">
-                            <Check className="h-4 w-4 text-green-500 mt-0.5 shrink-0" />
-                            <div className="flex-1">
-                              <span className="feature-name font-medium">{feature.name}</span>
-                              {featureCaps?.capabilities.includes('ai-powered') && (
-                                <Badge className="ml-2 badge-ai bg-purple-100 text-purple-700 text-[10px]">AI</Badge>
-                              )}
-                              {featureCaps?.differentiatorLevel === 'unique' && (
-                                <Badge className="ml-1 badge-unique bg-amber-100 text-amber-700 text-[10px]">Unique</Badge>
-                              )}
-                              <p className="feature-desc text-sm text-muted-foreground">{feature.description}</p>
+                          <li key={feature.code} className="feature-item bg-white rounded-lg p-3 border">
+                            <div className="flex items-start gap-2">
+                              <Check className="h-4 w-4 text-green-500 mt-1 shrink-0" />
+                              <div className="flex-1">
+                                <div className="flex items-center gap-2 mb-1">
+                                  <span className="feature-name font-medium text-slate-900">{feature.name}</span>
+                                  {featureCaps?.capabilities.includes('ai-powered') && (
+                                    <Badge className="badge-ai bg-purple-100 text-purple-700 text-[10px]">AI-Powered</Badge>
+                                  )}
+                                  {featureCaps?.differentiatorLevel === 'unique' && (
+                                    <Badge className="badge-unique bg-amber-100 text-amber-700 text-[10px]">Unique</Badge>
+                                  )}
+                                  {featureCaps?.differentiatorLevel === 'advanced' && (
+                                    <Badge className="badge-advanced bg-blue-100 text-blue-700 text-[10px]">Advanced</Badge>
+                                  )}
+                                </div>
+                                <p className="feature-desc text-sm text-slate-600">
+                                  {featureEnrichment?.detailedDescription || feature.description}
+                                </p>
+                                {featureEnrichment?.businessBenefit && (
+                                  <p className="text-xs text-green-700 mt-1">
+                                    <span className="font-medium">Value: </span>{featureEnrichment.businessBenefit}
+                                  </p>
+                                )}
+                              </div>
                             </div>
                           </li>
                         );
@@ -323,6 +383,14 @@ export function FeatureCatalogGuidePreview({ open, onOpenChange }: FeatureCatalo
                     </ul>
                   </div>
                 ))}
+
+                {/* Integration Points */}
+                {enrichment?.integrationPoints && enrichment.integrationPoints.length > 0 && (
+                  <div className="mt-4 pt-4 border-t border-slate-200">
+                    <span className="text-xs font-medium text-slate-500">Integrates with: </span>
+                    <span className="text-xs text-slate-600">{enrichment.integrationPoints.join(" • ")}</span>
+                  </div>
+                )}
               </div>
             );
           })}
@@ -369,70 +437,88 @@ export function FeatureCatalogGuidePreview({ open, onOpenChange }: FeatureCatalo
         </div>
       )}
 
-      {/* Matrix Section */}
+      {/* Matrix Section - Organized by Module */}
       {currentTemplate.includeMatrix && (
         <div className="guide-section p-8">
           <h2 className="section-title text-2xl font-bold border-b-2 border-purple-600 pb-2 mb-2">Capability Matrix</h2>
-          <p className="section-subtitle text-muted-foreground mb-6">Feature-by-Feature Capability Mapping</p>
+          <p className="section-subtitle text-muted-foreground mb-6">Feature-by-Feature Capability Mapping by Module</p>
           
-          <div className="overflow-x-auto">
-            <table className="matrix-table w-full border-collapse text-sm">
-              <thead>
-                <tr className="bg-slate-100">
-                  <th className="border p-2 text-left font-semibold">Feature</th>
-                  <th className="border p-2 text-left font-semibold">Module</th>
-                  <th className="border p-2 text-center font-semibold">Level</th>
-                  <th className="border p-2 text-center font-semibold whitespace-normal">AI-Powered</th>
-                  <th className="border p-2 text-center font-semibold whitespace-normal">Predictive Analytics</th>
-                  <th className="border p-2 text-center font-semibold whitespace-normal">Intelligent Automation</th>
-                  <th className="border p-2 text-center font-semibold whitespace-normal">Real-Time Processing</th>
-                  <th className="border p-2 text-center font-semibold whitespace-normal">Self-Service</th>
-                </tr>
-              </thead>
-              <tbody>
-                {FEATURE_CAPABILITIES.slice(0, 30).map((fc) => {
-                  let featureName = fc.featureCode;
-                  let moduleName = '';
-                  for (const mod of FEATURE_REGISTRY) {
-                    for (const group of mod.groups) {
-                      const feat = group.features.find(f => f.code === fc.featureCode);
-                      if (feat) {
-                        featureName = feat.name;
-                        moduleName = mod.name;
-                        break;
-                      }
-                    }
-                  }
-                  return (
-                    <tr key={fc.featureCode} className="hover:bg-slate-50">
-                      <td className="border p-2 font-medium">{featureName}</td>
-                      <td className="border p-2 text-muted-foreground">{moduleName}</td>
-                      <td className="border p-2 text-center">
-                        <span className={`inline-block px-2 py-0.5 rounded text-xs font-medium ${
-                          fc.differentiatorLevel === 'unique' ? 'bg-purple-100 text-purple-700' :
-                          fc.differentiatorLevel === 'advanced' ? 'bg-blue-100 text-blue-700' :
-                          'bg-slate-100 text-slate-600'
-                        }`}>
-                          {fc.differentiatorLevel === 'unique' ? 'Unique' : 
-                           fc.differentiatorLevel === 'advanced' ? 'Advanced' : 'Core'}
-                        </span>
-                      </td>
-                      <td className="border p-2 text-center">{fc.capabilities.includes('ai-powered') ? <Check className="h-4 w-4 text-green-500 mx-auto" /> : '—'}</td>
-                      <td className="border p-2 text-center">{fc.capabilities.includes('predictive-analytics') ? <Check className="h-4 w-4 text-green-500 mx-auto" /> : '—'}</td>
-                      <td className="border p-2 text-center">{fc.capabilities.includes('intelligent-automation') ? <Check className="h-4 w-4 text-green-500 mx-auto" /> : '—'}</td>
-                      <td className="border p-2 text-center">{fc.capabilities.includes('real-time-processing') ? <Check className="h-4 w-4 text-green-500 mx-auto" /> : '—'}</td>
-                      <td className="border p-2 text-center">{fc.capabilities.includes('self-service') ? <Check className="h-4 w-4 text-green-500 mx-auto" /> : '—'}</td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-          {FEATURE_CAPABILITIES.length > 30 && (
-            <p className="text-sm text-muted-foreground mt-4 italic">
-              Showing top 30 of {FEATURE_CAPABILITIES.length} features. Full matrix available in PDF export.
-            </p>
-          )}
+          {FEATURE_REGISTRY.map((module) => {
+            // Get features for this module that have capabilities defined
+            const moduleFeatures = FEATURE_CAPABILITIES.filter(fc => {
+              for (const group of module.groups) {
+                if (group.features.some(f => f.code === fc.featureCode)) {
+                  return true;
+                }
+              }
+              return false;
+            }).map(fc => {
+              let featureName = fc.featureCode;
+              let groupName = '';
+              for (const group of module.groups) {
+                const feat = group.features.find(f => f.code === fc.featureCode);
+                if (feat) {
+                  featureName = feat.name;
+                  groupName = group.groupName;
+                  break;
+                }
+              }
+              return { ...fc, featureName, groupName };
+            });
+
+            if (moduleFeatures.length === 0) return null;
+
+            return (
+              <div key={module.code} className="mb-8">
+                <h3 className="text-lg font-semibold text-purple-700 mb-3 flex items-center gap-2">
+                  <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+                  {module.name}
+                  <Badge variant="outline" className="text-xs">{moduleFeatures.length} features</Badge>
+                </h3>
+                
+                <div className="overflow-x-auto">
+                  <table className="matrix-table w-full border-collapse text-sm">
+                    <thead>
+                      <tr className="bg-slate-100">
+                        <th className="border p-2 text-left font-semibold">Feature</th>
+                        <th className="border p-2 text-center font-semibold">Level</th>
+                        <th className="border p-2 text-center font-semibold whitespace-normal">AI-Powered</th>
+                        <th className="border p-2 text-center font-semibold whitespace-normal">Predictive Analytics</th>
+                        <th className="border p-2 text-center font-semibold whitespace-normal">Intelligent Automation</th>
+                        <th className="border p-2 text-center font-semibold whitespace-normal">Real-Time Processing</th>
+                        <th className="border p-2 text-center font-semibold whitespace-normal">Self-Service</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {moduleFeatures.map((fc) => (
+                        <tr key={fc.featureCode} className="hover:bg-slate-50">
+                          <td className="border p-2">
+                            <div className="font-medium">{fc.featureName}</div>
+                            <div className="text-xs text-muted-foreground">{fc.groupName}</div>
+                          </td>
+                          <td className="border p-2 text-center">
+                            <span className={`inline-block px-2 py-0.5 rounded text-xs font-medium ${
+                              fc.differentiatorLevel === 'unique' ? 'bg-purple-100 text-purple-700' :
+                              fc.differentiatorLevel === 'advanced' ? 'bg-blue-100 text-blue-700' :
+                              'bg-slate-100 text-slate-600'
+                            }`}>
+                              {fc.differentiatorLevel === 'unique' ? 'Unique' : 
+                               fc.differentiatorLevel === 'advanced' ? 'Advanced' : 'Core'}
+                            </span>
+                          </td>
+                          <td className="border p-2 text-center">{fc.capabilities.includes('ai-powered') ? <Check className="h-4 w-4 text-green-500 mx-auto" /> : '—'}</td>
+                          <td className="border p-2 text-center">{fc.capabilities.includes('predictive-analytics') ? <Check className="h-4 w-4 text-green-500 mx-auto" /> : '—'}</td>
+                          <td className="border p-2 text-center">{fc.capabilities.includes('intelligent-automation') ? <Check className="h-4 w-4 text-green-500 mx-auto" /> : '—'}</td>
+                          <td className="border p-2 text-center">{fc.capabilities.includes('real-time-processing') ? <Check className="h-4 w-4 text-green-500 mx-auto" /> : '—'}</td>
+                          <td className="border p-2 text-center">{fc.capabilities.includes('self-service') ? <Check className="h-4 w-4 text-green-500 mx-auto" /> : '—'}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            );
+          })}
         </div>
       )}
 
