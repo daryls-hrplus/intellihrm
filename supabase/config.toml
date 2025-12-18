@@ -116,3 +116,27 @@ verify_jwt = false
 
 [functions.generate-release-notes]
 verify_jwt = false
+
+[functions.analyze-content-gaps]
+verify_jwt = false
+
+[functions.detect-feature-changes]
+verify_jwt = false
+
+[functions.generate-contextual-help]
+verify_jwt = false
+
+[functions.generate-faq-from-tickets]
+verify_jwt = false
+
+[functions.optimize-learning-path]
+verify_jwt = false
+
+[functions.generate-voiceover-script]
+verify_jwt = false
+
+[functions.score-content-effectiveness]
+verify_jwt = false
+
+[functions.detect-compliance-impact]
+verify_jwt = false
