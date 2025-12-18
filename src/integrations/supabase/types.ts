@@ -22882,6 +22882,7 @@ export type Database = {
           is_taxable: boolean
           name: string
           proration_method_id: string | null
+          show_on_payslip: boolean
           start_date: string
           updated_at: string
         }
@@ -22899,6 +22900,7 @@ export type Database = {
           is_taxable?: boolean
           name: string
           proration_method_id?: string | null
+          show_on_payslip?: boolean
           start_date?: string
           updated_at?: string
         }
@@ -22916,6 +22918,7 @@ export type Database = {
           is_taxable?: boolean
           name?: string
           proration_method_id?: string | null
+          show_on_payslip?: boolean
           start_date?: string
           updated_at?: string
         }

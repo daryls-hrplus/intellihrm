@@ -12,6 +12,7 @@ export interface PayElement {
   is_taxable: boolean;
   is_pensionable: boolean;
   is_active: boolean;
+  show_on_payslip: boolean;
   company_id: string | null;
   display_order: number;
   start_date: string;

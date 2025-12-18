@@ -72,6 +72,7 @@ export default function PayElementsPage() {
   const [formIsTaxable, setFormIsTaxable] = useState(true);
   const [formIsPensionable, setFormIsPensionable] = useState(false);
   const [formIsActive, setFormIsActive] = useState(true);
+  const [formShowOnPayslip, setFormShowOnPayslip] = useState(true);
   const [formDisplayOrder, setFormDisplayOrder] = useState("0");
   const [formStartDate, setFormStartDate] = useState(getTodayString());
   const [formEndDate, setFormEndDate] = useState("");
@@ -121,6 +122,7 @@ export default function PayElementsPage() {
     setFormIsTaxable(true);
     setFormIsPensionable(false);
     setFormIsActive(true);
+    setFormShowOnPayslip(true);
     setFormDisplayOrder("0");
     setFormStartDate(getTodayString());
     setFormEndDate("");
@@ -137,6 +139,7 @@ export default function PayElementsPage() {
     setFormIsTaxable(element.is_taxable);
     setFormIsPensionable(element.is_pensionable);
     setFormIsActive(element.is_active);
+    setFormShowOnPayslip(element.show_on_payslip);
     setFormDisplayOrder(element.display_order.toString());
     setFormStartDate(element.start_date || getTodayString());
     setFormEndDate(element.end_date || "");
@@ -158,6 +161,7 @@ export default function PayElementsPage() {
       is_taxable: formIsTaxable,
       is_pensionable: formIsPensionable,
       is_active: formIsActive,
+      show_on_payslip: formShowOnPayslip,
       company_id: selectedCompanyId || null,
       display_order: parseInt(formDisplayOrder) || 0,
       start_date: formStartDate,
@@ -431,6 +435,16 @@ export default function PayElementsPage() {
                   />
                   <Label htmlFor="active">{t("compensation.payElements.dialog.active")}</Label>
                 </div>
+                {elementTypes.find(et => et.id === formElementTypeId)?.code === 'BENEFIT' && (
+                  <div className="flex items-center gap-2">
+                    <Switch
+                      id="showOnPayslip"
+                      checked={formShowOnPayslip}
+                      onCheckedChange={setFormShowOnPayslip}
+                    />
+                    <Label htmlFor="showOnPayslip">{t("compensation.payElements.dialog.showOnPayslip", "Show on Payslip")}</Label>
+                  </div>
+                )}
               </div>
             </div>
 
