@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, Fragment } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -71,6 +71,7 @@ export default function PayrollProcessingPage() {
   const [expandedRunId, setExpandedRunId] = useState<string | null>(null);
   const [expandedEmployees, setExpandedEmployees] = useState<EmployeePayroll[]>([]);
   const [selectedEmployee, setSelectedEmployee] = useState<EmployeePayroll | null>(null);
+  const [selectedEmployeeId, setSelectedEmployeeId] = useState<string | null>(null);
   const [employeeDetailOpen, setEmployeeDetailOpen] = useState(false);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [recalcConfirmOpen, setRecalcConfirmOpen] = useState(false);
@@ -104,16 +105,16 @@ export default function PayrollProcessingPage() {
 
   const loadData = async () => {
     if (!selectedCompanyId || !selectedPayGroupId || selectedPayGroupId === "all") return;
-    
+
     // Fetch pay periods for the selected pay group
     const { data: periodData } = await supabase
       .from('pay_periods')
       .select('*')
       .eq('pay_group_id', selectedPayGroupId)
       .order('period_start', { ascending: false });
-    
+
     setPeriods((periodData || []) as PayPeriod[]);
-    
+
     // Fetch payroll runs for the selected pay group
     const { data: runData } = await supabase
       .from('payroll_runs')
@@ -124,14 +125,29 @@ export default function PayrollProcessingPage() {
       .eq('company_id', selectedCompanyId)
       .eq('pay_group_id', selectedPayGroupId)
       .order('created_at', { ascending: false });
-    
+
     setPayrollRuns((runData || []) as ExtendedPayrollRun[]);
+  };
+
+  const refreshExpandedEmployees = async (runId: string) => {
+    if (expandedRunId !== runId) return;
+
+    const empPayroll = await fetchEmployeePayroll(runId);
+    setExpandedEmployees(empPayroll);
+
+    if (employeeDetailOpen && selectedEmployeeId) {
+      const updated = empPayroll.find((e) => e.id === selectedEmployeeId);
+      if (updated) setSelectedEmployee(updated);
+    }
   };
 
   const handleCalculate = async (run: ExtendedPayrollRun) => {
     if (!selectedCompanyId || !selectedPayGroupId) return;
     const success = await calculatePayroll(run.id, selectedCompanyId, run.pay_period_id, selectedPayGroupId);
-    if (success) loadData();
+    if (success) {
+      await loadData();
+      await refreshExpandedEmployees(run.id);
+    }
   };
 
   const handleRecalculate = async (run: ExtendedPayrollRun) => {
@@ -154,23 +170,26 @@ export default function PayrollProcessingPage() {
 
   const confirmRecalculate = async () => {
     if (!runToRecalc || !selectedCompanyId) return;
-    
+
+    const runId = runToRecalc.id;
+
     // If supervisor approving for approved run
     if (runToRecalc.status === 'approved' && canApproveSupervisor) {
       await approveRecalculation(runToRecalc.id);
     }
-    
+
     // Use the run's pay_group_id, not the filter selection
     const success = await recalculatePayroll(
-      runToRecalc.id, 
-      selectedCompanyId, 
-      runToRecalc.pay_period_id, 
+      runToRecalc.id,
+      selectedCompanyId,
+      runToRecalc.pay_period_id,
       runToRecalc.pay_group_id
     );
     if (success) {
       setRecalcConfirmOpen(false);
       setRunToRecalc(null);
-      loadData();
+      await loadData();
+      await refreshExpandedEmployees(runId);
     }
   };
 
@@ -250,6 +269,10 @@ export default function PayrollProcessingPage() {
     if (expandedRunId === run.id) {
       setExpandedRunId(null);
       setExpandedEmployees([]);
+      setSelectedRun(null);
+      setSelectedEmployee(null);
+      setSelectedEmployeeId(null);
+      setEmployeeDetailOpen(false);
     } else {
       setExpandedRunId(run.id);
       setSelectedRun(run);
@@ -260,6 +283,7 @@ export default function PayrollProcessingPage() {
 
   const viewEmployeeDetails = (emp: EmployeePayroll) => {
     setSelectedEmployee(emp);
+    setSelectedEmployeeId(emp.id);
     setEmployeeDetailOpen(true);
   };
 
@@ -431,8 +455,8 @@ export default function PayrollProcessingPage() {
               </TableHeader>
               <TableBody>
                 {payrollRuns.map((run) => (
-                  <>
-                    <TableRow key={run.id}>
+                  <Fragment key={run.id}>
+                    <TableRow>
                       <TableCell className="font-medium">
                         <Button
                           variant="link"
@@ -586,7 +610,7 @@ export default function PayrollProcessingPage() {
                         </TableCell>
                       </TableRow>
                     )}
-                  </>
+                  </Fragment>
                 ))}
                 {payrollRuns.length === 0 && (
                   <TableRow>
