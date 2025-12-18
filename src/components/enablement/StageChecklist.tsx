@@ -33,7 +33,7 @@ import { cn } from "@/lib/utils";
 
 interface StageChecklistProps {
   contentStatusId?: string;
-  stage: "backlog" | "planning" | "development" | "review" | "published" | "maintenance";
+  stage: "backlog" | "development" | "review" | "published" | "maintenance";
   compact?: boolean;
   onNavigate?: (path: string) => void;
 }
@@ -44,12 +44,6 @@ const STAGE_CONFIG = {
     icon: ClipboardList, 
     color: "text-slate-600",
     bgColor: "bg-slate-100 dark:bg-slate-800"
-  },
-  planning: { 
-    label: "Planning", 
-    icon: ClipboardList, 
-    color: "text-purple-600",
-    bgColor: "bg-purple-100 dark:bg-purple-900/30"
   },
   development: { 
     label: "Development", 
@@ -283,8 +277,8 @@ function ChecklistItem({ item, isCompleted, onToggle, onNavigate, disabled, comp
 
 // All stages checklist panel for overview
 export function AllStagesChecklist({ contentStatusId, onNavigate }: { contentStatusId?: string; onNavigate?: (path: string) => void }) {
-  const stages: Array<"backlog" | "planning" | "development" | "review" | "published" | "maintenance"> = [
-    "backlog", "planning", "development", "review", "published", "maintenance"
+  const stages: Array<"backlog" | "development" | "review" | "published" | "maintenance"> = [
+    "backlog", "development", "review", "published", "maintenance"
   ];
 
   return (
