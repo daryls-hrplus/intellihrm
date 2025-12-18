@@ -182,6 +182,22 @@ const getModuleGroup = (moduleCode: string): { groupKey: string; group: typeof M
   return null;
 };
 
+// Helper function to get modules sorted by category groupings for better document flow
+const getModulesSortedByCategory = () => {
+  const categoryOrder = Object.keys(MODULE_GROUPS);
+  return [...FEATURE_REGISTRY].sort((a, b) => {
+    const groupA = getModuleGroup(a.code);
+    const groupB = getModuleGroup(b.code);
+    const indexA = groupA ? categoryOrder.indexOf(groupA.groupKey) : 999;
+    const indexB = groupB ? categoryOrder.indexOf(groupB.groupKey) : 999;
+    if (indexA !== indexB) return indexA - indexB;
+    // Within same category, maintain original order
+    const groupModulesA = groupA ? MODULE_GROUPS[groupA.groupKey as keyof typeof MODULE_GROUPS].modules : [];
+    const groupModulesB = groupB ? MODULE_GROUPS[groupB.groupKey as keyof typeof MODULE_GROUPS].modules : [];
+    return groupModulesA.indexOf(a.code) - groupModulesB.indexOf(b.code);
+  });
+};
+
 interface FeatureCatalogGuidePreviewProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -302,7 +318,7 @@ export function FeatureCatalogGuidePreview({ open, onOpenChange }: FeatureCatalo
     }
     
     if (currentTemplate.includeModules) {
-      FEATURE_REGISTRY.forEach((module, idx) => {
+      getModulesSortedByCategory().forEach((module, idx) => {
         fullContent += renderModuleHTML(module, idx === 0, idx);
       });
     }
@@ -312,7 +328,7 @@ export function FeatureCatalogGuidePreview({ open, onOpenChange }: FeatureCatalo
     }
     
     if (currentTemplate.includeMatrix) {
-      FEATURE_REGISTRY.forEach((module, idx) => {
+      getModulesSortedByCategory().forEach((module, idx) => {
         const hasFeatures = FEATURE_CAPABILITIES.some(fc => 
           module.groups.some(g => g.features.some(f => f.code === fc.featureCode))
         );
@@ -412,7 +428,7 @@ export function FeatureCatalogGuidePreview({ open, onOpenChange }: FeatureCatalo
       }
       
       if (currentTemplate.includeModules) {
-        FEATURE_REGISTRY.forEach((module, idx) => {
+        getModulesSortedByCategory().forEach((module, idx) => {
           sections.push({ id: `module-${module.code}`, render: () => renderModuleHTML(module, idx === 0, idx) });
         });
       }
@@ -422,7 +438,7 @@ export function FeatureCatalogGuidePreview({ open, onOpenChange }: FeatureCatalo
       }
       
       if (currentTemplate.includeMatrix) {
-        FEATURE_REGISTRY.forEach((module, idx) => {
+        getModulesSortedByCategory().forEach((module, idx) => {
           const hasFeatures = FEATURE_CAPABILITIES.some(fc => 
             module.groups.some(g => g.features.some(f => f.code === fc.featureCode))
           );
@@ -582,8 +598,15 @@ export function FeatureCatalogGuidePreview({ open, onOpenChange }: FeatureCatalo
     
     if (currentTemplate.includeModules) {
       tocItems += `<div style="display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px dashed #e2e8f0;"><span style="font-weight: 600;">Module Reference</span><span style="color: #64748b;">${pageNum}</span></div>`;
-      FEATURE_REGISTRY.forEach((module) => {
-        tocItems += `<div style="display: flex; justify-content: space-between; padding: 8px 0 8px 24px; border-bottom: 1px dotted #f1f5f9;"><span style="color: #475569; font-size: 14px;">${module.name}</span><span style="color: #94a3b8; font-size: 12px;">${pageNum++}</span></div>`;
+      getModulesSortedByCategory().forEach((module) => {
+        const moduleGroup = getModuleGroup(module.code);
+        tocItems += `<div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 0 8px 24px; border-bottom: 1px dotted #f1f5f9;">
+          <span style="display: flex; align-items: center; gap: 8px;">
+            <span style="color: #475569; font-size: 14px;">${module.name}</span>
+            ${moduleGroup ? `<span style="background: ${moduleGroup.group.color}15; color: ${moduleGroup.group.color}; font-size: 9px; padding: 1px 6px; border-radius: 3px;">${moduleGroup.group.name}</span>` : ''}
+          </span>
+          <span style="color: #94a3b8; font-size: 12px;">${pageNum++}</span>
+        </div>`;
       });
     }
     
@@ -1122,12 +1145,22 @@ export function FeatureCatalogGuidePreview({ open, onOpenChange }: FeatureCatalo
                 <span className="font-medium">Module Reference</span>
                 <span className="text-sm text-muted-foreground">{currentTemplate.includeExecutiveSummary ? 4 : 3}</span>
               </div>
-              {FEATURE_REGISTRY.map((module, idx) => (
-                <div key={module.code} className="flex items-center justify-between py-1.5 pl-6 border-b border-dotted border-slate-100">
-                  <span className="text-sm text-slate-600">{module.name}</span>
-                  <span className="text-xs text-muted-foreground">—</span>
-                </div>
-              ))}
+              {getModulesSortedByCategory().map((module, idx) => {
+                const moduleGroup = getModuleGroup(module.code);
+                return (
+                  <div key={module.code} className="flex items-center justify-between py-1.5 pl-6 border-b border-dotted border-slate-100">
+                    <span className="flex items-center gap-2">
+                      <span className="text-sm text-slate-600">{module.name}</span>
+                      {moduleGroup && (
+                        <Badge className="text-[9px] py-0" style={{ backgroundColor: `${moduleGroup.group.color}15`, color: moduleGroup.group.color }}>
+                          {moduleGroup.group.name}
+                        </Badge>
+                      )}
+                    </span>
+                    <span className="text-xs text-muted-foreground">—</span>
+                  </div>
+                );
+              })}
             </>
           )}
           {currentTemplate.includeCapabilities && (
@@ -1331,7 +1364,7 @@ export function FeatureCatalogGuidePreview({ open, onOpenChange }: FeatureCatalo
       {/* Module Browser Section */}
       {currentTemplate.includeModules && (
         <>
-          {FEATURE_REGISTRY.map((module, moduleIndex) => {
+          {getModulesSortedByCategory().map((module, moduleIndex) => {
             const ModuleIcon = getIcon(module.icon);
             const enrichment = MODULE_ENRICHMENTS[module.code];
             const moduleFeatureCount = module.groups.reduce((acc, g) => acc + g.features.length, 0);
@@ -1578,7 +1611,7 @@ export function FeatureCatalogGuidePreview({ open, onOpenChange }: FeatureCatalo
       {/* Matrix Section - Organized by Module */}
       {currentTemplate.includeMatrix && (
         <>
-          {FEATURE_REGISTRY.map((module, moduleIndex) => {
+          {getModulesSortedByCategory().map((module, moduleIndex) => {
             // Get features for this module that have capabilities defined
             const moduleFeatures = FEATURE_CAPABILITIES.filter(fc => {
               for (const group of module.groups) {
