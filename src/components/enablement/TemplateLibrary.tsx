@@ -8,13 +8,13 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
+import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import {
   Library,
-  Plus,
   Save,
   Copy,
   Trash2,
@@ -24,11 +24,11 @@ import {
   BookOpen,
   FileCheck,
   Zap,
-  Upload,
-  MessageSquare,
-  Palette,
   LayoutTemplate,
-  Eye
+  Eye,
+  Settings,
+  Palette,
+  Sparkles
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { DocumentTemplate, DEFAULT_TEMPLATES } from "./DocumentTemplateConfig";
@@ -63,9 +63,8 @@ export function TemplateLibrary({
   onTemplateSelect,
   onClose,
 }: TemplateLibraryProps) {
-  const [activeTab, setActiveTab] = useState("system");
+  const [activeTab, setActiveTab] = useState("templates");
   const [searchQuery, setSearchQuery] = useState("");
-  const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [showSaveDialog, setShowSaveDialog] = useState(false);
   const [saveTemplateName, setSaveTemplateName] = useState("");
   const [saveTemplateDescription, setSaveTemplateDescription] = useState("");
@@ -74,7 +73,7 @@ export function TemplateLibrary({
   const [previewTemplate, setPreviewTemplate] = useState<DocumentTemplate | null>(null);
   const [showPreviewDialog, setShowPreviewDialog] = useState(false);
   
-  // Internal working copy of template for styling changes (doesn't close sheet)
+  // Internal working copy of template for changes (doesn't close sheet)
   const [workingTemplate, setWorkingTemplate] = useState<DocumentTemplate | null>(selectedTemplate);
   
   // Sync working template when selected template changes from outside
@@ -205,19 +204,39 @@ export function TemplateLibrary({
     toast.success(`Template "${template.name}" selected`);
   };
 
-  const filteredSystemTemplates = DEFAULT_TEMPLATES.filter(t => {
-    const matchesSearch = t.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      t.description.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCategory = categoryFilter === "all" || t.type === categoryFilter;
-    return matchesSearch && matchesCategory;
-  });
+  const handleLayoutToggle = (key: keyof DocumentTemplate['layout'], value: boolean) => {
+    if (!workingTemplate) return;
+    setWorkingTemplate({
+      ...workingTemplate,
+      layout: { ...workingTemplate.layout, [key]: value }
+    });
+  };
 
-  const filteredSavedTemplates = savedTemplates.filter(t => {
-    const matchesSearch = t.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (t.description?.toLowerCase().includes(searchQuery.toLowerCase()) ?? false);
-    const matchesCategory = categoryFilter === "all" || t.category === categoryFilter;
-    return matchesSearch && matchesCategory;
-  });
+  const handleSectionToggle = (key: keyof DocumentTemplate['sections'], value: boolean) => {
+    if (!workingTemplate) return;
+    setWorkingTemplate({
+      ...workingTemplate,
+      sections: { ...workingTemplate.sections, [key]: value }
+    });
+  };
+
+  const handleFormattingChange = (key: keyof DocumentTemplate['formatting'], value: string) => {
+    if (!workingTemplate) return;
+    setWorkingTemplate({
+      ...workingTemplate,
+      formatting: { ...workingTemplate.formatting, [key]: value }
+    });
+  };
+
+  const filteredSystemTemplates = DEFAULT_TEMPLATES.filter(t => 
+    t.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    t.description.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const filteredSavedTemplates = savedTemplates.filter(t => 
+    t.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (t.description?.toLowerCase().includes(searchQuery.toLowerCase()) ?? false)
+  );
 
   const getCategoryIcon = (category: string) => {
     switch (category) {
@@ -227,6 +246,31 @@ export function TemplateLibrary({
       case 'quick_start': return <Zap className="h-4 w-4" />;
       default: return <LayoutTemplate className="h-4 w-4" />;
     }
+  };
+
+  const layoutLabels: Record<string, string> = {
+    includeTableOfContents: 'Table of Contents',
+    includeSummary: 'Executive Summary',
+    includePrerequisites: 'Prerequisites',
+    includeLearningObjectives: 'Learning Objectives',
+    includeScreenshots: 'Screenshots',
+    includeStepNumbers: 'Step Numbers',
+    includeTimeEstimates: 'Time Estimates',
+    includeRoleIndicators: 'Role Indicators',
+    includeVersionInfo: 'Version Info',
+    includeRelatedDocs: 'Related Documents'
+  };
+
+  const sectionLabels: Record<string, string> = {
+    introduction: 'Introduction',
+    overview: 'Overview',
+    prerequisites: 'Prerequisites',
+    stepByStep: 'Step-by-Step Guide',
+    bestPractices: 'Best Practices',
+    troubleshooting: 'Troubleshooting',
+    faqs: 'FAQs',
+    glossary: 'Glossary',
+    appendix: 'Appendix'
   };
 
   return (
@@ -245,7 +289,7 @@ export function TemplateLibrary({
               disabled={!workingTemplate}
             >
               <Save className="h-4 w-4 mr-2" />
-              Save Current
+              Save Template
             </Button>
             <Button 
               variant="default" 
@@ -257,295 +301,397 @@ export function TemplateLibrary({
                 onClose();
               }}
             >
+              <Check className="h-4 w-4 mr-2" />
               Apply & Close
             </Button>
           </div>
         </div>
         <CardDescription>
-          Browse, create, and manage document templates
+          Select, customize, and save document templates
         </CardDescription>
       </CardHeader>
       
       <CardContent className="space-y-4">
-        {/* Search and Filter */}
-        <div className="flex gap-4">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Search templates..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10"
-            />
+        {/* Current Template Indicator */}
+        {workingTemplate && (
+          <div className="flex items-center gap-3 p-3 bg-primary/5 border border-primary/20 rounded-lg">
+            <div className="p-2 bg-primary/10 rounded-lg">
+              {getCategoryIcon(workingTemplate.type)}
+            </div>
+            <div className="flex-1">
+              <p className="font-medium text-sm">{workingTemplate.name}</p>
+              <p className="text-xs text-muted-foreground">{workingTemplate.description}</p>
+            </div>
+            <div className="flex items-center gap-1">
+              <div 
+                className="w-4 h-4 rounded-full border"
+                style={{ backgroundColor: workingTemplate.branding.primaryColor }}
+                title="Primary color"
+              />
+              <div 
+                className="w-4 h-4 rounded-full border"
+                style={{ backgroundColor: workingTemplate.branding.secondaryColor || '#6b7280' }}
+                title="Secondary color"
+              />
+            </div>
           </div>
-          <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="All Categories" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Categories</SelectItem>
-              <SelectItem value="training_guide">Training Guide</SelectItem>
-              <SelectItem value="user_manual">User Manual</SelectItem>
-              <SelectItem value="sop">SOP</SelectItem>
-              <SelectItem value="quick_start">Quick Start</SelectItem>
-              <SelectItem value="custom">Custom</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+        )}
 
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid grid-cols-5 w-full">
-            <TabsTrigger value="system">System Templates</TabsTrigger>
-            <TabsTrigger value="my-templates">My Templates</TabsTrigger>
-            <TabsTrigger value="reference-docs">Reference Docs</TabsTrigger>
-            <TabsTrigger value="instructions">Instructions</TabsTrigger>
-            <TabsTrigger value="styling">Styling</TabsTrigger>
+          <TabsList className="grid grid-cols-4 w-full">
+            <TabsTrigger value="templates" className="gap-1">
+              <LayoutTemplate className="h-4 w-4" />
+              Templates
+            </TabsTrigger>
+            <TabsTrigger value="configure" className="gap-1">
+              <Settings className="h-4 w-4" />
+              Configure
+            </TabsTrigger>
+            <TabsTrigger value="branding" className="gap-1">
+              <Palette className="h-4 w-4" />
+              Branding
+            </TabsTrigger>
+            <TabsTrigger value="ai-context" className="gap-1">
+              <Sparkles className="h-4 w-4" />
+              AI Context
+            </TabsTrigger>
           </TabsList>
 
-          {/* System Templates */}
-          <TabsContent value="system" className="mt-4">
+          {/* Templates Tab - Gallery View */}
+          <TabsContent value="templates" className="mt-4 space-y-4">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search templates..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+
             <ScrollArea className="h-[400px]">
-              <div className="grid gap-3">
-                {filteredSystemTemplates.map((template) => (
-                  <div
-                    key={template.id}
-                    className={`p-4 border rounded-lg transition-all ${
-                      workingTemplate?.id === template.id
-                        ? 'border-primary bg-primary/5'
-                        : 'hover:border-muted-foreground/50'
-                    }`}
-                  >
-                    <div className="flex items-start justify-between">
-                      <div className="flex items-start gap-3 flex-1">
-                        <div className="p-2 bg-muted rounded-lg">
-                          {getCategoryIcon(template.type)}
+              {/* System Templates */}
+              <div className="space-y-3">
+                <h4 className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                  <LayoutTemplate className="h-4 w-4" />
+                  System Templates
+                </h4>
+                <div className="grid gap-2">
+                  {filteredSystemTemplates.map((template) => (
+                    <div
+                      key={template.id}
+                      className={`p-3 border rounded-lg transition-all cursor-pointer ${
+                        workingTemplate?.id === template.id
+                          ? 'border-primary bg-primary/5'
+                          : 'hover:border-muted-foreground/50'
+                      }`}
+                      onClick={() => setWorkingTemplate(template)}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 bg-muted rounded-lg">
+                            {getCategoryIcon(template.type)}
+                          </div>
+                          <div>
+                            <h4 className="font-medium text-sm">{template.name}</h4>
+                            <p className="text-xs text-muted-foreground">{template.description}</p>
+                          </div>
                         </div>
-                        <div className="flex-1">
-                          <h4 className="font-medium">{template.name}</h4>
-                          <p className="text-sm text-muted-foreground">{template.description}</p>
-                          <Badge variant="secondary" className="mt-2 text-xs">
-                            Industry Standard
-                          </Badge>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => {
-                            setPreviewTemplate(template);
-                            setShowPreviewDialog(true);
-                          }}
-                        >
-                          <Eye className="h-4 w-4 mr-1" />
-                          Preview
-                        </Button>
-                        <Button
-                          variant={workingTemplate?.id === template.id ? "default" : "outline"}
-                          size="sm"
-                          onClick={() => setWorkingTemplate(template)}
-                        >
-                          {workingTemplate?.id === template.id ? (
-                            <>
-                              <Check className="h-4 w-4 mr-1" />
-                              Selected
-                            </>
-                          ) : (
-                            "Use"
+                        <div className="flex items-center gap-2">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setPreviewTemplate(template);
+                              setShowPreviewDialog(true);
+                            }}
+                          >
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                          {workingTemplate?.id === template.id && (
+                            <Badge variant="default" className="text-xs">Selected</Badge>
                           )}
-                        </Button>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
-            </ScrollArea>
-          </TabsContent>
 
-          {/* My Templates */}
-          <TabsContent value="my-templates" className="mt-4">
-            <ScrollArea className="h-[400px]">
-              {isLoading ? (
-                <div className="flex items-center justify-center h-32">
-                  <span className="text-muted-foreground">Loading templates...</span>
-                </div>
-              ) : filteredSavedTemplates.length === 0 ? (
-                <div className="flex flex-col items-center justify-center h-32 text-center">
-                  <LayoutTemplate className="h-8 w-8 text-muted-foreground mb-2" />
-                  <p className="text-muted-foreground">No saved templates yet</p>
-                  <p className="text-sm text-muted-foreground">
-                    Configure a template and click "Save Current" to create one
-                  </p>
-                </div>
-              ) : (
-                <div className="grid gap-3">
-                  {filteredSavedTemplates.map((template) => {
-                    const branding = template.branding_config as DocumentTemplate['branding'];
-                    return (
-                      <div
-                        key={template.id}
-                        className={`p-4 border rounded-lg transition-all ${
-                          workingTemplate?.id === template.id
-                            ? 'border-primary bg-primary/5'
-                            : 'hover:border-muted-foreground/50'
-                        }`}
-                      >
-                        <div className="flex items-start gap-4">
-                          {/* Template Preview Thumbnail */}
-                          <div className="w-32 h-24 border rounded-lg overflow-hidden flex-shrink-0 bg-background">
-                            {/* Header with branding */}
-                            <div 
-                              className="h-6 flex items-center gap-1 px-2"
-                              style={{ backgroundColor: (branding?.primaryColor || '#1e40af') + '20' }}
-                            >
-                              {branding?.logoUrl ? (
-                                <img src={branding.logoUrl} alt="" className="h-3 object-contain" />
-                              ) : (
+              {/* Saved Templates */}
+              {savedTemplates.length > 0 && (
+                <div className="space-y-3 mt-6">
+                  <h4 className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                    <Save className="h-4 w-4" />
+                    My Templates
+                  </h4>
+                  <div className="grid gap-2">
+                    {filteredSavedTemplates.map((template) => {
+                      const branding = template.branding_config as DocumentTemplate['branding'];
+                      return (
+                        <div
+                          key={template.id}
+                          className={`p-3 border rounded-lg transition-all ${
+                            workingTemplate?.id === template.id
+                              ? 'border-primary bg-primary/5'
+                              : 'hover:border-muted-foreground/50'
+                          }`}
+                        >
+                          <div className="flex items-center gap-3">
+                            {/* Mini Preview */}
+                            <div className="w-16 h-12 border rounded overflow-hidden flex-shrink-0 bg-background">
+                              <div 
+                                className="h-3 flex items-center px-1"
+                                style={{ backgroundColor: (branding?.primaryColor || '#1e40af') + '20' }}
+                              >
                                 <div 
-                                  className="w-3 h-3 rounded-sm"
+                                  className="w-2 h-2 rounded-sm"
                                   style={{ backgroundColor: branding?.primaryColor || '#1e40af' }}
                                 />
-                              )}
-                              <span 
-                                className="text-[8px] font-medium truncate"
-                                style={{ color: branding?.primaryColor || '#1e40af' }}
-                              >
-                                {branding?.companyName || 'Company'}
-                              </span>
-                            </div>
-                            {/* Content preview */}
-                            <div className="p-1.5 space-y-1">
-                              <div 
-                                className="h-1.5 rounded-full w-3/4"
-                                style={{ backgroundColor: branding?.primaryColor || '#1e40af' }}
-                              />
-                              <div className="h-1 bg-muted rounded-full w-full" />
-                              <div className="h-1 bg-muted rounded-full w-5/6" />
-                              <div 
-                                className="h-2 rounded-sm mt-1"
-                                style={{ 
-                                  backgroundColor: (branding?.secondaryColor || '#6b7280') + '20',
-                                  borderLeft: `2px solid ${branding?.secondaryColor || '#6b7280'}`
-                                }}
-                              />
-                            </div>
-                          </div>
-
-                          {/* Template Info */}
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-start justify-between gap-2">
-                              <div className="flex-1 min-w-0">
-                                <h4 className="font-medium truncate">{template.name}</h4>
-                                <p className="text-sm text-muted-foreground line-clamp-2">{template.description}</p>
-                                <div className="flex items-center gap-2 mt-2">
-                                  <Badge variant="outline" className="text-xs">
-                                    {template.category.replace('_', ' ')}
-                                  </Badge>
-                                  {/* Color swatches */}
-                                  <div className="flex items-center gap-1">
-                                    <div 
-                                      className="w-4 h-4 rounded-full border"
-                                      style={{ backgroundColor: branding?.primaryColor || '#1e40af' }}
-                                      title="Primary color"
-                                    />
-                                    <div 
-                                      className="w-4 h-4 rounded-full border"
-                                      style={{ backgroundColor: branding?.secondaryColor || '#6b7280' }}
-                                      title="Secondary color"
-                                    />
-                                  </div>
-                                  <span className="text-xs text-muted-foreground">
-                                    {new Date(template.updated_at).toLocaleDateString()}
-                                  </span>
-                                </div>
+                              </div>
+                              <div className="p-1 space-y-0.5">
+                                <div className="h-1 bg-muted rounded-full w-3/4" />
+                                <div className="h-0.5 bg-muted rounded-full w-full" />
                               </div>
                             </div>
-                          </div>
 
-                          {/* Actions */}
-                          <div className="flex items-center gap-2 flex-shrink-0">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => {
-                                const docTemplate: DocumentTemplate = {
-                                  id: template.id,
-                                  name: template.name,
-                                  description: template.description || "",
-                                  type: template.category as DocumentTemplate['type'],
-                                  layout: template.layout_config as unknown as DocumentTemplate['layout'],
-                                  sections: template.sections_config as unknown as DocumentTemplate['sections'],
-                                  formatting: template.formatting_config as unknown as DocumentTemplate['formatting'],
-                                  branding: branding
-                                };
-                                setPreviewTemplate(docTemplate);
-                                setShowPreviewDialog(true);
-                              }}
-                            >
-                              <Eye className="h-4 w-4 mr-1" />
-                              Preview
-                            </Button>
-                            <Button
-                              variant={workingTemplate?.id === template.id ? "default" : "outline"}
-                              size="sm"
+                            <div 
+                              className="flex-1 cursor-pointer"
                               onClick={() => handleSelectSavedTemplate(template)}
                             >
-                              {workingTemplate?.id === template.id ? (
-                                <>
-                                  <Check className="h-4 w-4 mr-1" />
-                                  Selected
-                                </>
-                              ) : (
-                                "Use"
-                              )}
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => handleCloneTemplate(template)}
-                            >
-                              <Copy className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => deleteTemplateMutation.mutate(template.id)}
-                            >
-                              <Trash2 className="h-4 w-4 text-destructive" />
-                            </Button>
+                              <h4 className="font-medium text-sm">{template.name}</h4>
+                              <p className="text-xs text-muted-foreground line-clamp-1">{template.description}</p>
+                            </div>
+
+                            <div className="flex items-center gap-1">
+                              <div 
+                                className="w-3 h-3 rounded-full border"
+                                style={{ backgroundColor: branding?.primaryColor || '#1e40af' }}
+                              />
+                              <div 
+                                className="w-3 h-3 rounded-full border"
+                                style={{ backgroundColor: branding?.secondaryColor || '#6b7280' }}
+                              />
+                            </div>
+
+                            <div className="flex items-center gap-1">
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  const docTemplate: DocumentTemplate = {
+                                    id: template.id,
+                                    name: template.name,
+                                    description: template.description || "",
+                                    type: template.category as DocumentTemplate['type'],
+                                    layout: template.layout_config as unknown as DocumentTemplate['layout'],
+                                    sections: template.sections_config as unknown as DocumentTemplate['sections'],
+                                    formatting: template.formatting_config as unknown as DocumentTemplate['formatting'],
+                                    branding: branding
+                                  };
+                                  setPreviewTemplate(docTemplate);
+                                  setShowPreviewDialog(true);
+                                }}
+                              >
+                                <Eye className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8"
+                                onClick={() => handleCloneTemplate(template)}
+                              >
+                                <Copy className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8"
+                                onClick={() => deleteTemplateMutation.mutate(template.id)}
+                              >
+                                <Trash2 className="h-4 w-4 text-destructive" />
+                              </Button>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    );
-                  })}
+                      );
+                    })}
+                  </div>
                 </div>
               )}
             </ScrollArea>
           </TabsContent>
 
-          {/* Reference Documents */}
-          <TabsContent value="reference-docs" className="mt-4">
-            <TemplateReferenceUploader 
-              templateId={editingTemplate?.id} 
-            />
+          {/* Configure Tab - Layout, Sections, Formatting */}
+          <TabsContent value="configure" className="mt-4">
+            {!workingTemplate ? (
+              <div className="p-8 border-2 border-dashed rounded-lg text-center">
+                <Settings className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
+                <p className="text-muted-foreground">Select a template first to configure it</p>
+              </div>
+            ) : (
+              <ScrollArea className="h-[400px] pr-4">
+                <div className="space-y-6">
+                  {/* Layout Options */}
+                  <div className="space-y-3">
+                    <h4 className="font-medium text-sm flex items-center gap-2">
+                      <LayoutTemplate className="h-4 w-4" />
+                      Layout Options
+                    </h4>
+                    <div className="grid grid-cols-2 gap-3">
+                      {Object.entries(workingTemplate.layout).map(([key, value]) => (
+                        <div key={key} className="flex items-center justify-between p-2 border rounded-lg">
+                          <Label htmlFor={key} className="text-sm">
+                            {layoutLabels[key] || key.replace(/([A-Z])/g, ' $1').replace('include', '').trim()}
+                          </Label>
+                          <Switch
+                            id={key}
+                            checked={value}
+                            onCheckedChange={(checked) => 
+                              handleLayoutToggle(key as keyof DocumentTemplate['layout'], checked)
+                            }
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <Separator />
+
+                  {/* Sections */}
+                  <div className="space-y-3">
+                    <h4 className="font-medium text-sm flex items-center gap-2">
+                      <FileText className="h-4 w-4" />
+                      Document Sections
+                    </h4>
+                    <div className="grid grid-cols-2 gap-3">
+                      {Object.entries(workingTemplate.sections).map(([key, value]) => (
+                        <div key={key} className="flex items-center justify-between p-2 border rounded-lg">
+                          <Label htmlFor={`section-${key}`} className="text-sm">
+                            {sectionLabels[key] || key.replace(/([A-Z])/g, ' $1')}
+                          </Label>
+                          <Switch
+                            id={`section-${key}`}
+                            checked={value}
+                            onCheckedChange={(checked) => 
+                              handleSectionToggle(key as keyof DocumentTemplate['sections'], checked)
+                            }
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <Separator />
+
+                  {/* Formatting */}
+                  <div className="space-y-3">
+                    <h4 className="font-medium text-sm">Formatting Options</h4>
+                    <div className="grid gap-4">
+                      <div className="space-y-2">
+                        <Label className="text-sm">Header Style</Label>
+                        <Select
+                          value={workingTemplate.formatting.headerStyle}
+                          onValueChange={(v) => handleFormattingChange('headerStyle', v)}
+                        >
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="numbered">Numbered (1. 1.1 1.1.1)</SelectItem>
+                            <SelectItem value="plain">Plain Headers</SelectItem>
+                            <SelectItem value="icon">Icon Headers</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label className="text-sm">Callout Style</Label>
+                        <Select
+                          value={workingTemplate.formatting.calloutStyle}
+                          onValueChange={(v) => handleFormattingChange('calloutStyle', v)}
+                        >
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="confluence">Confluence (Info/Warning panels)</SelectItem>
+                            <SelectItem value="github">GitHub (Blockquote style)</SelectItem>
+                            <SelectItem value="minimal">Minimal (Bordered)</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label className="text-sm">Screenshot Placement</Label>
+                        <Select
+                          value={workingTemplate.formatting.screenshotPlacement}
+                          onValueChange={(v) => handleFormattingChange('screenshotPlacement', v)}
+                        >
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="inline">Inline with Text</SelectItem>
+                            <SelectItem value="sidebar">Sidebar Layout</SelectItem>
+                            <SelectItem value="annotated">Annotated with Callouts</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </ScrollArea>
+            )}
           </TabsContent>
 
-          {/* Custom Instructions */}
-          <TabsContent value="instructions" className="mt-4">
-            <TemplateInstructionsManager 
-              templateId={editingTemplate?.id}
-              onInstructionsChange={(instructions) => {
-                console.log("Instructions updated:", instructions);
-              }}
-            />
+          {/* Branding Tab */}
+          <TabsContent value="branding" className="mt-4">
+            <ScrollArea className="h-[400px]">
+              <TemplateStylingEditor
+                template={workingTemplate}
+                onTemplateUpdate={setWorkingTemplate}
+              />
+            </ScrollArea>
           </TabsContent>
 
-          {/* Styling Tab */}
-          <TabsContent value="styling" className="mt-4">
-            <TemplateStylingEditor
-              template={workingTemplate}
-              onTemplateUpdate={setWorkingTemplate}
-            />
+          {/* AI Context Tab */}
+          <TabsContent value="ai-context" className="mt-4">
+            <ScrollArea className="h-[400px]">
+              <div className="space-y-6">
+                <div className="space-y-3">
+                  <h4 className="font-medium text-sm flex items-center gap-2">
+                    <FileText className="h-4 w-4" />
+                    Reference Documents
+                  </h4>
+                  <p className="text-xs text-muted-foreground">
+                    Upload documents for AI to learn formatting and style patterns
+                  </p>
+                  <TemplateReferenceUploader templateId={editingTemplate?.id} />
+                </div>
+
+                <Separator />
+
+                <div className="space-y-3">
+                  <h4 className="font-medium text-sm flex items-center gap-2">
+                    <Sparkles className="h-4 w-4" />
+                    Custom Instructions
+                  </h4>
+                  <p className="text-xs text-muted-foreground">
+                    Add specific instructions for AI content generation
+                  </p>
+                  <TemplateInstructionsManager 
+                    templateId={editingTemplate?.id}
+                    onInstructionsChange={(instructions) => {
+                      console.log("Instructions updated:", instructions);
+                    }}
+                  />
+                </div>
+              </div>
+            </ScrollArea>
           </TabsContent>
         </Tabs>
       </CardContent>
