@@ -160,6 +160,9 @@ export default function EmployeeCompensationPage() {
   const [positionCompensationItems, setPositionCompensationItems] = useState<PositionCompensationItem[]>([]);
   const [paySpine, setPaySpine] = useState<PaySpine | null>(null);
   const [spinalPoints, setSpinalPoints] = useState<SpinalPoint[]>([]);
+  
+  // Pay elements linked to selected position in form
+  const [formPositionPayElementIds, setFormPositionPayElementIds] = useState<string[]>([]);
   const [frequencies, setFrequencies] = useState<LookupValue[]>([]);
 
   // Form state
@@ -430,8 +433,42 @@ export default function EmployeeCompensationPage() {
     } else if (!formEmployeeId) {
       setEmployeePositions([]);
       setFormPositionId("");
+      setFormPositionPayElementIds([]);
     }
   }, [formEmployeeId, dialogOpen]);
+
+  // Load position pay elements when position changes in form
+  useEffect(() => {
+    const loadPositionPayElements = async () => {
+      if (!formPositionId) {
+        setFormPositionPayElementIds([]);
+        setFormPayElementId("");
+        return;
+      }
+      
+      const { data } = await supabase
+        .from("position_compensation")
+        .select("pay_element_id")
+        .eq("position_id", formPositionId)
+        .eq("is_active", true);
+      
+      if (data && data.length > 0) {
+        const payElementIds = data.map(pc => pc.pay_element_id);
+        setFormPositionPayElementIds(payElementIds);
+        // Reset pay element if current selection is not in the position's pay elements
+        if (formPayElementId && !payElementIds.includes(formPayElementId)) {
+          setFormPayElementId("");
+        }
+      } else {
+        setFormPositionPayElementIds([]);
+        setFormPayElementId("");
+      }
+    };
+    
+    if (dialogOpen) {
+      loadPositionPayElements();
+    }
+  }, [formPositionId, dialogOpen]);
 
   const filteredItems = compensationItems.filter((item) => {
     if (!searchTerm) return true;
@@ -457,6 +494,7 @@ export default function EmployeeCompensationPage() {
     setFormEndDate("");
     setFormIsActive(true);
     setEmployeePositions([]);
+    setFormPositionPayElementIds([]);
     setDialogOpen(true);
   };
 
@@ -1186,16 +1224,28 @@ export default function EmployeeCompensationPage() {
 
               <div className="space-y-2">
                 <Label>{t("compensation.employeeCompensation.payElement")} *</Label>
-                <Select value={formPayElementId} onValueChange={setFormPayElementId}>
+                <Select 
+                  value={formPayElementId} 
+                  onValueChange={setFormPayElementId}
+                  disabled={!formPositionId || formPositionPayElementIds.length === 0}
+                >
                   <SelectTrigger>
-                    <SelectValue placeholder={t("compensation.employeeCompensation.dialog.selectPayElement")} />
+                    <SelectValue placeholder={
+                      !formPositionId 
+                        ? t("compensation.employeeCompensation.dialog.selectPositionFirst", "Select a position first")
+                        : formPositionPayElementIds.length === 0 
+                          ? t("compensation.employeeCompensation.dialog.noPayElementsForPosition", "No pay elements linked to position") 
+                          : t("compensation.employeeCompensation.dialog.selectPayElement")
+                    } />
                   </SelectTrigger>
                   <SelectContent>
-                    {payElements.map((pe) => (
-                      <SelectItem key={pe.id} value={pe.id}>
-                        {pe.name} ({pe.code})
-                      </SelectItem>
-                    ))}
+                    {payElements
+                      .filter(pe => formPositionPayElementIds.includes(pe.id))
+                      .map((pe) => (
+                        <SelectItem key={pe.id} value={pe.id}>
+                          {pe.name} ({pe.code})
+                        </SelectItem>
+                      ))}
                   </SelectContent>
                 </Select>
               </div>
