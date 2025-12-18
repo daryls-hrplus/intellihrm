@@ -213,7 +213,7 @@ export function AddContentItemDialog({ releaseId, onSuccess }: AddContentItemDia
         <DialogHeader>
           <DialogTitle>Add New Content Item</DialogTitle>
           <DialogDescription>
-            Create enablement content following Workday-style structured approach
+            Create enablement content following industry-standard structured approach
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-5">
