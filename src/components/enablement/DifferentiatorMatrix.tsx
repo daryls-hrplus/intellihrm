@@ -188,31 +188,32 @@ export function DifferentiatorMatrix({ onFeatureSelect }: DifferentiatorMatrixPr
           </div>
         </CardHeader>
         <CardContent className="p-0">
-          <ScrollArea className="w-full whitespace-nowrap">
+          <ScrollArea className="w-full">
             <div className="min-w-max">
               {/* Header Row */}
               <div className="flex border-b bg-muted/50">
-                <div className="w-[250px] p-3 font-semibold text-sm border-r shrink-0 sticky left-0 bg-muted/50 z-10">
+                <div className="w-[200px] p-3 font-semibold text-sm border-r shrink-0 sticky left-0 bg-muted/50 z-10">
                   Feature
                 </div>
-                <div className="w-[120px] p-3 font-semibold text-sm border-r shrink-0">
+                <div className="w-[140px] p-3 font-semibold text-sm border-r shrink-0">
                   Module
                 </div>
-                <div className="w-[100px] p-3 font-semibold text-sm border-r shrink-0">
+                <div className="w-[90px] p-3 font-semibold text-sm border-r shrink-0">
                   Level
                 </div>
                 <TooltipProvider>
                   {CAPABILITY_TAGS.map((tag) => (
                     <Tooltip key={tag}>
                       <TooltipTrigger asChild>
-                        <div className="w-[80px] p-2 text-center border-r shrink-0">
-                          <div className="text-[10px] font-medium leading-tight">
-                            {CAPABILITY_TAG_LABELS[tag]?.label.split(' ').slice(0, 2).join(' ')}
+                        <div className="w-[100px] p-2 text-center border-r shrink-0">
+                          <div className="text-[10px] font-medium leading-tight whitespace-normal break-words h-[32px] flex items-center justify-center">
+                            {CAPABILITY_TAG_LABELS[tag]?.label}
                           </div>
                         </div>
                       </TooltipTrigger>
-                      <TooltipContent>
-                        {CAPABILITY_TAG_LABELS[tag]?.label}
+                      <TooltipContent className="max-w-[200px]">
+                        <p className="font-medium">{CAPABILITY_TAG_LABELS[tag]?.label}</p>
+                        <p className="text-xs text-muted-foreground mt-1">{CAPABILITY_TAG_LABELS[tag]?.description}</p>
                       </TooltipContent>
                     </Tooltip>
                   ))}
@@ -227,20 +228,20 @@ export function DifferentiatorMatrix({ onFeatureSelect }: DifferentiatorMatrixPr
                     className="flex border-b hover:bg-muted/30 cursor-pointer"
                     onClick={() => onFeatureSelect?.(item.featureCode)}
                   >
-                    <div className="w-[250px] p-3 border-r shrink-0 sticky left-0 bg-background z-10">
+                    <div className="w-[200px] p-3 border-r shrink-0 sticky left-0 bg-background z-10">
                       <div className="font-medium text-sm truncate">{item.featureName}</div>
                       <div className="text-xs text-muted-foreground truncate">{item.groupName}</div>
                     </div>
-                    <div className="w-[120px] p-3 border-r shrink-0">
-                      <Badge variant="outline" className="text-[10px]">{item.moduleName}</Badge>
+                    <div className="w-[140px] p-3 border-r shrink-0">
+                      <Badge variant="outline" className="text-[10px] whitespace-normal">{item.moduleName}</Badge>
                     </div>
-                    <div className="w-[100px] p-3 border-r shrink-0">
+                    <div className="w-[90px] p-3 border-r shrink-0">
                       <DifferentiatorDot level={item.differentiatorLevel} />
                     </div>
                     {CAPABILITY_TAGS.map((tag) => (
                       <div 
                         key={tag} 
-                        className="w-[80px] p-2 border-r shrink-0 flex items-center justify-center"
+                        className="w-[100px] p-2 border-r shrink-0 flex items-center justify-center"
                       >
                         {item.capabilities.includes(tag) ? (
                           <div className={`w-5 h-5 rounded-full ${CAPABILITY_TAG_LABELS[tag]?.color || 'bg-primary'} flex items-center justify-center`}>
