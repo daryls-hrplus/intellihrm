@@ -49,22 +49,78 @@ const SUB_MODULE_HIGHLIGHTS: Record<string, { groups: string[]; label: string }>
   training: { groups: ['course_development'], label: 'LMS Management' },
 };
 
-// Talent Suite - modules that form the integrated talent management package
-const TALENT_SUITE = {
-  modules: ['performance', 'training', 'succession', 'recruitment'],
-  name: 'Talent Suite',
-  description: 'Integrated talent management across the employee lifecycle',
-  benefits: [
-    'Unified talent data across recruitment, performance, learning, and succession',
-    'AI-powered skill gap analysis linking training to performance goals',
-    'Automated succession pipeline based on performance and development progress',
-    'Predictive analytics for talent retention and flight risk',
-    'Seamless candidate-to-employee-to-leader journey tracking',
-    'Competency-based matching for internal mobility and promotions',
-  ],
+// Industry-standard module groupings (aligned with Workday, SAP, Oracle HCM marketing)
+const MODULE_GROUPS = {
+  core_hr: {
+    name: 'Core HR',
+    description: 'Foundation for all HR operations - employee records, organizational structure, and workforce administration',
+    modules: ['workforce'],
+    icon: '🏛️',
+    color: '#2563eb',
+    marketingMessage: 'Single source of truth for your entire workforce',
+  },
+  talent_management: {
+    name: 'Talent Management Suite',
+    description: 'End-to-end talent lifecycle from hire to retire with AI-powered insights',
+    modules: ['performance', 'training', 'succession', 'recruitment'],
+    icon: '🎯',
+    color: '#7c3aed',
+    marketingMessage: 'Attract, develop, and retain top talent with integrated talent management',
+    benefits: [
+      'Unified talent data across recruitment, performance, learning, and succession',
+      'AI-powered skill gap analysis linking training to performance goals',
+      'Automated succession pipeline based on performance and development',
+      'Predictive analytics for talent retention and flight risk',
+      'Seamless candidate-to-employee-to-leader journey tracking',
+      'Competency-based matching for internal mobility and promotions',
+    ],
+  },
+  workforce_operations: {
+    name: 'Workforce Operations',
+    description: 'Time tracking, scheduling, and absence management for operational excellence',
+    modules: ['time_attendance', 'leave'],
+    icon: '⏱️',
+    color: '#059669',
+    marketingMessage: 'Optimize workforce productivity and compliance',
+  },
+  compensation_benefits: {
+    name: 'Compensation & Benefits',
+    description: 'Complete compensation management from payroll to total rewards',
+    modules: ['payroll', 'compensation', 'benefits'],
+    icon: '💰',
+    color: '#d97706',
+    marketingMessage: 'Drive engagement through competitive and equitable compensation',
+  },
+  employee_experience: {
+    name: 'Employee Experience',
+    description: 'Self-service portals and HR command center for seamless employee engagement',
+    modules: ['ess', 'mss', 'hr_hub', 'help_center'],
+    icon: '👥',
+    color: '#0891b2',
+    marketingMessage: 'Empower employees and managers with intuitive self-service',
+  },
+  compliance_risk: {
+    name: 'Compliance & Risk',
+    description: 'Health, safety, and employee relations management for regulatory compliance',
+    modules: ['hse', 'employee_relations'],
+    icon: '🛡️',
+    color: '#dc2626',
+    marketingMessage: 'Mitigate risk and ensure regulatory compliance',
+  },
+  asset_management: {
+    name: 'Asset Management',
+    description: 'Track and manage company assets assigned to employees',
+    modules: ['company_property'],
+    icon: '📦',
+    color: '#6b7280',
+    marketingMessage: 'Full visibility into company asset allocation',
+  },
 };
 
-// Module integrations - how modules connect to each other
+// Talent Suite - modules that form the integrated talent management package (legacy support)
+const TALENT_SUITE = MODULE_GROUPS.talent_management;
+
+// Module integrations - how modules connect to each other on ONE platform
 const MODULE_INTEGRATIONS: Record<string, string[]> = {
   workforce: ['payroll', 'leave', 'time_attendance', 'performance', 'training', 'succession', 'benefits'],
   leave: ['workforce', 'payroll', 'time_attendance'],
@@ -82,6 +138,26 @@ const MODULE_INTEGRATIONS: Record<string, string[]> = {
   hr_hub: ['workforce', 'leave', 'payroll', 'performance', 'training'],
   ess: ['workforce', 'leave', 'payroll', 'benefits', 'training', 'performance'],
   mss: ['workforce', 'leave', 'performance', 'training'],
+};
+
+// One Platform messaging for integration highlights
+const ONE_PLATFORM_BENEFITS = [
+  { icon: '🔗', title: 'Unified Data Model', description: 'Single employee record flows across all modules - no duplicate entry, no data silos' },
+  { icon: '🔄', title: 'Automated Workflows', description: 'Actions in one module trigger smart updates across related modules' },
+  { icon: '📊', title: 'Cross-Module Analytics', description: 'Holistic insights combining data from workforce, talent, and operations' },
+  { icon: '🎯', title: 'Consistent Experience', description: 'Same intuitive interface across all HR functions for faster adoption' },
+  { icon: '🔒', title: 'Unified Security', description: 'Role-based access control consistently applied across the entire platform' },
+  { icon: '⚡', title: 'Real-Time Sync', description: 'Changes propagate instantly across modules for up-to-date information' },
+];
+
+// Helper function to get module group for a given module code
+const getModuleGroup = (moduleCode: string): { groupKey: string; group: typeof MODULE_GROUPS[keyof typeof MODULE_GROUPS] } | null => {
+  for (const [key, group] of Object.entries(MODULE_GROUPS)) {
+    if (group.modules.includes(moduleCode)) {
+      return { groupKey: key, group };
+    }
+  }
+  return null;
 };
 
 interface FeatureCatalogGuidePreviewProps {
@@ -454,22 +530,54 @@ export function FeatureCatalogGuidePreview({ open, onOpenChange }: FeatureCatalo
   };
 
   const renderExecutiveSummaryHTML = () => {
-    const allModulesHTML = FEATURE_REGISTRY.map(m => 
-      `<span style="display: inline-block; background: #f1f5f9; padding: 4px 10px; border-radius: 4px; margin: 3px; font-size: 12px; color: #475569;">${m.name}</span>`
-    ).join('');
-    
-    const talentSuiteModules = FEATURE_REGISTRY.filter(m => TALENT_SUITE.modules.includes(m.code));
-    const talentSuiteHTML = talentSuiteModules.map(m => 
-      `<span style="display: inline-block; background: ${primaryColor}15; padding: 4px 10px; border-radius: 4px; margin: 3px; font-size: 12px; color: ${primaryColor}; font-weight: 500;">${m.name}</span>`
-    ).join('');
-    
-    const integrationPairsHTML = Object.entries(MODULE_INTEGRATIONS).slice(0, 6).map(([source, targets]) => {
+    // Generate module groups HTML
+    const moduleGroupsHTML = Object.entries(MODULE_GROUPS).map(([key, group]) => {
+      const groupModules = FEATURE_REGISTRY.filter(m => group.modules.includes(m.code));
+      const isTalent = key === 'talent_management';
+      
+      return `
+        <div style="margin-bottom: 16px; padding: 16px; background: ${isTalent ? `linear-gradient(135deg, ${group.color}08 0%, ${primaryColor}08 100%)` : '#f8fafc'}; border-radius: 8px; border-left: 4px solid ${group.color}; ${isTalent ? `border: 2px solid ${group.color}30;` : ''}">
+          <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+            <span style="font-size: 18px;">${group.icon}</span>
+            <h4 style="font-size: 15px; font-weight: 600; color: ${group.color}; margin: 0;">${group.name}</h4>
+            ${isTalent ? `<span style="background: linear-gradient(135deg, ${primaryColor}, ${secondaryColor}); color: white; font-size: 10px; padding: 2px 8px; border-radius: 12px;">Featured</span>` : ''}
+          </div>
+          <p style="font-size: 12px; color: #64748b; margin: 0 0 10px 0;">${group.description}</p>
+          <div style="display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 8px;">
+            ${groupModules.map(m => `<span style="display: inline-block; background: ${group.color}15; padding: 3px 8px; border-radius: 4px; font-size: 11px; color: ${group.color}; font-weight: 500;">${m.name}</span>`).join('')}
+          </div>
+          <p style="font-size: 11px; color: ${group.color}; margin: 0; font-style: italic;">→ ${group.marketingMessage}</p>
+        </div>
+      `;
+    }).join('');
+
+    // Talent Suite benefits
+    const talentBenefitsHTML = TALENT_SUITE.benefits?.slice(0, 6).map(b => 
+      `<li style="font-size: 12px; color: #475569; margin-bottom: 4px; padding-left: 4px;">✓ ${b}</li>`
+    ).join('') || '';
+
+    // One Platform benefits
+    const onePlatformHTML = ONE_PLATFORM_BENEFITS.map(b => `
+      <div style="background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; text-align: center;">
+        <div style="font-size: 20px; margin-bottom: 6px;">${b.icon}</div>
+        <div style="font-size: 12px; font-weight: 600; color: #1e293b; margin-bottom: 4px;">${b.title}</div>
+        <p style="font-size: 10px; color: #64748b; margin: 0; line-height: 1.4;">${b.description}</p>
+      </div>
+    `).join('');
+
+    // Integration matrix
+    const integrationHTML = Object.entries(MODULE_INTEGRATIONS).slice(0, 8).map(([source, targets]) => {
       const sourceModule = FEATURE_REGISTRY.find(m => m.code === source);
-      return targets.slice(0, 2).map(target => {
-        const targetModule = FEATURE_REGISTRY.find(m => m.code === target);
-        return sourceModule && targetModule ? 
-          `<div style="font-size: 11px; color: #64748b; padding: 4px 0;"><span style="color: ${primaryColor};">${sourceModule.name}</span> ↔ ${targetModule.name}</div>` : '';
-      }).join('');
+      if (!sourceModule) return '';
+      return `
+        <div style="background: #f8fafc; border-radius: 6px; padding: 8px; font-size: 11px;">
+          <div style="font-weight: 600; color: ${primaryColor}; margin-bottom: 4px;">${sourceModule.name}</div>
+          <div style="color: #64748b;">↔ ${targets.slice(0, 3).map(t => {
+            const tm = FEATURE_REGISTRY.find(m => m.code === t);
+            return tm ? tm.name : t;
+          }).join(', ')}${targets.length > 3 ? ` +${targets.length - 3} more` : ''}</div>
+        </div>
+      `;
     }).join('');
     
     return `
@@ -489,51 +597,87 @@ export function FeatureCatalogGuidePreview({ open, onOpenChange }: FeatureCatalo
           and automated actions across the entire employee lifecycle.
         </p>
       </div>
-      
-      <!-- All Modules Overview -->
-      <div style="margin-bottom: 24px; padding: 20px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0;">
-        <h3 style="font-size: 16px; font-weight: 600; color: #1e293b; margin-bottom: 12px;">📦 Complete Module Suite (${totalModules} Modules)</h3>
-        <div style="display: flex; flex-wrap: wrap; gap: 4px;">${allModulesHTML}</div>
+
+      <!-- ONE PLATFORM Banner -->
+      <div style="margin-bottom: 24px; padding: 20px; background: linear-gradient(135deg, ${primaryColor} 0%, ${secondaryColor} 100%); border-radius: 12px; color: white; text-align: center;">
+        <h3 style="font-size: 20px; font-weight: 700; margin: 0 0 8px 0;">🚀 ONE PLATFORM - Complete HR Ecosystem</h3>
+        <p style="font-size: 14px; opacity: 0.9; margin: 0;">${totalModules} integrated modules working seamlessly together on a single unified platform</p>
       </div>
       
-      <!-- Talent Suite Highlight -->
-      <div style="margin-bottom: 24px; padding: 20px; background: linear-gradient(135deg, ${primaryColor}08 0%, ${secondaryColor}08 100%); border-radius: 8px; border: 2px solid ${primaryColor}30;">
-        <h3 style="font-size: 16px; font-weight: 600; color: ${primaryColor}; margin-bottom: 8px;">🎯 Talent Suite - Integrated Talent Management</h3>
-        <p style="font-size: 14px; color: #475569; margin-bottom: 12px;">${TALENT_SUITE.description}</p>
-        <div style="display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 16px;">${talentSuiteHTML}</div>
-        <div style="font-size: 13px; font-weight: 500; color: #1e293b; margin-bottom: 8px;">Key Benefits:</div>
-        <ul style="margin: 0; padding-left: 20px;">
-          ${TALENT_SUITE.benefits.slice(0, 4).map(b => `<li style="font-size: 13px; color: #475569; margin-bottom: 4px;">${b}</li>`).join('')}
-        </ul>
+      <!-- Module Groups by Industry Standard -->
+      <div style="margin-bottom: 24px;">
+        <h3 style="font-size: 18px; font-weight: 600; color: #1e293b; margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
+          <span style="background: ${primaryColor}; color: white; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px;">📦</span>
+          Module Categories
+        </h3>
+        ${moduleGroupsHTML}
       </div>
-      
+
+      <!-- Talent Suite Deep Dive -->
+      <div style="margin-bottom: 24px; padding: 20px; background: linear-gradient(135deg, #7c3aed08 0%, #4f46e508 100%); border-radius: 12px; border: 2px solid #7c3aed30;">
+        <h3 style="font-size: 18px; font-weight: 600; color: #7c3aed; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+          🎯 Talent Management Suite - Competitive Advantage
+        </h3>
+        <p style="font-size: 14px; color: #475569; margin-bottom: 16px;">
+          Our integrated Talent Suite combines Performance, Training, Succession, and Recruitment into a seamless experience 
+          that competitors like Workday, SAP, and Oracle HCM offer only as fragmented add-ons.
+        </p>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+          <div>
+            <div style="font-size: 13px; font-weight: 600; color: #1e293b; margin-bottom: 8px;">Key Benefits:</div>
+            <ul style="margin: 0; padding-left: 16px; list-style: none;">${talentBenefitsHTML}</ul>
+          </div>
+          <div style="background: white; border-radius: 8px; padding: 12px; border: 1px solid #e2e8f0;">
+            <div style="font-size: 12px; font-weight: 600; color: #7c3aed; margin-bottom: 8px;">Included Modules:</div>
+            <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+              ${FEATURE_REGISTRY.filter(m => TALENT_SUITE.modules?.includes(m.code)).map(m => 
+                `<span style="background: #7c3aed15; color: #7c3aed; padding: 4px 10px; border-radius: 4px; font-size: 11px; font-weight: 500;">${m.name}</span>`
+              ).join('')}
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- HR Hub & Help Center -->
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px;">
         <div style="background: #ecfdf5; border-radius: 8px; padding: 16px; border-left: 4px solid #10b981;">
           <div style="font-weight: 600; color: #065f46; margin-bottom: 8px;">🏠 HR Hub</div>
-          <p style="font-size: 13px; color: #047857;">Central command center for HR operations with pending actions, reminders, helpdesk, and compliance calendar.</p>
+          <p style="font-size: 13px; color: #047857; margin: 0;">Central command center for HR operations with pending actions, reminders, helpdesk, and compliance calendar.</p>
         </div>
         <div style="background: #eff6ff; border-radius: 8px; padding: 16px; border-left: 4px solid #3b82f6;">
           <div style="font-weight: 600; color: #1e40af; margin-bottom: 8px;">📚 Help Center</div>
-          <p style="font-size: 13px; color: #1d4ed8;">In-app documentation, guides, and AI-powered assistance for all user roles.</p>
+          <p style="font-size: 13px; color: #1d4ed8; margin: 0;">In-app documentation, guides, and AI-powered assistance for all user roles.</p>
+        </div>
+      </div>
+
+      <!-- One Platform Benefits -->
+      <div style="margin-bottom: 24px;">
+        <h3 style="font-size: 18px; font-weight: 600; color: #1e293b; margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
+          <span style="background: ${accentColor}; color: white; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px;">🔗</span>
+          One Platform Advantages
+        </h3>
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;">
+          ${onePlatformHTML}
         </div>
       </div>
       
-      <!-- Module Integrations -->
+      <!-- Cross-Module Integrations -->
       <div style="margin-bottom: 24px; padding: 20px; background: #fefce8; border-radius: 8px; border-left: 4px solid #eab308;">
-        <h3 style="font-size: 16px; font-weight: 600; color: #854d0e; margin-bottom: 12px;">🔗 Cross-Module Integrations</h3>
-        <p style="font-size: 13px; color: #713f12; margin-bottom: 12px;">Seamless data flow and automated workflows between modules eliminate silos and reduce manual effort.</p>
-        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;">${integrationPairsHTML}</div>
+        <h3 style="font-size: 16px; font-weight: 600; color: #854d0e; margin-bottom: 12px;">🔄 Cross-Module Integration Matrix</h3>
+        <p style="font-size: 13px; color: #713f12; margin-bottom: 16px;">Every module connects seamlessly - data flows automatically, actions trigger workflows, insights aggregate across boundaries.</p>
+        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;">
+          ${integrationHTML}
+        </div>
       </div>
       
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
         <div style="background: #faf5ff; border-radius: 8px; padding: 20px; border-left: 4px solid #a855f7;">
           <div style="font-weight: 600; color: #581c87; margin-bottom: 8px;">🧠 AI-First Architecture</div>
-          <p style="font-size: 14px; color: #7e22ce;">Predictive analytics, intelligent automation, and prescriptive guidance embedded across all modules.</p>
+          <p style="font-size: 14px; color: #7e22ce; margin: 0;">Predictive analytics, intelligent automation, and prescriptive guidance embedded across all modules.</p>
         </div>
         <div style="background: #fffbeb; border-radius: 8px; padding: 20px; border-left: 4px solid #f59e0b;">
           <div style="font-weight: 600; color: #78350f; margin-bottom: 8px;">⭐ Market Differentiators</div>
-          <p style="font-size: 14px; color: #b45309;">Unique capabilities not found in competing solutions like Workday, SAP, or Oracle HCM.</p>
+          <p style="font-size: 14px; color: #b45309; margin: 0;">Unique capabilities not found in competing solutions like Workday, SAP, or Oracle HCM.</p>
         </div>
       </div>
     </div>
@@ -820,43 +964,88 @@ export function FeatureCatalogGuidePreview({ open, onOpenChange }: FeatureCatalo
             </p>
           </div>
 
-          {/* All Modules Overview */}
-          <div className="mb-6 p-5 bg-slate-50 rounded-lg border">
-            <h3 className="text-base font-semibold text-slate-900 mb-3 flex items-center gap-2">
-              <Layers className="h-5 w-5" style={{ color: primaryColor }} />
-              Complete Module Suite ({totalModules} Modules)
+          {/* ONE PLATFORM Banner */}
+          <div 
+            className="mb-6 p-5 rounded-xl text-white text-center"
+            style={{ background: `linear-gradient(135deg, ${primaryColor} 0%, ${secondaryColor} 100%)` }}
+          >
+            <h3 className="text-xl font-bold mb-2">🚀 ONE PLATFORM - Complete HR Ecosystem</h3>
+            <p className="text-sm opacity-90">{totalModules} integrated modules working seamlessly together on a single unified platform</p>
+          </div>
+
+          {/* Module Groups by Industry Standard */}
+          <div className="mb-6">
+            <h3 className="text-lg font-semibold text-slate-900 mb-4 flex items-center gap-2">
+              <div className="w-7 h-7 rounded-full flex items-center justify-center text-white text-sm" style={{ backgroundColor: primaryColor }}>📦</div>
+              Module Categories
             </h3>
-            <div className="flex flex-wrap gap-2">
-              {FEATURE_REGISTRY.map(m => (
-                <Badge key={m.code} variant="secondary" className="text-xs">{m.name}</Badge>
-              ))}
+            <div className="space-y-3">
+              {Object.entries(MODULE_GROUPS).map(([key, group]) => {
+                const groupModules = FEATURE_REGISTRY.filter(m => group.modules.includes(m.code));
+                const isTalent = key === 'talent_management';
+                return (
+                  <div 
+                    key={key}
+                    className="p-4 rounded-lg"
+                    style={{ 
+                      background: isTalent ? `linear-gradient(135deg, ${group.color}08, ${primaryColor}08)` : '#f8fafc',
+                      borderLeft: `4px solid ${group.color}`,
+                      border: isTalent ? `2px solid ${group.color}30` : undefined
+                    }}
+                  >
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="text-lg">{group.icon}</span>
+                      <h4 className="text-sm font-semibold" style={{ color: group.color }}>{group.name}</h4>
+                      {isTalent && (
+                        <Badge style={{ background: `linear-gradient(135deg, ${primaryColor}, ${secondaryColor})`, color: 'white' }} className="text-[10px]">Featured</Badge>
+                      )}
+                    </div>
+                    <p className="text-xs text-slate-500 mb-2">{group.description}</p>
+                    <div className="flex flex-wrap gap-1 mb-2">
+                      {groupModules.map(m => (
+                        <Badge key={m.code} className="text-[10px]" style={{ backgroundColor: `${group.color}15`, color: group.color }}>{m.name}</Badge>
+                      ))}
+                    </div>
+                    <p className="text-[11px] italic" style={{ color: group.color }}>→ {group.marketingMessage}</p>
+                  </div>
+                );
+              })}
             </div>
           </div>
 
-          {/* Talent Suite Highlight */}
+          {/* Talent Suite Deep Dive */}
           <div 
-            className="mb-6 p-5 rounded-lg"
-            style={{ background: `linear-gradient(135deg, ${primaryColor}08, ${secondaryColor}08)`, border: `2px solid ${primaryColor}30` }}
+            className="mb-6 p-5 rounded-xl"
+            style={{ background: `linear-gradient(135deg, #7c3aed08, #4f46e508)`, border: `2px solid #7c3aed30` }}
           >
-            <h3 className="text-base font-semibold mb-2 flex items-center gap-2" style={{ color: primaryColor }}>
-              <Star className="h-5 w-5" />
-              🎯 Talent Suite - Integrated Talent Management
+            <h3 className="text-lg font-semibold mb-3 flex items-center gap-2" style={{ color: '#7c3aed' }}>
+              🎯 Talent Management Suite - Competitive Advantage
             </h3>
-            <p className="text-sm text-slate-600 mb-3">{TALENT_SUITE.description}</p>
-            <div className="flex flex-wrap gap-2 mb-4">
-              {FEATURE_REGISTRY.filter(m => TALENT_SUITE.modules.includes(m.code)).map(m => (
-                <Badge key={m.code} style={{ backgroundColor: `${primaryColor}15`, color: primaryColor }}>{m.name}</Badge>
-              ))}
+            <p className="text-sm text-slate-600 mb-4">
+              Our integrated Talent Suite combines Performance, Training, Succession, and Recruitment into a seamless experience 
+              that competitors like Workday, SAP, and Oracle HCM offer only as fragmented add-ons.
+            </p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <div className="text-sm font-semibold text-slate-900 mb-2">Key Benefits:</div>
+                <ul className="space-y-1">
+                  {TALENT_SUITE.benefits?.slice(0, 6).map((benefit, idx) => (
+                    <li key={idx} className="flex items-start gap-2 text-xs">
+                      <Check className="h-3 w-3 mt-0.5 shrink-0 text-emerald-500" />
+                      <span className="text-slate-600">{benefit}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div className="bg-white rounded-lg p-3 border">
+                <div className="text-xs font-semibold mb-2" style={{ color: '#7c3aed' }}>Included Modules:</div>
+                <div className="flex flex-wrap gap-1">
+                  {FEATURE_REGISTRY.filter(m => TALENT_SUITE.modules?.includes(m.code)).map(m => (
+                    <Badge key={m.code} className="text-[10px]" style={{ backgroundColor: '#7c3aed15', color: '#7c3aed' }}>{m.name}</Badge>
+                  ))}
+                </div>
+              </div>
             </div>
-            <div className="text-sm font-medium text-slate-900 mb-2">Key Benefits:</div>
-            <ul className="grid grid-cols-1 md:grid-cols-2 gap-2">
-              {TALENT_SUITE.benefits.slice(0, 4).map((benefit, idx) => (
-                <li key={idx} className="flex items-start gap-2 text-sm">
-                  <Check className="h-4 w-4 mt-0.5 shrink-0" style={{ color: accentColor }} />
-                  <span className="text-slate-600">{benefit}</span>
-                </li>
-              ))}
-            </ul>
           </div>
 
           {/* HR Hub & Help Center */}
@@ -877,24 +1066,45 @@ export function FeatureCatalogGuidePreview({ open, onOpenChange }: FeatureCatalo
             </div>
           </div>
 
-          {/* Module Integrations */}
+          {/* One Platform Benefits */}
+          <div className="mb-6">
+            <h3 className="text-lg font-semibold text-slate-900 mb-4 flex items-center gap-2">
+              <div className="w-7 h-7 rounded-full flex items-center justify-center text-white text-sm" style={{ backgroundColor: accentColor }}>🔗</div>
+              One Platform Advantages
+            </h3>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+              {ONE_PLATFORM_BENEFITS.map((benefit, idx) => (
+                <div key={idx} className="bg-white border rounded-lg p-3 text-center">
+                  <div className="text-xl mb-1">{benefit.icon}</div>
+                  <div className="text-xs font-semibold text-slate-900 mb-1">{benefit.title}</div>
+                  <p className="text-[10px] text-slate-500 leading-tight">{benefit.description}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Cross-Module Integration Matrix */}
           <div className="mb-6 p-5 bg-yellow-50 rounded-lg border-l-4 border-yellow-500">
             <h3 className="text-base font-semibold text-yellow-900 mb-3 flex items-center gap-2">
               <BarChart3 className="h-5 w-5" />
-              🔗 Cross-Module Integrations
+              🔄 Cross-Module Integration Matrix
             </h3>
-            <p className="text-sm text-yellow-800 mb-3">Seamless data flow and automated workflows between modules eliminate silos and reduce manual effort.</p>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-2 text-xs">
-              {Object.entries(MODULE_INTEGRATIONS).slice(0, 6).map(([source, targets]) => {
+            <p className="text-sm text-yellow-800 mb-4">Every module connects seamlessly - data flows automatically, actions trigger workflows, insights aggregate across boundaries.</p>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+              {Object.entries(MODULE_INTEGRATIONS).slice(0, 8).map(([source, targets]) => {
                 const sourceModule = FEATURE_REGISTRY.find(m => m.code === source);
-                return targets.slice(0, 2).map(target => {
-                  const targetModule = FEATURE_REGISTRY.find(m => m.code === target);
-                  return sourceModule && targetModule ? (
-                    <div key={`${source}-${target}`} className="text-slate-600">
-                      <span style={{ color: primaryColor }}>{sourceModule.name}</span> ↔ {targetModule.name}
+                if (!sourceModule) return null;
+                return (
+                  <div key={source} className="bg-white/80 rounded-md p-2 text-xs">
+                    <div className="font-semibold mb-1" style={{ color: primaryColor }}>{sourceModule.name}</div>
+                    <div className="text-slate-500">
+                      ↔ {targets.slice(0, 3).map(t => {
+                        const tm = FEATURE_REGISTRY.find(m => m.code === t);
+                        return tm ? tm.name : t;
+                      }).join(', ')}{targets.length > 3 && ` +${targets.length - 3}`}
                     </div>
-                  ) : null;
-                });
+                  </div>
+                );
               })}
             </div>
           </div>
