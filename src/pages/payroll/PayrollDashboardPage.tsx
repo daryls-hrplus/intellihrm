@@ -105,6 +105,7 @@ export default function PayrollDashboardPage() {
     regularDeductions: { title: "Regular Deductions", description: "Manage recurring employee deductions", icon: Clock, href: "/payroll/regular-deductions", color: "bg-destructive/10 text-destructive", tabCode: "regular_deductions" },
     payElements: { title: t("compensation.modules.payElements.title", "Pay Elements"), description: t("compensation.modules.payElements.description", "Define and manage pay element types"), icon: DollarSign, href: "/payroll/pay-elements", color: "bg-success/10 text-success", tabCode: "pay_elements" },
     benefitMapping: { title: t("payroll.modules.benefitMapping.title", "Benefit Payroll Mappings"), description: t("payroll.modules.benefitMapping.description", "Map benefit plans to pay element codes"), icon: LinkIcon, href: "/payroll/benefit-mappings", color: "bg-cyan-500/10 text-cyan-600", tabCode: "benefit_mappings" },
+    statutoryMapping: { title: t("payroll.modules.statutoryMapping.title", "Statutory Pay Mappings"), description: t("payroll.modules.statutoryMapping.description", "Map statutory deductions to pay elements"), icon: LinkIcon, href: "/payroll/statutory-pay-element-mappings", color: "bg-amber-500/10 text-amber-600", tabCode: "statutory_mappings" },
     leavePaymentConfig: { title: t("payroll.modules.leavePaymentConfig.title", "Leave Payment Config"), description: t("payroll.modules.leavePaymentConfig.description", "Configure leave payment rules and payroll mappings"), icon: Settings, href: "/payroll/leave-payment-config", color: "bg-primary/10 text-primary", tabCode: "leave_payment_config" },
     leaveBuyout: { title: t("payroll.modules.leaveBuyout.title", "Leave Buyout"), description: t("payroll.modules.leaveBuyout.description", "Manage leave balance buyout agreements"), icon: DollarSign, href: "/payroll/leave-buyout", color: "bg-success/10 text-success", tabCode: "leave_buyout" },
     templates: { title: t("payroll.modules.templates.title"), description: t("payroll.modules.templates.description"), icon: Palette, href: "/payroll/templates", color: "bg-purple-500/10 text-purple-600", tabCode: "templates" },
@@ -131,7 +132,7 @@ export default function PayrollDashboardPage() {
     },
     {
       titleKey: "Integration",
-      items: filterByAccess([allModules.benefitMapping, allModules.leavePaymentConfig, allModules.leaveBuyout, allModules.glInterface, allModules.bankFileBuilder]),
+      items: filterByAccess([allModules.benefitMapping, allModules.statutoryMapping, allModules.leavePaymentConfig, allModules.leaveBuyout, allModules.glInterface, allModules.bankFileBuilder]),
     },
     {
       titleKey: "Reporting & Analytics",
