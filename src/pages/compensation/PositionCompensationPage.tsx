@@ -260,7 +260,7 @@ export default function PositionCompensationPage() {
   };
 
   const handleSave = async () => {
-    if (!formPayElementId || !formAmount || !formEffectiveDate) return;
+    if (!formPayElementId || formAmount === "" || !formEffectiveDate) return;
 
     setIsProcessing(true);
     const data = {
