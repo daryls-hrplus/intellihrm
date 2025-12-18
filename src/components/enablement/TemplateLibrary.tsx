@@ -35,6 +35,7 @@ import { DocumentTemplate, DEFAULT_TEMPLATES } from "./DocumentTemplateConfig";
 import { TemplateReferenceUploader } from "./TemplateReferenceUploader";
 import { TemplateInstructionsManager } from "./TemplateInstructionsManager";
 import { TemplatePreviewDialog } from "./TemplatePreviewDialog";
+import { TemplateStylingEditor } from "./TemplateStylingEditor";
 
 interface SavedTemplate {
   id: string;
@@ -429,19 +430,12 @@ export function TemplateLibrary({
             />
           </TabsContent>
 
-          {/* Styling Tab - placeholder for now */}
+          {/* Styling Tab */}
           <TabsContent value="styling" className="mt-4">
-            <div className="space-y-4">
-              <p className="text-sm text-muted-foreground">
-                Configure visual styling and branding for your templates
-              </p>
-              <div className="p-8 border-2 border-dashed rounded-lg text-center">
-                <Palette className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
-                <p className="text-muted-foreground">
-                  Select a template first, then use the Layout, Sections, and Styling tabs in the main config
-                </p>
-              </div>
-            </div>
+            <TemplateStylingEditor
+              template={selectedTemplate}
+              onTemplateUpdate={onTemplateSelect}
+            />
           </TabsContent>
         </Tabs>
       </CardContent>
