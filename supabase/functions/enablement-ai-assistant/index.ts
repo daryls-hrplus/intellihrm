@@ -197,8 +197,17 @@ You are generating a comprehensive training guide/module overview for enterprise
 - Include SMART learning objectives (Specific, Measurable, Achievable, Relevant, Time-bound)
 - Structure content using the 4C/ID model for complex learning`;
 
-        userPrompt = `Generate a comprehensive, industry-standard training guide for the "${request.moduleName}" module in HRplus Cerebra enterprise HRIS system.
+        // Build feature-specific context if a feature is selected
+        const featureContext = request.featureName ? `
+SPECIFIC FEATURE FOCUS: ${request.featureName}
+Feature Description: ${request.featureDescription || 'Not provided'}
+${request.workflowSteps?.length ? `Workflow Steps: ${request.workflowSteps.join(' → ')}` : ''}
+${request.uiElements?.length ? `UI Elements: ${request.uiElements.join(', ')}` : ''}
 
+Generate the training guide specifically for this feature, not the entire module.` : '';
+
+        userPrompt = `Generate a comprehensive, industry-standard training guide for ${request.featureName ? `the "${request.featureName}" feature in` : ''} the "${request.moduleName}" module in HRplus Cerebra enterprise HRIS system.
+${featureContext}
 ${request.targetRoles ? `Target audience: ${request.targetRoles.join(', ')}` : ''}
 ${request.customInstructions ? `Additional instructions: ${request.customInstructions}` : ''}
 
