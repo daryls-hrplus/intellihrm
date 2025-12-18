@@ -30,6 +30,7 @@ import {
   Lock,
   Unlock,
   AlertTriangle,
+  Printer,
 } from "lucide-react";
 import { formatDateForDisplay } from "@/utils/dateUtils";
 
@@ -692,18 +693,63 @@ export default function PayrollProcessingPage() {
         {/* Employee Pay Details Dialog */}
         <Dialog open={employeeDetailOpen} onOpenChange={setEmployeeDetailOpen}>
           <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>{t("payroll.processing.employeePayDetails")}</DialogTitle>
-              <DialogDescription>
-                {t("payroll.processing.payBreakdownDescription", "Complete breakdown of earnings and deductions")}
-              </DialogDescription>
+            <DialogHeader className="flex flex-row items-start justify-between">
+              <div>
+                <DialogTitle>{t("payroll.processing.employeePayDetails")}</DialogTitle>
+                <DialogDescription>
+                  {t("payroll.processing.payBreakdownDescription", "Complete breakdown of earnings and deductions")}
+                </DialogDescription>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                className="ml-auto mr-8"
+                onClick={() => {
+                  const printContent = document.getElementById('payslip-print-content');
+                  if (!printContent) return;
+                  const printWindow = window.open('', '_blank');
+                  if (!printWindow) return;
+                  printWindow.document.write(`
+                    <html>
+                      <head>
+                        <title>Payslip - ${selectedEmployee?.employee?.full_name}</title>
+                        <style>
+                          body { font-family: Arial, sans-serif; padding: 20px; max-width: 800px; margin: 0 auto; }
+                          h2 { margin-bottom: 5px; }
+                          .section { margin-bottom: 20px; }
+                          .section-title { font-weight: bold; font-size: 12px; text-transform: uppercase; color: #666; margin-bottom: 8px; border-bottom: 1px solid #eee; padding-bottom: 4px; }
+                          .row { display: flex; justify-content: space-between; padding: 4px 0; }
+                          .row.total { border-top: 1px solid #333; margin-top: 8px; padding-top: 8px; font-weight: bold; }
+                          .label { color: #555; }
+                          .value { font-weight: 500; }
+                          .deduction { color: #c00; }
+                          .net { font-size: 18px; color: #090; }
+                          .header { border-bottom: 2px solid #333; padding-bottom: 10px; margin-bottom: 20px; }
+                          .meta { color: #666; font-size: 14px; }
+                          @media print { body { padding: 0; } }
+                        </style>
+                      </head>
+                      <body>
+                        ${printContent.innerHTML}
+                      </body>
+                    </html>
+                  `);
+                  printWindow.document.close();
+                  printWindow.focus();
+                  printWindow.print();
+                  printWindow.close();
+                }}
+              >
+                <Printer className="h-4 w-4 mr-2" />
+                {t("common.print", "Print")}
+              </Button>
             </DialogHeader>
             {selectedEmployee && (
-              <div className="space-y-6">
+              <div id="payslip-print-content" className="space-y-6">
                 {/* Employee Header */}
-                <div className="border-b pb-3">
-                  <p className="font-semibold text-lg">{selectedEmployee.employee?.full_name}</p>
-                  <p className="text-sm text-muted-foreground">{selectedEmployee.employee?.email}</p>
+                <div className="border-b pb-3 header">
+                  <h2 className="font-semibold text-lg">{selectedEmployee.employee?.full_name}</h2>
+                  <p className="text-sm text-muted-foreground meta">{selectedEmployee.employee?.email}</p>
                 </div>
 
                 {/* Hours Summary */}
