@@ -30,12 +30,15 @@ import {
   Check,
   Brain,
   Grid3X3,
-  Star
+  Star,
+  Printer,
+  Download
 } from "lucide-react";
 import * as LucideIcons from "lucide-react";
 import { cn } from "@/lib/utils";
 import { CapabilityBrowser } from "@/components/enablement/CapabilityBrowser";
 import { DifferentiatorMatrix } from "@/components/enablement/DifferentiatorMatrix";
+import { FeatureCatalogGuidePreview } from "@/components/enablement/FeatureCatalogGuidePreview";
 
 export default function FeatureCatalogPage() {
   const navigate = useNavigate();
@@ -46,6 +49,7 @@ export default function FeatureCatalogPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [expandedModules, setExpandedModules] = useState<string[]>([]);
   const [expandedGroups, setExpandedGroups] = useState<string[]>([]);
+  const [showGuidePreview, setShowGuidePreview] = useState(false);
 
   const getIcon = (iconName: string) => {
     const Icon = (LucideIcons as any)[iconName];
@@ -120,9 +124,10 @@ export default function FeatureCatalogPage() {
   const uniqueCount = getUniqueFeatures().length;
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
+    <>
+      <div className="space-y-6">
+        {/* Header */}
+        <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
           <Button variant="ghost" size="icon" onClick={() => navigate("/enablement")}>
             <ArrowLeft className="h-5 w-5" />
@@ -134,10 +139,16 @@ export default function FeatureCatalogPage() {
             </p>
           </div>
         </div>
-        <Badge variant="outline" className="gap-1">
-          <FolderTree className="h-3 w-3" />
-          Registry
-        </Badge>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" onClick={() => setShowGuidePreview(true)} className="gap-2">
+            <Printer className="h-4 w-4" />
+            Export Guide
+          </Button>
+          <Badge variant="outline" className="gap-1">
+            <FolderTree className="h-3 w-3" />
+            Registry
+          </Badge>
+        </div>
       </div>
 
       {/* Stats */}
@@ -472,5 +483,12 @@ export default function FeatureCatalogPage() {
         </CardContent>
       </Card>
     </div>
+
+      {/* Guide Export Preview Dialog */}
+      <FeatureCatalogGuidePreview
+        open={showGuidePreview}
+        onOpenChange={setShowGuidePreview}
+      />
+    </>
   );
 }

@@ -656,20 +656,20 @@ export const CAPABILITY_CATEGORY_LABELS: Record<CapabilityCategory, { label: str
 };
 
 // Capability tag labels for UI
-export const CAPABILITY_TAG_LABELS: Record<CapabilityTag, { label: string; color: string }> = {
-  'ai-powered': { label: 'AI-Powered', color: 'bg-purple-500' },
-  'predictive-analytics': { label: 'Predictive Analytics', color: 'bg-blue-500' },
-  'prescriptive-guidance': { label: 'Prescriptive Guidance', color: 'bg-indigo-500' },
-  'generative-ai': { label: 'Generative AI', color: 'bg-violet-500' },
-  'dynamic-dashboards': { label: 'Dynamic Dashboards', color: 'bg-cyan-500' },
-  'intelligent-automation': { label: 'Intelligent Automation', color: 'bg-green-500' },
-  'workflow-orchestration': { label: 'Workflow Orchestration', color: 'bg-amber-500' },
-  'real-time-processing': { label: 'Real-Time', color: 'bg-red-500' },
-  'compliance-tracking': { label: 'Compliance Tracking', color: 'bg-emerald-500' },
-  'audit-ready': { label: 'Audit Ready', color: 'bg-slate-500' },
-  'self-service': { label: 'Self-Service', color: 'bg-teal-500' },
-  'mobile-enabled': { label: 'Mobile Enabled', color: 'bg-pink-500' },
-  'multi-company': { label: 'Multi-Company', color: 'bg-orange-500' },
-  'temporal-tracking': { label: 'Historical Tracking', color: 'bg-yellow-500' },
-  'cross-module': { label: 'Cross-Module', color: 'bg-rose-500' }
+export const CAPABILITY_TAG_LABELS: Record<CapabilityTag, { label: string; color: string; description: string }> = {
+  'ai-powered': { label: 'AI-Powered', color: 'bg-purple-500', description: 'Uses artificial intelligence for predictions, recommendations, or automation' },
+  'predictive-analytics': { label: 'Predictive Analytics', color: 'bg-blue-500', description: 'Forecasts future outcomes based on historical data patterns' },
+  'prescriptive-guidance': { label: 'Prescriptive Guidance', color: 'bg-indigo-500', description: 'Recommends specific actions based on analysis' },
+  'generative-ai': { label: 'Generative AI', color: 'bg-violet-500', description: 'Creates content such as reports, documentation, or recommendations' },
+  'dynamic-dashboards': { label: 'Dynamic Dashboards', color: 'bg-cyan-500', description: 'Self-service business intelligence and visualization' },
+  'intelligent-automation': { label: 'Intelligent Automation', color: 'bg-green-500', description: 'Auto-processes tasks based on rules or AI decisions' },
+  'workflow-orchestration': { label: 'Workflow Orchestration', color: 'bg-amber-500', description: 'Multi-step approval routing and process coordination' },
+  'real-time-processing': { label: 'Real-Time', color: 'bg-red-500', description: 'Immediate data updates and live processing' },
+  'compliance-tracking': { label: 'Compliance Tracking', color: 'bg-emerald-500', description: 'Monitors regulatory requirements and policy adherence' },
+  'audit-ready': { label: 'Audit Ready', color: 'bg-slate-500', description: 'Full audit trail with export capabilities' },
+  'self-service': { label: 'Self-Service', color: 'bg-teal-500', description: 'Employee and manager portal functionality' },
+  'mobile-enabled': { label: 'Mobile Enabled', color: 'bg-pink-500', description: 'Responsive design for mobile devices' },
+  'multi-company': { label: 'Multi-Company', color: 'bg-orange-500', description: 'Cross-entity operations and multi-tenant support' },
+  'temporal-tracking': { label: 'Historical Tracking', color: 'bg-yellow-500', description: 'Point-in-time views and historical data analysis' },
+  'cross-module': { label: 'Cross-Module', color: 'bg-rose-500', description: 'Integrates data and workflows across HR domains' }
 };
