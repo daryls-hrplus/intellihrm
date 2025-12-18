@@ -118,8 +118,12 @@ export function TemplateStylingEditor({
     }
   };
 
-  const handleColorChange = (color: string) => {
+  const handlePrimaryColorChange = (color: string) => {
     updateBranding({ primaryColor: color });
+  };
+
+  const handleSecondaryColorChange = (color: string) => {
+    updateBranding({ secondaryColor: color });
   };
 
   return (
@@ -253,48 +257,91 @@ export function TemplateStylingEditor({
       <div className="space-y-4">
         <Label className="flex items-center gap-2">
           <Palette className="h-4 w-4" />
-          Brand Color
+          Brand Colors
         </Label>
         
-        {/* Color Presets */}
-        <div className="grid grid-cols-4 gap-2">
-          {COLOR_PRESETS.map((preset) => (
-            <button
-              key={preset.value}
-              className={`flex flex-col items-center gap-1 p-2 rounded-lg border transition-all ${
-                template.branding.primaryColor === preset.value 
-                  ? 'border-primary bg-primary/5' 
-                  : 'border-muted hover:border-muted-foreground/50'
-              }`}
-              onClick={() => handleColorChange(preset.value)}
-            >
-              <div 
-                className="w-8 h-8 rounded-full border"
-                style={{ backgroundColor: preset.value }}
+        {/* Primary Color */}
+        <div className="space-y-3">
+          <Label className="text-sm font-medium">Primary Color</Label>
+          <div className="grid grid-cols-4 gap-2">
+            {COLOR_PRESETS.map((preset) => (
+              <button
+                key={preset.value}
+                className={`flex flex-col items-center gap-1 p-2 rounded-lg border transition-all ${
+                  template.branding.primaryColor === preset.value 
+                    ? 'border-primary bg-primary/5' 
+                    : 'border-muted hover:border-muted-foreground/50'
+                }`}
+                onClick={() => handlePrimaryColorChange(preset.value)}
+              >
+                <div 
+                  className="w-8 h-8 rounded-full border"
+                  style={{ backgroundColor: preset.value }}
+                />
+                <span className="text-xs text-center">{preset.name}</span>
+              </button>
+            ))}
+          </div>
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2">
+              <Label htmlFor="custom-primary-color" className="text-sm">Custom:</Label>
+              <input
+                type="color"
+                id="custom-primary-color"
+                value={template.branding.primaryColor}
+                onChange={(e) => handlePrimaryColorChange(e.target.value)}
+                className="w-10 h-10 rounded border cursor-pointer"
               />
-              <span className="text-xs text-center">{preset.name}</span>
-            </button>
-          ))}
-        </div>
-
-        {/* Custom Color Picker */}
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2">
-            <Label htmlFor="custom-color" className="text-sm">Custom:</Label>
-            <input
-              type="color"
-              id="custom-color"
+            </div>
+            <Input
               value={template.branding.primaryColor}
-              onChange={(e) => handleColorChange(e.target.value)}
-              className="w-10 h-10 rounded border cursor-pointer"
+              onChange={(e) => handlePrimaryColorChange(e.target.value)}
+              placeholder="#000000"
+              className="w-28 font-mono text-sm"
             />
           </div>
-          <Input
-            value={template.branding.primaryColor}
-            onChange={(e) => handleColorChange(e.target.value)}
-            placeholder="#000000"
-            className="w-28 font-mono text-sm"
-          />
+        </div>
+
+        {/* Secondary Color */}
+        <div className="space-y-3">
+          <Label className="text-sm font-medium">Secondary Color</Label>
+          <div className="grid grid-cols-4 gap-2">
+            {COLOR_PRESETS.map((preset) => (
+              <button
+                key={preset.value}
+                className={`flex flex-col items-center gap-1 p-2 rounded-lg border transition-all ${
+                  template.branding.secondaryColor === preset.value 
+                    ? 'border-primary bg-primary/5' 
+                    : 'border-muted hover:border-muted-foreground/50'
+                }`}
+                onClick={() => handleSecondaryColorChange(preset.value)}
+              >
+                <div 
+                  className="w-8 h-8 rounded-full border"
+                  style={{ backgroundColor: preset.value }}
+                />
+                <span className="text-xs text-center">{preset.name}</span>
+              </button>
+            ))}
+          </div>
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2">
+              <Label htmlFor="custom-secondary-color" className="text-sm">Custom:</Label>
+              <input
+                type="color"
+                id="custom-secondary-color"
+                value={template.branding.secondaryColor || "#6b7280"}
+                onChange={(e) => handleSecondaryColorChange(e.target.value)}
+                className="w-10 h-10 rounded border cursor-pointer"
+              />
+            </div>
+            <Input
+              value={template.branding.secondaryColor || "#6b7280"}
+              onChange={(e) => handleSecondaryColorChange(e.target.value)}
+              placeholder="#6b7280"
+              className="w-28 font-mono text-sm"
+            />
+          </div>
         </div>
       </div>
 
@@ -388,12 +435,12 @@ export function TemplateStylingEditor({
             <div 
               className="p-2 rounded text-sm"
               style={{ 
-                backgroundColor: template.branding.primaryColor + '10',
-                borderLeft: `3px solid ${template.branding.primaryColor}`,
+                backgroundColor: (template.branding.secondaryColor || "#6b7280") + '15',
+                borderLeft: `3px solid ${template.branding.secondaryColor || "#6b7280"}`,
                 fontFamily: bodyFont
               }}
             >
-              This is a callout or tip box styled with your brand color.
+              This is a callout styled with your secondary color.
             </div>
           </div>
           
@@ -420,6 +467,7 @@ export function TemplateStylingEditor({
           onClick={() => {
             updateBranding({
               primaryColor: "#1e40af",
+              secondaryColor: "#6b7280",
               logoUrl: undefined,
               companyName: "",
               footerText: ""

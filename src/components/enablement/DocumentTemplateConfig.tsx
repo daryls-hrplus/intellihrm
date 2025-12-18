@@ -62,6 +62,7 @@ export interface DocumentTemplate {
   };
   branding: {
     primaryColor: string;
+    secondaryColor?: string;
     logoUrl?: string;
     footerText?: string;
     companyName?: string;
