@@ -366,7 +366,7 @@ export function ConfluenceStylePreview({ document, template }: ConfluenceStylePr
             {document.learningObjectives.map((obj, i) => (
               <li key={i} className="flex items-start gap-2 text-sm">
                 <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
-                {obj}
+                {typeof obj === 'string' ? obj : (obj as any).objective || JSON.stringify(obj)}
               </li>
             ))}
           </ul>
