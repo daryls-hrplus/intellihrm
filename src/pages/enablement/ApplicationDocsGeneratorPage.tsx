@@ -475,14 +475,17 @@ export default function ApplicationDocsGeneratorPage() {
                 </SheetContent>
               </Sheet>
               {selectedTemplate && (
-                <div className="flex items-center gap-2 mt-2">
-                  <div 
-                    className="w-4 h-4 rounded-full border"
-                    style={{ backgroundColor: selectedTemplate.branding.primaryColor }}
-                  />
-                  <span className="text-xs text-muted-foreground">
-                    {selectedTemplate.branding.companyName || 'No branding set'}
-                  </span>
+                <div className="mt-2 space-y-1">
+                  <span className="text-sm font-medium">{selectedTemplate.name}</span>
+                  <div className="flex items-center gap-2">
+                    <div 
+                      className="w-4 h-4 rounded-full border"
+                      style={{ backgroundColor: selectedTemplate.branding.primaryColor }}
+                    />
+                    <span className="text-xs text-muted-foreground">
+                      {selectedTemplate.branding.companyName || 'No branding set'}
+                    </span>
+                  </div>
                 </div>
               )}
             </div>
