@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -24,7 +24,7 @@ import {
   Library
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { FEATURE_REGISTRY, getModuleByCode, getFeatureByCode, FeatureDefinition, getFeatureCount, getTotalFeatureCount } from "@/lib/featureRegistry";
+import { useModulesWithFeatures, ApplicationFeature } from "@/hooks/useApplicationFeatures";
 import { FeatureBrowser, FeatureDetailPanel } from "@/components/enablement/FeatureBrowser";
 import { DocumentTemplate, DEFAULT_TEMPLATES } from "@/components/enablement/DocumentTemplateConfig";
 import { ConfluenceStylePreview, GeneratedDocument } from "@/components/enablement/ConfluenceStylePreview";
@@ -40,8 +40,10 @@ interface GeneratedContent {
 
 export default function ApplicationDocsGeneratorPage() {
   const { t } = useTranslation();
+  const { data: modulesWithFeatures } = useModulesWithFeatures();
   const [selectedModule, setSelectedModule] = useState<string>("");
   const [selectedFeature, setSelectedFeature] = useState<string>("");
+  const [selectedFeatureData, setSelectedFeatureData] = useState<ApplicationFeature | null>(null);
   const [contentType, setContentType] = useState<ContentType>("training_guide");
   const [targetRoles, setTargetRoles] = useState<string[]>([]);
   const [customInstructions, setCustomInstructions] = useState("");
@@ -52,9 +54,10 @@ export default function ApplicationDocsGeneratorPage() {
 
   const availableRoles = ["admin", "hr_manager", "employee"];
 
-  const module = selectedModule ? getModuleByCode(selectedModule) : null;
-  const features: FeatureDefinition[] = module?.groups?.flatMap(g => g.features) || [];
-  const feature = selectedFeature ? getFeatureByCode(selectedModule, selectedFeature) : null;
+  const module = useMemo(() => 
+    modulesWithFeatures.find(m => m.module_code === selectedModule),
+    [modulesWithFeatures, selectedModule]
+  );
 
   const handleGenerate = async () => {
     if (!selectedModule) {
@@ -84,18 +87,18 @@ export default function ApplicationDocsGeneratorPage() {
       const payload: any = {
         action: actionMap[contentType],
         moduleCode: selectedModule,
-        moduleName: module?.name,
+        moduleName: module?.module_name,
         targetRoles: targetRoles.length > 0 ? targetRoles : undefined,
         customInstructions: customInstructions || undefined,
         template: selectedTemplate
       };
 
-      if (feature) {
+      if (selectedFeatureData) {
         payload.featureCode = selectedFeature;
-        payload.featureName = feature.name;
-        payload.featureDescription = feature.description;
-        payload.workflowSteps = feature.workflowSteps;
-        payload.uiElements = feature.uiElements;
+        payload.featureName = selectedFeatureData.feature_name;
+        payload.featureDescription = selectedFeatureData.description;
+        payload.workflowSteps = selectedFeatureData.workflow_steps;
+        payload.uiElements = selectedFeatureData.ui_elements;
       }
 
       const { data, error } = await supabase.functions.invoke('enablement-ai-assistant', {
@@ -135,7 +138,7 @@ export default function ApplicationDocsGeneratorPage() {
     try {
       const { error } = await supabase.from('enablement_tutorials').insert({
         module_id: null, // Would need to look up from application_modules table
-        title: generatedContent.content.title || `${module?.name} ${contentType}`,
+        title: generatedContent.content.title || `${module?.module_name} ${contentType}`,
         description: generatedContent.content.description || generatedContent.content.summary,
         content_type: contentType.replace('_', ' '),
         content: generatedContent.content,
@@ -731,26 +734,30 @@ export default function ApplicationDocsGeneratorPage() {
                   <SelectValue placeholder="Select a module" />
                 </SelectTrigger>
                 <SelectContent>
-                  {FEATURE_REGISTRY.map((mod) => (
-                    <SelectItem key={mod.code} value={mod.code}>
-                      {mod.name}
+                  {modulesWithFeatures.map((mod) => (
+                    <SelectItem key={mod.module_code} value={mod.module_code}>
+                      {mod.module_name}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
 
-            {contentType !== 'module_overview' && features.length > 0 && (
+            {contentType !== 'module_overview' && module && module.features.length > 0 && (
               <div className="space-y-2">
                 <Label>Feature</Label>
-                <Select value={selectedFeature} onValueChange={setSelectedFeature}>
+                <Select value={selectedFeature} onValueChange={(v) => {
+                  setSelectedFeature(v);
+                  const feat = module.features.find(f => f.feature_code === v);
+                  setSelectedFeatureData(feat || null);
+                }}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select a feature" />
                   </SelectTrigger>
                   <SelectContent>
-                    {features.map((feat) => (
-                      <SelectItem key={feat.code} value={feat.code}>
-                        {feat.name}
+                    {module.features.map((feat) => (
+                      <SelectItem key={feat.feature_code} value={feat.feature_code}>
+                        {feat.feature_name}
                       </SelectItem>
                     ))}
                   </SelectContent>

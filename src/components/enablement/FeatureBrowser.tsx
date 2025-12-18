@@ -1,12 +1,5 @@
 import { useState, useMemo } from "react";
-import { 
-  FEATURE_REGISTRY, 
-  ModuleDefinition, 
-  FeatureGroup, 
-  FeatureDefinition,
-  searchFeatures,
-  getFeatureCount 
-} from "@/lib/featureRegistry";
+import { useModulesWithFeatures, ApplicationModule, ApplicationFeature } from "@/hooks/useApplicationFeatures";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -22,7 +15,8 @@ import {
   FolderOpen,
   FileText,
   Check,
-  X
+  X,
+  Loader2
 } from "lucide-react";
 import * as LucideIcons from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -31,7 +25,7 @@ interface FeatureBrowserProps {
   selectedModule?: string;
   selectedFeature?: string;
   onModuleSelect: (moduleCode: string) => void;
-  onFeatureSelect: (featureCode: string, feature: FeatureDefinition) => void;
+  onFeatureSelect: (featureCode: string, feature: ApplicationFeature) => void;
   multiSelect?: boolean;
   selectedFeatures?: string[];
   onMultiSelectChange?: (features: string[]) => void;
@@ -46,46 +40,37 @@ export function FeatureBrowser({
   selectedFeatures = [],
   onMultiSelectChange
 }: FeatureBrowserProps) {
+  const { data: modulesWithFeatures, isLoading } = useModulesWithFeatures();
   const [searchQuery, setSearchQuery] = useState("");
   const [expandedModules, setExpandedModules] = useState<string[]>([]);
-  const [expandedGroups, setExpandedGroups] = useState<string[]>([]);
 
-  const getIcon = (iconName: string) => {
+  const getIcon = (iconName: string | null) => {
+    if (!iconName) return LucideIcons.FileText;
     const Icon = (LucideIcons as any)[iconName];
     return Icon || LucideIcons.FileText;
   };
 
   const filteredData = useMemo(() => {
     if (!searchQuery.trim()) {
-      return FEATURE_REGISTRY;
+      return modulesWithFeatures;
     }
     
-    const searchResults = searchFeatures(searchQuery);
-    const moduleMap = new Map<string, ModuleDefinition>();
-    
-    searchResults.forEach(({ module, group, feature }) => {
-      if (!moduleMap.has(module.code)) {
-        moduleMap.set(module.code, {
-          ...module,
-          groups: []
-        });
-      }
-      
-      const mod = moduleMap.get(module.code)!;
-      let existingGroup = mod.groups.find(g => g.groupCode === group.groupCode);
-      
-      if (!existingGroup) {
-        existingGroup = { ...group, features: [] };
-        mod.groups.push(existingGroup);
-      }
-      
-      if (!existingGroup.features.find(f => f.code === feature.code)) {
-        existingGroup.features.push(feature);
-      }
-    });
-    
-    return Array.from(moduleMap.values());
-  }, [searchQuery]);
+    const query = searchQuery.toLowerCase();
+    return modulesWithFeatures
+      .map(module => ({
+        ...module,
+        features: module.features.filter(
+          f => f.feature_name.toLowerCase().includes(query) ||
+               f.feature_code.toLowerCase().includes(query) ||
+               (f.description && f.description.toLowerCase().includes(query))
+        )
+      }))
+      .filter(module => 
+        module.features.length > 0 ||
+        module.module_name.toLowerCase().includes(query) ||
+        module.module_code.toLowerCase().includes(query)
+      );
+  }, [searchQuery, modulesWithFeatures]);
 
   const toggleModule = (moduleCode: string) => {
     setExpandedModules(prev => 
@@ -95,24 +80,16 @@ export function FeatureBrowser({
     );
   };
 
-  const toggleGroup = (groupKey: string) => {
-    setExpandedGroups(prev =>
-      prev.includes(groupKey)
-        ? prev.filter(g => g !== groupKey)
-        : [...prev, groupKey]
-    );
-  };
-
-  const handleFeatureClick = (moduleCode: string, feature: FeatureDefinition) => {
+  const handleFeatureClick = (moduleCode: string, feature: ApplicationFeature) => {
     if (multiSelect) {
-      const featureKey = `${moduleCode}:${feature.code}`;
+      const featureKey = `${moduleCode}:${feature.feature_code}`;
       const newSelection = selectedFeatures.includes(featureKey)
         ? selectedFeatures.filter(f => f !== featureKey)
         : [...selectedFeatures, featureKey];
       onMultiSelectChange?.(newSelection);
     } else {
       onModuleSelect(moduleCode);
-      onFeatureSelect(feature.code, feature);
+      onFeatureSelect(feature.feature_code, feature);
     }
   };
 
@@ -123,12 +100,22 @@ export function FeatureBrowser({
     return selectedModule === moduleCode && selectedFeature === featureCode;
   };
 
+  if (isLoading) {
+    return (
+      <Card className="h-full">
+        <CardContent className="flex items-center justify-center h-[400px]">
+          <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
     <Card className="h-full">
       <CardHeader className="pb-3">
         <CardTitle className="text-lg flex items-center gap-2">
           <FolderOpen className="h-5 w-5" />
-          Feature Browser
+          Feature Repository
         </CardTitle>
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -157,21 +144,19 @@ export function FeatureBrowser({
         <ScrollArea className="h-[500px]">
           <div className="px-4 pb-4 space-y-1">
             {filteredData.map((module) => {
-              const ModuleIcon = getIcon(module.icon);
-              const isModuleExpanded = expandedModules.includes(module.code) || searchQuery.trim() !== "";
-              const featureCount = getFeatureCount(module.code);
+              const ModuleIcon = getIcon(module.icon_name);
+              const isModuleExpanded = expandedModules.includes(module.module_code) || searchQuery.trim() !== "";
               
               return (
-                <div key={module.code} className="space-y-1">
-                  {/* Module Header */}
+                <div key={module.id} className="space-y-1">
                   <Collapsible open={isModuleExpanded}>
                     <CollapsibleTrigger asChild>
                       <button
-                        onClick={() => toggleModule(module.code)}
+                        onClick={() => toggleModule(module.module_code)}
                         className={cn(
                           "w-full flex items-center gap-2 px-3 py-2 rounded-lg text-left transition-colors",
                           "hover:bg-muted/50",
-                          selectedModule === module.code && !selectedFeature && "bg-primary/10"
+                          selectedModule === module.module_code && !selectedFeature && "bg-primary/10"
                         )}
                       >
                         {isModuleExpanded ? (
@@ -180,72 +165,41 @@ export function FeatureBrowser({
                           <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
                         )}
                         <ModuleIcon className="h-4 w-4 text-primary shrink-0" />
-                        <span className="font-medium text-sm flex-1">{module.name}</span>
+                        <span className="font-medium text-sm flex-1">{module.module_name}</span>
                         <Badge variant="outline" className="text-xs">
-                          {featureCount}
+                          {module.features.length}
                         </Badge>
                       </button>
                     </CollapsibleTrigger>
                     <CollapsibleContent>
-                      <div className="ml-4 mt-1 space-y-1">
-                        {module.groups.map((group) => {
-                          const groupKey = `${module.code}:${group.groupCode}`;
-                          const isGroupExpanded = expandedGroups.includes(groupKey) || searchQuery.trim() !== "";
+                      <div className="ml-6 mt-1 space-y-0.5">
+                        {module.features.map((feature) => {
+                          const isSelected = isFeatureSelected(module.module_code, feature.feature_code);
                           
                           return (
-                            <div key={groupKey}>
-                              {/* Group Header */}
-                              <Collapsible open={isGroupExpanded}>
-                                <CollapsibleTrigger asChild>
-                                  <button
-                                    onClick={() => toggleGroup(groupKey)}
-                                    className="w-full flex items-center gap-2 px-3 py-1.5 rounded text-left hover:bg-muted/30 transition-colors"
-                                  >
-                                    {isGroupExpanded ? (
-                                      <FolderOpen className="h-3.5 w-3.5 text-muted-foreground" />
-                                    ) : (
-                                      <Folder className="h-3.5 w-3.5 text-muted-foreground" />
-                                    )}
-                                    <span className="text-sm text-muted-foreground">{group.groupName}</span>
-                                    <span className="text-xs text-muted-foreground/70">({group.features.length})</span>
-                                  </button>
-                                </CollapsibleTrigger>
-                                <CollapsibleContent>
-                                  <div className="ml-4 mt-0.5 space-y-0.5">
-                                    {group.features.map((feature) => {
-                                      const FeatureIcon = getIcon(feature.icon);
-                                      const isSelected = isFeatureSelected(module.code, feature.code);
-                                      
-                                      return (
-                                        <button
-                                          key={feature.code}
-                                          onClick={() => handleFeatureClick(module.code, feature)}
-                                          className={cn(
-                                            "w-full flex items-center gap-2 px-3 py-1.5 rounded text-left transition-colors",
-                                            "hover:bg-muted/50",
-                                            isSelected && "bg-primary/10 border-l-2 border-primary"
-                                          )}
-                                        >
-                                          {multiSelect && (
-                                            <Checkbox
-                                              checked={isSelected}
-                                              className="shrink-0"
-                                            />
-                                          )}
-                                          <FeatureIcon className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
-                                          <div className="flex-1 min-w-0">
-                                            <div className="text-sm truncate">{feature.name}</div>
-                                          </div>
-                                          {isSelected && !multiSelect && (
-                                            <Check className="h-3.5 w-3.5 text-primary shrink-0" />
-                                          )}
-                                        </button>
-                                      );
-                                    })}
-                                  </div>
-                                </CollapsibleContent>
-                              </Collapsible>
-                            </div>
+                            <button
+                              key={feature.id}
+                              onClick={() => handleFeatureClick(module.module_code, feature)}
+                              className={cn(
+                                "w-full flex items-center gap-2 px-3 py-1.5 rounded text-left transition-colors",
+                                "hover:bg-muted/50",
+                                isSelected && "bg-primary/10 border-l-2 border-primary"
+                              )}
+                            >
+                              {multiSelect && (
+                                <Checkbox
+                                  checked={isSelected}
+                                  className="shrink-0"
+                                />
+                              )}
+                              <FileText className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                              <div className="flex-1 min-w-0">
+                                <div className="text-sm truncate">{feature.feature_name}</div>
+                              </div>
+                              {isSelected && !multiSelect && (
+                                <Check className="h-3.5 w-3.5 text-primary shrink-0" />
+                              )}
+                            </button>
                           );
                         })}
                       </div>
@@ -254,6 +208,11 @@ export function FeatureBrowser({
                 </div>
               );
             })}
+            {filteredData.length === 0 && (
+              <div className="text-center py-8 text-muted-foreground">
+                No features found
+              </div>
+            )}
           </div>
         </ScrollArea>
       </CardContent>
@@ -264,26 +223,19 @@ export function FeatureBrowser({
 // Feature Detail Panel for showing selected feature info
 interface FeatureDetailPanelProps {
   moduleCode: string;
-  feature: FeatureDefinition;
+  feature: ApplicationFeature;
 }
 
 export function FeatureDetailPanel({ moduleCode, feature }: FeatureDetailPanelProps) {
-  const getIcon = (iconName: string) => {
-    const Icon = (LucideIcons as any)[iconName];
-    return Icon || LucideIcons.FileText;
-  };
-  
-  const FeatureIcon = getIcon(feature.icon);
-  
   return (
     <Card>
       <CardHeader className="pb-3">
         <div className="flex items-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-            <FeatureIcon className="h-5 w-5 text-primary" />
+            <FileText className="h-5 w-5 text-primary" />
           </div>
           <div>
-            <CardTitle className="text-lg">{feature.name}</CardTitle>
+            <CardTitle className="text-lg">{feature.feature_name}</CardTitle>
             <p className="text-sm text-muted-foreground">{feature.description}</p>
           </div>
         </div>
@@ -292,26 +244,26 @@ export function FeatureDetailPanel({ moduleCode, feature }: FeatureDetailPanelPr
         <div>
           <h4 className="text-sm font-medium mb-2">Route</h4>
           <Badge variant="outline" className="font-mono text-xs">
-            {feature.routePath}
+            {feature.route_path || "N/A"}
           </Badge>
         </div>
         
-        {feature.workflowSteps && feature.workflowSteps.length > 0 && (
+        {feature.workflow_steps && Array.isArray(feature.workflow_steps) && feature.workflow_steps.length > 0 && (
           <div>
             <h4 className="text-sm font-medium mb-2">Workflow Steps</h4>
             <ol className="list-decimal list-inside space-y-1">
-              {feature.workflowSteps.map((step, i) => (
+              {feature.workflow_steps.map((step: string, i: number) => (
                 <li key={i} className="text-sm text-muted-foreground">{step}</li>
               ))}
             </ol>
           </div>
         )}
         
-        {feature.uiElements && feature.uiElements.length > 0 && (
+        {feature.ui_elements && Array.isArray(feature.ui_elements) && feature.ui_elements.length > 0 && (
           <div>
             <h4 className="text-sm font-medium mb-2">UI Elements</h4>
             <div className="flex flex-wrap gap-1.5">
-              {feature.uiElements.map((element, i) => (
+              {feature.ui_elements.map((element: string, i: number) => (
                 <Badge key={i} variant="secondary" className="text-xs">
                   {element}
                 </Badge>
@@ -320,11 +272,11 @@ export function FeatureDetailPanel({ moduleCode, feature }: FeatureDetailPanelPr
           </div>
         )}
         
-        {feature.roleRequirements && feature.roleRequirements.length > 0 && (
+        {feature.role_requirements && feature.role_requirements.length > 0 && (
           <div>
             <h4 className="text-sm font-medium mb-2">Required Roles</h4>
             <div className="flex flex-wrap gap-1.5">
-              {feature.roleRequirements.map((role, i) => (
+              {feature.role_requirements.map((role: string, i: number) => (
                 <Badge key={i} variant="outline" className="text-xs capitalize">
                   {role.replace('_', ' ')}
                 </Badge>

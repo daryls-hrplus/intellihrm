@@ -1,15 +1,11 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { 
-  FEATURE_REGISTRY, 
-  FeatureDefinition,
-  getFeatureCount,
-  getTotalFeatureCount
-} from "@/lib/featureRegistry";
+import { useModulesWithFeatures, ApplicationFeature } from "@/hooks/useApplicationFeatures";
 import { FeatureBrowser, FeatureDetailPanel } from "@/components/enablement/FeatureBrowser";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import { 
   ArrowLeft, 
   FileText, 
@@ -22,15 +18,16 @@ import {
 
 export default function FeatureCatalogPage() {
   const navigate = useNavigate();
+  const { data: modulesWithFeatures, isLoading } = useModulesWithFeatures();
   const [selectedModule, setSelectedModule] = useState<string>("");
   const [selectedFeature, setSelectedFeature] = useState<string>("");
-  const [selectedFeatureData, setSelectedFeatureData] = useState<FeatureDefinition | null>(null);
+  const [selectedFeatureData, setSelectedFeatureData] = useState<ApplicationFeature | null>(null);
 
   const handleModuleSelect = (moduleCode: string) => {
     setSelectedModule(moduleCode);
   };
 
-  const handleFeatureSelect = (featureCode: string, feature: FeatureDefinition) => {
+  const handleFeatureSelect = (featureCode: string, feature: ApplicationFeature) => {
     setSelectedFeature(featureCode);
     setSelectedFeatureData(feature);
   };
@@ -42,15 +39,14 @@ export default function FeatureCatalogPage() {
   };
 
   const handleViewInApp = () => {
-    if (selectedFeatureData?.routePath) {
-      navigate(selectedFeatureData.routePath);
+    if (selectedFeatureData?.route_path) {
+      navigate(selectedFeatureData.route_path);
     }
   };
 
-  // Calculate statistics
-  const totalFeatures = getTotalFeatureCount();
-  const totalModules = FEATURE_REGISTRY.length;
-  const totalGroups = FEATURE_REGISTRY.reduce((acc, mod) => acc + mod.groups.length, 0);
+  // Calculate statistics from database data
+  const totalModules = modulesWithFeatures.length;
+  const totalFeatures = modulesWithFeatures.reduce((acc, mod) => acc + mod.features.length, 0);
 
   return (
     <div className="space-y-6">
@@ -69,30 +65,26 @@ export default function FeatureCatalogPage() {
         </div>
         <Badge variant="outline" className="gap-1">
           <FolderTree className="h-3 w-3" />
-          Registry
+          Repository
         </Badge>
       </div>
 
       {/* Stats */}
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-2">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Modules</CardTitle>
             <Layers className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{totalModules}</div>
-            <p className="text-xs text-muted-foreground">Core system modules</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Feature Groups</CardTitle>
-            <FolderTree className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{totalGroups}</div>
-            <p className="text-xs text-muted-foreground">Organized categories</p>
+            {isLoading ? (
+              <Skeleton className="h-8 w-16" />
+            ) : (
+              <>
+                <div className="text-2xl font-bold">{totalModules}</div>
+                <p className="text-xs text-muted-foreground">Core system modules</p>
+              </>
+            )}
           </CardContent>
         </Card>
         <Card>
@@ -101,8 +93,14 @@ export default function FeatureCatalogPage() {
             <BarChart3 className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{totalFeatures}</div>
-            <p className="text-xs text-muted-foreground">Documented capabilities</p>
+            {isLoading ? (
+              <Skeleton className="h-8 w-16" />
+            ) : (
+              <>
+                <div className="text-2xl font-bold">{totalFeatures}</div>
+                <p className="text-xs text-muted-foreground">Documented capabilities</p>
+              </>
+            )}
           </CardContent>
         </Card>
       </div>
@@ -136,7 +134,7 @@ export default function FeatureCatalogPage() {
                     <Sparkles className="h-4 w-4" />
                     Generate Documentation
                   </Button>
-                  {selectedFeatureData.routePath && (
+                  {selectedFeatureData.route_path && (
                     <Button variant="outline" onClick={handleViewInApp} className="gap-2">
                       <ExternalLink className="h-4 w-4" />
                       View in App
@@ -165,25 +163,30 @@ export default function FeatureCatalogPage() {
           <CardDescription>Feature distribution across all modules</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid gap-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-            {FEATURE_REGISTRY.map((module) => {
-              const count = getFeatureCount(module.code);
-              return (
+          {isLoading ? (
+            <div className="grid gap-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+              {[...Array(8)].map((_, i) => (
+                <Skeleton key={i} className="h-12" />
+              ))}
+            </div>
+          ) : (
+            <div className="grid gap-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+              {modulesWithFeatures.map((module) => (
                 <div 
-                  key={module.code}
+                  key={module.id}
                   className="flex items-center justify-between p-3 rounded-lg border hover:bg-muted/50 cursor-pointer transition-colors"
                   onClick={() => {
-                    setSelectedModule(module.code);
+                    setSelectedModule(module.module_code);
                     setSelectedFeature("");
                     setSelectedFeatureData(null);
                   }}
                 >
-                  <span className="text-sm font-medium truncate">{module.name}</span>
-                  <Badge variant="secondary">{count}</Badge>
+                  <span className="text-sm font-medium truncate">{module.module_name}</span>
+                  <Badge variant="secondary">{module.features.length}</Badge>
                 </div>
-              );
-            })}
-          </div>
+              ))}
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>
