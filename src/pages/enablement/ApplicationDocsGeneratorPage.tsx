@@ -24,7 +24,8 @@ import {
   Library
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { APPLICATION_MODULES, getModuleByCode, getFeatureByCode } from "@/lib/applicationMetadata";
+import { FEATURE_REGISTRY, getModuleByCode, getFeatureByCode, FeatureDefinition, getFeatureCount, getTotalFeatureCount } from "@/lib/featureRegistry";
+import { FeatureBrowser, FeatureDetailPanel } from "@/components/enablement/FeatureBrowser";
 import { DocumentTemplate, DEFAULT_TEMPLATES } from "@/components/enablement/DocumentTemplateConfig";
 import { ConfluenceStylePreview, GeneratedDocument } from "@/components/enablement/ConfluenceStylePreview";
 import { TemplateLibrary } from "@/components/enablement/TemplateLibrary";
