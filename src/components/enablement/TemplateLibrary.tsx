@@ -74,6 +74,14 @@ export function TemplateLibrary({
   const [previewTemplate, setPreviewTemplate] = useState<DocumentTemplate | null>(null);
   const [showPreviewDialog, setShowPreviewDialog] = useState(false);
   
+  // Internal working copy of template for styling changes (doesn't close sheet)
+  const [workingTemplate, setWorkingTemplate] = useState<DocumentTemplate | null>(selectedTemplate);
+  
+  // Sync working template when selected template changes from outside
+  useEffect(() => {
+    setWorkingTemplate(selectedTemplate);
+  }, [selectedTemplate]);
+  
   const queryClient = useQueryClient();
 
   // Fetch saved templates
@@ -158,7 +166,7 @@ export function TemplateLibrary({
   };
 
   const handleSaveTemplate = () => {
-    if (!selectedTemplate || !saveTemplateName.trim()) {
+    if (!workingTemplate || !saveTemplateName.trim()) {
       toast.error("Please provide a template name");
       return;
     }
@@ -167,10 +175,10 @@ export function TemplateLibrary({
       name: saveTemplateName,
       description: saveTemplateDescription,
       category: saveTemplateCategory,
-      layout_config: selectedTemplate.layout as unknown as Record<string, unknown>,
-      sections_config: selectedTemplate.sections as unknown as Record<string, unknown>,
-      formatting_config: selectedTemplate.formatting as unknown as Record<string, unknown>,
-      branding_config: selectedTemplate.branding as unknown as Record<string, unknown>
+      layout_config: workingTemplate.layout as unknown as Record<string, unknown>,
+      sections_config: workingTemplate.sections as unknown as Record<string, unknown>,
+      formatting_config: workingTemplate.formatting as unknown as Record<string, unknown>,
+      branding_config: workingTemplate.branding as unknown as Record<string, unknown>
     });
   };
 
@@ -192,7 +200,7 @@ export function TemplateLibrary({
       formatting: template.formatting_config as unknown as DocumentTemplate['formatting'],
       branding: template.branding_config as unknown as DocumentTemplate['branding']
     };
-    onTemplateSelect(docTemplate);
+    setWorkingTemplate(docTemplate);
     toast.success(`Template "${template.name}" selected`);
   };
 
@@ -233,13 +241,22 @@ export function TemplateLibrary({
               variant="outline"
               size="sm"
               onClick={() => setShowSaveDialog(true)}
-              disabled={!selectedTemplate}
+              disabled={!workingTemplate}
             >
               <Save className="h-4 w-4 mr-2" />
               Save Current
             </Button>
-            <Button variant="ghost" size="sm" onClick={onClose}>
-              Done
+            <Button 
+              variant="default" 
+              size="sm" 
+              onClick={() => {
+                if (workingTemplate) {
+                  onTemplateSelect(workingTemplate);
+                }
+                onClose();
+              }}
+            >
+              Apply & Close
             </Button>
           </div>
         </div>
@@ -292,7 +309,7 @@ export function TemplateLibrary({
                   <div
                     key={template.id}
                     className={`p-4 border rounded-lg transition-all ${
-                      selectedTemplate?.id === template.id
+                      workingTemplate?.id === template.id
                         ? 'border-primary bg-primary/5'
                         : 'hover:border-muted-foreground/50'
                     }`}
@@ -323,11 +340,11 @@ export function TemplateLibrary({
                           Preview
                         </Button>
                         <Button
-                          variant={selectedTemplate?.id === template.id ? "default" : "outline"}
+                          variant={workingTemplate?.id === template.id ? "default" : "outline"}
                           size="sm"
-                          onClick={() => onTemplateSelect(template)}
+                          onClick={() => setWorkingTemplate(template)}
                         >
-                          {selectedTemplate?.id === template.id ? (
+                          {workingTemplate?.id === template.id ? (
                             <>
                               <Check className="h-4 w-4 mr-1" />
                               Selected
@@ -365,7 +382,7 @@ export function TemplateLibrary({
                     <div
                       key={template.id}
                       className={`p-4 border rounded-lg transition-all ${
-                        selectedTemplate?.id === template.id
+                        workingTemplate?.id === template.id
                           ? 'border-primary bg-primary/5'
                           : 'hover:border-muted-foreground/50'
                       }`}
@@ -433,8 +450,8 @@ export function TemplateLibrary({
           {/* Styling Tab */}
           <TabsContent value="styling" className="mt-4">
             <TemplateStylingEditor
-              template={selectedTemplate}
-              onTemplateUpdate={onTemplateSelect}
+              template={workingTemplate}
+              onTemplateUpdate={setWorkingTemplate}
             />
           </TabsContent>
         </Tabs>
@@ -504,7 +521,7 @@ export function TemplateLibrary({
         onOpenChange={setShowPreviewDialog}
         template={previewTemplate}
         onSelect={(template) => {
-          onTemplateSelect(template);
+          setWorkingTemplate(template);
           toast.success(`Template "${template.name}" selected`);
         }}
       />
