@@ -277,7 +277,7 @@ import PayrollExpenseClaimsPage from "./pages/payroll/PayrollExpenseClaimsPage";
 import PayrollArchiveSettingsPage from "./pages/payroll/PayrollArchiveSettingsPage";
 import BenefitPayrollMappingsPage from "./pages/payroll/BenefitPayrollMappingsPage";
 import PayrollHolidaysPage from "./pages/payroll/PayrollHolidaysPage";
-
+import OpeningBalancesPage from "./pages/payroll/OpeningBalancesPage";
 import GLDashboardPage from "./pages/payroll/gl/GLDashboardPage";
 import GLAccountsPage from "./pages/payroll/gl/GLAccountsPage";
 import CostCenterSegmentsPage from "./pages/payroll/gl/CostCenterSegmentsPage";
@@ -1610,6 +1610,14 @@ const App = () => (
               element={
                 <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="payroll">
                   <PayrollHolidaysPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/payroll/opening-balances"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="payroll">
+                  <OpeningBalancesPage />
                 </ProtectedRoute>
               }
             />

@@ -6847,6 +6847,165 @@ export type Database = {
           },
         ]
       }
+      employee_opening_balance_details: {
+        Row: {
+          created_at: string
+          currency: string | null
+          id: string
+          notes: string | null
+          opening_balance_id: string
+          pay_element_code: string
+          pay_element_name: string
+          pay_element_type: string
+          updated_at: string
+          ytd_amount: number
+          ytd_employer_amount: number | null
+          ytd_taxable_amount: number | null
+        }
+        Insert: {
+          created_at?: string
+          currency?: string | null
+          id?: string
+          notes?: string | null
+          opening_balance_id: string
+          pay_element_code: string
+          pay_element_name: string
+          pay_element_type: string
+          updated_at?: string
+          ytd_amount?: number
+          ytd_employer_amount?: number | null
+          ytd_taxable_amount?: number | null
+        }
+        Update: {
+          created_at?: string
+          currency?: string | null
+          id?: string
+          notes?: string | null
+          opening_balance_id?: string
+          pay_element_code?: string
+          pay_element_name?: string
+          pay_element_type?: string
+          updated_at?: string
+          ytd_amount?: number
+          ytd_employer_amount?: number | null
+          ytd_taxable_amount?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "employee_opening_balance_details_opening_balance_id_fkey"
+            columns: ["opening_balance_id"]
+            isOneToOne: false
+            referencedRelation: "employee_opening_balances"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      employee_opening_balances: {
+        Row: {
+          company_id: string
+          created_at: string
+          created_by: string | null
+          effective_date: string
+          employee_id: string
+          id: string
+          import_batch_id: string | null
+          import_source: string | null
+          notes: string | null
+          previous_employer_name: string | null
+          previous_employer_tax_number: string | null
+          tax_year: number
+          updated_at: string
+          ytd_education_tax: number | null
+          ytd_employer_education_tax: number | null
+          ytd_employer_heart: number | null
+          ytd_employer_nht: number | null
+          ytd_employer_nis: number | null
+          ytd_gross_earnings: number | null
+          ytd_income_tax: number | null
+          ytd_nht: number | null
+          ytd_nis: number | null
+          ytd_non_taxable_income: number | null
+          ytd_other_statutory: Json | null
+          ytd_taxable_income: number | null
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          created_by?: string | null
+          effective_date: string
+          employee_id: string
+          id?: string
+          import_batch_id?: string | null
+          import_source?: string | null
+          notes?: string | null
+          previous_employer_name?: string | null
+          previous_employer_tax_number?: string | null
+          tax_year: number
+          updated_at?: string
+          ytd_education_tax?: number | null
+          ytd_employer_education_tax?: number | null
+          ytd_employer_heart?: number | null
+          ytd_employer_nht?: number | null
+          ytd_employer_nis?: number | null
+          ytd_gross_earnings?: number | null
+          ytd_income_tax?: number | null
+          ytd_nht?: number | null
+          ytd_nis?: number | null
+          ytd_non_taxable_income?: number | null
+          ytd_other_statutory?: Json | null
+          ytd_taxable_income?: number | null
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          effective_date?: string
+          employee_id?: string
+          id?: string
+          import_batch_id?: string | null
+          import_source?: string | null
+          notes?: string | null
+          previous_employer_name?: string | null
+          previous_employer_tax_number?: string | null
+          tax_year?: number
+          updated_at?: string
+          ytd_education_tax?: number | null
+          ytd_employer_education_tax?: number | null
+          ytd_employer_heart?: number | null
+          ytd_employer_nht?: number | null
+          ytd_employer_nis?: number | null
+          ytd_gross_earnings?: number | null
+          ytd_income_tax?: number | null
+          ytd_nht?: number | null
+          ytd_nis?: number | null
+          ytd_non_taxable_income?: number | null
+          ytd_other_statutory?: Json | null
+          ytd_taxable_income?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "employee_opening_balances_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_opening_balances_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_opening_balances_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       employee_pay_groups: {
         Row: {
           created_at: string
@@ -22711,6 +22870,72 @@ export type Database = {
           {
             foreignKeyName: "one_on_one_meetings_manager_id_fkey"
             columns: ["manager_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      opening_balance_imports: {
+        Row: {
+          company_id: string
+          completed_at: string | null
+          created_at: string
+          errors: Json | null
+          failed_records: number | null
+          file_name: string
+          id: string
+          import_type: string
+          imported_by: string | null
+          started_at: string | null
+          status: string
+          successful_records: number | null
+          tax_year: number
+          total_records: number | null
+        }
+        Insert: {
+          company_id: string
+          completed_at?: string | null
+          created_at?: string
+          errors?: Json | null
+          failed_records?: number | null
+          file_name: string
+          id?: string
+          import_type: string
+          imported_by?: string | null
+          started_at?: string | null
+          status?: string
+          successful_records?: number | null
+          tax_year: number
+          total_records?: number | null
+        }
+        Update: {
+          company_id?: string
+          completed_at?: string | null
+          created_at?: string
+          errors?: Json | null
+          failed_records?: number | null
+          file_name?: string
+          id?: string
+          import_type?: string
+          imported_by?: string | null
+          started_at?: string | null
+          status?: string
+          successful_records?: number | null
+          tax_year?: number
+          total_records?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "opening_balance_imports_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "opening_balance_imports_imported_by_fkey"
+            columns: ["imported_by"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
