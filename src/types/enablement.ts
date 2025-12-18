@@ -19,7 +19,7 @@ export interface EnablementContentStatus {
   feature_code: string;
   module_code: string;
   release_id: string | null;
-  workflow_status: 'backlog' | 'in_progress' | 'review' | 'published' | 'archived';
+  workflow_status: 'backlog' | 'planning' | 'development' | 'review' | 'published' | 'maintenance' | 'archived';
   priority: 'critical' | 'high' | 'medium' | 'low';
   documentation_status: string;
   scorm_lite_status: string;
@@ -120,7 +120,7 @@ export interface EnablementSCORMPackage {
   created_at: string;
 }
 
-export type WorkflowColumn = 'backlog' | 'in_progress' | 'review' | 'published' | 'archived';
+export type WorkflowColumn = 'backlog' | 'planning' | 'development' | 'review' | 'published' | 'maintenance' | 'archived';
 
 export interface ContentCoverageStats {
   total_features: number;

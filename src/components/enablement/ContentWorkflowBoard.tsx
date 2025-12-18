@@ -47,12 +47,15 @@ import { useEnablementContentStatus, useEnablementReleases } from "@/hooks/useEn
 import type { EnablementContentStatus, WorkflowColumn } from "@/types/enablement";
 import { WorkflowColumnComponent } from "./WorkflowColumn";
 import { ContentItemCard } from "./ContentItemCard";
+import { AddContentItemDialog } from "./AddContentItemDialog";
 
 const WORKFLOW_COLUMNS: { id: WorkflowColumn; label: string; color: string }[] = [
   { id: "backlog", label: "Backlog", color: "bg-muted" },
-  { id: "in_progress", label: "In Progress", color: "bg-blue-500/10" },
-  { id: "review", label: "In Review", color: "bg-amber-500/10" },
+  { id: "planning", label: "Planning", color: "bg-purple-500/10" },
+  { id: "development", label: "Development", color: "bg-blue-500/10" },
+  { id: "review", label: "Review", color: "bg-amber-500/10" },
   { id: "published", label: "Published", color: "bg-green-500/10" },
+  { id: "maintenance", label: "Maintenance", color: "bg-orange-500/10" },
 ];
 
 interface ContentWorkflowBoardProps {
@@ -89,9 +92,11 @@ export function ContentWorkflowBoard({ releaseId }: ContentWorkflowBoardProps) {
   const itemsByColumn = useMemo(() => {
     const grouped: Record<WorkflowColumn, EnablementContentStatus[]> = {
       backlog: [],
-      in_progress: [],
+      planning: [],
+      development: [],
       review: [],
       published: [],
+      maintenance: [],
       archived: [],
     };
 
@@ -187,6 +192,8 @@ export function ContentWorkflowBoard({ releaseId }: ContentWorkflowBoardProps) {
             ))}
           </SelectContent>
         </Select>
+
+        <AddContentItemDialog releaseId={releaseId} />
       </div>
 
       {/* Board */}
@@ -196,7 +203,7 @@ export function ContentWorkflowBoard({ releaseId }: ContentWorkflowBoardProps) {
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
       >
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
           {WORKFLOW_COLUMNS.map((column) => {
             const stats = getColumnStats(column.id);
             return (
