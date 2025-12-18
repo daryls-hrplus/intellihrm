@@ -100,6 +100,13 @@ export function FeatureCatalogGuidePreview({ open, onOpenChange }: FeatureCatalo
   const [includeDate, setIncludeDate] = useState(true);
   const [includePageNumbers, setIncludePageNumbers] = useState(true);
   const [isGenerating, setIsGenerating] = useState(false);
+  
+  // Branding options
+  const [primaryColor, setPrimaryColor] = useState("#7c3aed"); // Purple
+  const [secondaryColor, setSecondaryColor] = useState("#4f46e5"); // Indigo
+  const [accentColor, setAccentColor] = useState("#10b981"); // Green
+  const [companyName, setCompanyName] = useState("HRplus Cerebra");
+  
   const previewRef = useRef<HTMLDivElement>(null);
 
   const currentTemplate = GUIDE_TEMPLATES.find(t => t.id === selectedTemplate) || GUIDE_TEMPLATES[0];
@@ -127,7 +134,7 @@ export function FeatureCatalogGuidePreview({ open, onOpenChange }: FeatureCatalo
           <style>
             * { margin: 0; padding: 0; box-sizing: border-box; }
             body { font-family: 'Segoe UI', Arial, sans-serif; color: #1a1a1a; line-height: 1.6; }
-            .guide-cover { page-break-after: always; padding: 60px; text-align: center; min-height: 100vh; display: flex; flex-direction: column; justify-content: center; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+            .guide-cover { page-break-after: always; padding: 60px; text-align: center; min-height: 100vh; display: flex; flex-direction: column; justify-content: center; background: linear-gradient(135deg, ${primaryColor} 0%, ${secondaryColor} 100%); color: white; }
             .guide-cover h1 { font-size: 48px; font-weight: 700; margin-bottom: 16px; }
             .guide-cover p { font-size: 20px; opacity: 0.9; }
             .guide-cover .stats { display: flex; justify-content: center; gap: 40px; margin-top: 60px; }
@@ -135,9 +142,9 @@ export function FeatureCatalogGuidePreview({ open, onOpenChange }: FeatureCatalo
             .guide-cover .stat-value { font-size: 42px; font-weight: 700; }
             .guide-cover .stat-label { font-size: 14px; opacity: 0.8; text-transform: uppercase; letter-spacing: 1px; }
             .guide-section { padding: 40px; page-break-after: always; }
-            .section-title { font-size: 28px; font-weight: 700; color: #1a1a1a; margin-bottom: 8px; border-bottom: 3px solid #667eea; padding-bottom: 12px; }
+            .section-title { font-size: 28px; font-weight: 700; color: #1a1a1a; margin-bottom: 8px; border-bottom: 3px solid ${primaryColor}; padding-bottom: 12px; }
             .section-subtitle { font-size: 16px; color: #666; margin-bottom: 24px; }
-            .module-card { background: #f8f9fa; border-radius: 8px; padding: 20px; margin-bottom: 20px; border-left: 4px solid #667eea; }
+            .module-card { background: #f8f9fa; border-radius: 8px; padding: 20px; margin-bottom: 20px; border-left: 4px solid ${primaryColor}; }
             .module-name { font-size: 20px; font-weight: 600; color: #1a1a1a; margin-bottom: 8px; }
             .feature-list { list-style: none; padding-left: 0; }
             .feature-item { padding: 8px 0; border-bottom: 1px solid #eee; display: flex; align-items: center; gap: 8px; }
@@ -148,14 +155,16 @@ export function FeatureCatalogGuidePreview({ open, onOpenChange }: FeatureCatalo
             .capability-name { font-size: 18px; font-weight: 600; color: #1a1a1a; margin-bottom: 8px; }
             .capability-value { font-size: 14px; color: #333; margin-bottom: 4px; }
             .badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 500; }
-            .badge-ai { background: #ede9fe; color: #7c3aed; }
+            .badge-ai { background: ${primaryColor}20; color: ${primaryColor}; }
             .badge-unique { background: #fef3c7; color: #d97706; }
             .badge-advanced { background: #dbeafe; color: #2563eb; }
             .matrix-table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 20px; }
             .matrix-table th, .matrix-table td { border: 1px solid #e5e7eb; padding: 8px; text-align: left; }
             .matrix-table th { background: #f3f4f6; font-weight: 600; }
-            .check-mark { color: #10b981; font-weight: bold; }
+            .check-mark { color: ${accentColor}; font-weight: bold; }
             .footer { text-align: center; padding: 20px; font-size: 12px; color: #666; border-top: 1px solid #eee; margin-top: 40px; }
+            .brand-primary { color: ${primaryColor}; }
+            .brand-bg { background-color: ${primaryColor}; }
             @media print {
               .guide-section { page-break-after: always; }
               .no-break { page-break-inside: avoid; }
@@ -211,9 +220,15 @@ export function FeatureCatalogGuidePreview({ open, onOpenChange }: FeatureCatalo
   const renderGuideContent = () => (
     <div ref={previewRef} className="bg-white text-black">
       {/* Cover Page */}
-      <div className="guide-cover bg-gradient-to-br from-purple-600 to-indigo-700 text-white p-16 text-center min-h-[600px] flex flex-col justify-center">
+      <div 
+        className="guide-cover text-white p-16 text-center min-h-[600px] flex flex-col justify-center"
+        style={{ background: `linear-gradient(135deg, ${primaryColor} 0%, ${secondaryColor} 100%)` }}
+      >
         <h1 className="text-4xl font-bold mb-4">{customTitle}</h1>
         <p className="text-xl opacity-90 mb-2">{customSubtitle}</p>
+        {companyName && (
+          <p className="text-sm opacity-80 mt-2">by {companyName}</p>
+        )}
         {includeDate && (
           <p className="text-sm opacity-70 mt-4">
             Generated: {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
@@ -242,7 +257,7 @@ export function FeatureCatalogGuidePreview({ open, onOpenChange }: FeatureCatalo
       {/* Executive Summary */}
       {currentTemplate.includeExecutiveSummary && (
         <div className="guide-section p-8 border-b">
-          <h2 className="section-title text-2xl font-bold border-b-2 border-purple-600 pb-2 mb-2">Executive Summary</h2>
+          <h2 className="section-title text-2xl font-bold pb-2 mb-2" style={{ borderBottom: `3px solid ${primaryColor}` }}>Executive Summary</h2>
           <p className="section-subtitle text-muted-foreground mb-6">Platform Overview for Decision Makers</p>
           
           <div className="prose max-w-none mb-8">
@@ -280,7 +295,7 @@ export function FeatureCatalogGuidePreview({ open, onOpenChange }: FeatureCatalo
       {/* Module Browser Section */}
       {currentTemplate.includeModules && (
         <div className="guide-section p-8 border-b">
-          <h2 className="section-title text-2xl font-bold border-b-2 border-purple-600 pb-2 mb-2">Module Reference</h2>
+          <h2 className="section-title text-2xl font-bold pb-2 mb-2" style={{ borderBottom: `3px solid ${primaryColor}` }}>Module Reference</h2>
           <p className="section-subtitle text-muted-foreground mb-6">Complete Feature Inventory by Module</p>
           
           {FEATURE_REGISTRY.map((module) => {
@@ -289,16 +304,16 @@ export function FeatureCatalogGuidePreview({ open, onOpenChange }: FeatureCatalo
             const moduleFeatureCount = module.groups.reduce((acc, g) => acc + g.features.length, 0);
             
             return (
-              <div key={module.code} className="module-card bg-slate-50 rounded-lg p-6 mb-8 border-l-4 border-purple-500">
+              <div key={module.code} className="module-card bg-slate-50 rounded-lg p-6 mb-8" style={{ borderLeft: `4px solid ${primaryColor}` }}>
                 {/* Module Header */}
                 <div className="flex items-start gap-4 mb-4">
-                  <div className="p-3 bg-purple-100 rounded-lg shrink-0">
-                    <ModuleIcon className="h-6 w-6 text-purple-600" />
+                  <div className="p-3 rounded-lg shrink-0" style={{ backgroundColor: `${primaryColor}20` }}>
+                    <ModuleIcon className="h-6 w-6" style={{ color: primaryColor }} />
                   </div>
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-1">
                       <h3 className="module-name text-xl font-semibold">{module.name}</h3>
-                      <Badge className="bg-purple-100 text-purple-700">{moduleFeatureCount} Features</Badge>
+                      <Badge style={{ backgroundColor: `${primaryColor}20`, color: primaryColor }}>{moduleFeatureCount} Features</Badge>
                     </div>
                     <p className="text-sm text-muted-foreground">{module.description}</p>
                   </div>
@@ -330,8 +345,8 @@ export function FeatureCatalogGuidePreview({ open, onOpenChange }: FeatureCatalo
                       </div>
                     </div>
                     
-                    <div className="mt-2 p-3 bg-purple-50 rounded-lg">
-                      <p className="text-sm text-purple-800">
+                    <div className="mt-2 p-3 rounded-lg" style={{ backgroundColor: `${primaryColor}10` }}>
+                      <p className="text-sm" style={{ color: primaryColor }}>
                         <span className="font-semibold">Strategic Value: </span>
                         {enrichment.strategicValue}
                       </p>
@@ -343,7 +358,7 @@ export function FeatureCatalogGuidePreview({ open, onOpenChange }: FeatureCatalo
                 {module.groups.map((group) => (
                   <div key={group.groupCode} className="mb-4">
                     <h4 className="text-sm font-semibold text-slate-900 uppercase tracking-wide mb-3 flex items-center gap-2">
-                      <div className="w-1.5 h-1.5 bg-purple-500 rounded-full"></div>
+                      <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: primaryColor }}></div>
                       {group.groupName}
                     </h4>
                     <ul className="feature-list space-y-2">
@@ -353,12 +368,12 @@ export function FeatureCatalogGuidePreview({ open, onOpenChange }: FeatureCatalo
                         return (
                           <li key={feature.code} className="feature-item bg-white rounded-lg p-3 border">
                             <div className="flex items-start gap-2">
-                              <Check className="h-4 w-4 text-green-500 mt-1 shrink-0" />
+                              <Check className="h-4 w-4 mt-1 shrink-0" style={{ color: accentColor }} />
                               <div className="flex-1">
                                 <div className="flex items-center gap-2 mb-1">
                                   <span className="feature-name font-medium text-slate-900">{feature.name}</span>
                                   {featureCaps?.capabilities.includes('ai-powered') && (
-                                    <Badge className="badge-ai bg-purple-100 text-purple-700 text-[10px]">AI-Powered</Badge>
+                                    <Badge className="text-[10px]" style={{ backgroundColor: `${primaryColor}20`, color: primaryColor }}>AI-Powered</Badge>
                                   )}
                                   {featureCaps?.differentiatorLevel === 'unique' && (
                                     <Badge className="badge-unique bg-amber-100 text-amber-700 text-[10px]">Unique</Badge>
@@ -371,7 +386,7 @@ export function FeatureCatalogGuidePreview({ open, onOpenChange }: FeatureCatalo
                                   {featureEnrichment?.detailedDescription || feature.description}
                                 </p>
                                 {featureEnrichment?.businessBenefit && (
-                                  <p className="text-xs text-green-700 mt-1">
+                                  <p className="text-xs mt-1" style={{ color: accentColor }}>
                                     <span className="font-medium">Value: </span>{featureEnrichment.businessBenefit}
                                   </p>
                                 )}
@@ -644,6 +659,112 @@ export function FeatureCatalogGuidePreview({ open, onOpenChange }: FeatureCatalo
                       checked={includePageNumbers}
                       onCheckedChange={setIncludePageNumbers}
                     />
+                  </div>
+
+                  <Separator />
+
+                  {/* Branding Section */}
+                  <div>
+                    <Label className="text-sm font-semibold">Company Branding</Label>
+                    <p className="text-xs text-muted-foreground mb-3">Customize colors for your brand</p>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="companyName">Company Name</Label>
+                    <Input
+                      id="companyName"
+                      value={companyName}
+                      onChange={(e) => setCompanyName(e.target.value)}
+                      placeholder="Your company name"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-3 gap-3">
+                    <div className="space-y-2">
+                      <Label htmlFor="primary" className="text-xs">Primary Color</Label>
+                      <div className="flex gap-2">
+                        <input
+                          type="color"
+                          id="primary"
+                          value={primaryColor}
+                          onChange={(e) => setPrimaryColor(e.target.value)}
+                          className="w-10 h-10 rounded border cursor-pointer"
+                        />
+                        <Input
+                          value={primaryColor}
+                          onChange={(e) => setPrimaryColor(e.target.value)}
+                          className="flex-1 text-xs"
+                          placeholder="#7c3aed"
+                        />
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="secondary" className="text-xs">Secondary Color</Label>
+                      <div className="flex gap-2">
+                        <input
+                          type="color"
+                          id="secondary"
+                          value={secondaryColor}
+                          onChange={(e) => setSecondaryColor(e.target.value)}
+                          className="w-10 h-10 rounded border cursor-pointer"
+                        />
+                        <Input
+                          value={secondaryColor}
+                          onChange={(e) => setSecondaryColor(e.target.value)}
+                          className="flex-1 text-xs"
+                          placeholder="#4f46e5"
+                        />
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="accent" className="text-xs">Accent Color</Label>
+                      <div className="flex gap-2">
+                        <input
+                          type="color"
+                          id="accent"
+                          value={accentColor}
+                          onChange={(e) => setAccentColor(e.target.value)}
+                          className="w-10 h-10 rounded border cursor-pointer"
+                        />
+                        <Input
+                          value={accentColor}
+                          onChange={(e) => setAccentColor(e.target.value)}
+                          className="flex-1 text-xs"
+                          placeholder="#10b981"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Color Preview */}
+                  <div className="p-3 rounded-lg border">
+                    <div className="text-xs text-muted-foreground mb-2">Color Preview</div>
+                    <div 
+                      className="h-12 rounded-lg flex items-center justify-center text-white text-sm font-medium"
+                      style={{ background: `linear-gradient(135deg, ${primaryColor} 0%, ${secondaryColor} 100%)` }}
+                    >
+                      Cover Gradient
+                    </div>
+                    <div className="flex gap-2 mt-2">
+                      <div 
+                        className="flex-1 h-6 rounded flex items-center justify-center text-white text-xs"
+                        style={{ backgroundColor: primaryColor }}
+                      >
+                        Primary
+                      </div>
+                      <div 
+                        className="flex-1 h-6 rounded flex items-center justify-center text-white text-xs"
+                        style={{ backgroundColor: secondaryColor }}
+                      >
+                        Secondary
+                      </div>
+                      <div 
+                        className="flex-1 h-6 rounded flex items-center justify-center text-white text-xs"
+                        style={{ backgroundColor: accentColor }}
+                      >
+                        Accent
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
