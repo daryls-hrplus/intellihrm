@@ -422,7 +422,7 @@ export default function ApplicationDocsGeneratorPage() {
                   <SelectItem value="training_guide">
                     <div className="flex items-center gap-2">
                       <BookOpen className="h-4 w-4" />
-                      Training Guide (Industry Standard)
+                      Template Library
                     </div>
                   </SelectItem>
                   <SelectItem value="module_overview">
