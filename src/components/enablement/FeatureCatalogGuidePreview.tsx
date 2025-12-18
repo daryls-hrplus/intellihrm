@@ -38,6 +38,7 @@ import {
 import { MODULE_ENRICHMENTS, FEATURE_ENRICHMENTS } from "@/lib/moduleDescriptions";
 import { DETAILED_FEATURE_ENRICHMENTS } from "@/lib/featureEnrichmentsDetailed";
 import { useEnablementBranding } from "@/hooks/useEnablementBranding";
+import { toast } from "sonner";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 
@@ -150,9 +151,37 @@ export function FeatureCatalogGuidePreview({ open, onOpenChange }: FeatureCatalo
 
   const handlePrint = () => {
     const printWindow = window.open('', '_blank');
-    if (!printWindow || !previewRef.current) return;
+    if (!printWindow) return;
 
-    const content = previewRef.current.innerHTML;
+    // Generate content directly instead of relying on previewRef
+    let fullContent = renderCoverHTML();
+    fullContent += renderTOCHTML();
+    
+    if (currentTemplate.includeExecutiveSummary) {
+      fullContent += renderExecutiveSummaryHTML();
+    }
+    
+    if (currentTemplate.includeModules) {
+      FEATURE_REGISTRY.forEach((module, idx) => {
+        fullContent += renderModuleHTML(module, idx === 0);
+      });
+    }
+    
+    if (currentTemplate.includeCapabilities) {
+      fullContent += renderCapabilitiesHTML();
+    }
+    
+    if (currentTemplate.includeMatrix) {
+      FEATURE_REGISTRY.forEach((module, idx) => {
+        const hasFeatures = FEATURE_CAPABILITIES.some(fc => 
+          module.groups.some(g => g.features.some(f => f.code === fc.featureCode))
+        );
+        if (hasFeatures) {
+          fullContent += renderMatrixModuleHTML(module, idx === 0);
+        }
+      });
+    }
+
     printWindow.document.write(`
       <!DOCTYPE html>
       <html>
@@ -198,11 +227,11 @@ export function FeatureCatalogGuidePreview({ open, onOpenChange }: FeatureCatalo
             }
           </style>
         </head>
-        <body>${content}</body>
+        <body>${fullContent}</body>
       </html>
     `);
     printWindow.document.close();
-    printWindow.print();
+    setTimeout(() => printWindow.print(), 500);
   };
 
   const handleDownloadPDF = async () => {
@@ -323,8 +352,10 @@ export function FeatureCatalogGuidePreview({ open, onOpenChange }: FeatureCatalo
       
       document.body.removeChild(tempContainer);
       pdf.save(`${customTitle.replace(/\s+/g, '-')}.pdf`);
+      toast.success("PDF generated successfully!");
     } catch (error) {
       console.error('Error generating PDF:', error);
+      toast.error("Failed to generate PDF. Please try again.");
     } finally {
       setIsGenerating(false);
     }
