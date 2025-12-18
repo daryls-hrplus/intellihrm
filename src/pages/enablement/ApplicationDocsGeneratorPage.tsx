@@ -391,6 +391,236 @@ export default function ApplicationDocsGeneratorPage() {
           </div>
         );
 
+      case 'training_guide':
+        return (
+          <div className="space-y-6">
+            <div>
+              <h2 className="text-2xl font-bold">{content.title}</h2>
+              {content.description && <p className="text-muted-foreground mt-2">{content.description}</p>}
+              {content.summary && <p className="text-muted-foreground mt-2">{content.summary}</p>}
+            </div>
+            {content.estimatedDuration && (
+              <Badge variant="outline">Est. Duration: {content.estimatedDuration} minutes</Badge>
+            )}
+            {content.learningObjectives && content.learningObjectives.length > 0 && (
+              <div className="p-4 border rounded-lg bg-muted/30">
+                <h3 className="font-semibold mb-3">Learning Objectives</h3>
+                <ul className="space-y-2">
+                  {content.learningObjectives.map((obj: string, i: number) => (
+                    <li key={i} className="flex items-start gap-2">
+                      <span className="text-green-500">✓</span>
+                      <span>{obj}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            {content.prerequisites && content.prerequisites.length > 0 && (
+              <div>
+                <h3 className="font-semibold mb-2">Prerequisites</h3>
+                <ul className="list-disc list-inside space-y-1">
+                  {content.prerequisites.map((pre: string, i: number) => (
+                    <li key={i}>{pre}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            {content.sections && content.sections.map((section: any, i: number) => (
+              <div key={i} className="space-y-3">
+                <h3 className="font-semibold text-lg border-b pb-2">{section.heading || section.title}</h3>
+                {section.content && <p>{section.content}</p>}
+                {section.keyPoints && (
+                  <ul className="space-y-1 ml-4">
+                    {section.keyPoints.map((point: string, j: number) => (
+                      <li key={j} className="flex items-start gap-2">
+                        <span className="text-primary">•</span>
+                        <span>{point}</span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+                {section.steps && section.steps.map((step: any, j: number) => (
+                  <Card key={j} className="mt-2">
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-base flex items-center gap-2">
+                        <Badge variant="default">{step.stepNumber || j + 1}</Badge>
+                        {step.title}
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <p>{step.instruction || step.description}</p>
+                      {step.tip && (
+                        <div className="mt-2 p-2 bg-blue-50 dark:bg-blue-950/30 rounded text-sm border-l-4 border-blue-500">
+                          <span className="font-medium">💡 Tip:</span> {step.tip}
+                        </div>
+                      )}
+                      {step.warning && (
+                        <div className="mt-2 p-2 bg-yellow-50 dark:bg-yellow-950/30 rounded text-sm border-l-4 border-yellow-500">
+                          <span className="font-medium">⚠️ Warning:</span> {step.warning}
+                        </div>
+                      )}
+                      {step.screenshotHint && (
+                        <div className="mt-2 text-sm text-muted-foreground italic">
+                          📷 Screenshot: {step.screenshotHint}
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            ))}
+            {content.steps && !content.sections && (
+              <div>
+                <h3 className="font-semibold mb-4">Steps</h3>
+                <div className="space-y-4">
+                  {content.steps.map((step: any, i: number) => (
+                    <Card key={i}>
+                      <CardHeader className="pb-2">
+                        <CardTitle className="text-base flex items-center gap-2">
+                          <Badge variant="default">{step.stepNumber || i + 1}</Badge>
+                          {step.title}
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <p>{step.instruction || step.description}</p>
+                        {step.tip && (
+                          <div className="mt-2 p-2 bg-blue-50 dark:bg-blue-950/30 rounded text-sm border-l-4 border-blue-500">
+                            <span className="font-medium">💡 Tip:</span> {step.tip}
+                          </div>
+                        )}
+                        {step.warning && (
+                          <div className="mt-2 p-2 bg-yellow-50 dark:bg-yellow-950/30 rounded text-sm border-l-4 border-yellow-500">
+                            <span className="font-medium">⚠️ Warning:</span> {step.warning}
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </div>
+            )}
+            {content.summary && !content.description && (
+              <div className="p-4 bg-muted/30 rounded-lg">
+                <h3 className="font-semibold mb-2">Summary</h3>
+                <p>{content.summary}</p>
+              </div>
+            )}
+          </div>
+        );
+
+      case 'sop':
+        return (
+          <div className="space-y-6">
+            <div>
+              <h2 className="text-2xl font-bold">{content.title}</h2>
+              {content.description && <p className="text-muted-foreground mt-2">{content.description}</p>}
+              {content.purpose && <p className="text-muted-foreground mt-2">{content.purpose}</p>}
+            </div>
+            <div className="grid grid-cols-2 gap-4 text-sm">
+              {content.documentNumber && (
+                <div>
+                  <span className="font-medium">Document #:</span> {content.documentNumber}
+                </div>
+              )}
+              {content.version && (
+                <div>
+                  <span className="font-medium">Version:</span> {content.version}
+                </div>
+              )}
+              {content.effectiveDate && (
+                <div>
+                  <span className="font-medium">Effective Date:</span> {content.effectiveDate}
+                </div>
+              )}
+              {content.reviewDate && (
+                <div>
+                  <span className="font-medium">Review Date:</span> {content.reviewDate}
+                </div>
+              )}
+            </div>
+            {content.scope && (
+              <div>
+                <h3 className="font-semibold mb-2">Scope</h3>
+                <p>{content.scope}</p>
+              </div>
+            )}
+            {content.responsibilities && content.responsibilities.length > 0 && (
+              <div>
+                <h3 className="font-semibold mb-2">Responsibilities</h3>
+                <div className="space-y-2">
+                  {content.responsibilities.map((resp: any, i: number) => (
+                    <div key={i} className="flex gap-2">
+                      <Badge variant="outline">{resp.role}</Badge>
+                      <span>{resp.responsibility || resp.description}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+            {content.procedures && content.procedures.length > 0 && (
+              <div>
+                <h3 className="font-semibold mb-4">Procedures</h3>
+                <div className="space-y-4">
+                  {content.procedures.map((proc: any, i: number) => (
+                    <Card key={i}>
+                      <CardHeader className="pb-2">
+                        <CardTitle className="text-base flex items-center gap-2">
+                          <Badge variant="default">{proc.stepNumber || i + 1}</Badge>
+                          {proc.title || proc.action}
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <p>{proc.description || proc.instruction}</p>
+                        {proc.substeps && (
+                          <ul className="mt-2 ml-4 space-y-1 list-disc list-inside">
+                            {proc.substeps.map((sub: string, j: number) => (
+                              <li key={j}>{sub}</li>
+                            ))}
+                          </ul>
+                        )}
+                        {proc.note && (
+                          <div className="mt-2 p-2 bg-muted rounded text-sm">
+                            <span className="font-medium">Note:</span> {proc.note}
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </div>
+            )}
+            {content.sections && content.sections.map((section: any, i: number) => (
+              <div key={i} className="space-y-3">
+                <h3 className="font-semibold text-lg border-b pb-2">{section.heading || section.title}</h3>
+                {section.content && <p>{section.content}</p>}
+                {section.steps && section.steps.map((step: any, j: number) => (
+                  <Card key={j} className="mt-2">
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-base flex items-center gap-2">
+                        <Badge variant="default">{step.stepNumber || j + 1}</Badge>
+                        {step.title || step.action}
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <p>{step.description || step.instruction}</p>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            ))}
+            {content.references && content.references.length > 0 && (
+              <div>
+                <h3 className="font-semibold mb-2">References</h3>
+                <ul className="list-disc list-inside space-y-1">
+                  {content.references.map((ref: string, i: number) => (
+                    <li key={i}>{ref}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+        );
+
       default:
         return <pre className="text-sm">{JSON.stringify(content, null, 2)}</pre>;
     }
