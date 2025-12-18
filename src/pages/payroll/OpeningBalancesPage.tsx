@@ -175,12 +175,12 @@ const OpeningBalancesPage: React.FC = () => {
   const loadEmployees = async () => {
     if (!selectedCompanyId) return;
     
-    const { data, error } = await supabase
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data, error } = await (supabase as any)
       .from("profiles")
       .select("id, full_name, employee_id")
       .eq("company_id", selectedCompanyId)
-      .eq("status", "active")
-      .order("full_name");
+      .eq("status", "active");
     
     if (!error && data) {
       setEmployees(data.map((d: any) => ({
