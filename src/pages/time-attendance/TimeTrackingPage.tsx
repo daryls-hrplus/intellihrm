@@ -28,7 +28,9 @@ import {
   History,
   Sun,
   Moon,
-  DollarSign
+  DollarSign,
+  Camera,
+  Image
 } from "lucide-react";
 
 interface Company {
@@ -67,6 +69,8 @@ interface TimeEntry {
   clock_out_location: string | null;
   clock_in_method: string;
   clock_out_method: string | null;
+  clock_in_photo_url: string | null;
+  clock_out_photo_url: string | null;
   break_start: string | null;
   break_end: string | null;
   break_duration_minutes: number;
@@ -114,7 +118,7 @@ export default function TimeTrackingPage() {
   const [shifts, setShifts] = useState<Shift[]>([]);
   const [employeeShift, setEmployeeShift] = useState<Shift | null>(null);
   const [roundingRules, setRoundingRules] = useState<RoundingRule[]>([]);
-
+  const [photoViewEntry, setPhotoViewEntry] = useState<TimeEntry | null>(null);
   useEffect(() => {
     loadCompanies();
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
@@ -789,11 +793,21 @@ export default function TimeTrackingPage() {
                         )}
                       </TableCell>
                       <TableCell>
-                        <div className="flex flex-col">
+                        <div className="flex items-center gap-2">
                           <div className="flex items-center gap-1">
                             <Play className="h-3 w-3 text-success" />
                             {format(new Date(entry.clock_in), 'HH:mm')}
                           </div>
+                          {entry.clock_in_photo_url && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-6 w-6 p-0"
+                              onClick={() => setPhotoViewEntry(entry)}
+                            >
+                              <Camera className="h-3 w-3 text-primary" />
+                            </Button>
+                          )}
                         </div>
                       </TableCell>
                       <TableCell>
@@ -807,15 +821,27 @@ export default function TimeTrackingPage() {
                       </TableCell>
                       <TableCell>
                         {entry.clock_out ? (
-                          <div className="flex flex-col">
-                            <div className="flex items-center gap-1">
-                              <Square className="h-3 w-3 text-destructive" />
-                              {format(new Date(entry.clock_out), 'HH:mm')}
+                          <div className="flex items-center gap-2">
+                            <div className="flex flex-col">
+                              <div className="flex items-center gap-1">
+                                <Square className="h-3 w-3 text-destructive" />
+                                {format(new Date(entry.clock_out), 'HH:mm')}
+                              </div>
+                              {entry.rounded_clock_out && (
+                                <span className="text-xs text-muted-foreground">
+                                  → {format(new Date(entry.rounded_clock_out), 'HH:mm')}
+                                </span>
+                              )}
                             </div>
-                            {entry.rounded_clock_out && (
-                              <span className="text-xs text-muted-foreground">
-                                → {format(new Date(entry.rounded_clock_out), 'HH:mm')}
-                              </span>
+                            {entry.clock_out_photo_url && (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="h-6 w-6 p-0"
+                                onClick={() => setPhotoViewEntry(entry)}
+                              >
+                                <Camera className="h-3 w-3 text-primary" />
+                              </Button>
                             )}
                           </div>
                         ) : (
@@ -844,6 +870,64 @@ export default function TimeTrackingPage() {
             </Table>
           </CardContent>
         </Card>
+
+        {/* Photo View Dialog */}
+        <Dialog open={!!photoViewEntry} onOpenChange={(open) => !open && setPhotoViewEntry(null)}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Image className="h-5 w-5" />
+                Clock Photos - {photoViewEntry?.profile?.full_name}
+              </DialogTitle>
+            </DialogHeader>
+            <div className="grid gap-4 md:grid-cols-2">
+              <div className="space-y-2">
+                <Label className="flex items-center gap-2">
+                  <Play className="h-4 w-4 text-success" />
+                  Clock In Photo
+                </Label>
+                {photoViewEntry?.clock_in_photo_url ? (
+                  <img 
+                    src={photoViewEntry.clock_in_photo_url} 
+                    alt="Clock in photo" 
+                    className="w-full rounded-lg border"
+                  />
+                ) : (
+                  <div className="flex items-center justify-center h-48 bg-muted rounded-lg border">
+                    <span className="text-muted-foreground">No photo</span>
+                  </div>
+                )}
+                {photoViewEntry?.clock_in && (
+                  <p className="text-sm text-muted-foreground text-center">
+                    {format(new Date(photoViewEntry.clock_in), 'PPpp')}
+                  </p>
+                )}
+              </div>
+              <div className="space-y-2">
+                <Label className="flex items-center gap-2">
+                  <Square className="h-4 w-4 text-destructive" />
+                  Clock Out Photo
+                </Label>
+                {photoViewEntry?.clock_out_photo_url ? (
+                  <img 
+                    src={photoViewEntry.clock_out_photo_url} 
+                    alt="Clock out photo" 
+                    className="w-full rounded-lg border"
+                  />
+                ) : (
+                  <div className="flex items-center justify-center h-48 bg-muted rounded-lg border">
+                    <span className="text-muted-foreground">No photo</span>
+                  </div>
+                )}
+                {photoViewEntry?.clock_out && (
+                  <p className="text-sm text-muted-foreground text-center">
+                    {format(new Date(photoViewEntry.clock_out), 'PPpp')}
+                  </p>
+                )}
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     </AppLayout>
   );
