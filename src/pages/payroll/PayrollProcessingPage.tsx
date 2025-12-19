@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { usePayroll, PayrollRun, PayPeriod, EmployeePayroll } from "@/hooks/usePayroll";
+import { checkPayrollExecutionLock, showPayrollLockMessage } from "@/hooks/usePayrollExecutionLock";
 import { PayrollFilters, usePayrollFilters } from "@/components/payroll/PayrollFilters";
 import { usePayslipTemplates, PayslipTemplate } from "@/hooks/usePayslipTemplates";
 import { PayslipDocument } from "@/components/payroll/PayslipDocument";
@@ -169,6 +170,14 @@ export default function PayrollProcessingPage() {
 
   const handleCalculate = async (run: ExtendedPayrollRun) => {
     if (!selectedCompanyId || !selectedPayGroupId) return;
+    
+    // Check for concurrent payroll execution
+    const { isLocked, lockingRun } = await checkPayrollExecutionLock(run.pay_group_id, run.id);
+    if (isLocked && lockingRun) {
+      showPayrollLockMessage(lockingRun);
+      return;
+    }
+    
     const success = await calculatePayroll(run.id, selectedCompanyId, run.pay_period_id, selectedPayGroupId);
     if (success) {
       await loadData();
@@ -198,6 +207,15 @@ export default function PayrollProcessingPage() {
     if (!runToRecalc || !selectedCompanyId) return;
 
     const runId = runToRecalc.id;
+
+    // Check for concurrent payroll execution
+    const { isLocked, lockingRun } = await checkPayrollExecutionLock(runToRecalc.pay_group_id, runToRecalc.id);
+    if (isLocked && lockingRun) {
+      showPayrollLockMessage(lockingRun);
+      setRecalcConfirmOpen(false);
+      setRunToRecalc(null);
+      return;
+    }
 
     // If supervisor approving for approved run
     if (runToRecalc.status === 'approved' && canApproveSupervisor) {
@@ -237,6 +255,13 @@ export default function PayrollProcessingPage() {
   const handleCreateRun = async () => {
     if (!selectedCompanyId || !selectedPayGroupId || selectedPayGroupId === "all" || !createForm.pay_period_id) return;
 
+    // Check for concurrent payroll execution before creating
+    const { isLocked, lockingRun } = await checkPayrollExecutionLock(selectedPayGroupId);
+    if (isLocked && lockingRun) {
+      showPayrollLockMessage(lockingRun);
+      return;
+    }
+
     const result = await createPayrollRun({
       company_id: selectedCompanyId,
       pay_group_id: selectedPayGroupId,
@@ -259,6 +284,13 @@ export default function PayrollProcessingPage() {
   };
 
   const handleProcessPayment = async (run: ExtendedPayrollRun) => {
+    // Check for concurrent payroll execution
+    const { isLocked, lockingRun } = await checkPayrollExecutionLock(run.pay_group_id, run.id);
+    if (isLocked && lockingRun) {
+      showPayrollLockMessage(lockingRun);
+      return;
+    }
+    
     const success = await processPayment(run.id);
     if (success) loadData();
   };
