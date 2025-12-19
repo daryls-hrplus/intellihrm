@@ -21,6 +21,7 @@ export interface CumulativeCalculationContext {
 export interface ExtendedStatutoryRateBand extends StatutoryRateBand {
   annual_max_employee: number | null;
   annual_max_employer: number | null;
+  employer_fixed_amount: number | null;
 }
 
 /**
@@ -143,7 +144,7 @@ export function calculateCumulativeStatutoryDeductions(
           break;
         case 'fixed':
           employeeAmount = applicableBand.fixed_amount || 0;
-          employerAmount = 0;
+          employerAmount = applicableBand.employer_fixed_amount || 0;
           break;
       }
 
@@ -202,15 +203,41 @@ export function calculateCumulativeStatutoryDeductions(
 
 /**
  * Fetch extended rate bands with annual caps
+ * Filters by country and effective date
  */
 export async function fetchExtendedRateBands(
   supabaseClient: any,
-  countryCode?: string
+  countryCode?: string,
+  effectiveDate?: string
 ): Promise<ExtendedStatutoryRateBand[]> {
+  const today = effectiveDate || new Date().toISOString().split('T')[0];
+  
+  // First get statutory type IDs for this country if specified
+  let statutoryTypeIds: string[] = [];
+  if (countryCode) {
+    const { data: types } = await supabaseClient
+      .from('statutory_deduction_types')
+      .select('id')
+      .eq('country', countryCode)
+      .lte('start_date', today)
+      .or(`end_date.is.null,end_date.gte.${today}`);
+    
+    statutoryTypeIds = (types || []).map((t: any) => t.id);
+    if (statutoryTypeIds.length === 0) {
+      return [];
+    }
+  }
+
   let query = supabaseClient
     .from('statutory_rate_bands')
     .select('*')
-    .eq('is_active', true);
+    .eq('is_active', true)
+    .lte('start_date', today)
+    .or(`end_date.is.null,end_date.gte.${today}`);
+
+  if (countryCode && statutoryTypeIds.length > 0) {
+    query = query.in('statutory_type_id', statutoryTypeIds);
+  }
 
   const { data, error } = await query;
 

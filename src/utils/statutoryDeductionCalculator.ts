@@ -19,10 +19,13 @@ export interface StatutoryRateBand {
   employee_rate: number | null;
   employer_rate: number | null;
   fixed_amount: number | null;
+  employer_fixed_amount: number | null;
   per_monday_amount: number | null;
   employer_per_monday_amount: number | null;
   min_age: number | null;
   max_age: number | null;
+  start_date: string | null;
+  end_date: string | null;
   is_active: boolean;
 }
 
@@ -65,11 +68,13 @@ export async function fetchOpeningBalances(
   };
 }
 
-export async function fetchStatutoryDeductionsForCountry(countryCode: string): Promise<{
+export async function fetchStatutoryDeductionsForCountry(countryCode: string, effectiveDate?: string): Promise<{
   types: StatutoryDeduction[];
   bands: StatutoryRateBand[];
 }> {
-  const today = getTodayString();
+  const today = effectiveDate || getTodayString();
+  
+  // Fetch statutory types for the country that are active on the effective date
   const { data: types } = await supabase
     .from('statutory_deduction_types')
     .select('*')
@@ -77,10 +82,21 @@ export async function fetchStatutoryDeductionsForCountry(countryCode: string): P
     .lte('start_date', today)
     .or(`end_date.is.null,end_date.gte.${today}`);
 
+  if (!types || types.length === 0) {
+    return { types: [], bands: [] };
+  }
+
+  // Get the statutory type IDs to filter rate bands
+  const statutoryTypeIds = types.map(t => t.id);
+
+  // Fetch rate bands for these statutory types that are active on the effective date
   const { data: bands } = await supabase
     .from('statutory_rate_bands')
     .select('*')
-    .eq('is_active', true);
+    .eq('is_active', true)
+    .in('statutory_type_id', statutoryTypeIds)
+    .lte('start_date', today)
+    .or(`end_date.is.null,end_date.gte.${today}`);
 
   return {
     types: (types || []) as StatutoryDeduction[],
@@ -189,7 +205,7 @@ export function calculateStatutoryDeductions(
           break;
         case 'fixed':
           employeeAmount = applicableBand.fixed_amount || 0;
-          employerAmount = 0;
+          employerAmount = applicableBand.employer_fixed_amount || 0;
           break;
       }
     }
