@@ -13,6 +13,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Checkbox } from "@/components/ui/checkbox";
 import { PayrollFilters, usePayrollFilters } from "@/components/payroll/PayrollFilters";
 import { checkPayrollExecutionLock, showPayrollLockMessage } from "@/hooks/usePayrollExecutionLock";
+import { useGLCalculation } from "@/hooks/useGLCalculation";
 import { supabase } from "@/integrations/supabase/client";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "@/contexts/AuthContext";
@@ -27,6 +28,8 @@ import {
   CheckCircle,
   DollarSign,
   ArrowRight,
+  BookOpen,
+  CreditCard,
 } from "lucide-react";
 import { formatDateForDisplay } from "@/utils/dateUtils";
 
@@ -78,6 +81,7 @@ export default function OffCyclePayrollPage() {
   const { t } = useTranslation();
   const { user } = useAuth();
   const { selectedCompanyId, setSelectedCompanyId, selectedPayGroupId, setSelectedPayGroupId } = usePayrollFilters();
+  const { checkGLConfigured, checkGLCalculated, calculateGL } = useGLCalculation();
   
   const [isLoading, setIsLoading] = useState(false);
   const [offCycleRuns, setOffCycleRuns] = useState<OffCycleRun[]>([]);
@@ -86,6 +90,8 @@ export default function OffCyclePayrollPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [paidRuns, setPaidRuns] = useState<PayrollRun[]>([]);
   const [payPeriods, setPayPeriods] = useState<PayPeriod[]>([]);
+  const [payGroupGLConfigured, setPayGroupGLConfigured] = useState(false);
+  const [processingRunId, setProcessingRunId] = useState<string | null>(null);
   
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [createForm, setCreateForm] = useState({
@@ -107,6 +113,9 @@ export default function OffCyclePayrollPage() {
   useEffect(() => {
     if (selectedCompanyId && selectedPayGroupId && selectedPayGroupId !== "all") {
       loadData();
+      checkGLConfigured(selectedPayGroupId).then(setPayGroupGLConfigured);
+    } else {
+      setPayGroupGLConfigured(false);
     }
   }, [selectedCompanyId, selectedPayGroupId]);
 
@@ -338,6 +347,70 @@ export default function OffCyclePayrollPage() {
     }).format(amount);
   };
 
+  const handleCalculateGL = async (runId: string) => {
+    if (!selectedCompanyId) return;
+    
+    setProcessingRunId(runId);
+    try {
+      const success = await calculateGL(runId, selectedCompanyId);
+      if (success) {
+        loadData();
+      }
+    } finally {
+      setProcessingRunId(null);
+    }
+  };
+
+  const handleProcessPayment = async (runId: string) => {
+    if (!selectedCompanyId || !selectedPayGroupId) return;
+    
+    // Check for concurrent execution
+    const { isLocked, lockingRun } = await checkPayrollExecutionLock(selectedPayGroupId, runId);
+    if (isLocked && lockingRun) {
+      showPayrollLockMessage(lockingRun);
+      return;
+    }
+    
+    // Check GL requirement
+    if (payGroupGLConfigured) {
+      const glCalculated = await checkGLCalculated(runId);
+      if (!glCalculated) {
+        toast.error("GL entries must be calculated before processing payment");
+        return;
+      }
+    }
+    
+    setProcessingRunId(runId);
+    try {
+      const { error } = await supabase
+        .from("payroll_runs")
+        .update({ 
+          status: "paid",
+          paid_at: new Date().toISOString(),
+          paid_by: user?.id
+        })
+        .eq("id", runId);
+      
+      if (error) throw error;
+      
+      toast.success("Payment processed successfully");
+      loadData();
+    } catch (error: any) {
+      console.error("Error processing payment:", error);
+      toast.error(error.message || "Failed to process payment");
+    } finally {
+      setProcessingRunId(null);
+    }
+  };
+
+  const canCalculateGL = (status: string) => {
+    return payGroupGLConfigured && ['calculated', 'approved'].includes(status);
+  };
+
+  const canProcessPayment = (status: string) => {
+    return ['calculated', 'approved'].includes(status);
+  };
+
   const showContent = selectedCompanyId && selectedPayGroupId && selectedPayGroupId !== "all";
 
   return (
@@ -464,12 +537,13 @@ export default function OffCyclePayrollPage() {
                       <TableHead>Employees</TableHead>
                       <TableHead>Net Pay</TableHead>
                       <TableHead>Status</TableHead>
+                      <TableHead>Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {offCycleRuns.length === 0 ? (
                       <TableRow>
-                        <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
+                        <TableCell colSpan={9} className="text-center py-8 text-muted-foreground">
                           No off-cycle payroll runs found
                         </TableCell>
                       </TableRow>
@@ -499,6 +573,34 @@ export default function OffCyclePayrollPage() {
                           <TableCell>{formatCurrency(run.total_net_pay || 0)}</TableCell>
                           <TableCell>
                             <Badge className={getStatusColor(run.status)}>{run.status}</Badge>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-2">
+                              {canCalculateGL(run.status) && (
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => handleCalculateGL(run.id)}
+                                  disabled={processingRunId === run.id}
+                                >
+                                  <BookOpen className="h-4 w-4 mr-1" />
+                                  GL
+                                </Button>
+                              )}
+                              {canProcessPayment(run.status) && run.status !== 'paid' && (
+                                <Button
+                                  size="sm"
+                                  onClick={() => handleProcessPayment(run.id)}
+                                  disabled={processingRunId === run.id}
+                                >
+                                  <CreditCard className="h-4 w-4 mr-1" />
+                                  Pay
+                                </Button>
+                              )}
+                              {run.status === 'paid' && (
+                                <CheckCircle className="h-4 w-4 text-success" />
+                              )}
+                            </div>
                           </TableCell>
                         </TableRow>
                       ))
