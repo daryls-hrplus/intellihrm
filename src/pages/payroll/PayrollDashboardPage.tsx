@@ -24,6 +24,7 @@ import {
   Link as LinkIcon,
   PartyPopper,
   RefreshCw,
+  Globe,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
@@ -118,6 +119,7 @@ export default function PayrollDashboardPage() {
     bankFileBuilder: { title: t("payroll.modules.bankFileBuilder.title", "Bank File Builder"), description: t("payroll.modules.bankFileBuilder.description", "AI-powered bank file configuration and generation"), icon: FileSpreadsheet, href: "/payroll/bank-file-builder", color: "bg-indigo-500/10 text-indigo-600", tabCode: "bank_file_builder" },
     holidays: { title: t("leave.holidays.title", "Holidays Calendar"), description: t("leave.holidays.subtitle", "Manage country and company holidays"), icon: PartyPopper, href: "/payroll/holidays", color: "bg-pink-500/10 text-pink-600", tabCode: "holidays" },
     openingBalances: { title: "Opening Balances", description: "Import brought forward YTD balances for mid-year employees", icon: FileSpreadsheet, href: "/payroll/opening-balances", color: "bg-teal-500/10 text-teal-600", tabCode: "opening_balances" },
+    countryYearSetup: { title: "Country Year Setup", description: "Configure fiscal years, tax years, and regional settings per country", icon: Globe, href: "/payroll/country-year-setup", color: "bg-violet-500/10 text-violet-600", tabCode: "country_year_setup" },
   };
 
   const filterByAccess = (modules: typeof allModules[keyof typeof allModules][]) =>
@@ -130,7 +132,7 @@ export default function PayrollDashboardPage() {
     },
     {
       titleKey: "Configuration",
-      items: filterByAccess([allModules.payGroups, allModules.payElements, allModules.taxConfig, allModules.statutoryTypes, allModules.taxAllowances, allModules.templates, allModules.holidays, allModules.openingBalances]),
+      items: filterByAccess([allModules.payGroups, allModules.payElements, allModules.taxConfig, allModules.statutoryTypes, allModules.taxAllowances, allModules.countryYearSetup, allModules.templates, allModules.holidays, allModules.openingBalances]),
     },
     {
       titleKey: "Integration",
