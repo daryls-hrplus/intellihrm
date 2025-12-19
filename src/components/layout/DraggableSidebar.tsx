@@ -1,29 +1,11 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import {
-  DndContext,
-  closestCenter,
-  KeyboardSensor,
-  PointerSensor,
-  useSensor,
-  useSensors,
-  DragEndEvent,
-} from "@dnd-kit/core";
-import {
-  arrayMove,
-  SortableContext,
-  sortableKeyboardCoordinates,
-  verticalListSortingStrategy,
-  useSortable,
-} from "@dnd-kit/sortable";
-import { CSS } from "@dnd-kit/utilities";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { supportedLanguages } from "@/i18n/config";
 import { useMenuPermissions } from "@/hooks/useMenuPermissions";
-import { useDraggableOrderWithPersistence } from "@/hooks/useDraggableOrderWithPersistence";
 import {
   LayoutDashboard,
   Users,
@@ -52,7 +34,6 @@ import {
   Wallet,
   Briefcase,
   BookOpen,
-  GripVertical,
 } from "lucide-react";
 
 interface NavItem {
@@ -88,72 +69,6 @@ const navItems: NavItem[] = [
   { title: "navigation.admin", href: "/admin", icon: Settings, moduleCode: "admin", adminOnly: true },
 ];
 
-interface SortableNavItemProps {
-  item: NavItem;
-  isActive: boolean;
-  isCollapsed: boolean;
-  onNavigate: () => void;
-  canEdit: boolean;
-}
-
-function SortableNavItem({ item, isActive, isCollapsed, onNavigate, canEdit }: SortableNavItemProps) {
-  const { t } = useTranslation();
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging: isCurrentDragging,
-  } = useSortable({ id: item.moduleCode, disabled: !canEdit });
-
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-  };
-
-  const Icon = item.icon;
-
-  return (
-    <div
-      ref={setNodeRef}
-      style={style}
-      className={cn(
-        "group relative",
-        isCurrentDragging && "opacity-50 z-50"
-      )}
-    >
-      <NavLink
-        to={item.href}
-        onClick={onNavigate}
-        className={cn(
-          "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all",
-          isActive
-            ? "bg-sidebar-primary text-sidebar-primary-foreground shadow-glow"
-            : "text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-        )}
-      >
-        <Icon className="h-5 w-5 shrink-0" />
-        {!isCollapsed && (
-          <>
-            <span className="flex-1">{t(item.title)}</span>
-            {canEdit && (
-              <button
-                {...attributes}
-                {...listeners}
-                className="opacity-0 group-hover:opacity-100 p-1 hover:bg-sidebar-accent/50 rounded cursor-grab active:cursor-grabbing"
-                onClick={(e) => e.preventDefault()}
-              >
-                <GripVertical className="h-4 w-4 text-sidebar-foreground/60" />
-              </button>
-            )}
-          </>
-        )}
-      </NavLink>
-    </div>
-  );
-}
-
 export function DraggableSidebar() {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
@@ -174,25 +89,6 @@ export function DraggableSidebar() {
     if (!hasMenuAccess(item.moduleCode)) return false;
     return true;
   });
-
-  const getItemId = useCallback((item: NavItem) => item.moduleCode, []);
-
-  const { orderedItems, updateOrder, canEdit } = useDraggableOrderWithPersistence({
-    items: filteredNavItems,
-    preferenceKey: "sidebar-menu-order",
-    getItemId,
-  });
-
-  const sensors = useSensors(
-    useSensor(PointerSensor, {
-      activationConstraint: {
-        distance: 8,
-      },
-    }),
-    useSensor(KeyboardSensor, {
-      coordinateGetter: sortableKeyboardCoordinates,
-    })
-  );
 
   useEffect(() => {
     const fetchTerritory = async () => {
@@ -218,17 +114,6 @@ export function DraggableSidebar() {
   const handleSignOut = async () => {
     await signOut();
     navigate("/auth");
-  };
-
-  const handleDragEnd = (event: DragEndEvent) => {
-    const { active, over } = event;
-
-    if (over && active.id !== over.id) {
-      const oldIndex = orderedItems.findIndex((item) => item.moduleCode === active.id);
-      const newIndex = orderedItems.findIndex((item) => item.moduleCode === over.id);
-      const newItems = arrayMove(orderedItems, oldIndex, newIndex);
-      updateOrder(newItems);
-    }
   };
 
   const getInitials = (name: string | null) => {
@@ -325,30 +210,30 @@ export function DraggableSidebar() {
           </div>
         )}
 
-        {/* Navigation with drag and drop */}
-        <DndContext
-          sensors={sensors}
-          collisionDetection={closestCenter}
-          onDragEnd={handleDragEnd}
-        >
-          <SortableContext
-            items={orderedItems.map((item) => item.moduleCode)}
-            strategy={verticalListSortingStrategy}
-          >
-            <nav className="flex-1 space-y-1 overflow-y-auto p-3">
-              {orderedItems.map((item) => (
-                <SortableNavItem
-                  key={item.moduleCode}
-                  item={item}
-                  isActive={isActiveRoute(item.href)}
-                  isCollapsed={isCollapsed}
-                  onNavigate={() => setIsMobileOpen(false)}
-                  canEdit={canEdit}
-                />
-              ))}
-            </nav>
-          </SortableContext>
-        </DndContext>
+        {/* Navigation */}
+        <nav className="flex-1 space-y-1 overflow-y-auto p-3">
+          {filteredNavItems.map((item) => {
+            const Icon = item.icon;
+            const isActive = isActiveRoute(item.href);
+            
+            return (
+              <NavLink
+                key={item.moduleCode}
+                to={item.href}
+                onClick={() => setIsMobileOpen(false)}
+                className={cn(
+                  "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all",
+                  isActive
+                    ? "bg-sidebar-primary text-sidebar-primary-foreground shadow-glow"
+                    : "text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                )}
+              >
+                <Icon className="h-5 w-5 shrink-0" />
+                {!isCollapsed && <span className="flex-1">{t(item.title)}</span>}
+              </NavLink>
+            );
+          })}
+        </nav>
 
         <div className="border-t border-sidebar-border p-4">
           {!isCollapsed ? (
