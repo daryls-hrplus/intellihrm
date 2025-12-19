@@ -3781,6 +3781,8 @@ export type Database = {
           created_at: string
           division_id: string | null
           email: string | null
+          fiscal_year_start_day: number | null
+          fiscal_year_start_month: number | null
           group_id: string | null
           id: string
           industry: string | null
@@ -3793,6 +3795,7 @@ export type Database = {
           state: string | null
           territory_id: string | null
           updated_at: string
+          use_country_fiscal_year: boolean | null
           website: string | null
         }
         Insert: {
@@ -3803,6 +3806,8 @@ export type Database = {
           created_at?: string
           division_id?: string | null
           email?: string | null
+          fiscal_year_start_day?: number | null
+          fiscal_year_start_month?: number | null
           group_id?: string | null
           id?: string
           industry?: string | null
@@ -3815,6 +3820,7 @@ export type Database = {
           state?: string | null
           territory_id?: string | null
           updated_at?: string
+          use_country_fiscal_year?: boolean | null
           website?: string | null
         }
         Update: {
@@ -3825,6 +3831,8 @@ export type Database = {
           created_at?: string
           division_id?: string | null
           email?: string | null
+          fiscal_year_start_day?: number | null
+          fiscal_year_start_month?: number | null
           group_id?: string | null
           id?: string
           industry?: string | null
@@ -3837,6 +3845,7 @@ export type Database = {
           state?: string | null
           territory_id?: string | null
           updated_at?: string
+          use_country_fiscal_year?: boolean | null
           website?: string | null
         }
         Relationships: [
@@ -33300,6 +33309,13 @@ export type Database = {
       get_active_workflow_template: {
         Args: { p_as_of_date?: string; p_template_code: string }
         Returns: string
+      }
+      get_company_fiscal_config: {
+        Args: { p_company_id: string }
+        Returns: {
+          fiscal_year_start_day: number
+          fiscal_year_start_month: number
+        }[]
       }
       get_employee_period_statutory: {
         Args: {

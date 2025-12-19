@@ -64,43 +64,33 @@ export function calculateFiscalPeriod(
 }
 
 /**
- * Fetch country fiscal config and calculate fiscal period
+ * Fetch company fiscal config and calculate fiscal period
+ * Uses company-specific settings first, falls back to country settings
  */
 export async function getFiscalPeriodForCompany(
   companyId: string,
   periodEnd: Date | string
 ): Promise<FiscalPeriod | null> {
   try {
-    // Get company's country
-    const { data: company, error: companyError } = await supabase
-      .from("companies")
-      .select("country")
-      .eq("id", companyId)
-      .single();
-    
-    if (companyError || !company?.country) {
-      console.warn("Could not fetch company country, using calendar year");
-      return calculateFiscalPeriod(new Date(periodEnd));
-    }
-    
-    // Get country's fiscal year config
+    // Use the database function to get effective fiscal config
     const { data: fiscalConfig, error: fiscalError } = await supabase
-      .from("country_fiscal_years")
-      .select("fiscal_year_start_month, fiscal_year_start_day")
-      .eq("country_code", company.country)
-      .eq("is_active", true)
-      .single();
+      .rpc("get_company_fiscal_config", { p_company_id: companyId });
     
-    if (fiscalError || !fiscalConfig) {
-      console.warn(`No fiscal config for country ${company.country}, using calendar year`);
+    if (fiscalError) {
+      console.warn("Could not fetch company fiscal config, using calendar year", fiscalError);
       return calculateFiscalPeriod(new Date(periodEnd));
     }
     
-    return calculateFiscalPeriod(
-      new Date(periodEnd),
-      fiscalConfig.fiscal_year_start_month,
-      fiscalConfig.fiscal_year_start_day
-    );
+    if (fiscalConfig && fiscalConfig.length > 0) {
+      return calculateFiscalPeriod(
+        new Date(periodEnd),
+        fiscalConfig[0].fiscal_year_start_month,
+        fiscalConfig[0].fiscal_year_start_day
+      );
+    }
+    
+    // Fallback to calendar year
+    return calculateFiscalPeriod(new Date(periodEnd));
   } catch (error) {
     console.error("Error calculating fiscal period:", error);
     return null;
@@ -126,28 +116,16 @@ export async function calculateFiscalPeriodsForPayPeriods(
   
   // Process each company's periods
   for (const [companyId, periods] of byCompany) {
-    // Get company's country and fiscal config once
-    const { data: company } = await supabase
-      .from("companies")
-      .select("country")
-      .eq("id", companyId)
-      .single();
+    // Get company's fiscal config using the database function
+    const { data: fiscalConfig } = await supabase
+      .rpc("get_company_fiscal_config", { p_company_id: companyId });
     
     let fiscalStartMonth = 1;
     let fiscalStartDay = 1;
     
-    if (company?.country) {
-      const { data: fiscalConfig } = await supabase
-        .from("country_fiscal_years")
-        .select("fiscal_year_start_month, fiscal_year_start_day")
-        .eq("country_code", company.country)
-        .eq("is_active", true)
-        .single();
-      
-      if (fiscalConfig) {
-        fiscalStartMonth = fiscalConfig.fiscal_year_start_month;
-        fiscalStartDay = fiscalConfig.fiscal_year_start_day;
-      }
+    if (fiscalConfig && fiscalConfig.length > 0) {
+      fiscalStartMonth = fiscalConfig[0].fiscal_year_start_month;
+      fiscalStartDay = fiscalConfig[0].fiscal_year_start_day;
     }
     
     // Calculate for each period
