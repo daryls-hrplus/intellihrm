@@ -12,7 +12,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Switch } from "@/components/ui/switch";
 import { supabase } from "@/integrations/supabase/client";
-import { Plus, Edit, Trash2, FileText, Search, Sparkles, BookOpen, FileStack, Printer } from "lucide-react";
+import { Plus, Edit, Trash2, FileText, Search, Sparkles, BookOpen, FileStack, Printer, Globe } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { CountrySelect } from "@/components/ui/country-select";
@@ -288,7 +288,6 @@ export default function StatutoryDeductionTypesPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Country</TableHead>
                   <TableHead>Type</TableHead>
                   <TableHead>Code</TableHead>
                   <TableHead>Name</TableHead>
@@ -301,68 +300,93 @@ export default function StatutoryDeductionTypesPage() {
               <TableBody>
                 {isLoading ? (
                   <TableRow>
-                    <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
+                    <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
                       Loading...
                     </TableCell>
                   </TableRow>
                 ) : filteredItems.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
+                    <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
                       No statutory deduction types found
                     </TableCell>
                   </TableRow>
                 ) : (
-                  filteredItems.map((item) => (
-                    <TableRow key={item.id}>
-                      <TableCell className="font-medium">{getCountryName(item.country)}</TableCell>
-                      <TableCell>{getStatutoryTypeLabel(item.statutory_type)}</TableCell>
-                      <TableCell><code className="text-xs">{item.statutory_code}</code></TableCell>
-                      <TableCell>{item.statutory_name}</TableCell>
-                      <TableCell>{item.start_date}</TableCell>
-                      <TableCell>{item.end_date || "-"}</TableCell>
-                      <TableCell>
-                        <Badge variant={item.is_active ? "default" : "secondary"}>
-                          {item.is_active ? "Active" : "Inactive"}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex justify-end gap-2">
-                          <Button 
-                            variant="ghost" 
-                            size="sm" 
-                            onClick={() => {
-                              setSelectedStatutory(item);
-                              setPrintReportOpen(true);
-                            }}
-                            title="Print Report"
-                          >
-                            <Printer className="h-4 w-4" />
-                          </Button>
-                          <Button 
-                            variant="ghost" 
-                            size="sm" 
-                            onClick={() => openReportingDocs(item)}
-                            title="Reporting Documents"
-                          >
-                            <FileStack className="h-4 w-4" />
-                          </Button>
-                          <Button 
-                            variant="ghost" 
-                            size="sm" 
-                            onClick={() => openAiDialog(item)}
-                            title="AI Analysis"
-                          >
-                            <Sparkles className={`h-4 w-4 ${item.ai_analyzed_at ? "text-primary" : ""}`} />
-                          </Button>
-                          <Button variant="ghost" size="sm" onClick={() => openEdit(item)}>
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                          <Button variant="ghost" size="sm" onClick={() => handleDelete(item.id)}>
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
+                  // Group items by country
+                  Object.entries(
+                    filteredItems.reduce((acc, item) => {
+                      if (!acc[item.country]) acc[item.country] = [];
+                      acc[item.country].push(item);
+                      return acc;
+                    }, {} as Record<string, StatutoryDeductionType[]>)
+                  ).map(([countryCode, countryItems]) => (
+                    <>
+                      {/* Country Header Row */}
+                      <TableRow key={`header-${countryCode}`} className="bg-muted/50 hover:bg-muted/50">
+                        <TableCell colSpan={7} className="py-3">
+                          <div className="flex items-center gap-2">
+                            <Globe className="h-4 w-4 text-primary" />
+                            <span className="font-semibold text-foreground">
+                              {getCountryName(countryCode)}
+                            </span>
+                            <Badge variant="outline" className="ml-2">
+                              {countryItems.length} {countryItems.length === 1 ? 'type' : 'types'}
+                            </Badge>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                      {/* Country Items */}
+                      {countryItems.map((item) => (
+                        <TableRow key={item.id}>
+                          <TableCell>{getStatutoryTypeLabel(item.statutory_type)}</TableCell>
+                          <TableCell><code className="text-xs">{item.statutory_code}</code></TableCell>
+                          <TableCell>{item.statutory_name}</TableCell>
+                          <TableCell>{item.start_date}</TableCell>
+                          <TableCell>{item.end_date || "-"}</TableCell>
+                          <TableCell>
+                            <Badge variant={item.is_active ? "default" : "secondary"}>
+                              {item.is_active ? "Active" : "Inactive"}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <div className="flex justify-end gap-2">
+                              <Button 
+                                variant="ghost" 
+                                size="sm" 
+                                onClick={() => {
+                                  setSelectedStatutory(item);
+                                  setPrintReportOpen(true);
+                                }}
+                                title="Print Report"
+                              >
+                                <Printer className="h-4 w-4" />
+                              </Button>
+                              <Button 
+                                variant="ghost" 
+                                size="sm" 
+                                onClick={() => openReportingDocs(item)}
+                                title="Reporting Documents"
+                              >
+                                <FileStack className="h-4 w-4" />
+                              </Button>
+                              <Button 
+                                variant="ghost" 
+                                size="sm" 
+                                onClick={() => openAiDialog(item)}
+                                title="AI Analysis"
+                              >
+                                <Sparkles className={`h-4 w-4 ${item.ai_analyzed_at ? "text-primary" : ""}`} />
+                              </Button>
+                              <Button variant="ghost" size="sm" onClick={() => openEdit(item)}>
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                              <Button variant="ghost" size="sm" onClick={() => handleDelete(item.id)}>
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </>
                   ))
                 )}
               </TableBody>
