@@ -268,6 +268,7 @@ import OffCyclePayrollPage from "./pages/payroll/OffCyclePayrollPage";
 import TaxConfigPage from "./pages/payroll/TaxConfigPage";
 import PayrollReportsPage from "./pages/payroll/PayrollReportsPage";
 import YearEndProcessingPage from "./pages/payroll/YearEndProcessingPage";
+import YearEndPayrollClosingPage from "./pages/payroll/YearEndPayrollClosingPage";
 import StatutoryDeductionTypesPage from "./pages/payroll/StatutoryDeductionTypesPage";
 import PayslipsPage from "./pages/payroll/PayslipsPage";
 import PayPeriodPayrollEntriesPage from "./pages/payroll/PayPeriodPayrollEntriesPage";
@@ -1606,6 +1607,14 @@ const App = () => (
               element={
                 <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="payroll">
                   <YearEndProcessingPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/payroll/year-end-closing"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="payroll">
+                  <YearEndPayrollClosingPage />
                 </ProtectedRoute>
               }
             />

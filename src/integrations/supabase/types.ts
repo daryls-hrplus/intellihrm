@@ -24914,6 +24914,108 @@ export type Database = {
           },
         ]
       }
+      payroll_year_end_closings: {
+        Row: {
+          closed_at: string | null
+          closed_by: string | null
+          closing_year: number
+          company_id: string
+          created_at: string
+          created_by: string | null
+          employee_annual_report_generated: boolean | null
+          employee_annual_report_generated_at: string | null
+          first_new_period_start: string | null
+          id: string
+          new_periods_count: number | null
+          new_periods_generated: boolean | null
+          new_periods_generated_at: string | null
+          new_year: number
+          notes: string | null
+          pay_group_id: string
+          status: string
+          statutory_report_generated: boolean | null
+          statutory_report_generated_at: string | null
+          tax_summary_report_generated: boolean | null
+          tax_summary_report_generated_at: string | null
+          updated_at: string
+          ytd_report_generated: boolean | null
+          ytd_report_generated_at: string | null
+          ytd_reset_completed: boolean | null
+          ytd_reset_completed_at: string | null
+        }
+        Insert: {
+          closed_at?: string | null
+          closed_by?: string | null
+          closing_year: number
+          company_id: string
+          created_at?: string
+          created_by?: string | null
+          employee_annual_report_generated?: boolean | null
+          employee_annual_report_generated_at?: string | null
+          first_new_period_start?: string | null
+          id?: string
+          new_periods_count?: number | null
+          new_periods_generated?: boolean | null
+          new_periods_generated_at?: string | null
+          new_year: number
+          notes?: string | null
+          pay_group_id: string
+          status?: string
+          statutory_report_generated?: boolean | null
+          statutory_report_generated_at?: string | null
+          tax_summary_report_generated?: boolean | null
+          tax_summary_report_generated_at?: string | null
+          updated_at?: string
+          ytd_report_generated?: boolean | null
+          ytd_report_generated_at?: string | null
+          ytd_reset_completed?: boolean | null
+          ytd_reset_completed_at?: string | null
+        }
+        Update: {
+          closed_at?: string | null
+          closed_by?: string | null
+          closing_year?: number
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          employee_annual_report_generated?: boolean | null
+          employee_annual_report_generated_at?: string | null
+          first_new_period_start?: string | null
+          id?: string
+          new_periods_count?: number | null
+          new_periods_generated?: boolean | null
+          new_periods_generated_at?: string | null
+          new_year?: number
+          notes?: string | null
+          pay_group_id?: string
+          status?: string
+          statutory_report_generated?: boolean | null
+          statutory_report_generated_at?: string | null
+          tax_summary_report_generated?: boolean | null
+          tax_summary_report_generated_at?: string | null
+          updated_at?: string
+          ytd_report_generated?: boolean | null
+          ytd_report_generated_at?: string | null
+          ytd_reset_completed?: boolean | null
+          ytd_reset_completed_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payroll_year_end_closings_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payroll_year_end_closings_pay_group_id_fkey"
+            columns: ["pay_group_id"]
+            isOneToOne: false
+            referencedRelation: "pay_groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       payslip_templates: {
         Row: {
           accent_color: string | null
@@ -33167,7 +33269,22 @@ export type Database = {
           within_geofence: boolean
         }[]
       }
+      check_year_end_reports_complete: {
+        Args: { p_closing_id: string }
+        Returns: boolean
+      }
       execute_report_sql: { Args: { sql_query: string }; Returns: Json }
+      generate_new_year_pay_periods: {
+        Args: {
+          p_created_by: string
+          p_new_year: number
+          p_pay_group_id: string
+        }
+        Returns: {
+          first_period_start: string
+          periods_created: number
+        }[]
+      }
       get_360_feedback_summary: {
         Args: { p_participant_id: string }
         Returns: {
