@@ -3781,8 +3781,6 @@ export type Database = {
           created_at: string
           division_id: string | null
           email: string | null
-          fiscal_year_start_day: number | null
-          fiscal_year_start_month: number | null
           group_id: string | null
           id: string
           industry: string | null
@@ -3795,7 +3793,6 @@ export type Database = {
           state: string | null
           territory_id: string | null
           updated_at: string
-          use_country_fiscal_year: boolean | null
           website: string | null
         }
         Insert: {
@@ -3806,8 +3803,6 @@ export type Database = {
           created_at?: string
           division_id?: string | null
           email?: string | null
-          fiscal_year_start_day?: number | null
-          fiscal_year_start_month?: number | null
           group_id?: string | null
           id?: string
           industry?: string | null
@@ -3820,7 +3815,6 @@ export type Database = {
           state?: string | null
           territory_id?: string | null
           updated_at?: string
-          use_country_fiscal_year?: boolean | null
           website?: string | null
         }
         Update: {
@@ -3831,8 +3825,6 @@ export type Database = {
           created_at?: string
           division_id?: string | null
           email?: string | null
-          fiscal_year_start_day?: number | null
-          fiscal_year_start_month?: number | null
           group_id?: string | null
           id?: string
           industry?: string | null
@@ -3845,7 +3837,6 @@ export type Database = {
           state?: string | null
           territory_id?: string | null
           updated_at?: string
-          use_country_fiscal_year?: boolean | null
           website?: string | null
         }
         Relationships: [
@@ -4128,6 +4119,56 @@ export type Database = {
             columns: ["uploaded_by"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      company_fiscal_years: {
+        Row: {
+          company_id: string
+          created_at: string
+          created_by: string | null
+          effective_end_date: string | null
+          effective_start_date: string
+          fiscal_year_start_day: number
+          fiscal_year_start_month: number
+          id: string
+          notes: string | null
+          updated_at: string
+          use_country_fiscal_year: boolean
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          created_by?: string | null
+          effective_end_date?: string | null
+          effective_start_date: string
+          fiscal_year_start_day?: number
+          fiscal_year_start_month?: number
+          id?: string
+          notes?: string | null
+          updated_at?: string
+          use_country_fiscal_year?: boolean
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          effective_end_date?: string | null
+          effective_start_date?: string
+          fiscal_year_start_day?: number
+          fiscal_year_start_month?: number
+          id?: string
+          notes?: string | null
+          updated_at?: string
+          use_country_fiscal_year?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_fiscal_years_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
             referencedColumns: ["id"]
           },
         ]
@@ -33310,13 +33351,22 @@ export type Database = {
         Args: { p_as_of_date?: string; p_template_code: string }
         Returns: string
       }
-      get_company_fiscal_config: {
-        Args: { p_company_id: string }
-        Returns: {
-          fiscal_year_start_day: number
-          fiscal_year_start_month: number
-        }[]
-      }
+      get_company_fiscal_config:
+        | {
+            Args: { p_company_id: string }
+            Returns: {
+              fiscal_year_start_day: number
+              fiscal_year_start_month: number
+            }[]
+          }
+        | {
+            Args: { p_company_id: string; p_effective_date?: string }
+            Returns: {
+              fiscal_year_start_day: number
+              fiscal_year_start_month: number
+              use_country_fiscal_year: boolean
+            }[]
+          }
       get_employee_period_statutory: {
         Args: {
           p_employee_id: string
