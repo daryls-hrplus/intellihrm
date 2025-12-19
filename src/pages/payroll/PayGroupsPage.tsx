@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
-import { Plus, Pencil, Trash2, Users, ArrowLeft, ShieldCheck } from "lucide-react";
+import { Plus, Pencil, Trash2, Users, ArrowLeft, ShieldCheck, BookOpen } from "lucide-react";
 import { PayrollCalendarGenerator } from "@/components/payroll/PayrollCalendarGenerator";
 import { toast } from "sonner";
 import { formatDateForDisplay, getTodayString } from "@/utils/dateUtils";
@@ -26,6 +26,7 @@ interface PayGroupFormData {
   pay_frequency: string;
   is_active: boolean;
   uses_national_insurance: boolean;
+  gl_configured: boolean;
   start_date: string;
   end_date: string;
 }
@@ -44,6 +45,7 @@ export default function PayGroupsPage() {
     pay_frequency: "monthly",
     is_active: true,
     uses_national_insurance: false,
+    gl_configured: false,
     start_date: getTodayString(),
     end_date: "",
   });
@@ -73,6 +75,7 @@ export default function PayGroupsPage() {
         pay_frequency: data.pay_frequency,
         is_active: data.is_active,
         uses_national_insurance: data.uses_national_insurance,
+        gl_configured: data.gl_configured,
         start_date: data.start_date,
         end_date: data.end_date || null,
       };
@@ -121,6 +124,7 @@ export default function PayGroupsPage() {
       pay_frequency: "monthly",
       is_active: true,
       uses_national_insurance: false,
+      gl_configured: false,
       start_date: getTodayString(),
       end_date: "",
     });
@@ -135,6 +139,7 @@ export default function PayGroupsPage() {
       pay_frequency: item.pay_frequency,
       is_active: item.is_active,
       uses_national_insurance: item.uses_national_insurance || false,
+      gl_configured: item.gl_configured || false,
       start_date: item.start_date,
       end_date: item.end_date || "",
     });
@@ -207,6 +212,7 @@ export default function PayGroupsPage() {
                   <TableHead>{t("common.code")}</TableHead>
                   <TableHead>{t("payroll.payGroups.payFrequency")}</TableHead>
                   <TableHead>NI</TableHead>
+                  <TableHead>GL</TableHead>
                   <TableHead>{t("common.status")}</TableHead>
                   <TableHead>{t("common.startDate")}</TableHead>
                   <TableHead>{t("common.actions")}</TableHead>
@@ -223,6 +229,11 @@ export default function PayGroupsPage() {
                     <TableCell>
                       {pg.uses_national_insurance && (
                         <ShieldCheck className="h-4 w-4 text-success" />
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      {pg.gl_configured && (
+                        <BookOpen className="h-4 w-4 text-success" />
                       )}
                     </TableCell>
                     <TableCell>
@@ -319,20 +330,30 @@ export default function PayGroupsPage() {
                 />
               </div>
             </div>
-            <div className="flex items-center gap-4">
-              <div className="flex items-center gap-2">
-                <Switch
-                  checked={formData.is_active}
-                  onCheckedChange={(checked) => setFormData((prev) => ({ ...prev, is_active: checked }))}
-                />
-                <Label>{t("common.active")}</Label>
+            <div className="flex flex-col gap-3">
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2">
+                  <Switch
+                    checked={formData.is_active}
+                    onCheckedChange={(checked) => setFormData((prev) => ({ ...prev, is_active: checked }))}
+                  />
+                  <Label>{t("common.active")}</Label>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Switch
+                    checked={formData.uses_national_insurance}
+                    onCheckedChange={(checked) => setFormData((prev) => ({ ...prev, uses_national_insurance: checked }))}
+                  />
+                  <Label>{t("payroll.payGroups.usesNationalInsurance")}</Label>
+                </div>
               </div>
               <div className="flex items-center gap-2">
                 <Switch
-                  checked={formData.uses_national_insurance}
-                  onCheckedChange={(checked) => setFormData((prev) => ({ ...prev, uses_national_insurance: checked }))}
+                  checked={formData.gl_configured}
+                  onCheckedChange={(checked) => setFormData((prev) => ({ ...prev, gl_configured: checked }))}
                 />
-                <Label>{t("payroll.payGroups.usesNationalInsurance")}</Label>
+                <Label>GL Configured</Label>
+                <span className="text-xs text-muted-foreground">(Enables GL posting step before payout)</span>
               </div>
             </div>
           </div>
