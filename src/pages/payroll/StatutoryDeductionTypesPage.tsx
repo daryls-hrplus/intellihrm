@@ -188,10 +188,13 @@ export default function StatutoryDeductionTypesPage() {
   };
 
   const filteredItems = items.filter((item) => {
+    const countryName = getCountryName(item.country).toLowerCase();
     const matchesSearch =
       !searchTerm ||
       item.statutory_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.statutory_code.toLowerCase().includes(searchTerm.toLowerCase());
+      item.statutory_code.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      countryName.includes(searchTerm.toLowerCase()) ||
+      item.country.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCountry = countryFilter === "all" || item.country === countryFilter;
     return matchesSearch && matchesCountry;
   });
