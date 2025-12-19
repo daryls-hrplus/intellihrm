@@ -29514,6 +29514,8 @@ export type Database = {
       }
       statutory_rate_bands: {
         Row: {
+          annual_max_employee: number | null
+          annual_max_employer: number | null
           band_name: string | null
           calculation_method: string
           company_id: string | null
@@ -29539,6 +29541,8 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          annual_max_employee?: number | null
+          annual_max_employer?: number | null
           band_name?: string | null
           calculation_method?: string
           company_id?: string | null
@@ -29564,6 +29568,8 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          annual_max_employee?: number | null
+          annual_max_employer?: number | null
           band_name?: string | null
           calculation_method?: string
           company_id?: string | null
@@ -33105,6 +33111,19 @@ export type Database = {
         Args: { p_as_of_date?: string; p_template_code: string }
         Returns: string
       }
+      get_employee_period_statutory: {
+        Args: {
+          p_employee_id: string
+          p_exclude_run_id?: string
+          p_pay_period_id: string
+        }
+        Returns: {
+          period_employee_amount: number
+          period_employer_amount: number
+          statutory_code: string
+          statutory_type: string
+        }[]
+      }
       get_employee_supervisor: {
         Args: { p_employee_id: string; p_position_id?: string }
         Returns: {
@@ -33112,6 +33131,19 @@ export type Database = {
           supervisor_name: string
           supervisor_position_id: string
           supervisor_position_title: string
+        }[]
+      }
+      get_employee_ytd_statutory: {
+        Args: {
+          p_employee_id: string
+          p_exclude_run_id?: string
+          p_tax_year: number
+        }
+        Returns: {
+          statutory_code: string
+          statutory_type: string
+          ytd_employee_amount: number
+          ytd_employer_amount: number
         }[]
       }
       get_exchange_rate: {
