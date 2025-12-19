@@ -24237,8 +24237,54 @@ export type Database = {
           },
         ]
       }
+      payroll_run_employees: {
+        Row: {
+          created_at: string
+          employee_id: string
+          id: string
+          included: boolean | null
+          notes: string | null
+          payroll_run_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          employee_id: string
+          id?: string
+          included?: boolean | null
+          notes?: string | null
+          payroll_run_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          employee_id?: string
+          id?: string
+          included?: boolean | null
+          notes?: string | null
+          payroll_run_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payroll_run_employees_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payroll_run_employees_payroll_run_id_fkey"
+            columns: ["payroll_run_id"]
+            isOneToOne: false
+            referencedRelation: "payroll_runs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       payroll_runs: {
         Row: {
+          adjustment_reason: string | null
           approved_at: string | null
           approved_by: string | null
           base_currency_id: string | null
@@ -24249,6 +24295,7 @@ export type Database = {
           created_at: string
           created_by: string | null
           currency: string
+          description: string | null
           employee_count: number | null
           exchange_rate_date: string | null
           exchange_rate_to_base: number | null
@@ -24264,10 +24311,12 @@ export type Database = {
           paid_at: string | null
           paid_by: string | null
           pay_group_id: string | null
-          pay_period_id: string
+          pay_period_id: string | null
+          payment_date: string | null
           recalculation_approved_at: string | null
           recalculation_approved_by: string | null
           recalculation_requested_by: string | null
+          reference_run_id: string | null
           run_number: string
           run_type: string
           status: string
@@ -24285,6 +24334,7 @@ export type Database = {
           workflow_instance_id: string | null
         }
         Insert: {
+          adjustment_reason?: string | null
           approved_at?: string | null
           approved_by?: string | null
           base_currency_id?: string | null
@@ -24295,6 +24345,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           currency?: string
+          description?: string | null
           employee_count?: number | null
           exchange_rate_date?: string | null
           exchange_rate_to_base?: number | null
@@ -24310,10 +24361,12 @@ export type Database = {
           paid_at?: string | null
           paid_by?: string | null
           pay_group_id?: string | null
-          pay_period_id: string
+          pay_period_id?: string | null
+          payment_date?: string | null
           recalculation_approved_at?: string | null
           recalculation_approved_by?: string | null
           recalculation_requested_by?: string | null
+          reference_run_id?: string | null
           run_number: string
           run_type?: string
           status?: string
@@ -24331,6 +24384,7 @@ export type Database = {
           workflow_instance_id?: string | null
         }
         Update: {
+          adjustment_reason?: string | null
           approved_at?: string | null
           approved_by?: string | null
           base_currency_id?: string | null
@@ -24341,6 +24395,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           currency?: string
+          description?: string | null
           employee_count?: number | null
           exchange_rate_date?: string | null
           exchange_rate_to_base?: number | null
@@ -24356,10 +24411,12 @@ export type Database = {
           paid_at?: string | null
           paid_by?: string | null
           pay_group_id?: string | null
-          pay_period_id?: string
+          pay_period_id?: string | null
+          payment_date?: string | null
           recalculation_approved_at?: string | null
           recalculation_approved_by?: string | null
           recalculation_requested_by?: string | null
+          reference_run_id?: string | null
           run_number?: string
           run_type?: string
           status?: string
@@ -24445,6 +24502,13 @@ export type Database = {
             columns: ["pay_period_id"]
             isOneToOne: false
             referencedRelation: "pay_periods"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payroll_runs_reference_run_id_fkey"
+            columns: ["reference_run_id"]
+            isOneToOne: false
+            referencedRelation: "payroll_runs"
             referencedColumns: ["id"]
           },
           {
@@ -33270,6 +33334,7 @@ export type Database = {
         | "certification_type"
         | "certification_name"
         | "accrediting_body"
+        | "payroll_run_type"
       message_status: "sent" | "delivered" | "read"
       workflow_action:
         | "approve"
@@ -33474,6 +33539,7 @@ export const Constants = {
         "certification_type",
         "certification_name",
         "accrediting_body",
+        "payroll_run_type",
       ],
       message_status: ["sent", "delivered", "read"],
       workflow_action: [
