@@ -23573,6 +23573,8 @@ export type Database = {
           company_id: string
           created_at: string
           cutoff_date: string | null
+          fiscal_month: number | null
+          fiscal_year: number | null
           id: string
           monday_count: number | null
           notes: string | null
@@ -23596,6 +23598,8 @@ export type Database = {
           company_id: string
           created_at?: string
           cutoff_date?: string | null
+          fiscal_month?: number | null
+          fiscal_year?: number | null
           id?: string
           monday_count?: number | null
           notes?: string | null
@@ -23619,6 +23623,8 @@ export type Database = {
           company_id?: string
           created_at?: string
           cutoff_date?: string | null
+          fiscal_month?: number | null
+          fiscal_year?: number | null
           id?: string
           monday_count?: number | null
           notes?: string | null
@@ -33109,6 +33115,13 @@ export type Database = {
       calculate_distance_meters: {
         Args: { lat1: number; lat2: number; lon1: number; lon2: number }
         Returns: number
+      }
+      calculate_fiscal_period: {
+        Args: { p_country_code: string; p_period_end: string }
+        Returns: {
+          fiscal_month: number
+          fiscal_year: number
+        }[]
       }
       calculate_shift_differential: {
         Args: {
