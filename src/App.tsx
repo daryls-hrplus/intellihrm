@@ -263,6 +263,7 @@ import BankFileBuilderPage from "./pages/payroll/BankFileBuilderPage";
 import PayGroupsPage from "./pages/payroll/PayGroupsPage";
 import PayPeriodsPage from "./pages/payroll/PayPeriodsPage";
 import PayrollProcessingPage from "./pages/payroll/PayrollProcessingPage";
+import OffCyclePayrollPage from "./pages/payroll/OffCyclePayrollPage";
 import TaxConfigPage from "./pages/payroll/TaxConfigPage";
 import PayrollReportsPage from "./pages/payroll/PayrollReportsPage";
 import YearEndProcessingPage from "./pages/payroll/YearEndProcessingPage";
@@ -1556,6 +1557,14 @@ const App = () => (
               element={
                 <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="payroll">
                   <PayrollProcessingPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/payroll/off-cycle"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="payroll">
+                  <OffCyclePayrollPage />
                 </ProtectedRoute>
               }
             />
