@@ -52,6 +52,8 @@ export interface PayPeriod {
   notes: string | null;
   created_at: string;
   updated_at: string;
+  fiscal_year?: number | null;
+  fiscal_month?: number | null;
   schedule?: PayPeriodSchedule;
 }
 
@@ -350,7 +352,17 @@ export function usePayroll() {
   const createPayPeriod = async (data: Partial<PayPeriod>) => {
     setIsLoading(true);
     try {
-      const { error } = await supabase.from("pay_periods").insert([data as any]);
+      // Calculate fiscal period if we have company_id and period_end
+      let enrichedData = { ...data };
+      if (data.company_id && data.period_end) {
+        const { getFiscalPeriodForCompany } = await import("@/utils/fiscalPeriodCalculator");
+        const fiscalPeriod = await getFiscalPeriodForCompany(data.company_id, data.period_end);
+        if (fiscalPeriod) {
+          enrichedData = { ...enrichedData, ...fiscalPeriod };
+        }
+      }
+      
+      const { error } = await supabase.from("pay_periods").insert([enrichedData as any]);
       if (error) throw error;
       toast.success("Pay period created");
       return true;
@@ -365,7 +377,17 @@ export function usePayroll() {
   const updatePayPeriod = async (id: string, data: Partial<PayPeriod>) => {
     setIsLoading(true);
     try {
-      const { error } = await supabase.from("pay_periods").update(data as any).eq("id", id);
+      // Recalculate fiscal period if period_end changed
+      let enrichedData = { ...data };
+      if (data.period_end && data.company_id) {
+        const { getFiscalPeriodForCompany } = await import("@/utils/fiscalPeriodCalculator");
+        const fiscalPeriod = await getFiscalPeriodForCompany(data.company_id, data.period_end);
+        if (fiscalPeriod) {
+          enrichedData = { ...enrichedData, ...fiscalPeriod };
+        }
+      }
+      
+      const { error } = await supabase.from("pay_periods").update(enrichedData as any).eq("id", id);
       if (error) throw error;
       toast.success("Pay period updated");
       return true;
@@ -388,6 +410,32 @@ export function usePayroll() {
         .single();
       
       if (schedError) throw schedError;
+      
+      // Get company's country fiscal config
+      const { data: company } = await supabase
+        .from("companies")
+        .select("country")
+        .eq("id", companyId)
+        .single();
+      
+      let fiscalStartMonth = 1;
+      let fiscalStartDay = 1;
+      
+      if (company?.country) {
+        const { data: fiscalConfig } = await supabase
+          .from("country_fiscal_years")
+          .select("fiscal_year_start_month, fiscal_year_start_day")
+          .eq("country_code", company.country)
+          .eq("is_active", true)
+          .single();
+        
+        if (fiscalConfig) {
+          fiscalStartMonth = fiscalConfig.fiscal_year_start_month;
+          fiscalStartDay = fiscalConfig.fiscal_year_start_day;
+        }
+      }
+      
+      const { calculateFiscalPeriod } = await import("@/utils/fiscalPeriodCalculator");
       
       const periods: Partial<PayPeriod>[] = [];
       let currentStart = new Date(startDate);
@@ -433,6 +481,9 @@ export function usePayroll() {
         
         if (periodEnd > end) periodEnd = end;
         
+        // Calculate fiscal period for this pay period
+        const fiscalPeriod = calculateFiscalPeriod(periodEnd, fiscalStartMonth, fiscalStartDay);
+        
         periods.push({
           company_id: companyId,
           schedule_id: scheduleId,
@@ -441,6 +492,8 @@ export function usePayroll() {
           pay_date: toDateString(payDate),
           cutoff_date: toDateString(new Date(payDate.getTime() - (schedule.cutoff_days_before_pay || 3) * 24 * 60 * 60 * 1000)),
           status: 'open',
+          fiscal_year: fiscalPeriod.fiscal_year,
+          fiscal_month: fiscalPeriod.fiscal_month,
         });
         
         // Move to next period
