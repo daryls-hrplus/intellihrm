@@ -120,6 +120,7 @@ export default function PayrollDashboardPage() {
     holidays: { title: t("leave.holidays.title", "Holidays Calendar"), description: t("leave.holidays.subtitle", "Manage country and company holidays"), icon: PartyPopper, href: "/payroll/holidays", color: "bg-pink-500/10 text-pink-600", tabCode: "holidays" },
     openingBalances: { title: "Opening Balances", description: "Import brought forward YTD balances for mid-year employees", icon: FileSpreadsheet, href: "/payroll/opening-balances", color: "bg-teal-500/10 text-teal-600", tabCode: "opening_balances" },
     countryYearSetup: { title: "Country Year Setup", description: "Configure fiscal years, tax years, and regional settings per country", icon: Globe, href: "/payroll/country-year-setup", color: "bg-violet-500/10 text-violet-600", tabCode: "country_year_setup" },
+    yearEndClosing: { title: "Year End Closing", description: "Roll pay groups into new fiscal year, reset YTD, generate new periods", icon: Archive, href: "/payroll/year-end-closing", color: "bg-rose-500/10 text-rose-600", tabCode: "year_end_closing" },
   };
 
   const filterByAccess = (modules: typeof allModules[keyof typeof allModules][]) =>
@@ -140,7 +141,7 @@ export default function PayrollDashboardPage() {
     },
     {
       titleKey: "Reporting & Analytics",
-      items: filterByAccess([allModules.reports, allModules.yearEnd, allModules.archiveSettings]),
+      items: filterByAccess([allModules.reports, allModules.yearEnd, allModules.yearEndClosing, allModules.archiveSettings]),
     },
   ];
 
