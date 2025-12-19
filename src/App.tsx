@@ -259,6 +259,7 @@ import PropertyCategoriesPage from "./pages/property/PropertyCategoriesPage";
 // Payroll pages
 import PayrollDashboardPage from "./pages/payroll/PayrollDashboardPage";
 import TaxAllowancesPage from "./pages/payroll/TaxAllowancesPage";
+import CountryPayrollYearSetupPage from "./pages/payroll/CountryPayrollYearSetupPage";
 import BankFileBuilderPage from "./pages/payroll/BankFileBuilderPage";
 import PayGroupsPage from "./pages/payroll/PayGroupsPage";
 import PayPeriodsPage from "./pages/payroll/PayPeriodsPage";
@@ -1717,6 +1718,14 @@ const App = () => (
               element={
                 <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="payroll">
                   <BankFileBuilderPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/payroll/country-year-setup"
+              element={
+                <ProtectedRoute requiredRoles={["admin"]} moduleCode="payroll">
+                  <CountryPayrollYearSetupPage />
                 </ProtectedRoute>
               }
             />
