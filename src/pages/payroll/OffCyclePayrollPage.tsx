@@ -698,14 +698,14 @@ export default function OffCyclePayrollPage() {
                 <div className="space-y-2">
                   <Label>Reference Run (Optional)</Label>
                   <Select 
-                    value={createForm.reference_run_id} 
-                    onValueChange={(val) => setCreateForm(prev => ({ ...prev, reference_run_id: val }))}
+                    value={createForm.reference_run_id || "none"} 
+                    onValueChange={(val) => setCreateForm(prev => ({ ...prev, reference_run_id: val === "none" ? "" : val }))}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Select if correcting a previous run" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">None</SelectItem>
+                      <SelectItem value="none">None</SelectItem>
                       {paidRuns.map(run => (
                         <SelectItem key={run.id} value={run.id}>
                           {run.run_number} - {run.pay_period ? `${formatDateForDisplay(run.pay_period.period_start)} to ${formatDateForDisplay(run.pay_period.period_end)}` : 'N/A'}
