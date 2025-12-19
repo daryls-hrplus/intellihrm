@@ -29580,6 +29580,7 @@ export type Database = {
           display_order: number | null
           earnings_class: string | null
           employee_rate: number | null
+          employer_fixed_amount: number | null
           employer_per_monday_amount: number | null
           employer_rate: number | null
           end_date: string | null
@@ -29607,6 +29608,7 @@ export type Database = {
           display_order?: number | null
           earnings_class?: string | null
           employee_rate?: number | null
+          employer_fixed_amount?: number | null
           employer_per_monday_amount?: number | null
           employer_rate?: number | null
           end_date?: string | null
@@ -29634,6 +29636,7 @@ export type Database = {
           display_order?: number | null
           earnings_class?: string | null
           employee_rate?: number | null
+          employer_fixed_amount?: number | null
           employer_per_monday_amount?: number | null
           employer_rate?: number | null
           end_date?: string | null

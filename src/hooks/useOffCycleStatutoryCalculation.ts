@@ -78,6 +78,9 @@ export async function calculateOffCycleStatutory(
 
   const taxYear = getTaxYearFromDate(payPeriod.period_start);
 
+  // Use period end date as the effective date for rate lookups
+  const effectiveDate = payPeriod.period_end;
+
   // Fetch all necessary data in parallel
   const [
     ytdAmounts,
@@ -89,8 +92,8 @@ export async function calculateOffCycleStatutory(
     fetchYtdStatutoryAmounts(employeeId, taxYear, excludeRunId),
     fetchPeriodStatutoryAmounts(employeeId, payPeriodId, excludeRunId),
     fetchOpeningBalances(employeeId, taxYear),
-    fetchStatutoryDeductionsForCountry(countryCode),
-    fetchExtendedRateBands(supabase, countryCode)
+    fetchStatutoryDeductionsForCountry(countryCode, effectiveDate),
+    fetchExtendedRateBands(supabase, countryCode, effectiveDate)
   ]);
 
   const context: CumulativeCalculationContext = {
@@ -148,8 +151,8 @@ export async function calculateRegularStatutory(
   ] = await Promise.all([
     fetchYtdStatutoryAmounts(employeeId, taxYear, excludeRunId),
     fetchOpeningBalances(employeeId, taxYear),
-    fetchStatutoryDeductionsForCountry(countryCode),
-    fetchExtendedRateBands(supabase, countryCode)
+    fetchStatutoryDeductionsForCountry(countryCode, payPeriodStart),
+    fetchExtendedRateBands(supabase, countryCode, payPeriodStart)
   ]);
 
   const context: CumulativeCalculationContext = {
