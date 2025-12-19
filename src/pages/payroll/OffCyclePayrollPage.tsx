@@ -398,7 +398,9 @@ export default function OffCyclePayrollPage() {
                 <p className="font-medium text-primary">Off-Cycle Payroll Runs</p>
                 <p className="text-sm text-muted-foreground">
                   Use off-cycle runs to process corrections, adjustments, or supplemental payments outside the regular payroll schedule. 
-                  Once a regular payroll is paid, any changes must be made through an off-cycle run.
+                  <strong> Statutory deductions are cumulative</strong>—the system respects annual caps (NIS, Health Surcharge, etc.) 
+                  and applies progressive tax brackets based on YTD income. If a cap was reached in the regular run, 
+                  no additional deduction will be taken.
                 </p>
               </div>
             </div>
@@ -527,7 +529,9 @@ export default function OffCyclePayrollPage() {
                 </div>
                 <p className="text-sm text-muted-foreground">
                   Select the pay period that governs tax calculations and statutory deductions for this off-cycle run. 
-                  You can process unlimited off-cycle runs within any pay period.
+                  <strong className="text-foreground"> Statutory calculations will consider amounts already deducted in this period</strong> 
+                  (e.g., if NIS cap was reached in regular payroll, no additional NIS will be deducted). 
+                  Progressive tax brackets will also be applied based on cumulative YTD income.
                 </p>
                 <Select 
                   value={createForm.pay_period_id} 
