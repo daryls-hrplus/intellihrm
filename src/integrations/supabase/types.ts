@@ -5098,6 +5098,60 @@ export type Database = {
           },
         ]
       }
+      country_fiscal_years: {
+        Row: {
+          country_code: string
+          country_name: string
+          created_at: string
+          currency_code: string
+          date_format: string
+          fiscal_year_start_day: number
+          fiscal_year_start_month: number
+          id: string
+          is_active: boolean
+          notes: string | null
+          tax_year_same_as_fiscal: boolean
+          tax_year_start_day: number | null
+          tax_year_start_month: number | null
+          updated_at: string
+          week_start_day: number
+        }
+        Insert: {
+          country_code: string
+          country_name: string
+          created_at?: string
+          currency_code: string
+          date_format?: string
+          fiscal_year_start_day?: number
+          fiscal_year_start_month: number
+          id?: string
+          is_active?: boolean
+          notes?: string | null
+          tax_year_same_as_fiscal?: boolean
+          tax_year_start_day?: number | null
+          tax_year_start_month?: number | null
+          updated_at?: string
+          week_start_day?: number
+        }
+        Update: {
+          country_code?: string
+          country_name?: string
+          created_at?: string
+          currency_code?: string
+          date_format?: string
+          fiscal_year_start_day?: number
+          fiscal_year_start_month?: number
+          id?: string
+          is_active?: boolean
+          notes?: string | null
+          tax_year_same_as_fiscal?: boolean
+          tax_year_start_day?: number | null
+          tax_year_start_month?: number | null
+          updated_at?: string
+          week_start_day?: number
+        }
+        Relationships: []
+      }
       country_holidays: {
         Row: {
           country: string
