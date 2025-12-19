@@ -23391,6 +23391,7 @@ export type Database = {
           created_at: string
           description: string | null
           end_date: string | null
+          gl_configured: boolean
           id: string
           is_active: boolean
           name: string
@@ -23405,6 +23406,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           end_date?: string | null
+          gl_configured?: boolean
           id?: string
           is_active?: boolean
           name: string
@@ -23419,6 +23421,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           end_date?: string | null
+          gl_configured?: boolean
           id?: string
           is_active?: boolean
           name?: string

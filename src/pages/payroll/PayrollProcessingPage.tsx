@@ -12,6 +12,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogD
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { usePayroll, PayrollRun, PayPeriod, EmployeePayroll } from "@/hooks/usePayroll";
 import { checkPayrollExecutionLock, showPayrollLockMessage } from "@/hooks/usePayrollExecutionLock";
+import { useGLCalculation } from "@/hooks/useGLCalculation";
 import { PayrollFilters, usePayrollFilters } from "@/components/payroll/PayrollFilters";
 import { usePayslipTemplates, PayslipTemplate } from "@/hooks/usePayslipTemplates";
 import { PayslipDocument } from "@/components/payroll/PayslipDocument";
@@ -35,6 +36,7 @@ import {
   Unlock,
   AlertTriangle,
   Printer,
+  BookOpen,
 } from "lucide-react";
 import { formatDateForDisplay } from "@/utils/dateUtils";
 
@@ -70,6 +72,7 @@ export default function PayrollProcessingPage() {
   } = usePayroll();
 
   const { fetchDefaultTemplate } = usePayslipTemplates();
+  const { checkGLConfigured, checkGLCalculated, calculateGL, isCalculating: isGLCalculating } = useGLCalculation();
   const [payslipTemplate, setPayslipTemplate] = useState<PayslipTemplate | null>(null);
   const [companyInfo, setCompanyInfo] = useState<{ name: string; address?: string; logo_url?: string } | null>(null);
 
@@ -87,6 +90,7 @@ export default function PayrollProcessingPage() {
   const [reopenConfirmOpen, setReopenConfirmOpen] = useState(false);
   const [runToRecalc, setRunToRecalc] = useState<ExtendedPayrollRun | null>(null);
   const [runToReopen, setRunToReopen] = useState<ExtendedPayrollRun | null>(null);
+  const [payGroupGLConfigured, setPayGroupGLConfigured] = useState(false);
 
   const isAdmin = hasRole('admin');
   const isHRManager = hasRole('hr_manager');
@@ -124,9 +128,11 @@ export default function PayrollProcessingPage() {
   useEffect(() => {
     if (selectedCompanyId && selectedPayGroupId && selectedPayGroupId !== "all") {
       loadData();
+      checkGLConfigured(selectedPayGroupId).then(setPayGroupGLConfigured);
     } else {
       setPeriods([]);
       setPayrollRuns([]);
+      setPayGroupGLConfigured(false);
     }
   }, [selectedCompanyId, selectedPayGroupId]);
 
@@ -291,8 +297,23 @@ export default function PayrollProcessingPage() {
       return;
     }
     
+    // If GL is configured, check if GL has been calculated
+    if (payGroupGLConfigured) {
+      const glCalculated = await checkGLCalculated(run.id);
+      if (!glCalculated) {
+        toast.error("GL entries must be calculated before processing payment. Click the GL button first.");
+        return;
+      }
+    }
+    
     const success = await processPayment(run.id);
     if (success) loadData();
+  };
+
+  const handleCalculateGL = async (run: ExtendedPayrollRun) => {
+    if (!selectedCompanyId) return;
+    const result = await calculateGL(run.id, selectedCompanyId);
+    if (result) loadData();
   };
 
   const handleGeneratePayslips = async (run: ExtendedPayrollRun) => {
@@ -593,6 +614,11 @@ export default function PayrollProcessingPage() {
                               <Button variant="ghost" size="sm" onClick={() => handleGenerateBankFile(run)} title={t("payroll.processing.generateBankFile")} disabled={isLoading}>
                                 <Download className="h-4 w-4" />
                               </Button>
+                              {payGroupGLConfigured && (
+                                <Button variant="ghost" size="sm" onClick={() => handleCalculateGL(run)} title="Calculate GL Entries" disabled={isLoading || isGLCalculating}>
+                                  <BookOpen className="h-4 w-4" />
+                                </Button>
+                              )}
                               <Button variant="ghost" size="sm" onClick={() => handleProcessPayment(run)} title={t("payroll.processing.processPayment")} disabled={isLoading}>
                                 <DollarSign className="h-4 w-4" />
                               </Button>
