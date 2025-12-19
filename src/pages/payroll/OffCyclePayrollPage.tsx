@@ -12,6 +12,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogD
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Checkbox } from "@/components/ui/checkbox";
 import { PayrollFilters, usePayrollFilters } from "@/components/payroll/PayrollFilters";
+import { checkPayrollExecutionLock, showPayrollLockMessage } from "@/hooks/usePayrollExecutionLock";
 import { supabase } from "@/integrations/supabase/client";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "@/contexts/AuthContext";
@@ -210,6 +211,13 @@ export default function OffCyclePayrollPage() {
     
     if (!createForm.payment_date) {
       toast.error("Please select a payment date");
+      return;
+    }
+    
+    // Check for concurrent payroll execution before creating
+    const { isLocked, lockingRun } = await checkPayrollExecutionLock(selectedPayGroupId);
+    if (isLocked && lockingRun) {
+      showPayrollLockMessage(lockingRun);
       return;
     }
     
