@@ -18,6 +18,7 @@ import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { TaxBracketUpload } from "@/components/payroll/TaxBracketUpload";
 import { getTodayString } from "@/utils/dateUtils";
+import { getCountryName } from "@/lib/countries";
 
 interface StatutoryDeductionType {
   id: string;
@@ -340,7 +341,7 @@ export default function TaxConfigPage() {
               <SelectContent>
                 {countries.map((country) => (
                   <SelectItem key={country} value={country}>
-                    {country}
+                    {country} - {getCountryName(country)}
                   </SelectItem>
                 ))}
               </SelectContent>
