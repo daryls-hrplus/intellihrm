@@ -410,6 +410,80 @@ export type Database = {
           },
         ]
       }
+      ai_security_violations: {
+        Row: {
+          ai_response: string | null
+          allowed_modules: Json | null
+          attempted_resource: string | null
+          blocked_reason: string | null
+          company_id: string | null
+          created_at: string
+          id: string
+          ip_address: string | null
+          is_false_positive: boolean | null
+          review_notes: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          session_id: string | null
+          severity: string
+          user_agent: string | null
+          user_id: string
+          user_query: string
+          user_role: string | null
+          violation_type: string
+        }
+        Insert: {
+          ai_response?: string | null
+          allowed_modules?: Json | null
+          attempted_resource?: string | null
+          blocked_reason?: string | null
+          company_id?: string | null
+          created_at?: string
+          id?: string
+          ip_address?: string | null
+          is_false_positive?: boolean | null
+          review_notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          session_id?: string | null
+          severity?: string
+          user_agent?: string | null
+          user_id: string
+          user_query: string
+          user_role?: string | null
+          violation_type: string
+        }
+        Update: {
+          ai_response?: string | null
+          allowed_modules?: Json | null
+          attempted_resource?: string | null
+          blocked_reason?: string | null
+          company_id?: string | null
+          created_at?: string
+          id?: string
+          ip_address?: string | null
+          is_false_positive?: boolean | null
+          review_notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          session_id?: string | null
+          severity?: string
+          user_agent?: string | null
+          user_id?: string
+          user_query?: string
+          user_role?: string | null
+          violation_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_security_violations_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ai_system_settings: {
         Row: {
           allowed_models: string[] | null
@@ -33474,6 +33548,20 @@ export type Database = {
       is_messaging_channel_member: {
         Args: { p_channel_id: string; p_user_id: string }
         Returns: boolean
+      }
+      log_ai_security_violation: {
+        Args: {
+          p_ai_response?: string
+          p_attempted_resource?: string
+          p_blocked_reason?: string
+          p_company_id: string
+          p_session_id?: string
+          p_severity: string
+          p_user_id: string
+          p_user_query: string
+          p_violation_type: string
+        }
+        Returns: string
       }
       log_audit_event: {
         Args: {
