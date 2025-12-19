@@ -47,6 +47,15 @@ interface PayrollRun {
   paid_at: string | null;
 }
 
+interface PayPeriod {
+  id: string;
+  period_number: string;
+  period_start: string;
+  period_end: string;
+  pay_date: string;
+  status: string;
+}
+
 interface OffCycleRun {
   id: string;
   run_number: string;
@@ -59,6 +68,8 @@ interface OffCycleRun {
   total_gross_pay: number;
   total_net_pay: number;
   created_at: string;
+  pay_period_id: string | null;
+  pay_period?: PayPeriod | null;
   reference_run?: PayrollRun | null;
 }
 
@@ -73,6 +84,7 @@ export default function OffCyclePayrollPage() {
   const [selectedEmployees, setSelectedEmployees] = useState<Set<string>>(new Set());
   const [searchTerm, setSearchTerm] = useState("");
   const [paidRuns, setPaidRuns] = useState<PayrollRun[]>([]);
+  const [payPeriods, setPayPeriods] = useState<PayPeriod[]>([]);
   
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [createForm, setCreateForm] = useState({
@@ -81,6 +93,7 @@ export default function OffCyclePayrollPage() {
     adjustment_reason: "",
     payment_date: "",
     reference_run_id: "",
+    pay_period_id: "", // Required - determines tax/statutory rules
   });
 
   const runTypeOptions = [
@@ -101,12 +114,13 @@ export default function OffCyclePayrollPage() {
     
     setIsLoading(true);
     try {
-      // Fetch off-cycle runs
+      // Fetch off-cycle runs with pay period info
       const { data: runsData } = await supabase
         .from("payroll_runs")
         .select(`
           id, run_number, run_type, status, description, adjustment_reason, 
-          payment_date, employee_count, total_gross_pay, total_net_pay, created_at,
+          payment_date, employee_count, total_gross_pay, total_net_pay, created_at, pay_period_id,
+          pay_period:pay_periods (id, period_number, period_start, period_end, pay_date, status),
           reference_run:reference_run_id (id, run_number, run_type, status, paid_at)
         `)
         .eq("company_id", selectedCompanyId)
@@ -130,6 +144,18 @@ export default function OffCyclePayrollPage() {
         .limit(20);
       
       setPaidRuns((paidRunsData || []) as unknown as PayrollRun[]);
+      
+      // Fetch pay periods for this pay group (current and upcoming for statutory purposes)
+      const today = new Date().toISOString().split('T')[0];
+      const { data: periodsData } = await supabase
+        .from("pay_periods")
+        .select("id, period_number, period_start, period_end, pay_date, status")
+        .eq("pay_group_id", selectedPayGroupId)
+        .or(`period_end.gte.${today},status.neq.closed`)
+        .order("period_start", { ascending: true })
+        .limit(10);
+      
+      setPayPeriods((periodsData || []) as PayPeriod[]);
       
       // Fetch employees for this pay group
       const { data: employeesData } = await supabase
@@ -177,6 +203,11 @@ export default function OffCyclePayrollPage() {
       return;
     }
     
+    if (!createForm.pay_period_id) {
+      toast.error("Please select a pay period for tax/statutory purposes");
+      return;
+    }
+    
     if (!createForm.payment_date) {
       toast.error("Please select a payment date");
       return;
@@ -190,6 +221,7 @@ export default function OffCyclePayrollPage() {
         .insert({
           company_id: selectedCompanyId,
           pay_group_id: selectedPayGroupId,
+          pay_period_id: createForm.pay_period_id, // Links to pay period for tax/statutory
           run_type: createForm.run_type,
           status: "draft",
           description: createForm.description || null,
@@ -236,6 +268,7 @@ export default function OffCyclePayrollPage() {
       adjustment_reason: "",
       payment_date: "",
       reference_run_id: "",
+      pay_period_id: "",
     });
     setSelectedEmployees(new Set());
     setSearchTerm("");
@@ -415,12 +448,12 @@ export default function OffCyclePayrollPage() {
                     <TableRow>
                       <TableHead>Run Number</TableHead>
                       <TableHead>Type</TableHead>
+                      <TableHead>Tax Period</TableHead>
                       <TableHead>Description</TableHead>
                       <TableHead>Payment Date</TableHead>
                       <TableHead>Employees</TableHead>
                       <TableHead>Net Pay</TableHead>
                       <TableHead>Status</TableHead>
-                      <TableHead>Reference</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -439,7 +472,14 @@ export default function OffCyclePayrollPage() {
                               {run.run_type.replace('_', '-')}
                             </Badge>
                           </TableCell>
-                          <TableCell className="max-w-[200px] truncate">
+                          <TableCell>
+                            {run.pay_period ? (
+                              <span className="text-xs">
+                                {formatDateForDisplay(run.pay_period.period_start)} - {formatDateForDisplay(run.pay_period.period_end)}
+                              </span>
+                            ) : '-'}
+                          </TableCell>
+                          <TableCell className="max-w-[180px] truncate">
                             {run.description || run.adjustment_reason || '-'}
                           </TableCell>
                           <TableCell>
@@ -449,13 +489,6 @@ export default function OffCyclePayrollPage() {
                           <TableCell>{formatCurrency(run.total_net_pay || 0)}</TableCell>
                           <TableCell>
                             <Badge className={getStatusColor(run.status)}>{run.status}</Badge>
-                          </TableCell>
-                          <TableCell>
-                            {run.reference_run ? (
-                              <span className="text-xs text-muted-foreground">
-                                {run.reference_run.run_number}
-                              </span>
-                            ) : '-'}
                           </TableCell>
                         </TableRow>
                       ))
@@ -478,6 +511,43 @@ export default function OffCyclePayrollPage() {
             </DialogHeader>
             
             <div className="space-y-6 py-4">
+              {/* Pay Period Selection - Required for tax/statutory */}
+              <div className="rounded-lg border border-warning/30 bg-warning/5 p-4 space-y-3">
+                <div className="flex items-center gap-2">
+                  <Calendar className="h-5 w-5 text-warning" />
+                  <Label className="text-base font-semibold">Tax/Statutory Period</Label>
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  Select the pay period that governs tax calculations and statutory deductions for this off-cycle run. 
+                  You can process unlimited off-cycle runs within any pay period.
+                </p>
+                <Select 
+                  value={createForm.pay_period_id} 
+                  onValueChange={(val) => setCreateForm(prev => ({ ...prev, pay_period_id: val }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select pay period for tax/statutory rules" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {payPeriods.map(period => {
+                      const today = new Date().toISOString().split('T')[0];
+                      const isCurrent = period.period_start <= today && period.period_end >= today;
+                      const isFuture = period.period_start > today;
+                      return (
+                        <SelectItem key={period.id} value={period.id}>
+                          <div className="flex items-center gap-2">
+                            <span>{formatDateForDisplay(period.period_start)} - {formatDateForDisplay(period.period_end)}</span>
+                            {isCurrent && <Badge variant="outline" className="text-xs">Current</Badge>}
+                            {isFuture && <Badge variant="outline" className="text-xs">Upcoming</Badge>}
+                            <span className="text-muted-foreground text-xs">({period.status})</span>
+                          </div>
+                        </SelectItem>
+                      );
+                    })}
+                  </SelectContent>
+                </Select>
+              </div>
+
               {/* Run Configuration */}
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-2">

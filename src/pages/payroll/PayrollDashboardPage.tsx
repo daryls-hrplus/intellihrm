@@ -23,6 +23,7 @@ import {
   Archive,
   Link as LinkIcon,
   PartyPopper,
+  RefreshCw,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
@@ -96,6 +97,7 @@ export default function PayrollDashboardPage() {
   const allModules = {
     payGroups: { title: t("payroll.modules.payGroups.title"), description: t("payroll.modules.payGroups.description"), icon: Users, href: "/payroll/pay-groups", color: "bg-primary/10 text-primary", tabCode: "pay_groups" },
     processing: { title: t("payroll.modules.processing.title"), description: t("payroll.modules.processing.description"), icon: Calculator, href: "/payroll/processing", color: "bg-success/10 text-success", tabCode: "processing" },
+    offCycle: { title: "Off-Cycle Payroll", description: "Process corrections, adjustments, and supplemental payments", icon: RefreshCw, href: "/payroll/off-cycle", color: "bg-warning/10 text-warning", tabCode: "off_cycle" },
     payPeriods: { title: t("payroll.modules.payPeriods.title"), description: t("payroll.modules.payPeriods.description"), icon: CalendarCheck, href: "/payroll/pay-periods", color: "bg-warning/10 text-warning", tabCode: "pay_periods" },
     reports: { title: t("payroll.modules.reports.title"), description: t("payroll.modules.reports.description"), icon: FileSpreadsheet, href: "/payroll/reports", color: "bg-secondary/10 text-secondary-foreground", tabCode: "reports" },
     taxConfig: { title: t("payroll.modules.taxConfig.title"), description: t("payroll.modules.taxConfig.description"), icon: Receipt, href: "/payroll/tax-config", color: "bg-muted text-muted-foreground", tabCode: "tax_config" },
@@ -124,7 +126,7 @@ export default function PayrollDashboardPage() {
   const sections: ModuleSection[] = [
     {
       titleKey: "Processing",
-      items: filterByAccess([allModules.processing, allModules.payPeriods, allModules.salaryOvertime, allModules.regularDeductions, allModules.expenseClaims]),
+      items: filterByAccess([allModules.processing, allModules.offCycle, allModules.payPeriods, allModules.salaryOvertime, allModules.regularDeductions, allModules.expenseClaims]),
     },
     {
       titleKey: "Configuration",
