@@ -24,8 +24,10 @@ import {
   Upload,
   Image,
   Building,
+  Calendar,
 } from "lucide-react";
 import { CompanyBranchLocations } from "@/components/admin/CompanyBranchLocations";
+import { CompanyFiscalYearsManager } from "@/components/admin/CompanyFiscalYearsManager";
 import { CountrySelect } from "@/components/ui/country-select";
 
 interface Company {
@@ -46,9 +48,7 @@ interface Company {
   created_at: string;
   group_id: string | null;
   division_id: string | null;
-  fiscal_year_start_month: number | null;
-  fiscal_year_start_day: number | null;
-  use_country_fiscal_year: boolean | null;
+  local_currency_id: string | null;
   employee_count?: number;
   group_name?: string;
   division_name?: string;
@@ -85,9 +85,6 @@ const companySchema = z.object({
   website: z.string().url("Invalid URL").optional().or(z.literal("")),
   group_id: z.string().optional().or(z.literal("")),
   division_id: z.string().optional().or(z.literal("")),
-  use_country_fiscal_year: z.boolean().default(true),
-  fiscal_year_start_month: z.number().min(1).max(12).default(1),
-  fiscal_year_start_day: z.number().min(1).max(31).default(1),
 });
 
 type CompanyFormData = z.infer<typeof companySchema>;
@@ -106,9 +103,6 @@ const emptyFormData: CompanyFormData = {
   website: "",
   group_id: "",
   division_id: "",
-  use_country_fiscal_year: true,
-  fiscal_year_start_month: 1,
-  fiscal_year_start_day: 1,
 };
 
 const industries = [
@@ -139,6 +133,7 @@ export default function AdminCompaniesPage() {
   const [isSaving, setIsSaving] = useState(false);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [branchDialogCompany, setBranchDialogCompany] = useState<Company | null>(null);
+  const [fiscalYearsDialogCompany, setFiscalYearsDialogCompany] = useState<Company | null>(null);
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const [isUploadingLogo, setIsUploadingLogo] = useState(false);
@@ -257,9 +252,6 @@ export default function AdminCompaniesPage() {
         website: company.website || "",
         group_id: company.group_id || "",
         division_id: company.division_id || "",
-        use_country_fiscal_year: company.use_country_fiscal_year ?? true,
-        fiscal_year_start_month: company.fiscal_year_start_month ?? 1,
-        fiscal_year_start_day: company.fiscal_year_start_day ?? 1,
       });
       setLogoPreview(company.logo_url);
     } else {
@@ -391,9 +383,6 @@ export default function AdminCompaniesPage() {
           group_id: formData.group_id || null,
           division_id: formData.division_id || null,
           logo_url: logoUrl,
-          use_country_fiscal_year: formData.use_country_fiscal_year,
-          fiscal_year_start_month: formData.fiscal_year_start_month,
-          fiscal_year_start_day: formData.fiscal_year_start_day,
         };
 
         const { error } = await supabase
@@ -420,9 +409,6 @@ export default function AdminCompaniesPage() {
           website: formData.website || null,
           group_id: formData.group_id || null,
           division_id: formData.division_id || null,
-          use_country_fiscal_year: formData.use_country_fiscal_year,
-          fiscal_year_start_month: formData.fiscal_year_start_month,
-          fiscal_year_start_day: formData.fiscal_year_start_day,
         };
 
         const { data: newCompany, error } = await supabase
@@ -1031,67 +1017,26 @@ export default function AdminCompaniesPage() {
                 </div>
               </div>
 
-              {/* Fiscal Year Configuration */}
-              <div className="space-y-4 border-t border-border pt-4">
-                <h3 className="text-sm font-semibold text-foreground">Fiscal Year Configuration</h3>
-                
-                <div className="flex items-center gap-3">
-                  <input
-                    type="checkbox"
-                    id="use_country_fiscal_year"
-                    checked={formData.use_country_fiscal_year}
-                    onChange={(e) => setFormData({ ...formData, use_country_fiscal_year: e.target.checked })}
-                    className="h-4 w-4 rounded border-input text-primary focus:ring-primary"
-                  />
-                  <label htmlFor="use_country_fiscal_year" className="text-sm text-foreground">
-                    Use country default fiscal year settings
-                  </label>
+              {/* Fiscal Year - managed separately */}
+              {editingCompany && (
+                <div className="space-y-2 border-t border-border pt-4">
+                  <h3 className="text-sm font-semibold text-foreground">Fiscal Year Configuration</h3>
+                  <p className="text-xs text-muted-foreground">
+                    Manage fiscal year periods with effective dates for accurate historical tracking.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      handleCloseModal();
+                      setFiscalYearsDialogCompany(editingCompany);
+                    }}
+                    className="inline-flex items-center gap-2 rounded-lg border border-border px-4 py-2 text-sm font-medium text-foreground hover:bg-muted"
+                  >
+                    <Calendar className="h-4 w-4" />
+                    Manage Fiscal Years
+                  </button>
                 </div>
-                
-                {!formData.use_country_fiscal_year && (
-                  <div className="grid gap-4 sm:grid-cols-2">
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium text-foreground">Fiscal Year Start Month</label>
-                      <select
-                        value={formData.fiscal_year_start_month}
-                        onChange={(e) => setFormData({ ...formData, fiscal_year_start_month: parseInt(e.target.value) })}
-                        className="h-10 w-full rounded-lg border border-input bg-background px-3 text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-                      >
-                        <option value={1}>January</option>
-                        <option value={2}>February</option>
-                        <option value={3}>March</option>
-                        <option value={4}>April</option>
-                        <option value={5}>May</option>
-                        <option value={6}>June</option>
-                        <option value={7}>July</option>
-                        <option value={8}>August</option>
-                        <option value={9}>September</option>
-                        <option value={10}>October</option>
-                        <option value={11}>November</option>
-                        <option value={12}>December</option>
-                      </select>
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium text-foreground">Fiscal Year Start Day</label>
-                      <input
-                        type="number"
-                        min={1}
-                        max={31}
-                        value={formData.fiscal_year_start_day}
-                        onChange={(e) => setFormData({ ...formData, fiscal_year_start_day: parseInt(e.target.value) || 1 })}
-                        className="h-10 w-full rounded-lg border border-input bg-background px-3 text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-                      />
-                    </div>
-                  </div>
-                )}
-                
-                <p className="text-xs text-muted-foreground">
-                  {formData.use_country_fiscal_year 
-                    ? "Fiscal year settings will be inherited from the country configuration."
-                    : `Fiscal year starts on ${["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"][formData.fiscal_year_start_month - 1]} ${formData.fiscal_year_start_day}`}
-                </p>
-              </div>
+              )}
 
               <div className="flex justify-end gap-3 pt-4">
                 <button
@@ -1122,6 +1067,16 @@ export default function AdminCompaniesPage() {
           companyName={branchDialogCompany.name}
           isOpen={!!branchDialogCompany}
           onClose={() => setBranchDialogCompany(null)}
+        />
+      )}
+
+      {/* Fiscal Years Dialog */}
+      {fiscalYearsDialogCompany && (
+        <CompanyFiscalYearsManager
+          companyId={fiscalYearsDialogCompany.id}
+          companyName={fiscalYearsDialogCompany.name}
+          isOpen={!!fiscalYearsDialogCompany}
+          onClose={() => setFiscalYearsDialogCompany(null)}
         />
       )}
     </AppLayout>
