@@ -17,6 +17,7 @@ import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { CountrySelect } from "@/components/ui/country-select";
 import { getCountryName, countries } from "@/lib/countries";
+import { getCountryLanguage } from "@/lib/countryLanguages";
 import { StatutoryDocumentUpload } from "@/components/payroll/StatutoryDocumentUpload";
 import { ComprehensiveStatutoryDocumentation } from "@/components/payroll/ComprehensiveStatutoryDocumentation";
 import { StatutoryReportingDocuments } from "@/components/payroll/StatutoryReportingDocuments";
@@ -330,6 +331,9 @@ export default function StatutoryDeductionTypesPage() {
                             <Globe className="h-4 w-4 text-primary" />
                             <span className="font-semibold text-foreground">
                               {getCountryName(countryCode)}
+                            </span>
+                            <span className="text-muted-foreground text-sm">
+                              ({getCountryLanguage(countryCode)})
                             </span>
                             <Badge variant="outline" className="ml-2">
                               {countryItems.length} {countryItems.length === 1 ? 'type' : 'types'}
