@@ -289,6 +289,9 @@ import StatutoryPayElementMappingsPage from "./pages/payroll/StatutoryPayElement
 import PayrollHolidaysPage from "./pages/payroll/PayrollHolidaysPage";
 import OpeningBalancesPage from "./pages/payroll/OpeningBalancesPage";
 import HistoricalPayrollImportPage from "./pages/payroll/HistoricalPayrollImportPage";
+import RetroactivePayConfigPage from "./pages/payroll/RetroactivePayConfigPage";
+import RetroactivePayGeneratePage from "./pages/payroll/RetroactivePayGeneratePage";
+import PayrollCountryDocumentationPage from "./pages/payroll/PayrollCountryDocumentationPage";
 import GLDashboardPage from "./pages/payroll/gl/GLDashboardPage";
 import GLAccountsPage from "./pages/payroll/gl/GLAccountsPage";
 import CostCenterSegmentsPage from "./pages/payroll/gl/CostCenterSegmentsPage";
@@ -1617,6 +1620,22 @@ const App = () => (
               }
             />
             <Route
+              path="/payroll/retroactive-pay"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="payroll">
+                  <RetroactivePayConfigPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/payroll/retroactive-pay/generate/:configId"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="payroll">
+                  <RetroactivePayGeneratePage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
               path="/payroll/tax-config"
               element={
                 <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="payroll">
@@ -1629,6 +1648,14 @@ const App = () => (
               element={
                 <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="payroll">
                   <StatutoryDeductionTypesPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/payroll/country-documentation"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="payroll">
+                  <PayrollCountryDocumentationPage />
                 </ProtectedRoute>
               }
             />

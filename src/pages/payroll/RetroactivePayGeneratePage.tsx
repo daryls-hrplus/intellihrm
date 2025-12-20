@@ -81,16 +81,14 @@ export default function RetroactivePayGeneratePage() {
         .from("retroactive_pay_calculations")
         .select(`
           *,
-          employee:profiles(id, first_name, last_name, employee_id, status),
-          pay_element:pay_elements(id, name, code),
-          pay_period:pay_periods(id, period_number, start_date, end_date)
+          pay_element:pay_elements(id, name, code)
         `)
         .eq("config_id", configId)
         .order("pay_year")
         .order("pay_cycle_number")
         .order("employee_id");
       if (error) throw error;
-      return data as RetroactivePayCalculation[];
+      return (data || []) as unknown as RetroactivePayCalculation[];
     },
     enabled: !!configId,
   });
