@@ -1,5 +1,15 @@
 import { supabase } from "@/integrations/supabase/client";
 import { getTodayString } from "@/utils/dateUtils";
+import { 
+  fetchStatutoryTaxReliefRules, 
+  calculateStatutoryTaxRelief,
+  fetchTaxReliefSchemes,
+  fetchEmployeeReliefEnrollments,
+  calculateSchemeReliefs,
+  type TaxReliefRule,
+  type TaxReliefScheme,
+  type CalculatedRelief
+} from "@/utils/payroll/taxReliefCalculator";
 
 export interface StatutoryDeduction {
   id: string;
@@ -43,12 +53,16 @@ export interface CalculatedStatutory {
   calculationMethod: string;
   ytdTaxableIncome?: number;
   ytdTaxPaid?: number;
+  taxReliefAmount?: number; // NEW: Amount that reduces taxable income
 }
 
 export interface StatutoryCalculationResult {
   deductions: CalculatedStatutory[];
   totalEmployeeDeductions: number;
   totalEmployerContributions: number;
+  taxReliefs?: CalculatedRelief[]; // NEW: Tax relief details
+  adjustedTaxableIncome?: number; // NEW: Gross pay minus tax reliefs
+  taxCredits?: number; // NEW: Direct tax credits
 }
 
 export async function fetchOpeningBalances(
@@ -230,5 +244,160 @@ export function calculateStatutoryDeductions(
     deductions,
     totalEmployeeDeductions,
     totalEmployerContributions,
+  };
+}
+
+/**
+ * Enhanced statutory calculation with integrated tax relief
+ * This calculates:
+ * 1. Non-income-tax statutory deductions first (NIS, NHT, SSNIT, etc.)
+ * 2. Tax reliefs from those statutory contributions
+ * 3. Other tax relief schemes (personal reliefs, savings, etc.)
+ * 4. Adjusted taxable income after all reliefs
+ * 5. Income tax on the adjusted taxable income
+ */
+export async function calculateStatutoryWithTaxRelief(
+  employeeId: string,
+  countryCode: string,
+  grossPay: number,
+  statutoryTypes: StatutoryDeduction[],
+  rateBands: StatutoryRateBand[],
+  mondayCount: number = 4,
+  employeeAge: number | null = null,
+  openingBalances: OpeningBalances | null = null,
+  effectiveDate?: string
+): Promise<StatutoryCalculationResult> {
+  const deductions: CalculatedStatutory[] = [];
+  let totalEmployeeDeductions = 0;
+  let totalEmployerContributions = 0;
+
+  // Step 1: Calculate non-income-tax statutory deductions first
+  const nonTaxDeductions: Array<{ code: string; employeeAmount: number; employerAmount: number }> = [];
+  
+  for (const statType of statutoryTypes) {
+    if (statType.statutory_type === 'income_tax') continue; // Skip income tax for now
+
+    const applicableBand = rateBands.find(band => 
+      band.statutory_type_id === statType.id &&
+      (band.min_amount === null || grossPay >= band.min_amount) &&
+      (band.max_amount === null || grossPay <= band.max_amount) &&
+      band.is_active
+    );
+
+    if (!applicableBand) continue;
+
+    if (employeeAge !== null) {
+      if (applicableBand.min_age !== null && employeeAge < applicableBand.min_age) continue;
+      if (applicableBand.max_age !== null && employeeAge > applicableBand.max_age) continue;
+    }
+
+    let employeeAmount = 0;
+    let employerAmount = 0;
+    const calcMethod = applicableBand.calculation_method || 'percentage';
+
+    switch (calcMethod) {
+      case 'percentage':
+        employeeAmount = grossPay * (applicableBand.employee_rate || 0);
+        employerAmount = grossPay * (applicableBand.employer_rate || 0);
+        break;
+      case 'per_monday':
+        employeeAmount = mondayCount * (applicableBand.per_monday_amount || 0);
+        employerAmount = mondayCount * (applicableBand.employer_per_monday_amount || 0);
+        break;
+      case 'fixed':
+        employeeAmount = applicableBand.fixed_amount || 0;
+        employerAmount = applicableBand.employer_fixed_amount || 0;
+        break;
+    }
+
+    if (employeeAmount > 0 || employerAmount > 0) {
+      deductions.push({
+        code: statType.statutory_code,
+        name: statType.statutory_name,
+        type: statType.statutory_type,
+        employeeAmount,
+        employerAmount,
+        calculationMethod: calcMethod,
+      });
+      nonTaxDeductions.push({
+        code: statType.statutory_code,
+        employeeAmount,
+        employerAmount,
+      });
+      totalEmployeeDeductions += employeeAmount;
+      totalEmployerContributions += employerAmount;
+    }
+  }
+
+  // Step 2: Fetch and calculate tax reliefs
+  const [reliefRules, schemes, enrollments] = await Promise.all([
+    fetchStatutoryTaxReliefRules(countryCode, effectiveDate),
+    fetchTaxReliefSchemes(countryCode, effectiveDate),
+    fetchEmployeeReliefEnrollments(employeeId, effectiveDate),
+  ]);
+
+  // Calculate statutory tax relief (from NIS, SSNIT contributions)
+  const statutoryReliefs = calculateStatutoryTaxRelief(nonTaxDeductions, reliefRules);
+
+  // Calculate scheme reliefs (personal allowances, savings, etc.)
+  const schemeReliefs = calculateSchemeReliefs(grossPay, employeeAge, enrollments, schemes);
+
+  const allReliefs = [...statutoryReliefs, ...schemeReliefs];
+
+  // Calculate total taxable income reduction
+  const totalTaxableIncomeReduction = allReliefs
+    .filter(r => r.reduces_taxable_income)
+    .reduce((sum, r) => sum + r.amount, 0);
+
+  // Calculate tax credits (applied after tax is calculated)
+  const taxCredits = allReliefs
+    .filter(r => r.is_tax_credit)
+    .reduce((sum, r) => sum + r.amount, 0);
+
+  // Step 3: Calculate adjusted taxable income
+  const adjustedTaxableIncome = Math.max(0, grossPay - totalTaxableIncomeReduction);
+
+  // Step 4: Calculate income tax on adjusted taxable income
+  const incomeStatType = statutoryTypes.find(s => s.statutory_type === 'income_tax');
+  
+  if (incomeStatType && openingBalances) {
+    const previousYtdIncome = openingBalances.ytdTaxableIncome;
+    const previousYtdTax = openingBalances.ytdTaxPaid;
+    
+    // Use adjusted taxable income instead of gross pay
+    const newYtdIncome = previousYtdIncome + adjustedTaxableIncome;
+    
+    // Calculate total tax due on cumulative adjusted income
+    const totalTaxDue = calculateCumulativeTax(newYtdIncome, rateBands, incomeStatType.id);
+    
+    // This period's tax = total due - already paid - any tax credits
+    let periodTax = Math.max(0, totalTaxDue - previousYtdTax);
+    
+    // Apply tax credits (reduce tax directly)
+    periodTax = Math.max(0, periodTax - taxCredits);
+
+    if (periodTax > 0) {
+      deductions.push({
+        code: incomeStatType.statutory_code,
+        name: incomeStatType.statutory_name,
+        type: incomeStatType.statutory_type,
+        employeeAmount: periodTax,
+        employerAmount: 0,
+        calculationMethod: 'cumulative',
+        ytdTaxableIncome: newYtdIncome,
+        ytdTaxPaid: previousYtdTax + periodTax,
+        taxReliefAmount: totalTaxableIncomeReduction,
+      });
+      totalEmployeeDeductions += periodTax;
+    }
+  }
+
+  return {
+    deductions,
+    totalEmployeeDeductions,
+    totalEmployerContributions,
+    taxReliefs: allReliefs,
+    adjustedTaxableIncome,
+    taxCredits,
   };
 }
