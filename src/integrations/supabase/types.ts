@@ -5325,6 +5325,9 @@ export type Database = {
           effective_to: string | null
           id: string
           is_active: boolean
+          refund_calculation_frequency: string
+          refund_display_type: string
+          refund_line_item_label: string | null
           refund_method: string | null
           tax_calculation_method: string
           updated_at: string
@@ -5338,6 +5341,9 @@ export type Database = {
           effective_to?: string | null
           id?: string
           is_active?: boolean
+          refund_calculation_frequency?: string
+          refund_display_type?: string
+          refund_line_item_label?: string | null
           refund_method?: string | null
           tax_calculation_method?: string
           updated_at?: string
@@ -5351,6 +5357,9 @@ export type Database = {
           effective_to?: string | null
           id?: string
           is_active?: boolean
+          refund_calculation_frequency?: string
+          refund_display_type?: string
+          refund_line_item_label?: string | null
           refund_method?: string | null
           tax_calculation_method?: string
           updated_at?: string
