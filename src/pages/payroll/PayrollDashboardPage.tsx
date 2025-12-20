@@ -25,6 +25,7 @@ import {
   PartyPopper,
   RefreshCw,
   Globe,
+  CalendarRange,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
@@ -121,6 +122,7 @@ export default function PayrollDashboardPage() {
     openingBalances: { title: "Opening Balances", description: "Import brought forward YTD balances for mid-year employees", icon: FileSpreadsheet, href: "/payroll/opening-balances", color: "bg-teal-500/10 text-teal-600", tabCode: "opening_balances" },
     countryYearSetup: { title: "Country Year Setup", description: "Configure fiscal years, tax years, and regional settings per country", icon: Globe, href: "/payroll/country-year-setup", color: "bg-violet-500/10 text-violet-600", tabCode: "country_year_setup" },
     yearEndClosing: { title: "Year End Closing", description: "Roll pay groups into new fiscal year, reset YTD, generate new periods", icon: Archive, href: "/payroll/year-end-closing", color: "bg-rose-500/10 text-rose-600", tabCode: "year_end_closing" },
+    semiMonthlyRules: { title: "Semi-Monthly Rules", description: "Configure statutory and deduction handling for semi-monthly payroll", icon: CalendarRange, href: "/payroll/semimonthly-rules", color: "bg-cyan-500/10 text-cyan-600", tabCode: "semimonthly_rules" },
   };
 
   const filterByAccess = (modules: typeof allModules[keyof typeof allModules][]) =>
@@ -133,7 +135,7 @@ export default function PayrollDashboardPage() {
     },
     {
       titleKey: "Configuration",
-      items: filterByAccess([allModules.payGroups, allModules.payElements, allModules.taxConfig, allModules.statutoryTypes, allModules.taxAllowances, allModules.countryYearSetup, allModules.templates, allModules.holidays, allModules.openingBalances]),
+      items: filterByAccess([allModules.payGroups, allModules.semiMonthlyRules, allModules.payElements, allModules.taxConfig, allModules.statutoryTypes, allModules.taxAllowances, allModules.countryYearSetup, allModules.templates, allModules.holidays, allModules.openingBalances]),
     },
     {
       titleKey: "Integration",

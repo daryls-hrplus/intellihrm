@@ -29018,6 +29018,56 @@ export type Database = {
           },
         ]
       }
+      semimonthly_payroll_rules: {
+        Row: {
+          created_at: string
+          deduction_handling: string
+          deduction_overrides: Json | null
+          id: string
+          is_active: boolean
+          notes: string | null
+          pay_group_id: string
+          primary_cycle: string
+          statutory_handling: string
+          statutory_overrides: Json | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          deduction_handling?: string
+          deduction_overrides?: Json | null
+          id?: string
+          is_active?: boolean
+          notes?: string | null
+          pay_group_id: string
+          primary_cycle?: string
+          statutory_handling?: string
+          statutory_overrides?: Json | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          deduction_handling?: string
+          deduction_overrides?: Json | null
+          id?: string
+          is_active?: boolean
+          notes?: string | null
+          pay_group_id?: string
+          primary_cycle?: string
+          statutory_handling?: string
+          statutory_overrides?: Json | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "semimonthly_payroll_rules_pay_group_id_fkey"
+            columns: ["pay_group_id"]
+            isOneToOne: true
+            referencedRelation: "pay_groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       shift_payment_rules: {
         Row: {
           amount: number
