@@ -27,6 +27,7 @@ import {
   Globe,
   CalendarRange,
   Coins,
+  History,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
@@ -127,6 +128,7 @@ export default function PayrollDashboardPage() {
     tipPools: { title: "Tips & Tronc", description: "Manage tip pooling and tronc distribution for hospitality", icon: Coins, href: "/payroll/tip-pools", color: "bg-amber-500/10 text-amber-600", tabCode: "tip_pools" },
     statutoryTaxRelief: { title: "Statutory Tax Relief", description: "Configure social security deductions that reduce taxable income", icon: Calculator, href: "/payroll/statutory-tax-relief", color: "bg-lime-500/10 text-lime-600", tabCode: "statutory_tax_relief" },
     taxReliefSchemes: { title: "Tax Relief Schemes", description: "Personal reliefs, savings, housing, education & youth incentives", icon: Receipt, href: "/payroll/tax-relief-schemes", color: "bg-sky-500/10 text-sky-600", tabCode: "tax_relief_schemes" },
+    retroactivePay: { title: "Retroactive Pay", description: "Configure and generate back pay adjustments by pay group", icon: History, href: "/payroll/retroactive-pay", color: "bg-fuchsia-500/10 text-fuchsia-600", tabCode: "retroactive_pay" },
   };
 
   const filterByAccess = (modules: typeof allModules[keyof typeof allModules][]) =>
@@ -135,7 +137,7 @@ export default function PayrollDashboardPage() {
   const sections: ModuleSection[] = [
     {
       titleKey: "Processing",
-      items: filterByAccess([allModules.processing, allModules.offCycle, allModules.payPeriods, allModules.salaryOvertime, allModules.regularDeductions, allModules.expenseClaims, allModules.tipPools]),
+      items: filterByAccess([allModules.processing, allModules.offCycle, allModules.payPeriods, allModules.salaryOvertime, allModules.regularDeductions, allModules.expenseClaims, allModules.tipPools, allModules.retroactivePay]),
     },
     {
       titleKey: "Configuration",

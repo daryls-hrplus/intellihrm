@@ -39,7 +39,7 @@ interface ConfigFormData {
 
 interface ItemFormData {
   pay_element_id: string;
-  increase_type: 'percentage' | 'fixed_amount' | 'one_off';
+  increase_type: string;
   increase_value: string;
   min_amount: string;
   max_amount: string;
