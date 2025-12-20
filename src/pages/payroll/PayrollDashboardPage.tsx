@@ -125,6 +125,7 @@ export default function PayrollDashboardPage() {
     yearEndClosing: { title: "Year End Closing", description: "Roll pay groups into new fiscal year, reset YTD, generate new periods", icon: Archive, href: "/payroll/year-end-closing", color: "bg-rose-500/10 text-rose-600", tabCode: "year_end_closing" },
     semiMonthlyRules: { title: "Semi-Monthly Rules", description: "Configure statutory and deduction handling for semi-monthly payroll", icon: CalendarRange, href: "/payroll/semimonthly-rules", color: "bg-cyan-500/10 text-cyan-600", tabCode: "semimonthly_rules" },
     tipPools: { title: "Tips & Tronc", description: "Manage tip pooling and tronc distribution for hospitality", icon: Coins, href: "/payroll/tip-pools", color: "bg-amber-500/10 text-amber-600", tabCode: "tip_pools" },
+    statutoryTaxRelief: { title: "Statutory Tax Relief", description: "Configure social security deductions that reduce taxable income", icon: Calculator, href: "/payroll/statutory-tax-relief", color: "bg-lime-500/10 text-lime-600", tabCode: "statutory_tax_relief" },
   };
 
   const filterByAccess = (modules: typeof allModules[keyof typeof allModules][]) =>
@@ -137,7 +138,7 @@ export default function PayrollDashboardPage() {
     },
     {
       titleKey: "Configuration",
-      items: filterByAccess([allModules.payGroups, allModules.semiMonthlyRules, allModules.tipPools, allModules.payElements, allModules.taxConfig, allModules.statutoryTypes, allModules.taxAllowances, allModules.countryYearSetup, allModules.templates, allModules.holidays, allModules.openingBalances]),
+      items: filterByAccess([allModules.payGroups, allModules.semiMonthlyRules, allModules.tipPools, allModules.statutoryTaxRelief, allModules.payElements, allModules.taxConfig, allModules.statutoryTypes, allModules.taxAllowances, allModules.countryYearSetup, allModules.templates, allModules.holidays, allModules.openingBalances]),
     },
     {
       titleKey: "Integration",
