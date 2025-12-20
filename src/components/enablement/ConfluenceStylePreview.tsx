@@ -363,12 +363,23 @@ export function ConfluenceStylePreview({ document, template }: ConfluenceStylePr
             After completing this guide, you will be able to:
           </p>
           <ul className="space-y-2">
-            {document.learningObjectives.map((obj, i) => (
-              <li key={i} className="flex items-start gap-2 text-sm">
-                <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
-                {typeof obj === 'string' ? obj : (obj as any).objective || JSON.stringify(obj)}
-              </li>
-            ))}
+            {document.learningObjectives.map((obj, i) => {
+              let displayText = '';
+              if (typeof obj === 'string') {
+                displayText = obj;
+              } else if (typeof obj === 'object' && obj !== null) {
+                // Handle various object structures
+                displayText = (obj as any).objective || (obj as any).text || (obj as any).description || (obj as any).content || JSON.stringify(obj);
+              } else {
+                displayText = String(obj);
+              }
+              return (
+                <li key={i} className="flex items-start gap-2 text-sm">
+                  <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                  {displayText}
+                </li>
+              );
+            })}
           </ul>
         </div>
       )}
