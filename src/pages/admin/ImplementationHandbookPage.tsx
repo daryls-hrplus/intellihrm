@@ -103,7 +103,8 @@ const phases: Phase[] = [
       { order: 9, area: "Tax Relief Schemes", description: "Personal reliefs, savings incentives, housing, education & youth incentives by country" },
       { order: 10, area: "Bank File Config", description: "Payment file formats" },
       { order: 11, area: "Bonus Plans", description: "Performance-based bonuses" },
-      { order: 12, area: "Retroactive Pay (Back Pay)", description: "Configure increase parameters by pay group and generate back pay calculations for date ranges. Supports percentage, fixed amount, and one-off payments for active and terminated employees." },
+      { order: 12, area: "Tips & Tronc", description: "Configure tip pooling, distribution methods (points-based, hours-based, equal split), tronc schemes for fair allocation, and payroll integration" },
+      { order: 13, area: "Retroactive Pay (Back Pay)", description: "Configure increase parameters by pay group and generate back pay calculations for date ranges. Supports percentage, fixed amount, and one-off payments for active and terminated employees." },
     ],
   },
   {
