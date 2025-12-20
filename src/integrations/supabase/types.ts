@@ -28172,6 +28172,230 @@ export type Database = {
           },
         ]
       }
+      retroactive_pay_calculations: {
+        Row: {
+          adjustment_amount: number
+          calculation_date: string
+          config_id: string
+          created_at: string
+          employee_id: string
+          employee_status: string
+          id: string
+          increase_type: string
+          increase_value: number
+          original_amount: number
+          pay_cycle_number: number
+          pay_element_id: string
+          pay_period_id: string | null
+          pay_year: number
+          processed_at: string | null
+          processed_in_run_id: string | null
+        }
+        Insert: {
+          adjustment_amount: number
+          calculation_date?: string
+          config_id: string
+          created_at?: string
+          employee_id: string
+          employee_status?: string
+          id?: string
+          increase_type: string
+          increase_value: number
+          original_amount?: number
+          pay_cycle_number: number
+          pay_element_id: string
+          pay_period_id?: string | null
+          pay_year: number
+          processed_at?: string | null
+          processed_in_run_id?: string | null
+        }
+        Update: {
+          adjustment_amount?: number
+          calculation_date?: string
+          config_id?: string
+          created_at?: string
+          employee_id?: string
+          employee_status?: string
+          id?: string
+          increase_type?: string
+          increase_value?: number
+          original_amount?: number
+          pay_cycle_number?: number
+          pay_element_id?: string
+          pay_period_id?: string | null
+          pay_year?: number
+          processed_at?: string | null
+          processed_in_run_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "retroactive_pay_calculations_config_id_fkey"
+            columns: ["config_id"]
+            isOneToOne: false
+            referencedRelation: "retroactive_pay_configs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "retroactive_pay_calculations_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "retroactive_pay_calculations_pay_element_id_fkey"
+            columns: ["pay_element_id"]
+            isOneToOne: false
+            referencedRelation: "pay_elements"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "retroactive_pay_calculations_pay_period_id_fkey"
+            columns: ["pay_period_id"]
+            isOneToOne: false
+            referencedRelation: "pay_periods"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "retroactive_pay_calculations_processed_in_run_id_fkey"
+            columns: ["processed_in_run_id"]
+            isOneToOne: false
+            referencedRelation: "payroll_runs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      retroactive_pay_config_items: {
+        Row: {
+          config_id: string
+          created_at: string
+          id: string
+          increase_type: string
+          increase_value: number
+          max_amount: number | null
+          min_amount: number | null
+          notes: string | null
+          pay_element_id: string
+          updated_at: string
+        }
+        Insert: {
+          config_id: string
+          created_at?: string
+          id?: string
+          increase_type: string
+          increase_value: number
+          max_amount?: number | null
+          min_amount?: number | null
+          notes?: string | null
+          pay_element_id: string
+          updated_at?: string
+        }
+        Update: {
+          config_id?: string
+          created_at?: string
+          id?: string
+          increase_type?: string
+          increase_value?: number
+          max_amount?: number | null
+          min_amount?: number | null
+          notes?: string | null
+          pay_element_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "retroactive_pay_config_items_config_id_fkey"
+            columns: ["config_id"]
+            isOneToOne: false
+            referencedRelation: "retroactive_pay_configs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "retroactive_pay_config_items_pay_element_id_fkey"
+            columns: ["pay_element_id"]
+            isOneToOne: false
+            referencedRelation: "pay_elements"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      retroactive_pay_configs: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          company_id: string
+          config_name: string
+          created_at: string
+          created_by: string | null
+          description: string | null
+          effective_end_date: string
+          effective_start_date: string
+          id: string
+          pay_group_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          company_id: string
+          config_name: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          effective_end_date: string
+          effective_start_date: string
+          id?: string
+          pay_group_id: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          company_id?: string
+          config_name?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          effective_end_date?: string
+          effective_start_date?: string
+          id?: string
+          pay_group_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "retroactive_pay_configs_approved_by_fkey"
+            columns: ["approved_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "retroactive_pay_configs_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "retroactive_pay_configs_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "retroactive_pay_configs_pay_group_id_fkey"
+            columns: ["pay_group_id"]
+            isOneToOne: false
+            referencedRelation: "pay_groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       review_cycles: {
         Row: {
           company_id: string
