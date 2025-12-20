@@ -267,6 +267,7 @@ import SemiMonthlyPayrollRulesPage from "./pages/payroll/SemiMonthlyPayrollRules
 import CountryTaxSettingsPage from "./pages/payroll/CountryTaxSettingsPage";
 import TipPoolManagementPage from "./pages/payroll/TipPoolManagementPage";
 import StatutoryTaxReliefPage from "./pages/payroll/StatutoryTaxReliefPage";
+import TaxReliefSchemesPage from "./pages/payroll/TaxReliefSchemesPage";
 import PayPeriodsPage from "./pages/payroll/PayPeriodsPage";
 import PayrollProcessingPage from "./pages/payroll/PayrollProcessingPage";
 import OffCyclePayrollPage from "./pages/payroll/OffCyclePayrollPage";
@@ -1580,6 +1581,14 @@ const App = () => (
               element={
                 <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="payroll">
                   <StatutoryTaxReliefPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/payroll/tax-relief-schemes"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="payroll">
+                  <TaxReliefSchemesPage />
                 </ProtectedRoute>
               }
             />
