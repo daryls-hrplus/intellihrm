@@ -6,6 +6,9 @@ export interface CountryTaxSettings {
   taxCalculationMethod: 'cumulative' | 'non_cumulative';
   allowMidYearRefunds: boolean;
   refundMethod: 'automatic' | 'end_of_year' | 'manual_claim';
+  refundDisplayType: 'separate_line_item' | 'reduced_tax';
+  refundCalculationFrequency: 'monthly' | 'quarterly' | 'annually';
+  refundLineItemLabel: string | null;
   description: string | null;
   effectiveFrom: string;
   effectiveTo: string | null;
@@ -44,6 +47,9 @@ export async function fetchCountryTaxSettings(
     taxCalculationMethod: data.tax_calculation_method as 'cumulative' | 'non_cumulative',
     allowMidYearRefunds: data.allow_mid_year_refunds,
     refundMethod: data.refund_method as 'automatic' | 'end_of_year' | 'manual_claim',
+    refundDisplayType: (data.refund_display_type || 'reduced_tax') as 'separate_line_item' | 'reduced_tax',
+    refundCalculationFrequency: (data.refund_calculation_frequency || 'monthly') as 'monthly' | 'quarterly' | 'annually',
+    refundLineItemLabel: data.refund_line_item_label || 'PAYE Refund',
     description: data.description,
     effectiveFrom: data.effective_from,
     effectiveTo: data.effective_to,
@@ -62,6 +68,9 @@ export function getDefaultTaxSettings(countryCode: string): CountryTaxSettings {
     taxCalculationMethod: 'cumulative',
     allowMidYearRefunds: true,
     refundMethod: 'automatic',
+    refundDisplayType: 'reduced_tax',
+    refundCalculationFrequency: 'monthly',
+    refundLineItemLabel: 'PAYE Refund',
     description: 'Default settings - cumulative tax calculation',
     effectiveFrom: '1900-01-01',
     effectiveTo: null,
@@ -89,6 +98,9 @@ export async function fetchAllCountryTaxSettings(): Promise<CountryTaxSettings[]
     taxCalculationMethod: row.tax_calculation_method as 'cumulative' | 'non_cumulative',
     allowMidYearRefunds: row.allow_mid_year_refunds,
     refundMethod: row.refund_method as 'automatic' | 'end_of_year' | 'manual_claim',
+    refundDisplayType: (row.refund_display_type || 'reduced_tax') as 'separate_line_item' | 'reduced_tax',
+    refundCalculationFrequency: (row.refund_calculation_frequency || 'monthly') as 'monthly' | 'quarterly' | 'annually',
+    refundLineItemLabel: row.refund_line_item_label || 'PAYE Refund',
     description: row.description,
     effectiveFrom: row.effective_from,
     effectiveTo: row.effective_to,
@@ -108,6 +120,9 @@ export async function upsertCountryTaxSettings(
     tax_calculation_method: settings.taxCalculationMethod,
     allow_mid_year_refunds: settings.allowMidYearRefunds,
     refund_method: settings.refundMethod,
+    refund_display_type: settings.refundDisplayType,
+    refund_calculation_frequency: settings.refundCalculationFrequency,
+    refund_line_item_label: settings.refundLineItemLabel,
     description: settings.description,
     effective_from: settings.effectiveFrom,
     effective_to: settings.effectiveTo,

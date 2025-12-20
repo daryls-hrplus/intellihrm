@@ -33,6 +33,9 @@ interface FormData {
   taxCalculationMethod: 'cumulative' | 'non_cumulative';
   allowMidYearRefunds: boolean;
   refundMethod: 'automatic' | 'end_of_year' | 'manual_claim';
+  refundDisplayType: 'separate_line_item' | 'reduced_tax';
+  refundCalculationFrequency: 'monthly' | 'quarterly' | 'annually';
+  refundLineItemLabel: string;
   description: string;
   effectiveFrom: string;
   effectiveTo: string;
@@ -44,6 +47,9 @@ const initialFormData: FormData = {
   taxCalculationMethod: 'cumulative',
   allowMidYearRefunds: true,
   refundMethod: 'automatic',
+  refundDisplayType: 'reduced_tax',
+  refundCalculationFrequency: 'monthly',
+  refundLineItemLabel: 'PAYE Refund',
   description: '',
   effectiveFrom: new Date().toISOString().split('T')[0],
   effectiveTo: '',
@@ -68,6 +74,9 @@ export default function CountryTaxSettingsPage() {
       taxCalculationMethod: data.taxCalculationMethod,
       allowMidYearRefunds: data.allowMidYearRefunds,
       refundMethod: data.refundMethod,
+      refundDisplayType: data.refundDisplayType,
+      refundCalculationFrequency: data.refundCalculationFrequency,
+      refundLineItemLabel: data.refundLineItemLabel || null,
       description: data.description || null,
       effectiveFrom: data.effectiveFrom,
       effectiveTo: data.effectiveTo || null,
@@ -97,6 +106,9 @@ export default function CountryTaxSettingsPage() {
       taxCalculationMethod: setting.taxCalculationMethod,
       allowMidYearRefunds: setting.allowMidYearRefunds,
       refundMethod: setting.refundMethod,
+      refundDisplayType: setting.refundDisplayType || 'reduced_tax',
+      refundCalculationFrequency: setting.refundCalculationFrequency || 'monthly',
+      refundLineItemLabel: setting.refundLineItemLabel || 'PAYE Refund',
       description: setting.description || '',
       effectiveFrom: setting.effectiveFrom,
       effectiveTo: setting.effectiveTo || '',
@@ -190,7 +202,7 @@ export default function CountryTaxSettingsPage() {
                     <TableHead>Country</TableHead>
                     <TableHead>Tax Method</TableHead>
                     <TableHead>Refund Handling</TableHead>
-                    <TableHead>Description</TableHead>
+                    <TableHead>Refund Display</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
@@ -207,8 +219,21 @@ export default function CountryTaxSettingsPage() {
                       <TableCell>
                         {getRefundBadge(setting.refundMethod, setting.allowMidYearRefunds)}
                       </TableCell>
-                      <TableCell className="max-w-[300px] truncate">
-                        {setting.description || '-'}
+                      <TableCell>
+                        {setting.allowMidYearRefunds ? (
+                          <div className="flex flex-col gap-1">
+                            <Badge variant="outline" className="w-fit">
+                              {setting.refundDisplayType === 'separate_line_item' 
+                                ? 'Separate Line' 
+                                : 'Reduced Tax'}
+                            </Badge>
+                            <span className="text-xs text-muted-foreground">
+                              {setting.refundCalculationFrequency}
+                            </span>
+                          </div>
+                        ) : (
+                          <span className="text-muted-foreground">-</span>
+                        )}
                       </TableCell>
                       <TableCell>
                         {setting.isActive ? (
@@ -344,29 +369,87 @@ export default function CountryTaxSettingsPage() {
                   </div>
 
                   {formData.allowMidYearRefunds && (
-                    <div className="space-y-2">
-                      <Label>Refund Method</Label>
-                      <Select
-                        value={formData.refundMethod}
-                        onValueChange={(value: 'automatic' | 'end_of_year' | 'manual_claim') => 
-                          setFormData(prev => ({ ...prev, refundMethod: value }))}
-                      >
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="automatic">
-                            Automatic - Apply refund in payroll immediately
-                          </SelectItem>
-                          <SelectItem value="end_of_year">
-                            End of Year - Accumulate and refund at year end
-                          </SelectItem>
-                          <SelectItem value="manual_claim">
-                            Manual Claim - Employee must request refund
-                          </SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
+                    <>
+                      <div className="space-y-2">
+                        <Label>Refund Method</Label>
+                        <Select
+                          value={formData.refundMethod}
+                          onValueChange={(value: 'automatic' | 'end_of_year' | 'manual_claim') => 
+                            setFormData(prev => ({ ...prev, refundMethod: value }))}
+                        >
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="automatic">
+                              Automatic - Apply refund in payroll immediately
+                            </SelectItem>
+                            <SelectItem value="end_of_year">
+                              End of Year - Accumulate and refund at year end
+                            </SelectItem>
+                            <SelectItem value="manual_claim">
+                              Manual Claim - Employee must request refund
+                            </SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label>Refund Calculation Frequency</Label>
+                        <Select
+                          value={formData.refundCalculationFrequency}
+                          onValueChange={(value: 'monthly' | 'quarterly' | 'annually') => 
+                            setFormData(prev => ({ ...prev, refundCalculationFrequency: value }))}
+                        >
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="monthly">Monthly - Calculate refunds each month</SelectItem>
+                            <SelectItem value="quarterly">Quarterly - Calculate refunds each quarter</SelectItem>
+                            <SelectItem value="annually">Annually - Calculate refunds at year end only</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label>Refund Display on Payslip</Label>
+                        <Select
+                          value={formData.refundDisplayType}
+                          onValueChange={(value: 'separate_line_item' | 'reduced_tax') => 
+                            setFormData(prev => ({ ...prev, refundDisplayType: value }))}
+                        >
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="separate_line_item">
+                              Separate Line Item - Show refund as distinct entry under PAYE
+                            </SelectItem>
+                            <SelectItem value="reduced_tax">
+                              Reduced Tax Amount - Reflect as lower tax deduction
+                            </SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <p className="text-xs text-muted-foreground">
+                          Some countries require refunds shown separately, others as reduced tax
+                        </p>
+                      </div>
+
+                      {formData.refundDisplayType === 'separate_line_item' && (
+                        <div className="space-y-2">
+                          <Label>Refund Line Item Label</Label>
+                          <Input
+                            value={formData.refundLineItemLabel}
+                            onChange={(e) => setFormData(prev => ({ ...prev, refundLineItemLabel: e.target.value }))}
+                            placeholder="e.g., PAYE Refund, Income Tax Credit"
+                          />
+                          <p className="text-xs text-muted-foreground">
+                            Label shown on payslip for the refund line
+                          </p>
+                        </div>
+                      )}
+                    </>
                   )}
                 </>
               )}
