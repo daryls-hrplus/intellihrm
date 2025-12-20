@@ -9075,6 +9075,101 @@ export type Database = {
           },
         ]
       }
+      employee_tax_relief_enrollments: {
+        Row: {
+          annual_claimed_amount: number | null
+          company_id: string
+          contribution_amount: number | null
+          contribution_percentage: number | null
+          created_at: string
+          effective_from: string
+          effective_to: string | null
+          employee_id: string
+          enrollment_date: string
+          id: string
+          notes: string | null
+          proof_documents: Json | null
+          proof_submitted: boolean
+          proof_verified: boolean
+          proof_verified_at: string | null
+          proof_verified_by: string | null
+          scheme_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          annual_claimed_amount?: number | null
+          company_id: string
+          contribution_amount?: number | null
+          contribution_percentage?: number | null
+          created_at?: string
+          effective_from: string
+          effective_to?: string | null
+          employee_id: string
+          enrollment_date?: string
+          id?: string
+          notes?: string | null
+          proof_documents?: Json | null
+          proof_submitted?: boolean
+          proof_verified?: boolean
+          proof_verified_at?: string | null
+          proof_verified_by?: string | null
+          scheme_id: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          annual_claimed_amount?: number | null
+          company_id?: string
+          contribution_amount?: number | null
+          contribution_percentage?: number | null
+          created_at?: string
+          effective_from?: string
+          effective_to?: string | null
+          employee_id?: string
+          enrollment_date?: string
+          id?: string
+          notes?: string | null
+          proof_documents?: Json | null
+          proof_submitted?: boolean
+          proof_verified?: boolean
+          proof_verified_at?: string | null
+          proof_verified_by?: string | null
+          scheme_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "employee_tax_relief_enrollments_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_tax_relief_enrollments_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_tax_relief_enrollments_proof_verified_by_fkey"
+            columns: ["proof_verified_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_tax_relief_enrollments_scheme_id_fkey"
+            columns: ["scheme_id"]
+            isOneToOne: false
+            referencedRelation: "tax_relief_schemes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       employee_transactions: {
         Row: {
           acting_allowance: number | null
@@ -30725,6 +30820,157 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      tax_relief_period_claims: {
+        Row: {
+          claim_period_end: string
+          claim_period_start: string
+          contribution_amount: number | null
+          created_at: string
+          enrollment_id: string
+          id: string
+          pay_period_id: string | null
+          payroll_run_id: string | null
+          relief_amount: number
+          status: string
+          tax_saved: number | null
+          updated_at: string
+          ytd_contribution: number | null
+          ytd_relief: number | null
+        }
+        Insert: {
+          claim_period_end: string
+          claim_period_start: string
+          contribution_amount?: number | null
+          created_at?: string
+          enrollment_id: string
+          id?: string
+          pay_period_id?: string | null
+          payroll_run_id?: string | null
+          relief_amount?: number
+          status?: string
+          tax_saved?: number | null
+          updated_at?: string
+          ytd_contribution?: number | null
+          ytd_relief?: number | null
+        }
+        Update: {
+          claim_period_end?: string
+          claim_period_start?: string
+          contribution_amount?: number | null
+          created_at?: string
+          enrollment_id?: string
+          id?: string
+          pay_period_id?: string | null
+          payroll_run_id?: string | null
+          relief_amount?: number
+          status?: string
+          tax_saved?: number | null
+          updated_at?: string
+          ytd_contribution?: number | null
+          ytd_relief?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tax_relief_period_claims_enrollment_id_fkey"
+            columns: ["enrollment_id"]
+            isOneToOne: false
+            referencedRelation: "employee_tax_relief_enrollments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tax_relief_period_claims_pay_period_id_fkey"
+            columns: ["pay_period_id"]
+            isOneToOne: false
+            referencedRelation: "pay_periods"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tax_relief_period_claims_payroll_run_id_fkey"
+            columns: ["payroll_run_id"]
+            isOneToOne: false
+            referencedRelation: "payroll_runs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tax_relief_schemes: {
+        Row: {
+          annual_cap: number | null
+          calculation_method: string
+          country: string
+          created_at: string
+          description: string | null
+          effective_from: string
+          effective_to: string | null
+          eligibility_criteria: Json | null
+          id: string
+          is_active: boolean
+          legal_reference: string | null
+          max_age: number | null
+          min_age: number | null
+          monthly_cap: number | null
+          proof_documents: string[] | null
+          relief_percentage: number | null
+          relief_type: string
+          relief_value: number | null
+          requires_proof: boolean
+          scheme_category: string
+          scheme_code: string
+          scheme_name: string
+          updated_at: string
+        }
+        Insert: {
+          annual_cap?: number | null
+          calculation_method: string
+          country: string
+          created_at?: string
+          description?: string | null
+          effective_from?: string
+          effective_to?: string | null
+          eligibility_criteria?: Json | null
+          id?: string
+          is_active?: boolean
+          legal_reference?: string | null
+          max_age?: number | null
+          min_age?: number | null
+          monthly_cap?: number | null
+          proof_documents?: string[] | null
+          relief_percentage?: number | null
+          relief_type: string
+          relief_value?: number | null
+          requires_proof?: boolean
+          scheme_category: string
+          scheme_code: string
+          scheme_name: string
+          updated_at?: string
+        }
+        Update: {
+          annual_cap?: number | null
+          calculation_method?: string
+          country?: string
+          created_at?: string
+          description?: string | null
+          effective_from?: string
+          effective_to?: string | null
+          eligibility_criteria?: Json | null
+          id?: string
+          is_active?: boolean
+          legal_reference?: string | null
+          max_age?: number | null
+          min_age?: number | null
+          monthly_cap?: number | null
+          proof_documents?: string[] | null
+          relief_percentage?: number | null
+          relief_type?: string
+          relief_value?: number | null
+          requires_proof?: boolean
+          scheme_category?: string
+          scheme_code?: string
+          scheme_name?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       team_calendar_events: {
         Row: {
