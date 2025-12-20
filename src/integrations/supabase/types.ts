@@ -31716,6 +31716,414 @@ export type Database = {
           },
         ]
       }
+      tip_pool_allocations: {
+        Row: {
+          created_at: string
+          department_id: string | null
+          fixed_amount: number | null
+          id: string
+          is_active: boolean | null
+          job_title: string | null
+          percentage: number | null
+          points_per_hour: number | null
+          pool_config_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          department_id?: string | null
+          fixed_amount?: number | null
+          id?: string
+          is_active?: boolean | null
+          job_title?: string | null
+          percentage?: number | null
+          points_per_hour?: number | null
+          pool_config_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          department_id?: string | null
+          fixed_amount?: number | null
+          id?: string
+          is_active?: boolean | null
+          job_title?: string | null
+          percentage?: number | null
+          points_per_hour?: number | null
+          pool_config_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tip_pool_allocations_department_id_fkey"
+            columns: ["department_id"]
+            isOneToOne: false
+            referencedRelation: "departments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tip_pool_allocations_pool_config_id_fkey"
+            columns: ["pool_config_id"]
+            isOneToOne: false
+            referencedRelation: "tip_pool_configurations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tip_pool_collections: {
+        Row: {
+          card_tips: number | null
+          cash_tips: number | null
+          collection_date: string
+          created_at: string
+          deduction_notes: string | null
+          deductions: number | null
+          id: string
+          net_distributable: number | null
+          notes: string | null
+          other_gratuities: number | null
+          pool_config_id: string
+          recorded_by: string | null
+          service_charge: number | null
+          status: string | null
+          total_collected: number | null
+          updated_at: string
+        }
+        Insert: {
+          card_tips?: number | null
+          cash_tips?: number | null
+          collection_date: string
+          created_at?: string
+          deduction_notes?: string | null
+          deductions?: number | null
+          id?: string
+          net_distributable?: number | null
+          notes?: string | null
+          other_gratuities?: number | null
+          pool_config_id: string
+          recorded_by?: string | null
+          service_charge?: number | null
+          status?: string | null
+          total_collected?: number | null
+          updated_at?: string
+        }
+        Update: {
+          card_tips?: number | null
+          cash_tips?: number | null
+          collection_date?: string
+          created_at?: string
+          deduction_notes?: string | null
+          deductions?: number | null
+          id?: string
+          net_distributable?: number | null
+          notes?: string | null
+          other_gratuities?: number | null
+          pool_config_id?: string
+          recorded_by?: string | null
+          service_charge?: number | null
+          status?: string | null
+          total_collected?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tip_pool_collections_pool_config_id_fkey"
+            columns: ["pool_config_id"]
+            isOneToOne: false
+            referencedRelation: "tip_pool_configurations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tip_pool_collections_recorded_by_fkey"
+            columns: ["recorded_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tip_pool_configurations: {
+        Row: {
+          code: string
+          company_id: string
+          created_at: string
+          description: string | null
+          distribution_frequency: string
+          distribution_method: string
+          end_date: string | null
+          id: string
+          include_in_payroll: boolean | null
+          included_departments: Json | null
+          included_job_titles: Json | null
+          is_active: boolean | null
+          name: string
+          pay_group_id: string | null
+          pool_type: string
+          start_date: string
+          troncmaster_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          code: string
+          company_id: string
+          created_at?: string
+          description?: string | null
+          distribution_frequency?: string
+          distribution_method?: string
+          end_date?: string | null
+          id?: string
+          include_in_payroll?: boolean | null
+          included_departments?: Json | null
+          included_job_titles?: Json | null
+          is_active?: boolean | null
+          name: string
+          pay_group_id?: string | null
+          pool_type: string
+          start_date?: string
+          troncmaster_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          code?: string
+          company_id?: string
+          created_at?: string
+          description?: string | null
+          distribution_frequency?: string
+          distribution_method?: string
+          end_date?: string | null
+          id?: string
+          include_in_payroll?: boolean | null
+          included_departments?: Json | null
+          included_job_titles?: Json | null
+          is_active?: boolean | null
+          name?: string
+          pay_group_id?: string | null
+          pool_type?: string
+          start_date?: string
+          troncmaster_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tip_pool_configurations_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tip_pool_configurations_pay_group_id_fkey"
+            columns: ["pay_group_id"]
+            isOneToOne: false
+            referencedRelation: "pay_groups"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tip_pool_configurations_troncmaster_id_fkey"
+            columns: ["troncmaster_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tip_pool_distribution_details: {
+        Row: {
+          created_at: string
+          distribution_id: string
+          employee_id: string
+          gross_amount: number
+          hours_worked: number | null
+          id: string
+          net_amount: number
+          ni_amount: number | null
+          payroll_line_item_id: string | null
+          percentage_share: number | null
+          points_earned: number | null
+          status: string | null
+          tax_amount: number | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          distribution_id: string
+          employee_id: string
+          gross_amount: number
+          hours_worked?: number | null
+          id?: string
+          net_amount: number
+          ni_amount?: number | null
+          payroll_line_item_id?: string | null
+          percentage_share?: number | null
+          points_earned?: number | null
+          status?: string | null
+          tax_amount?: number | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          distribution_id?: string
+          employee_id?: string
+          gross_amount?: number
+          hours_worked?: number | null
+          id?: string
+          net_amount?: number
+          ni_amount?: number | null
+          payroll_line_item_id?: string | null
+          percentage_share?: number | null
+          points_earned?: number | null
+          status?: string | null
+          tax_amount?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tip_pool_distribution_details_distribution_id_fkey"
+            columns: ["distribution_id"]
+            isOneToOne: false
+            referencedRelation: "tip_pool_distributions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tip_pool_distribution_details_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tip_pool_distribution_details_payroll_line_item_id_fkey"
+            columns: ["payroll_line_item_id"]
+            isOneToOne: false
+            referencedRelation: "payroll_line_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tip_pool_distributions: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          created_at: string
+          id: string
+          notes: string | null
+          payroll_run_id: string | null
+          period_end: string
+          period_start: string
+          pool_config_id: string
+          status: string | null
+          total_distributed: number | null
+          total_pool_amount: number
+          updated_at: string
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          payroll_run_id?: string | null
+          period_end: string
+          period_start: string
+          pool_config_id: string
+          status?: string | null
+          total_distributed?: number | null
+          total_pool_amount: number
+          updated_at?: string
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          payroll_run_id?: string | null
+          period_end?: string
+          period_start?: string
+          pool_config_id?: string
+          status?: string | null
+          total_distributed?: number | null
+          total_pool_amount?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tip_pool_distributions_approved_by_fkey"
+            columns: ["approved_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tip_pool_distributions_payroll_run_id_fkey"
+            columns: ["payroll_run_id"]
+            isOneToOne: false
+            referencedRelation: "payroll_runs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tip_pool_distributions_pool_config_id_fkey"
+            columns: ["pool_config_id"]
+            isOneToOne: false
+            referencedRelation: "tip_pool_configurations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tip_pool_participants: {
+        Row: {
+          created_at: string
+          custom_percentage: number | null
+          custom_points_per_hour: number | null
+          employee_id: string
+          end_date: string | null
+          id: string
+          is_active: boolean | null
+          pool_config_id: string
+          start_date: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          custom_percentage?: number | null
+          custom_points_per_hour?: number | null
+          employee_id: string
+          end_date?: string | null
+          id?: string
+          is_active?: boolean | null
+          pool_config_id: string
+          start_date?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          custom_percentage?: number | null
+          custom_points_per_hour?: number | null
+          employee_id?: string
+          end_date?: string | null
+          id?: string
+          is_active?: boolean | null
+          pool_config_id?: string
+          start_date?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tip_pool_participants_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tip_pool_participants_pool_config_id_fkey"
+            columns: ["pool_config_id"]
+            isOneToOne: false
+            referencedRelation: "tip_pool_configurations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       total_rewards_statements: {
         Row: {
           base_salary: number | null
