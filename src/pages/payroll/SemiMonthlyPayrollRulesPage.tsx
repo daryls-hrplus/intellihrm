@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { ArrowLeft, Save, Info, Calendar, DollarSign, FileText } from "lucide-react";
+import { ArrowLeft, Save, Info, Calendar, DollarSign, FileText, Wallet } from "lucide-react";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { PayrollFilters, usePayrollFilters } from "@/components/payroll/PayrollFilters";
@@ -29,9 +29,18 @@ interface SemiMonthlyRule {
   statutory_overrides: string[];
   deduction_handling: "split" | "last_cycle" | "first_cycle";
   deduction_overrides: string[];
+  base_salary_handling: "split" | "last_cycle" | "first_cycle";
+  other_earnings_handling: "split" | "last_cycle" | "first_cycle";
+  other_earnings_overrides: string[];
   primary_cycle: "first" | "second";
   notes: string;
   is_active: boolean;
+}
+
+interface PayElement {
+  id: string;
+  code: string;
+  name: string;
 }
 
 interface PayGroup {
@@ -65,6 +74,9 @@ export default function SemiMonthlyPayrollRulesPage() {
     statutory_overrides: [],
     deduction_handling: "split",
     deduction_overrides: [],
+    base_salary_handling: "split",
+    other_earnings_handling: "split",
+    other_earnings_overrides: [],
     primary_cycle: "second",
     notes: "",
     is_active: true,
@@ -151,6 +163,26 @@ export default function SemiMonthlyPayrollRulesPage() {
     enabled: !!selectedCompanyId,
   });
 
+  // Fetch pay elements (earnings) for the company
+  const { data: payElements } = useQuery({
+    queryKey: ["pay-elements-for-rules", selectedCompanyId],
+    queryFn: async () => {
+      if (!selectedCompanyId) return [];
+      const { data, error } = await supabase
+        .from("pay_elements")
+        .select("id, code, name")
+        .eq("company_id", selectedCompanyId)
+        .eq("is_active", true);
+      if (error) throw error;
+      // Filter in JS to avoid complex type inference issues
+      const filtered = (data || []).filter(
+        (el: any) => ['earning', 'allowance'].includes(el.element_type) && el.code !== 'BASE_SALARY'
+      );
+      return filtered as PayElement[];
+    },
+    enabled: !!selectedCompanyId,
+  });
+
   // Update form when existing rule loads
   useEffect(() => {
     if (existingRule) {
@@ -161,6 +193,9 @@ export default function SemiMonthlyPayrollRulesPage() {
         statutory_overrides: (existingRule.statutory_overrides as string[]) || [],
         deduction_handling: existingRule.deduction_handling as "split" | "last_cycle" | "first_cycle",
         deduction_overrides: (existingRule.deduction_overrides as string[]) || [],
+        base_salary_handling: (existingRule.base_salary_handling as "split" | "last_cycle" | "first_cycle") || "split",
+        other_earnings_handling: (existingRule.other_earnings_handling as "split" | "last_cycle" | "first_cycle") || "split",
+        other_earnings_overrides: (existingRule.other_earnings_overrides as string[]) || [],
         primary_cycle: existingRule.primary_cycle as "first" | "second",
         notes: existingRule.notes || "",
         is_active: existingRule.is_active,
@@ -172,6 +207,9 @@ export default function SemiMonthlyPayrollRulesPage() {
         statutory_overrides: [],
         deduction_handling: "split",
         deduction_overrides: [],
+        base_salary_handling: "split",
+        other_earnings_handling: "split",
+        other_earnings_overrides: [],
         primary_cycle: "second",
         notes: "",
         is_active: true,
@@ -187,6 +225,9 @@ export default function SemiMonthlyPayrollRulesPage() {
         statutory_overrides: data.statutory_overrides,
         deduction_handling: data.deduction_handling,
         deduction_overrides: data.deduction_overrides,
+        base_salary_handling: data.base_salary_handling,
+        other_earnings_handling: data.other_earnings_handling,
+        other_earnings_overrides: data.other_earnings_overrides,
         primary_cycle: data.primary_cycle,
         notes: data.notes || null,
         is_active: data.is_active,
@@ -229,6 +270,15 @@ export default function SemiMonthlyPayrollRulesPage() {
       deduction_overrides: prev.deduction_overrides.includes(code)
         ? prev.deduction_overrides.filter(c => c !== code)
         : [...prev.deduction_overrides, code],
+    }));
+  };
+
+  const toggleEarningsOverride = (code: string) => {
+    setFormData(prev => ({
+      ...prev,
+      other_earnings_overrides: prev.other_earnings_overrides.includes(code)
+        ? prev.other_earnings_overrides.filter(c => c !== code)
+        : [...prev.other_earnings_overrides, code],
     }));
   };
 
@@ -422,6 +472,159 @@ export default function SemiMonthlyPayrollRulesPage() {
                       ))}
                     </div>
                     {formData.statutory_overrides.length > 0 && (
+                      <p className="text-sm text-primary">
+                        Selected items will use the <strong>opposite</strong> of the default handling
+                      </p>
+                    )}
+                  </div>
+                </>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Earnings Configuration */}
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle className="flex items-center gap-2">
+                    <Wallet className="h-5 w-5" />
+                    Earnings Handling
+                  </CardTitle>
+                  <CardDescription>
+                    How base salary and other regular earnings should be split across semi-monthly pay periods
+                  </CardDescription>
+                </div>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <Info className="h-4 w-4 text-muted-foreground" />
+                    </TooltipTrigger>
+                    <TooltipContent className="max-w-xs">
+                      <p>By default, earnings are split 50/50 between pay cycles. You can configure other earnings to be paid fully on a specific cycle.</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {/* Base Salary Handling */}
+              <div className="grid gap-2">
+                <Label>Base Salary Handling</Label>
+                <Select
+                  value={formData.base_salary_handling}
+                  onValueChange={(value: "split" | "last_cycle" | "first_cycle") => 
+                    setFormData(prev => ({ ...prev, base_salary_handling: value }))
+                  }
+                >
+                  <SelectTrigger className="w-full max-w-md">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="split">
+                      <div className="flex flex-col">
+                        <span>Split Evenly (50/50)</span>
+                        <span className="text-xs text-muted-foreground">Pay half the monthly salary each cycle</span>
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="last_cycle">
+                      <div className="flex flex-col">
+                        <span>Last Cycle Only</span>
+                        <span className="text-xs text-muted-foreground">Pay full monthly salary on 2nd cycle</span>
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="first_cycle">
+                      <div className="flex flex-col">
+                        <span>First Cycle Only</span>
+                        <span className="text-xs text-muted-foreground">Pay full monthly salary on 1st cycle</span>
+                      </div>
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+                <p className="text-sm text-muted-foreground">
+                  {formData.base_salary_handling === 'split' 
+                    ? 'Base salary will be split evenly (50/50) across both pay cycles'
+                    : `Base salary will be paid in full on the ${formData.base_salary_handling === 'last_cycle' ? 'second' : 'first'} pay cycle`}
+                </p>
+              </div>
+
+              <Separator />
+
+              {/* Other Regular Earnings Handling */}
+              <div className="grid gap-2">
+                <Label>Other Regular Earnings Handling</Label>
+                <Select
+                  value={formData.other_earnings_handling}
+                  onValueChange={(value: "split" | "last_cycle" | "first_cycle") => 
+                    setFormData(prev => ({ ...prev, other_earnings_handling: value }))
+                  }
+                >
+                  <SelectTrigger className="w-full max-w-md">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="split">
+                      <div className="flex flex-col">
+                        <span>Split Evenly (50/50)</span>
+                        <span className="text-xs text-muted-foreground">Pay half of each earning each cycle</span>
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="last_cycle">
+                      <div className="flex flex-col">
+                        <span>Last Cycle Only (2nd Cycle)</span>
+                        <span className="text-xs text-muted-foreground">Pay full amount on 2nd cycle only</span>
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="first_cycle">
+                      <div className="flex flex-col">
+                        <span>First Cycle Only</span>
+                        <span className="text-xs text-muted-foreground">Pay full amount on 1st cycle only</span>
+                      </div>
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+                <p className="text-sm text-muted-foreground">
+                  {formData.other_earnings_handling === 'split' 
+                    ? 'Regular earnings (excluding base salary) will be split evenly across both pay cycles'
+                    : `Regular earnings will be paid in full on the ${formData.other_earnings_handling === 'last_cycle' ? 'second' : 'first'} pay cycle`}
+                </p>
+              </div>
+
+              {payElements && payElements.length > 0 && (
+                <>
+                  <Separator />
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <Label>Earnings Overrides</Label>
+                      <Badge variant="outline">
+                        {formData.other_earnings_overrides.length} selected
+                      </Badge>
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      Select specific earnings that should be handled differently from the default setting above
+                    </p>
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                      {payElements.map((el) => (
+                        <div 
+                          key={el.id}
+                          className="flex items-center space-x-2 p-2 rounded border"
+                        >
+                          <Checkbox
+                            id={`earn-${el.code}`}
+                            checked={formData.other_earnings_overrides.includes(el.code)}
+                            onCheckedChange={() => toggleEarningsOverride(el.code)}
+                          />
+                          <label 
+                            htmlFor={`earn-${el.code}`}
+                            className="text-sm cursor-pointer flex-1"
+                          >
+                            {el.name}
+                            <span className="block text-xs text-muted-foreground">{el.code}</span>
+                          </label>
+                        </div>
+                      ))}
+                    </div>
+                    {formData.other_earnings_overrides.length > 0 && (
                       <p className="text-sm text-primary">
                         Selected items will use the <strong>opposite</strong> of the default handling
                       </p>

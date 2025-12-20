@@ -29020,12 +29020,15 @@ export type Database = {
       }
       semimonthly_payroll_rules: {
         Row: {
+          base_salary_handling: string
           created_at: string
           deduction_handling: string
           deduction_overrides: Json | null
           id: string
           is_active: boolean
           notes: string | null
+          other_earnings_handling: string
+          other_earnings_overrides: Json | null
           pay_group_id: string
           primary_cycle: string
           statutory_handling: string
@@ -29033,12 +29036,15 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          base_salary_handling?: string
           created_at?: string
           deduction_handling?: string
           deduction_overrides?: Json | null
           id?: string
           is_active?: boolean
           notes?: string | null
+          other_earnings_handling?: string
+          other_earnings_overrides?: Json | null
           pay_group_id: string
           primary_cycle?: string
           statutory_handling?: string
@@ -29046,12 +29052,15 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          base_salary_handling?: string
           created_at?: string
           deduction_handling?: string
           deduction_overrides?: Json | null
           id?: string
           is_active?: boolean
           notes?: string | null
+          other_earnings_handling?: string
+          other_earnings_overrides?: Json | null
           pay_group_id?: string
           primary_cycle?: string
           statutory_handling?: string
