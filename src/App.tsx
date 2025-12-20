@@ -263,6 +263,7 @@ import TaxAllowancesPage from "./pages/payroll/TaxAllowancesPage";
 import CountryPayrollYearSetupPage from "./pages/payroll/CountryPayrollYearSetupPage";
 import BankFileBuilderPage from "./pages/payroll/BankFileBuilderPage";
 import PayGroupsPage from "./pages/payroll/PayGroupsPage";
+import SemiMonthlyPayrollRulesPage from "./pages/payroll/SemiMonthlyPayrollRulesPage";
 import PayPeriodsPage from "./pages/payroll/PayPeriodsPage";
 import PayrollProcessingPage from "./pages/payroll/PayrollProcessingPage";
 import OffCyclePayrollPage from "./pages/payroll/OffCyclePayrollPage";
@@ -1552,6 +1553,14 @@ const App = () => (
               element={
                 <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="payroll">
                   <PayGroupsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/payroll/semimonthly-rules"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="payroll">
+                  <SemiMonthlyPayrollRulesPage />
                 </ProtectedRoute>
               }
             />
