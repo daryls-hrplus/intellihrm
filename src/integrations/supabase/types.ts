@@ -23624,6 +23624,7 @@ export type Database = {
           id: string
           is_active: boolean
           name: string
+          pay_calculation_method: string | null
           pay_frequency: string
           start_date: string
           updated_at: string
@@ -23639,6 +23640,7 @@ export type Database = {
           id?: string
           is_active?: boolean
           name: string
+          pay_calculation_method?: string | null
           pay_frequency: string
           start_date?: string
           updated_at?: string
@@ -23654,6 +23656,7 @@ export type Database = {
           id?: string
           is_active?: boolean
           name?: string
+          pay_calculation_method?: string | null
           pay_frequency?: string
           start_date?: string
           updated_at?: string
