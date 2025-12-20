@@ -12,6 +12,7 @@ export interface ApplicationModule {
   display_order: number | null;
   is_active: boolean | null;
   role_requirements: string[] | null;
+  parent_module_code: string | null;
 }
 
 export interface ApplicationFeature {
