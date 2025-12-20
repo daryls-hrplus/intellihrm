@@ -5315,6 +5315,48 @@ export type Database = {
         }
         Relationships: []
       }
+      country_tax_settings: {
+        Row: {
+          allow_mid_year_refunds: boolean
+          country: string
+          created_at: string
+          description: string | null
+          effective_from: string
+          effective_to: string | null
+          id: string
+          is_active: boolean
+          refund_method: string | null
+          tax_calculation_method: string
+          updated_at: string
+        }
+        Insert: {
+          allow_mid_year_refunds?: boolean
+          country: string
+          created_at?: string
+          description?: string | null
+          effective_from?: string
+          effective_to?: string | null
+          id?: string
+          is_active?: boolean
+          refund_method?: string | null
+          tax_calculation_method?: string
+          updated_at?: string
+        }
+        Update: {
+          allow_mid_year_refunds?: boolean
+          country?: string
+          created_at?: string
+          description?: string | null
+          effective_from?: string
+          effective_to?: string | null
+          id?: string
+          is_active?: boolean
+          refund_method?: string | null
+          tax_calculation_method?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       course_competencies: {
         Row: {
           competency_id: string

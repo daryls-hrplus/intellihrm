@@ -264,6 +264,7 @@ import CountryPayrollYearSetupPage from "./pages/payroll/CountryPayrollYearSetup
 import BankFileBuilderPage from "./pages/payroll/BankFileBuilderPage";
 import PayGroupsPage from "./pages/payroll/PayGroupsPage";
 import SemiMonthlyPayrollRulesPage from "./pages/payroll/SemiMonthlyPayrollRulesPage";
+import CountryTaxSettingsPage from "./pages/payroll/CountryTaxSettingsPage";
 import PayPeriodsPage from "./pages/payroll/PayPeriodsPage";
 import PayrollProcessingPage from "./pages/payroll/PayrollProcessingPage";
 import OffCyclePayrollPage from "./pages/payroll/OffCyclePayrollPage";
