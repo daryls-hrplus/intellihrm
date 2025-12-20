@@ -41,6 +41,7 @@ interface GeneratedContent {
 export default function ApplicationDocsGeneratorPage() {
   const { t } = useTranslation();
   const { data: modulesWithFeatures } = useModulesWithFeatures();
+  const [selectedCategory, setSelectedCategory] = useState<string>("");
   const [selectedModule, setSelectedModule] = useState<string>("");
   const [selectedFeature, setSelectedFeature] = useState<string>("");
   const [selectedFeatureData, setSelectedFeatureData] = useState<ApplicationFeature | null>(null);
@@ -53,6 +54,21 @@ export default function ApplicationDocsGeneratorPage() {
   const [showTemplateLibrary, setShowTemplateLibrary] = useState(false);
 
   const availableRoles = ["admin", "hr_manager", "employee"];
+
+  // Get categories (modules without parent_module_code that start with 'cat_')
+  const categories = useMemo(() => 
+    modulesWithFeatures.filter(m => m.module_code.startsWith('cat_')),
+    [modulesWithFeatures]
+  );
+
+  // Get modules within selected category
+  const modulesInCategory = useMemo(() => 
+    modulesWithFeatures.filter(m => 
+      !m.module_code.startsWith('cat_') && 
+      (m as any).parent_module_code === selectedCategory
+    ),
+    [modulesWithFeatures, selectedCategory]
+  );
 
   const module = useMemo(() => 
     modulesWithFeatures.find(m => m.module_code === selectedModule),
@@ -725,16 +741,42 @@ export default function ApplicationDocsGeneratorPage() {
             </div>
 
             <div className="space-y-2">
-              <Label>Module</Label>
-              <Select value={selectedModule} onValueChange={(v) => {
-                setSelectedModule(v);
+              <Label>Module Category</Label>
+              <Select value={selectedCategory} onValueChange={(v) => {
+                setSelectedCategory(v);
+                setSelectedModule("");
                 setSelectedFeature("");
+                setSelectedFeatureData(null);
               }}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select a module" />
+                  <SelectValue placeholder="Select a category" />
                 </SelectTrigger>
                 <SelectContent>
-                  {modulesWithFeatures.map((mod) => (
+                  {categories.map((cat) => (
+                    <SelectItem key={cat.module_code} value={cat.module_code}>
+                      {cat.module_name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Module</Label>
+              <Select 
+                value={selectedModule} 
+                onValueChange={(v) => {
+                  setSelectedModule(v);
+                  setSelectedFeature("");
+                  setSelectedFeatureData(null);
+                }}
+                disabled={!selectedCategory}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder={selectedCategory ? "Select a module" : "Select a category first"} />
+                </SelectTrigger>
+                <SelectContent>
+                  {modulesInCategory.map((mod) => (
                     <SelectItem key={mod.module_code} value={mod.module_code}>
                       {mod.module_name}
                     </SelectItem>
