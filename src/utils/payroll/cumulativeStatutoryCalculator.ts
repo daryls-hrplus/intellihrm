@@ -7,6 +7,8 @@ import {
 } from "@/utils/statutoryDeductionCalculator";
 import { YtdStatutoryAmounts, PeriodStatutoryAmounts } from "./ytdStatutoryService";
 
+export type TaxCalculationMethod = 'cumulative' | 'non_cumulative';
+
 export interface CumulativeCalculationContext {
   /** YTD amounts from opening balances (start of year or mid-year joiner) */
   openingBalances: OpeningBalances | null;
@@ -16,6 +18,10 @@ export interface CumulativeCalculationContext {
   periodStatutoryAmounts: PeriodStatutoryAmounts;
   /** Whether this is an off-cycle calculation */
   isOffCycle: boolean;
+  /** Tax calculation method for the country */
+  taxCalculationMethod?: TaxCalculationMethod;
+  /** Whether mid-year refunds are allowed (for cumulative method) */
+  allowMidYearRefunds?: boolean;
 }
 
 export interface ExtendedStatutoryRateBand extends StatutoryRateBand {
@@ -78,7 +84,14 @@ export function calculateCumulativeStatutoryDeductions(
   let totalEmployeeDeductions = 0;
   let totalEmployerContributions = 0;
 
-  const { openingBalances, ytdStatutoryAmounts, periodStatutoryAmounts, isOffCycle } = context;
+  const { 
+    openingBalances, 
+    ytdStatutoryAmounts, 
+    periodStatutoryAmounts, 
+    isOffCycle,
+    taxCalculationMethod = 'cumulative',
+    allowMidYearRefunds = true
+  } = context;
 
   for (const statType of statutoryTypes) {
     // Find applicable rate band for this statutory type
@@ -105,32 +118,61 @@ export function calculateCumulativeStatutoryDeductions(
     let employerAmount = 0;
     let ytdTaxableIncome: number | undefined;
     let ytdTaxPaid: number | undefined;
+    let isRefund = false;
     const calcMethod = applicableBand.calculation_method || 'percentage';
 
-    // Use cumulative calculation for income tax (PAYE)
+    // Handle income tax based on country's calculation method
     if (statType.statutory_type === 'income_tax') {
-      const openingYtdIncome = openingBalances?.ytdTaxableIncome || 0;
-      const openingYtdTax = openingBalances?.ytdTaxPaid || 0;
-      
-      // Total YTD income before this pay period
-      const previousYtdIncome = openingYtdIncome + ytdAmounts.ytdEmployeeAmount;
-      const previousYtdTax = openingYtdTax + ytdAmounts.ytdEmployeeAmount;
-      
-      // If off-cycle, add what was already calculated this period to the base
-      const periodBaseTax = isOffCycle ? periodAmounts.periodEmployeeAmount : 0;
-      
-      // New cumulative YTD income including this period
-      const newYtdIncome = previousYtdIncome + grossPay;
-      
-      // Calculate total tax due on cumulative income
-      const totalTaxDue = calculateCumulativeTax(newYtdIncome, rateBands, statType.id);
-      
-      // This period's tax = total due - already paid YTD - already paid this period
-      employeeAmount = Math.max(0, totalTaxDue - previousYtdTax - periodBaseTax);
-      employerAmount = 0;
-      
-      ytdTaxableIncome = newYtdIncome;
-      ytdTaxPaid = previousYtdTax + periodBaseTax + employeeAmount;
+      if (taxCalculationMethod === 'non_cumulative') {
+        // Non-cumulative: Calculate tax only on current period earnings
+        // No YTD considerations, no mid-year refunds
+        const periodTax = calculateCumulativeTax(grossPay, rateBands, statType.id);
+        employeeAmount = periodTax;
+        employerAmount = 0;
+        
+        // Still track YTD for reporting purposes, but don't use it in calculation
+        const openingYtdIncome = openingBalances?.ytdTaxableIncome || 0;
+        ytdTaxableIncome = openingYtdIncome + (ytdAmounts.ytdEmployeeAmount || 0) + grossPay;
+        ytdTaxPaid = (openingBalances?.ytdTaxPaid || 0) + (ytdAmounts.ytdEmployeeAmount || 0) + employeeAmount;
+      } else {
+        // Cumulative: Calculate tax on YTD basis with potential refunds
+        const openingYtdIncome = openingBalances?.ytdTaxableIncome || 0;
+        const openingYtdTax = openingBalances?.ytdTaxPaid || 0;
+        
+        // Total YTD income before this pay period
+        const previousYtdIncome = openingYtdIncome + ytdAmounts.ytdEmployeeAmount;
+        const previousYtdTax = openingYtdTax + ytdAmounts.ytdEmployeeAmount;
+        
+        // If off-cycle, add what was already calculated this period to the base
+        const periodBaseTax = isOffCycle ? periodAmounts.periodEmployeeAmount : 0;
+        
+        // New cumulative YTD income including this period
+        const newYtdIncome = previousYtdIncome + grossPay;
+        
+        // Calculate total tax due on cumulative income
+        const totalTaxDue = calculateCumulativeTax(newYtdIncome, rateBands, statType.id);
+        
+        // This period's tax = total due - already paid YTD - already paid this period
+        const rawTaxAmount = totalTaxDue - previousYtdTax - periodBaseTax;
+        
+        // Handle potential refunds based on country settings
+        if (rawTaxAmount < 0) {
+          if (allowMidYearRefunds) {
+            // Negative tax = refund to employee (reduce deduction)
+            employeeAmount = rawTaxAmount; // Will be negative
+            isRefund = true;
+          } else {
+            // No mid-year refunds - set to zero, will reconcile at year end
+            employeeAmount = 0;
+          }
+        } else {
+          employeeAmount = rawTaxAmount;
+        }
+        employerAmount = 0;
+        
+        ytdTaxableIncome = newYtdIncome;
+        ytdTaxPaid = previousYtdTax + periodBaseTax + Math.max(0, employeeAmount);
+      }
     } else {
       // For other statutories, calculate base amount first
       switch (calcMethod) {
