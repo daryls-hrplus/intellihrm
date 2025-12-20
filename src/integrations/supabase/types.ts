@@ -30084,6 +30084,63 @@ export type Database = {
           },
         ]
       }
+      statutory_tax_relief_rules: {
+        Row: {
+          annual_cap: number | null
+          applies_to_employee_contribution: boolean
+          applies_to_employer_contribution: boolean
+          country: string
+          created_at: string
+          description: string | null
+          effective_from: string
+          effective_to: string | null
+          id: string
+          is_active: boolean
+          legal_reference: string | null
+          monthly_cap: number | null
+          relief_percentage: number
+          statutory_type_code: string
+          statutory_type_name: string
+          updated_at: string
+        }
+        Insert: {
+          annual_cap?: number | null
+          applies_to_employee_contribution?: boolean
+          applies_to_employer_contribution?: boolean
+          country: string
+          created_at?: string
+          description?: string | null
+          effective_from?: string
+          effective_to?: string | null
+          id?: string
+          is_active?: boolean
+          legal_reference?: string | null
+          monthly_cap?: number | null
+          relief_percentage?: number
+          statutory_type_code: string
+          statutory_type_name: string
+          updated_at?: string
+        }
+        Update: {
+          annual_cap?: number | null
+          applies_to_employee_contribution?: boolean
+          applies_to_employer_contribution?: boolean
+          country?: string
+          created_at?: string
+          description?: string | null
+          effective_from?: string
+          effective_to?: string | null
+          id?: string
+          is_active?: boolean
+          legal_reference?: string | null
+          monthly_cap?: number | null
+          relief_percentage?: number
+          statutory_type_code?: string
+          statutory_type_name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       subscription_changes: {
         Row: {
           change_type: string
