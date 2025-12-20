@@ -135,11 +135,11 @@ export default function PayrollDashboardPage() {
   const sections: ModuleSection[] = [
     {
       titleKey: "Processing",
-      items: filterByAccess([allModules.processing, allModules.offCycle, allModules.payPeriods, allModules.salaryOvertime, allModules.regularDeductions, allModules.expenseClaims]),
+      items: filterByAccess([allModules.processing, allModules.offCycle, allModules.payPeriods, allModules.salaryOvertime, allModules.regularDeductions, allModules.expenseClaims, allModules.tipPools]),
     },
     {
       titleKey: "Configuration",
-      items: filterByAccess([allModules.payGroups, allModules.semiMonthlyRules, allModules.tipPools, allModules.statutoryTaxRelief, allModules.taxReliefSchemes, allModules.payElements, allModules.taxConfig, allModules.statutoryTypes, allModules.taxAllowances, allModules.countryYearSetup, allModules.templates, allModules.holidays, allModules.openingBalances]),
+      items: filterByAccess([allModules.payGroups, allModules.semiMonthlyRules, allModules.statutoryTaxRelief, allModules.taxReliefSchemes, allModules.payElements, allModules.taxConfig, allModules.statutoryTypes, allModules.taxAllowances, allModules.countryYearSetup, allModules.templates, allModules.holidays, allModules.openingBalances]),
     },
     {
       titleKey: "Integration",
