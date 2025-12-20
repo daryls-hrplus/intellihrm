@@ -24,6 +24,7 @@ interface PayGroupFormData {
   code: string;
   description: string;
   pay_frequency: string;
+  pay_calculation_method: string;
   is_active: boolean;
   uses_national_insurance: boolean;
   gl_configured: boolean;
@@ -43,6 +44,7 @@ export default function PayGroupsPage() {
     code: "",
     description: "",
     pay_frequency: "monthly",
+    pay_calculation_method: "time_rate",
     is_active: true,
     uses_national_insurance: false,
     gl_configured: false,
@@ -73,6 +75,8 @@ export default function PayGroupsPage() {
         code: data.code,
         description: data.description || null,
         pay_frequency: data.pay_frequency,
+        pay_calculation_method: (data.pay_frequency === 'weekly' || data.pay_frequency === 'biweekly') 
+          ? data.pay_calculation_method : null,
         is_active: data.is_active,
         uses_national_insurance: data.uses_national_insurance,
         gl_configured: data.gl_configured,
@@ -122,6 +126,7 @@ export default function PayGroupsPage() {
       code: "",
       description: "",
       pay_frequency: "monthly",
+      pay_calculation_method: "time_rate",
       is_active: true,
       uses_national_insurance: false,
       gl_configured: false,
@@ -137,6 +142,7 @@ export default function PayGroupsPage() {
       code: item.code,
       description: item.description || "",
       pay_frequency: item.pay_frequency,
+      pay_calculation_method: item.pay_calculation_method || "time_rate",
       is_active: item.is_active,
       uses_national_insurance: item.uses_national_insurance || false,
       gl_configured: item.gl_configured || false,
@@ -304,6 +310,29 @@ export default function PayGroupsPage() {
                 </SelectContent>
               </Select>
             </div>
+            {(formData.pay_frequency === 'weekly' || formData.pay_frequency === 'biweekly') && (
+              <div className="grid gap-2">
+                <Label>Pay Calculation Method *</Label>
+                <Select
+                  value={formData.pay_calculation_method}
+                  onValueChange={(value) => setFormData((prev) => ({ ...prev, pay_calculation_method: value }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="time_rate">Time Rate (Hours × Rate)</SelectItem>
+                    <SelectItem value="piece_rate">Piece Rate (Units × Rate)</SelectItem>
+                    <SelectItem value="balance_debt">Balance/Debt Method (Advances settled at period end)</SelectItem>
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-muted-foreground">
+                  {formData.pay_calculation_method === 'time_rate' && 'Pay calculated based on hours worked multiplied by hourly rate'}
+                  {formData.pay_calculation_method === 'piece_rate' && 'Pay calculated based on units/pieces produced multiplied by rate per piece'}
+                  {formData.pay_calculation_method === 'balance_debt' && 'Advances/draws given throughout period, settled against actual earnings at pay period end'}
+                </p>
+              </div>
+            )}
             <div className="grid gap-2">
               <Label>{t("common.description")}</Label>
               <Textarea
