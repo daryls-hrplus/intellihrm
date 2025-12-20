@@ -63,12 +63,16 @@ const PAYROLL_COUNTRIES = [
   { code: 'DO', name: 'Dominican Republic', region: 'Caribbean' },
   { code: 'BS', name: 'Bahamas', region: 'Caribbean' },
   { code: 'BZ', name: 'Belize', region: 'Caribbean' },
+  { code: 'SR', name: 'Suriname', region: 'Caribbean' },
+  { code: 'CW', name: 'Curaçao', region: 'Caribbean' },
+  { code: 'SX', name: 'Sint Maarten', region: 'Caribbean' },
   { code: 'GH', name: 'Ghana', region: 'Africa' },
   { code: 'NG', name: 'Nigeria', region: 'Africa' },
   { code: 'KE', name: 'Kenya', region: 'Africa' },
   { code: 'ZA', name: 'South Africa', region: 'Africa' },
   { code: 'RW', name: 'Rwanda', region: 'Africa' },
   { code: 'TZ', name: 'Tanzania', region: 'Africa' },
+  { code: 'CO', name: 'Colombia', region: 'South America' },
 ];
 
 // Industry-standard module groupings (aligned with Workday, SAP, Oracle HCM marketing)
