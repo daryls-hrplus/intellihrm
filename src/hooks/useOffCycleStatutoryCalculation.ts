@@ -11,10 +11,18 @@ import {
   fetchExtendedRateBands,
   CumulativeCalculationContext,
   ExtendedStatutoryRateBand,
-  TaxCalculationMethod
+  TaxCalculationMethod,
+  TaxReliefContext,
+  ExtendedStatutoryCalculationResult
 } from "@/utils/payroll/cumulativeStatutoryCalculator";
 import { fetchOpeningBalances, fetchStatutoryDeductionsForCountry, OpeningBalances } from "@/utils/statutoryDeductionCalculator";
 import { fetchCountryTaxSettings, getDefaultTaxSettings } from "@/utils/payroll/countryTaxSettings";
+import {
+  fetchStatutoryTaxReliefRules,
+  fetchTaxReliefSchemes,
+  fetchEmployeeReliefEnrollments,
+  CalculatedRelief
+} from "@/utils/payroll/taxReliefCalculator";
 
 export interface OffCycleCalculationParams {
   employeeId: string;
@@ -37,9 +45,14 @@ export interface OffCycleCalculationResult {
     ytdTaxableIncome?: number;
     ytdTaxPaid?: number;
     isRefund?: boolean;
+    taxReliefAmount?: number;
   }[];
   totalEmployeeDeductions: number;
   totalEmployerContributions: number;
+  taxReliefs?: CalculatedRelief[];
+  totalTaxableIncomeReduction?: number;
+  totalTaxCredits?: number;
+  adjustedTaxableIncome?: number;
   context: {
     ytdAmounts: YtdStatutoryAmounts;
     periodAmounts: PeriodStatutoryAmounts;
@@ -57,6 +70,7 @@ export interface OffCycleCalculationResult {
  * - Current period amounts already calculated (for off-cycle additions)
  * - Progressive tax bracket placement
  * - Country's tax calculation method (cumulative vs non-cumulative)
+ * - Tax relief from statutory contributions and enrolled schemes
  */
 export async function calculateOffCycleStatutory(
   params: OffCycleCalculationParams
@@ -87,25 +101,39 @@ export async function calculateOffCycleStatutory(
   // Use period end date as the effective date for rate lookups
   const effectiveDate = payPeriod.period_end;
 
-  // Fetch all necessary data in parallel, including country tax settings
+  // Fetch all necessary data in parallel, including tax relief data
   const [
     ytdAmounts,
     periodAmounts,
     openingBalances,
     { types: statutoryTypes },
     rateBands,
-    countryTaxSettings
+    countryTaxSettings,
+    statutoryReliefRules,
+    taxReliefSchemes,
+    employeeEnrollments
   ] = await Promise.all([
     fetchYtdStatutoryAmounts(employeeId, taxYear, excludeRunId),
     fetchPeriodStatutoryAmounts(employeeId, payPeriodId, excludeRunId),
     fetchOpeningBalances(employeeId, taxYear),
     fetchStatutoryDeductionsForCountry(countryCode, effectiveDate),
     fetchExtendedRateBands(supabase, countryCode, effectiveDate),
-    fetchCountryTaxSettings(countryCode, effectiveDate)
+    fetchCountryTaxSettings(countryCode, effectiveDate),
+    fetchStatutoryTaxReliefRules(countryCode, effectiveDate),
+    fetchTaxReliefSchemes(countryCode, effectiveDate),
+    fetchEmployeeReliefEnrollments(employeeId, effectiveDate)
   ]);
 
   // Use fetched settings or defaults
   const taxSettings = countryTaxSettings || getDefaultTaxSettings(countryCode);
+
+  // Build tax relief context
+  const taxReliefContext: TaxReliefContext = {
+    statutoryReliefRules,
+    taxReliefSchemes,
+    employeeEnrollments,
+    ytdReliefsClaimed: {}, // TODO: Track YTD relief claims
+  };
 
   const context: CumulativeCalculationContext = {
     openingBalances,
@@ -114,6 +142,7 @@ export async function calculateOffCycleStatutory(
     isOffCycle: true,
     taxCalculationMethod: taxSettings.taxCalculationMethod,
     allowMidYearRefunds: taxSettings.allowMidYearRefunds,
+    taxReliefContext,
   };
 
   const result = calculateCumulativeStatutoryDeductions(
@@ -142,6 +171,7 @@ export async function calculateOffCycleStatutory(
  * Calculate regular (non-off-cycle) statutory deductions with YTD awareness
  * Used for first-time calculations or recalculations
  * Respects country's tax calculation method (cumulative vs non-cumulative)
+ * Includes tax relief calculations
  */
 export async function calculateRegularStatutory(
   params: Omit<OffCycleCalculationParams, 'payPeriodId'> & { payPeriodStart: string }
@@ -158,23 +188,37 @@ export async function calculateRegularStatutory(
 
   const taxYear = getTaxYearFromDate(payPeriodStart);
 
-  // For regular payroll, we only consider YTD (not period amounts since this is the first run)
+  // Fetch all data including tax relief data
   const [
     ytdAmounts,
     openingBalances,
     { types: statutoryTypes },
     rateBands,
-    countryTaxSettings
+    countryTaxSettings,
+    statutoryReliefRules,
+    taxReliefSchemes,
+    employeeEnrollments
   ] = await Promise.all([
     fetchYtdStatutoryAmounts(employeeId, taxYear, excludeRunId),
     fetchOpeningBalances(employeeId, taxYear),
     fetchStatutoryDeductionsForCountry(countryCode, payPeriodStart),
     fetchExtendedRateBands(supabase, countryCode, payPeriodStart),
-    fetchCountryTaxSettings(countryCode, payPeriodStart)
+    fetchCountryTaxSettings(countryCode, payPeriodStart),
+    fetchStatutoryTaxReliefRules(countryCode, payPeriodStart),
+    fetchTaxReliefSchemes(countryCode, payPeriodStart),
+    fetchEmployeeReliefEnrollments(employeeId, payPeriodStart)
   ]);
 
   // Use fetched settings or defaults
   const taxSettings = countryTaxSettings || getDefaultTaxSettings(countryCode);
+
+  // Build tax relief context
+  const taxReliefContext: TaxReliefContext = {
+    statutoryReliefRules,
+    taxReliefSchemes,
+    employeeEnrollments,
+    ytdReliefsClaimed: {}, // TODO: Track YTD relief claims
+  };
 
   const context: CumulativeCalculationContext = {
     openingBalances,
@@ -183,6 +227,7 @@ export async function calculateRegularStatutory(
     isOffCycle: false,
     taxCalculationMethod: taxSettings.taxCalculationMethod,
     allowMidYearRefunds: taxSettings.allowMidYearRefunds,
+    taxReliefContext,
   };
 
   const result = calculateCumulativeStatutoryDeductions(
