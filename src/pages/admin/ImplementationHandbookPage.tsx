@@ -100,6 +100,7 @@ const phases: Phase[] = [
       { order: 6, area: "Tax Configuration", description: "Tax rates and rules" },
       { order: 7, area: "Bank File Config", description: "Payment file formats" },
       { order: 8, area: "Bonus Plans", description: "Performance-based bonuses" },
+      { order: 9, area: "Retroactive Pay (Back Pay)", description: "Configure increase parameters by pay group and generate back pay calculations for date ranges. Supports percentage, fixed amount, and one-off payments for active and terminated employees." },
     ],
   },
   {
@@ -219,6 +220,7 @@ const dependencies = [
   { module: "Workforce", dependsOn: "Admin (companies, departments)" },
   { module: "Compensation", dependsOn: "Workforce (jobs, positions)" },
   { module: "Payroll", dependsOn: "Compensation (pay elements, grades)" },
+  { module: "Retroactive Pay", dependsOn: "Payroll (pay groups, pay periods, pay elements)" },
   { module: "Leave", dependsOn: "Workforce (employees)" },
   { module: "Benefits", dependsOn: "Workforce (employees, positions)" },
   { module: "Training", dependsOn: "Workforce (employees)" },
