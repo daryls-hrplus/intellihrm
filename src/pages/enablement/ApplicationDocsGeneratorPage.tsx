@@ -425,12 +425,15 @@ export default function ApplicationDocsGeneratorPage() {
               <div className="p-4 border rounded-lg bg-muted/30">
                 <h3 className="font-semibold mb-3">Learning Objectives</h3>
                 <ul className="space-y-2">
-                  {content.learningObjectives.map((obj: string, i: number) => (
-                    <li key={i} className="flex items-start gap-2">
-                      <span className="text-green-500">✓</span>
-                      <span>{obj}</span>
-                    </li>
-                  ))}
+                  {content.learningObjectives.map((obj: any, i: number) => {
+                    const text = typeof obj === 'string' ? obj : obj?.objective || obj?.text || obj?.description || JSON.stringify(obj);
+                    return (
+                      <li key={i} className="flex items-start gap-2">
+                        <span className="text-green-500">✓</span>
+                        <span>{text}</span>
+                      </li>
+                    );
+                  })}
                 </ul>
               </div>
             )}
@@ -438,56 +441,133 @@ export default function ApplicationDocsGeneratorPage() {
               <div>
                 <h3 className="font-semibold mb-2">Prerequisites</h3>
                 <ul className="list-disc list-inside space-y-1">
-                  {content.prerequisites.map((pre: string, i: number) => (
-                    <li key={i}>{pre}</li>
-                  ))}
+                  {content.prerequisites.map((pre: any, i: number) => {
+                    const text = typeof pre === 'string' ? pre : pre?.text || pre?.description || JSON.stringify(pre);
+                    return <li key={i}>{text}</li>;
+                  })}
                 </ul>
               </div>
             )}
-            {content.sections && content.sections.map((section: any, i: number) => (
-              <div key={i} className="space-y-3">
-                <h3 className="font-semibold text-lg border-b pb-2">{section.heading || section.title}</h3>
-                {section.content && <p>{section.content}</p>}
-                {section.keyPoints && (
-                  <ul className="space-y-1 ml-4">
-                    {section.keyPoints.map((point: string, j: number) => (
-                      <li key={j} className="flex items-start gap-2">
-                        <span className="text-primary">•</span>
-                        <span>{point}</span>
-                      </li>
-                    ))}
+            {content.sections && content.sections.map((section: any, i: number) => {
+              // Handle structured section format from AI
+              if (section.type === 'heading') {
+                const level = section.level || 1;
+                const HeadingTag = level === 1 ? 'h3' : level === 2 ? 'h4' : 'h5';
+                return (
+                  <HeadingTag key={i} className={`font-semibold ${level === 1 ? 'text-lg border-b pb-2' : 'text-base'}`}>
+                    {section.content}
+                  </HeadingTag>
+                );
+              }
+              if (section.type === 'paragraph') {
+                return <p key={i}>{section.content}</p>;
+              }
+              if (section.type === 'callout') {
+                const bgColors: Record<string, string> = {
+                  tip: 'bg-blue-50 dark:bg-blue-950/30 border-blue-500',
+                  warning: 'bg-yellow-50 dark:bg-yellow-950/30 border-yellow-500',
+                  info: 'bg-slate-50 dark:bg-slate-950/30 border-slate-500',
+                  success: 'bg-green-50 dark:bg-green-950/30 border-green-500'
+                };
+                const icons: Record<string, string> = { tip: '💡', warning: '⚠️', info: 'ℹ️', success: '✓' };
+                const calloutType = section.calloutType || 'info';
+                return (
+                  <div key={i} className={`p-3 rounded text-sm border-l-4 ${bgColors[calloutType] || bgColors.info}`}>
+                    <span className="font-medium">{icons[calloutType] || 'ℹ️'} {calloutType.charAt(0).toUpperCase() + calloutType.slice(1)}:</span> {section.content}
+                  </div>
+                );
+              }
+              if (section.type === 'list') {
+                return (
+                  <ul key={i} className="list-disc list-inside space-y-1">
+                    {section.items?.map((item: any, j: number) => {
+                      const text = typeof item === 'string' ? item : item?.text || item?.description || JSON.stringify(item);
+                      return <li key={j}>{text}</li>;
+                    })}
                   </ul>
-                )}
-                {section.steps && section.steps.map((step: any, j: number) => (
-                  <Card key={j} className="mt-2">
-                    <CardHeader className="pb-2">
-                      <CardTitle className="text-base flex items-center gap-2">
-                        <Badge variant="default">{step.stepNumber || j + 1}</Badge>
-                        {step.title}
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <p>{step.instruction || step.description}</p>
-                      {step.tip && (
-                        <div className="mt-2 p-2 bg-blue-50 dark:bg-blue-950/30 rounded text-sm border-l-4 border-blue-500">
-                          <span className="font-medium">💡 Tip:</span> {step.tip}
-                        </div>
-                      )}
-                      {step.warning && (
-                        <div className="mt-2 p-2 bg-yellow-50 dark:bg-yellow-950/30 rounded text-sm border-l-4 border-yellow-500">
-                          <span className="font-medium">⚠️ Warning:</span> {step.warning}
-                        </div>
-                      )}
-                      {step.screenshotHint && (
-                        <div className="mt-2 text-sm text-muted-foreground italic">
-                          📷 Screenshot: {step.screenshotHint}
-                        </div>
-                      )}
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            ))}
+                );
+              }
+              if (section.type === 'steps') {
+                return (
+                  <div key={i} className="space-y-4">
+                    {section.items?.map((step: any, j: number) => (
+                      <Card key={j}>
+                        <CardHeader className="pb-2">
+                          <CardTitle className="text-base flex items-center gap-2">
+                            <Badge variant="default">{step.stepNumber || j + 1}</Badge>
+                            {step.title}
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <p>{step.instruction || step.description}</p>
+                          {step.tip && (
+                            <div className="mt-2 p-2 bg-blue-50 dark:bg-blue-950/30 rounded text-sm border-l-4 border-blue-500">
+                              <span className="font-medium">💡 Tip:</span> {step.tip}
+                            </div>
+                          )}
+                          {step.warning && (
+                            <div className="mt-2 p-2 bg-yellow-50 dark:bg-yellow-950/30 rounded text-sm border-l-4 border-yellow-500">
+                              <span className="font-medium">⚠️ Warning:</span> {step.warning}
+                            </div>
+                          )}
+                          {step.screenshotHint && (
+                            <div className="mt-2 text-sm text-muted-foreground italic">
+                              📷 Screenshot: {step.screenshotHint}
+                            </div>
+                          )}
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                );
+              }
+              if (section.type === 'screenshot') {
+                return (
+                  <div key={i} className="p-4 border rounded-lg bg-muted/20">
+                    <div className="text-sm text-muted-foreground mb-2">📷 Screenshot Placeholder</div>
+                    <p className="text-sm">{section.screenshot?.description || section.content}</p>
+                    {section.screenshot?.annotations && (
+                      <ul className="mt-2 text-xs text-muted-foreground list-disc list-inside">
+                        {section.screenshot.annotations.map((ann: string, j: number) => (
+                          <li key={j}>{ann}</li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                );
+              }
+              if (section.type === 'expandable') {
+                return (
+                  <div key={i} className="border rounded-lg p-4">
+                    <h4 className="font-medium mb-2">{section.content}</h4>
+                    {section.items && (
+                      <ul className="list-disc list-inside space-y-1 text-sm">
+                        {section.items.map((item: string, j: number) => <li key={j}>{item}</li>)}
+                      </ul>
+                    )}
+                  </div>
+                );
+              }
+              // Fallback for simple section format
+              return (
+                <div key={i} className="space-y-3">
+                  {(section.heading || section.title) && (
+                    <h3 className="font-semibold text-lg border-b pb-2">{section.heading || section.title}</h3>
+                  )}
+                  {section.content && typeof section.content === 'string' && <p>{section.content}</p>}
+                  {section.keyPoints && (
+                    <ul className="space-y-1 ml-4">
+                      {section.keyPoints.map((point: string, j: number) => (
+                        <li key={j} className="flex items-start gap-2">
+                          <span className="text-primary">•</span>
+                          <span>{point}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              );
+            })}
             {content.steps && !content.sections && (
               <div>
                 <h3 className="font-semibold mb-4">Steps</h3>
@@ -516,6 +596,32 @@ export default function ApplicationDocsGeneratorPage() {
                     </Card>
                   ))}
                 </div>
+              </div>
+            )}
+            {content.faqs && content.faqs.length > 0 && (
+              <div>
+                <h3 className="font-semibold mb-4">Frequently Asked Questions</h3>
+                <div className="space-y-4">
+                  {content.faqs.map((faq: any, i: number) => (
+                    <div key={i} className="border-b pb-3">
+                      <h4 className="font-medium">{faq.question}</h4>
+                      <p className="text-muted-foreground mt-1">{faq.answer}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+            {content.glossary && content.glossary.length > 0 && (
+              <div>
+                <h3 className="font-semibold mb-3">Glossary</h3>
+                <dl className="space-y-2">
+                  {content.glossary.map((item: any, i: number) => (
+                    <div key={i}>
+                      <dt className="font-medium">{item.term}</dt>
+                      <dd className="text-muted-foreground text-sm ml-4">{item.definition}</dd>
+                    </div>
+                  ))}
+                </dl>
               </div>
             )}
             {content.summary && !content.description && (
