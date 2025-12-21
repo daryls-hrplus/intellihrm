@@ -64,6 +64,9 @@ import ReleaseCalendarPage from "./pages/enablement/ReleaseCalendarPage";
 import EnablementSettingsPage from "./pages/enablement/EnablementSettingsPage";
 import EnablementAIToolsPage from "./pages/enablement/EnablementAIToolsPage";
 import EnablementGuidePage from "./pages/enablement/EnablementGuidePage";
+import EnablementArtifactsPage from "./pages/enablement/EnablementArtifactsPage";
+import ArtifactEditorPage from "./pages/enablement/ArtifactEditorPage";
+import ArtifactDetailPage from "./pages/enablement/ArtifactDetailPage";
 
 // Subscription pages
 import SubscriptionPage from "./pages/subscription/SubscriptionPage";
@@ -3124,6 +3127,38 @@ const App = () => (
               element={
                 <ProtectedRoute requiredRoles={["admin"]}>
                   <EnablementGuidePage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/enablement/artifacts"
+              element={
+                <ProtectedRoute requiredRoles={["admin"]}>
+                  <EnablementArtifactsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/enablement/artifacts/new"
+              element={
+                <ProtectedRoute requiredRoles={["admin"]}>
+                  <ArtifactEditorPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/enablement/artifacts/:id"
+              element={
+                <ProtectedRoute requiredRoles={["admin"]}>
+                  <ArtifactDetailPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/enablement/artifacts/:id/edit"
+              element={
+                <ProtectedRoute requiredRoles={["admin"]}>
+                  <ArtifactEditorPage />
                 </ProtectedRoute>
               }
             />
