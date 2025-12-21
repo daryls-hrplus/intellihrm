@@ -9668,6 +9668,183 @@ export type Database = {
           },
         ]
       }
+      enablement_artifact_approvals: {
+        Row: {
+          action: string
+          artifact_id: string
+          comments: string | null
+          created_at: string
+          from_status: string | null
+          id: string
+          metadata: Json | null
+          performed_by: string | null
+          to_status: string | null
+        }
+        Insert: {
+          action: string
+          artifact_id: string
+          comments?: string | null
+          created_at?: string
+          from_status?: string | null
+          id?: string
+          metadata?: Json | null
+          performed_by?: string | null
+          to_status?: string | null
+        }
+        Update: {
+          action?: string
+          artifact_id?: string
+          comments?: string | null
+          created_at?: string
+          from_status?: string | null
+          id?: string
+          metadata?: Json | null
+          performed_by?: string | null
+          to_status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "enablement_artifact_approvals_artifact_id_fkey"
+            columns: ["artifact_id"]
+            isOneToOne: false
+            referencedRelation: "enablement_artifacts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      enablement_artifacts: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          artifact_id: string
+          content_level: string
+          created_at: string
+          created_by: string | null
+          deprecated_at: string | null
+          deprecated_by: string | null
+          deprecation_reason: string | null
+          description: string | null
+          expected_outcomes: Json | null
+          feature_id: string | null
+          id: string
+          learning_objective: Json | null
+          module_id: string | null
+          preconditions: Json | null
+          product_version: string
+          published_at: string | null
+          published_by: string | null
+          review_notes: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          role_scope: string[]
+          status: string
+          steps: Json | null
+          submitted_at: string | null
+          submitted_by: string | null
+          supersedes_artifact_id: string | null
+          tags: string[] | null
+          title: string
+          ui_routes: string[] | null
+          updated_at: string
+          updated_by: string | null
+          version_number: number
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          artifact_id: string
+          content_level?: string
+          created_at?: string
+          created_by?: string | null
+          deprecated_at?: string | null
+          deprecated_by?: string | null
+          deprecation_reason?: string | null
+          description?: string | null
+          expected_outcomes?: Json | null
+          feature_id?: string | null
+          id?: string
+          learning_objective?: Json | null
+          module_id?: string | null
+          preconditions?: Json | null
+          product_version?: string
+          published_at?: string | null
+          published_by?: string | null
+          review_notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          role_scope?: string[]
+          status?: string
+          steps?: Json | null
+          submitted_at?: string | null
+          submitted_by?: string | null
+          supersedes_artifact_id?: string | null
+          tags?: string[] | null
+          title: string
+          ui_routes?: string[] | null
+          updated_at?: string
+          updated_by?: string | null
+          version_number?: number
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          artifact_id?: string
+          content_level?: string
+          created_at?: string
+          created_by?: string | null
+          deprecated_at?: string | null
+          deprecated_by?: string | null
+          deprecation_reason?: string | null
+          description?: string | null
+          expected_outcomes?: Json | null
+          feature_id?: string | null
+          id?: string
+          learning_objective?: Json | null
+          module_id?: string | null
+          preconditions?: Json | null
+          product_version?: string
+          published_at?: string | null
+          published_by?: string | null
+          review_notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          role_scope?: string[]
+          status?: string
+          steps?: Json | null
+          submitted_at?: string | null
+          submitted_by?: string | null
+          supersedes_artifact_id?: string | null
+          tags?: string[] | null
+          title?: string
+          ui_routes?: string[] | null
+          updated_at?: string
+          updated_by?: string | null
+          version_number?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "enablement_artifacts_feature_id_fkey"
+            columns: ["feature_id"]
+            isOneToOne: false
+            referencedRelation: "application_features"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "enablement_artifacts_module_id_fkey"
+            columns: ["module_id"]
+            isOneToOne: false
+            referencedRelation: "application_modules"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "enablement_artifacts_supersedes_artifact_id_fkey"
+            columns: ["supersedes_artifact_id"]
+            isOneToOne: false
+            referencedRelation: "enablement_artifacts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       enablement_change_tracking: {
         Row: {
           change_category: string
@@ -10306,6 +10483,7 @@ export type Database = {
         Row: {
           annotated_url: string | null
           annotations: Json | null
+          artifact_id: string | null
           capture_metadata: Json | null
           captured_by: string | null
           client_company_id: string | null
@@ -10313,15 +10491,19 @@ export type Database = {
           description: string | null
           feature_id: string | null
           id: string
+          is_auto_captured: boolean | null
           is_client_specific: boolean | null
           route_path: string | null
           screenshot_url: string | null
+          step_number: number | null
           title: string
+          ui_route_path: string | null
           updated_at: string
         }
         Insert: {
           annotated_url?: string | null
           annotations?: Json | null
+          artifact_id?: string | null
           capture_metadata?: Json | null
           captured_by?: string | null
           client_company_id?: string | null
@@ -10329,15 +10511,19 @@ export type Database = {
           description?: string | null
           feature_id?: string | null
           id?: string
+          is_auto_captured?: boolean | null
           is_client_specific?: boolean | null
           route_path?: string | null
           screenshot_url?: string | null
+          step_number?: number | null
           title: string
+          ui_route_path?: string | null
           updated_at?: string
         }
         Update: {
           annotated_url?: string | null
           annotations?: Json | null
+          artifact_id?: string | null
           capture_metadata?: Json | null
           captured_by?: string | null
           client_company_id?: string | null
@@ -10345,13 +10531,23 @@ export type Database = {
           description?: string | null
           feature_id?: string | null
           id?: string
+          is_auto_captured?: boolean | null
           is_client_specific?: boolean | null
           route_path?: string | null
           screenshot_url?: string | null
+          step_number?: number | null
           title?: string
+          ui_route_path?: string | null
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "enablement_screenshots_artifact_id_fkey"
+            columns: ["artifact_id"]
+            isOneToOne: false
+            referencedRelation: "enablement_artifacts"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "enablement_screenshots_client_company_id_fkey"
             columns: ["client_company_id"]
