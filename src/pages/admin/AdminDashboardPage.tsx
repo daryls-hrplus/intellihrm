@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { NavLink } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -9,6 +9,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { AccessRequestsAnalytics } from "@/components/admin/AccessRequestsAnalytics";
 import { useTranslation } from "react-i18next";
 import { GroupedModuleCards, ModuleSection, GroupedModuleItem } from "@/components/ui/GroupedModuleCards";
+import { useTenantContext } from "@/hooks/useTenantContext";
 import {
   Building,
   Building2,
@@ -61,7 +62,11 @@ import {
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 
-const getAdminModuleSections = (t: (key: string) => string, hasTabAccess: (module: string, tab: string) => boolean): ModuleSection[] => {
+const getAdminModuleSections = (
+  t: (key: string) => string, 
+  hasTabAccess: (module: string, tab: string) => boolean,
+  isHRPlusInternal: boolean
+): ModuleSection[] => {
   const allModules: Record<string, GroupedModuleItem[]> = {
     // Section 1: Organization & Structure
     organization: [
@@ -117,11 +122,20 @@ const getAdminModuleSections = (t: (key: string) => string, hasTabAccess: (modul
       { title: "Statutory Reporting", description: "Report templates and filing schedules", href: "/statutory-reporting", icon: FileCheck, color: "bg-green-500/10 text-green-600", tabCode: "statutory-reporting" },
     ],
     // Section 7: Documentation & Enablement
+    // Enablement Center is only visible to HRplus internal tenants
     documentation: [
       { title: "Implementation Handbook", description: "Step-by-step guide for configuring all modules", href: "/admin/implementation-handbook", icon: BookOpen, color: "bg-rose-500/10 text-rose-600", tabCode: "implementation-handbook" },
       { title: "Modules Brochure", description: "Comprehensive guide to all modules and features", href: "/admin/modules-brochure", icon: Layers, color: "bg-green-500/10 text-green-600", tabCode: "modules-brochure" },
       { title: "Features Brochure", description: "Marketing summary of HRplus Cerebra capabilities", href: "/admin/features-brochure", icon: FileSpreadsheet, color: "bg-blue-500/10 text-blue-600", tabCode: "features-brochure" },
-      { title: "Enablement Center", description: "AI-powered documentation and training content generation", href: "/enablement", icon: Sparkles, color: "bg-gradient-to-r from-purple-500/10 to-pink-500/10 text-purple-600", tabCode: "enablement" },
+      // Enablement Center - only visible for HRplus internal tenants
+      ...(isHRPlusInternal ? [{
+        title: "Enablement Center",
+        description: "AI-powered documentation and training content generation",
+        href: "/enablement",
+        icon: Sparkles,
+        color: "bg-gradient-to-r from-purple-500/10 to-pink-500/10 text-purple-600",
+        tabCode: "enablement"
+      }] : []),
     ],
     // Section 8: Billing & Subscriptions
     billing: [
@@ -172,12 +186,16 @@ interface PiiAlertStats {
 export default function AdminDashboardPage() {
   const { t } = useTranslation();
   const { hasTabAccess } = useGranularPermissions();
+  const { isHRPlusInternal } = useTenantContext();
   const [stats, setStats] = useState<Stats>({ totalUsers: 0, totalCompanies: 0, totalGroups: 0, admins: 0 });
   const [piiAlertStats, setPiiAlertStats] = useState<PiiAlertStats>({ total: 0, emailsSent: 0, last24Hours: 0, recentAlerts: [] });
   const [isLoading, setIsLoading] = useState(true);
   const [isPiiAlertsOpen, setIsPiiAlertsOpen] = useState(false);
 
-  const adminSections = getAdminModuleSections(t, hasTabAccess);
+  const adminSections = useMemo(() => 
+    getAdminModuleSections(t, hasTabAccess, isHRPlusInternal),
+    [t, hasTabAccess, isHRPlusInternal]
+  );
 
   useEffect(() => {
     const fetchStats = async () => {
