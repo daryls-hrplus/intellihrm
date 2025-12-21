@@ -102,18 +102,24 @@ const getAdminModuleSections = (
       { title: t("admin.modules.bulkImport.title"), description: t("admin.modules.bulkImport.description"), href: "/admin/bulk-import", icon: Upload, color: "bg-cyan-500/10 text-cyan-600", tabCode: "bulk-import" },
       { title: "API Management", description: "Manage API keys, webhooks, and integrations", href: "/system/api-management", icon: Webhook, color: "bg-indigo-500/10 text-indigo-600", tabCode: "api-management" },
     ],
-    // Section 5: Strategic Planning & Analytics
+    // Section 5: Strategic Planning
     strategicPlanning: [
       { title: "Strategic Planning Hub", description: "Workforce planning, org design, and scenario analysis", href: "/strategic-planning", icon: TrendingUp, color: "bg-gradient-to-r from-blue-500/10 to-cyan-500/10 text-blue-600", tabCode: "strategic-planning" },
       { title: "Workforce Planning", description: "Strategic headcount and succession planning", href: "/workforce", icon: Users, color: "bg-blue-500/10 text-blue-600", tabCode: "workforce-planning" },
-      { title: "Workforce Analytics", description: "Insights, dashboards, and predictive models", href: "/workforce-analytics", icon: BarChart2, color: "bg-cyan-500/10 text-cyan-600", tabCode: "workforce-analytics" },
       { title: "Organization Design", description: "Org structure and restructuring scenarios", href: "/org-design", icon: Network, color: "bg-violet-500/10 text-violet-600", tabCode: "org-design" },
       { title: "Scenario Planning", description: "What-if analysis and budget impact modeling", href: "/scenario-planning", icon: GitBranch, color: "bg-green-500/10 text-green-600", tabCode: "scenario-planning" },
+    ],
+    // Section 6: Analytics & Insights
+    analyticsInsights: [
+      { title: "Workforce Analytics", description: "Insights, dashboards, and predictive models", href: "/workforce-analytics", icon: BarChart2, color: "bg-cyan-500/10 text-cyan-600", tabCode: "workforce-analytics" },
       { title: "Cross-Module Dashboards", description: "Unified analytics across all modules", href: "/dashboards", icon: LayoutDashboard, color: "bg-purple-500/10 text-purple-600", tabCode: "dashboards" },
       { title: "Report Builder", description: "Custom report creation and scheduling", href: "/report-builder", icon: FileBarChart, color: "bg-orange-500/10 text-orange-600", tabCode: "report-builder" },
       { title: "AI Insights", description: "AI-powered analytics and recommendations", href: "/ai-insights", icon: Brain, color: "bg-gradient-to-r from-purple-500/10 to-pink-500/10 text-purple-600", tabCode: "ai-insights" },
+      { title: "Talent Insights", description: "Skills gaps, succession readiness, and attrition risk", href: "/insights/talent", icon: Users, color: "bg-emerald-500/10 text-emerald-600", tabCode: "talent-insights" },
+      { title: "Compensation Insights", description: "Pay equity analysis, market benchmarking, budget impact", href: "/insights/compensation", icon: TrendingUp, color: "bg-amber-500/10 text-amber-600", tabCode: "compensation-insights" },
+      { title: "Operational Insights", description: "Attendance patterns, productivity metrics, efficiency", href: "/insights/operational", icon: BarChart2, color: "bg-indigo-500/10 text-indigo-600", tabCode: "operational-insights" },
     ],
-    // Section 6: Compliance & Risk
+    // Section 7: Compliance & Risk
     complianceRisk: [
       { title: "Global Compliance Hub", description: "Multi-country payroll and labor law compliance", href: "/global-compliance", icon: Globe2, color: "bg-gradient-to-r from-teal-500/10 to-emerald-500/10 text-teal-600", tabCode: "global-compliance" },
       { title: "Multi-Country Rules", description: "Configure country-specific compliance rules", href: "/multi-country-rules", icon: Globe, color: "bg-teal-500/10 text-teal-600", tabCode: "multi-country-rules" },
@@ -121,7 +127,7 @@ const getAdminModuleSections = (
       { title: "Labor Law Compliance", description: "Leave policies, working hours, and overtime rules", href: "/labor-law", icon: Scale, color: "bg-blue-500/10 text-blue-600", tabCode: "labor-law" },
       { title: "Statutory Reporting", description: "Report templates and filing schedules", href: "/statutory-reporting", icon: FileCheck, color: "bg-green-500/10 text-green-600", tabCode: "statutory-reporting" },
     ],
-    // Section 7: Documentation & Enablement
+    // Section 8: Documentation & Enablement
     // Enablement Center is only visible to HRplus internal tenants
     documentation: [
       { title: "Implementation Handbook", description: "Step-by-step guide for configuring all modules", href: "/admin/implementation-handbook", icon: BookOpen, color: "bg-rose-500/10 text-rose-600", tabCode: "implementation-handbook" },
@@ -137,7 +143,7 @@ const getAdminModuleSections = (
         tabCode: "enablement"
       }] : []),
     ],
-    // Section 8: Billing & Subscriptions
+    // Section 9: Billing & Subscriptions
     billing: [
       { title: "Subscriptions", description: "Manage company subscriptions and billing", href: "/admin/subscriptions", icon: CreditCard, color: "bg-emerald-500/10 text-emerald-600", tabCode: "subscriptions" },
       { title: "Upgrade Plan", description: "Add or remove modules from your subscription", href: "/subscription/upgrade", icon: ArrowUpCircle, color: "bg-gradient-to-r from-amber-500/10 to-orange-500/10 text-orange-600", tabCode: "upgrade" },
@@ -153,7 +159,8 @@ const getAdminModuleSections = (
     { titleKey: "Users, Roles & Access", items: filterByPermission(allModules.usersAccess) },
     { titleKey: "Security & Governance", items: filterByPermission(allModules.security) },
     { titleKey: "System & Platform Configuration", items: filterByPermission(allModules.systemConfig) },
-    { titleKey: "Strategic Planning & Analytics", items: filterByPermission(allModules.strategicPlanning) },
+    { titleKey: "Strategic Planning", items: filterByPermission(allModules.strategicPlanning) },
+    { titleKey: "Analytics & Insights", items: filterByPermission(allModules.analyticsInsights) },
     { titleKey: "Compliance & Risk", items: filterByPermission(allModules.complianceRisk) },
     { titleKey: "Documentation & Enablement", items: filterByPermission(allModules.documentation) },
     { titleKey: "Billing & Subscriptions", items: filterByPermission(allModules.billing) },

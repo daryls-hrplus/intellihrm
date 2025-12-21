@@ -412,6 +412,11 @@ import ReportBuilderPage from "./pages/reporting/ReportBuilderPage";
 import AIInsightsPage from "./pages/reporting/AIInsightsPage";
 import DataExportPage from "./pages/reporting/DataExportPage";
 
+// Insights pages
+import TalentInsightsPage from "./pages/insights/TalentInsightsPage";
+import CompensationInsightsPage from "./pages/insights/CompensationInsightsPage";
+import OperationalInsightsPage from "./pages/insights/OperationalInsightsPage";
+
 // Global Compliance pages
 import GlobalComplianceHubPage from "./pages/global-compliance/GlobalComplianceHubPage";
 import MultiCountryRulesPage from "./pages/global-compliance/MultiCountryRulesPage";
@@ -3154,7 +3159,32 @@ const App = () => (
               }
             />
 
-            {/* Global Compliance Routes */}
+            {/* Insights Routes */}
+            <Route
+              path="/insights/talent"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
+                  <TalentInsightsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/insights/compensation"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
+                  <CompensationInsightsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/insights/operational"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
+                  <OperationalInsightsPage />
+                </ProtectedRoute>
+              }
+            />
+
             <Route
               path="/global-compliance"
               element={

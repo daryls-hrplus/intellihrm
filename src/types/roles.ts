@@ -111,7 +111,7 @@ export const ADMIN_CONTAINERS = [
   { code: "security_governance", label: "Security & Governance", description: "Security policies, audit logs, and governance settings" },
   { code: "system_platform_config", label: "System & Platform Configuration", description: "System settings, integrations, and platform configuration" },
   { code: "strategic_planning", label: "Strategic Planning", description: "Workforce planning, scenario modeling, and organizational design" },
-  { code: "insights_analytics", label: "Insights & Analytics", description: "Workforce analytics, dashboards, and strategic insights" },
+  { code: "analytics_insights", label: "Analytics & Insights", description: "Workforce analytics, dashboards, reports, and AI-powered insights" },
   { code: "compliance_risk", label: "Compliance & Risk", description: "Compliance monitoring, risk management, and regulatory settings" },
   { code: "documentation_enablement", label: "Documentation & Enablement", description: "Documentation, training materials, and enablement resources" },
   { code: "billing_subscriptions", label: "Billing & Subscriptions", description: "Billing, invoices, and subscription management" },
