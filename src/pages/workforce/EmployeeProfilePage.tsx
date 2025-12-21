@@ -24,8 +24,7 @@ import { EmployeeCertificatesTab } from "@/components/employee/EmployeeCertifica
 import { EmployeeMembershipsTab } from "@/components/employee/EmployeeMembershipsTab";
 import { EmployeeInterestsTab } from "@/components/employee/EmployeeInterestsTab";
 import { EmployeeMedicalProfileTab } from "@/components/employee/EmployeeMedicalProfileTab";
-import { EmployeeContactsTab } from "@/components/employee/EmployeeContactsTab";
-import { EmployeeEmergencyContactsTab } from "@/components/employee/EmployeeEmergencyContactsTab";
+import { EmployeeContactInformationCard } from "@/components/employee/contact-information";
 import { EmployeePayGroupTab } from "@/components/employee/EmployeePayGroupTab";
 import { EmployeeBranchLocationsTab } from "@/components/employee/EmployeeBranchLocationsTab";
 import { EmployeeCompetenciesTab } from "@/components/employee/EmployeeCompetenciesTab";
@@ -289,10 +288,9 @@ export default function EmployeeProfilePage() {
             <TabsTrigger value="branches"><Building2 className="h-4 w-4 mr-1" />{t("workforce.profile.tabs.branches")}</TabsTrigger>
             <TabsTrigger value="certificates"><GraduationCap className="h-4 w-4 mr-1" />{t("workforce.profile.tabs.certificates")}</TabsTrigger>
             <TabsTrigger value="competencies"><Award className="h-4 w-4 mr-1" />{t("workforce.profile.tabs.competencies")}</TabsTrigger>
-            <TabsTrigger value="contacts"><Phone className="h-4 w-4 mr-1" />{t("workforce.profile.tabs.contacts")}</TabsTrigger>
+            <TabsTrigger value="contact-info"><Phone className="h-4 w-4 mr-1" />Contact Info</TabsTrigger>
             <TabsTrigger value="dependents"><Baby className="h-4 w-4 mr-1" />{t("workforce.profile.tabs.dependents")}</TabsTrigger>
             <TabsTrigger value="documents"><FileText className="h-4 w-4 mr-1" />{t("workforce.profile.tabs.documents")}</TabsTrigger>
-            <TabsTrigger value="emergency"><AlertTriangle className="h-4 w-4 mr-1" />{t("workforce.profile.tabs.emergency")}</TabsTrigger>
             <TabsTrigger value="interests"><Sparkles className="h-4 w-4 mr-1" />{t("workforce.profile.tabs.interests")}</TabsTrigger>
             <TabsTrigger value="licenses"><Award className="h-4 w-4 mr-1" />{t("workforce.profile.tabs.licenses")}</TabsTrigger>
             <TabsTrigger value="medical"><Stethoscope className="h-4 w-4 mr-1" />{t("workforce.profile.tabs.medical")}</TabsTrigger>
@@ -331,8 +329,8 @@ export default function EmployeeProfilePage() {
             <EmployeeCompetenciesTab employeeId={employee.id} />
           </TabsContent>
 
-          <TabsContent value="contacts" className="mt-6">
-            <EmployeeContactsTab employeeId={employee.id} />
+          <TabsContent value="contact-info" className="mt-6">
+            <EmployeeContactInformationCard employeeId={employee.id} />
           </TabsContent>
 
           <TabsContent value="dependents" className="mt-6">
@@ -341,10 +339,6 @@ export default function EmployeeProfilePage() {
 
           <TabsContent value="documents" className="mt-6">
             <EmployeeDocumentsTab employeeId={employee.id} />
-          </TabsContent>
-
-          <TabsContent value="emergency" className="mt-6">
-            <EmployeeEmergencyContactsTab employeeId={employee.id} />
           </TabsContent>
 
           <TabsContent value="interests" className="mt-6">
