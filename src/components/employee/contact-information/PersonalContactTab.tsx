@@ -12,6 +12,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Plus, Pencil, Trash2, Mail, Phone, MapPin, User } from "lucide-react";
+import { CountrySelect } from "@/components/ui/country-select";
 import { toast } from "sonner";
 import { getTodayString, formatDateForDisplay } from "@/utils/dateUtils";
 import { useAuth } from "@/contexts/AuthContext";
@@ -455,7 +456,11 @@ export function PersonalContactTab({ employeeId, canEdit }: PersonalContactTabPr
               </div>
               <div className="grid gap-2">
                 <Label>Country *</Label>
-                <Input value={addressFormData.country} onChange={(e) => setAddressFormData(prev => ({ ...prev, country: e.target.value }))} />
+                <CountrySelect 
+                  value={addressFormData.country} 
+                  onChange={(value) => setAddressFormData(prev => ({ ...prev, country: value }))}
+                  valueType="name"
+                />
               </div>
             </div>
             <div className="flex items-center gap-2">
