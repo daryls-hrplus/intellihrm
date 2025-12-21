@@ -73,8 +73,15 @@ export default function EnablementHubPage() {
   // Grouped sections following the pattern from other modules
   const sections: ModuleSection[] = useMemo(() => [
     {
-      titleKey: "Feature Repository",
+      titleKey: "Content Authoring",
       items: [
+        {
+          title: "Enablement Artifacts",
+          description: "Single source of truth for all enablement content",
+          href: "/enablement/artifacts",
+          icon: FileText,
+          color: "bg-primary/10 text-primary",
+        },
         {
           title: "Feature Catalog",
           description: "Browse all modules, groups, and features with search and details",
