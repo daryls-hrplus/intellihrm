@@ -3,7 +3,7 @@ import { User, Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 
-type AppRole = "admin" | "hr_manager" | "employee";
+type AppRole = "admin" | "system_admin" | "enablement_admin" | "billing_admin" | "hr_manager" | "employee";
 
 interface Profile {
   id: string;
@@ -253,7 +253,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const hasRole = (role: AppRole) => roles.includes(role);
-  const isAdmin = hasRole("admin");
+  const isAdmin = hasRole("admin") || hasRole("system_admin");
   const isHRManager = hasRole("hr_manager") || isAdmin;
 
   return (
