@@ -258,7 +258,6 @@ export default function WorkforceDashboardPage() {
         allModules.companies,
         allModules.departments,
         allModules.orgStructure,
-        allModules.orgChart,
         allModules.governance,
         allModules.vacancies,
         allModules.headcountRequests,
@@ -267,8 +266,9 @@ export default function WorkforceDashboardPage() {
       ]),
     },
     {
-      titleKey: "Job Architecture",
+      titleKey: "Job Architecture and Reporting Relationships",
       items: filterByAccess([
+        allModules.orgChart,
         allModules.jobFamilies,
         allModules.jobs,
         allModules.competencies,
