@@ -1,10 +1,29 @@
 import { Json } from "@/integrations/supabase/types";
 
-export type RoleType = "system" | "hr" | "business" | "commercial" | "internal";
-export type TenantVisibility = "all" | "hrplus_internal" | "client";
-export type PiiLevel = "none" | "limited" | "full";
+export type RoleType = "system" | "seeded" | "custom" | "hr" | "business" | "commercial" | "internal";
+export type TenantVisibility = "single" | "multi" | "global" | "all" | "hrplus_internal" | "client";
+export type PiiLevel = "none" | "masked" | "partial" | "limited" | "full";
 export type ExportPermission = "none" | "allowed" | "approval_required";
 export type ContainerPermissionLevel = "none" | "view" | "configure" | "approve";
+export type AdminContainerPermission = "none" | "view" | "configure" | "approve";
+
+export interface EnhancedRole {
+  id: string;
+  name: string;
+  code: string;
+  description: string | null;
+  is_system: boolean;
+  is_active: boolean;
+  is_seeded: boolean;
+  role_type: RoleType;
+  base_role_id: string | null;
+  seeded_role_code: string | null;
+  tenant_visibility: TenantVisibility;
+  menu_permissions: string[];
+  can_view_pii: boolean;
+  created_at: string;
+  updated_at: string;
+}
 
 export interface Role {
   id: string;
