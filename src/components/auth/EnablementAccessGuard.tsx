@@ -14,7 +14,7 @@ interface EnablementAccessGuardProps {
  */
 export function EnablementAccessGuard({ children }: EnablementAccessGuardProps) {
   const { isHRPlusInternal, isLoading: isTenantLoading } = useTenantContext();
-  const { isLoading: isAuthLoading } = useAuth();
+  const { isLoading: isAuthLoading, hasRole } = useAuth();
   const location = useLocation();
 
   // Show loading while determining tenant type
@@ -26,8 +26,14 @@ export function EnablementAccessGuard({ children }: EnablementAccessGuardProps) 
     );
   }
 
-  // Client tenants cannot access Enablement Center - redirect to Help Center
-  if (!isHRPlusInternal) {
+  // Access rules:
+  // - HRplus internal tenants: always allowed
+  // - Explicit roles: enablement_admin and system_admin can access from any tenant
+  const canAccess =
+    isHRPlusInternal || hasRole("enablement_admin") || hasRole("system_admin");
+
+  // Client tenants without explicit role cannot access Enablement Center - redirect to Help Center
+  if (!canAccess) {
     return <Navigate to="/help" state={{ from: location }} replace />;
   }
 
