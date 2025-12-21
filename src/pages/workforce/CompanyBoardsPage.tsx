@@ -41,7 +41,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Pencil, Trash2, Users2, ChevronDown, ChevronRight, ChevronLeft } from "lucide-react";
+import { Plus, Pencil, Trash2, Landmark, ChevronDown, ChevronRight, ChevronLeft } from "lucide-react";
 import { toast } from "sonner";
 import { useAuditLog } from "@/hooks/useAuditLog";
 import { NavLink } from "react-router-dom";
@@ -362,7 +362,7 @@ export default function CompanyBoardsPage() {
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                <Users2 className="h-5 w-5 text-primary" />
+                <Landmark className="h-5 w-5 text-primary" />
               </div>
               <div>
                 <CardTitle className="text-xl">Company Boards</CardTitle>

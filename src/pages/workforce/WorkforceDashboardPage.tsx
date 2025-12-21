@@ -25,7 +25,7 @@ import {
   Rocket,
   UserMinus,
   GraduationCap,
-  Users2,
+  Landmark,
 } from "lucide-react";
 
 interface Stats {
@@ -79,7 +79,7 @@ export default function WorkforceDashboardPage() {
       title: "Company Boards",
       description: "Manage board of directors and committees",
       href: "/workforce/company-boards",
-      icon: Users2,
+      icon: Landmark,
       color: "bg-slate-500/10 text-slate-500",
       tabCode: "company_boards",
     },
