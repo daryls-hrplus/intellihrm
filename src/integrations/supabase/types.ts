@@ -22550,10 +22550,12 @@ export type Database = {
       }
       module_permissions: {
         Row: {
+          container_code: string | null
           created_at: string | null
           display_order: number | null
           id: string
           is_active: boolean | null
+          is_container: boolean | null
           module_code: string
           module_name: string
           parent_tab_code: string | null
@@ -22562,10 +22564,12 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          container_code?: string | null
           created_at?: string | null
           display_order?: number | null
           id?: string
           is_active?: boolean | null
+          is_container?: boolean | null
           module_code: string
           module_name: string
           parent_tab_code?: string | null
@@ -22574,10 +22578,12 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          container_code?: string | null
           created_at?: string | null
           display_order?: number | null
           id?: string
           is_active?: boolean | null
+          is_container?: boolean | null
           module_code?: string
           module_name?: string
           parent_tab_code?: string | null

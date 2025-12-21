@@ -36,6 +36,7 @@ import {
   GitBranch,
   FolderTree,
   Briefcase,
+  Container,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -55,6 +56,8 @@ interface ModulePermission {
   tab_code: string | null;
   tab_name: string | null;
   display_order: number;
+  container_code: string | null;
+  is_container: boolean;
 }
 
 interface RolePermission {
@@ -77,18 +80,6 @@ interface CompanyTag {
   name: string;
   code: string;
   color: string;
-}
-
-interface RoleCompanyAccess {
-  id: string;
-  role_id: string;
-  company_id: string;
-}
-
-interface RoleTagAccess {
-  id: string;
-  role_id: string;
-  tag_id: string;
 }
 
 interface Division {
@@ -114,6 +105,9 @@ interface PositionType {
   code: string;
   company_id: string;
 }
+
+// Modules that use container-based hierarchy
+const CONTAINER_BASED_MODULES = ["admin", "insights"];
 
 const breadcrumbItems = [
   { label: "Admin", href: "/admin" },
@@ -279,33 +273,6 @@ export default function GranularPermissionsPage() {
     });
   };
 
-  const toggleAllForModule = (moduleCode: string, action: keyof RolePermission, value: boolean) => {
-    setHasChanges(true);
-    const moduleTabs = modulePermissions.filter((mp) => mp.module_code === moduleCode);
-    
-    setRolePermissions((prev) => {
-      const updated = { ...prev };
-      moduleTabs.forEach((mp) => {
-        const existing = updated[mp.id];
-        if (existing) {
-          updated[mp.id] = { ...existing, [action]: value };
-        } else {
-          // Default all to true, then apply the specific action value
-          updated[mp.id] = {
-            id: "",
-            role_id: selectedRoleId,
-            module_permission_id: mp.id,
-            can_view: action === "can_view" ? value : true,
-            can_create: action === "can_create" ? value : true,
-            can_edit: action === "can_edit" ? value : true,
-            can_delete: action === "can_delete" ? value : true,
-          };
-        }
-      });
-      return updated;
-    });
-  };
-
   const toggleCompanyAccess = (companyId: string) => {
     setHasChanges(true);
     setRoleCompanyAccess((prev) =>
@@ -458,15 +425,223 @@ export default function GranularPermissionsPage() {
         module_code: mp.module_code,
         module_name: mp.module_name,
         tabs: [],
+        containers: [],
+        isContainerBased: CONTAINER_BASED_MODULES.includes(mp.module_code),
       };
     }
+    
     if (mp.tab_code) {
-      acc[mp.module_code].tabs.push(mp);
+      if (mp.is_container) {
+        // This is a container
+        acc[mp.module_code].containers.push({
+          ...mp,
+          features: [] as ModulePermission[],
+        });
+      } else if (mp.container_code) {
+        // This is a feature within a container
+        const container = acc[mp.module_code].containers.find(
+          (c: any) => c.tab_code === mp.container_code
+        );
+        if (container) {
+          container.features.push(mp);
+        } else {
+          // Fallback to tabs if container not found
+          acc[mp.module_code].tabs.push(mp);
+        }
+      } else {
+        // Regular tab (no container hierarchy)
+        acc[mp.module_code].tabs.push(mp);
+      }
     }
     return acc;
-  }, {} as Record<string, { module_code: string; module_name: string; tabs: ModulePermission[] }>);
+  }, {} as Record<string, { 
+    module_code: string; 
+    module_name: string; 
+    tabs: ModulePermission[];
+    containers: (ModulePermission & { features: ModulePermission[] })[];
+    isContainerBased: boolean;
+  }>);
 
   const selectedRole = roles.find((r) => r.id === selectedRoleId);
+
+  // Render permission row
+  const renderPermissionRow = (item: ModulePermission, indent: number = 0) => (
+    <div
+      key={item.id}
+      className="grid grid-cols-[1fr,80px,80px,80px,80px] gap-2 px-4 py-2 border-b last:border-b-0 hover:bg-muted/20"
+    >
+      <div className="text-sm" style={{ paddingLeft: `${indent * 1.5}rem` }}>
+        {item.tab_name}
+      </div>
+      {["can_view", "can_create", "can_edit", "can_delete"].map((action) => (
+        <div key={action} className="flex justify-center">
+          <Checkbox
+            checked={getPermissionValue(item.id, action)}
+            onCheckedChange={() =>
+              togglePermission(item.id, action as keyof RolePermission)
+            }
+          />
+        </div>
+      ))}
+    </div>
+  );
+
+  // Render container-based module (admin/insights)
+  const renderContainerBasedModule = (group: typeof groupedPermissions[string]) => {
+    const modulePerm = modulePermissions.find(
+      (mp) => mp.module_code === group.module_code && !mp.tab_code
+    );
+
+    return (
+      <AccordionItem key={group.module_code} value={group.module_code}>
+        <AccordionTrigger className="px-4 hover:no-underline hover:bg-muted/50">
+          <div className="flex items-center gap-2">
+            <ChevronRight className="h-4 w-4 transition-transform duration-200" />
+            <span className="font-semibold">{group.module_name}</span>
+            <Badge variant="outline" className="ml-2">
+              {group.containers.length} containers
+            </Badge>
+          </div>
+        </AccordionTrigger>
+        <AccordionContent className="pb-0">
+          {/* Module-level permission row */}
+          {modulePerm && (
+            <div className="grid grid-cols-[1fr,80px,80px,80px,80px] gap-2 px-4 py-2 border-b bg-muted/30">
+              <div className="pl-6 text-sm text-muted-foreground italic">
+                All {group.module_name}
+              </div>
+              {["can_view", "can_create", "can_edit", "can_delete"].map((action) => (
+                <div key={action} className="flex justify-center">
+                  <Checkbox
+                    checked={getPermissionValue(modulePerm.id, action)}
+                    onCheckedChange={() =>
+                      togglePermission(modulePerm.id, action as keyof RolePermission)
+                    }
+                  />
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Container accordion */}
+          <Accordion type="multiple" className="w-full">
+            {group.containers.map((container) => (
+              <AccordionItem key={container.id} value={container.tab_code || container.id}>
+                <AccordionTrigger className="px-4 pl-8 hover:no-underline hover:bg-muted/30 py-2">
+                  <div className="flex items-center gap-2">
+                    <Container className="h-4 w-4 text-primary" />
+                    <span className="font-medium text-sm">{container.tab_name}</span>
+                    <Badge variant="secondary" className="ml-2 text-xs">
+                      {container.features.length} features
+                    </Badge>
+                  </div>
+                </AccordionTrigger>
+                <AccordionContent className="pb-0">
+                  {/* Container-level permission row */}
+                  <div className="grid grid-cols-[1fr,80px,80px,80px,80px] gap-2 px-4 py-2 border-b bg-primary/5">
+                    <div className="pl-12 text-sm text-muted-foreground italic">
+                      All {container.tab_name}
+                    </div>
+                    {["can_view", "can_create", "can_edit", "can_delete"].map((action) => (
+                      <div key={action} className="flex justify-center">
+                        <Checkbox
+                          checked={getPermissionValue(container.id, action)}
+                          onCheckedChange={() =>
+                            togglePermission(container.id, action as keyof RolePermission)
+                          }
+                        />
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Feature rows within container */}
+                  {container.features.map((feature) => (
+                    <div
+                      key={feature.id}
+                      className="grid grid-cols-[1fr,80px,80px,80px,80px] gap-2 px-4 py-2 border-b last:border-b-0 hover:bg-muted/20"
+                    >
+                      <div className="pl-16 text-sm">{feature.tab_name}</div>
+                      {["can_view", "can_create", "can_edit", "can_delete"].map((action) => (
+                        <div key={action} className="flex justify-center">
+                          <Checkbox
+                            checked={getPermissionValue(feature.id, action)}
+                            onCheckedChange={() =>
+                              togglePermission(feature.id, action as keyof RolePermission)
+                            }
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  ))}
+                </AccordionContent>
+              </AccordionItem>
+            ))}
+          </Accordion>
+        </AccordionContent>
+      </AccordionItem>
+    );
+  };
+
+  // Render regular module (flat tabs)
+  const renderRegularModule = (group: typeof groupedPermissions[string]) => {
+    const modulePerm = modulePermissions.find(
+      (mp) => mp.module_code === group.module_code && !mp.tab_code
+    );
+
+    return (
+      <AccordionItem key={group.module_code} value={group.module_code}>
+        <AccordionTrigger className="px-4 hover:no-underline hover:bg-muted/50">
+          <div className="flex items-center gap-2">
+            <ChevronRight className="h-4 w-4 transition-transform duration-200" />
+            <span className="font-semibold">{group.module_name}</span>
+            <Badge variant="outline" className="ml-2">
+              {group.tabs.length} tabs
+            </Badge>
+          </div>
+        </AccordionTrigger>
+        <AccordionContent className="pb-0">
+          {/* Module-level permission row */}
+          {modulePerm && (
+            <div className="grid grid-cols-[1fr,80px,80px,80px,80px] gap-2 px-4 py-2 border-b bg-muted/30">
+              <div className="pl-6 text-sm text-muted-foreground italic">
+                All {group.module_name}
+              </div>
+              {["can_view", "can_create", "can_edit", "can_delete"].map((action) => (
+                <div key={action} className="flex justify-center">
+                  <Checkbox
+                    checked={getPermissionValue(modulePerm.id, action)}
+                    onCheckedChange={() =>
+                      togglePermission(modulePerm.id, action as keyof RolePermission)
+                    }
+                  />
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Tab-level permission rows */}
+          {group.tabs.map((tab) => (
+            <div
+              key={tab.id}
+              className="grid grid-cols-[1fr,80px,80px,80px,80px] gap-2 px-4 py-2 border-b last:border-b-0 hover:bg-muted/20"
+            >
+              <div className="pl-10 text-sm">{tab.tab_name}</div>
+              {["can_view", "can_create", "can_edit", "can_delete"].map((action) => (
+                <div key={action} className="flex justify-center">
+                  <Checkbox
+                    checked={getPermissionValue(tab.id, action)}
+                    onCheckedChange={() =>
+                      togglePermission(tab.id, action as keyof RolePermission)
+                    }
+                  />
+                </div>
+              ))}
+            </div>
+          ))}
+        </AccordionContent>
+      </AccordionItem>
+    );
+  };
 
   if (isLoading) {
     return (
@@ -487,7 +662,7 @@ export default function GranularPermissionsPage() {
           <div>
             <h1 className="text-3xl font-bold tracking-tight">Granular Permissions</h1>
             <p className="text-muted-foreground mt-1">
-              Configure module, tab, and action-level permissions for each role
+              Configure module, container, and action-level permissions for each role
             </p>
           </div>
           <div className="flex items-center gap-3">
@@ -529,7 +704,7 @@ export default function GranularPermissionsPage() {
             <TabsContent value="permissions" className="space-y-4">
               <div className="rounded-lg border bg-card">
                 <div className="grid grid-cols-[1fr,80px,80px,80px,80px] gap-2 p-4 border-b bg-muted/50 text-sm font-medium">
-                  <div>Module / Tab</div>
+                  <div>Module / Container / Feature</div>
                   <div className="text-center"><Eye className="h-4 w-4 mx-auto" /></div>
                   <div className="text-center"><PlusCircle className="h-4 w-4 mx-auto" /></div>
                   <div className="text-center"><Pencil className="h-4 w-4 mx-auto" /></div>
@@ -539,63 +714,11 @@ export default function GranularPermissionsPage() {
                 <ScrollArea className="h-[600px]">
                   <Accordion type="multiple" className="w-full">
                     {Object.values(groupedPermissions).map((group) => {
-                      const modulePerm = modulePermissions.find(
-                        (mp) => mp.module_code === group.module_code && !mp.tab_code
-                      );
-                      
-                      return (
-                        <AccordionItem key={group.module_code} value={group.module_code}>
-                          <AccordionTrigger className="px-4 hover:no-underline hover:bg-muted/50">
-                            <div className="flex items-center gap-2">
-                              <ChevronRight className="h-4 w-4 transition-transform duration-200" />
-                              <span className="font-semibold">{group.module_name}</span>
-                              <Badge variant="outline" className="ml-2">
-                                {group.tabs.length} tabs
-                              </Badge>
-                            </div>
-                          </AccordionTrigger>
-                          <AccordionContent className="pb-0">
-                            {/* Module-level permission row */}
-                            {modulePerm && (
-                              <div className="grid grid-cols-[1fr,80px,80px,80px,80px] gap-2 px-4 py-2 border-b bg-muted/30">
-                                <div className="pl-6 text-sm text-muted-foreground italic">
-                                  All {group.module_name}
-                                </div>
-                                {["can_view", "can_create", "can_edit", "can_delete"].map((action) => (
-                                  <div key={action} className="flex justify-center">
-                                    <Checkbox
-                                      checked={getPermissionValue(modulePerm.id, action)}
-                                      onCheckedChange={() =>
-                                        togglePermission(modulePerm.id, action as keyof RolePermission)
-                                      }
-                                    />
-                                  </div>
-                                ))}
-                              </div>
-                            )}
-
-                            {/* Tab-level permission rows */}
-                            {group.tabs.map((tab) => (
-                              <div
-                                key={tab.id}
-                                className="grid grid-cols-[1fr,80px,80px,80px,80px] gap-2 px-4 py-2 border-b last:border-b-0 hover:bg-muted/20"
-                              >
-                                <div className="pl-10 text-sm">{tab.tab_name}</div>
-                                {["can_view", "can_create", "can_edit", "can_delete"].map((action) => (
-                                  <div key={action} className="flex justify-center">
-                                    <Checkbox
-                                      checked={getPermissionValue(tab.id, action)}
-                                      onCheckedChange={() =>
-                                        togglePermission(tab.id, action as keyof RolePermission)
-                                      }
-                                    />
-                                  </div>
-                                ))}
-                              </div>
-                            ))}
-                          </AccordionContent>
-                        </AccordionItem>
-                      );
+                      if (group.isContainerBased && group.containers.length > 0) {
+                        return renderContainerBasedModule(group);
+                      } else {
+                        return renderRegularModule(group);
+                      }
                     })}
                   </Accordion>
                 </ScrollArea>
@@ -864,16 +987,19 @@ export default function GranularPermissionsPage() {
                               className="flex-1 cursor-pointer"
                             >
                               <div className="text-sm font-medium">{posType.name}</div>
-                              <div className="text-xs text-muted-foreground">
-                                {company?.name || "Unknown"} • {posType.code}
-                              </div>
+                              {company && (
+                                <div className="text-xs text-muted-foreground">{company.name}</div>
+                              )}
                             </label>
+                            <code className="text-xs text-muted-foreground">
+                              {posType.code}
+                            </code>
                           </div>
                         );
                       })}
                       {positionTypes.length === 0 && (
-                        <p className="text-center text-muted-foreground py-4 col-span-full">
-                          No position types found. Create position types in Workforce Management first.
+                        <p className="col-span-full text-center text-muted-foreground py-4">
+                          No position types found
                         </p>
                       )}
                     </div>
