@@ -79,6 +79,8 @@ export interface RoleWithDetails extends Role {
 // Role type badges configuration
 export const ROLE_TYPE_CONFIG: Record<RoleType, { label: string; color: string }> = {
   system: { label: "System", color: "bg-red-500/10 text-red-600 dark:text-red-400" },
+  seeded: { label: "Seeded", color: "bg-violet-500/10 text-violet-600 dark:text-violet-400" },
+  custom: { label: "Custom", color: "bg-gray-500/10 text-gray-600 dark:text-gray-400" },
   hr: { label: "HR", color: "bg-blue-500/10 text-blue-600 dark:text-blue-400" },
   business: { label: "Business", color: "bg-green-500/10 text-green-600 dark:text-green-400" },
   commercial: { label: "Commercial", color: "bg-purple-500/10 text-purple-600 dark:text-purple-400" },
@@ -88,6 +90,8 @@ export const ROLE_TYPE_CONFIG: Record<RoleType, { label: string; color: string }
 // PII level badges configuration
 export const PII_LEVEL_CONFIG: Record<PiiLevel, { label: string; color: string }> = {
   none: { label: "No PII Access", color: "bg-muted text-muted-foreground" },
+  masked: { label: "Masked", color: "bg-gray-500/10 text-gray-600 dark:text-gray-400" },
+  partial: { label: "Partial", color: "bg-blue-500/10 text-blue-600 dark:text-blue-400" },
   limited: { label: "Limited PII", color: "bg-yellow-500/10 text-yellow-600 dark:text-yellow-400" },
   full: { label: "Full PII", color: "bg-amber-500/10 text-amber-600 dark:text-amber-400" },
 };

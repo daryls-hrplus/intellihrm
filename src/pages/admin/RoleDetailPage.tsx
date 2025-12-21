@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { SidebarProvider } from "@/components/ui/sidebar";
-import { AppSidebar } from "@/components/AppSidebar";
+import { AppSidebar } from "@/components/layout/AppSidebar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -91,13 +91,14 @@ export default function RoleDetailPage() {
       if (isNew) {
         const { data, error } = await supabase
           .from("roles")
-          .insert({
+          .insert([{
             name: role.name,
+            code: role.name.toLowerCase().replace(/\s+/g, "_"),
             description: role.description,
             role_type: role.role_type,
             is_active: role.is_active,
             tenant_visibility: role.tenant_visibility,
-          })
+          }])
           .select()
           .single();
 
@@ -362,7 +363,9 @@ export default function RoleDetailPage() {
             {id && !isNew && <RoleAuditLog roleId={id} />}
           </TabsContent>
         </Tabs>
+          </div>
+        </main>
       </div>
-    </AdminLayout>
+    </SidebarProvider>
   );
 }
