@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,47 +8,63 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ArrowLeft, Save, Send, X, Plus, Trash2 } from 'lucide-react';
+import { ArrowLeft, Save, Send, X, Plus, Trash2, Sparkles, Loader2, ChevronRight } from 'lucide-react';
 import { useEnablementArtifacts, useArtifact } from '@/hooks/useEnablementArtifacts';
 import { useApplicationModules, useApplicationFeatures } from '@/hooks/useApplicationFeatures';
 import { ArtifactStatusBadge } from '@/components/enablement/artifacts/ArtifactStatusBadge';
 import { ArtifactStepEditor } from '@/components/enablement/artifacts/ArtifactStepEditor';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 import type { 
   CreateArtifactInput, 
   ContentLevel, 
   RoleScope, 
-  ArtifactStep,
-  ROLE_SCOPE_OPTIONS,
-  CONTENT_LEVEL_OPTIONS 
+  ArtifactStep 
 } from '@/types/artifact';
 
 const ROLES: RoleScope[] = ['Employee', 'Manager', 'HR User', 'Client Module Admin', 'Enablement Admin', 'Consultant'];
-const CONTENT_LEVELS: { value: ContentLevel; label: string }[] = [
-  { value: 'Overview', label: 'Overview' },
-  { value: 'How-To', label: 'How-To' },
-  { value: 'Advanced', label: 'Advanced' },
-  { value: 'Scenario', label: 'Scenario' },
-  { value: 'FAQ', label: 'FAQ' },
-  { value: 'Video', label: 'Video' }
+const CONTENT_LEVELS: { value: ContentLevel; label: string; description: string }[] = [
+  { value: 'Overview', label: 'Overview', description: 'High-level introduction to a feature' },
+  { value: 'How-To', label: 'How-To', description: 'Step-by-step task instructions' },
+  { value: 'Advanced', label: 'Advanced', description: 'In-depth guidance for power users' },
+  { value: 'Scenario', label: 'Scenario', description: 'Real-world use cases' },
+  { value: 'FAQ', label: 'FAQ', description: 'Common questions and answers' },
+  { value: 'Video', label: 'Video', description: 'Video script outline' }
 ];
 
 export default function ArtifactEditorPage() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { toast } = useToast();
   const isEditing = !!id;
 
   const { createArtifact, updateArtifact, submitForReview } = useEnablementArtifacts();
   const { artifact, isLoading, fetchArtifact } = useArtifact(id);
   const { modules } = useApplicationModules();
+
+  // Hierarchical selection state
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string>('');
   const [selectedModuleId, setSelectedModuleId] = useState<string>('');
+  const [selectedFeatureId, setSelectedFeatureId] = useState<string>('');
   const { features } = useApplicationFeatures(selectedModuleId || undefined);
+
+  // Derive categories (parent modules) and child modules
+  const categories = useMemo(() => 
+    modules.filter(m => !m.parent_module_code),
+    [modules]
+  );
+
+  const childModules = useMemo(() => {
+    if (!selectedCategoryId) return [];
+    const category = modules.find(m => m.id === selectedCategoryId);
+    if (!category) return [];
+    return modules.filter(m => m.parent_module_code === category.module_code);
+  }, [modules, selectedCategoryId]);
 
   // Form state
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [productVersion, setProductVersion] = useState('v1.0');
-  const [moduleId, setModuleId] = useState<string>('');
-  const [featureId, setFeatureId] = useState<string>('');
   const [roleScope, setRoleScope] = useState<RoleScope[]>(['Employee']);
   const [contentLevel, setContentLevel] = useState<ContentLevel>('How-To');
   const [learningObjectives, setLearningObjectives] = useState<string[]>([]);
@@ -59,6 +75,11 @@ export default function ArtifactEditorPage() {
   const [tagInput, setTagInput] = useState('');
 
   const [isSaving, setIsSaving] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [hasGenerated, setHasGenerated] = useState(false);
+
+  // Check if ready to generate
+  const canGenerate = selectedCategoryId && selectedModuleId && selectedFeatureId && roleScope.length > 0;
 
   useEffect(() => {
     if (id) {
@@ -71,9 +92,18 @@ export default function ArtifactEditorPage() {
       setTitle(artifact.title);
       setDescription(artifact.description || '');
       setProductVersion(artifact.product_version);
-      setModuleId(artifact.module_id || '');
+      
+      // Find category from module
+      const module = modules.find(m => m.id === artifact.module_id);
+      if (module && module.parent_module_code) {
+        const category = modules.find(m => m.module_code === module.parent_module_code);
+        if (category) {
+          setSelectedCategoryId(category.id);
+        }
+      }
+      
       setSelectedModuleId(artifact.module_id || '');
-      setFeatureId(artifact.feature_id || '');
+      setSelectedFeatureId(artifact.feature_id || '');
       setRoleScope(artifact.role_scope);
       setContentLevel(artifact.content_level);
       setLearningObjectives(artifact.learning_objective || []);
@@ -81,13 +111,81 @@ export default function ArtifactEditorPage() {
       setSteps(artifact.steps || []);
       setExpectedOutcomes(artifact.expected_outcomes || []);
       setTags(artifact.tags || []);
+      setHasGenerated(true);
     }
-  }, [artifact]);
+  }, [artifact, modules]);
+
+  const handleCategoryChange = (value: string) => {
+    setSelectedCategoryId(value);
+    setSelectedModuleId('');
+    setSelectedFeatureId('');
+    setHasGenerated(false);
+  };
 
   const handleModuleChange = (value: string) => {
-    setModuleId(value);
     setSelectedModuleId(value);
-    setFeatureId(''); // Reset feature when module changes
+    setSelectedFeatureId('');
+    setHasGenerated(false);
+  };
+
+  const handleFeatureChange = (value: string) => {
+    setSelectedFeatureId(value);
+    setHasGenerated(false);
+  };
+
+  const handleGenerateContent = async () => {
+    if (!canGenerate) return;
+
+    const category = categories.find(c => c.id === selectedCategoryId);
+    const module = childModules.find(m => m.id === selectedModuleId);
+    const feature = features.find(f => f.id === selectedFeatureId);
+
+    if (!category || !module || !feature) {
+      toast({ title: 'Error', description: 'Please complete all selections', variant: 'destructive' });
+      return;
+    }
+
+    setIsGenerating(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('generate-artifact-content', {
+        body: {
+          categoryName: category.module_name,
+          moduleName: module.module_name,
+          featureName: feature.feature_name,
+          featureDescription: feature.description,
+          contentLevel,
+          targetRoles: roleScope,
+          uiElements: feature.ui_elements,
+          workflowSteps: feature.workflow_steps
+        }
+      });
+
+      if (error) throw error;
+      if (data.error) throw new Error(data.error);
+
+      const { artifact: generatedContent } = data;
+
+      // Populate form with generated content
+      setTitle(generatedContent.title);
+      setDescription(generatedContent.description || '');
+      setLearningObjectives(generatedContent.learning_objectives || []);
+      setPreconditions(generatedContent.preconditions || []);
+      setSteps(generatedContent.steps || []);
+      setExpectedOutcomes(generatedContent.expected_outcomes || []);
+      setTags(generatedContent.tags || []);
+      setHasGenerated(true);
+
+      toast({ title: 'Content Generated', description: 'AI has generated your artifact content. Review and customize as needed.' });
+    } catch (error) {
+      console.error('Generation error:', error);
+      toast({ 
+        title: 'Generation Failed', 
+        description: error instanceof Error ? error.message : 'Failed to generate content',
+        variant: 'destructive'
+      });
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
   const handleSave = async () => {
@@ -99,8 +197,8 @@ export default function ArtifactEditorPage() {
         title,
         description: description || undefined,
         product_version: productVersion,
-        module_id: moduleId || undefined,
-        feature_id: featureId || undefined,
+        module_id: selectedModuleId || undefined,
+        feature_id: selectedFeatureId || undefined,
         role_scope: roleScope,
         content_level: contentLevel,
         learning_objective: learningObjectives,
@@ -175,6 +273,11 @@ export default function ArtifactEditorPage() {
     );
   }
 
+  // Get selected names for breadcrumb display
+  const selectedCategoryName = categories.find(c => c.id === selectedCategoryId)?.module_name;
+  const selectedModuleName = childModules.find(m => m.id === selectedModuleId)?.module_name;
+  const selectedFeatureName = features.find(f => f.id === selectedFeatureId)?.feature_name;
+
   return (
     <div className="container mx-auto py-6 space-y-6">
       {/* Header */}
@@ -209,105 +312,113 @@ export default function ArtifactEditorPage() {
         </div>
       </div>
 
-      <Tabs defaultValue="content" className="space-y-6">
-        <TabsList>
-          <TabsTrigger value="content">Content</TabsTrigger>
-          <TabsTrigger value="steps">Steps ({steps.length})</TabsTrigger>
-          <TabsTrigger value="metadata">Metadata</TabsTrigger>
-        </TabsList>
+      {/* Step 1: Selection Panel */}
+      <Card className="border-primary/20">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <span className="flex items-center justify-center w-6 h-6 rounded-full bg-primary text-primary-foreground text-sm">1</span>
+            Select Content Scope
+          </CardTitle>
+          <CardDescription>
+            Choose the category, module, feature, content level, and target audience
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          {/* Hierarchical Selection */}
+          <div className="grid grid-cols-3 gap-4">
+            <div className="space-y-2">
+              <Label>Category *</Label>
+              <Select value={selectedCategoryId} onValueChange={handleCategoryChange}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select category" />
+                </SelectTrigger>
+                <SelectContent>
+                  {categories.map((cat) => (
+                    <SelectItem key={cat.id} value={cat.id}>{cat.module_name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
 
-        {/* Content Tab */}
-        <TabsContent value="content" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Basic Information</CardTitle>
-              <CardDescription>Core details about this artifact</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="title">Title *</Label>
-                <Input
-                  id="title"
-                  placeholder="e.g., How to Submit a Leave Request"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                />
-              </div>
+            <div className="space-y-2">
+              <Label>Module *</Label>
+              <Select 
+                value={selectedModuleId} 
+                onValueChange={handleModuleChange}
+                disabled={!selectedCategoryId}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder={selectedCategoryId ? "Select module" : "Select category first"} />
+                </SelectTrigger>
+                <SelectContent>
+                  {childModules.map((mod) => (
+                    <SelectItem key={mod.id} value={mod.id}>{mod.module_name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="description">Description</Label>
-                <Textarea
-                  id="description"
-                  placeholder="Brief description of what this artifact covers..."
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  rows={3}
-                />
-              </div>
+            <div className="space-y-2">
+              <Label>Feature *</Label>
+              <Select 
+                value={selectedFeatureId} 
+                onValueChange={handleFeatureChange}
+                disabled={!selectedModuleId}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder={selectedModuleId ? "Select feature" : "Select module first"} />
+                </SelectTrigger>
+                <SelectContent>
+                  {features.map((feat) => (
+                    <SelectItem key={feat.id} value={feat.id}>{feat.feature_name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Module</Label>
-                  <Select value={moduleId} onValueChange={handleModuleChange}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select module" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {modules.map((mod) => (
-                        <SelectItem key={mod.id} value={mod.id}>{mod.module_name}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+          {/* Selection breadcrumb */}
+          {(selectedCategoryName || selectedModuleName || selectedFeatureName) && (
+            <div className="flex items-center gap-2 text-sm text-muted-foreground bg-muted/50 px-3 py-2 rounded-md">
+              {selectedCategoryName && <span>{selectedCategoryName}</span>}
+              {selectedModuleName && (
+                <>
+                  <ChevronRight className="h-4 w-4" />
+                  <span>{selectedModuleName}</span>
+                </>
+              )}
+              {selectedFeatureName && (
+                <>
+                  <ChevronRight className="h-4 w-4" />
+                  <span className="font-medium text-foreground">{selectedFeatureName}</span>
+                </>
+              )}
+            </div>
+          )}
 
-                <div className="space-y-2">
-                  <Label>Feature</Label>
-                  <Select value={featureId} onValueChange={setFeatureId} disabled={!moduleId}>
-                    <SelectTrigger>
-                      <SelectValue placeholder={moduleId ? "Select feature" : "Select module first"} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {features.map((feat) => (
-                        <SelectItem key={feat.id} value={feat.id}>{feat.feature_name}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
+          {/* Content Level and Roles */}
+          <div className="grid grid-cols-2 gap-6">
+            <div className="space-y-2">
+              <Label>Content Level *</Label>
+              <Select value={contentLevel} onValueChange={(v) => setContentLevel(v as ContentLevel)}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {CONTENT_LEVELS.map((level) => (
+                    <SelectItem key={level.value} value={level.value}>
+                      <div className="flex flex-col">
+                        <span>{level.label}</span>
+                        <span className="text-xs text-muted-foreground">{level.description}</span>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Content Level</Label>
-                  <Select value={contentLevel} onValueChange={(v) => setContentLevel(v as ContentLevel)}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {CONTENT_LEVELS.map((level) => (
-                        <SelectItem key={level.value} value={level.value}>{level.label}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-2">
-                  <Label>Product Version</Label>
-                  <Input
-                    value={productVersion}
-                    onChange={(e) => setProductVersion(e.target.value)}
-                    placeholder="e.g., v1.0"
-                  />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Target Audience</CardTitle>
-              <CardDescription>Who should see this content</CardDescription>
-            </CardHeader>
-            <CardContent>
+            <div className="space-y-2">
+              <Label>Target Audience *</Label>
               <div className="flex flex-wrap gap-2">
                 {ROLES.map((role) => (
                   <Badge
@@ -320,170 +431,215 @@ export default function ArtifactEditorPage() {
                   </Badge>
                 ))}
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Learning Objectives</CardTitle>
-              <CardDescription>What will users learn from this artifact</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              {learningObjectives.map((obj, index) => (
-                <div key={index} className="flex items-center gap-2">
-                  <Input
-                    value={obj}
-                    onChange={(e) => updateListItem(setLearningObjectives, index, e.target.value)}
-                    placeholder="e.g., Understand how to navigate the leave request form"
-                  />
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => removeListItem(setLearningObjectives, index)}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
-              ))}
-              <Button type="button" variant="outline" size="sm" onClick={() => addListItem(setLearningObjectives)}>
-                <Plus className="h-4 w-4 mr-2" />
-                Add Objective
-              </Button>
-            </CardContent>
-          </Card>
+          {/* Generate Button */}
+          <div className="flex justify-end pt-4 border-t">
+            <Button 
+              onClick={handleGenerateContent}
+              disabled={!canGenerate || isGenerating}
+              size="lg"
+              className="gap-2"
+            >
+              {isGenerating ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Generating...
+                </>
+              ) : (
+                <>
+                  <Sparkles className="h-4 w-4" />
+                  {hasGenerated ? 'Regenerate Content' : 'Generate Content with AI'}
+                </>
+              )}
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Preconditions</CardTitle>
-              <CardDescription>Requirements before starting</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              {preconditions.map((pre, index) => (
-                <div key={index} className="flex items-center gap-2">
-                  <Input
-                    value={pre}
-                    onChange={(e) => updateListItem(setPreconditions, index, e.target.value)}
-                    placeholder="e.g., User must be logged in"
-                  />
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => removeListItem(setPreconditions, index)}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
-              ))}
-              <Button type="button" variant="outline" size="sm" onClick={() => addListItem(setPreconditions)}>
-                <Plus className="h-4 w-4 mr-2" />
-                Add Precondition
-              </Button>
-            </CardContent>
-          </Card>
+      {/* Step 2: Content Editor (shown after generation or when editing) */}
+      {(hasGenerated || isEditing) && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <span className="flex items-center justify-center w-6 h-6 rounded-full bg-primary text-primary-foreground text-sm">2</span>
+              Review & Customize Content
+            </CardTitle>
+            <CardDescription>
+              Review the AI-generated content and make any necessary adjustments
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Tabs defaultValue="content" className="space-y-6">
+              <TabsList>
+                <TabsTrigger value="content">Content</TabsTrigger>
+                <TabsTrigger value="steps">Steps ({steps.length})</TabsTrigger>
+                <TabsTrigger value="metadata">Metadata</TabsTrigger>
+              </TabsList>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Expected Outcomes</CardTitle>
-              <CardDescription>What users will achieve</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              {expectedOutcomes.map((outcome, index) => (
-                <div key={index} className="flex items-center gap-2">
-                  <Input
-                    value={outcome}
-                    onChange={(e) => updateListItem(setExpectedOutcomes, index, e.target.value)}
-                    placeholder="e.g., Leave request submitted for manager approval"
-                  />
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => removeListItem(setExpectedOutcomes, index)}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
-              ))}
-              <Button type="button" variant="outline" size="sm" onClick={() => addListItem(setExpectedOutcomes)}>
-                <Plus className="h-4 w-4 mr-2" />
-                Add Outcome
-              </Button>
-            </CardContent>
-          </Card>
-        </TabsContent>
+              {/* Content Tab */}
+              <TabsContent value="content" className="space-y-6">
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="title">Title *</Label>
+                    <Input
+                      id="title"
+                      placeholder="e.g., How to Submit a Leave Request"
+                      value={title}
+                      onChange={(e) => setTitle(e.target.value)}
+                    />
+                  </div>
 
-        {/* Steps Tab */}
-        <TabsContent value="steps">
-          <Card>
-            <CardHeader>
-              <CardTitle>Instructional Steps</CardTitle>
-              <CardDescription>Step-by-step instructions for completing the task</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <ArtifactStepEditor steps={steps} onChange={setSteps} />
-            </CardContent>
-          </Card>
-        </TabsContent>
+                  <div className="space-y-2">
+                    <Label htmlFor="description">Description</Label>
+                    <Textarea
+                      id="description"
+                      placeholder="Brief description of what this artifact covers..."
+                      value={description}
+                      onChange={(e) => setDescription(e.target.value)}
+                      rows={3}
+                    />
+                  </div>
 
-        {/* Metadata Tab */}
-        <TabsContent value="metadata" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Tags</CardTitle>
-              <CardDescription>Keywords to help with search and categorization</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center gap-2">
-                <Input
-                  value={tagInput}
-                  onChange={(e) => setTagInput(e.target.value)}
-                  placeholder="Add a tag..."
-                  onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addTag())}
-                />
-                <Button type="button" variant="outline" onClick={addTag}>
-                  Add
-                </Button>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {tags.map((tag) => (
-                  <Badge key={tag} variant="secondary" className="gap-1">
-                    {tag}
-                    <X className="h-3 w-3 cursor-pointer" onClick={() => removeTag(tag)} />
-                  </Badge>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label>Product Version</Label>
+                      <Input
+                        value={productVersion}
+                        onChange={(e) => setProductVersion(e.target.value)}
+                        placeholder="e.g., v1.0"
+                      />
+                    </div>
+                  </div>
+                </div>
 
-          {isEditing && artifact && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Version Information</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-2 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Artifact ID</span>
-                  <span className="font-mono">{artifact.artifact_id}</span>
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <Label>Learning Objectives</Label>
+                      <Button type="button" variant="outline" size="sm" onClick={() => addListItem(setLearningObjectives)}>
+                        <Plus className="h-4 w-4 mr-1" />
+                        Add
+                      </Button>
+                    </div>
+                    {learningObjectives.map((obj, index) => (
+                      <div key={index} className="flex items-center gap-2">
+                        <Input
+                          value={obj}
+                          onChange={(e) => updateListItem(setLearningObjectives, index, e.target.value)}
+                          placeholder="Learning objective..."
+                        />
+                        <Button type="button" variant="ghost" size="icon" onClick={() => removeListItem(setLearningObjectives, index)}>
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <Label>Preconditions</Label>
+                      <Button type="button" variant="outline" size="sm" onClick={() => addListItem(setPreconditions)}>
+                        <Plus className="h-4 w-4 mr-1" />
+                        Add
+                      </Button>
+                    </div>
+                    {preconditions.map((pre, index) => (
+                      <div key={index} className="flex items-center gap-2">
+                        <Input
+                          value={pre}
+                          onChange={(e) => updateListItem(setPreconditions, index, e.target.value)}
+                          placeholder="Precondition..."
+                        />
+                        <Button type="button" variant="ghost" size="icon" onClick={() => removeListItem(setPreconditions, index)}>
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <Label>Expected Outcomes</Label>
+                      <Button type="button" variant="outline" size="sm" onClick={() => addListItem(setExpectedOutcomes)}>
+                        <Plus className="h-4 w-4 mr-1" />
+                        Add
+                      </Button>
+                    </div>
+                    {expectedOutcomes.map((outcome, index) => (
+                      <div key={index} className="flex items-center gap-2">
+                        <Input
+                          value={outcome}
+                          onChange={(e) => updateListItem(setExpectedOutcomes, index, e.target.value)}
+                          placeholder="Expected outcome..."
+                        />
+                        <Button type="button" variant="ghost" size="icon" onClick={() => removeListItem(setExpectedOutcomes, index)}>
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Version</span>
-                  <span>{artifact.version_number}</span>
+              </TabsContent>
+
+              {/* Steps Tab */}
+              <TabsContent value="steps">
+                <ArtifactStepEditor steps={steps} onChange={setSteps} />
+              </TabsContent>
+
+              {/* Metadata Tab */}
+              <TabsContent value="metadata" className="space-y-6">
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <Label>Tags</Label>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Input
+                      value={tagInput}
+                      onChange={(e) => setTagInput(e.target.value)}
+                      placeholder="Add a tag..."
+                      onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addTag())}
+                    />
+                    <Button type="button" variant="outline" onClick={addTag}>
+                      Add
+                    </Button>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {tags.map((tag) => (
+                      <Badge key={tag} variant="secondary" className="gap-1">
+                        {tag}
+                        <X className="h-3 w-3 cursor-pointer" onClick={() => removeTag(tag)} />
+                      </Badge>
+                    ))}
+                  </div>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Created</span>
-                  <span>{new Date(artifact.created_at).toLocaleDateString()}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Last Updated</span>
-                  <span>{new Date(artifact.updated_at).toLocaleDateString()}</span>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-        </TabsContent>
-      </Tabs>
+
+                {isEditing && artifact && (
+                  <div className="space-y-2 text-sm border-t pt-4">
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Artifact ID</span>
+                      <span className="font-mono">{artifact.artifact_id}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Version</span>
+                      <span>{artifact.version_number}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Created</span>
+                      <span>{new Date(artifact.created_at).toLocaleDateString()}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Last Updated</span>
+                      <span>{new Date(artifact.updated_at).toLocaleDateString()}</span>
+                    </div>
+                  </div>
+                )}
+              </TabsContent>
+            </Tabs>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }
