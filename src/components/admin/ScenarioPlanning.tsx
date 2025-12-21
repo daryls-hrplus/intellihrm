@@ -490,7 +490,7 @@ export function ScenarioPlanning({ currentHeadcount, sharedToken }: ScenarioPlan
       return null;
     }
     
-    const url = `${window.location.origin}/admin/org-structure?scenario=${shareToken}`;
+    const url = `${window.location.origin}/workforce/org-structure?scenario=${shareToken}`;
     setShareUrl(url);
     setCurrentSavedId(data.id);
     

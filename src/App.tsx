@@ -32,7 +32,7 @@ import AdminPermissionsSummaryPage from "./pages/admin/AdminPermissionsSummaryPa
 import AdminAccessRequestsPage from "./pages/admin/AdminAccessRequestsPage";
 import AdminAutoApprovalPage from "./pages/admin/AdminAutoApprovalPage";
 import AdminBulkImportPage from "./pages/admin/AdminBulkImportPage";
-import AdminOrgStructurePage from "./pages/admin/AdminOrgStructurePage";
+import OrgStructureConfigPage from "./pages/workforce/OrgStructureConfigPage";
 import AdminScheduledReportsPage from "./pages/admin/AdminScheduledReportsPage";
 import AdminKnowledgeBasePage from "./pages/admin/AdminKnowledgeBasePage";
 import AdminHelpdeskPage from "./pages/admin/AdminHelpdeskPage";
@@ -1041,10 +1041,10 @@ const App = () => (
               }
             />
             <Route
-              path="/admin/org-structure"
+              path="/workforce/org-structure"
               element={
                 <ProtectedRoute requiredRoles={["admin"]}>
-                  <AdminOrgStructurePage />
+                  <OrgStructureConfigPage />
                 </ProtectedRoute>
               }
             />

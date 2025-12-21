@@ -675,7 +675,7 @@ export default function AdminCompaniesPage() {
                           </button>
                           <button
                             onClick={() => {
-                              navigate(`/admin/org-structure?company=${company.id}`);
+                              navigate(`/workforce/org-structure?company=${company.id}`);
                               setOpenDropdown(null);
                             }}
                             className="flex w-full items-center gap-2 px-3 py-2 text-sm text-card-foreground hover:bg-muted"
