@@ -109,6 +109,7 @@ export default function AdminOrgStructurePage() {
   const [searchParams] = useSearchParams();
   const sharedScenarioToken = searchParams.get("scenario");
   const companyFromUrl = searchParams.get("company");
+  const tabFromUrl = searchParams.get("tab");
   
   const [companies, setCompanies] = useState<Company[]>([]);
   const [selectedCompanyId, setSelectedCompanyId] = useState<string>("");
@@ -118,7 +119,9 @@ export default function AdminOrgStructurePage() {
   const [isLoading, setIsLoading] = useState(true);
   const [expandedDivisions, setExpandedDivisions] = useState<Set<string>>(new Set());
   const [expandedDepartments, setExpandedDepartments] = useState<Set<string>>(new Set());
-  const [activeTab, setActiveTab] = useState(sharedScenarioToken ? "forecast" : "structure");
+  const [activeTab, setActiveTab] = useState(
+    tabFromUrl || (sharedScenarioToken ? "forecast" : "structure")
+  );
 
   // Dialog state
   const [dialogOpen, setDialogOpen] = useState(false);
