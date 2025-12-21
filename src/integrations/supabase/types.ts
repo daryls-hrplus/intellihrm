@@ -35165,7 +35165,12 @@ export type Database = {
     }
     Enums: {
       admin_container_permission: "none" | "view" | "configure" | "approve"
-      app_role: "admin" | "hr_manager" | "employee" | "system_admin"
+      app_role:
+        | "admin"
+        | "hr_manager"
+        | "employee"
+        | "system_admin"
+        | "billing_admin"
       audit_action:
         | "CREATE"
         | "UPDATE"
@@ -35369,7 +35374,13 @@ export const Constants = {
   public: {
     Enums: {
       admin_container_permission: ["none", "view", "configure", "approve"],
-      app_role: ["admin", "hr_manager", "employee", "system_admin"],
+      app_role: [
+        "admin",
+        "hr_manager",
+        "employee",
+        "system_admin",
+        "billing_admin",
+      ],
       audit_action: [
         "CREATE",
         "UPDATE",
