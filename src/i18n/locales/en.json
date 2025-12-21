@@ -379,7 +379,7 @@
         "description": "Manage employee-position relationships"
       },
       "orgStructure": {
-        "title": "View Orgchart",
+        "title": "Organisation Structure",
         "description": "View organizational hierarchy"
       },
       "departments": {
