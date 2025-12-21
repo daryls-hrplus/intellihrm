@@ -81,7 +81,6 @@ interface GovernanceManagementProps {
 }
 
 const bodyTypeLabels: Record<string, { label: string; icon: any }> = {
-  board: { label: "Board of Directors", icon: Crown },
   management: { label: "Management Team", icon: Building },
   committee: { label: "Committee", icon: Gavel },
 };
@@ -107,7 +106,7 @@ export function GovernanceManagement({ companyId }: GovernanceManagementProps) {
 
   // Body form state
   const [formName, setFormName] = useState("");
-  const [formType, setFormType] = useState("board");
+  const [formType, setFormType] = useState("management");
   const [formDescription, setFormDescription] = useState("");
   const [formCanApprove, setFormCanApprove] = useState(false);
   const [formIsActive, setFormIsActive] = useState(true);
@@ -190,7 +189,7 @@ export function GovernanceManagement({ companyId }: GovernanceManagementProps) {
   const openCreateBody = () => {
     setEditingBody(null);
     setFormName("");
-    setFormType("board");
+    setFormType("management");
     setFormDescription("");
     setFormCanApprove(false);
     setFormIsActive(true);
@@ -518,7 +517,6 @@ export function GovernanceManagement({ companyId }: GovernanceManagementProps) {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="board">Board of Directors</SelectItem>
                   <SelectItem value="management">Management Team</SelectItem>
                   <SelectItem value="committee">Committee</SelectItem>
                 </SelectContent>
