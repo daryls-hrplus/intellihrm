@@ -72,7 +72,7 @@ export default function HRHubDashboardPage() {
     {
       titleKey: "hrHub.organizationConfiguration",
       items: [
-        { titleKey: "hrHub.orgStructure", descKey: "hrHub.orgStructureDesc", icon: FolderTree, href: "/admin/org-structure", badge: null },
+        { titleKey: "hrHub.orgStructure", descKey: "hrHub.orgStructureDesc", icon: FolderTree, href: "/workforce/org-structure", badge: null },
         { titleKey: "hrHub.lookupValues", descKey: "hrHub.lookupValuesDesc", icon: List, href: "/admin/lookup-values", badge: null },
       ],
     },
