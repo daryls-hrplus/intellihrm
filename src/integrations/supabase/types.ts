@@ -35381,6 +35381,7 @@ export type Database = {
         | "employee"
         | "system_admin"
         | "billing_admin"
+        | "enablement_admin"
       audit_action:
         | "CREATE"
         | "UPDATE"
@@ -35590,6 +35591,7 @@ export const Constants = {
         "employee",
         "system_admin",
         "billing_admin",
+        "enablement_admin",
       ],
       audit_action: [
         "CREATE",
