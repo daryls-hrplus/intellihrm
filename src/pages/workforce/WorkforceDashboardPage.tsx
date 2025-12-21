@@ -25,8 +25,6 @@ import {
   Rocket,
   UserMinus,
   GraduationCap,
-  Landmark,
-  GitBranch,
   Shield,
   UserX,
   FileText,
@@ -90,11 +88,11 @@ export default function WorkforceDashboardPage() {
     },
     governance: {
       title: "Governance",
-      description: "Manage governance bodies and committees",
-      href: "/workforce/org-structure?tab=governance",
+      description: "Manage company boards and management teams",
+      href: "/workforce/governance",
       icon: Shield,
       color: "bg-indigo-500/10 text-indigo-500",
-      tabCode: "org_structure",
+      tabCode: "governance",
     },
     vacancies: {
       title: "Vacancies",
@@ -127,14 +125,6 @@ export default function WorkforceDashboardPage() {
       icon: Brain,
       color: "bg-pink-500/10 text-pink-500",
       tabCode: "org_structure",
-    },
-    companyBoards: {
-      title: "Company Boards",
-      description: "Manage board of directors and committees",
-      href: "/workforce/company-boards",
-      icon: Landmark,
-      color: "bg-slate-500/10 text-slate-500",
-      tabCode: "company_boards",
     },
     // Job Architecture
     jobFamilies: {
@@ -266,7 +256,6 @@ export default function WorkforceDashboardPage() {
       items: filterByAccess([
         allModules.companyGroups,
         allModules.companies,
-        allModules.companyBoards,
         allModules.departments,
         allModules.orgStructure,
         allModules.orgChart,

@@ -94,6 +94,7 @@ import OffboardingPage from "./pages/workforce/OffboardingPage";
 import WorkforceAnalyticsPage from "./pages/workforce/WorkforceAnalyticsPage";
 import QualificationsPage from "./pages/workforce/QualificationsPage";
 import CompanyBoardsPage from "./pages/workforce/CompanyBoardsPage";
+import GovernancePage from "./pages/workforce/GovernancePage";
 
 // Intranet pages
 import IntranetDashboardPage from "./pages/intranet/IntranetDashboardPage";
@@ -1286,6 +1287,14 @@ const App = () => (
               element={
                 <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
                   <CompanyBoardsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/workforce/governance"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
+                  <GovernancePage />
                 </ProtectedRoute>
               }
             />
