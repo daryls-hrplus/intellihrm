@@ -542,7 +542,16 @@ export default function ApplicationDocsGeneratorPage() {
                     <h4 className="font-medium mb-2">{section.content}</h4>
                     {section.items && (
                       <ul className="list-disc list-inside space-y-1 text-sm">
-                        {section.items.map((item: string, j: number) => <li key={j}>{item}</li>)}
+                        {section.items.map((item: any, j: number) => {
+                          const text =
+                            typeof item === 'string'
+                              ? item
+                              : item?.issue && item?.solution
+                                ? `${item.issue} — ${item.solution}`
+                                : item?.text || item?.description || item?.content || JSON.stringify(item);
+
+                          return <li key={j}>{text}</li>;
+                        })}
                       </ul>
                     )}
                   </div>
