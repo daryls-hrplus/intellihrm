@@ -103,8 +103,6 @@ export function RolePiiAccess({ roleId }: RolePiiAccessProps) {
             access_banking: config.access_banking,
             access_medical: config.access_medical,
             access_disciplinary: config.access_disciplinary,
-            access_documents: config.access_documents,
-            access_notes: config.access_notes,
             masking_enabled: config.masking_enabled,
             export_permission: config.export_permission,
             jit_access_required: config.jit_access_required,
@@ -264,8 +262,8 @@ export function RolePiiAccess({ roleId }: RolePiiAccessProps) {
               </div>
             </div>
             <Switch
-              checked={config.export_permission}
-              onCheckedChange={(v) => updateConfig("export_permission", v)}
+              checked={config.export_permission === "allowed"}
+              onCheckedChange={(v) => updateConfig("export_permission", v ? "allowed" : "none")}
             />
           </div>
 
