@@ -268,12 +268,12 @@ export default function WorkforceDashboardPage() {
     {
       titleKey: "Job Architecture and Reporting Relationships",
       items: filterByAccess([
-        allModules.orgChart,
         allModules.jobFamilies,
         allModules.jobs,
         allModules.competencies,
         allModules.responsibilities,
         allModules.positions,
+        allModules.orgChart,
       ]),
     },
     {
