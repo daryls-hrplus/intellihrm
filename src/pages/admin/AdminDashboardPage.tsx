@@ -51,10 +51,6 @@ import {
   FileBarChart,
   Brain,
   Download,
-  Globe2,
-  Receipt,
-  Scale,
-  FileCheck,
   Webhook,
   History,
   TrendingUp,
@@ -119,14 +115,6 @@ const getAdminModuleSections = (
       { title: "Compensation Insights", description: "Pay equity analysis, market benchmarking, budget impact", href: "/insights/compensation", icon: TrendingUp, color: "bg-amber-500/10 text-amber-600", tabCode: "compensation-insights" },
       { title: "Operational Insights", description: "Attendance patterns, productivity metrics, efficiency", href: "/insights/operational", icon: BarChart2, color: "bg-indigo-500/10 text-indigo-600", tabCode: "operational-insights" },
     ],
-    // Section 7: Compliance & Risk
-    complianceRisk: [
-      { title: "Global Compliance Hub", description: "Multi-country payroll and labor law compliance", href: "/global-compliance", icon: Globe2, color: "bg-gradient-to-r from-teal-500/10 to-emerald-500/10 text-teal-600", tabCode: "global-compliance" },
-      { title: "Multi-Country Rules", description: "Configure country-specific compliance rules", href: "/multi-country-rules", icon: Globe, color: "bg-teal-500/10 text-teal-600", tabCode: "multi-country-rules" },
-      { title: "Tax Configuration", description: "Tax tables, deductions, and thresholds", href: "/tax-config", icon: Receipt, color: "bg-amber-500/10 text-amber-600", tabCode: "tax-config" },
-      { title: "Labor Law Compliance", description: "Leave policies, working hours, and overtime rules", href: "/labor-law", icon: Scale, color: "bg-blue-500/10 text-blue-600", tabCode: "labor-law" },
-      { title: "Statutory Reporting", description: "Report templates and filing schedules", href: "/statutory-reporting", icon: FileCheck, color: "bg-green-500/10 text-green-600", tabCode: "statutory-reporting" },
-    ],
     // Section 8: Documentation & Enablement
     // Enablement Center is only visible to HRplus internal tenants
     documentation: [
@@ -161,7 +149,7 @@ const getAdminModuleSections = (
     { titleKey: "System & Platform Configuration", items: filterByPermission(allModules.systemConfig) },
     { titleKey: "Strategic Planning", items: filterByPermission(allModules.strategicPlanning) },
     { titleKey: "Analytics & Insights", items: filterByPermission(allModules.analyticsInsights) },
-    { titleKey: "Compliance & Risk", items: filterByPermission(allModules.complianceRisk) },
+    
     { titleKey: "Documentation & Enablement", items: filterByPermission(allModules.documentation) },
     { titleKey: "Billing & Subscriptions", items: filterByPermission(allModules.billing) },
   ];

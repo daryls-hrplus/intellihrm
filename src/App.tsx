@@ -419,12 +419,7 @@ import TalentInsightsPage from "./pages/insights/TalentInsightsPage";
 import CompensationInsightsPage from "./pages/insights/CompensationInsightsPage";
 import OperationalInsightsPage from "./pages/insights/OperationalInsightsPage";
 
-// Global Compliance pages
-import GlobalComplianceHubPage from "./pages/global-compliance/GlobalComplianceHubPage";
-import MultiCountryRulesPage from "./pages/global-compliance/MultiCountryRulesPage";
-import TaxConfigurationPage from "./pages/global-compliance/TaxConfigurationPage";
-import LaborLawPage from "./pages/global-compliance/LaborLawPage";
-import StatutoryReportingPage from "./pages/global-compliance/StatutoryReportingPage";
+
 
 // System & Integration pages
 import SystemHubPage from "./pages/system/SystemHubPage";
@@ -3203,46 +3198,8 @@ const App = () => (
               }
             />
 
-            <Route
-              path="/global-compliance"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <GlobalComplianceHubPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/multi-country-rules"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <MultiCountryRulesPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/tax-config"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <TaxConfigurationPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/labor-law"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <LaborLawPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/statutory-reporting"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <StatutoryReportingPage />
-                </ProtectedRoute>
-              }
-            />
+
+
 
             {/* System & Integration Routes */}
             <Route
