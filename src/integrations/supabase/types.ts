@@ -26038,6 +26038,56 @@ export type Database = {
         }
         Relationships: []
       }
+      pii_access_logs: {
+        Row: {
+          access_result: string
+          created_at: string | null
+          entity_id: string | null
+          entity_type: string
+          field_name: string | null
+          id: string
+          pii_domain: string
+          role_id: string | null
+          source_ip: string | null
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          access_result: string
+          created_at?: string | null
+          entity_id?: string | null
+          entity_type: string
+          field_name?: string | null
+          id?: string
+          pii_domain: string
+          role_id?: string | null
+          source_ip?: string | null
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          access_result?: string
+          created_at?: string | null
+          entity_id?: string | null
+          entity_type?: string
+          field_name?: string | null
+          id?: string
+          pii_domain?: string
+          role_id?: string | null
+          source_ip?: string | null
+          user_agent?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pii_access_logs_role_id_fkey"
+            columns: ["role_id"]
+            isOneToOne: false
+            referencedRelation: "roles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pip_milestones: {
         Row: {
           completion_date: string | null
@@ -28836,6 +28886,47 @@ export type Database = {
           },
         ]
       }
+      role_container_access: {
+        Row: {
+          container_code: string
+          created_at: string | null
+          id: string
+          permission_level:
+            | Database["public"]["Enums"]["admin_container_permission"]
+            | null
+          role_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          container_code: string
+          created_at?: string | null
+          id?: string
+          permission_level?:
+            | Database["public"]["Enums"]["admin_container_permission"]
+            | null
+          role_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          container_code?: string
+          created_at?: string | null
+          id?: string
+          permission_level?:
+            | Database["public"]["Enums"]["admin_container_permission"]
+            | null
+          role_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "role_container_access_role_id_fkey"
+            columns: ["role_id"]
+            isOneToOne: false
+            referencedRelation: "roles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       role_department_access: {
         Row: {
           created_at: string
@@ -28908,6 +28999,59 @@ export type Database = {
           },
         ]
       }
+      role_migration_records: {
+        Row: {
+          id: string
+          migrated_at: string | null
+          migration_batch_id: string
+          migration_type: string | null
+          new_role_id: string | null
+          new_role_name: string | null
+          pii_changes_detected: boolean | null
+          previous_role_id: string | null
+          previous_role_name: string | null
+          rollback_available: boolean | null
+          rollback_expires_at: string | null
+          similarity_score: number | null
+        }
+        Insert: {
+          id?: string
+          migrated_at?: string | null
+          migration_batch_id: string
+          migration_type?: string | null
+          new_role_id?: string | null
+          new_role_name?: string | null
+          pii_changes_detected?: boolean | null
+          previous_role_id?: string | null
+          previous_role_name?: string | null
+          rollback_available?: boolean | null
+          rollback_expires_at?: string | null
+          similarity_score?: number | null
+        }
+        Update: {
+          id?: string
+          migrated_at?: string | null
+          migration_batch_id?: string
+          migration_type?: string | null
+          new_role_id?: string | null
+          new_role_name?: string | null
+          pii_changes_detected?: boolean | null
+          previous_role_id?: string | null
+          previous_role_name?: string | null
+          rollback_available?: boolean | null
+          rollback_expires_at?: string | null
+          similarity_score?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "role_migration_records_new_role_id_fkey"
+            columns: ["new_role_id"]
+            isOneToOne: false
+            referencedRelation: "roles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       role_permissions: {
         Row: {
           can_create: boolean | null
@@ -28954,6 +29098,65 @@ export type Database = {
             foreignKeyName: "role_permissions_role_id_fkey"
             columns: ["role_id"]
             isOneToOne: false
+            referencedRelation: "roles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      role_pii_access: {
+        Row: {
+          access_banking: boolean | null
+          access_compensation: boolean | null
+          access_disciplinary: boolean | null
+          access_medical: boolean | null
+          access_personal_details: boolean | null
+          approval_required_for_full: boolean | null
+          created_at: string | null
+          export_permission: string | null
+          id: string
+          jit_access_required: boolean | null
+          masking_enabled: boolean | null
+          pii_level: string | null
+          role_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          access_banking?: boolean | null
+          access_compensation?: boolean | null
+          access_disciplinary?: boolean | null
+          access_medical?: boolean | null
+          access_personal_details?: boolean | null
+          approval_required_for_full?: boolean | null
+          created_at?: string | null
+          export_permission?: string | null
+          id?: string
+          jit_access_required?: boolean | null
+          masking_enabled?: boolean | null
+          pii_level?: string | null
+          role_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          access_banking?: boolean | null
+          access_compensation?: boolean | null
+          access_disciplinary?: boolean | null
+          access_medical?: boolean | null
+          access_personal_details?: boolean | null
+          approval_required_for_full?: boolean | null
+          created_at?: string | null
+          export_permission?: string | null
+          id?: string
+          jit_access_required?: boolean | null
+          masking_enabled?: boolean | null
+          pii_level?: string | null
+          role_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "role_pii_access_role_id_fkey"
+            columns: ["role_id"]
+            isOneToOne: true
             referencedRelation: "roles"
             referencedColumns: ["id"]
           },
@@ -29072,42 +29275,65 @@ export type Database = {
       }
       roles: {
         Row: {
+          base_role_id: string | null
           can_view_pii: boolean | null
           code: string
           created_at: string | null
           description: string | null
           id: string
           is_active: boolean | null
+          is_seeded: boolean | null
           is_system: boolean | null
           menu_permissions: Json | null
           name: string
+          role_type: string | null
+          seeded_role_code: string | null
+          tenant_visibility: string | null
           updated_at: string | null
         }
         Insert: {
+          base_role_id?: string | null
           can_view_pii?: boolean | null
           code: string
           created_at?: string | null
           description?: string | null
           id?: string
           is_active?: boolean | null
+          is_seeded?: boolean | null
           is_system?: boolean | null
           menu_permissions?: Json | null
           name: string
+          role_type?: string | null
+          seeded_role_code?: string | null
+          tenant_visibility?: string | null
           updated_at?: string | null
         }
         Update: {
+          base_role_id?: string | null
           can_view_pii?: boolean | null
           code?: string
           created_at?: string | null
           description?: string | null
           id?: string
           is_active?: boolean | null
+          is_seeded?: boolean | null
           is_system?: boolean | null
           menu_permissions?: Json | null
           name?: string
+          role_type?: string | null
+          seeded_role_code?: string | null
+          tenant_visibility?: string | null
           updated_at?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "roles_base_role_id_fkey"
+            columns: ["base_role_id"]
+            isOneToOne: false
+            referencedRelation: "roles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       salary_grade_spinal_ranges: {
         Row: {
@@ -34930,6 +35156,7 @@ export type Database = {
       }
     }
     Enums: {
+      admin_container_permission: "none" | "view" | "configure" | "approve"
       app_role: "admin" | "hr_manager" | "employee"
       audit_action:
         | "CREATE"
@@ -35133,6 +35360,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      admin_container_permission: ["none", "view", "configure", "approve"],
       app_role: ["admin", "hr_manager", "employee"],
       audit_action: [
         "CREATE",
