@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
+import { EnablementAccessGuard } from "@/components/auth/EnablementAccessGuard";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import AuthPage from "./pages/AuthPage";
@@ -3232,7 +3233,9 @@ const App = () => (
               path="/enablement"
               element={
                 <ProtectedRoute requiredRoles={["admin"]}>
-                  <EnablementHubPage />
+                  <EnablementAccessGuard>
+                    <EnablementHubPage />
+                  </EnablementAccessGuard>
                 </ProtectedRoute>
               }
             />
@@ -3240,7 +3243,9 @@ const App = () => (
               path="/enablement/feature-catalog"
               element={
                 <ProtectedRoute requiredRoles={["admin"]}>
-                  <FeatureCatalogPage />
+                  <EnablementAccessGuard>
+                    <FeatureCatalogPage />
+                  </EnablementAccessGuard>
                 </ProtectedRoute>
               }
             />
@@ -3248,7 +3253,9 @@ const App = () => (
               path="/enablement/docs-generator"
               element={
                 <ProtectedRoute requiredRoles={["admin"]}>
-                  <ApplicationDocsGeneratorPage />
+                  <EnablementAccessGuard>
+                    <ApplicationDocsGeneratorPage />
+                  </EnablementAccessGuard>
                 </ProtectedRoute>
               }
             />
@@ -3256,7 +3263,9 @@ const App = () => (
               path="/enablement/template-library"
               element={
                 <ProtectedRoute requiredRoles={["admin"]}>
-                  <TemplateLibraryPage />
+                  <EnablementAccessGuard>
+                    <TemplateLibraryPage />
+                  </EnablementAccessGuard>
                 </ProtectedRoute>
               }
             />
@@ -3264,7 +3273,9 @@ const App = () => (
               path="/enablement/analytics"
               element={
                 <ProtectedRoute requiredRoles={["admin"]}>
-                  <EnablementAnalyticsPage />
+                  <EnablementAccessGuard>
+                    <EnablementAnalyticsPage />
+                  </EnablementAccessGuard>
                 </ProtectedRoute>
               }
             />
@@ -3272,7 +3283,9 @@ const App = () => (
               path="/enablement/scorm-generator"
               element={
                 <ProtectedRoute requiredRoles={["admin"]}>
-                  <SCORMGeneratorPage />
+                  <EnablementAccessGuard>
+                    <SCORMGeneratorPage />
+                  </EnablementAccessGuard>
                 </ProtectedRoute>
               }
             />
@@ -3280,7 +3293,9 @@ const App = () => (
               path="/enablement/release-calendar"
               element={
                 <ProtectedRoute requiredRoles={["admin"]}>
-                  <ReleaseCalendarPage />
+                  <EnablementAccessGuard>
+                    <ReleaseCalendarPage />
+                  </EnablementAccessGuard>
                 </ProtectedRoute>
               }
             />
@@ -3288,7 +3303,9 @@ const App = () => (
               path="/enablement/settings"
               element={
                 <ProtectedRoute requiredRoles={["admin"]}>
-                  <EnablementSettingsPage />
+                  <EnablementAccessGuard>
+                    <EnablementSettingsPage />
+                  </EnablementAccessGuard>
                 </ProtectedRoute>
               }
             />
@@ -3296,7 +3313,9 @@ const App = () => (
               path="/enablement/ai-tools"
               element={
                 <ProtectedRoute requiredRoles={["admin"]}>
-                  <EnablementAIToolsPage />
+                  <EnablementAccessGuard>
+                    <EnablementAIToolsPage />
+                  </EnablementAccessGuard>
                 </ProtectedRoute>
               }
             />
@@ -3304,7 +3323,9 @@ const App = () => (
               path="/enablement/guide"
               element={
                 <ProtectedRoute requiredRoles={["admin"]}>
-                  <EnablementGuidePage />
+                  <EnablementAccessGuard>
+                    <EnablementGuidePage />
+                  </EnablementAccessGuard>
                 </ProtectedRoute>
               }
             />
@@ -3312,7 +3333,9 @@ const App = () => (
               path="/enablement/artifacts"
               element={
                 <ProtectedRoute requiredRoles={["admin"]}>
-                  <EnablementArtifactsPage />
+                  <EnablementAccessGuard>
+                    <EnablementArtifactsPage />
+                  </EnablementAccessGuard>
                 </ProtectedRoute>
               }
             />
@@ -3320,7 +3343,9 @@ const App = () => (
               path="/enablement/artifacts/new"
               element={
                 <ProtectedRoute requiredRoles={["admin"]}>
-                  <ArtifactEditorPage />
+                  <EnablementAccessGuard>
+                    <ArtifactEditorPage />
+                  </EnablementAccessGuard>
                 </ProtectedRoute>
               }
             />
@@ -3328,7 +3353,9 @@ const App = () => (
               path="/enablement/artifacts/:id"
               element={
                 <ProtectedRoute requiredRoles={["admin"]}>
-                  <ArtifactDetailPage />
+                  <EnablementAccessGuard>
+                    <ArtifactDetailPage />
+                  </EnablementAccessGuard>
                 </ProtectedRoute>
               }
             />

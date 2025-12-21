@@ -3849,6 +3849,7 @@ export type Database = {
       companies: {
         Row: {
           address: string | null
+          app_version: string | null
           city: string | null
           code: string
           country: string | null
@@ -3867,10 +3868,12 @@ export type Database = {
           state: string | null
           territory_id: string | null
           updated_at: string
+          version_updated_at: string | null
           website: string | null
         }
         Insert: {
           address?: string | null
+          app_version?: string | null
           city?: string | null
           code: string
           country?: string | null
@@ -3889,10 +3892,12 @@ export type Database = {
           state?: string | null
           territory_id?: string | null
           updated_at?: string
+          version_updated_at?: string | null
           website?: string | null
         }
         Update: {
           address?: string | null
+          app_version?: string | null
           city?: string | null
           code?: string
           country?: string | null
@@ -3911,6 +3916,7 @@ export type Database = {
           state?: string | null
           territory_id?: string | null
           updated_at?: string
+          version_updated_at?: string | null
           website?: string | null
         }
         Relationships: [
@@ -4257,6 +4263,7 @@ export type Database = {
           is_active: boolean
           logo_url: string | null
           name: string
+          tenant_type: string | null
           updated_at: string
         }
         Insert: {
@@ -4268,6 +4275,7 @@ export type Database = {
           is_active?: boolean
           logo_url?: string | null
           name: string
+          tenant_type?: string | null
           updated_at?: string
         }
         Update: {
@@ -4279,6 +4287,7 @@ export type Database = {
           is_active?: boolean
           logo_url?: string | null
           name?: string
+          tenant_type?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -9714,6 +9723,8 @@ export type Database = {
       }
       enablement_artifacts: {
         Row: {
+          app_version_max: string | null
+          app_version_min: string | null
           approved_at: string | null
           approved_by: string | null
           artifact_id: string
@@ -9727,6 +9738,7 @@ export type Database = {
           expected_outcomes: Json | null
           feature_id: string | null
           id: string
+          is_centrally_managed: boolean | null
           learning_objective: Json | null
           module_id: string | null
           preconditions: Json | null
@@ -9750,6 +9762,8 @@ export type Database = {
           version_number: number
         }
         Insert: {
+          app_version_max?: string | null
+          app_version_min?: string | null
           approved_at?: string | null
           approved_by?: string | null
           artifact_id: string
@@ -9763,6 +9777,7 @@ export type Database = {
           expected_outcomes?: Json | null
           feature_id?: string | null
           id?: string
+          is_centrally_managed?: boolean | null
           learning_objective?: Json | null
           module_id?: string | null
           preconditions?: Json | null
@@ -9786,6 +9801,8 @@ export type Database = {
           version_number?: number
         }
         Update: {
+          app_version_max?: string | null
+          app_version_min?: string | null
           approved_at?: string | null
           approved_by?: string | null
           artifact_id?: string
@@ -9799,6 +9816,7 @@ export type Database = {
           expected_outcomes?: Json | null
           feature_id?: string | null
           id?: string
+          is_centrally_managed?: boolean | null
           learning_objective?: Json | null
           module_id?: string | null
           preconditions?: Json | null
@@ -34748,6 +34766,8 @@ export type Database = {
           vacancy_count: number
         }[]
       }
+      get_user_app_version: { Args: never; Returns: string }
+      get_user_tenant_type: { Args: never; Returns: string }
       get_workflow_approver: {
         Args: { p_instance_id: string; p_step_id: string }
         Returns: {
@@ -34785,6 +34805,7 @@ export type Database = {
         Args: { p_employee_id: string }
         Returns: boolean
       }
+      is_hrplus_internal_user: { Args: never; Returns: boolean }
       is_messaging_channel_admin: {
         Args: { p_channel_id: string; p_user_id: string }
         Returns: boolean
