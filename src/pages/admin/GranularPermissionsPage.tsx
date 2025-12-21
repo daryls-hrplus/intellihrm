@@ -112,7 +112,7 @@ const CONTAINER_BASED_MODULES = ["admin"];
 // Modules that should be hidden (now containers inside other modules)
 const HIDDEN_MODULES = ["strategic_planning", "insights"];
 
-// Module display order matching main menu
+// Module display order matching main menu exactly
 const MODULE_DISPLAY_ORDER = [
   "dashboard",
   "hr_hub",
@@ -128,12 +128,13 @@ const MODULE_DISPLAY_ORDER = [
   "training",
   "succession",
   "recruitment",
-  "health_safety",
+  "hse",              // Health & Safety
   "employee_relations",
-  "company_property",
+  "property",         // Company Property
   "help_center",
   "enablement",
   "admin",
+  "profile",          // Profile at the end
 ];
 
 const breadcrumbItems = [
