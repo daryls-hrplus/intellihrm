@@ -106,8 +106,8 @@ interface PositionType {
   company_id: string;
 }
 
-// Modules that use container-based hierarchy
-const CONTAINER_BASED_MODULES = ["admin", "insights"];
+// Modules that use container-based hierarchy (admin now includes insights)
+const CONTAINER_BASED_MODULES = ["admin"];
 
 const breadcrumbItems = [
   { label: "Admin", href: "/admin" },
