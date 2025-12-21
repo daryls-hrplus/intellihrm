@@ -42,24 +42,16 @@ export default function ArtifactEditorPage() {
   const { artifact, isLoading, fetchArtifact } = useArtifact(id);
   const { modules } = useApplicationModules();
 
-  // Hierarchical selection state
-  const [selectedCategoryId, setSelectedCategoryId] = useState<string>('');
+  // Selection state
   const [selectedModuleId, setSelectedModuleId] = useState<string>('');
   const [selectedFeatureId, setSelectedFeatureId] = useState<string>('');
   const { features } = useApplicationFeatures(selectedModuleId || undefined);
 
-  // Derive categories (parent modules) and child modules
-  const categories = useMemo(() => 
-    modules.filter(m => !m.parent_module_code),
+  // Filter to only show actual modules (exclude parent categories)
+  const availableModules = useMemo(() => 
+    modules.filter(m => m.parent_module_code),
     [modules]
   );
-
-  const childModules = useMemo(() => {
-    if (!selectedCategoryId) return [];
-    const category = modules.find(m => m.id === selectedCategoryId);
-    if (!category) return [];
-    return modules.filter(m => m.parent_module_code === category.module_code);
-  }, [modules, selectedCategoryId]);
 
   // Form state
   const [title, setTitle] = useState('');
@@ -79,7 +71,7 @@ export default function ArtifactEditorPage() {
   const [hasGenerated, setHasGenerated] = useState(false);
 
   // Check if ready to generate
-  const canGenerate = selectedCategoryId && selectedModuleId && selectedFeatureId && roleScope.length > 0;
+  const canGenerate = selectedModuleId && selectedFeatureId && roleScope.length > 0;
 
   useEffect(() => {
     if (id) {
@@ -92,16 +84,6 @@ export default function ArtifactEditorPage() {
       setTitle(artifact.title);
       setDescription(artifact.description || '');
       setProductVersion(artifact.product_version);
-      
-      // Find category from module
-      const module = modules.find(m => m.id === artifact.module_id);
-      if (module && module.parent_module_code) {
-        const category = modules.find(m => m.module_code === module.parent_module_code);
-        if (category) {
-          setSelectedCategoryId(category.id);
-        }
-      }
-      
       setSelectedModuleId(artifact.module_id || '');
       setSelectedFeatureId(artifact.feature_id || '');
       setRoleScope(artifact.role_scope);
@@ -114,13 +96,6 @@ export default function ArtifactEditorPage() {
       setHasGenerated(true);
     }
   }, [artifact, modules]);
-
-  const handleCategoryChange = (value: string) => {
-    setSelectedCategoryId(value);
-    setSelectedModuleId('');
-    setSelectedFeatureId('');
-    setHasGenerated(false);
-  };
 
   const handleModuleChange = (value: string) => {
     setSelectedModuleId(value);
@@ -136,11 +111,11 @@ export default function ArtifactEditorPage() {
   const handleGenerateContent = async () => {
     if (!canGenerate) return;
 
-    const category = categories.find(c => c.id === selectedCategoryId);
-    const module = childModules.find(m => m.id === selectedModuleId);
+    const module = availableModules.find(m => m.id === selectedModuleId);
     const feature = features.find(f => f.id === selectedFeatureId);
+    const parentCategory = module ? modules.find(m => m.module_code === module.parent_module_code) : null;
 
-    if (!category || !module || !feature) {
+    if (!module || !feature) {
       toast({ title: 'Error', description: 'Please complete all selections', variant: 'destructive' });
       return;
     }
@@ -149,7 +124,7 @@ export default function ArtifactEditorPage() {
     try {
       const { data, error } = await supabase.functions.invoke('generate-artifact-content', {
         body: {
-          categoryName: category.module_name,
+          categoryName: parentCategory?.module_name || '',
           moduleName: module.module_name,
           featureName: feature.feature_name,
           featureDescription: feature.description,
@@ -274,8 +249,8 @@ export default function ArtifactEditorPage() {
   }
 
   // Get selected names for breadcrumb display
-  const selectedCategoryName = categories.find(c => c.id === selectedCategoryId)?.module_name;
-  const selectedModuleName = childModules.find(m => m.id === selectedModuleId)?.module_name;
+  const selectedModule = availableModules.find(m => m.id === selectedModuleId);
+  const selectedModuleName = selectedModule?.module_name;
   const selectedFeatureName = features.find(f => f.id === selectedFeatureId)?.feature_name;
 
   return (
@@ -320,38 +295,20 @@ export default function ArtifactEditorPage() {
             Select Content Scope
           </CardTitle>
           <CardDescription>
-            Choose the category, module, feature, content level, and target audience
+            Choose the module, feature, content level, and target audience
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          {/* Hierarchical Selection */}
-          <div className="grid grid-cols-3 gap-4">
-            <div className="space-y-2">
-              <Label>Category *</Label>
-              <Select value={selectedCategoryId} onValueChange={handleCategoryChange}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select category" />
-                </SelectTrigger>
-                <SelectContent>
-                  {categories.map((cat) => (
-                    <SelectItem key={cat.id} value={cat.id}>{cat.module_name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
+          {/* Module and Feature Selection */}
+          <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label>Module *</Label>
-              <Select 
-                value={selectedModuleId} 
-                onValueChange={handleModuleChange}
-                disabled={!selectedCategoryId}
-              >
+              <Select value={selectedModuleId} onValueChange={handleModuleChange}>
                 <SelectTrigger>
-                  <SelectValue placeholder={selectedCategoryId ? "Select module" : "Select category first"} />
+                  <SelectValue placeholder="Select module" />
                 </SelectTrigger>
                 <SelectContent>
-                  {childModules.map((mod) => (
+                  {availableModules.map((mod) => (
                     <SelectItem key={mod.id} value={mod.id}>{mod.module_name}</SelectItem>
                   ))}
                 </SelectContent>
@@ -378,15 +335,9 @@ export default function ArtifactEditorPage() {
           </div>
 
           {/* Selection breadcrumb */}
-          {(selectedCategoryName || selectedModuleName || selectedFeatureName) && (
+          {(selectedModuleName || selectedFeatureName) && (
             <div className="flex items-center gap-2 text-sm text-muted-foreground bg-muted/50 px-3 py-2 rounded-md">
-              {selectedCategoryName && <span>{selectedCategoryName}</span>}
-              {selectedModuleName && (
-                <>
-                  <ChevronRight className="h-4 w-4" />
-                  <span>{selectedModuleName}</span>
-                </>
-              )}
+              {selectedModuleName && <span>{selectedModuleName}</span>}
               {selectedFeatureName && (
                 <>
                   <ChevronRight className="h-4 w-4" />
