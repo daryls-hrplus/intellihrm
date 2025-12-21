@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -16,15 +16,36 @@ export default function EnablementArtifactsPage() {
   const navigate = useNavigate();
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<ArtifactStatus | 'all'>('all');
+  const [categoryFilter, setCategoryFilter] = useState<string>('all');
   const [moduleFilter, setModuleFilter] = useState<string>('all');
   
+  const { modules } = useApplicationModules();
+
+  // Derive categories (parent modules) and filtered child modules
+  const categories = useMemo(() => 
+    modules.filter(m => !m.parent_module_code),
+    [modules]
+  );
+
+  const filteredModules = useMemo(() => {
+    const childModules = modules.filter(m => m.parent_module_code);
+    if (categoryFilter === 'all') return childModules;
+    const category = modules.find(m => m.id === categoryFilter);
+    if (!category) return childModules;
+    return childModules.filter(m => m.parent_module_code === category.module_code);
+  }, [modules, categoryFilter]);
+
+  // Reset module filter when category changes
+  const handleCategoryChange = (value: string) => {
+    setCategoryFilter(value);
+    setModuleFilter('all');
+  };
+
   const { artifacts, isLoading, fetchArtifacts } = useEnablementArtifacts({
     status: statusFilter === 'all' ? undefined : statusFilter,
     moduleId: moduleFilter === 'all' ? undefined : moduleFilter,
     search: search || undefined
   });
-  
-  const { modules } = useApplicationModules();
 
   useEffect(() => {
     fetchArtifacts();
@@ -73,13 +94,24 @@ export default function EnablementArtifactsPage() {
                 <SelectItem value="deprecated">Deprecated</SelectItem>
               </SelectContent>
             </Select>
+            <Select value={categoryFilter} onValueChange={handleCategoryChange}>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Category" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Categories</SelectItem>
+                {categories.map((cat) => (
+                  <SelectItem key={cat.id} value={cat.id}>{cat.module_name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
             <Select value={moduleFilter} onValueChange={setModuleFilter}>
               <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder="Module" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Modules</SelectItem>
-                {modules.map((mod) => (
+                {filteredModules.map((mod) => (
                   <SelectItem key={mod.id} value={mod.id}>{mod.module_name}</SelectItem>
                 ))}
               </SelectContent>
