@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { supabase } from "@/integrations/supabase/client";
@@ -25,6 +26,7 @@ import {
   Image,
   Building,
   Calendar,
+  Network,
 } from "lucide-react";
 import { CompanyBranchLocations } from "@/components/admin/CompanyBranchLocations";
 import { CompanyFiscalYearsManager } from "@/components/admin/CompanyFiscalYearsManager";
@@ -120,6 +122,7 @@ const industries = [
 ];
 
 export default function AdminCompaniesPage() {
+  const navigate = useNavigate();
   const [companies, setCompanies] = useState<Company[]>([]);
   const [groups, setGroups] = useState<CompanyGroup[]>([]);
   const [divisions, setDivisions] = useState<Division[]>([]);
@@ -669,6 +672,16 @@ export default function AdminCompaniesPage() {
                           >
                             <Building className="h-4 w-4" />
                             Branch Locations
+                          </button>
+                          <button
+                            onClick={() => {
+                              navigate(`/admin/org-structure?company=${company.id}`);
+                              setOpenDropdown(null);
+                            }}
+                            className="flex w-full items-center gap-2 px-3 py-2 text-sm text-card-foreground hover:bg-muted"
+                          >
+                            <Network className="h-4 w-4" />
+                            Manage Divisions
                           </button>
                           <button
                             onClick={() => toggleActive(company)}

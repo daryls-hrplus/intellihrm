@@ -108,6 +108,7 @@ type EntityType = "division" | "department" | "section";
 export default function AdminOrgStructurePage() {
   const [searchParams] = useSearchParams();
   const sharedScenarioToken = searchParams.get("scenario");
+  const companyFromUrl = searchParams.get("company");
   
   const [companies, setCompanies] = useState<Company[]>([]);
   const [selectedCompanyId, setSelectedCompanyId] = useState<string>("");
@@ -155,7 +156,12 @@ export default function AdminOrgStructurePage() {
       setCompanies(data || []);
       
       if (data && data.length > 0) {
-        setSelectedCompanyId(data[0].id);
+        // If company ID is in URL params, use that; otherwise use the first company
+        if (companyFromUrl && data.some(c => c.id === companyFromUrl)) {
+          setSelectedCompanyId(companyFromUrl);
+        } else {
+          setSelectedCompanyId(data[0].id);
+        }
       }
     } catch (error) {
       console.error("Error fetching companies:", error);
