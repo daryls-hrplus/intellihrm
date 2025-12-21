@@ -280,7 +280,7 @@
     "property": "Company Property",
     "help": "Help Center",
     "enablement": "Enablement Center",
-    "admin": "Admin & Security",
+    "admin": "Admin & Insights",
     "employees": "Employees",
     "departments": "Departments",
     "positions": "Positions",
@@ -1842,8 +1842,8 @@
     }
   },
   "admin": {
-    "title": "Admin & Security",
-    "description": "System administration and security settings",
+    "title": "Admin & Insights",
+    "description": "Configuration, governance, analytics, and strategic planning hub",
     "adminAccess": "Admin Access",
     "stats": {
       "totalUsers": "Total Users",
