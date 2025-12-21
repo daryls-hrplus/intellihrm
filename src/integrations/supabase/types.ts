@@ -35127,6 +35127,8 @@ export type Database = {
             }
             Returns: Json
           }
+      seed_role_container_access: { Args: never; Returns: undefined }
+      seed_role_pii_access: { Args: never; Returns: undefined }
       user_has_company_access: {
         Args: { p_company_id: string; p_user_id: string }
         Returns: boolean
