@@ -95,7 +95,7 @@ export default function WorkforceDashboardPage() {
       tabCode: "governance",
     },
     vacancies: {
-      title: "Vacancies",
+      title: "Position Control and Vacancies",
       description: "Track open positions and vacancies",
       href: "/workforce/org-structure?tab=vacancies",
       icon: UserX,
@@ -259,7 +259,6 @@ export default function WorkforceDashboardPage() {
         allModules.departments,
         allModules.orgStructure,
         allModules.governance,
-        allModules.vacancies,
         allModules.headcountRequests,
         allModules.headcountAnalytics,
         allModules.headcountForecast,
@@ -274,6 +273,7 @@ export default function WorkforceDashboardPage() {
         allModules.responsibilities,
         allModules.positions,
         allModules.orgChart,
+        allModules.vacancies,
       ]),
     },
     {
