@@ -4019,6 +4019,128 @@ export type Database = {
           },
         ]
       }
+      company_board_members: {
+        Row: {
+          appointment_date: string | null
+          appointment_type: string | null
+          board_id: string
+          board_role: string
+          created_at: string
+          employee_id: string | null
+          external_member_email: string | null
+          external_member_name: string | null
+          has_voting_rights: boolean
+          id: string
+          is_active: boolean
+          is_independent: boolean
+          is_renewable: boolean
+          notes: string | null
+          term_end_date: string | null
+          term_start_date: string | null
+          updated_at: string
+        }
+        Insert: {
+          appointment_date?: string | null
+          appointment_type?: string | null
+          board_id: string
+          board_role?: string
+          created_at?: string
+          employee_id?: string | null
+          external_member_email?: string | null
+          external_member_name?: string | null
+          has_voting_rights?: boolean
+          id?: string
+          is_active?: boolean
+          is_independent?: boolean
+          is_renewable?: boolean
+          notes?: string | null
+          term_end_date?: string | null
+          term_start_date?: string | null
+          updated_at?: string
+        }
+        Update: {
+          appointment_date?: string | null
+          appointment_type?: string | null
+          board_id?: string
+          board_role?: string
+          created_at?: string
+          employee_id?: string | null
+          external_member_email?: string | null
+          external_member_name?: string | null
+          has_voting_rights?: boolean
+          id?: string
+          is_active?: boolean
+          is_independent?: boolean
+          is_renewable?: boolean
+          notes?: string | null
+          term_end_date?: string | null
+          term_start_date?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_board_members_board_id_fkey"
+            columns: ["board_id"]
+            isOneToOne: false
+            referencedRelation: "company_boards"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "company_board_members_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      company_boards: {
+        Row: {
+          board_type: string
+          company_id: string
+          created_at: string
+          description: string | null
+          end_date: string | null
+          id: string
+          is_active: boolean
+          name: string
+          start_date: string
+          updated_at: string
+        }
+        Insert: {
+          board_type?: string
+          company_id: string
+          created_at?: string
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          start_date?: string
+          updated_at?: string
+        }
+        Update: {
+          board_type?: string
+          company_id?: string
+          created_at?: string
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          start_date?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_boards_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       company_branch_locations: {
         Row: {
           address: string | null

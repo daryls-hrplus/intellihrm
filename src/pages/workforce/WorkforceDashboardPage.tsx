@@ -25,6 +25,7 @@ import {
   Rocket,
   UserMinus,
   GraduationCap,
+  Users2,
 } from "lucide-react";
 
 interface Stats {
@@ -73,6 +74,14 @@ export default function WorkforceDashboardPage() {
       icon: Network,
       color: "bg-success/10 text-success",
       tabCode: "org_structure",
+    },
+    companyBoards: {
+      title: "Company Boards",
+      description: "Manage board of directors and committees",
+      href: "/workforce/company-boards",
+      icon: Users2,
+      color: "bg-slate-500/10 text-slate-500",
+      tabCode: "company_boards",
     },
     // Job Architecture
     jobFamilies: {
@@ -204,6 +213,7 @@ export default function WorkforceDashboardPage() {
       items: filterByAccess([
         allModules.companyGroups,
         allModules.companies,
+        allModules.companyBoards,
         allModules.departments,
         allModules.orgStructure,
       ]),
