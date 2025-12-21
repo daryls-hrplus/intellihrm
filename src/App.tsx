@@ -397,6 +397,32 @@ import AdminWorkflowTemplatesPage from "./pages/admin/AdminWorkflowTemplatesPage
 import MyApprovalsPage from "./pages/workflow/MyApprovalsPage";
 import MyDelegatesPage from "./pages/workflow/MyDelegatesPage";
 
+// Strategic Planning pages
+import StrategicPlanningHubPage from "./pages/strategic-planning/StrategicPlanningHubPage";
+import OrgDesignPage from "./pages/strategic-planning/OrgDesignPage";
+import ScenarioPlanningPage from "./pages/strategic-planning/ScenarioPlanningPage";
+
+// Reporting & Analytics pages
+import ReportingHubPage from "./pages/reporting/ReportingHubPage";
+import DashboardsPage from "./pages/reporting/DashboardsPage";
+import ReportBuilderPage from "./pages/reporting/ReportBuilderPage";
+import AIInsightsPage from "./pages/reporting/AIInsightsPage";
+import DataExportPage from "./pages/reporting/DataExportPage";
+
+// Global Compliance pages
+import GlobalComplianceHubPage from "./pages/global-compliance/GlobalComplianceHubPage";
+import MultiCountryRulesPage from "./pages/global-compliance/MultiCountryRulesPage";
+import TaxConfigurationPage from "./pages/global-compliance/TaxConfigurationPage";
+import LaborLawPage from "./pages/global-compliance/LaborLawPage";
+import StatutoryReportingPage from "./pages/global-compliance/StatutoryReportingPage";
+
+// System & Integration pages
+import SystemHubPage from "./pages/system/SystemHubPage";
+import APIManagementPage from "./pages/system/APIManagementPage";
+import SystemAuditLogsPage from "./pages/system/AuditLogsPage";
+import SecuritySettingsPage from "./pages/system/SecuritySettingsPage";
+import SystemConfigPage from "./pages/system/SystemConfigPage";
+
 // Other pages
 import ProfilePage from "./pages/profile/ProfilePage";
 import MyPermissionsPage from "./pages/profile/MyPermissionsPage";
@@ -3045,6 +3071,158 @@ const App = () => (
               element={
                 <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
                   <StaffLoanDesignDocumentPage />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Strategic Planning Routes */}
+            <Route
+              path="/strategic-planning"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
+                  <StrategicPlanningHubPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/org-design"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
+                  <OrgDesignPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/scenario-planning"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
+                  <ScenarioPlanningPage />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Reporting & Analytics Routes */}
+            <Route
+              path="/reporting"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
+                  <ReportingHubPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/dashboards"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
+                  <DashboardsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/report-builder"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
+                  <ReportBuilderPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/ai-insights"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
+                  <AIInsightsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/data-export"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
+                  <DataExportPage />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Global Compliance Routes */}
+            <Route
+              path="/global-compliance"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
+                  <GlobalComplianceHubPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/multi-country-rules"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
+                  <MultiCountryRulesPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/tax-config"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
+                  <TaxConfigurationPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/labor-law"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
+                  <LaborLawPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/statutory-reporting"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
+                  <StatutoryReportingPage />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* System & Integration Routes */}
+            <Route
+              path="/system"
+              element={
+                <ProtectedRoute requiredRoles={["admin"]}>
+                  <SystemHubPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/system/api-management"
+              element={
+                <ProtectedRoute requiredRoles={["admin"]}>
+                  <APIManagementPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/system/audit-logs"
+              element={
+                <ProtectedRoute requiredRoles={["admin"]}>
+                  <SystemAuditLogsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/system/security"
+              element={
+                <ProtectedRoute requiredRoles={["admin"]}>
+                  <SecuritySettingsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/system/config"
+              element={
+                <ProtectedRoute requiredRoles={["admin"]}>
+                  <SystemConfigPage />
                 </ProtectedRoute>
               }
             />

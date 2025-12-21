@@ -43,17 +43,34 @@ import {
   Fingerprint,
   KeyRound,
   Sparkles,
+  BarChart2,
+  Network,
+  GitBranch,
+  LayoutDashboard,
+  FileBarChart,
+  Brain,
+  Download,
+  Globe2,
+  Receipt,
+  Scale,
+  FileCheck,
+  Webhook,
+  History,
+  TrendingUp,
+  Lightbulb,
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 
 const getAdminModuleSections = (t: (key: string) => string, hasTabAccess: (module: string, tab: string) => boolean): ModuleSection[] => {
   const allModules: Record<string, GroupedModuleItem[]> = {
+    // Section 1: Organization & Structure
     organization: [
       { title: t("admin.modules.companyGroups.title"), description: t("admin.modules.companyGroups.description"), href: "/admin/company-groups", icon: Building, color: "bg-primary/10 text-primary", tabCode: "company-groups" },
       { title: t("admin.modules.companies.title"), description: t("admin.modules.companies.description"), href: "/admin/companies", icon: Building2, color: "bg-info/10 text-info", tabCode: "companies" },
       { title: t("admin.modules.territories.title"), description: t("admin.modules.territories.description"), href: "/admin/territories", icon: Globe, color: "bg-destructive/10 text-destructive", tabCode: "territories" },
       { title: "Company Tags", description: "Group companies with tags for scoped admin access", href: "/admin/company-tags", icon: Tag, color: "bg-teal-500/10 text-teal-600", tabCode: "company-tags" },
     ],
+    // Section 2: Users, Roles & Access
     usersAccess: [
       { title: t("admin.modules.users.title"), description: t("admin.modules.users.description"), href: "/admin/users", icon: Users, color: "bg-success/10 text-success", tabCode: "users" },
       { title: t("admin.modules.roles.title"), description: t("admin.modules.roles.description"), href: "/admin/roles", icon: Shield, color: "bg-warning/10 text-warning", tabCode: "roles" },
@@ -62,27 +79,51 @@ const getAdminModuleSections = (t: (key: string) => string, hasTabAccess: (modul
       { title: t("admin.modules.accessRequests.title"), description: t("admin.modules.accessRequests.description"), href: "/admin/access-requests", icon: ClipboardList, color: "bg-emerald-500/10 text-emerald-600", tabCode: "access-requests" },
       { title: t("admin.modules.autoApproval.title"), description: t("admin.modules.autoApproval.description"), href: "/admin/auto-approval", icon: Zap, color: "bg-orange-500/10 text-orange-600", tabCode: "auto-approval" },
     ],
+    // Section 3: Security & Governance
     security: [
       { title: t("admin.modules.auditLogs.title"), description: t("admin.modules.auditLogs.description"), href: "/admin/audit-logs", icon: FileText, color: "bg-secondary/10 text-secondary-foreground", tabCode: "audit-logs" },
       { title: t("admin.modules.piiAccess.title"), description: t("admin.modules.piiAccess.description"), href: "/admin/pii-access", icon: Eye, color: "bg-amber-500/10 text-amber-600", tabCode: "pii-access" },
-      { title: "AI Security Violations", description: "Monitor attempted unauthorized AI access", href: "/admin/ai-security-violations", icon: Shield, color: "bg-red-500/10 text-red-600", tabCode: "ai-security-violations" },
+      { title: "AI Security Violations", description: "Monitor attempted unauthorized AI access", href: "/admin/ai-security-violations", icon: ShieldAlert, color: "bg-red-500/10 text-red-600", tabCode: "ai-security-violations" },
       { title: "MFA Settings", description: "Configure multi-factor authentication requirements", href: "/admin/mfa-settings", icon: Fingerprint, color: "bg-red-500/10 text-red-600", tabCode: "mfa-settings" },
       { title: "SSO Settings", description: "Configure Single Sign-On providers and domain mappings", href: "/admin/sso-settings", icon: KeyRound, color: "bg-sky-500/10 text-sky-600", tabCode: "sso-settings" },
       { title: "Password Policies", description: "Configure enterprise password security requirements", href: "/admin/password-policies", icon: Lock, color: "bg-amber-500/10 text-amber-600", tabCode: "password-policies" },
     ],
+    // Section 4: System & Platform Configuration
     systemConfig: [
       { title: t("admin.modules.settings.title"), description: t("admin.modules.settings.description"), href: "/admin/settings", icon: Cog, color: "bg-slate-500/10 text-slate-600", tabCode: "settings" },
       { title: t("admin.modules.aiUsage.title"), description: t("admin.modules.aiUsage.description"), href: "/admin/ai-usage", icon: Bot, color: "bg-purple-500/10 text-purple-600", tabCode: "ai-usage" },
-      { title: "Color Scheme", description: "Customize the application's color theme with live preview", href: "/admin/color-scheme", icon: Palette, color: "bg-gradient-to-r from-pink-500/10 to-violet-500/10 text-violet-600", tabCode: "color-scheme" },
       { title: t("admin.modules.languages.title"), description: t("admin.modules.languages.description"), href: "/admin/languages", icon: Languages, color: "bg-accent/10 text-accent-foreground", tabCode: "languages" },
+      { title: "Color Scheme", description: "Customize the application's color theme with live preview", href: "/admin/color-scheme", icon: Palette, color: "bg-gradient-to-r from-pink-500/10 to-violet-500/10 text-violet-600", tabCode: "color-scheme" },
       { title: t("admin.modules.bulkImport.title"), description: t("admin.modules.bulkImport.description"), href: "/admin/bulk-import", icon: Upload, color: "bg-cyan-500/10 text-cyan-600", tabCode: "bulk-import" },
+      { title: "API Management", description: "Manage API keys, webhooks, and integrations", href: "/system/api-management", icon: Webhook, color: "bg-indigo-500/10 text-indigo-600", tabCode: "api-management" },
     ],
+    // Section 5: Strategic Planning & Analytics
+    strategicPlanning: [
+      { title: "Strategic Planning Hub", description: "Workforce planning, org design, and scenario analysis", href: "/strategic-planning", icon: TrendingUp, color: "bg-gradient-to-r from-blue-500/10 to-cyan-500/10 text-blue-600", tabCode: "strategic-planning" },
+      { title: "Workforce Planning", description: "Strategic headcount and succession planning", href: "/workforce", icon: Users, color: "bg-blue-500/10 text-blue-600", tabCode: "workforce-planning" },
+      { title: "Workforce Analytics", description: "Insights, dashboards, and predictive models", href: "/workforce-analytics", icon: BarChart2, color: "bg-cyan-500/10 text-cyan-600", tabCode: "workforce-analytics" },
+      { title: "Organization Design", description: "Org structure and restructuring scenarios", href: "/org-design", icon: Network, color: "bg-violet-500/10 text-violet-600", tabCode: "org-design" },
+      { title: "Scenario Planning", description: "What-if analysis and budget impact modeling", href: "/scenario-planning", icon: GitBranch, color: "bg-green-500/10 text-green-600", tabCode: "scenario-planning" },
+      { title: "Cross-Module Dashboards", description: "Unified analytics across all modules", href: "/dashboards", icon: LayoutDashboard, color: "bg-purple-500/10 text-purple-600", tabCode: "dashboards" },
+      { title: "Report Builder", description: "Custom report creation and scheduling", href: "/report-builder", icon: FileBarChart, color: "bg-orange-500/10 text-orange-600", tabCode: "report-builder" },
+      { title: "AI Insights", description: "AI-powered analytics and recommendations", href: "/ai-insights", icon: Brain, color: "bg-gradient-to-r from-purple-500/10 to-pink-500/10 text-purple-600", tabCode: "ai-insights" },
+    ],
+    // Section 6: Compliance & Risk
+    complianceRisk: [
+      { title: "Global Compliance Hub", description: "Multi-country payroll and labor law compliance", href: "/global-compliance", icon: Globe2, color: "bg-gradient-to-r from-teal-500/10 to-emerald-500/10 text-teal-600", tabCode: "global-compliance" },
+      { title: "Multi-Country Rules", description: "Configure country-specific compliance rules", href: "/multi-country-rules", icon: Globe, color: "bg-teal-500/10 text-teal-600", tabCode: "multi-country-rules" },
+      { title: "Tax Configuration", description: "Tax tables, deductions, and thresholds", href: "/tax-config", icon: Receipt, color: "bg-amber-500/10 text-amber-600", tabCode: "tax-config" },
+      { title: "Labor Law Compliance", description: "Leave policies, working hours, and overtime rules", href: "/labor-law", icon: Scale, color: "bg-blue-500/10 text-blue-600", tabCode: "labor-law" },
+      { title: "Statutory Reporting", description: "Report templates and filing schedules", href: "/statutory-reporting", icon: FileCheck, color: "bg-green-500/10 text-green-600", tabCode: "statutory-reporting" },
+    ],
+    // Section 7: Documentation & Enablement
     documentation: [
       { title: "Implementation Handbook", description: "Step-by-step guide for configuring all modules", href: "/admin/implementation-handbook", icon: BookOpen, color: "bg-rose-500/10 text-rose-600", tabCode: "implementation-handbook" },
-      { title: "Features Brochure", description: "Marketing summary of HRplus Cerebra capabilities", href: "/admin/features-brochure", icon: FileSpreadsheet, color: "bg-blue-500/10 text-blue-600", tabCode: "features-brochure" },
       { title: "Modules Brochure", description: "Comprehensive guide to all modules and features", href: "/admin/modules-brochure", icon: Layers, color: "bg-green-500/10 text-green-600", tabCode: "modules-brochure" },
+      { title: "Features Brochure", description: "Marketing summary of HRplus Cerebra capabilities", href: "/admin/features-brochure", icon: FileSpreadsheet, color: "bg-blue-500/10 text-blue-600", tabCode: "features-brochure" },
       { title: "Enablement Center", description: "AI-powered documentation and training content generation", href: "/enablement", icon: Sparkles, color: "bg-gradient-to-r from-purple-500/10 to-pink-500/10 text-purple-600", tabCode: "enablement" },
     ],
+    // Section 8: Billing & Subscriptions
     billing: [
       { title: "Subscriptions", description: "Manage company subscriptions and billing", href: "/admin/subscriptions", icon: CreditCard, color: "bg-emerald-500/10 text-emerald-600", tabCode: "subscriptions" },
       { title: "Upgrade Plan", description: "Add or remove modules from your subscription", href: "/subscription/upgrade", icon: ArrowUpCircle, color: "bg-gradient-to-r from-amber-500/10 to-orange-500/10 text-orange-600", tabCode: "upgrade" },
@@ -94,12 +135,14 @@ const getAdminModuleSections = (t: (key: string) => string, hasTabAccess: (modul
     items.filter(item => hasTabAccess("admin", item.tabCode || ""));
 
   return [
-    { titleKey: "Organization", items: filterByPermission(allModules.organization) },
-    { titleKey: "Users & Access", items: filterByPermission(allModules.usersAccess) },
-    { titleKey: "Security", items: filterByPermission(allModules.security) },
-    { titleKey: "System Configuration", items: filterByPermission(allModules.systemConfig) },
-    { titleKey: "Documentation", items: filterByPermission(allModules.documentation) },
-    { titleKey: "Billing", items: filterByPermission(allModules.billing) },
+    { titleKey: "Organization & Structure", items: filterByPermission(allModules.organization) },
+    { titleKey: "Users, Roles & Access", items: filterByPermission(allModules.usersAccess) },
+    { titleKey: "Security & Governance", items: filterByPermission(allModules.security) },
+    { titleKey: "System & Platform Configuration", items: filterByPermission(allModules.systemConfig) },
+    { titleKey: "Strategic Planning & Analytics", items: filterByPermission(allModules.strategicPlanning) },
+    { titleKey: "Compliance & Risk", items: filterByPermission(allModules.complianceRisk) },
+    { titleKey: "Documentation & Enablement", items: filterByPermission(allModules.documentation) },
+    { titleKey: "Billing & Subscriptions", items: filterByPermission(allModules.billing) },
   ];
 };
 
@@ -198,14 +241,14 @@ export default function AdminDashboardPage() {
         <div className="animate-fade-in">
           <div className="flex items-center gap-3 mb-2">
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-              <Settings className="h-5 w-5 text-primary" />
+              <Lightbulb className="h-5 w-5 text-primary" />
             </div>
             <div>
               <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
-                {t("admin.title")}
+                Admin & Insights
               </h1>
               <p className="text-muted-foreground">
-                {t("admin.description")}
+                Configuration, governance, analytics, and strategic planning hub
               </p>
             </div>
           </div>
