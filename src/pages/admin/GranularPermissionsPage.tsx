@@ -106,8 +106,35 @@ interface PositionType {
   company_id: string;
 }
 
-// Modules that use container-based hierarchy (admin now includes insights)
+// Modules that use container-based hierarchy (admin now includes insights and strategic planning)
 const CONTAINER_BASED_MODULES = ["admin"];
+
+// Modules that should be hidden (now containers inside other modules)
+const HIDDEN_MODULES = ["strategic_planning", "insights"];
+
+// Module display order matching main menu
+const MODULE_DISPLAY_ORDER = [
+  "dashboard",
+  "hr_hub",
+  "ess",
+  "mss",
+  "workforce",
+  "time_attendance",
+  "leave",
+  "payroll",
+  "compensation",
+  "benefits",
+  "performance",
+  "training",
+  "succession",
+  "recruitment",
+  "health_safety",
+  "employee_relations",
+  "company_property",
+  "help_center",
+  "enablement",
+  "admin",
+];
 
 const breadcrumbItems = [
   { label: "Admin", href: "/admin" },
@@ -713,13 +740,23 @@ export default function GranularPermissionsPage() {
 
                 <ScrollArea className="h-[600px]">
                   <Accordion type="multiple" className="w-full">
-                    {Object.values(groupedPermissions).map((group) => {
-                      if (group.isContainerBased && group.containers.length > 0) {
-                        return renderContainerBasedModule(group);
-                      } else {
-                        return renderRegularModule(group);
-                      }
-                    })}
+                    {Object.values(groupedPermissions)
+                      .filter((group) => !HIDDEN_MODULES.includes(group.module_code))
+                      .sort((a, b) => {
+                        const aIndex = MODULE_DISPLAY_ORDER.indexOf(a.module_code);
+                        const bIndex = MODULE_DISPLAY_ORDER.indexOf(b.module_code);
+                        // If not in order list, put at end
+                        const aOrder = aIndex === -1 ? 999 : aIndex;
+                        const bOrder = bIndex === -1 ? 999 : bIndex;
+                        return aOrder - bOrder;
+                      })
+                      .map((group) => {
+                        if (group.isContainerBased && group.containers.length > 0) {
+                          return renderContainerBasedModule(group);
+                        } else {
+                          return renderRegularModule(group);
+                        }
+                      })}
                   </Accordion>
                 </ScrollArea>
               </div>
