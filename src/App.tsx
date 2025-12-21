@@ -385,6 +385,7 @@ import CompanyDocumentsPage from "./pages/admin/CompanyDocumentsPage";
 import HRHubDashboardPage from "./pages/hr-hub/HRHubDashboardPage";
 import HRCalendarPage from "./pages/hr-hub/HRCalendarPage";
 import HRTasksPage from "./pages/hr-hub/HRTasksPage";
+import ESSChangeRequestsPage from "./pages/hr/ESSChangeRequestsPage";
 import HRMilestonesPage from "./pages/hr-hub/HRMilestonesPage";
 import ComplianceTrackerPage from "./pages/hr-hub/ComplianceTrackerPage";
 import HRRemindersPage from "./pages/hr-hub/HRRemindersPage";
@@ -3038,6 +3039,14 @@ const App = () => (
               element={
                 <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
                   <HRHubDashboardPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/hr-hub/ess-change-requests"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
+                  <ESSChangeRequestsPage />
                 </ProtectedRoute>
               }
             />

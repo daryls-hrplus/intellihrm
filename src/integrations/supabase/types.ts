@@ -6555,6 +6555,94 @@ export type Database = {
           },
         ]
       }
+      employee_data_change_requests: {
+        Row: {
+          applied_at: string | null
+          change_action: string
+          company_id: string | null
+          created_at: string
+          current_values: Json | null
+          employee_id: string
+          entity_id: string | null
+          entity_table: string
+          id: string
+          new_values: Json
+          request_type: string
+          requested_at: string
+          requested_by: string
+          review_notes: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          updated_at: string
+          workflow_instance_id: string | null
+        }
+        Insert: {
+          applied_at?: string | null
+          change_action?: string
+          company_id?: string | null
+          created_at?: string
+          current_values?: Json | null
+          employee_id: string
+          entity_id?: string | null
+          entity_table: string
+          id?: string
+          new_values: Json
+          request_type: string
+          requested_at?: string
+          requested_by: string
+          review_notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          updated_at?: string
+          workflow_instance_id?: string | null
+        }
+        Update: {
+          applied_at?: string | null
+          change_action?: string
+          company_id?: string | null
+          created_at?: string
+          current_values?: Json | null
+          employee_id?: string
+          entity_id?: string | null
+          entity_table?: string
+          id?: string
+          new_values?: Json
+          request_type?: string
+          requested_at?: string
+          requested_by?: string
+          review_notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          updated_at?: string
+          workflow_instance_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "employee_data_change_requests_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_data_change_requests_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_data_change_requests_workflow_instance_id_fkey"
+            columns: ["workflow_instance_id"]
+            isOneToOne: false
+            referencedRelation: "workflow_instances"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       employee_deductions: {
         Row: {
           amount: number | null
