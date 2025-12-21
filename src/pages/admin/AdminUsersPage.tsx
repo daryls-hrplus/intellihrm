@@ -299,15 +299,25 @@ export default function AdminUsersPage() {
   };
 
   const invokeManageUser = async (body: Record<string, unknown>) => {
-    const { data: session } = await supabase.auth.getSession();
-    const { data, error } = await supabase.functions.invoke("manage-user", {
-      body,
-      headers: {
-        Authorization: `Bearer ${session?.session?.access_token}`,
-      },
-    });
-    if (error) throw error;
-    if (data?.error) throw new Error(data.error);
+    // Let the SDK attach the freshest access token automatically.
+    // Passing a manually-captured token can cause 401s when auto-refresh rotates sessions.
+    const { data, error } = await supabase.functions.invoke("manage-user", { body });
+
+    if (error) {
+      const msg = (error as unknown as { message?: string })?.message || "Unauthorized";
+      if (/unauthorized/i.test(msg)) {
+        toast({
+          title: "Session expired",
+          description: "Please sign in again to continue.",
+          variant: "destructive",
+        });
+        await supabase.auth.signOut();
+        window.location.assign("/auth");
+      }
+      throw error;
+    }
+
+    if ((data as { error?: string } | null)?.error) throw new Error((data as { error: string }).error);
     return data;
   };
 
