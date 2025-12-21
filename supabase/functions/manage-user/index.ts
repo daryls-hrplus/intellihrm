@@ -68,9 +68,12 @@ serve(async (req) => {
     const { data: { user: requestingUser }, error: authError } = await supabase.auth.getUser(token);
     
     if (authError || !requestingUser) {
-      console.error("Auth error:", authError);
+      console.error("Auth error:", authError?.message, authError?.status);
+      const errorMessage = authError?.message?.includes("session") || authError?.message?.includes("expired") 
+        ? "Session expired - please log out and log back in"
+        : "Unauthorized - please log in again";
       return new Response(
-        JSON.stringify({ error: "Unauthorized" }),
+        JSON.stringify({ error: errorMessage, code: "SESSION_EXPIRED" }),
         { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
