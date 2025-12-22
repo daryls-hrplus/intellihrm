@@ -56,14 +56,15 @@ export function KeyPositionsTab({ companyId }: KeyPositionsTabProps) {
   } = useSuccession(companyId);
 
   const [keyPositions, setKeyPositions] = useState<KeyPosition[]>([]);
-  const [availablePositions, setAvailablePositions] = useState<{ id: string; title: string; code: string; matchingJobId: string; current_holder?: { id: string; full_name: string } | null }[]>([]);
-  const [keyJobs, setKeyJobs] = useState<{ id: string; name: string; code: string; job_family_id: string | null }[]>([]);
+  const [availablePositions, setAvailablePositions] = useState<{ id: string; title: string; code: string; current_holder?: { id: string; full_name: string } | null }[]>([]);
+  const [keyJobs, setKeyJobs] = useState<{ id: string; name: string; code: string }[]>([]);
   const [loadingAvailable, setLoadingAvailable] = useState(false);
   const [loadingKeyPositions, setLoadingKeyPositions] = useState(true);
   const [employees, setEmployees] = useState<{ id: string; full_name: string }[]>([]);
   const [showDialog, setShowDialog] = useState(false);
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [selectedPositionId, setSelectedPositionId] = useState<string>('');
+  const [selectedJobId, setSelectedJobId] = useState<string>('');
   const [searchTerm, setSearchTerm] = useState('');
   const [editingPosition, setEditingPosition] = useState<KeyPosition | null>(null);
   const [formData, setFormData] = useState({
@@ -158,7 +159,7 @@ export function KeyPositionsTab({ companyId }: KeyPositionsTabProps) {
     // Get all jobs that are marked as key positions
     const { data: keyJobsData } = await supabase
       .from('jobs')
-      .select('id, name, code, job_family_id')
+      .select('id, name, code')
       .eq('company_id', companyId)
       .eq('is_key_position', true)
       .eq('is_active', true);
@@ -171,37 +172,17 @@ export function KeyPositionsTab({ companyId }: KeyPositionsTabProps) {
       return;
     }
     
-    // Get job_family_ids from key jobs
-    const keyJobFamilyIds = keyJobsData
-      .filter(j => j.job_family_id)
-      .map(j => j.job_family_id as string);
-    
-    if (keyJobFamilyIds.length === 0) {
-      setAvailablePositions([]);
-      setLoadingAvailable(false);
-      return;
-    }
-    
-    // Get positions that match key job families but don't have job_id set yet
+    // Get positions that don't have a job_id yet (available to be linked to key jobs)
     const { data: positionsData } = await supabase
       .from('positions')
-      .select('id, title, code, job_family_id, department_id, departments!inner(company_id)')
-      .in('job_family_id', keyJobFamilyIds)
+      .select('id, title, code, department_id, departments!inner(company_id)')
       .is('job_id', null)
       .is('end_date', null)
       .eq('departments.company_id', companyId)
       .order('title');
     
     if (positionsData) {
-      // Create a map of job_family_id to key job id for matching
-      const familyToJobMap = new Map<string, string>();
-      keyJobsData.forEach(job => {
-        if (job.job_family_id) {
-          familyToJobMap.set(job.job_family_id, job.id);
-        }
-      });
-      
-      const positions: { id: string; title: string; code: string; matchingJobId: string; current_holder?: { id: string; full_name: string } | null }[] = [];
+      const positions: { id: string; title: string; code: string; current_holder?: { id: string; full_name: string } | null }[] = [];
       for (const pos of positionsData) {
         const { data: holder } = await supabase
           .from('employee_positions')
@@ -212,16 +193,12 @@ export function KeyPositionsTab({ companyId }: KeyPositionsTabProps) {
           .limit(1)
           .maybeSingle();
         
-        const matchingJobId = pos.job_family_id ? familyToJobMap.get(pos.job_family_id) : undefined;
-        if (matchingJobId) {
-          positions.push({
-            id: pos.id,
-            title: pos.title,
-            code: pos.code,
-            matchingJobId,
-            current_holder: holder?.profiles || null,
-          });
-        }
+        positions.push({
+          id: pos.id,
+          title: pos.title,
+          code: pos.code,
+          current_holder: holder?.profiles || null,
+        });
       }
       setAvailablePositions(positions);
     }
@@ -310,19 +287,18 @@ export function KeyPositionsTab({ companyId }: KeyPositionsTabProps) {
   const openAddDialog = () => {
     setSearchTerm('');
     setSelectedPositionId('');
+    // Auto-select first key job (or only key job)
+    setSelectedJobId(keyJobs.length > 0 ? keyJobs[0].id : '');
     setShowAddDialog(true);
   };
 
   const handleAddKeyPosition = async () => {
-    if (!selectedPositionId) return;
+    if (!selectedPositionId || !selectedJobId) return;
     
-    const position = availablePositions.find(p => p.id === selectedPositionId);
-    if (!position) return;
-    
-    // Link the position to its matching key job based on job_family_id
+    // Link the position to the selected key job via job_id
     const { error } = await (supabase
       .from('positions') as any)
-      .update({ job_id: position.matchingJobId })
+      .update({ job_id: selectedJobId })
       .eq('id', selectedPositionId);
 
     if (error) {
@@ -330,9 +306,10 @@ export function KeyPositionsTab({ companyId }: KeyPositionsTabProps) {
       return;
     }
 
-    const job = keyJobs.find(j => j.id === position.matchingJobId);
+    const position = availablePositions.find(p => p.id === selectedPositionId);
+    const job = keyJobs.find(j => j.id === selectedJobId);
     
-    toast.success(`${position.title} added as key position`);
+    toast.success(`${position?.title} linked to ${job?.name}`);
     setShowAddDialog(false);
     loadData();
   };
@@ -674,8 +651,27 @@ export function KeyPositionsTab({ companyId }: KeyPositionsTabProps) {
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
+            {/* Only show key job selector when there are multiple key jobs */}
+            {keyJobs.length > 1 && (
+              <div className="space-y-2">
+                <Label>Link to Key Job</Label>
+                <Select value={selectedJobId} onValueChange={setSelectedJobId}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a key job" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {keyJobs.map((job) => (
+                      <SelectItem key={job.id} value={job.id}>
+                        {job.name} ({job.code})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+
             <div className="space-y-2">
-              <Label>Search Key Positions</Label>
+              <Label>Search Positions</Label>
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
@@ -687,7 +683,7 @@ export function KeyPositionsTab({ companyId }: KeyPositionsTabProps) {
               </div>
               {availablePositions.length > 0 && (
                 <p className="text-xs text-muted-foreground">
-                  Showing {filteredAvailablePositions.length} of {availablePositions.length} positions matching key jobs
+                  Showing {filteredAvailablePositions.length} of {availablePositions.length} available positions
                 </p>
               )}
             </div>
@@ -706,8 +702,8 @@ export function KeyPositionsTab({ companyId }: KeyPositionsTabProps) {
               ) : availablePositions.length === 0 ? (
                 <div className="p-8 text-center text-muted-foreground">
                   <Shield className="h-10 w-10 mx-auto mb-3 opacity-50" />
-                  <p>No positions available</p>
-                  <p className="text-sm">All positions matching key jobs are already added</p>
+                  <p>No unlinked positions available</p>
+                  <p className="text-sm">All positions are already linked to jobs</p>
                 </div>
               ) : filteredAvailablePositions.length === 0 ? (
                 <div className="p-8 text-center text-muted-foreground">
