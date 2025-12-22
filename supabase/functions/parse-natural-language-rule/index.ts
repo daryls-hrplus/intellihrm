@@ -82,6 +82,7 @@ Parse the user's request and extract:
 3. Who should receive the reminder (employee, manager, HR, or combinations)
 4. Priority level (critical, high, medium, low)
 5. Notification method preference (in_app, email, or both)
+6. Generate a professional, friendly message template appropriate for the event type and urgency
 
 Common patterns to recognize:
 - "2 weeks before" = 14 days
@@ -92,6 +93,13 @@ Common patterns to recognize:
 - "send to employee" = sendToEmployee: true
 - "urgent" or "critical" = priority: critical
 - "important" = priority: high
+
+Message Template Guidelines:
+- ALWAYS generate a professional, contextual message template
+- Use placeholders: {employee_name}, {event_date}, {days_until}, {event_type}, {manager_name}, {department}
+- Match tone to priority (critical = urgent action needed, low = friendly reminder)
+- Include clear call-to-action
+- Example for visa expiry: "Dear {employee_name}, This is a reminder that your visa will expire on {event_date} ({days_until} days from now). Please initiate the renewal process immediately to avoid any work authorization issues. Contact HR if you need assistance."
 
 If you can't confidently parse the request, set confidence < 0.7 and provide clarificationNeeded.`
           },
