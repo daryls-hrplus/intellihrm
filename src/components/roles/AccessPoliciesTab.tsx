@@ -110,12 +110,12 @@ export function AccessPoliciesTab() {
         </CardContent>
       </Card>
 
-      {/* Admin & Insights Policies */}
+      {/* Admin & Security Policies */}
       <Card>
         <CardHeader>
           <div className="flex items-center gap-2">
             <Shield className="h-5 w-5 text-blue-500" />
-            <CardTitle className="text-lg">Admin & Insights Policies</CardTitle>
+            <CardTitle className="text-lg">Admin & Security Policies</CardTitle>
           </div>
           <CardDescription>
             Configure access rules for administrative containers

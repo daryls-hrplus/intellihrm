@@ -55,7 +55,7 @@ const metrics = [
 
 export default function OperationalInsightsPage() {
   const breadcrumbItems = [
-    { label: "Admin & Insights", href: "/admin" },
+    { label: "Admin & Security", href: "/admin" },
     { label: "Operational Insights" },
   ];
 

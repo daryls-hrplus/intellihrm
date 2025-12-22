@@ -175,7 +175,7 @@ export function PermissionTemplatesTab() {
 
                     {/* Admin Container Permissions */}
                     <div>
-                      <h4 className="text-sm font-medium mb-2">Admin & Insights Access</h4>
+                      <h4 className="text-sm font-medium mb-2">Admin & Security Access</h4>
                       <div className="grid gap-2 sm:grid-cols-2">
                         {ADMIN_CONTAINERS.map((container) => {
                           const access = role.container_access?.find(

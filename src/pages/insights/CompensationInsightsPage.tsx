@@ -54,7 +54,7 @@ const metrics = [
 
 export default function CompensationInsightsPage() {
   const breadcrumbItems = [
-    { label: "Admin & Insights", href: "/admin" },
+    { label: "Admin & Security", href: "/admin" },
     { label: "Compensation Insights" },
   ];
 

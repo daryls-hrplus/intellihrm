@@ -54,7 +54,7 @@ const metrics = [
 
 export default function TalentInsightsPage() {
   const breadcrumbItems = [
-    { label: "Admin & Insights", href: "/admin" },
+    { label: "Admin & Security", href: "/admin" },
     { label: "Talent Insights" },
   ];
 
