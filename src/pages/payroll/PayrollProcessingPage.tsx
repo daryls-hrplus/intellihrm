@@ -879,8 +879,12 @@ export default function PayrollProcessingPage() {
                           <title>Payslip - ${selectedEmployee.employee?.full_name}</title>
                           <style>
                             * { box-sizing: border-box; margin: 0; padding: 0; }
-                            body { font-family: 'Segoe UI', Arial, sans-serif; padding: 20px; max-width: 800px; margin: 0 auto; background: white; color: #333; }
+                            body { font-family: 'Segoe UI', Arial, sans-serif; padding: 40px 20px 20px 20px; max-width: 800px; margin: 0 auto; background: white; color: #333; }
                             #payslip-document { padding: 24px; }
+                            @media print {
+                              body { padding: 0; margin: 0; }
+                              @page { margin: 20mm 15mm 15mm 15mm; }
+                            }
                             .bg-white { background: white; }
                             .bg-muted\\/50, .bg-muted\\/30 { background: #f8fafc; }
                             .bg-muted { background: #f1f5f9; }
