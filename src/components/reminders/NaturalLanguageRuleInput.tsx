@@ -395,11 +395,23 @@ export function NaturalLanguageRuleInput({ companyId, onRuleCreated }: NaturalLa
                       key={placeholder.key}
                       type="button"
                       onClick={() => {
-                        const currentTemplate = editedRule.messageTemplate || '';
-                        setEditedRule({ 
-                          ...editedRule, 
-                          messageTemplate: currentTemplate + placeholder.key 
-                        });
+                        const textarea = document.getElementById('nl-message-template-textarea') as HTMLTextAreaElement;
+                        if (textarea) {
+                          const start = textarea.selectionStart;
+                          const end = textarea.selectionEnd;
+                          const currentValue = editedRule.messageTemplate || '';
+                          const newValue = currentValue.substring(0, start) + placeholder.key + currentValue.substring(end);
+                          setEditedRule({ ...editedRule, messageTemplate: newValue });
+                          setTimeout(() => {
+                            textarea.focus();
+                            textarea.setSelectionRange(start + placeholder.key.length, start + placeholder.key.length);
+                          }, 0);
+                        } else {
+                          setEditedRule({ 
+                            ...editedRule, 
+                            messageTemplate: (editedRule.messageTemplate || '') + placeholder.key 
+                          });
+                        }
                       }}
                       className="text-xs px-2 py-0.5 rounded bg-primary/10 hover:bg-primary/20 text-primary border border-primary/20 transition-colors"
                     >
@@ -408,6 +420,7 @@ export function NaturalLanguageRuleInput({ companyId, onRuleCreated }: NaturalLa
                   ))}
                 </div>
                 <Textarea
+                  id="nl-message-template-textarea"
                   value={editedRule.messageTemplate || ''}
                   onChange={(e) => setEditedRule({ ...editedRule, messageTemplate: e.target.value })}
                   placeholder="AI will generate a message template, or write your own..."

@@ -414,10 +414,24 @@ export const ReminderRulesManager = forwardRef<ReminderRulesManagerRef, Reminder
                       key={placeholder.key}
                       type="button"
                       onClick={() => {
-                        setFormData({ 
-                          ...formData, 
-                          message_template: (formData.message_template || '') + placeholder.key 
-                        });
+                        const textarea = document.getElementById('message-template-textarea') as HTMLTextAreaElement;
+                        if (textarea) {
+                          const start = textarea.selectionStart;
+                          const end = textarea.selectionEnd;
+                          const currentValue = formData.message_template || '';
+                          const newValue = currentValue.substring(0, start) + placeholder.key + currentValue.substring(end);
+                          setFormData({ ...formData, message_template: newValue });
+                          // Restore cursor position after the inserted placeholder
+                          setTimeout(() => {
+                            textarea.focus();
+                            textarea.setSelectionRange(start + placeholder.key.length, start + placeholder.key.length);
+                          }, 0);
+                        } else {
+                          setFormData({ 
+                            ...formData, 
+                            message_template: (formData.message_template || '') + placeholder.key 
+                          });
+                        }
                       }}
                       className="text-xs px-2 py-0.5 rounded bg-primary/10 hover:bg-primary/20 text-primary border border-primary/20 transition-colors"
                     >
@@ -426,6 +440,7 @@ export const ReminderRulesManager = forwardRef<ReminderRulesManagerRef, Reminder
                   ))}
                 </div>
                 <Textarea
+                  id="message-template-textarea"
                   value={formData.message_template}
                   onChange={(e) => setFormData({ ...formData, message_template: e.target.value })}
                   placeholder="Custom message template..."
