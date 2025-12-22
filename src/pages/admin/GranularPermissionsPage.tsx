@@ -37,6 +37,7 @@ import {
   FolderTree,
   Briefcase,
   Container,
+  Wallet,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -106,6 +107,14 @@ interface PositionType {
   company_id: string;
 }
 
+interface PayGroup {
+  id: string;
+  name: string;
+  code: string;
+  pay_frequency: string;
+  company_id: string;
+}
+
 // Modules that use container-based hierarchy (admin now includes insights and strategic planning)
 const CONTAINER_BASED_MODULES = ["admin"];
 
@@ -156,12 +165,14 @@ export default function GranularPermissionsPage() {
   const [departments, setDepartments] = useState<Department[]>([]);
   const [sections, setSections] = useState<Section[]>([]);
   const [positionTypes, setPositionTypes] = useState<PositionType[]>([]);
+  const [payGroups, setPayGroups] = useState<PayGroup[]>([]);
   const [roleCompanyAccess, setRoleCompanyAccess] = useState<string[]>([]);
   const [roleTagAccess, setRoleTagAccess] = useState<string[]>([]);
   const [roleDivisionAccess, setRoleDivisionAccess] = useState<string[]>([]);
   const [roleDepartmentAccess, setRoleDepartmentAccess] = useState<string[]>([]);
   const [roleSectionAccess, setRoleSectionAccess] = useState<string[]>([]);
   const [rolePositionTypeExclusions, setRolePositionTypeExclusions] = useState<string[]>([]);
+  const [rolePayGroupAccess, setRolePayGroupAccess] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
@@ -180,7 +191,7 @@ export default function GranularPermissionsPage() {
 
   const fetchInitialData = async () => {
     try {
-      const [rolesRes, permissionsRes, companiesRes, tagsRes, divisionsRes, departmentsRes, sectionsRes, positionTypesRes] = await Promise.all([
+      const [rolesRes, permissionsRes, companiesRes, tagsRes, divisionsRes, departmentsRes, sectionsRes, positionTypesRes, payGroupsRes] = await Promise.all([
         supabase.from("roles").select("id, name, code, is_system").order("name"),
         supabase.from("module_permissions").select("*").eq("is_active", true).order("display_order"),
         supabase.from("companies").select("id, name").eq("is_active", true).order("name"),
@@ -189,6 +200,7 @@ export default function GranularPermissionsPage() {
         supabase.from("departments").select("id, name, company_id").eq("is_active", true).order("name"),
         supabase.from("sections").select("id, name, department_id").eq("is_active", true).order("name"),
         supabase.from("position_types").select("id, name, code, company_id").eq("is_active", true).order("name"),
+        supabase.from("pay_groups").select("id, name, code, pay_frequency, company_id").eq("is_active", true).order("name"),
       ]);
 
       if (rolesRes.error) throw rolesRes.error;
@@ -202,6 +214,7 @@ export default function GranularPermissionsPage() {
       setDepartments(departmentsRes.data || []);
       setSections(sectionsRes.data || []);
       setPositionTypes(positionTypesRes.data || []);
+      setPayGroups(payGroupsRes.data || []);
 
       // Use role from URL if provided, otherwise first role
       if (roleIdFromUrl && rolesRes.data?.find(r => r.id === roleIdFromUrl)) {
@@ -242,13 +255,14 @@ export default function GranularPermissionsPage() {
 
   const fetchRoleAccess = async (roleId: string) => {
     try {
-      const [companyRes, tagRes, divisionRes, departmentRes, sectionRes, positionTypeExclusionsRes] = await Promise.all([
+      const [companyRes, tagRes, divisionRes, departmentRes, sectionRes, positionTypeExclusionsRes, payGroupRes] = await Promise.all([
         supabase.from("role_company_access").select("company_id").eq("role_id", roleId),
         supabase.from("role_tag_access").select("tag_id").eq("role_id", roleId),
         supabase.from("role_division_access").select("division_id").eq("role_id", roleId),
         supabase.from("role_department_access").select("department_id").eq("role_id", roleId),
         supabase.from("role_section_access").select("section_id").eq("role_id", roleId),
         supabase.from("role_position_type_exclusions").select("position_type_id").eq("role_id", roleId),
+        supabase.from("role_pay_group_access").select("pay_group_id").eq("role_id", roleId),
       ]);
 
       setRoleCompanyAccess((companyRes.data || []).map((c) => c.company_id));
@@ -257,6 +271,7 @@ export default function GranularPermissionsPage() {
       setRoleDepartmentAccess((departmentRes.data || []).map((d) => d.department_id));
       setRoleSectionAccess((sectionRes.data || []).map((s) => s.section_id));
       setRolePositionTypeExclusions((positionTypeExclusionsRes.data || []).map((p) => p.position_type_id));
+      setRolePayGroupAccess((payGroupRes.data || []).map((p) => p.pay_group_id));
     } catch (error) {
       console.error("Error fetching role access:", error);
     }
@@ -355,6 +370,15 @@ export default function GranularPermissionsPage() {
     );
   };
 
+  const togglePayGroupAccess = (payGroupId: string) => {
+    setHasChanges(true);
+    setRolePayGroupAccess((prev) =>
+      prev.includes(payGroupId)
+        ? prev.filter((id) => id !== payGroupId)
+        : [...prev, payGroupId]
+    );
+  };
+
   const savePermissions = async () => {
     if (!selectedRoleId) return;
 
@@ -430,6 +454,15 @@ export default function GranularPermissionsPage() {
           .from("role_position_type_exclusions")
           .insert(rolePositionTypeExclusions.map((positionTypeId) => ({ role_id: selectedRoleId, position_type_id: positionTypeId })));
         if (positionTypeError) throw positionTypeError;
+      }
+
+      // Save pay group access - delete existing and insert new
+      await supabase.from("role_pay_group_access").delete().eq("role_id", selectedRoleId);
+      if (rolePayGroupAccess.length > 0) {
+        const { error: payGroupError } = await supabase
+          .from("role_pay_group_access")
+          .insert(rolePayGroupAccess.map((payGroupId) => ({ role_id: selectedRoleId, pay_group_id: payGroupId })));
+        if (payGroupError) throw payGroupError;
       }
 
       toast({ title: "Permissions saved successfully" });
@@ -726,6 +759,7 @@ export default function GranularPermissionsPage() {
               <TabsTrigger value="permissions">Module Permissions</TabsTrigger>
               <TabsTrigger value="company_access">Company Access</TabsTrigger>
               <TabsTrigger value="org_access">Organization Access</TabsTrigger>
+              <TabsTrigger value="pay_group_access">Pay Group Access</TabsTrigger>
               <TabsTrigger value="position_type_restrictions">Position Type Restrictions</TabsTrigger>
             </TabsList>
 
@@ -989,6 +1023,61 @@ export default function GranularPermissionsPage() {
                   </CardContent>
                 </Card>
               </div>
+            </TabsContent>
+
+            <TabsContent value="pay_group_access" className="space-y-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Wallet className="h-5 w-5" />
+                    Pay Group Access
+                  </CardTitle>
+                  <CardDescription>
+                    By default, this role has access to all pay groups. Check pay groups below to <strong>restrict</strong> access to only the selected pay groups. This affects payroll processing and reporting visibility.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <ScrollArea className="h-[400px]">
+                    <div className="grid gap-2 md:grid-cols-2 lg:grid-cols-3">
+                      {payGroups.map((payGroup) => {
+                        const company = companies.find((c) => c.id === payGroup.company_id);
+                        return (
+                          <div
+                            key={payGroup.id}
+                            className={cn(
+                              "flex items-center space-x-3 rounded-lg border p-3 hover:bg-muted/50",
+                              rolePayGroupAccess.includes(payGroup.id) && "border-primary/50 bg-primary/5"
+                            )}
+                          >
+                            <Checkbox
+                              id={`paygroup-${payGroup.id}`}
+                              checked={rolePayGroupAccess.includes(payGroup.id)}
+                              onCheckedChange={() => togglePayGroupAccess(payGroup.id)}
+                            />
+                            <label
+                              htmlFor={`paygroup-${payGroup.id}`}
+                              className="flex-1 cursor-pointer"
+                            >
+                              <div className="text-sm font-medium">{payGroup.name}</div>
+                              <div className="text-xs text-muted-foreground">
+                                {company?.name} • {payGroup.pay_frequency}
+                              </div>
+                            </label>
+                            <code className="text-xs text-muted-foreground">
+                              {payGroup.code}
+                            </code>
+                          </div>
+                        );
+                      })}
+                      {payGroups.length === 0 && (
+                        <p className="col-span-full text-center text-muted-foreground py-4">
+                          No pay groups found
+                        </p>
+                      )}
+                    </div>
+                  </ScrollArea>
+                </CardContent>
+              </Card>
             </TabsContent>
 
             <TabsContent value="position_type_restrictions" className="space-y-4">
