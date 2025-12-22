@@ -9,10 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
-import { AlertTriangle, Shield, Clock, Plane, Edit, Loader2, Key, Plus, Search, Users, Trash2, Check, ChevronsUpDown } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { AlertTriangle, Shield, Clock, Plane, Edit, Loader2, Key, Plus, Search, Users, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { KeyPositionRisk, useSuccession } from '@/hooks/useSuccession';
 import { supabase } from '@/integrations/supabase/client';
@@ -68,7 +65,7 @@ export function KeyPositionsTab({ companyId }: KeyPositionsTabProps) {
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [selectedPositionId, setSelectedPositionId] = useState<string>('');
   const [selectedJobId, setSelectedJobId] = useState<string>('');
-  const [positionComboOpen, setPositionComboOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
   const [editingPosition, setEditingPosition] = useState<KeyPosition | null>(null);
   const [formData, setFormData] = useState({
     position_id: '',
@@ -288,9 +285,9 @@ export function KeyPositionsTab({ companyId }: KeyPositionsTabProps) {
   };
 
   const openAddDialog = () => {
+    setSearchTerm('');
     setSelectedPositionId('');
     setSelectedJobId(keyJobs.length > 0 ? keyJobs[0].id : '');
-    setPositionComboOpen(false);
     setShowAddDialog(true);
   };
 
@@ -316,8 +313,12 @@ export function KeyPositionsTab({ companyId }: KeyPositionsTabProps) {
     loadData();
   };
 
-  // Get selected position details for display
-  const selectedPosition = availablePositions.find(p => p.id === selectedPositionId);
+  // Filter available positions based on search term
+  const filteredAvailablePositions = availablePositions.filter(pos => 
+    pos.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    pos.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (pos.current_holder?.full_name || 'vacant').toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   // Stats
   const positionsWithRisk = keyPositions.filter(p => p.riskAssessment);
@@ -670,84 +671,87 @@ export function KeyPositionsTab({ companyId }: KeyPositionsTabProps) {
             </div>
 
             <div className="space-y-2">
-              <Label>Select Position</Label>
+              <Label>Search Positions</Label>
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Type to filter by position title, code, or incumbent..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-9"
+                />
+              </div>
+              {availablePositions.length > 0 && (
+                <p className="text-xs text-muted-foreground">
+                  Showing {filteredAvailablePositions.length} of {availablePositions.length} positions
+                </p>
+              )}
+            </div>
+
+            <div className="border rounded-lg max-h-[300px] overflow-y-auto">
               {loadingAvailable ? (
-                <div className="flex items-center justify-center py-4">
-                  <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                <div className="flex items-center justify-center py-12">
+                  <Loader2 className="h-8 w-8 animate-spin text-primary" />
                 </div>
               ) : keyJobs.length === 0 ? (
-                <div className="p-4 text-center text-muted-foreground border rounded-lg">
-                  <Shield className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                  <p className="text-sm">No key jobs defined</p>
-                  <p className="text-xs">Mark jobs as "Key Position" in Workforce &gt; Jobs first</p>
+                <div className="p-8 text-center text-muted-foreground">
+                  <Shield className="h-10 w-10 mx-auto mb-3 opacity-50" />
+                  <p>No key jobs defined</p>
+                  <p className="text-sm">Mark jobs as "Key Position" in Workforce &gt; Jobs first</p>
                 </div>
               ) : availablePositions.length === 0 ? (
-                <div className="p-4 text-center text-muted-foreground border rounded-lg">
-                  <Shield className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                  <p className="text-sm">No unlinked positions available</p>
-                  <p className="text-xs">All positions are already linked to jobs</p>
+                <div className="p-8 text-center text-muted-foreground">
+                  <Shield className="h-10 w-10 mx-auto mb-3 opacity-50" />
+                  <p>No unlinked positions available</p>
+                  <p className="text-sm">All positions are already linked to jobs</p>
+                </div>
+              ) : filteredAvailablePositions.length === 0 ? (
+                <div className="p-8 text-center text-muted-foreground">
+                  <Users className="h-10 w-10 mx-auto mb-3 opacity-50" />
+                  <p>No positions match "{searchTerm}"</p>
+                  <p className="text-sm">Try a different search term</p>
                 </div>
               ) : (
-                <Popover open={positionComboOpen} onOpenChange={setPositionComboOpen}>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      role="combobox"
-                      aria-expanded={positionComboOpen}
-                      className="w-full justify-between h-auto min-h-10"
-                    >
-                      {selectedPosition ? (
-                        <div className="flex flex-col items-start text-left">
-                          <span className="font-medium">{selectedPosition.title}</span>
-                          <span className="text-xs text-muted-foreground">
-                            {selectedPosition.code} • {selectedPosition.current_holder?.full_name || 'Vacant'}
-                          </span>
-                        </div>
-                      ) : (
-                        <span className="text-muted-foreground">Search and select a position...</span>
-                      )}
-                      <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-[500px] p-0" align="start">
-                    <Command>
-                      <CommandInput placeholder="Type to search positions..." />
-                      <CommandList className="max-h-[300px]">
-                        <CommandEmpty>No positions found.</CommandEmpty>
-                        <CommandGroup>
-                          {availablePositions.map((pos) => (
-                            <CommandItem
-                              key={pos.id}
-                              value={`${pos.title} ${pos.code} ${pos.current_holder?.full_name || 'vacant'}`}
-                              onSelect={() => {
-                                setSelectedPositionId(pos.id);
-                                setPositionComboOpen(false);
-                              }}
-                              className="cursor-pointer"
-                            >
-                              <Check
-                                className={cn(
-                                  "mr-2 h-4 w-4",
-                                  selectedPositionId === pos.id ? "opacity-100" : "opacity-0"
-                                )}
-                              />
-                              <div className="flex flex-col">
-                                <span className="font-medium">{pos.title}</span>
-                                <span className="text-xs text-muted-foreground">
-                                  {pos.code} • {pos.current_holder?.full_name || <span className="text-amber-600">Vacant</span>}
-                                </span>
-                              </div>
-                            </CommandItem>
-                          ))}
-                        </CommandGroup>
-                      </CommandList>
-                    </Command>
-                  </PopoverContent>
-                </Popover>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="w-8"></TableHead>
+                      <TableHead>Position</TableHead>
+                      <TableHead>Incumbent</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredAvailablePositions.map((pos) => (
+                      <TableRow 
+                        key={pos.id} 
+                        className={`cursor-pointer hover:bg-muted/50 ${selectedPositionId === pos.id ? 'bg-primary/10' : ''}`}
+                        onClick={() => setSelectedPositionId(pos.id)}
+                      >
+                        <TableCell>
+                          <input 
+                            type="radio" 
+                            name="position" 
+                            checked={selectedPositionId === pos.id}
+                            onChange={() => setSelectedPositionId(pos.id)}
+                            className="h-4 w-4 accent-primary"
+                          />
+                        </TableCell>
+                        <TableCell>
+                          <div>
+                            <div className="font-medium">{pos.title}</div>
+                            <div className="text-sm text-muted-foreground">{pos.code}</div>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          {pos.current_holder?.full_name || (
+                            <span className="text-amber-600 italic">Vacant</span>
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
               )}
-              <p className="text-xs text-muted-foreground">
-                {availablePositions.length} positions available to link
-              </p>
             </div>
 
             <div className="flex justify-end gap-2">
