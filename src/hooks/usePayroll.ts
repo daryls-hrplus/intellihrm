@@ -694,6 +694,18 @@ export function usePayroll() {
         .select('*')
         .eq('is_active', true);
       
+      // Get pay frequency from pay group
+      // Get pay frequency from pay group (if provided)
+      let payFrequency = 'monthly';
+      if (payGroupId) {
+        const { data: payGroup } = await supabase
+          .from("pay_groups")
+          .select("pay_frequency")
+          .eq("id", payGroupId)
+          .single();
+        payFrequency = payGroup?.pay_frequency || 'monthly';
+      }
+      
       // Get active employees with positions
       const { data: employees, error: empError } = await supabase
         .from("employee_positions")
@@ -701,6 +713,12 @@ export function usePayroll() {
           id,
           employee_id,
           position_id,
+          start_date,
+          end_date,
+          compensation_amount,
+          compensation_currency,
+          compensation_frequency,
+          is_primary,
           employee:profiles!employee_positions_employee_id_fkey(id, full_name, email, company_id),
           position:positions!employee_positions_position_id_fkey(id, title)
         `)
@@ -746,19 +764,19 @@ export function usePayroll() {
       let totalEmployerBenefits = 0;
       
       for (const emp of companyEmployees) {
-        // Get employee position start/end dates for proration
-        const { data: positionInfo } = await supabase
-          .from("employee_positions")
-          .select("start_date, end_date")
-          .eq("id", emp.id)
-          .single();
+        // Get ALL employee positions for this employee (they may have multiple)
+        const employeePositions = (employees || []).filter((e: any) => 
+          e.employee_id === emp.employee_id && e.employee?.company_id === companyId
+        );
         
-        // Use position start_date as hire date and end_date as termination date
-        const employeeStartDate = positionInfo?.start_date 
-          ? new Date(positionInfo.start_date) 
+        // Use primary position for proration dates, or first position if no primary
+        const primaryPosition = employeePositions.find((p: any) => p.is_primary) || employeePositions[0];
+        
+        const employeeStartDate = primaryPosition?.start_date 
+          ? new Date(primaryPosition.start_date) 
           : null;
-        const employeeEndDate = positionInfo?.end_date
-          ? new Date(positionInfo.end_date)
+        const employeeEndDate = primaryPosition?.end_date
+          ? new Date(primaryPosition.end_date)
           : null;
         
         // First check employee_compensation (overrides position compensation)
@@ -766,6 +784,7 @@ export function usePayroll() {
           .from("employee_compensation")
           .select(`
             *, 
+            positions (title),
             pay_elements(
               name, 
               code, 
@@ -779,27 +798,83 @@ export function usePayroll() {
         let regularPay = 0;
         
         // Track itemized earnings for calculation_details
-        const earningsBreakdown: { name: string; code: string; amount: number; type: string }[] = [];
+        const earningsBreakdown: { name: string; code: string; amount: number; type: string; is_prorated?: boolean; proration_factor?: number }[] = [];
         const allowancesBreakdown: { name: string; amount: number; is_taxable: boolean }[] = [];
         
         if (employeeComp && employeeComp.length > 0) {
-          // Use employee compensation with proration
+          // Use employee compensation with proration - matching simulator logic
           for (const comp of employeeComp) {
+            let basePeriodAmount = comp.amount || 0;
+            const freq = comp.frequency || 'monthly';
+            
+            // Convert to pay period frequency (same as simulator)
+            if (freq !== payFrequency) {
+              let annualAmount = basePeriodAmount;
+              switch (freq) {
+                case 'monthly':
+                  annualAmount = basePeriodAmount * 12;
+                  break;
+                case 'biweekly':
+                case 'fortnightly':
+                  annualAmount = basePeriodAmount * 26;
+                  break;
+                case 'weekly':
+                  annualAmount = basePeriodAmount * 52;
+                  break;
+                case 'annual':
+                  annualAmount = basePeriodAmount;
+                  break;
+              }
+
+              switch (payFrequency) {
+                case 'monthly':
+                  basePeriodAmount = annualAmount / 12;
+                  break;
+                case 'biweekly':
+                case 'fortnightly':
+                  basePeriodAmount = annualAmount / 26;
+                  break;
+                case 'weekly':
+                  basePeriodAmount = annualAmount / 52;
+                  break;
+                case 'semimonthly':
+                  basePeriodAmount = annualAmount / 24;
+                  break;
+                default:
+                  basePeriodAmount = annualAmount / 12;
+                  break;
+              }
+            }
+            
             const prorationMethodCode = getProrationMethodCode(
               (comp.pay_elements as any)?.proration_method?.code
             );
             
-            // Calculate proration factor for this pay element
-            const prorationResult = calculateProrationFactor({
-              periodStart: new Date(payPeriod?.period_start || new Date()),
-              periodEnd: new Date(payPeriod?.period_end || new Date()),
-              employeeStartDate,
-              employeeEndDate,
-              prorationMethod: prorationMethodCode,
-            });
+            let calculatedAmount = basePeriodAmount;
+            let isProrated = false;
+            let prorationFactor = 1;
             
-            const proratedAmount = applyProration(comp.amount || 0, prorationResult);
-            grossPay += proratedAmount;
+            // Use compensation's own start/end dates for proration (not position dates)
+            if (payPeriod?.period_start && payPeriod?.period_end && prorationMethodCode !== 'NONE') {
+              const compStartDate = comp.start_date ? new Date(comp.start_date) : null;
+              const compEndDate = comp.end_date ? new Date(comp.end_date) : null;
+              
+              const pr = calculateProrationFactor({
+                periodStart: new Date(payPeriod.period_start),
+                periodEnd: new Date(payPeriod.period_end),
+                employeeStartDate: compStartDate,
+                employeeEndDate: compEndDate,
+                prorationMethod: prorationMethodCode,
+              });
+              
+              isProrated = pr.isProrated;
+              prorationFactor = pr.factor;
+              if (pr.isProrated) {
+                calculatedAmount = applyProration(basePeriodAmount, pr);
+              }
+            }
+            
+            grossPay += calculatedAmount;
             
             const payElementName = (comp.pay_elements as any)?.name || 'Compensation';
             const payElementCode = (comp.pay_elements as any)?.code || 'COMP';
@@ -807,59 +882,79 @@ export function usePayroll() {
             earningsBreakdown.push({
               name: payElementName,
               code: payElementCode,
-              amount: proratedAmount,
-              type: payElementCode.toUpperCase() === 'SAL' ? 'base_salary' : 'additional'
+              amount: calculatedAmount,
+              type: payElementCode.toUpperCase() === 'SAL' ? 'base_salary' : 'additional',
+              is_prorated: isProrated,
+              proration_factor: prorationFactor,
             });
             
             // Base salary (SAL code) goes to regular_pay
             if (payElementCode.toUpperCase() === 'SAL') {
-              regularPay += proratedAmount;
+              regularPay += calculatedAmount;
             }
           }
         } else {
-          // Fall back to position compensation with proration
-          const { data: positionComp } = await supabase
-            .from("position_compensation")
-            .select(`
-              *, 
-              pay_element:pay_elements(
-                *,
-                proration_method:lookup_values!pay_elements_proration_method_id_fkey(code, name)
-              )
-            `)
-            .eq("position_id", emp.position_id)
-            .eq("is_active", true);
-          
-          for (const comp of positionComp || []) {
-            const prorationMethodCode = getProrationMethodCode(
-              comp.pay_element?.proration_method?.code
-            );
+          // Fall back to position compensation with proration (for each position)
+          for (const pos of employeePositions) {
+            const posAmount = pos.compensation_amount || 0;
+            const posFreq = pos.compensation_frequency || 'monthly';
             
-            // Calculate proration factor for this pay element
-            const prorationResult = calculateProrationFactor({
-              periodStart: new Date(payPeriod?.period_start || new Date()),
-              periodEnd: new Date(payPeriod?.period_end || new Date()),
-              employeeStartDate,
-              employeeEndDate,
-              prorationMethod: prorationMethodCode,
-            });
+            // Convert to period amount based on pay frequency
+            let periodAmount = posAmount;
+            let annualAmount = posAmount;
+            switch (posFreq) {
+              case 'annual': annualAmount = posAmount; break;
+              case 'monthly': annualAmount = posAmount * 12; break;
+              case 'weekly': annualAmount = posAmount * 52; break;
+              case 'biweekly': 
+              case 'fortnightly': annualAmount = posAmount * 26; break;
+            }
             
-            const proratedAmount = applyProration(comp.amount || 0, prorationResult);
+            // Convert to pay period amount
+            switch (payFrequency) {
+              case 'monthly': periodAmount = annualAmount / 12; break;
+              case 'biweekly':
+              case 'fortnightly': periodAmount = annualAmount / 26; break;
+              case 'weekly': periodAmount = annualAmount / 52; break;
+              case 'semimonthly': periodAmount = annualAmount / 24; break;
+              default: periodAmount = annualAmount / 12; break;
+            }
+            
+            // Calculate proration for THIS position based on its own start/end dates
+            let proratedAmount = periodAmount;
+            let isProrated = false;
+            let prorationFactor = 1;
+            
+            if (payPeriod?.period_start && payPeriod?.period_end) {
+              const posStartDate = pos.start_date ? new Date(pos.start_date) : null;
+              const posEndDate = pos.end_date ? new Date(pos.end_date) : null;
+              
+              const posProration = calculateProrationFactor({
+                periodStart: new Date(payPeriod.period_start),
+                periodEnd: new Date(payPeriod.period_end),
+                employeeStartDate: posStartDate,
+                employeeEndDate: posEndDate,
+                prorationMethod: 'CALENDAR_DAYS',
+              });
+              
+              isProrated = posProration.isProrated;
+              prorationFactor = posProration.factor;
+              if (posProration.isProrated) {
+                proratedAmount = applyProration(periodAmount, posProration);
+              }
+            }
+            
             grossPay += proratedAmount;
-            
-            const payElementName = comp.pay_element?.name || 'Compensation';
-            const payElementCode = comp.pay_element?.code || 'COMP';
+            regularPay += proratedAmount;
             
             earningsBreakdown.push({
-              name: payElementName,
-              code: payElementCode,
+              name: (pos.position as any)?.title || 'Position Salary',
+              code: 'SAL',
               amount: proratedAmount,
-              type: comp.pay_element?.element_type_id ? 'base_salary' : 'additional'
+              type: 'base_salary',
+              is_prorated: isProrated,
+              proration_factor: prorationFactor,
             });
-            
-            if (comp.pay_element?.element_type_id) {
-              regularPay += proratedAmount;
-            }
           }
         }
         
