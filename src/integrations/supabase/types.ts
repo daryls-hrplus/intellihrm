@@ -5933,6 +5933,100 @@ export type Database = {
           },
         ]
       }
+      employee_agreements: {
+        Row: {
+          agreement_name: string
+          agreement_type: string
+          archived_at: string | null
+          archived_by: string | null
+          company_id: string | null
+          created_at: string
+          document_url: string | null
+          effective_date: string
+          employee_id: string
+          expiry_date: string | null
+          id: string
+          is_archived: boolean | null
+          issued_date: string | null
+          notes: string | null
+          signatory_name: string | null
+          signature_method: string | null
+          signature_status: string | null
+          signed_date: string | null
+          updated_at: string
+          version: string | null
+          witness_name: string | null
+        }
+        Insert: {
+          agreement_name: string
+          agreement_type: string
+          archived_at?: string | null
+          archived_by?: string | null
+          company_id?: string | null
+          created_at?: string
+          document_url?: string | null
+          effective_date?: string
+          employee_id: string
+          expiry_date?: string | null
+          id?: string
+          is_archived?: boolean | null
+          issued_date?: string | null
+          notes?: string | null
+          signatory_name?: string | null
+          signature_method?: string | null
+          signature_status?: string | null
+          signed_date?: string | null
+          updated_at?: string
+          version?: string | null
+          witness_name?: string | null
+        }
+        Update: {
+          agreement_name?: string
+          agreement_type?: string
+          archived_at?: string | null
+          archived_by?: string | null
+          company_id?: string | null
+          created_at?: string
+          document_url?: string | null
+          effective_date?: string
+          employee_id?: string
+          expiry_date?: string | null
+          id?: string
+          is_archived?: boolean | null
+          issued_date?: string | null
+          notes?: string | null
+          signatory_name?: string | null
+          signature_method?: string | null
+          signature_status?: string | null
+          signed_date?: string | null
+          updated_at?: string
+          version?: string | null
+          witness_name?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "employee_agreements_archived_by_fkey"
+            columns: ["archived_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_agreements_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_agreements_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       employee_attendance_policies: {
         Row: {
           created_at: string
@@ -5980,12 +6074,15 @@ export type Database = {
       }
       employee_background_checks: {
         Row: {
+          archived_at: string | null
+          archived_by: string | null
           check_type: string
           completed_date: string | null
           created_at: string
           employee_id: string
           expiry_date: string | null
           id: string
+          is_archived: boolean | null
           notes: string | null
           provider: string | null
           reference_number: string | null
@@ -5995,12 +6092,15 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          archived_at?: string | null
+          archived_by?: string | null
           check_type: string
           completed_date?: string | null
           created_at?: string
           employee_id: string
           expiry_date?: string | null
           id?: string
+          is_archived?: boolean | null
           notes?: string | null
           provider?: string | null
           reference_number?: string | null
@@ -6010,12 +6110,15 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          archived_at?: string | null
+          archived_by?: string | null
           check_type?: string
           completed_date?: string | null
           created_at?: string
           employee_id?: string
           expiry_date?: string | null
           id?: string
+          is_archived?: boolean | null
           notes?: string | null
           provider?: string | null
           reference_number?: string | null
@@ -6025,6 +6128,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "employee_background_checks_archived_by_fkey"
+            columns: ["archived_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "employee_background_checks_employee_id_fkey"
             columns: ["employee_id"]
@@ -6291,6 +6401,8 @@ export type Database = {
       }
       employee_certificates: {
         Row: {
+          archived_at: string | null
+          archived_by: string | null
           certificate_name: string
           certificate_number: string | null
           created_at: string
@@ -6300,6 +6412,7 @@ export type Database = {
           file_name: string | null
           file_url: string | null
           id: string
+          is_archived: boolean | null
           issue_date: string
           issuing_organization: string
           notes: string | null
@@ -6307,6 +6420,8 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          archived_at?: string | null
+          archived_by?: string | null
           certificate_name: string
           certificate_number?: string | null
           created_at?: string
@@ -6316,6 +6431,7 @@ export type Database = {
           file_name?: string | null
           file_url?: string | null
           id?: string
+          is_archived?: boolean | null
           issue_date: string
           issuing_organization: string
           notes?: string | null
@@ -6323,6 +6439,8 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          archived_at?: string | null
+          archived_by?: string | null
           certificate_name?: string
           certificate_number?: string | null
           created_at?: string
@@ -6332,6 +6450,7 @@ export type Database = {
           file_name?: string | null
           file_url?: string | null
           id?: string
+          is_archived?: boolean | null
           issue_date?: string
           issuing_organization?: string
           notes?: string | null
@@ -6339,6 +6458,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "employee_certificates_archived_by_fkey"
+            columns: ["archived_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "employee_certificates_employee_id_fkey"
             columns: ["employee_id"]
@@ -7079,10 +7205,13 @@ export type Database = {
       }
       employee_licenses: {
         Row: {
+          archived_at: string | null
+          archived_by: string | null
           created_at: string
           employee_id: string
           expiry_date: string | null
           id: string
+          is_archived: boolean | null
           issue_date: string
           issuing_authority: string
           issuing_country: string | null
@@ -7093,10 +7222,13 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          archived_at?: string | null
+          archived_by?: string | null
           created_at?: string
           employee_id: string
           expiry_date?: string | null
           id?: string
+          is_archived?: boolean | null
           issue_date: string
           issuing_authority: string
           issuing_country?: string | null
@@ -7107,10 +7239,13 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          archived_at?: string | null
+          archived_by?: string | null
           created_at?: string
           employee_id?: string
           expiry_date?: string | null
           id?: string
+          is_archived?: boolean | null
           issue_date?: string
           issuing_authority?: string
           issuing_country?: string | null
@@ -7121,6 +7256,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "employee_licenses_archived_by_fkey"
+            columns: ["archived_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "employee_licenses_employee_id_fkey"
             columns: ["employee_id"]
@@ -7197,10 +7339,13 @@ export type Database = {
       }
       employee_memberships: {
         Row: {
+          archived_at: string | null
+          archived_by: string | null
           created_at: string
           employee_id: string
           end_date: string | null
           id: string
+          is_archived: boolean | null
           membership_number: string | null
           membership_type: string
           notes: string | null
@@ -7210,10 +7355,13 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          archived_at?: string | null
+          archived_by?: string | null
           created_at?: string
           employee_id: string
           end_date?: string | null
           id?: string
+          is_archived?: boolean | null
           membership_number?: string | null
           membership_type: string
           notes?: string | null
@@ -7223,10 +7371,13 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          archived_at?: string | null
+          archived_by?: string | null
           created_at?: string
           employee_id?: string
           end_date?: string | null
           id?: string
+          is_archived?: boolean | null
           membership_number?: string | null
           membership_type?: string
           notes?: string | null
@@ -7236,6 +7387,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "employee_memberships_archived_by_fkey"
+            columns: ["archived_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "employee_memberships_employee_id_fkey"
             columns: ["employee_id"]
@@ -8464,6 +8622,8 @@ export type Database = {
       }
       employee_references: {
         Row: {
+          archived_at: string | null
+          archived_by: string | null
           company: string | null
           created_at: string
           email: string | null
@@ -8471,6 +8631,7 @@ export type Database = {
           feedback: string | null
           full_name: string
           id: string
+          is_archived: boolean | null
           notes: string | null
           phone: string | null
           position: string | null
@@ -8481,6 +8642,8 @@ export type Database = {
           years_known: number | null
         }
         Insert: {
+          archived_at?: string | null
+          archived_by?: string | null
           company?: string | null
           created_at?: string
           email?: string | null
@@ -8488,6 +8651,7 @@ export type Database = {
           feedback?: string | null
           full_name: string
           id?: string
+          is_archived?: boolean | null
           notes?: string | null
           phone?: string | null
           position?: string | null
@@ -8498,6 +8662,8 @@ export type Database = {
           years_known?: number | null
         }
         Update: {
+          archived_at?: string | null
+          archived_by?: string | null
           company?: string | null
           created_at?: string
           email?: string | null
@@ -8505,6 +8671,7 @@ export type Database = {
           feedback?: string | null
           full_name?: string
           id?: string
+          is_archived?: boolean | null
           notes?: string | null
           phone?: string | null
           position?: string | null
@@ -8515,6 +8682,13 @@ export type Database = {
           years_known?: number | null
         }
         Relationships: [
+          {
+            foreignKeyName: "employee_references_archived_by_fkey"
+            columns: ["archived_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "employee_references_employee_id_fkey"
             columns: ["employee_id"]
@@ -9685,6 +9859,131 @@ export type Database = {
           },
         ]
       }
+      employee_work_history: {
+        Row: {
+          achievements: string | null
+          archived_at: string | null
+          archived_by: string | null
+          can_contact_employer: boolean | null
+          company_id: string | null
+          created_at: string
+          department: string | null
+          employee_id: string
+          employer_name: string
+          employment_type: string | null
+          end_date: string | null
+          id: string
+          industry: string | null
+          is_archived: boolean | null
+          is_current: boolean | null
+          job_title: string
+          location: string | null
+          notes: string | null
+          reason_for_leaving: string | null
+          responsibilities: string | null
+          salary_range: string | null
+          start_date: string
+          supervisor_contact: string | null
+          supervisor_name: string | null
+          updated_at: string
+          verification_date: string | null
+          verification_notes: string | null
+          verified: boolean | null
+          verified_by: string | null
+        }
+        Insert: {
+          achievements?: string | null
+          archived_at?: string | null
+          archived_by?: string | null
+          can_contact_employer?: boolean | null
+          company_id?: string | null
+          created_at?: string
+          department?: string | null
+          employee_id: string
+          employer_name: string
+          employment_type?: string | null
+          end_date?: string | null
+          id?: string
+          industry?: string | null
+          is_archived?: boolean | null
+          is_current?: boolean | null
+          job_title: string
+          location?: string | null
+          notes?: string | null
+          reason_for_leaving?: string | null
+          responsibilities?: string | null
+          salary_range?: string | null
+          start_date: string
+          supervisor_contact?: string | null
+          supervisor_name?: string | null
+          updated_at?: string
+          verification_date?: string | null
+          verification_notes?: string | null
+          verified?: boolean | null
+          verified_by?: string | null
+        }
+        Update: {
+          achievements?: string | null
+          archived_at?: string | null
+          archived_by?: string | null
+          can_contact_employer?: boolean | null
+          company_id?: string | null
+          created_at?: string
+          department?: string | null
+          employee_id?: string
+          employer_name?: string
+          employment_type?: string | null
+          end_date?: string | null
+          id?: string
+          industry?: string | null
+          is_archived?: boolean | null
+          is_current?: boolean | null
+          job_title?: string
+          location?: string | null
+          notes?: string | null
+          reason_for_leaving?: string | null
+          responsibilities?: string | null
+          salary_range?: string | null
+          start_date?: string
+          supervisor_contact?: string | null
+          supervisor_name?: string | null
+          updated_at?: string
+          verification_date?: string | null
+          verification_notes?: string | null
+          verified?: boolean | null
+          verified_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "employee_work_history_archived_by_fkey"
+            columns: ["archived_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_work_history_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_work_history_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_work_history_verified_by_fkey"
+            columns: ["verified_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       employee_work_periods: {
         Row: {
           clock_in: string
@@ -9744,6 +10043,8 @@ export type Database = {
       }
       employee_work_permits: {
         Row: {
+          archived_at: string | null
+          archived_by: string | null
           created_at: string
           document_mime_type: string | null
           document_name: string | null
@@ -9752,6 +10053,7 @@ export type Database = {
           employee_id: string
           expiry_date: string
           id: string
+          is_archived: boolean | null
           issue_date: string
           issuing_country: string
           notes: string | null
@@ -9762,6 +10064,8 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          archived_at?: string | null
+          archived_by?: string | null
           created_at?: string
           document_mime_type?: string | null
           document_name?: string | null
@@ -9770,6 +10074,7 @@ export type Database = {
           employee_id: string
           expiry_date: string
           id?: string
+          is_archived?: boolean | null
           issue_date: string
           issuing_country: string
           notes?: string | null
@@ -9780,6 +10085,8 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          archived_at?: string | null
+          archived_by?: string | null
           created_at?: string
           document_mime_type?: string | null
           document_name?: string | null
@@ -9788,6 +10095,7 @@ export type Database = {
           employee_id?: string
           expiry_date?: string
           id?: string
+          is_archived?: boolean | null
           issue_date?: string
           issuing_country?: string
           notes?: string | null
@@ -9798,6 +10106,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "employee_work_permits_archived_by_fkey"
+            columns: ["archived_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "employee_work_permits_employee_id_fkey"
             columns: ["employee_id"]
