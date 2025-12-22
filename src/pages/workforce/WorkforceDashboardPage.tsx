@@ -78,14 +78,6 @@ export default function WorkforceDashboardPage() {
       color: "bg-warning/10 text-warning",
       tabCode: "departments",
     },
-    orgStructure: {
-      title: t("workforce.modules.orgStructure.title"),
-      description: t("workforce.modules.orgStructure.description"),
-      href: "/workforce/org-structure",
-      icon: FolderTree,
-      color: "bg-success/10 text-success",
-      tabCode: "org_structure",
-    },
     orgChart: {
       title: "Org Chart",
       description: "View organizational hierarchy visually",
@@ -266,7 +258,6 @@ export default function WorkforceDashboardPage() {
         allModules.companies,
         allModules.divisions,
         allModules.departments,
-        allModules.orgStructure,
         allModules.governance,
         allModules.headcountRequests,
         allModules.headcountAnalytics,
