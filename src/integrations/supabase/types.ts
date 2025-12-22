@@ -4726,6 +4726,7 @@ export type Database = {
           id: string
           new_salary: number
           notes: string | null
+          position_id: string | null
           previous_salary: number | null
           reason: string | null
           updated_at: string
@@ -4745,6 +4746,7 @@ export type Database = {
           id?: string
           new_salary: number
           notes?: string | null
+          position_id?: string | null
           previous_salary?: number | null
           reason?: string | null
           updated_at?: string
@@ -4764,6 +4766,7 @@ export type Database = {
           id?: string
           new_salary?: number
           notes?: string | null
+          position_id?: string | null
           previous_salary?: number | null
           reason?: string | null
           updated_at?: string
@@ -4795,6 +4798,13 @@ export type Database = {
             columns: ["employee_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "compensation_history_position_id_fkey"
+            columns: ["position_id"]
+            isOneToOne: false
+            referencedRelation: "positions"
             referencedColumns: ["id"]
           },
         ]
