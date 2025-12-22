@@ -25856,9 +25856,14 @@ export type Database = {
           pay_date: string
           pay_period_end: string
           pay_period_start: string
+          payroll_run_id: string | null
           payslip_number: string
           pdf_generated_at: string | null
           pdf_url: string | null
+          recall_reason: string | null
+          recalled_at: string | null
+          recalled_by: string | null
+          status: string
           total_deductions: number
           updated_at: string
           viewed_at: string | null
@@ -25876,9 +25881,14 @@ export type Database = {
           pay_date: string
           pay_period_end: string
           pay_period_start: string
+          payroll_run_id?: string | null
           payslip_number: string
           pdf_generated_at?: string | null
           pdf_url?: string | null
+          recall_reason?: string | null
+          recalled_at?: string | null
+          recalled_by?: string | null
+          status?: string
           total_deductions: number
           updated_at?: string
           viewed_at?: string | null
@@ -25896,9 +25906,14 @@ export type Database = {
           pay_date?: string
           pay_period_end?: string
           pay_period_start?: string
+          payroll_run_id?: string | null
           payslip_number?: string
           pdf_generated_at?: string | null
           pdf_url?: string | null
+          recall_reason?: string | null
+          recalled_at?: string | null
+          recalled_by?: string | null
+          status?: string
           total_deductions?: number
           updated_at?: string
           viewed_at?: string | null
@@ -25916,6 +25931,13 @@ export type Database = {
             columns: ["employee_payroll_id"]
             isOneToOne: false
             referencedRelation: "employee_payroll"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payslips_payroll_run_id_fkey"
+            columns: ["payroll_run_id"]
+            isOneToOne: false
+            referencedRelation: "payroll_runs"
             referencedColumns: ["id"]
           },
         ]

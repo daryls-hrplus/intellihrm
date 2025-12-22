@@ -217,6 +217,11 @@ export interface Payslip {
   is_viewable: boolean;
   viewed_at: string | null;
   downloaded_at: string | null;
+  status?: 'active' | 'recalled' | 'superseded';
+  recalled_at?: string | null;
+  recalled_by?: string | null;
+  recall_reason?: string | null;
+  payroll_run_id?: string | null;
   created_at: string;
   updated_at: string;
   employee?: { full_name: string; email: string };
@@ -1519,6 +1524,7 @@ export function usePayroll() {
           employee:profiles!payslips_employee_id_fkey(full_name, email),
           employee_payroll!inner(payroll_run_id, payroll_runs!inner(status))
         `)
+        .eq("status", "active") // Only show active payslips (not recalled/superseded)
         .order("pay_date", { ascending: false });
       
       if (employeeId) {
@@ -1579,6 +1585,8 @@ export function usePayroll() {
           total_deductions: emp.total_deductions,
           net_pay: emp.net_pay,
           currency: emp.currency,
+          payroll_run_id: payrollRunId,
+          status: 'active',
         });
       }
       
@@ -1597,6 +1605,35 @@ export function usePayroll() {
       return true;
     } catch (err: any) {
       toast.error(err.message || "Failed to generate payslips");
+      return false;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Recall payslips for a payroll run
+  const recallPayslips = async (payrollRunId: string, reason: string, userId: string) => {
+    setIsLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from("payslips")
+        .update({
+          status: 'recalled',
+          recalled_at: new Date().toISOString(),
+          recalled_by: userId,
+          recall_reason: reason,
+        } as any)
+        .eq("payroll_run_id", payrollRunId)
+        .eq("status", "active")
+        .select();
+      
+      if (error) throw error;
+      
+      const count = data?.length || 0;
+      toast.success(`Recalled ${count} payslips`);
+      return true;
+    } catch (err: any) {
+      toast.error(err.message || "Failed to recall payslips");
       return false;
     } finally {
       setIsLoading(false);
@@ -1857,6 +1894,7 @@ export function usePayroll() {
     // Payslips
     fetchPayslips,
     generatePayslips,
+    recallPayslips,
     // Bank Files
     fetchBankFileConfig,
     createBankFileConfig,
