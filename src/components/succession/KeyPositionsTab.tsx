@@ -257,18 +257,24 @@ export function KeyPositionsTab({ companyId }: KeyPositionsTabProps) {
   };
 
   const handleRemoveKeyPosition = async (position: KeyPosition) => {
-    // Remove the job_id link from the position (this removes it from key positions list)
-    const { error } = await (supabase
-      .from('positions') as any)
-      .update({ job_id: null })
-      .eq('id', position.id);
-
-    if (error) {
-      toast.error('Failed to remove key position');
+    // Key positions are derived from the job being marked as key.
+    // This action should only clear the risk assessment, not break the position↔job link.
+    if (!position.riskAssessment?.id) {
+      toast('This position is key because its job is marked as key. Remove the job\'s key flag to remove it from this list.');
       return;
     }
 
-    toast.success(`${position.title} removed from key positions`);
+    const { error } = await supabase
+      .from('key_position_risks')
+      .delete()
+      .eq('id', position.riskAssessment.id);
+
+    if (error) {
+      toast.error('Failed to clear risk assessment');
+      return;
+    }
+
+    toast.success(`Risk assessment cleared for ${position.title}`);
     loadData();
   };
 
@@ -296,26 +302,31 @@ export function KeyPositionsTab({ companyId }: KeyPositionsTabProps) {
 
   const handleAddKeyPosition = async () => {
     if (!selectedPositionId) return;
-    
-    const position = availablePositions.find(p => p.id === selectedPositionId);
-    if (!position) return;
-    
-    // Link the position to its matching key job via job_id (auto-determined by job_family_id)
-    const { error } = await (supabase
-      .from('positions') as any)
-      .update({ job_id: position.matchingJobId })
-      .eq('id', selectedPositionId);
 
-    if (error) {
-      toast.error('Failed to add key position');
+    // Start assessment for the selected position (no relinking).
+    const existing = keyPositions.find(p => p.id === selectedPositionId);
+    if (existing) {
+      setShowAddDialog(false);
+      openRiskDialog(existing);
       return;
     }
 
-    const job = keyJobs.find(j => j.id === position.matchingJobId);
-    
-    toast.success(`${position.title} linked to ${job?.name}`);
+    const selected = availablePositions.find(p => p.id === selectedPositionId);
+    if (!selected) return;
+
+    const job = keyJobs.find(j => j.id === selected.matchingJobId);
+    const temp: KeyPosition = {
+      id: selected.id,
+      title: selected.title,
+      code: selected.code,
+      job_id: selected.matchingJobId,
+      job: job ? { name: job.name, code: job.code } : undefined,
+      current_holder: selected.current_holder || null,
+      riskAssessment: null,
+    };
+
     setShowAddDialog(false);
-    loadData();
+    openRiskDialog(temp);
   };
 
   // Filter available positions based on search term
@@ -687,8 +698,8 @@ export function KeyPositionsTab({ companyId }: KeyPositionsTabProps) {
               ) : availablePositions.length === 0 ? (
                 <div className="p-8 text-center text-muted-foreground">
                   <Shield className="h-10 w-10 mx-auto mb-3 opacity-50" />
-                  <p>No unlinked positions available</p>
-                  <p className="text-sm">All positions are already linked to jobs</p>
+                  <p>No positions found for key jobs</p>
+                  <p className="text-sm">Ensure positions are linked to jobs that are marked as "Key Position"</p>
                 </div>
               ) : filteredAvailablePositions.length === 0 ? (
                 <div className="p-8 text-center text-muted-foreground">
