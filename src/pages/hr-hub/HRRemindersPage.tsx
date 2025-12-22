@@ -122,7 +122,14 @@ export default function HRRemindersPage() {
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="reminders">
+          <TabsContent value="reminders" className="space-y-6">
+            {/* AI Recommendations Panel - also visible on reminders tab */}
+            {selectedCompanyId && selectedCompanyId !== 'all' && (
+              <AIRecommendationsPanel 
+                companyId={selectedCompanyId}
+                onApplyRecommendation={handleApplyRecommendation}
+              />
+            )}
             <Card>
               <CardHeader>
                 <CardTitle>{t('hrHub.reminders')}</CardTitle>
