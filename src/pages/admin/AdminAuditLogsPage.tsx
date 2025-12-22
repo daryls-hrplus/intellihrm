@@ -558,7 +558,7 @@ export default function AdminAuditLogsPage() {
 
         {/* Detail Dialog */}
         <Dialog open={!!selectedLog} onOpenChange={() => setSelectedLog(null)}>
-          <DialogContent className="max-w-2xl max-h-[80vh]">
+          <DialogContent className="max-w-4xl max-h-[80vh]">
             <DialogHeader>
               <DialogTitle>Audit Log Details</DialogTitle>
             </DialogHeader>
