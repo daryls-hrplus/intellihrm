@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Calculator, RefreshCw } from "lucide-react";
+import { format, parseISO } from "date-fns";
 import { 
   calculateProrationFactor, 
   applyProration, 
@@ -82,6 +83,8 @@ interface SimulationResult {
       is_prorated: boolean;
       proration_factor?: number;
       position_title?: string;
+      effective_start?: string | null;
+      effective_end?: string | null;
     }>;
     allowances: Array<{
       name: string;
@@ -663,6 +666,8 @@ export function PayrollSimulator({ companyId, employeeId, payPeriodId }: Payroll
           is_prorated: isProrated,
           proration_factor: prorationFactor,
           position_title: (c.positions as any)?.title || 'Unassigned Position',
+          effective_start: c.start_date,
+          effective_end: c.end_date || payPeriod?.period_end,
         };
       });
 
@@ -1026,12 +1031,19 @@ export function PayrollSimulator({ companyId, employeeId, payPeriodId }: Payroll
               )}
               {result.earnings.additional_comp.map((comp, idx) => (
                 <TableRow key={`comp-${idx}`}>
-                  <TableCell className="flex items-center gap-2">
-                    {comp.name}
-                    {comp.is_prorated && (
-                      <Badge variant="outline" className="text-xs">
-                        Prorated
-                      </Badge>
+                  <TableCell>
+                    <div className="flex items-center gap-2">
+                      {comp.name}
+                      {comp.is_prorated && (
+                        <Badge variant="outline" className="text-xs">
+                          Prorated
+                        </Badge>
+                      )}
+                    </div>
+                    {comp.is_prorated && comp.effective_start && (
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        {format(parseISO(comp.effective_start), 'MMM d')} - {comp.effective_end ? format(parseISO(comp.effective_end), 'MMM d, yyyy') : 'Period End'}
+                      </p>
                     )}
                   </TableCell>
                   <TableCell className="text-right">
