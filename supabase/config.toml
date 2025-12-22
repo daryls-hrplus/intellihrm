@@ -155,3 +155,6 @@ verify_jwt = false
 
 [functions.bulk-payslip-distribution]
 verify_jwt = false
+
+[functions.ai-reminder-analysis]
+verify_jwt = false
