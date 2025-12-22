@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -6,13 +6,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { usePayroll, Payslip } from "@/hooks/usePayroll";
 import { usePayslipTemplates, PayslipTemplate } from "@/hooks/usePayslipTemplates";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { PayslipDocument } from "@/components/payroll/PayslipDocument";
-import { FileText, Download, Eye, Search, DollarSign, Calendar, Loader2 } from "lucide-react";
-import { format } from "date-fns";
+import { FileText, Download, Eye, Search, DollarSign, Calendar, Loader2, Filter } from "lucide-react";
+import { format, getMonth } from "date-fns";
 import { useTranslation } from "react-i18next";
 import { jsPDF } from "jspdf";
 import html2canvas from "html2canvas";
@@ -26,6 +27,8 @@ export default function PayslipsPage() {
   
   const [payslips, setPayslips] = useState<Payslip[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedYear, setSelectedYear] = useState<string>("all");
+  const [selectedPeriod, setSelectedPeriod] = useState<string>("all");
   const [selectedPayslip, setSelectedPayslip] = useState<Payslip | null>(null);
   const [detailDialogOpen, setDetailDialogOpen] = useState(false);
   const [template, setTemplate] = useState<PayslipTemplate | null>(null);
@@ -56,6 +59,36 @@ export default function PayslipsPage() {
     setTemplate(tmpl);
   };
 
+  // Extract available years from payslips
+  const availableYears = useMemo(() => {
+    const years = new Set<number>();
+    payslips.forEach(p => {
+      years.add(new Date(p.pay_date).getFullYear());
+    });
+    return Array.from(years).sort((a, b) => b - a); // Most recent first
+  }, [payslips]);
+
+  // Pay period options (quarters and months)
+  const periodOptions = [
+    { value: "all", label: t("payroll.payslips.allPeriods", "All Periods") },
+    { value: "q1", label: t("payroll.payslips.q1", "Q1 (Jan-Mar)") },
+    { value: "q2", label: t("payroll.payslips.q2", "Q2 (Apr-Jun)") },
+    { value: "q3", label: t("payroll.payslips.q3", "Q3 (Jul-Sep)") },
+    { value: "q4", label: t("payroll.payslips.q4", "Q4 (Oct-Dec)") },
+    { value: "jan", label: t("common.months.january", "January") },
+    { value: "feb", label: t("common.months.february", "February") },
+    { value: "mar", label: t("common.months.march", "March") },
+    { value: "apr", label: t("common.months.april", "April") },
+    { value: "may", label: t("common.months.may", "May") },
+    { value: "jun", label: t("common.months.june", "June") },
+    { value: "jul", label: t("common.months.july", "July") },
+    { value: "aug", label: t("common.months.august", "August") },
+    { value: "sep", label: t("common.months.september", "September") },
+    { value: "oct", label: t("common.months.october", "October") },
+    { value: "nov", label: t("common.months.november", "November") },
+    { value: "dec", label: t("common.months.december", "December") },
+  ];
+
   const formatCurrency = (amount: number, currency: string = 'USD') => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
@@ -63,10 +96,50 @@ export default function PayslipsPage() {
     }).format(amount);
   };
 
-  const filteredPayslips = payslips.filter(p =>
-    p.payslip_number.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    format(new Date(p.pay_date), "MMM yyyy").toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // Filter payslips based on year, period, and search
+  const filteredPayslips = useMemo(() => {
+    return payslips.filter(p => {
+      const payDate = new Date(p.pay_date);
+      const year = payDate.getFullYear();
+      const month = getMonth(payDate); // 0-11
+
+      // Year filter
+      if (selectedYear !== "all" && year !== parseInt(selectedYear)) {
+        return false;
+      }
+
+      // Period filter
+      if (selectedPeriod !== "all") {
+        const monthMap: Record<string, number> = {
+          jan: 0, feb: 1, mar: 2, apr: 3, may: 4, jun: 5,
+          jul: 6, aug: 7, sep: 8, oct: 9, nov: 10, dec: 11
+        };
+        const quarterMap: Record<string, number[]> = {
+          q1: [0, 1, 2],
+          q2: [3, 4, 5],
+          q3: [6, 7, 8],
+          q4: [9, 10, 11]
+        };
+
+        if (quarterMap[selectedPeriod]) {
+          if (!quarterMap[selectedPeriod].includes(month)) return false;
+        } else if (monthMap[selectedPeriod] !== undefined) {
+          if (month !== monthMap[selectedPeriod]) return false;
+        }
+      }
+
+      // Search filter
+      if (searchQuery) {
+        const searchLower = searchQuery.toLowerCase();
+        return (
+          p.payslip_number.toLowerCase().includes(searchLower) ||
+          format(payDate, "MMM yyyy").toLowerCase().includes(searchLower)
+        );
+      }
+
+      return true;
+    });
+  }, [payslips, selectedYear, selectedPeriod, searchQuery]);
 
   const viewPayslip = (payslip: Payslip) => {
     setSelectedPayslip(payslip);
@@ -245,19 +318,79 @@ export default function PayslipsPage() {
         {/* Payslips List */}
         <Card>
           <CardHeader>
-            <div className="flex items-center justify-between">
-              <div>
-                <CardTitle>{t("payroll.payslips.payslipHistory")}</CardTitle>
-                <CardDescription>{t("payroll.payslips.payslipHistorySubtitle")}</CardDescription>
+            <div className="flex flex-col gap-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle>{t("payroll.payslips.payslipHistory")}</CardTitle>
+                  <CardDescription>{t("payroll.payslips.payslipHistorySubtitle")}</CardDescription>
+                </div>
               </div>
-              <div className="relative w-64">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder={t("payroll.payslips.search")}
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-9"
-                />
+              
+              {/* Filters Row */}
+              <div className="flex flex-wrap items-center gap-3">
+                <div className="flex items-center gap-2">
+                  <Filter className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-sm font-medium text-muted-foreground">{t("common.filters", "Filters")}:</span>
+                </div>
+                
+                {/* Year Filter */}
+                <Select value={selectedYear} onValueChange={setSelectedYear}>
+                  <SelectTrigger className="w-[130px]">
+                    <SelectValue placeholder={t("payroll.payslips.selectYear", "Select Year")} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">{t("payroll.payslips.allYears", "All Years")}</SelectItem>
+                    {availableYears.map(year => (
+                      <SelectItem key={year} value={year.toString()}>{year}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+
+                {/* Period Filter */}
+                <Select value={selectedPeriod} onValueChange={setSelectedPeriod}>
+                  <SelectTrigger className="w-[160px]">
+                    <SelectValue placeholder={t("payroll.payslips.selectPeriod", "Select Period")} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {periodOptions.map(option => (
+                      <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+
+                {/* Search */}
+                <div className="relative flex-1 min-w-[200px]">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder={t("payroll.payslips.search")}
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-9"
+                  />
+                </div>
+
+                {/* Clear Filters */}
+                {(selectedYear !== "all" || selectedPeriod !== "all" || searchQuery) && (
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    onClick={() => {
+                      setSelectedYear("all");
+                      setSelectedPeriod("all");
+                      setSearchQuery("");
+                    }}
+                  >
+                    {t("common.clearFilters", "Clear Filters")}
+                  </Button>
+                )}
+              </div>
+
+              {/* Results count */}
+              <div className="text-sm text-muted-foreground">
+                {t("payroll.payslips.showingResults", "Showing {{count}} of {{total}} payslips", {
+                  count: filteredPayslips.length,
+                  total: payslips.length
+                })}
               </div>
             </div>
           </CardHeader>
