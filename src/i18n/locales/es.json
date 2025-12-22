@@ -172,7 +172,20 @@
     "website": "Sitio Web",
     "industry": "Industria",
     "code": "Código",
-    "required": "Requerido"
+    "required": "Requerido",
+    "department": "Departamento",
+    "position": "Puesto",
+    "selectDepartment": "Seleccionar departamento",
+    "selectPosition": "Seleccionar puesto",
+    "selectPayGroup": "Seleccionar grupo de nómina",
+    "allPayGroups": "Todos los Grupos de Nómina",
+    "selectDepartmentFirst": "Seleccionar primero el departamento",
+    "selectEmployeeFirst": "Seleccionar primero el empleado",
+    "selectEmployee": "Seleccionar empleado",
+    "fillRequiredFields": "Por favor complete todos los campos requeridos",
+    "saving": "Guardando...",
+    "notes": "Notas",
+    "notesPlaceholder": "Agregar notas adicionales aquí..."
   },
   "auth": {
     "login": "Iniciar Sesión",
