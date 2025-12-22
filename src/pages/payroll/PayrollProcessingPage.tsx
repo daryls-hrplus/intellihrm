@@ -827,9 +827,20 @@ export default function PayrollProcessingPage() {
                       effective_start: e.effective_start,
                       effective_end: e.effective_end,
                     })),
-                    deductions: (calcDetails?.deductions || []).map((d: any) => ({ name: d.name, amount: d.amount })),
-                    taxes: (calcDetails?.statutory || []).map((t: any) => ({ name: t.name, amount: t.amount })),
-                    employer: (calcDetails?.employer_contributions || []).map((c: any) => ({ name: c.name, amount: c.amount })),
+                    deductions: (calcDetails?.period_deductions || []).map((d: any) => ({ 
+                      name: d.name, 
+                      amount: d.amount 
+                    })),
+                    taxes: (calcDetails?.statutory_deductions || []).map((t: any) => ({ 
+                      name: t.name, 
+                      amount: t.employee_amount || 0 
+                    })),
+                    employer: (calcDetails?.statutory_deductions || [])
+                      .filter((t: any) => (t.employer_amount || 0) > 0)
+                      .map((c: any) => ({ 
+                        name: `Employer ${c.name}`, 
+                        amount: c.employer_amount || 0 
+                      })),
                   };
                   
                   // Create a container for React rendering
