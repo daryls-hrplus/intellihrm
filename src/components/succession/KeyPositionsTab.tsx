@@ -104,16 +104,17 @@ export function KeyPositionsTab({ companyId }: KeyPositionsTabProps) {
       return;
     }
     
-    const keyJobIds = keyJobs.map(j => j.id);
-    const jobMap = new Map(keyJobs.map(j => [j.id, { name: j.name, code: j.code }]));
+    // Map jobs by code for matching with positions
+    const keyJobCodes = keyJobs.map(j => j.code);
+    const jobByCode = new Map(keyJobs.map(j => [j.code, { id: j.id, name: j.name, code: j.code }]));
     
-    // Get positions for those key jobs
-    const { data: positionsData } = await (supabase
-      .from('positions') as any)
-      .select('id, title, code, job_id')
-      .eq('company_id', companyId)
-      .in('job_id', keyJobIds)
+    // Get positions matching key job codes (positions are linked to jobs via matching code)
+    const { data: positionsData } = await supabase
+      .from('positions')
+      .select('id, title, code, department_id, departments!inner(company_id)')
+      .in('code', keyJobCodes)
       .is('end_date', null)
+      .eq('departments.company_id', companyId)
       .order('title');
     
     // Get risk assessments
@@ -133,12 +134,13 @@ export function KeyPositionsTab({ companyId }: KeyPositionsTabProps) {
           .limit(1)
           .maybeSingle();
         
+        const matchedJob = jobByCode.get(pos.code);
         keyPositionsWithData.push({
           id: pos.id,
           title: pos.title,
           code: pos.code,
-          job_id: pos.job_id,
-          job: jobMap.get(pos.job_id) || null,
+          job_id: matchedJob?.id || '',
+          job: matchedJob ? { name: matchedJob.name, code: matchedJob.code } : null,
           current_holder: holder?.profiles || null,
           riskAssessment: riskMap.get(pos.id) || null,
         });
@@ -166,16 +168,17 @@ export function KeyPositionsTab({ companyId }: KeyPositionsTabProps) {
       return;
     }
     
-    const keyJobIds = keyJobs.map(j => j.id);
-    const jobMap = new Map(keyJobs.map(j => [j.id, { name: j.name, code: j.code }]));
+    // Map jobs by code for matching with positions
+    const keyJobCodes = keyJobs.map(j => j.code);
+    const jobByCode = new Map(keyJobs.map(j => [j.code, { id: j.id, name: j.name, code: j.code }]));
     
-    // Get positions for those key jobs
-    const { data: positionsData } = await (supabase
-      .from('positions') as any)
-      .select('id, title, code, job_id')
-      .eq('company_id', companyId)
-      .in('job_id', keyJobIds)
+    // Get positions matching key job codes
+    const { data: positionsData } = await supabase
+      .from('positions')
+      .select('id, title, code, department_id, departments!inner(company_id)')
+      .in('code', keyJobCodes)
       .is('end_date', null)
+      .eq('departments.company_id', companyId)
       .order('title');
     
     if (positionsData) {
@@ -190,12 +193,13 @@ export function KeyPositionsTab({ companyId }: KeyPositionsTabProps) {
           .limit(1)
           .maybeSingle();
         
+        const matchedJob = jobByCode.get(pos.code);
         positions.push({
           id: pos.id,
           title: pos.title,
           code: pos.code,
-          job_id: pos.job_id,
-          job: jobMap.get(pos.job_id) || null,
+          job_id: matchedJob?.id || '',
+          job: matchedJob ? { name: matchedJob.name, code: matchedJob.code } : null,
           current_holder: holder?.profiles || null,
         });
       }
