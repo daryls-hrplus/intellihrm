@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -10,12 +10,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Pencil, Archive, CheckCircle, AlertTriangle, XCircle, Clock, Users } from "lucide-react";
+import { Plus, Pencil, Archive, CheckCircle, AlertTriangle, XCircle, Clock, Users, Upload, Download, X, FileText } from "lucide-react";
 import { toast } from "sonner";
 import { format, differenceInDays } from "date-fns";
 import { getTodayString } from "@/utils/dateUtils";
 import { useAuditLog } from "@/hooks/useAuditLog";
-
 interface EmployeeMembershipsTabProps {
   employeeId: string;
   viewType?: "hr" | "manager" | "ess";
@@ -28,7 +27,10 @@ interface MembershipFormData {
   start_date: string;
   end_date: string;
   status: string;
+  renewal_required: string;
   notes: string;
+  file_url: string;
+  file_name: string;
 }
 
 // Industry-standard membership types aligned with professional bodies (CIPD, ACCA, ICAEW, IEEE, CPA, PMP, etc.)
@@ -43,6 +45,12 @@ const MEMBERSHIP_TYPES = [
   { value: "honorary", label: "Honorary" },
   { value: "lifetime", label: "Lifetime" },
   { value: "other", label: "Other" },
+];
+
+const RENEWAL_REQUIRED_OPTIONS = [
+  { value: "auto", label: "Automatic" },
+  { value: "manual", label: "Manual" },
+  { value: "none", label: "None (Lifetime)" },
 ];
 
 const STATUS_OPTIONS = [
@@ -65,8 +73,13 @@ export function EmployeeMembershipsTab({ employeeId, viewType = "hr" }: Employee
     start_date: getTodayString(),
     end_date: "",
     status: "active",
+    renewal_required: "manual",
     notes: "",
+    file_url: "",
+    file_name: "",
   });
+  const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const isHR = viewType === "hr";
   const isManager = viewType === "manager";
@@ -114,7 +127,10 @@ export function EmployeeMembershipsTab({ employeeId, viewType = "hr" }: Employee
         start_date: data.start_date,
         end_date: data.end_date || null,
         status: data.status,
+        renewal_required: data.renewal_required || "manual",
         notes: data.notes || null,
+        file_url: data.file_url || null,
+        file_name: data.file_name || null,
       };
 
       if (editingId) {
@@ -176,7 +192,10 @@ export function EmployeeMembershipsTab({ employeeId, viewType = "hr" }: Employee
       start_date: getTodayString(),
       end_date: "",
       status: "active",
+      renewal_required: "manual",
       notes: "",
+      file_url: "",
+      file_name: "",
     });
   };
 
@@ -194,9 +213,67 @@ export function EmployeeMembershipsTab({ employeeId, viewType = "hr" }: Employee
       start_date: item.start_date,
       end_date: item.end_date || "",
       status: item.status,
+      renewal_required: item.renewal_required || "manual",
       notes: item.notes || "",
+      file_url: item.file_url || "",
+      file_name: item.file_name || "",
     });
     setIsDialogOpen(true);
+  };
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const maxSize = 10 * 1024 * 1024; // 10MB
+    if (file.size > maxSize) {
+      toast.error("File size must be less than 10MB");
+      return;
+    }
+
+    setIsUploading(true);
+    try {
+      const timestamp = Date.now();
+      const sanitizedName = file.name.replace(/[^a-zA-Z0-9.-]/g, "_");
+      const filePath = `memberships/${employeeId}/${timestamp}_${sanitizedName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from("employee-documents")
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      setFormData((prev) => ({
+        ...prev,
+        file_url: filePath,
+        file_name: file.name,
+      }));
+      toast.success("File uploaded successfully");
+    } catch (error) {
+      console.error("Upload error:", error);
+      toast.error("Failed to upload file");
+    } finally {
+      setIsUploading(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+    }
+  };
+
+  const handleRemoveFile = async () => {
+    if (formData.file_url) {
+      try {
+        await supabase.storage.from("employee-documents").remove([formData.file_url]);
+      } catch (error) {
+        console.error("Failed to delete file from storage:", error);
+      }
+    }
+    setFormData((prev) => ({ ...prev, file_url: "", file_name: "" }));
+  };
+
+  const getFileDownloadUrl = (filePath: string) => {
+    const { data } = supabase.storage.from("employee-documents").getPublicUrl(filePath);
+    return data.publicUrl;
   };
 
   const getStatusIcon = (status: string) => {
@@ -271,6 +348,8 @@ export function EmployeeMembershipsTab({ employeeId, viewType = "hr" }: Employee
                 <TableHead>Start Date</TableHead>
                 <TableHead>End Date</TableHead>
                 <TableHead>Status</TableHead>
+                <TableHead>Renewal</TableHead>
+                <TableHead>Attachment</TableHead>
                 {(isHR || isManager) && <TableHead>Notes</TableHead>}
                 <TableHead>Actions</TableHead>
               </TableRow>
@@ -284,6 +363,27 @@ export function EmployeeMembershipsTab({ employeeId, viewType = "hr" }: Employee
                   <TableCell>{format(new Date(item.start_date), "PP")}</TableCell>
                   <TableCell>{item.end_date ? format(new Date(item.end_date), "PP") : "-"}</TableCell>
                   <TableCell>{getStatusBadge(item.computedStatus)}</TableCell>
+                  <TableCell>
+                    <Badge variant="outline" className="capitalize">
+                      {item.renewal_required === "auto" ? "Automatic" : item.renewal_required === "none" ? "Lifetime" : "Manual"}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
+                    {item.file_url ? (
+                      <a
+                        href={getFileDownloadUrl(item.file_url)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-1 text-primary hover:underline"
+                        title={item.file_name || "Download"}
+                      >
+                        <Download className="h-4 w-4" />
+                        <span className="text-sm truncate max-w-[100px]">{item.file_name || "File"}</span>
+                      </a>
+                    ) : (
+                      "-"
+                    )}
+                  </TableCell>
                   {(isHR || isManager) && (
                     <TableCell className="max-w-[200px] truncate" title={item.notes || ""}>
                       {item.notes || "-"}
@@ -359,8 +459,8 @@ export function EmployeeMembershipsTab({ employeeId, viewType = "hr" }: Employee
               </div>
             </div>
 
-            {/* Row 2: Dates and Status */}
-            <div className="grid grid-cols-3 gap-4">
+            {/* Row 2: Dates, Status, and Renewal Required */}
+            <div className="grid grid-cols-4 gap-4">
               <div className="grid gap-2">
                 <Label>Start Date *</Label>
                 <Input
@@ -395,9 +495,62 @@ export function EmployeeMembershipsTab({ employeeId, viewType = "hr" }: Employee
                   </SelectContent>
                 </Select>
               </div>
+              <div className="grid gap-2">
+                <Label>Renewal Required</Label>
+                <Select
+                  value={formData.renewal_required}
+                  onValueChange={(value) => setFormData((prev) => ({ ...prev, renewal_required: value }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {RENEWAL_REQUIRED_OPTIONS.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
 
-            {/* Row 3: Notes (full width) */}
+            {/* Row 3: Attachment */}
+            <div className="grid gap-2">
+              <Label>Attachment</Label>
+              {formData.file_name ? (
+                <div className="flex items-center gap-2 p-2 border rounded-md bg-muted/50">
+                  <FileText className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-sm flex-1 truncate">{formData.file_name}</span>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleRemoveFile}
+                    className="h-8 w-8 p-0"
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              ) : (
+                <div className="flex items-center gap-2">
+                  <Input
+                    ref={fileInputRef}
+                    type="file"
+                    onChange={handleFileUpload}
+                    accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                    disabled={isUploading}
+                    className="flex-1"
+                  />
+                  {isUploading && <span className="text-sm text-muted-foreground">Uploading...</span>}
+                </div>
+              )}
+              <p className="text-xs text-muted-foreground">
+                Upload membership certificate or card (PDF, DOC, DOCX, JPG, PNG - max 10MB)
+              </p>
+            </div>
+
+            {/* Row 4: Notes (full width) */}
             <div className="grid gap-2">
               <Label>Notes</Label>
               <Textarea

@@ -7365,12 +7365,15 @@ export type Database = {
           created_at: string
           employee_id: string
           end_date: string | null
+          file_name: string | null
+          file_url: string | null
           id: string
           is_archived: boolean | null
           membership_number: string | null
           membership_type: string
           notes: string | null
           organization_name: string
+          renewal_required: string | null
           start_date: string
           status: string
           updated_at: string
@@ -7381,12 +7384,15 @@ export type Database = {
           created_at?: string
           employee_id: string
           end_date?: string | null
+          file_name?: string | null
+          file_url?: string | null
           id?: string
           is_archived?: boolean | null
           membership_number?: string | null
           membership_type: string
           notes?: string | null
           organization_name: string
+          renewal_required?: string | null
           start_date?: string
           status?: string
           updated_at?: string
@@ -7397,12 +7403,15 @@ export type Database = {
           created_at?: string
           employee_id?: string
           end_date?: string | null
+          file_name?: string | null
+          file_url?: string | null
           id?: string
           is_archived?: boolean | null
           membership_number?: string | null
           membership_type?: string
           notes?: string | null
           organization_name?: string
+          renewal_required?: string | null
           start_date?: string
           status?: string
           updated_at?: string
