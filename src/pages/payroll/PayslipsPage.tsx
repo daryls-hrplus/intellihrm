@@ -9,6 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { usePayroll, Payslip } from "@/hooks/usePayroll";
 import { usePayslipTemplates, PayslipTemplate } from "@/hooks/usePayslipTemplates";
 import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 import { PayslipDocument } from "@/components/payroll/PayslipDocument";
 import { FileText, Download, Eye, Search, DollarSign, Calendar, Loader2 } from "lucide-react";
 import { format } from "date-fns";
@@ -76,7 +77,33 @@ export default function PayslipsPage() {
     setIsDownloading(true);
     
     try {
-      // Wait for dialog to render if not already open
+      // Check if stored PDF exists
+      if (payslip.pdf_url) {
+        // Download from storage
+        const response = await fetch(payslip.pdf_url);
+        if (response.ok) {
+          const blob = await response.blob();
+          const url = window.URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = url;
+          link.download = `payslip_${payslip.payslip_number}.pdf`;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          window.URL.revokeObjectURL(url);
+          
+          // Update downloaded_at timestamp
+          await supabase
+            .from('payslips')
+            .update({ downloaded_at: new Date().toISOString() })
+            .eq('id', payslip.id);
+          
+          toast.success(t("payroll.payslips.downloadSuccess"));
+          return;
+        }
+      }
+
+      // Fallback: Generate on-the-fly if no stored PDF
       if (!detailDialogOpen) {
         setSelectedPayslip(payslip);
         setDetailDialogOpen(true);

@@ -20,6 +20,7 @@ import {
   XCircle,
   FileText,
   Users,
+  Save,
 } from "lucide-react";
 import { jsPDF } from "jspdf";
 import html2canvas from "html2canvas";
@@ -75,7 +76,7 @@ export function BulkPayslipDistribution({
 }: BulkPayslipDistributionProps) {
   const { t } = useTranslation();
   const [isLoading, setIsLoading] = useState(false);
-  const [action, setAction] = useState<'download' | 'email' | 'print' | null>(null);
+  const [action, setAction] = useState<'download' | 'email' | 'print' | 'store' | null>(null);
   const [progress, setProgress] = useState(0);
   const [payslipData, setPayslipData] = useState<PayslipData | null>(null);
   const [selectedEmployees, setSelectedEmployees] = useState<Set<string>>(new Set());
@@ -262,6 +263,153 @@ export function BulkPayslipDistribution({
     } catch (err: any) {
       console.error("Bulk download failed:", err);
       toast.error("Bulk download failed");
+    } finally {
+      setIsLoading(false);
+      setAction(null);
+    }
+  };
+
+  const handleStorePayslips = async () => {
+    if (!payslipData || selectedEmployees.size === 0) return;
+    
+    setAction('store');
+    setIsLoading(true);
+    setProgress(0);
+    setResults([]);
+
+    const selectedEmps = payslipData.employees.filter(e => selectedEmployees.has(e.employee_id));
+    const total = selectedEmps.length;
+    const newResults: typeof results = [];
+
+    try {
+      for (let i = 0; i < selectedEmps.length; i++) {
+        const emp = selectedEmps[i];
+        setProgress(Math.round(((i + 1) / total) * 100));
+
+        try {
+          // Create payslip data for this employee
+          const payslip = {
+            id: emp.employee_id,
+            employee_payroll_id: emp.employee_id,
+            employee_id: emp.employee_id,
+            payslip_number: emp.payslip_number,
+            pay_period_start: emp.pay_period_start,
+            pay_period_end: emp.pay_period_end,
+            pay_date: emp.pay_date,
+            gross_pay: emp.gross_pay,
+            net_pay: emp.net_pay,
+            total_deductions: emp.total_deductions,
+            currency: emp.currency,
+            pdf_url: null,
+            pdf_generated_at: null,
+            is_viewable: true,
+            viewed_at: null,
+            downloaded_at: null,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          };
+
+          // Create a temporary container and render the payslip
+          const container = document.createElement('div');
+          container.style.position = 'absolute';
+          container.style.left = '-9999px';
+          container.style.width = '800px';
+          document.body.appendChild(container);
+
+          const root = createRoot(container);
+          root.render(
+            <PayslipDocument
+              payslip={payslip}
+              template={payslipTemplate}
+              employee={{
+                full_name: emp.employee_name,
+                email: emp.employee_email,
+              }}
+              company={companyInfo || undefined}
+            />
+          );
+
+          // Wait for render
+          await new Promise(resolve => setTimeout(resolve, 200));
+
+          // Capture as canvas
+          const canvas = await html2canvas(container, {
+            scale: 2,
+            useCORS: true,
+            logging: false,
+            backgroundColor: '#ffffff',
+          });
+
+          // Generate PDF
+          const pdf = new jsPDF({
+            orientation: 'portrait',
+            unit: 'mm',
+            format: 'a4',
+          });
+
+          const imgData = canvas.toDataURL('image/png');
+          const pdfWidth = pdf.internal.pageSize.getWidth();
+          const pdfHeight = pdf.internal.pageSize.getHeight();
+          const imgWidth = canvas.width;
+          const imgHeight = canvas.height;
+          const ratio = Math.min(pdfWidth / imgWidth, pdfHeight / imgHeight);
+          const imgX = (pdfWidth - imgWidth * ratio) / 2;
+          const imgY = 10;
+
+          pdf.addImage(imgData, 'PNG', imgX, imgY, imgWidth * ratio, imgHeight * ratio);
+
+          // Cleanup DOM
+          root.unmount();
+          document.body.removeChild(container);
+
+          // Convert PDF to blob
+          const pdfBlob = pdf.output('blob');
+          
+          // Upload to storage - path: employee_id/payslip_number.pdf
+          const filePath = `${emp.employee_id}/${emp.payslip_number}.pdf`;
+          
+          const { error: uploadError } = await supabase.storage
+            .from('payslips')
+            .upload(filePath, pdfBlob, {
+              contentType: 'application/pdf',
+              upsert: true,
+            });
+
+          if (uploadError) throw uploadError;
+
+          // Get the public URL
+          const { data: urlData } = supabase.storage
+            .from('payslips')
+            .getPublicUrl(filePath);
+
+          // Update the payslip record with the PDF URL
+          const { error: updateError } = await supabase
+            .from('payslips')
+            .update({
+              pdf_url: urlData.publicUrl,
+              pdf_generated_at: new Date().toISOString(),
+            })
+            .eq('payslip_number', emp.payslip_number);
+
+          if (updateError) {
+            console.warn("Could not update payslip record:", updateError);
+          }
+
+          newResults.push({ name: emp.employee_name, status: 'success' });
+        } catch (err: any) {
+          console.error(`Failed to store payslip for ${emp.employee_name}:`, err);
+          newResults.push({ name: emp.employee_name, status: 'failed', error: err.message });
+        }
+      }
+
+      setResults(newResults);
+      setShowResults(true);
+      
+      const successCount = newResults.filter(r => r.status === 'success').length;
+      toast.success(`Stored ${successCount} payslips successfully`);
+    } catch (err: any) {
+      console.error("Store payslips failed:", err);
+      toast.error("Failed to store payslips");
     } finally {
       setIsLoading(false);
       setAction(null);
@@ -564,6 +712,7 @@ export function BulkPayslipDistribution({
                     {action === 'download' && t("payroll.bulkDistribution.generating", "Generating PDFs...")}
                     {action === 'email' && t("payroll.bulkDistribution.sending", "Sending emails...")}
                     {action === 'print' && t("payroll.bulkDistribution.preparing", "Preparing for print...")}
+                    {action === 'store' && t("payroll.bulkDistribution.storing", "Storing payslips...")}
                   </span>
                   <span className="text-sm font-medium">{progress}%</span>
                 </div>
@@ -610,6 +759,7 @@ export function BulkPayslipDistribution({
               <Button 
                 onClick={handleBulkDownload}
                 disabled={isLoading || selectedCount === 0}
+                variant="outline"
               >
                 {action === 'download' ? (
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -617,6 +767,17 @@ export function BulkPayslipDistribution({
                   <Download className="h-4 w-4 mr-2" />
                 )}
                 {t("payroll.bulkDistribution.download", "Download All")}
+              </Button>
+              <Button 
+                onClick={handleStorePayslips}
+                disabled={isLoading || selectedCount === 0}
+              >
+                {action === 'store' ? (
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                ) : (
+                  <Save className="h-4 w-4 mr-2" />
+                )}
+                {t("payroll.bulkDistribution.storeFinalize", "Store & Finalize")}
               </Button>
             </>
           )}
