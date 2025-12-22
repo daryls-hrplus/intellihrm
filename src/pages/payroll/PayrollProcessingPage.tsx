@@ -16,6 +16,7 @@ import { useGLCalculation } from "@/hooks/useGLCalculation";
 import { PayrollFilters, usePayrollFilters } from "@/components/payroll/PayrollFilters";
 import { usePayslipTemplates, PayslipTemplate } from "@/hooks/usePayslipTemplates";
 import { PayslipDocument } from "@/components/payroll/PayslipDocument";
+import { BulkPayslipDistribution } from "@/components/payroll/BulkPayslipDistribution";
 import { supabase } from "@/integrations/supabase/client";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "@/contexts/AuthContext";
@@ -37,6 +38,7 @@ import {
   AlertTriangle,
   Printer,
   BookOpen,
+  Mail,
 } from "lucide-react";
 import { formatDateForDisplay } from "@/utils/dateUtils";
 
@@ -91,6 +93,8 @@ export default function PayrollProcessingPage() {
   const [runToRecalc, setRunToRecalc] = useState<ExtendedPayrollRun | null>(null);
   const [runToReopen, setRunToReopen] = useState<ExtendedPayrollRun | null>(null);
   const [payGroupGLConfigured, setPayGroupGLConfigured] = useState(false);
+  const [bulkDistributionOpen, setBulkDistributionOpen] = useState(false);
+  const [bulkDistributionRun, setBulkDistributionRun] = useState<ExtendedPayrollRun | null>(null);
 
   const isAdmin = hasRole('admin');
   const isHRManager = hasRole('hr_manager');
