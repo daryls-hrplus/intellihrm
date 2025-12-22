@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { formatDateForDisplay } from "@/utils/dateUtils";
 import { Plus, Filter, Eye, Edit, Trash2, PlayCircle, Loader2 } from "lucide-react";
+import { useLanguage } from "@/hooks/useLanguage";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -60,7 +61,9 @@ export function EmployeeTransactionsList({
   onEdit,
   onStartWorkflow,
 }: EmployeeTransactionsListProps) {
+  const { t } = useLanguage();
   const { fetchTransactions, deleteTransaction, fetchLookupValues, isLoading } =
+    useEmployeeTransactions();
     useEmployeeTransactions();
   const [transactions, setTransactions] = useState<EmployeeTransaction[]>([]);
   const [transactionTypes, setTransactionTypes] = useState<LookupValue[]>([]);
@@ -123,31 +126,31 @@ export function EmployeeTransactionsList({
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-1 gap-2">
           <Input
-            placeholder="Search transactions..."
+            placeholder={t("workforce.modules.transactions.searchPlaceholder")}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="max-w-xs"
           />
           <Select value={statusFilter} onValueChange={setStatusFilter}>
             <SelectTrigger className="w-40">
-              <SelectValue placeholder="Status" />
+              <SelectValue placeholder={t("common.status")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Statuses</SelectItem>
-              <SelectItem value="draft">Draft</SelectItem>
-              <SelectItem value="pending_approval">Pending Approval</SelectItem>
-              <SelectItem value="approved">Approved</SelectItem>
-              <SelectItem value="rejected">Rejected</SelectItem>
-              <SelectItem value="completed">Completed</SelectItem>
-              <SelectItem value="cancelled">Cancelled</SelectItem>
+              <SelectItem value="all">{t("workforce.modules.transactions.allStatuses")}</SelectItem>
+              <SelectItem value="draft">{t("workforce.modules.transactions.statuses.draft")}</SelectItem>
+              <SelectItem value="pending_approval">{t("workforce.modules.transactions.statuses.pending_approval")}</SelectItem>
+              <SelectItem value="approved">{t("workforce.modules.transactions.statuses.approved")}</SelectItem>
+              <SelectItem value="rejected">{t("workforce.modules.transactions.statuses.rejected")}</SelectItem>
+              <SelectItem value="completed">{t("workforce.modules.transactions.statuses.completed")}</SelectItem>
+              <SelectItem value="cancelled">{t("workforce.modules.transactions.statuses.cancelled")}</SelectItem>
             </SelectContent>
           </Select>
           <Select value={typeFilter} onValueChange={setTypeFilter}>
             <SelectTrigger className="w-48">
-              <SelectValue placeholder="Transaction Type" />
+              <SelectValue placeholder={t("workforce.modules.transactions.transactionType")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Types</SelectItem>
+              <SelectItem value="all">{t("workforce.modules.transactions.allTypes")}</SelectItem>
               {transactionTypes.map((type) => (
                 <SelectItem key={type.id} value={type.id}>
                   {type.name}
@@ -159,7 +162,7 @@ export function EmployeeTransactionsList({
         <Select onValueChange={onCreateNew}>
           <SelectTrigger className="w-48">
             <Plus className="mr-2 h-4 w-4" />
-            <SelectValue placeholder="New Transaction" />
+            <SelectValue placeholder={t("workforce.modules.transactions.newTransaction")} />
           </SelectTrigger>
           <SelectContent>
             {transactionTypes.map((type) => (
@@ -176,13 +179,13 @@ export function EmployeeTransactionsList({
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Transaction #</TableHead>
-              <TableHead>Type</TableHead>
-              <TableHead>Employee</TableHead>
-              <TableHead>Effective Date</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Created</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
+              <TableHead>{t("workforce.modules.transactions.transactionNumber")}</TableHead>
+              <TableHead>{t("workforce.modules.transactions.transactionType")}</TableHead>
+              <TableHead>{t("common.employee")}</TableHead>
+              <TableHead>{t("workforce.modules.transactions.effectiveDate")}</TableHead>
+              <TableHead>{t("common.status")}</TableHead>
+              <TableHead>{t("workforce.modules.transactions.created")}</TableHead>
+              <TableHead className="text-right">{t("common.actions")}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -198,7 +201,7 @@ export function EmployeeTransactionsList({
                   colSpan={7}
                   className="text-center py-8 text-muted-foreground"
                 >
-                  No transactions found
+                  {t("workforce.modules.transactions.noTransactionsFound")}
                 </TableCell>
               </TableRow>
             ) : (
@@ -222,7 +225,7 @@ export function EmployeeTransactionsList({
                   </TableCell>
                   <TableCell>
                     <Badge className={statusColors[transaction.status]}>
-                      {transaction.status.replace("_", " ")}
+                      {t(`workforce.modules.transactions.statuses.${transaction.status}`)}
                     </Badge>
                   </TableCell>
                   <TableCell>
@@ -280,20 +283,18 @@ export function EmployeeTransactionsList({
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Transaction</AlertDialogTitle>
+            <AlertDialogTitle>{t("workforce.modules.transactions.deleteTransaction")}</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete transaction{" "}
-              {transactionToDelete?.transaction_number}? This action cannot be
-              undone.
+              {t("workforce.modules.transactions.deleteConfirmation", { number: transactionToDelete?.transaction_number })}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{t("common.cancel")}</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDelete}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              Delete
+              {t("common.delete")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
