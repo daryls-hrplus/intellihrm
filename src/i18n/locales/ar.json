@@ -172,7 +172,20 @@
     "website": "الموقع الإلكتروني",
     "industry": "الصناعة",
     "code": "الرمز",
-    "required": "مطلوب"
+    "required": "مطلوب",
+    "department": "القسم",
+    "position": "المنصب",
+    "selectDepartment": "اختر القسم",
+    "selectPosition": "اختر المنصب",
+    "selectPayGroup": "اختر مجموعة الرواتب",
+    "allPayGroups": "كل مجموعات الرواتب",
+    "selectDepartmentFirst": "اختر القسم أولاً",
+    "selectEmployeeFirst": "اختر الموظف أولاً",
+    "selectEmployee": "اختر الموظف",
+    "fillRequiredFields": "يرجى ملء جميع الحقول المطلوبة",
+    "saving": "جاري الحفظ...",
+    "notes": "ملاحظات",
+    "notesPlaceholder": "أضف ملاحظات إضافية هنا..."
   },
   "auth": {
     "login": "تسجيل الدخول",
