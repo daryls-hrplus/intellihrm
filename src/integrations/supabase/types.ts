@@ -6076,9 +6076,12 @@ export type Database = {
         Row: {
           archived_at: string | null
           archived_by: string | null
+          attachment_name: string | null
+          attachment_url: string | null
           category: string | null
           check_type: string
           completed_date: string | null
+          consent_date: string | null
           created_at: string
           employee_id: string
           expiry_date: string | null
@@ -6090,15 +6093,19 @@ export type Database = {
           reference_number: string | null
           requested_date: string
           result: string | null
+          scope: string | null
           status: string
           updated_at: string
         }
         Insert: {
           archived_at?: string | null
           archived_by?: string | null
+          attachment_name?: string | null
+          attachment_url?: string | null
           category?: string | null
           check_type: string
           completed_date?: string | null
+          consent_date?: string | null
           created_at?: string
           employee_id: string
           expiry_date?: string | null
@@ -6110,15 +6117,19 @@ export type Database = {
           reference_number?: string | null
           requested_date: string
           result?: string | null
+          scope?: string | null
           status?: string
           updated_at?: string
         }
         Update: {
           archived_at?: string | null
           archived_by?: string | null
+          attachment_name?: string | null
+          attachment_url?: string | null
           category?: string | null
           check_type?: string
           completed_date?: string | null
+          consent_date?: string | null
           created_at?: string
           employee_id?: string
           expiry_date?: string | null
@@ -6130,6 +6141,7 @@ export type Database = {
           reference_number?: string | null
           requested_date?: string
           result?: string | null
+          scope?: string | null
           status?: string
           updated_at?: string
         }

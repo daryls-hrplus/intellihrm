@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -10,10 +10,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { Plus, Pencil, Archive, ShieldCheck, CheckCircle, XCircle, Clock, Eye } from "lucide-react";
+import { Plus, Pencil, Archive, ShieldCheck, CheckCircle, XCircle, Clock, Eye, Upload, FileText, X, Download } from "lucide-react";
 import { getTodayString, formatDateForDisplay } from "@/utils/dateUtils";
 import { useGranularPermissions } from "@/hooks/useGranularPermissions";
 import { useAuditLog } from "@/hooks/useAuditLog";
+import { CountrySelect } from "@/components/ui/country-select";
 
 interface BackgroundCheck {
   id: string;
@@ -27,6 +28,11 @@ interface BackgroundCheck {
   expiry_date: string | null;
   notes: string | null;
   category: string | null;
+  jurisdiction: string | null;
+  scope: string | null;
+  consent_date: string | null;
+  attachment_url: string | null;
+  attachment_name: string | null;
 }
 
 interface BackgroundCheckFormData {
@@ -39,6 +45,9 @@ interface BackgroundCheckFormData {
   reference_number: string;
   expiry_date: string;
   notes: string;
+  jurisdiction: string;
+  scope: string;
+  consent_date: string;
 }
 
 interface EmployeeBackgroundChecksTabProps {
@@ -52,6 +61,10 @@ export function EmployeeBackgroundChecksTab({ employeeId, viewType = "hr" }: Emp
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingCheck, setEditingCheck] = useState<BackgroundCheck | null>(null);
   const [viewingCheck, setViewingCheck] = useState<BackgroundCheck | null>(null);
+  const [uploadingFile, setUploadingFile] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [currentAttachment, setCurrentAttachment] = useState<{ url: string; name: string } | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const { hasTabAccess } = useGranularPermissions();
   const { logAction } = useAuditLog();
@@ -72,6 +85,9 @@ export function EmployeeBackgroundChecksTab({ employeeId, viewType = "hr" }: Emp
       reference_number: "",
       expiry_date: "",
       notes: "",
+      jurisdiction: "",
+      scope: "",
+      consent_date: "",
     },
   });
 
@@ -96,8 +112,44 @@ export function EmployeeBackgroundChecksTab({ employeeId, viewType = "hr" }: Emp
     fetchChecks();
   }, [employeeId]);
 
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 10 * 1024 * 1024) {
+        toast.error("File size must be less than 10MB");
+        return;
+      }
+      setSelectedFile(file);
+    }
+  };
+
+  const uploadFile = async (checkId: string): Promise<{ url: string; name: string } | null> => {
+    if (!selectedFile) return null;
+
+    const fileExt = selectedFile.name.split('.').pop();
+    const filePath = `background-checks/${employeeId}/${checkId}/${Date.now()}.${fileExt}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from('compliance-documents')
+      .upload(filePath, selectedFile);
+
+    if (uploadError) {
+      console.error("Upload error:", uploadError);
+      toast.error("Failed to upload document");
+      return null;
+    }
+
+    const { data: { publicUrl } } = supabase.storage
+      .from('compliance-documents')
+      .getPublicUrl(filePath);
+
+    return { url: publicUrl, name: selectedFile.name };
+  };
+
   const handleSubmit = async (data: BackgroundCheckFormData) => {
     try {
+      setUploadingFile(true);
+      
       const payload = {
         ...data,
         category: "background_check",
@@ -107,12 +159,23 @@ export function EmployeeBackgroundChecksTab({ employeeId, viewType = "hr" }: Emp
         reference_number: data.reference_number || null,
         expiry_date: data.expiry_date || null,
         notes: data.notes || null,
+        jurisdiction: data.jurisdiction || null,
+        scope: data.scope || null,
+        consent_date: data.consent_date || null,
       };
 
       if (editingCheck) {
+        let attachmentData = {};
+        if (selectedFile) {
+          const uploaded = await uploadFile(editingCheck.id);
+          if (uploaded) {
+            attachmentData = { attachment_url: uploaded.url, attachment_name: uploaded.name };
+          }
+        }
+
         const { error } = await supabase
           .from("employee_background_checks")
-          .update(payload)
+          .update({ ...payload, ...attachmentData })
           .eq("id", editingCheck.id);
 
         if (error) throw error;
@@ -133,6 +196,16 @@ export function EmployeeBackgroundChecksTab({ employeeId, viewType = "hr" }: Emp
         }).select().single();
 
         if (error) throw error;
+
+        if (selectedFile && result) {
+          const uploaded = await uploadFile(result.id);
+          if (uploaded) {
+            await supabase
+              .from("employee_background_checks")
+              .update({ attachment_url: uploaded.url, attachment_name: uploaded.name })
+              .eq("id", result.id);
+          }
+        }
         
         await logAction({
           action: "CREATE",
@@ -147,15 +220,21 @@ export function EmployeeBackgroundChecksTab({ employeeId, viewType = "hr" }: Emp
 
       setDialogOpen(false);
       setEditingCheck(null);
+      setSelectedFile(null);
+      setCurrentAttachment(null);
       form.reset();
       fetchChecks();
     } catch (error) {
       toast.error("Failed to save background check");
+    } finally {
+      setUploadingFile(false);
     }
   };
 
   const handleEdit = (check: BackgroundCheck) => {
     setEditingCheck(check);
+    setCurrentAttachment(check.attachment_url ? { url: check.attachment_url, name: check.attachment_name || 'Document' } : null);
+    setSelectedFile(null);
     form.reset({
       check_type: check.check_type,
       provider: check.provider || "",
@@ -166,6 +245,9 @@ export function EmployeeBackgroundChecksTab({ employeeId, viewType = "hr" }: Emp
       reference_number: check.reference_number || "",
       expiry_date: check.expiry_date || "",
       notes: check.notes || "",
+      jurisdiction: check.jurisdiction || "",
+      scope: check.scope || "",
+      consent_date: check.consent_date || "",
     });
     setDialogOpen(true);
   };
@@ -194,6 +276,8 @@ export function EmployeeBackgroundChecksTab({ employeeId, viewType = "hr" }: Emp
 
   const openNewDialog = () => {
     setEditingCheck(null);
+    setSelectedFile(null);
+    setCurrentAttachment(null);
     form.reset({
       check_type: "criminal",
       provider: "",
@@ -204,6 +288,9 @@ export function EmployeeBackgroundChecksTab({ employeeId, viewType = "hr" }: Emp
       reference_number: "",
       expiry_date: "",
       notes: "",
+      jurisdiction: "",
+      scope: "",
+      consent_date: "",
     });
     setDialogOpen(true);
   };
@@ -247,6 +334,17 @@ export function EmployeeBackgroundChecksTab({ employeeId, viewType = "hr" }: Emp
       default:
         return <Badge variant="secondary" className="capitalize">{status}</Badge>;
     }
+  };
+
+  const getScopeBadge = (scope: string | null) => {
+    if (!scope) return null;
+    const labels: Record<string, string> = {
+      local: "Local",
+      regional: "Regional",
+      national: "National",
+      international: "International",
+    };
+    return <Badge variant="outline" className="text-xs">{labels[scope] || scope}</Badge>;
   };
 
   // ESS View - Simplified status card
@@ -317,6 +415,7 @@ export function EmployeeBackgroundChecksTab({ employeeId, viewType = "hr" }: Emp
                         {check.check_type.replace("_", " ")}
                       </CardTitle>
                       {getStatusBadge(check.status)}
+                      {getScopeBadge(check.scope)}
                     </div>
                   </div>
                 </CardHeader>
@@ -326,6 +425,12 @@ export function EmployeeBackgroundChecksTab({ employeeId, viewType = "hr" }: Emp
                       <span className="text-muted-foreground">Requested:</span>{" "}
                       {formatDateForDisplay(check.requested_date)}
                     </div>
+                    {check.jurisdiction && (
+                      <div>
+                        <span className="text-muted-foreground">Jurisdiction:</span>{" "}
+                        {check.jurisdiction}
+                      </div>
+                    )}
                     {check.expiry_date && (
                       <div>
                         <span className="text-muted-foreground">Expires:</span>{" "}
@@ -355,13 +460,14 @@ export function EmployeeBackgroundChecksTab({ employeeId, viewType = "hr" }: Emp
                 Add Background Check
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-lg">
+            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>{editingCheck ? "Edit Background Check" : "Add Background Check"}</DialogTitle>
               </DialogHeader>
               <Form {...form}>
                 <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
+                  {/* Row 1: Check Type, Jurisdiction, Scope */}
+                  <div className="grid grid-cols-3 gap-4">
                     <FormField
                       control={form.control}
                       name="check_type"
@@ -381,12 +487,57 @@ export function EmployeeBackgroundChecksTab({ employeeId, viewType = "hr" }: Emp
                               <SelectItem value="education">Education Verification</SelectItem>
                               <SelectItem value="drug_test">Drug Test</SelectItem>
                               <SelectItem value="identity">Identity Verification</SelectItem>
+                              <SelectItem value="reference">Reference Check</SelectItem>
+                              <SelectItem value="social_media">Social Media Screening</SelectItem>
                               <SelectItem value="other">Other</SelectItem>
                             </SelectContent>
                           </Select>
                         </FormItem>
                       )}
                     />
+                    <FormField
+                      control={form.control}
+                      name="jurisdiction"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Jurisdiction</FormLabel>
+                          <FormControl>
+                            <CountrySelect
+                              value={field.value}
+                              onChange={field.onChange}
+                              valueType="name"
+                              placeholder="Select jurisdiction"
+                            />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="scope"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Scope</FormLabel>
+                          <Select onValueChange={field.onChange} value={field.value}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select scope..." />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="local">Local</SelectItem>
+                              <SelectItem value="regional">Regional</SelectItem>
+                              <SelectItem value="national">National</SelectItem>
+                              <SelectItem value="international">International</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
+                  {/* Row 2: Provider, Reference Number */}
+                  <div className="grid grid-cols-2 gap-4">
                     <FormField
                       control={form.control}
                       name="provider"
@@ -399,9 +550,22 @@ export function EmployeeBackgroundChecksTab({ employeeId, viewType = "hr" }: Emp
                         </FormItem>
                       )}
                     />
+                    <FormField
+                      control={form.control}
+                      name="reference_number"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Reference Number</FormLabel>
+                          <FormControl>
+                            <Input {...field} placeholder="Case/Reference ID" />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
+                  {/* Row 3: Requested Date, Consent Date, Completed Date */}
+                  <div className="grid grid-cols-3 gap-4">
                     <FormField
                       control={form.control}
                       name="requested_date"
@@ -413,6 +577,18 @@ export function EmployeeBackgroundChecksTab({ employeeId, viewType = "hr" }: Emp
                             <Input type="date" {...field} />
                           </FormControl>
                           <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="consent_date"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Consent Date</FormLabel>
+                          <FormControl>
+                            <Input type="date" {...field} />
+                          </FormControl>
                         </FormItem>
                       )}
                     />
@@ -430,7 +606,8 @@ export function EmployeeBackgroundChecksTab({ employeeId, viewType = "hr" }: Emp
                     />
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
+                  {/* Row 4: Status, Result, Expiry Date */}
+                  <div className="grid grid-cols-3 gap-4">
                     <FormField
                       control={form.control}
                       name="status"
@@ -470,23 +647,9 @@ export function EmployeeBackgroundChecksTab({ employeeId, viewType = "hr" }: Emp
                               <SelectItem value="passed">Passed</SelectItem>
                               <SelectItem value="flagged">Flagged</SelectItem>
                               <SelectItem value="failed">Failed</SelectItem>
+                              <SelectItem value="inconclusive">Inconclusive</SelectItem>
                             </SelectContent>
                           </Select>
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4">
-                    <FormField
-                      control={form.control}
-                      name="reference_number"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Reference Number</FormLabel>
-                          <FormControl>
-                            <Input {...field} />
-                          </FormControl>
                         </FormItem>
                       )}
                     />
@@ -504,6 +667,77 @@ export function EmployeeBackgroundChecksTab({ employeeId, viewType = "hr" }: Emp
                     />
                   </div>
 
+                  {/* Row 5: Attachment */}
+                  <div className="space-y-2">
+                    <FormLabel>Attachment</FormLabel>
+                    <div className="border rounded-md p-4 space-y-3">
+                      {currentAttachment && !selectedFile && (
+                        <div className="flex items-center justify-between p-2 bg-muted rounded">
+                          <div className="flex items-center gap-2">
+                            <FileText className="h-4 w-4" />
+                            <span className="text-sm">{currentAttachment.name}</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => window.open(currentAttachment.url, '_blank')}
+                            >
+                              <Download className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => setCurrentAttachment(null)}
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </div>
+                      )}
+                      {selectedFile && (
+                        <div className="flex items-center justify-between p-2 bg-muted rounded">
+                          <div className="flex items-center gap-2">
+                            <FileText className="h-4 w-4" />
+                            <span className="text-sm">{selectedFile.name}</span>
+                          </div>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setSelectedFile(null)}
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      )}
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="file"
+                          ref={fileInputRef}
+                          onChange={handleFileSelect}
+                          className="hidden"
+                          accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                        />
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => fileInputRef.current?.click()}
+                        >
+                          <Upload className="h-4 w-4 mr-2" />
+                          {selectedFile || currentAttachment ? "Replace File" : "Upload Document"}
+                        </Button>
+                        <span className="text-xs text-muted-foreground">
+                          PDF, Word, or Image (max 10MB)
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Row 6: Notes */}
                   <FormField
                     control={form.control}
                     name="notes"
@@ -521,7 +755,9 @@ export function EmployeeBackgroundChecksTab({ employeeId, viewType = "hr" }: Emp
                     <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
                       Cancel
                     </Button>
-                    <Button type="submit">Save</Button>
+                    <Button type="submit" disabled={uploadingFile}>
+                      {uploadingFile ? "Saving..." : editingCheck ? "Update" : "Add"}
+                    </Button>
                   </div>
                 </form>
               </Form>
@@ -530,61 +766,93 @@ export function EmployeeBackgroundChecksTab({ employeeId, viewType = "hr" }: Emp
         )}
       </div>
 
-      {/* Detail View Dialog */}
+      {/* View Dialog */}
       <Dialog open={!!viewingCheck} onOpenChange={() => setViewingCheck(null)}>
         <DialogContent className="max-w-lg">
           <DialogHeader>
-            <DialogTitle>Background Check Details</DialogTitle>
+            <DialogTitle className="capitalize">{viewingCheck?.check_type.replace("_", " ")} Details</DialogTitle>
           </DialogHeader>
           {viewingCheck && (
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div>
-                  <span className="text-muted-foreground">Type:</span>
-                  <p className="font-medium capitalize">{viewingCheck.check_type.replace("_", " ")}</p>
+                  <p className="text-muted-foreground">Check Type</p>
+                  <p className="capitalize">{viewingCheck.check_type.replace("_", " ")}</p>
                 </div>
                 <div>
-                  <span className="text-muted-foreground">Status:</span>
-                  <div className="mt-1">{getStatusBadge(viewingCheck.status)}</div>
+                  <p className="text-muted-foreground">Status</p>
+                  {getStatusBadge(viewingCheck.status)}
                 </div>
+                {viewingCheck.jurisdiction && (
+                  <div>
+                    <p className="text-muted-foreground">Jurisdiction</p>
+                    <p>{viewingCheck.jurisdiction}</p>
+                  </div>
+                )}
+                {viewingCheck.scope && (
+                  <div>
+                    <p className="text-muted-foreground">Scope</p>
+                    <p className="capitalize">{viewingCheck.scope}</p>
+                  </div>
+                )}
                 {viewingCheck.provider && (
                   <div>
-                    <span className="text-muted-foreground">Provider:</span>
-                    <p className="font-medium">{viewingCheck.provider}</p>
+                    <p className="text-muted-foreground">Provider</p>
+                    <p>{viewingCheck.provider}</p>
                   </div>
                 )}
                 {viewingCheck.reference_number && (
                   <div>
-                    <span className="text-muted-foreground">Reference:</span>
-                    <p className="font-medium">{viewingCheck.reference_number}</p>
+                    <p className="text-muted-foreground">Reference</p>
+                    <p>{viewingCheck.reference_number}</p>
                   </div>
                 )}
                 <div>
-                  <span className="text-muted-foreground">Requested:</span>
-                  <p className="font-medium">{formatDateForDisplay(viewingCheck.requested_date)}</p>
+                  <p className="text-muted-foreground">Requested Date</p>
+                  <p>{formatDateForDisplay(viewingCheck.requested_date)}</p>
                 </div>
+                {viewingCheck.consent_date && (
+                  <div>
+                    <p className="text-muted-foreground">Consent Date</p>
+                    <p>{formatDateForDisplay(viewingCheck.consent_date)}</p>
+                  </div>
+                )}
                 {viewingCheck.completed_date && (
                   <div>
-                    <span className="text-muted-foreground">Completed:</span>
-                    <p className="font-medium">{formatDateForDisplay(viewingCheck.completed_date)}</p>
+                    <p className="text-muted-foreground">Completed Date</p>
+                    <p>{formatDateForDisplay(viewingCheck.completed_date)}</p>
+                  </div>
+                )}
+                {viewingCheck.expiry_date && (
+                  <div>
+                    <p className="text-muted-foreground">Expiry Date</p>
+                    <p>{formatDateForDisplay(viewingCheck.expiry_date)}</p>
                   </div>
                 )}
                 {canViewResults && viewingCheck.result && (
                   <div>
-                    <span className="text-muted-foreground">Result:</span>
-                    <Badge 
-                      variant={viewingCheck.result === "clear" || viewingCheck.result === "passed" ? "default" : "destructive"}
-                      className="mt-1 capitalize"
-                    >
-                      {viewingCheck.result}
-                    </Badge>
+                    <p className="text-muted-foreground">Result</p>
+                    <p className="capitalize">{viewingCheck.result}</p>
                   </div>
                 )}
               </div>
-              {viewingCheck.notes && canViewNotes && (
-                <div>
-                  <span className="text-muted-foreground text-sm">Notes:</span>
-                  <p className="text-sm mt-1 bg-muted p-2 rounded">{viewingCheck.notes}</p>
+              {viewingCheck.attachment_url && (
+                <div className="pt-2 border-t">
+                  <p className="text-sm text-muted-foreground mb-2">Attachment</p>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => window.open(viewingCheck.attachment_url!, '_blank')}
+                  >
+                    <Download className="h-4 w-4 mr-2" />
+                    {viewingCheck.attachment_name || 'Download Document'}
+                  </Button>
+                </div>
+              )}
+              {canViewNotes && viewingCheck.notes && (
+                <div className="pt-2 border-t">
+                  <p className="text-sm text-muted-foreground">Notes</p>
+                  <p className="text-sm">{viewingCheck.notes}</p>
                 </div>
               )}
             </div>
@@ -607,20 +875,15 @@ export function EmployeeBackgroundChecksTab({ employeeId, viewType = "hr" }: Emp
             <Card key={check.id} className={check.status === "archived" ? "opacity-60" : ""}>
               <CardHeader className="pb-2">
                 <div className="flex justify-between items-start">
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 flex-wrap">
                     {getComplianceIndicator(check)}
-                    {getStatusIcon(check.status, check.result)}
                     <CardTitle className="text-base capitalize">
                       {check.check_type.replace("_", " ")}
                     </CardTitle>
                     {getStatusBadge(check.status)}
-                    {canViewResults && check.result && (
-                      <Badge 
-                        variant={check.result === "clear" || check.result === "passed" ? "default" : "destructive"}
-                        className="capitalize"
-                      >
-                        {check.result}
-                      </Badge>
+                    {getScopeBadge(check.scope)}
+                    {check.attachment_url && (
+                      <FileText className="h-4 w-4 text-muted-foreground" />
                     )}
                   </div>
                   <div className="flex gap-1">
@@ -646,20 +909,34 @@ export function EmployeeBackgroundChecksTab({ employeeId, viewType = "hr" }: Emp
                     <span className="text-muted-foreground">Requested:</span>{" "}
                     {formatDateForDisplay(check.requested_date)}
                   </div>
-                  {check.completed_date && (
+                  {check.jurisdiction && (
                     <div>
-                      <span className="text-muted-foreground">Completed:</span>{" "}
-                      {formatDateForDisplay(check.completed_date)}
+                      <span className="text-muted-foreground">Jurisdiction:</span>{" "}
+                      {check.jurisdiction}
+                    </div>
+                  )}
+                  {check.consent_date && (
+                    <div>
+                      <span className="text-muted-foreground">Consent:</span>{" "}
+                      {formatDateForDisplay(check.consent_date)}
+                    </div>
+                  )}
+                  {canViewResults && check.result && (
+                    <div>
+                      <span className="text-muted-foreground">Result:</span>{" "}
+                      <span className="capitalize">{check.result}</span>
+                    </div>
+                  )}
+                  {check.expiry_date && (
+                    <div>
+                      <span className="text-muted-foreground">Expires:</span>{" "}
+                      {formatDateForDisplay(check.expiry_date)}
                     </div>
                   )}
                   {check.provider && (
                     <div>
-                      <span className="text-muted-foreground">Provider:</span> {check.provider}
-                    </div>
-                  )}
-                  {check.reference_number && (
-                    <div>
-                      <span className="text-muted-foreground">Reference:</span> {check.reference_number}
+                      <span className="text-muted-foreground">Provider:</span>{" "}
+                      {check.provider}
                     </div>
                   )}
                 </div>
