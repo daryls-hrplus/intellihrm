@@ -10,13 +10,17 @@ import { useTranslation } from "react-i18next";
 interface SalarySummarySectionProps {
   companyId: string;
   employeeId: string;
+  payGroupId?: string;
 }
 
 interface PositionData {
+  id: string;
+  position_id: string;
   position_title: string;
   compensation_amount: number;
   compensation_currency: string;
   compensation_frequency: string;
+  is_primary: boolean;
 }
 
 interface CompensationItem {
@@ -28,9 +32,9 @@ interface CompensationItem {
   pay_element_code: string;
 }
 
-export function SalarySummarySection({ companyId, employeeId }: SalarySummarySectionProps) {
+export function SalarySummarySection({ companyId, employeeId, payGroupId }: SalarySummarySectionProps) {
   const { t } = useTranslation();
-  const [positionData, setPositionData] = useState<PositionData | null>(null);
+  const [positions, setPositions] = useState<PositionData[]>([]);
   const [compensationItems, setCompensationItems] = useState<CompensationItem[]>([]);
   const [employeeName, setEmployeeName] = useState<string>("");
   const [isLoading, setIsLoading] = useState(true);
@@ -39,34 +43,47 @@ export function SalarySummarySection({ companyId, employeeId }: SalarySummarySec
     if (employeeId) {
       loadSalaryData();
     }
-  }, [employeeId]);
+  }, [employeeId, payGroupId]);
 
   const loadSalaryData = async () => {
     setIsLoading(true);
     try {
-      // Load employee position with salary
-      const { data: posData, error: posError } = await supabase
+      // Load all active positions for this employee in the specified pay group
+      let posQuery = supabase
         .from('employee_positions')
         .select(`
+          id,
+          position_id,
           compensation_amount,
           compensation_currency,
           compensation_frequency,
+          is_primary,
           positions (title)
         `)
         .eq('employee_id', employeeId)
-        .eq('is_active', true)
-        .eq('is_primary', true)
-        .maybeSingle();
+        .eq('is_active', true);
+      
+      // If payGroupId is provided, filter by it
+      if (payGroupId) {
+        posQuery = posQuery.eq('pay_group_id', payGroupId);
+      }
+
+      const { data: posData, error: posError } = await posQuery.order('is_primary', { ascending: false });
 
       if (posError) throw posError;
 
-      if (posData) {
-        setPositionData({
-          position_title: (posData.positions as any)?.title || 'N/A',
-          compensation_amount: posData.compensation_amount || 0,
-          compensation_currency: posData.compensation_currency || 'USD',
-          compensation_frequency: posData.compensation_frequency || 'monthly'
-        });
+      if (posData && posData.length > 0) {
+        setPositions(posData.map(pos => ({
+          id: pos.id,
+          position_id: pos.position_id,
+          position_title: (pos.positions as any)?.title || 'N/A',
+          compensation_amount: pos.compensation_amount || 0,
+          compensation_currency: pos.compensation_currency || 'USD',
+          compensation_frequency: pos.compensation_frequency || 'monthly',
+          is_primary: pos.is_primary
+        })));
+      } else {
+        setPositions([]);
       }
 
       // Load employee name
@@ -130,6 +147,15 @@ export function SalarySummarySection({ companyId, employeeId }: SalarySummarySec
     return frequencies[freq] || freq;
   };
 
+  const convertToMonthly = (amount: number, frequency: string): number => {
+    switch (frequency) {
+      case 'annual': return amount / 12;
+      case 'weekly': return amount * 4.33;
+      case 'biweekly': return amount * 2.17;
+      default: return amount;
+    }
+  };
+
   if (isLoading) {
     return (
       <Card>
@@ -142,26 +168,22 @@ export function SalarySummarySection({ companyId, employeeId }: SalarySummarySec
     );
   }
 
-  // Employee compensation overrides position compensation
-  const useEmployeeCompensation = compensationItems.length > 0;
-  
-  const totalMonthlyComp = compensationItems.reduce((sum, item) => {
-    // Convert to monthly for comparison
-    let monthlyAmount = item.amount;
-    if (item.frequency === 'annual') monthlyAmount = item.amount / 12;
-    if (item.frequency === 'weekly') monthlyAmount = item.amount * 4.33;
-    if (item.frequency === 'biweekly') monthlyAmount = item.amount * 2.17;
-    return sum + monthlyAmount;
+  // Calculate totals from positions
+  const totalPositionMonthlyComp = positions.reduce((sum, pos) => {
+    return sum + convertToMonthly(pos.compensation_amount, pos.compensation_frequency);
   }, 0);
 
-  // Calculate position compensation monthly equivalent for fallback
-  const positionMonthlyComp = positionData ? (() => {
-    let monthlyAmount = positionData.compensation_amount;
-    if (positionData.compensation_frequency === 'annual') monthlyAmount = positionData.compensation_amount / 12;
-    if (positionData.compensation_frequency === 'weekly') monthlyAmount = positionData.compensation_amount * 4.33;
-    if (positionData.compensation_frequency === 'biweekly') monthlyAmount = positionData.compensation_amount * 2.17;
-    return monthlyAmount;
-  })() : 0;
+  // Calculate totals from additional compensation items
+  const totalCompItemsMonthlyComp = compensationItems.reduce((sum, item) => {
+    return sum + convertToMonthly(item.amount, item.frequency);
+  }, 0);
+
+  const totalMonthlyComp = totalPositionMonthlyComp + totalCompItemsMonthlyComp;
+  const primaryCurrency = positions.length > 0 
+    ? positions[0].compensation_currency 
+    : (compensationItems.length > 0 ? compensationItems[0].currency : 'USD');
+
+  const hasMultiplePositions = positions.length > 1;
 
   return (
     <Card>
@@ -169,81 +191,101 @@ export function SalarySummarySection({ companyId, employeeId }: SalarySummarySec
         <CardTitle className="text-lg flex items-center gap-2">
           <DollarSign className="h-5 w-5" />
           {t("payroll.salaryOvertime.salarySummary", "Salary Summary")}
+          {hasMultiplePositions && (
+            <Badge variant="secondary" className="ml-2">
+              {positions.length} Positions
+            </Badge>
+          )}
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        {/* Employee & Position Info */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
-            <User className="h-5 w-5 text-muted-foreground" />
-            <div>
-              <p className="text-sm text-muted-foreground">{t("payroll.salaryOvertime.employee")}</p>
-              <p className="font-medium">{employeeName}</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
-            <Briefcase className="h-5 w-5 text-muted-foreground" />
-            <div>
-              <p className="text-sm text-muted-foreground">{t("payroll.salaryOvertime.position", "Position")}</p>
-              <p className="font-medium">{positionData?.position_title || 'N/A'}</p>
-            </div>
+        {/* Employee Info */}
+        <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
+          <User className="h-5 w-5 text-muted-foreground" />
+          <div>
+            <p className="text-sm text-muted-foreground">{t("payroll.salaryOvertime.employee")}</p>
+            <p className="font-medium">{employeeName}</p>
           </div>
         </div>
 
         <Separator />
 
-        {/* Base Salary - Employee compensation overrides position compensation */}
-        {useEmployeeCompensation ? (
-          <div className="space-y-2">
-            <h4 className="font-medium text-sm text-muted-foreground">
-              {t("payroll.salaryOvertime.baseSalarySection", "Base Salary")}
+        {/* Positions with Compensation */}
+        {positions.length > 0 && (
+          <div className="space-y-3">
+            <h4 className="font-medium text-sm text-muted-foreground flex items-center gap-2">
+              <Briefcase className="h-4 w-4" />
+              {hasMultiplePositions 
+                ? t("payroll.salaryOvertime.positionsInPayGroup", "Positions in Pay Group")
+                : t("payroll.salaryOvertime.position", "Position")
+              }
             </h4>
             <div className="space-y-2">
-              {compensationItems.map((item) => (
+              {positions.map((pos) => (
                 <div 
-                  key={item.id} 
+                  key={pos.id} 
                   className="flex items-center justify-between p-3 rounded-lg border bg-card"
                 >
-                  <div>
-                    <p className="font-medium">{item.pay_element_name}</p>
-                    <p className="text-sm text-muted-foreground">
-                      {item.pay_element_code} • {formatFrequency(item.frequency)}
-                    </p>
+                  <div className="flex items-center gap-3">
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <p className="font-medium">{pos.position_title}</p>
+                        {pos.is_primary && (
+                          <Badge variant="outline" className="text-xs">Primary</Badge>
+                        )}
+                      </div>
+                      <p className="text-sm text-muted-foreground">
+                        {formatFrequency(pos.compensation_frequency)}
+                      </p>
+                    </div>
                   </div>
                   <div className="text-right">
                     <p className="text-xl font-bold text-primary">
-                      {formatCurrency(item.amount, item.currency)}
+                      {formatCurrency(pos.compensation_amount, pos.compensation_currency)}
                     </p>
-                    <Badge variant="outline">{item.currency}</Badge>
+                    <Badge variant="outline">{pos.compensation_currency}</Badge>
                   </div>
                 </div>
               ))}
             </div>
           </div>
-        ) : positionData && positionData.compensation_amount > 0 ? (
-          <div className="space-y-2">
-            <h4 className="font-medium text-sm text-muted-foreground">
-              {t("payroll.salaryOvertime.baseSalarySection", "Base Salary")}
-            </h4>
-            <div className="flex items-center justify-between p-3 rounded-lg border bg-card">
-              <div>
-                <p className="font-medium">{t("payroll.salaryOvertime.baseSalary", "Base Salary")}</p>
-                <p className="text-sm text-muted-foreground">
-                  {formatFrequency(positionData.compensation_frequency)}
-                </p>
-              </div>
-              <div className="text-right">
-                <p className="text-xl font-bold text-primary">
-                  {formatCurrency(positionData.compensation_amount, positionData.compensation_currency)}
-                </p>
-                <Badge variant="outline">{positionData.compensation_currency}</Badge>
+        )}
+
+        {/* Additional Compensation Items */}
+        {compensationItems.length > 0 && (
+          <>
+            <Separator />
+            <div className="space-y-2">
+              <h4 className="font-medium text-sm text-muted-foreground">
+                {t("payroll.salaryOvertime.additionalCompensation", "Additional Compensation")}
+              </h4>
+              <div className="space-y-2">
+                {compensationItems.map((item) => (
+                  <div 
+                    key={item.id} 
+                    className="flex items-center justify-between p-3 rounded-lg border bg-card"
+                  >
+                    <div>
+                      <p className="font-medium">{item.pay_element_name}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {item.pay_element_code} • {formatFrequency(item.frequency)}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-xl font-bold text-primary">
+                        {formatCurrency(item.amount, item.currency)}
+                      </p>
+                      <Badge variant="outline">{item.currency}</Badge>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
-          </div>
-        ) : null}
+          </>
+        )}
 
         {/* Total Summary */}
-        {(useEmployeeCompensation || positionData?.compensation_amount) && (
+        {(positions.length > 0 || compensationItems.length > 0) && (
           <>
             <Separator />
             <div className="flex items-center justify-between p-4 rounded-lg bg-primary/10">
@@ -251,21 +293,17 @@ export function SalarySummarySection({ companyId, employeeId }: SalarySummarySec
                 <p className="font-semibold">{t("payroll.salaryOvertime.totalCompensation", "Total Compensation")}</p>
                 <p className="text-sm text-muted-foreground">
                   {t("payroll.salaryOvertime.monthlyEquivalent", "Monthly equivalent")}
+                  {hasMultiplePositions && ` • ${positions.length} positions combined`}
                 </p>
               </div>
               <p className="text-2xl font-bold text-primary">
-                {formatCurrency(
-                  useEmployeeCompensation ? totalMonthlyComp : positionMonthlyComp,
-                  useEmployeeCompensation 
-                    ? (compensationItems[0]?.currency || 'USD')
-                    : (positionData?.compensation_currency || 'USD')
-                )}
+                {formatCurrency(totalMonthlyComp, primaryCurrency)}
               </p>
             </div>
           </>
         )}
 
-        {!positionData?.compensation_amount && compensationItems.length === 0 && (
+        {positions.length === 0 && compensationItems.length === 0 && (
           <div className="text-center py-4 text-muted-foreground">
             {t("payroll.salaryOvertime.noSalaryConfigured", "No salary configured for this employee")}
           </div>

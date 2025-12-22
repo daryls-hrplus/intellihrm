@@ -40,6 +40,17 @@ interface PayPeriod {
 interface Employee {
   id: string;
   full_name: string;
+  positions: EmployeePosition[];
+}
+
+interface EmployeePosition {
+  id: string;
+  position_id: string;
+  position_title: string;
+  compensation_amount: number | null;
+  compensation_currency: string | null;
+  compensation_frequency: string | null;
+  is_primary: boolean;
 }
 
 export default function PayPeriodPayrollEntriesPage() {
@@ -64,13 +75,16 @@ export default function PayPeriodPayrollEntriesPage() {
   useEffect(() => {
     if (selectedCompany) {
       loadPayGroups();
-      loadEmployees();
     }
   }, [selectedCompany]);
 
   useEffect(() => {
     if (selectedPayGroup) {
       loadPayPeriods();
+      loadEmployees();
+    } else {
+      setEmployees([]);
+      setSelectedEmployee("");
     }
   }, [selectedPayGroup]);
 
@@ -118,17 +132,67 @@ export default function PayPeriodPayrollEntriesPage() {
   };
 
   const loadEmployees = async () => {
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('id, full_name')
-      .eq('company_id', selectedCompany)
-      .order('full_name');
-    
-    if (error) {
+    if (!selectedPayGroup) {
+      setEmployees([]);
+      return;
+    }
+
+    // Query employee_positions for the selected pay group
+    const { data: positionsData, error: posError } = await supabase
+      .from('employee_positions')
+      .select(`
+        id,
+        employee_id,
+        position_id,
+        compensation_amount,
+        compensation_currency,
+        compensation_frequency,
+        is_primary,
+        positions (title),
+        profiles!employee_positions_employee_id_fkey (id, full_name)
+      `)
+      .eq('pay_group_id', selectedPayGroup)
+      .eq('is_active', true);
+
+    if (posError) {
+      console.error('Error loading employees:', posError);
       toast.error(t("payroll.salaryOvertime.failedToLoadEmployees"));
       return;
     }
-    setEmployees(data || []);
+
+    // Group positions by employee
+    const employeeMap = new Map<string, Employee>();
+    
+    (positionsData || []).forEach((pos: any) => {
+      const employeeId = pos.profiles?.id;
+      const employeeName = pos.profiles?.full_name || 'Unknown';
+      
+      if (!employeeId) return;
+
+      if (!employeeMap.has(employeeId)) {
+        employeeMap.set(employeeId, {
+          id: employeeId,
+          full_name: employeeName,
+          positions: []
+        });
+      }
+
+      employeeMap.get(employeeId)!.positions.push({
+        id: pos.id,
+        position_id: pos.position_id,
+        position_title: (pos.positions as any)?.title || 'N/A',
+        compensation_amount: pos.compensation_amount,
+        compensation_currency: pos.compensation_currency,
+        compensation_frequency: pos.compensation_frequency,
+        is_primary: pos.is_primary
+      });
+    });
+
+    // Sort by name
+    const employeeList = Array.from(employeeMap.values())
+      .sort((a, b) => a.full_name.localeCompare(b.full_name));
+    
+    setEmployees(employeeList);
   };
 
   const handleRegularDeductionsApplied = () => {
@@ -256,10 +320,11 @@ export default function PayPeriodPayrollEntriesPage() {
 
       {selectedEmployee && selectedPayPeriod && (
         <>
-          {/* Salary Summary Section */}
+          {/* Salary Summary Section - Shows all positions in the pay group */}
           <SalarySummarySection 
             companyId={selectedCompany}
             employeeId={selectedEmployee}
+            payGroupId={selectedPayGroup}
           />
 
           {/* Work Records Section */}
@@ -267,6 +332,7 @@ export default function PayPeriodPayrollEntriesPage() {
             companyId={selectedCompany}
             employeeId={selectedEmployee}
             payPeriodId={selectedPayPeriod}
+            payGroupId={selectedPayGroup}
           />
 
           {/* Allowances Section */}
