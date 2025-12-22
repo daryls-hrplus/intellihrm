@@ -62,6 +62,14 @@ export default function WorkforceDashboardPage() {
       color: "bg-orange-500/10 text-orange-500",
       tabCode: "companies",
     },
+    divisions: {
+      title: "Divisions",
+      description: "Manage company divisions and linked departments",
+      href: "/workforce/divisions",
+      icon: Network,
+      color: "bg-violet-500/10 text-violet-500",
+      tabCode: "divisions",
+    },
     departments: {
       title: t("workforce.modules.departments.title"),
       description: t("workforce.modules.departments.description"),
@@ -256,6 +264,7 @@ export default function WorkforceDashboardPage() {
       items: filterByAccess([
         allModules.companyGroups,
         allModules.companies,
+        allModules.divisions,
         allModules.departments,
         allModules.orgStructure,
         allModules.governance,
