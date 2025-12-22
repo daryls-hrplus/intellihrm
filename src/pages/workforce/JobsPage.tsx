@@ -81,6 +81,7 @@ interface Job {
   start_date: string;
   end_date: string | null;
   is_active: boolean;
+  is_key_position: boolean;
   created_at: string;
   companies?: { name: string; code: string };
   job_families?: { name: string; code: string };
@@ -121,6 +122,7 @@ const emptyForm = {
   start_date: getTodayString(),
   end_date: "",
   is_active: true,
+  is_key_position: false,
 };
 
 export default function JobsPage() {
@@ -237,6 +239,7 @@ export default function JobsPage() {
         start_date: job.start_date,
         end_date: job.end_date || "",
         is_active: job.is_active,
+        is_key_position: job.is_key_position,
       });
     } else {
       setSelectedJob(null);
@@ -283,6 +286,7 @@ export default function JobsPage() {
       start_date: formData.start_date,
       end_date: formData.end_date || null,
       is_active: formData.is_active,
+      is_key_position: formData.is_key_position,
     };
 
     if (selectedJob) {
@@ -672,12 +676,21 @@ export default function JobsPage() {
         </div>
       </div>
 
-      <div className="flex items-center gap-2">
-        <Switch
-          checked={formData.is_active}
-          onCheckedChange={(checked) => setFormData({ ...formData, is_active: checked })}
-        />
-        <Label>Active</Label>
+      <div className="flex items-center gap-6">
+        <div className="flex items-center gap-2">
+          <Switch
+            checked={formData.is_active}
+            onCheckedChange={(checked) => setFormData({ ...formData, is_active: checked })}
+          />
+          <Label>Active</Label>
+        </div>
+        <div className="flex items-center gap-2">
+          <Switch
+            checked={formData.is_key_position}
+            onCheckedChange={(checked) => setFormData({ ...formData, is_key_position: checked })}
+          />
+          <Label>Key Position</Label>
+        </div>
       </div>
     </>
   );
@@ -752,6 +765,7 @@ export default function JobsPage() {
                 <TableHead>Grade</TableHead>
                 <TableHead>Level</TableHead>
                 <TableHead>Work Period</TableHead>
+                <TableHead>Key Position</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead className="w-[100px]">Actions</TableHead>
               </TableRow>
@@ -759,13 +773,13 @@ export default function JobsPage() {
             <TableBody>
               {isLoading ? (
                 <TableRow>
-                  <TableCell colSpan={9} className="text-center py-8">
+                  <TableCell colSpan={10} className="text-center py-8">
                     <Loader2 className="h-6 w-6 animate-spin mx-auto" />
                   </TableCell>
                 </TableRow>
               ) : filteredJobs.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={9} className="text-center py-8 text-muted-foreground">
+                  <TableCell colSpan={10} className="text-center py-8 text-muted-foreground">
                     {searchTerm ? "No jobs found matching your search" : "No jobs found. Create one to get started."}
                   </TableCell>
                 </TableRow>
@@ -793,6 +807,13 @@ export default function JobsPage() {
                       <TableCell>{job.job_grade || "-"}</TableCell>
                       <TableCell>{job.job_level || "-"}</TableCell>
                       <TableCell className="capitalize">{job.standard_work_period || "-"}</TableCell>
+                      <TableCell>
+                        {job.is_key_position && (
+                          <Badge variant="outline" className="border-amber-500 text-amber-600">
+                            Key
+                          </Badge>
+                        )}
+                      </TableCell>
                       <TableCell>
                         <Badge variant={job.is_active ? "default" : "secondary"}>
                           {job.is_active ? "Active" : "Inactive"}
@@ -832,7 +853,7 @@ export default function JobsPage() {
                     </TableRow>
                     {expandedJobId === job.id && (
                       <TableRow>
-                        <TableCell colSpan={9} className="bg-muted/30 p-4">
+                        <TableCell colSpan={10} className="bg-muted/30 p-4">
                           <Tabs defaultValue="competencies" className="w-full">
                             <TabsList>
                               <TabsTrigger value="competencies">Competencies</TabsTrigger>

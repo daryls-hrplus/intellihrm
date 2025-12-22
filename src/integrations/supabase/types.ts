@@ -19023,6 +19023,7 @@ export type Database = {
           end_date: string | null
           id: string
           is_active: boolean
+          is_key_position: boolean
           job_class: string | null
           job_family_id: string
           job_grade: string | null
@@ -19042,6 +19043,7 @@ export type Database = {
           end_date?: string | null
           id?: string
           is_active?: boolean
+          is_key_position?: boolean
           job_class?: string | null
           job_family_id: string
           job_grade?: string | null
@@ -19061,6 +19063,7 @@ export type Database = {
           end_date?: string | null
           id?: string
           is_active?: boolean
+          is_key_position?: boolean
           job_class?: string | null
           job_family_id?: string
           job_grade?: string | null

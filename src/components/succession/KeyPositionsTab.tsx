@@ -3,18 +3,33 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Plus, AlertTriangle, Shield, Clock, Plane, Edit, Loader2 } from 'lucide-react';
+import { AlertTriangle, Shield, Clock, Plane, Edit, Loader2, Key, Plus } from 'lucide-react';
 import { KeyPositionRisk, useSuccession } from '@/hooks/useSuccession';
 import { supabase } from '@/integrations/supabase/client';
 
 interface KeyPositionsTabProps {
   companyId: string;
+}
+
+interface KeyPosition {
+  id: string;
+  title: string;
+  code: string;
+  job_id: string;
+  job?: {
+    name: string;
+    code: string;
+  };
+  current_holder?: {
+    id: string;
+    full_name: string;
+  } | null;
+  riskAssessment?: KeyPositionRisk | null;
 }
 
 const criticalityColors: Record<string, string> = {
@@ -38,11 +53,11 @@ export function KeyPositionsTab({ companyId }: KeyPositionsTabProps) {
     updateKeyPositionRisk,
   } = useSuccession(companyId);
 
-  const [positions, setPositions] = useState<KeyPositionRisk[]>([]);
-  const [allPositions, setAllPositions] = useState<{ id: string; title: string; code: string }[]>([]);
+  const [keyPositions, setKeyPositions] = useState<KeyPosition[]>([]);
+  const [loadingKeyPositions, setLoadingKeyPositions] = useState(true);
   const [employees, setEmployees] = useState<{ id: string; full_name: string }[]>([]);
   const [showDialog, setShowDialog] = useState(false);
-  const [editingPosition, setEditingPosition] = useState<KeyPositionRisk | null>(null);
+  const [editingPosition, setEditingPosition] = useState<KeyPosition | null>(null);
   const [formData, setFormData] = useState({
     position_id: '',
     criticality_level: 'high',
@@ -59,21 +74,61 @@ export function KeyPositionsTab({ companyId }: KeyPositionsTabProps) {
   }, [companyId]);
 
   const loadData = async () => {
-    const [keyPositions] = await Promise.all([
-      fetchKeyPositionRisks(),
-      loadPositions(),
+    await Promise.all([
+      loadKeyPositionsFromJobs(),
       loadEmployees(),
     ]);
-    setPositions(keyPositions);
   };
 
-  const loadPositions = async () => {
-    const { data } = await (supabase
+  const loadKeyPositionsFromJobs = async () => {
+    setLoadingKeyPositions(true);
+    
+    // Get positions where the associated job is marked as key position
+    const { data: positionsData } = await (supabase
       .from('positions') as any)
-      .select('id, title, code')
+      .select(`
+        id, 
+        title, 
+        code,
+        job_id,
+        jobs!inner(id, name, code, is_key_position)
+      `)
       .eq('company_id', companyId)
+      .eq('jobs.is_key_position', true)
+      .is('end_date', null)
       .order('title');
-    setAllPositions(data || []);
+    
+    // Get risk assessments
+    const riskAssessments = await fetchKeyPositionRisks();
+    const riskMap = new Map(riskAssessments.map(r => [r.position_id, r]));
+    
+    // Get current holder for each position
+    const keyPositionsWithData: KeyPosition[] = [];
+    if (positionsData) {
+      for (const pos of positionsData) {
+        const { data: holder } = await supabase
+          .from('employee_positions')
+          .select('profiles(id, full_name)')
+          .eq('position_id', pos.id)
+          .is('end_date', null)
+          .order('start_date', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        
+        keyPositionsWithData.push({
+          id: pos.id,
+          title: pos.title,
+          code: pos.code,
+          job_id: pos.job_id,
+          job: pos.jobs,
+          current_holder: holder?.profiles || null,
+          riskAssessment: riskMap.get(pos.id) || null,
+        });
+      }
+    }
+    
+    setKeyPositions(keyPositionsWithData);
+    setLoadingKeyPositions(false);
   };
 
   const loadEmployees = async () => {
@@ -97,8 +152,9 @@ export function KeyPositionsTab({ companyId }: KeyPositionsTabProps) {
       risk_notes: formData.risk_notes || null,
     };
 
-    if (editingPosition) {
-      await updateKeyPositionRisk(editingPosition.id, submitData);
+    const existingRisk = editingPosition?.riskAssessment;
+    if (existingRisk) {
+      await updateKeyPositionRisk(existingRisk.id, submitData);
     } else {
       await createKeyPositionRisk(submitData);
     }
@@ -122,40 +178,52 @@ export function KeyPositionsTab({ companyId }: KeyPositionsTabProps) {
     });
   };
 
-  const openEditDialog = (position: KeyPositionRisk) => {
-    setEditingPosition(position);
+  const openRiskDialog = (keyPos: KeyPosition) => {
+    setEditingPosition(keyPos);
+    const risk = keyPos.riskAssessment;
     setFormData({
-      position_id: position.position_id,
-      criticality_level: position.criticality_level,
-      vacancy_risk: position.vacancy_risk,
-      impact_if_vacant: position.impact_if_vacant || '',
-      current_incumbent_id: position.current_incumbent_id || '',
-      retirement_risk: position.retirement_risk,
-      flight_risk: position.flight_risk,
-      risk_notes: position.risk_notes || '',
+      position_id: keyPos.id,
+      criticality_level: risk?.criticality_level || 'high',
+      vacancy_risk: risk?.vacancy_risk || 'medium',
+      impact_if_vacant: risk?.impact_if_vacant || '',
+      current_incumbent_id: risk?.current_incumbent_id || keyPos.current_holder?.id || '',
+      retirement_risk: risk?.retirement_risk || false,
+      flight_risk: risk?.flight_risk || false,
+      risk_notes: risk?.risk_notes || '',
     });
     setShowDialog(true);
   };
 
-  const existingPositionIds = positions.map(p => p.position_id);
-  const availablePositions = allPositions.filter(p => !existingPositionIds.includes(p.id) || editingPosition?.position_id === p.id);
-
+  // Stats
+  const positionsWithRisk = keyPositions.filter(p => p.riskAssessment);
   const stats = {
-    total: positions.length,
-    critical: positions.filter(p => p.criticality_level === 'critical').length,
-    highVacancyRisk: positions.filter(p => p.vacancy_risk === 'high').length,
-    retirementRisk: positions.filter(p => p.retirement_risk).length,
-    flightRisk: positions.filter(p => p.flight_risk).length,
+    total: keyPositions.length,
+    withRiskAssessment: positionsWithRisk.length,
+    critical: positionsWithRisk.filter(p => p.riskAssessment?.criticality_level === 'critical').length,
+    highVacancyRisk: positionsWithRisk.filter(p => p.riskAssessment?.vacancy_risk === 'high').length,
+    retirementRisk: positionsWithRisk.filter(p => p.riskAssessment?.retirement_risk).length,
+    flightRisk: positionsWithRisk.filter(p => p.riskAssessment?.flight_risk).length,
   };
+
+  const isLoading = loading || loadingKeyPositions;
 
   return (
     <div className="space-y-6">
       {/* Summary Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
         <Card>
           <CardContent className="pt-4">
-            <div className="text-2xl font-bold">{stats.total}</div>
+            <div className="flex items-center gap-2">
+              <Key className="h-5 w-5 text-amber-600" />
+              <span className="text-2xl font-bold">{stats.total}</span>
+            </div>
             <div className="text-sm text-muted-foreground">Key Positions</div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="pt-4">
+            <div className="text-2xl font-bold text-blue-600">{stats.withRiskAssessment}</div>
+            <div className="text-sm text-muted-foreground">Risk Assessed</div>
           </CardContent>
         </Card>
         <Card>
@@ -192,29 +260,32 @@ export function KeyPositionsTab({ companyId }: KeyPositionsTabProps) {
 
       {/* Key Positions Table */}
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle>Key Position Risk Assessment</CardTitle>
-          <Button onClick={() => { resetForm(); setEditingPosition(null); setShowDialog(true); }}>
-            <Plus className="h-4 w-4 mr-2" />
-            Add Key Position
-          </Button>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Key className="h-5 w-5" />
+            Key Positions from Jobs
+          </CardTitle>
+          <p className="text-sm text-muted-foreground">
+            Positions are marked as key based on their job configuration in Workforce &gt; Jobs
+          </p>
         </CardHeader>
         <CardContent>
-          {loading ? (
+          {isLoading ? (
             <div className="flex items-center justify-center py-8">
               <Loader2 className="h-8 w-8 animate-spin text-primary" />
             </div>
-          ) : positions.length === 0 ? (
+          ) : keyPositions.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
               <Shield className="h-12 w-12 mx-auto mb-4 opacity-50" />
-              <p>No key positions identified yet.</p>
-              <p className="text-sm">Add key positions to assess succession risk.</p>
+              <p>No key positions found.</p>
+              <p className="text-sm">Mark jobs as "Key Position" in Workforce &gt; Jobs to see them here.</p>
             </div>
           ) : (
             <Table>
               <TableHeader>
                 <TableRow>
                   <TableHead>Position</TableHead>
+                  <TableHead>Job</TableHead>
                   <TableHead>Incumbent</TableHead>
                   <TableHead>Criticality</TableHead>
                   <TableHead>Vacancy Risk</TableHead>
@@ -224,90 +295,104 @@ export function KeyPositionsTab({ companyId }: KeyPositionsTabProps) {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {positions.map((position) => (
-                  <TableRow key={position.id}>
-                    <TableCell>
-                      <div>
-                        <div className="font-medium">{position.position?.title}</div>
-                        <div className="text-sm text-muted-foreground">{position.position?.code}</div>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      {position.incumbent?.full_name || (
-                        <span className="text-muted-foreground italic">Vacant</span>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      <Badge className={criticalityColors[position.criticality_level]}>
-                        {position.criticality_level}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <Badge className={vacancyRiskColors[position.vacancy_risk]}>
-                        {position.vacancy_risk}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex gap-2">
-                        {position.retirement_risk && (
-                          <Badge variant="outline" className="border-blue-500 text-blue-600">
-                            <Clock className="h-3 w-3 mr-1" />
-                            Retirement
-                          </Badge>
+                {keyPositions.map((keyPos) => {
+                  const risk = keyPos.riskAssessment;
+                  return (
+                    <TableRow key={keyPos.id}>
+                      <TableCell>
+                        <div>
+                          <div className="font-medium">{keyPos.title}</div>
+                          <div className="text-sm text-muted-foreground">{keyPos.code}</div>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="text-sm">{keyPos.job?.name || '-'}</div>
+                      </TableCell>
+                      <TableCell>
+                        {keyPos.current_holder?.full_name || (
+                          <span className="text-muted-foreground italic">Vacant</span>
                         )}
-                        {position.flight_risk && (
-                          <Badge variant="outline" className="border-purple-500 text-purple-600">
-                            <Plane className="h-3 w-3 mr-1" />
-                            Flight
+                      </TableCell>
+                      <TableCell>
+                        {risk ? (
+                          <Badge className={criticalityColors[risk.criticality_level]}>
+                            {risk.criticality_level}
                           </Badge>
+                        ) : (
+                          <span className="text-muted-foreground text-sm">Not assessed</span>
                         )}
-                        {!position.retirement_risk && !position.flight_risk && (
+                      </TableCell>
+                      <TableCell>
+                        {risk ? (
+                          <Badge className={vacancyRiskColors[risk.vacancy_risk]}>
+                            {risk.vacancy_risk}
+                          </Badge>
+                        ) : (
+                          <span className="text-muted-foreground text-sm">-</span>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        {risk ? (
+                          <div className="flex gap-2">
+                            {risk.retirement_risk && (
+                              <Badge variant="outline" className="border-blue-500 text-blue-600">
+                                <Clock className="h-3 w-3 mr-1" />
+                                Retirement
+                              </Badge>
+                            )}
+                            {risk.flight_risk && (
+                              <Badge variant="outline" className="border-purple-500 text-purple-600">
+                                <Plane className="h-3 w-3 mr-1" />
+                                Flight
+                              </Badge>
+                            )}
+                            {!risk.retirement_risk && !risk.flight_risk && (
+                              <span className="text-muted-foreground">-</span>
+                            )}
+                          </div>
+                        ) : (
                           <span className="text-muted-foreground">-</span>
                         )}
-                      </div>
-                    </TableCell>
-                    <TableCell className="max-w-[200px]">
-                      <p className="text-sm truncate">{position.impact_if_vacant || '-'}</p>
-                    </TableCell>
-                    <TableCell>
-                      <Button size="sm" variant="ghost" onClick={() => openEditDialog(position)}>
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
+                      </TableCell>
+                      <TableCell className="max-w-[200px]">
+                        <p className="text-sm truncate">{risk?.impact_if_vacant || '-'}</p>
+                      </TableCell>
+                      <TableCell>
+                        <Button size="sm" variant={risk ? "ghost" : "outline"} onClick={() => openRiskDialog(keyPos)}>
+                          {risk ? (
+                            <Edit className="h-4 w-4" />
+                          ) : (
+                            <>
+                              <Plus className="h-4 w-4 mr-1" />
+                              Assess
+                            </>
+                          )}
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
               </TableBody>
             </Table>
           )}
         </CardContent>
       </Card>
 
-      {/* Dialog */}
+      {/* Risk Assessment Dialog */}
       <Dialog open={showDialog} onOpenChange={setShowDialog}>
         <DialogContent className="max-w-lg">
           <DialogHeader>
-            <DialogTitle>{editingPosition ? 'Edit Key Position' : 'Add Key Position'}</DialogTitle>
+            <DialogTitle>
+              {editingPosition?.riskAssessment ? 'Edit Risk Assessment' : 'Add Risk Assessment'}
+            </DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
-            <div className="space-y-2">
-              <Label>Position *</Label>
-              <Select
-                value={formData.position_id}
-                onValueChange={(value) => setFormData({ ...formData, position_id: value })}
-                disabled={!!editingPosition}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select position" />
-                </SelectTrigger>
-                <SelectContent>
-                  {availablePositions.map((pos) => (
-                    <SelectItem key={pos.id} value={pos.id}>
-                      {pos.title} ({pos.code})
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+            {editingPosition && (
+              <div className="p-3 bg-muted rounded-lg">
+                <div className="font-medium">{editingPosition.title}</div>
+                <div className="text-sm text-muted-foreground">{editingPosition.code}</div>
+              </div>
+            )}
 
             <div className="space-y-2">
               <Label>Current Incumbent</Label>
@@ -405,8 +490,8 @@ export function KeyPositionsTab({ companyId }: KeyPositionsTabProps) {
 
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={() => setShowDialog(false)}>Cancel</Button>
-              <Button onClick={handleSubmit} disabled={!formData.position_id}>
-                {editingPosition ? 'Update' : 'Add'} Position
+              <Button onClick={handleSubmit}>
+                {editingPosition?.riskAssessment ? 'Update' : 'Save'} Assessment
               </Button>
             </div>
           </div>
