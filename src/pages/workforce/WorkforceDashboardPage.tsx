@@ -105,26 +105,26 @@ export default function WorkforceDashboardPage() {
     headcountRequests: {
       title: "Headcount Requests",
       description: "Manage headcount request workflows",
-      href: "/workforce/org-structure?tab=requests",
+      href: "/workforce/headcount-requests",
       icon: FileText,
       color: "bg-purple-500/10 text-purple-500",
-      tabCode: "org_structure",
+      tabCode: "headcount_requests",
     },
     headcountAnalytics: {
       title: "Headcount Analytics",
       description: "Analyze headcount trends and metrics",
-      href: "/workforce/org-structure?tab=analytics",
+      href: "/workforce/headcount-analytics",
       icon: BarChart3,
       color: "bg-blue-500/10 text-blue-500",
-      tabCode: "org_structure",
+      tabCode: "headcount_analytics",
     },
     headcountForecast: {
       title: "Headcount Forecast",
       description: "AI-powered workforce forecasting",
-      href: "/workforce/org-structure?tab=forecast",
+      href: "/workforce/headcount-forecast",
       icon: Brain,
       color: "bg-pink-500/10 text-pink-500",
-      tabCode: "org_structure",
+      tabCode: "headcount_forecast",
     },
     // Job Architecture
     jobFamilies: {
