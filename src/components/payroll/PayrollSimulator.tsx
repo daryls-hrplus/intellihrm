@@ -39,6 +39,16 @@ interface OpeningBalances {
   ytd_gross_earnings: number;
 }
 
+interface PositionProration {
+  title: string;
+  fullAmount: number;
+  proratedAmount: number;
+  isProrated: boolean;
+  factor: number;
+  daysWorked: number;
+  totalDays: number;
+}
+
 interface SimulationResult {
   employee: {
     name: string;
@@ -59,6 +69,7 @@ interface SimulationResult {
     method: string;
     fullPeriodSalary: number;
   };
+  positionProrations?: PositionProration[];
   earnings: {
     regular_hours: number;
     overtime_hours: number;
@@ -669,6 +680,7 @@ export function PayrollSimulator({ companyId, employeeId, payPeriodId }: Payroll
           method: baseProrationMethodCode,
           fullPeriodSalary: fullPeriodBaseSalary
         } : undefined,
+        positionProrations: positionProrations.length > 0 ? positionProrations : undefined,
         earnings: {
           regular_hours: regularHours,
           overtime_hours: overtimeHours,
@@ -782,23 +794,69 @@ export function PayrollSimulator({ companyId, employeeId, payPeriodId }: Payroll
             </div>
           </div>
           
-          {/* Proration Info */}
+          {/* Position-level Proration Details */}
+          {result.positionProrations && result.positionProrations.length > 0 && (
+            <div className="space-y-2">
+              <p className="text-sm font-medium text-muted-foreground">Position Compensation Breakdown</p>
+              <div className="space-y-2">
+                {result.positionProrations.map((pos, idx) => (
+                  <div 
+                    key={idx} 
+                    className={`p-3 rounded-lg border ${pos.isProrated ? 'bg-amber-500/10 border-amber-500/20' : 'bg-muted/30'}`}
+                  >
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="font-medium">{pos.title}</span>
+                      {pos.isProrated && (
+                        <Badge variant="outline" className="text-amber-600 border-amber-500/50">
+                          Prorated
+                        </Badge>
+                      )}
+                    </div>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm">
+                      <div>
+                        <p className="text-muted-foreground text-xs">Full Amount</p>
+                        <p className="font-medium">{result.salary.currency} {formatCurrency(pos.fullAmount)}</p>
+                      </div>
+                      <div>
+                        <p className="text-muted-foreground text-xs">Period Amount</p>
+                        <p className="font-medium text-primary">{result.salary.currency} {formatCurrency(pos.proratedAmount)}</p>
+                      </div>
+                      {pos.isProrated && (
+                        <>
+                          <div>
+                            <p className="text-muted-foreground text-xs">Days Worked</p>
+                            <p className="font-medium">{pos.daysWorked} / {pos.totalDays}</p>
+                          </div>
+                          <div>
+                            <p className="text-muted-foreground text-xs">Factor</p>
+                            <p className="font-medium">{(pos.factor * 100).toFixed(1)}%</p>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+          
+          {/* Overall Proration Summary */}
           {result.proration?.isProrated && (
             <div className="p-3 bg-amber-500/10 border border-amber-500/20 rounded-lg">
               <p className="text-sm font-medium text-amber-700 dark:text-amber-400 mb-2">
-                ⚡ Mid-Period Proration Applied
+                ⚡ Total Proration Summary
               </p>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
                 <div>
-                  <p className="text-muted-foreground">Full Period Salary</p>
+                  <p className="text-muted-foreground">Full Period Total</p>
                   <p className="font-medium">{result.salary.currency} {formatCurrency(result.proration.fullPeriodSalary)}</p>
                 </div>
                 <div>
-                  <p className="text-muted-foreground">Days Worked</p>
-                  <p className="font-medium">{result.proration.daysWorked} / {result.proration.totalDays}</p>
+                  <p className="text-muted-foreground">Prorated Total</p>
+                  <p className="font-medium text-primary">{result.salary.currency} {formatCurrency(result.salary.base_salary)}</p>
                 </div>
                 <div>
-                  <p className="text-muted-foreground">Proration Factor</p>
+                  <p className="text-muted-foreground">Overall Factor</p>
                   <p className="font-medium">{(result.proration.factor * 100).toFixed(1)}%</p>
                 </div>
                 <div>
