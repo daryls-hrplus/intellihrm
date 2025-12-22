@@ -241,7 +241,7 @@ export default function AdminDashboardPage() {
             </div>
             <div>
               <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
-                Admin & Insights
+                Admin & Security
               </h1>
               <p className="text-muted-foreground">
                 Configuration, governance, analytics, and strategic planning hub
