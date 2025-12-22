@@ -20,7 +20,15 @@ interface PayslipDocumentProps {
     logo_url?: string;
   };
   lineItems?: {
-    earnings: Array<{ name: string; amount: number; ytd?: number }>;
+    earnings: Array<{ 
+      name: string; 
+      amount: number; 
+      ytd?: number;
+      job_title?: string;
+      is_prorated?: boolean;
+      effective_start?: string;
+      effective_end?: string;
+    }>;
     deductions: Array<{ name: string; amount: number; ytd?: number }>;
     taxes: Array<{ name: string; amount: number; ytd?: number }>;
     employer: Array<{ name: string; amount: number }>;
@@ -182,8 +190,27 @@ export function PayslipDocument({
           <div className="space-y-2">
             {lineItems?.earnings && lineItems.earnings.length > 0 ? (
               lineItems.earnings.map((item, idx) => (
-                <div key={idx} className="flex justify-between text-sm">
-                  <span>{item.name}</span>
+                <div key={idx} className="flex justify-between text-sm py-1 border-b border-border/30 last:border-0">
+                  <div className="flex flex-col">
+                    <span className="flex items-center gap-1.5">
+                      {item.name}
+                      {item.is_prorated && (
+                        <span className="text-[10px] bg-amber-100 text-amber-700 px-1 py-0.5 rounded">Prorated</span>
+                      )}
+                    </span>
+                    {item.job_title && (
+                      <span className="text-[10px] text-muted-foreground">{item.job_title}</span>
+                    )}
+                    {item.is_prorated && item.effective_start && (
+                      <span className="text-[10px] text-muted-foreground">
+                        {new Date(item.effective_start).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                        {' - '}
+                        {item.effective_end 
+                          ? new Date(item.effective_end).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+                          : 'Period End'}
+                      </span>
+                    )}
+                  </div>
                   <span className="font-medium">{formatCurrency(item.amount, payslip.currency)}</span>
                 </div>
               ))

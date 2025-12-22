@@ -819,7 +819,14 @@ export default function PayrollProcessingPage() {
                   // Build line items from calculation_details
                   const calcDetails = selectedEmployee.calculation_details as any;
                   const lineItems = {
-                    earnings: (calcDetails?.earnings || []).map((e: any) => ({ name: e.name, amount: e.amount })),
+                    earnings: (calcDetails?.earnings || []).map((e: any) => ({ 
+                      name: e.name, 
+                      amount: e.amount,
+                      job_title: e.job_title,
+                      is_prorated: e.is_prorated,
+                      effective_start: e.effective_start,
+                      effective_end: e.effective_end,
+                    })),
                     deductions: (calcDetails?.deductions || []).map((d: any) => ({ name: d.name, amount: d.amount })),
                     taxes: (calcDetails?.statutory || []).map((t: any) => ({ name: t.name, amount: t.amount })),
                     employer: (calcDetails?.employer_contributions || []).map((c: any) => ({ name: c.name, amount: c.amount })),
