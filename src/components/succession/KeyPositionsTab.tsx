@@ -93,7 +93,7 @@ export function KeyPositionsTab({ companyId }: KeyPositionsTabProps) {
     // First get all jobs that are marked as key positions
     const { data: keyJobs } = await supabase
       .from('jobs')
-      .select('id, name, code')
+      .select('id, name, code, job_family_id')
       .eq('company_id', companyId)
       .eq('is_key_position', true)
       .eq('is_active', true);
@@ -104,15 +104,29 @@ export function KeyPositionsTab({ companyId }: KeyPositionsTabProps) {
       return;
     }
     
-    // Map jobs by code for matching with positions
-    const keyJobCodes = keyJobs.map(j => j.code);
-    const jobByCode = new Map(keyJobs.map(j => [j.code, { id: j.id, name: j.name, code: j.code }]));
+    // Jobs are linked to positions via job_family_id
+    const keyJobFamilyIds = keyJobs
+      .filter(j => j.job_family_id)
+      .map(j => j.job_family_id as string);
     
-    // Get positions matching key job codes (positions are linked to jobs via matching code)
+    // Create a map of job_family_id -> job for easy lookup
+    const jobByFamilyId = new Map(
+      keyJobs
+        .filter(j => j.job_family_id)
+        .map(j => [j.job_family_id as string, { id: j.id, name: j.name, code: j.code }])
+    );
+    
+    if (keyJobFamilyIds.length === 0) {
+      setKeyPositions([]);
+      setLoadingKeyPositions(false);
+      return;
+    }
+    
+    // Get positions that belong to key job families
     const { data: positionsData } = await supabase
       .from('positions')
-      .select('id, title, code, department_id, departments!inner(company_id)')
-      .in('code', keyJobCodes)
+      .select('id, title, code, job_family_id, department_id, departments!inner(company_id)')
+      .in('job_family_id', keyJobFamilyIds)
       .is('end_date', null)
       .eq('departments.company_id', companyId)
       .order('title');
@@ -134,7 +148,7 @@ export function KeyPositionsTab({ companyId }: KeyPositionsTabProps) {
           .limit(1)
           .maybeSingle();
         
-        const matchedJob = jobByCode.get(pos.code);
+        const matchedJob = pos.job_family_id ? jobByFamilyId.get(pos.job_family_id) : null;
         keyPositionsWithData.push({
           id: pos.id,
           title: pos.title,
@@ -157,7 +171,7 @@ export function KeyPositionsTab({ companyId }: KeyPositionsTabProps) {
     // First get all jobs that are marked as key positions
     const { data: keyJobs } = await supabase
       .from('jobs')
-      .select('id, name, code')
+      .select('id, name, code, job_family_id')
       .eq('company_id', companyId)
       .eq('is_key_position', true)
       .eq('is_active', true);
@@ -168,15 +182,29 @@ export function KeyPositionsTab({ companyId }: KeyPositionsTabProps) {
       return;
     }
     
-    // Map jobs by code for matching with positions
-    const keyJobCodes = keyJobs.map(j => j.code);
-    const jobByCode = new Map(keyJobs.map(j => [j.code, { id: j.id, name: j.name, code: j.code }]));
+    // Jobs are linked to positions via job_family_id
+    const keyJobFamilyIds = keyJobs
+      .filter(j => j.job_family_id)
+      .map(j => j.job_family_id as string);
     
-    // Get positions matching key job codes
+    // Create a map of job_family_id -> job for easy lookup
+    const jobByFamilyId = new Map(
+      keyJobs
+        .filter(j => j.job_family_id)
+        .map(j => [j.job_family_id as string, { id: j.id, name: j.name, code: j.code }])
+    );
+    
+    if (keyJobFamilyIds.length === 0) {
+      setAvailablePositions([]);
+      setLoadingAvailable(false);
+      return;
+    }
+    
+    // Get positions that belong to key job families
     const { data: positionsData } = await supabase
       .from('positions')
-      .select('id, title, code, department_id, departments!inner(company_id)')
-      .in('code', keyJobCodes)
+      .select('id, title, code, job_family_id, department_id, departments!inner(company_id)')
+      .in('job_family_id', keyJobFamilyIds)
       .is('end_date', null)
       .eq('departments.company_id', companyId)
       .order('title');
@@ -193,7 +221,7 @@ export function KeyPositionsTab({ companyId }: KeyPositionsTabProps) {
           .limit(1)
           .maybeSingle();
         
-        const matchedJob = jobByCode.get(pos.code);
+        const matchedJob = pos.job_family_id ? jobByFamilyId.get(pos.job_family_id) : null;
         positions.push({
           id: pos.id,
           title: pos.title,
