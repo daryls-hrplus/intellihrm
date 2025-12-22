@@ -267,8 +267,8 @@ export function PayrollSimulator({ companyId, employeeId, payPeriodId }: Payroll
       // Determine country code (default to TT if not set)
       const countryCode = (company?.territories as any)?.country_code || 'TT';
 
-      // Fetch employee position with compensation
-      const { data: positionData, error: positionError } = await supabase
+      // Fetch ALL active employee positions with compensation
+      const { data: positionsData, error: positionError } = await supabase
         .from('employee_positions')
         .select(`
           compensation_amount,
@@ -276,21 +276,27 @@ export function PayrollSimulator({ companyId, employeeId, payPeriodId }: Payroll
           compensation_frequency,
           start_date,
           end_date,
+          is_primary,
           positions (title)
         `)
         .eq('employee_id', employeeId)
-        .eq('is_primary', true)
         .eq('is_active', true)
-        .maybeSingle();
+        .order('is_primary', { ascending: false });
 
       if (positionError) throw positionError;
 
-      // Get employee start/end dates for proration
-      const employeeStartDate = positionData?.start_date 
-        ? new Date(positionData.start_date) 
+      // Get positions array (could be multiple)
+      const allPositions = positionsData || [];
+      
+      // Use primary position for proration dates, or first position if no primary
+      const primaryPosition = allPositions.find(p => p.is_primary) || allPositions[0];
+      
+      // Get employee start/end dates for proration from primary position
+      const employeeStartDate = primaryPosition?.start_date 
+        ? new Date(primaryPosition.start_date) 
         : null;
-      const employeeEndDate = positionData?.end_date
-        ? new Date(positionData.end_date)
+      const employeeEndDate = primaryPosition?.end_date
+        ? new Date(primaryPosition.end_date)
         : null;
 
       // Fetch employee compensation (overrides position compensation when present)
@@ -391,11 +397,27 @@ export function PayrollSimulator({ companyId, employeeId, payPeriodId }: Payroll
           ? employeeCompList[baseSalaryItemIndex >= 0 ? baseSalaryItemIndex : 0]
           : null;
 
-      const baseCompAmount = baseSalaryItem ? (baseSalaryItem.amount || 0) : (positionData?.compensation_amount || 0);
-      const baseCompFrequency = baseSalaryItem ? (baseSalaryItem.frequency || 'monthly') : (positionData?.compensation_frequency || 'monthly');
+      // Calculate total position compensation from ALL positions
+      const totalPositionCompensation = allPositions.reduce((sum, pos) => {
+        const amount = pos.compensation_amount || 0;
+        const freq = pos.compensation_frequency || 'monthly';
+        // Convert to monthly for consistent aggregation
+        let monthlyAmount = amount;
+        switch (freq) {
+          case 'annual': monthlyAmount = amount / 12; break;
+          case 'weekly': monthlyAmount = amount * 4.33; break;
+          case 'biweekly': monthlyAmount = amount * 2.17; break;
+          case 'fortnightly': monthlyAmount = amount * 2.17; break;
+        }
+        return sum + monthlyAmount;
+      }, 0);
+      
+      // Use employee compensation if available, otherwise use total position compensation
+      const baseCompAmount = baseSalaryItem ? (baseSalaryItem.amount || 0) : totalPositionCompensation;
+      const baseCompFrequency = baseSalaryItem ? (baseSalaryItem.frequency || 'monthly') : 'monthly'; // Aggregated is monthly
       const baseCompCurrency = baseSalaryItem
-        ? (baseSalaryItem.currency || positionData?.compensation_currency || 'USD')
-        : (positionData?.compensation_currency || 'USD');
+        ? (baseSalaryItem.currency || primaryPosition?.compensation_currency || 'USD')
+        : (primaryPosition?.compensation_currency || 'USD');
 
       // Get proration method from base salary pay element
       const baseProrationMethodCode = getProrationMethodCode(
@@ -576,7 +598,9 @@ export function PayrollSimulator({ companyId, employeeId, payPeriodId }: Payroll
         employee: {
           name: employee?.full_name || 'N/A',
           employee_id: employeeId.slice(0, 8).toUpperCase(),
-          position: (positionData?.positions as any)?.title || 'N/A'
+          position: allPositions.length > 1 
+            ? `${allPositions.length} positions` 
+            : ((primaryPosition?.positions as any)?.title || 'N/A')
         },
         salary: {
           base_salary: periodBaseSalary,
