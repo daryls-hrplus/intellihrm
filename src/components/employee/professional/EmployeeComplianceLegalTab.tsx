@@ -50,15 +50,15 @@ export function EmployeeComplianceLegalTab({ employeeId, viewType = "hr" }: Empl
           </TabsList>
 
           <TabsContent value="work_permits">
-            <EmployeeWorkPermitsTab employeeId={employeeId} />
+            <EmployeeWorkPermitsTab employeeId={employeeId} viewType={viewType} />
           </TabsContent>
 
           <TabsContent value="licenses">
-            <EmployeeLicensesTab employeeId={employeeId} />
+            <EmployeeLicensesTab employeeId={employeeId} viewType={viewType} />
           </TabsContent>
 
           <TabsContent value="background">
-            <EmployeeBackgroundChecksTab employeeId={employeeId} />
+            <EmployeeBackgroundChecksTab employeeId={employeeId} viewType={viewType} />
           </TabsContent>
 
           <TabsContent value="character">

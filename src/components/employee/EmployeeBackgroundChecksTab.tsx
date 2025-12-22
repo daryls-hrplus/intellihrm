@@ -10,8 +10,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { Plus, Pencil, Trash2, ShieldCheck, CheckCircle, XCircle, Clock } from "lucide-react";
+import { Plus, Pencil, Archive, ShieldCheck, CheckCircle, XCircle, Clock, Eye } from "lucide-react";
 import { getTodayString, formatDateForDisplay } from "@/utils/dateUtils";
+import { useGranularPermissions } from "@/hooks/useGranularPermissions";
+import { useAuditLog } from "@/hooks/useAuditLog";
 
 interface BackgroundCheck {
   id: string;
@@ -24,6 +26,7 @@ interface BackgroundCheck {
   reference_number: string | null;
   expiry_date: string | null;
   notes: string | null;
+  category: string | null;
 }
 
 interface BackgroundCheckFormData {
@@ -36,19 +39,27 @@ interface BackgroundCheckFormData {
   reference_number: string;
   expiry_date: string;
   notes: string;
-  start_date: string;
-  end_date: string;
 }
 
 interface EmployeeBackgroundChecksTabProps {
   employeeId: string;
+  viewType?: "hr" | "manager" | "ess";
 }
 
-export function EmployeeBackgroundChecksTab({ employeeId }: EmployeeBackgroundChecksTabProps) {
+export function EmployeeBackgroundChecksTab({ employeeId, viewType = "hr" }: EmployeeBackgroundChecksTabProps) {
   const [checks, setChecks] = useState<BackgroundCheck[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingCheck, setEditingCheck] = useState<BackgroundCheck | null>(null);
+  const [viewingCheck, setViewingCheck] = useState<BackgroundCheck | null>(null);
+
+  const { hasTabAccess } = useGranularPermissions();
+  const { logAction } = useAuditLog();
+
+  const canEdit = viewType === "hr" && hasTabAccess("workforce", "compliance_legal", "edit");
+  const canAdd = viewType === "hr" && hasTabAccess("workforce", "compliance_legal", "create");
+  const canViewResults = viewType === "hr";
+  const canViewNotes = viewType === "hr";
 
   const form = useForm<BackgroundCheckFormData>({
     defaultValues: {
@@ -61,8 +72,6 @@ export function EmployeeBackgroundChecksTab({ employeeId }: EmployeeBackgroundCh
       reference_number: "",
       expiry_date: "",
       notes: "",
-      start_date: getTodayString(),
-      end_date: "",
     },
   });
 
@@ -72,6 +81,7 @@ export function EmployeeBackgroundChecksTab({ employeeId }: EmployeeBackgroundCh
       .from("employee_background_checks")
       .select("*")
       .eq("employee_id", employeeId)
+      .or("category.is.null,category.eq.background_check")
       .order("requested_date", { ascending: false });
 
     if (error) {
@@ -90,6 +100,7 @@ export function EmployeeBackgroundChecksTab({ employeeId }: EmployeeBackgroundCh
     try {
       const payload = {
         ...data,
+        category: "background_check",
         provider: data.provider || null,
         completed_date: data.completed_date || null,
         result: data.result || null,
@@ -105,14 +116,32 @@ export function EmployeeBackgroundChecksTab({ employeeId }: EmployeeBackgroundCh
           .eq("id", editingCheck.id);
 
         if (error) throw error;
+        
+        await logAction({
+          action: "UPDATE",
+          entityType: "background_check",
+          entityId: editingCheck.id,
+          entityName: data.check_type,
+          newValues: payload,
+        });
+        
         toast.success("Background check updated");
       } else {
-        const { error } = await supabase.from("employee_background_checks").insert({
+        const { data: result, error } = await supabase.from("employee_background_checks").insert({
           employee_id: employeeId,
           ...payload,
-        });
+        }).select().single();
 
         if (error) throw error;
+        
+        await logAction({
+          action: "CREATE",
+          entityType: "background_check",
+          entityId: result.id,
+          entityName: data.check_type,
+          newValues: payload,
+        });
+        
         toast.success("Background check added");
       }
 
@@ -125,7 +154,7 @@ export function EmployeeBackgroundChecksTab({ employeeId }: EmployeeBackgroundCh
     }
   };
 
-  const handleEdit = (check: any) => {
+  const handleEdit = (check: BackgroundCheck) => {
     setEditingCheck(check);
     form.reset({
       check_type: check.check_type,
@@ -137,18 +166,28 @@ export function EmployeeBackgroundChecksTab({ employeeId }: EmployeeBackgroundCh
       reference_number: check.reference_number || "",
       expiry_date: check.expiry_date || "",
       notes: check.notes || "",
-      start_date: check.start_date || getTodayString(),
-      end_date: check.end_date || "",
     });
     setDialogOpen(true);
   };
 
-  const handleDelete = async (id: string) => {
-    const { error } = await supabase.from("employee_background_checks").delete().eq("id", id);
+  const handleArchive = async (check: BackgroundCheck) => {
+    const { error } = await supabase
+      .from("employee_background_checks")
+      .update({ status: "archived" })
+      .eq("id", check.id);
+
     if (error) {
-      toast.error("Failed to delete background check");
+      toast.error("Failed to archive background check");
     } else {
-      toast.success("Background check deleted");
+      await logAction({
+        action: "UPDATE",
+        entityType: "background_check",
+        entityId: check.id,
+        entityName: check.check_type,
+        oldValues: { status: check.status },
+        newValues: { status: "archived" },
+      });
+      toast.success("Background check archived");
       fetchChecks();
     }
   };
@@ -165,8 +204,6 @@ export function EmployeeBackgroundChecksTab({ employeeId }: EmployeeBackgroundCh
       reference_number: "",
       expiry_date: "",
       notes: "",
-      start_date: getTodayString(),
-      end_date: "",
     });
     setDialogOpen(true);
   };
@@ -182,6 +219,21 @@ export function EmployeeBackgroundChecksTab({ employeeId }: EmployeeBackgroundCh
     return <Clock className="h-4 w-4 text-muted-foreground" />;
   };
 
+  const getComplianceIndicator = (check: BackgroundCheck) => {
+    if (check.status === "archived") return null;
+    
+    if (check.result === "failed" || check.result === "flagged") {
+      return <span className="text-destructive font-medium">✖</span>;
+    }
+    if (check.status === "pending" || check.status === "in_progress") {
+      return <span className="text-yellow-500 font-medium">⚠</span>;
+    }
+    if (check.result === "clear" || check.result === "passed") {
+      return <span className="text-green-500 font-medium">✔</span>;
+    }
+    return <span className="text-yellow-500 font-medium">⚠</span>;
+  };
+
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "completed":
@@ -190,222 +242,355 @@ export function EmployeeBackgroundChecksTab({ employeeId }: EmployeeBackgroundCh
         return <Badge variant="secondary">In Progress</Badge>;
       case "pending":
         return <Badge variant="outline">Pending</Badge>;
+      case "archived":
+        return <Badge variant="secondary">Archived</Badge>;
       default:
         return <Badge variant="secondary" className="capitalize">{status}</Badge>;
     }
   };
 
+  // ESS View - Simplified status card
+  if (viewType === "ess") {
+    return (
+      <div className="space-y-4">
+        <h3 className="text-lg font-medium">Background Checks</h3>
+        {isLoading ? (
+          <div className="text-muted-foreground">Loading...</div>
+        ) : checks.length === 0 ? (
+          <Card>
+            <CardContent className="py-8 text-center text-muted-foreground">
+              <ShieldCheck className="h-12 w-12 mx-auto mb-2 opacity-50" />
+              No background checks on file
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="space-y-2">
+            {checks.filter(c => c.status !== "archived").map((check) => (
+              <Card key={check.id}>
+                <CardContent className="py-4">
+                  <div className="flex justify-between items-center">
+                    <div className="flex items-center gap-3">
+                      {getStatusIcon(check.status, check.result)}
+                      <div>
+                        <p className="font-medium capitalize">{check.check_type.replace("_", " ")}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {check.status === "completed" ? "Completed" : "In Progress"}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {getStatusBadge(check.status)}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // Manager View - Limited list (no results visible)
+  if (viewType === "manager") {
+    return (
+      <div className="space-y-4">
+        <h3 className="text-lg font-medium">Background Checks</h3>
+        {isLoading ? (
+          <div className="text-muted-foreground">Loading...</div>
+        ) : checks.length === 0 ? (
+          <Card>
+            <CardContent className="py-8 text-center text-muted-foreground">
+              <ShieldCheck className="h-12 w-12 mx-auto mb-2 opacity-50" />
+              No background checks on file
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="grid gap-4">
+            {checks.filter(c => c.status !== "archived").map((check) => (
+              <Card key={check.id}>
+                <CardHeader className="pb-2">
+                  <div className="flex justify-between items-start">
+                    <div className="flex items-center gap-2">
+                      {getComplianceIndicator(check)}
+                      <CardTitle className="text-base capitalize">
+                        {check.check_type.replace("_", " ")}
+                      </CardTitle>
+                      {getStatusBadge(check.status)}
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-2 gap-2 text-sm">
+                    <div>
+                      <span className="text-muted-foreground">Requested:</span>{" "}
+                      {formatDateForDisplay(check.requested_date)}
+                    </div>
+                    {check.expiry_date && (
+                      <div>
+                        <span className="text-muted-foreground">Expires:</span>{" "}
+                        {formatDateForDisplay(check.expiry_date)}
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // HR View - Full access
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
         <h3 className="text-lg font-medium">Background Checks</h3>
-        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-          <DialogTrigger asChild>
-            <Button onClick={openNewDialog} size="sm">
-              <Plus className="h-4 w-4 mr-2" />
-              Add Background Check
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-lg">
-            <DialogHeader>
-              <DialogTitle>{editingCheck ? "Edit Background Check" : "Add Background Check"}</DialogTitle>
-            </DialogHeader>
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="check_type"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Check Type</FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value}>
+        {canAdd && (
+          <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+            <DialogTrigger asChild>
+              <Button onClick={openNewDialog} size="sm">
+                <Plus className="h-4 w-4 mr-2" />
+                Add Background Check
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-lg">
+              <DialogHeader>
+                <DialogTitle>{editingCheck ? "Edit Background Check" : "Add Background Check"}</DialogTitle>
+              </DialogHeader>
+              <Form {...form}>
+                <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="check_type"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Check Type</FormLabel>
+                          <Select onValueChange={field.onChange} value={field.value}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="criminal">Criminal Record</SelectItem>
+                              <SelectItem value="credit">Credit Check</SelectItem>
+                              <SelectItem value="employment">Employment Verification</SelectItem>
+                              <SelectItem value="education">Education Verification</SelectItem>
+                              <SelectItem value="drug_test">Drug Test</SelectItem>
+                              <SelectItem value="identity">Identity Verification</SelectItem>
+                              <SelectItem value="other">Other</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="provider"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Provider</FormLabel>
                           <FormControl>
-                            <SelectTrigger>
-                              <SelectValue />
-                            </SelectTrigger>
+                            <Input {...field} placeholder="Background check company" />
                           </FormControl>
-                          <SelectContent>
-                            <SelectItem value="criminal">Criminal Record</SelectItem>
-                            <SelectItem value="credit">Credit Check</SelectItem>
-                            <SelectItem value="employment">Employment Verification</SelectItem>
-                            <SelectItem value="education">Education Verification</SelectItem>
-                            <SelectItem value="drug_test">Drug Test</SelectItem>
-                            <SelectItem value="identity">Identity Verification</SelectItem>
-                            <SelectItem value="other">Other</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="provider"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Provider</FormLabel>
-                        <FormControl>
-                          <Input {...field} placeholder="Background check company" />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-                </div>
+                        </FormItem>
+                      )}
+                    />
+                  </div>
 
-                <div className="grid grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="requested_date"
-                    rules={{ required: "Requested date is required" }}
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Requested Date</FormLabel>
-                        <FormControl>
-                          <Input type="date" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="completed_date"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Completed Date</FormLabel>
-                        <FormControl>
-                          <Input type="date" {...field} />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="status"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Status</FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value}>
+                  <div className="grid grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="requested_date"
+                      rules={{ required: "Requested date is required" }}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Requested Date</FormLabel>
                           <FormControl>
-                            <SelectTrigger>
-                              <SelectValue />
-                            </SelectTrigger>
+                            <Input type="date" {...field} />
                           </FormControl>
-                          <SelectContent>
-                            <SelectItem value="pending">Pending</SelectItem>
-                            <SelectItem value="in_progress">In Progress</SelectItem>
-                            <SelectItem value="completed">Completed</SelectItem>
-                            <SelectItem value="cancelled">Cancelled</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="result"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Result</FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value}>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="completed_date"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Completed Date</FormLabel>
                           <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select result..." />
-                            </SelectTrigger>
+                            <Input type="date" {...field} />
                           </FormControl>
-                          <SelectContent>
-                            <SelectItem value="clear">Clear</SelectItem>
-                            <SelectItem value="passed">Passed</SelectItem>
-                            <SelectItem value="flagged">Flagged</SelectItem>
-                            <SelectItem value="failed">Failed</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </FormItem>
-                    )}
-                  />
-                </div>
+                        </FormItem>
+                      )}
+                    />
+                  </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="status"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Status</FormLabel>
+                          <Select onValueChange={field.onChange} value={field.value}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="pending">Pending</SelectItem>
+                              <SelectItem value="in_progress">In Progress</SelectItem>
+                              <SelectItem value="completed">Completed</SelectItem>
+                              <SelectItem value="cancelled">Cancelled</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="result"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Result</FormLabel>
+                          <Select onValueChange={field.onChange} value={field.value}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select result..." />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="clear">Clear</SelectItem>
+                              <SelectItem value="passed">Passed</SelectItem>
+                              <SelectItem value="flagged">Flagged</SelectItem>
+                              <SelectItem value="failed">Failed</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="reference_number"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Reference Number</FormLabel>
+                          <FormControl>
+                            <Input {...field} />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="expiry_date"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Expiry Date</FormLabel>
+                          <FormControl>
+                            <Input type="date" {...field} />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
                   <FormField
                     control={form.control}
-                    name="reference_number"
+                    name="notes"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Reference Number</FormLabel>
+                        <FormLabel>Notes (HR Only)</FormLabel>
                         <FormControl>
-                          <Input {...field} />
+                          <Textarea {...field} rows={2} />
                         </FormControl>
                       </FormItem>
                     )}
                   />
-                  <FormField
-                    control={form.control}
-                    name="expiry_date"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Expiry Date</FormLabel>
-                        <FormControl>
-                          <Input type="date" {...field} />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-                </div>
 
-                <div className="grid grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="start_date"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Start Date</FormLabel>
-                        <FormControl>
-                          <Input type="date" {...field} />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="end_date"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>End Date</FormLabel>
-                        <FormControl>
-                          <Input type="date" {...field} />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-                </div>
-
-                <FormField
-                  control={form.control}
-                  name="notes"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Notes</FormLabel>
-                      <FormControl>
-                        <Textarea {...field} rows={2} />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-
-                <div className="flex justify-end gap-2">
-                  <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
-                    Cancel
-                  </Button>
-                  <Button type="submit">Save</Button>
-                </div>
-              </form>
-            </Form>
-          </DialogContent>
-        </Dialog>
+                  <div className="flex justify-end gap-2">
+                    <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
+                      Cancel
+                    </Button>
+                    <Button type="submit">Save</Button>
+                  </div>
+                </form>
+              </Form>
+            </DialogContent>
+          </Dialog>
+        )}
       </div>
+
+      {/* Detail View Dialog */}
+      <Dialog open={!!viewingCheck} onOpenChange={() => setViewingCheck(null)}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Background Check Details</DialogTitle>
+          </DialogHeader>
+          {viewingCheck && (
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4 text-sm">
+                <div>
+                  <span className="text-muted-foreground">Type:</span>
+                  <p className="font-medium capitalize">{viewingCheck.check_type.replace("_", " ")}</p>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Status:</span>
+                  <div className="mt-1">{getStatusBadge(viewingCheck.status)}</div>
+                </div>
+                {viewingCheck.provider && (
+                  <div>
+                    <span className="text-muted-foreground">Provider:</span>
+                    <p className="font-medium">{viewingCheck.provider}</p>
+                  </div>
+                )}
+                {viewingCheck.reference_number && (
+                  <div>
+                    <span className="text-muted-foreground">Reference:</span>
+                    <p className="font-medium">{viewingCheck.reference_number}</p>
+                  </div>
+                )}
+                <div>
+                  <span className="text-muted-foreground">Requested:</span>
+                  <p className="font-medium">{formatDateForDisplay(viewingCheck.requested_date)}</p>
+                </div>
+                {viewingCheck.completed_date && (
+                  <div>
+                    <span className="text-muted-foreground">Completed:</span>
+                    <p className="font-medium">{formatDateForDisplay(viewingCheck.completed_date)}</p>
+                  </div>
+                )}
+                {canViewResults && viewingCheck.result && (
+                  <div>
+                    <span className="text-muted-foreground">Result:</span>
+                    <Badge 
+                      variant={viewingCheck.result === "clear" || viewingCheck.result === "passed" ? "default" : "destructive"}
+                      className="mt-1 capitalize"
+                    >
+                      {viewingCheck.result}
+                    </Badge>
+                  </div>
+                )}
+              </div>
+              {viewingCheck.notes && canViewNotes && (
+                <div>
+                  <span className="text-muted-foreground text-sm">Notes:</span>
+                  <p className="text-sm mt-1 bg-muted p-2 rounded">{viewingCheck.notes}</p>
+                </div>
+              )}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
 
       {isLoading ? (
         <div className="text-muted-foreground">Loading...</div>
@@ -419,16 +604,17 @@ export function EmployeeBackgroundChecksTab({ employeeId }: EmployeeBackgroundCh
       ) : (
         <div className="grid gap-4">
           {checks.map((check) => (
-            <Card key={check.id}>
+            <Card key={check.id} className={check.status === "archived" ? "opacity-60" : ""}>
               <CardHeader className="pb-2">
                 <div className="flex justify-between items-start">
                   <div className="flex items-center gap-2">
+                    {getComplianceIndicator(check)}
                     {getStatusIcon(check.status, check.result)}
                     <CardTitle className="text-base capitalize">
                       {check.check_type.replace("_", " ")}
                     </CardTitle>
                     {getStatusBadge(check.status)}
-                    {check.result && (
+                    {canViewResults && check.result && (
                       <Badge 
                         variant={check.result === "clear" || check.result === "passed" ? "default" : "destructive"}
                         className="capitalize"
@@ -438,17 +624,24 @@ export function EmployeeBackgroundChecksTab({ employeeId }: EmployeeBackgroundCh
                     )}
                   </div>
                   <div className="flex gap-1">
-                    <Button variant="ghost" size="icon" onClick={() => handleEdit(check)}>
-                      <Pencil className="h-4 w-4" />
+                    <Button variant="ghost" size="icon" onClick={() => setViewingCheck(check)}>
+                      <Eye className="h-4 w-4" />
                     </Button>
-                    <Button variant="ghost" size="icon" onClick={() => handleDelete(check.id)}>
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
+                    {canEdit && check.status !== "archived" && (
+                      <>
+                        <Button variant="ghost" size="icon" onClick={() => handleEdit(check)}>
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                        <Button variant="ghost" size="icon" onClick={() => handleArchive(check)}>
+                          <Archive className="h-4 w-4" />
+                        </Button>
+                      </>
+                    )}
                   </div>
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-2 gap-2 text-sm">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm">
                   <div>
                     <span className="text-muted-foreground">Requested:</span>{" "}
                     {formatDateForDisplay(check.requested_date)}
