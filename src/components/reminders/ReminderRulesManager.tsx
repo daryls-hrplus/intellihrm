@@ -401,12 +401,39 @@ export const ReminderRulesManager = forwardRef<ReminderRulesManagerRef, Reminder
 
               <div className="space-y-2">
                 <Label>Message Template (Optional)</Label>
+                <div className="flex flex-wrap gap-1 mb-2">
+                  <span className="text-xs text-muted-foreground mr-2">Insert placeholder:</span>
+                  {[
+                    { key: '{employee_name}', label: 'Employee Name' },
+                    { key: '{item_name}', label: 'Item Name' },
+                    { key: '{event_date}', label: 'Event Date' },
+                    { key: '{days_until}', label: 'Days Until' },
+                    { key: '{event_type}', label: 'Event Type' },
+                  ].map((placeholder) => (
+                    <button
+                      key={placeholder.key}
+                      type="button"
+                      onClick={() => {
+                        setFormData({ 
+                          ...formData, 
+                          message_template: (formData.message_template || '') + placeholder.key 
+                        });
+                      }}
+                      className="text-xs px-2 py-0.5 rounded bg-primary/10 hover:bg-primary/20 text-primary border border-primary/20 transition-colors"
+                    >
+                      {placeholder.label}
+                    </button>
+                  ))}
+                </div>
                 <Textarea
                   value={formData.message_template}
                   onChange={(e) => setFormData({ ...formData, message_template: e.target.value })}
-                  placeholder="Custom message template. Use {employee_name}, {event_date}, {days_until} as placeholders."
+                  placeholder="Custom message template..."
                   rows={3}
                 />
+                <p className="text-xs text-muted-foreground">
+                  Use <code className="bg-muted px-1 rounded">{'{item_name}'}</code> for specific certificate/license names
+                </p>
               </div>
 
               <div className="flex items-center gap-2">
