@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -54,9 +55,13 @@ export function KeyPositionsTab({ companyId }: KeyPositionsTabProps) {
   } = useSuccession(companyId);
 
   const [keyPositions, setKeyPositions] = useState<KeyPosition[]>([]);
+  const [availablePositions, setAvailablePositions] = useState<KeyPosition[]>([]);
   const [loadingKeyPositions, setLoadingKeyPositions] = useState(true);
   const [employees, setEmployees] = useState<{ id: string; full_name: string }[]>([]);
   const [showDialog, setShowDialog] = useState(false);
+  const [showAddDialog, setShowAddDialog] = useState(false);
+  const [selectedPositionId, setSelectedPositionId] = useState<string>('');
+  const [searchTerm, setSearchTerm] = useState('');
   const [editingPosition, setEditingPosition] = useState<KeyPosition | null>(null);
   const [formData, setFormData] = useState({
     position_id: '',
@@ -76,6 +81,7 @@ export function KeyPositionsTab({ companyId }: KeyPositionsTabProps) {
   const loadData = async () => {
     await Promise.all([
       loadKeyPositionsFromJobs(),
+      loadAvailablePositions(),
       loadEmployees(),
     ]);
   };
@@ -129,6 +135,47 @@ export function KeyPositionsTab({ companyId }: KeyPositionsTabProps) {
     
     setKeyPositions(keyPositionsWithData);
     setLoadingKeyPositions(false);
+  };
+
+  const loadAvailablePositions = async () => {
+    // Get all positions linked to key jobs (for the add dialog)
+    const { data: positionsData } = await (supabase
+      .from('positions') as any)
+      .select(`
+        id, 
+        title, 
+        code,
+        job_id,
+        jobs!inner(id, name, code, is_key_position)
+      `)
+      .eq('company_id', companyId)
+      .eq('jobs.is_key_position', true)
+      .is('end_date', null)
+      .order('title');
+    
+    if (positionsData) {
+      const positions: KeyPosition[] = [];
+      for (const pos of positionsData) {
+        const { data: holder } = await supabase
+          .from('employee_positions')
+          .select('profiles(id, full_name)')
+          .eq('position_id', pos.id)
+          .is('end_date', null)
+          .order('start_date', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        
+        positions.push({
+          id: pos.id,
+          title: pos.title,
+          code: pos.code,
+          job_id: pos.job_id,
+          job: pos.jobs,
+          current_holder: holder?.profiles || null,
+        });
+      }
+      setAvailablePositions(positions);
+    }
   };
 
   const loadEmployees = async () => {
@@ -193,6 +240,29 @@ export function KeyPositionsTab({ companyId }: KeyPositionsTabProps) {
     });
     setShowDialog(true);
   };
+
+  const openAddDialog = () => {
+    setSearchTerm('');
+    setSelectedPositionId('');
+    setShowAddDialog(true);
+  };
+
+  const handleAddKeyPosition = () => {
+    if (!selectedPositionId) return;
+    const position = availablePositions.find(p => p.id === selectedPositionId);
+    if (position) {
+      setShowAddDialog(false);
+      openRiskDialog(position);
+    }
+  };
+
+  // Filter available positions based on search term
+  const filteredAvailablePositions = availablePositions.filter(pos => 
+    pos.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    pos.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    pos.job?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (pos.current_holder?.full_name || 'vacant').toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   // Stats
   const positionsWithRisk = keyPositions.filter(p => p.riskAssessment);
@@ -260,14 +330,20 @@ export function KeyPositionsTab({ companyId }: KeyPositionsTabProps) {
 
       {/* Key Positions Table */}
       <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Key className="h-5 w-5" />
-            Key Positions from Jobs
-          </CardTitle>
-          <p className="text-sm text-muted-foreground">
-            Positions are marked as key based on their job configuration in Workforce &gt; Jobs
-          </p>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <div>
+            <CardTitle className="flex items-center gap-2">
+              <Key className="h-5 w-5" />
+              Key Positions from Jobs
+            </CardTitle>
+            <p className="text-sm text-muted-foreground mt-1">
+              Positions are marked as key based on their job configuration in Workforce &gt; Jobs
+            </p>
+          </div>
+          <Button onClick={openAddDialog}>
+            <Plus className="h-4 w-4 mr-2" />
+            Add Key Position
+          </Button>
         </CardHeader>
         <CardContent>
           {isLoading ? (
@@ -492,6 +568,98 @@ export function KeyPositionsTab({ companyId }: KeyPositionsTabProps) {
               <Button variant="outline" onClick={() => setShowDialog(false)}>Cancel</Button>
               <Button onClick={handleSubmit}>
                 {editingPosition?.riskAssessment ? 'Update' : 'Save'} Assessment
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Key Position Dialog */}
+      <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Plus className="h-5 w-5" />
+              Add Key Position
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label>Search Positions</Label>
+              <Input
+                placeholder="Search by position, job, or incumbent name..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+
+            <div className="border rounded-lg max-h-[400px] overflow-y-auto">
+              {filteredAvailablePositions.length === 0 ? (
+                <div className="p-8 text-center text-muted-foreground">
+                  <Shield className="h-10 w-10 mx-auto mb-3 opacity-50" />
+                  <p>No positions found</p>
+                  <p className="text-sm">Mark jobs as "Key Position" in Workforce &gt; Jobs first</p>
+                </div>
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="w-8"></TableHead>
+                      <TableHead>Position</TableHead>
+                      <TableHead>Job</TableHead>
+                      <TableHead>Incumbent</TableHead>
+                      <TableHead>Status</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredAvailablePositions.map((pos) => {
+                      const hasRisk = keyPositions.find(kp => kp.id === pos.id)?.riskAssessment;
+                      return (
+                        <TableRow 
+                          key={pos.id} 
+                          className={`cursor-pointer ${selectedPositionId === pos.id ? 'bg-primary/10' : ''}`}
+                          onClick={() => setSelectedPositionId(pos.id)}
+                        >
+                          <TableCell>
+                            <input 
+                              type="radio" 
+                              name="position" 
+                              checked={selectedPositionId === pos.id}
+                              onChange={() => setSelectedPositionId(pos.id)}
+                              className="h-4 w-4"
+                            />
+                          </TableCell>
+                          <TableCell>
+                            <div>
+                              <div className="font-medium">{pos.title}</div>
+                              <div className="text-sm text-muted-foreground">{pos.code}</div>
+                            </div>
+                          </TableCell>
+                          <TableCell className="text-sm">{pos.job?.name || '-'}</TableCell>
+                          <TableCell>
+                            {pos.current_holder?.full_name || (
+                              <span className="text-muted-foreground italic">Vacant</span>
+                            )}
+                          </TableCell>
+                          <TableCell>
+                            {hasRisk ? (
+                              <Badge variant="outline" className="text-emerald-600 border-emerald-500">Assessed</Badge>
+                            ) : (
+                              <Badge variant="outline" className="text-amber-600 border-amber-500">Needs Assessment</Badge>
+                            )}
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
+              )}
+            </div>
+
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowAddDialog(false)}>Cancel</Button>
+              <Button onClick={handleAddKeyPosition} disabled={!selectedPositionId}>
+                Select &amp; Assess Risk
               </Button>
             </div>
           </div>
