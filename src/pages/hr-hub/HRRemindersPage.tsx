@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useLanguage } from '@/hooks/useLanguage';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Breadcrumbs } from '@/components/ui/breadcrumbs';
@@ -7,14 +7,19 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ReminderRulesManager } from '@/components/reminders/ReminderRulesManager';
 import { EmployeeRemindersList } from '@/components/reminders/EmployeeRemindersList';
+import { AIRecommendationsPanel } from '@/components/reminders/AIRecommendationsPanel';
+import { useReminders } from '@/hooks/useReminders';
 import { supabase } from '@/integrations/supabase/client';
 import { Bell, Settings, List, Loader2 } from 'lucide-react';
+import { toast } from 'sonner';
 
 export default function HRRemindersPage() {
   const { t } = useLanguage();
+  const { createRule, fetchEventTypes } = useReminders();
   const [companies, setCompanies] = useState<{ id: string; name: string }[]>([]);
   const [selectedCompanyId, setSelectedCompanyId] = useState<string>('all');
   const [loading, setLoading] = useState(true);
+  const rulesManagerRef = useRef<{ reload: () => void } | null>(null);
 
   useEffect(() => {
     const fetchCompanies = async () => {
@@ -28,6 +33,41 @@ export default function HRRemindersPage() {
     };
     fetchCompanies();
   }, []);
+
+  const handleApplyRecommendation = async (recommendation: any) => {
+    try {
+      // Fetch event types to get the ID
+      const eventTypes = await fetchEventTypes();
+      const eventType = eventTypes.find((et: any) => et.id === recommendation.eventTypeId);
+      
+      if (!eventType) {
+        throw new Error('Event type not found');
+      }
+
+      // Create the rule with AI-suggested values
+      await createRule({
+        company_id: selectedCompanyId,
+        name: `${eventType.name} Reminder`,
+        description: `Auto-generated rule for ${eventType.name.toLowerCase()} reminders`,
+        event_type_id: recommendation.eventTypeId,
+        days_before: recommendation.suggestedIntervals[0],
+        reminder_intervals: recommendation.suggestedIntervals,
+        send_to_employee: recommendation.suggestedRecipients.employee,
+        send_to_manager: recommendation.suggestedRecipients.manager,
+        send_to_hr: recommendation.suggestedRecipients.hr,
+        notification_method: 'both',
+        message_template: recommendation.suggestedTemplate,
+        priority: recommendation.suggestedPriority,
+        is_active: true,
+      });
+
+      // Trigger reload of the rules manager
+      rulesManagerRef.current?.reload();
+    } catch (error) {
+      console.error('Error applying recommendation:', error);
+      throw error;
+    }
+  };
 
   const breadcrumbItems = [
     { label: t('hrHub.title'), href: '/hr-hub' },
@@ -99,7 +139,15 @@ export default function HRRemindersPage() {
             </Card>
           </TabsContent>
 
-          <TabsContent value="rules">
+          <TabsContent value="rules" className="space-y-6">
+            {/* AI Recommendations Panel */}
+            {selectedCompanyId && selectedCompanyId !== 'all' && (
+              <AIRecommendationsPanel 
+                companyId={selectedCompanyId}
+                onApplyRecommendation={handleApplyRecommendation}
+              />
+            )}
+
             <Card>
               <CardHeader>
                 <CardTitle>{t('common.rules') || 'Reminder Rules'}</CardTitle>
@@ -113,7 +161,10 @@ export default function HRRemindersPage() {
                     {t('common.select')} {t('common.company')}
                   </div>
                 ) : (
-                  <ReminderRulesManager companyId={selectedCompanyId} />
+                  <ReminderRulesManager 
+                    companyId={selectedCompanyId}
+                    ref={rulesManagerRef}
+                  />
                 )}
               </CardContent>
             </Card>

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, forwardRef, useImperativeHandle } from 'react';
 import { useReminders } from '@/hooks/useReminders';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -18,7 +18,12 @@ interface ReminderRulesManagerProps {
   companyId: string;
 }
 
-export function ReminderRulesManager({ companyId }: ReminderRulesManagerProps) {
+export interface ReminderRulesManagerRef {
+  reload: () => void;
+}
+
+export const ReminderRulesManager = forwardRef<ReminderRulesManagerRef, ReminderRulesManagerProps>(
+  function ReminderRulesManager({ companyId }, ref) {
   const { fetchRules, fetchEventTypes, createRule, updateRule, deleteRule, isLoading } = useReminders();
   const [rules, setRules] = useState<ReminderRule[]>([]);
   const [eventTypes, setEventTypes] = useState<ReminderEventType[]>([]);
@@ -69,6 +74,10 @@ export function ReminderRulesManager({ companyId }: ReminderRulesManagerProps) {
       setLoading(false);
     }
   };
+
+  useImperativeHandle(ref, () => ({
+    reload: loadData,
+  }));
 
   useEffect(() => {
     if (companyId) {
@@ -438,4 +447,4 @@ export function ReminderRulesManager({ companyId }: ReminderRulesManagerProps) {
       )}
     </div>
   );
-}
+});
