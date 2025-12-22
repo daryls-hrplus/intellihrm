@@ -55,6 +55,13 @@ export function PayslipDocument({
     }).format(amount);
   };
 
+  const getJobInitials = (jobName: string) => {
+    return jobName
+      .split(' ')
+      .map(word => word.charAt(0).toUpperCase())
+      .join('');
+  };
+
   // Default template values if none provided
   const t = template || {
     template_style: 'classic' as const,
@@ -200,7 +207,7 @@ export function PayslipDocument({
                     </span>
                     {(item.job_title || (item.is_prorated && item.effective_start)) && (
                       <span className="text-[6px] text-muted-foreground leading-tight mt-1">
-                        {item.job_title}
+                        {item.job_title && getJobInitials(item.job_title)}
                         {item.job_title && item.is_prorated && item.effective_start && ' · '}
                         {item.is_prorated && item.effective_start && (
                           <>
