@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { createRoot } from "react-dom/client";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -109,17 +109,21 @@ export function BulkPayslipDistribution({
     }
   };
 
-  const handleOpen = (isOpen: boolean) => {
-    if (isOpen && !payslipData) {
+  // Fetch payslip data when dialog opens
+  useEffect(() => {
+    if (open && !payslipData && !isLoading) {
       fetchPayslipData();
     }
-    if (!isOpen) {
-      setShowResults(false);
-      setResults([]);
-      setProgress(0);
-      setAction(null);
-    }
-    onOpenChange(isOpen);
+  }, [open]);
+
+  const handleClose = () => {
+    setShowResults(false);
+    setResults([]);
+    setProgress(0);
+    setAction(null);
+    setPayslipData(null); // Reset data so it refetches next time
+    setSelectedEmployees(new Set());
+    onOpenChange(false);
   };
 
   const toggleEmployee = (employeeId: string) => {
@@ -589,7 +593,7 @@ export function BulkPayslipDistribution({
   const totalCount = payslipData?.employees.length || 0;
 
   return (
-    <Dialog open={open} onOpenChange={handleOpen}>
+    <Dialog open={open} onOpenChange={(isOpen) => !isOpen && handleClose()}>
       <DialogContent className="max-w-2xl max-h-[85vh] overflow-hidden flex flex-col">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
@@ -730,7 +734,7 @@ export function BulkPayslipDistribution({
             </Button>
           ) : (
             <>
-              <Button variant="outline" onClick={() => handleOpen(false)}>
+              <Button variant="outline" onClick={handleClose}>
                 {t("common.cancel", "Cancel")}
               </Button>
               <Button 
