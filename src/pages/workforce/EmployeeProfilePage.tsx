@@ -290,7 +290,7 @@ export default function EmployeeProfilePage() {
           <TabsList className="flex flex-wrap h-auto gap-1 p-1">
             <TabsTrigger value="overview"><User className="h-4 w-4 mr-1" />{t("workforce.profile.tabs.overview")}</TabsTrigger>
             <TabsTrigger value="addresses"><Home className="h-4 w-4 mr-1" />{t("workforce.profile.tabs.addresses")}</TabsTrigger>
-            <TabsTrigger value="background"><ShieldCheck className="h-4 w-4 mr-1" />{t("workforce.profile.tabs.background")}</TabsTrigger>
+            
             <TabsTrigger value="bank"><CreditCard className="h-4 w-4 mr-1" />{t("workforce.profile.tabs.bank")}</TabsTrigger>
             <TabsTrigger value="beneficiaries"><Users className="h-4 w-4 mr-1" />{t("workforce.profile.tabs.beneficiaries")}</TabsTrigger>
             <TabsTrigger value="branches"><Building2 className="h-4 w-4 mr-1" />{t("workforce.profile.tabs.branches")}</TabsTrigger>
@@ -314,9 +314,6 @@ export default function EmployeeProfilePage() {
             <EmployeeAddressesTab employeeId={employee.id} />
           </TabsContent>
 
-          <TabsContent value="background" className="mt-6">
-            <EmployeeBackgroundChecksTab employeeId={employee.id} />
-          </TabsContent>
 
           <TabsContent value="bank" className="mt-6">
             <EmployeeBankAccountsTab employeeId={employee.id} />

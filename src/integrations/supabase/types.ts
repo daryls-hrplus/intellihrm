@@ -6076,6 +6076,7 @@ export type Database = {
         Row: {
           archived_at: string | null
           archived_by: string | null
+          category: string | null
           check_type: string
           completed_date: string | null
           created_at: string
@@ -6083,6 +6084,7 @@ export type Database = {
           expiry_date: string | null
           id: string
           is_archived: boolean | null
+          jurisdiction: string | null
           notes: string | null
           provider: string | null
           reference_number: string | null
@@ -6094,6 +6096,7 @@ export type Database = {
         Insert: {
           archived_at?: string | null
           archived_by?: string | null
+          category?: string | null
           check_type: string
           completed_date?: string | null
           created_at?: string
@@ -6101,6 +6104,7 @@ export type Database = {
           expiry_date?: string | null
           id?: string
           is_archived?: boolean | null
+          jurisdiction?: string | null
           notes?: string | null
           provider?: string | null
           reference_number?: string | null
@@ -6112,6 +6116,7 @@ export type Database = {
         Update: {
           archived_at?: string | null
           archived_by?: string | null
+          category?: string | null
           check_type?: string
           completed_date?: string | null
           created_at?: string
@@ -6119,6 +6124,7 @@ export type Database = {
           expiry_date?: string | null
           id?: string
           is_archived?: boolean | null
+          jurisdiction?: string | null
           notes?: string | null
           provider?: string | null
           reference_number?: string | null
