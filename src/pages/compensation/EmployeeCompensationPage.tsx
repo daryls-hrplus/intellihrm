@@ -958,98 +958,43 @@ export default function EmployeeCompensationPage() {
           </div>
         </div>
 
-        {/* Position Compensation Info */}
-        {selectedEmployeeId && employeePrimaryPosition && (
+        {/* Total Package Summary - All Positions */}
+        {selectedEmployeeId && employeePositions.length > 0 && (
           <Card className="bg-muted/30">
             <CardContent className="p-4">
-              <div className="space-y-3">
-                {/* Compensation Model */}
-                <div className="flex items-center gap-2">
-                  <Badge variant="secondary" className="text-sm">
-                    {employeePrimaryPosition.compensation_model === 'salary_grade' 
-                      ? t("compensation.employeeCompensation.compensationModel.salaryGrade")
-                      : employeePrimaryPosition.compensation_model === 'spinal_point'
-                        ? t("compensation.employeeCompensation.compensationModel.paySpine")
-                        : employeePrimaryPosition.compensation_model === 'hybrid'
-                          ? t("compensation.employeeCompensation.compensationModel.hybrid")
-                          : t("compensation.employeeCompensation.compensationModel.none")}
-                  </Badge>
-                  <span className="text-sm text-muted-foreground">
-                    {t("compensation.employeeCompensation.forPosition")}: {employeePrimaryPosition.title} ({employeePrimaryPosition.code})
-                  </span>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                    <DollarSign className="h-5 w-5 text-primary" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">{t("compensation.employeeCompensation.totalPackage", "Total Package")}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {employeePositions.length} {employeePositions.length === 1 ? t("compensation.employeeCompensation.position", "position") : t("compensation.employeeCompensation.positions", "positions")}
+                    </p>
+                  </div>
                 </div>
-
-                {/* Salary Range Line */}
-                {(employeePrimaryPosition.compensation_model === 'salary_grade' || employeePrimaryPosition.compensation_model === 'hybrid') && employeePrimaryPosition.salary_grade && (
-                  <div className="flex items-center gap-4">
-                    <span className="text-sm font-medium w-32">{t("compensation.employeeCompensation.salaryRange")}:</span>
-                    <span className="text-sm">
-                      {employeePrimaryPosition.salary_grade.name} ({employeePrimaryPosition.salary_grade.code}): {formatAmount(employeePrimaryPosition.salary_grade.min_salary, employeePrimaryPosition.salary_grade.currency)} - {formatAmount(employeePrimaryPosition.salary_grade.max_salary, employeePrimaryPosition.salary_grade.currency)}
-                    </span>
-                  </div>
-                )}
-                {(employeePrimaryPosition.compensation_model === 'spinal_point' || employeePrimaryPosition.compensation_model === 'hybrid') && paySpine && spinalPoints.length > 0 && (
-                  <div className="flex items-center gap-4">
-                    <span className="text-sm font-medium w-32">{t("compensation.employeeCompensation.paySpineRange")}:</span>
-                    <span className="text-sm">
-                      {paySpine.name} ({paySpine.code}): {formatAmount(spinalPoints[0].annual_salary, paySpine.currency)} - {formatAmount(spinalPoints[spinalPoints.length - 1].annual_salary, paySpine.currency)}
-                    </span>
-                  </div>
-                )}
-
-                {/* Total Position Compensation Range Line */}
-                {(() => {
-                  const additionalComp = positionCompensationItems.reduce((sum, item) => sum + (item.amount * getAnnualMultiplier(item.frequency_id)), 0);
-                  const currency = employeePrimaryPosition.salary_grade?.currency || paySpine?.currency || "USD";
-                  
-                  if (employeePrimaryPosition.compensation_model === 'salary_grade' && employeePrimaryPosition.salary_grade) {
-                    const minTotal = employeePrimaryPosition.salary_grade.min_salary + additionalComp;
-                    const maxTotal = employeePrimaryPosition.salary_grade.max_salary + additionalComp;
+                <div className="text-right">
+                  {(() => {
+                    // Calculate total from all active compensation items across all positions
+                    const totalMonthly = compensationItems
+                      .filter(item => item.is_active)
+                      .reduce((sum, item) => {
+                        const multiplier = getAnnualMultiplierByFrequency(item.frequency);
+                        return sum + (item.amount * multiplier / 12);
+                      }, 0);
+                    const totalAnnual = totalMonthly * 12;
+                    
                     return (
-                      <div className="flex items-center gap-4">
-                        <span className="text-sm font-medium w-32">{t("compensation.employeeCompensation.totalPackageRange")}:</span>
-                        <span className="text-sm font-semibold">
-                          {formatAmount(minTotal, currency)} - {formatAmount(maxTotal, currency)}
-                        </span>
-                      </div>
+                      <>
+                        <p className="text-2xl font-bold">{formatAmount(totalAnnual, "USD")}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {formatAmount(totalMonthly, "USD")} / {t("compensation.employeeCompensation.monthly", "month")}
+                        </p>
+                      </>
                     );
-                  }
-                  if (employeePrimaryPosition.compensation_model === 'spinal_point' && spinalPoints.length > 0 && paySpine) {
-                    const minTotal = spinalPoints[0].annual_salary + additionalComp;
-                    const maxTotal = spinalPoints[spinalPoints.length - 1].annual_salary + additionalComp;
-                    return (
-                      <div className="flex items-center gap-4">
-                        <span className="text-sm font-medium w-32">{t("compensation.employeeCompensation.totalPackageRange")}:</span>
-                        <span className="text-sm font-semibold">
-                          {formatAmount(minTotal, paySpine.currency)} - {formatAmount(maxTotal, paySpine.currency)}
-                        </span>
-                      </div>
-                    );
-                  }
-                  if (employeePrimaryPosition.compensation_model === 'hybrid') {
-                    return (
-                      <div className="space-y-1">
-                        {employeePrimaryPosition.salary_grade && (
-                          <div className="flex items-center gap-4">
-                            <span className="text-sm font-medium w-32">{t("compensation.employeeCompensation.totalPackageRange")} ({t("compensation.positionCompensation.salaryGrade")}):</span>
-                            <span className="text-sm font-semibold">
-                              {formatAmount(employeePrimaryPosition.salary_grade.min_salary + additionalComp, employeePrimaryPosition.salary_grade.currency)} - {formatAmount(employeePrimaryPosition.salary_grade.max_salary + additionalComp, employeePrimaryPosition.salary_grade.currency)}
-                            </span>
-                          </div>
-                        )}
-                        {spinalPoints.length > 0 && paySpine && (
-                          <div className="flex items-center gap-4">
-                            <span className="text-sm font-medium w-32">{t("compensation.employeeCompensation.totalPackageRange")} ({t("compensation.positionCompensation.paySpine")}):</span>
-                            <span className="text-sm font-semibold">
-                              {formatAmount(spinalPoints[0].annual_salary + additionalComp, paySpine.currency)} - {formatAmount(spinalPoints[spinalPoints.length - 1].annual_salary + additionalComp, paySpine.currency)}
-                            </span>
-                          </div>
-                        )}
-                      </div>
-                    );
-                  }
-                  return null;
-                })()}
+                  })()}
+                </div>
               </div>
             </CardContent>
           </Card>
