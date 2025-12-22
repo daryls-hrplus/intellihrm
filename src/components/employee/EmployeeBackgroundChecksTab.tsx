@@ -21,6 +21,7 @@ interface BackgroundCheck {
   check_type: string;
   provider: string | null;
   requested_date: string;
+  start_date: string | null;
   completed_date: string | null;
   status: string;
   result: string | null;
@@ -39,6 +40,7 @@ interface BackgroundCheckFormData {
   check_type: string;
   provider: string;
   requested_date: string;
+  start_date: string;
   completed_date: string;
   status: string;
   result: string;
@@ -79,6 +81,7 @@ export function EmployeeBackgroundChecksTab({ employeeId, viewType = "hr" }: Emp
       check_type: "criminal",
       provider: "",
       requested_date: getTodayString(),
+      start_date: "",
       completed_date: "",
       status: "pending",
       result: "",
@@ -154,6 +157,7 @@ export function EmployeeBackgroundChecksTab({ employeeId, viewType = "hr" }: Emp
         ...data,
         category: "background_check",
         provider: data.provider || null,
+        start_date: data.start_date || null,
         completed_date: data.completed_date || null,
         result: data.result || null,
         reference_number: data.reference_number || null,
@@ -239,6 +243,7 @@ export function EmployeeBackgroundChecksTab({ employeeId, viewType = "hr" }: Emp
       check_type: check.check_type,
       provider: check.provider || "",
       requested_date: check.requested_date,
+      start_date: check.start_date || "",
       completed_date: check.completed_date || "",
       status: check.status,
       result: check.result || "",
@@ -282,6 +287,7 @@ export function EmployeeBackgroundChecksTab({ employeeId, viewType = "hr" }: Emp
       check_type: "criminal",
       provider: "",
       requested_date: getTodayString(),
+      start_date: "",
       completed_date: "",
       status: "pending",
       result: "",
@@ -564,8 +570,8 @@ export function EmployeeBackgroundChecksTab({ employeeId, viewType = "hr" }: Emp
                     />
                   </div>
 
-                  {/* Row 3: Requested Date, Consent Date, Completed Date */}
-                  <div className="grid grid-cols-3 gap-4">
+                  {/* Row 3: Requested Date, Consent Date, Start Date, Completed Date */}
+                  <div className="grid grid-cols-4 gap-4">
                     <FormField
                       control={form.control}
                       name="requested_date"
@@ -586,6 +592,18 @@ export function EmployeeBackgroundChecksTab({ employeeId, viewType = "hr" }: Emp
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>Consent Date</FormLabel>
+                          <FormControl>
+                            <Input type="date" {...field} />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="start_date"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Start Date</FormLabel>
                           <FormControl>
                             <Input type="date" {...field} />
                           </FormControl>
@@ -815,6 +833,12 @@ export function EmployeeBackgroundChecksTab({ employeeId, viewType = "hr" }: Emp
                   <div>
                     <p className="text-muted-foreground">Consent Date</p>
                     <p>{formatDateForDisplay(viewingCheck.consent_date)}</p>
+                  </div>
+                )}
+                {viewingCheck.start_date && (
+                  <div>
+                    <p className="text-muted-foreground">Start Date</p>
+                    <p>{formatDateForDisplay(viewingCheck.start_date)}</p>
                   </div>
                 )}
                 {viewingCheck.completed_date && (
