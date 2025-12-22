@@ -68,7 +68,7 @@ export default function ManagerSelfServicePage() {
       items: filterByAccess([allModules.team, allModules.onboarding, allModules.offboarding, allModules.recruitment]),
     },
     {
-      titleKey: "Approvals & Workflow",
+      titleKey: "Approvals & Attendance",
       items: filterByAccess([allModules.approvals, allModules.delegates, allModules.leave, allModules.timeAttendance]),
     },
     {
