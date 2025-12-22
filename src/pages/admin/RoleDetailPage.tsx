@@ -205,13 +205,13 @@ export default function RoleDetailPage() {
               <Settings className="h-4 w-4" />
               Identity
             </TabsTrigger>
-            <TabsTrigger value="containers" className="flex items-center gap-2" disabled={isNew}>
-              <Database className="h-4 w-4" />
-              Containers
-            </TabsTrigger>
             <TabsTrigger value="modules" className="flex items-center gap-2" disabled={isNew}>
               <Users className="h-4 w-4" />
               Modules
+            </TabsTrigger>
+            <TabsTrigger value="containers" className="flex items-center gap-2" disabled={isNew}>
+              <Database className="h-4 w-4" />
+              Containers
             </TabsTrigger>
             <TabsTrigger value="pii" className="flex items-center gap-2" disabled={isNew}>
               <Eye className="h-4 w-4" />
