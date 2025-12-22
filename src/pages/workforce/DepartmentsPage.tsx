@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { supabase } from "@/integrations/supabase/client";
-import { FolderTree, Building2, ChevronRight, ChevronDown, Users, Plus, Pencil, Trash2, Calendar } from "lucide-react";
+import { FolderTree, Building2, ChevronRight, ChevronDown, Users, Plus, Pencil, Trash2, Calendar, Network } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -59,6 +59,7 @@ interface Department {
   description: string | null;
   is_active: boolean;
   company_division_id: string | null;
+  division_name?: string | null;
   start_date: string;
   end_date: string | null;
   sections: Section[];
@@ -147,7 +148,10 @@ export default function DepartmentsPage() {
 
       const { data: depts } = await supabase
         .from("departments")
-        .select("id, name, code, description, is_active, company_division_id, start_date, end_date")
+        .select(`
+          id, name, code, description, is_active, company_division_id, start_date, end_date,
+          company_divisions!departments_company_division_id_fkey(name)
+        `)
         .eq("company_id", selectedCompanyId)
         .order("name");
 
@@ -160,6 +164,7 @@ export default function DepartmentsPage() {
 
         const departmentsWithSections = depts.map(dept => ({
           ...dept,
+          division_name: (dept.company_divisions as any)?.name || null,
           sections: sections?.filter(s => s.department_id === dept.id) || []
         }));
 
@@ -307,7 +312,10 @@ export default function DepartmentsPage() {
       // Refresh data
       const { data: depts } = await supabase
         .from("departments")
-        .select("id, name, code, description, is_active, company_division_id, start_date, end_date")
+        .select(`
+          id, name, code, description, is_active, company_division_id, start_date, end_date,
+          company_divisions!departments_company_division_id_fkey(name)
+        `)
         .eq("company_id", selectedCompanyId)
         .order("name");
 
@@ -320,6 +328,7 @@ export default function DepartmentsPage() {
 
         const departmentsWithSections = depts.map(dept => ({
           ...dept,
+          division_name: (dept.company_divisions as any)?.name || null,
           sections: sections?.filter(s => s.department_id === dept.id) || []
         }));
 
@@ -366,7 +375,10 @@ export default function DepartmentsPage() {
       // Refresh data
       const { data: depts } = await supabase
         .from("departments")
-        .select("id, name, code, description, is_active, company_division_id, start_date, end_date")
+        .select(`
+          id, name, code, description, is_active, company_division_id, start_date, end_date,
+          company_divisions!departments_company_division_id_fkey(name)
+        `)
         .eq("company_id", selectedCompanyId)
         .order("name");
 
@@ -379,6 +391,7 @@ export default function DepartmentsPage() {
 
         const departmentsWithSections = depts.map(dept => ({
           ...dept,
+          division_name: (dept.company_divisions as any)?.name || null,
           sections: sections?.filter(s => s.department_id === dept.id) || []
         }));
 
@@ -495,7 +508,15 @@ export default function DepartmentsPage() {
                     )}
                     <FolderTree className="h-5 w-5 text-warning" />
                     <div className="text-left">
-                      <p className="font-medium text-foreground">{dept.name}</p>
+                      <div className="flex items-center gap-2">
+                        <p className="font-medium text-foreground">{dept.name}</p>
+                        {dept.division_name && (
+                          <span className="inline-flex items-center gap-1 rounded-full bg-violet-500/10 px-2 py-0.5 text-xs text-violet-600 dark:text-violet-400">
+                            <Network className="h-3 w-3" />
+                            {dept.division_name}
+                          </span>
+                        )}
+                      </div>
                       <p className="text-sm text-muted-foreground">{dept.code}</p>
                     </div>
                   </button>
