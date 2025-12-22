@@ -763,7 +763,18 @@ export function usePayroll() {
       let totalEmployerTaxes = 0;
       let totalEmployerBenefits = 0;
       
-      for (const emp of companyEmployees) {
+      // Deduplicate employees - each employee should only appear once regardless of how many positions they have
+      const uniqueEmployeeIds = [...new Set(companyEmployees.map((emp: any) => emp.employee_id))];
+      const processedEmployees: any[] = [];
+      for (const empId of uniqueEmployeeIds) {
+        // Get the first position record for employee metadata (name, email, etc.)
+        const empRecord = companyEmployees.find((e: any) => e.employee_id === empId);
+        if (empRecord) {
+          processedEmployees.push(empRecord);
+        }
+      }
+      
+      for (const emp of processedEmployees) {
         // Get ALL employee positions for this employee (they may have multiple)
         const employeePositions = (employees || []).filter((e: any) => 
           e.employee_id === emp.employee_id && e.employee?.company_id === companyId
