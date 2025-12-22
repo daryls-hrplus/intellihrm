@@ -98,13 +98,6 @@ const getAdminModuleSections = (
       { title: t("admin.modules.bulkImport.title"), description: t("admin.modules.bulkImport.description"), href: "/admin/bulk-import", icon: Upload, color: "bg-cyan-500/10 text-cyan-600", tabCode: "bulk-import" },
       { title: "API Management", description: "Manage API keys, webhooks, and integrations", href: "/system/api-management", icon: Webhook, color: "bg-indigo-500/10 text-indigo-600", tabCode: "api-management" },
     ],
-    // Section 5: Strategic Planning
-    strategicPlanning: [
-      { title: "Strategic Planning Hub", description: "Workforce planning, org design, and scenario analysis", href: "/strategic-planning", icon: TrendingUp, color: "bg-gradient-to-r from-blue-500/10 to-cyan-500/10 text-blue-600", tabCode: "strategic-planning" },
-      { title: "Workforce Planning", description: "Strategic headcount and succession planning", href: "/workforce", icon: Users, color: "bg-blue-500/10 text-blue-600", tabCode: "workforce-planning" },
-      { title: "Organization Design", description: "Org structure and restructuring scenarios", href: "/org-design", icon: Network, color: "bg-violet-500/10 text-violet-600", tabCode: "org-design" },
-      { title: "Scenario Planning", description: "What-if analysis and budget impact modeling", href: "/scenario-planning", icon: GitBranch, color: "bg-green-500/10 text-green-600", tabCode: "scenario-planning" },
-    ],
     // Section 8: Documentation & Enablement
     // Enablement Center is only visible to HRplus internal tenants
     documentation: [
@@ -137,7 +130,7 @@ const getAdminModuleSections = (
     { titleKey: "Users, Roles & Access", items: filterByPermission(allModules.usersAccess) },
     { titleKey: "Security & Governance", items: filterByPermission(allModules.security) },
     { titleKey: "System & Platform Configuration", items: filterByPermission(allModules.systemConfig) },
-    { titleKey: "Strategic Planning", items: filterByPermission(allModules.strategicPlanning) },
+    
     
     
     { titleKey: "Documentation & Enablement", items: filterByPermission(allModules.documentation) },
