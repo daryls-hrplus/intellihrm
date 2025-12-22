@@ -81,10 +81,10 @@ export default function WorkforceDashboardPage() {
     orgChart: {
       title: "Org Chart",
       description: "View organizational hierarchy visually",
-      href: "/workforce/org-structure?tab=orgchart",
+      href: "/workforce/org-chart",
       icon: Network,
       color: "bg-teal-500/10 text-teal-500",
-      tabCode: "org_structure",
+      tabCode: "orgchart",
     },
     governance: {
       title: "Governance",

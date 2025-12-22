@@ -1228,7 +1228,7 @@ const App = () => (
               }
             />
             <Route
-              path="/workforce/org-structure"
+              path="/workforce/org-chart"
               element={
                 <ProtectedRoute>
                   <OrgStructurePage />
