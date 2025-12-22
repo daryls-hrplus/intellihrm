@@ -118,7 +118,7 @@ export default function HRRemindersPage() {
             </TabsTrigger>
             <TabsTrigger value="rules" className="flex items-center gap-2">
               <Settings className="h-4 w-4" />
-              {t('common.rules') || 'Rules'}
+              Rules
             </TabsTrigger>
           </TabsList>
 
@@ -157,7 +157,7 @@ export default function HRRemindersPage() {
 
             <Card>
               <CardHeader>
-                <CardTitle>{t('common.rules') || 'Reminder Rules'}</CardTitle>
+                <CardTitle>Reminder Rules</CardTitle>
                 <p className="text-sm text-muted-foreground">
                   {t('hrHub.remindersDesc')}
                 </p>
