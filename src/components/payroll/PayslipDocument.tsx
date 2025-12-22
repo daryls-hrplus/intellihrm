@@ -192,23 +192,27 @@ export function PayslipDocument({
               lineItems.earnings.map((item, idx) => (
                 <div key={idx} className="flex justify-between text-xs py-1 border-b border-border/30 last:border-0">
                   <div className="flex flex-col">
-                    <span className="flex items-center gap-1">
+                    <span className="flex items-center gap-1.5">
                       {item.name}
                       {item.is_prorated && (
-                        <span className="text-[8px] bg-amber-100 text-amber-700 px-1 py-0.5 rounded">Prorated</span>
+                        <span className="text-[6px] font-bold uppercase bg-amber-100 text-amber-700 px-1 py-0.5 rounded">Prorated</span>
                       )}
                     </span>
-                    {item.job_title && (
-                      <span className="text-[9px] text-muted-foreground">{item.job_title}</span>
-                    )}
-                    {item.is_prorated && item.effective_start && (
-                      <span className="text-[9px] text-muted-foreground">
-                        {new Date(item.effective_start).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                        {' - '}
-                        {item.effective_end 
-                          ? new Date(item.effective_end).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
-                          : 'Period End'}
-                      </span>
+                    {(item.job_title || (item.is_prorated && item.effective_start)) && (
+                      <div className="flex flex-col mt-1">
+                        {item.job_title && (
+                          <span className="text-[8px] text-muted-foreground">{item.job_title}</span>
+                        )}
+                        {item.is_prorated && item.effective_start && (
+                          <span className="text-[8px] text-muted-foreground">
+                            {new Date(item.effective_start).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                            {' - '}
+                            {item.effective_end 
+                              ? new Date(item.effective_end).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+                              : 'Period End'}
+                          </span>
+                        )}
+                      </div>
                     )}
                   </div>
                   <span className="font-medium">{formatCurrency(item.amount, payslip.currency)}</span>
