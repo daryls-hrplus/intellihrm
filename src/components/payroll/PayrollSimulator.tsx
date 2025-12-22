@@ -397,37 +397,97 @@ export function PayrollSimulator({ companyId, employeeId, payPeriodId }: Payroll
           ? employeeCompList[baseSalaryItemIndex >= 0 ? baseSalaryItemIndex : 0]
           : null;
 
-      // Calculate total position compensation from ALL positions
-      const totalPositionCompensation = allPositions.reduce((sum, pos) => {
+      // Calculate total position compensation from ALL positions with individual proration
+      let totalPositionCompensation = 0;
+      let totalFullPeriodCompensation = 0;
+      const positionProrations: Array<{
+        title: string;
+        fullAmount: number;
+        proratedAmount: number;
+        isProrated: boolean;
+        factor: number;
+        daysWorked: number;
+        totalDays: number;
+      }> = [];
+
+      for (const pos of allPositions) {
         const amount = pos.compensation_amount || 0;
         const freq = pos.compensation_frequency || 'monthly';
-        // Convert to monthly for consistent aggregation
-        let monthlyAmount = amount;
+        
+        // Convert to period amount based on pay frequency
+        let periodAmount = amount;
+        let annualAmount = amount;
         switch (freq) {
-          case 'annual': monthlyAmount = amount / 12; break;
-          case 'weekly': monthlyAmount = amount * 4.33; break;
-          case 'biweekly': monthlyAmount = amount * 2.17; break;
-          case 'fortnightly': monthlyAmount = amount * 2.17; break;
+          case 'annual': annualAmount = amount; break;
+          case 'monthly': annualAmount = amount * 12; break;
+          case 'weekly': annualAmount = amount * 52; break;
+          case 'biweekly': 
+          case 'fortnightly': annualAmount = amount * 26; break;
         }
-        return sum + monthlyAmount;
-      }, 0);
+        
+        // Convert to pay period amount
+        switch (payFrequency) {
+          case 'monthly': periodAmount = annualAmount / 12; break;
+          case 'biweekly':
+          case 'fortnightly': periodAmount = annualAmount / 26; break;
+          case 'weekly': periodAmount = annualAmount / 52; break;
+          case 'semimonthly': periodAmount = annualAmount / 24; break;
+          default: periodAmount = annualAmount / 12; break;
+        }
+        
+        const fullPeriodAmount = periodAmount;
+        totalFullPeriodCompensation += fullPeriodAmount;
+        
+        // Calculate proration for THIS position based on its own start/end dates
+        let posProration: ProrationResult | null = null;
+        if (payPeriod?.period_start && payPeriod?.period_end) {
+          const posStartDate = pos.start_date ? new Date(pos.start_date) : null;
+          const posEndDate = pos.end_date ? new Date(pos.end_date) : null;
+          
+          posProration = calculateProrationFactor({
+            periodStart: new Date(payPeriod.period_start),
+            periodEnd: new Date(payPeriod.period_end),
+            employeeStartDate: posStartDate,
+            employeeEndDate: posEndDate,
+            prorationMethod: 'CALENDAR_DAYS', // Default proration method for positions
+          });
+        }
+        
+        // Apply proration if applicable
+        let proratedAmount = periodAmount;
+        if (posProration && posProration.isProrated) {
+          proratedAmount = applyProration(periodAmount, posProration);
+        }
+        
+        totalPositionCompensation += proratedAmount;
+        
+        positionProrations.push({
+          title: (pos.positions as any)?.title || 'Unknown Position',
+          fullAmount: fullPeriodAmount,
+          proratedAmount: proratedAmount,
+          isProrated: posProration?.isProrated || false,
+          factor: posProration?.factor || 1,
+          daysWorked: posProration?.daysWorked || 0,
+          totalDays: posProration?.totalDays || 0,
+        });
+      }
       
-      // Use employee compensation if available, otherwise use total position compensation
+      // Use employee compensation if available, otherwise use total prorated position compensation
       const baseCompAmount = baseSalaryItem ? (baseSalaryItem.amount || 0) : totalPositionCompensation;
-      const baseCompFrequency = baseSalaryItem ? (baseSalaryItem.frequency || 'monthly') : 'monthly'; // Aggregated is monthly
+      const baseCompFrequency = baseSalaryItem ? (baseSalaryItem.frequency || 'monthly') : payFrequency;
       const baseCompCurrency = baseSalaryItem
         ? (baseSalaryItem.currency || primaryPosition?.compensation_currency || 'USD')
         : (primaryPosition?.compensation_currency || 'USD');
 
-      // Get proration method from base salary pay element
+      // Get proration method from base salary pay element (for employee_compensation items)
       const baseProrationMethodCode = getProrationMethodCode(
         (baseSalaryItem?.pay_elements as any)?.proration_method?.code
       );
 
-      // Calculate proration factor for base salary
-      let prorationResult: ProrationResult | null = null;
-      if (payPeriod?.period_start && payPeriod?.period_end) {
-        prorationResult = calculateProrationFactor({
+      // Calculate proration for employee_compensation items (if used instead of positions)
+      let employeeCompProration: ProrationResult | null = null;
+      if (baseSalaryItem && payPeriod?.period_start && payPeriod?.period_end) {
+        employeeCompProration = calculateProrationFactor({
           periodStart: new Date(payPeriod.period_start),
           periodEnd: new Date(payPeriod.period_end),
           employeeStartDate,
@@ -460,31 +520,24 @@ export function PayrollSimulator({ companyId, employeeId, payPeriodId }: Payroll
 
       const hourlyRate = hoursPerYear > 0 ? annualSalary / hoursPerYear : 0;
 
-      // Calculate period-based base salary
+      // For employee_compensation, apply proration if not using position-based comp
       let periodBaseSalary = baseCompAmount;
-      if (baseCompFrequency !== payFrequency) {
-        switch (payFrequency) {
-          case 'monthly':
-            periodBaseSalary = annualSalary / 12;
-            break;
-          case 'biweekly':
-          case 'fortnightly':
-            periodBaseSalary = annualSalary / 26;
-            break;
-          case 'weekly':
-            periodBaseSalary = annualSalary / 52;
-            break;
-          case 'semimonthly':
-            periodBaseSalary = annualSalary / 24;
-            break;
-        }
+      const fullPeriodBaseSalary = baseSalaryItem ? baseCompAmount : totalFullPeriodCompensation;
+      
+      if (baseSalaryItem && employeeCompProration && employeeCompProration.isProrated) {
+        periodBaseSalary = applyProration(baseCompAmount, employeeCompProration);
       }
-
-      // Apply proration to base salary if applicable
-      const fullPeriodBaseSalary = periodBaseSalary;
-      if (prorationResult && prorationResult.isProrated) {
-        periodBaseSalary = applyProration(periodBaseSalary, prorationResult);
-      }
+      
+      // Determine the proration result to display (use first prorated position or employee comp proration)
+      const anyPositionProrated = positionProrations.some(p => p.isProrated);
+      const prorationResult = baseSalaryItem 
+        ? employeeCompProration 
+        : (anyPositionProrated ? {
+            isProrated: true,
+            factor: totalPositionCompensation / totalFullPeriodCompensation,
+            daysWorked: positionProrations[0]?.daysWorked || 0,
+            totalDays: positionProrations[0]?.totalDays || 0,
+          } : null);
 
       // Calculate totals from work records
       const regularHours = (workRecords || []).reduce((sum, r) => sum + (r.regular_hours || 0), 0);
