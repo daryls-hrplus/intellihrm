@@ -26699,6 +26699,7 @@ export type Database = {
           id: string
           is_active: boolean
           job_family_id: string | null
+          job_id: string | null
           max_spinal_point: number | null
           min_spinal_point: number | null
           pay_spine_id: string | null
@@ -26722,6 +26723,7 @@ export type Database = {
           id?: string
           is_active?: boolean
           job_family_id?: string | null
+          job_id?: string | null
           max_spinal_point?: number | null
           min_spinal_point?: number | null
           pay_spine_id?: string | null
@@ -26745,6 +26747,7 @@ export type Database = {
           id?: string
           is_active?: boolean
           job_family_id?: string | null
+          job_id?: string | null
           max_spinal_point?: number | null
           min_spinal_point?: number | null
           pay_spine_id?: string | null
@@ -26768,6 +26771,13 @@ export type Database = {
             columns: ["job_family_id"]
             isOneToOne: false
             referencedRelation: "job_families"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "positions_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs"
             referencedColumns: ["id"]
           },
           {
