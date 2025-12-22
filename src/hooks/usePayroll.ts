@@ -809,7 +809,17 @@ export function usePayroll() {
         let regularPay = 0;
         
         // Track itemized earnings for calculation_details
-        const earningsBreakdown: { name: string; code: string; amount: number; type: string; is_prorated?: boolean; proration_factor?: number }[] = [];
+        const earningsBreakdown: { 
+          name: string; 
+          code: string; 
+          amount: number; 
+          type: string; 
+          is_prorated?: boolean; 
+          proration_factor?: number;
+          job_title?: string;
+          effective_start?: string;
+          effective_end?: string;
+        }[] = [];
         const allowancesBreakdown: { name: string; amount: number; is_taxable: boolean }[] = [];
         
         if (employeeComp && employeeComp.length > 0) {
@@ -890,6 +900,9 @@ export function usePayroll() {
             const payElementName = (comp.pay_elements as any)?.name || 'Compensation';
             const payElementCode = (comp.pay_elements as any)?.code || 'COMP';
             
+            // Get job title from the position linked to this compensation
+            const jobTitle = (comp.positions as any)?.title || '';
+            
             earningsBreakdown.push({
               name: payElementName,
               code: payElementCode,
@@ -897,6 +910,9 @@ export function usePayroll() {
               type: payElementCode.toUpperCase() === 'SAL' ? 'base_salary' : 'additional',
               is_prorated: isProrated,
               proration_factor: prorationFactor,
+              job_title: jobTitle,
+              effective_start: comp.start_date || undefined,
+              effective_end: comp.end_date || undefined,
             });
             
             // Base salary (SAL code) goes to regular_pay
@@ -965,6 +981,9 @@ export function usePayroll() {
               type: 'base_salary',
               is_prorated: isProrated,
               proration_factor: prorationFactor,
+              job_title: (pos.position as any)?.title || '',
+              effective_start: pos.start_date || undefined,
+              effective_end: pos.end_date || undefined,
             });
           }
         }

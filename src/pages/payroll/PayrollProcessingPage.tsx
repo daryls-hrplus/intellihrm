@@ -982,13 +982,32 @@ export default function PayrollProcessingPage() {
                     {(selectedEmployee.calculation_details as any)?.earnings?.length > 0 ? (
                       <>
                         {((selectedEmployee.calculation_details as any)?.earnings || []).map((earning: any, idx: number) => (
-                          <div key={idx} className="flex justify-between py-1">
-                            <span className="text-muted-foreground">
-                              {earning.name}
-                              {earning.type === 'base_salary' && (
-                                <span className="ml-1 text-xs text-primary">(Base)</span>
+                          <div key={idx} className="flex justify-between py-1.5 border-b border-border/30 last:border-0">
+                            <div className="flex flex-col">
+                              <span className="text-muted-foreground">
+                                {earning.name}
+                                {earning.type === 'base_salary' && (
+                                  <span className="ml-1 text-xs text-primary">(Base)</span>
+                                )}
+                                {earning.is_prorated && (
+                                  <span className="ml-1 text-xs bg-warning/20 text-warning px-1.5 py-0.5 rounded">Prorated</span>
+                                )}
+                              </span>
+                              {earning.job_title && (
+                                <span className="text-xs text-muted-foreground/70 mt-0.5">
+                                  {earning.job_title}
+                                </span>
                               )}
-                            </span>
+                              {earning.is_prorated && earning.effective_start && (
+                                <span className="text-xs text-muted-foreground/70">
+                                  {new Date(earning.effective_start).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                                  {' - '}
+                                  {earning.effective_end 
+                                    ? new Date(earning.effective_end).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+                                    : 'Period End'}
+                                </span>
+                              )}
+                            </div>
                             <span className="font-medium">{formatCurrency(earning.amount || 0)}</span>
                           </div>
                         ))}
