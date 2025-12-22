@@ -166,6 +166,12 @@ interface SalaryGrade {
   currency: string;
 }
 
+interface Job {
+  id: string;
+  name: string;
+  code: string;
+}
+
 interface PositionsManagementProps {
   companyId: string;
 }
@@ -182,6 +188,7 @@ export function PositionsManagement({ companyId }: PositionsManagementProps) {
   const [spinalPoints, setSpinalPoints] = useState<SpinalPoint[]>([]);
   const [payGroups, setPayGroups] = useState<PayGroup[]>([]);
   const [salaryGrades, setSalaryGrades] = useState<SalaryGrade[]>([]);
+  const [jobs, setJobs] = useState<Job[]>([]);
   const [expandedAssignments, setExpandedAssignments] = useState<Set<string>>(new Set());
 
   // Position dialog state
@@ -193,6 +200,7 @@ export function PositionsManagement({ companyId }: PositionsManagementProps) {
   const [formTitle, setFormTitle] = useState("");
   const [formCode, setFormCode] = useState("");
   const [formDescription, setFormDescription] = useState("");
+  const [formJobId, setFormJobId] = useState("");
   const [formDepartmentId, setFormDepartmentId] = useState("");
   const [formReportsTo, setFormReportsTo] = useState("");
   const [formIsActive, setFormIsActive] = useState(true);
@@ -350,6 +358,18 @@ export function PositionsManagement({ companyId }: PositionsManagementProps) {
       if (!gradeError && gradeData) {
         setSalaryGrades(gradeData);
       }
+
+      // Fetch jobs for this company
+      const { data: jobsData, error: jobsError } = await supabase
+        .from("jobs")
+        .select("id, name, code")
+        .eq("company_id", companyId)
+        .eq("is_active", true)
+        .order("name");
+
+      if (!jobsError && jobsData) {
+        setJobs(jobsData);
+      }
     } catch (error) {
       console.error("Error fetching data:", error);
       toast.error("Failed to load positions data");
@@ -376,6 +396,7 @@ export function PositionsManagement({ companyId }: PositionsManagementProps) {
   // Position CRUD
   const openCreatePosition = (deptId?: string) => {
     setEditingPosition(null);
+    setFormJobId("");
     setFormTitle("");
     setFormCode("");
     setFormDescription("");
@@ -414,6 +435,15 @@ export function PositionsManagement({ companyId }: PositionsManagementProps) {
     setPositionDialogOpen(true);
   };
 
+  const handleSelectJob = (jobId: string) => {
+    setFormJobId(jobId);
+    const job = jobs.find(j => j.id === jobId);
+    if (job) {
+      setFormTitle(job.name);
+      setFormCode(job.code);
+    }
+  };
+
   const handleSavePosition = async () => {
     if (!formTitle.trim() || !formCode.trim() || !formDepartmentId) {
       toast.error("Title, code, and department are required");
@@ -424,6 +454,7 @@ export function PositionsManagement({ companyId }: PositionsManagementProps) {
     try {
       const data: any = {
         department_id: formDepartmentId,
+        job_id: formJobId || null,
         title: formTitle.trim(),
         code: formCode.trim(),
         description: formDescription.trim() || null,
@@ -887,6 +918,24 @@ export function PositionsManagement({ companyId }: PositionsManagementProps) {
                   </SelectContent>
                 </Select>
               </div>
+              <div className="space-y-2">
+                <Label>Job *</Label>
+                <Select value={formJobId} onValueChange={handleSelectJob}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select job (populates title & code)" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {jobs.map((job) => (
+                      <SelectItem key={job.id} value={job.id}>
+                        {job.name} ({job.code})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-muted-foreground">
+                  Selecting a job auto-fills Title and Code below
+                </p>
+              </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>Title *</Label>
@@ -894,6 +943,8 @@ export function PositionsManagement({ companyId }: PositionsManagementProps) {
                     value={formTitle}
                     onChange={(e) => setFormTitle(e.target.value)}
                     placeholder="e.g., Senior Developer"
+                    readOnly={!!formJobId}
+                    className={formJobId ? "bg-muted" : ""}
                   />
                 </div>
                 <div className="space-y-2">
@@ -902,6 +953,8 @@ export function PositionsManagement({ companyId }: PositionsManagementProps) {
                     value={formCode}
                     onChange={(e) => setFormCode(e.target.value)}
                     placeholder="e.g., SR-DEV"
+                    readOnly={!!formJobId}
+                    className={formJobId ? "bg-muted" : ""}
                   />
                 </div>
               </div>
