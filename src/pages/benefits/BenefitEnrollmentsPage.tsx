@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { useTranslation } from "react-i18next";
@@ -10,10 +10,11 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
+import { Card, CardContent } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
-import { Plus, Pencil, Check, X, UserCheck } from "lucide-react";
+import { Plus, Pencil, Check, X, UserCheck, Filter, RotateCcw } from "lucide-react";
 import { getTodayString } from "@/utils/dateUtils";
 
 interface BenefitEnrollment {
@@ -69,6 +70,12 @@ export default function BenefitEnrollmentsPage() {
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingEnrollment, setEditingEnrollment] = useState<BenefitEnrollment | null>(null);
+  
+  // Filter states
+  const [filterEmployeeId, setFilterEmployeeId] = useState<string>("all");
+  const [filterPlanId, setFilterPlanId] = useState<string>("all");
+  const [filterEffectiveDateFrom, setFilterEffectiveDateFrom] = useState<string>("");
+  const [filterEffectiveDateTo, setFilterEffectiveDateTo] = useState<string>("");
   
   const [formData, setFormData] = useState({
     employee_id: "",
@@ -279,6 +286,37 @@ export default function BenefitEnrollmentsPage() {
     return <Badge variant={variants[status] || "secondary"}>{status}</Badge>;
   };
 
+  // Filtered enrollments
+  const filteredEnrollments = useMemo(() => {
+    return enrollments.filter(enr => {
+      // Filter by employee
+      if (filterEmployeeId !== "all" && enr.employee_id !== filterEmployeeId) {
+        return false;
+      }
+      // Filter by plan
+      if (filterPlanId !== "all" && enr.plan_id !== filterPlanId) {
+        return false;
+      }
+      // Filter by effective date range
+      if (filterEffectiveDateFrom && enr.effective_date < filterEffectiveDateFrom) {
+        return false;
+      }
+      if (filterEffectiveDateTo && enr.effective_date > filterEffectiveDateTo) {
+        return false;
+      }
+      return true;
+    });
+  }, [enrollments, filterEmployeeId, filterPlanId, filterEffectiveDateFrom, filterEffectiveDateTo]);
+
+  const clearFilters = () => {
+    setFilterEmployeeId("all");
+    setFilterPlanId("all");
+    setFilterEffectiveDateFrom("");
+    setFilterEffectiveDateTo("");
+  };
+
+  const hasActiveFilters = filterEmployeeId !== "all" || filterPlanId !== "all" || filterEffectiveDateFrom || filterEffectiveDateTo;
+
   return (
     <AppLayout>
       <div className="space-y-6">
@@ -317,6 +355,68 @@ export default function BenefitEnrollmentsPage() {
           </div>
         </div>
 
+        {/* Filters Section */}
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex items-center gap-2 mb-4">
+              <Filter className="h-4 w-4 text-muted-foreground" />
+              <span className="text-sm font-medium">{t("common.filters")}</span>
+              {hasActiveFilters && (
+                <Button variant="ghost" size="sm" onClick={clearFilters} className="ml-auto">
+                  <RotateCcw className="h-3 w-3 mr-1" />
+                  {t("common.clearFilters")}
+                </Button>
+              )}
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <div className="space-y-2">
+                <Label className="text-xs text-muted-foreground">{t("benefits.enrollments.employee")}</Label>
+                <Select value={filterEmployeeId} onValueChange={setFilterEmployeeId}>
+                  <SelectTrigger>
+                    <SelectValue placeholder={t("common.all")} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">{t("common.all")}</SelectItem>
+                    {employees.map(e => (
+                      <SelectItem key={e.id} value={e.id}>{e.full_name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label className="text-xs text-muted-foreground">{t("benefits.enrollments.plan")}</Label>
+                <Select value={filterPlanId} onValueChange={setFilterPlanId}>
+                  <SelectTrigger>
+                    <SelectValue placeholder={t("common.all")} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">{t("common.all")}</SelectItem>
+                    {plans.map(p => (
+                      <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label className="text-xs text-muted-foreground">{t("benefits.enrollments.effectiveDateFrom")}</Label>
+                <Input 
+                  type="date" 
+                  value={filterEffectiveDateFrom} 
+                  onChange={e => setFilterEffectiveDateFrom(e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label className="text-xs text-muted-foreground">{t("benefits.enrollments.effectiveDateTo")}</Label>
+                <Input 
+                  type="date" 
+                  value={filterEffectiveDateTo} 
+                  onChange={e => setFilterEffectiveDateTo(e.target.value)}
+                />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
         <div className="rounded-lg border bg-card">
           <Table>
             <TableHeader>
@@ -333,9 +433,9 @@ export default function BenefitEnrollmentsPage() {
             <TableBody>
               {loading ? (
                 <TableRow><TableCell colSpan={7} className="text-center py-8">{t("common.loading")}</TableCell></TableRow>
-              ) : enrollments.length === 0 ? (
-                <TableRow><TableCell colSpan={7} className="text-center py-8 text-muted-foreground">{t("benefits.enrollments.noEnrollments")}</TableCell></TableRow>
-              ) : enrollments.map(enr => (
+              ) : filteredEnrollments.length === 0 ? (
+                <TableRow><TableCell colSpan={7} className="text-center py-8 text-muted-foreground">{hasActiveFilters ? t("common.noResults") : t("benefits.enrollments.noEnrollments")}</TableCell></TableRow>
+              ) : filteredEnrollments.map(enr => (
                 <TableRow key={enr.id}>
                   <TableCell className="font-medium">{enr.profiles?.full_name}</TableCell>
                   <TableCell>{enr.benefit_plans?.name}</TableCell>

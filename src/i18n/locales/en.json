@@ -5993,7 +5993,9 @@
       "openSource": "Open",
       "autoSource": "Auto",
       "lifeEventSource": "Life Event",
-      "newHireSource": "New Hire"
+      "newHireSource": "New Hire",
+      "effectiveDateFrom": "Effective Date From",
+      "effectiveDateTo": "Effective Date To"
     },
     "claims": {
       "title": "Benefit Claims",
