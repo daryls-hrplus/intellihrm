@@ -9,7 +9,8 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { AlertTriangle, Shield, Clock, Plane, Edit, Loader2, Key, Plus, Search, Users } from 'lucide-react';
+import { AlertTriangle, Shield, Clock, Plane, Edit, Loader2, Key, Plus, Search, Users, Trash2 } from 'lucide-react';
+import { toast } from 'sonner';
 import { KeyPositionRisk, useSuccession } from '@/hooks/useSuccession';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -253,6 +254,22 @@ export function KeyPositionsTab({ companyId }: KeyPositionsTabProps) {
     });
   };
 
+  const handleRemoveKeyPosition = async (position: KeyPosition) => {
+    // Remove the job_id link from the position (this removes it from key positions list)
+    const { error } = await (supabase
+      .from('positions') as any)
+      .update({ job_id: null })
+      .eq('id', position.id);
+
+    if (error) {
+      toast.error('Failed to remove key position');
+      return;
+    }
+
+    toast.success(`${position.title} removed from key positions`);
+    loadData();
+  };
+
   const openRiskDialog = (keyPos: KeyPosition) => {
     setEditingPosition(keyPos);
     const risk = keyPos.riskAssessment;
@@ -462,16 +479,26 @@ export function KeyPositionsTab({ companyId }: KeyPositionsTabProps) {
                         <p className="text-sm truncate">{risk?.impact_if_vacant || '-'}</p>
                       </TableCell>
                       <TableCell>
-                        <Button size="sm" variant={risk ? "ghost" : "outline"} onClick={() => openRiskDialog(keyPos)}>
-                          {risk ? (
-                            <Edit className="h-4 w-4" />
-                          ) : (
-                            <>
-                              <Plus className="h-4 w-4 mr-1" />
-                              Assess
-                            </>
-                          )}
-                        </Button>
+                        <div className="flex gap-1">
+                          <Button size="sm" variant={risk ? "ghost" : "outline"} onClick={() => openRiskDialog(keyPos)}>
+                            {risk ? (
+                              <Edit className="h-4 w-4" />
+                            ) : (
+                              <>
+                                <Plus className="h-4 w-4 mr-1" />
+                                Assess
+                              </>
+                            )}
+                          </Button>
+                          <Button 
+                            size="sm" 
+                            variant="ghost" 
+                            className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                            onClick={() => handleRemoveKeyPosition(keyPos)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
                       </TableCell>
                     </TableRow>
                   );
