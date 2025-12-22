@@ -58,6 +58,19 @@ export interface TalentPoolMember {
     full_name: string;
     email: string;
     avatar_url: string | null;
+    department?: {
+      id: string;
+      name: string;
+    } | null;
+    employee_positions?: Array<{
+      id: string;
+      start_date: string;
+      is_primary: boolean;
+      position?: {
+        id: string;
+        title: string;
+      };
+    }>;
   };
 }
 
@@ -333,7 +346,14 @@ export function useSuccession(companyId?: string) {
         .from('talent_pool_members')
         .select(`
           *,
-          employee:profiles!talent_pool_members_employee_id_fkey(id, full_name, email, avatar_url)
+          employee:profiles!talent_pool_members_employee_id_fkey(
+            id, 
+            full_name, 
+            email, 
+            avatar_url,
+            department:departments(id, name),
+            employee_positions(id, start_date, is_primary, position:positions(id, title))
+          )
         `)
         .eq('pool_id', poolId)
         .order('start_date', { ascending: false });

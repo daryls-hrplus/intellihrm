@@ -240,43 +240,71 @@ export function TalentPoolsTab({ companyId }: TalentPoolsTabProps) {
                   <TableHeader>
                     <TableRow>
                       <TableHead>Employee</TableHead>
-                      <TableHead>Added</TableHead>
+                      <TableHead>Job Title</TableHead>
+                      <TableHead>Department</TableHead>
+                      <TableHead>Hire Date</TableHead>
+                      <TableHead>Added to Pool</TableHead>
                       <TableHead>Reason</TableHead>
                       <TableHead>Status</TableHead>
                       <TableHead></TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {members.map((member) => (
-                      <TableRow key={member.id}>
-                        <TableCell>
-                          <div className="flex items-center gap-2">
-                            <Avatar className="h-8 w-8">
-                              <AvatarImage src={member.employee?.avatar_url || undefined} />
-                              <AvatarFallback>
-                                {member.employee?.full_name?.split(' ').map(n => n[0]).join('') || '?'}
-                              </AvatarFallback>
-                            </Avatar>
-                            <div>
-                              <div className="font-medium">{member.employee?.full_name}</div>
-                              <div className="text-sm text-muted-foreground">{member.employee?.email}</div>
+                    {members.map((member) => {
+                      const primaryPosition = member.employee?.employee_positions?.find(p => p.is_primary) 
+                        || member.employee?.employee_positions?.[0];
+                      const hireDate = member.employee?.employee_positions
+                        ?.reduce((earliest, pos) => {
+                          if (!earliest) return pos.start_date;
+                          return pos.start_date < earliest ? pos.start_date : earliest;
+                        }, null as string | null);
+                      
+                      return (
+                        <TableRow key={member.id}>
+                          <TableCell>
+                            <div className="flex items-center gap-2">
+                              <Avatar className="h-8 w-8">
+                                <AvatarImage src={member.employee?.avatar_url || undefined} />
+                                <AvatarFallback>
+                                  {member.employee?.full_name?.split(' ').map(n => n[0]).join('') || '?'}
+                                </AvatarFallback>
+                              </Avatar>
+                              <div>
+                                <div className="font-medium">{member.employee?.full_name}</div>
+                                <div className="text-sm text-muted-foreground">{member.employee?.email}</div>
+                              </div>
                             </div>
-                          </div>
-                        </TableCell>
-                        <TableCell>{format(new Date(member.start_date), 'MMM d, yyyy')}</TableCell>
-                        <TableCell>{member.reason || '-'}</TableCell>
-                        <TableCell>
-                          <Badge variant={member.status === 'active' ? 'default' : 'secondary'}>
-                            {member.status}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <Button size="sm" variant="ghost" onClick={() => handleRemoveMember(member.id)}>
-                            <Trash2 className="h-4 w-4 text-destructive" />
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    ))}
+                          </TableCell>
+                          <TableCell>
+                            {primaryPosition?.position?.title || (
+                              <span className="text-muted-foreground italic">-</span>
+                            )}
+                          </TableCell>
+                          <TableCell>
+                            {member.employee?.department?.name || (
+                              <span className="text-muted-foreground italic">-</span>
+                            )}
+                          </TableCell>
+                          <TableCell>
+                            {hireDate ? format(new Date(hireDate), 'MMM d, yyyy') : (
+                              <span className="text-muted-foreground italic">-</span>
+                            )}
+                          </TableCell>
+                          <TableCell>{format(new Date(member.start_date), 'MMM d, yyyy')}</TableCell>
+                          <TableCell>{member.reason || '-'}</TableCell>
+                          <TableCell>
+                            <Badge variant={member.status === 'active' ? 'default' : 'secondary'}>
+                              {member.status}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <Button size="sm" variant="ghost" onClick={() => handleRemoveMember(member.id)}>
+                              <Trash2 className="h-4 w-4 text-destructive" />
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
                   </TableBody>
                 </Table>
               )}
