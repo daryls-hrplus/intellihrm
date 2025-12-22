@@ -14,6 +14,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { Plus, Pencil, Trash2, Bell, Mail, BellRing, Loader2, X, Settings, HelpCircle, Zap } from 'lucide-react';
 import type { ReminderRule, ReminderEventType } from '@/types/reminders';
 import { PRIORITY_OPTIONS, NOTIFICATION_METHODS } from '@/types/reminders';
+import { NaturalLanguageRuleInput } from './NaturalLanguageRuleInput';
 
 interface ReminderRulesManagerProps {
   companyId: string;
@@ -187,7 +188,10 @@ export const ReminderRulesManager = forwardRef<ReminderRulesManagerRef, Reminder
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
+      {/* Natural Language Rule Input */}
+      <NaturalLanguageRuleInput companyId={companyId} onRuleCreated={loadData} />
+
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-medium">Automatic Reminder Rules</h3>
         <div className="flex items-center gap-2">
