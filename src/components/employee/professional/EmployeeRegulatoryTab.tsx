@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { Plus, Pencil, Archive, Stamp, CheckCircle, XCircle, Clock, Eye } from "lucide-react";
+import { Plus, Pencil, Archive, Stamp, CheckCircle, XCircle, Clock, Eye, Upload, FileText, X, Download } from "lucide-react";
 import { formatDateForDisplay, getTodayString } from "@/utils/dateUtils";
 import { useGranularPermissions } from "@/hooks/useGranularPermissions";
 import { useEnhancedPiiVisibility } from "@/hooks/useEnhancedPiiVisibility";
@@ -30,6 +30,10 @@ interface RegulatoryClearance {
   notes: string | null;
   jurisdiction: string | null;
   category: string;
+  scope: string | null;
+  consent_date: string | null;
+  attachment_url: string | null;
+  attachment_name: string | null;
 }
 
 interface RegulatoryFormData {
@@ -43,6 +47,8 @@ interface RegulatoryFormData {
   expiry_date: string;
   notes: string;
   jurisdiction: string;
+  scope: string;
+  consent_date: string;
 }
 
 interface EmployeeRegulatoryTabProps {
@@ -56,6 +62,10 @@ export function EmployeeRegulatoryTab({ employeeId, viewType = "hr" }: EmployeeR
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingClearance, setEditingClearance] = useState<RegulatoryClearance | null>(null);
   const [viewingClearance, setViewingClearance] = useState<RegulatoryClearance | null>(null);
+  const [uploadingFile, setUploadingFile] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [currentAttachment, setCurrentAttachment] = useState<{ url: string; name: string } | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   
   const { hasTabAccess } = useGranularPermissions();
   const { canViewDomain, maskPiiValue } = useEnhancedPiiVisibility();
@@ -78,6 +88,8 @@ export function EmployeeRegulatoryTab({ employeeId, viewType = "hr" }: EmployeeR
       expiry_date: "",
       notes: "",
       jurisdiction: "",
+      scope: "",
+      consent_date: "",
     },
   });
 
@@ -102,8 +114,44 @@ export function EmployeeRegulatoryTab({ employeeId, viewType = "hr" }: EmployeeR
     fetchClearances();
   }, [employeeId]);
 
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 10 * 1024 * 1024) {
+        toast.error("File size must be less than 10MB");
+        return;
+      }
+      setSelectedFile(file);
+    }
+  };
+
+  const uploadFile = async (checkId: string): Promise<{ url: string; name: string } | null> => {
+    if (!selectedFile) return null;
+
+    const fileExt = selectedFile.name.split('.').pop();
+    const filePath = `regulatory/${employeeId}/${checkId}/${Date.now()}.${fileExt}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from('compliance-documents')
+      .upload(filePath, selectedFile);
+
+    if (uploadError) {
+      console.error("Upload error:", uploadError);
+      toast.error("Failed to upload document");
+      return null;
+    }
+
+    const { data: { publicUrl } } = supabase.storage
+      .from('compliance-documents')
+      .getPublicUrl(filePath);
+
+    return { url: publicUrl, name: selectedFile.name };
+  };
+
   const handleSubmit = async (data: RegulatoryFormData) => {
     try {
+      setUploadingFile(true);
+      
       const payload = {
         ...data,
         category: "regulatory_clearance",
@@ -114,12 +162,22 @@ export function EmployeeRegulatoryTab({ employeeId, viewType = "hr" }: EmployeeR
         expiry_date: data.expiry_date || null,
         notes: data.notes || null,
         jurisdiction: data.jurisdiction || null,
+        scope: data.scope || null,
+        consent_date: data.consent_date || null,
       };
 
       if (editingClearance) {
+        let attachmentData = {};
+        if (selectedFile) {
+          const uploaded = await uploadFile(editingClearance.id);
+          if (uploaded) {
+            attachmentData = { attachment_url: uploaded.url, attachment_name: uploaded.name };
+          }
+        }
+
         const { error } = await supabase
           .from("employee_background_checks")
-          .update(payload)
+          .update({ ...payload, ...attachmentData })
           .eq("id", editingClearance.id);
 
         if (error) throw error;
@@ -141,6 +199,16 @@ export function EmployeeRegulatoryTab({ employeeId, viewType = "hr" }: EmployeeR
           .single();
 
         if (error) throw error;
+
+        if (selectedFile && result) {
+          const uploaded = await uploadFile(result.id);
+          if (uploaded) {
+            await supabase
+              .from("employee_background_checks")
+              .update({ attachment_url: uploaded.url, attachment_name: uploaded.name })
+              .eq("id", result.id);
+          }
+        }
         
         await logAction({
           action: "CREATE",
@@ -155,15 +223,21 @@ export function EmployeeRegulatoryTab({ employeeId, viewType = "hr" }: EmployeeR
 
       setDialogOpen(false);
       setEditingClearance(null);
+      setSelectedFile(null);
+      setCurrentAttachment(null);
       form.reset();
       fetchClearances();
     } catch (error) {
       toast.error("Failed to save regulatory clearance");
+    } finally {
+      setUploadingFile(false);
     }
   };
 
   const handleEdit = (clearance: RegulatoryClearance) => {
     setEditingClearance(clearance);
+    setCurrentAttachment(clearance.attachment_url ? { url: clearance.attachment_url, name: clearance.attachment_name || 'Document' } : null);
+    setSelectedFile(null);
     form.reset({
       check_type: clearance.check_type,
       provider: clearance.provider || "",
@@ -175,6 +249,8 @@ export function EmployeeRegulatoryTab({ employeeId, viewType = "hr" }: EmployeeR
       expiry_date: clearance.expiry_date || "",
       notes: clearance.notes || "",
       jurisdiction: clearance.jurisdiction || "",
+      scope: clearance.scope || "",
+      consent_date: clearance.consent_date || "",
     });
     setDialogOpen(true);
   };
@@ -203,6 +279,8 @@ export function EmployeeRegulatoryTab({ employeeId, viewType = "hr" }: EmployeeR
 
   const openNewDialog = () => {
     setEditingClearance(null);
+    setSelectedFile(null);
+    setCurrentAttachment(null);
     form.reset({
       check_type: "financial_services",
       provider: "",
@@ -214,6 +292,8 @@ export function EmployeeRegulatoryTab({ employeeId, viewType = "hr" }: EmployeeR
       expiry_date: "",
       notes: "",
       jurisdiction: "",
+      scope: "",
+      consent_date: "",
     });
     setDialogOpen(true);
   };
@@ -265,6 +345,17 @@ export function EmployeeRegulatoryTab({ employeeId, viewType = "hr" }: EmployeeR
     }
   };
 
+  const getScopeBadge = (scope: string | null) => {
+    if (!scope) return null;
+    const labels: Record<string, string> = {
+      local: "Local",
+      regional: "Regional",
+      national: "National",
+      international: "International",
+    };
+    return <Badge variant="outline" className="text-xs">{labels[scope] || scope}</Badge>;
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-start">
@@ -282,13 +373,14 @@ export function EmployeeRegulatoryTab({ employeeId, viewType = "hr" }: EmployeeR
                 Add Clearance
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-lg">
+            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>{editingClearance ? "Edit Clearance" : "Add Regulatory Clearance"}</DialogTitle>
               </DialogHeader>
               <Form {...form}>
                 <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
+                  {/* Row 1: Clearance Type, Jurisdiction, Scope */}
+                  <div className="grid grid-cols-3 gap-4">
                     <FormField
                       control={form.control}
                       name="check_type"
@@ -309,6 +401,8 @@ export function EmployeeRegulatoryTab({ employeeId, viewType = "hr" }: EmployeeR
                               <SelectItem value="maritime">Maritime Clearance</SelectItem>
                               <SelectItem value="gaming">Gaming License Clearance</SelectItem>
                               <SelectItem value="securities">Securities Clearance</SelectItem>
+                              <SelectItem value="insurance">Insurance Clearance</SelectItem>
+                              <SelectItem value="telecommunications">Telecommunications Clearance</SelectItem>
                               <SelectItem value="other">Other</SelectItem>
                             </SelectContent>
                           </Select>
@@ -332,22 +426,60 @@ export function EmployeeRegulatoryTab({ employeeId, viewType = "hr" }: EmployeeR
                         </FormItem>
                       )}
                     />
+                    <FormField
+                      control={form.control}
+                      name="scope"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Scope</FormLabel>
+                          <Select onValueChange={field.onChange} value={field.value}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select scope..." />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="local">Local</SelectItem>
+                              <SelectItem value="regional">Regional</SelectItem>
+                              <SelectItem value="national">National</SelectItem>
+                              <SelectItem value="international">International</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </FormItem>
+                      )}
+                    />
                   </div>
 
-                  <FormField
-                    control={form.control}
-                    name="provider"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Regulatory Body / Provider</FormLabel>
-                        <FormControl>
-                          <Input {...field} placeholder="e.g., Central Bank, FAA, etc." />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-
+                  {/* Row 2: Provider, Reference Number */}
                   <div className="grid grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="provider"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Regulatory Body / Provider</FormLabel>
+                          <FormControl>
+                            <Input {...field} placeholder="e.g., Central Bank, FAA, etc." />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="reference_number"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Reference Number</FormLabel>
+                          <FormControl>
+                            <Input {...field} placeholder="Clearance ID" />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
+                  {/* Row 3: Requested Date, Consent Date, Completed Date */}
+                  <div className="grid grid-cols-3 gap-4">
                     <FormField
                       control={form.control}
                       name="requested_date"
@@ -359,6 +491,18 @@ export function EmployeeRegulatoryTab({ employeeId, viewType = "hr" }: EmployeeR
                             <Input type="date" {...field} />
                           </FormControl>
                           <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="consent_date"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Consent Date</FormLabel>
+                          <FormControl>
+                            <Input type="date" {...field} />
+                          </FormControl>
                         </FormItem>
                       )}
                     />
@@ -376,7 +520,8 @@ export function EmployeeRegulatoryTab({ employeeId, viewType = "hr" }: EmployeeR
                     />
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
+                  {/* Row 4: Status, Result, Expiry Date */}
+                  <div className="grid grid-cols-3 gap-4">
                     <FormField
                       control={form.control}
                       name="status"
@@ -416,23 +561,9 @@ export function EmployeeRegulatoryTab({ employeeId, viewType = "hr" }: EmployeeR
                               <SelectItem value="passed">Passed</SelectItem>
                               <SelectItem value="flagged">Flagged</SelectItem>
                               <SelectItem value="failed">Failed</SelectItem>
+                              <SelectItem value="inconclusive">Inconclusive</SelectItem>
                             </SelectContent>
                           </Select>
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4">
-                    <FormField
-                      control={form.control}
-                      name="reference_number"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Reference Number</FormLabel>
-                          <FormControl>
-                            <Input {...field} />
-                          </FormControl>
                         </FormItem>
                       )}
                     />
@@ -450,6 +581,77 @@ export function EmployeeRegulatoryTab({ employeeId, viewType = "hr" }: EmployeeR
                     />
                   </div>
 
+                  {/* Row 5: Attachment */}
+                  <div className="space-y-2">
+                    <FormLabel>Attachment</FormLabel>
+                    <div className="border rounded-md p-4 space-y-3">
+                      {currentAttachment && !selectedFile && (
+                        <div className="flex items-center justify-between p-2 bg-muted rounded">
+                          <div className="flex items-center gap-2">
+                            <FileText className="h-4 w-4" />
+                            <span className="text-sm">{currentAttachment.name}</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => window.open(currentAttachment.url, '_blank')}
+                            >
+                              <Download className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => setCurrentAttachment(null)}
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </div>
+                      )}
+                      {selectedFile && (
+                        <div className="flex items-center justify-between p-2 bg-muted rounded">
+                          <div className="flex items-center gap-2">
+                            <FileText className="h-4 w-4" />
+                            <span className="text-sm">{selectedFile.name}</span>
+                          </div>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setSelectedFile(null)}
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      )}
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="file"
+                          ref={fileInputRef}
+                          onChange={handleFileSelect}
+                          className="hidden"
+                          accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                        />
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => fileInputRef.current?.click()}
+                        >
+                          <Upload className="h-4 w-4 mr-2" />
+                          {selectedFile || currentAttachment ? "Replace File" : "Upload Document"}
+                        </Button>
+                        <span className="text-xs text-muted-foreground">
+                          PDF, Word, or Image (max 10MB)
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Row 6: Notes */}
                   <FormField
                     control={form.control}
                     name="notes"
@@ -467,7 +669,9 @@ export function EmployeeRegulatoryTab({ employeeId, viewType = "hr" }: EmployeeR
                     <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
                       Cancel
                     </Button>
-                    <Button type="submit">Save</Button>
+                    <Button type="submit" disabled={uploadingFile}>
+                      {uploadingFile ? "Saving..." : editingClearance ? "Update" : "Add"}
+                    </Button>
                   </div>
                 </form>
               </Form>
@@ -475,6 +679,100 @@ export function EmployeeRegulatoryTab({ employeeId, viewType = "hr" }: EmployeeR
           </Dialog>
         )}
       </div>
+
+      {/* View Dialog */}
+      <Dialog open={!!viewingClearance} onOpenChange={() => setViewingClearance(null)}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="capitalize">{viewingClearance?.check_type.replace("_", " ")} Details</DialogTitle>
+          </DialogHeader>
+          {viewingClearance && (
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4 text-sm">
+                <div>
+                  <p className="text-muted-foreground">Clearance Type</p>
+                  <p className="capitalize">{viewingClearance.check_type.replace("_", " ")}</p>
+                </div>
+                <div>
+                  <p className="text-muted-foreground">Status</p>
+                  {getStatusBadge(viewingClearance.status)}
+                </div>
+                {viewingClearance.jurisdiction && (
+                  <div>
+                    <p className="text-muted-foreground">Jurisdiction</p>
+                    <p>{viewingClearance.jurisdiction}</p>
+                  </div>
+                )}
+                {viewingClearance.scope && (
+                  <div>
+                    <p className="text-muted-foreground">Scope</p>
+                    <p className="capitalize">{viewingClearance.scope}</p>
+                  </div>
+                )}
+                {viewingClearance.provider && (
+                  <div>
+                    <p className="text-muted-foreground">Regulatory Body</p>
+                    <p>{viewingClearance.provider}</p>
+                  </div>
+                )}
+                {viewingClearance.reference_number && (
+                  <div>
+                    <p className="text-muted-foreground">Reference</p>
+                    <p>{viewingClearance.reference_number}</p>
+                  </div>
+                )}
+                <div>
+                  <p className="text-muted-foreground">Requested Date</p>
+                  <p>{formatDateForDisplay(viewingClearance.requested_date)}</p>
+                </div>
+                {viewingClearance.consent_date && (
+                  <div>
+                    <p className="text-muted-foreground">Consent Date</p>
+                    <p>{formatDateForDisplay(viewingClearance.consent_date)}</p>
+                  </div>
+                )}
+                {viewingClearance.completed_date && (
+                  <div>
+                    <p className="text-muted-foreground">Completed Date</p>
+                    <p>{formatDateForDisplay(viewingClearance.completed_date)}</p>
+                  </div>
+                )}
+                {viewingClearance.expiry_date && (
+                  <div>
+                    <p className="text-muted-foreground">Expiry Date</p>
+                    <p>{formatDateForDisplay(viewingClearance.expiry_date)}</p>
+                  </div>
+                )}
+                {canViewResults && viewingClearance.result && (
+                  <div>
+                    <p className="text-muted-foreground">Result</p>
+                    <p className="capitalize">{viewingClearance.result}</p>
+                  </div>
+                )}
+              </div>
+              {viewingClearance.attachment_url && (
+                <div className="pt-2 border-t">
+                  <p className="text-sm text-muted-foreground mb-2">Attachment</p>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => window.open(viewingClearance.attachment_url!, '_blank')}
+                  >
+                    <Download className="h-4 w-4 mr-2" />
+                    {viewingClearance.attachment_name || 'Download Document'}
+                  </Button>
+                </div>
+              )}
+              {canViewNotes && viewingClearance.notes && (
+                <div className="pt-2 border-t">
+                  <p className="text-sm text-muted-foreground">Notes</p>
+                  <p className="text-sm">{viewingClearance.notes}</p>
+                </div>
+              )}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
 
       {isLoading ? (
         <div className="text-muted-foreground">Loading...</div>
@@ -488,66 +786,59 @@ export function EmployeeRegulatoryTab({ employeeId, viewType = "hr" }: EmployeeR
       ) : (
         <div className="grid gap-4">
           {clearances.map((clearance) => (
-            <Card key={clearance.id}>
+            <Card key={clearance.id} className={clearance.status === "archived" ? "opacity-60" : ""}>
               <CardHeader className="pb-2">
                 <div className="flex justify-between items-start">
-                  <div className="flex items-center gap-2">
-                    {getStatusIcon(clearance.status, clearance.result)}
+                  <div className="flex items-center gap-2 flex-wrap">
+                    {getComplianceIndicator(clearance)}
                     <CardTitle className="text-base capitalize">
-                      {clearance.check_type.replace(/_/g, " ")}
+                      {clearance.check_type.replace("_", " ")}
                     </CardTitle>
                     {getStatusBadge(clearance.status)}
-                    {viewType !== "ess" && getComplianceIndicator(clearance)}
-                    {canViewResults && clearance.result && (
-                      <Badge
-                        variant={clearance.result === "clear" || clearance.result === "passed" ? "default" : "destructive"}
-                        className="capitalize"
-                      >
-                        {clearance.result}
-                      </Badge>
+                    {getScopeBadge(clearance.scope)}
+                    {clearance.attachment_url && (
+                      <FileText className="h-4 w-4 text-muted-foreground" />
                     )}
                   </div>
                   <div className="flex gap-1">
-                    {viewType === "hr" && (
+                    <Button variant="ghost" size="icon" onClick={() => setViewingClearance(clearance)}>
+                      <Eye className="h-4 w-4" />
+                    </Button>
+                    {canEdit && clearance.status !== "archived" && (
                       <>
-                        <Button variant="ghost" size="icon" onClick={() => setViewingClearance(clearance)}>
-                          <Eye className="h-4 w-4" />
+                        <Button variant="ghost" size="icon" onClick={() => handleEdit(clearance)}>
+                          <Pencil className="h-4 w-4" />
                         </Button>
-                        {canEdit && clearance.status !== "archived" && (
-                          <>
-                            <Button variant="ghost" size="icon" onClick={() => handleEdit(clearance)}>
-                              <Pencil className="h-4 w-4" />
-                            </Button>
-                            <Button variant="ghost" size="icon" onClick={() => handleArchive(clearance)}>
-                              <Archive className="h-4 w-4" />
-                            </Button>
-                          </>
-                        )}
+                        <Button variant="ghost" size="icon" onClick={() => handleArchive(clearance)}>
+                          <Archive className="h-4 w-4" />
+                        </Button>
                       </>
                     )}
                   </div>
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-2 gap-2 text-sm">
-                  {viewType === "hr" && clearance.jurisdiction && (
-                    <div>
-                      <span className="text-muted-foreground">Jurisdiction:</span> {clearance.jurisdiction}
-                    </div>
-                  )}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm">
                   <div>
-                    <span className="text-muted-foreground">Status:</span> {clearance.status}
+                    <span className="text-muted-foreground">Requested:</span>{" "}
+                    {formatDateForDisplay(clearance.requested_date)}
                   </div>
-                  {viewType === "hr" && (
+                  {clearance.jurisdiction && (
                     <div>
-                      <span className="text-muted-foreground">Requested:</span>{" "}
-                      {formatDateForDisplay(clearance.requested_date)}
+                      <span className="text-muted-foreground">Jurisdiction:</span>{" "}
+                      {clearance.jurisdiction}
                     </div>
                   )}
-                  {viewType === "hr" && clearance.completed_date && (
+                  {clearance.consent_date && (
                     <div>
-                      <span className="text-muted-foreground">Completed:</span>{" "}
-                      {formatDateForDisplay(clearance.completed_date)}
+                      <span className="text-muted-foreground">Consent:</span>{" "}
+                      {formatDateForDisplay(clearance.consent_date)}
+                    </div>
+                  )}
+                  {canViewResults && clearance.result && (
+                    <div>
+                      <span className="text-muted-foreground">Result:</span>{" "}
+                      <span className="capitalize">{clearance.result}</span>
                     </div>
                   )}
                   {clearance.expiry_date && (
@@ -556,10 +847,10 @@ export function EmployeeRegulatoryTab({ employeeId, viewType = "hr" }: EmployeeR
                       {formatDateForDisplay(clearance.expiry_date)}
                     </div>
                   )}
-                  {viewType === "ess" && (
+                  {clearance.provider && (
                     <div>
-                      <span className="text-muted-foreground">Action Required:</span>{" "}
-                      {clearance.status === "pending" ? "Yes" : "No"}
+                      <span className="text-muted-foreground">Regulatory Body:</span>{" "}
+                      {clearance.provider}
                     </div>
                   )}
                 </div>
@@ -568,79 +859,6 @@ export function EmployeeRegulatoryTab({ employeeId, viewType = "hr" }: EmployeeR
           ))}
         </div>
       )}
-
-      {/* Detail Dialog for HR */}
-      <Dialog open={!!viewingClearance} onOpenChange={(open) => !open && setViewingClearance(null)}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>Regulatory Clearance Details</DialogTitle>
-          </DialogHeader>
-          {viewingClearance && (
-            <div className="space-y-6">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <h4 className="font-medium text-sm text-muted-foreground mb-1">Type</h4>
-                  <p className="capitalize">{viewingClearance.check_type.replace(/_/g, " ")}</p>
-                </div>
-                <div>
-                  <h4 className="font-medium text-sm text-muted-foreground mb-1">Jurisdiction</h4>
-                  <p>{viewingClearance.jurisdiction || "Not specified"}</p>
-                </div>
-                <div>
-                  <h4 className="font-medium text-sm text-muted-foreground mb-1">Regulatory Body</h4>
-                  <p>{viewingClearance.provider || "Not specified"}</p>
-                </div>
-                <div>
-                  <h4 className="font-medium text-sm text-muted-foreground mb-1">Reference Number</h4>
-                  <p>{viewingClearance.reference_number || "Not specified"}</p>
-                </div>
-                <div>
-                  <h4 className="font-medium text-sm text-muted-foreground mb-1">Status</h4>
-                  {getStatusBadge(viewingClearance.status)}
-                </div>
-                <div>
-                  <h4 className="font-medium text-sm text-muted-foreground mb-1">Result</h4>
-                  {viewingClearance.result ? (
-                    <Badge
-                      variant={viewingClearance.result === "clear" || viewingClearance.result === "passed" ? "default" : "destructive"}
-                      className="capitalize"
-                    >
-                      {viewingClearance.result}
-                    </Badge>
-                  ) : (
-                    <span className="text-muted-foreground">Pending</span>
-                  )}
-                </div>
-              </div>
-
-              <div className="border-t pt-4">
-                <h4 className="font-medium mb-2">Dates</h4>
-                <div className="grid grid-cols-2 gap-4 text-sm">
-                  <div>
-                    <span className="text-muted-foreground">Requested:</span>{" "}
-                    {formatDateForDisplay(viewingClearance.requested_date)}
-                  </div>
-                  <div>
-                    <span className="text-muted-foreground">Completed:</span>{" "}
-                    {viewingClearance.completed_date ? formatDateForDisplay(viewingClearance.completed_date) : "Pending"}
-                  </div>
-                  <div>
-                    <span className="text-muted-foreground">Expiry:</span>{" "}
-                    {viewingClearance.expiry_date ? formatDateForDisplay(viewingClearance.expiry_date) : "N/A"}
-                  </div>
-                </div>
-              </div>
-
-              {canViewNotes && viewingClearance.notes && (
-                <div className="border-t pt-4">
-                  <h4 className="font-medium mb-2">Notes (HR Only)</h4>
-                  <p className="text-sm text-muted-foreground">{viewingClearance.notes}</p>
-                </div>
-              )}
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }
