@@ -48,10 +48,28 @@ export function RegularDeductionsSection({
 
   useEffect(() => {
     loadDeductions();
-  }, [employeeId]);
+  }, [employeeId, payPeriodId]);
 
   const loadDeductions = async () => {
     setIsLoading(true);
+    
+    // First, get the pay period to know its start date
+    const { data: payPeriodData, error: payPeriodError } = await supabase
+      .from('pay_periods')
+      .select('period_start')
+      .eq('id', payPeriodId)
+      .single();
+    
+    if (payPeriodError) {
+      console.error("Failed to load pay period:", payPeriodError);
+      toast.error("Failed to load pay period details");
+      setIsLoading(false);
+      return;
+    }
+    
+    const periodStart = payPeriodData?.period_start;
+    
+    // Load deductions, then filter out those with end_date before the pay period start
     const { data, error } = await supabase
       .from('employee_regular_deductions')
       .select('*')
@@ -64,9 +82,18 @@ export function RegularDeductionsSection({
       setIsLoading(false);
       return;
     }
-    setDeductions(data || []);
+    
+    // Filter out deductions with end_date before the current pay period start
+    const filteredDeductions = (data || []).filter(d => {
+      // If no end_date, the deduction is ongoing and should be included
+      if (!d.end_date) return true;
+      // Include only if end_date >= period_start (still active during this period)
+      return d.end_date >= periodStart;
+    });
+    
+    setDeductions(filteredDeductions);
     // Pre-select all active deductions
-    setSelectedIds((data || []).map(d => d.id));
+    setSelectedIds(filteredDeductions.map(d => d.id));
     setIsLoading(false);
   };
 
