@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { AlertTriangle, Shield, Clock, Plane, Edit, Loader2, Key, Plus } from 'lucide-react';
+import { AlertTriangle, Shield, Clock, Plane, Edit, Loader2, Key, Plus, Search, Users } from 'lucide-react';
 import { KeyPositionRisk, useSuccession } from '@/hooks/useSuccession';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -56,6 +56,7 @@ export function KeyPositionsTab({ companyId }: KeyPositionsTabProps) {
 
   const [keyPositions, setKeyPositions] = useState<KeyPosition[]>([]);
   const [availablePositions, setAvailablePositions] = useState<KeyPosition[]>([]);
+  const [loadingAvailable, setLoadingAvailable] = useState(false);
   const [loadingKeyPositions, setLoadingKeyPositions] = useState(true);
   const [employees, setEmployees] = useState<{ id: string; full_name: string }[]>([]);
   const [showDialog, setShowDialog] = useState(false);
@@ -149,6 +150,8 @@ export function KeyPositionsTab({ companyId }: KeyPositionsTabProps) {
   };
 
   const loadAvailablePositions = async () => {
+    setLoadingAvailable(true);
+    
     // First get all jobs that are marked as key positions
     const { data: keyJobs } = await supabase
       .from('jobs')
@@ -159,6 +162,7 @@ export function KeyPositionsTab({ companyId }: KeyPositionsTabProps) {
     
     if (!keyJobs || keyJobs.length === 0) {
       setAvailablePositions([]);
+      setLoadingAvailable(false);
       return;
     }
     
@@ -197,6 +201,7 @@ export function KeyPositionsTab({ companyId }: KeyPositionsTabProps) {
       }
       setAvailablePositions(positions);
     }
+    setLoadingAvailable(false);
   };
 
   const loadEmployees = async () => {
@@ -607,19 +612,38 @@ export function KeyPositionsTab({ companyId }: KeyPositionsTabProps) {
           <div className="space-y-4">
             <div className="space-y-2">
               <Label>Search Positions</Label>
-              <Input
-                placeholder="Search by position, job, or incumbent name..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Type to filter by position, job, or incumbent..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-9"
+                />
+              </div>
+              {availablePositions.length > 0 && (
+                <p className="text-xs text-muted-foreground">
+                  Showing {filteredAvailablePositions.length} of {availablePositions.length} positions
+                </p>
+              )}
             </div>
 
             <div className="border rounded-lg max-h-[400px] overflow-y-auto">
-              {filteredAvailablePositions.length === 0 ? (
+              {loadingAvailable ? (
+                <div className="flex items-center justify-center py-12">
+                  <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                </div>
+              ) : availablePositions.length === 0 ? (
                 <div className="p-8 text-center text-muted-foreground">
                   <Shield className="h-10 w-10 mx-auto mb-3 opacity-50" />
-                  <p>No positions found</p>
+                  <p>No key positions available</p>
                   <p className="text-sm">Mark jobs as "Key Position" in Workforce &gt; Jobs first</p>
+                </div>
+              ) : filteredAvailablePositions.length === 0 ? (
+                <div className="p-8 text-center text-muted-foreground">
+                  <Users className="h-10 w-10 mx-auto mb-3 opacity-50" />
+                  <p>No positions match "{searchTerm}"</p>
+                  <p className="text-sm">Try a different search term</p>
                 </div>
               ) : (
                 <Table>
@@ -638,7 +662,7 @@ export function KeyPositionsTab({ companyId }: KeyPositionsTabProps) {
                       return (
                         <TableRow 
                           key={pos.id} 
-                          className={`cursor-pointer ${selectedPositionId === pos.id ? 'bg-primary/10' : ''}`}
+                          className={`cursor-pointer hover:bg-muted/50 ${selectedPositionId === pos.id ? 'bg-primary/10' : ''}`}
                           onClick={() => setSelectedPositionId(pos.id)}
                         >
                           <TableCell>
@@ -647,7 +671,7 @@ export function KeyPositionsTab({ companyId }: KeyPositionsTabProps) {
                               name="position" 
                               checked={selectedPositionId === pos.id}
                               onChange={() => setSelectedPositionId(pos.id)}
-                              className="h-4 w-4"
+                              className="h-4 w-4 accent-primary"
                             />
                           </TableCell>
                           <TableCell>
@@ -659,7 +683,7 @@ export function KeyPositionsTab({ companyId }: KeyPositionsTabProps) {
                           <TableCell className="text-sm">{pos.job?.name || '-'}</TableCell>
                           <TableCell>
                             {pos.current_holder?.full_name || (
-                              <span className="text-muted-foreground italic">Vacant</span>
+                              <span className="text-amber-600 italic">Vacant</span>
                             )}
                           </TableCell>
                           <TableCell>
