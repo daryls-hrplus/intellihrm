@@ -1852,7 +1852,7 @@
   },
   "admin": {
     "title": "Admin & Security",
-    "description": "Configuration, governance, and security management hub",
+    "description": "Configuration and Governance",
     "adminAccess": "Admin Access",
     "stats": {
       "totalUsers": "Total Users",
