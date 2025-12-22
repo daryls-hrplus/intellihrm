@@ -29303,6 +29303,42 @@ export type Database = {
           },
         ]
       }
+      role_pay_group_access: {
+        Row: {
+          created_at: string
+          id: string
+          pay_group_id: string
+          role_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          pay_group_id: string
+          role_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          pay_group_id?: string
+          role_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "role_pay_group_access_pay_group_id_fkey"
+            columns: ["pay_group_id"]
+            isOneToOne: false
+            referencedRelation: "pay_groups"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "role_pay_group_access_role_id_fkey"
+            columns: ["role_id"]
+            isOneToOne: false
+            referencedRelation: "roles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       role_permissions: {
         Row: {
           can_create: boolean | null
