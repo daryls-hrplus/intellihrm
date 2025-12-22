@@ -42,6 +42,7 @@ export function EmployeeRemindersList({
   const [editingReminder, setEditingReminder] = useState<EmployeeReminder | null>(null);
   const [statusFilter, setStatusFilter] = useState('pending');
   const [categoryFilter, setCategoryFilter] = useState('all');
+  const [eventTypeFilter, setEventTypeFilter] = useState('all');
 
   const [newInterval, setNewInterval] = useState('');
   const [formData, setFormData] = useState<{
@@ -95,7 +96,8 @@ export function EmployeeRemindersList({
         fetchReminders({ 
           companyId, 
           status: statusFilter !== 'all' ? statusFilter : undefined,
-          category: categoryFilter !== 'all' ? categoryFilter : undefined
+          category: categoryFilter !== 'all' ? categoryFilter : undefined,
+          eventTypeId: eventTypeFilter !== 'all' ? eventTypeFilter : undefined
         }),
         fetchEventTypes(),
       ]);
@@ -132,7 +134,22 @@ export function EmployeeRemindersList({
 
   useEffect(() => {
     loadData();
-  }, [companyId, statusFilter, categoryFilter]);
+  }, [companyId, statusFilter, categoryFilter, eventTypeFilter]);
+
+  // Get event types filtered by selected category
+  const filteredEventTypes = categoryFilter === 'all' 
+    ? eventTypes 
+    : eventTypes.filter(et => et.category === categoryFilter);
+
+  // Reset event type filter when category changes (if the selected event type is no longer in category)
+  useEffect(() => {
+    if (eventTypeFilter !== 'all') {
+      const selectedEventType = eventTypes.find(et => et.id === eventTypeFilter);
+      if (selectedEventType && categoryFilter !== 'all' && selectedEventType.category !== categoryFilter) {
+        setEventTypeFilter('all');
+      }
+    }
+  }, [categoryFilter, eventTypes, eventTypeFilter]);
 
   const handleOpenDialog = (reminder?: EmployeeReminder) => {
     if (reminder) {
@@ -256,12 +273,12 @@ export function EmployeeRemindersList({
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between flex-wrap gap-4">
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3 flex-wrap">
           <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="w-[150px]">
+            <SelectTrigger className="w-[140px] bg-background">
               <SelectValue placeholder="Status" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="bg-background border shadow-md z-50">
               <SelectItem value="all">All Statuses</SelectItem>
               {REMINDER_STATUS.map((s) => (
                 <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>
@@ -269,13 +286,29 @@ export function EmployeeRemindersList({
             </SelectContent>
           </Select>
           <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-            <SelectTrigger className="w-[150px]">
+            <SelectTrigger className="w-[150px] bg-background">
               <SelectValue placeholder="Category" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="bg-background border shadow-md z-50">
               <SelectItem value="all">All Categories</SelectItem>
               {REMINDER_CATEGORIES.map((c) => (
                 <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Select value={eventTypeFilter} onValueChange={setEventTypeFilter}>
+            <SelectTrigger className="w-[200px] bg-background">
+              <SelectValue placeholder="Event Type" />
+            </SelectTrigger>
+            <SelectContent className="bg-background border shadow-md z-50 max-h-[300px]">
+              <SelectItem value="all">All Event Types</SelectItem>
+              {filteredEventTypes.map((type) => (
+                <SelectItem key={type.id} value={type.id}>
+                  <span className="flex items-center gap-2">
+                    <span className="text-xs text-muted-foreground capitalize">[{type.category}]</span>
+                    {type.name}
+                  </span>
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
