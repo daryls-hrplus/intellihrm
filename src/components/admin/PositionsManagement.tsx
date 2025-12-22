@@ -1164,7 +1164,11 @@ export function PositionsManagement({ companyId }: PositionsManagementProps) {
                 <Input
                   type="date"
                   value={assignStartDate}
-                  onChange={(e) => setAssignStartDate(e.target.value)}
+                  onChange={(e) => {
+                    const newDate = e.target.value;
+                    setAssignStartDate(newDate);
+                    setAssignPayGroupStartDate(newDate);
+                  }}
                 />
               </div>
               <div className="space-y-2">
@@ -1225,12 +1229,16 @@ export function PositionsManagement({ companyId }: PositionsManagementProps) {
                 {assignPayGroupId && (
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label>Pay Group Start Date *</Label>
+                      <Label>Pay Group Start Date</Label>
                       <Input
                         type="date"
                         value={assignPayGroupStartDate}
-                        onChange={(e) => setAssignPayGroupStartDate(e.target.value)}
+                        readOnly
+                        className="bg-muted"
                       />
+                      <p className="text-xs text-muted-foreground">
+                        Synced with position start date
+                      </p>
                     </div>
                     <div className="space-y-2">
                       <Label>Pay Group End Date</Label>
