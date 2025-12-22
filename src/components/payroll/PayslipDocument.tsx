@@ -191,7 +191,7 @@ export function PayslipDocument({
             {lineItems?.earnings && lineItems.earnings.length > 0 ? (
               lineItems.earnings.map((item, idx) => (
                 <div key={idx} className="flex justify-between text-xs py-0.5 border-b border-border/30 last:border-0">
-                  <div className="flex flex-col gap-0.5">
+                  <div className="flex flex-col">
                     <span className="flex items-center gap-1">
                       {item.name}
                       {item.is_prorated && (
@@ -199,7 +199,7 @@ export function PayslipDocument({
                       )}
                     </span>
                     {(item.job_title || (item.is_prorated && item.effective_start)) && (
-                      <span className="text-[6px] text-muted-foreground leading-tight">
+                      <span className="text-[6px] text-muted-foreground leading-tight mt-1">
                         {item.job_title}
                         {item.job_title && item.is_prorated && item.effective_start && ' · '}
                         {item.is_prorated && item.effective_start && (
