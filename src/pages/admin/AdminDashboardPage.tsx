@@ -105,16 +105,6 @@ const getAdminModuleSections = (
       { title: "Organization Design", description: "Org structure and restructuring scenarios", href: "/org-design", icon: Network, color: "bg-violet-500/10 text-violet-600", tabCode: "org-design" },
       { title: "Scenario Planning", description: "What-if analysis and budget impact modeling", href: "/scenario-planning", icon: GitBranch, color: "bg-green-500/10 text-green-600", tabCode: "scenario-planning" },
     ],
-    // Section 6: Analytics & Insights
-    analyticsInsights: [
-      { title: "Workforce Analytics", description: "Insights, dashboards, and predictive models", href: "/workforce-analytics", icon: BarChart2, color: "bg-cyan-500/10 text-cyan-600", tabCode: "workforce-analytics" },
-      { title: "Cross-Module Dashboards", description: "Unified analytics across all modules", href: "/dashboards", icon: LayoutDashboard, color: "bg-purple-500/10 text-purple-600", tabCode: "dashboards" },
-      { title: "Report Builder", description: "Custom report creation and scheduling", href: "/report-builder", icon: FileBarChart, color: "bg-orange-500/10 text-orange-600", tabCode: "report-builder" },
-      { title: "AI Insights", description: "AI-powered analytics and recommendations", href: "/ai-insights", icon: Brain, color: "bg-gradient-to-r from-purple-500/10 to-pink-500/10 text-purple-600", tabCode: "ai-insights" },
-      { title: "Talent Insights", description: "Skills gaps, succession readiness, and attrition risk", href: "/insights/talent", icon: Users, color: "bg-emerald-500/10 text-emerald-600", tabCode: "talent-insights" },
-      { title: "Compensation Insights", description: "Pay equity analysis, market benchmarking, budget impact", href: "/insights/compensation", icon: TrendingUp, color: "bg-amber-500/10 text-amber-600", tabCode: "compensation-insights" },
-      { title: "Operational Insights", description: "Attendance patterns, productivity metrics, efficiency", href: "/insights/operational", icon: BarChart2, color: "bg-indigo-500/10 text-indigo-600", tabCode: "operational-insights" },
-    ],
     // Section 8: Documentation & Enablement
     // Enablement Center is only visible to HRplus internal tenants
     documentation: [
@@ -148,7 +138,7 @@ const getAdminModuleSections = (
     { titleKey: "Security & Governance", items: filterByPermission(allModules.security) },
     { titleKey: "System & Platform Configuration", items: filterByPermission(allModules.systemConfig) },
     { titleKey: "Strategic Planning", items: filterByPermission(allModules.strategicPlanning) },
-    { titleKey: "Analytics & Insights", items: filterByPermission(allModules.analyticsInsights) },
+    
     
     { titleKey: "Documentation & Enablement", items: filterByPermission(allModules.documentation) },
     { titleKey: "Billing & Subscriptions", items: filterByPermission(allModules.billing) },
