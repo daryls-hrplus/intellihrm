@@ -190,19 +190,19 @@ export function PayslipDocument({
           <div className="space-y-2">
             {lineItems?.earnings && lineItems.earnings.length > 0 ? (
               lineItems.earnings.map((item, idx) => (
-                <div key={idx} className="flex justify-between text-sm py-1 border-b border-border/30 last:border-0">
+                <div key={idx} className="flex justify-between text-xs py-1 border-b border-border/30 last:border-0">
                   <div className="flex flex-col">
-                    <span className="flex items-center gap-1.5">
+                    <span className="flex items-center gap-1">
                       {item.name}
                       {item.is_prorated && (
-                        <span className="text-[10px] bg-amber-100 text-amber-700 px-1 py-0.5 rounded">Prorated</span>
+                        <span className="text-[8px] bg-amber-100 text-amber-700 px-1 py-0.5 rounded">Prorated</span>
                       )}
                     </span>
                     {item.job_title && (
-                      <span className="text-[10px] text-muted-foreground">{item.job_title}</span>
+                      <span className="text-[9px] text-muted-foreground">{item.job_title}</span>
                     )}
                     {item.is_prorated && item.effective_start && (
-                      <span className="text-[10px] text-muted-foreground">
+                      <span className="text-[9px] text-muted-foreground">
                         {new Date(item.effective_start).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                         {' - '}
                         {item.effective_end 
@@ -231,37 +231,43 @@ export function PayslipDocument({
         {/* Deductions */}
         <div className={`p-4 rounded ${style.section}`}>
           <h3 className="font-semibold mb-3" style={{ color: t.primary_color }}>Deductions</h3>
-          <div className="space-y-2">
-            {t.show_tax_breakdown && lineItems?.taxes && lineItems.taxes.length > 0 && (
+          <div className="space-y-1">
+            {/* Statutory/Taxes */}
+            {lineItems?.taxes && lineItems.taxes.length > 0 && (
               <>
-                <p className="text-xs text-muted-foreground font-medium">Taxes</p>
+                <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-wide">Statutory Deductions</p>
                 {lineItems.taxes.map((item, idx) => (
-                  <div key={idx} className="flex justify-between text-sm">
+                  <div key={idx} className="flex justify-between text-xs py-0.5">
                     <span>{item.name}</span>
                     <span className="font-medium text-destructive">-{formatCurrency(item.amount, payslip.currency)}</span>
                   </div>
                 ))}
               </>
             )}
+            
+            {/* Other Deductions */}
             {lineItems?.deductions && lineItems.deductions.length > 0 && (
               <>
-                <p className="text-xs text-muted-foreground font-medium mt-2">Other Deductions</p>
+                <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-wide mt-2">Other Deductions</p>
                 {lineItems.deductions.map((item, idx) => (
-                  <div key={idx} className="flex justify-between text-sm">
+                  <div key={idx} className="flex justify-between text-xs py-0.5">
                     <span>{item.name}</span>
                     <span className="font-medium text-destructive">-{formatCurrency(item.amount, payslip.currency)}</span>
                   </div>
                 ))}
               </>
             )}
+            
+            {/* Fallback when no itemized deductions */}
             {(!lineItems?.taxes?.length && !lineItems?.deductions?.length) && (
-              <div className="flex justify-between text-sm">
+              <div className="flex justify-between text-xs">
                 <span>Total Deductions</span>
                 <span className="font-medium text-destructive">-{formatCurrency(payslip.total_deductions, payslip.currency)}</span>
               </div>
             )}
+            
             <Separator className="my-2" />
-            <div className="flex justify-between font-semibold">
+            <div className="flex justify-between font-semibold text-sm">
               <span>Total Deductions</span>
               <span className="text-destructive">-{formatCurrency(payslip.total_deductions, payslip.currency)}</span>
             </div>
