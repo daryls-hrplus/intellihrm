@@ -119,6 +119,7 @@ export function useReminders() {
     employeeId?: string;
     status?: string;
     category?: string;
+    eventTypeId?: string;
     dateFrom?: string;
     dateTo?: string;
   }) => {
@@ -141,6 +142,9 @@ export function useReminders() {
     if (filters?.status && filters.status !== 'all') {
       query = query.eq('status', filters.status);
     }
+    if (filters?.eventTypeId && filters.eventTypeId !== 'all') {
+      query = query.eq('event_type_id', filters.eventTypeId);
+    }
     if (filters?.dateFrom) {
       query = query.gte('reminder_date', filters.dateFrom);
     }
@@ -151,9 +155,9 @@ export function useReminders() {
     const { data, error } = await query;
     if (error) throw error;
 
-    // Filter by category if needed
+    // Filter by category if needed (when eventTypeId is not specified)
     let results = data as EmployeeReminder[];
-    if (filters?.category && filters.category !== 'all') {
+    if (filters?.category && filters.category !== 'all' && (!filters?.eventTypeId || filters.eventTypeId === 'all')) {
       results = results.filter(r => r.event_type?.category === filters.category);
     }
 
