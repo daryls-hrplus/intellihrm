@@ -327,7 +327,7 @@ export function PayrollSimulator({ companyId, employeeId, payPeriodId }: Payroll
         : null;
 
       // Fetch employee compensation (can be linked to a specific position)
-      const { data: employeeComp, error: employeeCompError } = await supabase
+      const { data: employeeCompRaw, error: employeeCompError } = await supabase
         .from('employee_compensation')
         .select(`
           amount,
@@ -382,6 +382,17 @@ export function PayrollSimulator({ companyId, employeeId, payPeriodId }: Payroll
       if (payPeriodError) {
         console.error('Pay period fetch error:', payPeriodError);
       }
+      
+      // Filter out compensation items with end_date before the pay period start
+      const periodStart = payPeriod?.period_start;
+      const employeeComp = (employeeCompRaw || []).filter((comp: any) => {
+        // If no end_date, it's ongoing and should be included
+        if (!comp.end_date) return true;
+        // If no period start available, include all
+        if (!periodStart) return true;
+        // Include only if end_date >= period_start (still active during this period)
+        return comp.end_date >= periodStart;
+      });
 
       // Fetch statutory deduction types for the country
       const { data: statutoryTypes } = await supabase

@@ -796,7 +796,8 @@ export function usePayroll() {
           : null;
         
         // First check employee_compensation (overrides position compensation)
-        const { data: employeeComp } = await supabase
+        // Filter out compensation items that have ended before this pay period
+        const { data: employeeCompRaw } = await supabase
           .from("employee_compensation")
           .select(`
             *, 
@@ -809,6 +810,17 @@ export function usePayroll() {
           `)
           .eq("employee_id", emp.employee_id)
           .eq("is_active", true);
+        
+        // Filter out compensation items with end_date before the pay period start
+        const periodStart = payPeriod?.period_start;
+        const employeeComp = (employeeCompRaw || []).filter((comp: any) => {
+          // If no end_date, it's ongoing and should be included
+          if (!comp.end_date) return true;
+          // If no period start available, include all
+          if (!periodStart) return true;
+          // Include only if end_date >= period_start (still active during this period)
+          return comp.end_date >= periodStart;
+        });
         
         let grossPay = 0;
         let regularPay = 0;
