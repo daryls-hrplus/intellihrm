@@ -12,6 +12,7 @@ interface SalarySummarySectionProps {
   companyId: string;
   employeeId: string;
   payGroupId?: string;
+  payPeriodId?: string;
 }
 
 interface PositionData {
@@ -37,7 +38,7 @@ interface CompensationItem {
   end_date: string | null;
 }
 
-export function SalarySummarySection({ companyId, employeeId, payGroupId }: SalarySummarySectionProps) {
+export function SalarySummarySection({ companyId, employeeId, payGroupId, payPeriodId }: SalarySummarySectionProps) {
   const { t } = useTranslation();
   const [positions, setPositions] = useState<PositionData[]>([]);
   const [compensationItems, setCompensationItems] = useState<CompensationItem[]>([]);
@@ -48,11 +49,25 @@ export function SalarySummarySection({ companyId, employeeId, payGroupId }: Sala
     if (employeeId) {
       loadSalaryData();
     }
-  }, [employeeId, payGroupId]);
+  }, [employeeId, payGroupId, payPeriodId]);
 
   const loadSalaryData = async () => {
     setIsLoading(true);
     try {
+      // Get pay period start date for filtering
+      let periodStart: string | null = null;
+      if (payPeriodId) {
+        const { data: payPeriodData, error: payPeriodError } = await supabase
+          .from('pay_periods')
+          .select('period_start')
+          .eq('id', payPeriodId)
+          .single();
+        
+        if (!payPeriodError && payPeriodData) {
+          periodStart = payPeriodData.period_start;
+        }
+      }
+
       // Load all active positions for this employee in the specified pay group
       let posQuery = supabase
         .from('employee_positions')
@@ -80,7 +95,13 @@ export function SalarySummarySection({ companyId, employeeId, payGroupId }: Sala
       if (posError) throw posError;
 
       if (posData && posData.length > 0) {
-        setPositions(posData.map(pos => ({
+        // Filter positions by end_date if periodStart is available
+        const filteredPositions = posData.filter(pos => {
+          if (!periodStart || !pos.end_date) return true;
+          return pos.end_date >= periodStart;
+        });
+        
+        setPositions(filteredPositions.map(pos => ({
           id: pos.id,
           position_id: pos.position_id,
           position_title: (pos.positions as any)?.title || 'N/A',
@@ -124,7 +145,13 @@ export function SalarySummarySection({ companyId, employeeId, payGroupId }: Sala
       if (compError) throw compError;
 
       if (compData) {
-        setCompensationItems(compData.map(item => ({
+        // Filter out compensation items with end_date before the current pay period start
+        const filteredCompData = compData.filter(item => {
+          if (!periodStart || !item.end_date) return true;
+          return item.end_date >= periodStart;
+        });
+        
+        setCompensationItems(filteredCompData.map(item => ({
           id: item.id,
           amount: item.amount || 0,
           currency: item.currency || 'USD',
