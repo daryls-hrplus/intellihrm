@@ -30,6 +30,13 @@ import { EmployeeBranchLocationsTab } from "@/components/employee/EmployeeBranch
 import { EmployeeCompetenciesTab } from "@/components/employee/EmployeeCompetenciesTab";
 import { EmployeeTaxAllowancesTab } from "@/components/employee/EmployeeTaxAllowancesTab";
 import { EmployeeEditDialog } from "@/components/employee/EmployeeEditDialog";
+import {
+  EmployeeComplianceLegalTab,
+  EmployeeCredentialsMembershipsTab,
+  EmployeeReferencesVerificationsTab,
+  EmployeeAgreementsSignaturesTab,
+  EmployeeProfessionalHistoryTab,
+} from "@/components/employee/professional";
 
 import {
   ArrowLeft,
@@ -60,6 +67,7 @@ import {
   Sparkles,
   Receipt,
   Pencil,
+  FileSignature,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
@@ -296,6 +304,7 @@ export default function EmployeeProfilePage() {
             <TabsTrigger value="medical"><Stethoscope className="h-4 w-4 mr-1" />{t("workforce.profile.tabs.medical")}</TabsTrigger>
             <TabsTrigger value="memberships"><Heart className="h-4 w-4 mr-1" />{t("workforce.profile.tabs.memberships")}</TabsTrigger>
             <TabsTrigger value="paygroup"><DollarSign className="h-4 w-4 mr-1" />{t("workforce.profile.tabs.payGroup")}</TabsTrigger>
+            <TabsTrigger value="professional_info"><FileSignature className="h-4 w-4 mr-1" />Professional Info</TabsTrigger>
             <TabsTrigger value="references"><UserCheck className="h-4 w-4 mr-1" />{t("workforce.profile.tabs.references")}</TabsTrigger>
             <TabsTrigger value="tax_allowances"><Receipt className="h-4 w-4 mr-1" />{t("workforce.profile.tabs.taxAllowances", "Tax Allowances")}</TabsTrigger>
             <TabsTrigger value="work_permits"><FileCheck className="h-4 w-4 mr-1" />{t("workforce.profile.tabs.workPermits")}</TabsTrigger>
@@ -461,6 +470,48 @@ export default function EmployeeProfilePage() {
 
           <TabsContent value="work_permits" className="mt-6">
             <EmployeeWorkPermitsTab employeeId={employee.id} />
+          </TabsContent>
+
+          <TabsContent value="professional_info" className="mt-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <FileSignature className="h-5 w-5" />
+                  Professional Information
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Tabs defaultValue="compliance_legal" className="w-full">
+                  <TabsList className="mb-4">
+                    <TabsTrigger value="compliance_legal">Compliance & Legal</TabsTrigger>
+                    <TabsTrigger value="credentials_memberships">Credentials & Memberships</TabsTrigger>
+                    <TabsTrigger value="references_verifications">References & Verifications</TabsTrigger>
+                    <TabsTrigger value="agreements_signatures">Agreements & Signatures</TabsTrigger>
+                    <TabsTrigger value="professional_history">Professional History</TabsTrigger>
+                  </TabsList>
+
+                  <TabsContent value="compliance_legal">
+                    <EmployeeComplianceLegalTab employeeId={employee.id} />
+                  </TabsContent>
+
+                  <TabsContent value="credentials_memberships">
+                    <EmployeeCredentialsMembershipsTab employeeId={employee.id} />
+                  </TabsContent>
+
+                  <TabsContent value="references_verifications">
+                    <EmployeeReferencesVerificationsTab employeeId={employee.id} />
+                  </TabsContent>
+
+                  <TabsContent value="agreements_signatures">
+                    <EmployeeAgreementsSignaturesTab employeeId={employee.id} />
+                  </TabsContent>
+
+                  <TabsContent value="professional_history">
+                    <EmployeeProfessionalHistoryTab employeeId={employee.id} />
+                  </TabsContent>
+                </Tabs>
+              </CardContent>
+            </Card>
           </TabsContent>
         </Tabs>
 
