@@ -267,8 +267,13 @@ export function EmployeeRegulatoryTab({ employeeId, viewType = "hr" }: EmployeeR
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-between items-center">
-        <h3 className="text-lg font-medium">Regulatory Clearances</h3>
+      <div className="flex justify-between items-start">
+        <div>
+          <h3 className="text-lg font-medium">Regulatory Clearances</h3>
+          <p className="text-sm text-muted-foreground mt-1">
+            Industry-specific clearances required by regulatory bodies (e.g., Financial Services, Healthcare, Aviation, Maritime, Gaming)
+          </p>
+        </div>
         {canAdd && (
           <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
             <DialogTrigger asChild>
