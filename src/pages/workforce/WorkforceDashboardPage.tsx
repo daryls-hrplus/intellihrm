@@ -97,10 +97,10 @@ export default function WorkforceDashboardPage() {
     vacancies: {
       title: "Position Control and Vacancies",
       description: "Track open positions and vacancies",
-      href: "/workforce/org-structure?tab=vacancies",
+      href: "/workforce/position-control-vacancies",
       icon: UserX,
       color: "bg-orange-500/10 text-orange-500",
-      tabCode: "org_structure",
+      tabCode: "vacancies",
     },
     headcountRequests: {
       title: "Headcount Requests",
