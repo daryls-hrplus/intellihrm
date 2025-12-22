@@ -190,20 +190,15 @@ export function PayslipDocument({
       </div>
 
       {/* Earnings Section */}
-      <div className={`p-5 rounded ${style.section}`}>
+      <div className="rounded" style={{ padding: 0 }}>
         <h3 className="font-semibold mb-4 text-sm uppercase tracking-wide" style={{ color: t.primary_color }}>Earnings</h3>
-        <table className="w-full text-sm" style={{ tableLayout: 'fixed' }}>
-          <colgroup>
-            <col style={{ width: '55%' }} />
-            <col style={{ width: '22.5%' }} />
-            {t.show_ytd_totals && <col style={{ width: '22.5%' }} />}
-          </colgroup>
+        <table className="w-full text-sm border-collapse">
           <thead>
             <tr className="border-b-2 border-border">
               <th className="text-left py-2 font-semibold text-foreground">Description</th>
-              <th className="text-right py-2 font-semibold text-foreground pr-4">Current</th>
+              <th className="text-right py-2 font-semibold text-foreground" style={{ width: '140px' }}>Current</th>
               {t.show_ytd_totals && (
-                <th className="text-right py-2 font-semibold text-foreground">Year to Date</th>
+                <th className="text-right py-2 font-semibold text-foreground" style={{ width: '140px' }}>Year to Date</th>
               )}
             </tr>
           </thead>
@@ -235,7 +230,7 @@ export function PayslipDocument({
                         )}
                       </div>
                     </td>
-                    <td className="text-right py-2.5 font-medium tabular-nums pr-4">{formatCurrency(item.amount, payslip.currency)}</td>
+                    <td className="text-right py-2.5 font-medium tabular-nums">{formatCurrency(item.amount, payslip.currency)}</td>
                     {t.show_ytd_totals && (
                       <td className="text-right py-2.5 tabular-nums text-muted-foreground">{formatCurrency(ytdTotal, payslip.currency)}</td>
                     )}
@@ -245,7 +240,7 @@ export function PayslipDocument({
             ) : (
               <tr className="border-b border-border/40">
                 <td className="py-2.5">Gross Pay</td>
-                <td className="text-right py-2.5 font-medium tabular-nums pr-4">{formatCurrency(payslip.gross_pay, payslip.currency)}</td>
+                <td className="text-right py-2.5 font-medium tabular-nums">{formatCurrency(payslip.gross_pay, payslip.currency)}</td>
                 {t.show_ytd_totals && (
                   <td className="text-right py-2.5 tabular-nums text-muted-foreground">{formatCurrency(payslip.gross_pay, payslip.currency)}</td>
                 )}
@@ -255,7 +250,7 @@ export function PayslipDocument({
           <tfoot>
             <tr className="border-t-2 border-border bg-muted/30">
               <td className="py-3 font-bold">Total Earnings</td>
-              <td className="text-right py-3 font-bold tabular-nums pr-4" style={{ color: t.accent_color }}>{formatCurrency(payslip.gross_pay, payslip.currency)}</td>
+              <td className="text-right py-3 font-bold tabular-nums" style={{ color: t.accent_color }}>{formatCurrency(payslip.gross_pay, payslip.currency)}</td>
               {t.show_ytd_totals && (
                 <td className="text-right py-3 font-bold tabular-nums" style={{ color: t.accent_color }}>{formatCurrency((ytdTotals?.gross || 0) + payslip.gross_pay, payslip.currency)}</td>
               )}
@@ -265,20 +260,15 @@ export function PayslipDocument({
       </div>
 
       {/* Deductions Section */}
-      <div className={`p-5 rounded ${style.section}`}>
+      <div className="rounded" style={{ padding: 0 }}>
         <h3 className="font-semibold mb-4 text-sm uppercase tracking-wide" style={{ color: t.primary_color }}>Deductions</h3>
-        <table className="w-full text-sm" style={{ tableLayout: 'fixed' }}>
-          <colgroup>
-            <col style={{ width: '55%' }} />
-            <col style={{ width: '22.5%' }} />
-            {t.show_ytd_totals && <col style={{ width: '22.5%' }} />}
-          </colgroup>
+        <table className="w-full text-sm border-collapse">
           <thead>
             <tr className="border-b-2 border-border">
               <th className="text-left py-2 font-semibold text-foreground">Description</th>
-              <th className="text-right py-2 font-semibold text-foreground pr-4">Current</th>
+              <th className="text-right py-2 font-semibold text-foreground" style={{ width: '140px' }}>Current</th>
               {t.show_ytd_totals && (
-                <th className="text-right py-2 font-semibold text-foreground">Year to Date</th>
+                <th className="text-right py-2 font-semibold text-foreground" style={{ width: '140px' }}>Year to Date</th>
               )}
             </tr>
           </thead>
@@ -296,7 +286,7 @@ export function PayslipDocument({
                   return (
                     <tr key={`tax-${idx}`} className="border-b border-border/40">
                       <td className="py-2.5 pl-4">{item.name}</td>
-                      <td className="text-right py-2.5 font-medium tabular-nums text-destructive pr-4">({formatCurrency(item.amount, payslip.currency)})</td>
+                      <td className="text-right py-2.5 font-medium tabular-nums text-destructive">({formatCurrency(item.amount, payslip.currency)})</td>
                       {t.show_ytd_totals && (
                         <td className="text-right py-2.5 tabular-nums text-muted-foreground">({formatCurrency(ytdTotal, payslip.currency)})</td>
                       )}
@@ -319,7 +309,7 @@ export function PayslipDocument({
                   return (
                     <tr key={`ded-${idx}`} className="border-b border-border/40">
                       <td className="py-2.5 pl-4">{item.name}</td>
-                      <td className="text-right py-2.5 font-medium tabular-nums text-destructive pr-4">({formatCurrency(item.amount, payslip.currency)})</td>
+                      <td className="text-right py-2.5 font-medium tabular-nums text-destructive">({formatCurrency(item.amount, payslip.currency)})</td>
                       {t.show_ytd_totals && (
                         <td className="text-right py-2.5 tabular-nums text-muted-foreground">({formatCurrency(ytdTotal, payslip.currency)})</td>
                       )}
@@ -333,7 +323,7 @@ export function PayslipDocument({
             {(!lineItems?.taxes?.length && !lineItems?.deductions?.length) && (
               <tr className="border-b border-border/40">
                 <td className="py-2.5">Total Deductions</td>
-                <td className="text-right py-2.5 font-medium tabular-nums text-destructive pr-4">({formatCurrency(payslip.total_deductions, payslip.currency)})</td>
+                <td className="text-right py-2.5 font-medium tabular-nums text-destructive">({formatCurrency(payslip.total_deductions, payslip.currency)})</td>
                 {t.show_ytd_totals && (
                   <td className="text-right py-2.5 tabular-nums text-muted-foreground">({formatCurrency(payslip.total_deductions, payslip.currency)})</td>
                 )}
@@ -343,7 +333,7 @@ export function PayslipDocument({
           <tfoot>
             <tr className="border-t-2 border-border bg-muted/30">
               <td className="py-3 font-bold">Total Deductions</td>
-              <td className="text-right py-3 font-bold tabular-nums text-destructive pr-4">({formatCurrency(payslip.total_deductions, payslip.currency)})</td>
+              <td className="text-right py-3 font-bold tabular-nums text-destructive">({formatCurrency(payslip.total_deductions, payslip.currency)})</td>
               {t.show_ytd_totals && (
                 <td className="text-right py-3 font-bold tabular-nums text-destructive">({formatCurrency((ytdTotals?.deductions || 0) + payslip.total_deductions, payslip.currency)})</td>
               )}
@@ -353,26 +343,21 @@ export function PayslipDocument({
       </div>
 
       {/* Net Pay */}
-      <div className={`p-5 rounded-lg ${style.accent}`} style={{ borderColor: t.accent_color, borderWidth: '2px' }}>
-        <table className="w-full text-sm" style={{ tableLayout: 'fixed' }}>
-          <colgroup>
-            <col style={{ width: '55%' }} />
-            <col style={{ width: '22.5%' }} />
-            {t.show_ytd_totals && <col style={{ width: '22.5%' }} />}
-          </colgroup>
+      <div className={`rounded-lg ${style.accent}`} style={{ borderColor: t.accent_color, borderWidth: '2px', padding: 0 }}>
+        <table className="w-full text-sm border-collapse">
           <tbody>
             <tr>
-              <td className="align-middle py-2">
+              <td className="align-middle py-3">
                 <h3 className="text-xl font-bold" style={{ color: t.accent_color }}>NET PAY</h3>
                 <p className="text-sm text-muted-foreground">Amount credited to your account</p>
               </td>
-              <td className="text-right align-middle py-2 pr-4">
+              <td className="text-right align-middle py-3" style={{ width: '140px' }}>
                 <p className="text-2xl font-bold tabular-nums" style={{ color: t.accent_color }}>
                   {formatCurrency(payslip.net_pay, payslip.currency)}
                 </p>
               </td>
               {t.show_ytd_totals && (
-                <td className="text-right align-middle py-2">
+                <td className="text-right align-middle py-3" style={{ width: '140px' }}>
                   <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">Year to Date</p>
                   <p className="text-xl font-bold tabular-nums" style={{ color: t.accent_color }}>
                     {formatCurrency((ytdTotals?.net || 0) + payslip.net_pay, payslip.currency)}
