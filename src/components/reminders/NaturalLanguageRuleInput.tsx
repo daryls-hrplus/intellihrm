@@ -384,6 +384,7 @@ export function NaturalLanguageRuleInput({ companyId, onRuleCreated }: NaturalLa
                   <span className="text-xs text-muted-foreground mr-2">Insert placeholder:</span>
                   {[
                     { key: '{employee_name}', label: 'Employee Name' },
+                    { key: '{item_name}', label: 'Item Name' },
                     { key: '{event_date}', label: 'Event Date' },
                     { key: '{days_until}', label: 'Days Until' },
                     { key: '{event_type}', label: 'Event Type' },
