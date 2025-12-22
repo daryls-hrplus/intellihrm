@@ -60,7 +60,7 @@
   "mss": {
     "groups": {
       "teamManagement": "Team Management",
-      "approvalsWorkflow": "Approvals & Workflow",
+      "approvalsWorkflow": "Approvals & Attendance",
       "performanceDevelopment": "Performance & Development",
       "teamResources": "Team Resources",
       "analyticsSupport": "Analytics & Support"
