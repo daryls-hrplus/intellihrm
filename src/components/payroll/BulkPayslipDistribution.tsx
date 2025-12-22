@@ -382,12 +382,13 @@ export function BulkPayslipDistribution({
             .from('payslips')
             .getPublicUrl(filePath);
 
-          // Update the payslip record with the PDF URL
+          // Update the payslip record with the PDF URL and payroll_run_id
           const { error: updateError } = await supabase
             .from('payslips')
             .update({
               pdf_url: urlData.publicUrl,
               pdf_generated_at: new Date().toISOString(),
+              payroll_run_id: payrollRunId,
             })
             .eq('payslip_number', emp.payslip_number);
 
