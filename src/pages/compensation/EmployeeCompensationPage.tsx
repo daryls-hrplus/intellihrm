@@ -1339,27 +1339,28 @@ export default function EmployeeCompensationPage() {
                 <Select 
                   value={formPayElementId} 
                   onValueChange={setFormPayElementId}
-                  disabled={!formPositionId || formPositionPayElementIds.length === 0}
+                  disabled={!formPositionId}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder={
                       !formPositionId 
                         ? t("compensation.employeeCompensation.dialog.selectPositionFirst", "Select a position first")
-                        : formPositionPayElementIds.length === 0 
-                          ? t("compensation.employeeCompensation.dialog.noPayElementsForPosition", "No pay elements linked to position") 
-                          : t("compensation.employeeCompensation.dialog.selectPayElement")
+                        : t("compensation.employeeCompensation.dialog.selectPayElement")
                     } />
                   </SelectTrigger>
                   <SelectContent>
-                    {payElements
-                      .filter(pe => formPositionPayElementIds.includes(pe.id))
-                      .map((pe) => (
-                        <SelectItem key={pe.id} value={pe.id}>
-                          {pe.name} ({pe.code})
-                        </SelectItem>
-                      ))}
+                    {payElements.map((pe) => (
+                      <SelectItem key={pe.id} value={pe.id}>
+                        {pe.name} ({pe.code}) {formPositionPayElementIds.includes(pe.id) && "★"}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
+                {formPositionPayElementIds.length > 0 && (
+                  <p className="text-xs text-muted-foreground">
+                    ★ = {t("compensation.employeeCompensation.dialog.linkedToPosition", "Linked to position")}
+                  </p>
+                )}
               </div>
 
               <div className="grid grid-cols-3 gap-4">
