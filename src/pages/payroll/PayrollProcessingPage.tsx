@@ -618,6 +618,17 @@ export default function PayrollProcessingPage() {
                               <Button variant="ghost" size="sm" onClick={() => handleGenerateBankFile(run)} title={t("payroll.processing.generateBankFile")} disabled={isLoading}>
                                 <Download className="h-4 w-4" />
                               </Button>
+                              <Button 
+                                variant="ghost" 
+                                size="sm" 
+                                onClick={() => {
+                                  setBulkDistributionRun(run);
+                                  setBulkDistributionOpen(true);
+                                }} 
+                                title="Bulk Payslip Distribution"
+                              >
+                                <Mail className="h-4 w-4" />
+                              </Button>
                               {payGroupGLConfigured && (
                                 <Button variant="ghost" size="sm" onClick={() => handleCalculateGL(run)} title="Calculate GL Entries" disabled={isLoading || isGLCalculating}>
                                   <BookOpen className="h-4 w-4" />
@@ -1274,6 +1285,19 @@ export default function PayrollProcessingPage() {
             </DialogFooter>
           </DialogContent>
         </Dialog>
+
+        {/* Bulk Payslip Distribution */}
+        {bulkDistributionRun && selectedCompanyId && (
+          <BulkPayslipDistribution
+            open={bulkDistributionOpen}
+            onOpenChange={setBulkDistributionOpen}
+            payrollRunId={bulkDistributionRun.id}
+            runNumber={bulkDistributionRun.run_number}
+            companyId={selectedCompanyId}
+            payslipTemplate={payslipTemplate}
+            companyInfo={companyInfo}
+          />
+        )}
       </div>
     </AppLayout>
   );
