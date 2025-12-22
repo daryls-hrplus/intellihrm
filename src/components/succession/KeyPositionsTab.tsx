@@ -257,24 +257,26 @@ export function KeyPositionsTab({ companyId }: KeyPositionsTabProps) {
   };
 
   const handleRemoveKeyPosition = async (position: KeyPosition) => {
-    // Key positions are derived from the job being marked as key.
-    // This action should only clear the risk assessment, not break the position↔job link.
-    if (!position.riskAssessment?.id) {
-      toast('This position is key because its job is marked as key. Remove the job\'s key flag to remove it from this list.');
-      return;
+    // First, delete any risk assessment if it exists
+    if (position.riskAssessment?.id) {
+      await supabase
+        .from('key_position_risks')
+        .delete()
+        .eq('id', position.riskAssessment.id);
     }
 
-    const { error } = await supabase
-      .from('key_position_risks')
-      .delete()
-      .eq('id', position.riskAssessment.id);
+    // Remove the position from the key positions list by unlinking it from the job
+    const { error } = await (supabase
+      .from('positions') as any)
+      .update({ job_id: null })
+      .eq('id', position.id);
 
     if (error) {
-      toast.error('Failed to clear risk assessment');
+      toast.error('Failed to remove key position');
       return;
     }
 
-    toast.success(`Risk assessment cleared for ${position.title}`);
+    toast.success(`${position.title} removed from key positions`);
     loadData();
   };
 
