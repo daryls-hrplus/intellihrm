@@ -109,7 +109,7 @@ export default function EmployeeTransactionsPage() {
       <div className="space-y-6">
         <Breadcrumbs items={[
           { label: t("navigation.workforce"), href: "/workforce" },
-          { label: t("workforce.transactions.title") },
+          { label: t("workforce.modules.transactions.title") },
         ]} />
 
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
