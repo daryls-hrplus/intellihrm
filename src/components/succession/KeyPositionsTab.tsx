@@ -92,10 +92,10 @@ export function KeyPositionsTab({ companyId }: KeyPositionsTabProps) {
   const loadKeyPositionsFromJobs = async () => {
     setLoadingKeyPositions(true);
     
-    // First get all jobs that are marked as key positions (with their job_family_id)
+    // Get all jobs that are marked as key positions
     const { data: keyJobsData } = await supabase
       .from('jobs')
-      .select('id, name, code, job_family_id')
+      .select('id, name, code')
       .eq('company_id', companyId)
       .eq('is_key_position', true)
       .eq('is_active', true);
@@ -106,49 +106,17 @@ export function KeyPositionsTab({ companyId }: KeyPositionsTabProps) {
       return;
     }
     
-    // Build maps for both job_id and job_family_id matching
     const keyJobIds = keyJobsData.map(j => j.id);
-    const keyJobFamilyIds = keyJobsData.filter(j => j.job_family_id).map(j => j.job_family_id!);
     const jobById = new Map(keyJobsData.map(j => [j.id, { name: j.name, code: j.code }]));
-    const jobByFamilyId = new Map(keyJobsData.filter(j => j.job_family_id).map(j => [j.job_family_id!, { name: j.name, code: j.code }]));
     
-    // Get positions linked via job_id OR job_family_id
-    let positionsData: any[] = [];
-    
-    // First try job_id match
-    if (keyJobIds.length > 0) {
-      const { data: jobIdPositions } = await (supabase
-        .from('positions') as any)
-        .select('id, title, code, job_id, job_family_id, department_id, departments!inner(company_id)')
-        .in('job_id', keyJobIds)
-        .is('end_date', null)
-        .eq('departments.company_id', companyId);
-      
-      if (jobIdPositions) positionsData = [...jobIdPositions];
-    }
-    
-    // Then try job_family_id match (if positions aren't linked via job_id)
-    if (keyJobFamilyIds.length > 0) {
-      const { data: familyPositions } = await (supabase
-        .from('positions') as any)
-        .select('id, title, code, job_id, job_family_id, department_id, departments!inner(company_id)')
-        .in('job_family_id', keyJobFamilyIds)
-        .is('end_date', null)
-        .eq('departments.company_id', companyId);
-      
-      if (familyPositions) {
-        // Merge without duplicates
-        const existingIds = new Set(positionsData.map(p => p.id));
-        for (const pos of familyPositions) {
-          if (!existingIds.has(pos.id)) {
-            positionsData.push(pos);
-          }
-        }
-      }
-    }
-    
-    // Sort by title
-    positionsData.sort((a, b) => a.title.localeCompare(b.title));
+    // Get positions linked to key jobs via job_id
+    const { data: positionsData } = await (supabase
+      .from('positions') as any)
+      .select('id, title, code, job_id, department_id, departments!inner(company_id)')
+      .in('job_id', keyJobIds)
+      .is('end_date', null)
+      .eq('departments.company_id', companyId)
+      .order('title');
     
     // Get risk assessments
     const riskAssessments = await fetchKeyPositionRisks();
@@ -156,32 +124,29 @@ export function KeyPositionsTab({ companyId }: KeyPositionsTabProps) {
     
     // Get current holder for each position
     const keyPositionsWithData: KeyPosition[] = [];
-    for (const pos of positionsData) {
-      const { data: holder } = await supabase
-        .from('employee_positions')
-        .select('profiles(id, full_name)')
-        .eq('position_id', pos.id)
-        .is('end_date', null)
-        .order('start_date', { ascending: false })
-        .limit(1)
-        .maybeSingle();
-      
-      // Match job by job_id first, then by job_family_id
-      const matchedJob = pos.job_id 
-        ? jobById.get(pos.job_id) 
-        : pos.job_family_id 
-          ? jobByFamilyId.get(pos.job_family_id)
-          : null;
-      
-      keyPositionsWithData.push({
-        id: pos.id,
-        title: pos.title,
-        code: pos.code,
-        job_id: pos.job_id || pos.job_family_id || '',
-        job: matchedJob || null,
-        current_holder: holder?.profiles || null,
-        riskAssessment: riskMap.get(pos.id) || null,
-      });
+    if (positionsData) {
+      for (const pos of positionsData) {
+        const { data: holder } = await supabase
+          .from('employee_positions')
+          .select('profiles(id, full_name)')
+          .eq('position_id', pos.id)
+          .is('end_date', null)
+          .order('start_date', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        
+        const matchedJob = pos.job_id ? jobById.get(pos.job_id) : null;
+        
+        keyPositionsWithData.push({
+          id: pos.id,
+          title: pos.title,
+          code: pos.code,
+          job_id: pos.job_id || '',
+          job: matchedJob || null,
+          current_holder: holder?.profiles || null,
+          riskAssessment: riskMap.get(pos.id) || null,
+        });
+      }
     }
     
     setKeyPositions(keyPositionsWithData);
@@ -191,10 +156,10 @@ export function KeyPositionsTab({ companyId }: KeyPositionsTabProps) {
   const loadAvailablePositions = async () => {
     setLoadingAvailable(true);
     
-    // Get all jobs that are marked as key positions (with job_family_id)
+    // Get all jobs that are marked as key positions
     const { data: keyJobsData } = await supabase
       .from('jobs')
-      .select('id, name, code, job_family_id')
+      .select('id, name, code')
       .eq('company_id', companyId)
       .eq('is_key_position', true)
       .eq('is_active', true);
@@ -207,66 +172,37 @@ export function KeyPositionsTab({ companyId }: KeyPositionsTabProps) {
       return;
     }
     
-    // Get key job IDs and job_family_ids
     const keyJobIds = keyJobsData.map(j => j.id);
-    const keyJobFamilyIds = keyJobsData.filter(j => j.job_family_id).map(j => j.job_family_id!);
     
-    // Get positions linked via job_id OR job_family_id
-    let positionsData: any[] = [];
-    
-    // First try job_id match
-    if (keyJobIds.length > 0) {
-      const { data: jobIdPositions } = await (supabase
-        .from('positions') as any)
-        .select('id, title, code, job_id, job_family_id, department_id, departments!inner(company_id)')
-        .in('job_id', keyJobIds)
-        .is('end_date', null)
-        .eq('departments.company_id', companyId);
-      
-      if (jobIdPositions) positionsData = [...jobIdPositions];
-    }
-    
-    // Then try job_family_id match
-    if (keyJobFamilyIds.length > 0) {
-      const { data: familyPositions } = await (supabase
-        .from('positions') as any)
-        .select('id, title, code, job_id, job_family_id, department_id, departments!inner(company_id)')
-        .in('job_family_id', keyJobFamilyIds)
-        .is('end_date', null)
-        .eq('departments.company_id', companyId);
-      
-      if (familyPositions) {
-        // Merge without duplicates
-        const existingIds = new Set(positionsData.map(p => p.id));
-        for (const pos of familyPositions) {
-          if (!existingIds.has(pos.id)) {
-            positionsData.push(pos);
-          }
-        }
-      }
-    }
-    
-    // Sort by title
-    positionsData.sort((a, b) => a.title.localeCompare(b.title));
+    // Get positions linked to key jobs via job_id
+    const { data: positionsData } = await (supabase
+      .from('positions') as any)
+      .select('id, title, code, job_id, department_id, departments!inner(company_id)')
+      .in('job_id', keyJobIds)
+      .is('end_date', null)
+      .eq('departments.company_id', companyId)
+      .order('title');
     
     const positions: { id: string; title: string; code: string; matchingJobId: string; current_holder?: { id: string; full_name: string } | null }[] = [];
-    for (const pos of positionsData) {
-      const { data: holder } = await supabase
-        .from('employee_positions')
-        .select('profiles(id, full_name)')
-        .eq('position_id', pos.id)
-        .is('end_date', null)
-        .order('start_date', { ascending: false })
-        .limit(1)
-        .maybeSingle();
-      
-      positions.push({
-        id: pos.id,
-        title: pos.title,
-        code: pos.code,
-        matchingJobId: pos.job_id || pos.job_family_id || '',
-        current_holder: holder?.profiles || null,
-      });
+    if (positionsData) {
+      for (const pos of positionsData) {
+        const { data: holder } = await supabase
+          .from('employee_positions')
+          .select('profiles(id, full_name)')
+          .eq('position_id', pos.id)
+          .is('end_date', null)
+          .order('start_date', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        
+        positions.push({
+          id: pos.id,
+          title: pos.title,
+          code: pos.code,
+          matchingJobId: pos.job_id || '',
+          current_holder: holder?.profiles || null,
+        });
+      }
     }
     setAvailablePositions(positions);
     setLoadingAvailable(false);
@@ -328,10 +264,10 @@ export function KeyPositionsTab({ companyId }: KeyPositionsTabProps) {
         .eq('id', position.riskAssessment.id);
     }
 
-    // Remove the position from the key positions list by unlinking it from both job_id and job_family_id
+    // Remove the position from the key positions list by unlinking it from job_id
     const { error } = await (supabase
       .from('positions') as any)
-      .update({ job_id: null, job_family_id: null })
+      .update({ job_id: null })
       .eq('id', position.id);
 
     if (error) {

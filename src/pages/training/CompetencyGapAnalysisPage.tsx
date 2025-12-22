@@ -255,7 +255,7 @@ export default function CompetencyGapAnalysisPage() {
       // First get positions in the department
       const { data: posData, error: posError } = await supabase
         .from("positions")
-        .select("id, title, department_id, job_family_id")
+        .select("id, title, department_id, job_id")
         .eq("department_id", departmentId)
         .eq("is_active", true);
 
@@ -300,7 +300,7 @@ export default function CompetencyGapAnalysisPage() {
             position: {
               id: ep.position_id,
               title: pos?.title || "Unknown",
-              job_id: null, // Will need job linking via job_family
+              job_id: pos?.job_id || null,
               department_id: pos?.department_id || null,
             },
           };
