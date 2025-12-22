@@ -190,38 +190,39 @@ export const ReminderRulesManager = forwardRef<ReminderRulesManagerRef, Reminder
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-medium">Automatic Reminder Rules</h3>
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button variant="outline" size="icon" className="mr-2">
-                <HelpCircle className="h-4 w-4" />
+        <div className="flex items-center gap-2">
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="outline" size="icon">
+                  <HelpCircle className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" className="max-w-sm p-4">
+                <div className="space-y-2">
+                  <p className="font-semibold flex items-center gap-2">
+                    <Settings className="h-4 w-4 text-primary" />
+                    When to use Reminder Rules
+                  </p>
+                  <ul className="text-sm space-y-1 list-disc pl-4">
+                    <li>Set up <strong>automated reminders</strong> that trigger for ALL employees</li>
+                    <li>Perfect for recurring events like contract renewals, certifications, or probation reviews</li>
+                    <li>Reminders are sent automatically based on event dates in the system</li>
+                  </ul>
+                  <p className="text-xs text-muted-foreground mt-2 pt-2 border-t">
+                    Example: "Send reminder 30 days before passport expiry" will auto-notify every employee approaching expiry.
+                  </p>
+                </div>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+          <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+            <DialogTrigger asChild>
+              <Button onClick={() => handleOpenDialog()} className="bg-primary hover:bg-primary/90">
+                <Zap className="h-4 w-4 mr-2" />
+                Add Rule
               </Button>
-            </TooltipTrigger>
-            <TooltipContent side="bottom" className="max-w-sm p-4">
-              <div className="space-y-2">
-                <p className="font-semibold flex items-center gap-2">
-                  <Settings className="h-4 w-4 text-primary" />
-                  When to use Reminder Rules
-                </p>
-                <ul className="text-sm space-y-1 list-disc pl-4">
-                  <li>Set up <strong>automated reminders</strong> that trigger for ALL employees</li>
-                  <li>Perfect for recurring events like contract renewals, certifications, or probation reviews</li>
-                  <li>Reminders are sent automatically based on event dates in the system</li>
-                </ul>
-                <p className="text-xs text-muted-foreground mt-2 pt-2 border-t">
-                  Example: "Send reminder 30 days before passport expiry" will auto-notify every employee approaching expiry.
-                </p>
-              </div>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-          <DialogTrigger asChild>
-            <Button onClick={() => handleOpenDialog()} className="bg-primary hover:bg-primary/90">
-              <Zap className="h-4 w-4 mr-2" />
-              Add Rule
-            </Button>
-          </DialogTrigger>
+            </DialogTrigger>
           <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto border-t-4 border-t-primary">
             <DialogHeader className="pb-4 border-b">
               <div className="flex items-center gap-2">
@@ -423,6 +424,7 @@ export const ReminderRulesManager = forwardRef<ReminderRulesManagerRef, Reminder
             </DialogFooter>
           </DialogContent>
         </Dialog>
+        </div>
       </div>
 
       {rules.length === 0 ? (
