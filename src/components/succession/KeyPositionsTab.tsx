@@ -312,14 +312,14 @@ export function KeyPositionsTab({ companyId }: KeyPositionsTabProps) {
             <div className="space-y-2">
               <Label>Current Incumbent</Label>
               <Select
-                value={formData.current_incumbent_id}
-                onValueChange={(value) => setFormData({ ...formData, current_incumbent_id: value })}
+                value={formData.current_incumbent_id || 'none'}
+                onValueChange={(value) => setFormData({ ...formData, current_incumbent_id: value === 'none' ? '' : value })}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Select employee (optional)" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">None / Vacant</SelectItem>
+                  <SelectItem value="none">None / Vacant</SelectItem>
                   {employees.map((emp) => (
                     <SelectItem key={emp.id} value={emp.id}>
                       {emp.full_name}
