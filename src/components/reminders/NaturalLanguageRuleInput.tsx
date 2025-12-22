@@ -379,13 +379,45 @@ export function NaturalLanguageRuleInput({ companyId, onRuleCreated }: NaturalLa
 
               {/* Message template */}
               <div className="space-y-2">
-                <Label>Message Template (Optional)</Label>
+                <Label>Message Template</Label>
+                <div className="flex flex-wrap gap-1 mb-2">
+                  <span className="text-xs text-muted-foreground mr-2">Insert placeholder:</span>
+                  {[
+                    { key: '{employee_name}', label: 'Employee Name' },
+                    { key: '{event_date}', label: 'Event Date' },
+                    { key: '{days_until}', label: 'Days Until' },
+                    { key: '{event_type}', label: 'Event Type' },
+                    { key: '{manager_name}', label: 'Manager Name' },
+                    { key: '{department}', label: 'Department' },
+                  ].map((placeholder) => (
+                    <button
+                      key={placeholder.key}
+                      type="button"
+                      onClick={() => {
+                        const currentTemplate = editedRule.messageTemplate || '';
+                        setEditedRule({ 
+                          ...editedRule, 
+                          messageTemplate: currentTemplate + placeholder.key 
+                        });
+                      }}
+                      className="text-xs px-2 py-0.5 rounded bg-primary/10 hover:bg-primary/20 text-primary border border-primary/20 transition-colors"
+                    >
+                      {placeholder.label}
+                    </button>
+                  ))}
+                </div>
                 <Textarea
                   value={editedRule.messageTemplate || ''}
                   onChange={(e) => setEditedRule({ ...editedRule, messageTemplate: e.target.value })}
-                  placeholder="Use {employee_name}, {event_date}, {days_until} as placeholders"
-                  rows={2}
+                  placeholder="AI will generate a message template, or write your own..."
+                  rows={3}
+                  className="font-mono text-sm"
                 />
+                {!editedRule.messageTemplate && (
+                  <p className="text-xs text-amber-600">
+                    No template generated. Click placeholder buttons above or type your own message.
+                  </p>
+                )}
               </div>
             </div>
           )}
