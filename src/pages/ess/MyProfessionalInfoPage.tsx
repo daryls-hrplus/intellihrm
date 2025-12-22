@@ -6,7 +6,7 @@ import { useGranularPermissions } from "@/hooks/useGranularPermissions";
 import { EmployeeCredentialsMembershipsTab } from "@/components/employee/professional/EmployeeCredentialsMembershipsTab";
 import { EmployeeAgreementsSignaturesTab } from "@/components/employee/professional/EmployeeAgreementsSignaturesTab";
 import { EmployeeProfessionalHistoryTab } from "@/components/employee/professional/EmployeeProfessionalHistoryTab";
-import { EmployeeComplianceLegalTab } from "@/components/employee/professional/EmployeeComplianceLegalTab";
+import { ComplianceStatusCard } from "@/components/ess/ComplianceStatusCard";
 
 export default function MyProfessionalInfoPage() {
   const { user } = useAuth();
@@ -107,8 +107,7 @@ export default function MyProfessionalInfoPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                {/* Status-only view for employees - no sensitive details */}
-                <EmployeeComplianceLegalTab employeeId={user.id} />
+                <ComplianceStatusCard employeeId={user.id} />
               </CardContent>
             </Card>
           </TabsContent>
