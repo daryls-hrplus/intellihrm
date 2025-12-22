@@ -4,7 +4,7 @@ import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Users, Save, RefreshCw, Eye, Plus, Edit, Trash2 } from "lucide-react";
+import { Users, Save, RefreshCw, Check } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
@@ -23,9 +23,6 @@ interface RolePermission {
   role_id: string;
   module_permission_id: string;
   can_view: boolean;
-  can_create: boolean;
-  can_edit: boolean;
-  can_delete: boolean;
 }
 
 interface RoleModulePermissionsProps {
@@ -38,7 +35,7 @@ export function RoleModulePermissions({ roleId }: RoleModulePermissionsProps) {
   const [saving, setSaving] = useState(false);
   const [modulePermissions, setModulePermissions] = useState<ModulePermission[]>([]);
   const [rolePermissions, setRolePermissions] = useState<RolePermission[]>([]);
-  const [changes, setChanges] = useState<Record<string, Partial<RolePermission>>>({});
+  const [changes, setChanges] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     fetchData();
@@ -51,7 +48,8 @@ export function RoleModulePermissions({ roleId }: RoleModulePermissionsProps) {
           .from("module_permissions")
           .select("*")
           .eq("is_active", true)
-          .order("module_name"),
+          .order("module_name")
+          .order("display_order"),
         supabase
           .from("role_permissions")
           .select("*")
@@ -83,56 +81,68 @@ export function RoleModulePermissions({ roleId }: RoleModulePermissionsProps) {
     return acc;
   }, {} as Record<string, { module_name: string; module_code: string; items: ModulePermission[] }>);
 
-  const getPermission = (modulePermissionId: string) => {
-    const changed = changes[modulePermissionId];
+  const hasAccess = (modulePermissionId: string): boolean => {
+    if (changes[modulePermissionId] !== undefined) {
+      return changes[modulePermissionId];
+    }
     const existing = rolePermissions.find((rp) => rp.module_permission_id === modulePermissionId);
-    
-    return {
-      can_view: changed?.can_view ?? existing?.can_view ?? false,
-      can_create: changed?.can_create ?? existing?.can_create ?? false,
-      can_edit: changed?.can_edit ?? existing?.can_edit ?? false,
-      can_delete: changed?.can_delete ?? existing?.can_delete ?? false,
-    };
+    return existing?.can_view ?? false;
   };
 
-  const handleToggle = (
-    modulePermissionId: string,
-    field: "can_view" | "can_create" | "can_edit" | "can_delete",
-    value: boolean
-  ) => {
+  const handleToggle = (modulePermissionId: string, value: boolean) => {
     setChanges((prev) => ({
       ...prev,
-      [modulePermissionId]: {
-        ...prev[modulePermissionId],
-        [field]: value,
-      },
+      [modulePermissionId]: value,
     }));
+  };
+
+  // Toggle all cards within a module
+  const handleModuleToggle = (moduleCode: string, value: boolean) => {
+    const moduleItems = groupedModules[moduleCode]?.items || [];
+    const newChanges = { ...changes };
+    moduleItems.forEach((item) => {
+      newChanges[item.id] = value;
+    });
+    setChanges(newChanges);
+  };
+
+  // Check if all cards in a module have access
+  const isModuleFullyEnabled = (moduleCode: string): boolean => {
+    const moduleItems = groupedModules[moduleCode]?.items || [];
+    return moduleItems.every((item) => hasAccess(item.id));
+  };
+
+  // Check if some but not all cards have access
+  const isModulePartiallyEnabled = (moduleCode: string): boolean => {
+    const moduleItems = groupedModules[moduleCode]?.items || [];
+    const enabledCount = moduleItems.filter((item) => hasAccess(item.id)).length;
+    return enabledCount > 0 && enabledCount < moduleItems.length;
   };
 
   const handleSave = async () => {
     setSaving(true);
     try {
-      for (const [modulePermissionId, change] of Object.entries(changes)) {
+      for (const [modulePermissionId, hasAccessValue] of Object.entries(changes)) {
         const existing = rolePermissions.find((rp) => rp.module_permission_id === modulePermissionId);
         
         if (existing) {
           await supabase
             .from("role_permissions")
             .update({
-              can_view: change.can_view ?? existing.can_view,
-              can_create: change.can_create ?? existing.can_create,
-              can_edit: change.can_edit ?? existing.can_edit,
-              can_delete: change.can_delete ?? existing.can_delete,
+              can_view: hasAccessValue,
+              can_create: hasAccessValue,
+              can_edit: hasAccessValue,
+              can_delete: hasAccessValue,
             })
             .eq("id", existing.id);
-        } else {
+        } else if (hasAccessValue) {
           await supabase.from("role_permissions").insert({
             role_id: roleId,
             module_permission_id: modulePermissionId,
-            can_view: change.can_view ?? false,
-            can_create: change.can_create ?? false,
-            can_edit: change.can_edit ?? false,
-            can_delete: change.can_delete ?? false,
+            can_view: true,
+            can_create: true,
+            can_edit: true,
+            can_delete: true,
           });
         }
       }
@@ -173,10 +183,10 @@ export function RoleModulePermissions({ roleId }: RoleModulePermissionsProps) {
         <div>
           <CardTitle className="flex items-center gap-2">
             <Users className="h-5 w-5" />
-            Module & Tab Permissions
+            Module & Card Access
           </CardTitle>
           <CardDescription>
-            Configure CRUD permissions for each module and tab
+            Define which modules and cards this role can access
           </CardDescription>
         </div>
         {hasChanges && (
@@ -188,72 +198,76 @@ export function RoleModulePermissions({ roleId }: RoleModulePermissionsProps) {
       </CardHeader>
       <CardContent>
         <Accordion type="multiple" className="space-y-2">
-          {Object.entries(groupedModules).map(([moduleCode, group]) => (
-            <AccordionItem key={moduleCode} value={moduleCode} className="border rounded-lg px-4">
-              <AccordionTrigger className="hover:no-underline">
-                <div className="flex items-center gap-2">
-                  <span className="font-medium">{group.module_name}</span>
-                  <Badge variant="outline" className="text-xs">
-                    {group.items.length} items
-                  </Badge>
-                </div>
-              </AccordionTrigger>
-              <AccordionContent>
-                <div className="space-y-3 pt-2">
-                  {group.items.map((item) => {
-                    const perm = getPermission(item.id);
-                    const isModified = changes[item.id] !== undefined;
-                    
-                    return (
-                      <div
-                        key={item.id}
-                        className="flex items-center justify-between p-3 bg-muted/30 rounded-lg"
+          {Object.entries(groupedModules).map(([moduleCode, group]) => {
+            const isFullyEnabled = isModuleFullyEnabled(moduleCode);
+            const isPartiallyEnabled = isModulePartiallyEnabled(moduleCode);
+            const enabledCount = group.items.filter((item) => hasAccess(item.id)).length;
+
+            return (
+              <AccordionItem key={moduleCode} value={moduleCode} className="border rounded-lg px-4">
+                <AccordionTrigger className="hover:no-underline">
+                  <div className="flex items-center justify-between w-full pr-4">
+                    <div className="flex items-center gap-3">
+                      <span className="font-medium">{group.module_name}</span>
+                      <Badge 
+                        variant={isFullyEnabled ? "default" : isPartiallyEnabled ? "secondary" : "outline"}
+                        className="text-xs"
                       >
-                        <div className="flex items-center gap-2">
-                          <span className="text-sm">
-                            {item.tab_name || item.module_name}
-                          </span>
-                          {isModified && (
-                            <Badge variant="outline" className="text-xs">Modified</Badge>
-                          )}
+                        {enabledCount}/{group.items.length} cards
+                      </Badge>
+                    </div>
+                    <div 
+                      className="flex items-center gap-2"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <span className="text-xs text-muted-foreground">
+                        {isFullyEnabled ? "All" : isPartiallyEnabled ? "Partial" : "None"}
+                      </span>
+                      <Switch
+                        checked={isFullyEnabled}
+                        onCheckedChange={(v) => handleModuleToggle(moduleCode, v)}
+                      />
+                    </div>
+                  </div>
+                </AccordionTrigger>
+                <AccordionContent>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 pt-2">
+                    {group.items.map((item) => {
+                      const itemHasAccess = hasAccess(item.id);
+                      const isModified = changes[item.id] !== undefined;
+                      
+                      return (
+                        <div
+                          key={item.id}
+                          className={`flex items-center justify-between p-3 rounded-lg border transition-colors ${
+                            itemHasAccess 
+                              ? "bg-primary/5 border-primary/20" 
+                              : "bg-muted/30 border-transparent"
+                          }`}
+                        >
+                          <div className="flex items-center gap-2">
+                            {itemHasAccess && (
+                              <Check className="h-4 w-4 text-primary" />
+                            )}
+                            <span className={`text-sm ${itemHasAccess ? "font-medium" : ""}`}>
+                              {item.tab_name || item.module_name}
+                            </span>
+                            {isModified && (
+                              <Badge variant="outline" className="text-xs">Modified</Badge>
+                            )}
+                          </div>
+                          <Switch
+                            checked={itemHasAccess}
+                            onCheckedChange={(v) => handleToggle(item.id, v)}
+                          />
                         </div>
-                        <div className="flex items-center gap-4">
-                          <div className="flex items-center gap-1">
-                            <Eye className="h-3 w-3 text-muted-foreground" />
-                            <Switch
-                              checked={perm.can_view}
-                              onCheckedChange={(v) => handleToggle(item.id, "can_view", v)}
-                            />
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <Plus className="h-3 w-3 text-muted-foreground" />
-                            <Switch
-                              checked={perm.can_create}
-                              onCheckedChange={(v) => handleToggle(item.id, "can_create", v)}
-                            />
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <Edit className="h-3 w-3 text-muted-foreground" />
-                            <Switch
-                              checked={perm.can_edit}
-                              onCheckedChange={(v) => handleToggle(item.id, "can_edit", v)}
-                            />
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <Trash2 className="h-3 w-3 text-muted-foreground" />
-                            <Switch
-                              checked={perm.can_delete}
-                              onCheckedChange={(v) => handleToggle(item.id, "can_delete", v)}
-                            />
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </AccordionContent>
-            </AccordionItem>
-          ))}
+                      );
+                    })}
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+            );
+          })}
         </Accordion>
       </CardContent>
     </Card>
