@@ -297,17 +297,14 @@ export function EmployeeRemindersList({
             </SelectContent>
           </Select>
           <Select value={eventTypeFilter} onValueChange={setEventTypeFilter}>
-            <SelectTrigger className="w-[200px] bg-background">
+            <SelectTrigger className="w-[220px] bg-background">
               <SelectValue placeholder="Event Type" />
             </SelectTrigger>
-            <SelectContent className="bg-background border shadow-md z-50 max-h-[300px]">
+            <SelectContent className="bg-background border shadow-md z-50 max-h-[300px] min-w-[280px]">
               <SelectItem value="all">All Event Types</SelectItem>
               {filteredEventTypes.map((type) => (
                 <SelectItem key={type.id} value={type.id}>
-                  <span className="flex items-center gap-2">
-                    <span className="text-xs text-muted-foreground capitalize">[{type.category}]</span>
-                    {type.name}
-                  </span>
+                  {type.name}
                 </SelectItem>
               ))}
             </SelectContent>
