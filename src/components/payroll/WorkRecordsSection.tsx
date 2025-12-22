@@ -17,6 +17,13 @@ interface WorkRecordsSectionProps {
   companyId: string;
   employeeId: string;
   payPeriodId: string;
+  payGroupId?: string;
+}
+
+interface EmployeePosition {
+  id: string;
+  position_id: string;
+  position_title: string;
 }
 
 interface PayrollRule {
@@ -36,6 +43,7 @@ interface WorkRecord {
   overtime_hours: number;
   notes: string | null;
   payroll_rule_id: string | null;
+  position_id: string | null;
   payroll_rules?: PayrollRule;
   position?: { title: string } | null;
   work_periods?: WorkPeriod[];
@@ -53,9 +61,10 @@ interface WorkPeriod {
   payroll_rules?: PayrollRule;
 }
 
-export function WorkRecordsSection({ companyId, employeeId, payPeriodId }: WorkRecordsSectionProps) {
+export function WorkRecordsSection({ companyId, employeeId, payPeriodId, payGroupId }: WorkRecordsSectionProps) {
   const [workRecords, setWorkRecords] = useState<WorkRecord[]>([]);
   const [payrollRules, setPayrollRules] = useState<PayrollRule[]>([]);
+  const [employeePositions, setEmployeePositions] = useState<EmployeePosition[]>([]);
   const [expandedRecords, setExpandedRecords] = useState<Set<string>>(new Set());
   const [isAddingRecord, setIsAddingRecord] = useState(false);
   const [isAddingPeriod, setIsAddingPeriod] = useState<string | null>(null);
@@ -66,6 +75,7 @@ export function WorkRecordsSection({ companyId, employeeId, payPeriodId }: WorkR
     day_type: 'work_day',
     is_scheduled_day: true,
     payroll_rule_id: '',
+    position_id: '',
     notes: ''
   });
 
@@ -81,7 +91,8 @@ export function WorkRecordsSection({ companyId, employeeId, payPeriodId }: WorkR
   useEffect(() => {
     loadWorkRecords();
     loadPayrollRules();
-  }, [employeeId, payPeriodId]);
+    loadEmployeePositions();
+  }, [employeeId, payPeriodId, payGroupId]);
 
   const loadPayrollRules = async () => {
     const { data, error } = await supabase
@@ -93,6 +104,32 @@ export function WorkRecordsSection({ companyId, employeeId, payPeriodId }: WorkR
     
     if (!error && data) {
       setPayrollRules(data);
+    }
+  };
+
+  const loadEmployeePositions = async () => {
+    if (!payGroupId) {
+      setEmployeePositions([]);
+      return;
+    }
+
+    const { data, error } = await supabase
+      .from('employee_positions')
+      .select(`
+        id,
+        position_id,
+        positions (title)
+      `)
+      .eq('employee_id', employeeId)
+      .eq('pay_group_id', payGroupId)
+      .eq('is_active', true);
+
+    if (!error && data) {
+      setEmployeePositions(data.map((pos: any) => ({
+        id: pos.id,
+        position_id: pos.position_id,
+        position_title: pos.positions?.title || 'N/A'
+      })));
     }
   };
 
@@ -136,12 +173,24 @@ export function WorkRecordsSection({ companyId, employeeId, payPeriodId }: WorkR
       return;
     }
 
+    // If there are multiple positions, require position selection
+    if (employeePositions.length > 1 && !newRecord.position_id) {
+      toast.error("Please select a position");
+      return;
+    }
+
+    // Auto-select if only one position
+    const positionId = employeePositions.length === 1 
+      ? employeePositions[0].position_id 
+      : (newRecord.position_id || null);
+
     const { error } = await supabase
       .from('employee_work_records')
       .insert({
         company_id: companyId,
         employee_id: employeeId,
         pay_period_id: payPeriodId,
+        position_id: positionId,
         work_date: newRecord.work_date,
         day_type: newRecord.day_type,
         is_scheduled_day: newRecord.is_scheduled_day,
@@ -156,7 +205,7 @@ export function WorkRecordsSection({ companyId, employeeId, payPeriodId }: WorkR
 
     toast.success("Work record added");
     setIsAddingRecord(false);
-    setNewRecord({ work_date: '', day_type: 'work_day', is_scheduled_day: true, payroll_rule_id: '', notes: '' });
+    setNewRecord({ work_date: '', day_type: 'work_day', is_scheduled_day: true, payroll_rule_id: '', position_id: '', notes: '' });
     loadWorkRecords();
   };
 
@@ -263,6 +312,27 @@ export function WorkRecordsSection({ companyId, employeeId, payPeriodId }: WorkR
               <DialogTitle>Add Work Record</DialogTitle>
             </DialogHeader>
             <div className="space-y-4">
+              {/* Position selector - show only if multiple positions */}
+              {employeePositions.length > 1 && (
+                <div className="space-y-2">
+                  <Label>Position *</Label>
+                  <Select 
+                    value={newRecord.position_id} 
+                    onValueChange={(v) => setNewRecord({ ...newRecord, position_id: v })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select position" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {employeePositions.map((pos) => (
+                        <SelectItem key={pos.position_id} value={pos.position_id}>
+                          {pos.position_title}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
               <div className="space-y-2">
                 <Label>Date</Label>
                 <Input
@@ -362,6 +432,11 @@ export function WorkRecordsSection({ companyId, employeeId, payPeriodId }: WorkR
                         <span className="font-medium">
                           {formatDateForDisplay(record.work_date, 'EEE, MMM d, yyyy')}
                         </span>
+                        {record.position && (
+                          <Badge variant="secondary" className="text-xs">
+                            {record.position.title}
+                          </Badge>
+                        )}
                         <Badge className={getDayTypeBadge(record.day_type)}>
                           {record.day_type.replace('_', ' ')}
                         </Badge>
