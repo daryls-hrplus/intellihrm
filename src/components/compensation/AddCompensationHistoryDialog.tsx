@@ -17,9 +17,25 @@ interface AddCompensationHistoryDialogProps {
   onSuccess: () => void;
 }
 
+interface Department {
+  id: string;
+  name: string;
+}
+
 interface Employee {
   id: string;
   full_name: string;
+}
+
+interface EmployeePosition {
+  id: string;
+  position_id: string;
+  is_primary: boolean;
+  compensation_amount: number | null;
+  position: {
+    id: string;
+    title: string;
+  };
 }
 
 export function AddCompensationHistoryDialog({
@@ -31,9 +47,13 @@ export function AddCompensationHistoryDialog({
   const { t } = useTranslation();
   const { user } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [departments, setDepartments] = useState<Department[]>([]);
   const [employees, setEmployees] = useState<Employee[]>([]);
+  const [positions, setPositions] = useState<EmployeePosition[]>([]);
+  const [selectedDepartmentId, setSelectedDepartmentId] = useState<string>("");
   const [formData, setFormData] = useState({
     employee_id: "",
+    position_id: "",
     change_type: "",
     effective_date: "",
     previous_salary: "",
@@ -45,9 +65,39 @@ export function AddCompensationHistoryDialog({
 
   useEffect(() => {
     if (open && companyId) {
-      loadEmployees();
+      loadDepartments();
+      setSelectedDepartmentId("");
+      setEmployees([]);
+      setPositions([]);
+      resetForm();
     }
   }, [open, companyId]);
+
+  useEffect(() => {
+    if (selectedDepartmentId) {
+      loadEmployees();
+      setFormData(prev => ({ ...prev, employee_id: "", position_id: "" }));
+      setPositions([]);
+    }
+  }, [selectedDepartmentId]);
+
+  useEffect(() => {
+    if (formData.employee_id) {
+      loadPositions();
+      setFormData(prev => ({ ...prev, position_id: "" }));
+    }
+  }, [formData.employee_id]);
+
+  const loadDepartments = async () => {
+    // @ts-ignore - Supabase type instantiation issue
+    const { data, error } = await supabase
+      .from("departments")
+      .select("id, name")
+      .eq("company_id", companyId)
+      .eq("is_active", true)
+      .order("name");
+    if (data && !error) setDepartments(data as Department[]);
+  };
 
   const loadEmployees = async () => {
     // @ts-ignore - Supabase type instantiation issue
@@ -55,13 +105,59 @@ export function AddCompensationHistoryDialog({
       .from("profiles")
       .select("id, full_name")
       .eq("company_id", companyId)
-      .eq("status", "active")
+      .eq("department_id", selectedDepartmentId)
+      .eq("is_active", true)
       .order("full_name");
     if (data && !error) setEmployees(data as Employee[]);
   };
 
+  const loadPositions = async () => {
+    // @ts-ignore - Supabase type instantiation issue
+    const { data, error } = await supabase
+      .from("employee_positions")
+      .select(`
+        id,
+        position_id,
+        is_primary,
+        compensation_amount,
+        position:positions(id, title)
+      `)
+      .eq("employee_id", formData.employee_id)
+      .eq("is_active", true);
+    
+    if (data && !error) {
+      const mappedPositions = data.map((ep: any) => ({
+        id: ep.id,
+        position_id: ep.position_id,
+        is_primary: ep.is_primary,
+        compensation_amount: ep.compensation_amount,
+        position: ep.position,
+      }));
+      setPositions(mappedPositions);
+      
+      // Auto-fill previous salary if position is selected
+      if (mappedPositions.length === 1) {
+        const singlePosition = mappedPositions[0];
+        setFormData(prev => ({
+          ...prev,
+          position_id: singlePosition.position_id,
+          previous_salary: singlePosition.compensation_amount?.toString() || "",
+        }));
+      }
+    }
+  };
+
+  const handlePositionChange = (positionId: string) => {
+    const selectedPosition = positions.find(p => p.position_id === positionId);
+    setFormData(prev => ({
+      ...prev,
+      position_id: positionId,
+      previous_salary: selectedPosition?.compensation_amount?.toString() || "",
+    }));
+  };
+
   const handleSubmit = async () => {
-    if (!formData.employee_id || !formData.change_type || !formData.effective_date || !formData.new_salary) {
+    if (!formData.employee_id || !formData.change_type || !formData.effective_date || !formData.new_salary || !formData.position_id) {
       toast.error(t("common.fillRequiredFields"));
       return;
     }
@@ -79,9 +175,11 @@ export function AddCompensationHistoryDialog({
         changePercentage = parseFloat(((changeAmount / previousSalary) * 100).toFixed(2));
       }
 
+      // @ts-ignore - Supabase type instantiation issue
       const { error } = await supabase.from("compensation_history").insert({
         company_id: companyId,
         employee_id: formData.employee_id,
+        position_id: formData.position_id,
         change_type: formData.change_type,
         effective_date: formData.effective_date,
         previous_salary: previousSalary,
@@ -110,6 +208,7 @@ export function AddCompensationHistoryDialog({
   const resetForm = () => {
     setFormData({
       employee_id: "",
+      position_id: "",
       change_type: "",
       effective_date: "",
       previous_salary: "",
@@ -126,20 +225,60 @@ export function AddCompensationHistoryDialog({
         <DialogHeader>
           <DialogTitle>{t("compensation.history.addRecord")}</DialogTitle>
         </DialogHeader>
-        <div className="grid gap-4 py-4">
+        <div className="grid gap-4 py-4 max-h-[70vh] overflow-y-auto">
+          <div className="space-y-2">
+            <Label>{t("common.department")} *</Label>
+            <Select
+              value={selectedDepartmentId}
+              onValueChange={setSelectedDepartmentId}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder={t("common.selectDepartment")} />
+              </SelectTrigger>
+              <SelectContent>
+                {departments.map((dept) => (
+                  <SelectItem key={dept.id} value={dept.id}>
+                    {dept.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
           <div className="space-y-2">
             <Label htmlFor="employee">{t("compensation.history.employee")} *</Label>
             <Select
               value={formData.employee_id}
               onValueChange={(value) => setFormData({ ...formData, employee_id: value })}
+              disabled={!selectedDepartmentId}
             >
               <SelectTrigger>
-                <SelectValue placeholder={t("common.selectEmployee")} />
+                <SelectValue placeholder={selectedDepartmentId ? t("common.selectEmployee") : t("common.selectDepartmentFirst")} />
               </SelectTrigger>
               <SelectContent>
                 {employees.map((emp) => (
                   <SelectItem key={emp.id} value={emp.id}>
                     {emp.full_name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label>{t("common.position")} *</Label>
+            <Select
+              value={formData.position_id}
+              onValueChange={handlePositionChange}
+              disabled={!formData.employee_id}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder={formData.employee_id ? t("common.selectPosition") : t("common.selectEmployeeFirst")} />
+              </SelectTrigger>
+              <SelectContent>
+                {positions.map((pos) => (
+                  <SelectItem key={pos.position_id} value={pos.position_id}>
+                    {pos.position?.title} {pos.is_primary && "(Primary)"}
                   </SelectItem>
                 ))}
               </SelectContent>
