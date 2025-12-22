@@ -56,13 +56,15 @@ export function KeyPositionsTab({ companyId }: KeyPositionsTabProps) {
   } = useSuccession(companyId);
 
   const [keyPositions, setKeyPositions] = useState<KeyPosition[]>([]);
-  const [availablePositions, setAvailablePositions] = useState<KeyPosition[]>([]);
+  const [availablePositions, setAvailablePositions] = useState<{ id: string; title: string; code: string; current_holder?: { id: string; full_name: string } | null }[]>([]);
+  const [keyJobs, setKeyJobs] = useState<{ id: string; name: string; code: string }[]>([]);
   const [loadingAvailable, setLoadingAvailable] = useState(false);
   const [loadingKeyPositions, setLoadingKeyPositions] = useState(true);
   const [employees, setEmployees] = useState<{ id: string; full_name: string }[]>([]);
   const [showDialog, setShowDialog] = useState(false);
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [selectedPositionId, setSelectedPositionId] = useState<string>('');
+  const [selectedJobId, setSelectedJobId] = useState<string>('');
   const [searchTerm, setSearchTerm] = useState('');
   const [editingPosition, setEditingPosition] = useState<KeyPosition | null>(null);
   const [formData, setFormData] = useState({
@@ -154,34 +156,33 @@ export function KeyPositionsTab({ companyId }: KeyPositionsTabProps) {
   const loadAvailablePositions = async () => {
     setLoadingAvailable(true);
     
-    // First get all jobs that are marked as key positions
-    const { data: keyJobs } = await supabase
+    // Get all jobs that are marked as key positions
+    const { data: keyJobsData } = await supabase
       .from('jobs')
       .select('id, name, code')
       .eq('company_id', companyId)
       .eq('is_key_position', true)
       .eq('is_active', true);
     
-    if (!keyJobs || keyJobs.length === 0) {
+    setKeyJobs(keyJobsData || []);
+    
+    if (!keyJobsData || keyJobsData.length === 0) {
       setAvailablePositions([]);
       setLoadingAvailable(false);
       return;
     }
     
-    const keyJobIds = keyJobs.map(j => j.id);
-    const jobById = new Map(keyJobs.map(j => [j.id, { name: j.name, code: j.code }]));
-    
-    // Get positions that are directly linked to key jobs via job_id
-    const { data: positionsData } = await (supabase
-      .from('positions') as any)
-      .select('id, title, code, job_id, department_id, departments!inner(company_id)')
-      .in('job_id', keyJobIds)
+    // Get positions that don't have a job_id yet (available to be linked to key jobs)
+    const { data: positionsData } = await supabase
+      .from('positions')
+      .select('id, title, code, department_id, departments!inner(company_id)')
+      .is('job_id', null)
       .is('end_date', null)
       .eq('departments.company_id', companyId)
       .order('title');
     
     if (positionsData) {
-      const positions: KeyPosition[] = [];
+      const positions: { id: string; title: string; code: string; current_holder?: { id: string; full_name: string } | null }[] = [];
       for (const pos of positionsData) {
         const { data: holder } = await supabase
           .from('employee_positions')
@@ -192,13 +193,10 @@ export function KeyPositionsTab({ companyId }: KeyPositionsTabProps) {
           .limit(1)
           .maybeSingle();
         
-        const matchedJob = pos.job_id ? jobById.get(pos.job_id) : null;
         positions.push({
           id: pos.id,
           title: pos.title,
           code: pos.code,
-          job_id: pos.job_id || '',
-          job: matchedJob || null,
           current_holder: holder?.profiles || null,
         });
       }
@@ -289,23 +287,36 @@ export function KeyPositionsTab({ companyId }: KeyPositionsTabProps) {
   const openAddDialog = () => {
     setSearchTerm('');
     setSelectedPositionId('');
+    setSelectedJobId(keyJobs.length > 0 ? keyJobs[0].id : '');
     setShowAddDialog(true);
   };
 
-  const handleAddKeyPosition = () => {
-    if (!selectedPositionId) return;
-    const position = availablePositions.find(p => p.id === selectedPositionId);
-    if (position) {
-      setShowAddDialog(false);
-      openRiskDialog(position);
+  const handleAddKeyPosition = async () => {
+    if (!selectedPositionId || !selectedJobId) return;
+    
+    // Link the position to the selected key job
+    const { error } = await (supabase
+      .from('positions') as any)
+      .update({ job_id: selectedJobId })
+      .eq('id', selectedPositionId);
+
+    if (error) {
+      toast.error('Failed to add key position');
+      return;
     }
+
+    const position = availablePositions.find(p => p.id === selectedPositionId);
+    const job = keyJobs.find(j => j.id === selectedJobId);
+    
+    toast.success(`${position?.title} linked to ${job?.name}`);
+    setShowAddDialog(false);
+    loadData();
   };
 
   // Filter available positions based on search term
   const filteredAvailablePositions = availablePositions.filter(pos => 
     pos.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
     pos.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    pos.job?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     (pos.current_holder?.full_name || 'vacant').toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -639,12 +650,32 @@ export function KeyPositionsTab({ companyId }: KeyPositionsTabProps) {
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
+            {/* Select Key Job */}
+            <div className="space-y-2">
+              <Label>Link to Key Job</Label>
+              <Select value={selectedJobId} onValueChange={setSelectedJobId}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a key job" />
+                </SelectTrigger>
+                <SelectContent>
+                  {keyJobs.map((job) => (
+                    <SelectItem key={job.id} value={job.id}>
+                      {job.name} ({job.code})
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground">
+                Select the key job to link this position to
+              </p>
+            </div>
+
             <div className="space-y-2">
               <Label>Search Positions</Label>
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
-                  placeholder="Type to filter by position, job, or incumbent..."
+                  placeholder="Type to filter by position or incumbent..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-9"
@@ -652,21 +683,27 @@ export function KeyPositionsTab({ companyId }: KeyPositionsTabProps) {
               </div>
               {availablePositions.length > 0 && (
                 <p className="text-xs text-muted-foreground">
-                  Showing {filteredAvailablePositions.length} of {availablePositions.length} positions
+                  Showing {filteredAvailablePositions.length} of {availablePositions.length} positions without a job link
                 </p>
               )}
             </div>
 
-            <div className="border rounded-lg max-h-[400px] overflow-y-auto">
+            <div className="border rounded-lg max-h-[300px] overflow-y-auto">
               {loadingAvailable ? (
                 <div className="flex items-center justify-center py-12">
                   <Loader2 className="h-8 w-8 animate-spin text-primary" />
                 </div>
+              ) : keyJobs.length === 0 ? (
+                <div className="p-8 text-center text-muted-foreground">
+                  <Shield className="h-10 w-10 mx-auto mb-3 opacity-50" />
+                  <p>No key jobs defined</p>
+                  <p className="text-sm">Mark jobs as "Key Position" in Workforce &gt; Jobs first</p>
+                </div>
               ) : availablePositions.length === 0 ? (
                 <div className="p-8 text-center text-muted-foreground">
                   <Shield className="h-10 w-10 mx-auto mb-3 opacity-50" />
-                  <p>No key positions available</p>
-                  <p className="text-sm">Mark jobs as "Key Position" in Workforce &gt; Jobs first</p>
+                  <p>No unlinked positions available</p>
+                  <p className="text-sm">All positions are already linked to jobs</p>
                 </div>
               ) : filteredAvailablePositions.length === 0 ? (
                 <div className="p-8 text-center text-muted-foreground">
@@ -680,51 +717,38 @@ export function KeyPositionsTab({ companyId }: KeyPositionsTabProps) {
                     <TableRow>
                       <TableHead className="w-8"></TableHead>
                       <TableHead>Position</TableHead>
-                      <TableHead>Job</TableHead>
                       <TableHead>Incumbent</TableHead>
-                      <TableHead>Status</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {filteredAvailablePositions.map((pos) => {
-                      const hasRisk = keyPositions.find(kp => kp.id === pos.id)?.riskAssessment;
-                      return (
-                        <TableRow 
-                          key={pos.id} 
-                          className={`cursor-pointer hover:bg-muted/50 ${selectedPositionId === pos.id ? 'bg-primary/10' : ''}`}
-                          onClick={() => setSelectedPositionId(pos.id)}
-                        >
-                          <TableCell>
-                            <input 
-                              type="radio" 
-                              name="position" 
-                              checked={selectedPositionId === pos.id}
-                              onChange={() => setSelectedPositionId(pos.id)}
-                              className="h-4 w-4 accent-primary"
-                            />
-                          </TableCell>
-                          <TableCell>
-                            <div>
-                              <div className="font-medium">{pos.title}</div>
-                              <div className="text-sm text-muted-foreground">{pos.code}</div>
-                            </div>
-                          </TableCell>
-                          <TableCell className="text-sm">{pos.job?.name || '-'}</TableCell>
-                          <TableCell>
-                            {pos.current_holder?.full_name || (
-                              <span className="text-amber-600 italic">Vacant</span>
-                            )}
-                          </TableCell>
-                          <TableCell>
-                            {hasRisk ? (
-                              <Badge variant="outline" className="text-emerald-600 border-emerald-500">Assessed</Badge>
-                            ) : (
-                              <Badge variant="outline" className="text-amber-600 border-amber-500">Needs Assessment</Badge>
-                            )}
-                          </TableCell>
-                        </TableRow>
-                      );
-                    })}
+                    {filteredAvailablePositions.map((pos) => (
+                      <TableRow 
+                        key={pos.id} 
+                        className={`cursor-pointer hover:bg-muted/50 ${selectedPositionId === pos.id ? 'bg-primary/10' : ''}`}
+                        onClick={() => setSelectedPositionId(pos.id)}
+                      >
+                        <TableCell>
+                          <input 
+                            type="radio" 
+                            name="position" 
+                            checked={selectedPositionId === pos.id}
+                            onChange={() => setSelectedPositionId(pos.id)}
+                            className="h-4 w-4 accent-primary"
+                          />
+                        </TableCell>
+                        <TableCell>
+                          <div>
+                            <div className="font-medium">{pos.title}</div>
+                            <div className="text-sm text-muted-foreground">{pos.code}</div>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          {pos.current_holder?.full_name || (
+                            <span className="text-amber-600 italic">Vacant</span>
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    ))}
                   </TableBody>
                 </Table>
               )}
@@ -732,8 +756,8 @@ export function KeyPositionsTab({ companyId }: KeyPositionsTabProps) {
 
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={() => setShowAddDialog(false)}>Cancel</Button>
-              <Button onClick={handleAddKeyPosition} disabled={!selectedPositionId}>
-                Select &amp; Assess Risk
+              <Button onClick={handleAddKeyPosition} disabled={!selectedPositionId || !selectedJobId}>
+                Add Key Position
               </Button>
             </div>
           </div>
