@@ -60,7 +60,7 @@
   "mss": {
     "groups": {
       "teamManagement": "Gestion d'Équipe",
-      "approvalsWorkflow": "Approbations et Flux de Travail",
+      "approvalsWorkflow": "Approbations et Présence",
       "performanceDevelopment": "Performance et Développement",
       "teamResources": "Ressources de l'Équipe",
       "analyticsSupport": "Analytique et Support"
