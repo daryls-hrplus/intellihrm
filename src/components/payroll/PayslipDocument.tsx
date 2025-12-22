@@ -209,13 +209,13 @@ export function PayslipDocument({
                       )}
                     </span>
                     {item.is_prorated && item.effective_start && (
-                      <span className="text-[6px] text-muted-foreground leading-tight mt-0.5">
+                      <div className="text-[6px] text-muted-foreground leading-tight mt-0.5">
                         {new Date(item.effective_start).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                         {' - '}
                         {item.effective_end 
                           ? new Date(item.effective_end).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
                           : 'End'}
-                      </span>
+                      </div>
                     )}
                   </div>
                   <span className="font-medium">{formatCurrency(item.amount, payslip.currency)}</span>
