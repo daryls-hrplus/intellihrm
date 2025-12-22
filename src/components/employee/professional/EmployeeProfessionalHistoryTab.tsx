@@ -139,10 +139,10 @@ export function EmployeeProfessionalHistoryTab({ employeeId, isEssView = false }
     onSuccess: async (result) => {
       await logAction({
         action: "CREATE",
-        entity_type: "employee_work_history",
-        entity_id: result.id,
-        entity_name: `${result.job_title} at ${result.employer_name}`,
-        new_values: result,
+        entityType: "employee_work_history",
+        entityId: result.id,
+        entityName: `${result.job_title} at ${result.employer_name}`,
+        newValues: result,
       });
       queryClient.invalidateQueries({ queryKey: ["employee-work-history", employeeId] });
       toast.success("Work history added successfully");
@@ -187,10 +187,10 @@ export function EmployeeProfessionalHistoryTab({ employeeId, isEssView = false }
     onSuccess: async (result) => {
       await logAction({
         action: "UPDATE",
-        entity_type: "employee_work_history",
-        entity_id: result.id,
-        entity_name: `${result.job_title} at ${result.employer_name}`,
-        new_values: result,
+        entityType: "employee_work_history",
+        entityId: result.id,
+        entityName: `${result.job_title} at ${result.employer_name}`,
+        newValues: result,
       });
       queryClient.invalidateQueries({ queryKey: ["employee-work-history", employeeId] });
       toast.success("Work history updated successfully");
@@ -222,10 +222,10 @@ export function EmployeeProfessionalHistoryTab({ employeeId, isEssView = false }
     onSuccess: async (result) => {
       await logAction({
         action: "DELETE",
-        entity_type: "employee_work_history",
-        entity_id: result.id,
-        entity_name: `${result.job_title} at ${result.employer_name}`,
-        old_values: { archived: true },
+        entityType: "employee_work_history",
+        entityId: result.id,
+        entityName: `${result.job_title} at ${result.employer_name}`,
+        oldValues: { archived: true },
       });
       queryClient.invalidateQueries({ queryKey: ["employee-work-history", employeeId] });
       toast.success("Work history archived successfully");
