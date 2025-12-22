@@ -204,20 +204,17 @@ export function PayslipDocument({
                       {item.is_prorated && (
                         <span className="text-[5px] font-bold uppercase bg-amber-100 text-amber-700 px-0.5 rounded leading-tight">Pro</span>
                       )}
+                      {item.job_title && (
+                        <span className="text-[6px] text-muted-foreground ml-2">{getJobInitials(item.job_title)}</span>
+                      )}
                     </span>
-                    {(item.job_title || (item.is_prorated && item.effective_start)) && (
-                      <span className="text-[6px] text-muted-foreground leading-tight mt-1 ml-2">
-                        {item.job_title && getJobInitials(item.job_title)}
-                        {item.job_title && item.is_prorated && item.effective_start && ' · '}
-                        {item.is_prorated && item.effective_start && (
-                          <>
-                            {new Date(item.effective_start).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                            {' - '}
-                            {item.effective_end 
-                              ? new Date(item.effective_end).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
-                              : 'End'}
-                          </>
-                        )}
+                    {item.is_prorated && item.effective_start && (
+                      <span className="text-[6px] text-muted-foreground leading-tight mt-0.5">
+                        {new Date(item.effective_start).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                        {' - '}
+                        {item.effective_end 
+                          ? new Date(item.effective_end).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+                          : 'End'}
                       </span>
                     )}
                   </div>
