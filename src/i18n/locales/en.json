@@ -422,6 +422,80 @@
           "rejected": "Rejected",
           "completed": "Completed",
           "cancelled": "Cancelled"
+        },
+        "form": {
+          "fillDetails": "Fill in the transaction details below.",
+          "selectDate": "Select date",
+          "selectEmployee": "Select employee",
+          "selectPosition": "Select position",
+          "selectDepartment": "Select department",
+          "selectCompany": "Select company",
+          "selectReason": "Select reason",
+          "selectType": "Select type",
+          "notesPlaceholder": "Add any additional notes...",
+          "requiresWorkflow": "Requires Workflow Approval",
+          "createTransaction": "Create Transaction",
+          "updateTransaction": "Update Transaction",
+          "types": {
+            "HIRE": "New Hire",
+            "CONFIRMATION": "Confirmation",
+            "PROBATION_EXT": "Probation Extension",
+            "ACTING": "Acting Assignment",
+            "PROMOTION": "Promotion",
+            "TRANSFER": "Transfer",
+            "TERMINATION": "Termination"
+          },
+          "hire": {
+            "hireType": "Hire Type",
+            "employeeType": "Employee Type",
+            "contractType": "Contract Type",
+            "probationEndDate": "Probation End Date",
+            "selectHireType": "Select hire type",
+            "selectEmployeeType": "Select employee type",
+            "selectContractType": "Select contract type"
+          },
+          "confirmation": {
+            "confirmationDate": "Confirmation Date"
+          },
+          "probationExt": {
+            "originalEndDate": "Original End Date",
+            "newEndDate": "New End Date",
+            "extensionDays": "Extension Days",
+            "extensionReason": "Extension Reason"
+          },
+          "acting": {
+            "actingPosition": "Acting Position",
+            "startDate": "Start Date",
+            "endDate": "End Date",
+            "actingReason": "Acting Reason",
+            "actingAllowance": "Acting Allowance"
+          },
+          "promotion": {
+            "fromPosition": "From Position",
+            "toPosition": "To Position",
+            "promotionReason": "Promotion Reason",
+            "salaryAdjustment": "Salary Adjustment",
+            "adjustmentType": "Adjustment Type",
+            "percentage": "Percentage",
+            "fixedAmount": "Fixed Amount"
+          },
+          "transfer": {
+            "fromDepartment": "From Department",
+            "toDepartment": "To Department",
+            "fromCompany": "From Company",
+            "toCompany": "To Company",
+            "transferReason": "Transfer Reason"
+          },
+          "termination": {
+            "terminationType": "Termination Type",
+            "terminationReason": "Termination Reason",
+            "lastWorkingDate": "Last Working Date",
+            "exitInterviewCompleted": "Exit Interview Completed",
+            "voluntary": "Voluntary",
+            "involuntary": "Involuntary",
+            "retirement": "Retirement",
+            "endOfContract": "End of Contract"
+          }
         }
       },
       "forecasting": {

@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { CalendarIcon, Loader2 } from "lucide-react";
+import { useLanguage } from "@/hooks/useLanguage";
 import { formatDateForDisplay, toDateString, getTodayString } from "@/utils/dateUtils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -73,6 +74,7 @@ export function TransactionFormDialog({
   existingTransaction,
   onSuccess,
 }: TransactionFormDialogProps) {
+  const { t } = useLanguage();
   const { createTransaction, updateTransaction, fetchLookupValues, isLoading } =
     useEmployeeTransactions();
 
@@ -205,17 +207,10 @@ export function TransactionFormDialog({
   };
 
   const getTitle = () => {
-    const typeNames: Record<TransactionType, string> = {
-      HIRE: "New Hire",
-      CONFIRMATION: "Confirmation",
-      PROBATION_EXT: "Probation Extension",
-      ACTING: "Acting Assignment",
-      PROMOTION: "Promotion",
-      TRANSFER: "Transfer",
-      TERMINATION: "Termination",
-    };
-    const prefix = existingTransaction ? "Edit" : "Create";
-    return `${prefix} ${typeNames[transactionType!] || "Transaction"}`;
+    const typeKey = transactionType ? `workforce.modules.transactions.form.types.${transactionType}` : "";
+    const typeName = transactionType ? t(typeKey) : t("workforce.modules.transactions.title");
+    const prefix = existingTransaction ? t("common.edit") : t("common.create");
+    return `${prefix} ${typeName}`;
   };
 
   const renderTypeSpecificFields = () => {
@@ -225,13 +220,13 @@ export function TransactionFormDialog({
           <>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label>Hire Type</Label>
+                <Label>{t("workforce.modules.transactions.form.hire.hireType")}</Label>
                 <Select
                   value={formData.hire_type_id || ""}
                   onValueChange={(v) => setFormData({ ...formData, hire_type_id: v })}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select hire type" />
+                    <SelectValue placeholder={t("workforce.modules.transactions.form.hire.selectHireType")} />
                   </SelectTrigger>
                   <SelectContent>
                     {hireTypes.map((t) => (
@@ -243,13 +238,13 @@ export function TransactionFormDialog({
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label>Employee Type</Label>
+                <Label>{t("workforce.modules.transactions.form.hire.employeeType")}</Label>
                 <Select
                   value={formData.employment_type_id || ""}
                   onValueChange={(v) => setFormData({ ...formData, employment_type_id: v })}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select employee type" />
+                    <SelectValue placeholder={t("workforce.modules.transactions.form.hire.selectEmployeeType")} />
                   </SelectTrigger>
                   <SelectContent>
                     {employeeTypes.map((t) => (
@@ -263,13 +258,13 @@ export function TransactionFormDialog({
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label>Contract Type</Label>
+                <Label>{t("workforce.modules.transactions.form.hire.contractType")}</Label>
                 <Select
                   value={formData.contract_type_id || ""}
                   onValueChange={(v) => setFormData({ ...formData, contract_type_id: v })}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select contract type" />
+                    <SelectValue placeholder={t("workforce.modules.transactions.form.hire.selectContractType")} />
                   </SelectTrigger>
                   <SelectContent>
                     {contractTypes.map((t) => (
@@ -281,7 +276,7 @@ export function TransactionFormDialog({
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label>Probation End Date</Label>
+                <Label>{t("workforce.modules.transactions.form.hire.probationEndDate")}</Label>
                 <Popover>
                   <PopoverTrigger asChild>
                     <Button
@@ -294,7 +289,7 @@ export function TransactionFormDialog({
                       <CalendarIcon className="mr-2 h-4 w-4" />
                       {formData.probation_end_date
                         ? formatDateForDisplay(formData.probation_end_date, "PPP")
-                        : "Select date"}
+                        : t("workforce.modules.transactions.form.selectDate")}
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0">
@@ -314,13 +309,13 @@ export function TransactionFormDialog({
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label>Position</Label>
+                <Label>{t("common.position")}</Label>
                 <Select
                   value={formData.position_id || ""}
                   onValueChange={(v) => setFormData({ ...formData, position_id: v })}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select position" />
+                    <SelectValue placeholder={t("workforce.modules.transactions.form.selectPosition")} />
                   </SelectTrigger>
                   <SelectContent>
                     {positions.map((p) => (
@@ -332,13 +327,13 @@ export function TransactionFormDialog({
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label>Department</Label>
+                <Label>{t("common.department")}</Label>
                 <Select
                   value={formData.department_id || ""}
                   onValueChange={(v) => setFormData({ ...formData, department_id: v })}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select department" />
+                    <SelectValue placeholder={t("workforce.modules.transactions.form.selectDepartment")} />
                   </SelectTrigger>
                   <SelectContent>
                     {departments.map((d) => (
@@ -351,13 +346,13 @@ export function TransactionFormDialog({
               </div>
             </div>
             <div className="space-y-2">
-              <Label>Company</Label>
+              <Label>{t("common.company")}</Label>
               <Select
                 value={formData.company_id || ""}
                 onValueChange={(v) => setFormData({ ...formData, company_id: v })}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select company" />
+                  <SelectValue placeholder={t("workforce.modules.transactions.form.selectCompany")} />
                 </SelectTrigger>
                 <SelectContent>
                   {companies.map((c) => (
@@ -374,7 +369,7 @@ export function TransactionFormDialog({
       case "CONFIRMATION":
         return (
           <div className="space-y-2">
-            <Label>Confirmation Date</Label>
+            <Label>{t("workforce.modules.transactions.form.confirmation.confirmationDate")}</Label>
             <Popover>
               <PopoverTrigger asChild>
                 <Button
@@ -387,7 +382,7 @@ export function TransactionFormDialog({
                   <CalendarIcon className="mr-2 h-4 w-4" />
                   {formData.confirmation_date
                     ? formatDateForDisplay(formData.confirmation_date, "PPP")
-                    : "Select date"}
+                    : t("workforce.modules.transactions.form.selectDate")}
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0">
@@ -411,14 +406,14 @@ export function TransactionFormDialog({
           <>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label>Original End Date</Label>
+                <Label>{t("workforce.modules.transactions.form.probationExt.originalEndDate")}</Label>
                 <Popover>
                   <PopoverTrigger asChild>
                     <Button variant="outline" className="w-full justify-start text-left font-normal">
                       <CalendarIcon className="mr-2 h-4 w-4" />
                       {formData.original_probation_end_date
                         ? formatDateForDisplay(formData.original_probation_end_date, "PPP")
-                        : "Select date"}
+                        : t("workforce.modules.transactions.form.selectDate")}
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0">
@@ -436,14 +431,14 @@ export function TransactionFormDialog({
                 </Popover>
               </div>
               <div className="space-y-2">
-                <Label>New End Date</Label>
+                <Label>{t("workforce.modules.transactions.form.probationExt.newEndDate")}</Label>
                 <Popover>
                   <PopoverTrigger asChild>
                     <Button variant="outline" className="w-full justify-start text-left font-normal">
                       <CalendarIcon className="mr-2 h-4 w-4" />
                       {formData.new_probation_end_date
                         ? formatDateForDisplay(formData.new_probation_end_date, "PPP")
-                        : "Select date"}
+                        : t("workforce.modules.transactions.form.selectDate")}
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0">
@@ -463,7 +458,7 @@ export function TransactionFormDialog({
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label>Extension Days</Label>
+                <Label>{t("workforce.modules.transactions.form.probationExt.extensionDays")}</Label>
                 <Input
                   type="number"
                   value={formData.extension_days || ""}
@@ -473,13 +468,13 @@ export function TransactionFormDialog({
                 />
               </div>
               <div className="space-y-2">
-                <Label>Extension Reason</Label>
+                <Label>{t("workforce.modules.transactions.form.probationExt.extensionReason")}</Label>
                 <Select
                   value={formData.extension_reason_id || ""}
                   onValueChange={(v) => setFormData({ ...formData, extension_reason_id: v })}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select reason" />
+                    <SelectValue placeholder={t("workforce.modules.transactions.form.selectReason")} />
                   </SelectTrigger>
                   <SelectContent>
                     {extensionReasons.map((r) => (
@@ -498,13 +493,13 @@ export function TransactionFormDialog({
         return (
           <>
             <div className="space-y-2">
-              <Label>Acting Position</Label>
+              <Label>{t("workforce.modules.transactions.form.acting.actingPosition")}</Label>
               <Select
                 value={formData.acting_position_id || ""}
                 onValueChange={(v) => setFormData({ ...formData, acting_position_id: v })}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select position" />
+                  <SelectValue placeholder={t("workforce.modules.transactions.form.selectPosition")} />
                 </SelectTrigger>
                 <SelectContent>
                   {positions.map((p) => (
@@ -517,14 +512,14 @@ export function TransactionFormDialog({
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label>Start Date</Label>
+                <Label>{t("workforce.modules.transactions.form.acting.startDate")}</Label>
                 <Popover>
                   <PopoverTrigger asChild>
                     <Button variant="outline" className="w-full justify-start text-left font-normal">
                       <CalendarIcon className="mr-2 h-4 w-4" />
                       {formData.acting_start_date
                         ? formatDateForDisplay(formData.acting_start_date, "PPP")
-                        : "Select date"}
+                        : t("workforce.modules.transactions.form.selectDate")}
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0">
@@ -542,14 +537,14 @@ export function TransactionFormDialog({
                 </Popover>
               </div>
               <div className="space-y-2">
-                <Label>End Date</Label>
+                <Label>{t("workforce.modules.transactions.form.acting.endDate")}</Label>
                 <Popover>
                   <PopoverTrigger asChild>
                     <Button variant="outline" className="w-full justify-start text-left font-normal">
                       <CalendarIcon className="mr-2 h-4 w-4" />
                       {formData.acting_end_date
                         ? formatDateForDisplay(formData.acting_end_date, "PPP")
-                        : "Select date"}
+                        : t("workforce.modules.transactions.form.selectDate")}
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0">
@@ -569,13 +564,13 @@ export function TransactionFormDialog({
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label>Acting Reason</Label>
+                <Label>{t("workforce.modules.transactions.form.acting.actingReason")}</Label>
                 <Select
                   value={formData.acting_reason_id || ""}
                   onValueChange={(v) => setFormData({ ...formData, acting_reason_id: v })}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select reason" />
+                    <SelectValue placeholder={t("workforce.modules.transactions.form.selectReason")} />
                   </SelectTrigger>
                   <SelectContent>
                     {actingReasons.map((r) => (
@@ -587,7 +582,7 @@ export function TransactionFormDialog({
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label>Acting Allowance</Label>
+                <Label>{t("workforce.modules.transactions.form.acting.actingAllowance")}</Label>
                 <Input
                   type="number"
                   value={formData.acting_allowance || ""}
@@ -605,13 +600,13 @@ export function TransactionFormDialog({
           <>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label>From Position</Label>
+                <Label>{t("workforce.modules.transactions.form.promotion.fromPosition")}</Label>
                 <Select
                   value={formData.from_position_id || ""}
                   onValueChange={(v) => setFormData({ ...formData, from_position_id: v })}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select position" />
+                    <SelectValue placeholder={t("workforce.modules.transactions.form.selectPosition")} />
                   </SelectTrigger>
                   <SelectContent>
                     {positions.map((p) => (
@@ -623,13 +618,13 @@ export function TransactionFormDialog({
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label>To Position</Label>
+                <Label>{t("workforce.modules.transactions.form.promotion.toPosition")}</Label>
                 <Select
                   value={formData.to_position_id || ""}
                   onValueChange={(v) => setFormData({ ...formData, to_position_id: v })}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select position" />
+                    <SelectValue placeholder={t("workforce.modules.transactions.form.selectPosition")} />
                   </SelectTrigger>
                   <SelectContent>
                     {positions.map((p) => (
@@ -642,13 +637,13 @@ export function TransactionFormDialog({
               </div>
             </div>
             <div className="space-y-2">
-              <Label>Promotion Reason</Label>
+              <Label>{t("workforce.modules.transactions.form.promotion.promotionReason")}</Label>
               <Select
                 value={formData.promotion_reason_id || ""}
                 onValueChange={(v) => setFormData({ ...formData, promotion_reason_id: v })}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select reason" />
+                  <SelectValue placeholder={t("workforce.modules.transactions.form.selectReason")} />
                 </SelectTrigger>
                 <SelectContent>
                   {promotionReasons.map((r) => (
@@ -661,7 +656,7 @@ export function TransactionFormDialog({
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label>Salary Adjustment</Label>
+                <Label>{t("workforce.modules.transactions.form.promotion.salaryAdjustment")}</Label>
                 <Input
                   type="number"
                   value={formData.salary_adjustment || ""}
@@ -671,17 +666,17 @@ export function TransactionFormDialog({
                 />
               </div>
               <div className="space-y-2">
-                <Label>Adjustment Type</Label>
+                <Label>{t("workforce.modules.transactions.form.promotion.adjustmentType")}</Label>
                 <Select
                   value={formData.salary_adjustment_type || ""}
                   onValueChange={(v) => setFormData({ ...formData, salary_adjustment_type: v })}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select type" />
+                    <SelectValue placeholder={t("workforce.modules.transactions.form.selectType")} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="percentage">Percentage</SelectItem>
-                    <SelectItem value="fixed">Fixed Amount</SelectItem>
+                    <SelectItem value="percentage">{t("workforce.modules.transactions.form.promotion.percentage")}</SelectItem>
+                    <SelectItem value="fixed">{t("workforce.modules.transactions.form.promotion.fixedAmount")}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -694,13 +689,13 @@ export function TransactionFormDialog({
           <>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label>From Department</Label>
+                <Label>{t("workforce.modules.transactions.form.transfer.fromDepartment")}</Label>
                 <Select
                   value={formData.from_department_id || ""}
                   onValueChange={(v) => setFormData({ ...formData, from_department_id: v })}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select department" />
+                    <SelectValue placeholder={t("workforce.modules.transactions.form.selectDepartment")} />
                   </SelectTrigger>
                   <SelectContent>
                     {departments.map((d) => (
@@ -712,13 +707,13 @@ export function TransactionFormDialog({
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label>To Department</Label>
+                <Label>{t("workforce.modules.transactions.form.transfer.toDepartment")}</Label>
                 <Select
                   value={formData.to_department_id || ""}
                   onValueChange={(v) => setFormData({ ...formData, to_department_id: v })}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select department" />
+                    <SelectValue placeholder={t("workforce.modules.transactions.form.selectDepartment")} />
                   </SelectTrigger>
                   <SelectContent>
                     {departments.map((d) => (
@@ -732,13 +727,13 @@ export function TransactionFormDialog({
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label>From Company</Label>
+                <Label>{t("workforce.modules.transactions.form.transfer.fromCompany")}</Label>
                 <Select
                   value={formData.from_company_id || ""}
                   onValueChange={(v) => setFormData({ ...formData, from_company_id: v })}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select company" />
+                    <SelectValue placeholder={t("workforce.modules.transactions.form.selectCompany")} />
                   </SelectTrigger>
                   <SelectContent>
                     {companies.map((c) => (
@@ -750,13 +745,13 @@ export function TransactionFormDialog({
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label>To Company</Label>
+                <Label>{t("workforce.modules.transactions.form.transfer.toCompany")}</Label>
                 <Select
                   value={formData.to_company_id || ""}
                   onValueChange={(v) => setFormData({ ...formData, to_company_id: v })}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select company" />
+                    <SelectValue placeholder={t("workforce.modules.transactions.form.selectCompany")} />
                   </SelectTrigger>
                   <SelectContent>
                     {companies.map((c) => (
@@ -769,13 +764,13 @@ export function TransactionFormDialog({
               </div>
             </div>
             <div className="space-y-2">
-              <Label>Transfer Reason</Label>
+              <Label>{t("workforce.modules.transactions.form.transfer.transferReason")}</Label>
               <Select
                 value={formData.transfer_reason_id || ""}
                 onValueChange={(v) => setFormData({ ...formData, transfer_reason_id: v })}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select reason" />
+                  <SelectValue placeholder={t("workforce.modules.transactions.form.selectReason")} />
                 </SelectTrigger>
                 <SelectContent>
                   {transferReasons.map((r) => (
@@ -794,30 +789,30 @@ export function TransactionFormDialog({
           <>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label>Termination Type</Label>
+                <Label>{t("workforce.modules.transactions.form.termination.terminationType")}</Label>
                 <Select
                   value={formData.termination_type || ""}
                   onValueChange={(v) => setFormData({ ...formData, termination_type: v })}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select type" />
+                    <SelectValue placeholder={t("workforce.modules.transactions.form.selectType")} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="voluntary">Voluntary</SelectItem>
-                    <SelectItem value="involuntary">Involuntary</SelectItem>
-                    <SelectItem value="retirement">Retirement</SelectItem>
-                    <SelectItem value="end_of_contract">End of Contract</SelectItem>
+                    <SelectItem value="voluntary">{t("workforce.modules.transactions.form.termination.voluntary")}</SelectItem>
+                    <SelectItem value="involuntary">{t("workforce.modules.transactions.form.termination.involuntary")}</SelectItem>
+                    <SelectItem value="retirement">{t("workforce.modules.transactions.form.termination.retirement")}</SelectItem>
+                    <SelectItem value="end_of_contract">{t("workforce.modules.transactions.form.termination.endOfContract")}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label>Termination Reason</Label>
+                <Label>{t("workforce.modules.transactions.form.termination.terminationReason")}</Label>
                 <Select
                   value={formData.termination_reason_id || ""}
                   onValueChange={(v) => setFormData({ ...formData, termination_reason_id: v })}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select reason" />
+                    <SelectValue placeholder={t("workforce.modules.transactions.form.selectReason")} />
                   </SelectTrigger>
                   <SelectContent>
                     {terminationReasons.map((r) => (
@@ -831,14 +826,14 @@ export function TransactionFormDialog({
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label>Last Working Date</Label>
+                <Label>{t("workforce.modules.transactions.form.termination.lastWorkingDate")}</Label>
                 <Popover>
                   <PopoverTrigger asChild>
                     <Button variant="outline" className="w-full justify-start text-left font-normal">
                       <CalendarIcon className="mr-2 h-4 w-4" />
                       {formData.last_working_date
                         ? formatDateForDisplay(formData.last_working_date, "PPP")
-                        : "Select date"}
+                        : t("workforce.modules.transactions.form.selectDate")}
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0">
@@ -862,7 +857,7 @@ export function TransactionFormDialog({
                     setFormData({ ...formData, exit_interview_completed: checked })
                   }
                 />
-                <Label>Exit Interview Completed</Label>
+                <Label>{t("workforce.modules.transactions.form.termination.exitInterviewCompleted")}</Label>
               </div>
             </div>
           </>
@@ -879,7 +874,7 @@ export function TransactionFormDialog({
         <DialogHeader>
           <DialogTitle>{getTitle()}</DialogTitle>
           <DialogDescription>
-            Fill in the transaction details below.
+            {t("workforce.modules.transactions.form.fillDetails")}
           </DialogDescription>
         </DialogHeader>
 
@@ -887,13 +882,13 @@ export function TransactionFormDialog({
           {/* Common Fields */}
           {transactionType !== "HIRE" && (
             <div className="space-y-2">
-              <Label>Employee *</Label>
+              <Label>{t("common.employee")} *</Label>
               <Select
                 value={formData.employee_id || ""}
                 onValueChange={(v) => setFormData({ ...formData, employee_id: v })}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select employee" />
+                  <SelectValue placeholder={t("workforce.modules.transactions.form.selectEmployee")} />
                 </SelectTrigger>
                 <SelectContent>
                   {employees.map((e) => (
@@ -907,7 +902,7 @@ export function TransactionFormDialog({
           )}
 
           <div className="space-y-2">
-            <Label>Effective Date *</Label>
+            <Label>{t("workforce.modules.transactions.effectiveDate")} *</Label>
             <Popover>
               <PopoverTrigger asChild>
                 <Button
@@ -920,7 +915,7 @@ export function TransactionFormDialog({
                   <CalendarIcon className="mr-2 h-4 w-4" />
                   {formData.effective_date
                     ? formatDateForDisplay(formData.effective_date, "PPP")
-                    : "Select date"}
+                    : t("workforce.modules.transactions.form.selectDate")}
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0">
@@ -943,11 +938,11 @@ export function TransactionFormDialog({
 
           {/* Common fields continued */}
           <div className="space-y-2">
-            <Label>Notes</Label>
+            <Label>{t("common.notes")}</Label>
             <Textarea
               value={formData.notes || ""}
               onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-              placeholder="Add any additional notes..."
+              placeholder={t("workforce.modules.transactions.form.notesPlaceholder")}
               rows={3}
             />
           </div>
@@ -959,17 +954,17 @@ export function TransactionFormDialog({
                 setFormData({ ...formData, requires_workflow: checked })
               }
             />
-            <Label>Requires Workflow Approval</Label>
+            <Label>{t("workforce.modules.transactions.form.requiresWorkflow")}</Label>
           </div>
         </div>
 
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Cancel
+            {t("common.cancel")}
           </Button>
           <Button onClick={handleSubmit} disabled={isLoading}>
             {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            {existingTransaction ? "Update" : "Create"} Transaction
+            {existingTransaction ? t("workforce.modules.transactions.form.updateTransaction") : t("workforce.modules.transactions.form.createTransaction")}
           </Button>
         </DialogFooter>
       </DialogContent>
