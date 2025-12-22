@@ -56,15 +56,14 @@ export function KeyPositionsTab({ companyId }: KeyPositionsTabProps) {
   } = useSuccession(companyId);
 
   const [keyPositions, setKeyPositions] = useState<KeyPosition[]>([]);
-  const [availablePositions, setAvailablePositions] = useState<{ id: string; title: string; code: string; current_holder?: { id: string; full_name: string } | null }[]>([]);
-  const [keyJobs, setKeyJobs] = useState<{ id: string; name: string; code: string }[]>([]);
+  const [availablePositions, setAvailablePositions] = useState<{ id: string; title: string; code: string; matchingJobId: string; current_holder?: { id: string; full_name: string } | null }[]>([]);
+  const [keyJobs, setKeyJobs] = useState<{ id: string; name: string; code: string; job_family_id: string | null }[]>([]);
   const [loadingAvailable, setLoadingAvailable] = useState(false);
   const [loadingKeyPositions, setLoadingKeyPositions] = useState(true);
   const [employees, setEmployees] = useState<{ id: string; full_name: string }[]>([]);
   const [showDialog, setShowDialog] = useState(false);
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [selectedPositionId, setSelectedPositionId] = useState<string>('');
-  const [selectedJobId, setSelectedJobId] = useState<string>('');
   const [searchTerm, setSearchTerm] = useState('');
   const [editingPosition, setEditingPosition] = useState<KeyPosition | null>(null);
   const [formData, setFormData] = useState({
@@ -156,10 +155,10 @@ export function KeyPositionsTab({ companyId }: KeyPositionsTabProps) {
   const loadAvailablePositions = async () => {
     setLoadingAvailable(true);
     
-    // Get all jobs that are marked as key positions
+    // Get all jobs that are marked as key positions (with job_family_id for matching)
     const { data: keyJobsData } = await supabase
       .from('jobs')
-      .select('id, name, code')
+      .select('id, name, code, job_family_id')
       .eq('company_id', companyId)
       .eq('is_key_position', true)
       .eq('is_active', true);
@@ -172,17 +171,37 @@ export function KeyPositionsTab({ companyId }: KeyPositionsTabProps) {
       return;
     }
     
-    // Get positions that don't have a job_id yet (available to be linked to key jobs)
+    // Get job_family_ids from key jobs for filtering positions
+    const keyJobFamilyIds = keyJobsData
+      .filter(j => j.job_family_id)
+      .map(j => j.job_family_id as string);
+    
+    if (keyJobFamilyIds.length === 0) {
+      setAvailablePositions([]);
+      setLoadingAvailable(false);
+      return;
+    }
+    
+    // Get positions that match key job families but don't have job_id set yet
     const { data: positionsData } = await supabase
       .from('positions')
-      .select('id, title, code, department_id, departments!inner(company_id)')
+      .select('id, title, code, job_family_id, department_id, departments!inner(company_id)')
+      .in('job_family_id', keyJobFamilyIds)
       .is('job_id', null)
       .is('end_date', null)
       .eq('departments.company_id', companyId)
       .order('title');
     
     if (positionsData) {
-      const positions: { id: string; title: string; code: string; current_holder?: { id: string; full_name: string } | null }[] = [];
+      // Create a map of job_family_id to key job id for auto-linking
+      const familyToJobMap = new Map<string, string>();
+      keyJobsData.forEach(job => {
+        if (job.job_family_id) {
+          familyToJobMap.set(job.job_family_id, job.id);
+        }
+      });
+      
+      const positions: { id: string; title: string; code: string; matchingJobId: string; current_holder?: { id: string; full_name: string } | null }[] = [];
       for (const pos of positionsData) {
         const { data: holder } = await supabase
           .from('employee_positions')
@@ -193,12 +212,16 @@ export function KeyPositionsTab({ companyId }: KeyPositionsTabProps) {
           .limit(1)
           .maybeSingle();
         
-        positions.push({
-          id: pos.id,
-          title: pos.title,
-          code: pos.code,
-          current_holder: holder?.profiles || null,
-        });
+        const matchingJobId = pos.job_family_id ? familyToJobMap.get(pos.job_family_id) : undefined;
+        if (matchingJobId) {
+          positions.push({
+            id: pos.id,
+            title: pos.title,
+            code: pos.code,
+            matchingJobId,
+            current_holder: holder?.profiles || null,
+          });
+        }
       }
       setAvailablePositions(positions);
     }
@@ -287,18 +310,19 @@ export function KeyPositionsTab({ companyId }: KeyPositionsTabProps) {
   const openAddDialog = () => {
     setSearchTerm('');
     setSelectedPositionId('');
-    // Auto-select first key job (or only key job)
-    setSelectedJobId(keyJobs.length > 0 ? keyJobs[0].id : '');
     setShowAddDialog(true);
   };
 
   const handleAddKeyPosition = async () => {
-    if (!selectedPositionId || !selectedJobId) return;
+    if (!selectedPositionId) return;
     
-    // Link the position to the selected key job via job_id
+    const position = availablePositions.find(p => p.id === selectedPositionId);
+    if (!position) return;
+    
+    // Link the position to its matching key job via job_id (auto-determined by job_family_id)
     const { error } = await (supabase
       .from('positions') as any)
-      .update({ job_id: selectedJobId })
+      .update({ job_id: position.matchingJobId })
       .eq('id', selectedPositionId);
 
     if (error) {
@@ -306,10 +330,9 @@ export function KeyPositionsTab({ companyId }: KeyPositionsTabProps) {
       return;
     }
 
-    const position = availablePositions.find(p => p.id === selectedPositionId);
-    const job = keyJobs.find(j => j.id === selectedJobId);
+    const job = keyJobs.find(j => j.id === position.matchingJobId);
     
-    toast.success(`${position?.title} linked to ${job?.name}`);
+    toast.success(`${position.title} linked to ${job?.name}`);
     setShowAddDialog(false);
     loadData();
   };
@@ -651,25 +674,6 @@ export function KeyPositionsTab({ companyId }: KeyPositionsTabProps) {
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
-            {/* Only show key job selector when there are multiple key jobs */}
-            {keyJobs.length > 1 && (
-              <div className="space-y-2">
-                <Label>Link to Key Job</Label>
-                <Select value={selectedJobId} onValueChange={setSelectedJobId}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select a key job" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {keyJobs.map((job) => (
-                      <SelectItem key={job.id} value={job.id}>
-                        {job.name} ({job.code})
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            )}
-
             <div className="space-y-2">
               <Label>Search Positions</Label>
               <div className="relative">
