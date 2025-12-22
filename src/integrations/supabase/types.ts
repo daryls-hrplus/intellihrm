@@ -26698,7 +26698,6 @@ export type Database = {
           headcount_notes: string | null
           id: string
           is_active: boolean
-          job_family_id: string | null
           job_id: string | null
           max_spinal_point: number | null
           min_spinal_point: number | null
@@ -26722,7 +26721,6 @@ export type Database = {
           headcount_notes?: string | null
           id?: string
           is_active?: boolean
-          job_family_id?: string | null
           job_id?: string | null
           max_spinal_point?: number | null
           min_spinal_point?: number | null
@@ -26746,7 +26744,6 @@ export type Database = {
           headcount_notes?: string | null
           id?: string
           is_active?: boolean
-          job_family_id?: string | null
           job_id?: string | null
           max_spinal_point?: number | null
           min_spinal_point?: number | null
@@ -26764,13 +26761,6 @@ export type Database = {
             columns: ["department_id"]
             isOneToOne: false
             referencedRelation: "departments"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "positions_job_family_id_fkey"
-            columns: ["job_family_id"]
-            isOneToOne: false
-            referencedRelation: "job_families"
             referencedColumns: ["id"]
           },
           {
