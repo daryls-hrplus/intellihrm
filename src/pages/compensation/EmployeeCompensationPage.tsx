@@ -147,7 +147,7 @@ export default function EmployeeCompensationPage() {
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [payElements, setPayElements] = useState<PayElement[]>([]);
   const [positions, setPositions] = useState<Position[]>([]);
-  const [employeePositions, setEmployeePositions] = useState<{position_id: string; is_primary: boolean; position: Position}[]>([]);
+  const [employeePositions, setEmployeePositions] = useState<{position_id: string; is_primary: boolean; position: PositionWithCompensation}[]>([]);
   const [compensationItems, setCompensationItems] = useState<EmployeeCompensation[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
@@ -349,11 +349,11 @@ export default function EmployeeCompensationPage() {
       .eq("is_active", true);
 
     if (positionsData && positionsData.length > 0) {
-      // Store all positions for display
+      // Store all positions for display with full compensation data
       const positions = positionsData.map(pd => ({
         position_id: pd.position_id,
         is_primary: pd.is_primary,
-        position: pd.position as unknown as Position
+        position: pd.position as unknown as PositionWithCompensation
       }));
       setEmployeePositions(positions);
 
@@ -417,13 +417,20 @@ export default function EmployeeCompensationPage() {
       .select(`
         position_id,
         is_primary,
-        position:positions!employee_positions_position_id_fkey(id, title, code)
+        position:positions!employee_positions_position_id_fkey(
+          id, title, code, compensation_model, salary_grade_id, pay_spine_id,
+          salary_grade:salary_grades!positions_salary_grade_id_fkey(id, name, code, min_salary, mid_salary, max_salary, currency)
+        )
       `)
       .eq("employee_id", employeeId)
       .eq("is_active", true);
     
     if (data && data.length > 0) {
-      const positions = data as {position_id: string; is_primary: boolean; position: Position}[];
+      const positions = data.map(d => ({
+        position_id: d.position_id,
+        is_primary: d.is_primary,
+        position: d.position as unknown as PositionWithCompensation
+      }));
       setEmployeePositions(positions);
       
       // Auto-select primary position as default
@@ -1121,7 +1128,19 @@ export default function EmployeeCompensationPage() {
                               </Badge>
                             )}
                           </div>
-                          <p className="text-sm text-muted-foreground">
+                          <div className="flex items-center gap-2 mt-1">
+                            {ep.position.salary_grade && (
+                              <Badge variant="outline" className="text-xs bg-muted">
+                                {ep.position.salary_grade.name} ({ep.position.salary_grade.code})
+                              </Badge>
+                            )}
+                            {ep.position.salary_grade && (
+                              <span className="text-xs text-muted-foreground">
+                                {t("compensation.employeeCompensation.range", "Range")}: {formatAmount(ep.position.salary_grade.min_salary, ep.position.salary_grade.currency)} - {formatAmount(ep.position.salary_grade.max_salary, ep.position.salary_grade.currency)}
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-sm text-muted-foreground mt-1">
                             {positionItems.filter(i => i.is_active).length} {t("compensation.employeeCompensation.activeElements", "active compensation elements")}
                           </p>
                         </div>
