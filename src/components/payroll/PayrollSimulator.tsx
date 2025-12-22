@@ -583,10 +583,8 @@ export function PayrollSimulator({ companyId, employeeId, payPeriodId }: Payroll
       const regularPay = periodBaseSalary;
       const overtimePay = overtimeHours * hourlyRate * 1.5;
 
-      // Any remaining employee compensation items (besides Base Salary) are treated as additional comp
-      const remainingEmployeeComp = employeeCompList.filter(
-        (c) => ((c.pay_elements as any)?.code || '').toUpperCase() !== 'SAL'
-      );
+      // All employee compensation items are treated as additional comp (includes base salary items)
+      const remainingEmployeeComp = employeeCompList;
 
       const additionalCompList = remainingEmployeeComp.map((c) => {
         let basePeriodAmount = c.amount || 0;
