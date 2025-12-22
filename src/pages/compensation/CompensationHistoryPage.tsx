@@ -7,12 +7,13 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 import { History, Search, Plus, TrendingUp, TrendingDown, Minus } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useTranslation } from "react-i18next";
+import { AddCompensationHistoryDialog } from "@/components/compensation/AddCompensationHistoryDialog";
 
 interface Company {
   id: string;
@@ -21,10 +22,12 @@ interface Company {
 
 export default function CompensationHistoryPage() {
   const { t } = useTranslation();
+  const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState("");
   const [changeTypeFilter, setChangeTypeFilter] = useState<string>("all");
   const [companies, setCompanies] = useState<Company[]>([]);
   const [selectedCompanyId, setSelectedCompanyId] = useState<string>("");
+  const [addDialogOpen, setAddDialogOpen] = useState(false);
 
   useEffect(() => {
     const fetchCompanies = async () => {
@@ -118,7 +121,7 @@ export default function CompensationHistoryPage() {
                 ))}
               </SelectContent>
             </Select>
-            <Button>
+            <Button onClick={() => setAddDialogOpen(true)}>
               <Plus className="mr-2 h-4 w-4" />
               {t("compensation.history.addRecord")}
             </Button>
@@ -204,6 +207,13 @@ export default function CompensationHistoryPage() {
             )}
           </CardContent>
         </Card>
+
+        <AddCompensationHistoryDialog
+          open={addDialogOpen}
+          onOpenChange={setAddDialogOpen}
+          companyId={selectedCompanyId}
+          onSuccess={() => queryClient.invalidateQueries({ queryKey: ["compensation-history"] })}
+        />
       </div>
     </AppLayout>
   );
