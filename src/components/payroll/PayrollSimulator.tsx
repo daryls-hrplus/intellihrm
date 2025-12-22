@@ -75,8 +75,20 @@ interface SimulationResult {
     overtime_hours: number;
     regular_pay: number;
     overtime_pay: number;
-    additional_comp: Array<{ name: string; amount: number }>;
-    allowances: Array<{ name: string; amount: number; is_taxable: boolean; is_bik: boolean }>;
+    additional_comp: Array<{
+      name: string;
+      base_amount: number;
+      amount: number; // included in gross pay
+      is_prorated: boolean;
+      proration_factor?: number;
+    }>;
+    allowances: Array<{
+      name: string;
+      base_amount: number;
+      amount: number; // included in gross pay
+      is_taxable: boolean;
+      is_bik: boolean;
+    }>;
     total_gross: number;
   };
   deductions: {
@@ -564,55 +576,89 @@ export function PayrollSimulator({ companyId, employeeId, payPeriodId }: Payroll
         : [];
 
       const additionalCompList = remainingEmployeeComp.map((c) => {
-        let periodAmount = c.amount || 0;
+        let basePeriodAmount = c.amount || 0;
         const freq = c.frequency || 'monthly';
 
+        // Convert to pay period frequency (base amount)
         if (freq !== payFrequency) {
-          let annualAmount = periodAmount;
+          let annualAmount = basePeriodAmount;
           switch (freq) {
             case 'monthly':
-              annualAmount = periodAmount * 12;
+              annualAmount = basePeriodAmount * 12;
               break;
             case 'biweekly':
-              annualAmount = periodAmount * 26;
+            case 'fortnightly':
+              annualAmount = basePeriodAmount * 26;
               break;
             case 'weekly':
-              annualAmount = periodAmount * 52;
+              annualAmount = basePeriodAmount * 52;
               break;
             case 'annual':
-              annualAmount = periodAmount;
+              annualAmount = basePeriodAmount;
               break;
           }
 
           switch (payFrequency) {
             case 'monthly':
-              periodAmount = annualAmount / 12;
+              basePeriodAmount = annualAmount / 12;
               break;
             case 'biweekly':
-              periodAmount = annualAmount / 26;
+            case 'fortnightly':
+              basePeriodAmount = annualAmount / 26;
               break;
             case 'weekly':
-              periodAmount = annualAmount / 52;
+              basePeriodAmount = annualAmount / 52;
               break;
             case 'semimonthly':
-              periodAmount = annualAmount / 24;
+              basePeriodAmount = annualAmount / 24;
               break;
+            default:
+              basePeriodAmount = annualAmount / 12;
+              break;
+          }
+        }
+
+        const prorationMethodCode = getProrationMethodCode(
+          (c.pay_elements as any)?.proration_method?.code
+        );
+
+        let calculatedAmount = basePeriodAmount;
+        let isProrated = false;
+        let prorationFactor = 1;
+
+        if (payPeriod?.period_start && payPeriod?.period_end && prorationMethodCode !== 'NONE') {
+          const pr = calculateProrationFactor({
+            periodStart: new Date(payPeriod.period_start),
+            periodEnd: new Date(payPeriod.period_end),
+            employeeStartDate,
+            employeeEndDate,
+            prorationMethod: prorationMethodCode,
+          });
+
+          isProrated = pr.isProrated;
+          prorationFactor = pr.factor;
+          if (pr.isProrated) {
+            calculatedAmount = applyProration(basePeriodAmount, pr);
           }
         }
 
         return {
           name: (c.pay_elements as any)?.name || 'Compensation',
-          amount: periodAmount,
+          base_amount: basePeriodAmount,
+          amount: calculatedAmount,
+          is_prorated: isProrated,
+          proration_factor: prorationFactor,
         };
       });
 
       const totalAdditionalComp = additionalCompList.reduce((sum, c) => sum + c.amount, 0);
 
-      const allowanceList = (allowances || []).map(a => ({
+      const allowanceList = (allowances || []).map((a) => ({
         name: a.allowance_name,
+        base_amount: a.amount,
         amount: a.amount,
         is_taxable: a.is_taxable,
-        is_bik: a.is_benefit_in_kind
+        is_bik: a.is_benefit_in_kind,
       }));
 
       const totalAllowances = allowanceList.reduce((sum, a) => sum + a.amount, 0);
@@ -680,7 +726,7 @@ export function PayrollSimulator({ companyId, employeeId, payPeriodId }: Payroll
           method: baseProrationMethodCode,
           fullPeriodSalary: fullPeriodBaseSalary
         } : undefined,
-        positionProrations: positionProrations.length > 0 ? positionProrations : undefined,
+        positionProrations: !baseSalaryItem && positionProrations.length > 0 ? positionProrations : undefined,
         earnings: {
           regular_hours: regularHours,
           overtime_hours: overtimeHours,
@@ -733,6 +779,23 @@ export function PayrollSimulator({ companyId, employeeId, payPeriodId }: Payroll
       maximumFractionDigits: 2
     }).format(amount);
   };
+
+  const baseSalaryBaseTotal = result.positionProrations?.length
+    ? result.positionProrations.reduce((sum, p) => sum + (p.fullAmount || 0), 0)
+    : (result.proration?.fullPeriodSalary ?? result.earnings.regular_pay);
+
+  const baseAdditionalTotal = result.earnings.additional_comp.reduce(
+    (sum, c) => sum + (c.base_amount ?? c.amount),
+    0,
+  );
+
+  const baseAllowancesTotal = result.earnings.allowances.reduce(
+    (sum, a) => sum + (a.base_amount ?? a.amount),
+    0,
+  );
+
+  const baseGrossTotal =
+    baseSalaryBaseTotal + result.earnings.overtime_pay + baseAdditionalTotal + baseAllowancesTotal;
 
   return (
     <div className="space-y-6">
@@ -876,36 +939,134 @@ export function PayrollSimulator({ companyId, employeeId, payPeriodId }: Payroll
         </CardHeader>
         <CardContent className="py-0">
           <Table>
-            <TableBody>
+            <TableHeader>
               <TableRow>
-                <TableCell>Base Salary ({result.salary.frequency})</TableCell>
-                <TableCell className="text-right">{result.salary.currency} {formatCurrency(result.earnings.regular_pay)}</TableCell>
+                <TableHead>Earning</TableHead>
+                <TableHead className="text-right">Base</TableHead>
+                <TableHead className="text-right">Included</TableHead>
               </TableRow>
+            </TableHeader>
+            <TableBody>
+              {/* Grouped by Position when position-based compensation is used */}
+              {result.positionProrations?.length ? (
+                <>
+                  <TableRow className="bg-muted/30">
+                    <TableCell colSpan={3} className="font-medium">
+                      Position earnings
+                    </TableCell>
+                  </TableRow>
+                  {result.positionProrations.map((pos, idx) => (
+                    <TableRow key={`pos-sal-${idx}`}>
+                      <TableCell className="flex items-center gap-2">
+                        Base Salary — {pos.title} ({result.salary.frequency})
+                        {pos.isProrated && (
+                          <Badge variant="outline" className="text-xs">
+                            Prorated
+                          </Badge>
+                        )}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        {result.salary.currency} {formatCurrency(pos.fullAmount)}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        {result.salary.currency} {formatCurrency(pos.proratedAmount)}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </>
+              ) : (
+                <TableRow>
+                  <TableCell>Base Salary ({result.salary.frequency})</TableCell>
+                  <TableCell className="text-right">
+                    {result.salary.currency}{" "}
+                    {formatCurrency(result.proration?.fullPeriodSalary ?? result.earnings.regular_pay)}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    {result.salary.currency} {formatCurrency(result.earnings.regular_pay)}
+                  </TableCell>
+                </TableRow>
+              )}
+
               {result.earnings.overtime_hours > 0 && (
                 <TableRow>
-                  <TableCell>Overtime ({result.earnings.overtime_hours}h @ {result.salary.currency} {formatCurrency(result.salary.hourly_rate)} × 1.5)</TableCell>
-                  <TableCell className="text-right">{result.salary.currency} {formatCurrency(result.earnings.overtime_pay)}</TableCell>
+                  <TableCell>
+                    Overtime ({result.earnings.overtime_hours}h @ {result.salary.currency}{" "}
+                    {formatCurrency(result.salary.hourly_rate)} × 1.5)
+                  </TableCell>
+                  <TableCell className="text-right">
+                    {result.salary.currency} {formatCurrency(result.earnings.overtime_pay)}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    {result.salary.currency} {formatCurrency(result.earnings.overtime_pay)}
+                  </TableCell>
+                </TableRow>
+              )}
+
+              {result.earnings.additional_comp.length > 0 && (
+                <TableRow className="bg-muted/30">
+                  <TableCell colSpan={3} className="font-medium">
+                    Other earnings
+                  </TableCell>
                 </TableRow>
               )}
               {result.earnings.additional_comp.map((comp, idx) => (
                 <TableRow key={`comp-${idx}`}>
-                  <TableCell>{comp.name}</TableCell>
-                  <TableCell className="text-right">{result.salary.currency} {formatCurrency(comp.amount)}</TableCell>
+                  <TableCell className="flex items-center gap-2">
+                    {comp.name}
+                    {comp.is_prorated && (
+                      <Badge variant="outline" className="text-xs">
+                        Prorated
+                      </Badge>
+                    )}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    {result.salary.currency} {formatCurrency(comp.base_amount)}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    {result.salary.currency} {formatCurrency(comp.amount)}
+                  </TableCell>
                 </TableRow>
               ))}
+
+              {result.earnings.allowances.length > 0 && (
+                <TableRow className="bg-muted/30">
+                  <TableCell colSpan={3} className="font-medium">
+                    Allowances
+                  </TableCell>
+                </TableRow>
+              )}
               {result.earnings.allowances.map((allowance, idx) => (
                 <TableRow key={`allow-${idx}`}>
                   <TableCell className="flex items-center gap-2">
                     {allowance.name}
-                    {allowance.is_bik && <Badge variant="secondary" className="text-xs">BIK</Badge>}
-                    {!allowance.is_taxable && <Badge variant="outline" className="text-xs">Non-taxable</Badge>}
+                    {allowance.is_bik && (
+                      <Badge variant="secondary" className="text-xs">
+                        BIK
+                      </Badge>
+                    )}
+                    {!allowance.is_taxable && (
+                      <Badge variant="outline" className="text-xs">
+                        Non-taxable
+                      </Badge>
+                    )}
                   </TableCell>
-                  <TableCell className="text-right">{result.salary.currency} {formatCurrency(allowance.amount)}</TableCell>
+                  <TableCell className="text-right">
+                    {result.salary.currency} {formatCurrency(allowance.base_amount)}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    {result.salary.currency} {formatCurrency(allowance.amount)}
+                  </TableCell>
                 </TableRow>
               ))}
+
               <TableRow className="font-medium bg-muted/50">
                 <TableCell>Total Gross Pay</TableCell>
-                <TableCell className="text-right">{result.salary.currency} {formatCurrency(result.earnings.total_gross)}</TableCell>
+                <TableCell className="text-right">
+                  {result.salary.currency} {formatCurrency(baseGrossTotal)}
+                </TableCell>
+                <TableCell className="text-right">
+                  {result.salary.currency} {formatCurrency(result.earnings.total_gross)}
+                </TableCell>
               </TableRow>
             </TableBody>
           </Table>
