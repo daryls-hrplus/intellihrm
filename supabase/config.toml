@@ -158,3 +158,6 @@ verify_jwt = false
 
 [functions.ai-reminder-analysis]
 verify_jwt = false
+
+[functions.parse-natural-language-rule]
+verify_jwt = false
