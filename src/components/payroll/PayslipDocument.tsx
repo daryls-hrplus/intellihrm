@@ -206,7 +206,7 @@ export function PayslipDocument({
                       )}
                     </span>
                     {(item.job_title || (item.is_prorated && item.effective_start)) && (
-                      <span className="text-[6px] text-muted-foreground leading-tight mt-1">
+                      <span className="text-[6px] text-muted-foreground leading-tight mt-1 ml-2">
                         {item.job_title && getJobInitials(item.job_title)}
                         {item.job_title && item.is_prorated && item.effective_start && ' · '}
                         {item.is_prorated && item.effective_start && (
