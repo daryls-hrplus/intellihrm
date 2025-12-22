@@ -89,18 +89,29 @@ export function KeyPositionsTab({ companyId }: KeyPositionsTabProps) {
   const loadKeyPositionsFromJobs = async () => {
     setLoadingKeyPositions(true);
     
-    // Get positions where the associated job is marked as key position
+    // First get all jobs that are marked as key positions
+    const { data: keyJobs } = await supabase
+      .from('jobs')
+      .select('id, name, code')
+      .eq('company_id', companyId)
+      .eq('is_key_position', true)
+      .eq('is_active', true);
+    
+    if (!keyJobs || keyJobs.length === 0) {
+      setKeyPositions([]);
+      setLoadingKeyPositions(false);
+      return;
+    }
+    
+    const keyJobIds = keyJobs.map(j => j.id);
+    const jobMap = new Map(keyJobs.map(j => [j.id, { name: j.name, code: j.code }]));
+    
+    // Get positions for those key jobs
     const { data: positionsData } = await (supabase
       .from('positions') as any)
-      .select(`
-        id, 
-        title, 
-        code,
-        job_id,
-        jobs!inner(id, name, code, is_key_position)
-      `)
+      .select('id, title, code, job_id')
       .eq('company_id', companyId)
-      .eq('jobs.is_key_position', true)
+      .in('job_id', keyJobIds)
       .is('end_date', null)
       .order('title');
     
@@ -126,7 +137,7 @@ export function KeyPositionsTab({ companyId }: KeyPositionsTabProps) {
           title: pos.title,
           code: pos.code,
           job_id: pos.job_id,
-          job: pos.jobs,
+          job: jobMap.get(pos.job_id) || null,
           current_holder: holder?.profiles || null,
           riskAssessment: riskMap.get(pos.id) || null,
         });
@@ -138,18 +149,28 @@ export function KeyPositionsTab({ companyId }: KeyPositionsTabProps) {
   };
 
   const loadAvailablePositions = async () => {
-    // Get all positions linked to key jobs (for the add dialog)
+    // First get all jobs that are marked as key positions
+    const { data: keyJobs } = await supabase
+      .from('jobs')
+      .select('id, name, code')
+      .eq('company_id', companyId)
+      .eq('is_key_position', true)
+      .eq('is_active', true);
+    
+    if (!keyJobs || keyJobs.length === 0) {
+      setAvailablePositions([]);
+      return;
+    }
+    
+    const keyJobIds = keyJobs.map(j => j.id);
+    const jobMap = new Map(keyJobs.map(j => [j.id, { name: j.name, code: j.code }]));
+    
+    // Get positions for those key jobs
     const { data: positionsData } = await (supabase
       .from('positions') as any)
-      .select(`
-        id, 
-        title, 
-        code,
-        job_id,
-        jobs!inner(id, name, code, is_key_position)
-      `)
+      .select('id, title, code, job_id')
       .eq('company_id', companyId)
-      .eq('jobs.is_key_position', true)
+      .in('job_id', keyJobIds)
       .is('end_date', null)
       .order('title');
     
@@ -170,7 +191,7 @@ export function KeyPositionsTab({ companyId }: KeyPositionsTabProps) {
           title: pos.title,
           code: pos.code,
           job_id: pos.job_id,
-          job: pos.jobs,
+          job: jobMap.get(pos.job_id) || null,
           current_holder: holder?.profiles || null,
         });
       }
