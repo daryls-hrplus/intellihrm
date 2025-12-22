@@ -56,15 +56,11 @@ export function KeyPositionsTab({ companyId }: KeyPositionsTabProps) {
   } = useSuccession(companyId);
 
   const [keyPositions, setKeyPositions] = useState<KeyPosition[]>([]);
-  const [availablePositions, setAvailablePositions] = useState<{ id: string; title: string; code: string; current_holder?: { id: string; full_name: string } | null }[]>([]);
-  const [keyJobs, setKeyJobs] = useState<{ id: string; name: string; code: string }[]>([]);
-  const [loadingAvailable, setLoadingAvailable] = useState(false);
   const [loadingKeyPositions, setLoadingKeyPositions] = useState(true);
   const [employees, setEmployees] = useState<{ id: string; full_name: string }[]>([]);
   const [showDialog, setShowDialog] = useState(false);
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [selectedPositionId, setSelectedPositionId] = useState<string>('');
-  const [selectedJobId, setSelectedJobId] = useState<string>('');
   const [searchTerm, setSearchTerm] = useState('');
   const [editingPosition, setEditingPosition] = useState<KeyPosition | null>(null);
   const [formData, setFormData] = useState({
@@ -85,7 +81,6 @@ export function KeyPositionsTab({ companyId }: KeyPositionsTabProps) {
   const loadData = async () => {
     await Promise.all([
       loadKeyPositionsFromJobs(),
-      loadAvailablePositions(),
       loadEmployees(),
     ]);
   };
@@ -154,51 +149,8 @@ export function KeyPositionsTab({ companyId }: KeyPositionsTabProps) {
     setLoadingKeyPositions(false);
   };
 
-  const loadAvailablePositions = async () => {
-    setLoadingAvailable(true);
-    
-    // Get all jobs that are marked as key positions
-    const { data: keyJobsData } = await supabase
-      .from('jobs')
-      .select('id, name, code')
-      .eq('company_id', companyId)
-      .eq('is_key_position', true)
-      .eq('is_active', true);
-    
-    setKeyJobs(keyJobsData || []);
-    
-    // Get positions where job_id IS NULL (unlinked positions available to add)
-    const { data: positionsData } = await (supabase
-      .from('positions') as any)
-      .select('id, title, code, job_id, department_id, departments!inner(company_id)')
-      .is('job_id', null)
-      .is('end_date', null)
-      .eq('departments.company_id', companyId)
-      .order('title');
-    
-    const positions: { id: string; title: string; code: string; current_holder?: { id: string; full_name: string } | null }[] = [];
-    if (positionsData) {
-      for (const pos of positionsData) {
-        const { data: holder } = await supabase
-          .from('employee_positions')
-          .select('profiles(id, full_name)')
-          .eq('position_id', pos.id)
-          .is('end_date', null)
-          .order('start_date', { ascending: false })
-          .limit(1)
-          .maybeSingle();
-        
-        positions.push({
-          id: pos.id,
-          title: pos.title,
-          code: pos.code,
-          current_holder: holder?.profiles || null,
-        });
-      }
-    }
-    setAvailablePositions(positions);
-    setLoadingAvailable(false);
-  };
+  // Add dialog uses the key-job-linked positions already loaded in `keyPositions`.
+  // (No separate "available positions" fetch needed.)
 
   const loadEmployees = async () => {
     const { data } = await supabase
@@ -290,55 +242,27 @@ export function KeyPositionsTab({ companyId }: KeyPositionsTabProps) {
   const openAddDialog = () => {
     setSearchTerm('');
     setSelectedPositionId('');
-    setSelectedJobId('');
     setShowAddDialog(true);
   };
 
   const handleAddKeyPosition = async () => {
-    if (!selectedPositionId || !selectedJobId) {
-      toast.error('Please select both a position and a key job');
+    if (!selectedPositionId) {
+      toast.error('Please select a position');
       return;
     }
 
-    // Link the position to the selected key job
-    const { error } = await (supabase
-      .from('positions') as any)
-      .update({ job_id: selectedJobId })
-      .eq('id', selectedPositionId);
-
-    if (error) {
-      toast.error('Failed to link position to key job');
+    const selected = keyPositions.find((p) => p.id === selectedPositionId);
+    if (!selected) {
+      toast.error('Selected position not found');
       return;
     }
 
-    const selected = availablePositions.find(p => p.id === selectedPositionId);
-    const job = keyJobs.find(j => j.id === selectedJobId);
-    
-    if (!selected || !job) {
-      toast.success('Position added as key position');
-      setShowAddDialog(false);
-      loadData();
-      return;
-    }
-
-    const temp: KeyPosition = {
-      id: selected.id,
-      title: selected.title,
-      code: selected.code,
-      job_id: selectedJobId,
-      job: { name: job.name, code: job.code },
-      current_holder: selected.current_holder || null,
-      riskAssessment: null,
-    };
-
-    toast.success('Position linked to key job');
     setShowAddDialog(false);
-    loadData();
-    openRiskDialog(temp);
+    openRiskDialog(selected);
   };
 
-  // Filter available positions based on search term
-  const filteredAvailablePositions = availablePositions.filter(pos => 
+  // Filter positions (already linked to key jobs) based on search term
+  const filteredAvailablePositions = keyPositions.filter((pos) =>
     pos.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
     pos.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
     (pos.current_holder?.full_name || 'vacant').toLowerCase().includes(searchTerm.toLowerCase())
@@ -675,55 +599,33 @@ export function KeyPositionsTab({ companyId }: KeyPositionsTabProps) {
           </DialogHeader>
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label>Select Key Job *</Label>
-              <Select value={selectedJobId} onValueChange={setSelectedJobId}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select a key job to link..." />
-                </SelectTrigger>
-                <SelectContent>
-                  {keyJobs.map((job) => (
-                    <SelectItem key={job.id} value={job.id}>
-                      {job.name} ({job.code})
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
               <Label>Search Positions</Label>
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
-                  placeholder="Type to filter by position title, code, or incumbent..."
+                  placeholder="Type to filter by position title, code, job, or incumbent..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-9"
                 />
               </div>
-              {availablePositions.length > 0 && (
+              {keyPositions.length > 0 && (
                 <p className="text-xs text-muted-foreground">
-                  Showing {filteredAvailablePositions.length} of {availablePositions.length} unlinked positions
+                  Showing {filteredAvailablePositions.length} of {keyPositions.length} positions linked to key jobs
                 </p>
               )}
             </div>
 
             <div className="border rounded-lg max-h-[300px] overflow-y-auto">
-              {loadingAvailable ? (
+              {isLoading ? (
                 <div className="flex items-center justify-center py-12">
                   <Loader2 className="h-8 w-8 animate-spin text-primary" />
                 </div>
-              ) : keyJobs.length === 0 ? (
+              ) : keyPositions.length === 0 ? (
                 <div className="p-8 text-center text-muted-foreground">
                   <Shield className="h-10 w-10 mx-auto mb-3 opacity-50" />
-                  <p>No key jobs defined</p>
-                  <p className="text-sm">Mark jobs as "Key Position" in Workforce &gt; Jobs first</p>
-                </div>
-              ) : availablePositions.length === 0 ? (
-                <div className="p-8 text-center text-muted-foreground">
-                  <Shield className="h-10 w-10 mx-auto mb-3 opacity-50" />
-                  <p>All positions are already linked</p>
-                  <p className="text-sm">Create new positions or unlink existing ones to add here</p>
+                  <p>No positions linked to key jobs</p>
+                  <p className="text-sm">Mark jobs as "Key Position" (and link positions to those jobs) first</p>
                 </div>
               ) : filteredAvailablePositions.length === 0 ? (
                 <div className="p-8 text-center text-muted-foreground">
@@ -737,20 +639,21 @@ export function KeyPositionsTab({ companyId }: KeyPositionsTabProps) {
                     <TableRow>
                       <TableHead className="w-8"></TableHead>
                       <TableHead>Position</TableHead>
+                      <TableHead>Job</TableHead>
                       <TableHead>Incumbent</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {filteredAvailablePositions.map((pos) => (
-                      <TableRow 
-                        key={pos.id} 
+                      <TableRow
+                        key={pos.id}
                         className={`cursor-pointer hover:bg-muted/50 ${selectedPositionId === pos.id ? 'bg-primary/10' : ''}`}
                         onClick={() => setSelectedPositionId(pos.id)}
                       >
                         <TableCell>
-                          <input 
-                            type="radio" 
-                            name="position" 
+                          <input
+                            type="radio"
+                            name="position"
                             checked={selectedPositionId === pos.id}
                             onChange={() => setSelectedPositionId(pos.id)}
                             className="h-4 w-4 accent-primary"
@@ -761,6 +664,9 @@ export function KeyPositionsTab({ companyId }: KeyPositionsTabProps) {
                             <div className="font-medium">{pos.title}</div>
                             <div className="text-sm text-muted-foreground">{pos.code}</div>
                           </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="text-sm text-muted-foreground">{pos.job?.name || '-'}</div>
                         </TableCell>
                         <TableCell>
                           {pos.current_holder?.full_name || (
@@ -775,8 +681,10 @@ export function KeyPositionsTab({ companyId }: KeyPositionsTabProps) {
             </div>
 
             <div className="flex justify-end gap-2">
-              <Button variant="outline" onClick={() => setShowAddDialog(false)}>Cancel</Button>
-              <Button onClick={handleAddKeyPosition} disabled={!selectedPositionId || !selectedJobId}>
+              <Button variant="outline" onClick={() => setShowAddDialog(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleAddKeyPosition} disabled={!selectedPositionId}>
                 Add Key Position
               </Button>
             </div>
