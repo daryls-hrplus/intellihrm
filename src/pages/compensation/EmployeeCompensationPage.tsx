@@ -334,59 +334,76 @@ export default function EmployeeCompensationPage() {
   const loadEmployeePrimaryPosition = async () => {
     if (!selectedEmployeeId) return;
 
-    // Get primary position for employee
-    const { data: positionData } = await supabase
+    // Get ALL positions for the employee (not just primary)
+    const { data: positionsData } = await supabase
       .from("employee_positions")
       .select(`
         position_id,
+        is_primary,
         position:positions!employee_positions_position_id_fkey(
           id, title, code, compensation_model, salary_grade_id, pay_spine_id,
           salary_grade:salary_grades!positions_salary_grade_id_fkey(id, name, code, min_salary, mid_salary, max_salary, currency)
         )
       `)
       .eq("employee_id", selectedEmployeeId)
-      .eq("is_primary", true)
-      .eq("is_active", true)
-      .single();
+      .eq("is_active", true);
 
-    if (positionData?.position) {
-      const pos = positionData.position as unknown as PositionWithCompensation;
-      setEmployeePrimaryPosition(pos);
+    if (positionsData && positionsData.length > 0) {
+      // Store all positions for display
+      const positions = positionsData.map(pd => ({
+        position_id: pd.position_id,
+        is_primary: pd.is_primary,
+        position: pd.position as unknown as Position
+      }));
+      setEmployeePositions(positions);
 
-      // Load position compensation items
-      const { data: compData } = await supabase
-        .from("position_compensation")
-        .select(`
-          id, amount, currency, frequency_id,
-          pay_element:pay_elements!position_compensation_pay_element_id_fkey(name)
-        `)
-        .eq("position_id", pos.id)
-        .eq("is_active", true);
+      // Find primary position for the summary card
+      const primaryPosData = positionsData.find(p => p.is_primary);
+      if (primaryPosData?.position) {
+        const pos = primaryPosData.position as unknown as PositionWithCompensation;
+        setEmployeePrimaryPosition(pos);
 
-      setPositionCompensationItems((compData as unknown as PositionCompensationItem[]) || []);
+        // Load position compensation items for primary position
+        const { data: compData } = await supabase
+          .from("position_compensation")
+          .select(`
+            id, amount, currency, frequency_id,
+            pay_element:pay_elements!position_compensation_pay_element_id_fkey(name)
+          `)
+          .eq("position_id", pos.id)
+          .eq("is_active", true);
 
-      // Load pay spine and points if applicable
-      if (pos.pay_spine_id && (pos.compensation_model === 'spinal_point' || pos.compensation_model === 'hybrid')) {
-        const { data: spineData } = await supabase
-          .from("pay_spines")
-          .select("id, name, code, currency")
-          .eq("id", pos.pay_spine_id)
-          .single();
+        setPositionCompensationItems((compData as unknown as PositionCompensationItem[]) || []);
 
-        if (spineData) {
-          setPaySpine(spineData);
-          const { data: pointsData } = await supabase
-            .from("spinal_points")
-            .select("id, point_number, annual_salary")
-            .eq("pay_spine_id", spineData.id)
-            .order("point_number");
-          setSpinalPoints(pointsData || []);
+        // Load pay spine and points if applicable
+        if (pos.pay_spine_id && (pos.compensation_model === 'spinal_point' || pos.compensation_model === 'hybrid')) {
+          const { data: spineData } = await supabase
+            .from("pay_spines")
+            .select("id, name, code, currency")
+            .eq("id", pos.pay_spine_id)
+            .single();
+
+          if (spineData) {
+            setPaySpine(spineData);
+            const { data: pointsData } = await supabase
+              .from("spinal_points")
+              .select("id, point_number, annual_salary")
+              .eq("pay_spine_id", spineData.id)
+              .order("point_number");
+            setSpinalPoints(pointsData || []);
+          }
+        } else {
+          setPaySpine(null);
+          setSpinalPoints([]);
         }
       } else {
+        setEmployeePrimaryPosition(null);
+        setPositionCompensationItems([]);
         setPaySpine(null);
         setSpinalPoints([]);
       }
     } else {
+      setEmployeePositions([]);
       setEmployeePrimaryPosition(null);
       setPositionCompensationItems([]);
       setPaySpine(null);
@@ -1031,140 +1048,235 @@ export default function EmployeeCompensationPage() {
           </Card>
         )}
 
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2 mb-4">
-              <div className="relative flex-1 max-w-sm">
-                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <Input
-                  placeholder={t("compensation.employeeCompensation.searchPlaceholder")}
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-9"
-                />
-              </div>
-            </div>
-
-            {!selectedEmployeeId ? (
+        {/* Compensation by Position */}
+        {!selectedEmployeeId ? (
+          <Card>
+            <CardContent className="p-4">
               <div className="text-center py-12 text-muted-foreground">
                 {t("compensation.employeeCompensation.selectEmployeeFirst")}
               </div>
-            ) : isLoading ? (
+            </CardContent>
+          </Card>
+        ) : isLoading ? (
+          <Card>
+            <CardContent className="p-4">
               <div className="flex justify-center py-12">
                 <Loader2 className="h-8 w-8 animate-spin text-primary" />
               </div>
-            ) : filteredItems.length === 0 ? (
+            </CardContent>
+          </Card>
+        ) : employeePositions.length === 0 ? (
+          <Card>
+            <CardContent className="p-4">
               <div className="text-center py-12 text-muted-foreground">
-                {t("compensation.employeeCompensation.noItems")}
+                {t("compensation.employeeCompensation.noPositionsAssigned", "No positions assigned to this employee")}
               </div>
-            ) : (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>{t("compensation.employeeCompensation.employee")}</TableHead>
-                    <TableHead>{t("compensation.employeeCompensation.position")}</TableHead>
-                    <TableHead>{t("compensation.employeeCompensation.payElement")}</TableHead>
-                    <TableHead className="text-right">{t("compensation.employeeCompensation.amount")}</TableHead>
-                    <TableHead>{t("compensation.employeeCompensation.frequencyLabel")}</TableHead>
-                    <TableHead>{t("compensation.employeeCompensation.effectiveDates")}</TableHead>
-                    <TableHead>{t("common.status")}</TableHead>
-                    <TableHead className="text-right">{t("common.actions")}</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredItems.map((item) => (
-                    <TableRow key={item.id}>
-                      <TableCell>
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="space-y-4">
+            {/* Search bar */}
+            <Card>
+              <CardContent className="p-4">
+                <div className="flex items-center gap-2">
+                  <div className="relative flex-1 max-w-sm">
+                    <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                    <Input
+                      placeholder={t("compensation.employeeCompensation.searchPlaceholder")}
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="pl-9"
+                    />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Position cards with compensation */}
+            {employeePositions.map((ep) => {
+              const positionItems = filteredItems.filter(item => item.position_id === ep.position_id);
+              const positionTotal = positionItems
+                .filter(item => item.is_active)
+                .reduce((sum, item) => {
+                  const multiplier = getAnnualMultiplierByFrequency(item.frequency);
+                  return sum + (item.amount * multiplier / 12); // Convert to monthly
+                }, 0);
+              
+              return (
+                <Card key={ep.position_id}>
+                  <CardContent className="p-4">
+                    {/* Position Header */}
+                    <div className="flex items-center justify-between mb-4 pb-3 border-b">
+                      <div className="flex items-center gap-3">
+                        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                          <User className="h-5 w-5 text-primary" />
+                        </div>
                         <div>
-                          <div className="font-medium">
-                            {item.employee?.full_name}
+                          <div className="flex items-center gap-2">
+                            <h3 className="font-semibold text-lg">{ep.position.title}</h3>
+                            <Badge variant="outline" className="text-xs">{ep.position.code}</Badge>
+                            {ep.is_primary && (
+                              <Badge variant="secondary" className="text-xs">
+                                ★ {t("common.primary", "Primary")}
+                              </Badge>
+                            )}
                           </div>
-                          <div className="text-sm text-muted-foreground">
-                            {item.employee?.email}
-                          </div>
+                          <p className="text-sm text-muted-foreground">
+                            {positionItems.filter(i => i.is_active).length} {t("compensation.employeeCompensation.activeElements", "active compensation elements")}
+                          </p>
                         </div>
-                      </TableCell>
-                      <TableCell>
-                        {item.position ? (
-                          <div>
-                            <div className="font-medium">{item.position.title}</div>
-                            <div className="text-xs text-muted-foreground">{item.position.code}</div>
-                          </div>
-                        ) : (
-                          <span className="text-muted-foreground">—</span>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-sm text-muted-foreground">{t("compensation.employeeCompensation.monthlyTotal", "Monthly Total")}</div>
+                        <div className="text-xl font-bold text-primary">
+                          {formatAmount(positionTotal, positionItems[0]?.currency || "USD")}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Compensation Table for this Position */}
+                    {positionItems.length === 0 ? (
+                      <div className="text-center py-8 text-muted-foreground">
+                        {t("compensation.employeeCompensation.noItemsForPosition", "No compensation records for this position")}
+                      </div>
+                    ) : (
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead>{t("compensation.employeeCompensation.payElement")}</TableHead>
+                            <TableHead className="text-right">{t("compensation.employeeCompensation.amount")}</TableHead>
+                            <TableHead>{t("compensation.employeeCompensation.frequencyLabel")}</TableHead>
+                            <TableHead className="text-right">{t("compensation.employeeCompensation.monthlyEquivalent", "Monthly Equiv.")}</TableHead>
+                            <TableHead>{t("compensation.employeeCompensation.effectiveDates")}</TableHead>
+                            <TableHead>{t("common.status")}</TableHead>
+                            <TableHead className="text-right">{t("common.actions")}</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {positionItems.map((item) => {
+                            const monthlyAmount = item.amount * getAnnualMultiplierByFrequency(item.frequency) / 12;
+                            return (
+                              <TableRow key={item.id}>
+                                <TableCell>
+                                  <div className="flex items-center gap-2">
+                                    <span>{item.pay_element?.name}</span>
+                                    {item.is_override && (
+                                      <Badge variant="outline" className="text-xs">
+                                        <AlertCircle className="h-3 w-3 mr-1" />
+                                        {t("compensation.employeeCompensation.override")}
+                                      </Badge>
+                                    )}
+                                  </div>
+                                </TableCell>
+                                <TableCell className="text-right font-mono">
+                                  {(() => {
+                                    const rangeCheck = isAmountOutOfRange(item.amount, item.frequency, item.pay_element_id);
+                                    return (
+                                      <div className="flex items-center justify-end gap-2">
+                                        {rangeCheck.outOfRange && (
+                                          <Tooltip>
+                                            <TooltipTrigger asChild>
+                                              <div className="flex items-center justify-center w-5 h-5 rounded-full bg-destructive/20 border-2 border-destructive cursor-help">
+                                                <AlertCircle className="h-3 w-3 text-destructive" />
+                                              </div>
+                                            </TooltipTrigger>
+                                            <TooltipContent>
+                                              <p>{rangeCheck.message}</p>
+                                            </TooltipContent>
+                                          </Tooltip>
+                                        )}
+                                        <span className={rangeCheck.outOfRange ? "text-destructive font-semibold" : ""}>
+                                          {formatAmount(item.amount, item.currency)}
+                                        </span>
+                                      </div>
+                                    );
+                                  })()}
+                                </TableCell>
+                                <TableCell className="capitalize">{item.frequency}</TableCell>
+                                <TableCell className="text-right font-mono text-muted-foreground">
+                                  {formatAmount(monthlyAmount, item.currency)}
+                                </TableCell>
+                                <TableCell>
+                                  <span className="text-sm">
+                                    {item.start_date} → {item.end_date || t("common.present")}
+                                  </span>
+                                </TableCell>
+                                <TableCell>
+                                  <Badge variant={item.is_active ? "default" : "secondary"}>
+                                    {item.is_active ? t("common.active") : t("common.inactive")}
+                                  </Badge>
+                                </TableCell>
+                                <TableCell className="text-right">
+                                  <div className="flex justify-end gap-1">
+                                    <Button
+                                      variant="ghost"
+                                      size="icon"
+                                      onClick={() => openEdit(item)}
+                                    >
+                                      <Pencil className="h-4 w-4" />
+                                    </Button>
+                                    <Button
+                                      variant="ghost"
+                                      size="icon"
+                                      onClick={() => handleDelete(item.id)}
+                                    >
+                                      <Trash2 className="h-4 w-4 text-destructive" />
+                                    </Button>
+                                  </div>
+                                </TableCell>
+                              </TableRow>
+                            );
+                          })}
+                        </TableBody>
+                      </Table>
+                    )}
+                  </CardContent>
+                </Card>
+              );
+            })}
+
+            {/* Total Compensation Summary */}
+            {filteredItems.length > 0 && (
+              <Card className="bg-primary/5 border-primary/20">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h4 className="font-semibold text-lg">{t("compensation.employeeCompensation.totalCompensation", "Total Compensation")}</h4>
+                      <p className="text-sm text-muted-foreground">
+                        {t("compensation.employeeCompensation.acrossAllPositions", "Across all positions")}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-sm text-muted-foreground">{t("compensation.employeeCompensation.monthlyTotal", "Monthly Total")}</div>
+                      <div className="text-2xl font-bold text-primary">
+                        {formatAmount(
+                          filteredItems
+                            .filter(item => item.is_active)
+                            .reduce((sum, item) => {
+                              const multiplier = getAnnualMultiplierByFrequency(item.frequency);
+                              return sum + (item.amount * multiplier / 12);
+                            }, 0),
+                          filteredItems[0]?.currency || "USD"
                         )}
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <span>{item.pay_element?.name}</span>
-                          {item.is_override && (
-                            <Badge variant="outline" className="text-xs">
-                              <AlertCircle className="h-3 w-3 mr-1" />
-                              {t("compensation.employeeCompensation.override")}
-                            </Badge>
-                          )}
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-right font-mono">
-                        {(() => {
-                          const rangeCheck = isAmountOutOfRange(item.amount, item.frequency, item.pay_element_id);
-                          return (
-                            <div className="flex items-center justify-end gap-2">
-                              {rangeCheck.outOfRange && (
-                                <Tooltip>
-                                  <TooltipTrigger asChild>
-                                    <div className="flex items-center justify-center w-5 h-5 rounded-full bg-destructive/20 border-2 border-destructive cursor-help">
-                                      <AlertCircle className="h-3 w-3 text-destructive" />
-                                    </div>
-                                  </TooltipTrigger>
-                                  <TooltipContent>
-                                    <p>{rangeCheck.message}</p>
-                                  </TooltipContent>
-                                </Tooltip>
-                              )}
-                              <span className={rangeCheck.outOfRange ? "text-destructive font-semibold" : ""}>
-                                {formatAmount(item.amount, item.currency)}
-                              </span>
-                            </div>
-                          );
-                        })()}
-                      </TableCell>
-                      <TableCell className="capitalize">{item.frequency}</TableCell>
-                      <TableCell>
-                        <span className="text-sm">
-                          {item.start_date} → {item.end_date || t("common.present")}
-                        </span>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant={item.is_active ? "default" : "secondary"}>
-                          {item.is_active ? t("common.active") : t("common.inactive")}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex justify-end gap-1">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => openEdit(item)}
-                          >
-                            <Pencil className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => handleDelete(item.id)}
-                          >
-                            <Trash2 className="h-4 w-4 text-destructive" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                      </div>
+                      <div className="text-sm text-muted-foreground mt-1">
+                        {t("compensation.employeeCompensation.annualEquivalent", "Annual")}: {formatAmount(
+                          filteredItems
+                            .filter(item => item.is_active)
+                            .reduce((sum, item) => {
+                              const multiplier = getAnnualMultiplierByFrequency(item.frequency);
+                              return sum + (item.amount * multiplier);
+                            }, 0),
+                          filteredItems[0]?.currency || "USD"
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
             )}
-          </CardContent>
-        </Card>
+          </div>
+        )}
 
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogContent className="max-w-lg">
