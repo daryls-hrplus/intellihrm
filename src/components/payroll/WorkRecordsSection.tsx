@@ -88,12 +88,6 @@ export function WorkRecordsSection({ companyId, employeeId, payPeriodId, payGrou
     notes: ''
   });
 
-  useEffect(() => {
-    loadWorkRecords();
-    loadPayrollRules();
-    loadEmployeePositions();
-  }, [employeeId, payPeriodId, payGroupId]);
-
   const loadPayrollRules = async () => {
     const { data, error } = await supabase
       .from('payroll_rules')
@@ -166,6 +160,12 @@ export function WorkRecordsSection({ companyId, employeeId, payPeriodId, payGrou
     setWorkRecords(recordsWithPeriods);
     setIsLoading(false);
   };
+
+  useEffect(() => {
+    loadWorkRecords();
+    loadPayrollRules();
+    loadEmployeePositions();
+  }, [employeeId, payPeriodId, payGroupId]);
 
   const handleAddRecord = async () => {
     if (!newRecord.work_date) {
