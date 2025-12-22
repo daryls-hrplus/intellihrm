@@ -7,10 +7,11 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogDescription } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Switch } from '@/components/ui/switch';
-import { Plus, Pencil, X, Bell, Mail, BellRing, Loader2, Calendar, User, Clock, CheckCircle2, XCircle } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Plus, Pencil, X, Bell, Mail, BellRing, Loader2, Calendar, User, Clock, CheckCircle2, XCircle, Send, HelpCircle, UserCheck } from 'lucide-react';
 import { format } from 'date-fns';
 import type { EmployeeReminder, ReminderEventType } from '@/types/reminders';
 import { PRIORITY_OPTIONS, NOTIFICATION_METHODS, REMINDER_STATUS, REMINDER_CATEGORIES } from '@/types/reminders';
@@ -279,21 +280,72 @@ export function EmployeeRemindersList({
             </SelectContent>
           </Select>
         </div>
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button variant="outline" size="icon" className="mr-2">
+                <HelpCircle className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="bottom" className="max-w-sm p-4">
+              <div className="space-y-2">
+                <p className="font-semibold flex items-center gap-2">
+                  <Send className="h-4 w-4 text-blue-600" />
+                  When to use Manual Reminders
+                </p>
+                <ul className="text-sm space-y-1 list-disc pl-4">
+                  <li>Send a <strong>one-time reminder</strong> to a specific employee</li>
+                  <li>Perfect for ad-hoc tasks, follow-ups, or custom deadlines</li>
+                  <li>You choose exactly who receives the reminder and when</li>
+                </ul>
+                <p className="text-xs text-muted-foreground mt-2 pt-2 border-t">
+                  Example: "Remind John to submit his expense report by Friday" - a one-off notification just for John.
+                </p>
+              </div>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
-            <Button onClick={() => handleOpenDialog()}>
-              <Plus className="h-4 w-4 mr-2" />
+            <Button onClick={() => handleOpenDialog()} variant="secondary" className="bg-blue-600 hover:bg-blue-700 text-white">
+              <Send className="h-4 w-4 mr-2" />
               Create Reminder
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>{editingReminder ? 'Edit Reminder' : 'Create Reminder'}</DialogTitle>
+          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto border-t-4 border-t-blue-600">
+            <DialogHeader className="pb-4 border-b">
+              <div className="flex items-center gap-2">
+                <div className="p-2 rounded-lg bg-blue-600/10">
+                  <Send className="h-5 w-5 text-blue-600" />
+                </div>
+                <div>
+                  <DialogTitle className="text-lg">{editingReminder ? 'Edit Reminder' : 'Create Manual Reminder'}</DialogTitle>
+                  <DialogDescription className="mt-1">
+                    Send a one-time reminder to a specific employee for a particular event or task
+                  </DialogDescription>
+                </div>
+              </div>
             </DialogHeader>
+            
+            {/* Quick Guide Banner */}
+            <div className="bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 rounded-lg p-3 flex items-start gap-3">
+              <UserCheck className="h-5 w-5 text-blue-600 mt-0.5 shrink-0" />
+              <div className="text-sm">
+                <p className="font-medium text-blue-700 dark:text-blue-400">Manual Reminder</p>
+                <p className="text-muted-foreground">
+                  This reminder is for <strong>one specific employee</strong> only. 
+                  Use for ad-hoc notifications, personal follow-ups, or custom deadlines that don't apply to everyone.
+                </p>
+              </div>
+            </div>
+
             <div className="grid gap-4 py-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>Employee *</Label>
+                  <Label className="flex items-center gap-1">
+                    Employee *
+                    <span className="text-xs text-muted-foreground">(Who receives this)</span>
+                  </Label>
                   <Select
                     value={formData.employee_id}
                     onValueChange={(v) => setFormData({ ...formData, employee_id: v })}
@@ -309,7 +361,7 @@ export function EmployeeRemindersList({
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label>Event Type</Label>
+                  <Label>Event Type <span className="text-xs text-muted-foreground">(Optional)</span></Label>
                   <Select
                     value={formData.event_type_id}
                     onValueChange={(v) => setFormData({ ...formData, event_type_id: v })}

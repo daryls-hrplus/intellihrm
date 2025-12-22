@@ -8,9 +8,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogDescription } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Plus, Pencil, Trash2, Bell, Mail, BellRing, Loader2, X } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Plus, Pencil, Trash2, Bell, Mail, BellRing, Loader2, X, Settings, HelpCircle, Zap } from 'lucide-react';
 import type { ReminderRule, ReminderEventType } from '@/types/reminders';
 import { PRIORITY_OPTIONS, NOTIFICATION_METHODS } from '@/types/reminders';
 
@@ -189,21 +190,72 @@ export const ReminderRulesManager = forwardRef<ReminderRulesManagerRef, Reminder
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-medium">Automatic Reminder Rules</h3>
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button variant="outline" size="icon" className="mr-2">
+                <HelpCircle className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="bottom" className="max-w-sm p-4">
+              <div className="space-y-2">
+                <p className="font-semibold flex items-center gap-2">
+                  <Settings className="h-4 w-4 text-primary" />
+                  When to use Reminder Rules
+                </p>
+                <ul className="text-sm space-y-1 list-disc pl-4">
+                  <li>Set up <strong>automated reminders</strong> that trigger for ALL employees</li>
+                  <li>Perfect for recurring events like contract renewals, certifications, or probation reviews</li>
+                  <li>Reminders are sent automatically based on event dates in the system</li>
+                </ul>
+                <p className="text-xs text-muted-foreground mt-2 pt-2 border-t">
+                  Example: "Send reminder 30 days before passport expiry" will auto-notify every employee approaching expiry.
+                </p>
+              </div>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
-            <Button onClick={() => handleOpenDialog()}>
-              <Plus className="h-4 w-4 mr-2" />
+            <Button onClick={() => handleOpenDialog()} className="bg-primary hover:bg-primary/90">
+              <Zap className="h-4 w-4 mr-2" />
               Add Rule
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>{editingRule ? 'Edit Reminder Rule' : 'Create Reminder Rule'}</DialogTitle>
+          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto border-t-4 border-t-primary">
+            <DialogHeader className="pb-4 border-b">
+              <div className="flex items-center gap-2">
+                <div className="p-2 rounded-lg bg-primary/10">
+                  <Settings className="h-5 w-5 text-primary" />
+                </div>
+                <div>
+                  <DialogTitle className="text-lg">{editingRule ? 'Edit Reminder Rule' : 'Create Automated Reminder Rule'}</DialogTitle>
+                  <DialogDescription className="mt-1">
+                    Configure a rule to automatically send reminders to all employees matching certain criteria
+                  </DialogDescription>
+                </div>
+              </div>
             </DialogHeader>
+            
+            {/* Quick Guide Banner */}
+            <div className="bg-primary/5 border border-primary/20 rounded-lg p-3 flex items-start gap-3">
+              <Zap className="h-5 w-5 text-primary mt-0.5 shrink-0" />
+              <div className="text-sm">
+                <p className="font-medium text-primary">Automated Rule</p>
+                <p className="text-muted-foreground">
+                  This rule will apply to <strong>all employees</strong> with matching events. 
+                  Use for system-wide policies like expiring documents, upcoming reviews, or certification renewals.
+                </p>
+              </div>
+            </div>
+
             <div className="grid gap-4 py-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>Rule Name</Label>
+                  <Label className="flex items-center gap-1">
+                    Rule Name
+                    <span className="text-xs text-muted-foreground">(Template identifier)</span>
+                  </Label>
                   <Input
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
