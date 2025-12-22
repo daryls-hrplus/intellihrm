@@ -325,6 +325,7 @@ export default function PayPeriodPayrollEntriesPage() {
             companyId={selectedCompany}
             employeeId={selectedEmployee}
             payGroupId={selectedPayGroup}
+            payPeriodId={selectedPayPeriod}
           />
 
           {/* Work Records Section */}
