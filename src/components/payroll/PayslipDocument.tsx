@@ -194,9 +194,9 @@ export function PayslipDocument({
         <h3 className="font-semibold mb-2 text-xs uppercase tracking-wide" style={{ color: t.primary_color }}>Earnings</h3>
         <table className="w-full text-xs border-collapse" style={{ tableLayout: 'fixed' }}>
           <colgroup>
-            <col />
+            <col style={{ width: t.show_ytd_totals ? 'calc(100% - 360px)' : 'calc(100% - 180px)' }} />
             <col style={{ width: '180px' }} />
-            {t.show_ytd_totals && <col style={{ width: '180px' }} />}
+            <col style={{ width: '180px', display: t.show_ytd_totals ? undefined : 'none' }} />
           </colgroup>
           <thead>
             <tr className="border-b-2 border-border">
@@ -269,9 +269,9 @@ export function PayslipDocument({
         <h3 className="font-semibold mb-2 text-xs uppercase tracking-wide" style={{ color: t.primary_color }}>Deductions</h3>
         <table className="w-full text-xs border-collapse" style={{ tableLayout: 'fixed' }}>
           <colgroup>
-            <col />
+            <col style={{ width: t.show_ytd_totals ? 'calc(100% - 360px)' : 'calc(100% - 180px)' }} />
             <col style={{ width: '180px' }} />
-            {t.show_ytd_totals && <col style={{ width: '180px' }} />}
+            <col style={{ width: '180px', display: t.show_ytd_totals ? undefined : 'none' }} />
           </colgroup>
           <thead>
             <tr className="border-b-2 border-border">
@@ -356,9 +356,9 @@ export function PayslipDocument({
       <div className={`rounded-lg ${style.accent}`} style={{ borderColor: t.accent_color, borderWidth: '2px', padding: 0 }}>
         <table className="w-full text-xs border-collapse" style={{ tableLayout: 'fixed' }}>
           <colgroup>
-            <col />
+            <col style={{ width: t.show_ytd_totals ? 'calc(100% - 360px)' : 'calc(100% - 180px)' }} />
             <col style={{ width: '180px' }} />
-            {t.show_ytd_totals && <col style={{ width: '180px' }} />}
+            <col style={{ width: '180px', display: t.show_ytd_totals ? undefined : 'none' }} />
           </colgroup>
           <tbody>
             <tr>
