@@ -57,7 +57,7 @@ export function KeyPositionsTab({ companyId }: KeyPositionsTabProps) {
 
   const [keyPositions, setKeyPositions] = useState<KeyPosition[]>([]);
   const [availablePositions, setAvailablePositions] = useState<{ id: string; title: string; code: string; matchingJobId: string; current_holder?: { id: string; full_name: string } | null }[]>([]);
-  const [keyJobs, setKeyJobs] = useState<{ id: string; name: string; code: string; job_family_id: string | null }[]>([]);
+  const [keyJobs, setKeyJobs] = useState<{ id: string; name: string; code: string }[]>([]);
   const [loadingAvailable, setLoadingAvailable] = useState(false);
   const [loadingKeyPositions, setLoadingKeyPositions] = useState(true);
   const [employees, setEmployees] = useState<{ id: string; full_name: string }[]>([]);
@@ -155,10 +155,10 @@ export function KeyPositionsTab({ companyId }: KeyPositionsTabProps) {
   const loadAvailablePositions = async () => {
     setLoadingAvailable(true);
     
-    // Get all jobs that are marked as key positions (with job_family_id for matching)
+    // Get all jobs that are marked as key positions
     const { data: keyJobsData } = await supabase
       .from('jobs')
-      .select('id, name, code, job_family_id')
+      .select('id, name, code')
       .eq('company_id', companyId)
       .eq('is_key_position', true)
       .eq('is_active', true);
@@ -171,35 +171,19 @@ export function KeyPositionsTab({ companyId }: KeyPositionsTabProps) {
       return;
     }
     
-    // Get job_family_ids from key jobs for filtering positions
-    const keyJobFamilyIds = keyJobsData
-      .filter(j => j.job_family_id)
-      .map(j => j.job_family_id as string);
+    // Get key job IDs
+    const keyJobIds = keyJobsData.map(j => j.id);
     
-    if (keyJobFamilyIds.length === 0) {
-      setAvailablePositions([]);
-      setLoadingAvailable(false);
-      return;
-    }
-    
-    // Get positions that match key job families but don't have job_id set yet
+    // Get positions where job_id matches a key job (already linked to key jobs)
     const { data: positionsData } = await supabase
       .from('positions')
-      .select('id, title, code, job_family_id, department_id, departments!inner(company_id)')
-      .in('job_family_id', keyJobFamilyIds)
-      .is('job_id', null)
+      .select('id, title, code, job_id, department_id, departments!inner(company_id)')
+      .in('job_id', keyJobIds)
       .is('end_date', null)
       .eq('departments.company_id', companyId)
       .order('title');
     
     if (positionsData) {
-      // Create a map of job_family_id to key job id for auto-linking
-      const familyToJobMap = new Map<string, string>();
-      keyJobsData.forEach(job => {
-        if (job.job_family_id) {
-          familyToJobMap.set(job.job_family_id, job.id);
-        }
-      });
       
       const positions: { id: string; title: string; code: string; matchingJobId: string; current_holder?: { id: string; full_name: string } | null }[] = [];
       for (const pos of positionsData) {
@@ -212,16 +196,13 @@ export function KeyPositionsTab({ companyId }: KeyPositionsTabProps) {
           .limit(1)
           .maybeSingle();
         
-        const matchingJobId = pos.job_family_id ? familyToJobMap.get(pos.job_family_id) : undefined;
-        if (matchingJobId) {
-          positions.push({
-            id: pos.id,
-            title: pos.title,
-            code: pos.code,
-            matchingJobId,
-            current_holder: holder?.profiles || null,
-          });
-        }
+        positions.push({
+          id: pos.id,
+          title: pos.title,
+          code: pos.code,
+          matchingJobId: pos.job_id,
+          current_holder: holder?.profiles || null,
+        });
       }
       setAvailablePositions(positions);
     }
