@@ -146,10 +146,10 @@ export function EmployeeAgreementsSignaturesTab({ employeeId, isEssView = false 
     onSuccess: async (result) => {
       await logAction({
         action: "CREATE",
-        entity_type: "employee_agreement",
-        entity_id: result.id,
-        entity_name: result.agreement_name,
-        new_values: result,
+        entityType: "employee_agreement",
+        entityId: result.id,
+        entityName: result.agreement_name,
+        newValues: result,
       });
       queryClient.invalidateQueries({ queryKey: ["employee-agreements", employeeId] });
       toast.success("Agreement added successfully");
@@ -191,10 +191,10 @@ export function EmployeeAgreementsSignaturesTab({ employeeId, isEssView = false 
     onSuccess: async (result) => {
       await logAction({
         action: "UPDATE",
-        entity_type: "employee_agreement",
-        entity_id: result.id,
-        entity_name: result.agreement_name,
-        new_values: result,
+        entityType: "employee_agreement",
+        entityId: result.id,
+        entityName: result.agreement_name,
+        newValues: result,
       });
       queryClient.invalidateQueries({ queryKey: ["employee-agreements", employeeId] });
       toast.success("Agreement updated successfully");
@@ -226,10 +226,10 @@ export function EmployeeAgreementsSignaturesTab({ employeeId, isEssView = false 
     onSuccess: async (result) => {
       await logAction({
         action: "DELETE",
-        entity_type: "employee_agreement",
-        entity_id: result.id,
-        entity_name: result.agreement_name,
-        old_values: { archived: true },
+        entityType: "employee_agreement",
+        entityId: result.id,
+        entityName: result.agreement_name,
+        oldValues: { archived: true },
       });
       queryClient.invalidateQueries({ queryKey: ["employee-agreements", employeeId] });
       toast.success("Agreement archived successfully");
@@ -260,10 +260,10 @@ export function EmployeeAgreementsSignaturesTab({ employeeId, isEssView = false 
     onSuccess: async (result) => {
       await logAction({
         action: "UPDATE",
-        entity_type: "employee_agreement",
-        entity_id: result.id,
-        entity_name: result.agreement_name,
-        new_values: { signature_status: "signed" },
+        entityType: "employee_agreement",
+        entityId: result.id,
+        entityName: result.agreement_name,
+        newValues: { signature_status: "signed" },
       });
       queryClient.invalidateQueries({ queryKey: ["employee-agreements", employeeId] });
       toast.success("Agreement signed successfully");
