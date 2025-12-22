@@ -20,42 +20,95 @@ interface Company {
   name: string;
 }
 
+interface PayGroup {
+  id: string;
+  name: string;
+}
+
 export default function CompensationHistoryPage() {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState("");
   const [changeTypeFilter, setChangeTypeFilter] = useState<string>("all");
   const [companies, setCompanies] = useState<Company[]>([]);
+  const [payGroups, setPayGroups] = useState<PayGroup[]>([]);
   const [selectedCompanyId, setSelectedCompanyId] = useState<string>("");
+  const [selectedPayGroupId, setSelectedPayGroupId] = useState<string>("all");
   const [addDialogOpen, setAddDialogOpen] = useState(false);
 
   useEffect(() => {
     const fetchCompanies = async () => {
+      // @ts-ignore - Supabase type instantiation issue
       const { data } = await supabase.from("companies").select("id, name").eq("is_active", true).order("name");
       if (data && data.length > 0) {
-        setCompanies(data);
+        setCompanies(data as Company[]);
         setSelectedCompanyId(data[0].id);
       }
     };
     fetchCompanies();
   }, []);
 
+  useEffect(() => {
+    const fetchPayGroups = async () => {
+      if (!selectedCompanyId) {
+        setPayGroups([]);
+        return;
+      }
+      // @ts-ignore - Supabase type instantiation issue
+      const { data } = await supabase
+        .from("pay_groups")
+        .select("id, name")
+        .eq("company_id", selectedCompanyId)
+        .eq("is_active", true)
+        .order("name");
+      if (data) {
+        setPayGroups(data as PayGroup[]);
+      }
+    };
+    fetchPayGroups();
+    setSelectedPayGroupId("all");
+  }, [selectedCompanyId]);
+
   const { data: history = [], isLoading } = useQuery({
-    queryKey: ["compensation-history", changeTypeFilter, selectedCompanyId],
+    queryKey: ["compensation-history", changeTypeFilter, selectedCompanyId, selectedPayGroupId],
     queryFn: async () => {
       if (!selectedCompanyId) return [];
+      
+      // If filtering by pay group, we need to get employee IDs from employee_positions first
+      let employeeIds: string[] | null = null;
+      if (selectedPayGroupId !== "all") {
+        // @ts-ignore - Supabase type instantiation issue
+        const { data: empPositions } = await supabase
+          .from("employee_positions")
+          .select("employee_id")
+          .eq("pay_group_id", selectedPayGroupId)
+          .eq("is_active", true);
+        
+        if (empPositions && empPositions.length > 0) {
+          employeeIds = [...new Set(empPositions.map((ep: any) => ep.employee_id))];
+        } else {
+          return []; // No employees in this pay group
+        }
+      }
+      
+      // @ts-ignore - Supabase type instantiation issue
       let query = supabase
         .from("compensation_history")
         .select(`
           *,
           employee:profiles!compensation_history_employee_id_fkey(full_name, email),
-          approver:profiles!compensation_history_approved_by_fkey(full_name)
+          approver:profiles!compensation_history_approved_by_fkey(full_name),
+          position:positions!compensation_history_position_id_fkey(title)
         `)
         .eq("company_id", selectedCompanyId)
         .order("effective_date", { ascending: false });
 
       if (changeTypeFilter !== "all") {
         query = query.eq("change_type", changeTypeFilter);
+      }
+      
+      if (employeeIds) {
+        query = query.in("employee_id", employeeIds);
       }
 
       const { data, error } = await query;
@@ -110,13 +163,26 @@ export default function CompensationHistoryPage() {
           </div>
           <div className="flex items-center gap-3">
             <Select value={selectedCompanyId} onValueChange={setSelectedCompanyId}>
-              <SelectTrigger className="w-[200px]">
+              <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder={t("common.selectCompany")} />
               </SelectTrigger>
               <SelectContent>
                 {companies.map((company) => (
                   <SelectItem key={company.id} value={company.id}>
                     {company.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select value={selectedPayGroupId} onValueChange={setSelectedPayGroupId}>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder={t("common.selectPayGroup")} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">{t("common.allPayGroups")}</SelectItem>
+                {payGroups.map((pg) => (
+                  <SelectItem key={pg.id} value={pg.id}>
+                    {pg.name}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -167,6 +233,7 @@ export default function CompensationHistoryPage() {
                 <TableHeader>
                   <TableRow>
                     <TableHead>{t("compensation.history.employee")}</TableHead>
+                    <TableHead>{t("common.position")}</TableHead>
                     <TableHead>{t("compensation.history.effectiveDate")}</TableHead>
                     <TableHead>{t("compensation.history.type")}</TableHead>
                     <TableHead className="text-right">{t("compensation.history.previous")}</TableHead>
@@ -178,7 +245,7 @@ export default function CompensationHistoryPage() {
                 <TableBody>
                   {filteredHistory.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={7} className="text-center text-muted-foreground">
+                      <TableCell colSpan={8} className="text-center text-muted-foreground">
                         {t("compensation.history.noHistory")}
                       </TableCell>
                     </TableRow>
@@ -186,6 +253,7 @@ export default function CompensationHistoryPage() {
                     filteredHistory.map((record: any) => (
                       <TableRow key={record.id}>
                         <TableCell className="font-medium">{record.employee?.full_name}</TableCell>
+                        <TableCell>{record.position?.title || "-"}</TableCell>
                         <TableCell>{format(new Date(record.effective_date), "MMM d, yyyy")}</TableCell>
                         <TableCell>{getChangeTypeBadge(record.change_type)}</TableCell>
                         <TableCell className="text-right">

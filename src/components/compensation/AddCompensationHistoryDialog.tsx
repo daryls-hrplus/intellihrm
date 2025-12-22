@@ -75,7 +75,7 @@ export function AddCompensationHistoryDialog({
 
   useEffect(() => {
     if (selectedDepartmentId) {
-      loadEmployees();
+      loadEmployeesByDepartment();
       setFormData(prev => ({ ...prev, employee_id: "", position_id: "" }));
       setPositions([]);
     }
@@ -99,16 +99,32 @@ export function AddCompensationHistoryDialog({
     if (data && !error) setDepartments(data as Department[]);
   };
 
-  const loadEmployees = async () => {
+  const loadEmployeesByDepartment = async () => {
+    // Get employees through their positions (department is on position, not profile)
     // @ts-ignore - Supabase type instantiation issue
     const { data, error } = await supabase
-      .from("profiles")
-      .select("id, full_name")
-      .eq("company_id", companyId)
-      .eq("department_id", selectedDepartmentId)
+      .from("employee_positions")
+      .select(`
+        employee_id,
+        employee:profiles!employee_positions_employee_id_fkey(id, full_name, is_active),
+        position:positions!employee_positions_position_id_fkey(department_id)
+      `)
       .eq("is_active", true)
-      .order("full_name");
-    if (data && !error) setEmployees(data as Employee[]);
+      .eq("position.department_id", selectedDepartmentId);
+    
+    if (data && !error) {
+      // Filter active employees and deduplicate
+      const employeeMap = new Map<string, Employee>();
+      data.forEach((ep: any) => {
+        if (ep.employee && ep.employee.is_active && ep.position?.department_id === selectedDepartmentId) {
+          employeeMap.set(ep.employee.id, {
+            id: ep.employee.id,
+            full_name: ep.employee.full_name,
+          });
+        }
+      });
+      setEmployees(Array.from(employeeMap.values()).sort((a, b) => a.full_name.localeCompare(b.full_name)));
+    }
   };
 
   const loadPositions = async () => {
@@ -135,7 +151,7 @@ export function AddCompensationHistoryDialog({
       }));
       setPositions(mappedPositions);
       
-      // Auto-fill previous salary if position is selected
+      // Auto-fill previous salary if only one position
       if (mappedPositions.length === 1) {
         const singlePosition = mappedPositions[0];
         setFormData(prev => ({
