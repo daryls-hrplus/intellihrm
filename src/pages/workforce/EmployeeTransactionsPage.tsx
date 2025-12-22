@@ -119,10 +119,10 @@ export default function EmployeeTransactionsPage() {
             </div>
             <div>
               <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
-                {t("workforce.transactions.title")}
+                {t("workforce.modules.transactions.title")}
               </h1>
               <p className="text-muted-foreground">
-                {t("workforce.transactions.subtitle")}
+                {t("workforce.modules.transactions.subtitle")}
               </p>
             </div>
           </div>
@@ -130,10 +130,10 @@ export default function EmployeeTransactionsPage() {
           <div className="flex items-center gap-2">
             <Select value={selectedCompanyId} onValueChange={(id) => { setSelectedCompanyId(id); setSelectedDepartmentId("all"); }}>
               <SelectTrigger className="w-[200px]">
-                <SelectValue placeholder={t("workforce.allCompanies")} />
+                <SelectValue placeholder={t("common.allCompanies")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">{t("workforce.allCompanies")}</SelectItem>
+                <SelectItem value="all">{t("common.allCompanies")}</SelectItem>
                 {companies.map((company) => (
                   <SelectItem key={company.id} value={company.id}>
                     {company.name}
@@ -151,9 +151,9 @@ export default function EmployeeTransactionsPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle>{t("workforce.transactions.allTransactions")}</CardTitle>
+            <CardTitle>{t("workforce.modules.transactions.allTransactions")}</CardTitle>
             <CardDescription>
-              {t("workforce.transactions.description")}
+              {t("workforce.modules.transactions.description")}
             </CardDescription>
           </CardHeader>
           <CardContent>
