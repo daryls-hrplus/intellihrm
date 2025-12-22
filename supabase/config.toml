@@ -152,3 +152,6 @@ verify_jwt = false
 
 [functions.sync-guide-updates]
 verify_jwt = false
+
+[functions.bulk-payslip-distribution]
+verify_jwt = false
