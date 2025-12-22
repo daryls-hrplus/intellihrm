@@ -280,38 +280,39 @@ export function EmployeeRemindersList({
             </SelectContent>
           </Select>
         </div>
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button variant="outline" size="icon" className="mr-2">
-                <HelpCircle className="h-4 w-4" />
+        <div className="flex items-center gap-2">
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="outline" size="icon">
+                  <HelpCircle className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" className="max-w-sm p-4">
+                <div className="space-y-2">
+                  <p className="font-semibold flex items-center gap-2">
+                    <Send className="h-4 w-4 text-blue-600" />
+                    When to use Manual Reminders
+                  </p>
+                  <ul className="text-sm space-y-1 list-disc pl-4">
+                    <li>Send a <strong>one-time reminder</strong> to a specific employee</li>
+                    <li>Perfect for ad-hoc tasks, follow-ups, or custom deadlines</li>
+                    <li>You choose exactly who receives the reminder and when</li>
+                  </ul>
+                  <p className="text-xs text-muted-foreground mt-2 pt-2 border-t">
+                    Example: "Remind John to submit his expense report by Friday" - a one-off notification just for John.
+                  </p>
+                </div>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+          <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+            <DialogTrigger asChild>
+              <Button onClick={() => handleOpenDialog()} variant="secondary" className="bg-blue-600 hover:bg-blue-700 text-white">
+                <Send className="h-4 w-4 mr-2" />
+                Create Reminder
               </Button>
-            </TooltipTrigger>
-            <TooltipContent side="bottom" className="max-w-sm p-4">
-              <div className="space-y-2">
-                <p className="font-semibold flex items-center gap-2">
-                  <Send className="h-4 w-4 text-blue-600" />
-                  When to use Manual Reminders
-                </p>
-                <ul className="text-sm space-y-1 list-disc pl-4">
-                  <li>Send a <strong>one-time reminder</strong> to a specific employee</li>
-                  <li>Perfect for ad-hoc tasks, follow-ups, or custom deadlines</li>
-                  <li>You choose exactly who receives the reminder and when</li>
-                </ul>
-                <p className="text-xs text-muted-foreground mt-2 pt-2 border-t">
-                  Example: "Remind John to submit his expense report by Friday" - a one-off notification just for John.
-                </p>
-              </div>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-          <DialogTrigger asChild>
-            <Button onClick={() => handleOpenDialog()} variant="secondary" className="bg-blue-600 hover:bg-blue-700 text-white">
-              <Send className="h-4 w-4 mr-2" />
-              Create Reminder
-            </Button>
-          </DialogTrigger>
+            </DialogTrigger>
           <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto border-t-4 border-t-blue-600">
             <DialogHeader className="pb-4 border-b">
               <div className="flex items-center gap-2">
@@ -509,6 +510,7 @@ export function EmployeeRemindersList({
             </DialogFooter>
           </DialogContent>
         </Dialog>
+        </div>
       </div>
 
       {reminders.length === 0 ? (
