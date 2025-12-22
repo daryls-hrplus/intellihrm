@@ -95,6 +95,7 @@ import WorkforceAnalyticsPage from "./pages/workforce/WorkforceAnalyticsPage";
 import QualificationsPage from "./pages/workforce/QualificationsPage";
 import CompanyBoardsPage from "./pages/workforce/CompanyBoardsPage";
 import GovernancePage from "./pages/workforce/GovernancePage";
+import PositionControlVacanciesPage from "./pages/workforce/PositionControlVacanciesPage";
 
 // Intranet pages
 import IntranetDashboardPage from "./pages/intranet/IntranetDashboardPage";
@@ -1046,6 +1047,14 @@ const App = () => (
               element={
                 <ProtectedRoute requiredRoles={["admin"]}>
                   <OrgStructureConfigPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/workforce/position-control-vacancies"
+              element={
+                <ProtectedRoute requiredRoles={["admin"]}>
+                  <PositionControlVacanciesPage />
                 </ProtectedRoute>
               }
             />
