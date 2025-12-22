@@ -4,8 +4,9 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { DollarSign, Briefcase, User } from "lucide-react";
+import { DollarSign, Briefcase, User, Calendar } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { format, parseISO } from "date-fns";
 
 interface SalarySummarySectionProps {
   companyId: string;
@@ -21,6 +22,8 @@ interface PositionData {
   compensation_currency: string;
   compensation_frequency: string;
   is_primary: boolean;
+  start_date: string | null;
+  end_date: string | null;
 }
 
 interface CompensationItem {
@@ -30,6 +33,8 @@ interface CompensationItem {
   frequency: string;
   pay_element_name: string;
   pay_element_code: string;
+  start_date: string | null;
+  end_date: string | null;
 }
 
 export function SalarySummarySection({ companyId, employeeId, payGroupId }: SalarySummarySectionProps) {
@@ -58,6 +63,8 @@ export function SalarySummarySection({ companyId, employeeId, payGroupId }: Sala
           compensation_currency,
           compensation_frequency,
           is_primary,
+          start_date,
+          end_date,
           positions (title)
         `)
         .eq('employee_id', employeeId)
@@ -80,7 +87,9 @@ export function SalarySummarySection({ companyId, employeeId, payGroupId }: Sala
           compensation_amount: pos.compensation_amount || 0,
           compensation_currency: pos.compensation_currency || 'USD',
           compensation_frequency: pos.compensation_frequency || 'monthly',
-          is_primary: pos.is_primary
+          is_primary: pos.is_primary,
+          start_date: pos.start_date,
+          end_date: pos.end_date
         })));
       } else {
         setPositions([]);
@@ -105,6 +114,8 @@ export function SalarySummarySection({ companyId, employeeId, payGroupId }: Sala
           amount,
           currency,
           frequency,
+          start_date,
+          end_date,
           pay_elements (name, code)
         `)
         .eq('employee_id', employeeId)
@@ -119,7 +130,9 @@ export function SalarySummarySection({ companyId, employeeId, payGroupId }: Sala
           currency: item.currency || 'USD',
           frequency: item.frequency || 'monthly',
           pay_element_name: (item.pay_elements as any)?.name || 'N/A',
-          pay_element_code: (item.pay_elements as any)?.code || ''
+          pay_element_code: (item.pay_elements as any)?.code || '',
+          start_date: item.start_date,
+          end_date: item.end_date
         })));
       }
     } catch (error) {
@@ -154,6 +167,13 @@ export function SalarySummarySection({ companyId, employeeId, payGroupId }: Sala
       case 'biweekly': return amount * 2.17;
       default: return amount;
     }
+  };
+
+  const formatDateRange = (startDate: string | null, endDate: string | null) => {
+    if (!startDate && !endDate) return null;
+    const start = startDate ? format(parseISO(startDate), 'MMM d, yyyy') : 'N/A';
+    const end = endDate ? format(parseISO(endDate), 'MMM d, yyyy') : 'Ongoing';
+    return `${start} - ${end}`;
   };
 
   if (isLoading) {
@@ -237,6 +257,12 @@ export function SalarySummarySection({ companyId, employeeId, payGroupId }: Sala
                       <p className="text-sm text-muted-foreground">
                         {formatFrequency(pos.compensation_frequency)}
                       </p>
+                      {formatDateRange(pos.start_date, pos.end_date) && (
+                        <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
+                          <Calendar className="h-3 w-3" />
+                          {formatDateRange(pos.start_date, pos.end_date)}
+                        </p>
+                      )}
                     </div>
                   </div>
                   <div className="text-right">
@@ -270,6 +296,12 @@ export function SalarySummarySection({ companyId, employeeId, payGroupId }: Sala
                       <p className="text-sm text-muted-foreground">
                         {item.pay_element_code} • {formatFrequency(item.frequency)}
                       </p>
+                      {formatDateRange(item.start_date, item.end_date) && (
+                        <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
+                          <Calendar className="h-3 w-3" />
+                          {formatDateRange(item.start_date, item.end_date)}
+                        </p>
+                      )}
                     </div>
                     <div className="text-right">
                       <p className="text-xl font-bold text-primary">
