@@ -403,7 +403,26 @@
         "title": "Employee Transactions",
         "description": "Manage hires, promotions, transfers, terminations",
         "subtitle": "Manage employee lifecycle transactions",
-        "allTransactions": "All Transactions"
+        "allTransactions": "All Transactions",
+        "searchPlaceholder": "Search transactions...",
+        "allStatuses": "All Statuses",
+        "allTypes": "All Types",
+        "newTransaction": "New Transaction",
+        "transactionNumber": "Transaction #",
+        "transactionType": "Type",
+        "effectiveDate": "Effective Date",
+        "created": "Created",
+        "noTransactionsFound": "No transactions found",
+        "deleteTransaction": "Delete Transaction",
+        "deleteConfirmation": "Are you sure you want to delete transaction {{number}}? This action cannot be undone.",
+        "statuses": {
+          "draft": "Draft",
+          "pending_approval": "Pending Approval",
+          "approved": "Approved",
+          "rejected": "Rejected",
+          "completed": "Completed",
+          "cancelled": "Cancelled"
+        }
       },
       "forecasting": {
         "title": "Workforce Forecasting",
