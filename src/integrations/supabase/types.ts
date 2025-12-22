@@ -6094,6 +6094,7 @@ export type Database = {
           requested_date: string
           result: string | null
           scope: string | null
+          start_date: string | null
           status: string
           updated_at: string
         }
@@ -6118,6 +6119,7 @@ export type Database = {
           requested_date: string
           result?: string | null
           scope?: string | null
+          start_date?: string | null
           status?: string
           updated_at?: string
         }
@@ -6142,6 +6144,7 @@ export type Database = {
           requested_date?: string
           result?: string | null
           scope?: string | null
+          start_date?: string | null
           status?: string
           updated_at?: string
         }
