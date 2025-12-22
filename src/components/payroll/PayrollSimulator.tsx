@@ -81,6 +81,7 @@ interface SimulationResult {
       amount: number; // included in gross pay
       is_prorated: boolean;
       proration_factor?: number;
+      position_title?: string;
     }>;
     allowances: Array<{
       name: string;
@@ -322,13 +323,17 @@ export function PayrollSimulator({ companyId, employeeId, payPeriodId }: Payroll
         ? new Date(primaryPosition.end_date)
         : null;
 
-      // Fetch employee compensation (overrides position compensation when present)
+      // Fetch employee compensation (can be linked to a specific position)
       const { data: employeeComp, error: employeeCompError } = await supabase
         .from('employee_compensation')
         .select(`
           amount,
           currency,
           frequency,
+          position_id,
+          start_date,
+          end_date,
+          positions (title),
           pay_elements (
             name, 
             code,
@@ -410,15 +415,17 @@ export function PayrollSimulator({ companyId, employeeId, payPeriodId }: Payroll
       const payFrequency = (payPeriod?.pay_groups as any)?.pay_frequency || 'monthly';
       const mondayCount = payPeriod?.monday_count || 4; // Default to 4 Mondays if not set
 
-      // Employee compensation overrides position compensation when present
+      // Employee compensation (may contain multiple Base Salary lines across positions)
       const employeeCompList = employeeComp || [];
-      const baseSalaryItemIndex = employeeCompList.findIndex(
+      const baseSalaryItems = employeeCompList.filter(
         (c) => ((c.pay_elements as any)?.code || '').toUpperCase() === 'SAL'
       );
-      const baseSalaryItem =
-        employeeCompList.length > 0
-          ? employeeCompList[baseSalaryItemIndex >= 0 ? baseSalaryItemIndex : 0]
-          : null;
+
+      // Keep a "representative" base salary item for currency display
+      const baseSalaryItem = baseSalaryItems.length > 0 ? baseSalaryItems[0] : null;
+
+      // Used to override hourly-rate calculation when multiple salaries exist
+      let annualSalaryOverride: number | null = null;
 
       // Calculate total position compensation from ALL positions with individual proration
       let totalPositionCompensation = 0;
@@ -523,44 +530,50 @@ export function PayrollSimulator({ companyId, employeeId, payPeriodId }: Payroll
       const standardHours = 40;
 
       const hoursPerYear = standardHours * 52;
-      let annualSalary = baseCompAmount;
 
-      switch (baseCompFrequency) {
-        case 'monthly':
-          annualSalary = baseCompAmount * 12;
-          break;
-        case 'biweekly':
-        case 'fortnightly':
-          annualSalary = baseCompAmount * 26;
-          break;
-        case 'weekly':
-          annualSalary = baseCompAmount * 52;
-          break;
-        case 'annual':
-          annualSalary = baseCompAmount;
-          break;
+      // Hourly rate: prefer aggregated annual salary when multiple base salaries exist
+      let annualSalary = annualSalaryOverride !== null ? annualSalaryOverride : 0;
+
+      if (annualSalaryOverride === null) {
+        let tmpAnnualSalary = baseSalaryItem ? (baseSalaryItem.amount || 0) : 0;
+        const tmpFreq = baseSalaryItem ? (baseSalaryItem.frequency || 'monthly') : payFrequency;
+
+        switch (tmpFreq) {
+          case 'monthly':
+            tmpAnnualSalary = tmpAnnualSalary * 12;
+            break;
+          case 'biweekly':
+          case 'fortnightly':
+            tmpAnnualSalary = tmpAnnualSalary * 26;
+            break;
+          case 'weekly':
+            tmpAnnualSalary = tmpAnnualSalary * 52;
+            break;
+          case 'annual':
+            tmpAnnualSalary = tmpAnnualSalary;
+            break;
+        }
+
+        annualSalary = tmpAnnualSalary;
       }
 
       const hourlyRate = hoursPerYear > 0 ? annualSalary / hoursPerYear : 0;
 
-      // For employee_compensation, apply proration if not using position-based comp
-      let periodBaseSalary = baseCompAmount;
-      const fullPeriodBaseSalary = baseSalaryItem ? baseCompAmount : totalFullPeriodCompensation;
+      // Base salary included in this pay period
+      const fullPeriodBaseSalary = totalFullPeriodCompensation;
+      const periodBaseSalary = totalPositionCompensation;
       
-      if (baseSalaryItem && employeeCompProration && employeeCompProration.isProrated) {
-        periodBaseSalary = applyProration(baseCompAmount, employeeCompProration);
-      }
-      
-      // Determine the proration result to display (use first prorated position or employee comp proration)
-      const anyPositionProrated = positionProrations.some(p => p.isProrated);
-      const prorationResult = baseSalaryItem 
-        ? employeeCompProration 
-        : (anyPositionProrated ? {
-            isProrated: true,
-            factor: totalPositionCompensation / totalFullPeriodCompensation,
-            daysWorked: positionProrations[0]?.daysWorked || 0,
-            totalDays: positionProrations[0]?.totalDays || 0,
-          } : null);
+      // Overall proration summary (aggregated across Base Salary lines)
+      const anyPositionProrated = positionProrations.some((p) => p.isProrated);
+      const prorationResult =
+        anyPositionProrated && totalFullPeriodCompensation > 0
+          ? {
+              isProrated: true,
+              factor: totalPositionCompensation / totalFullPeriodCompensation,
+              daysWorked: positionProrations[0]?.daysWorked || 0,
+              totalDays: positionProrations[0]?.totalDays || 0,
+            }
+          : null;
 
       // Calculate totals from work records
       const regularHours = (workRecords || []).reduce((sum, r) => sum + (r.regular_hours || 0), 0);
@@ -627,11 +640,14 @@ export function PayrollSimulator({ companyId, employeeId, payPeriodId }: Payroll
         let prorationFactor = 1;
 
         if (payPeriod?.period_start && payPeriod?.period_end && prorationMethodCode !== 'NONE') {
+          const compStartDate = c.start_date ? new Date(c.start_date) : null;
+          const compEndDate = c.end_date ? new Date(c.end_date) : null;
+
           const pr = calculateProrationFactor({
             periodStart: new Date(payPeriod.period_start),
             periodEnd: new Date(payPeriod.period_end),
-            employeeStartDate,
-            employeeEndDate,
+            employeeStartDate: compStartDate,
+            employeeEndDate: compEndDate,
             prorationMethod: prorationMethodCode,
           });
 
@@ -648,6 +664,7 @@ export function PayrollSimulator({ companyId, employeeId, payPeriodId }: Payroll
           amount: calculatedAmount,
           is_prorated: isProrated,
           proration_factor: prorationFactor,
+          position_title: (c.positions as any)?.title || 'Unassigned Position',
         };
       });
 
@@ -726,7 +743,7 @@ export function PayrollSimulator({ companyId, employeeId, payPeriodId }: Payroll
           method: baseProrationMethodCode,
           fullPeriodSalary: fullPeriodBaseSalary
         } : undefined,
-        positionProrations: !baseSalaryItem && positionProrations.length > 0 ? positionProrations : undefined,
+        positionProrations: positionProrations.length > 0 ? positionProrations : undefined,
         earnings: {
           regular_hours: regularHours,
           overtime_hours: overtimeHours,
