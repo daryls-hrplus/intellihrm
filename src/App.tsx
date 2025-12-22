@@ -96,6 +96,9 @@ import QualificationsPage from "./pages/workforce/QualificationsPage";
 import CompanyBoardsPage from "./pages/workforce/CompanyBoardsPage";
 import GovernancePage from "./pages/workforce/GovernancePage";
 import PositionControlVacanciesPage from "./pages/workforce/PositionControlVacanciesPage";
+import HeadcountRequestsPage from "./pages/workforce/HeadcountRequestsPage";
+import HeadcountAnalyticsPage from "./pages/workforce/HeadcountAnalyticsPage";
+import HeadcountForecastPage from "./pages/workforce/HeadcountForecastPage";
 
 // Intranet pages
 import IntranetDashboardPage from "./pages/intranet/IntranetDashboardPage";
@@ -1055,6 +1058,30 @@ const App = () => (
               element={
                 <ProtectedRoute requiredRoles={["admin"]}>
                   <PositionControlVacanciesPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/workforce/headcount-requests"
+              element={
+                <ProtectedRoute requiredRoles={["admin"]}>
+                  <HeadcountRequestsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/workforce/headcount-analytics"
+              element={
+                <ProtectedRoute requiredRoles={["admin"]}>
+                  <HeadcountAnalyticsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/workforce/headcount-forecast"
+              element={
+                <ProtectedRoute requiredRoles={["admin"]}>
+                  <HeadcountForecastPage />
                 </ProtectedRoute>
               }
             />
