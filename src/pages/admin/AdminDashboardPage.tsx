@@ -244,7 +244,7 @@ export default function AdminDashboardPage() {
                 Admin & Security
               </h1>
               <p className="text-muted-foreground">
-                Configuration, governance, analytics, and strategic planning hub
+                Configuration and Governance
               </p>
             </div>
           </div>
