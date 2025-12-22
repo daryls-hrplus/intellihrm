@@ -21,7 +21,7 @@ import { EmployeeLicensesTab } from "@/components/employee/EmployeeLicensesTab";
 import { EmployeeBackgroundChecksTab } from "@/components/employee/EmployeeBackgroundChecksTab";
 import { EmployeeReferencesTab } from "@/components/employee/EmployeeReferencesTab";
 import { EmployeeCertificatesTab } from "@/components/employee/EmployeeCertificatesTab";
-import { EmployeeMembershipsTab } from "@/components/employee/EmployeeMembershipsTab";
+
 import { EmployeeInterestsTab } from "@/components/employee/EmployeeInterestsTab";
 import { EmployeeMedicalProfileTab } from "@/components/employee/EmployeeMedicalProfileTab";
 import { EmployeeContactInformationCard } from "@/components/employee/contact-information";
@@ -302,7 +302,7 @@ export default function EmployeeProfilePage() {
             <TabsTrigger value="interests"><Sparkles className="h-4 w-4 mr-1" />{t("workforce.profile.tabs.interests")}</TabsTrigger>
             <TabsTrigger value="licenses"><Award className="h-4 w-4 mr-1" />{t("workforce.profile.tabs.licenses")}</TabsTrigger>
             <TabsTrigger value="medical"><Stethoscope className="h-4 w-4 mr-1" />{t("workforce.profile.tabs.medical")}</TabsTrigger>
-            <TabsTrigger value="memberships"><Heart className="h-4 w-4 mr-1" />{t("workforce.profile.tabs.memberships")}</TabsTrigger>
+            
             <TabsTrigger value="paygroup"><DollarSign className="h-4 w-4 mr-1" />{t("workforce.profile.tabs.payGroup")}</TabsTrigger>
             <TabsTrigger value="professional_info"><FileSignature className="h-4 w-4 mr-1" />Professional Info</TabsTrigger>
             <TabsTrigger value="references"><UserCheck className="h-4 w-4 mr-1" />{t("workforce.profile.tabs.references")}</TabsTrigger>
@@ -359,9 +359,6 @@ export default function EmployeeProfilePage() {
             <EmployeeMedicalProfileTab employeeId={employee.id} />
           </TabsContent>
 
-          <TabsContent value="memberships" className="mt-6">
-            <EmployeeMembershipsTab employeeId={employee.id} />
-          </TabsContent>
 
           <TabsContent value="tax_allowances" className="mt-6">
             <EmployeeTaxAllowancesTab employeeId={employee.id} />
