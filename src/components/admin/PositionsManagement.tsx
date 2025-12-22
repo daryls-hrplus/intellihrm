@@ -861,200 +861,211 @@ export function PositionsManagement({ companyId }: PositionsManagementProps) {
 
       {/* Position Dialog */}
       <Dialog open={positionDialogOpen} onOpenChange={setPositionDialogOpen}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{editingPosition ? "Edit Position" : "Add Position"}</DialogTitle>
             <DialogDescription>
               {editingPosition ? "Update position details" : "Create a new position in a department"}
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label>Department *</Label>
-              <Select value={formDepartmentId} onValueChange={setFormDepartmentId}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select department" />
-                </SelectTrigger>
-                <SelectContent>
-                  {departments.map((dept) => (
-                    <SelectItem key={dept.id} value={dept.id}>
-                      {dept.name} ({dept.code})
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Left Column - Basic Info */}
+            <div className="space-y-4">
+              <h4 className="font-medium text-sm text-muted-foreground border-b pb-2">Basic Information</h4>
               <div className="space-y-2">
-                <Label>Title *</Label>
-                <Input
-                  value={formTitle}
-                  onChange={(e) => setFormTitle(e.target.value)}
-                  placeholder="e.g., Senior Developer"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>Code *</Label>
-                <Input
-                  value={formCode}
-                  onChange={(e) => setFormCode(e.target.value)}
-                  placeholder="e.g., SR-DEV"
-                />
-              </div>
-            </div>
-            <div className="space-y-2">
-              <Label>Description</Label>
-              <Textarea
-                value={formDescription}
-                onChange={(e) => setFormDescription(e.target.value)}
-                placeholder="Position description..."
-              />
-            </div>
-            <div className="space-y-2">
-              <Label>Reports To Position</Label>
-              <Select value={formReportsTo || "none"} onValueChange={(val) => setFormReportsTo(val === "none" ? "" : val)}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select supervisor position (optional)" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none">None</SelectItem>
-                  {positions
-                    .filter(p => p.id !== editingPosition?.id)
-                    .map((pos) => (
-                      <SelectItem key={pos.id} value={pos.id}>
-                        {pos.title} ({pos.department?.name})
-                      </SelectItem>
-                    ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label>Authorized Headcount</Label>
-              <Input
-                type="number"
-                min="1"
-                value={formAuthorizedHeadcount}
-                onChange={(e) => setFormAuthorizedHeadcount(e.target.value)}
-                placeholder="Number of positions"
-              />
-              <p className="text-xs text-muted-foreground">
-                How many employees can fill this position
-              </p>
-            </div>
-            
-            {/* Compensation Model */}
-            <div className="space-y-2">
-              <Label>Compensation Model</Label>
-              <Select value={formCompensationModel} onValueChange={setFormCompensationModel}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="salary_grade">Salary Grade (Min/Max Ranges)</SelectItem>
-                  <SelectItem value="spinal_point">Spinal Point System</SelectItem>
-                  <SelectItem value="hybrid">Hybrid (Both Systems)</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Salary Grade Configuration - shown when salary_grade or hybrid */}
-            {(formCompensationModel === 'salary_grade' || formCompensationModel === 'hybrid') && (
-              <div className="space-y-2">
-                <Label>Salary Grade</Label>
-                <Select value={formSalaryGradeId} onValueChange={setFormSalaryGradeId}>
+                <Label>Department *</Label>
+                <Select value={formDepartmentId} onValueChange={setFormDepartmentId}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select salary grade" />
+                    <SelectValue placeholder="Select department" />
                   </SelectTrigger>
                   <SelectContent>
-                    {salaryGrades.map((grade) => (
-                      <SelectItem key={grade.id} value={grade.id}>
-                        {grade.name} ({grade.code}) - {grade.currency} {grade.min_salary.toLocaleString()} - {grade.max_salary.toLocaleString()}
+                    {departments.map((dept) => (
+                      <SelectItem key={dept.id} value={dept.id}>
+                        {dept.name} ({dept.code})
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
-                {formSalaryGradeId && (
-                  <p className="text-xs text-muted-foreground">
-                    {(() => {
-                      const grade = salaryGrades.find(g => g.id === formSalaryGradeId);
-                      return grade ? `Pay range: ${grade.currency} ${grade.min_salary.toLocaleString()} - ${grade.max_salary.toLocaleString()}` : '';
-                    })()}
-                  </p>
-                )}
               </div>
-            )}
-
-            {(formCompensationModel === 'spinal_point' || formCompensationModel === 'hybrid') && (
-              <>
+              <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>Pay Spine</Label>
-                  <Select value={formPaySpineId} onValueChange={setFormPaySpineId}>
+                  <Label>Title *</Label>
+                  <Input
+                    value={formTitle}
+                    onChange={(e) => setFormTitle(e.target.value)}
+                    placeholder="e.g., Senior Developer"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Code *</Label>
+                  <Input
+                    value={formCode}
+                    onChange={(e) => setFormCode(e.target.value)}
+                    placeholder="e.g., SR-DEV"
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>Description</Label>
+                <Textarea
+                  value={formDescription}
+                  onChange={(e) => setFormDescription(e.target.value)}
+                  placeholder="Position description..."
+                  rows={3}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Reports To Position</Label>
+                <Select value={formReportsTo || "none"} onValueChange={(val) => setFormReportsTo(val === "none" ? "" : val)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select supervisor position (optional)" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">None</SelectItem>
+                    {positions
+                      .filter(p => p.id !== editingPosition?.id)
+                      .map((pos) => (
+                        <SelectItem key={pos.id} value={pos.id}>
+                          {pos.title} ({pos.department?.name})
+                        </SelectItem>
+                      ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Authorized Headcount</Label>
+                  <Input
+                    type="number"
+                    min="1"
+                    value={formAuthorizedHeadcount}
+                    onChange={(e) => setFormAuthorizedHeadcount(e.target.value)}
+                    placeholder="Number of positions"
+                  />
+                </div>
+                <div className="flex items-end pb-2">
+                  <div className="flex items-center gap-2">
+                    <Switch checked={formIsActive} onCheckedChange={setFormIsActive} />
+                    <Label>Active</Label>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Right Column - Compensation & Dates */}
+            <div className="space-y-4">
+              <h4 className="font-medium text-sm text-muted-foreground border-b pb-2">Compensation & Dates</h4>
+              
+              <div className="space-y-2">
+                <Label>Compensation Model</Label>
+                <Select value={formCompensationModel} onValueChange={setFormCompensationModel}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="salary_grade">Salary Grade (Min/Max Ranges)</SelectItem>
+                    <SelectItem value="spinal_point">Spinal Point System</SelectItem>
+                    <SelectItem value="hybrid">Hybrid (Both Systems)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Salary Grade Configuration */}
+              {(formCompensationModel === 'salary_grade' || formCompensationModel === 'hybrid') && (
+                <div className="space-y-2">
+                  <Label>Salary Grade</Label>
+                  <Select value={formSalaryGradeId} onValueChange={setFormSalaryGradeId}>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select pay spine" />
+                      <SelectValue placeholder="Select salary grade" />
                     </SelectTrigger>
                     <SelectContent>
-                      {paySpines.map((spine) => (
-                        <SelectItem key={spine.id} value={spine.id}>
-                          {spine.name} ({spine.code})
+                      {salaryGrades.map((grade) => (
+                        <SelectItem key={grade.id} value={grade.id}>
+                          {grade.name} ({grade.code}) - {grade.currency} {grade.min_salary.toLocaleString()} - {grade.max_salary.toLocaleString()}
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
+                  {formSalaryGradeId && (
+                    <p className="text-xs text-muted-foreground">
+                      {(() => {
+                        const grade = salaryGrades.find(g => g.id === formSalaryGradeId);
+                        return grade ? `Pay range: ${grade.currency} ${grade.min_salary.toLocaleString()} - ${grade.max_salary.toLocaleString()}` : '';
+                      })()}
+                    </p>
+                  )}
                 </div>
-                <div className="grid grid-cols-3 gap-4">
-                  <div className="space-y-2">
-                    <Label>Min Point</Label>
-                    <Input
-                      type="number"
-                      value={formMinSpinalPoint}
-                      onChange={(e) => setFormMinSpinalPoint(e.target.value)}
-                      placeholder="e.g., 10"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Max Point</Label>
-                    <Input
-                      type="number"
-                      value={formMaxSpinalPoint}
-                      onChange={(e) => setFormMaxSpinalPoint(e.target.value)}
-                      placeholder="e.g., 20"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Entry Point</Label>
-                    <Input
-                      type="number"
-                      value={formEntrySpinalPoint}
-                      onChange={(e) => setFormEntrySpinalPoint(e.target.value)}
-                      placeholder="e.g., 12"
-                    />
-                  </div>
-                </div>
-              </>
-            )}
+              )}
 
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>Start Date *</Label>
-                <Input
-                  type="date"
-                  value={formStartDate}
-                  onChange={(e) => setFormStartDate(e.target.value)}
-                />
+              {/* Spinal Point Configuration */}
+              {(formCompensationModel === 'spinal_point' || formCompensationModel === 'hybrid') && (
+                <>
+                  <div className="space-y-2">
+                    <Label>Pay Spine</Label>
+                    <Select value={formPaySpineId} onValueChange={setFormPaySpineId}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select pay spine" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {paySpines.map((spine) => (
+                          <SelectItem key={spine.id} value={spine.id}>
+                            {spine.name} ({spine.code})
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="grid grid-cols-3 gap-3">
+                    <div className="space-y-2">
+                      <Label>Min Point</Label>
+                      <Input
+                        type="number"
+                        value={formMinSpinalPoint}
+                        onChange={(e) => setFormMinSpinalPoint(e.target.value)}
+                        placeholder="e.g., 10"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Max Point</Label>
+                      <Input
+                        type="number"
+                        value={formMaxSpinalPoint}
+                        onChange={(e) => setFormMaxSpinalPoint(e.target.value)}
+                        placeholder="e.g., 20"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Entry Point</Label>
+                      <Input
+                        type="number"
+                        value={formEntrySpinalPoint}
+                        onChange={(e) => setFormEntrySpinalPoint(e.target.value)}
+                        placeholder="e.g., 12"
+                      />
+                    </div>
+                  </div>
+                </>
+              )}
+
+              <div className="grid grid-cols-2 gap-4 pt-2">
+                <div className="space-y-2">
+                  <Label>Start Date *</Label>
+                  <Input
+                    type="date"
+                    value={formStartDate}
+                    onChange={(e) => setFormStartDate(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>End Date</Label>
+                  <Input
+                    type="date"
+                    value={formEndDate}
+                    onChange={(e) => setFormEndDate(e.target.value)}
+                    placeholder="Leave empty for ongoing"
+                  />
+                </div>
               </div>
-              <div className="space-y-2">
-                <Label>End Date</Label>
-                <Input
-                  type="date"
-                  value={formEndDate}
-                  onChange={(e) => setFormEndDate(e.target.value)}
-                  placeholder="Leave empty for ongoing"
-                />
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <Switch checked={formIsActive} onCheckedChange={setFormIsActive} />
-              <Label>Active</Label>
             </div>
           </div>
           <DialogFooter>
