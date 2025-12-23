@@ -44,6 +44,8 @@ interface EventType {
   code: string;
   name: string;
   category: string;
+  source_table?: string;
+  date_field?: string;
 }
 
 interface NaturalLanguageRuleInputProps {
@@ -79,19 +81,17 @@ export function NaturalLanguageRuleInput({ companyId, onRuleCreated }: NaturalLa
   useEffect(() => {
     if (showReviewDialog && selectedEventTypeId && editedRule) {
       const eventType = availableEventTypes.find(t => t.id === selectedEventTypeId);
-      if (eventType) {
-        // Create a minimal event type object for the preview hook
+      if (eventType && eventType.source_table && eventType.date_field) {
+        // Use the actual source_table and date_field from the event type
         fetchPreview(
-          { 
-            ...eventType, 
-            source_table: eventType.code.includes('probation') ? 'profiles' : `employee_${eventType.code.split('_')[0]}s`,
-            date_field: eventType.code.includes('expiry') ? 'expiry_date' : 'end_date'
-          } as any, 
+          eventType as any, 
           companyId, 
           editedRule.daysBeforeIntervals
         ).then(data => {
           setDialogPreviewData(data);
         });
+      } else {
+        setDialogPreviewData(null);
       }
     } else {
       setDialogPreviewData(null);

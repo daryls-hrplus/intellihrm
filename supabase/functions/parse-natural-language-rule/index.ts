@@ -52,7 +52,7 @@ serve(async (req) => {
     // Fetch available event types to provide context to AI
     const { data: eventTypes } = await supabase
       .from('reminder_event_types')
-      .select('id, code, name, category')
+      .select('id, code, name, category, source_table, date_field')
       .eq('is_active', true);
 
     const eventTypesList = (eventTypes || []).map(et => 
