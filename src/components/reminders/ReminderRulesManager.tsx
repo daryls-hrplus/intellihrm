@@ -18,6 +18,8 @@ import type { ReminderRule, ReminderEventType } from '@/types/reminders';
 import { PRIORITY_OPTIONS, NOTIFICATION_METHODS } from '@/types/reminders';
 import { NaturalLanguageRuleInput } from './NaturalLanguageRuleInput';
 import { RuleSourcePreview } from './RuleSourcePreview';
+import { TemplateMessagePreview } from './TemplateMessagePreview';
+import type { SourcePreviewData } from '@/hooks/useReminderSourcePreview';
 
 interface ReminderRulesManagerProps {
   companyId: string;
@@ -31,7 +33,7 @@ export const ReminderRulesManager = forwardRef<ReminderRulesManagerRef, Reminder
   function ReminderRulesManager({ companyId }, ref) {
   const navigate = useNavigate();
   const { fetchRules, fetchEventTypes, createRule, updateRule, deleteRule, isLoading } = useReminders();
-  const { fetchRuleAffectedCount } = useReminderSourcePreview();
+  const { fetchRuleAffectedCount, fetchPreview, previewData, loading: previewLoading } = useReminderSourcePreview();
   const [rules, setRules] = useState<ReminderRule[]>([]);
   const [eventTypes, setEventTypes] = useState<ReminderEventType[]>([]);
   const [ruleAffectedCounts, setRuleAffectedCounts] = useState<Record<string, { count: number; employeeCount: number }>>({});
@@ -39,6 +41,7 @@ export const ReminderRulesManager = forwardRef<ReminderRulesManagerRef, Reminder
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingRule, setEditingRule] = useState<ReminderRule | null>(null);
   const [newInterval, setNewInterval] = useState<string>('');
+  const [dialogPreviewData, setDialogPreviewData] = useState<SourcePreviewData | null>(null);
   const [formData, setFormData] = useState<{
     name: string;
     description: string;
@@ -106,6 +109,20 @@ export const ReminderRulesManager = forwardRef<ReminderRulesManagerRef, Reminder
       loadData();
     }
   }, [companyId]);
+
+  // Fetch preview data when event type changes in dialog
+  useEffect(() => {
+    if (dialogOpen && formData.event_type_id) {
+      const eventType = eventTypes.find(t => t.id === formData.event_type_id);
+      if (eventType) {
+        fetchPreview(eventType, companyId, formData.reminder_intervals).then(data => {
+          setDialogPreviewData(data);
+        });
+      }
+    } else {
+      setDialogPreviewData(null);
+    }
+  }, [dialogOpen, formData.event_type_id, formData.reminder_intervals, eventTypes, companyId]);
 
   const handleOpenDialog = (rule?: ReminderRule) => {
     if (rule) {
@@ -491,6 +508,14 @@ export const ReminderRulesManager = forwardRef<ReminderRulesManagerRef, Reminder
                 <p className="text-xs text-muted-foreground">
                   Use <code className="bg-muted px-1 rounded">{'{item_name}'}</code> for specific certificate/license names
                 </p>
+                
+                {/* Live Template Preview */}
+                <TemplateMessagePreview
+                  template={formData.message_template}
+                  sampleItems={dialogPreviewData?.items || []}
+                  eventTypeName={eventTypes.find(t => t.id === formData.event_type_id)?.name}
+                  loading={previewLoading}
+                />
               </div>
 
               <div className="flex items-center gap-2">
