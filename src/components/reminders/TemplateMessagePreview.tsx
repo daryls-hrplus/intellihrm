@@ -1,10 +1,11 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ChevronLeft, ChevronRight, Eye, Users } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { SourcePreviewItem } from '@/hooks/useReminderSourcePreview';
 import { format, differenceInDays, parseISO } from 'date-fns';
+import { parseNameParts } from './templatePlaceholders';
 
 interface TemplateMessagePreviewProps {
   template: string;
@@ -20,6 +21,11 @@ export function TemplateMessagePreview({
   loading = false 
 }: TemplateMessagePreviewProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
+
+  // Reset index when template or sample items change
+  useEffect(() => {
+    setCurrentIndex(0);
+  }, [template, sampleItems]);
 
   // Get current sample item
   const currentItem = sampleItems[currentIndex];
@@ -39,10 +45,21 @@ export function TemplateMessagePreview({
   const renderedMessage = useMemo(() => {
     if (!template || !currentItem) return null;
 
+    // Parse first/last name from full name
+    const { firstName, lastName } = parseNameParts(currentItem.employee_name);
+
     const replacements: Record<string, { value: string; label: string }> = {
       '{employee_name}': { 
         value: currentItem.employee_name || 'Employee', 
-        label: 'Employee Name' 
+        label: 'Full Name' 
+      },
+      '{employee_first_name}': { 
+        value: firstName, 
+        label: 'First Name' 
+      },
+      '{employee_last_name}': { 
+        value: lastName || 'Employee', 
+        label: 'Last Name' 
       },
       '{item_name}': { 
         value: currentItem.name || 'Item', 
@@ -70,12 +87,20 @@ export function TemplateMessagePreview({
         value: 'Department', 
         label: 'Department' 
       },
+      '{position}': { 
+        value: 'Position', 
+        label: 'Position' 
+      },
+      '{company_name}': { 
+        value: 'Company', 
+        label: 'Company' 
+      },
     };
 
     // Split template by placeholders and rebuild with highlighted values
     const parts: { text: string; isPlaceholder: boolean; label?: string }[] = [];
     let lastIndex = 0;
-    const placeholderRegex = /\{(employee_name|item_name|event_date|days_until|event_type|manager_name|department)\}/g;
+    const placeholderRegex = /\{(employee_name|employee_first_name|employee_last_name|item_name|event_date|days_until|event_type|manager_name|department|position|company_name)\}/g;
     
     let match;
     while ((match = placeholderRegex.exec(template)) !== null) {

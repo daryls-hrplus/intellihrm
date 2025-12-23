@@ -432,13 +432,17 @@ export function NaturalLanguageRuleInput({ companyId, onRuleCreated }: NaturalLa
                 <div className="flex flex-wrap gap-1 mb-2">
                   <span className="text-xs text-muted-foreground mr-2">Insert placeholder:</span>
                   {[
-                    { key: '{employee_name}', label: 'Employee Name' },
+                    { key: '{employee_name}', label: 'Full Name' },
+                    { key: '{employee_first_name}', label: 'First Name' },
+                    { key: '{employee_last_name}', label: 'Last Name' },
                     { key: '{item_name}', label: 'Item Name' },
                     { key: '{event_date}', label: 'Event Date' },
                     { key: '{days_until}', label: 'Days Until' },
                     { key: '{event_type}', label: 'Event Type' },
-                    { key: '{manager_name}', label: 'Manager Name' },
+                    { key: '{manager_name}', label: 'Manager' },
                     { key: '{department}', label: 'Department' },
+                    { key: '{position}', label: 'Position' },
+                    { key: '{company_name}', label: 'Company' },
                   ].map((placeholder) => (
                     <button
                       key={placeholder.key}
