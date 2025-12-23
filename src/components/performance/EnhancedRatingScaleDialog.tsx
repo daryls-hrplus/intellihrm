@@ -414,7 +414,7 @@ export function EnhancedRatingScaleDialog({
           </DialogDescription>
         </DialogHeader>
         
-        <ScrollArea className="flex-1 -mx-6 px-6">
+        <ScrollArea className="flex-1 min-h-0 -mx-6 px-6">
           <div className="space-y-6 py-2">
             {/* Scale Type Selector */}
             <FieldWithTooltip
