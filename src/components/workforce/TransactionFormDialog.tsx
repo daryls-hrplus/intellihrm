@@ -309,6 +309,24 @@ export function TransactionFormDialog({
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
+                <Label>{t("common.company")}</Label>
+                <Select
+                  value={formData.company_id || ""}
+                  onValueChange={(v) => setFormData({ ...formData, company_id: v })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder={t("workforce.modules.transactions.form.selectCompany")} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {companies.map((c) => (
+                      <SelectItem key={c.id} value={c.id}>
+                        {c.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
                 <Label>{t("common.position")}</Label>
                 <Select
                   value={formData.position_id || ""}
@@ -326,38 +344,20 @@ export function TransactionFormDialog({
                   </SelectContent>
                 </Select>
               </div>
-              <div className="space-y-2">
-                <Label>{t("common.department")}</Label>
-                <Select
-                  value={formData.department_id || ""}
-                  onValueChange={(v) => setFormData({ ...formData, department_id: v })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder={t("workforce.modules.transactions.form.selectDepartment")} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {departments.map((d) => (
-                      <SelectItem key={d.id} value={d.id}>
-                        {d.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
             </div>
             <div className="space-y-2">
-              <Label>{t("common.company")}</Label>
+              <Label>{t("common.department")}</Label>
               <Select
-                value={formData.company_id || ""}
-                onValueChange={(v) => setFormData({ ...formData, company_id: v })}
+                value={formData.department_id || ""}
+                onValueChange={(v) => setFormData({ ...formData, department_id: v })}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder={t("workforce.modules.transactions.form.selectCompany")} />
+                  <SelectValue placeholder={t("workforce.modules.transactions.form.selectDepartment")} />
                 </SelectTrigger>
                 <SelectContent>
-                  {companies.map((c) => (
-                    <SelectItem key={c.id} value={c.id}>
-                      {c.name}
+                  {departments.map((d) => (
+                    <SelectItem key={d.id} value={d.id}>
+                      {d.name}
                     </SelectItem>
                   ))}
                 </SelectContent>
