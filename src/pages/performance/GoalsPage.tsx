@@ -478,8 +478,8 @@ export default function GoalsPage() {
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <TabsList className="flex-wrap">
               <TabsTrigger value="my-goals" className="gap-2">
-                <User className="h-4 w-4" />
-                {t('performance.goals.myGoals')}
+                <Users className="h-4 w-4" />
+                {t('performance.goals.employeeGoals')}
               </TabsTrigger>
               {directReports.length > 0 && (
                 <TabsTrigger value="direct-reports" className="gap-2">
