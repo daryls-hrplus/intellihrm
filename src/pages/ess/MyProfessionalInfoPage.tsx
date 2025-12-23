@@ -1,12 +1,13 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Briefcase, GraduationCap, FileSignature, Shield, Loader2 } from "lucide-react";
+import { Briefcase, GraduationCap, FileSignature, Shield, Loader2, Languages } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useGranularPermissions } from "@/hooks/useGranularPermissions";
 import { EmployeeCredentialsMembershipsTab } from "@/components/employee/professional/EmployeeCredentialsMembershipsTab";
 import { EmployeeAgreementsSignaturesTab } from "@/components/employee/professional/EmployeeAgreementsSignaturesTab";
 import { EmployeeProfessionalHistoryTab } from "@/components/employee/professional/EmployeeProfessionalHistoryTab";
 import { ComplianceStatusCard } from "@/components/ess/ComplianceStatusCard";
+import { EmployeeLanguagesTab } from "@/components/employee/EmployeeLanguagesTab";
 
 export default function MyProfessionalInfoPage() {
   const { user } = useAuth();
@@ -17,6 +18,7 @@ export default function MyProfessionalInfoPage() {
   const canViewAgreements = hasTabAccess("ess", "ess_agreements_signatures");
   const canViewHistory = hasTabAccess("ess", "ess_professional_history");
   const canViewCompliance = hasTabAccess("ess", "ess_compliance_status");
+  const canViewLanguages = hasTabAccess("ess", "ess_languages");
 
   if (permissionsLoading) {
     return (
@@ -41,6 +43,7 @@ export default function MyProfessionalInfoPage() {
     { id: "credentials", label: "Credentials", icon: GraduationCap, visible: canViewCredentials },
     { id: "agreements", label: "Agreements", icon: FileSignature, visible: canViewAgreements },
     { id: "history", label: "Work History", icon: Briefcase, visible: canViewHistory },
+    { id: "languages", label: "Languages", icon: Languages, visible: canViewLanguages },
     { id: "compliance", label: "Compliance Status", icon: Shield, visible: canViewCompliance },
   ].filter(tab => tab.visible);
 
@@ -91,6 +94,12 @@ export default function MyProfessionalInfoPage() {
         {canViewHistory && (
           <TabsContent value="history">
             <EmployeeProfessionalHistoryTab employeeId={user.id} isEssView={true} />
+          </TabsContent>
+        )}
+
+        {canViewLanguages && (
+          <TabsContent value="languages">
+            <EmployeeLanguagesTab employeeId={user.id} viewType="ess" />
           </TabsContent>
         )}
 
