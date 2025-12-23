@@ -55,6 +55,7 @@ import MFASettingsPage from "./pages/admin/MFASettingsPage";
 import SSOSettingsPage from "./pages/admin/SSOSettingsPage";
 import PasswordPoliciesPage from "./pages/admin/PasswordPoliciesPage";
 import StaffLoanDesignDocumentPage from "./pages/documents/StaffLoanDesignDocumentPage";
+import AIGovernancePage from "./pages/admin/AIGovernancePage";
 
 // Enablement pages
 import EnablementHubPage from "./pages/enablement/EnablementHubPage";
