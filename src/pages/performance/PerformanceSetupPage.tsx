@@ -15,6 +15,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/hooks/useLanguage";
 import { toast } from "sonner";
+import { EnhancedRatingScaleDialog } from "@/components/performance/EnhancedRatingScaleDialog";
 import { 
   Settings, 
   Star, 
@@ -734,7 +735,7 @@ export default function PerformanceSetupPage() {
         )}
 
         {/* Rating Scale Dialog */}
-        <RatingScaleDialog
+        <EnhancedRatingScaleDialog
           open={ratingScaleDialogOpen}
           onOpenChange={setRatingScaleDialogOpen}
           companyId={selectedCompany}
@@ -782,174 +783,6 @@ export default function PerformanceSetupPage() {
         />
       </div>
     </AppLayout>
-  );
-}
-
-// Rating Scale Dialog Component
-function RatingScaleDialog({
-  open,
-  onOpenChange,
-  companyId,
-  editingScale,
-  onSuccess,
-}: {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  companyId: string;
-  editingScale: RatingScale | null;
-  onSuccess: () => void;
-}) {
-  const { t } = useLanguage();
-  const [formData, setFormData] = useState({
-    name: "",
-    code: "",
-    description: "",
-    min_rating: 1,
-    max_rating: 5,
-    is_default: false,
-    is_active: true,
-  });
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  useEffect(() => {
-    if (editingScale) {
-      setFormData({
-        name: editingScale.name,
-        code: editingScale.code,
-        description: editingScale.description || "",
-        min_rating: editingScale.min_rating,
-        max_rating: editingScale.max_rating,
-        is_default: editingScale.is_default,
-        is_active: editingScale.is_active,
-      });
-    } else {
-      setFormData({
-        name: "",
-        code: "",
-        description: "",
-        min_rating: 1,
-        max_rating: 5,
-        is_default: false,
-        is_active: true,
-      });
-    }
-  }, [editingScale, open]);
-
-  const handleSubmit = async () => {
-    if (!formData.name || !formData.code) {
-      toast.error("Name and code are required");
-      return;
-    }
-
-    setIsSubmitting(true);
-    try {
-      if (editingScale) {
-        const { error } = await supabase
-          .from("performance_rating_scales")
-          .update(formData)
-          .eq("id", editingScale.id);
-
-        if (error) throw error;
-        toast.success("Rating scale updated");
-      } else {
-        const { error } = await supabase
-          .from("performance_rating_scales")
-          .insert({ ...formData, company_id: companyId });
-
-        if (error) throw error;
-        toast.success("Rating scale created");
-      }
-      onSuccess();
-    } catch (error: any) {
-      toast.error(error.message || "Failed to save rating scale");
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>
-            {editingScale ? t("performance.setup.editRatingScale", "Edit Rating Scale") : t("performance.setup.addRatingScale", "Add Rating Scale")}
-          </DialogTitle>
-          <DialogDescription>
-            {t("performance.setup.ratingScaleDialogDesc", "Configure the rating scale settings")}
-          </DialogDescription>
-        </DialogHeader>
-        <div className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label>{t("common.name", "Name")}</Label>
-              <Input
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                placeholder="e.g., Standard 5-Point Scale"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label>{t("common.code", "Code")}</Label>
-              <Input
-                value={formData.code}
-                onChange={(e) => setFormData({ ...formData, code: e.target.value })}
-                placeholder="e.g., SCALE_5PT"
-              />
-            </div>
-          </div>
-          <div className="space-y-2">
-            <Label>{t("common.description", "Description")}</Label>
-            <Textarea
-              value={formData.description}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              placeholder="Optional description"
-            />
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label>{t("performance.setup.minRating", "Min Rating")}</Label>
-              <Input
-                type="number"
-                value={formData.min_rating}
-                onChange={(e) => setFormData({ ...formData, min_rating: parseInt(e.target.value) || 1 })}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label>{t("performance.setup.maxRating", "Max Rating")}</Label>
-              <Input
-                type="number"
-                value={formData.max_rating}
-                onChange={(e) => setFormData({ ...formData, max_rating: parseInt(e.target.value) || 5 })}
-              />
-            </div>
-          </div>
-          <div className="flex items-center gap-6">
-            <div className="flex items-center gap-2">
-              <Switch
-                checked={formData.is_default}
-                onCheckedChange={(checked) => setFormData({ ...formData, is_default: checked })}
-              />
-              <Label>{t("common.default", "Default")}</Label>
-            </div>
-            <div className="flex items-center gap-2">
-              <Switch
-                checked={formData.is_active}
-                onCheckedChange={(checked) => setFormData({ ...formData, is_active: checked })}
-              />
-              <Label>{t("common.active", "Active")}</Label>
-            </div>
-          </div>
-        </div>
-        <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
-            {t("common.cancel", "Cancel")}
-          </Button>
-          <Button onClick={handleSubmit} disabled={isSubmitting}>
-            {isSubmitting ? t("common.saving", "Saving...") : t("common.save", "Save")}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
   );
 }
 
