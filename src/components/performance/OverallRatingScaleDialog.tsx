@@ -275,57 +275,59 @@ export function OverallRatingScaleDialog({
 
               <div className="space-y-2">
                 {formData.levels.map((level, index) => (
-                  <div key={index} className="flex items-start gap-2 p-3 rounded-lg border bg-muted/30">
-                    <GripVertical className="h-5 w-5 text-muted-foreground mt-2 cursor-grab" />
-                    
-                    <div className="w-14">
-                      <Label className="text-xs text-muted-foreground">Value</Label>
-                      <Input
-                        type="number"
-                        value={level.value}
-                        onChange={(e) => handleLevelChange(index, 'value', parseInt(e.target.value) || 0)}
-                        className="h-8"
-                      />
+                  <div key={index} className="p-3 rounded-lg border bg-muted/30 space-y-2">
+                    <div className="flex items-start gap-2">
+                      <GripVertical className="h-5 w-5 text-muted-foreground mt-2 cursor-grab" />
+                      
+                      <div className="w-14">
+                        <Label className="text-xs text-muted-foreground">Value</Label>
+                        <Input
+                          type="number"
+                          value={level.value}
+                          onChange={(e) => handleLevelChange(index, 'value', parseInt(e.target.value) || 0)}
+                          className="h-8"
+                        />
+                      </div>
+
+                      <div className="flex-1">
+                        <Label className="text-xs text-muted-foreground">Label</Label>
+                        <Input
+                          value={level.label}
+                          onChange={(e) => handleLevelChange(index, 'label', e.target.value)}
+                          placeholder="e.g., Exceeds Expectations"
+                          className="h-8"
+                        />
+                      </div>
+
+                      <div className="w-16">
+                        <Label className="text-xs text-muted-foreground">Color</Label>
+                        <Input
+                          type="color"
+                          value={level.color}
+                          onChange={(e) => handleLevelChange(index, 'color', e.target.value)}
+                          className="h-8 p-1 cursor-pointer"
+                        />
+                      </div>
+
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="mt-5"
+                        onClick={() => removeLevel(index)}
+                      >
+                        <Trash2 className="h-4 w-4 text-muted-foreground hover:text-destructive" />
+                      </Button>
                     </div>
 
-                    <div className="flex-1">
-                      <Label className="text-xs text-muted-foreground">Label</Label>
-                      <Input
-                        value={level.label}
-                        onChange={(e) => handleLevelChange(index, 'label', e.target.value)}
-                        placeholder="e.g., Exceeds Expectations"
-                        className="h-8"
-                      />
-                    </div>
-
-                    <div className="flex-1">
+                    <div className="ml-7">
                       <Label className="text-xs text-muted-foreground">Description</Label>
                       <Input
                         value={level.description}
                         onChange={(e) => handleLevelChange(index, 'description', e.target.value)}
-                        placeholder="Brief description..."
+                        placeholder="Brief description of this rating level..."
                         className="h-8"
                       />
                     </div>
-
-                    <div className="w-16">
-                      <Label className="text-xs text-muted-foreground">Color</Label>
-                      <Input
-                        type="color"
-                        value={level.color}
-                        onChange={(e) => handleLevelChange(index, 'color', e.target.value)}
-                        className="h-8 p-1 cursor-pointer"
-                      />
-                    </div>
-
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="mt-5"
-                      onClick={() => removeLevel(index)}
-                    >
-                      <Trash2 className="h-4 w-4 text-muted-foreground hover:text-destructive" />
-                    </Button>
                   </div>
                 ))}
               </div>
