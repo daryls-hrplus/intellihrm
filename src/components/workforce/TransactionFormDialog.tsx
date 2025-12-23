@@ -192,8 +192,18 @@ export function TransactionFormDialog({
   };
 
   const handleSubmit = async () => {
+    // Strip out joined/virtual fields that shouldn't be sent to the database
+    const { 
+      transaction_type, 
+      employee, 
+      position, 
+      department, 
+      company,
+      ...cleanFormData 
+    } = formData as any;
+
     const submitData = {
-      ...formData,
+      ...cleanFormData,
       transaction_type_id: transactionTypeId,
     };
 
