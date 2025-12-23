@@ -29,6 +29,7 @@ import {
   UserCircle,
   BarChart3,
   AlertCircle,
+  CalendarClock,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -44,6 +45,7 @@ import { GoalsFilters } from "@/components/performance/GoalsFilters";
 import { EnhancedGoalCard } from "@/components/performance/EnhancedGoalCard";
 import { GoalProgressDialog } from "@/components/performance/GoalProgressDialog";
 import { GoalCommentsDialog } from "@/components/performance/GoalCommentsDialog";
+import { GoalInterviewsList } from "@/components/goals/GoalInterviewsList";
 import { useAuditLog } from "@/hooks/useAuditLog";
 import { useLanguage } from "@/hooks/useLanguage";
 import { isPast } from "date-fns";
@@ -506,6 +508,10 @@ export default function GoalsPage() {
                 <LayoutGrid className="h-4 w-4" />
                 {t('performance.goals.templates')}
               </TabsTrigger>
+              <TabsTrigger value="interviews" className="gap-2">
+                <CalendarClock className="h-4 w-4" />
+                {t('performance.goals.interviews')}
+              </TabsTrigger>
             </TabsList>
           </div>
 
@@ -626,6 +632,12 @@ export default function GoalsPage() {
 
           <TabsContent value="templates" className="mt-6">
             <GoalTemplatesManager companyId={company?.id} />
+          </TabsContent>
+
+          <TabsContent value="interviews" className="mt-6">
+            {user?.id && (
+              <GoalInterviewsList userId={user.id} userRole="manager" />
+            )}
           </TabsContent>
 
           <TabsContent value="direct-reports" className="mt-6">
