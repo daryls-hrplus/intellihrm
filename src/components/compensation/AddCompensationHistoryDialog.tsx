@@ -237,145 +237,196 @@ export function AddCompensationHistoryDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg">
+      <DialogContent className="max-w-2xl">
         <DialogHeader>
-          <DialogTitle>{t("compensation.history.addRecord")}</DialogTitle>
+          <DialogTitle className="text-xl">{t("compensation.history.addRecord")}</DialogTitle>
         </DialogHeader>
-        <div className="grid gap-4 py-4 max-h-[70vh] overflow-y-auto">
-          <div className="space-y-2">
-            <Label>{t("common.department")} *</Label>
-            <Select
-              value={selectedDepartmentId}
-              onValueChange={setSelectedDepartmentId}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder={t("common.selectDepartment")} />
-              </SelectTrigger>
-              <SelectContent>
-                {departments.map((dept) => (
-                  <SelectItem key={dept.id} value={dept.id}>
-                    {dept.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+        <div className="grid gap-6 py-4 max-h-[75vh] overflow-y-auto px-1">
+          {/* Employee Selection Section */}
+          <div className="space-y-4">
+            <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
+              {t("common.employee")} Selection
+            </h3>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>{t("common.department")} *</Label>
+                <Select
+                  value={selectedDepartmentId}
+                  onValueChange={setSelectedDepartmentId}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder={t("common.selectDepartment")} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {departments.map((dept) => (
+                      <SelectItem key={dept.id} value={dept.id}>
+                        {dept.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="employee">{t("compensation.history.employee")} *</Label>
-            <Select
-              value={formData.employee_id}
-              onValueChange={(value) => setFormData({ ...formData, employee_id: value })}
-              disabled={!selectedDepartmentId}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder={selectedDepartmentId ? t("common.selectEmployee") : t("common.selectDepartmentFirst")} />
-              </SelectTrigger>
-              <SelectContent>
-                {employees.map((emp) => (
-                  <SelectItem key={emp.id} value={emp.id}>
-                    {emp.full_name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            <Label>{t("common.position")} *</Label>
-            <Select
-              value={formData.position_id}
-              onValueChange={handlePositionChange}
-              disabled={!formData.employee_id}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder={formData.employee_id ? t("common.selectPosition") : t("common.selectEmployeeFirst")} />
-              </SelectTrigger>
-              <SelectContent>
-                {positions.map((pos) => (
-                  <SelectItem key={pos.position_id} value={pos.position_id}>
-                    {pos.position?.title} {pos.is_primary && "(Primary)"}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="change_type">{t("compensation.history.type")} *</Label>
-            <Select
-              value={formData.change_type}
-              onValueChange={(value) => setFormData({ ...formData, change_type: value })}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder={t("compensation.history.selectType")} />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="hire">{t("compensation.history.changeTypes.hire")}</SelectItem>
-                <SelectItem value="promotion">{t("compensation.history.changeTypes.promotion")}</SelectItem>
-                <SelectItem value="merit">{t("compensation.history.changeTypes.merit")}</SelectItem>
-                <SelectItem value="adjustment">{t("compensation.history.changeTypes.adjustment")}</SelectItem>
-                <SelectItem value="market">{t("compensation.history.changeTypes.market")}</SelectItem>
-                <SelectItem value="demotion">{t("compensation.history.changeTypes.demotion")}</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="effective_date">{t("compensation.history.effectiveDate")} *</Label>
-            <Input
-              id="effective_date"
-              type="date"
-              value={formData.effective_date}
-              onChange={(e) => setFormData({ ...formData, effective_date: e.target.value })}
-            />
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="previous_salary">{t("compensation.history.previous")}</Label>
-              <Input
-                id="previous_salary"
-                type="number"
-                placeholder="0.00"
-                value={formData.previous_salary}
-                onChange={(e) => setFormData({ ...formData, previous_salary: e.target.value })}
-              />
+              <div className="space-y-2">
+                <Label htmlFor="employee">{t("compensation.history.employee")} *</Label>
+                <Select
+                  value={formData.employee_id}
+                  onValueChange={(value) => setFormData({ ...formData, employee_id: value })}
+                  disabled={!selectedDepartmentId}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder={selectedDepartmentId ? t("common.selectEmployee") : t("common.selectDepartmentFirst")} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {employees.map((emp) => (
+                      <SelectItem key={emp.id} value={emp.id}>
+                        {emp.full_name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="new_salary">{t("compensation.history.new")} *</Label>
-              <Input
-                id="new_salary"
-                type="number"
-                placeholder="0.00"
-                value={formData.new_salary}
-                onChange={(e) => setFormData({ ...formData, new_salary: e.target.value })}
-              />
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>{t("common.position")} *</Label>
+                <Select
+                  value={formData.position_id}
+                  onValueChange={handlePositionChange}
+                  disabled={!formData.employee_id}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder={formData.employee_id ? t("common.selectPosition") : t("common.selectEmployeeFirst")} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {positions.map((pos) => (
+                      <SelectItem key={pos.position_id} value={pos.position_id}>
+                        {pos.position?.title} {pos.is_primary && "(Primary)"}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="change_type">{t("compensation.history.type")} *</Label>
+                <Select
+                  value={formData.change_type}
+                  onValueChange={(value) => setFormData({ ...formData, change_type: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder={t("compensation.history.selectType")} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="hire">{t("compensation.history.changeTypes.hire")}</SelectItem>
+                    <SelectItem value="promotion">{t("compensation.history.changeTypes.promotion")}</SelectItem>
+                    <SelectItem value="merit">{t("compensation.history.changeTypes.merit")}</SelectItem>
+                    <SelectItem value="adjustment">{t("compensation.history.changeTypes.adjustment")}</SelectItem>
+                    <SelectItem value="market">{t("compensation.history.changeTypes.market")}</SelectItem>
+                    <SelectItem value="demotion">{t("compensation.history.changeTypes.demotion")}</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="reason">{t("compensation.history.reason")}</Label>
-            <Input
-              id="reason"
-              value={formData.reason}
-              onChange={(e) => setFormData({ ...formData, reason: e.target.value })}
-              placeholder={t("compensation.history.reasonPlaceholder")}
-            />
+          {/* Compensation Details Section */}
+          <div className="space-y-4">
+            <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
+              Compensation Details
+            </h3>
+            <div className="grid grid-cols-3 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="effective_date">{t("compensation.history.effectiveDate")} *</Label>
+                <Input
+                  id="effective_date"
+                  type="date"
+                  value={formData.effective_date}
+                  onChange={(e) => setFormData({ ...formData, effective_date: e.target.value })}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="previous_salary">{t("compensation.history.previous")}</Label>
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">$</span>
+                  <Input
+                    id="previous_salary"
+                    type="number"
+                    placeholder="0.00"
+                    className="pl-7"
+                    value={formData.previous_salary}
+                    onChange={(e) => setFormData({ ...formData, previous_salary: e.target.value })}
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="new_salary">{t("compensation.history.new")} *</Label>
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">$</span>
+                  <Input
+                    id="new_salary"
+                    type="number"
+                    placeholder="0.00"
+                    className="pl-7"
+                    value={formData.new_salary}
+                    onChange={(e) => setFormData({ ...formData, new_salary: e.target.value })}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Change Preview */}
+            {formData.previous_salary && formData.new_salary && (
+              <div className="rounded-lg border bg-muted/50 p-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-muted-foreground">Change Amount</span>
+                  <span className={`font-medium ${parseFloat(formData.new_salary) - parseFloat(formData.previous_salary) >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
+                    {parseFloat(formData.new_salary) - parseFloat(formData.previous_salary) >= 0 ? '+' : ''}
+                    ${(parseFloat(formData.new_salary) - parseFloat(formData.previous_salary)).toLocaleString()}
+                    {parseFloat(formData.previous_salary) > 0 && (
+                      <span className="ml-2 text-sm">
+                        ({(((parseFloat(formData.new_salary) - parseFloat(formData.previous_salary)) / parseFloat(formData.previous_salary)) * 100).toFixed(1)}%)
+                      </span>
+                    )}
+                  </span>
+                </div>
+              </div>
+            )}
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="notes">{t("common.notes")}</Label>
-            <Textarea
-              id="notes"
-              value={formData.notes}
-              onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-              placeholder={t("common.notesPlaceholder")}
-              rows={3}
-            />
+          {/* Additional Information Section */}
+          <div className="space-y-4">
+            <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
+              Additional Information
+            </h3>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="reason">{t("compensation.history.reason")}</Label>
+                <Input
+                  id="reason"
+                  value={formData.reason}
+                  onChange={(e) => setFormData({ ...formData, reason: e.target.value })}
+                  placeholder={t("compensation.history.reasonPlaceholder")}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="notes">{t("common.notes")}</Label>
+                <Textarea
+                  id="notes"
+                  value={formData.notes}
+                  onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                  placeholder={t("common.notesPlaceholder")}
+                  rows={3}
+                />
+              </div>
+            </div>
           </div>
         </div>
-        <DialogFooter>
+        <DialogFooter className="gap-2 sm:gap-0">
           <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isSubmitting}>
             {t("common.cancel")}
           </Button>
