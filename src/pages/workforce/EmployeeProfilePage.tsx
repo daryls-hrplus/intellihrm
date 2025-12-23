@@ -19,7 +19,7 @@ import { EmployeeDependentsTab } from "@/components/employee/EmployeeDependentsT
 import { EmployeeWorkPermitsTab } from "@/components/employee/EmployeeWorkPermitsTab";
 
 import { EmployeeBackgroundChecksTab } from "@/components/employee/EmployeeBackgroundChecksTab";
-import { EmployeeReferencesTab } from "@/components/employee/EmployeeReferencesTab";
+
 import { EmployeeQualificationsTab } from "@/components/employee/EmployeeQualificationsTab";
 
 import { EmployeeInterestsTab } from "@/components/employee/EmployeeInterestsTab";
@@ -304,7 +304,7 @@ export default function EmployeeProfilePage() {
             
             <TabsTrigger value="paygroup"><DollarSign className="h-4 w-4 mr-1" />{t("workforce.profile.tabs.payGroup")}</TabsTrigger>
             <TabsTrigger value="professional_info"><FileSignature className="h-4 w-4 mr-1" />Professional Info</TabsTrigger>
-            <TabsTrigger value="references"><UserCheck className="h-4 w-4 mr-1" />{t("workforce.profile.tabs.references")}</TabsTrigger>
+            
             <TabsTrigger value="tax_allowances"><Receipt className="h-4 w-4 mr-1" />{t("workforce.profile.tabs.taxAllowances", "Tax Allowances")}</TabsTrigger>
             <TabsTrigger value="work_permits"><FileCheck className="h-4 w-4 mr-1" />{t("workforce.profile.tabs.workPermits")}</TabsTrigger>
           </TabsList>
@@ -451,9 +451,8 @@ export default function EmployeeProfilePage() {
             <EmployeePayGroupTab employeeId={employee.id} />
           </TabsContent>
 
-          <TabsContent value="references" className="mt-6">
-            <EmployeeReferencesTab employeeId={employee.id} />
-          </TabsContent>
+
+
 
           <TabsContent value="work_permits" className="mt-6">
             <EmployeeWorkPermitsTab employeeId={employee.id} />
