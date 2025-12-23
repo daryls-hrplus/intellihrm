@@ -17,7 +17,7 @@ import { EmployeeBeneficiariesTab } from "@/components/employee/EmployeeBenefici
 import { EmployeeDocumentsTab } from "@/components/employee/EmployeeDocumentsTab";
 import { EmployeeDependentsTab } from "@/components/employee/EmployeeDependentsTab";
 import { EmployeeWorkPermitsTab } from "@/components/employee/EmployeeWorkPermitsTab";
-import { EmployeeLicensesTab } from "@/components/employee/EmployeeLicensesTab";
+
 import { EmployeeBackgroundChecksTab } from "@/components/employee/EmployeeBackgroundChecksTab";
 import { EmployeeReferencesTab } from "@/components/employee/EmployeeReferencesTab";
 import { EmployeeCertificatesTab } from "@/components/employee/EmployeeCertificatesTab";
@@ -300,7 +300,7 @@ export default function EmployeeProfilePage() {
             <TabsTrigger value="dependents"><Baby className="h-4 w-4 mr-1" />{t("workforce.profile.tabs.dependents")}</TabsTrigger>
             <TabsTrigger value="documents"><FileText className="h-4 w-4 mr-1" />{t("workforce.profile.tabs.documents")}</TabsTrigger>
             <TabsTrigger value="interests"><Sparkles className="h-4 w-4 mr-1" />{t("workforce.profile.tabs.interests")}</TabsTrigger>
-            <TabsTrigger value="licenses"><Award className="h-4 w-4 mr-1" />{t("workforce.profile.tabs.licenses")}</TabsTrigger>
+            
             <TabsTrigger value="medical"><Stethoscope className="h-4 w-4 mr-1" />{t("workforce.profile.tabs.medical")}</TabsTrigger>
             
             <TabsTrigger value="paygroup"><DollarSign className="h-4 w-4 mr-1" />{t("workforce.profile.tabs.payGroup")}</TabsTrigger>
@@ -351,9 +351,6 @@ export default function EmployeeProfilePage() {
             <EmployeeInterestsTab employeeId={employee.id} />
           </TabsContent>
 
-          <TabsContent value="licenses" className="mt-6">
-            <EmployeeLicensesTab employeeId={employee.id} />
-          </TabsContent>
 
           <TabsContent value="medical" className="mt-6">
             <EmployeeMedicalProfileTab employeeId={employee.id} />
