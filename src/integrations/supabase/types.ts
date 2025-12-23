@@ -136,6 +136,98 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_bias_incidents: {
+        Row: {
+          affected_characteristic: string | null
+          bias_type: string
+          company_id: string | null
+          created_at: string | null
+          detection_method: string
+          evidence_description: string | null
+          id: string
+          interaction_log_id: string | null
+          investigated_by: string | null
+          prompt_content: string | null
+          remediation_actions: Json | null
+          remediation_notes: string | null
+          remediation_status: string | null
+          reported_by: string | null
+          resolved_at: string | null
+          response_content: string | null
+          severity: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          affected_characteristic?: string | null
+          bias_type: string
+          company_id?: string | null
+          created_at?: string | null
+          detection_method: string
+          evidence_description?: string | null
+          id?: string
+          interaction_log_id?: string | null
+          investigated_by?: string | null
+          prompt_content?: string | null
+          remediation_actions?: Json | null
+          remediation_notes?: string | null
+          remediation_status?: string | null
+          reported_by?: string | null
+          resolved_at?: string | null
+          response_content?: string | null
+          severity?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          affected_characteristic?: string | null
+          bias_type?: string
+          company_id?: string | null
+          created_at?: string | null
+          detection_method?: string
+          evidence_description?: string | null
+          id?: string
+          interaction_log_id?: string | null
+          investigated_by?: string | null
+          prompt_content?: string | null
+          remediation_actions?: Json | null
+          remediation_notes?: string | null
+          remediation_status?: string | null
+          reported_by?: string | null
+          resolved_at?: string | null
+          response_content?: string | null
+          severity?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_bias_incidents_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ai_bias_incidents_interaction_log_id_fkey"
+            columns: ["interaction_log_id"]
+            isOneToOne: false
+            referencedRelation: "ai_interaction_logs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ai_bias_incidents_investigated_by_fkey"
+            columns: ["investigated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ai_bias_incidents_reported_by_fkey"
+            columns: ["reported_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ai_budget_tiers: {
         Row: {
           company_id: string | null
@@ -180,6 +272,128 @@ export type Database = {
           },
         ]
       }
+      ai_explainability_logs: {
+        Row: {
+          citations: Json | null
+          company_id: string | null
+          completion_tokens: number | null
+          confidence_score: number | null
+          context_sources_used: Json | null
+          created_at: string | null
+          decision_factors: Json | null
+          explanation_generated: string | null
+          id: string
+          interaction_log_id: string | null
+          model_used: string | null
+          prompt_tokens: number | null
+          uncertainty_areas: string[] | null
+        }
+        Insert: {
+          citations?: Json | null
+          company_id?: string | null
+          completion_tokens?: number | null
+          confidence_score?: number | null
+          context_sources_used?: Json | null
+          created_at?: string | null
+          decision_factors?: Json | null
+          explanation_generated?: string | null
+          id?: string
+          interaction_log_id?: string | null
+          model_used?: string | null
+          prompt_tokens?: number | null
+          uncertainty_areas?: string[] | null
+        }
+        Update: {
+          citations?: Json | null
+          company_id?: string | null
+          completion_tokens?: number | null
+          confidence_score?: number | null
+          context_sources_used?: Json | null
+          created_at?: string | null
+          decision_factors?: Json | null
+          explanation_generated?: string | null
+          id?: string
+          interaction_log_id?: string | null
+          model_used?: string | null
+          prompt_tokens?: number | null
+          uncertainty_areas?: string[] | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_explainability_logs_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ai_explainability_logs_interaction_log_id_fkey"
+            columns: ["interaction_log_id"]
+            isOneToOne: false
+            referencedRelation: "ai_interaction_logs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ai_governance_metrics: {
+        Row: {
+          avg_confidence_score: number | null
+          avg_risk_score: number | null
+          bias_incidents_detected: number | null
+          company_id: string | null
+          compliance_rate: number | null
+          created_at: string | null
+          high_risk_interactions: number | null
+          human_reviews_completed: number | null
+          human_reviews_required: number | null
+          id: string
+          metric_date: string
+          metric_type: string
+          overrides_count: number | null
+          total_interactions: number | null
+        }
+        Insert: {
+          avg_confidence_score?: number | null
+          avg_risk_score?: number | null
+          bias_incidents_detected?: number | null
+          company_id?: string | null
+          compliance_rate?: number | null
+          created_at?: string | null
+          high_risk_interactions?: number | null
+          human_reviews_completed?: number | null
+          human_reviews_required?: number | null
+          id?: string
+          metric_date: string
+          metric_type: string
+          overrides_count?: number | null
+          total_interactions?: number | null
+        }
+        Update: {
+          avg_confidence_score?: number | null
+          avg_risk_score?: number | null
+          bias_incidents_detected?: number | null
+          company_id?: string | null
+          compliance_rate?: number | null
+          created_at?: string | null
+          high_risk_interactions?: number | null
+          human_reviews_completed?: number | null
+          human_reviews_required?: number | null
+          id?: string
+          metric_date?: string
+          metric_type?: string
+          overrides_count?: number | null
+          total_interactions?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_governance_metrics_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ai_guardrails_config: {
         Row: {
           company_id: string | null
@@ -217,6 +431,83 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ai_human_overrides: {
+        Row: {
+          approval_required: boolean | null
+          approval_status: string | null
+          approved_by: string | null
+          company_id: string | null
+          created_at: string | null
+          id: string
+          interaction_log_id: string | null
+          justification_category: string | null
+          modified_response: string | null
+          original_ai_response: string
+          overridden_by: string
+          override_action: string
+          override_reason: string
+        }
+        Insert: {
+          approval_required?: boolean | null
+          approval_status?: string | null
+          approved_by?: string | null
+          company_id?: string | null
+          created_at?: string | null
+          id?: string
+          interaction_log_id?: string | null
+          justification_category?: string | null
+          modified_response?: string | null
+          original_ai_response: string
+          overridden_by: string
+          override_action: string
+          override_reason: string
+        }
+        Update: {
+          approval_required?: boolean | null
+          approval_status?: string | null
+          approved_by?: string | null
+          company_id?: string | null
+          created_at?: string | null
+          id?: string
+          interaction_log_id?: string | null
+          justification_category?: string | null
+          modified_response?: string | null
+          original_ai_response?: string
+          overridden_by?: string
+          override_action?: string
+          override_reason?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_human_overrides_approved_by_fkey"
+            columns: ["approved_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ai_human_overrides_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ai_human_overrides_interaction_log_id_fkey"
+            columns: ["interaction_log_id"]
+            isOneToOne: false
+            referencedRelation: "ai_interaction_logs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ai_human_overrides_overridden_by_fkey"
+            columns: ["overridden_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -273,6 +564,87 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ai_model_registry: {
+        Row: {
+          approved_use_cases: string[] | null
+          audit_findings: Json | null
+          company_id: string | null
+          compliance_status: string | null
+          created_at: string | null
+          created_by: string | null
+          data_retention_policy: string | null
+          display_name: string
+          id: string
+          is_active: boolean | null
+          last_audit_date: string | null
+          model_identifier: string
+          next_audit_due: string | null
+          prohibited_use_cases: string[] | null
+          provider: string
+          purpose: string
+          risk_classification: string | null
+          updated_at: string | null
+          version: string | null
+        }
+        Insert: {
+          approved_use_cases?: string[] | null
+          audit_findings?: Json | null
+          company_id?: string | null
+          compliance_status?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          data_retention_policy?: string | null
+          display_name: string
+          id?: string
+          is_active?: boolean | null
+          last_audit_date?: string | null
+          model_identifier: string
+          next_audit_due?: string | null
+          prohibited_use_cases?: string[] | null
+          provider: string
+          purpose: string
+          risk_classification?: string | null
+          updated_at?: string | null
+          version?: string | null
+        }
+        Update: {
+          approved_use_cases?: string[] | null
+          audit_findings?: Json | null
+          company_id?: string | null
+          compliance_status?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          data_retention_policy?: string | null
+          display_name?: string
+          id?: string
+          is_active?: boolean | null
+          last_audit_date?: string | null
+          model_identifier?: string
+          next_audit_due?: string | null
+          prohibited_use_cases?: string[] | null
+          provider?: string
+          purpose?: string
+          risk_classification?: string | null
+          updated_at?: string | null
+          version?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_model_registry_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ai_model_registry_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -406,6 +778,82 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ai_risk_assessments: {
+        Row: {
+          company_id: string | null
+          created_at: string | null
+          human_review_completed: boolean | null
+          human_review_required: boolean | null
+          id: string
+          interaction_log_id: string | null
+          mitigation_applied: string[] | null
+          review_notes: string | null
+          review_outcome: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          risk_category: string
+          risk_factors: Json | null
+          risk_score: number | null
+          user_id: string | null
+        }
+        Insert: {
+          company_id?: string | null
+          created_at?: string | null
+          human_review_completed?: boolean | null
+          human_review_required?: boolean | null
+          id?: string
+          interaction_log_id?: string | null
+          mitigation_applied?: string[] | null
+          review_notes?: string | null
+          review_outcome?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          risk_category: string
+          risk_factors?: Json | null
+          risk_score?: number | null
+          user_id?: string | null
+        }
+        Update: {
+          company_id?: string | null
+          created_at?: string | null
+          human_review_completed?: boolean | null
+          human_review_required?: boolean | null
+          id?: string
+          interaction_log_id?: string | null
+          mitigation_applied?: string[] | null
+          review_notes?: string | null
+          review_outcome?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          risk_category?: string
+          risk_factors?: Json | null
+          risk_score?: number | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_risk_assessments_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ai_risk_assessments_interaction_log_id_fkey"
+            columns: ["interaction_log_id"]
+            isOneToOne: false
+            referencedRelation: "ai_interaction_logs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ai_risk_assessments_reviewed_by_fkey"
+            columns: ["reviewed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
