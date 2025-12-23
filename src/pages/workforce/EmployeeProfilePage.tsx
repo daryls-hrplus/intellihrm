@@ -473,7 +473,7 @@ export default function EmployeeProfilePage() {
                 <Tabs defaultValue="compliance_legal" className="w-full">
                   <TabsList className="mb-4">
                     <TabsTrigger value="compliance_legal">Compliance & Legal</TabsTrigger>
-                    <TabsTrigger value="credentials_memberships">Qualifications Compliance & Memberships</TabsTrigger>
+                    <TabsTrigger value="credentials_memberships">Credentials & Memberships</TabsTrigger>
                     <TabsTrigger value="references_verifications">References & Verifications</TabsTrigger>
                     <TabsTrigger value="agreements_signatures">Agreements & Signatures</TabsTrigger>
                     <TabsTrigger value="professional_history">Professional History</TabsTrigger>
