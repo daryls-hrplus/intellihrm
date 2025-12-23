@@ -1,5 +1,7 @@
 import { useState, useEffect, forwardRef, useImperativeHandle } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useReminders } from '@/hooks/useReminders';
+import { useReminderSourcePreview } from '@/hooks/useReminderSourcePreview';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -11,10 +13,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogDescription } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Plus, Pencil, Trash2, Bell, Mail, BellRing, Loader2, X, Settings, HelpCircle, Zap } from 'lucide-react';
+import { Plus, Pencil, Trash2, Bell, Mail, BellRing, Loader2, X, Settings, HelpCircle, Zap, FileText, Users, ExternalLink } from 'lucide-react';
 import type { ReminderRule, ReminderEventType } from '@/types/reminders';
 import { PRIORITY_OPTIONS, NOTIFICATION_METHODS } from '@/types/reminders';
 import { NaturalLanguageRuleInput } from './NaturalLanguageRuleInput';
+import { RuleSourcePreview } from './RuleSourcePreview';
 
 interface ReminderRulesManagerProps {
   companyId: string;
@@ -26,9 +29,12 @@ export interface ReminderRulesManagerRef {
 
 export const ReminderRulesManager = forwardRef<ReminderRulesManagerRef, ReminderRulesManagerProps>(
   function ReminderRulesManager({ companyId }, ref) {
+  const navigate = useNavigate();
   const { fetchRules, fetchEventTypes, createRule, updateRule, deleteRule, isLoading } = useReminders();
+  const { fetchRuleAffectedCount } = useReminderSourcePreview();
   const [rules, setRules] = useState<ReminderRule[]>([]);
   const [eventTypes, setEventTypes] = useState<ReminderEventType[]>([]);
+  const [ruleAffectedCounts, setRuleAffectedCounts] = useState<Record<string, { count: number; employeeCount: number }>>({});
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingRule, setEditingRule] = useState<ReminderRule | null>(null);
@@ -70,6 +76,20 @@ export const ReminderRulesManager = forwardRef<ReminderRulesManagerRef, Reminder
       ]);
       setRules(rulesData);
       setEventTypes(typesData);
+      
+      // Fetch affected counts for each rule
+      const counts: Record<string, { count: number; employeeCount: number }> = {};
+      await Promise.all(
+        rulesData.map(async (rule) => {
+          if (rule.event_type) {
+            const result = await fetchRuleAffectedCount(rule.event_type, companyId);
+            if (result) {
+              counts[rule.id] = result;
+            }
+          }
+        })
+      );
+      setRuleAffectedCounts(counts);
     } catch (error) {
       console.error('Error loading rules:', error);
     } finally {
@@ -287,6 +307,13 @@ export const ReminderRulesManager = forwardRef<ReminderRulesManagerRef, Reminder
                 </div>
               </div>
 
+              {/* Source Record Preview - Shows affected items when event type is selected */}
+              <RuleSourcePreview
+                eventType={eventTypes.find(t => t.id === formData.event_type_id) || null}
+                companyId={companyId}
+                daysBeforeArray={formData.reminder_intervals}
+              />
+
               <div className="space-y-2">
                 <Label>Description</Label>
                 <Textarea
@@ -488,9 +515,9 @@ export const ReminderRulesManager = forwardRef<ReminderRulesManagerRef, Reminder
               <TableRow>
                 <TableHead>Rule Name</TableHead>
                 <TableHead>Event Type</TableHead>
-                <TableHead>Reminder Intervals</TableHead>
+                <TableHead>Affected Items</TableHead>
+                <TableHead>Intervals</TableHead>
                 <TableHead>Recipients</TableHead>
-                <TableHead>Method</TableHead>
                 <TableHead>Priority</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
@@ -499,10 +526,40 @@ export const ReminderRulesManager = forwardRef<ReminderRulesManagerRef, Reminder
             <TableBody>
               {rules.map((rule) => {
                 const intervals = rule.reminder_intervals || [rule.days_before];
+                const affectedData = ruleAffectedCounts[rule.id];
+                const sourceTableLabel = rule.event_type?.source_table
+                  ?.replace('employee_', '')
+                  .replace(/_/g, ' ') || 'records';
+                
                 return (
                 <TableRow key={rule.id}>
                   <TableCell className="font-medium">{rule.name}</TableCell>
-                  <TableCell>{rule.event_type?.name || '-'}</TableCell>
+                  <TableCell>
+                    <span className="text-sm">{rule.event_type?.name || '-'}</span>
+                  </TableCell>
+                  <TableCell>
+                    {affectedData ? (
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Badge 
+                              variant="secondary" 
+                              className="cursor-pointer hover:bg-primary/20 transition-colors gap-1"
+                            >
+                              <FileText className="h-3 w-3" />
+                              {affectedData.count} {sourceTableLabel}
+                            </Badge>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>{affectedData.count} records across {affectedData.employeeCount} employees</p>
+                            <p className="text-xs text-muted-foreground">Click edit to see details</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    ) : (
+                      <span className="text-muted-foreground text-sm">-</span>
+                    )}
+                  </TableCell>
                   <TableCell>
                     <div className="flex flex-wrap gap-1">
                       {intervals.sort((a, b) => b - a).map((interval) => (
@@ -514,12 +571,11 @@ export const ReminderRulesManager = forwardRef<ReminderRulesManagerRef, Reminder
                   </TableCell>
                   <TableCell>
                     <div className="flex gap-1">
-                      {rule.send_to_employee && <Badge variant="outline" className="text-xs">Employee</Badge>}
-                      {rule.send_to_manager && <Badge variant="outline" className="text-xs">Manager</Badge>}
+                      {rule.send_to_employee && <Badge variant="outline" className="text-xs">Emp</Badge>}
+                      {rule.send_to_manager && <Badge variant="outline" className="text-xs">Mgr</Badge>}
                       {rule.send_to_hr && <Badge variant="outline" className="text-xs">HR</Badge>}
                     </div>
                   </TableCell>
-                  <TableCell>{getMethodIcon(rule.notification_method)}</TableCell>
                   <TableCell>
                     <span className={getPriorityColor(rule.priority)}>{rule.priority}</span>
                   </TableCell>
