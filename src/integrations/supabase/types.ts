@@ -858,6 +858,62 @@ export type Database = {
           },
         ]
       }
+      ai_scheduled_job_runs: {
+        Row: {
+          companies_processed: number | null
+          company_id: string | null
+          completed_at: string | null
+          created_at: string
+          error_message: string | null
+          id: string
+          job_name: string
+          job_type: string
+          metrics_generated: Json | null
+          started_at: string
+          status: string
+          triggered_by: string | null
+          triggered_by_user: string | null
+        }
+        Insert: {
+          companies_processed?: number | null
+          company_id?: string | null
+          completed_at?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          job_name: string
+          job_type: string
+          metrics_generated?: Json | null
+          started_at?: string
+          status?: string
+          triggered_by?: string | null
+          triggered_by_user?: string | null
+        }
+        Update: {
+          companies_processed?: number | null
+          company_id?: string | null
+          completed_at?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          job_name?: string
+          job_type?: string
+          metrics_generated?: Json | null
+          started_at?: string
+          status?: string
+          triggered_by?: string | null
+          triggered_by_user?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_scheduled_job_runs_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ai_security_violations: {
         Row: {
           ai_response: string | null

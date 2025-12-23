@@ -8,6 +8,8 @@ import { BiasIncidentPanel } from "@/components/ai/BiasIncidentPanel";
 import { AIModelRegistryPanel } from "@/components/ai/AIModelRegistryPanel";
 import { AIGuardrailsConfigPanel } from "@/components/ai/AIGuardrailsConfigPanel";
 import { AIExplainabilityPanel } from "@/components/ai/AIExplainabilityPanel";
+import { AIScheduledJobsPanel } from "@/components/ai/AIScheduledJobsPanel";
+import { AIComplianceReportsPanel } from "@/components/ai/AIComplianceReportsPanel";
 import {
   Shield, 
   AlertTriangle, 
@@ -18,7 +20,9 @@ import {
   XCircle,
   Eye,
   TrendingUp,
-  BarChart3
+  BarChart3,
+  Clock,
+  FileText
 } from "lucide-react";
 import { 
   ResponsiveContainer, 
@@ -238,7 +242,7 @@ export default function AIGovernancePage() {
 
         {/* Main Tabs */}
         <Tabs defaultValue="reviews" className="space-y-4">
-          <TabsList className="grid w-full grid-cols-6">
+          <TabsList className="grid w-full grid-cols-8">
             <TabsTrigger value="reviews" className="flex items-center gap-2">
               <Eye className="h-4 w-4" />
               Reviews
@@ -262,6 +266,14 @@ export default function AIGovernancePage() {
             <TabsTrigger value="explainability" className="flex items-center gap-2">
               <CheckCircle className="h-4 w-4" />
               Explain
+            </TabsTrigger>
+            <TabsTrigger value="automation" className="flex items-center gap-2">
+              <Clock className="h-4 w-4" />
+              Automation
+            </TabsTrigger>
+            <TabsTrigger value="reports" className="flex items-center gap-2">
+              <FileText className="h-4 w-4" />
+              Reports
             </TabsTrigger>
           </TabsList>
 
@@ -334,6 +346,14 @@ export default function AIGovernancePage() {
 
           <TabsContent value="explainability">
             <AIExplainabilityPanel />
+          </TabsContent>
+
+          <TabsContent value="automation">
+            <AIScheduledJobsPanel />
+          </TabsContent>
+
+          <TabsContent value="reports">
+            <AIComplianceReportsPanel />
           </TabsContent>
         </Tabs>
       </div>
