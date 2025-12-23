@@ -9,7 +9,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Separator } from "@/components/ui/separator";
-import { HelpCircle, Info, Lightbulb, AlertCircle } from "lucide-react";
+import { HelpCircle, Info, Lightbulb, AlertCircle, CheckSquare } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/hooks/useLanguage";
 import { toast } from "sonner";
@@ -25,6 +26,7 @@ interface RatingScale {
   min_rating: number;
   max_rating: number;
   rating_labels: any;
+  scale_purpose: string[] | null;
   is_default: boolean;
   is_active: boolean;
 }
@@ -135,6 +137,7 @@ export function EnhancedRatingScaleDialog({
     min_rating: 1,
     max_rating: 5,
     rating_labels: {} as Record<string, RatingLabel>,
+    scale_purpose: ["appraisal"] as string[],
     is_default: false,
     is_active: true,
   });
@@ -169,6 +172,7 @@ export function EnhancedRatingScaleDialog({
         min_rating: editingScale.min_rating,
         max_rating: editingScale.max_rating,
         rating_labels: labels,
+        scale_purpose: editingScale.scale_purpose || ["appraisal"],
         is_default: editingScale.is_default,
         is_active: editingScale.is_active,
       });
@@ -189,6 +193,7 @@ export function EnhancedRatingScaleDialog({
         min_rating: defaultPreset.min,
         max_rating: defaultPreset.max,
         rating_labels: { ...defaultPreset.labels },
+        scale_purpose: ["appraisal"],
         is_default: false,
         is_active: true,
       });
@@ -263,6 +268,7 @@ export function EnhancedRatingScaleDialog({
         min_rating: formData.min_rating,
         max_rating: formData.max_rating,
         rating_labels: JSON.parse(JSON.stringify(formData.rating_labels)) as Json,
+        scale_purpose: formData.scale_purpose,
         is_default: formData.is_default,
         is_active: formData.is_active,
       };
@@ -476,6 +482,93 @@ export function EnhancedRatingScaleDialog({
                 rows={2}
               />
             </FieldWithTooltip>
+
+            {/* Scale Purpose Section */}
+            <div className="space-y-3">
+              <div className="flex items-center gap-1.5">
+                <CheckSquare className="h-4 w-4 text-muted-foreground" />
+                <Label className="text-base font-medium">
+                  {t("performance.setup.scalePurpose", "Scale Purpose")}
+                </Label>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <HelpCircle className="h-3.5 w-3.5 text-muted-foreground cursor-help" />
+                    </TooltipTrigger>
+                    <TooltipContent side="top" className="max-w-xs">
+                      <p className="text-xs">
+                        {t("performance.setup.scalePurposeTooltip", "Select where this rating scale should be available. You can select multiple purposes.")}
+                      </p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </div>
+              <div className="grid gap-3 p-3 rounded-lg border bg-muted/30">
+                <div className="flex items-start space-x-3">
+                  <Checkbox
+                    id="purpose-appraisal"
+                    checked={formData.scale_purpose.includes("appraisal")}
+                    onCheckedChange={(checked) => {
+                      if (checked) {
+                        setFormData({ ...formData, scale_purpose: [...formData.scale_purpose, "appraisal"] });
+                      } else {
+                        setFormData({ ...formData, scale_purpose: formData.scale_purpose.filter(p => p !== "appraisal") });
+                      }
+                    }}
+                  />
+                  <div className="grid gap-1 leading-none">
+                    <Label htmlFor="purpose-appraisal" className="text-sm font-medium cursor-pointer">
+                      {t("performance.setup.purposeAppraisal", "Appraisals")}
+                    </Label>
+                    <p className="text-xs text-muted-foreground">
+                      {t("performance.setup.purposeAppraisalDesc", "Annual/periodic performance reviews and evaluations")}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-start space-x-3">
+                  <Checkbox
+                    id="purpose-goals"
+                    checked={formData.scale_purpose.includes("goals")}
+                    onCheckedChange={(checked) => {
+                      if (checked) {
+                        setFormData({ ...formData, scale_purpose: [...formData.scale_purpose, "goals"] });
+                      } else {
+                        setFormData({ ...formData, scale_purpose: formData.scale_purpose.filter(p => p !== "goals") });
+                      }
+                    }}
+                  />
+                  <div className="grid gap-1 leading-none">
+                    <Label htmlFor="purpose-goals" className="text-sm font-medium cursor-pointer">
+                      {t("performance.setup.purposeGoals", "Goals")}
+                    </Label>
+                    <p className="text-xs text-muted-foreground">
+                      {t("performance.setup.purposeGoalsDesc", "Goal progress and achievement ratings")}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-start space-x-3">
+                  <Checkbox
+                    id="purpose-360"
+                    checked={formData.scale_purpose.includes("360_feedback")}
+                    onCheckedChange={(checked) => {
+                      if (checked) {
+                        setFormData({ ...formData, scale_purpose: [...formData.scale_purpose, "360_feedback"] });
+                      } else {
+                        setFormData({ ...formData, scale_purpose: formData.scale_purpose.filter(p => p !== "360_feedback") });
+                      }
+                    }}
+                  />
+                  <div className="grid gap-1 leading-none">
+                    <Label htmlFor="purpose-360" className="text-sm font-medium cursor-pointer">
+                      {t("performance.setup.purpose360", "360 Feedback")}
+                    </Label>
+                    <p className="text-xs text-muted-foreground">
+                      {t("performance.setup.purpose360Desc", "Multi-rater feedback questionnaires")}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
 
             {/* Rating Range (for custom) */}
             {scaleType === "custom" && (
