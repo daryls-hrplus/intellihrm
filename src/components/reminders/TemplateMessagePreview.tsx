@@ -219,7 +219,7 @@ export function TemplateMessagePreview({
 
       {/* Rendered message */}
       <div className="p-4">
-        <div className="text-sm leading-relaxed">
+        <div className="text-sm leading-relaxed whitespace-pre-wrap">
           {renderedMessage?.map((part, idx) => (
             <span
               key={idx}
