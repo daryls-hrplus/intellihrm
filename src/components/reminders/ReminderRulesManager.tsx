@@ -297,10 +297,25 @@ export const ReminderRulesManager = forwardRef<ReminderRulesManagerRef, Reminder
                       <SelectValue placeholder="Select event type" />
                     </SelectTrigger>
                     <SelectContent>
-                      {eventTypes.map((type) => (
-                        <SelectItem key={type.id} value={type.id}>
-                          {type.name}
-                        </SelectItem>
+                      {/* Group event types by category */}
+                      {Object.entries(
+                        eventTypes.reduce((acc, type) => {
+                          const cat = type.category || 'other';
+                          if (!acc[cat]) acc[cat] = [];
+                          acc[cat].push(type);
+                          return acc;
+                        }, {} as Record<string, ReminderEventType[]>)
+                      ).map(([category, types]) => (
+                        <div key={category}>
+                          <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground uppercase tracking-wider bg-muted/50 sticky top-0">
+                            {category.replace(/_/g, ' ')}
+                          </div>
+                          {types.map((type) => (
+                            <SelectItem key={type.id} value={type.id} className="pl-4">
+                              {type.name}
+                            </SelectItem>
+                          ))}
+                        </div>
                       ))}
                     </SelectContent>
                   </Select>
