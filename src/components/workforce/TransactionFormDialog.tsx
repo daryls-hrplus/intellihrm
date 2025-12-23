@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { CalendarIcon, Loader2 } from "lucide-react";
+import { CalendarIcon, Loader2, DollarSign } from "lucide-react";
 import { useLanguage } from "@/hooks/useLanguage";
 import { formatDateForDisplay, toDateString, getTodayString } from "@/utils/dateUtils";
 import { Button } from "@/components/ui/button";
@@ -36,6 +36,7 @@ import {
   LookupValue,
   TransactionType,
 } from "@/hooks/useEmployeeTransactions";
+import { TransactionCompensationDialog } from "@/components/compensation/TransactionCompensationDialog";
 
 interface TransactionFormDialogProps {
   open: boolean;
@@ -101,6 +102,9 @@ export function TransactionFormDialog({
     requires_workflow: false,
     notes: "",
   });
+
+  // Compensation dialog state
+  const [compensationDialogOpen, setCompensationDialogOpen] = useState(false);
 
   useEffect(() => {
     if (open) {
@@ -958,16 +962,47 @@ export function TransactionFormDialog({
           </div>
         </div>
 
-        <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
-            {t("common.cancel")}
-          </Button>
-          <Button onClick={handleSubmit} disabled={isLoading}>
-            {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            {existingTransaction ? t("workforce.modules.transactions.form.updateTransaction") : t("workforce.modules.transactions.form.createTransaction")}
-          </Button>
+        <DialogFooter className="sm:justify-between">
+          <div>
+            {formData.employee_id && formData.position_id && transactionType !== "TERMINATION" && (
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setCompensationDialogOpen(true)}
+                className="gap-2"
+              >
+                <DollarSign className="h-4 w-4" />
+                {t("workforce.modules.transactions.form.setCompensation")}
+              </Button>
+            )}
+          </div>
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={() => onOpenChange(false)}>
+              {t("common.cancel")}
+            </Button>
+            <Button onClick={handleSubmit} disabled={isLoading}>
+              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {existingTransaction ? t("workforce.modules.transactions.form.updateTransaction") : t("workforce.modules.transactions.form.createTransaction")}
+            </Button>
+          </div>
         </DialogFooter>
       </DialogContent>
+
+      {/* Compensation Dialog */}
+      {formData.employee_id && formData.position_id && transactionType && (
+        <TransactionCompensationDialog
+          open={compensationDialogOpen}
+          onOpenChange={setCompensationDialogOpen}
+          employeeId={formData.employee_id}
+          employeeName={employees.find(e => e.id === formData.employee_id)?.full_name || ""}
+          positionId={formData.position_id}
+          positionTitle={positions.find(p => p.id === formData.position_id)?.title || ""}
+          companyId={formData.company_id || ""}
+          effectiveDate={formData.effective_date || ""}
+          transactionType={transactionType}
+          onSuccess={() => {}}
+        />
+      )}
     </Dialog>
   );
 }
