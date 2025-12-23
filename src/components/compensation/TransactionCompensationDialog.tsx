@@ -11,6 +11,17 @@ import { useTranslation } from "react-i18next";
 import { useAuth } from "@/contexts/AuthContext";
 import { TransactionType } from "@/hooks/useEmployeeTransactions";
 
+interface CompensationRecord {
+  id: string;
+  change_type: string;
+  effective_date: string;
+  previous_salary: number | null;
+  new_salary: number;
+  reason: string | null;
+  notes: string | null;
+  currency: string;
+}
+
 interface TransactionCompensationDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -21,6 +32,7 @@ interface TransactionCompensationDialogProps {
   companyId: string;
   effectiveDate: string;
   transactionType: TransactionType;
+  existingRecord?: CompensationRecord | null;
   onSuccess: () => void;
 }
 
@@ -44,8 +56,10 @@ export function TransactionCompensationDialog({
   companyId,
   effectiveDate,
   transactionType,
+  existingRecord,
   onSuccess,
 }: TransactionCompensationDialogProps) {
+  const isEditMode = !!existingRecord;
   const { t } = useTranslation();
   const { user } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -72,15 +86,32 @@ export function TransactionCompensationDialog({
 
   useEffect(() => {
     if (open && employeeId && positionId) {
-      loadCurrentCompensation();
+      if (existingRecord) {
+        // Populate form with existing record data
+        setFormData({
+          change_type: existingRecord.change_type,
+          effective_date: existingRecord.effective_date,
+          previous_salary: existingRecord.previous_salary?.toString() || "",
+          new_salary: existingRecord.new_salary.toString(),
+          reason: existingRecord.reason || "",
+          notes: existingRecord.notes || "",
+          currency: existingRecord.currency || "USD",
+        });
+      } else {
+        loadCurrentCompensation();
+        setFormData((prev) => ({
+          ...prev,
+          change_type: transactionTypeToChangeType[transactionType] || "adjustment",
+          effective_date: effectiveDate || "",
+          previous_salary: "",
+          new_salary: "",
+          reason: "",
+          notes: "",
+        }));
+      }
       loadPositionDetails();
-      setFormData((prev) => ({
-        ...prev,
-        change_type: transactionTypeToChangeType[transactionType] || "adjustment",
-        effective_date: effectiveDate || "",
-      }));
     }
-  }, [open, employeeId, positionId, effectiveDate, transactionType, positionTitle]);
+  }, [open, employeeId, positionId, effectiveDate, transactionType, positionTitle, existingRecord]);
 
   const loadCurrentCompensation = async () => {
     // Get current compensation from employee_positions
@@ -138,25 +169,44 @@ export function TransactionCompensationDialog({
         changePercentage = parseFloat(((changeAmount / previousSalary) * 100).toFixed(2));
       }
 
-      const { error } = await supabase.from("compensation_history").insert({
-        company_id: resolvedCompanyId || null,
-        employee_id: employeeId,
-        position_id: positionId,
-        change_type: formData.change_type,
-        effective_date: formData.effective_date,
-        previous_salary: previousSalary,
-        new_salary: newSalary,
-        change_amount: changeAmount,
-        change_percentage: changePercentage,
-        reason: formData.reason || null,
-        notes: formData.notes || null,
-        currency: formData.currency,
-        created_by: user?.id,
-      });
+      if (isEditMode && existingRecord) {
+        // Update existing record
+        const { error } = await supabase.from("compensation_history").update({
+          change_type: formData.change_type,
+          effective_date: formData.effective_date,
+          previous_salary: previousSalary,
+          new_salary: newSalary,
+          change_amount: changeAmount,
+          change_percentage: changePercentage,
+          reason: formData.reason || null,
+          notes: formData.notes || null,
+          currency: formData.currency,
+        }).eq("id", existingRecord.id);
 
-      if (error) throw error;
+        if (error) throw error;
+        toast.success(t("compensation.history.recordUpdated"));
+      } else {
+        // Create new record
+        const { error } = await supabase.from("compensation_history").insert({
+          company_id: resolvedCompanyId || null,
+          employee_id: employeeId,
+          position_id: positionId,
+          change_type: formData.change_type,
+          effective_date: formData.effective_date,
+          previous_salary: previousSalary,
+          new_salary: newSalary,
+          change_amount: changeAmount,
+          change_percentage: changePercentage,
+          reason: formData.reason || null,
+          notes: formData.notes || null,
+          currency: formData.currency,
+          created_by: user?.id,
+        });
 
-      toast.success(t("compensation.history.recordAdded"));
+        if (error) throw error;
+        toast.success(t("compensation.history.recordAdded"));
+      }
+
       onOpenChange(false);
       onSuccess();
     } catch (error: any) {
@@ -171,7 +221,7 @@ export function TransactionCompensationDialog({
       <DialogContent className="max-w-lg">
         <DialogHeader>
           <DialogTitle className="text-xl">
-            {t("compensation.history.addRecord")}
+            {isEditMode ? t("compensation.history.editRecord") : t("compensation.history.addRecord")}
           </DialogTitle>
         </DialogHeader>
         <div className="grid gap-4 py-4">

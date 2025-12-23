@@ -53,6 +53,8 @@ interface CompensationRecord {
   new_salary: number;
   change_amount: number | null;
   change_percentage: number | null;
+  reason: string | null;
+  notes: string | null;
   currency: string;
 }
 
@@ -93,6 +95,7 @@ export function EmployeeTransactionsList({
     useState<EmployeeTransaction | null>(null);
   const [compensationDialogOpen, setCompensationDialogOpen] = useState(false);
   const [selectedForCompensation, setSelectedForCompensation] = useState<EmployeeTransaction | null>(null);
+  const [editingCompensation, setEditingCompensation] = useState<CompensationRecord | null>(null);
   const [transactionCompensation, setTransactionCompensation] = useState<Record<string, CompensationRecord[]>>({});
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
 
@@ -135,7 +138,7 @@ export function EmployeeTransactionsList({
     // Fetch compensation records matching these transactions
     const { data: compData } = await supabase
       .from("compensation_history")
-      .select("id, employee_id, position_id, effective_date, change_type, previous_salary, new_salary, change_amount, change_percentage, currency")
+      .select("id, employee_id, position_id, effective_date, change_type, previous_salary, new_salary, change_amount, change_percentage, currency, reason, notes")
       .in("employee_id", [...new Set(checks.map(c => c.employee_id).filter(Boolean))])
       .order("effective_date", { ascending: false });
 
@@ -430,35 +433,49 @@ export function EmployeeTransactionsList({
                           </p>
                           <div className="space-y-2">
                             {transactionCompensation[transaction.id].map((comp) => (
-                              <div key={comp.id} className="flex items-center gap-6 text-sm bg-background rounded-md px-3 py-2 border">
-                                <div>
-                                  <span className="text-muted-foreground">{t("compensation.history.type")}:</span>{" "}
-                                  <Badge variant="outline" className="ml-1">{comp.change_type}</Badge>
-                                </div>
-                                <div>
-                                  <span className="text-muted-foreground">{t("compensation.history.effectiveDate")}:</span>{" "}
-                                  <span className="font-medium">{formatDateForDisplay(comp.effective_date, "MMM d, yyyy")}</span>
-                                </div>
-                                {comp.previous_salary && (
+                              <div key={comp.id} className="flex items-center justify-between text-sm bg-background rounded-md px-3 py-2 border">
+                                <div className="flex items-center gap-6">
                                   <div>
-                                    <span className="text-muted-foreground">{t("compensation.history.previous")}:</span>{" "}
-                                    <span className="font-medium">${comp.previous_salary.toLocaleString()}</span>
+                                    <span className="text-muted-foreground">{t("compensation.history.type")}:</span>{" "}
+                                    <Badge variant="outline" className="ml-1">{comp.change_type}</Badge>
                                   </div>
-                                )}
-                                <div>
-                                  <span className="text-muted-foreground">{t("compensation.history.new")}:</span>{" "}
-                                  <span className="font-medium">${comp.new_salary.toLocaleString()}</span>
-                                </div>
-                                {comp.change_amount !== null && (
                                   <div>
-                                    <span className={`font-medium ${comp.change_amount >= 0 ? 'text-success' : 'text-destructive'}`}>
-                                      {comp.change_amount >= 0 ? '+' : ''}${comp.change_amount.toLocaleString()}
-                                      {comp.change_percentage !== null && (
-                                        <span className="ml-1 text-xs">({comp.change_percentage}%)</span>
-                                      )}
-                                    </span>
+                                    <span className="text-muted-foreground">{t("compensation.history.effectiveDate")}:</span>{" "}
+                                    <span className="font-medium">{formatDateForDisplay(comp.effective_date, "MMM d, yyyy")}</span>
                                   </div>
-                                )}
+                                  {comp.previous_salary && (
+                                    <div>
+                                      <span className="text-muted-foreground">{t("compensation.history.previous")}:</span>{" "}
+                                      <span className="font-medium">${comp.previous_salary.toLocaleString()}</span>
+                                    </div>
+                                  )}
+                                  <div>
+                                    <span className="text-muted-foreground">{t("compensation.history.new")}:</span>{" "}
+                                    <span className="font-medium">${comp.new_salary.toLocaleString()}</span>
+                                  </div>
+                                  {comp.change_amount !== null && (
+                                    <div>
+                                      <span className={`font-medium ${comp.change_amount >= 0 ? 'text-success' : 'text-destructive'}`}>
+                                        {comp.change_amount >= 0 ? '+' : ''}${comp.change_amount.toLocaleString()}
+                                        {comp.change_percentage !== null && (
+                                          <span className="ml-1 text-xs">({comp.change_percentage}%)</span>
+                                        )}
+                                      </span>
+                                    </div>
+                                  )}
+                                </div>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => {
+                                    setSelectedForCompensation(transaction);
+                                    setEditingCompensation(comp);
+                                    setCompensationDialogOpen(true);
+                                  }}
+                                >
+                                  <Edit className="h-3.5 w-3.5 mr-1" />
+                                  {t("common.edit")}
+                                </Button>
                               </div>
                             ))}
                           </div>
@@ -500,7 +517,10 @@ export function EmployeeTransactionsList({
           open={compensationDialogOpen}
           onOpenChange={(open) => {
             setCompensationDialogOpen(open);
-            if (!open) setSelectedForCompensation(null);
+            if (!open) {
+              setSelectedForCompensation(null);
+              setEditingCompensation(null);
+            }
           }}
           employeeId={selectedForCompensation.employee_id}
           employeeName={selectedForCompensation.employee?.full_name || selectedForCompensation.employee?.email || ""}
@@ -509,6 +529,7 @@ export function EmployeeTransactionsList({
           companyId={selectedForCompensation.company_id || ""}
           effectiveDate={selectedForCompensation.effective_date}
           transactionType={(selectedForCompensation.transaction_type?.code as TransactionType) || "HIRE"}
+          existingRecord={editingCompensation}
           onSuccess={() => {
             loadData();
           }}
