@@ -5592,6 +5592,53 @@ export type Database = {
           },
         ]
       }
+      csme_skill_categories: {
+        Row: {
+          code: string
+          company_id: string | null
+          created_at: string
+          description: string | null
+          display_order: number | null
+          eligible_countries: string[] | null
+          id: string
+          is_active: boolean | null
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          code: string
+          company_id?: string | null
+          created_at?: string
+          description?: string | null
+          display_order?: number | null
+          eligible_countries?: string[] | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          code?: string
+          company_id?: string | null
+          created_at?: string
+          description?: string | null
+          display_order?: number | null
+          eligible_countries?: string[] | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "csme_skill_categories_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       currencies: {
         Row: {
           code: string
@@ -17658,6 +17705,209 @@ export type Database = {
             columns: ["idp_id"]
             isOneToOne: false
             referencedRelation: "individual_development_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      immigration_categories: {
+        Row: {
+          code: string
+          company_id: string | null
+          country_code: string | null
+          created_at: string
+          description: string | null
+          display_order: number | null
+          id: string
+          is_active: boolean | null
+          is_renewable: boolean | null
+          max_renewals: number | null
+          name: string
+          permit_duration_months: number | null
+          updated_at: string
+        }
+        Insert: {
+          code: string
+          company_id?: string | null
+          country_code?: string | null
+          created_at?: string
+          description?: string | null
+          display_order?: number | null
+          id?: string
+          is_active?: boolean | null
+          is_renewable?: boolean | null
+          max_renewals?: number | null
+          name: string
+          permit_duration_months?: number | null
+          updated_at?: string
+        }
+        Update: {
+          code?: string
+          company_id?: string | null
+          country_code?: string | null
+          created_at?: string
+          description?: string | null
+          display_order?: number | null
+          id?: string
+          is_active?: boolean | null
+          is_renewable?: boolean | null
+          max_renewals?: number | null
+          name?: string
+          permit_duration_months?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "immigration_categories_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      immigration_dependent_types: {
+        Row: {
+          code: string
+          company_id: string | null
+          created_at: string
+          description: string | null
+          display_order: number | null
+          id: string
+          is_active: boolean | null
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          code: string
+          company_id?: string | null
+          created_at?: string
+          description?: string | null
+          display_order?: number | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          code?: string
+          company_id?: string | null
+          created_at?: string
+          description?: string | null
+          display_order?: number | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "immigration_dependent_types_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      immigration_document_types: {
+        Row: {
+          category: string
+          code: string
+          company_id: string | null
+          created_at: string
+          description: string | null
+          display_order: number | null
+          id: string
+          is_active: boolean | null
+          name: string
+          requires_expiry: boolean | null
+          requires_fee: boolean | null
+          updated_at: string
+        }
+        Insert: {
+          category: string
+          code: string
+          company_id?: string | null
+          created_at?: string
+          description?: string | null
+          display_order?: number | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          requires_expiry?: boolean | null
+          requires_fee?: boolean | null
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          code?: string
+          company_id?: string | null
+          created_at?: string
+          description?: string | null
+          display_order?: number | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          requires_expiry?: boolean | null
+          requires_fee?: boolean | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "immigration_document_types_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      immigration_permit_statuses: {
+        Row: {
+          code: string
+          company_id: string | null
+          created_at: string
+          description: string | null
+          display_order: number | null
+          id: string
+          is_active: boolean | null
+          is_terminal: boolean | null
+          name: string
+          status_color: string | null
+          updated_at: string
+        }
+        Insert: {
+          code: string
+          company_id?: string | null
+          created_at?: string
+          description?: string | null
+          display_order?: number | null
+          id?: string
+          is_active?: boolean | null
+          is_terminal?: boolean | null
+          name: string
+          status_color?: string | null
+          updated_at?: string
+        }
+        Update: {
+          code?: string
+          company_id?: string | null
+          created_at?: string
+          description?: string | null
+          display_order?: number | null
+          id?: string
+          is_active?: boolean | null
+          is_terminal?: boolean | null
+          name?: string
+          status_color?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "immigration_permit_statuses_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
             referencedColumns: ["id"]
           },
         ]
@@ -34303,6 +34553,56 @@ export type Database = {
             columns: ["workflow_instance_id"]
             isOneToOne: false
             referencedRelation: "workflow_instances"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      travel_document_types: {
+        Row: {
+          code: string
+          company_id: string | null
+          created_at: string
+          description: string | null
+          display_order: number | null
+          id: string
+          is_active: boolean | null
+          is_identity_doc: boolean | null
+          name: string
+          requires_expiry: boolean | null
+          updated_at: string
+        }
+        Insert: {
+          code: string
+          company_id?: string | null
+          created_at?: string
+          description?: string | null
+          display_order?: number | null
+          id?: string
+          is_active?: boolean | null
+          is_identity_doc?: boolean | null
+          name: string
+          requires_expiry?: boolean | null
+          updated_at?: string
+        }
+        Update: {
+          code?: string
+          company_id?: string | null
+          created_at?: string
+          description?: string | null
+          display_order?: number | null
+          id?: string
+          is_active?: boolean | null
+          is_identity_doc?: boolean | null
+          name?: string
+          requires_expiry?: boolean | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "travel_document_types_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
             referencedColumns: ["id"]
           },
         ]
