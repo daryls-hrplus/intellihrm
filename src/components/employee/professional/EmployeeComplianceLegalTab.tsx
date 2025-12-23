@@ -1,10 +1,10 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { EmployeeWorkPermitsTab } from "@/components/employee/EmployeeWorkPermitsTab";
 import { EmployeeBackgroundChecksTab } from "@/components/employee/EmployeeBackgroundChecksTab";
 import { EmployeeCertificateOfCharacterTab } from "@/components/employee/professional/EmployeeCertificateOfCharacterTab";
 import { EmployeeRegulatoryTab } from "@/components/employee/professional/EmployeeRegulatoryTab";
-import { FileCheck, ShieldCheck, FileText, Stamp } from "lucide-react";
+import { ShieldCheck, FileText, Stamp, Plane } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
 interface EmployeeComplianceLegalTabProps {
   employeeId: string;
@@ -20,16 +20,12 @@ export function EmployeeComplianceLegalTab({ employeeId, viewType = "hr" }: Empl
           Compliance & Legal
         </CardTitle>
         <CardDescription>
-          Work permits, background checks, certificates of character, and regulatory clearances
+          Background checks, certificates of character, and regulatory clearances
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <Tabs defaultValue="work_permits" className="w-full">
+        <Tabs defaultValue="background" className="w-full">
           <TabsList className="mb-4 flex flex-wrap h-auto gap-1">
-            <TabsTrigger value="work_permits" className="flex items-center gap-2">
-              <FileCheck className="h-4 w-4" />
-              Work Permits
-            </TabsTrigger>
             <TabsTrigger value="background" className="flex items-center gap-2">
               <ShieldCheck className="h-4 w-4" />
               Background Checks
@@ -44,10 +40,6 @@ export function EmployeeComplianceLegalTab({ employeeId, viewType = "hr" }: Empl
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="work_permits">
-            <EmployeeWorkPermitsTab employeeId={employeeId} viewType={viewType} />
-          </TabsContent>
-
           <TabsContent value="background">
             <EmployeeBackgroundChecksTab employeeId={employeeId} viewType={viewType} />
           </TabsContent>
@@ -60,6 +52,16 @@ export function EmployeeComplianceLegalTab({ employeeId, viewType = "hr" }: Empl
             <EmployeeRegulatoryTab employeeId={employeeId} viewType={viewType} />
           </TabsContent>
         </Tabs>
+
+        {/* Immigration Reference */}
+        <div className="mt-6 pt-4 border-t">
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <Plane className="h-4 w-4" />
+            <span>Work permits and immigration documents are managed in the</span>
+            <Badge variant="outline" className="font-normal">Immigration</Badge>
+            <span>tab</span>
+          </div>
+        </div>
       </CardContent>
     </Card>
   );

@@ -102,7 +102,7 @@ export function EmployeeCSMETab({ employeeId, viewType = "hr" }: EmployeeCSMETab
   const fetchCertificates = async () => {
     setIsLoading(true);
     const { data, error } = await supabase
-      .from("employee_csme_certificates")
+      .from("employee_csme_certificates" as any)
       .select("*")
       .eq("employee_id", employeeId)
       .order("issue_date", { ascending: false });
@@ -110,7 +110,7 @@ export function EmployeeCSMETab({ employeeId, viewType = "hr" }: EmployeeCSMETab
     if (error) {
       toast.error("Failed to load CSME certificates");
     } else {
-      setCertificates(data || []);
+      setCertificates((data || []) as unknown as CSMECertificate[]);
     }
     setIsLoading(false);
   };
@@ -171,7 +171,7 @@ export function EmployeeCSMETab({ employeeId, viewType = "hr" }: EmployeeCSMETab
 
       if (editingCertificate) {
         const { error } = await supabase
-          .from("employee_csme_certificates")
+          .from("employee_csme_certificates" as any)
           .update(payload)
           .eq("id", editingCertificate.id);
 
@@ -188,7 +188,7 @@ export function EmployeeCSMETab({ employeeId, viewType = "hr" }: EmployeeCSMETab
         toast.success("CSME certificate updated");
       } else {
         const { data: result, error } = await supabase
-          .from("employee_csme_certificates")
+          .from("employee_csme_certificates" as any)
           .insert({
             employee_id: employeeId,
             ...payload,
@@ -198,10 +198,11 @@ export function EmployeeCSMETab({ employeeId, viewType = "hr" }: EmployeeCSMETab
 
         if (error) throw error;
 
+        const resultData = result as unknown as CSMECertificate;
         await logAction({
           action: "CREATE",
           entityType: "csme_certificate",
-          entityId: result.id,
+          entityId: resultData.id,
           entityName: data.certificate_number,
           newValues: payload,
         });
@@ -241,7 +242,7 @@ export function EmployeeCSMETab({ employeeId, viewType = "hr" }: EmployeeCSMETab
 
   const handleArchive = async (certificate: CSMECertificate) => {
     const { error } = await supabase
-      .from("employee_csme_certificates")
+      .from("employee_csme_certificates" as any)
       .update({ status: "archived" })
       .eq("id", certificate.id);
 

@@ -6759,6 +6759,74 @@ export type Database = {
           },
         ]
       }
+      employee_csme_certificates: {
+        Row: {
+          certificate_number: string
+          created_at: string
+          document_name: string | null
+          document_url: string | null
+          employee_id: string
+          expiry_date: string | null
+          id: string
+          issue_date: string
+          issuing_country: string
+          notes: string | null
+          occupation: string
+          skill_category: string
+          status: string
+          updated_at: string
+          verification_date: string | null
+          verification_status: string
+          verified_by_country: string | null
+        }
+        Insert: {
+          certificate_number: string
+          created_at?: string
+          document_name?: string | null
+          document_url?: string | null
+          employee_id: string
+          expiry_date?: string | null
+          id?: string
+          issue_date: string
+          issuing_country: string
+          notes?: string | null
+          occupation: string
+          skill_category: string
+          status?: string
+          updated_at?: string
+          verification_date?: string | null
+          verification_status?: string
+          verified_by_country?: string | null
+        }
+        Update: {
+          certificate_number?: string
+          created_at?: string
+          document_name?: string | null
+          document_url?: string | null
+          employee_id?: string
+          expiry_date?: string | null
+          id?: string
+          issue_date?: string
+          issuing_country?: string
+          notes?: string | null
+          occupation?: string
+          skill_category?: string
+          status?: string
+          updated_at?: string
+          verification_date?: string | null
+          verification_status?: string
+          verified_by_country?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "employee_csme_certificates_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       employee_data_change_requests: {
         Row: {
           applied_at: string | null
@@ -7110,6 +7178,75 @@ export type Database = {
           {
             foreignKeyName: "employee_emergency_contacts_employee_id_fkey"
             columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      employee_emergency_plans: {
+        Row: {
+          created_at: string
+          embassy_contact: string | null
+          employee_id: string
+          evacuation_contact_name: string | null
+          evacuation_contact_phone: string | null
+          evacuation_contact_relationship: string | null
+          evacuation_destination: string | null
+          id: string
+          last_reviewed_at: string | null
+          last_reviewed_by: string | null
+          medical_considerations: string | null
+          notes: string | null
+          preferred_airline: string | null
+          travel_restrictions: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          embassy_contact?: string | null
+          employee_id: string
+          evacuation_contact_name?: string | null
+          evacuation_contact_phone?: string | null
+          evacuation_contact_relationship?: string | null
+          evacuation_destination?: string | null
+          id?: string
+          last_reviewed_at?: string | null
+          last_reviewed_by?: string | null
+          medical_considerations?: string | null
+          notes?: string | null
+          preferred_airline?: string | null
+          travel_restrictions?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          embassy_contact?: string | null
+          employee_id?: string
+          evacuation_contact_name?: string | null
+          evacuation_contact_phone?: string | null
+          evacuation_contact_relationship?: string | null
+          evacuation_destination?: string | null
+          id?: string
+          last_reviewed_at?: string | null
+          last_reviewed_by?: string | null
+          medical_considerations?: string | null
+          notes?: string | null
+          preferred_airline?: string | null
+          travel_restrictions?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "employee_emergency_plans_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_emergency_plans_last_reviewed_by_fkey"
+            columns: ["last_reviewed_by"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
@@ -9932,6 +10069,71 @@ export type Database = {
             columns: ["workflow_instance_id"]
             isOneToOne: false
             referencedRelation: "workflow_instances"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      employee_travel_documents: {
+        Row: {
+          created_at: string
+          document_name: string | null
+          document_number: string
+          document_type: string
+          document_url: string | null
+          employee_id: string
+          expiry_date: string
+          id: string
+          is_primary: boolean
+          issue_date: string
+          issue_place: string | null
+          issuing_country: string
+          nationality: string | null
+          notes: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          document_name?: string | null
+          document_number: string
+          document_type: string
+          document_url?: string | null
+          employee_id: string
+          expiry_date: string
+          id?: string
+          is_primary?: boolean
+          issue_date: string
+          issue_place?: string | null
+          issuing_country: string
+          nationality?: string | null
+          notes?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          document_name?: string | null
+          document_number?: string
+          document_type?: string
+          document_url?: string | null
+          employee_id?: string
+          expiry_date?: string
+          id?: string
+          is_primary?: boolean
+          issue_date?: string
+          issue_place?: string | null
+          issuing_country?: string
+          nationality?: string | null
+          notes?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "employee_travel_documents_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
