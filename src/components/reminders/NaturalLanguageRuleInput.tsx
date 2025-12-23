@@ -265,7 +265,7 @@ export function NaturalLanguageRuleInput({ companyId, onRuleCreated }: NaturalLa
                 />
               </div>
 
-              {/* Event type selector */}
+              {/* Event type selector with category grouping */}
               <div className="space-y-2">
                 <Label>Event Type *</Label>
                 <Select value={selectedEventTypeId} onValueChange={setSelectedEventTypeId}>
@@ -273,13 +273,33 @@ export function NaturalLanguageRuleInput({ companyId, onRuleCreated }: NaturalLa
                     <SelectValue placeholder="Select event type" />
                   </SelectTrigger>
                   <SelectContent>
-                    {availableEventTypes.map((et) => (
-                      <SelectItem key={et.id} value={et.id}>
-                        {et.name} ({et.category})
-                      </SelectItem>
+                    {/* Group event types by category */}
+                    {Object.entries(
+                      availableEventTypes.reduce((acc, type) => {
+                        const cat = type.category || 'other';
+                        if (!acc[cat]) acc[cat] = [];
+                        acc[cat].push(type);
+                        return acc;
+                      }, {} as Record<string, EventType[]>)
+                    ).map(([category, types]) => (
+                      <div key={category}>
+                        <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground uppercase tracking-wider bg-muted/50 sticky top-0">
+                          {category.replace(/_/g, ' ')}
+                        </div>
+                        {types.map((et) => (
+                          <SelectItem key={et.id} value={et.id} className="pl-4">
+                            {et.name}
+                          </SelectItem>
+                        ))}
+                      </div>
                     ))}
                   </SelectContent>
                 </Select>
+                {matchedEventType && (
+                  <p className="text-xs text-muted-foreground">
+                    AI matched: <Badge variant="outline" className="ml-1">{matchedEventType.category}</Badge> → {matchedEventType.name}
+                  </p>
+                )}
               </div>
 
               {/* Reminder intervals */}
