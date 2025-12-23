@@ -298,6 +298,7 @@ import PayslipTemplateConfigPage from "./pages/payroll/PayslipTemplateConfigPage
 import PayrollExpenseClaimsPage from "./pages/payroll/PayrollExpenseClaimsPage";
 import PayrollArchiveSettingsPage from "./pages/payroll/PayrollArchiveSettingsPage";
 import BenefitPayrollMappingsPage from "./pages/payroll/BenefitPayrollMappingsPage";
+import EmployeeTransactionPayrollMappingsPage from "./pages/payroll/EmployeeTransactionPayrollMappingsPage";
 import StatutoryPayElementMappingsPage from "./pages/payroll/StatutoryPayElementMappingsPage";
 import PayrollHolidaysPage from "./pages/payroll/PayrollHolidaysPage";
 import OpeningBalancesPage from "./pages/payroll/OpeningBalancesPage";
@@ -1856,6 +1857,14 @@ const App = () => (
               element={
                 <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="payroll">
                   <BenefitPayrollMappingsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/payroll/transaction-mappings"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="payroll">
+                  <EmployeeTransactionPayrollMappingsPage />
                 </ProtectedRoute>
               }
             />
