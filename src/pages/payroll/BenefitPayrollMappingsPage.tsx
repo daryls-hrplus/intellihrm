@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/hooks/useLanguage";
 import { Button } from "@/components/ui/button";
@@ -72,8 +71,9 @@ interface BenefitPayrollMapping {
 
 export default function BenefitPayrollMappingsPage() {
   const navigate = useNavigate();
-  const { company } = useAuth();
   const { t } = useLanguage();
+  const [companies, setCompanies] = useState<{ id: string; name: string }[]>([]);
+  const [selectedCompany, setSelectedCompany] = useState<string>("");
   const [mappings, setMappings] = useState<BenefitPayrollMapping[]>([]);
   const [benefitPlans, setBenefitPlans] = useState<BenefitPlan[]>([]);
   const [payElements, setPayElements] = useState<PayElement[]>([]);
@@ -93,12 +93,31 @@ export default function BenefitPayrollMappingsPage() {
   });
 
   useEffect(() => {
-    if (company?.id) {
+    fetchCompanies();
+  }, []);
+
+  useEffect(() => {
+    if (selectedCompany) {
       fetchData();
     }
-  }, [company?.id]);
+  }, [selectedCompany]);
+
+  const fetchCompanies = async () => {
+    const { data } = await supabase
+      .from("companies")
+      .select("id, name")
+      .eq("is_active", true)
+      .order("name");
+    if (data) {
+      setCompanies(data);
+      if (data.length > 0 && !selectedCompany) {
+        setSelectedCompany(data[0].id);
+      }
+    }
+  };
 
   const fetchData = async () => {
+    if (!selectedCompany) return;
     setIsLoading(true);
     try {
       const [mappingsRes, plansRes, elementsRes] = await Promise.all([
@@ -109,18 +128,18 @@ export default function BenefitPayrollMappingsPage() {
             benefit_plan:benefit_plans(id, name, code, plan_type),
             pay_element:pay_elements(id, name, code)
           `)
-          .eq("company_id", company!.id)
+          .eq("company_id", selectedCompany)
           .order("created_at", { ascending: false }),
         supabase
           .from("benefit_plans")
           .select("id, name, code, plan_type")
-          .eq("company_id", company!.id)
+          .eq("company_id", selectedCompany)
           .eq("is_active", true)
           .order("name"),
         supabase
           .from("pay_elements")
           .select("id, name, code")
-          .eq("company_id", company!.id)
+          .eq("company_id", selectedCompany)
           .eq("is_active", true)
           .order("name"),
       ]);
@@ -176,7 +195,7 @@ export default function BenefitPayrollMappingsPage() {
     setIsSaving(true);
     try {
       const data = {
-        company_id: company!.id,
+        company_id: selectedCompany,
         benefit_plan_id: formData.benefit_plan_id,
         pay_element_id: formData.pay_element_id,
         mapping_type: formData.mapping_type,
@@ -275,6 +294,25 @@ export default function BenefitPayrollMappingsPage() {
       </div>
 
       <Card>
+        <CardContent className="pt-6">
+          <div className="w-64">
+            <Label>{t("common.company", "Company")}</Label>
+            <Select value={selectedCompany} onValueChange={setSelectedCompany}>
+              <SelectTrigger>
+                <SelectValue placeholder={t("common.selectCompany", "Select company")} />
+              </SelectTrigger>
+              <SelectContent>
+                {companies.map((c) => (
+                  <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </CardContent>
+      </Card>
+
+      {selectedCompany && (
+      <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle className="flex items-center gap-2">
             <LinkIcon className="h-5 w-5" />
@@ -361,6 +399,7 @@ export default function BenefitPayrollMappingsPage() {
           )}
         </CardContent>
       </Card>
+      )}
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="max-w-lg">
