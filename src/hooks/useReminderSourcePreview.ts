@@ -24,19 +24,44 @@ const SOURCE_TABLE_CONFIG: Record<string, {
   employeeField: string;
   dateField?: string;
 }> = {
+  // Documents & Certifications
   employee_certificates: { nameField: 'certificate_name', employeeField: 'employee_id' },
   employee_licenses: { nameField: 'license_name', employeeField: 'employee_id' },
   employee_documents: { nameField: 'document_name', employeeField: 'employee_id' },
-  employee_visas: { nameField: 'visa_type', employeeField: 'employee_id' },
   employee_work_permits: { nameField: 'permit_type', employeeField: 'employee_id' },
   employee_memberships: { nameField: 'organization_name', employeeField: 'employee_id' },
-  employee_certifications: { nameField: 'certification_name', employeeField: 'employee_id' },
-  employee_trainings: { nameField: 'training_name', employeeField: 'employee_id' },
-  safety_training_records: { nameField: 'training_type', employeeField: 'employee_id' },
+  employee_csme_certificates: { nameField: 'certificate_type', employeeField: 'employee_id' },
+  employee_travel_documents: { nameField: 'document_type', employeeField: 'employee_id' },
+  
+  // Training & Compliance
+  hse_training_records: { nameField: 'training_id', employeeField: 'employee_id' },
+  lms_enrollments: { nameField: 'course_id', employeeField: 'employee_id' },
+  lms_courses: { nameField: 'title', employeeField: 'created_by' },
+  compliance_training_assignments: { nameField: 'compliance_training_id', employeeField: 'employee_id' },
+  employee_competencies: { nameField: 'competency_id', employeeField: 'employee_id' },
+  
+  // Contracts & Agreements
+  employee_agreements: { nameField: 'agreement_type', employeeField: 'employee_id' },
+  collective_agreements: { nameField: 'name', employeeField: 'company_id' },
+  
+  // HR Core
   profiles: { nameField: 'full_name', employeeField: 'id' },
-  benefit_enrollments: { nameField: 'plan_name', employeeField: 'employee_id' },
+  leave_requests: { nameField: 'leave_type_id', employeeField: 'employee_id' },
+  
+  // Performance
+  performance_goals: { nameField: 'title', employeeField: 'employee_id' },
+  appraisal_participants: { nameField: 'cycle_id', employeeField: 'employee_id' },
+  appraisal_cycles: { nameField: 'name', employeeField: 'created_by' },
+  compensation_review_cycles: { nameField: 'name', employeeField: 'created_by' },
+  
+  // Benefits
+  benefit_enrollments: { nameField: 'plan_id', employeeField: 'employee_id' },
   benefit_enrollment_periods: { nameField: 'name', employeeField: 'company_id' },
+  
+  // Other
   employee_medical_profiles: { nameField: 'blood_type', employeeField: 'employee_id' },
+  employee_background_checks: { nameField: 'check_type', employeeField: 'employee_id' },
+  union_memberships: { nameField: 'union_id', employeeField: 'employee_id' },
 };
 
 export function useReminderSourcePreview() {
