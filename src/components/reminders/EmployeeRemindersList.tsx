@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useReminders } from '@/hooks/useReminders';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -11,7 +12,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Dialog
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Switch } from '@/components/ui/switch';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Plus, Pencil, X, Bell, Mail, BellRing, Loader2, Calendar, User, Clock, CheckCircle2, XCircle, Send, HelpCircle, UserCheck } from 'lucide-react';
+import { Plus, Pencil, X, Bell, Mail, BellRing, Loader2, Calendar, User, Clock, CheckCircle2, XCircle, Send, HelpCircle, UserCheck, ExternalLink, FileText, Award, Plane, GraduationCap, FileCheck } from 'lucide-react';
 import { format } from 'date-fns';
 import type { EmployeeReminder, ReminderEventType } from '@/types/reminders';
 import { PRIORITY_OPTIONS, NOTIFICATION_METHODS, REMINDER_STATUS, REMINDER_CATEGORIES } from '@/types/reminders';
@@ -26,6 +27,16 @@ interface EmployeeRemindersListProps {
   managerId?: string;
 }
 
+// Map source_table to employee tab and display info
+const SOURCE_TABLE_CONFIG: Record<string, { label: string; tab: string; icon: React.ReactNode }> = {
+  'employee_certificates': { label: 'Certificate', tab: 'certificates', icon: <Award className="h-3.5 w-3.5" /> },
+  'employee_licenses': { label: 'License', tab: 'licenses', icon: <FileCheck className="h-3.5 w-3.5" /> },
+  'employee_travel_documents': { label: 'Travel Doc', tab: 'immigration', icon: <Plane className="h-3.5 w-3.5" /> },
+  'employee_work_permits': { label: 'Work Permit', tab: 'immigration', icon: <FileText className="h-3.5 w-3.5" /> },
+  'employee_training': { label: 'Training', tab: 'training', icon: <GraduationCap className="h-3.5 w-3.5" /> },
+  'profiles': { label: 'Employee', tab: 'overview', icon: <User className="h-3.5 w-3.5" /> },
+};
+
 export function EmployeeRemindersList({ 
   companyId, 
   departmentId,
@@ -33,6 +44,7 @@ export function EmployeeRemindersList({
   directReportsOnly = false,
   managerId
 }: EmployeeRemindersListProps) {
+  const navigate = useNavigate();
   const { fetchReminders, fetchEventTypes, createReminder, updateReminder, cancelReminder, isLoading } = useReminders();
   const [reminders, setReminders] = useState<EmployeeReminder[]>([]);
   const [eventTypes, setEventTypes] = useState<ReminderEventType[]>([]);
@@ -250,6 +262,18 @@ export function EmployeeRemindersList({
       critical: 'bg-destructive/10 text-destructive',
     };
     return <Badge className={colors[priority] || colors.medium}>{priority}</Badge>;
+  };
+
+  const getSourceConfig = (sourceTable: string | null) => {
+    if (!sourceTable) return null;
+    return SOURCE_TABLE_CONFIG[sourceTable] || { label: sourceTable.replace('employee_', '').replace(/_/g, ' '), tab: 'overview', icon: <FileText className="h-3.5 w-3.5" /> };
+  };
+
+  const handleNavigateToSource = (reminder: EmployeeReminder) => {
+    if (!reminder.employee_id) return;
+    const config = getSourceConfig(reminder.source_table);
+    const tab = config?.tab || 'overview';
+    navigate(`/workforce/employees/${reminder.employee_id}?tab=${tab}`);
   };
 
   const getStatusBadge = (status: string) => {
@@ -557,6 +581,7 @@ export function EmployeeRemindersList({
               <TableRow>
                 <TableHead>Employee</TableHead>
                 <TableHead>Title</TableHead>
+                <TableHead>Source</TableHead>
                 <TableHead>Event Date</TableHead>
                 <TableHead>Reminder Date</TableHead>
                 <TableHead>Priority</TableHead>
@@ -566,45 +591,81 @@ export function EmployeeRemindersList({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {reminders.map((reminder) => (
-                <TableRow key={reminder.id}>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      <User className="h-4 w-4 text-muted-foreground" />
-                      <span>{reminder.employee?.full_name || '-'}</span>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div>
-                      <div className="font-medium">{reminder.title}</div>
-                      {reminder.event_type && (
-                        <span className="text-xs text-muted-foreground">{reminder.event_type.name}</span>
+              {reminders.map((reminder) => {
+                const sourceConfig = getSourceConfig(reminder.source_table);
+                return (
+                  <TableRow key={reminder.id}>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <User className="h-4 w-4 text-muted-foreground" />
+                        <button 
+                          onClick={() => navigate(`/workforce/employees/${reminder.employee_id}?tab=overview`)}
+                          className="hover:underline hover:text-primary transition-colors text-left"
+                        >
+                          {reminder.employee?.full_name || '-'}
+                        </button>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div>
+                        <button
+                          onClick={() => handleNavigateToSource(reminder)}
+                          className="font-medium hover:underline hover:text-primary transition-colors text-left"
+                        >
+                          {reminder.title}
+                        </button>
+                        {reminder.event_type && (
+                          <span className="text-xs text-muted-foreground block">{reminder.event_type.name}</span>
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      {sourceConfig ? (
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <button
+                                onClick={() => handleNavigateToSource(reminder)}
+                                className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md bg-muted/50 hover:bg-muted text-xs font-medium transition-colors"
+                              >
+                                {sourceConfig.icon}
+                                {sourceConfig.label}
+                                <ExternalLink className="h-3 w-3 text-muted-foreground" />
+                              </button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>View {sourceConfig.label} in employee profile</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      ) : (
+                        <span className="text-xs text-muted-foreground">-</span>
                       )}
-                    </div>
-                  </TableCell>
-                  <TableCell>{formatDateForDisplay(reminder.event_date, 'MMM dd, yyyy')}</TableCell>
-                  <TableCell>{formatDateForDisplay(reminder.reminder_date, 'MMM dd, yyyy')}</TableCell>
-                  <TableCell>{getPriorityBadge(reminder.priority)}</TableCell>
-                  <TableCell>{getStatusBadge(reminder.status)}</TableCell>
-                  <TableCell>
-                    <span className="text-xs capitalize">{reminder.created_by_role || 'system'}</span>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex justify-end gap-2">
-                      {reminder.status === 'pending' && (
-                        <>
-                          <Button variant="ghost" size="icon" onClick={() => handleOpenDialog(reminder)}>
-                            <Pencil className="h-4 w-4" />
-                          </Button>
-                          <Button variant="ghost" size="icon" onClick={() => handleCancel(reminder.id)}>
-                            <XCircle className="h-4 w-4 text-destructive" />
-                          </Button>
-                        </>
-                      )}
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
+                    </TableCell>
+                    <TableCell>{formatDateForDisplay(reminder.event_date, 'MMM dd, yyyy')}</TableCell>
+                    <TableCell>{formatDateForDisplay(reminder.reminder_date, 'MMM dd, yyyy')}</TableCell>
+                    <TableCell>{getPriorityBadge(reminder.priority)}</TableCell>
+                    <TableCell>{getStatusBadge(reminder.status)}</TableCell>
+                    <TableCell>
+                      <span className="text-xs capitalize">{reminder.created_by_role || 'system'}</span>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex justify-end gap-2">
+                        {reminder.status === 'pending' && (
+                          <>
+                            <Button variant="ghost" size="icon" onClick={() => handleOpenDialog(reminder)}>
+                              <Pencil className="h-4 w-4" />
+                            </Button>
+                            <Button variant="ghost" size="icon" onClick={() => handleCancel(reminder.id)}>
+                              <XCircle className="h-4 w-4 text-destructive" />
+                            </Button>
+                          </>
+                        )}
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
             </TableBody>
           </Table>
         </Card>
