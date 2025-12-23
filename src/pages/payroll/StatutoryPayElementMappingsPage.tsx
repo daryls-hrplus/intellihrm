@@ -469,14 +469,14 @@ export default function StatutoryPayElementMappingsPage() {
             <div className="space-y-2">
               <Label>{t("payroll.statutoryMapping.employeePayElement", "Employee Pay Element")}</Label>
               <Select
-                value={formData.employee_pay_element_id}
-                onValueChange={(value) => setFormData({ ...formData, employee_pay_element_id: value })}
+                value={formData.employee_pay_element_id || "none"}
+                onValueChange={(value) => setFormData({ ...formData, employee_pay_element_id: value === "none" ? "" : value })}
               >
                 <SelectTrigger>
                   <SelectValue placeholder={t("payroll.statutoryMapping.selectPayElement", "Select pay element (optional)")} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">None</SelectItem>
+                  <SelectItem value="none">None</SelectItem>
                   {payElements.map((element) => (
                     <SelectItem key={element.id} value={element.id}>
                       {element.name} ({element.code})
@@ -492,14 +492,14 @@ export default function StatutoryPayElementMappingsPage() {
             <div className="space-y-2">
               <Label>{t("payroll.statutoryMapping.employerPayElement", "Employer Pay Element")}</Label>
               <Select
-                value={formData.employer_pay_element_id}
-                onValueChange={(value) => setFormData({ ...formData, employer_pay_element_id: value })}
+                value={formData.employer_pay_element_id || "none"}
+                onValueChange={(value) => setFormData({ ...formData, employer_pay_element_id: value === "none" ? "" : value })}
               >
                 <SelectTrigger>
                   <SelectValue placeholder={t("payroll.statutoryMapping.selectPayElement", "Select pay element (optional)")} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">None</SelectItem>
+                  <SelectItem value="none">None</SelectItem>
                   {payElements.map((element) => (
                     <SelectItem key={element.id} value={element.id}>
                       {element.name} ({element.code})
