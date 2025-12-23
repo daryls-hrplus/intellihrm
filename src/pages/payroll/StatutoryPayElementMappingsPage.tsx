@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/hooks/useLanguage";
 import { Button } from "@/components/ui/button";
@@ -74,8 +73,9 @@ interface StatutoryPayElementMapping {
 
 export default function StatutoryPayElementMappingsPage() {
   const navigate = useNavigate();
-  const { company } = useAuth();
   const { t } = useLanguage();
+  const [companies, setCompanies] = useState<{ id: string; name: string; country: string | null }[]>([]);
+  const [selectedCompany, setSelectedCompany] = useState<string>("");
   const [mappings, setMappings] = useState<StatutoryPayElementMapping[]>([]);
   const [statutoryTypes, setStatutoryTypes] = useState<StatutoryType[]>([]);
   const [payElements, setPayElements] = useState<PayElement[]>([]);
@@ -96,34 +96,38 @@ export default function StatutoryPayElementMappingsPage() {
   });
 
   useEffect(() => {
-    if (company?.id) {
-      fetchCompanyCountry();
-    }
-  }, [company?.id]);
+    fetchCompanies();
+  }, []);
 
   useEffect(() => {
-    if (company?.id && companyCountry) {
+    if (selectedCompany) {
+      const selected = companies.find(c => c.id === selectedCompany);
+      setCompanyCountry(selected?.country || null);
+    }
+  }, [selectedCompany, companies]);
+
+  useEffect(() => {
+    if (selectedCompany && companyCountry) {
       fetchData();
     }
-  }, [company?.id, companyCountry]);
+  }, [selectedCompany, companyCountry]);
 
-  const fetchCompanyCountry = async () => {
-    try {
-      const { data, error } = await supabase
-        .from("companies")
-        .select("country")
-        .eq("id", company!.id)
-        .single();
-
-      if (error) throw error;
-      setCompanyCountry(data?.country || null);
-    } catch (error) {
-      console.error("Error fetching company country:", error);
-      toast.error("Failed to load company information");
+  const fetchCompanies = async () => {
+    const { data } = await supabase
+      .from("companies")
+      .select("id, name, country")
+      .eq("is_active", true)
+      .order("name");
+    if (data) {
+      setCompanies(data);
+      if (data.length > 0 && !selectedCompany) {
+        setSelectedCompany(data[0].id);
+      }
     }
   };
 
   const fetchData = async () => {
+    if (!selectedCompany || !companyCountry) return;
     setIsLoading(true);
     try {
       const [mappingsRes, typesRes, elementsRes] = await Promise.all([
@@ -135,18 +139,18 @@ export default function StatutoryPayElementMappingsPage() {
             employee_pay_element:pay_elements!statutory_pay_element_mappings_employee_pay_element_id_fkey(id, name, code),
             employer_pay_element:pay_elements!statutory_pay_element_mappings_employer_pay_element_id_fkey(id, name, code)
           `)
-          .eq("company_id", company!.id)
+          .eq("company_id", selectedCompany)
           .order("created_at", { ascending: false }),
         supabase
           .from("statutory_deduction_types")
           .select("id, statutory_code, statutory_name, statutory_type, country")
-          .eq("country", companyCountry!)
+          .eq("country", companyCountry)
           .eq("is_active", true)
           .order("statutory_name"),
         supabase
           .from("pay_elements")
           .select("id, name, code")
-          .eq("company_id", company!.id)
+          .eq("company_id", selectedCompany)
           .eq("is_active", true)
           .order("name"),
       ]);
@@ -207,7 +211,7 @@ export default function StatutoryPayElementMappingsPage() {
     setIsSaving(true);
     try {
       const data = {
-        company_id: company!.id,
+        company_id: selectedCompany,
         statutory_type_id: formData.statutory_type_id,
         employee_pay_element_id: formData.employee_pay_element_id || null,
         employer_pay_element_id: formData.employer_pay_element_id || null,
@@ -303,7 +307,25 @@ export default function StatutoryPayElementMappingsPage() {
         </div>
       </div>
 
-      {!companyCountry && !isLoading && (
+      <Card>
+        <CardContent className="pt-6">
+          <div className="w-64">
+            <Label>{t("common.company", "Company")}</Label>
+            <Select value={selectedCompany} onValueChange={setSelectedCompany}>
+              <SelectTrigger>
+                <SelectValue placeholder={t("common.selectCompany", "Select company")} />
+              </SelectTrigger>
+              <SelectContent>
+                {companies.map((c) => (
+                  <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </CardContent>
+      </Card>
+
+      {selectedCompany && !companyCountry && !isLoading && (
         <Card className="border-destructive">
           <CardContent className="pt-6">
             <p className="text-destructive">
@@ -313,7 +335,7 @@ export default function StatutoryPayElementMappingsPage() {
         </Card>
       )}
 
-      {companyCountry && (
+      {selectedCompany && companyCountry && (
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle className="flex items-center gap-2">
