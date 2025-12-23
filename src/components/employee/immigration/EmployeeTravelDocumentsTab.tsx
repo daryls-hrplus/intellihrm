@@ -94,7 +94,7 @@ export function EmployeeTravelDocumentsTab({ employeeId, viewType = "hr" }: Empl
   const fetchDocuments = async () => {
     setIsLoading(true);
     const { data, error } = await supabase
-      .from("employee_travel_documents")
+      .from("employee_travel_documents" as any)
       .select("*")
       .eq("employee_id", employeeId)
       .order("is_primary", { ascending: false })
@@ -103,7 +103,7 @@ export function EmployeeTravelDocumentsTab({ employeeId, viewType = "hr" }: Empl
     if (error) {
       toast.error("Failed to load travel documents");
     } else {
-      setDocuments(data || []);
+      setDocuments((data || []) as unknown as TravelDocument[]);
     }
     setIsLoading(false);
   };
@@ -164,7 +164,7 @@ export function EmployeeTravelDocumentsTab({ employeeId, viewType = "hr" }: Empl
 
       if (editingDocument) {
         const { error } = await supabase
-          .from("employee_travel_documents")
+          .from("employee_travel_documents" as any)
           .update(payload)
           .eq("id", editingDocument.id);
 
@@ -181,7 +181,7 @@ export function EmployeeTravelDocumentsTab({ employeeId, viewType = "hr" }: Empl
         toast.success("Travel document updated");
       } else {
         const { data: result, error } = await supabase
-          .from("employee_travel_documents")
+          .from("employee_travel_documents" as any)
           .insert({
             employee_id: employeeId,
             ...payload,
@@ -191,10 +191,11 @@ export function EmployeeTravelDocumentsTab({ employeeId, viewType = "hr" }: Empl
 
         if (error) throw error;
 
+        const resultData = result as unknown as TravelDocument;
         await logAction({
           action: "CREATE",
           entityType: "travel_document",
-          entityId: result.id,
+          entityId: resultData.id,
           entityName: data.document_number,
           newValues: payload,
         });
@@ -234,7 +235,7 @@ export function EmployeeTravelDocumentsTab({ employeeId, viewType = "hr" }: Empl
 
   const handleArchive = async (document: TravelDocument) => {
     const { error } = await supabase
-      .from("employee_travel_documents")
+      .from("employee_travel_documents" as any)
       .update({ status: "archived" })
       .eq("id", document.id);
 

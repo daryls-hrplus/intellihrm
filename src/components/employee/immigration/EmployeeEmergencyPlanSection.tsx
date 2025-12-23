@@ -72,7 +72,7 @@ export function EmployeeEmergencyPlanSection({ employeeId, viewType = "hr" }: Em
   const fetchPlan = async () => {
     setIsLoading(true);
     const { data, error } = await supabase
-      .from("employee_emergency_plans")
+      .from("employee_emergency_plans" as any)
       .select("*")
       .eq("employee_id", employeeId)
       .maybeSingle();
@@ -80,18 +80,19 @@ export function EmployeeEmergencyPlanSection({ employeeId, viewType = "hr" }: Em
     if (error) {
       toast.error("Failed to load emergency plan");
     } else {
-      setPlan(data);
-      if (data) {
+      const planData = data as unknown as EmergencyPlan | null;
+      setPlan(planData);
+      if (planData) {
         form.reset({
-          evacuation_destination: data.evacuation_destination || "",
-          evacuation_contact_name: data.evacuation_contact_name || "",
-          evacuation_contact_phone: data.evacuation_contact_phone || "",
-          evacuation_contact_relationship: data.evacuation_contact_relationship || "",
-          embassy_contact: data.embassy_contact || "",
-          medical_considerations: data.medical_considerations || "",
-          travel_restrictions: data.travel_restrictions || "",
-          preferred_airline: data.preferred_airline || "",
-          notes: data.notes || "",
+          evacuation_destination: planData.evacuation_destination || "",
+          evacuation_contact_name: planData.evacuation_contact_name || "",
+          evacuation_contact_phone: planData.evacuation_contact_phone || "",
+          evacuation_contact_relationship: planData.evacuation_contact_relationship || "",
+          embassy_contact: planData.embassy_contact || "",
+          medical_considerations: planData.medical_considerations || "",
+          travel_restrictions: planData.travel_restrictions || "",
+          preferred_airline: planData.preferred_airline || "",
+          notes: planData.notes || "",
         });
       }
     }
@@ -119,7 +120,7 @@ export function EmployeeEmergencyPlanSection({ employeeId, viewType = "hr" }: Em
 
       if (plan) {
         const { error } = await supabase
-          .from("employee_emergency_plans")
+          .from("employee_emergency_plans" as any)
           .update(payload)
           .eq("id", plan.id);
 
@@ -136,7 +137,7 @@ export function EmployeeEmergencyPlanSection({ employeeId, viewType = "hr" }: Em
         toast.success("Emergency plan updated");
       } else {
         const { data: result, error } = await supabase
-          .from("employee_emergency_plans")
+          .from("employee_emergency_plans" as any)
           .insert({
             employee_id: employeeId,
             ...payload,
@@ -146,10 +147,11 @@ export function EmployeeEmergencyPlanSection({ employeeId, viewType = "hr" }: Em
 
         if (error) throw error;
 
+        const resultData = result as unknown as EmergencyPlan;
         await logAction({
           action: "CREATE",
           entityType: "emergency_plan",
-          entityId: result.id,
+          entityId: resultData.id,
           entityName: "Emergency Plan",
           newValues: payload,
         });

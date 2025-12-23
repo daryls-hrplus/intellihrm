@@ -14,7 +14,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import { EmployeeBenefitsTab } from "@/components/employee/EmployeeBenefitsTab";
 import { EmployeeDocumentsTab } from "@/components/employee/EmployeeDocumentsTab";
-import { EmployeeWorkPermitsTab } from "@/components/employee/EmployeeWorkPermitsTab";
 
 import { EmployeeBackgroundChecksTab } from "@/components/employee/EmployeeBackgroundChecksTab";
 
@@ -34,6 +33,7 @@ import {
   EmployeeAgreementsSignaturesTab,
   EmployeeProfessionalHistoryTab,
 } from "@/components/employee/professional";
+import { EmployeeImmigrationTab } from "@/components/employee/immigration";
 
 import {
   ArrowLeft,
@@ -49,7 +49,6 @@ import {
   FileText,
   Wallet,
   Contact,
-  FileCheck,
   Award,
   ShieldCheck,
   UserCheck,
@@ -61,6 +60,7 @@ import {
   Sparkles,
   Pencil,
   FileSignature,
+  Plane,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
@@ -292,7 +292,7 @@ export default function EmployeeProfilePage() {
             <TabsTrigger value="medical"><Stethoscope className="h-4 w-4 mr-1" />{t("workforce.profile.tabs.medical")}</TabsTrigger>
             <TabsTrigger value="pay_info"><Wallet className="h-4 w-4 mr-1" />Pay Information</TabsTrigger>
             <TabsTrigger value="professional_info"><FileSignature className="h-4 w-4 mr-1" />Professional Info</TabsTrigger>
-            <TabsTrigger value="work_permits"><FileCheck className="h-4 w-4 mr-1" />{t("workforce.profile.tabs.workPermits")}</TabsTrigger>
+            <TabsTrigger value="immigration"><Plane className="h-4 w-4 mr-1" />Immigration</TabsTrigger>
           </TabsList>
 
 
@@ -427,8 +427,8 @@ export default function EmployeeProfilePage() {
 
 
 
-          <TabsContent value="work_permits" className="mt-6">
-            <EmployeeWorkPermitsTab employeeId={employee.id} />
+          <TabsContent value="immigration" className="mt-6">
+            <EmployeeImmigrationTab employeeId={employee.id} />
           </TabsContent>
 
           <TabsContent value="professional_info" className="mt-6">
