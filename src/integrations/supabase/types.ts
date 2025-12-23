@@ -27616,6 +27616,7 @@ export type Database = {
         Row: {
           authorized_headcount: number
           code: string
+          company_id: string | null
           compensation_model: string
           created_at: string
           department_id: string
@@ -27639,6 +27640,7 @@ export type Database = {
         Insert: {
           authorized_headcount?: number
           code: string
+          company_id?: string | null
           compensation_model?: string
           created_at?: string
           department_id: string
@@ -27662,6 +27664,7 @@ export type Database = {
         Update: {
           authorized_headcount?: number
           code?: string
+          company_id?: string | null
           compensation_model?: string
           created_at?: string
           department_id?: string
@@ -27683,6 +27686,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "positions_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "positions_department_id_fkey"
             columns: ["department_id"]
