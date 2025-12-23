@@ -20,6 +20,7 @@ import {
   MessageCircle,
   BarChart3,
   Award,
+  Settings,
 } from "lucide-react";
 
 export default function PerformanceDashboardPage() {
@@ -35,6 +36,7 @@ export default function PerformanceDashboardPage() {
     feedback: { title: t('performance.modules.continuousFeedback'), description: t('performance.modules.continuousFeedbackDesc'), href: "/performance/feedback", icon: MessageCircle, color: "bg-violet-500/10 text-violet-600", tabCode: "feedback" },
     recognition: { title: t('performance.modules.recognitionAwards'), description: t('performance.modules.recognitionAwardsDesc'), href: "/performance/recognition", icon: Award, color: "bg-rose-500/10 text-rose-600", tabCode: "recognition" },
     analytics: { title: t('performance.modules.analytics'), description: t('performance.modules.analyticsDesc'), href: "/performance/analytics", icon: BarChart3, color: "bg-muted text-muted-foreground", tabCode: "analytics" },
+    setup: { title: t('performance.modules.setup', 'Setup'), description: t('performance.modules.setupDesc', 'Configure performance settings'), href: "/performance/setup", icon: Settings, color: "bg-slate-500/10 text-slate-600", tabCode: "setup" },
   };
 
   const filterByAccess = (modules: typeof allModules[keyof typeof allModules][]) =>
@@ -56,6 +58,10 @@ export default function PerformanceDashboardPage() {
     {
       titleKey: "Analytics",
       items: filterByAccess([allModules.analytics]),
+    },
+    {
+      titleKey: "Configuration",
+      items: filterByAccess([allModules.setup]),
     },
   ];
 

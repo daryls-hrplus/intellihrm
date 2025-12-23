@@ -116,6 +116,7 @@ import PerformanceImprovementPlansPage from "./pages/performance/PerformanceImpr
 import ContinuousFeedbackPage from "./pages/performance/ContinuousFeedbackPage";
 import RecognitionAwardsPage from "./pages/performance/RecognitionAwardsPage";
 import PerformanceAnalyticsPage from "./pages/performance/PerformanceAnalyticsPage";
+import PerformanceSetupPage from "./pages/performance/PerformanceSetupPage";
 
 // Leave pages
 import LeaveDashboardPage from "./pages/leave/LeaveDashboardPage";
@@ -2319,6 +2320,14 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <RecognitionAwardsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/performance/setup"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
+                  <PerformanceSetupPage />
                 </ProtectedRoute>
               }
             />

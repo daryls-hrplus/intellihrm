@@ -27208,6 +27208,59 @@ export type Database = {
           },
         ]
       }
+      performance_rating_scales: {
+        Row: {
+          code: string
+          company_id: string
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean | null
+          is_default: boolean | null
+          max_rating: number
+          min_rating: number
+          name: string
+          rating_labels: Json | null
+          updated_at: string
+        }
+        Insert: {
+          code: string
+          company_id: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_default?: boolean | null
+          max_rating?: number
+          min_rating?: number
+          name: string
+          rating_labels?: Json | null
+          updated_at?: string
+        }
+        Update: {
+          code?: string
+          company_id?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_default?: boolean | null
+          max_rating?: number
+          min_rating?: number
+          name?: string
+          rating_labels?: Json | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "performance_rating_scales_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pii_access_alerts: {
         Row: {
           access_count: number
@@ -28965,6 +29018,59 @@ export type Database = {
             columns: ["recipient_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      recognition_categories: {
+        Row: {
+          code: string
+          color: string | null
+          company_id: string
+          created_at: string
+          description: string | null
+          icon: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          points_value: number | null
+          requires_approval: boolean | null
+          updated_at: string
+        }
+        Insert: {
+          code: string
+          color?: string | null
+          company_id: string
+          created_at?: string
+          description?: string | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          points_value?: number | null
+          requires_approval?: boolean | null
+          updated_at?: string
+        }
+        Update: {
+          code?: string
+          color?: string | null
+          company_id?: string
+          created_at?: string
+          description?: string | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          points_value?: number | null
+          requires_approval?: boolean | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "recognition_categories_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
             referencedColumns: ["id"]
           },
         ]
