@@ -15,10 +15,10 @@ export function EmployeeCredentialsMembershipsTab({ employeeId, viewType = "hr" 
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <FileCheck className="h-5 w-5" />
-          Qualifications Compliance & Memberships
+          Credentials & Memberships
         </CardTitle>
         <CardDescription>
-          Compliance status of certifications and licenses from qualifications, plus professional memberships
+          Compliance status of certifications, licenses, and professional memberships
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -26,7 +26,7 @@ export function EmployeeCredentialsMembershipsTab({ employeeId, viewType = "hr" 
           <TabsList className="mb-4">
             <TabsTrigger value="compliance" className="flex items-center gap-2">
               <GraduationCap className="h-4 w-4" />
-              Qualification Compliance
+              Credential Compliance
             </TabsTrigger>
             <TabsTrigger value="memberships" className="flex items-center gap-2">
               <Users className="h-4 w-4" />
