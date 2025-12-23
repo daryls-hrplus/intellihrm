@@ -10120,66 +10120,117 @@ export type Database = {
       }
       employee_work_permits: {
         Row: {
+          application_date: string | null
+          approval_date: string | null
           archived_at: string | null
           archived_by: string | null
+          company_id: string | null
           created_at: string
           document_mime_type: string | null
           document_name: string | null
           document_size: number | null
+          document_type_id: string | null
           document_url: string | null
+          emergency_evacuation_plan: string | null
           employee_id: string
           expiry_date: string
+          fee_amount: number | null
+          fee_currency: string | null
+          fee_due_date: string | null
+          fee_paid_date: string | null
           id: string
+          immigration_category_id: string | null
           is_archived: boolean | null
+          is_initial_permit: boolean | null
           issue_date: string
           issuing_country: string
+          max_renewals: number | null
           notes: string | null
+          permanent_resident_eligible_date: string | null
           permit_number: string
+          permit_status_id: string | null
           permit_type: string
+          previous_permit_id: string | null
+          renewal_count: number | null
           sponsoring_company: string | null
           status: string
+          term_limit_years: number | null
           updated_at: string
         }
         Insert: {
+          application_date?: string | null
+          approval_date?: string | null
           archived_at?: string | null
           archived_by?: string | null
+          company_id?: string | null
           created_at?: string
           document_mime_type?: string | null
           document_name?: string | null
           document_size?: number | null
+          document_type_id?: string | null
           document_url?: string | null
+          emergency_evacuation_plan?: string | null
           employee_id: string
           expiry_date: string
+          fee_amount?: number | null
+          fee_currency?: string | null
+          fee_due_date?: string | null
+          fee_paid_date?: string | null
           id?: string
+          immigration_category_id?: string | null
           is_archived?: boolean | null
+          is_initial_permit?: boolean | null
           issue_date: string
           issuing_country: string
+          max_renewals?: number | null
           notes?: string | null
+          permanent_resident_eligible_date?: string | null
           permit_number: string
+          permit_status_id?: string | null
           permit_type: string
+          previous_permit_id?: string | null
+          renewal_count?: number | null
           sponsoring_company?: string | null
           status?: string
+          term_limit_years?: number | null
           updated_at?: string
         }
         Update: {
+          application_date?: string | null
+          approval_date?: string | null
           archived_at?: string | null
           archived_by?: string | null
+          company_id?: string | null
           created_at?: string
           document_mime_type?: string | null
           document_name?: string | null
           document_size?: number | null
+          document_type_id?: string | null
           document_url?: string | null
+          emergency_evacuation_plan?: string | null
           employee_id?: string
           expiry_date?: string
+          fee_amount?: number | null
+          fee_currency?: string | null
+          fee_due_date?: string | null
+          fee_paid_date?: string | null
           id?: string
+          immigration_category_id?: string | null
           is_archived?: boolean | null
+          is_initial_permit?: boolean | null
           issue_date?: string
           issuing_country?: string
+          max_renewals?: number | null
           notes?: string | null
+          permanent_resident_eligible_date?: string | null
           permit_number?: string
+          permit_status_id?: string | null
           permit_type?: string
+          previous_permit_id?: string | null
+          renewal_count?: number | null
           sponsoring_company?: string | null
           status?: string
+          term_limit_years?: number | null
           updated_at?: string
         }
         Relationships: [
@@ -10191,10 +10242,45 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "employee_work_permits_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_work_permits_document_type_id_fkey"
+            columns: ["document_type_id"]
+            isOneToOne: false
+            referencedRelation: "immigration_document_types"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "employee_work_permits_employee_id_fkey"
             columns: ["employee_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_work_permits_immigration_category_id_fkey"
+            columns: ["immigration_category_id"]
+            isOneToOne: false
+            referencedRelation: "immigration_categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_work_permits_permit_status_id_fkey"
+            columns: ["permit_status_id"]
+            isOneToOne: false
+            referencedRelation: "immigration_permit_statuses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_work_permits_previous_permit_id_fkey"
+            columns: ["previous_permit_id"]
+            isOneToOne: false
+            referencedRelation: "employee_work_permits"
             referencedColumns: ["id"]
           },
         ]
