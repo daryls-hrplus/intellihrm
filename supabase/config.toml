@@ -161,3 +161,18 @@ verify_jwt = false
 
 [functions.parse-natural-language-rule]
 verify_jwt = false
+
+[functions.ai-governance-daily]
+verify_jwt = false
+
+[functions.ai-governance-weekly]
+verify_jwt = false
+
+[functions.ai-governance-monthly]
+verify_jwt = false
+
+[functions.ai-governance-quarterly]
+verify_jwt = false
+
+[functions.ai-governance-alerts]
+verify_jwt = false
