@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -23,11 +24,13 @@ import {
   Users,
   Building2,
   User,
+  Star,
 } from "lucide-react";
 import { differenceInDays, isPast } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { formatDateForDisplay } from "@/utils/dateUtils";
+import { GoalRatingDialog } from "./GoalRatingDialog";
 
 type GoalStatus = 'draft' | 'active' | 'in_progress' | 'completed' | 'cancelled' | 'overdue';
 type GoalType = 'okr_objective' | 'okr_key_result' | 'smart_goal';
@@ -47,6 +50,10 @@ interface Goal {
   current_value: number | null;
   unit_of_measure: string | null;
   category: string | null;
+  employee_id?: string | null;
+  self_rating?: number | null;
+  manager_rating?: number | null;
+  final_score?: number | null;
   employee?: { full_name: string } | null;
   department?: { name: string } | null;
 }
@@ -58,6 +65,7 @@ interface EnhancedGoalCardProps {
   onUpdateProgress?: (goal: Goal) => void;
   onViewComments?: (goal: Goal) => void;
   showOwner?: boolean;
+  userRole?: "employee" | "manager";
 }
 
 const statusColors: Record<GoalStatus, string> = {
@@ -89,7 +97,9 @@ export function EnhancedGoalCard({
   onUpdateProgress,
   onViewComments,
   showOwner = false,
+  userRole = "employee",
 }: EnhancedGoalCardProps) {
+  const [ratingDialogOpen, setRatingDialogOpen] = useState(false);
   const isOverdue = goal.due_date && isPast(new Date(goal.due_date)) && goal.status !== "completed";
   const daysUntilDue = goal.due_date ? differenceInDays(new Date(goal.due_date), new Date()) : null;
   
@@ -180,6 +190,12 @@ export function EnhancedGoalCard({
                     Comments
                   </DropdownMenuItem>
                 )}
+                {(goal.status === "completed" || goal.progress_percentage >= 80) && (
+                  <DropdownMenuItem onClick={() => setRatingDialogOpen(true)}>
+                    <Star className="mr-2 h-4 w-4" />
+                    {userRole === "employee" ? "Rate Goal" : "Rate / Review"}
+                  </DropdownMenuItem>
+                )}
                 {goal.status !== "completed" && (
                   <DropdownMenuItem onClick={handleMarkComplete}>
                     <CheckCircle className="mr-2 h-4 w-4" />
@@ -248,9 +264,27 @@ export function EnhancedGoalCard({
                 </div>
               )}
             </div>
+            {/* Rating Badge */}
+            {(goal.self_rating || goal.manager_rating || goal.final_score) && (
+              <div className="flex items-center gap-1">
+                <Star className="h-3.5 w-3.5 fill-warning text-warning" />
+                <span className="text-sm font-medium">
+                  {goal.final_score ?? goal.manager_rating ?? goal.self_rating}/5
+                </span>
+              </div>
+            )}
           </div>
         </div>
       </CardContent>
+
+      {/* Rating Dialog */}
+      <GoalRatingDialog
+        open={ratingDialogOpen}
+        onOpenChange={setRatingDialogOpen}
+        goal={goal}
+        userRole={userRole}
+        onSuccess={onRefresh}
+      />
     </Card>
   );
 }
