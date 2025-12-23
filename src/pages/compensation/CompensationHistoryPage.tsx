@@ -10,10 +10,18 @@ import { Badge } from "@/components/ui/badge";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
-import { History, Search, Plus, TrendingUp, TrendingDown, Minus } from "lucide-react";
+import { History, Search, Plus, TrendingUp, TrendingDown, Minus, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useTranslation } from "react-i18next";
 import { AddCompensationHistoryDialog } from "@/components/compensation/AddCompensationHistoryDialog";
+import { EditCompensationHistoryDialog } from "@/components/compensation/EditCompensationHistoryDialog";
+import { DeleteCompensationHistoryDialog } from "@/components/compensation/DeleteCompensationHistoryDialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface Company {
   id: string;
@@ -35,6 +43,9 @@ export default function CompensationHistoryPage() {
   const [selectedCompanyId, setSelectedCompanyId] = useState<string>("");
   const [selectedPayGroupId, setSelectedPayGroupId] = useState<string>("all");
   const [addDialogOpen, setAddDialogOpen] = useState(false);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [selectedRecord, setSelectedRecord] = useState<any>(null);
 
   useEffect(() => {
     const fetchCompanies = async () => {
@@ -240,12 +251,13 @@ export default function CompensationHistoryPage() {
                     <TableHead className="text-right">{t("compensation.history.new")}</TableHead>
                     <TableHead className="text-right">{t("compensation.history.change")}</TableHead>
                     <TableHead>{t("compensation.history.approvedBy")}</TableHead>
+                    <TableHead className="w-[50px]"></TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {filteredHistory.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={8} className="text-center text-muted-foreground">
+                      <TableCell colSpan={9} className="text-center text-muted-foreground">
                         {t("compensation.history.noHistory")}
                       </TableCell>
                     </TableRow>
@@ -267,6 +279,36 @@ export default function CompensationHistoryPage() {
                           </div>
                         </TableCell>
                         <TableCell>{record.approver?.full_name || "-"}</TableCell>
+                        <TableCell>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="icon" className="h-8 w-8">
+                                <MoreHorizontal className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem
+                                onClick={() => {
+                                  setSelectedRecord(record);
+                                  setEditDialogOpen(true);
+                                }}
+                              >
+                                <Pencil className="mr-2 h-4 w-4" />
+                                {t("common.edit")}
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                onClick={() => {
+                                  setSelectedRecord(record);
+                                  setDeleteDialogOpen(true);
+                                }}
+                                className="text-destructive focus:text-destructive"
+                              >
+                                <Trash2 className="mr-2 h-4 w-4" />
+                                {t("common.delete")}
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </TableCell>
                       </TableRow>
                     ))
                   )}
@@ -280,6 +322,20 @@ export default function CompensationHistoryPage() {
           open={addDialogOpen}
           onOpenChange={setAddDialogOpen}
           companyId={selectedCompanyId}
+          onSuccess={() => queryClient.invalidateQueries({ queryKey: ["compensation-history"] })}
+        />
+
+        <EditCompensationHistoryDialog
+          open={editDialogOpen}
+          onOpenChange={setEditDialogOpen}
+          record={selectedRecord}
+          onSuccess={() => queryClient.invalidateQueries({ queryKey: ["compensation-history"] })}
+        />
+
+        <DeleteCompensationHistoryDialog
+          open={deleteDialogOpen}
+          onOpenChange={setDeleteDialogOpen}
+          record={selectedRecord}
           onSuccess={() => queryClient.invalidateQueries({ queryKey: ["compensation-history"] })}
         />
       </div>
