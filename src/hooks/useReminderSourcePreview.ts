@@ -127,7 +127,8 @@ export function useReminderSourcePreview() {
       } else {
         // For other tables, join with profiles
         // First, get the total count and sample items
-        const { data, error, count } = await supabase
+        // Build base query
+        let baseQuery = supabase
           .from(sourceTable as any)
           .select(`
             id,
@@ -140,7 +141,17 @@ export function useReminderSourcePreview() {
               company_id
             )
           `, { count: 'exact' })
-          .not(dateField, 'is', null)
+          .not(dateField, 'is', null);
+
+        // Apply filter conditions if present (e.g., for CHARACTER_CERTIFICATE_EXPIRY)
+        if (eventType.filter_condition) {
+          Object.entries(eventType.filter_condition).forEach(([field, value]) => {
+            baseQuery = baseQuery.eq(field, value);
+          });
+        }
+
+        // Apply date range and ordering
+        const { data, error, count } = await baseQuery
           .gte(dateField, today.toISOString().split('T')[0])
           .lte(dateField, futureDate.toISOString().split('T')[0])
           .order(dateField, { ascending: true })
@@ -254,10 +265,20 @@ export function useReminderSourcePreview() {
 
         return { count: count || 0, employeeCount: count || 0 };
       } else {
-        const { data, count } = await supabase
+        // Build base query for affected count
+        let countQuery = supabase
           .from(sourceTable as any)
           .select(`${employeeField}, profiles!${employeeField}(company_id)`, { count: 'exact' })
-          .not(dateField, 'is', null)
+          .not(dateField, 'is', null);
+
+        // Apply filter conditions if present (e.g., for CHARACTER_CERTIFICATE_EXPIRY)
+        if (eventType.filter_condition) {
+          Object.entries(eventType.filter_condition).forEach(([field, value]) => {
+            countQuery = countQuery.eq(field, value);
+          });
+        }
+
+        const { data, count } = await countQuery
           .gte(dateField, today.toISOString().split('T')[0])
           .lte(dateField, futureDate.toISOString().split('T')[0]);
 
