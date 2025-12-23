@@ -10955,7 +10955,6 @@ export type Database = {
       employee_travel_documents: {
         Row: {
           created_at: string
-          date_of_birth_on_doc: string | null
           document_name: string | null
           document_number: string
           document_subtype: string | null
@@ -10964,21 +10963,13 @@ export type Database = {
           employee_id: string
           expiry_alert_days: number | null
           expiry_date: string
-          gender_on_doc: string | null
           id: string
           is_biometric: boolean | null
-          is_machine_readable: boolean | null
           is_primary: boolean
           issue_date: string
           issue_place: string | null
           issuing_authority: string | null
           issuing_country: string
-          machine_readable_name: string | null
-          mrz_check_digit_valid: boolean | null
-          mrz_given_names: string | null
-          mrz_line_1: string | null
-          mrz_line_2: string | null
-          mrz_surname: string | null
           nationality: string | null
           notes: string | null
           previous_document_number: string | null
@@ -10989,11 +10980,9 @@ export type Database = {
           verification_status: string | null
           verified_at: string | null
           verified_by: string | null
-          visa_pages_remaining: number | null
         }
         Insert: {
           created_at?: string
-          date_of_birth_on_doc?: string | null
           document_name?: string | null
           document_number: string
           document_subtype?: string | null
@@ -11002,21 +10991,13 @@ export type Database = {
           employee_id: string
           expiry_alert_days?: number | null
           expiry_date: string
-          gender_on_doc?: string | null
           id?: string
           is_biometric?: boolean | null
-          is_machine_readable?: boolean | null
           is_primary?: boolean
           issue_date: string
           issue_place?: string | null
           issuing_authority?: string | null
           issuing_country: string
-          machine_readable_name?: string | null
-          mrz_check_digit_valid?: boolean | null
-          mrz_given_names?: string | null
-          mrz_line_1?: string | null
-          mrz_line_2?: string | null
-          mrz_surname?: string | null
           nationality?: string | null
           notes?: string | null
           previous_document_number?: string | null
@@ -11027,11 +11008,9 @@ export type Database = {
           verification_status?: string | null
           verified_at?: string | null
           verified_by?: string | null
-          visa_pages_remaining?: number | null
         }
         Update: {
           created_at?: string
-          date_of_birth_on_doc?: string | null
           document_name?: string | null
           document_number?: string
           document_subtype?: string | null
@@ -11040,21 +11019,13 @@ export type Database = {
           employee_id?: string
           expiry_alert_days?: number | null
           expiry_date?: string
-          gender_on_doc?: string | null
           id?: string
           is_biometric?: boolean | null
-          is_machine_readable?: boolean | null
           is_primary?: boolean
           issue_date?: string
           issue_place?: string | null
           issuing_authority?: string | null
           issuing_country?: string
-          machine_readable_name?: string | null
-          mrz_check_digit_valid?: boolean | null
-          mrz_given_names?: string | null
-          mrz_line_1?: string | null
-          mrz_line_2?: string | null
-          mrz_surname?: string | null
           nationality?: string | null
           notes?: string | null
           previous_document_number?: string | null
@@ -11065,7 +11036,6 @@ export type Database = {
           verification_status?: string | null
           verified_at?: string | null
           verified_by?: string | null
-          visa_pages_remaining?: number | null
         }
         Relationships: [
           {
