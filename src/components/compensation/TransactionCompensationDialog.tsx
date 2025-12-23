@@ -130,7 +130,7 @@ export function TransactionCompensationDialog({
       }
 
       const { error } = await supabase.from("compensation_history").insert({
-        company_id: companyId,
+        company_id: companyId || null,
         employee_id: employeeId,
         position_id: positionId,
         change_type: formData.change_type,
