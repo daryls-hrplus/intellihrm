@@ -30197,6 +30197,7 @@ export type Database = {
           created_at: string
           date_field: string | null
           description: string | null
+          filter_condition: Json | null
           id: string
           is_active: boolean | null
           is_system: boolean | null
@@ -30211,6 +30212,7 @@ export type Database = {
           created_at?: string
           date_field?: string | null
           description?: string | null
+          filter_condition?: Json | null
           id?: string
           is_active?: boolean | null
           is_system?: boolean | null
@@ -30225,6 +30227,7 @@ export type Database = {
           created_at?: string
           date_field?: string | null
           description?: string | null
+          filter_condition?: Json | null
           id?: string
           is_active?: boolean | null
           is_system?: boolean | null

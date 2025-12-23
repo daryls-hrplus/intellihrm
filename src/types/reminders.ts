@@ -7,6 +7,7 @@ export interface ReminderEventType {
   category: string;
   source_table: string | null;
   date_field: string | null;
+  filter_condition?: Record<string, any> | null;
   is_system: boolean;
   is_active: boolean;
   created_at: string;
