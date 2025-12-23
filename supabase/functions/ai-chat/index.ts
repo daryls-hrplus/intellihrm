@@ -401,7 +401,7 @@ ${employeeContext || "No employee data found matching the query."}
     });
 
     // Log AI interaction for audit (with guardrail tracking)
-    await supabase.from("ai_interaction_logs").insert({
+    const { data: interactionLog } = await supabase.from("ai_interaction_logs").insert({
       user_id: user.id,
       company_id: profile?.company_id,
       user_message: userMessage,
@@ -416,7 +416,109 @@ ${employeeContext || "No employee data found matching the query."}
       user_role: roles.join(", ") || "employee",
       pii_accessed: requestsPii && canViewPii,
       escalation_triggered: triggeredEscalation,
-    });
+    }).select("id").single();
+
+    // === ISO 42001 AI GUARDRAILS INTEGRATION ===
+    let riskAssessment = null;
+    let biasDetected = false;
+    
+    try {
+      // 1. Call AI Risk Assessor
+      const riskResponse = await fetch(`${supabaseUrl}/functions/v1/ai-risk-assessor`, {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${supabaseKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          interactionLogId: interactionLog?.id,
+          userId: user.id,
+          companyId: profile?.company_id,
+          userMessage,
+          aiResponse: assistantMessage,
+          context: feature || "chat",
+        }),
+      });
+      
+      if (riskResponse.ok) {
+        const riskData = await riskResponse.json();
+        riskAssessment = riskData.assessment;
+        console.log("Risk assessment completed:", riskAssessment?.riskScore);
+      }
+    } catch (riskError) {
+      console.error("Risk assessment error (non-blocking):", riskError);
+    }
+
+    try {
+      // 2. Call AI Bias Detector
+      const biasResponse = await fetch(`${supabaseUrl}/functions/v1/ai-bias-detector`, {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${supabaseKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          prompt: userMessage,
+          response: assistantMessage,
+          context: feature || "chat",
+          userId: user.id,
+          companyId: profile?.company_id,
+          interactionLogId: interactionLog?.id,
+        }),
+      });
+      
+      if (biasResponse.ok) {
+        const biasData = await biasResponse.json();
+        biasDetected = biasData.biasDetected;
+        console.log("Bias detection completed:", biasDetected);
+      }
+    } catch (biasError) {
+      console.error("Bias detection error (non-blocking):", biasError);
+    }
+
+    try {
+      // 3. Generate explainability log for high-risk or complex interactions
+      if (riskAssessment?.riskScore >= 0.4 || triggeredEscalation) {
+        await fetch(`${supabaseUrl}/functions/v1/ai-explainability-generator`, {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${supabaseKey}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            interactionLogId: interactionLog?.id,
+            userMessage,
+            aiResponse: assistantMessage,
+            modelUsed: "google/gemini-2.5-flash",
+            contextSources: [
+              policyContext ? "policies" : null,
+              sopContext ? "sops" : null,
+              helpCenterContext ? "help_center" : null,
+              employeeContext ? "employee_data" : null,
+            ].filter(Boolean),
+            companyId: profile?.company_id,
+          }),
+        });
+        console.log("Explainability log generated");
+      }
+    } catch (explainError) {
+      console.error("Explainability generation error (non-blocking):", explainError);
+    }
+
+    // If risk is critical (>= 0.8), block the response
+    if (riskAssessment?.shouldBlock) {
+      return new Response(JSON.stringify({ 
+        message: "I apologize, but I cannot provide this response as it has been flagged for human review due to potential compliance concerns. Please contact HR directly for assistance with this matter.",
+        guardrails: {
+          blocked: true,
+          riskScore: riskAssessment.riskScore,
+          riskCategory: riskAssessment.riskCategory,
+          humanReviewRequired: true,
+        }
+      }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
     return new Response(JSON.stringify({ 
       message: assistantMessage,
@@ -426,7 +528,11 @@ ${employeeContext || "No employee data found matching the query."}
       },
       guardrails: {
         escalation_triggered: triggeredEscalation,
-        pii_protected: requestsPii && !canViewPii
+        pii_protected: requestsPii && !canViewPii,
+        riskScore: riskAssessment?.riskScore || 0,
+        riskCategory: riskAssessment?.riskCategory || 'low',
+        humanReviewRequired: riskAssessment?.humanReviewRequired || false,
+        biasDetected,
       }
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },

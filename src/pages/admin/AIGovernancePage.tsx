@@ -6,8 +6,9 @@ import { useAIGovernance } from "@/hooks/useAIGovernance";
 import { AIHumanReviewQueue } from "@/components/ai/AIHumanReviewQueue";
 import { BiasIncidentPanel } from "@/components/ai/BiasIncidentPanel";
 import { AIModelRegistryPanel } from "@/components/ai/AIModelRegistryPanel";
-import { AIRiskBadge } from "@/components/ai/AIRiskBadge";
-import { 
+import { AIGuardrailsConfigPanel } from "@/components/ai/AIGuardrailsConfigPanel";
+import { AIExplainabilityPanel } from "@/components/ai/AIExplainabilityPanel";
+import {
   Shield, 
   AlertTriangle, 
   Users, 
@@ -237,22 +238,30 @@ export default function AIGovernancePage() {
 
         {/* Main Tabs */}
         <Tabs defaultValue="reviews" className="space-y-4">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-6">
             <TabsTrigger value="reviews" className="flex items-center gap-2">
               <Eye className="h-4 w-4" />
-              Human Reviews
+              Reviews
             </TabsTrigger>
             <TabsTrigger value="bias" className="flex items-center gap-2">
               <AlertTriangle className="h-4 w-4" />
-              Bias Incidents
+              Bias
             </TabsTrigger>
             <TabsTrigger value="models" className="flex items-center gap-2">
               <Bot className="h-4 w-4" />
-              Model Registry
+              Models
             </TabsTrigger>
             <TabsTrigger value="overrides" className="flex items-center gap-2">
               <Users className="h-4 w-4" />
-              Human Overrides
+              Overrides
+            </TabsTrigger>
+            <TabsTrigger value="config" className="flex items-center gap-2">
+              <Activity className="h-4 w-4" />
+              Config
+            </TabsTrigger>
+            <TabsTrigger value="explainability" className="flex items-center gap-2">
+              <CheckCircle className="h-4 w-4" />
+              Explain
             </TabsTrigger>
           </TabsList>
 
@@ -313,10 +322,18 @@ export default function AIGovernancePage() {
                         </p>
                       </div>
                     ))}
-                  </div>
+              </div>
                 )}
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="config">
+            <AIGuardrailsConfigPanel />
+          </TabsContent>
+
+          <TabsContent value="explainability">
+            <AIExplainabilityPanel />
           </TabsContent>
         </Tabs>
       </div>
