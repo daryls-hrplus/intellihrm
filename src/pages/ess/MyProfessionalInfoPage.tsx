@@ -78,7 +78,7 @@ export default function MyProfessionalInfoPage() {
 
         {canViewCredentials && (
           <TabsContent value="credentials">
-            <EmployeeCredentialsMembershipsTab employeeId={user.id} />
+            <EmployeeCredentialsMembershipsTab employeeId={user.id} viewType="ess" />
           </TabsContent>
         )}
 
