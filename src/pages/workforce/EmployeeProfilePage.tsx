@@ -20,7 +20,7 @@ import { EmployeeWorkPermitsTab } from "@/components/employee/EmployeeWorkPermit
 
 import { EmployeeBackgroundChecksTab } from "@/components/employee/EmployeeBackgroundChecksTab";
 import { EmployeeReferencesTab } from "@/components/employee/EmployeeReferencesTab";
-import { EmployeeCertificatesTab } from "@/components/employee/EmployeeCertificatesTab";
+import { EmployeeQualificationsTab } from "@/components/employee/EmployeeQualificationsTab";
 
 import { EmployeeInterestsTab } from "@/components/employee/EmployeeInterestsTab";
 import { EmployeeMedicalProfileTab } from "@/components/employee/EmployeeMedicalProfileTab";
@@ -294,7 +294,7 @@ export default function EmployeeProfilePage() {
             <TabsTrigger value="bank"><CreditCard className="h-4 w-4 mr-1" />{t("workforce.profile.tabs.bank")}</TabsTrigger>
             <TabsTrigger value="beneficiaries"><Users className="h-4 w-4 mr-1" />{t("workforce.profile.tabs.beneficiaries")}</TabsTrigger>
             <TabsTrigger value="branches"><Building2 className="h-4 w-4 mr-1" />{t("workforce.profile.tabs.branches")}</TabsTrigger>
-            <TabsTrigger value="certificates"><GraduationCap className="h-4 w-4 mr-1" />{t("workforce.profile.tabs.certificates")}</TabsTrigger>
+            <TabsTrigger value="qualifications"><GraduationCap className="h-4 w-4 mr-1" />Qualifications</TabsTrigger>
             <TabsTrigger value="competencies"><Award className="h-4 w-4 mr-1" />{t("workforce.profile.tabs.competencies")}</TabsTrigger>
             <TabsTrigger value="contact-info"><Phone className="h-4 w-4 mr-1" />Contact Info</TabsTrigger>
             <TabsTrigger value="dependents"><Baby className="h-4 w-4 mr-1" />{t("workforce.profile.tabs.dependents")}</TabsTrigger>
@@ -323,8 +323,8 @@ export default function EmployeeProfilePage() {
             <EmployeeBeneficiariesTab employeeId={employee.id} />
           </TabsContent>
 
-          <TabsContent value="certificates" className="mt-6">
-            <EmployeeCertificatesTab employeeId={employee.id} />
+          <TabsContent value="qualifications" className="mt-6">
+            <EmployeeQualificationsTab employeeId={employee.id} />
           </TabsContent>
 
           <TabsContent value="branches" className="mt-6">
