@@ -10323,6 +10323,7 @@ export type Database = {
       employee_work_permits: {
         Row: {
           application_date: string | null
+          application_reference: string | null
           approval_date: string | null
           archived_at: string | null
           archived_by: string | null
@@ -10345,13 +10346,16 @@ export type Database = {
           is_archived: boolean | null
           is_initial_permit: boolean | null
           issue_date: string
+          issuing_authority: string | null
           issuing_country: string
           max_renewals: number | null
           notes: string | null
           permanent_resident_eligible_date: string | null
+          permit_conditions: string[] | null
           permit_number: string
           permit_status_id: string | null
           permit_type: string
+          port_of_entry: string | null
           previous_permit_id: string | null
           renewal_count: number | null
           sponsoring_company: string | null
@@ -10361,6 +10365,7 @@ export type Database = {
         }
         Insert: {
           application_date?: string | null
+          application_reference?: string | null
           approval_date?: string | null
           archived_at?: string | null
           archived_by?: string | null
@@ -10383,13 +10388,16 @@ export type Database = {
           is_archived?: boolean | null
           is_initial_permit?: boolean | null
           issue_date: string
+          issuing_authority?: string | null
           issuing_country: string
           max_renewals?: number | null
           notes?: string | null
           permanent_resident_eligible_date?: string | null
+          permit_conditions?: string[] | null
           permit_number: string
           permit_status_id?: string | null
           permit_type: string
+          port_of_entry?: string | null
           previous_permit_id?: string | null
           renewal_count?: number | null
           sponsoring_company?: string | null
@@ -10399,6 +10407,7 @@ export type Database = {
         }
         Update: {
           application_date?: string | null
+          application_reference?: string | null
           approval_date?: string | null
           archived_at?: string | null
           archived_by?: string | null
@@ -10421,13 +10430,16 @@ export type Database = {
           is_archived?: boolean | null
           is_initial_permit?: boolean | null
           issue_date?: string
+          issuing_authority?: string | null
           issuing_country?: string
           max_renewals?: number | null
           notes?: string | null
           permanent_resident_eligible_date?: string | null
+          permit_conditions?: string[] | null
           permit_number?: string
           permit_status_id?: string | null
           permit_type?: string
+          port_of_entry?: string | null
           previous_permit_id?: string | null
           renewal_count?: number | null
           sponsoring_company?: string | null
