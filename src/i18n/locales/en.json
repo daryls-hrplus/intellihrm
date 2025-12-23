@@ -436,6 +436,7 @@
           "requiresWorkflow": "Requires Workflow Approval",
           "createTransaction": "Create Transaction",
           "updateTransaction": "Update Transaction",
+          "setCompensation": "Set Compensation",
           "types": {
             "HIRE": "New Hire",
             "CONFIRMATION": "Confirmation",
