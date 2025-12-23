@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { formatDateForDisplay } from "@/utils/dateUtils";
-import { Plus, Filter, Eye, Edit, Trash2, PlayCircle, Loader2 } from "lucide-react";
+import { Plus, Filter, Eye, Edit, Trash2, PlayCircle, Loader2, DollarSign } from "lucide-react";
 import { useLanguage } from "@/hooks/useLanguage";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -31,11 +31,18 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import {
   useEmployeeTransactions,
   EmployeeTransaction,
   TransactionStatus,
+  TransactionType,
   LookupValue,
 } from "@/hooks/useEmployeeTransactions";
+import { TransactionCompensationDialog } from "@/components/compensation/TransactionCompensationDialog";
 
 interface EmployeeTransactionsListProps {
   companyId?: string;
@@ -73,6 +80,8 @@ export function EmployeeTransactionsList({
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [transactionToDelete, setTransactionToDelete] =
     useState<EmployeeTransaction | null>(null);
+  const [compensationDialogOpen, setCompensationDialogOpen] = useState(false);
+  const [selectedForCompensation, setSelectedForCompensation] = useState<EmployeeTransaction | null>(null);
 
   useEffect(() => {
     loadData();
@@ -240,6 +249,28 @@ export function EmployeeTransactionsList({
                       >
                         <Eye className="h-4 w-4" />
                       </Button>
+                      {/* Compensation button - show for approved/completed transactions with employee and position */}
+                      {transaction.employee_id && transaction.position_id && 
+                       transaction.transaction_type?.code !== "TERMINATION" &&
+                       (transaction.status === "approved" || transaction.status === "completed" || transaction.status === "draft") && (
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => {
+                                setSelectedForCompensation(transaction);
+                                setCompensationDialogOpen(true);
+                              }}
+                            >
+                              <DollarSign className="h-4 w-4" />
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            {t("workforce.modules.transactions.form.setCompensation")}
+                          </TooltipContent>
+                        </Tooltip>
+                      )}
                       {transaction.status === "draft" && (
                         <>
                           <Button
@@ -299,6 +330,25 @@ export function EmployeeTransactionsList({
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Compensation Dialog */}
+      {selectedForCompensation && selectedForCompensation.employee_id && selectedForCompensation.position_id && (
+        <TransactionCompensationDialog
+          open={compensationDialogOpen}
+          onOpenChange={(open) => {
+            setCompensationDialogOpen(open);
+            if (!open) setSelectedForCompensation(null);
+          }}
+          employeeId={selectedForCompensation.employee_id}
+          employeeName={selectedForCompensation.employee?.full_name || selectedForCompensation.employee?.email || ""}
+          positionId={selectedForCompensation.position_id}
+          positionTitle={selectedForCompensation.position?.title || ""}
+          companyId={selectedForCompensation.company_id || ""}
+          effectiveDate={selectedForCompensation.effective_date}
+          transactionType={(selectedForCompensation.transaction_type?.code as TransactionType) || "HIRE"}
+          onSuccess={() => {}}
+        />
+      )}
     </div>
   );
 }
