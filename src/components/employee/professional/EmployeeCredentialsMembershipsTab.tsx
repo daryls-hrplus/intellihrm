@@ -26,7 +26,7 @@ export function EmployeeCredentialsMembershipsTab({ employeeId, viewType = "hr" 
           <TabsList className="mb-4">
             <TabsTrigger value="compliance" className="flex items-center gap-2">
               <GraduationCap className="h-4 w-4" />
-              Credential Compliance
+              Qualifications Compliance
             </TabsTrigger>
             <TabsTrigger value="memberships" className="flex items-center gap-2">
               <Users className="h-4 w-4" />
