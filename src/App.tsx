@@ -962,6 +962,14 @@ const App = () => (
               }
             />
             <Route
+              path="/admin/ai-governance"
+              element={
+                <ProtectedRoute requiredRoles={["admin"]}>
+                  <AIGovernancePage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
               path="/admin/settings"
               element={
                 <ProtectedRoute requiredRoles={["admin"]}>
