@@ -129,6 +129,23 @@ export function EmployeeTransactionsList({
     );
   });
 
+  // Helper to get the relevant position ID based on transaction type
+  const getRelevantPositionId = (transaction: EmployeeTransaction): string | null => {
+    const typeCode = transaction.transaction_type?.code;
+    switch (typeCode) {
+      case "HIRE":
+        return transaction.position_id;
+      case "ACTING":
+        return transaction.acting_position_id;
+      case "PROMOTION":
+        return transaction.to_position_id || transaction.from_position_id;
+      case "TRANSFER":
+        return transaction.position_id;
+      default:
+        return transaction.position_id;
+    }
+  };
+
   return (
     <div className="space-y-4">
       {/* Filters and Actions */}
@@ -249,8 +266,8 @@ export function EmployeeTransactionsList({
                       >
                         <Eye className="h-4 w-4" />
                       </Button>
-                      {/* Compensation button - show for approved/completed transactions with employee and position */}
-                      {transaction.employee_id && transaction.position_id && 
+                      {/* Compensation button - show for transactions with employee and relevant position */}
+                      {transaction.employee_id && getRelevantPositionId(transaction) && 
                        transaction.transaction_type?.code !== "TERMINATION" &&
                        (transaction.status === "approved" || transaction.status === "completed" || transaction.status === "draft") && (
                         <Tooltip>
@@ -332,7 +349,7 @@ export function EmployeeTransactionsList({
       </AlertDialog>
 
       {/* Compensation Dialog */}
-      {selectedForCompensation && selectedForCompensation.employee_id && selectedForCompensation.position_id && (
+      {selectedForCompensation && selectedForCompensation.employee_id && getRelevantPositionId(selectedForCompensation) && (
         <TransactionCompensationDialog
           open={compensationDialogOpen}
           onOpenChange={(open) => {
@@ -341,7 +358,7 @@ export function EmployeeTransactionsList({
           }}
           employeeId={selectedForCompensation.employee_id}
           employeeName={selectedForCompensation.employee?.full_name || selectedForCompensation.employee?.email || ""}
-          positionId={selectedForCompensation.position_id}
+          positionId={getRelevantPositionId(selectedForCompensation)!}
           positionTitle={selectedForCompensation.position?.title || ""}
           companyId={selectedForCompensation.company_id || ""}
           effectiveDate={selectedForCompensation.effective_date}
