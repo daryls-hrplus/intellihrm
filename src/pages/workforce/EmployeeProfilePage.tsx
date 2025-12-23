@@ -1,7 +1,7 @@
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuditLog } from "@/hooks/useAuditLog";
 import { usePiiVisibility } from "@/hooks/usePiiVisibility";
 import { useLanguage } from "@/hooks/useLanguage";
@@ -89,12 +89,36 @@ interface EmployeeProfile {
 export default function EmployeeProfilePage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { t } = useLanguage();
   const [employee, setEmployee] = useState<EmployeeProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const { logView } = useAuditLog();
   const { canViewPii, maskPii } = usePiiVisibility();
+  
+  // Get initial tab from URL query parameter
+  const initialTab = searchParams.get("tab") || "overview";
+  const [activeTab, setActiveTab] = useState(initialTab);
+
+  // Update active tab when URL changes
+  useEffect(() => {
+    const tabFromUrl = searchParams.get("tab");
+    if (tabFromUrl && tabFromUrl !== activeTab) {
+      setActiveTab(tabFromUrl);
+    }
+  }, [searchParams]);
+
+  // Update URL when tab changes
+  const handleTabChange = (value: string) => {
+    setActiveTab(value);
+    if (value === "overview") {
+      searchParams.delete("tab");
+    } else {
+      searchParams.set("tab", value);
+    }
+    setSearchParams(searchParams, { replace: true });
+  };
 
   useEffect(() => {
     if (id) {
@@ -279,7 +303,7 @@ export default function EmployeeProfilePage() {
         </Card>
 
         {/* Tabs Section */}
-        <Tabs defaultValue="overview" className="w-full">
+        <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
           <TabsList className="flex flex-wrap h-auto gap-1 p-1">
             <TabsTrigger value="overview"><User className="h-4 w-4 mr-1" />{t("workforce.profile.tabs.overview")}</TabsTrigger>
             <TabsTrigger value="benefits"><Heart className="h-4 w-4 mr-1" />Benefits</TabsTrigger>
