@@ -51,6 +51,7 @@ export function TransactionCompensationDialog({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [currentSalary, setCurrentSalary] = useState<number | null>(null);
   const [resolvedPositionTitle, setResolvedPositionTitle] = useState(positionTitle);
+  const [resolvedCompanyId, setResolvedCompanyId] = useState(companyId);
   const [formData, setFormData] = useState({
     change_type: transactionTypeToChangeType[transactionType] || "adjustment",
     effective_date: effectiveDate || "",
@@ -66,11 +67,13 @@ export function TransactionCompensationDialog({
   }, [positionTitle]);
 
   useEffect(() => {
+    setResolvedCompanyId(companyId);
+  }, [companyId]);
+
+  useEffect(() => {
     if (open && employeeId && positionId) {
       loadCurrentCompensation();
-      if (!positionTitle) {
-        loadPositionTitle();
-      }
+      loadPositionDetails();
       setFormData((prev) => ({
         ...prev,
         change_type: transactionTypeToChangeType[transactionType] || "adjustment",
@@ -98,15 +101,22 @@ export function TransactionCompensationDialog({
     }
   };
 
-  const loadPositionTitle = async () => {
+  const loadPositionDetails = async () => {
     const { data } = await supabase
       .from("positions")
-      .select("title")
+      .select("title, department:departments(company_id)")
       .eq("id", positionId)
       .single();
 
-    if (data?.title) {
-      setResolvedPositionTitle(data.title);
+    if (data) {
+      if (!positionTitle && data.title) {
+        setResolvedPositionTitle(data.title);
+      }
+      // If companyId is not provided, use the position's department company_id
+      const positionCompanyId = (data.department as any)?.company_id;
+      if (!companyId && positionCompanyId) {
+        setResolvedCompanyId(positionCompanyId);
+      }
     }
   };
 
@@ -130,7 +140,7 @@ export function TransactionCompensationDialog({
       }
 
       const { error } = await supabase.from("compensation_history").insert({
-        company_id: companyId || null,
+        company_id: resolvedCompanyId || null,
         employee_id: employeeId,
         position_id: positionId,
         change_type: formData.change_type,
