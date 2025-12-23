@@ -8987,61 +8987,112 @@ export type Database = {
         Row: {
           archived_at: string | null
           archived_by: string | null
+          areas_for_improvement: string | null
+          attachment_url: string | null
+          best_time_to_contact: string | null
           company: string | null
+          consent_date: string | null
+          consent_obtained: boolean | null
           created_at: string
           email: string | null
           employee_id: string
+          employment_dates_confirmed: boolean | null
           feedback: string | null
           full_name: string
           id: string
           is_archived: boolean | null
           notes: string | null
+          overall_rating: number | null
           phone: string | null
+          phone_extension: string | null
           position: string | null
+          preferred_contact_method: string | null
+          questions_responses: Json | null
           reference_date: string | null
+          reference_type: string | null
           relationship: string
           status: string
+          strengths: string | null
+          title_confirmed: boolean | null
           updated_at: string
+          verification_method: string | null
+          verified_by: string | null
+          verified_date: string | null
+          would_rehire: string | null
           years_known: number | null
         }
         Insert: {
           archived_at?: string | null
           archived_by?: string | null
+          areas_for_improvement?: string | null
+          attachment_url?: string | null
+          best_time_to_contact?: string | null
           company?: string | null
+          consent_date?: string | null
+          consent_obtained?: boolean | null
           created_at?: string
           email?: string | null
           employee_id: string
+          employment_dates_confirmed?: boolean | null
           feedback?: string | null
           full_name: string
           id?: string
           is_archived?: boolean | null
           notes?: string | null
+          overall_rating?: number | null
           phone?: string | null
+          phone_extension?: string | null
           position?: string | null
+          preferred_contact_method?: string | null
+          questions_responses?: Json | null
           reference_date?: string | null
+          reference_type?: string | null
           relationship: string
           status?: string
+          strengths?: string | null
+          title_confirmed?: boolean | null
           updated_at?: string
+          verification_method?: string | null
+          verified_by?: string | null
+          verified_date?: string | null
+          would_rehire?: string | null
           years_known?: number | null
         }
         Update: {
           archived_at?: string | null
           archived_by?: string | null
+          areas_for_improvement?: string | null
+          attachment_url?: string | null
+          best_time_to_contact?: string | null
           company?: string | null
+          consent_date?: string | null
+          consent_obtained?: boolean | null
           created_at?: string
           email?: string | null
           employee_id?: string
+          employment_dates_confirmed?: boolean | null
           feedback?: string | null
           full_name?: string
           id?: string
           is_archived?: boolean | null
           notes?: string | null
+          overall_rating?: number | null
           phone?: string | null
+          phone_extension?: string | null
           position?: string | null
+          preferred_contact_method?: string | null
+          questions_responses?: Json | null
           reference_date?: string | null
+          reference_type?: string | null
           relationship?: string
           status?: string
+          strengths?: string | null
+          title_confirmed?: boolean | null
           updated_at?: string
+          verification_method?: string | null
+          verified_by?: string | null
+          verified_date?: string | null
+          would_rehire?: string | null
           years_known?: number | null
         }
         Relationships: [
@@ -9055,6 +9106,13 @@ export type Database = {
           {
             foreignKeyName: "employee_references_employee_id_fkey"
             columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_references_verified_by_fkey"
+            columns: ["verified_by"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
