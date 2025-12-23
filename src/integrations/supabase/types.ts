@@ -6096,6 +6096,78 @@ export type Database = {
           },
         ]
       }
+      csme_certificate_types: {
+        Row: {
+          code: string
+          created_at: string | null
+          description: string | null
+          display_order: number | null
+          eligible_countries: string[] | null
+          id: string
+          is_active: boolean | null
+          name: string
+          requires_expiry: boolean | null
+          updated_at: string | null
+        }
+        Insert: {
+          code: string
+          created_at?: string | null
+          description?: string | null
+          display_order?: number | null
+          eligible_countries?: string[] | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          requires_expiry?: boolean | null
+          updated_at?: string | null
+        }
+        Update: {
+          code?: string
+          created_at?: string | null
+          description?: string | null
+          display_order?: number | null
+          eligible_countries?: string[] | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          requires_expiry?: boolean | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      csme_issuing_authorities: {
+        Row: {
+          authority_type: string | null
+          country_code: string
+          country_name: string
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          updated_at: string | null
+        }
+        Insert: {
+          authority_type?: string | null
+          country_code: string
+          country_name: string
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          updated_at?: string | null
+        }
+        Update: {
+          authority_type?: string | null
+          country_code?: string
+          country_name?: string
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       csme_skill_categories: {
         Row: {
           code: string
@@ -7266,6 +7338,7 @@ export type Database = {
       employee_csme_certificates: {
         Row: {
           certificate_number: string
+          certificate_type_id: string | null
           created_at: string
           document_name: string | null
           document_url: string | null
@@ -7273,6 +7346,8 @@ export type Database = {
           expiry_date: string | null
           id: string
           issue_date: string
+          issuing_authority_id: string | null
+          issuing_authority_name: string | null
           issuing_country: string
           notes: string | null
           occupation: string
@@ -7280,11 +7355,15 @@ export type Database = {
           status: string
           updated_at: string
           verification_date: string | null
+          verification_method: string | null
           verification_status: string
           verified_by_country: string | null
+          verified_by_name: string | null
+          verified_by_user_id: string | null
         }
         Insert: {
           certificate_number: string
+          certificate_type_id?: string | null
           created_at?: string
           document_name?: string | null
           document_url?: string | null
@@ -7292,6 +7371,8 @@ export type Database = {
           expiry_date?: string | null
           id?: string
           issue_date: string
+          issuing_authority_id?: string | null
+          issuing_authority_name?: string | null
           issuing_country: string
           notes?: string | null
           occupation: string
@@ -7299,11 +7380,15 @@ export type Database = {
           status?: string
           updated_at?: string
           verification_date?: string | null
+          verification_method?: string | null
           verification_status?: string
           verified_by_country?: string | null
+          verified_by_name?: string | null
+          verified_by_user_id?: string | null
         }
         Update: {
           certificate_number?: string
+          certificate_type_id?: string | null
           created_at?: string
           document_name?: string | null
           document_url?: string | null
@@ -7311,6 +7396,8 @@ export type Database = {
           expiry_date?: string | null
           id?: string
           issue_date?: string
+          issuing_authority_id?: string | null
+          issuing_authority_name?: string | null
           issuing_country?: string
           notes?: string | null
           occupation?: string
@@ -7318,13 +7405,37 @@ export type Database = {
           status?: string
           updated_at?: string
           verification_date?: string | null
+          verification_method?: string | null
           verification_status?: string
           verified_by_country?: string | null
+          verified_by_name?: string | null
+          verified_by_user_id?: string | null
         }
         Relationships: [
           {
+            foreignKeyName: "employee_csme_certificates_certificate_type_id_fkey"
+            columns: ["certificate_type_id"]
+            isOneToOne: false
+            referencedRelation: "csme_certificate_types"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "employee_csme_certificates_employee_id_fkey"
             columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_csme_certificates_issuing_authority_id_fkey"
+            columns: ["issuing_authority_id"]
+            isOneToOne: false
+            referencedRelation: "csme_issuing_authorities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_csme_certificates_verified_by_user_id_fkey"
+            columns: ["verified_by_user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
