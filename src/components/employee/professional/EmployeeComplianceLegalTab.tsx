@@ -1,11 +1,10 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { EmployeeWorkPermitsTab } from "@/components/employee/EmployeeWorkPermitsTab";
-import { EmployeeLicensesTab } from "@/components/employee/EmployeeLicensesTab";
 import { EmployeeBackgroundChecksTab } from "@/components/employee/EmployeeBackgroundChecksTab";
 import { EmployeeCertificateOfCharacterTab } from "@/components/employee/professional/EmployeeCertificateOfCharacterTab";
 import { EmployeeRegulatoryTab } from "@/components/employee/professional/EmployeeRegulatoryTab";
-import { FileCheck, Award, ShieldCheck, FileText, Stamp } from "lucide-react";
+import { FileCheck, ShieldCheck, FileText, Stamp } from "lucide-react";
 
 interface EmployeeComplianceLegalTabProps {
   employeeId: string;
@@ -21,7 +20,7 @@ export function EmployeeComplianceLegalTab({ employeeId, viewType = "hr" }: Empl
           Compliance & Legal
         </CardTitle>
         <CardDescription>
-          Work permits, licenses, background checks, certificates of character, and regulatory clearances
+          Work permits, background checks, certificates of character, and regulatory clearances
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -30,10 +29,6 @@ export function EmployeeComplianceLegalTab({ employeeId, viewType = "hr" }: Empl
             <TabsTrigger value="work_permits" className="flex items-center gap-2">
               <FileCheck className="h-4 w-4" />
               Work Permits
-            </TabsTrigger>
-            <TabsTrigger value="licenses" className="flex items-center gap-2">
-              <Award className="h-4 w-4" />
-              Licenses
             </TabsTrigger>
             <TabsTrigger value="background" className="flex items-center gap-2">
               <ShieldCheck className="h-4 w-4" />
@@ -51,10 +46,6 @@ export function EmployeeComplianceLegalTab({ employeeId, viewType = "hr" }: Empl
 
           <TabsContent value="work_permits">
             <EmployeeWorkPermitsTab employeeId={employeeId} viewType={viewType} />
-          </TabsContent>
-
-          <TabsContent value="licenses">
-            <EmployeeLicensesTab employeeId={employeeId} viewType={viewType} />
           </TabsContent>
 
           <TabsContent value="background">
