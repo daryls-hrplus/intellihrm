@@ -20,6 +20,7 @@ import { EmployeeBackgroundChecksTab } from "@/components/employee/EmployeeBackg
 import { EmployeeQualificationsTab } from "@/components/employee/EmployeeQualificationsTab";
 
 import { EmployeeInterestsTab } from "@/components/employee/EmployeeInterestsTab";
+import { EmployeeLanguagesTab } from "@/components/employee/EmployeeLanguagesTab";
 import { EmployeeMedicalProfileTab } from "@/components/employee/EmployeeMedicalProfileTab";
 import { EmployeeContactInformationCard } from "@/components/employee/contact-information";
 import { EmployeeBranchLocationsTab } from "@/components/employee/EmployeeBranchLocationsTab";
@@ -313,6 +314,7 @@ export default function EmployeeProfilePage() {
             <TabsTrigger value="documents"><FileText className="h-4 w-4 mr-1" />{t("workforce.profile.tabs.documents")}</TabsTrigger>
             <TabsTrigger value="immigration"><Plane className="h-4 w-4 mr-1" />Immigration</TabsTrigger>
             <TabsTrigger value="interests"><Sparkles className="h-4 w-4 mr-1" />{t("workforce.profile.tabs.interests")}</TabsTrigger>
+            <TabsTrigger value="languages"><Globe className="h-4 w-4 mr-1" />Languages</TabsTrigger>
             <TabsTrigger value="medical"><Stethoscope className="h-4 w-4 mr-1" />{t("workforce.profile.tabs.medical")}</TabsTrigger>
             <TabsTrigger value="pay_info"><Wallet className="h-4 w-4 mr-1" />Pay Information</TabsTrigger>
             <TabsTrigger value="professional_info"><FileSignature className="h-4 w-4 mr-1" />Professional Info</TabsTrigger>
@@ -347,6 +349,10 @@ export default function EmployeeProfilePage() {
 
           <TabsContent value="interests" className="mt-6">
             <EmployeeInterestsTab employeeId={employee.id} />
+          </TabsContent>
+
+          <TabsContent value="languages" className="mt-6">
+            <EmployeeLanguagesTab employeeId={employee.id} viewType="hr" />
           </TabsContent>
 
 

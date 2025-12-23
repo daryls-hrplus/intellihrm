@@ -7408,6 +7408,155 @@ export type Database = {
           },
         ]
       }
+      employee_languages: {
+        Row: {
+          certification_exam: string | null
+          certification_score: string | null
+          company_id: string | null
+          created_at: string
+          created_by: string | null
+          effective_date: string | null
+          employee_id: string
+          expiry_date: string | null
+          id: string
+          is_native: boolean | null
+          is_primary: boolean | null
+          language_code: string
+          language_name: string
+          notes: string | null
+          overall_proficiency: string | null
+          proficiency_scale: string | null
+          reading_proficiency: string | null
+          speaking_proficiency: string | null
+          updated_at: string
+          updated_by: string | null
+          writing_proficiency: string | null
+        }
+        Insert: {
+          certification_exam?: string | null
+          certification_score?: string | null
+          company_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          effective_date?: string | null
+          employee_id: string
+          expiry_date?: string | null
+          id?: string
+          is_native?: boolean | null
+          is_primary?: boolean | null
+          language_code: string
+          language_name: string
+          notes?: string | null
+          overall_proficiency?: string | null
+          proficiency_scale?: string | null
+          reading_proficiency?: string | null
+          speaking_proficiency?: string | null
+          updated_at?: string
+          updated_by?: string | null
+          writing_proficiency?: string | null
+        }
+        Update: {
+          certification_exam?: string | null
+          certification_score?: string | null
+          company_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          effective_date?: string | null
+          employee_id?: string
+          expiry_date?: string | null
+          id?: string
+          is_native?: boolean | null
+          is_primary?: boolean | null
+          language_code?: string
+          language_name?: string
+          notes?: string | null
+          overall_proficiency?: string | null
+          proficiency_scale?: string | null
+          reading_proficiency?: string | null
+          speaking_proficiency?: string | null
+          updated_at?: string
+          updated_by?: string | null
+          writing_proficiency?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "employee_languages_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_languages_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_languages_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_languages_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      employee_languages_history: {
+        Row: {
+          change_type: string
+          changed_at: string
+          changed_by: string | null
+          employee_id: string
+          id: string
+          language_record_id: string | null
+          new_values: Json | null
+          previous_values: Json | null
+        }
+        Insert: {
+          change_type: string
+          changed_at?: string
+          changed_by?: string | null
+          employee_id: string
+          id?: string
+          language_record_id?: string | null
+          new_values?: Json | null
+          previous_values?: Json | null
+        }
+        Update: {
+          change_type?: string
+          changed_at?: string
+          changed_by?: string | null
+          employee_id?: string
+          id?: string
+          language_record_id?: string | null
+          new_values?: Json | null
+          previous_values?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "employee_languages_history_changed_by_fkey"
+            columns: ["changed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_languages_history_language_record_id_fkey"
+            columns: ["language_record_id"]
+            isOneToOne: false
+            referencedRelation: "employee_languages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       employee_licenses: {
         Row: {
           archived_at: string | null
