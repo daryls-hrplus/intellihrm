@@ -12,7 +12,6 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-import { EmployeeBankAccountsTab } from "@/components/employee/EmployeeBankAccountsTab";
 import { EmployeeBeneficiariesTab } from "@/components/employee/EmployeeBeneficiariesTab";
 import { EmployeeDocumentsTab } from "@/components/employee/EmployeeDocumentsTab";
 import { EmployeeDependentsTab } from "@/components/employee/EmployeeDependentsTab";
@@ -25,10 +24,9 @@ import { EmployeeQualificationsTab } from "@/components/employee/EmployeeQualifi
 import { EmployeeInterestsTab } from "@/components/employee/EmployeeInterestsTab";
 import { EmployeeMedicalProfileTab } from "@/components/employee/EmployeeMedicalProfileTab";
 import { EmployeeContactInformationCard } from "@/components/employee/contact-information";
-import { EmployeePayGroupTab } from "@/components/employee/EmployeePayGroupTab";
 import { EmployeeBranchLocationsTab } from "@/components/employee/EmployeeBranchLocationsTab";
 import { EmployeeCompetenciesTab } from "@/components/employee/EmployeeCompetenciesTab";
-import { EmployeeTaxAllowancesTab } from "@/components/employee/EmployeeTaxAllowancesTab";
+import { EmployeePayInfoTab } from "@/components/employee/EmployeePayInfoTab";
 import { EmployeeEditDialog } from "@/components/employee/EmployeeEditDialog";
 import {
   EmployeeComplianceLegalTab,
@@ -50,7 +48,7 @@ import {
   Loader2,
   User,
   FileText,
-  CreditCard,
+  Wallet,
   Users,
   Contact,
   Baby,
@@ -63,9 +61,7 @@ import {
   Stethoscope,
   Phone,
   AlertTriangle,
-  DollarSign,
   Sparkles,
-  Receipt,
   Pencil,
   FileSignature,
 } from "lucide-react";
@@ -289,8 +285,6 @@ export default function EmployeeProfilePage() {
         <Tabs defaultValue="overview" className="w-full">
           <TabsList className="flex flex-wrap h-auto gap-1 p-1">
             <TabsTrigger value="overview"><User className="h-4 w-4 mr-1" />{t("workforce.profile.tabs.overview")}</TabsTrigger>
-            
-            <TabsTrigger value="bank"><CreditCard className="h-4 w-4 mr-1" />{t("workforce.profile.tabs.bank")}</TabsTrigger>
             <TabsTrigger value="beneficiaries"><Users className="h-4 w-4 mr-1" />{t("workforce.profile.tabs.beneficiaries")}</TabsTrigger>
             <TabsTrigger value="branches"><Building2 className="h-4 w-4 mr-1" />{t("workforce.profile.tabs.branches")}</TabsTrigger>
             <TabsTrigger value="qualifications"><GraduationCap className="h-4 w-4 mr-1" />Qualifications</TabsTrigger>
@@ -299,21 +293,13 @@ export default function EmployeeProfilePage() {
             <TabsTrigger value="dependents"><Baby className="h-4 w-4 mr-1" />{t("workforce.profile.tabs.dependents")}</TabsTrigger>
             <TabsTrigger value="documents"><FileText className="h-4 w-4 mr-1" />{t("workforce.profile.tabs.documents")}</TabsTrigger>
             <TabsTrigger value="interests"><Sparkles className="h-4 w-4 mr-1" />{t("workforce.profile.tabs.interests")}</TabsTrigger>
-            
             <TabsTrigger value="medical"><Stethoscope className="h-4 w-4 mr-1" />{t("workforce.profile.tabs.medical")}</TabsTrigger>
-            
-            <TabsTrigger value="paygroup"><DollarSign className="h-4 w-4 mr-1" />{t("workforce.profile.tabs.payGroup")}</TabsTrigger>
+            <TabsTrigger value="pay_info"><Wallet className="h-4 w-4 mr-1" />Pay Information</TabsTrigger>
             <TabsTrigger value="professional_info"><FileSignature className="h-4 w-4 mr-1" />Professional Info</TabsTrigger>
-            
-            <TabsTrigger value="tax_allowances"><Receipt className="h-4 w-4 mr-1" />{t("workforce.profile.tabs.taxAllowances", "Tax Allowances")}</TabsTrigger>
             <TabsTrigger value="work_permits"><FileCheck className="h-4 w-4 mr-1" />{t("workforce.profile.tabs.workPermits")}</TabsTrigger>
           </TabsList>
 
 
-
-          <TabsContent value="bank" className="mt-6">
-            <EmployeeBankAccountsTab employeeId={employee.id} />
-          </TabsContent>
 
           <TabsContent value="beneficiaries" className="mt-6">
             <EmployeeBeneficiariesTab employeeId={employee.id} />
@@ -352,9 +338,8 @@ export default function EmployeeProfilePage() {
             <EmployeeMedicalProfileTab employeeId={employee.id} />
           </TabsContent>
 
-
-          <TabsContent value="tax_allowances" className="mt-6">
-            <EmployeeTaxAllowancesTab employeeId={employee.id} />
+          <TabsContent value="pay_info" className="mt-6">
+            <EmployeePayInfoTab employeeId={employee.id} />
           </TabsContent>
 
           <TabsContent value="overview" className="mt-6">
@@ -445,10 +430,6 @@ export default function EmployeeProfilePage() {
                 </CardContent>
               </Card>
             </div>
-          </TabsContent>
-
-          <TabsContent value="paygroup" className="mt-6">
-            <EmployeePayGroupTab employeeId={employee.id} />
           </TabsContent>
 
 
