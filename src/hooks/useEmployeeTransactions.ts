@@ -206,10 +206,23 @@ export function useEmployeeTransactions() {
     setError(null);
 
     try {
+      // Normalize position_id for transaction types that use alternate position fields
+      const normalizedData = { ...data };
+      
+      // For ACTING transactions, set position_id to acting_position_id
+      if (data.acting_position_id && !data.position_id) {
+        normalizedData.position_id = data.acting_position_id;
+      }
+      
+      // For PROMOTION transactions, set position_id to to_position_id
+      if (data.to_position_id && !data.position_id) {
+        normalizedData.position_id = data.to_position_id;
+      }
+
       const { data: newTransaction, error: createError } = await supabase
         .from("employee_transactions")
         .insert({
-          ...data,
+          ...normalizedData,
           created_by: user.id,
         } as any)
         .select()
@@ -249,9 +262,22 @@ export function useEmployeeTransactions() {
         .eq("id", id)
         .single();
 
+      // Normalize position_id for transaction types that use alternate position fields
+      const normalizedData = { ...data };
+      
+      // For ACTING transactions, set position_id to acting_position_id
+      if (data.acting_position_id && !data.position_id) {
+        normalizedData.position_id = data.acting_position_id;
+      }
+      
+      // For PROMOTION transactions, set position_id to to_position_id
+      if (data.to_position_id && !data.position_id) {
+        normalizedData.position_id = data.to_position_id;
+      }
+
       const { data: updatedTransaction, error: updateError } = await supabase
         .from("employee_transactions")
-        .update(data as any)
+        .update(normalizedData as any)
         .eq("id", id)
         .select()
         .single();
