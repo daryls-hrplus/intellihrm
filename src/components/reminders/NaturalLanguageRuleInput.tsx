@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -20,6 +20,8 @@ import {
   X
 } from 'lucide-react';
 import { PRIORITY_OPTIONS, NOTIFICATION_METHODS } from '@/types/reminders';
+import { TemplateMessagePreview } from './TemplateMessagePreview';
+import { useReminderSourcePreview, type SourcePreviewData } from '@/hooks/useReminderSourcePreview';
 
 interface ParsedRule {
   name: string;
@@ -58,6 +60,10 @@ export function NaturalLanguageRuleInput({ companyId, onRuleCreated }: NaturalLa
   const [showReviewDialog, setShowReviewDialog] = useState(false);
   const [creating, setCreating] = useState(false);
 
+  // Preview data for template
+  const { fetchPreview, loading: previewLoading } = useReminderSourcePreview();
+  const [dialogPreviewData, setDialogPreviewData] = useState<SourcePreviewData | null>(null);
+
   // Editable form state for review
   const [editedRule, setEditedRule] = useState<ParsedRule | null>(null);
   const [selectedEventTypeId, setSelectedEventTypeId] = useState<string>('');
@@ -68,6 +74,29 @@ export function NaturalLanguageRuleInput({ companyId, onRuleCreated }: NaturalLa
     "Notify employee and manager 30, 14, and 7 days before contract ends",
     "Create a high priority reminder for certificate expiry at 60 and 30 days",
   ];
+
+  // Fetch preview data when event type changes in dialog
+  useEffect(() => {
+    if (showReviewDialog && selectedEventTypeId && editedRule) {
+      const eventType = availableEventTypes.find(t => t.id === selectedEventTypeId);
+      if (eventType) {
+        // Create a minimal event type object for the preview hook
+        fetchPreview(
+          { 
+            ...eventType, 
+            source_table: eventType.code.includes('probation') ? 'profiles' : `employee_${eventType.code.split('_')[0]}s`,
+            date_field: eventType.code.includes('expiry') ? 'expiry_date' : 'end_date'
+          } as any, 
+          companyId, 
+          editedRule.daysBeforeIntervals
+        ).then(data => {
+          setDialogPreviewData(data);
+        });
+      }
+    } else {
+      setDialogPreviewData(null);
+    }
+  }, [showReviewDialog, selectedEventTypeId, editedRule?.daysBeforeIntervals, availableEventTypes, companyId]);
 
   const handleParse = async () => {
     if (!input.trim()) {
@@ -452,6 +481,14 @@ export function NaturalLanguageRuleInput({ companyId, onRuleCreated }: NaturalLa
                     No template generated. Click placeholder buttons above or type your own message.
                   </p>
                 )}
+                
+                {/* Live Template Preview */}
+                <TemplateMessagePreview
+                  template={editedRule.messageTemplate || ''}
+                  sampleItems={dialogPreviewData?.items || []}
+                  eventTypeName={availableEventTypes.find(t => t.id === selectedEventTypeId)?.name}
+                  loading={previewLoading}
+                />
               </div>
             </div>
           )}
