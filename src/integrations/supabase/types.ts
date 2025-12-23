@@ -1358,6 +1358,7 @@ export type Database = {
         Row: {
           company_id: string
           competency_weight: number
+          component_scale_id: string | null
           created_at: string
           created_by: string | null
           description: string | null
@@ -1370,6 +1371,7 @@ export type Database = {
           max_rating: number
           min_rating: number
           name: string
+          overall_scale_id: string | null
           responsibility_weight: number
           start_date: string
           status: string
@@ -1378,6 +1380,7 @@ export type Database = {
         Insert: {
           company_id: string
           competency_weight?: number
+          component_scale_id?: string | null
           created_at?: string
           created_by?: string | null
           description?: string | null
@@ -1390,6 +1393,7 @@ export type Database = {
           max_rating?: number
           min_rating?: number
           name: string
+          overall_scale_id?: string | null
           responsibility_weight?: number
           start_date: string
           status?: string
@@ -1398,6 +1402,7 @@ export type Database = {
         Update: {
           company_id?: string
           competency_weight?: number
+          component_scale_id?: string | null
           created_at?: string
           created_by?: string | null
           description?: string | null
@@ -1410,6 +1415,7 @@ export type Database = {
           max_rating?: number
           min_rating?: number
           name?: string
+          overall_scale_id?: string | null
           responsibility_weight?: number
           start_date?: string
           status?: string
@@ -1424,10 +1430,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "appraisal_cycles_component_scale_id_fkey"
+            columns: ["component_scale_id"]
+            isOneToOne: false
+            referencedRelation: "performance_rating_scales"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "appraisal_cycles_created_by_fkey"
             columns: ["created_by"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appraisal_cycles_overall_scale_id_fkey"
+            columns: ["overall_scale_id"]
+            isOneToOne: false
+            referencedRelation: "overall_rating_scales"
             referencedColumns: ["id"]
           },
         ]
@@ -3571,6 +3591,99 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      calibration_sessions: {
+        Row: {
+          appraisal_cycle_id: string | null
+          calibration_rules: Json | null
+          company_id: string
+          completed_at: string | null
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          facilitator_id: string | null
+          id: string
+          name: string
+          outcome_summary: string | null
+          overall_scale_id: string | null
+          participants: string[] | null
+          scheduled_date: string | null
+          status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          appraisal_cycle_id?: string | null
+          calibration_rules?: Json | null
+          company_id: string
+          completed_at?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          facilitator_id?: string | null
+          id?: string
+          name: string
+          outcome_summary?: string | null
+          overall_scale_id?: string | null
+          participants?: string[] | null
+          scheduled_date?: string | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          appraisal_cycle_id?: string | null
+          calibration_rules?: Json | null
+          company_id?: string
+          completed_at?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          facilitator_id?: string | null
+          id?: string
+          name?: string
+          outcome_summary?: string | null
+          overall_scale_id?: string | null
+          participants?: string[] | null
+          scheduled_date?: string | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "calibration_sessions_appraisal_cycle_id_fkey"
+            columns: ["appraisal_cycle_id"]
+            isOneToOne: false
+            referencedRelation: "appraisal_cycles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "calibration_sessions_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "calibration_sessions_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "calibration_sessions_facilitator_id_fkey"
+            columns: ["facilitator_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "calibration_sessions_overall_scale_id_fkey"
+            columns: ["overall_scale_id"]
+            isOneToOne: false
+            referencedRelation: "overall_rating_scales"
             referencedColumns: ["id"]
           },
         ]
@@ -25595,6 +25708,140 @@ export type Database = {
           },
         ]
       }
+      overall_rating_mappings: {
+        Row: {
+          company_id: string
+          component_scale_id: string
+          created_at: string | null
+          created_by: string | null
+          id: string
+          is_active: boolean | null
+          mapping_rules: Json
+          name: string
+          overall_scale_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          company_id: string
+          component_scale_id: string
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          is_active?: boolean | null
+          mapping_rules?: Json
+          name: string
+          overall_scale_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          company_id?: string
+          component_scale_id?: string
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          is_active?: boolean | null
+          mapping_rules?: Json
+          name?: string
+          overall_scale_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "overall_rating_mappings_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "overall_rating_mappings_component_scale_id_fkey"
+            columns: ["component_scale_id"]
+            isOneToOne: false
+            referencedRelation: "performance_rating_scales"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "overall_rating_mappings_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "overall_rating_mappings_overall_scale_id_fkey"
+            columns: ["overall_scale_id"]
+            isOneToOne: false
+            referencedRelation: "overall_rating_scales"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      overall_rating_scales: {
+        Row: {
+          code: string
+          company_id: string
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          distribution_targets: Json | null
+          has_forced_distribution: boolean | null
+          id: string
+          is_active: boolean | null
+          is_default: boolean | null
+          levels: Json
+          name: string
+          requires_calibration: boolean | null
+          updated_at: string | null
+        }
+        Insert: {
+          code: string
+          company_id: string
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          distribution_targets?: Json | null
+          has_forced_distribution?: boolean | null
+          id?: string
+          is_active?: boolean | null
+          is_default?: boolean | null
+          levels?: Json
+          name: string
+          requires_calibration?: boolean | null
+          updated_at?: string | null
+        }
+        Update: {
+          code?: string
+          company_id?: string
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          distribution_targets?: Json | null
+          has_forced_distribution?: boolean | null
+          id?: string
+          is_active?: boolean | null
+          is_default?: boolean | null
+          levels?: Json
+          name?: string
+          requires_calibration?: boolean | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "overall_rating_scales_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "overall_rating_scales_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       overtime_requests: {
         Row: {
           actual_hours: number | null
@@ -28080,6 +28327,7 @@ export type Database = {
           min_rating: number
           name: string
           rating_labels: Json | null
+          scale_purpose: string[] | null
           updated_at: string
         }
         Insert: {
@@ -28094,6 +28342,7 @@ export type Database = {
           min_rating?: number
           name: string
           rating_labels?: Json | null
+          scale_purpose?: string[] | null
           updated_at?: string
         }
         Update: {
@@ -28108,6 +28357,7 @@ export type Database = {
           min_rating?: number
           name?: string
           rating_labels?: Json | null
+          scale_purpose?: string[] | null
           updated_at?: string
         }
         Relationships: [
@@ -30859,6 +31109,7 @@ export type Database = {
           min_peer_reviewers: number | null
           name: string
           peer_nomination_deadline: string | null
+          rating_scale_id: string | null
           self_review_deadline: string | null
           start_date: string
           status: string
@@ -30881,6 +31132,7 @@ export type Database = {
           min_peer_reviewers?: number | null
           name: string
           peer_nomination_deadline?: string | null
+          rating_scale_id?: string | null
           self_review_deadline?: string | null
           start_date: string
           status?: string
@@ -30903,6 +31155,7 @@ export type Database = {
           min_peer_reviewers?: number | null
           name?: string
           peer_nomination_deadline?: string | null
+          rating_scale_id?: string | null
           self_review_deadline?: string | null
           start_date?: string
           status?: string
@@ -30914,6 +31167,13 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "review_cycles_rating_scale_id_fkey"
+            columns: ["rating_scale_id"]
+            isOneToOne: false
+            referencedRelation: "performance_rating_scales"
             referencedColumns: ["id"]
           },
         ]
