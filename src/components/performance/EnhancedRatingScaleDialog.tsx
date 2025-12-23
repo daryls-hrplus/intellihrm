@@ -305,7 +305,9 @@ export function EnhancedRatingScaleDialog({
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
-              <HelpCircle className="h-3.5 w-3.5 text-muted-foreground cursor-help" />
+              <span className="inline-flex">
+                <HelpCircle className="h-3.5 w-3.5 text-muted-foreground cursor-help" />
+              </span>
             </TooltipTrigger>
             <TooltipContent side="top" className="max-w-sm">
               <p className="text-xs leading-relaxed">{tooltip}</p>
