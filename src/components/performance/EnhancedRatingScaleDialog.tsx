@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,6 +16,13 @@ import { useLanguage } from "@/hooks/useLanguage";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import type { Json } from "@/integrations/supabase/types";
+
+const sanitizeScaleCode = (value: string) =>
+  value
+    .trim()
+    .toUpperCase()
+    .replace(/\s+/g, "_")
+    .replace(/[^A-Z0-9_]/g, "");
 
 interface RatingScale {
   id: string;
@@ -240,30 +247,41 @@ export function EnhancedRatingScaleDialog({
   };
 
   // Handle label change
-  const handleLabelChange = (level: number, field: "label" | "description", value: string) => {
-    setFormData(prev => ({
-      ...prev,
-      rating_labels: {
-        ...prev.rating_labels,
-        [String(level)]: {
-          ...prev.rating_labels[String(level)],
-          [field]: value,
+  const handleLabelChange = useCallback(
+    (level: number, field: "label" | "description", value: string) => {
+      setFormData((prev) => ({
+        ...prev,
+        rating_labels: {
+          ...prev.rating_labels,
+          [String(level)]: {
+            ...prev.rating_labels[String(level)],
+            [field]: value,
+          },
         },
-      },
-    }));
-  };
+      }));
+    },
+    [],
+  );
 
   const handleSubmit = async () => {
-    if (!formData.name || !formData.code) {
+    const trimmedName = formData.name.trim();
+    const cleanedCode = sanitizeScaleCode(formData.code);
+
+    if (!trimmedName || !cleanedCode) {
       toast.error(t("common.fillRequiredFields", "Name and code are required"));
+      return;
+    }
+
+    if (!formData.scale_purpose.length) {
+      toast.error(t("performance.setup.scalePurposeRequired", "Select at least one purpose"));
       return;
     }
 
     setIsSubmitting(true);
     try {
       const submitData = {
-        name: formData.name,
-        code: formData.code,
+        name: trimmedName,
+        code: cleanedCode,
         description: formData.description,
         min_rating: formData.min_rating,
         max_rating: formData.max_rating,
@@ -319,8 +337,8 @@ export function EnhancedRatingScaleDialog({
     </div>
   );
 
-  // Visual Scale Preview
-  const ScalePreview = () => (
+  // Visual Scale Preview (memoized for smoother typing)
+  const scalePreview = useMemo(() => (
     <div className="rounded-lg border bg-muted/30 p-4">
       <div className="flex items-center gap-2 mb-3">
         <Info className="h-4 w-4 text-muted-foreground" />
@@ -329,23 +347,21 @@ export function EnhancedRatingScaleDialog({
       <div className="flex items-center justify-between gap-1">
         {ratingLevels.map((level, index) => {
           const labelData = formData.rating_labels[String(level)];
-          const isFirst = index === 0;
-          const isLast = index === ratingLevels.length - 1;
-          
+
           // Color gradient from red to green
           const hue = (index / (ratingLevels.length - 1)) * 120; // 0 = red, 120 = green
-          
+
           return (
             <TooltipProvider key={level}>
               <Tooltip>
                 <TooltipTrigger asChild>
                   <div className="flex flex-col items-center gap-1 flex-1">
-                    <div 
+                    <div
                       className={cn(
                         "w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium border-2 transition-all cursor-pointer hover:scale-110",
-                        "text-foreground"
+                        "text-foreground",
                       )}
-                      style={{ 
+                      style={{
                         backgroundColor: `hsla(${hue}, 70%, 85%, 0.5)`,
                         borderColor: `hsl(${hue}, 70%, 50%)`,
                       }}
@@ -373,7 +389,7 @@ export function EnhancedRatingScaleDialog({
         <div className="absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-destructive via-warning to-success rounded-full" />
       </div>
     </div>
-  );
+  ), [formData.rating_labels, ratingLevels, t]);
 
   // Guidance Alert
   const GuidanceAlert = () => {
@@ -406,6 +422,70 @@ export function EnhancedRatingScaleDialog({
       </Alert>
     );
   };
+
+  const ratingLabelsSection = useMemo(
+    () => (
+      <div className="space-y-3">
+        <div className="flex items-center gap-1.5">
+          <Label className="text-base font-medium">{t("performance.setup.ratingLabels", "Rating Labels")}</Label>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span className="inline-flex">
+                  <HelpCircle className="h-3.5 w-3.5 text-muted-foreground cursor-help" />
+                </span>
+              </TooltipTrigger>
+              <TooltipContent side="top" className="max-w-xs">
+                <p className="text-xs">
+                  {t(
+                    "performance.setup.ratingLabelsTooltip",
+                    "Define clear behavioral anchors for each rating level. These labels will be shown to raters during evaluations.",
+                  )}
+                </p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        </div>
+
+        <div className="space-y-3">
+          {ratingLevels.map((level) => {
+            const labelData = formData.rating_labels[String(level)] || { label: "", description: "" };
+            const hue = ((level - formData.min_rating) / (formData.max_rating - formData.min_rating)) * 120;
+
+            return (
+              <div key={level} className="flex items-start gap-3 p-3 rounded-lg border bg-card">
+                <div
+                  className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold shrink-0 mt-1"
+                  style={{
+                    backgroundColor: `hsla(${hue}, 70%, 85%, 0.5)`,
+                    borderColor: `hsl(${hue}, 70%, 50%)`,
+                    borderWidth: "2px",
+                  }}
+                >
+                  {level}
+                </div>
+                <div className="flex-1 grid gap-2">
+                  <Input
+                    value={labelData.label}
+                    onChange={(e) => handleLabelChange(level, "label", e.target.value)}
+                    placeholder={t("performance.setup.labelPlaceholder", "e.g., Exceeds Expectations")}
+                    className="font-medium"
+                  />
+                  <Input
+                    value={labelData.description}
+                    onChange={(e) => handleLabelChange(level, "description", e.target.value)}
+                    placeholder={t("performance.setup.behaviorPlaceholder", "Describe expected behaviors at this level...")}
+                    className="text-sm text-muted-foreground"
+                  />
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    ),
+    [formData.max_rating, formData.min_rating, formData.rating_labels, handleLabelChange, ratingLevels, t],
+  );
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -452,22 +532,34 @@ export function EnhancedRatingScaleDialog({
             <div className="grid grid-cols-2 gap-4">
               <FieldWithTooltip
                 label={t("common.name", "Name")}
-                tooltip={t("performance.setup.nameTooltip", "Choose a descriptive name that reflects the scale type and purpose (e.g., 'Annual Review Scale')")}
+                tooltip={t(
+                  "performance.setup.nameTooltip",
+                  "Choose a descriptive name that reflects the scale type and purpose (e.g., 'Annual Review Scale')",
+                )}
               >
                 <Input
                   value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
                   placeholder="e.g., Standard 5-Point Scale"
                 />
               </FieldWithTooltip>
 
               <FieldWithTooltip
                 label={t("common.code", "Code")}
-                tooltip={t("performance.setup.codeTooltip", "Unique identifier for reports and API integrations. Use UPPERCASE_SNAKE_CASE (e.g., SCALE_5PT)")}
+                tooltip={t(
+                  "performance.setup.codeTooltip",
+                  "Unique identifier for reports and API integrations. Use UPPERCASE_SNAKE_CASE (e.g., SCALE_5PT)",
+                )}
               >
                 <Input
                   value={formData.code}
-                  onChange={(e) => setFormData({ ...formData, code: e.target.value.toUpperCase().replace(/\s+/g, '_') })}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, code: e.target.value }))}
+                  onBlur={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      code: sanitizeScaleCode(e.target.value),
+                    }))
+                  }
                   placeholder="e.g., SCALE_5PT"
                 />
               </FieldWithTooltip>
@@ -495,11 +587,16 @@ export function EnhancedRatingScaleDialog({
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <HelpCircle className="h-3.5 w-3.5 text-muted-foreground cursor-help" />
+                      <span className="inline-flex">
+                        <HelpCircle className="h-3.5 w-3.5 text-muted-foreground cursor-help" />
+                      </span>
                     </TooltipTrigger>
                     <TooltipContent side="top" className="max-w-xs">
                       <p className="text-xs">
-                        {t("performance.setup.scalePurposeTooltip", "Select where this rating scale should be available. You can select multiple purposes.")}
+                        {t(
+                          "performance.setup.scalePurposeTooltip",
+                          "Select where this rating scale should be available. You can select multiple purposes.",
+                        )}
                       </p>
                     </TooltipContent>
                   </Tooltip>
@@ -604,70 +701,12 @@ export function EnhancedRatingScaleDialog({
             )}
 
             {/* Visual Preview */}
-            <ScalePreview />
+            {scalePreview}
 
             <Separator />
 
             {/* Rating Labels Section */}
-            <div className="space-y-3">
-              <div className="flex items-center gap-1.5">
-                <Label className="text-base font-medium">
-                  {t("performance.setup.ratingLabels", "Rating Labels")}
-                </Label>
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <HelpCircle className="h-3.5 w-3.5 text-muted-foreground cursor-help" />
-                    </TooltipTrigger>
-                    <TooltipContent side="top" className="max-w-xs">
-                      <p className="text-xs">
-                        {t("performance.setup.ratingLabelsTooltip", "Define clear behavioral anchors for each rating level. These labels will be shown to raters during evaluations.")}
-                      </p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              </div>
-
-              <div className="space-y-3">
-                {ratingLevels.map((level) => {
-                  const labelData = formData.rating_labels[String(level)] || { label: "", description: "" };
-                  // Color gradient from red to green
-                  const hue = ((level - formData.min_rating) / (formData.max_rating - formData.min_rating)) * 120;
-                  
-                  return (
-                    <div 
-                      key={level} 
-                      className="flex items-start gap-3 p-3 rounded-lg border bg-card"
-                    >
-                      <div 
-                        className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold shrink-0 mt-1"
-                        style={{ 
-                          backgroundColor: `hsla(${hue}, 70%, 85%, 0.5)`,
-                          borderColor: `hsl(${hue}, 70%, 50%)`,
-                          borderWidth: '2px',
-                        }}
-                      >
-                        {level}
-                      </div>
-                      <div className="flex-1 grid gap-2">
-                        <Input
-                          value={labelData.label}
-                          onChange={(e) => handleLabelChange(level, "label", e.target.value)}
-                          placeholder={t("performance.setup.labelPlaceholder", "e.g., Exceeds Expectations")}
-                          className="font-medium"
-                        />
-                        <Input
-                          value={labelData.description}
-                          onChange={(e) => handleLabelChange(level, "description", e.target.value)}
-                          placeholder={t("performance.setup.behaviorPlaceholder", "Describe expected behaviors at this level...")}
-                          className="text-sm text-muted-foreground"
-                        />
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
+            {ratingLabelsSection}
 
             <Separator />
 
