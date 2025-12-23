@@ -16,6 +16,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/hooks/useLanguage";
 import { toast } from "sonner";
 import { EnhancedRatingScaleDialog } from "@/components/performance/EnhancedRatingScaleDialog";
+import { OverallRatingScaleDialog } from "@/components/performance/OverallRatingScaleDialog";
+import { useOverallRatingScales, OverallRatingScale } from "@/hooks/useRatingScales";
+import { Layers } from "lucide-react";
 import { 
   Settings, 
   Star, 
@@ -113,15 +116,23 @@ export default function PerformanceSetupPage() {
 
   // Dialog states
   const [ratingScaleDialogOpen, setRatingScaleDialogOpen] = useState(false);
+  const [overallScaleDialogOpen, setOverallScaleDialogOpen] = useState(false);
   const [competencyDialogOpen, setCompetencyDialogOpen] = useState(false);
   const [goalTemplateDialogOpen, setGoalTemplateDialogOpen] = useState(false);
   const [recognitionCategoryDialogOpen, setRecognitionCategoryDialogOpen] = useState(false);
 
   // Edit states
   const [editingRatingScale, setEditingRatingScale] = useState<RatingScale | null>(null);
+  const [editingOverallScale, setEditingOverallScale] = useState<OverallRatingScale | null>(null);
   const [editingCompetency, setEditingCompetency] = useState<Competency | null>(null);
   const [editingGoalTemplate, setEditingGoalTemplate] = useState<GoalTemplate | null>(null);
   const [editingRecognitionCategory, setEditingRecognitionCategory] = useState<RecognitionCategory | null>(null);
+
+  // Overall rating scales hook
+  const { scales: overallScales, isLoading: overallScalesLoading, refetch: refetchOverallScales } = useOverallRatingScales({ 
+    companyId: selectedCompany, 
+    activeOnly: false 
+  });
 
   useEffect(() => {
     fetchCompanies();
@@ -253,6 +264,22 @@ export default function PerformanceSetupPage() {
     fetchRatingScales();
   };
 
+  const handleDeleteOverallScale = async (id: string) => {
+    if (!confirm("Are you sure you want to delete this overall rating scale?")) return;
+    
+    const { error } = await supabase
+      .from("overall_rating_scales")
+      .delete()
+      .eq("id", id);
+
+    if (error) {
+      toast.error("Failed to delete overall rating scale");
+      return;
+    }
+    toast.success("Overall rating scale deleted");
+    refetchOverallScales();
+  };
+
   const handleDeleteCompetency = async (id: string) => {
     if (!confirm("Are you sure you want to delete this competency?")) return;
     
@@ -303,6 +330,7 @@ export default function PerformanceSetupPage() {
 
   const tabs = [
     { id: "rating-scales", label: t("performance.setup.ratingScales", "Rating Scales"), icon: Star },
+    { id: "overall-scales", label: t("performance.setup.overallScales", "Overall Scales"), icon: Layers },
     { id: "competencies", label: t("performance.setup.competencies", "Competencies"), icon: BookOpen },
     { id: "goal-templates", label: t("performance.setup.goalTemplates", "Goal Templates"), icon: Target },
     { id: "recognition", label: t("performance.setup.recognition", "Recognition Categories"), icon: Award },
@@ -354,7 +382,7 @@ export default function PerformanceSetupPage() {
 
         {selectedCompany && (
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-            <TabsList className="grid w-full grid-cols-5">
+            <TabsList className="grid w-full grid-cols-6">
               {tabs.map((tab) => {
                 const Icon = tab.icon;
                 return (
@@ -431,6 +459,92 @@ export default function PerformanceSetupPage() {
                                 variant="ghost"
                                 size="icon"
                                 onClick={() => handleDeleteRatingScale(scale.id)}
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  )}
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            {/* Overall Rating Scales Tab */}
+            <TabsContent value="overall-scales" className="space-y-4">
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between">
+                  <div>
+                    <CardTitle>{t("performance.setup.overallScales", "Overall Rating Scales")}</CardTitle>
+                    <CardDescription>
+                      {t("performance.setup.overallScalesDesc", "Define final talent categorization scales for performance outcomes")}
+                    </CardDescription>
+                  </div>
+                  <Button onClick={() => { setEditingOverallScale(null); setOverallScaleDialogOpen(true); }}>
+                    <Plus className="h-4 w-4 mr-2" />
+                    {t("common.add", "Add")}
+                  </Button>
+                </CardHeader>
+                <CardContent>
+                  {overallScalesLoading ? (
+                    <div className="space-y-2">
+                      {[1, 2, 3].map((i) => (
+                        <Skeleton key={i} className="h-12 w-full" />
+                      ))}
+                    </div>
+                  ) : overallScales.length === 0 ? (
+                    <div className="text-center py-8 text-muted-foreground">
+                      {t("performance.setup.noOverallScales", "No overall rating scales configured. Add one to get started.")}
+                    </div>
+                  ) : (
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>{t("common.name", "Name")}</TableHead>
+                          <TableHead>{t("common.code", "Code")}</TableHead>
+                          <TableHead>{t("performance.setup.levels", "Levels")}</TableHead>
+                          <TableHead>{t("performance.setup.calibration", "Calibration")}</TableHead>
+                          <TableHead>{t("common.status", "Status")}</TableHead>
+                          <TableHead className="text-right">{t("common.actions", "Actions")}</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {overallScales.map((scale) => (
+                          <TableRow key={scale.id}>
+                            <TableCell className="font-medium">{scale.name}</TableCell>
+                            <TableCell>{scale.code}</TableCell>
+                            <TableCell>{scale.levels.length} levels</TableCell>
+                            <TableCell>
+                              {scale.requires_calibration ? (
+                                <Badge variant="outline">{t("common.required", "Required")}</Badge>
+                              ) : (
+                                <span className="text-muted-foreground text-sm">{t("common.optional", "Optional")}</span>
+                              )}
+                            </TableCell>
+                            <TableCell>
+                              <Badge variant={scale.is_active ? "default" : "secondary"}>
+                                {scale.is_active ? t("common.active", "Active") : t("common.inactive", "Inactive")}
+                              </Badge>
+                              {scale.is_default && (
+                                <Badge variant="outline" className="ml-2">
+                                  {t("common.default", "Default")}
+                                </Badge>
+                              )}
+                            </TableCell>
+                            <TableCell className="text-right">
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => { setEditingOverallScale(scale); setOverallScaleDialogOpen(true); }}
+                              >
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => handleDeleteOverallScale(scale.id)}
                               >
                                 <Trash2 className="h-4 w-4" />
                               </Button>
@@ -743,6 +857,18 @@ export default function PerformanceSetupPage() {
           onSuccess={() => {
             setRatingScaleDialogOpen(false);
             fetchRatingScales();
+          }}
+        />
+
+        {/* Overall Rating Scale Dialog */}
+        <OverallRatingScaleDialog
+          open={overallScaleDialogOpen}
+          onOpenChange={setOverallScaleDialogOpen}
+          companyId={selectedCompany}
+          editingScale={editingOverallScale}
+          onSuccess={() => {
+            setOverallScaleDialogOpen(false);
+            refetchOverallScales();
           }}
         />
 
