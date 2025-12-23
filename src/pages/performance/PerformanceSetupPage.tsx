@@ -46,6 +46,7 @@ interface RatingScale {
   min_rating: number;
   max_rating: number;
   rating_labels: any;
+  scale_purpose: string[] | null;
   is_default: boolean;
   is_active: boolean;
 }
@@ -426,6 +427,7 @@ export default function PerformanceSetupPage() {
                         <TableRow>
                           <TableHead>{t("common.name", "Name")}</TableHead>
                           <TableHead>{t("common.code", "Code")}</TableHead>
+                          <TableHead>{t("performance.setup.purpose", "Purpose")}</TableHead>
                           <TableHead>{t("performance.setup.range", "Range")}</TableHead>
                           <TableHead>{t("common.status", "Status")}</TableHead>
                           <TableHead className="text-right">{t("common.actions", "Actions")}</TableHead>
@@ -436,6 +438,17 @@ export default function PerformanceSetupPage() {
                           <TableRow key={scale.id}>
                             <TableCell className="font-medium">{scale.name}</TableCell>
                             <TableCell>{scale.code}</TableCell>
+                            <TableCell>
+                              <div className="flex flex-wrap gap-1">
+                                {scale.scale_purpose?.map((purpose) => (
+                                  <Badge key={purpose} variant="outline" className="text-xs">
+                                    {purpose === "appraisal" ? t("performance.setup.purposeAppraisal", "Appraisal") :
+                                     purpose === "goals" ? t("performance.setup.purposeGoals", "Goals") :
+                                     purpose === "360_feedback" ? t("performance.setup.purpose360", "360") : purpose}
+                                  </Badge>
+                                )) || <span className="text-muted-foreground text-xs">—</span>}
+                              </div>
+                            </TableCell>
                             <TableCell>{scale.min_rating} - {scale.max_rating}</TableCell>
                             <TableCell>
                               <Badge variant={scale.is_active ? "default" : "secondary"}>
