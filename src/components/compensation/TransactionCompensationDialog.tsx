@@ -28,7 +28,7 @@ const transactionTypeToChangeType: Record<TransactionType, string> = {
   HIRE: "hire",
   CONFIRMATION: "adjustment",
   PROBATION_EXT: "adjustment",
-  ACTING: "adjustment",
+  ACTING: "acting",
   PROMOTION: "promotion",
   TRANSFER: "adjustment",
   TERMINATION: "adjustment",
@@ -50,6 +50,7 @@ export function TransactionCompensationDialog({
   const { user } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [currentSalary, setCurrentSalary] = useState<number | null>(null);
+  const [resolvedPositionTitle, setResolvedPositionTitle] = useState(positionTitle);
   const [formData, setFormData] = useState({
     change_type: transactionTypeToChangeType[transactionType] || "adjustment",
     effective_date: effectiveDate || "",
@@ -61,15 +62,22 @@ export function TransactionCompensationDialog({
   });
 
   useEffect(() => {
+    setResolvedPositionTitle(positionTitle);
+  }, [positionTitle]);
+
+  useEffect(() => {
     if (open && employeeId && positionId) {
       loadCurrentCompensation();
-      setFormData(prev => ({
+      if (!positionTitle) {
+        loadPositionTitle();
+      }
+      setFormData((prev) => ({
         ...prev,
         change_type: transactionTypeToChangeType[transactionType] || "adjustment",
         effective_date: effectiveDate || "",
       }));
     }
-  }, [open, employeeId, positionId, effectiveDate, transactionType]);
+  }, [open, employeeId, positionId, effectiveDate, transactionType, positionTitle]);
 
   const loadCurrentCompensation = async () => {
     // Get current compensation from employee_positions
@@ -83,10 +91,22 @@ export function TransactionCompensationDialog({
 
     if (data?.compensation_amount) {
       setCurrentSalary(data.compensation_amount);
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
         previous_salary: data.compensation_amount?.toString() || "",
       }));
+    }
+  };
+
+  const loadPositionTitle = async () => {
+    const { data } = await supabase
+      .from("positions")
+      .select("title")
+      .eq("id", positionId)
+      .single();
+
+    if (data?.title) {
+      setResolvedPositionTitle(data.title);
     }
   };
 
@@ -154,7 +174,7 @@ export function TransactionCompensationDialog({
             </div>
             <div className="flex justify-between">
               <span className="text-sm text-muted-foreground">{t("common.position")}</span>
-              <span className="font-medium">{positionTitle}</span>
+              <span className="font-medium">{resolvedPositionTitle || "—"}</span>
             </div>
           </div>
 
@@ -173,6 +193,7 @@ export function TransactionCompensationDialog({
                   <SelectItem value="promotion">{t("compensation.history.changeTypes.promotion")}</SelectItem>
                   <SelectItem value="merit">{t("compensation.history.changeTypes.merit")}</SelectItem>
                   <SelectItem value="adjustment">{t("compensation.history.changeTypes.adjustment")}</SelectItem>
+                  <SelectItem value="acting">{t("compensation.history.changeTypes.acting")}</SelectItem>
                   <SelectItem value="market">{t("compensation.history.changeTypes.market")}</SelectItem>
                   <SelectItem value="demotion">{t("compensation.history.changeTypes.demotion")}</SelectItem>
                 </SelectContent>
