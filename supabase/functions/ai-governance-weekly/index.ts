@@ -27,12 +27,28 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
-  try {
-    const supabase = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-    );
+  const supabase = createClient(
+    Deno.env.get('SUPABASE_URL') ?? '',
+    Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+  );
 
+  // Log job start
+  const { data: jobRun, error: jobRunError } = await supabase
+    .from('ai_scheduled_job_runs')
+    .insert({
+      job_name: 'Weekly Bias Analysis',
+      job_type: 'weekly',
+      status: 'running',
+      triggered_by: req.headers.get('x-triggered-by') || 'scheduled'
+    })
+    .select()
+    .single();
+
+  if (jobRunError) {
+    console.error('Error creating job run record:', jobRunError);
+  }
+
+  try {
     console.log('Starting weekly AI bias pattern analysis...');
     
     const today = new Date();
@@ -211,6 +227,19 @@ serve(async (req) => {
 
     console.log('Weekly AI bias pattern analysis completed');
 
+    // Update job run record
+    if (jobRun?.id) {
+      await supabase
+        .from('ai_scheduled_job_runs')
+        .update({
+          status: 'completed',
+          completed_at: new Date().toISOString(),
+          companies_processed: results.length,
+          metrics_generated: { week_ending: today.toISOString().split('T')[0], results_count: results.length }
+        })
+        .eq('id', jobRun.id);
+    }
+
     return new Response(
       JSON.stringify({ 
         success: true, 
@@ -224,6 +253,19 @@ serve(async (req) => {
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     console.error('Error in weekly bias analysis:', error);
+
+    // Update job run record with failure
+    if (jobRun?.id) {
+      await supabase
+        .from('ai_scheduled_job_runs')
+        .update({
+          status: 'failed',
+          completed_at: new Date().toISOString(),
+          error_message: errorMessage
+        })
+        .eq('id', jobRun.id);
+    }
+
     return new Response(
       JSON.stringify({ error: errorMessage }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
