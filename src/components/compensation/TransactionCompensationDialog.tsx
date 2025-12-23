@@ -104,7 +104,7 @@ export function TransactionCompensationDialog({
   const loadPositionDetails = async () => {
     const { data } = await supabase
       .from("positions")
-      .select("title, department:departments(company_id)")
+      .select("title, company_id")
       .eq("id", positionId)
       .single();
 
@@ -112,10 +112,9 @@ export function TransactionCompensationDialog({
       if (!positionTitle && data.title) {
         setResolvedPositionTitle(data.title);
       }
-      // If companyId is not provided, use the position's department company_id
-      const positionCompanyId = (data.department as any)?.company_id;
-      if (!companyId && positionCompanyId) {
-        setResolvedCompanyId(positionCompanyId);
+      // If companyId is not provided, use the position's company_id
+      if (!companyId && data.company_id) {
+        setResolvedCompanyId(data.company_id);
       }
     }
   };
