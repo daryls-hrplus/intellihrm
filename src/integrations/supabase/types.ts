@@ -9787,6 +9787,63 @@ export type Database = {
           },
         ]
       }
+      employee_transaction_payroll_mappings: {
+        Row: {
+          company_id: string
+          created_at: string
+          end_date: string | null
+          id: string
+          is_active: boolean
+          mapping_type: string
+          notes: string | null
+          pay_element_id: string
+          start_date: string
+          transaction_type: string
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          end_date?: string | null
+          id?: string
+          is_active?: boolean
+          mapping_type?: string
+          notes?: string | null
+          pay_element_id: string
+          start_date?: string
+          transaction_type: string
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          end_date?: string | null
+          id?: string
+          is_active?: boolean
+          mapping_type?: string
+          notes?: string | null
+          pay_element_id?: string
+          start_date?: string
+          transaction_type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "employee_transaction_payroll_mappings_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_transaction_payroll_mappings_pay_element_id_fkey"
+            columns: ["pay_element_id"]
+            isOneToOne: false
+            referencedRelation: "pay_elements"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       employee_transactions: {
         Row: {
           acting_allowance: number | null
