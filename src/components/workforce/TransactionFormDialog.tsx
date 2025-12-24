@@ -232,6 +232,24 @@ export function TransactionFormDialog({
       case "HIRE":
         return (
           <>
+            <div className="space-y-2">
+              <Label>{t("common.employee")}</Label>
+              <Select
+                value={formData.employee_id || ""}
+                onValueChange={(v) => setFormData({ ...formData, employee_id: v })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder={t("workforce.modules.transactions.form.selectEmployee")} />
+                </SelectTrigger>
+                <SelectContent>
+                  {employees.map((e) => (
+                    <SelectItem key={e.id} value={e.id}>
+                      {e.full_name || e.email}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>{t("workforce.modules.transactions.form.hire.hireType")}</Label>
