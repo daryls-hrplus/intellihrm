@@ -175,7 +175,7 @@ export function FeatureRegistrySyncDialog({
           </DialogTitle>
           <DialogDescription>
             Review and select features to sync from the code registry to the database.
-            Synced features automatically go to the Development Backlog.
+            Synced features automatically go to In Development.
           </DialogDescription>
         </DialogHeader>
 
@@ -270,7 +270,7 @@ export function FeatureRegistrySyncDialog({
               <div className="p-3 rounded-lg border bg-blue-500/5 border-blue-500/20">
                 <p className="text-sm text-blue-700 dark:text-blue-300">
                   <strong>Workflow:</strong> Selected features will be added to{" "}
-                  <Badge variant="secondary">Development Backlog</Badge> and must progress through
+                  <Badge variant="secondary">In Development</Badge> and must progress through
                   Testing → Documentation → Ready for Enablement before artifacts can be created.
                 </p>
               </div>
@@ -311,7 +311,7 @@ export function FeatureRegistrySyncDialog({
                 <div>
                   <p className="font-medium text-green-700">Sync Complete!</p>
                   <p className="text-sm text-muted-foreground">
-                    {finalResult.summary.newFeatures} new features added to Development Backlog,{" "}
+                    {finalResult.summary.newFeatures} new features added to In Development,{" "}
                     {finalResult.summary.updatedFeatures} updated
                   </p>
                 </div>
