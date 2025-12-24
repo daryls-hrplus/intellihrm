@@ -31,6 +31,7 @@ const workflowCodeMap: Record<TransactionType, string> = {
   ACTING: "acting_assignment",
   PROMOTION: "promotion",
   TRANSFER: "transfer",
+  SECONDMENT: "secondment",
   TERMINATION: "termination",
 };
 

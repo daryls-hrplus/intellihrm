@@ -10817,7 +10817,12 @@ export type Database = {
           requires_workflow: boolean | null
           salary_adjustment: number | null
           salary_adjustment_type: string | null
+          secondment_end_date: string | null
+          secondment_position_id: string | null
+          secondment_reason_id: string | null
+          secondment_start_date: string | null
           status: string
+          suspended_position_id: string | null
           termination_reason_id: string | null
           termination_type: string | null
           to_company_id: string | null
@@ -10863,7 +10868,12 @@ export type Database = {
           requires_workflow?: boolean | null
           salary_adjustment?: number | null
           salary_adjustment_type?: string | null
+          secondment_end_date?: string | null
+          secondment_position_id?: string | null
+          secondment_reason_id?: string | null
+          secondment_start_date?: string | null
           status?: string
+          suspended_position_id?: string | null
           termination_reason_id?: string | null
           termination_type?: string | null
           to_company_id?: string | null
@@ -10909,7 +10919,12 @@ export type Database = {
           requires_workflow?: boolean | null
           salary_adjustment?: number | null
           salary_adjustment_type?: string | null
+          secondment_end_date?: string | null
+          secondment_position_id?: string | null
+          secondment_reason_id?: string | null
+          secondment_start_date?: string | null
           status?: string
+          suspended_position_id?: string | null
           termination_reason_id?: string | null
           termination_type?: string | null
           to_company_id?: string | null
@@ -11025,6 +11040,27 @@ export type Database = {
             columns: ["promotion_reason_id"]
             isOneToOne: false
             referencedRelation: "lookup_values"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_transactions_secondment_position_id_fkey"
+            columns: ["secondment_position_id"]
+            isOneToOne: false
+            referencedRelation: "positions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_transactions_secondment_reason_id_fkey"
+            columns: ["secondment_reason_id"]
+            isOneToOne: false
+            referencedRelation: "lookup_values"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_transactions_suspended_position_id_fkey"
+            columns: ["suspended_position_id"]
+            isOneToOne: false
+            referencedRelation: "positions"
             referencedColumns: ["id"]
           },
           {
@@ -38729,6 +38765,7 @@ export type Database = {
         | "certification_name"
         | "accrediting_body"
         | "payroll_run_type"
+        | "secondment_reason"
       message_status: "sent" | "delivered" | "read"
       workflow_action:
         | "approve"
@@ -38946,6 +38983,7 @@ export const Constants = {
         "certification_name",
         "accrediting_body",
         "payroll_run_type",
+        "secondment_reason",
       ],
       message_status: ["sent", "delivered", "read"],
       workflow_action: [
