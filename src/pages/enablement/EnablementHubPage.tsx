@@ -33,6 +33,7 @@ import {
   Brain,
   HelpCircle,
   FolderTree,
+  ClipboardCheck,
 } from "lucide-react";
 import { ContentWorkflowBoard } from "@/components/enablement/ContentWorkflowBoard";
 import { ReleaseManager } from "@/components/enablement/ReleaseManager";
@@ -41,6 +42,7 @@ import { ContentCoverageMatrix } from "@/components/enablement/ContentCoverageMa
 import { VideoLibraryManager } from "@/components/enablement/VideoLibraryManager";
 import { DAPGuidesManager } from "@/components/enablement/DAPGuidesManager";
 import { RiseTemplateManager } from "@/components/enablement/RiseTemplateManager";
+import { ImplementationTracker } from "@/components/enablement/implementation";
 import { useEnablementContentStatus, useEnablementReleases } from "@/hooks/useEnablementData";
 import { FEATURE_REGISTRY } from "@/lib/featureRegistry";
 
@@ -236,7 +238,7 @@ export default function EnablementHubPage() {
 
   // Sync tab state with URL
   useEffect(() => {
-    if (tabParam && tabParam !== activeTab && ["workflow", "releases", "coverage", "videos", "dap", "rise"].includes(tabParam)) {
+    if (tabParam && tabParam !== activeTab && ["workflow", "releases", "coverage", "videos", "dap", "rise", "implementations"].includes(tabParam)) {
       setActiveTab(tabParam);
     } else if (!tabParam && activeTab !== "dashboard") {
       setActiveTab("dashboard");
@@ -383,10 +385,14 @@ export default function EnablementHubPage() {
 
         {/* Main Tabs */}
         <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-7">
+          <TabsList className="grid w-full grid-cols-8">
             <TabsTrigger value="dashboard" className="gap-2">
               <LayoutDashboard className="h-4 w-4" />
               <span className="hidden sm:inline">Dashboard</span>
+            </TabsTrigger>
+            <TabsTrigger value="implementations" className="gap-2">
+              <ClipboardCheck className="h-4 w-4" />
+              <span className="hidden sm:inline">Implementations</span>
             </TabsTrigger>
             <TabsTrigger value="workflow" className="gap-2">
               <Kanban className="h-4 w-4" />
@@ -416,6 +422,10 @@ export default function EnablementHubPage() {
 
           <TabsContent value="dashboard" className="space-y-6">
             <GroupedModuleCards sections={sections} />
+          </TabsContent>
+
+          <TabsContent value="implementations">
+            <ImplementationTracker />
           </TabsContent>
 
           <TabsContent value="workflow">
