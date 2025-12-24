@@ -3,6 +3,21 @@ import Joyride, { CallBackProps, STATUS, EVENTS, ACTIONS, Step } from 'react-joy
 import { useTourContext } from './TourProvider';
 import { TourTooltip } from './TourTooltip';
 
+// Safely validate a CSS selector without throwing
+function isValidSelector(selector: string): boolean {
+  if (!selector || !selector.trim()) return false;
+  
+  // Check for known invalid patterns that would crash querySelector
+  if (selector.includes(':contains(')) return false;
+  
+  try {
+    document.querySelector(selector);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 export function TourEngine() {
   const { 
     activeTour, 
@@ -15,27 +30,36 @@ export function TourEngine() {
     goToStep,
   } = useTourContext();
 
-  // Convert our steps to Joyride format
+  // Convert our steps to Joyride format, filtering out invalid selectors
   const joyrideSteps: Step[] = useMemo(() => {
     if (!activeTour) return [];
     
-    return activeTour.steps.map((step, index) => ({
-      target: step.target_selector,
-      content: step.content,
-      title: step.title,
-      placement: step.placement as Step['placement'],
-      disableBeacon: true,
-      disableOverlay: step.disable_overlay,
-      disableScrolling: step.disable_scroll,
-      spotlightPadding: step.spot_light_padding,
-      data: {
-        stepId: step.id,
-        videoId: step.video_id,
-        video: step.video,
-        stepIndex: index,
-        totalSteps: activeTour.steps.length,
-      },
-    }));
+    return activeTour.steps
+      .filter((step) => {
+        // Skip steps with invalid selectors to prevent crashes
+        if (!isValidSelector(step.target_selector)) {
+          console.warn(`Tour step "${step.title}" has invalid selector: ${step.target_selector}`);
+          return false;
+        }
+        return true;
+      })
+      .map((step, index) => ({
+        target: step.target_selector,
+        content: step.content,
+        title: step.title,
+        placement: step.placement as Step['placement'],
+        disableBeacon: true,
+        disableOverlay: step.disable_overlay,
+        disableScrolling: step.disable_scroll,
+        spotlightPadding: step.spot_light_padding,
+        data: {
+          stepId: step.id,
+          videoId: step.video_id,
+          video: step.video,
+          stepIndex: index,
+          totalSteps: activeTour.steps.length,
+        },
+      }));
   }, [activeTour]);
 
   const handleJoyrideCallback = useCallback((data: CallBackProps) => {
