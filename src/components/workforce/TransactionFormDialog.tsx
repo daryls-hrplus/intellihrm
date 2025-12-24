@@ -56,6 +56,7 @@ interface Position {
   id: string;
   title: string;
   code: string;
+  department_id?: string | null;
 }
 
 interface EmployeePosition {
@@ -176,7 +177,7 @@ export function TransactionFormDialog({
       companiesRes,
     ] = await Promise.all([
       supabase.from("profiles").select("id, full_name, email").order("full_name"),
-      supabase.from("positions").select("id, title, code").eq("is_active", true).order("title"),
+      supabase.from("positions").select("id, title, code, department_id").eq("is_active", true).order("title"),
       supabase.from("departments").select("id, name").eq("is_active", true).order("name"),
       supabase.from("companies").select("id, name").eq("is_active", true).order("name"),
     ]);
@@ -401,18 +402,27 @@ export function TransactionFormDialog({
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label>{t("common.position")}</Label>
+                <Label>{t("common.department")}</Label>
                 <Select
-                  value={formData.position_id || ""}
-                  onValueChange={(v) => setFormData({ ...formData, position_id: v })}
+                  value={formData.department_id || ""}
+                  onValueChange={(v) => {
+                    // When department changes, clear position if it doesn't belong to the new department
+                    const currentPosition = positions.find(p => p.id === formData.position_id);
+                    const shouldClearPosition = currentPosition && currentPosition.department_id !== v;
+                    setFormData({ 
+                      ...formData, 
+                      department_id: v,
+                      position_id: shouldClearPosition ? undefined : formData.position_id
+                    });
+                  }}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder={t("workforce.modules.transactions.form.selectPosition")} />
+                    <SelectValue placeholder={t("workforce.modules.transactions.form.selectDepartment")} />
                   </SelectTrigger>
                   <SelectContent>
-                    {positions.map((p) => (
-                      <SelectItem key={p.id} value={p.id}>
-                        {p.title} ({p.code})
+                    {departments.map((d) => (
+                      <SelectItem key={d.id} value={d.id}>
+                        {d.name}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -420,22 +430,43 @@ export function TransactionFormDialog({
               </div>
             </div>
             <div className="space-y-2">
-              <Label>{t("common.department")}</Label>
+              <Label>{t("common.position")}</Label>
               <Select
-                value={formData.department_id || ""}
-                onValueChange={(v) => setFormData({ ...formData, department_id: v })}
+                value={formData.position_id || ""}
+                onValueChange={(v) => {
+                  // When position is selected, auto-populate department if position has one
+                  const selectedPosition = positions.find(p => p.id === v);
+                  if (selectedPosition?.department_id && !formData.department_id) {
+                    setFormData({ 
+                      ...formData, 
+                      position_id: v,
+                      department_id: selectedPosition.department_id
+                    });
+                  } else {
+                    setFormData({ ...formData, position_id: v });
+                  }
+                }}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder={t("workforce.modules.transactions.form.selectDepartment")} />
+                  <SelectValue placeholder={t("workforce.modules.transactions.form.selectPosition")} />
                 </SelectTrigger>
                 <SelectContent>
-                  {departments.map((d) => (
-                    <SelectItem key={d.id} value={d.id}>
-                      {d.name}
+                  {/* Filter positions by department if department is selected */}
+                  {(formData.department_id 
+                    ? positions.filter(p => p.department_id === formData.department_id || !p.department_id)
+                    : positions
+                  ).map((p) => (
+                    <SelectItem key={p.id} value={p.id}>
+                      {p.title} ({p.code})
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
+              {formData.department_id && (
+                <p className="text-xs text-muted-foreground">
+                  {t("workforce.modules.transactions.form.hire.positionsFilteredByDepartment", "Showing positions in the selected department")}
+                </p>
+              )}
             </div>
           </>
         );
