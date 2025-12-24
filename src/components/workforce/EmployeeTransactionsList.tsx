@@ -182,7 +182,13 @@ export function EmployeeTransactionsList({
 
   const loadLookupValues = async () => {
     const types = await fetchLookupValues("transaction_type");
-    setTransactionTypes(types);
+    // Sort to put SECONDMENT at the bottom
+    const sorted = [...types].sort((a, b) => {
+      if (a.code === "SECONDMENT") return 1;
+      if (b.code === "SECONDMENT") return -1;
+      return 0; // Preserve existing order
+    });
+    setTransactionTypes(sorted);
   };
 
   const handleDelete = async () => {
