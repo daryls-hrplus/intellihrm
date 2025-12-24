@@ -14,6 +14,7 @@ import {
   Eye,
   Calendar,
   TrendingUp,
+  TrendingDown,
   MoreVertical,
   MessageSquare,
   Edit,
@@ -26,7 +27,20 @@ import {
   User,
   Star,
   Send,
+  ShieldAlert,
+  Folder,
 } from "lucide-react";
+import {
+  parseExtendedAttributes,
+  getDisplayCategory,
+  calculateGoalAchievement,
+} from "@/utils/goalCalculations";
+import {
+  COMPLIANCE_CATEGORY_LABELS,
+  ACHIEVEMENT_LEVEL_COLORS,
+  ACHIEVEMENT_LEVEL_LABELS,
+  ComplianceCategory,
+} from "@/types/goalEnhancements";
 import { differenceInDays, isPast } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -109,6 +123,22 @@ export function EnhancedGoalCard({
   const isOverdue = goal.due_date && isPast(new Date(goal.due_date)) && goal.status !== "completed";
   const daysUntilDue = goal.due_date ? differenceInDays(new Date(goal.due_date), new Date()) : null;
   
+  // Parse extended attributes for enhanced display
+  const extAttrs = parseExtendedAttributes(goal.category);
+  const displayCategory = getDisplayCategory(goal.category);
+  const isMandatory = extAttrs?.isMandatory || false;
+  const isInverse = extAttrs?.isInverse || false;
+  const complianceCategory = extAttrs?.complianceCategory;
+  
+  // Calculate achievement if we have target value
+  const achievement = goal.target_value && goal.current_value !== null
+    ? calculateGoalAchievement(
+        goal.current_value || 0,
+        goal.target_value,
+        extAttrs || undefined
+      )
+    : null;
+  
   // Calculate if goal is at risk
   const isAtRisk = daysUntilDue !== null && daysUntilDue > 0 && daysUntilDue <= 7 && goal.progress_percentage < 80;
 
@@ -153,6 +183,16 @@ export function EnhancedGoalCard({
             <div className="flex items-center gap-2">
               <LevelIcon className="h-4 w-4 text-muted-foreground flex-shrink-0" />
               <CardTitle className="text-base truncate">{goal.title}</CardTitle>
+              {isMandatory && (
+                <span title="Mandatory/Compliance Goal">
+                  <ShieldAlert className="h-4 w-4 text-warning flex-shrink-0" />
+                </span>
+              )}
+              {isInverse && (
+                <span title="Inverse Target (Lower is Better)">
+                  <TrendingDown className="h-4 w-4 text-primary flex-shrink-0" />
+                </span>
+              )}
               {isAtRisk && !isOverdue && (
                 <AlertTriangle className="h-4 w-4 text-warning flex-shrink-0" />
               )}
@@ -164,16 +204,30 @@ export function EnhancedGoalCard({
               {showOwner && goal.employee?.full_name && (
                 <span className="text-xs">{goal.employee.full_name}</span>
               )}
-              {goal.category && (
-                <Badge variant="secondary" className="text-xs">{goal.category}</Badge>
+              {displayCategory && (
+                <Badge variant="secondary" className="text-xs">{displayCategory}</Badge>
+              )}
+              {complianceCategory && (
+                <Badge variant="outline" className="text-xs border-warning/50 text-warning">
+                  {COMPLIANCE_CATEGORY_LABELS[complianceCategory as ComplianceCategory]}
+                </Badge>
               )}
             </CardDescription>
           </div>
           <div className="flex items-center gap-2">
+            {/* Achievement Zone Badge */}
+            {achievement && (
+              <Badge className={`text-xs ${ACHIEVEMENT_LEVEL_COLORS[achievement.achievementLevel]}`}>
+                {ACHIEVEMENT_LEVEL_LABELS[achievement.achievementLevel]}
+              </Badge>
+            )}
             {/* Approval Status Indicator */}
             {goal.status !== "draft" && (
               <GoalApprovalStatus goalId={goal.id} goalStatus={goal.status} compact />
             )}
+            <Badge className={statusColors[effectiveStatus]}>
+              {effectiveStatus.replace("_", " ")}
+            </Badge>
             <Badge className={statusColors[effectiveStatus]}>
               {effectiveStatus.replace("_", " ")}
             </Badge>
