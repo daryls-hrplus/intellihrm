@@ -385,8 +385,8 @@ export function EmployeeTransactionsList({
                         >
                           <Eye className="h-4 w-4" />
                         </Button>
-                        {/* Compensation button - show for transactions with employee and relevant position */}
-                        {transaction.employee_id && getRelevantPositionId(transaction) && 
+                        {/* Compensation button - show for transactions with relevant position (employee_id optional for HIRE) */}
+                        {getRelevantPositionId(transaction) && 
                          transaction.transaction_type?.code !== "TERMINATION" &&
                          (transaction.status === "approved" || transaction.status === "completed" || transaction.status === "draft") && (
                           <Tooltip>
