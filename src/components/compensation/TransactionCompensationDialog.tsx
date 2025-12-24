@@ -43,6 +43,7 @@ const transactionTypeToChangeType: Record<TransactionType, string> = {
   ACTING: "acting",
   PROMOTION: "promotion",
   TRANSFER: "adjustment",
+  SECONDMENT: "secondment",
   TERMINATION: "adjustment",
 };
 

@@ -12,6 +12,7 @@ export type TransactionType =
   | "ACTING" 
   | "PROMOTION" 
   | "TRANSFER" 
+  | "SECONDMENT"
   | "TERMINATION";
 
 export type TransactionStatus = 
@@ -71,6 +72,13 @@ export interface EmployeeTransaction {
   from_company_id: string | null;
   to_company_id: string | null;
   transfer_reason_id: string | null;
+  
+  // Secondment fields
+  secondment_position_id: string | null;
+  secondment_start_date: string | null;
+  secondment_end_date: string | null;
+  secondment_reason_id: string | null;
+  suspended_position_id: string | null;
   
   // Pay group change (for promotions and transfers)
   pay_group_id: string | null;

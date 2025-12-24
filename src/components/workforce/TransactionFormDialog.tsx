@@ -112,6 +112,7 @@ export function TransactionFormDialog({
   const [promotionReasons, setPromotionReasons] = useState<LookupValue[]>([]);
   const [transferReasons, setTransferReasons] = useState<LookupValue[]>([]);
   const [actingReasons, setActingReasons] = useState<LookupValue[]>([]);
+  const [secondmentReasons, setSecondmentReasons] = useState<LookupValue[]>([]);
   const [terminationReasons, setTerminationReasons] = useState<LookupValue[]>([]);
 
   // Form state
@@ -132,10 +133,10 @@ export function TransactionFormDialog({
     }
   }, [open, transactionType]);
 
-  // Load employee positions when employee is selected (for CONFIRMATION, PROBATION_EXT, and TERMINATION transaction types)
+  // Load employee positions when employee is selected (for CONFIRMATION, PROBATION_EXT, SECONDMENT and TERMINATION transaction types)
   useEffect(() => {
     const loadEmployeePositions = async () => {
-      if (formData.employee_id && (transactionType === "CONFIRMATION" || transactionType === "PROBATION_EXT" || transactionType === "TERMINATION")) {
+      if (formData.employee_id && (transactionType === "CONFIRMATION" || transactionType === "PROBATION_EXT" || transactionType === "SECONDMENT" || transactionType === "TERMINATION")) {
         const { data } = await supabase
           .from("employee_positions")
           .select(`
@@ -208,6 +209,7 @@ export function TransactionFormDialog({
         promotionReasonsData,
         transferReasonsData,
         actingReasonsData,
+        secondmentReasonsData,
         terminationReasonsData,
       ] = await Promise.all([
         fetchLookupValues("hire_type"),
@@ -217,6 +219,7 @@ export function TransactionFormDialog({
         fetchLookupValues("promotion_reason"),
         fetchLookupValues("transfer_reason"),
         fetchLookupValues("acting_reason"),
+        fetchLookupValues("secondment_reason"),
         fetchLookupValues("termination_reason"),
       ]);
 
@@ -227,6 +230,7 @@ export function TransactionFormDialog({
       setPromotionReasons(promotionReasonsData);
       setTransferReasons(transferReasonsData);
       setActingReasons(actingReasonsData);
+      setSecondmentReasons(secondmentReasonsData);
       setTerminationReasons(terminationReasonsData);
     }
   };
@@ -989,6 +993,128 @@ export function TransactionFormDialog({
               <p className="text-xs text-muted-foreground">
                 {t("workforce.modules.transactions.form.payGroupHint", "Leave empty to keep current pay group assignment")}
               </p>
+            </div>
+          </>
+        );
+
+      case "SECONDMENT":
+        return (
+          <>
+            {/* Primary Position to Suspend */}
+            <div className="space-y-2">
+              <Label>{t("workforce.modules.transactions.form.secondment.suspendedPosition", "Position to Suspend")} *</Label>
+              <Select
+                value={formData.suspended_position_id || ""}
+                onValueChange={(v) => setFormData({ ...formData, suspended_position_id: v })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder={t("workforce.modules.transactions.form.secondment.selectPositionToSuspend", "Select current position to suspend")} />
+                </SelectTrigger>
+                <SelectContent>
+                  {employeePositions.map((ep) => (
+                    <SelectItem key={ep.position_id} value={ep.position_id}>
+                      {ep.position.title} ({ep.position.code})
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground">
+                {t("workforce.modules.transactions.form.secondment.suspendedPositionHint", "This position will be marked as suspended during the secondment")}
+              </p>
+            </div>
+
+            {/* Secondment Position */}
+            <div className="space-y-2">
+              <Label>{t("workforce.modules.transactions.form.secondment.secondmentPosition", "Secondment Position")} *</Label>
+              <Select
+                value={formData.secondment_position_id || ""}
+                onValueChange={(v) => setFormData({ ...formData, secondment_position_id: v })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder={t("workforce.modules.transactions.form.selectPosition")} />
+                </SelectTrigger>
+                <SelectContent>
+                  {positions.map((p) => (
+                    <SelectItem key={p.id} value={p.id}>
+                      {p.title} ({p.code})
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Secondment Dates */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>{t("workforce.modules.transactions.form.secondment.startDate", "Secondment Start Date")} *</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" className="w-full justify-start text-left font-normal">
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {formData.secondment_start_date
+                        ? formatDateForDisplay(formData.secondment_start_date, "PPP")
+                        : t("workforce.modules.transactions.form.selectDate")}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0">
+                    <Calendar
+                      mode="single"
+                      selected={formData.secondment_start_date ? new Date(formData.secondment_start_date) : undefined}
+                      onSelect={(date) =>
+                        setFormData({
+                          ...formData,
+                          secondment_start_date: date ? toDateString(date) : undefined,
+                        })
+                      }
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+              <div className="space-y-2">
+                <Label>{t("workforce.modules.transactions.form.secondment.endDate", "Expected End Date")} *</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" className="w-full justify-start text-left font-normal">
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {formData.secondment_end_date
+                        ? formatDateForDisplay(formData.secondment_end_date, "PPP")
+                        : t("workforce.modules.transactions.form.selectDate")}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0">
+                    <Calendar
+                      mode="single"
+                      selected={formData.secondment_end_date ? new Date(formData.secondment_end_date) : undefined}
+                      onSelect={(date) =>
+                        setFormData({
+                          ...formData,
+                          secondment_end_date: date ? toDateString(date) : undefined,
+                        })
+                      }
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+            </div>
+
+            {/* Secondment Reason */}
+            <div className="space-y-2">
+              <Label>{t("workforce.modules.transactions.form.secondment.reason", "Secondment Reason")}</Label>
+              <Select
+                value={formData.secondment_reason_id || ""}
+                onValueChange={(v) => setFormData({ ...formData, secondment_reason_id: v })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder={t("workforce.modules.transactions.form.selectReason")} />
+                </SelectTrigger>
+                <SelectContent>
+                  {secondmentReasons.map((r) => (
+                    <SelectItem key={r.id} value={r.id}>
+                      {r.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </>
         );
