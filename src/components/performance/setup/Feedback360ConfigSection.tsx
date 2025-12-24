@@ -1,0 +1,471 @@
+import { useState, useEffect } from "react";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/components/ui/tabs";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Plus, Edit, Trash2, MessageSquare, Users, HelpCircle } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
+import { useLanguage } from "@/hooks/useLanguage";
+
+interface RaterCategory {
+  id: string;
+  name: string;
+  code: string;
+  description: string | null;
+  min_raters: number;
+  max_raters: number;
+  is_mandatory: boolean;
+  is_active: boolean;
+}
+
+interface QuestionBank {
+  id: string;
+  question_text: string;
+  category: string;
+  question_type: string;
+  is_active: boolean;
+}
+
+interface Feedback360ConfigSectionProps {
+  companyId: string;
+}
+
+export function Feedback360ConfigSection({ companyId }: Feedback360ConfigSectionProps) {
+  const { t } = useLanguage();
+  const [activeTab, setActiveTab] = useState("rater-categories");
+  const [isLoading, setIsLoading] = useState(true);
+  
+  // Rater Categories
+  const [raterCategories, setRaterCategories] = useState<RaterCategory[]>([]);
+  const [raterDialogOpen, setRaterDialogOpen] = useState(false);
+  const [editingRater, setEditingRater] = useState<RaterCategory | null>(null);
+  const [raterForm, setRaterForm] = useState({
+    name: "",
+    code: "",
+    description: "",
+    min_raters: 1,
+    max_raters: 5,
+    is_mandatory: true,
+    is_active: true,
+  });
+
+  // Question Bank
+  const [questions, setQuestions] = useState<QuestionBank[]>([]);
+  const [questionDialogOpen, setQuestionDialogOpen] = useState(false);
+  const [editingQuestion, setEditingQuestion] = useState<QuestionBank | null>(null);
+  const [questionForm, setQuestionForm] = useState({
+    question_text: "",
+    category: "general",
+    question_type: "rating",
+    is_active: true,
+  });
+
+  useEffect(() => {
+    if (companyId) {
+      loadData();
+    }
+  }, [companyId]);
+
+  const loadData = async () => {
+    setIsLoading(true);
+    // For now, use mock data since tables may not exist yet
+    // In production, these would query actual tables
+    setRaterCategories([
+      { id: "1", name: "Direct Manager", code: "MGR", description: "Immediate supervisor", min_raters: 1, max_raters: 1, is_mandatory: true, is_active: true },
+      { id: "2", name: "Peers", code: "PEER", description: "Team members and colleagues", min_raters: 2, max_raters: 5, is_mandatory: true, is_active: true },
+      { id: "3", name: "Direct Reports", code: "DR", description: "Employees who report to this person", min_raters: 1, max_raters: 10, is_mandatory: false, is_active: true },
+      { id: "4", name: "External", code: "EXT", description: "Clients, vendors, or external stakeholders", min_raters: 0, max_raters: 3, is_mandatory: false, is_active: true },
+    ]);
+    
+    setQuestions([
+      { id: "1", question_text: "How effectively does this person communicate with others?", category: "communication", question_type: "rating", is_active: true },
+      { id: "2", question_text: "How well does this person collaborate with team members?", category: "teamwork", question_type: "rating", is_active: true },
+      { id: "3", question_text: "What are this person's greatest strengths?", category: "strengths", question_type: "open_text", is_active: true },
+      { id: "4", question_text: "What areas could this person improve?", category: "development", question_type: "open_text", is_active: true },
+    ]);
+    
+    setIsLoading(false);
+  };
+
+  const handleSaveRater = () => {
+    if (!raterForm.name || !raterForm.code) {
+      toast.error("Name and code are required");
+      return;
+    }
+    
+    if (editingRater) {
+      setRaterCategories(prev => prev.map(r => 
+        r.id === editingRater.id ? { ...r, ...raterForm, id: r.id } : r
+      ));
+      toast.success("Rater category updated");
+    } else {
+      setRaterCategories(prev => [...prev, { ...raterForm, id: Date.now().toString() }]);
+      toast.success("Rater category created");
+    }
+    
+    setRaterDialogOpen(false);
+    setEditingRater(null);
+    setRaterForm({ name: "", code: "", description: "", min_raters: 1, max_raters: 5, is_mandatory: true, is_active: true });
+  };
+
+  const handleDeleteRater = (id: string) => {
+    if (!confirm("Delete this rater category?")) return;
+    setRaterCategories(prev => prev.filter(r => r.id !== id));
+    toast.success("Rater category deleted");
+  };
+
+  const handleSaveQuestion = () => {
+    if (!questionForm.question_text) {
+      toast.error("Question text is required");
+      return;
+    }
+    
+    if (editingQuestion) {
+      setQuestions(prev => prev.map(q => 
+        q.id === editingQuestion.id ? { ...q, ...questionForm, id: q.id } : q
+      ));
+      toast.success("Question updated");
+    } else {
+      setQuestions(prev => [...prev, { ...questionForm, id: Date.now().toString() }]);
+      toast.success("Question created");
+    }
+    
+    setQuestionDialogOpen(false);
+    setEditingQuestion(null);
+    setQuestionForm({ question_text: "", category: "general", question_type: "rating", is_active: true });
+  };
+
+  const handleDeleteQuestion = (id: string) => {
+    if (!confirm("Delete this question?")) return;
+    setQuestions(prev => prev.filter(q => q.id !== id));
+    toast.success("Question deleted");
+  };
+
+  return (
+    <div className="space-y-4">
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="rater-categories" className="flex items-center gap-2">
+            <Users className="h-4 w-4" />
+            Rater Categories
+          </TabsTrigger>
+          <TabsTrigger value="question-bank" className="flex items-center gap-2">
+            <HelpCircle className="h-4 w-4" />
+            Question Bank
+          </TabsTrigger>
+        </TabsList>
+
+        {/* Rater Categories Tab */}
+        <TabsContent value="rater-categories">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <div>
+                <CardTitle className="text-base">Rater Categories</CardTitle>
+                <CardDescription>Define who can provide feedback (peers, managers, direct reports, etc.)</CardDescription>
+              </div>
+              <Button size="sm" onClick={() => { setEditingRater(null); setRaterDialogOpen(true); }}>
+                <Plus className="h-4 w-4 mr-2" />
+                Add Category
+              </Button>
+            </CardHeader>
+            <CardContent>
+              {isLoading ? (
+                <div className="space-y-2">
+                  {[1, 2, 3].map(i => <Skeleton key={i} className="h-12 w-full" />)}
+                </div>
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Name</TableHead>
+                      <TableHead>Code</TableHead>
+                      <TableHead>Raters Required</TableHead>
+                      <TableHead>Mandatory</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {raterCategories.map(rater => (
+                      <TableRow key={rater.id}>
+                        <TableCell className="font-medium">{rater.name}</TableCell>
+                        <TableCell>{rater.code}</TableCell>
+                        <TableCell>{rater.min_raters} - {rater.max_raters}</TableCell>
+                        <TableCell>
+                          <Badge variant={rater.is_mandatory ? "default" : "secondary"}>
+                            {rater.is_mandatory ? "Yes" : "No"}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant={rater.is_active ? "default" : "secondary"}>
+                            {rater.is_active ? "Active" : "Inactive"}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <Button variant="ghost" size="icon" onClick={() => {
+                            setEditingRater(rater);
+                            setRaterForm({
+                              name: rater.name,
+                              code: rater.code,
+                              description: rater.description || "",
+                              min_raters: rater.min_raters,
+                              max_raters: rater.max_raters,
+                              is_mandatory: rater.is_mandatory,
+                              is_active: rater.is_active,
+                            });
+                            setRaterDialogOpen(true);
+                          }}>
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button variant="ghost" size="icon" onClick={() => handleDeleteRater(rater.id)}>
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Question Bank Tab */}
+        <TabsContent value="question-bank">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <div>
+                <CardTitle className="text-base">Question Bank</CardTitle>
+                <CardDescription>Manage feedback questions used in 360° reviews</CardDescription>
+              </div>
+              <Button size="sm" onClick={() => { setEditingQuestion(null); setQuestionDialogOpen(true); }}>
+                <Plus className="h-4 w-4 mr-2" />
+                Add Question
+              </Button>
+            </CardHeader>
+            <CardContent>
+              {isLoading ? (
+                <div className="space-y-2">
+                  {[1, 2, 3].map(i => <Skeleton key={i} className="h-12 w-full" />)}
+                </div>
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Question</TableHead>
+                      <TableHead>Category</TableHead>
+                      <TableHead>Type</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {questions.map(question => (
+                      <TableRow key={question.id}>
+                        <TableCell className="font-medium max-w-xs truncate">{question.question_text}</TableCell>
+                        <TableCell className="capitalize">{question.category}</TableCell>
+                        <TableCell>
+                          <Badge variant="outline">
+                            {question.question_type === "rating" ? "Rating Scale" : "Open Text"}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant={question.is_active ? "default" : "secondary"}>
+                            {question.is_active ? "Active" : "Inactive"}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <Button variant="ghost" size="icon" onClick={() => {
+                            setEditingQuestion(question);
+                            setQuestionForm({
+                              question_text: question.question_text,
+                              category: question.category,
+                              question_type: question.question_type,
+                              is_active: question.is_active,
+                            });
+                            setQuestionDialogOpen(true);
+                          }}>
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button variant="ghost" size="icon" onClick={() => handleDeleteQuestion(question.id)}>
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
+
+      {/* Rater Category Dialog */}
+      <Dialog open={raterDialogOpen} onOpenChange={setRaterDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{editingRater ? "Edit Rater Category" : "Add Rater Category"}</DialogTitle>
+            <DialogDescription>Configure who can provide feedback in 360° reviews</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Name</Label>
+                <Input
+                  value={raterForm.name}
+                  onChange={e => setRaterForm({ ...raterForm, name: e.target.value })}
+                  placeholder="e.g., Peers"
+                />
+              </div>
+              <div>
+                <Label>Code</Label>
+                <Input
+                  value={raterForm.code}
+                  onChange={e => setRaterForm({ ...raterForm, code: e.target.value })}
+                  placeholder="e.g., PEER"
+                />
+              </div>
+            </div>
+            <div>
+              <Label>Description</Label>
+              <Textarea
+                value={raterForm.description}
+                onChange={e => setRaterForm({ ...raterForm, description: e.target.value })}
+                placeholder="Optional description"
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Min Raters</Label>
+                <Input
+                  type="number"
+                  min={0}
+                  value={raterForm.min_raters}
+                  onChange={e => setRaterForm({ ...raterForm, min_raters: parseInt(e.target.value) || 0 })}
+                />
+              </div>
+              <div>
+                <Label>Max Raters</Label>
+                <Input
+                  type="number"
+                  min={1}
+                  value={raterForm.max_raters}
+                  onChange={e => setRaterForm({ ...raterForm, max_raters: parseInt(e.target.value) || 1 })}
+                />
+              </div>
+            </div>
+            <div className="flex items-center gap-6">
+              <div className="flex items-center gap-2">
+                <Switch checked={raterForm.is_mandatory} onCheckedChange={c => setRaterForm({ ...raterForm, is_mandatory: c })} />
+                <Label>Mandatory</Label>
+              </div>
+              <div className="flex items-center gap-2">
+                <Switch checked={raterForm.is_active} onCheckedChange={c => setRaterForm({ ...raterForm, is_active: c })} />
+                <Label>Active</Label>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setRaterDialogOpen(false)}>Cancel</Button>
+            <Button onClick={handleSaveRater}>Save</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Question Dialog */}
+      <Dialog open={questionDialogOpen} onOpenChange={setQuestionDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{editingQuestion ? "Edit Question" : "Add Question"}</DialogTitle>
+            <DialogDescription>Configure feedback questions for 360° reviews</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label>Question Text</Label>
+              <Textarea
+                value={questionForm.question_text}
+                onChange={e => setQuestionForm({ ...questionForm, question_text: e.target.value })}
+                placeholder="Enter the feedback question"
+                rows={3}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Category</Label>
+                <Select value={questionForm.category} onValueChange={v => setQuestionForm({ ...questionForm, category: v })}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="general">General</SelectItem>
+                    <SelectItem value="communication">Communication</SelectItem>
+                    <SelectItem value="teamwork">Teamwork</SelectItem>
+                    <SelectItem value="leadership">Leadership</SelectItem>
+                    <SelectItem value="technical">Technical Skills</SelectItem>
+                    <SelectItem value="strengths">Strengths</SelectItem>
+                    <SelectItem value="development">Development Areas</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>Question Type</Label>
+                <Select value={questionForm.question_type} onValueChange={v => setQuestionForm({ ...questionForm, question_type: v })}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="rating">Rating Scale</SelectItem>
+                    <SelectItem value="open_text">Open Text</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <Switch checked={questionForm.is_active} onCheckedChange={c => setQuestionForm({ ...questionForm, is_active: c })} />
+              <Label>Active</Label>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setQuestionDialogOpen(false)}>Cancel</Button>
+            <Button onClick={handleSaveQuestion}>Save</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
