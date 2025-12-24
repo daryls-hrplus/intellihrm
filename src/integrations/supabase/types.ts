@@ -12287,6 +12287,75 @@ export type Database = {
           },
         ]
       }
+      enablement_help_tooltips: {
+        Row: {
+          company_id: string | null
+          content: string
+          created_at: string | null
+          created_by: string | null
+          element_selector: string
+          feature_code: string | null
+          id: string
+          is_active: boolean | null
+          learn_more_url: string | null
+          module_code: string
+          target_roles: string[] | null
+          title: string | null
+          tooltip_code: string
+          updated_at: string | null
+          video_id: string | null
+        }
+        Insert: {
+          company_id?: string | null
+          content: string
+          created_at?: string | null
+          created_by?: string | null
+          element_selector: string
+          feature_code?: string | null
+          id?: string
+          is_active?: boolean | null
+          learn_more_url?: string | null
+          module_code: string
+          target_roles?: string[] | null
+          title?: string | null
+          tooltip_code: string
+          updated_at?: string | null
+          video_id?: string | null
+        }
+        Update: {
+          company_id?: string | null
+          content?: string
+          created_at?: string | null
+          created_by?: string | null
+          element_selector?: string
+          feature_code?: string | null
+          id?: string
+          is_active?: boolean | null
+          learn_more_url?: string | null
+          module_code?: string
+          target_roles?: string[] | null
+          title?: string | null
+          tooltip_code?: string
+          updated_at?: string | null
+          video_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "enablement_help_tooltips_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "enablement_help_tooltips_video_id_fkey"
+            columns: ["video_id"]
+            isOneToOne: false
+            referencedRelation: "enablement_video_library"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       enablement_releases: {
         Row: {
           created_at: string | null
@@ -12676,6 +12745,301 @@ export type Database = {
           },
         ]
       }
+      enablement_tour_analytics: {
+        Row: {
+          company_id: string | null
+          created_at: string | null
+          event_data: Json | null
+          event_type: string
+          id: string
+          session_id: string | null
+          step_id: string | null
+          tour_id: string | null
+          user_agent: string | null
+          user_id: string
+          video_id: string | null
+        }
+        Insert: {
+          company_id?: string | null
+          created_at?: string | null
+          event_data?: Json | null
+          event_type: string
+          id?: string
+          session_id?: string | null
+          step_id?: string | null
+          tour_id?: string | null
+          user_agent?: string | null
+          user_id: string
+          video_id?: string | null
+        }
+        Update: {
+          company_id?: string | null
+          created_at?: string | null
+          event_data?: Json | null
+          event_type?: string
+          id?: string
+          session_id?: string | null
+          step_id?: string | null
+          tour_id?: string | null
+          user_agent?: string | null
+          user_id?: string
+          video_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "enablement_tour_analytics_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "enablement_tour_analytics_step_id_fkey"
+            columns: ["step_id"]
+            isOneToOne: false
+            referencedRelation: "enablement_tour_steps"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "enablement_tour_analytics_tour_id_fkey"
+            columns: ["tour_id"]
+            isOneToOne: false
+            referencedRelation: "enablement_tour_analytics_summary"
+            referencedColumns: ["tour_id"]
+          },
+          {
+            foreignKeyName: "enablement_tour_analytics_tour_id_fkey"
+            columns: ["tour_id"]
+            isOneToOne: false
+            referencedRelation: "enablement_tours"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "enablement_tour_analytics_video_id_fkey"
+            columns: ["video_id"]
+            isOneToOne: false
+            referencedRelation: "enablement_video_library"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      enablement_tour_completions: {
+        Row: {
+          company_id: string | null
+          completed_at: string | null
+          created_at: string | null
+          feedback_comment: string | null
+          feedback_rating: number | null
+          id: string
+          last_step_completed: number | null
+          started_at: string | null
+          total_steps: number | null
+          tour_id: string
+          updated_at: string | null
+          user_id: string
+          was_skipped: boolean | null
+        }
+        Insert: {
+          company_id?: string | null
+          completed_at?: string | null
+          created_at?: string | null
+          feedback_comment?: string | null
+          feedback_rating?: number | null
+          id?: string
+          last_step_completed?: number | null
+          started_at?: string | null
+          total_steps?: number | null
+          tour_id: string
+          updated_at?: string | null
+          user_id: string
+          was_skipped?: boolean | null
+        }
+        Update: {
+          company_id?: string | null
+          completed_at?: string | null
+          created_at?: string | null
+          feedback_comment?: string | null
+          feedback_rating?: number | null
+          id?: string
+          last_step_completed?: number | null
+          started_at?: string | null
+          total_steps?: number | null
+          tour_id?: string
+          updated_at?: string | null
+          user_id?: string
+          was_skipped?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "enablement_tour_completions_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "enablement_tour_completions_tour_id_fkey"
+            columns: ["tour_id"]
+            isOneToOne: false
+            referencedRelation: "enablement_tour_analytics_summary"
+            referencedColumns: ["tour_id"]
+          },
+          {
+            foreignKeyName: "enablement_tour_completions_tour_id_fkey"
+            columns: ["tour_id"]
+            isOneToOne: false
+            referencedRelation: "enablement_tours"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      enablement_tour_steps: {
+        Row: {
+          action_target: string | null
+          action_type: string | null
+          content: string
+          created_at: string | null
+          disable_overlay: boolean | null
+          disable_scroll: boolean | null
+          highlight_type: string | null
+          id: string
+          placement: string | null
+          skip_if_missing: boolean | null
+          spot_light_padding: number | null
+          step_order: number
+          target_selector: string
+          title: string
+          tour_id: string
+          video_id: string | null
+        }
+        Insert: {
+          action_target?: string | null
+          action_type?: string | null
+          content: string
+          created_at?: string | null
+          disable_overlay?: boolean | null
+          disable_scroll?: boolean | null
+          highlight_type?: string | null
+          id?: string
+          placement?: string | null
+          skip_if_missing?: boolean | null
+          spot_light_padding?: number | null
+          step_order: number
+          target_selector: string
+          title: string
+          tour_id: string
+          video_id?: string | null
+        }
+        Update: {
+          action_target?: string | null
+          action_type?: string | null
+          content?: string
+          created_at?: string | null
+          disable_overlay?: boolean | null
+          disable_scroll?: boolean | null
+          highlight_type?: string | null
+          id?: string
+          placement?: string | null
+          skip_if_missing?: boolean | null
+          spot_light_padding?: number | null
+          step_order?: number
+          target_selector?: string
+          title?: string
+          tour_id?: string
+          video_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "enablement_tour_steps_tour_id_fkey"
+            columns: ["tour_id"]
+            isOneToOne: false
+            referencedRelation: "enablement_tour_analytics_summary"
+            referencedColumns: ["tour_id"]
+          },
+          {
+            foreignKeyName: "enablement_tour_steps_tour_id_fkey"
+            columns: ["tour_id"]
+            isOneToOne: false
+            referencedRelation: "enablement_tours"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "enablement_tour_steps_video_id_fkey"
+            columns: ["video_id"]
+            isOneToOne: false
+            referencedRelation: "enablement_video_library"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      enablement_tours: {
+        Row: {
+          auto_trigger_on: string | null
+          company_id: string | null
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          estimated_duration_seconds: number | null
+          feature_code: string | null
+          id: string
+          is_active: boolean | null
+          module_code: string
+          priority: number | null
+          target_roles: string[] | null
+          tour_code: string
+          tour_name: string
+          tour_type: string | null
+          trigger_route: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          auto_trigger_on?: string | null
+          company_id?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          estimated_duration_seconds?: number | null
+          feature_code?: string | null
+          id?: string
+          is_active?: boolean | null
+          module_code: string
+          priority?: number | null
+          target_roles?: string[] | null
+          tour_code: string
+          tour_name: string
+          tour_type?: string | null
+          trigger_route?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          auto_trigger_on?: string | null
+          company_id?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          estimated_duration_seconds?: number | null
+          feature_code?: string | null
+          id?: string
+          is_active?: boolean | null
+          module_code?: string
+          priority?: number | null
+          target_roles?: string[] | null
+          tour_code?: string
+          tour_name?: string
+          tour_type?: string | null
+          trigger_route?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "enablement_tours_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       enablement_tutorials: {
         Row: {
           client_company_id: string | null
@@ -12776,8 +13140,57 @@ export type Database = {
           },
         ]
       }
+      enablement_user_feature_visits: {
+        Row: {
+          company_id: string | null
+          feature_code: string | null
+          first_visit_at: string | null
+          id: string
+          last_visit_at: string | null
+          module_code: string
+          tour_completed: boolean | null
+          tour_triggered: boolean | null
+          user_id: string
+          visit_count: number | null
+        }
+        Insert: {
+          company_id?: string | null
+          feature_code?: string | null
+          first_visit_at?: string | null
+          id?: string
+          last_visit_at?: string | null
+          module_code: string
+          tour_completed?: boolean | null
+          tour_triggered?: boolean | null
+          user_id: string
+          visit_count?: number | null
+        }
+        Update: {
+          company_id?: string | null
+          feature_code?: string | null
+          first_visit_at?: string | null
+          id?: string
+          last_visit_at?: string | null
+          module_code?: string
+          tour_completed?: boolean | null
+          tour_triggered?: boolean | null
+          user_id?: string
+          visit_count?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "enablement_user_feature_visits_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       enablement_video_library: {
         Row: {
+          auto_play_on_step: boolean | null
+          chapters: Json | null
           created_at: string | null
           created_by: string | null
           description: string | null
@@ -12789,11 +13202,15 @@ export type Database = {
           module_code: string
           thumbnail_url: string | null
           title: string
+          tour_step_id: string | null
+          transcript: string | null
           updated_at: string | null
           video_provider: string
           video_url: string
         }
         Insert: {
+          auto_play_on_step?: boolean | null
+          chapters?: Json | null
           created_at?: string | null
           created_by?: string | null
           description?: string | null
@@ -12805,11 +13222,15 @@ export type Database = {
           module_code: string
           thumbnail_url?: string | null
           title: string
+          tour_step_id?: string | null
+          transcript?: string | null
           updated_at?: string | null
           video_provider: string
           video_url: string
         }
         Update: {
+          auto_play_on_step?: boolean | null
+          chapters?: Json | null
           created_at?: string | null
           created_by?: string | null
           description?: string | null
@@ -12821,11 +13242,21 @@ export type Database = {
           module_code?: string
           thumbnail_url?: string | null
           title?: string
+          tour_step_id?: string | null
+          transcript?: string | null
           updated_at?: string | null
           video_provider?: string
           video_url?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "enablement_video_library_tour_step_id_fkey"
+            columns: ["tour_step_id"]
+            isOneToOne: false
+            referencedRelation: "enablement_tour_steps"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       equity_grants: {
         Row: {
@@ -37819,7 +38250,23 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      enablement_tour_analytics_summary: {
+        Row: {
+          avg_feedback_rating: number | null
+          completion_rate: number | null
+          is_active: boolean | null
+          module_code: string | null
+          total_abandons: number | null
+          total_completions: number | null
+          total_skips: number | null
+          total_starts: number | null
+          tour_code: string | null
+          tour_id: string | null
+          tour_name: string | null
+          video_plays: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       accrue_leave_balance: {
