@@ -78,7 +78,7 @@ export function GoalApprovalInbox({ companyId }: GoalApprovalInboxProps) {
             const goal = approval.goal;
             if (!goal) return null;
 
-            const isOverdue = approval.sla_deadline && isPast(new Date(approval.sla_deadline));
+            const isOverdue = approval.due_date && isPast(new Date(approval.due_date));
             const timeAgo = formatDistanceToNow(new Date(approval.created_at), { addSuffix: true });
 
             return (
@@ -122,10 +122,10 @@ export function GoalApprovalInbox({ companyId }: GoalApprovalInboxProps) {
                         </span>
                       </div>
 
-                      {approval.sla_deadline && (
+                      {approval.due_date && (
                         <p className={`text-xs ${isOverdue ? "text-destructive" : "text-muted-foreground"}`}>
                           SLA: {isOverdue ? "Overdue since " : "Due "}
-                          {formatDistanceToNow(new Date(approval.sla_deadline), { addSuffix: !isOverdue })}
+                          {formatDistanceToNow(new Date(approval.due_date), { addSuffix: !isOverdue })}
                         </p>
                       )}
                     </div>
