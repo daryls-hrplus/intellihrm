@@ -20,6 +20,19 @@ interface PayElement {
   element_type?: { code: string; name: string };
 }
 
+interface EditingRecord {
+  id: string;
+  pay_element_id: string;
+  amount: number;
+  currency: string;
+  frequency: string;
+  start_date: string;
+  end_date: string | null;
+  is_active: boolean;
+  is_override: boolean;
+  notes: string | null;
+}
+
 interface TransactionEmployeeCompensationDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -31,6 +44,7 @@ interface TransactionEmployeeCompensationDialogProps {
   transactionType: TransactionType;
   defaultStartDate: string;
   defaultEndDate?: string;
+  editingRecord?: EditingRecord;
   onSuccess: () => void;
 }
 
@@ -45,6 +59,7 @@ export function TransactionEmployeeCompensationDialog({
   transactionType,
   defaultStartDate,
   defaultEndDate,
+  editingRecord,
   onSuccess,
 }: TransactionEmployeeCompensationDialogProps) {
   const { t } = useTranslation();
@@ -59,6 +74,8 @@ export function TransactionEmployeeCompensationDialog({
   const [formStartDate, setFormStartDate] = useState(defaultStartDate || "");
   const [formEndDate, setFormEndDate] = useState(defaultEndDate || "");
   const [formIsActive, setFormIsActive] = useState(true);
+
+  const isEditing = !!editingRecord;
 
   const frequencyOptions = [
     { value: "monthly", label: t("compensation.employeeCompensation.frequency.monthly", "Monthly") },
@@ -79,20 +96,35 @@ export function TransactionEmployeeCompensationDialog({
       loadPayElements();
       loadPositionPayElements();
       loadPositionCompanyId();
-      // Reset form with defaults
-      setFormPayElementId("");
-      setFormAmount("");
-      setFormCurrency("USD");
-      setFormFrequency("monthly");
-      setFormIsOverride(false);
-      setFormOverrideReason("");
-      setFormNotes("");
-      setFormStartDate(defaultStartDate || "");
-      setFormEndDate(defaultEndDate || "");
-      setFormIsActive(true);
+      
+      // If editing, populate form with existing values
+      if (editingRecord) {
+        setFormPayElementId(editingRecord.pay_element_id);
+        setFormAmount(editingRecord.amount.toString());
+        setFormCurrency(editingRecord.currency);
+        setFormFrequency(editingRecord.frequency);
+        setFormIsOverride(editingRecord.is_override);
+        setFormOverrideReason("");
+        setFormNotes(editingRecord.notes || "");
+        setFormStartDate(editingRecord.start_date);
+        setFormEndDate(editingRecord.end_date || "");
+        setFormIsActive(editingRecord.is_active);
+      } else {
+        // Reset form with defaults for new record
+        setFormPayElementId("");
+        setFormAmount("");
+        setFormCurrency("USD");
+        setFormFrequency("monthly");
+        setFormIsOverride(false);
+        setFormOverrideReason("");
+        setFormNotes("");
+        setFormStartDate(defaultStartDate || "");
+        setFormEndDate(defaultEndDate || "");
+        setFormIsActive(true);
+      }
       setResolvedCompanyId(companyId);
     }
-  }, [open, defaultStartDate, defaultEndDate, companyId]);
+  }, [open, defaultStartDate, defaultEndDate, companyId, editingRecord]);
 
   const loadPayElements = async () => {
     const { data } = await supabase
@@ -157,7 +189,7 @@ export function TransactionEmployeeCompensationDialog({
 
     setIsSubmitting(true);
     try {
-      const { error } = await supabase.from("employee_compensation").insert({
+      const compensationData = {
         company_id: resolvedCompanyId,
         employee_id: employeeId,
         position_id: positionId,
@@ -171,12 +203,29 @@ export function TransactionEmployeeCompensationDialog({
         start_date: formStartDate,
         end_date: formEndDate || null,
         is_active: formIsActive,
-        created_by: user?.id,
         updated_by: user?.id,
-      });
+      };
 
-      if (error) throw error;
-      toast.success(t("compensation.employeeCompensation.added", "Compensation record added"));
+      if (isEditing && editingRecord) {
+        // Update existing record
+        const { error } = await supabase
+          .from("employee_compensation")
+          .update(compensationData)
+          .eq("id", editingRecord.id);
+
+        if (error) throw error;
+        toast.success(t("compensation.employeeCompensation.updated", "Compensation record updated"));
+      } else {
+        // Create new record
+        const { error } = await supabase.from("employee_compensation").insert({
+          ...compensationData,
+          created_by: user?.id,
+        });
+
+        if (error) throw error;
+        toast.success(t("compensation.employeeCompensation.added", "Compensation record added"));
+      }
+      
       onOpenChange(false);
       onSuccess();
     } catch (error: any) {
@@ -191,10 +240,14 @@ export function TransactionEmployeeCompensationDialog({
       <DialogContent className="max-w-lg">
         <DialogHeader>
           <DialogTitle>
-            {t("compensation.employeeCompensation.dialog.createTitle", "Add Compensation")}
+            {isEditing 
+              ? t("compensation.employeeCompensation.dialog.editTitle", "Edit Compensation")
+              : t("compensation.employeeCompensation.dialog.createTitle", "Add Compensation")}
           </DialogTitle>
           <DialogDescription>
-            {t("compensation.employeeCompensation.dialog.description", "Add a compensation element for this employee")}
+            {isEditing
+              ? t("compensation.employeeCompensation.dialog.editDescription", "Update the compensation element for this employee")
+              : t("compensation.employeeCompensation.dialog.description", "Add a compensation element for this employee")}
           </DialogDescription>
         </DialogHeader>
 
