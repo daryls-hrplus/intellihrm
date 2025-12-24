@@ -123,10 +123,10 @@ export function TransactionFormDialog({
     }
   }, [open, transactionType]);
 
-  // Load employee positions when employee is selected (for CONFIRMATION and PROBATION_EXT transaction types)
+  // Load employee positions when employee is selected (for CONFIRMATION, PROBATION_EXT, and TERMINATION transaction types)
   useEffect(() => {
     const loadEmployeePositions = async () => {
-      if (formData.employee_id && (transactionType === "CONFIRMATION" || transactionType === "PROBATION_EXT")) {
+      if (formData.employee_id && (transactionType === "CONFIRMATION" || transactionType === "PROBATION_EXT" || transactionType === "TERMINATION")) {
         const { data } = await supabase
           .from("employee_positions")
           .select(`
@@ -919,6 +919,85 @@ export function TransactionFormDialog({
       case "TERMINATION":
         return (
           <>
+            {/* Position Selection for Termination */}
+            {employeePositions.length > 0 && (
+              <div className="space-y-3">
+                <Label>{t("workforce.modules.transactions.form.termination.positionsToTerminate", "Positions to Terminate")} *</Label>
+                
+                {/* Terminate All Option */}
+                <div className="flex items-center space-x-2">
+                  <Switch
+                    checked={formData.terminate_all_positions || false}
+                    onCheckedChange={(checked) => {
+                      if (checked) {
+                        // Select all position IDs when toggling on
+                        setFormData({ 
+                          ...formData, 
+                          terminate_all_positions: true,
+                          terminated_position_ids: employeePositions.map(ep => ep.position_id)
+                        });
+                      } else {
+                        setFormData({ 
+                          ...formData, 
+                          terminate_all_positions: false,
+                          terminated_position_ids: []
+                        });
+                      }
+                    }}
+                  />
+                  <Label className="font-normal">
+                    {t("workforce.modules.transactions.form.termination.terminateAllPositions", "Terminate all positions")}
+                  </Label>
+                </div>
+
+                {/* Individual Position Selection */}
+                {!formData.terminate_all_positions && (
+                  <div className="space-y-2 pl-4 border-l-2 border-muted">
+                    <p className="text-sm text-muted-foreground">
+                      {t("workforce.modules.transactions.form.termination.selectPositionsNote", "Select specific positions to terminate:")}
+                    </p>
+                    {employeePositions.map((ep) => (
+                      <div key={ep.position_id} className="flex items-center space-x-2">
+                        <Switch
+                          checked={(formData.terminated_position_ids || []).includes(ep.position_id)}
+                          onCheckedChange={(checked) => {
+                            const currentIds = formData.terminated_position_ids || [];
+                            if (checked) {
+                              setFormData({
+                                ...formData,
+                                terminated_position_ids: [...currentIds, ep.position_id]
+                              });
+                            } else {
+                              setFormData({
+                                ...formData,
+                                terminated_position_ids: currentIds.filter(id => id !== ep.position_id)
+                              });
+                            }
+                          }}
+                        />
+                        <Label className="font-normal">
+                          {ep.position.title} ({ep.position.code})
+                        </Label>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {employeePositions.length > 1 && (
+                  <p className="text-xs text-muted-foreground">
+                    {t("workforce.modules.transactions.form.termination.multiplePositionsNote", "Employee has multiple positions. Select which positions to terminate.")}
+                  </p>
+                )}
+              </div>
+            )}
+            
+            {/* Show message if employee selected but no positions */}
+            {formData.employee_id && employeePositions.length === 0 && (
+              <div className="text-sm text-muted-foreground bg-muted p-3 rounded-md">
+                {t("workforce.modules.transactions.form.termination.noPositions", "No active positions found for this employee.")}
+              </div>
+            )}
+
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>{t("workforce.modules.transactions.form.termination.terminationType")}</Label>
