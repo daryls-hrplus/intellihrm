@@ -176,3 +176,9 @@ verify_jwt = false
 
 [functions.ai-governance-alerts]
 verify_jwt = false
+
+[functions.generate-tour-ai]
+verify_jwt = false
+
+[functions.generate-release-tours]
+verify_jwt = false

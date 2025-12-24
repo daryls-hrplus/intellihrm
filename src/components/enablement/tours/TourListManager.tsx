@@ -100,7 +100,7 @@ export function TourListManager({ onSelectTour }: TourListManagerProps) {
         .order("created_at", { ascending: false });
 
       if (error) throw error;
-      return data as (Tour & { enablement_tour_steps: [{ count: number }] })[];
+      return data as (Tour & { enablement_tour_steps: { count: number }[]; review_status?: string; generated_by?: string })[];
     },
   });
 
