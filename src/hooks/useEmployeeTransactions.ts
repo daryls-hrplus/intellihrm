@@ -130,7 +130,7 @@ export function useEmployeeTransactions() {
         .select(`
           *,
           transaction_type:lookup_values!employee_transactions_transaction_type_id_fkey(code, name),
-          employee:profiles!employee_transactions_employee_id_fkey(full_name, email),
+          employee:profiles!employee_transactions_employee_id_fkey(full_name, email, company_id),
           position:positions!employee_transactions_position_id_fkey(title, code),
           department:departments!employee_transactions_department_id_fkey(name),
           company:companies!employee_transactions_company_id_fkey(name)
@@ -146,9 +146,8 @@ export function useEmployeeTransactions() {
       if (filters?.employeeId) {
         query = query.eq("employee_id", filters.employeeId);
       }
-      if (filters?.companyId) {
-        query = query.eq("company_id", filters.companyId);
-      }
+      // For company filtering, we need to filter by either transaction.company_id OR employee.company_id
+      // This is handled after fetching since Supabase doesn't support OR across tables easily
       if (filters?.fromDate) {
         query = query.gte("effective_date", filters.fromDate);
       }
@@ -159,7 +158,17 @@ export function useEmployeeTransactions() {
       const { data, error: fetchError } = await query;
 
       if (fetchError) throw fetchError;
-      return data as EmployeeTransaction[];
+      
+      // Filter by company - check both transaction.company_id and employee.company_id
+      let filteredData = data as unknown as EmployeeTransaction[];
+      if (filters?.companyId) {
+        filteredData = filteredData.filter(t => 
+          t.company_id === filters.companyId || 
+          (t.employee as any)?.company_id === filters.companyId
+        );
+      }
+      
+      return filteredData;
     } catch (err) {
       const message = err instanceof Error ? err.message : "Failed to fetch transactions";
       setError(message);
