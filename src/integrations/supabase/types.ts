@@ -14554,6 +14554,268 @@ export type Database = {
           },
         ]
       }
+      feature_impl_task_progress: {
+        Row: {
+          company_id: string | null
+          completed_at: string | null
+          completed_by: string | null
+          created_at: string | null
+          feature_impl_id: string
+          id: string
+          is_completed: boolean | null
+          notes: string | null
+          task_id: string
+          uncompleted_at: string | null
+          uncompleted_by: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          company_id?: string | null
+          completed_at?: string | null
+          completed_by?: string | null
+          created_at?: string | null
+          feature_impl_id: string
+          id?: string
+          is_completed?: boolean | null
+          notes?: string | null
+          task_id: string
+          uncompleted_at?: string | null
+          uncompleted_by?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          company_id?: string | null
+          completed_at?: string | null
+          completed_by?: string | null
+          created_at?: string | null
+          feature_impl_id?: string
+          id?: string
+          is_completed?: boolean | null
+          notes?: string | null
+          task_id?: string
+          uncompleted_at?: string | null
+          uncompleted_by?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "feature_impl_task_progress_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feature_impl_task_progress_completed_by_fkey"
+            columns: ["completed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feature_impl_task_progress_feature_impl_id_fkey"
+            columns: ["feature_impl_id"]
+            isOneToOne: false
+            referencedRelation: "feature_implementations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feature_impl_task_progress_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "feature_implementation_tasks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feature_impl_task_progress_uncompleted_by_fkey"
+            columns: ["uncompleted_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      feature_implementation_tasks: {
+        Row: {
+          company_id: string | null
+          created_at: string | null
+          created_by: string | null
+          feature_id: string
+          id: string
+          is_required: boolean | null
+          is_standard: boolean | null
+          task_description: string | null
+          task_name: string
+          task_order: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          company_id?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          feature_id: string
+          id?: string
+          is_required?: boolean | null
+          is_standard?: boolean | null
+          task_description?: string | null
+          task_name: string
+          task_order?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          company_id?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          feature_id?: string
+          id?: string
+          is_required?: boolean | null
+          is_standard?: boolean | null
+          task_description?: string | null
+          task_name?: string
+          task_order?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "feature_implementation_tasks_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feature_implementation_tasks_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feature_implementation_tasks_feature_id_fkey"
+            columns: ["feature_id"]
+            isOneToOne: false
+            referencedRelation: "application_features"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      feature_implementations: {
+        Row: {
+          company_id: string | null
+          created_at: string | null
+          feature_id: string
+          id: string
+          impl_complete: boolean | null
+          impl_completed_at: string | null
+          impl_completed_by: string | null
+          impl_uncompleted_at: string | null
+          impl_uncompleted_by: string | null
+          implementation_order: number | null
+          module_impl_id: string
+          notes: string | null
+          tour_completed_at: string | null
+          tour_completed_by: string | null
+          tour_id: string | null
+          tour_watched: boolean | null
+          updated_at: string | null
+        }
+        Insert: {
+          company_id?: string | null
+          created_at?: string | null
+          feature_id: string
+          id?: string
+          impl_complete?: boolean | null
+          impl_completed_at?: string | null
+          impl_completed_by?: string | null
+          impl_uncompleted_at?: string | null
+          impl_uncompleted_by?: string | null
+          implementation_order?: number | null
+          module_impl_id: string
+          notes?: string | null
+          tour_completed_at?: string | null
+          tour_completed_by?: string | null
+          tour_id?: string | null
+          tour_watched?: boolean | null
+          updated_at?: string | null
+        }
+        Update: {
+          company_id?: string | null
+          created_at?: string | null
+          feature_id?: string
+          id?: string
+          impl_complete?: boolean | null
+          impl_completed_at?: string | null
+          impl_completed_by?: string | null
+          impl_uncompleted_at?: string | null
+          impl_uncompleted_by?: string | null
+          implementation_order?: number | null
+          module_impl_id?: string
+          notes?: string | null
+          tour_completed_at?: string | null
+          tour_completed_by?: string | null
+          tour_id?: string | null
+          tour_watched?: boolean | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "feature_implementations_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feature_implementations_feature_id_fkey"
+            columns: ["feature_id"]
+            isOneToOne: false
+            referencedRelation: "application_features"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feature_implementations_impl_completed_by_fkey"
+            columns: ["impl_completed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feature_implementations_impl_uncompleted_by_fkey"
+            columns: ["impl_uncompleted_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feature_implementations_module_impl_id_fkey"
+            columns: ["module_impl_id"]
+            isOneToOne: false
+            referencedRelation: "module_implementations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feature_implementations_tour_completed_by_fkey"
+            columns: ["tour_completed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feature_implementations_tour_id_fkey"
+            columns: ["tour_id"]
+            isOneToOne: false
+            referencedRelation: "enablement_tour_analytics_summary"
+            referencedColumns: ["tour_id"]
+          },
+          {
+            foreignKeyName: "feature_implementations_tour_id_fkey"
+            columns: ["tour_id"]
+            isOneToOne: false
+            referencedRelation: "enablement_tours"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       feedback_responses: {
         Row: {
           created_at: string
@@ -25643,6 +25905,73 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: true
             referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      module_implementations: {
+        Row: {
+          company_id: string | null
+          completed_at: string | null
+          created_at: string | null
+          created_by: string | null
+          id: string
+          implementation_order: number | null
+          module_id: string
+          notes: string | null
+          started_at: string | null
+          status: string | null
+          target_go_live: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          company_id?: string | null
+          completed_at?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          implementation_order?: number | null
+          module_id: string
+          notes?: string | null
+          started_at?: string | null
+          status?: string | null
+          target_go_live?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          company_id?: string | null
+          completed_at?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          implementation_order?: number | null
+          module_id?: string
+          notes?: string | null
+          started_at?: string | null
+          status?: string | null
+          target_go_live?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "module_implementations_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "module_implementations_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "module_implementations_module_id_fkey"
+            columns: ["module_id"]
+            isOneToOne: false
+            referencedRelation: "application_modules"
             referencedColumns: ["id"]
           },
         ]
