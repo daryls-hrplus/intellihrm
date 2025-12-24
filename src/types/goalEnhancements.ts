@@ -32,6 +32,9 @@ export interface GoalExtendedAttributes {
   
   // Metric Template Reference
   metricTemplateId?: string;
+  
+  // Actual goal level (for project level stored as team in DB)
+  actualGoalLevel?: GoalLevel;
 }
 
 export interface GoalAchievement {

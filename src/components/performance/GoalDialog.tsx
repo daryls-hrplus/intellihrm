@@ -37,9 +37,15 @@ import {
 
 type GoalStatus = 'draft' | 'active' | 'in_progress' | 'completed' | 'cancelled' | 'overdue';
 type GoalType = 'okr_objective' | 'okr_key_result' | 'smart_goal';
-type GoalLevel = 'company' | 'department' | 'team' | 'individual';
+type GoalLevel = 'company' | 'department' | 'team' | 'individual' | 'project';
 type DbGoalLevel = 'company' | 'department' | 'team' | 'individual';
 type GoalSource = 'cascaded' | 'manager_assigned' | 'self_created';
+
+// Map UI goal levels to DB-compatible values
+const mapGoalLevelToDb = (level: GoalLevel): DbGoalLevel => {
+  if (level === 'project') return 'team'; // Store as team, actual level in extended attrs
+  return level;
+};
 
 interface Goal {
   id: string;
@@ -236,7 +242,8 @@ export function GoalDialog({
         title: goal.title,
         description: goal.description || "",
         goal_type: goal.goal_type,
-        goal_level: goal.goal_level,
+        // Restore actual goal level from extended attrs if available
+        goal_level: extAttrs?.actualGoalLevel || goal.goal_level,
         goal_source: "self_created",
         status: goal.status,
         category: getDisplayCategory(goal.category) || "",
@@ -335,7 +342,7 @@ export function GoalDialog({
 
     setLoading(true);
     try {
-      // Build extended attributes
+      // Build extended attributes - include actual goal level if it's "project"
       const extendedAttrs: GoalExtendedAttributes = {
         measurementType: formData.measurement_type,
         thresholdValue: formData.threshold_value ? parseFloat(formData.threshold_value) : undefined,
@@ -348,6 +355,8 @@ export function GoalDialog({
         isWeightRequired: formData.is_weight_required,
         inheritedWeightPortion: formData.inherited_weight_portion ? parseFloat(formData.inherited_weight_portion) : undefined,
         metricTemplateId: formData.metric_template_id || undefined,
+        // Store actual goal level if different from DB value
+        actualGoalLevel: formData.goal_level === 'project' ? 'project' : undefined,
       };
 
       // Serialize extended attrs with legacy category
@@ -359,7 +368,7 @@ export function GoalDialog({
         title: formData.title,
         description: formData.description || null,
         goal_type: formData.goal_type,
-        goal_level: formData.goal_level as DbGoalLevel,
+        goal_level: mapGoalLevelToDb(formData.goal_level),
         goal_source: formData.goal_source,
         status: formData.status,
         category: categoryWithAttrs,
@@ -553,8 +562,9 @@ export function GoalDialog({
                     <SelectContent>
                       <SelectItem value="individual">Individual</SelectItem>
                       <SelectItem value="team">Team</SelectItem>
+                      <SelectItem value="project">Project / Initiative</SelectItem>
                       <SelectItem value="department">Department</SelectItem>
-                      <SelectItem value="company">Company</SelectItem>
+                      <SelectItem value="company">Company / Strategic</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
