@@ -20,6 +20,8 @@ import { OverallRatingScaleDialog } from "@/components/performance/OverallRating
 import { useOverallRatingScales, OverallRatingScale } from "@/hooks/useRatingScales";
 import { TalentApprovalWorkflowManager } from "@/components/performance/setup/TalentApprovalWorkflowManager";
 import { Feedback360ConfigSection } from "@/components/performance/setup/Feedback360ConfigSection";
+import { GoalCyclesManager } from "@/components/performance/setup/GoalCyclesManager";
+import { GoalLockingRulesManager } from "@/components/performance/setup/GoalLockingRulesManager";
 import { 
   Settings, 
   Star, 
@@ -85,7 +87,7 @@ export default function PerformanceSetupPage() {
   useEffect(() => {
     const defaultSecondaryTabs: Record<string, string> = {
       foundation: "rating-scales",
-      goals: "goal-templates",
+      goals: "goal-cycles",
       appraisals: "appraisal-cycles",
       "360-feedback": "feedback-360",
       recognition: "recognition-categories",
@@ -284,17 +286,31 @@ export default function PerformanceSetupPage() {
             {/* Goals Configuration */}
             <TabsContent value="goals" className="space-y-4">
               <div className="text-sm text-muted-foreground mb-4">
-                Goal-specific settings and templates
+                Goal framework configuration including cycles, templates, and locking rules
               </div>
               <Tabs value={secondaryTab} onValueChange={setSecondaryTab}>
                 <TabsList>
+                  <TabsTrigger value="goal-cycles" className="flex items-center gap-2">
+                    <Calendar className="h-4 w-4" />
+                    Goal Cycles
+                  </TabsTrigger>
                   <TabsTrigger value="goal-templates" className="flex items-center gap-2">
                     <Target className="h-4 w-4" />
                     Goal Templates
                   </TabsTrigger>
+                  <TabsTrigger value="goal-locking" className="flex items-center gap-2">
+                    <GitBranch className="h-4 w-4" />
+                    Locking Rules
+                  </TabsTrigger>
                 </TabsList>
+                <TabsContent value="goal-cycles" className="mt-4">
+                  <GoalCyclesManager companyId={selectedCompany} />
+                </TabsContent>
                 <TabsContent value="goal-templates" className="mt-4">
                   <GoalTemplatesContent templates={goalTemplates} isLoading={isLoading} onAdd={() => { setEditingGoalTemplate(null); setGoalTemplateDialogOpen(true); }} onEdit={(t: GoalTemplate) => { setEditingGoalTemplate(t); setGoalTemplateDialogOpen(true); }} onDelete={handleDeleteGoalTemplate} t={t} />
+                </TabsContent>
+                <TabsContent value="goal-locking" className="mt-4">
+                  <GoalLockingRulesManager companyId={selectedCompany} />
                 </TabsContent>
               </Tabs>
             </TabsContent>
