@@ -128,11 +128,12 @@ export function EmployeeTransactionsList({
   };
 
   const loadCompensationData = async (txns: EmployeeTransaction[]) => {
-    // Get all unique employee/position combinations to check for compensation
+    // Get all unique employee/position/effective_date combinations to check for compensation
     const checks = txns.map(t => ({
       id: t.id,
       employee_id: t.employee_id,
       position_id: getRelevantPositionId(t),
+      effective_date: t.effective_date,
     })).filter(c => c.employee_id && c.position_id);
 
     if (checks.length === 0) return;
@@ -151,12 +152,14 @@ export function EmployeeTransactionsList({
 
     if (!compData) return;
 
-    // Map compensation records to transactions by employee_id and position_id
+    // Map compensation records to transactions by employee_id, position_id, AND matching effective_date with start_date
     const compMap: Record<string, EmployeeCompensationRecord[]> = {};
     for (const txn of checks) {
+      // Only match compensation records where the start_date equals the transaction's effective_date
       const matching = compData.filter(c => 
         c.employee_id === txn.employee_id && 
-        c.position_id === txn.position_id
+        c.position_id === txn.position_id &&
+        c.start_date === txn.effective_date
       );
       if (matching.length > 0) {
         compMap[txn.id] = matching.map(c => ({
