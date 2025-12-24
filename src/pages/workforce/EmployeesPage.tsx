@@ -55,13 +55,18 @@ import { toast } from "sonner";
 import { EmployeeEditDialog } from "@/components/employee/EmployeeEditDialog";
 import { AddEmployeeDialog } from "@/components/employee/AddEmployeeDialog";
 
+interface EmployeePosition {
+  position_title: string;
+  department_name: string | null;
+  assignment_type: string;
+}
+
 interface Employee {
   id: string;
   full_name: string;
   email: string;
   avatar_url: string | null;
-  position_title: string | null;
-  department_name: string | null;
+  positions: EmployeePosition[];
   location: string | null;
   is_active: boolean;
 }
@@ -137,6 +142,7 @@ export default function EmployeesPage() {
         .select(`
           employee_id,
           is_active,
+          assignment_type,
           positions:position_id (
             title,
             departments:department_id (
@@ -153,10 +159,9 @@ export default function EmployeesPage() {
 
       if (positionsError) throw positionsError;
 
-      // Create a map of employee positions
+      // Create a map of employee positions (array of positions per employee)
       const positionMap = new Map<string, {
-        position_title: string | null;
-        department_name: string | null;
+        positions: EmployeePosition[];
         location: string | null;
       }>();
 
@@ -166,11 +171,24 @@ export default function EmployeesPage() {
             ? `${ep.positions.departments.companies.city || ''}, ${ep.positions.departments.companies.country || ''}`.replace(/^, |, $/g, '')
             : null;
           
-          positionMap.set(ep.employee_id, {
+          const positionData: EmployeePosition = {
             position_title: ep.positions.title,
             department_name: ep.positions.departments?.name || null,
-            location: location || null,
-          });
+            assignment_type: ep.assignment_type || 'permanent',
+          };
+
+          const existing = positionMap.get(ep.employee_id);
+          if (existing) {
+            existing.positions.push(positionData);
+            if (!existing.location && location) {
+              existing.location = location;
+            }
+          } else {
+            positionMap.set(ep.employee_id, {
+              positions: [positionData],
+              location: location || null,
+            });
+          }
         }
       });
 
@@ -182,10 +200,9 @@ export default function EmployeesPage() {
           full_name: profile.full_name || profile.email,
           email: profile.email,
           avatar_url: profile.avatar_url,
-          position_title: positionData?.position_title || null,
-          department_name: positionData?.department_name || null,
+          positions: positionData?.positions || [],
           location: positionData?.location || null,
-          is_active: !!positionData,
+          is_active: (positionData?.positions?.length || 0) > 0,
         };
       });
 
@@ -201,18 +218,24 @@ export default function EmployeesPage() {
   const departments = useMemo(() => {
     const deptSet = new Set<string>();
     employees.forEach(emp => {
-      if (emp.department_name) deptSet.add(emp.department_name);
+      emp.positions.forEach(pos => {
+        if (pos.department_name) deptSet.add(pos.department_name);
+      });
     });
     return Array.from(deptSet).sort();
   }, [employees]);
 
   const filteredEmployees = useMemo(() => {
     return employees.filter((emp) => {
-      // Search filter
+      // Search filter - check across all positions
+      const positionSearchMatch = emp.positions.some(pos => 
+        pos.position_title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (pos.department_name?.toLowerCase().includes(searchQuery.toLowerCase()) ?? false)
+      );
       const matchesSearch = 
         emp.full_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         emp.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (emp.department_name?.toLowerCase().includes(searchQuery.toLowerCase()) ?? false);
+        positionSearchMatch;
       
       // Status filter
       const matchesStatus = 
@@ -220,10 +243,10 @@ export default function EmployeesPage() {
         (statusFilter === "active" && emp.is_active) ||
         (statusFilter === "unassigned" && !emp.is_active);
       
-      // Department filter
+      // Department filter - check if any position matches
       const matchesDepartment = 
         departmentFilter === "all" || 
-        emp.department_name === departmentFilter;
+        emp.positions.some(pos => pos.department_name === departmentFilter);
 
       return matchesSearch && matchesStatus && matchesDepartment;
     });
@@ -484,13 +507,22 @@ export default function EmployeesPage() {
                         {getInitials(employee.full_name)}
                       </AvatarFallback>
                     </Avatar>
-                    <div>
+                    <div className="min-w-0">
                       <h3 className="font-semibold text-card-foreground">
                         {employee.full_name}
                       </h3>
-                      <p className="text-sm text-muted-foreground">
-                        {employee.position_title || t("workforce.noPositionAssigned")}
-                      </p>
+                      {employee.positions.length > 0 ? (
+                        <p className="text-sm text-muted-foreground truncate">
+                          {employee.positions[0].position_title}
+                          {employee.positions.length > 1 && (
+                            <span className="text-xs ml-1">+{employee.positions.length - 1}</span>
+                          )}
+                        </p>
+                      ) : (
+                        <p className="text-sm text-muted-foreground">
+                          {t("workforce.noPositionAssigned")}
+                        </p>
+                      )}
                     </div>
                   </div>
                   <DropdownMenu>
@@ -515,6 +547,31 @@ export default function EmployeesPage() {
                   </DropdownMenu>
                 </div>
 
+                {/* Positions Section */}
+                {employee.positions.length > 0 && (
+                  <div className="mt-3 space-y-1.5">
+                    {employee.positions.map((pos, idx) => (
+                      <div key={idx} className="flex items-center gap-2 text-sm">
+                        <Badge 
+                          variant="outline" 
+                          className={cn(
+                            "text-xs capitalize shrink-0",
+                            pos.assignment_type === 'acting' && "border-amber-500/50 text-amber-600 bg-amber-50 dark:bg-amber-950/30",
+                            pos.assignment_type === 'permanent' && "border-primary/50 text-primary bg-primary/5",
+                            pos.assignment_type === 'temporary' && "border-blue-500/50 text-blue-600 bg-blue-50 dark:bg-blue-950/30"
+                          )}
+                        >
+                          {pos.assignment_type}
+                        </Badge>
+                        <span className="text-muted-foreground truncate">
+                          {pos.position_title}
+                          {pos.department_name && <span className="text-xs ml-1">({pos.department_name})</span>}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
                 <div className="mt-4 space-y-2">
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
                     <Mail className="h-4 w-4 shrink-0" />
@@ -522,12 +579,6 @@ export default function EmployeesPage() {
                       {maskPii(employee.email, "email")}
                     </span>
                   </div>
-                  {employee.department_name && (
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <Building2 className="h-4 w-4 shrink-0" />
-                      <span>{employee.department_name}</span>
-                    </div>
-                  )}
                   {employee.location && (
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
                       <MapPin className="h-4 w-4 shrink-0" />
