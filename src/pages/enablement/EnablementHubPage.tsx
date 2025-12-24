@@ -80,10 +80,17 @@ export default function EnablementHubPage() {
 
   const stats = {
     total: totalFeatures,
-    inProgress: contentItems.filter((i) => i.workflow_status === "development" || i.workflow_status === "planning").length,
-    inReview: contentItems.filter((i) => i.workflow_status === "review").length,
-    published: contentItems.filter((i) => i.workflow_status === "published").length,
+    inProgress: contentItems.filter((i) => 
+      (i.workflow_status as string) === "in_development" || 
+      (i.workflow_status as string) === "development_backlog"
+    ).length,
+    inReview: contentItems.filter((i) => 
+      (i.workflow_status as string) === "testing_review" || 
+      (i.workflow_status as string) === "documentation"
+    ).length,
+    published: contentItems.filter((i) => (i.workflow_status as string) === "published").length,
     critical: contentItems.filter((i) => i.priority === "critical").length,
+    readyForEnablement: contentItems.filter((i) => (i.workflow_status as string) === "ready_for_enablement").length,
   };
 
   // Grouped sections following the pattern from other modules
@@ -231,6 +238,13 @@ export default function EnablementHubPage() {
     {
       titleKey: "Analytics & Settings",
       items: [
+        {
+          title: "Feature Audit Dashboard",
+          description: "Track feature coverage, workflow status, and documentation gaps",
+          href: "/enablement/audit",
+          icon: ClipboardCheck,
+          color: "bg-emerald-500/10 text-emerald-500",
+        },
         {
           title: "Content Analytics",
           description: "Track content creation metrics and team performance",

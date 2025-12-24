@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { isReadyForEnablement, WorkflowColumn } from "@/types/enablement";
 
 export interface NewFeature {
   id: string;
@@ -12,7 +13,8 @@ export interface NewFeature {
   icon_name: string | null;
   route_path: string | null;
   created_at: string;
-  reason: "no_enablement_record" | "all_not_started" | "recently_added";
+  workflow_status?: string;
+  reason: "no_enablement_record" | "all_not_started" | "recently_added" | "ready_for_artifacts";
 }
 
 /**
@@ -21,6 +23,7 @@ export interface NewFeature {
  * 1. It has no enablement_content_status record
  * 2. All artifact statuses are 'not_started'
  * 3. It was added in the last 7 days
+ * 4. It's ready for enablement artifacts (in documentation/ready_for_enablement stage)
  */
 export function useNewFeaturesDetection() {
   const [newFeatures, setNewFeatures] = useState<NewFeature[]>([]);
@@ -55,7 +58,7 @@ export function useNewFeaturesDetection() {
       // Get all enablement content statuses (keyed by feature_code)
       const { data: statuses, error: statusError } = await supabase
         .from("enablement_content_status")
-        .select("feature_code, documentation_status, scorm_lite_status, rise_course_status, video_status, dap_guide_status");
+        .select("feature_code, workflow_status, documentation_status, scorm_lite_status, rise_course_status, video_status, dap_guide_status");
 
       if (statusError) throw statusError;
 
@@ -81,13 +84,26 @@ export function useNewFeaturesDetection() {
         if (!status) {
           reason = "no_enablement_record";
         } 
-        // Check if all statuses are 'not_started'
+        // Check if ready for enablement artifacts
+        else if (isReadyForEnablement(status.workflow_status as WorkflowColumn)) {
+          // Only flag if artifacts not started
+          const hasNoArtifacts = 
+            status.documentation_status === "not_started" &&
+            status.scorm_lite_status === "not_started" &&
+            status.rise_course_status === "not_started" &&
+            status.video_status === "not_started";
+          
+          if (hasNoArtifacts) {
+            reason = "ready_for_artifacts";
+          }
+        }
+        // Check if all statuses are 'not_started' (in earlier stages)
         else if (
           status.documentation_status === "not_started" &&
           status.scorm_lite_status === "not_started" &&
           status.rise_course_status === "not_started" &&
           status.video_status === "not_started" &&
-          status.dap_guide_status === "not_started"
+          (status.dap_guide_status === "not_started" || status.dap_guide_status === "na")
         ) {
           reason = "all_not_started";
         }
@@ -108,6 +124,7 @@ export function useNewFeaturesDetection() {
             icon_name: feature.icon_name,
             route_path: feature.route_path,
             created_at: feature.created_at,
+            workflow_status: status?.workflow_status,
             reason
           });
         }
@@ -130,12 +147,14 @@ export function useNewFeaturesDetection() {
   const noEnablementRecord = newFeatures.filter(f => f.reason === "no_enablement_record");
   const allNotStarted = newFeatures.filter(f => f.reason === "all_not_started");
   const recentlyAdded = newFeatures.filter(f => f.reason === "recently_added");
+  const readyForArtifacts = newFeatures.filter(f => f.reason === "ready_for_artifacts");
 
   return {
     newFeatures,
     noEnablementRecord,
     allNotStarted,
     recentlyAdded,
+    readyForArtifacts,
     totalCount: newFeatures.length,
     isLoading,
     error,
