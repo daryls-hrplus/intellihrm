@@ -45,17 +45,18 @@ import {
 import { TransactionEmployeeCompensationDialog } from "@/components/compensation/TransactionEmployeeCompensationDialog";
 import { supabase } from "@/integrations/supabase/client";
 
-interface CompensationRecord {
+interface EmployeeCompensationRecord {
   id: string;
-  change_type: string;
-  effective_date: string;
-  previous_salary: number | null;
-  new_salary: number;
-  change_amount: number | null;
-  change_percentage: number | null;
-  reason: string | null;
-  notes: string | null;
+  pay_element_id: string;
+  pay_element?: { name: string; code: string };
+  amount: number;
   currency: string;
+  frequency: string;
+  start_date: string;
+  end_date: string | null;
+  is_active: boolean;
+  is_override: boolean;
+  notes: string | null;
 }
 
 interface EmployeeTransactionsListProps {
@@ -95,8 +96,7 @@ export function EmployeeTransactionsList({
     useState<EmployeeTransaction | null>(null);
   const [compensationDialogOpen, setCompensationDialogOpen] = useState(false);
   const [selectedForCompensation, setSelectedForCompensation] = useState<EmployeeTransaction | null>(null);
-  const [editingCompensation, setEditingCompensation] = useState<CompensationRecord | null>(null);
-  const [transactionCompensation, setTransactionCompensation] = useState<Record<string, CompensationRecord[]>>({});
+  const [transactionCompensation, setTransactionCompensation] = useState<Record<string, EmployeeCompensationRecord[]>>({});
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
 
   useEffect(() => {
@@ -125,35 +125,52 @@ export function EmployeeTransactionsList({
   };
 
   const loadCompensationData = async (txns: EmployeeTransaction[]) => {
-    // Get all unique employee/position/date combinations to check for compensation
+    // Get all unique employee/position combinations to check for compensation
     const checks = txns.map(t => ({
       id: t.id,
       employee_id: t.employee_id,
       position_id: getRelevantPositionId(t),
-      effective_date: t.effective_date
+      start_date: t.transaction_type?.code === "ACTING" ? t.acting_start_date : t.effective_date,
+      end_date: t.transaction_type?.code === "ACTING" ? t.acting_end_date : null
     })).filter(c => c.employee_id && c.position_id);
 
     if (checks.length === 0) return;
 
-    // Fetch compensation records matching these transactions
+    // Fetch employee compensation records matching these transactions
     const { data: compData } = await supabase
-      .from("compensation_history")
-      .select("id, employee_id, position_id, effective_date, change_type, previous_salary, new_salary, change_amount, change_percentage, currency, reason, notes")
+      .from("employee_compensation")
+      .select(`
+        id, employee_id, position_id, pay_element_id, amount, currency, frequency, 
+        start_date, end_date, is_active, is_override, notes,
+        pay_element:pay_elements(name, code)
+      `)
       .in("employee_id", [...new Set(checks.map(c => c.employee_id).filter(Boolean))])
-      .order("effective_date", { ascending: false });
+      .order("start_date", { ascending: false });
 
     if (!compData) return;
 
     // Map compensation records to transactions
-    const compMap: Record<string, CompensationRecord[]> = {};
+    const compMap: Record<string, EmployeeCompensationRecord[]> = {};
     for (const txn of checks) {
       const matching = compData.filter(c => 
         c.employee_id === txn.employee_id && 
         c.position_id === txn.position_id &&
-        c.effective_date === txn.effective_date
+        c.start_date === txn.start_date
       );
       if (matching.length > 0) {
-        compMap[txn.id] = matching;
+        compMap[txn.id] = matching.map(c => ({
+          id: c.id,
+          pay_element_id: c.pay_element_id,
+          pay_element: c.pay_element as { name: string; code: string } | undefined,
+          amount: c.amount,
+          currency: c.currency,
+          frequency: c.frequency,
+          start_date: c.start_date,
+          end_date: c.end_date,
+          is_active: c.is_active,
+          is_override: c.is_override,
+          notes: c.notes
+        }));
       }
     }
     setTransactionCompensation(compMap);
@@ -429,53 +446,41 @@ export function EmployeeTransactionsList({
                       <TableCell colSpan={8} className="py-3 px-4">
                         <div className="ml-8">
                           <p className="text-sm font-medium mb-2 text-muted-foreground">
-                            {t("compensation.history.title")}
+                            {t("compensation.employeeCompensation.title", "Employee Compensation")}
                           </p>
                           <div className="space-y-2">
                             {transactionCompensation[transaction.id].map((comp) => (
                               <div key={comp.id} className="flex items-center justify-between text-sm bg-background rounded-md px-3 py-2 border">
                                 <div className="flex items-center gap-6">
                                   <div>
-                                    <span className="text-muted-foreground">{t("compensation.history.type")}:</span>{" "}
-                                    <Badge variant="outline" className="ml-1">{comp.change_type}</Badge>
+                                    <span className="text-muted-foreground">{t("compensation.employeeCompensation.payElement", "Pay Element")}:</span>{" "}
+                                    <Badge variant="outline" className="ml-1">{comp.pay_element?.name || comp.pay_element_id}</Badge>
                                   </div>
                                   <div>
-                                    <span className="text-muted-foreground">{t("compensation.history.effectiveDate")}:</span>{" "}
-                                    <span className="font-medium">{formatDateForDisplay(comp.effective_date, "MMM d, yyyy")}</span>
+                                    <span className="text-muted-foreground">{t("compensation.employeeCompensation.amount", "Amount")}:</span>{" "}
+                                    <span className="font-medium">{comp.currency} {comp.amount.toLocaleString()}</span>
                                   </div>
-                                  {comp.previous_salary && (
+                                  <div>
+                                    <span className="text-muted-foreground">{t("compensation.employeeCompensation.frequencyLabel", "Frequency")}:</span>{" "}
+                                    <span className="font-medium capitalize">{comp.frequency}</span>
+                                  </div>
+                                  <div>
+                                    <span className="text-muted-foreground">{t("common.startDate")}:</span>{" "}
+                                    <span className="font-medium">{formatDateForDisplay(comp.start_date, "MMM d, yyyy")}</span>
+                                  </div>
+                                  {comp.end_date && (
                                     <div>
-                                      <span className="text-muted-foreground">{t("compensation.history.previous")}:</span>{" "}
-                                      <span className="font-medium">${comp.previous_salary.toLocaleString()}</span>
+                                      <span className="text-muted-foreground">{t("common.endDate")}:</span>{" "}
+                                      <span className="font-medium">{formatDateForDisplay(comp.end_date, "MMM d, yyyy")}</span>
                                     </div>
                                   )}
-                                  <div>
-                                    <span className="text-muted-foreground">{t("compensation.history.new")}:</span>{" "}
-                                    <span className="font-medium">${comp.new_salary.toLocaleString()}</span>
-                                  </div>
-                                  {comp.change_amount !== null && (
-                                    <div>
-                                      <span className={`font-medium ${comp.change_amount >= 0 ? 'text-success' : 'text-destructive'}`}>
-                                        {comp.change_amount >= 0 ? '+' : ''}${comp.change_amount.toLocaleString()}
-                                        {comp.change_percentage !== null && (
-                                          <span className="ml-1 text-xs">({comp.change_percentage}%)</span>
-                                        )}
-                                      </span>
-                                    </div>
+                                  {comp.is_override && (
+                                    <Badge variant="secondary" className="text-xs">Override</Badge>
                                   )}
                                 </div>
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => {
-                                    setSelectedForCompensation(transaction);
-                                    setEditingCompensation(comp);
-                                    setCompensationDialogOpen(true);
-                                  }}
-                                >
-                                  <Edit className="h-3.5 w-3.5 mr-1" />
-                                  {t("common.edit")}
-                                </Button>
+                                <Badge variant={comp.is_active ? "default" : "outline"} className="text-xs">
+                                  {comp.is_active ? t("common.active") : t("common.inactive")}
+                                </Badge>
                               </div>
                             ))}
                           </div>
@@ -519,7 +524,6 @@ export function EmployeeTransactionsList({
             setCompensationDialogOpen(open);
             if (!open) {
               setSelectedForCompensation(null);
-              setEditingCompensation(null);
             }
           }}
           employeeId={selectedForCompensation.employee_id}
