@@ -215,18 +215,42 @@ serve(async (req) => {
 
     // Perform upserts if not dry run
     if (!dryRun && featuresToUpsert.length > 0) {
-      const { error: upsertError } = await supabase
-        .from('application_features')
-        .upsert(featuresToUpsert, { 
-          onConflict: 'feature_code',
-          ignoreDuplicates: false 
-        });
+      // Split into inserts (new features without ID) and updates (existing features with ID)
+      const featuresToInsert = featuresToUpsert.filter(f => !f.id);
+      const featuresToUpdate = featuresToUpsert.filter(f => f.id);
+      
+      // Insert new features (they get auto-generated IDs from default)
+      if (featuresToInsert.length > 0) {
+        const { error: insertError } = await supabase
+          .from('application_features')
+          .insert(featuresToInsert);
 
-      if (upsertError) {
-        console.error('[sync-feature-registry] Error upserting features:', upsertError);
-        result.errors.push(`Error upserting features: ${upsertError.message}`);
-      } else {
-        console.log(`[sync-feature-registry] Upserted ${featuresToUpsert.length} features`);
+        if (insertError) {
+          console.error('[sync-feature-registry] Error inserting new features:', insertError);
+          result.errors.push(`Error inserting features: ${insertError.message}`);
+        } else {
+          console.log(`[sync-feature-registry] Inserted ${featuresToInsert.length} new features`);
+        }
+      }
+      
+      // Update existing features one by one to avoid upsert issues
+      for (const feature of featuresToUpdate) {
+        const featureId = feature.id;
+        delete feature.id; // Remove id from the update payload
+        
+        const { error: updateError } = await supabase
+          .from('application_features')
+          .update(feature)
+          .eq('id', featureId);
+          
+        if (updateError) {
+          console.error(`[sync-feature-registry] Error updating feature ${feature.feature_code}:`, updateError);
+          result.errors.push(`Error updating ${feature.feature_code}: ${updateError.message}`);
+        }
+      }
+      
+      if (featuresToUpdate.length > 0) {
+        console.log(`[sync-feature-registry] Updated ${featuresToUpdate.length} existing features`);
       }
     }
 
@@ -247,10 +271,11 @@ serve(async (req) => {
         dap_guide_status: 'na'
       }));
 
+      // Use insert with onConflict on (feature_code, release_id) composite key
       const { error: statusError } = await supabase
         .from('enablement_content_status')
         .upsert(statusRecords, { 
-          onConflict: 'feature_code',
+          onConflict: 'feature_code,release_id',
           ignoreDuplicates: true 
         });
 
