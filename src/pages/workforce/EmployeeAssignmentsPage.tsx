@@ -96,6 +96,7 @@ interface EmployeeAssignment {
   start_date: string;
   end_date: string | null;
   is_primary: boolean;
+  assignment_type: string | null;
   compensation_amount: number | null;
   compensation_currency: string | null;
   compensation_frequency: string | null;
@@ -519,7 +520,7 @@ export default function EmployeeAssignmentsPage() {
                       <TableHead>{t("common.startDate")}</TableHead>
                       <TableHead>{t("common.endDate")}</TableHead>
                       <TableHead>{t("common.status")}</TableHead>
-                      <TableHead>{t("workforce.primaryAssignment")}</TableHead>
+                      <TableHead>{t("workforce.assignmentType", "Assignment Type")}</TableHead>
                       {isAdmin && <TableHead className="text-right">{t("common.actions")}</TableHead>}
                     </TableRow>
                   </TableHeader>
@@ -550,9 +551,12 @@ export default function EmployeeAssignmentsPage() {
                           </Badge>
                         </TableCell>
                         <TableCell>
-                          {assignment.is_primary && (
-                            <Badge variant="outline" className="bg-primary/10">{t("workforce.primaryAssignment")}</Badge>
-                          )}
+                          <Badge 
+                            variant="outline" 
+                            className={assignment.assignment_type === "primary" ? "bg-primary/10" : "bg-muted"}
+                          >
+                            {assignment.assignment_type ? t(`workforce.assignmentTypes.${assignment.assignment_type}`, assignment.assignment_type.charAt(0).toUpperCase() + assignment.assignment_type.slice(1)) : "-"}
+                          </Badge>
                         </TableCell>
                         {isAdmin && (
                           <TableCell className="text-right">
