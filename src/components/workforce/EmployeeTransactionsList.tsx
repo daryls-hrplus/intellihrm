@@ -98,6 +98,9 @@ export function EmployeeTransactionsList({
   const [selectedForCompensation, setSelectedForCompensation] = useState<EmployeeTransaction | null>(null);
   const [transactionCompensation, setTransactionCompensation] = useState<Record<string, EmployeeCompensationRecord[]>>({});
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
+  const [editingCompensation, setEditingCompensation] = useState<{record: EmployeeCompensationRecord; transaction: EmployeeTransaction} | null>(null);
+  const [deleteCompensationDialogOpen, setDeleteCompensationDialogOpen] = useState(false);
+  const [compensationToDelete, setCompensationToDelete] = useState<{id: string; transactionId: string} | null>(null);
 
   useEffect(() => {
     loadData();
@@ -204,6 +207,35 @@ export function EmployeeTransactionsList({
 
   const hasCompensation = (transactionId: string) => {
     return transactionCompensation[transactionId] && transactionCompensation[transactionId].length > 0;
+  };
+
+  const handleEditCompensation = (record: EmployeeCompensationRecord, transaction: EmployeeTransaction) => {
+    setEditingCompensation({ record, transaction });
+    setSelectedForCompensation(transaction);
+    setCompensationDialogOpen(true);
+  };
+
+  const handleDeleteCompensation = async () => {
+    if (!compensationToDelete) return;
+    
+    const { error } = await supabase
+      .from("employee_compensation")
+      .delete()
+      .eq("id", compensationToDelete.id);
+    
+    if (error) {
+      console.error("Failed to delete compensation:", error);
+      return;
+    }
+    
+    // Remove from local state
+    setTransactionCompensation(prev => ({
+      ...prev,
+      [compensationToDelete.transactionId]: prev[compensationToDelete.transactionId].filter(c => c.id !== compensationToDelete.id)
+    }));
+    
+    setDeleteCompensationDialogOpen(false);
+    setCompensationToDelete(null);
   };
 
   const filteredTransactions = transactions.filter((t) => {
@@ -445,7 +477,7 @@ export function EmployeeTransactionsList({
                   {/* Expanded compensation details row */}
                   {expandedRows.has(transaction.id) && hasCompensation(transaction.id) && (
                     <TableRow className="bg-muted/30">
-                      <TableCell colSpan={8} className="py-3 px-4">
+                      <TableCell colSpan={9} className="py-3 px-4">
                         <div className="ml-8">
                           <p className="text-sm font-medium mb-2 text-muted-foreground">
                             {t("compensation.employeeCompensation.title", "Employee Compensation")}
@@ -480,9 +512,40 @@ export function EmployeeTransactionsList({
                                     <Badge variant="secondary" className="text-xs">Override</Badge>
                                   )}
                                 </div>
-                                <Badge variant={comp.is_active ? "default" : "outline"} className="text-xs">
-                                  {comp.is_active ? t("common.active") : t("common.inactive")}
-                                </Badge>
+                                <div className="flex items-center gap-2">
+                                  <Badge variant={comp.is_active ? "default" : "outline"} className="text-xs">
+                                    {comp.is_active ? t("common.active") : t("common.inactive")}
+                                  </Badge>
+                                  <Tooltip>
+                                    <TooltipTrigger asChild>
+                                      <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="h-7 w-7"
+                                        onClick={() => handleEditCompensation(comp, transaction)}
+                                      >
+                                        <Edit className="h-3.5 w-3.5" />
+                                      </Button>
+                                    </TooltipTrigger>
+                                    <TooltipContent>{t("common.edit")}</TooltipContent>
+                                  </Tooltip>
+                                  <Tooltip>
+                                    <TooltipTrigger asChild>
+                                      <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="h-7 w-7 text-destructive hover:text-destructive"
+                                        onClick={() => {
+                                          setCompensationToDelete({ id: comp.id, transactionId: transaction.id });
+                                          setDeleteCompensationDialogOpen(true);
+                                        }}
+                                      >
+                                        <Trash2 className="h-3.5 w-3.5" />
+                                      </Button>
+                                    </TooltipTrigger>
+                                    <TooltipContent>{t("common.delete")}</TooltipContent>
+                                  </Tooltip>
+                                </div>
                               </div>
                             ))}
                           </div>
@@ -518,6 +581,27 @@ export function EmployeeTransactionsList({
         </AlertDialogContent>
       </AlertDialog>
 
+      {/* Delete Compensation Confirmation */}
+      <AlertDialog open={deleteCompensationDialogOpen} onOpenChange={setDeleteCompensationDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t("compensation.employeeCompensation.deleteCompensation", "Delete Compensation")}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t("compensation.employeeCompensation.deleteConfirmation", "Are you sure you want to delete this compensation record? This action cannot be undone.")}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t("common.cancel")}</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteCompensation}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {t("common.delete")}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
       {/* Compensation Dialog */}
       {selectedForCompensation && selectedForCompensation.employee_id && getRelevantPositionId(selectedForCompensation) && (
         <TransactionEmployeeCompensationDialog
@@ -526,6 +610,7 @@ export function EmployeeTransactionsList({
             setCompensationDialogOpen(open);
             if (!open) {
               setSelectedForCompensation(null);
+              setEditingCompensation(null);
             }
           }}
           employeeId={selectedForCompensation.employee_id}
@@ -544,8 +629,10 @@ export function EmployeeTransactionsList({
               ? selectedForCompensation.acting_end_date
               : undefined
           }
+          editingRecord={editingCompensation?.record}
           onSuccess={() => {
             loadData();
+            setEditingCompensation(null);
           }}
         />
       )}
