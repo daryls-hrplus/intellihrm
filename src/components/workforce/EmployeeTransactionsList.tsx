@@ -130,8 +130,6 @@ export function EmployeeTransactionsList({
       id: t.id,
       employee_id: t.employee_id,
       position_id: getRelevantPositionId(t),
-      start_date: t.transaction_type?.code === "ACTING" ? t.acting_start_date : t.effective_date,
-      end_date: t.transaction_type?.code === "ACTING" ? t.acting_end_date : null
     })).filter(c => c.employee_id && c.position_id);
 
     if (checks.length === 0) return;
@@ -145,17 +143,17 @@ export function EmployeeTransactionsList({
         pay_element:pay_elements(name, code)
       `)
       .in("employee_id", [...new Set(checks.map(c => c.employee_id).filter(Boolean))])
+      .in("position_id", [...new Set(checks.map(c => c.position_id).filter(Boolean))])
       .order("start_date", { ascending: false });
 
     if (!compData) return;
 
-    // Map compensation records to transactions
+    // Map compensation records to transactions by employee_id and position_id
     const compMap: Record<string, EmployeeCompensationRecord[]> = {};
     for (const txn of checks) {
       const matching = compData.filter(c => 
         c.employee_id === txn.employee_id && 
-        c.position_id === txn.position_id &&
-        c.start_date === txn.start_date
+        c.position_id === txn.position_id
       );
       if (matching.length > 0) {
         compMap[txn.id] = matching.map(c => ({
