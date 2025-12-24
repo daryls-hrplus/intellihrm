@@ -845,7 +845,9 @@ export function PositionsManagement({ companyId }: PositionsManagementProps) {
                                                 </TableCell>
                                                 <TableCell>{assignment.start_date}</TableCell>
                                                 <TableCell>
-                                                  {assignment.is_primary && <Badge>Primary</Badge>}
+                                                  <Badge variant={assignment.assignment_type === "primary" ? "default" : "outline"}>
+                                                    {ASSIGNMENT_TYPES.find(t => t.value === assignment.assignment_type)?.label || "Primary"}
+                                                  </Badge>
                                                 </TableCell>
                                                 <TableCell>
                                                   <Badge variant={assignment.is_active ? "default" : "secondary"}>
