@@ -42,7 +42,7 @@ import {
   TransactionType,
   LookupValue,
 } from "@/hooks/useEmployeeTransactions";
-import { TransactionCompensationDialog } from "@/components/compensation/TransactionCompensationDialog";
+import { TransactionEmployeeCompensationDialog } from "@/components/compensation/TransactionEmployeeCompensationDialog";
 import { supabase } from "@/integrations/supabase/client";
 
 interface CompensationRecord {
@@ -513,7 +513,7 @@ export function EmployeeTransactionsList({
 
       {/* Compensation Dialog */}
       {selectedForCompensation && selectedForCompensation.employee_id && getRelevantPositionId(selectedForCompensation) && (
-        <TransactionCompensationDialog
+        <TransactionEmployeeCompensationDialog
           open={compensationDialogOpen}
           onOpenChange={(open) => {
             setCompensationDialogOpen(open);
@@ -527,9 +527,17 @@ export function EmployeeTransactionsList({
           positionId={getRelevantPositionId(selectedForCompensation)!}
           positionTitle={selectedForCompensation.position?.title || ""}
           companyId={selectedForCompensation.company_id || ""}
-          effectiveDate={selectedForCompensation.effective_date}
           transactionType={(selectedForCompensation.transaction_type?.code as TransactionType) || "HIRE"}
-          existingRecord={editingCompensation}
+          defaultStartDate={
+            (selectedForCompensation.transaction_type?.code === "ACTING")
+              ? selectedForCompensation.acting_start_date || selectedForCompensation.effective_date || ""
+              : selectedForCompensation.effective_date || ""
+          }
+          defaultEndDate={
+            (selectedForCompensation.transaction_type?.code === "ACTING")
+              ? selectedForCompensation.acting_end_date
+              : undefined
+          }
           onSuccess={() => {
             loadData();
           }}
