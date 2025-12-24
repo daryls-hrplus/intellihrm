@@ -30,6 +30,7 @@ import {
   BarChart3,
   AlertCircle,
   CalendarClock,
+  Inbox,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -46,6 +47,8 @@ import { EnhancedGoalCard } from "@/components/performance/EnhancedGoalCard";
 import { GoalProgressDialog } from "@/components/performance/GoalProgressDialog";
 import { GoalCommentsDialog } from "@/components/performance/GoalCommentsDialog";
 import { GoalInterviewsList } from "@/components/goals/GoalInterviewsList";
+import { GoalApprovalInbox } from "@/components/performance/GoalApprovalInbox";
+import { useGoalApprovals } from "@/hooks/useGoalApprovals";
 import { useAuditLog } from "@/hooks/useAuditLog";
 import { useLanguage } from "@/hooks/useLanguage";
 import { isPast } from "date-fns";
@@ -115,6 +118,9 @@ export default function GoalsPage() {
   const [showAnalytics, setShowAnalytics] = useState(true);
   const [progressDialogOpen, setProgressDialogOpen] = useState(false);
   const [commentsDialogOpen, setCommentsDialogOpen] = useState(false);
+
+  // Goal approvals hook
+  const { pendingApprovals } = useGoalApprovals(selectedCompanyId || company?.id);
 
   // Fetch companies for company switcher
   useEffect(() => {
@@ -512,6 +518,15 @@ export default function GoalsPage() {
                 <CalendarClock className="h-4 w-4" />
                 {t('performance.goals.interviews')}
               </TabsTrigger>
+              {pendingApprovals.length > 0 && (
+                <TabsTrigger value="approvals" className="gap-2">
+                  <Inbox className="h-4 w-4" />
+                  {t('performance.goals.approvals', 'Approvals')}
+                  <Badge variant="destructive" className="ml-1 h-5 px-1.5 text-xs">
+                    {pendingApprovals.length}
+                  </Badge>
+                </TabsTrigger>
+              )}
             </TabsList>
           </div>
 
@@ -565,6 +580,7 @@ export default function GoalsPage() {
                     onRefresh={fetchGoals}
                     onUpdateProgress={handleUpdateProgress}
                     onViewComments={handleViewComments}
+                    companyId={selectedCompanyId || company?.id}
                   />
                 ))}
               </div>
@@ -592,6 +608,7 @@ export default function GoalsPage() {
                     onEdit={handleEditGoal} 
                     onRefresh={fetchGoals}
                     showOwner
+                    companyId={selectedCompanyId || company?.id}
                   />
                 ))}
               </div>
@@ -618,6 +635,7 @@ export default function GoalsPage() {
                     goal={goal} 
                     onEdit={handleEditGoal} 
                     onRefresh={fetchGoals}
+                    companyId={selectedCompanyId || company?.id}
                   />
                 ))}
               </div>
@@ -670,6 +688,7 @@ export default function GoalsPage() {
                     onUpdateProgress={handleUpdateProgress}
                     onViewComments={handleViewComments}
                     showOwner
+                    companyId={selectedCompanyId || company?.id}
                   />
                 ))}
               </div>
@@ -717,6 +736,10 @@ export default function GoalsPage() {
                 ))}
               </div>
             )}
+          </TabsContent>
+
+          <TabsContent value="approvals" className="mt-6">
+            <GoalApprovalInbox companyId={selectedCompanyId || company?.id} />
           </TabsContent>
         </Tabs>
       </div>
