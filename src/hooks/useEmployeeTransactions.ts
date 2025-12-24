@@ -230,6 +230,32 @@ export function useEmployeeTransactions() {
 
       if (createError) throw createError;
 
+      // For ACTING transactions, also create an employee_positions record
+      if (data.acting_position_id && data.employee_id) {
+        const employeePositionData = {
+          employee_id: data.employee_id,
+          position_id: data.acting_position_id,
+          start_date: data.acting_start_date || data.effective_date,
+          end_date: data.acting_end_date || null,
+          is_primary: false,
+          assignment_type: "acting",
+          compensation_amount: null,
+          compensation_currency: "USD",
+          compensation_frequency: "monthly",
+          benefits_profile: {},
+          is_active: true,
+        };
+
+        const { error: positionError } = await supabase
+          .from("employee_positions")
+          .insert(employeePositionData as any);
+
+        if (positionError) {
+          console.error("Failed to create employee position for acting assignment:", positionError);
+          // Don't fail the transaction, just log the error
+        }
+      }
+
       await logAction({
         action: "CREATE",
         entityType: "employee_transaction",
@@ -283,6 +309,49 @@ export function useEmployeeTransactions() {
         .single();
 
       if (updateError) throw updateError;
+
+      // For ACTING transactions, also update employee_positions record
+      if (data.acting_position_id && data.employee_id) {
+        // First, try to find existing acting assignment for this employee and position
+        const { data: existingPosition } = await supabase
+          .from("employee_positions")
+          .select("id")
+          .eq("employee_id", data.employee_id)
+          .eq("position_id", data.acting_position_id)
+          .eq("assignment_type", "acting")
+          .single();
+
+        if (existingPosition) {
+          // Update existing record
+          await supabase
+            .from("employee_positions")
+            .update({
+              start_date: data.acting_start_date || data.effective_date,
+              end_date: data.acting_end_date || null,
+              is_active: !data.acting_end_date || new Date(data.acting_end_date) >= new Date(),
+            })
+            .eq("id", existingPosition.id);
+        } else {
+          // Create new record
+          const employeePositionData = {
+            employee_id: data.employee_id,
+            position_id: data.acting_position_id,
+            start_date: data.acting_start_date || data.effective_date,
+            end_date: data.acting_end_date || null,
+            is_primary: false,
+            assignment_type: "acting",
+            compensation_amount: null,
+            compensation_currency: "USD",
+            compensation_frequency: "monthly",
+            benefits_profile: {},
+            is_active: true,
+          };
+
+          await supabase
+            .from("employee_positions")
+            .insert(employeePositionData as any);
+        }
+      }
 
       await logAction({
         action: "UPDATE",
