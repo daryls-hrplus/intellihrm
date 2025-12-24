@@ -173,6 +173,7 @@ import PlanComparisonPage from "./pages/benefits/PlanComparisonPage";
 import BenefitCalculatorPage from "./pages/benefits/BenefitCalculatorPage";
 import BenefitProvidersPage from "./pages/benefits/BenefitProvidersPage";
 import MyBenefitsPage from "./pages/ess/MyBenefitsPage";
+import MyBankingPage from "./pages/ess/MyBankingPage";
 
 // Training pages
 import TrainingDashboardPage from "./pages/training/TrainingDashboardPage";
@@ -660,6 +661,14 @@ const App = () => (
               element={
                 <ProtectedRoute moduleCode="ess">
                   <EssCompaRatioPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/ess/banking"
+              element={
+                <ProtectedRoute moduleCode="ess">
+                  <MyBankingPage />
                 </ProtectedRoute>
               }
             />
