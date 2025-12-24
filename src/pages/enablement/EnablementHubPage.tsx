@@ -27,6 +27,7 @@ import {
   Package,
   Settings,
   BarChart3,
+  Map,
   Upload,
   Library,
   Brain,
@@ -171,6 +172,18 @@ export default function EnablementHubPage() {
           href: "/enablement/release-calendar",
           icon: Calendar,
           color: "bg-cyan-500/10 text-cyan-500",
+        },
+      ],
+    },
+    {
+      titleKey: "User Guidance",
+      items: [
+        {
+          title: "Guided Tours",
+          description: "Create and manage interactive guided tours and tooltips",
+          href: "/enablement/tours",
+          icon: Map,
+          color: "bg-teal-500/10 text-teal-500",
         },
       ],
     },
