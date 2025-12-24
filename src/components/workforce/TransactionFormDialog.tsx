@@ -58,6 +58,15 @@ interface Position {
   code: string;
 }
 
+interface EmployeePosition {
+  position_id: string;
+  position: {
+    id: string;
+    title: string;
+    code: string;
+  };
+}
+
 interface Department {
   id: string;
   name: string;
@@ -84,6 +93,7 @@ export function TransactionFormDialog({
   const [departments, setDepartments] = useState<Department[]>([]);
   const [companies, setCompanies] = useState<Company[]>([]);
   const [transactionTypeId, setTransactionTypeId] = useState<string>("");
+  const [employeePositions, setEmployeePositions] = useState<EmployeePosition[]>([]);
 
   // Lookup values
   const [hireTypes, setHireTypes] = useState<LookupValue[]>([]);
@@ -112,6 +122,38 @@ export function TransactionFormDialog({
       loadTransactionTypeId();
     }
   }, [open, transactionType]);
+
+  // Load employee positions when employee is selected (for CONFIRMATION transaction type)
+  useEffect(() => {
+    const loadEmployeePositions = async () => {
+      if (formData.employee_id && transactionType === "CONFIRMATION") {
+        const { data } = await supabase
+          .from("employee_positions")
+          .select(`
+            position_id,
+            position:positions!employee_positions_position_id_fkey (
+              id,
+              title,
+              code
+            )
+          `)
+          .eq("employee_id", formData.employee_id)
+          .eq("is_active", true);
+        
+        if (data) {
+          setEmployeePositions(data as unknown as EmployeePosition[]);
+          // Auto-select if only one position
+          if (data.length === 1 && !formData.position_id) {
+            setFormData(prev => ({ ...prev, position_id: data[0].position_id }));
+          }
+        }
+      } else {
+        setEmployeePositions([]);
+      }
+    };
+    
+    loadEmployeePositions();
+  }, [formData.employee_id, transactionType]);
 
   useEffect(() => {
     if (existingTransaction) {
@@ -400,36 +442,72 @@ export function TransactionFormDialog({
 
       case "CONFIRMATION":
         return (
-          <div className="space-y-2">
-            <Label>{t("workforce.modules.transactions.form.confirmation.confirmationDate")}</Label>
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  className={cn(
-                    "w-full justify-start text-left font-normal",
-                    !formData.confirmation_date && "text-muted-foreground"
-                  )}
+          <div className="space-y-4">
+            {/* Position Selection - shown when employee has positions */}
+            {employeePositions.length > 0 && (
+              <div className="space-y-2">
+                <Label>{t("common.position")} *</Label>
+                <Select
+                  value={formData.position_id || ""}
+                  onValueChange={(v) => setFormData({ ...formData, position_id: v })}
                 >
-                  <CalendarIcon className="mr-2 h-4 w-4" />
-                  {formData.confirmation_date
-                    ? formatDateForDisplay(formData.confirmation_date, "PPP")
-                    : t("workforce.modules.transactions.form.selectDate")}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0">
-                <Calendar
-                  mode="single"
-                  selected={formData.confirmation_date ? new Date(formData.confirmation_date) : undefined}
-                  onSelect={(date) =>
-                    setFormData({
-                      ...formData,
-                      confirmation_date: date ? toDateString(date) : undefined,
-                    })
-                  }
-                />
-              </PopoverContent>
-            </Popover>
+                  <SelectTrigger>
+                    <SelectValue placeholder={t("workforce.modules.transactions.form.selectPosition")} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {employeePositions.map((ep) => (
+                      <SelectItem key={ep.position_id} value={ep.position_id}>
+                        {ep.position.title} ({ep.position.code})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {employeePositions.length > 1 && (
+                  <p className="text-xs text-muted-foreground">
+                    {t("workforce.modules.transactions.form.confirmation.multiplePositionsNote", "Employee has multiple positions. Please select the position to confirm.")}
+                  </p>
+                )}
+              </div>
+            )}
+            
+            {/* Show message if employee selected but no positions */}
+            {formData.employee_id && employeePositions.length === 0 && (
+              <div className="text-sm text-muted-foreground bg-muted p-3 rounded-md">
+                {t("workforce.modules.transactions.form.confirmation.noPositions", "No active positions found for this employee.")}
+              </div>
+            )}
+
+            <div className="space-y-2">
+              <Label>{t("workforce.modules.transactions.form.confirmation.confirmationDate")}</Label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      "w-full justify-start text-left font-normal",
+                      !formData.confirmation_date && "text-muted-foreground"
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {formData.confirmation_date
+                      ? formatDateForDisplay(formData.confirmation_date, "PPP")
+                      : t("workforce.modules.transactions.form.selectDate")}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0">
+                  <Calendar
+                    mode="single"
+                    selected={formData.confirmation_date ? new Date(formData.confirmation_date) : undefined}
+                    onSelect={(date) =>
+                      setFormData({
+                        ...formData,
+                        confirmation_date: date ? toDateString(date) : undefined,
+                      })
+                    }
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
           </div>
         );
 
