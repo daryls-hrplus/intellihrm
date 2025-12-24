@@ -269,7 +269,7 @@ export default function QualificationsPage() {
       <div className="space-y-6">
         <Breadcrumbs
           items={[
-            { label: t("sidebar.workforce"), href: "/workforce" },
+            { label: t("navigation.workforce"), href: "/workforce" },
             { label: t("workforce.modules.qualifications.title") },
           ]}
         />
