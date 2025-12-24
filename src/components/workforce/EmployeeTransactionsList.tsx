@@ -62,6 +62,8 @@ interface EmployeeCompensationRecord {
 interface EmployeeTransactionsListProps {
   companyId?: string;
   departmentId?: string;
+  fromDate?: string;
+  toDate?: string;
   onCreateNew: (type: string) => void;
   onView: (transaction: EmployeeTransaction) => void;
   onEdit: (transaction: EmployeeTransaction) => void;
@@ -80,6 +82,8 @@ const statusColors: Record<TransactionStatus, string> = {
 export function EmployeeTransactionsList({
   companyId,
   departmentId,
+  fromDate,
+  toDate,
   onCreateNew,
   onView,
   onEdit,
@@ -107,7 +111,7 @@ export function EmployeeTransactionsList({
   useEffect(() => {
     loadData();
     loadLookupValues();
-  }, [statusFilter, typeFilter, companyId, departmentId]);
+  }, [statusFilter, typeFilter, companyId, departmentId, fromDate, toDate]);
 
   const loadData = async () => {
     const filters: any = {};
@@ -122,6 +126,12 @@ export function EmployeeTransactionsList({
     }
     if (departmentId) {
       filters.departmentId = departmentId;
+    }
+    if (fromDate) {
+      filters.fromDate = fromDate;
+    }
+    if (toDate) {
+      filters.toDate = toDate;
     }
     const data = await fetchTransactions(filters);
     setTransactions(data);
