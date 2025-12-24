@@ -69,6 +69,20 @@ serve(async (req) => {
     const excludeSet = new Set(excludeFeatureCodes as string[]);
     console.log(`[sync-feature-registry] Starting sync for ${registry.length} modules, dryRun: ${dryRun}, excluding: ${excludeFeatureCodes.length} features`);
 
+    const registryModules = registry as ModuleDefinition[];
+
+    // Build list of registry feature codes up front so we can fetch existing rows without
+    // hitting the default 1000-row query limit.
+    const registryFeatureCodes: string[] = [];
+    for (const module of registryModules) {
+      for (const group of module.groups) {
+        for (const feature of group.features) {
+          if (excludeSet.has(feature.code)) continue;
+          registryFeatureCodes.push(feature.code);
+        }
+      }
+    }
+
     // Get existing module mapping
     const { data: existingModules, error: moduleError } = await supabase
       .from('application_modules')
@@ -81,14 +95,27 @@ serve(async (req) => {
 
     const moduleMap = new Map(existingModules?.map(m => [m.module_code, m.id]) || []);
 
-    // Get existing features for comparison
-    const { data: existingFeatures, error: featureError } = await supabase
-      .from('application_features')
-      .select('id, feature_code, feature_name, description, route_path, icon_name, module_code, group_code');
+    // Get existing features for comparison (only for registry feature codes)
+    const existingFeatures: any[] = [];
+    const featureSelect = 'id, feature_code, feature_name, description, route_path, icon_name, module_code, group_code';
 
-    if (featureError) {
-      console.error('[sync-feature-registry] Error fetching features:', featureError);
-      throw featureError;
+    if (registryFeatureCodes.length > 0) {
+      const chunkSize = 500;
+      for (let i = 0; i < registryFeatureCodes.length; i += chunkSize) {
+        const chunk = registryFeatureCodes.slice(i, i + chunkSize);
+
+        const { data: chunkData, error: chunkError } = await supabase
+          .from('application_features')
+          .select(featureSelect)
+          .in('feature_code', chunk);
+
+        if (chunkError) {
+          console.error('[sync-feature-registry] Error fetching features:', chunkError);
+          throw chunkError;
+        }
+
+        if (chunkData?.length) existingFeatures.push(...chunkData);
+      }
     }
 
     const existingFeatureMap = new Map(existingFeatures?.map(f => [f.feature_code, f]) || []);
@@ -104,7 +131,7 @@ serve(async (req) => {
     const newFeatureDetails: any[] = [];
 
     // Process each module and its features
-    for (const module of registry as ModuleDefinition[]) {
+    for (const module of registryModules) {
       let moduleId = moduleMap.get(module.code);
 
       // Create module if it doesn't exist
@@ -142,7 +169,7 @@ serve(async (req) => {
           }
 
           const existing = existingFeatureMap.get(feature.code);
-          
+
           const featureData = {
             feature_code: feature.code,
             feature_name: feature.name,
@@ -174,7 +201,7 @@ serve(async (req) => {
               icon: feature.icon,
               routePath: feature.routePath
             });
-            
+
             if (moduleId) {
               featuresToUpsert.push({
                 ...featureData,
@@ -183,7 +210,7 @@ serve(async (req) => {
             }
           } else {
             // Check if any fields changed
-            const hasChanges = 
+            const hasChanges =
               existing.feature_name !== feature.name ||
               existing.description !== feature.description ||
               existing.route_path !== feature.routePath ||
@@ -195,7 +222,7 @@ serve(async (req) => {
               result.updatedFeatures.push(feature.code);
               featuresToUpsert.push({
                 ...featureData,
-                id: existing.id,
+                // NOTE: do not include id in upsert payload to avoid null/not-null violations
                 module_id: moduleId
               });
             } else {
@@ -215,42 +242,21 @@ serve(async (req) => {
 
     // Perform upserts if not dry run
     if (!dryRun && featuresToUpsert.length > 0) {
-      // Split into inserts (new features without ID) and updates (existing features with ID)
-      const featuresToInsert = featuresToUpsert.filter(f => !f.id);
-      const featuresToUpdate = featuresToUpsert.filter(f => f.id);
-      
-      // Insert new features (they get auto-generated IDs from default)
-      if (featuresToInsert.length > 0) {
-        const { error: insertError } = await supabase
-          .from('application_features')
-          .insert(featuresToInsert);
+      // Ensure we never send an id for inserts/updates; feature_code is the conflict target.
+      const upsertPayload = featuresToUpsert.map(({ id: _id, ...rest }) => rest);
 
-        if (insertError) {
-          console.error('[sync-feature-registry] Error inserting new features:', insertError);
-          result.errors.push(`Error inserting features: ${insertError.message}`);
-        } else {
-          console.log(`[sync-feature-registry] Inserted ${featuresToInsert.length} new features`);
-        }
-      }
-      
-      // Update existing features one by one to avoid upsert issues
-      for (const feature of featuresToUpdate) {
-        const featureId = feature.id;
-        delete feature.id; // Remove id from the update payload
-        
-        const { error: updateError } = await supabase
-          .from('application_features')
-          .update(feature)
-          .eq('id', featureId);
-          
-        if (updateError) {
-          console.error(`[sync-feature-registry] Error updating feature ${feature.feature_code}:`, updateError);
-          result.errors.push(`Error updating ${feature.feature_code}: ${updateError.message}`);
-        }
-      }
-      
-      if (featuresToUpdate.length > 0) {
-        console.log(`[sync-feature-registry] Updated ${featuresToUpdate.length} existing features`);
+      const { error: upsertError } = await supabase
+        .from('application_features')
+        .upsert(upsertPayload, {
+          onConflict: 'feature_code',
+          ignoreDuplicates: false,
+        });
+
+      if (upsertError) {
+        console.error('[sync-feature-registry] Error upserting features:', upsertError);
+        result.errors.push(`Error upserting features: ${upsertError.message}`);
+      } else {
+        console.log(`[sync-feature-registry] Upserted ${upsertPayload.length} features`);
       }
     }
 
