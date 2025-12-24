@@ -22,10 +22,23 @@ import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { useAuditLog } from "@/hooks/useAuditLog";
 import { getTodayString } from "@/utils/dateUtils";
+import { GoalEnhancedMetricsTab } from "./GoalEnhancedMetricsTab";
+import {
+  MeasurementType,
+  ComplianceCategory,
+  GoalExtendedAttributes,
+  GOAL_LEVEL_LABELS,
+} from "@/types/goalEnhancements";
+import {
+  parseExtendedAttributes,
+  serializeExtendedAttributes,
+  getDisplayCategory,
+} from "@/utils/goalCalculations";
 
 type GoalStatus = 'draft' | 'active' | 'in_progress' | 'completed' | 'cancelled' | 'overdue';
 type GoalType = 'okr_objective' | 'okr_key_result' | 'smart_goal';
 type GoalLevel = 'company' | 'department' | 'team' | 'individual';
+type DbGoalLevel = 'company' | 'department' | 'team' | 'individual';
 type GoalSource = 'cascaded' | 'manager_assigned' | 'self_created';
 
 interface Goal {
@@ -78,6 +91,18 @@ interface FormData {
   achievable: string;
   relevant: string;
   time_bound: string;
+  // Enhanced attributes
+  measurement_type: MeasurementType;
+  threshold_value: string;
+  stretch_value: string;
+  threshold_percentage: string;
+  stretch_percentage: string;
+  is_inverse: boolean;
+  is_mandatory: boolean;
+  compliance_category: ComplianceCategory | "";
+  is_weight_required: boolean;
+  inherited_weight_portion: string;
+  metric_template_id: string;
 }
 
 interface JobGoal {
@@ -100,6 +125,7 @@ export function GoalDialog({
   const [loading, setLoading] = useState(false);
   const [parentGoals, setParentGoals] = useState<{ id: string; title: string }[]>([]);
   const [jobGoals, setJobGoals] = useState<JobGoal[]>([]);
+  const [parentGoalWeight, setParentGoalWeight] = useState<number | null>(null);
   const [formData, setFormData] = useState<FormData>({
     title: "",
     description: "",
@@ -121,6 +147,18 @@ export function GoalDialog({
     achievable: "",
     relevant: "",
     time_bound: "",
+    // Enhanced attributes
+    measurement_type: "quantitative",
+    threshold_value: "",
+    stretch_value: "",
+    threshold_percentage: "80",
+    stretch_percentage: "120",
+    is_inverse: false,
+    is_mandatory: false,
+    compliance_category: "",
+    is_weight_required: true,
+    inherited_weight_portion: "",
+    metric_template_id: "",
   });
 
   // Fetch job goals for selected employee
@@ -193,6 +231,7 @@ export function GoalDialog({
 
   useEffect(() => {
     if (goal) {
+      const extAttrs = parseExtendedAttributes(goal.category);
       setFormData({
         title: goal.title,
         description: goal.description || "",
@@ -200,7 +239,7 @@ export function GoalDialog({
         goal_level: goal.goal_level,
         goal_source: "self_created",
         status: goal.status,
-        category: goal.category || "",
+        category: getDisplayCategory(goal.category) || "",
         start_date: goal.start_date,
         due_date: goal.due_date || "",
         weighting: String(goal.weighting),
@@ -214,6 +253,17 @@ export function GoalDialog({
         achievable: "",
         relevant: "",
         time_bound: "",
+        measurement_type: extAttrs?.measurementType || "quantitative",
+        threshold_value: extAttrs?.thresholdValue ? String(extAttrs.thresholdValue) : "",
+        stretch_value: extAttrs?.stretchValue ? String(extAttrs.stretchValue) : "",
+        threshold_percentage: String(extAttrs?.thresholdPercentage || 80),
+        stretch_percentage: String(extAttrs?.stretchPercentage || 120),
+        is_inverse: extAttrs?.isInverse || false,
+        is_mandatory: extAttrs?.isMandatory || false,
+        compliance_category: extAttrs?.complianceCategory || "",
+        is_weight_required: extAttrs?.isWeightRequired !== false,
+        inherited_weight_portion: extAttrs?.inheritedWeightPortion ? String(extAttrs.inheritedWeightPortion) : "",
+        metric_template_id: extAttrs?.metricTemplateId || "",
       });
     } else {
       const initialEmployeeId = user?.id || "";
@@ -238,6 +288,17 @@ export function GoalDialog({
         achievable: "",
         relevant: "",
         time_bound: "",
+        measurement_type: "quantitative",
+        threshold_value: "",
+        stretch_value: "",
+        threshold_percentage: "80",
+        stretch_percentage: "120",
+        is_inverse: false,
+        is_mandatory: false,
+        compliance_category: "",
+        is_weight_required: true,
+        inherited_weight_portion: "",
+        metric_template_id: "",
       });
       // Fetch job goals immediately for the initial employee
       if (initialEmployeeId && open) {
@@ -274,16 +335,34 @@ export function GoalDialog({
 
     setLoading(true);
     try {
+      // Build extended attributes
+      const extendedAttrs: GoalExtendedAttributes = {
+        measurementType: formData.measurement_type,
+        thresholdValue: formData.threshold_value ? parseFloat(formData.threshold_value) : undefined,
+        stretchValue: formData.stretch_value ? parseFloat(formData.stretch_value) : undefined,
+        thresholdPercentage: parseFloat(formData.threshold_percentage) || 80,
+        stretchPercentage: parseFloat(formData.stretch_percentage) || 120,
+        isInverse: formData.is_inverse,
+        isMandatory: formData.is_mandatory,
+        complianceCategory: formData.compliance_category || undefined,
+        isWeightRequired: formData.is_weight_required,
+        inheritedWeightPortion: formData.inherited_weight_portion ? parseFloat(formData.inherited_weight_portion) : undefined,
+        metricTemplateId: formData.metric_template_id || undefined,
+      };
+
+      // Serialize extended attrs with legacy category
+      const categoryWithAttrs = serializeExtendedAttributes(extendedAttrs, formData.category || undefined);
+
       const goalData = {
         company_id: companyId,
         employee_id: formData.goal_level === "individual" ? (formData.employee_id || user.id) : null,
         title: formData.title,
         description: formData.description || null,
         goal_type: formData.goal_type,
-        goal_level: formData.goal_level,
+        goal_level: formData.goal_level as DbGoalLevel,
         goal_source: formData.goal_source,
         status: formData.status,
-        category: formData.category || null,
+        category: categoryWithAttrs,
         start_date: formData.start_date,
         due_date: formData.due_date || null,
         weighting: parseFloat(formData.weighting) || 10,
