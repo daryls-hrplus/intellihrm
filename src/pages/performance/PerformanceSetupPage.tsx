@@ -29,8 +29,10 @@ import {
   Plus, 
   Edit, 
   Trash2,
-  Building
+  Building,
+  GitBranch
 } from "lucide-react";
+import { GoalApprovalRulesManager } from "@/components/performance/GoalApprovalRulesManager";
 
 interface Company {
   id: string;
@@ -334,6 +336,7 @@ export default function PerformanceSetupPage() {
     { id: "overall-scales", label: t("performance.setup.overallScales", "Overall Scales"), icon: Layers },
     { id: "competencies", label: t("performance.setup.competencies", "Competencies"), icon: BookOpen },
     { id: "goal-templates", label: t("performance.setup.goalTemplates", "Goal Templates"), icon: Target },
+    { id: "approval-workflows", label: t("performance.setup.approvalWorkflows", "Approval Workflows"), icon: GitBranch },
     { id: "recognition", label: t("performance.setup.recognition", "Recognition Categories"), icon: Award },
     { id: "appraisal-cycles", label: t("performance.setup.appraisalCycles", "Appraisal Cycles"), icon: Calendar },
   ];
@@ -383,7 +386,7 @@ export default function PerformanceSetupPage() {
 
         {selectedCompany && (
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-            <TabsList className="grid w-full grid-cols-6">
+            <TabsList className="grid w-full grid-cols-7">
               {tabs.map((tab) => {
                 const Icon = tab.icon;
                 return (
@@ -717,6 +720,11 @@ export default function PerformanceSetupPage() {
                   )}
                 </CardContent>
               </Card>
+            </TabsContent>
+
+            {/* Approval Workflows Tab */}
+            <TabsContent value="approval-workflows" className="space-y-4">
+              <GoalApprovalRulesManager companyId={selectedCompany} />
             </TabsContent>
 
             {/* Recognition Categories Tab */}

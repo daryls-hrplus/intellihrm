@@ -25,12 +25,15 @@ import {
   Building2,
   User,
   Star,
+  Send,
 } from "lucide-react";
 import { differenceInDays, isPast } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { formatDateForDisplay } from "@/utils/dateUtils";
 import { GoalRatingDialog } from "./GoalRatingDialog";
+import { GoalSubmitDialog } from "./GoalSubmitDialog";
+import { GoalApprovalStatus } from "./GoalApprovalStatus";
 
 type GoalStatus = 'draft' | 'active' | 'in_progress' | 'completed' | 'cancelled' | 'overdue';
 type GoalType = 'okr_objective' | 'okr_key_result' | 'smart_goal';
@@ -66,6 +69,7 @@ interface EnhancedGoalCardProps {
   onViewComments?: (goal: Goal) => void;
   showOwner?: boolean;
   userRole?: "employee" | "manager";
+  companyId?: string;
 }
 
 const statusColors: Record<GoalStatus, string> = {
@@ -98,8 +102,10 @@ export function EnhancedGoalCard({
   onViewComments,
   showOwner = false,
   userRole = "employee",
+  companyId,
 }: EnhancedGoalCardProps) {
   const [ratingDialogOpen, setRatingDialogOpen] = useState(false);
+  const [submitDialogOpen, setSubmitDialogOpen] = useState(false);
   const isOverdue = goal.due_date && isPast(new Date(goal.due_date)) && goal.status !== "completed";
   const daysUntilDue = goal.due_date ? differenceInDays(new Date(goal.due_date), new Date()) : null;
   
@@ -164,6 +170,10 @@ export function EnhancedGoalCard({
             </CardDescription>
           </div>
           <div className="flex items-center gap-2">
+            {/* Approval Status Indicator */}
+            {goal.status !== "draft" && (
+              <GoalApprovalStatus goalId={goal.id} goalStatus={goal.status} compact />
+            )}
             <Badge className={statusColors[effectiveStatus]}>
               {effectiveStatus.replace("_", " ")}
             </Badge>
@@ -196,7 +206,13 @@ export function EnhancedGoalCard({
                     {userRole === "employee" ? "Rate Goal" : "Rate / Review"}
                   </DropdownMenuItem>
                 )}
-                {goal.status !== "completed" && (
+                {goal.status === "draft" && (
+                  <DropdownMenuItem onClick={() => setSubmitDialogOpen(true)}>
+                    <Send className="mr-2 h-4 w-4" />
+                    Submit for Approval
+                  </DropdownMenuItem>
+                )}
+                {goal.status !== "completed" && goal.status !== "draft" && (
                   <DropdownMenuItem onClick={handleMarkComplete}>
                     <CheckCircle className="mr-2 h-4 w-4" />
                     Mark Complete
@@ -283,6 +299,22 @@ export function EnhancedGoalCard({
         onOpenChange={setRatingDialogOpen}
         goal={goal}
         userRole={userRole}
+        onSuccess={onRefresh}
+      />
+
+      {/* Submit for Approval Dialog */}
+      <GoalSubmitDialog
+        open={submitDialogOpen}
+        onOpenChange={setSubmitDialogOpen}
+        goal={{
+          id: goal.id,
+          title: goal.title,
+          description: goal.description,
+          goal_level: goal.goal_level,
+          goal_type: goal.goal_type,
+          status: goal.status,
+        }}
+        companyId={companyId}
         onSuccess={onRefresh}
       />
     </Card>
