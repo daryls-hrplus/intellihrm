@@ -6,44 +6,38 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Stepper } from "@/components/ui/stepper";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { useAuditLog } from "@/hooks/useAuditLog";
 import { getTodayString } from "@/utils/dateUtils";
-import { GoalEnhancedMetricsTab } from "./GoalEnhancedMetricsTab";
 import {
   MeasurementType,
   ComplianceCategory,
   GoalExtendedAttributes,
-  GOAL_LEVEL_LABELS,
 } from "@/types/goalEnhancements";
 import {
   parseExtendedAttributes,
   serializeExtendedAttributes,
   getDisplayCategory,
 } from "@/utils/goalCalculations";
+import {
+  StepClassification,
+  StepDefinition,
+  StepMetrics,
+  StepAlignment,
+  GoalLevel,
+  GoalType,
+} from "./goal-wizard";
+import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
 
 type GoalStatus = 'draft' | 'active' | 'in_progress' | 'completed' | 'cancelled' | 'overdue';
-type GoalType = 'okr_objective' | 'okr_key_result' | 'smart_goal';
-type GoalLevel = 'company' | 'department' | 'team' | 'individual' | 'project';
 type DbGoalLevel = 'company' | 'department' | 'team' | 'individual';
 type GoalSource = 'cascaded' | 'manager_assigned' | 'self_created';
 
-// Map UI goal levels to DB-compatible values
 const mapGoalLevelToDb = (level: GoalLevel): DbGoalLevel => {
-  if (level === 'project') return 'team'; // Store as team, actual level in extended attrs
+  if (level === 'project') return 'team';
   return level;
 };
 
@@ -97,7 +91,6 @@ interface FormData {
   achievable: string;
   relevant: string;
   time_bound: string;
-  // Enhanced attributes
   measurement_type: MeasurementType;
   threshold_value: string;
   stretch_value: string;
@@ -118,6 +111,47 @@ interface JobGoal {
   weighting: number;
 }
 
+const WIZARD_STEPS = [
+  { title: "Classification", description: "Level & Type" },
+  { title: "Definition", description: "Core details" },
+  { title: "Metrics", description: "Measurement" },
+  { title: "Alignment", description: "SMART/OKR" },
+];
+
+const getInitialFormData = (userId?: string): FormData => ({
+  title: "",
+  description: "",
+  goal_type: "smart_goal",
+  goal_level: "individual",
+  goal_source: "self_created",
+  status: "draft",
+  category: "",
+  start_date: getTodayString(),
+  due_date: "",
+  weighting: "10",
+  target_value: "",
+  current_value: "0",
+  unit_of_measure: "",
+  parent_goal_id: "",
+  employee_id: userId || "",
+  specific: "",
+  measurable: "",
+  achievable: "",
+  relevant: "",
+  time_bound: "",
+  measurement_type: "quantitative",
+  threshold_value: "",
+  stretch_value: "",
+  threshold_percentage: "80",
+  stretch_percentage: "120",
+  is_inverse: false,
+  is_mandatory: false,
+  compliance_category: "",
+  is_weight_required: true,
+  inherited_weight_portion: "",
+  metric_template_id: "",
+});
+
 export function GoalDialog({
   open,
   onOpenChange,
@@ -129,43 +163,11 @@ export function GoalDialog({
   const { user } = useAuth();
   const { logAction } = useAuditLog();
   const [loading, setLoading] = useState(false);
+  const [currentStep, setCurrentStep] = useState(0);
   const [parentGoals, setParentGoals] = useState<{ id: string; title: string }[]>([]);
   const [jobGoals, setJobGoals] = useState<JobGoal[]>([]);
   const [parentGoalWeight, setParentGoalWeight] = useState<number | null>(null);
-  const [formData, setFormData] = useState<FormData>({
-    title: "",
-    description: "",
-    goal_type: "smart_goal",
-    goal_level: "individual",
-    goal_source: "self_created",
-    status: "draft",
-    category: "",
-    start_date: getTodayString(),
-    due_date: "",
-    weighting: "10",
-    target_value: "",
-    current_value: "0",
-    unit_of_measure: "",
-    parent_goal_id: "",
-    employee_id: "",
-    specific: "",
-    measurable: "",
-    achievable: "",
-    relevant: "",
-    time_bound: "",
-    // Enhanced attributes
-    measurement_type: "quantitative",
-    threshold_value: "",
-    stretch_value: "",
-    threshold_percentage: "80",
-    stretch_percentage: "120",
-    is_inverse: false,
-    is_mandatory: false,
-    compliance_category: "",
-    is_weight_required: true,
-    inherited_weight_portion: "",
-    metric_template_id: "",
-  });
+  const [formData, setFormData] = useState<FormData>(getInitialFormData(user?.id));
 
   // Fetch job goals for selected employee
   const fetchJobGoalsForEmployee = async (employeeId: string) => {
@@ -175,7 +177,6 @@ export function GoalDialog({
     }
 
     try {
-      // Get employee's current position and its job family
       const { data: positions } = await supabase
         .from("employee_positions")
         .select(`
@@ -199,7 +200,6 @@ export function GoalDialog({
         return;
       }
 
-      // Get jobs in this job family
       const { data: jobs } = await supabase
         .from("jobs")
         .select("id")
@@ -213,7 +213,6 @@ export function GoalDialog({
 
       const jobIds = jobs.map(j => j.id);
 
-      // Get job goals for these jobs
       const { data: goals } = await supabase
         .from("job_goals")
         .select("id, goal_name, goal_description, weighting")
@@ -242,7 +241,6 @@ export function GoalDialog({
         title: goal.title,
         description: goal.description || "",
         goal_type: goal.goal_type,
-        // Restore actual goal level from extended attrs if available
         goal_level: extAttrs?.actualGoalLevel || goal.goal_level,
         goal_source: "self_created",
         status: goal.status,
@@ -272,44 +270,13 @@ export function GoalDialog({
         inherited_weight_portion: extAttrs?.inheritedWeightPortion ? String(extAttrs.inheritedWeightPortion) : "",
         metric_template_id: extAttrs?.metricTemplateId || "",
       });
+      setCurrentStep(0);
     } else {
-      const initialEmployeeId = user?.id || "";
-      setFormData({
-        title: "",
-        description: "",
-        goal_type: "smart_goal",
-        goal_level: "individual",
-        goal_source: "self_created",
-        status: "draft",
-        category: "",
-        start_date: getTodayString(),
-        due_date: "",
-        weighting: "10",
-        target_value: "",
-        current_value: "0",
-        unit_of_measure: "",
-        parent_goal_id: "",
-        employee_id: initialEmployeeId,
-        specific: "",
-        measurable: "",
-        achievable: "",
-        relevant: "",
-        time_bound: "",
-        measurement_type: "quantitative",
-        threshold_value: "",
-        stretch_value: "",
-        threshold_percentage: "80",
-        stretch_percentage: "120",
-        is_inverse: false,
-        is_mandatory: false,
-        compliance_category: "",
-        is_weight_required: true,
-        inherited_weight_portion: "",
-        metric_template_id: "",
-      });
-      // Fetch job goals immediately for the initial employee
-      if (initialEmployeeId && open) {
-        fetchJobGoalsForEmployee(initialEmployeeId);
+      const initialData = getInitialFormData(user?.id);
+      setFormData(initialData);
+      setCurrentStep(0);
+      if (initialData.employee_id && open) {
+        fetchJobGoalsForEmployee(initialData.employee_id);
       }
     }
   }, [goal, open, user?.id]);
@@ -336,13 +303,11 @@ export function GoalDialog({
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async () => {
     if (!companyId || !user?.id) return;
 
     setLoading(true);
     try {
-      // Build extended attributes - include actual goal level if it's "project"
       const extendedAttrs: GoalExtendedAttributes = {
         measurementType: formData.measurement_type,
         thresholdValue: formData.threshold_value ? parseFloat(formData.threshold_value) : undefined,
@@ -355,11 +320,9 @@ export function GoalDialog({
         isWeightRequired: formData.is_weight_required,
         inheritedWeightPortion: formData.inherited_weight_portion ? parseFloat(formData.inherited_weight_portion) : undefined,
         metricTemplateId: formData.metric_template_id || undefined,
-        // Store actual goal level if different from DB value
         actualGoalLevel: formData.goal_level === 'project' ? 'project' : undefined,
       };
 
-      // Serialize extended attrs with legacy category
       const categoryWithAttrs = serializeExtendedAttributes(extendedAttrs, formData.category || undefined);
 
       const goalData = {
@@ -435,323 +398,174 @@ export function GoalDialog({
     }
   };
 
+  const canProceed = () => {
+    switch (currentStep) {
+      case 0: // Classification
+        return true; // Always has defaults
+      case 1: // Definition
+        return formData.title.trim().length > 0 && formData.start_date;
+      case 2: // Metrics
+        return true; // Metrics are optional
+      case 3: // Alignment
+        return true; // SMART criteria are optional
+      default:
+        return false;
+    }
+  };
+
+  const handleNext = () => {
+    if (currentStep < WIZARD_STEPS.length - 1) {
+      setCurrentStep(currentStep + 1);
+    } else {
+      handleSubmit();
+    }
+  };
+
+  const handleBack = () => {
+    if (currentStep > 0) {
+      setCurrentStep(currentStep - 1);
+    }
+  };
+
+  const handleSelectJobGoal = (jobGoal: JobGoal) => {
+    setFormData({
+      ...formData,
+      title: jobGoal.goal_name,
+      description: jobGoal.goal_description || "",
+      weighting: String(jobGoal.weighting || 10),
+    });
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
+        <DialogHeader className="pb-4 border-b">
           <DialogTitle>{goal ? "Edit Goal" : "Create New Goal"}</DialogTitle>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <Tabs defaultValue="basic" className="w-full">
-            <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="basic">Basic Info</TabsTrigger>
-              <TabsTrigger value="metrics">Metrics</TabsTrigger>
-              <TabsTrigger value="smart">SMART Criteria</TabsTrigger>
-            </TabsList>
+        {/* Stepper */}
+        <div className="py-4 px-2">
+          <Stepper
+            steps={WIZARD_STEPS}
+            currentStep={currentStep}
+            onStepClick={(step) => step <= currentStep && setCurrentStep(step)}
+          />
+        </div>
 
-            <TabsContent value="basic" className="space-y-4 mt-4">
-              <div className="grid grid-cols-2 gap-4">
-                {/* Employee Selector - only for individual goals */}
-                {formData.goal_level === "individual" && (
-                  <div className="col-span-2">
-                    <Label htmlFor="employee_id">Employee *</Label>
-                    <Select
-                      value={formData.employee_id || "none"}
-                      onValueChange={(value) => setFormData({ ...formData, employee_id: value === "none" ? "" : value })}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select employee" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="none">Select an employee</SelectItem>
-                        {employees.length > 0 ? (
-                          employees.map((emp) => (
-                            <SelectItem key={emp.id} value={emp.id}>
-                              {emp.full_name}
-                            </SelectItem>
-                          ))
-                        ) : (
-                          <SelectItem value="no-employees" disabled>
-                            No employees found
-                          </SelectItem>
-                        )}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                )}
+        {/* Step Content */}
+        <div className="flex-1 overflow-y-auto py-4 px-1">
+          {currentStep === 0 && (
+            <StepClassification
+              goalLevel={formData.goal_level}
+              goalType={formData.goal_type}
+              onLevelChange={(level) => setFormData({ ...formData, goal_level: level })}
+              onTypeChange={(type) => setFormData({ ...formData, goal_type: type })}
+            />
+          )}
 
-                {/* Job Goals Suggestions */}
-                {jobGoals.length > 0 && (
-                  <div className="col-span-2">
-                    <Label>Suggested Goals from Job</Label>
-                    <div className="mt-2 p-3 border rounded-md bg-muted/30 max-h-32 overflow-y-auto">
-                      <p className="text-xs text-muted-foreground mb-2">Click a goal to use it as a template:</p>
-                      <div className="space-y-1">
-                        {jobGoals.map((jg) => (
-                          <button
-                            type="button"
-                            key={jg.id}
-                            onClick={() => setFormData({
-                              ...formData,
-                              title: jg.goal_name,
-                              description: jg.goal_description || "",
-                              weighting: String(jg.weighting || 10),
-                            })}
-                            className="w-full text-left p-2 text-sm rounded hover:bg-accent transition-colors"
-                          >
-                            <span className="font-medium">{jg.goal_name}</span>
-                            {jg.weighting && (
-                              <span className="text-xs text-muted-foreground ml-2">({jg.weighting}%)</span>
-                            )}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                )}
+          {currentStep === 1 && (
+            <StepDefinition
+              goalLevel={formData.goal_level}
+              formData={{
+                title: formData.title,
+                description: formData.description,
+                category: formData.category,
+                start_date: formData.start_date,
+                due_date: formData.due_date,
+                status: formData.status,
+                employee_id: formData.employee_id,
+                parent_goal_id: formData.parent_goal_id,
+                goal_source: formData.goal_source,
+              }}
+              onChange={(updates) => setFormData((prev) => ({ ...prev, ...updates } as FormData))}
+              employees={employees}
+              parentGoals={parentGoals}
+              jobGoals={jobGoals}
+              onSelectJobGoal={handleSelectJobGoal}
+            />
+          )}
 
-                <div className="col-span-2">
-                  <Label htmlFor="title">Title *</Label>
-                  <Input
-                    id="title"
-                    value={formData.title}
-                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                    placeholder="Enter goal title"
-                    required
-                  />
-                </div>
+          {currentStep === 2 && (
+            <StepMetrics
+              goalType={formData.goal_type}
+              formData={{
+                weighting: formData.weighting,
+                unit_of_measure: formData.unit_of_measure,
+                target_value: formData.target_value,
+                current_value: formData.current_value,
+                measurement_type: formData.measurement_type,
+                threshold_value: formData.threshold_value,
+                stretch_value: formData.stretch_value,
+                threshold_percentage: formData.threshold_percentage,
+                stretch_percentage: formData.stretch_percentage,
+                is_inverse: formData.is_inverse,
+                is_mandatory: formData.is_mandatory,
+                compliance_category: formData.compliance_category,
+                is_weight_required: formData.is_weight_required,
+                inherited_weight_portion: formData.inherited_weight_portion,
+                metric_template_id: formData.metric_template_id,
+              }}
+              onChange={(updates) => setFormData({ ...formData, ...updates })}
+              parentGoalWeight={parentGoalWeight}
+              companyId={companyId}
+            />
+          )}
 
-                <div className="col-span-2">
-                  <Label htmlFor="description">Description</Label>
-                  <Textarea
-                    id="description"
-                    value={formData.description}
-                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                    placeholder="Describe the goal..."
-                    rows={3}
-                  />
-                </div>
+          {currentStep === 3 && (
+            <StepAlignment
+              goalType={formData.goal_type}
+              smartCriteria={{
+                specific: formData.specific,
+                measurable: formData.measurable,
+                achievable: formData.achievable,
+                relevant: formData.relevant,
+                time_bound: formData.time_bound,
+              }}
+              onSmartChange={(updates) => setFormData({ ...formData, ...updates })}
+            />
+          )}
+        </div>
 
-                <div>
-                  <Label htmlFor="goal_type">Goal Type *</Label>
-                  <Select
-                    value={formData.goal_type}
-                    onValueChange={(value: GoalType) => setFormData({ ...formData, goal_type: value })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="smart_goal">SMART Goal</SelectItem>
-                      <SelectItem value="okr_objective">OKR Objective</SelectItem>
-                      <SelectItem value="okr_key_result">Key Result</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+        {/* Footer Navigation */}
+        <div className="flex items-center justify-between pt-4 border-t">
+          <Button
+            type="button"
+            variant="ghost"
+            onClick={handleBack}
+            disabled={currentStep === 0}
+          >
+            <ChevronLeft className="h-4 w-4 mr-1" />
+            Back
+          </Button>
 
-                <div>
-                  <Label htmlFor="goal_level">Level *</Label>
-                  <Select
-                    value={formData.goal_level}
-                    onValueChange={(value: GoalLevel) => setFormData({ ...formData, goal_level: value })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="individual">Individual</SelectItem>
-                      <SelectItem value="team">Team</SelectItem>
-                      <SelectItem value="project">Project / Initiative</SelectItem>
-                      <SelectItem value="department">Department</SelectItem>
-                      <SelectItem value="company">Company / Strategic</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div>
-                  <Label htmlFor="goal_source">Source</Label>
-                  <Select
-                    value={formData.goal_source}
-                    onValueChange={(value: GoalSource) => setFormData({ ...formData, goal_source: value })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="self_created">Self-Created</SelectItem>
-                      <SelectItem value="manager_assigned">Manager Assigned</SelectItem>
-                      <SelectItem value="cascaded">Cascaded</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div>
-                  <Label htmlFor="status">Status</Label>
-                  <Select
-                    value={formData.status}
-                    onValueChange={(value: GoalStatus) => setFormData({ ...formData, status: value })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="draft">Draft</SelectItem>
-                      <SelectItem value="active">Active</SelectItem>
-                      <SelectItem value="in_progress">In Progress</SelectItem>
-                      <SelectItem value="completed">Completed</SelectItem>
-                      <SelectItem value="cancelled">Cancelled</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div>
-                  <Label htmlFor="category">Category</Label>
-                  <Input
-                    id="category"
-                    value={formData.category}
-                    onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                    placeholder="e.g., Sales, Development"
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="parent_goal_id">Align to Parent Goal</Label>
-                  <Select
-                    value={formData.parent_goal_id || "none"}
-                    onValueChange={(value) => setFormData({ ...formData, parent_goal_id: value === "none" ? "" : value })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select parent goal" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="none">None</SelectItem>
-                      {parentGoals.map((pg) => (
-                        <SelectItem key={pg.id} value={pg.id}>
-                          {pg.title}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div>
-                  <Label htmlFor="start_date">Start Date *</Label>
-                  <Input
-                    id="start_date"
-                    type="date"
-                    value={formData.start_date}
-                    onChange={(e) => setFormData({ ...formData, start_date: e.target.value })}
-                    required
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="due_date">Due Date</Label>
-                  <Input
-                    id="due_date"
-                    type="date"
-                    value={formData.due_date}
-                    onChange={(e) => setFormData({ ...formData, due_date: e.target.value })}
-                  />
-                </div>
-              </div>
-            </TabsContent>
-
-            <TabsContent value="metrics" className="space-y-4 mt-4">
-              <GoalEnhancedMetricsTab
-                formData={{
-                  weighting: formData.weighting,
-                  unit_of_measure: formData.unit_of_measure,
-                  target_value: formData.target_value,
-                  current_value: formData.current_value,
-                  measurement_type: formData.measurement_type,
-                  threshold_value: formData.threshold_value,
-                  stretch_value: formData.stretch_value,
-                  threshold_percentage: formData.threshold_percentage,
-                  stretch_percentage: formData.stretch_percentage,
-                  is_inverse: formData.is_inverse,
-                  is_mandatory: formData.is_mandatory,
-                  compliance_category: formData.compliance_category,
-                  is_weight_required: formData.is_weight_required,
-                  inherited_weight_portion: formData.inherited_weight_portion,
-                  metric_template_id: formData.metric_template_id,
-                }}
-                onChange={(updates) => setFormData({ ...formData, ...updates })}
-                parentGoalWeight={parentGoalWeight}
-                companyId={companyId}
-              />
-            </TabsContent>
-
-            <TabsContent value="smart" className="space-y-4 mt-4">
-              <div className="space-y-4">
-                <div>
-                  <Label htmlFor="specific">Specific</Label>
-                  <Textarea
-                    id="specific"
-                    value={formData.specific}
-                    onChange={(e) => setFormData({ ...formData, specific: e.target.value })}
-                    placeholder="What exactly do you want to accomplish?"
-                    rows={2}
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="measurable">Measurable</Label>
-                  <Textarea
-                    id="measurable"
-                    value={formData.measurable}
-                    onChange={(e) => setFormData({ ...formData, measurable: e.target.value })}
-                    placeholder="How will you measure success?"
-                    rows={2}
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="achievable">Achievable</Label>
-                  <Textarea
-                    id="achievable"
-                    value={formData.achievable}
-                    onChange={(e) => setFormData({ ...formData, achievable: e.target.value })}
-                    placeholder="Is this goal realistic and attainable?"
-                    rows={2}
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="relevant">Relevant</Label>
-                  <Textarea
-                    id="relevant"
-                    value={formData.relevant}
-                    onChange={(e) => setFormData({ ...formData, relevant: e.target.value })}
-                    placeholder="Why is this goal important?"
-                    rows={2}
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="time_bound">Time-Bound</Label>
-                  <Textarea
-                    id="time_bound"
-                    value={formData.time_bound}
-                    onChange={(e) => setFormData({ ...formData, time_bound: e.target.value })}
-                    placeholder="What is the deadline?"
-                    rows={2}
-                  />
-                </div>
-              </div>
-            </TabsContent>
-          </Tabs>
-
-          <div className="flex justify-end gap-2 pt-4 border-t">
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+          <div className="flex gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+            >
               Cancel
             </Button>
-            <Button type="submit" disabled={loading}>
-              {loading ? "Saving..." : goal ? "Update Goal" : "Create Goal"}
+            <Button
+              onClick={handleNext}
+              disabled={loading || !canProceed()}
+            >
+              {loading ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                  Saving...
+                </>
+              ) : currentStep === WIZARD_STEPS.length - 1 ? (
+                goal ? "Update Goal" : "Create Goal"
+              ) : (
+                <>
+                  Next
+                  <ChevronRight className="h-4 w-4 ml-1" />
+                </>
+              )}
             </Button>
           </div>
-        </form>
+        </div>
       </DialogContent>
     </Dialog>
   );
