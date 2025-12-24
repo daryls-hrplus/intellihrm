@@ -41,8 +41,17 @@ import {
   Eye,
   EyeOff,
   Play,
+  Sparkles,
+  Bot,
+  FileCheck,
+  Clock,
+  CheckCircle2,
+  XCircle,
+  Send,
 } from "lucide-react";
 import type { Tour } from "@/types/tours";
+import { AITourGenerator } from "./AITourGenerator";
+import { TourReviewPanel } from "./TourReviewPanel";
 
 interface TourListManagerProps {
   onSelectTour: (tourId: string) => void;
@@ -60,6 +69,15 @@ const AUTO_TRIGGER_OPTIONS = [
   { value: "manual", label: "Manual" },
 ];
 
+const REVIEW_STATUS_OPTIONS = [
+  { value: "all", label: "All Status" },
+  { value: "draft", label: "Drafts" },
+  { value: "in_review", label: "In Review" },
+  { value: "approved", label: "Approved" },
+  { value: "rejected", label: "Rejected" },
+  { value: "published", label: "Published" },
+];
+
 type TourFormData = {
   tour_code: string;
   tour_name: string;
@@ -73,10 +91,21 @@ type TourFormData = {
   is_active: boolean;
 };
 
+type ExtendedTour = Tour & { 
+  enablement_tour_steps: { count: number }[]; 
+  review_status?: string; 
+  generated_by?: string;
+  review_notes?: string;
+  rejected_reason?: string;
+};
+
 export function TourListManager({ onSelectTour }: TourListManagerProps) {
   const queryClient = useQueryClient();
   const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [isAIGeneratorOpen, setIsAIGeneratorOpen] = useState(false);
+  const [reviewingTour, setReviewingTour] = useState<ExtendedTour | null>(null);
   const [editingTour, setEditingTour] = useState<Tour | null>(null);
   const [formData, setFormData] = useState<TourFormData>({
     tour_code: "",
@@ -100,7 +129,7 @@ export function TourListManager({ onSelectTour }: TourListManagerProps) {
         .order("created_at", { ascending: false });
 
       if (error) throw error;
-      return data as (Tour & { enablement_tour_steps: { count: number }[]; review_status?: string; generated_by?: string })[];
+      return data as ExtendedTour[];
     },
   });
 
@@ -229,19 +258,127 @@ export function TourListManager({ onSelectTour }: TourListManagerProps) {
     }
   };
 
-  const filteredTours = tours?.filter(
-    (tour) =>
+  const filteredTours = tours?.filter((tour) => {
+    const matchesSearch =
       tour.tour_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       tour.tour_code.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      tour.module_code?.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+      tour.module_code?.toLowerCase().includes(searchQuery.toLowerCase());
+    
+    const matchesStatus = statusFilter === "all" || tour.review_status === statusFilter;
+    
+    return matchesSearch && matchesStatus;
+  });
 
   const getTourTypeLabel = (type: string) => {
     return TOUR_TYPES.find((t) => t.value === type)?.label || type;
   };
 
+  const getReviewStatusBadge = (status?: string) => {
+    switch (status) {
+      case "draft":
+        return (
+          <Badge variant="secondary" className="gap-1">
+            <Clock className="h-3 w-3" />
+            Draft
+          </Badge>
+        );
+      case "in_review":
+        return (
+          <Badge className="bg-amber-500/10 text-amber-600 border-amber-200 gap-1">
+            <FileCheck className="h-3 w-3" />
+            In Review
+          </Badge>
+        );
+      case "approved":
+        return (
+          <Badge className="bg-blue-500/10 text-blue-600 border-blue-200 gap-1">
+            <CheckCircle2 className="h-3 w-3" />
+            Approved
+          </Badge>
+        );
+      case "rejected":
+        return (
+          <Badge className="bg-red-500/10 text-red-600 border-red-200 gap-1">
+            <XCircle className="h-3 w-3" />
+            Rejected
+          </Badge>
+        );
+      case "published":
+        return (
+          <Badge className="bg-green-500/10 text-green-600 border-green-200 gap-1">
+            <Send className="h-3 w-3" />
+            Published
+          </Badge>
+        );
+      default:
+        return null;
+    }
+  };
+
+  const statusCounts = {
+    draft: tours?.filter(t => t.review_status === "draft").length || 0,
+    in_review: tours?.filter(t => t.review_status === "in_review").length || 0,
+    approved: tours?.filter(t => t.review_status === "approved").length || 0,
+    rejected: tours?.filter(t => t.review_status === "rejected").length || 0,
+    published: tours?.filter(t => t.review_status === "published").length || 0,
+  };
+
   return (
     <div className="space-y-6">
+      {/* Status Summary Cards */}
+      <div className="grid grid-cols-5 gap-4">
+        <Card 
+          className={`cursor-pointer transition-colors ${statusFilter === "draft" ? "ring-2 ring-primary" : ""}`}
+          onClick={() => setStatusFilter(statusFilter === "draft" ? "all" : "draft")}
+        >
+          <CardContent className="p-4 text-center">
+            <Clock className="h-5 w-5 mx-auto mb-1 text-muted-foreground" />
+            <div className="text-2xl font-bold">{statusCounts.draft}</div>
+            <div className="text-xs text-muted-foreground">Drafts</div>
+          </CardContent>
+        </Card>
+        <Card 
+          className={`cursor-pointer transition-colors ${statusFilter === "in_review" ? "ring-2 ring-primary" : ""}`}
+          onClick={() => setStatusFilter(statusFilter === "in_review" ? "all" : "in_review")}
+        >
+          <CardContent className="p-4 text-center">
+            <FileCheck className="h-5 w-5 mx-auto mb-1 text-amber-500" />
+            <div className="text-2xl font-bold">{statusCounts.in_review}</div>
+            <div className="text-xs text-muted-foreground">In Review</div>
+          </CardContent>
+        </Card>
+        <Card 
+          className={`cursor-pointer transition-colors ${statusFilter === "approved" ? "ring-2 ring-primary" : ""}`}
+          onClick={() => setStatusFilter(statusFilter === "approved" ? "all" : "approved")}
+        >
+          <CardContent className="p-4 text-center">
+            <CheckCircle2 className="h-5 w-5 mx-auto mb-1 text-blue-500" />
+            <div className="text-2xl font-bold">{statusCounts.approved}</div>
+            <div className="text-xs text-muted-foreground">Approved</div>
+          </CardContent>
+        </Card>
+        <Card 
+          className={`cursor-pointer transition-colors ${statusFilter === "rejected" ? "ring-2 ring-primary" : ""}`}
+          onClick={() => setStatusFilter(statusFilter === "rejected" ? "all" : "rejected")}
+        >
+          <CardContent className="p-4 text-center">
+            <XCircle className="h-5 w-5 mx-auto mb-1 text-red-500" />
+            <div className="text-2xl font-bold">{statusCounts.rejected}</div>
+            <div className="text-xs text-muted-foreground">Rejected</div>
+          </CardContent>
+        </Card>
+        <Card 
+          className={`cursor-pointer transition-colors ${statusFilter === "published" ? "ring-2 ring-primary" : ""}`}
+          onClick={() => setStatusFilter(statusFilter === "published" ? "all" : "published")}
+        >
+          <CardContent className="p-4 text-center">
+            <Send className="h-5 w-5 mx-auto mb-1 text-green-500" />
+            <div className="text-2xl font-bold">{statusCounts.published}</div>
+            <div className="text-xs text-muted-foreground">Published</div>
+          </CardContent>
+        </Card>
+      </div>
+
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between">
@@ -251,10 +388,20 @@ export function TourListManager({ onSelectTour }: TourListManagerProps) {
                 Manage guided tours for user onboarding and feature discovery
               </CardDescription>
             </div>
-            <Button onClick={() => setIsCreateDialogOpen(true)}>
-              <Plus className="h-4 w-4 mr-2" />
-              Create Tour
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button 
+                variant="outline" 
+                onClick={() => setIsAIGeneratorOpen(true)}
+                className="gap-2"
+              >
+                <Sparkles className="h-4 w-4" />
+                AI Generate
+              </Button>
+              <Button onClick={() => setIsCreateDialogOpen(true)}>
+                <Plus className="h-4 w-4 mr-2" />
+                Create Tour
+              </Button>
+            </div>
           </div>
         </CardHeader>
         <CardContent>
@@ -268,6 +415,18 @@ export function TourListManager({ onSelectTour }: TourListManagerProps) {
                 className="pl-10"
               />
             </div>
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger className="w-[160px]">
+                <SelectValue placeholder="Filter by status" />
+              </SelectTrigger>
+              <SelectContent>
+                {REVIEW_STATUS_OPTIONS.map((opt) => (
+                  <SelectItem key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           {isLoading ? (
@@ -276,7 +435,7 @@ export function TourListManager({ onSelectTour }: TourListManagerProps) {
             </div>
           ) : filteredTours?.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
-              No tours found. Create your first guided tour.
+              No tours found. Create your first guided tour or use AI to generate one.
             </div>
           ) : (
             <Table>
@@ -285,9 +444,9 @@ export function TourListManager({ onSelectTour }: TourListManagerProps) {
                   <TableHead>Name</TableHead>
                   <TableHead>Type</TableHead>
                   <TableHead>Module</TableHead>
-                  <TableHead>Route</TableHead>
                   <TableHead>Steps</TableHead>
-                  <TableHead>Status</TableHead>
+                  <TableHead>Review Status</TableHead>
+                  <TableHead>Active</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
@@ -295,10 +454,24 @@ export function TourListManager({ onSelectTour }: TourListManagerProps) {
                 {filteredTours?.map((tour) => (
                   <TableRow key={tour.id}>
                     <TableCell>
-                      <div>
-                        <div className="font-medium">{tour.tour_name}</div>
-                        <div className="text-xs text-muted-foreground">
-                          {tour.tour_code}
+                      <div className="flex items-start gap-2">
+                        <div>
+                          <div className="font-medium flex items-center gap-1.5">
+                            {tour.tour_name}
+                            {tour.generated_by === "ai" && (
+                              <span title="AI Generated">
+                                <Bot className="h-3.5 w-3.5 text-purple-500" />
+                              </span>
+                            )}
+                            {tour.generated_by === "release_trigger" && (
+                              <span title="Release Auto-Generated">
+                                <Sparkles className="h-3.5 w-3.5 text-amber-500" />
+                              </span>
+                            )}
+                          </div>
+                          <div className="text-xs text-muted-foreground">
+                            {tour.tour_code}
+                          </div>
                         </div>
                       </div>
                     </TableCell>
@@ -313,14 +486,17 @@ export function TourListManager({ onSelectTour }: TourListManagerProps) {
                       </code>
                     </TableCell>
                     <TableCell>
-                      <code className="text-xs bg-muted px-1 py-0.5 rounded">
-                        {tour.trigger_route || "-"}
-                      </code>
-                    </TableCell>
-                    <TableCell>
                       <Badge variant="secondary">
                         {tour.enablement_tour_steps?.[0]?.count || 0}
                       </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <button 
+                        onClick={() => setReviewingTour(tour)}
+                        className="hover:opacity-80 transition-opacity"
+                      >
+                        {getReviewStatusBadge(tour.review_status)}
+                      </button>
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2">
@@ -348,8 +524,14 @@ export function TourListManager({ onSelectTour }: TourListManagerProps) {
                         <Button
                           variant="ghost"
                           size="icon"
+                          onClick={() => setReviewingTour(tour)}
+                        >
+                          <FileCheck className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
                           onClick={() => onSelectTour(tour.id)}
-                          title="Edit Steps"
                         >
                           <Settings2 className="h-4 w-4" />
                         </Button>
@@ -403,6 +585,40 @@ export function TourListManager({ onSelectTour }: TourListManagerProps) {
           )}
         </CardContent>
       </Card>
+
+      {/* AI Tour Generator Dialog */}
+      <AITourGenerator 
+        open={isAIGeneratorOpen} 
+        onOpenChange={setIsAIGeneratorOpen} 
+      />
+
+      {/* Tour Review Panel */}
+      {reviewingTour && (
+        <TourReviewPanel
+          tour={{
+            id: reviewingTour.id,
+            tour_name: reviewingTour.tour_name,
+            tour_code: reviewingTour.tour_code,
+            description: reviewingTour.description || null,
+            module_code: reviewingTour.module_code || "",
+            feature_code: reviewingTour.feature_code || null,
+            tour_type: reviewingTour.tour_type,
+            trigger_route: reviewingTour.trigger_route || null,
+            is_active: reviewingTour.is_active,
+            review_status: reviewingTour.review_status || null,
+            generated_by: reviewingTour.generated_by || null,
+            reviewed_by: null,
+            reviewed_at: null,
+            review_notes: reviewingTour.review_notes || null,
+            rejected_reason: reviewingTour.rejected_reason || null,
+            created_at: reviewingTour.created_at,
+            estimated_duration_seconds: reviewingTour.estimated_duration_seconds || null,
+            enablement_tour_steps: reviewingTour.enablement_tour_steps,
+          }}
+          open={!!reviewingTour}
+          onOpenChange={(open) => !open && setReviewingTour(null)}
+        />
+      )}
 
       {/* Create/Edit Dialog */}
       <Dialog
