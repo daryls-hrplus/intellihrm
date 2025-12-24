@@ -400,6 +400,10 @@
         "title": "Org Changes Report",
         "description": "Track organizational changes over time"
       },
+      "qualifications": {
+        "title": "Qualifications",
+        "description": "Manage academic qualifications and professional certifications"
+      },
       "transactions": {
         "title": "Employee Transactions",
         "description": "Manage hires, promotions, transfers, terminations",
