@@ -310,6 +310,9 @@ export function useEmployeeTransactions() {
           compensation_frequency: "monthly",
           benefits_profile: {},
           is_active: true,
+          pay_group_id: data.pay_group_id || null,
+          pay_group_start_date: data.pay_group_id ? data.effective_date : null,
+          pay_group_end_date: null,
         };
 
         const { error: positionError } = await supabase
@@ -356,6 +359,9 @@ export function useEmployeeTransactions() {
             compensation_frequency: "monthly",
             benefits_profile: {},
             is_active: true,
+            pay_group_id: data.pay_group_id || null,
+            pay_group_start_date: data.pay_group_id ? data.effective_date : null,
+            pay_group_end_date: null,
           };
 
           const { error: positionError } = await supabase
@@ -368,46 +374,6 @@ export function useEmployeeTransactions() {
         }
       }
 
-      // Handle pay group assignment for PROMOTION and TRANSFER transactions
-      if (data.pay_group_id && data.employee_id) {
-        // Get the pay group details
-        const { data: payGroup } = await supabase
-          .from("pay_groups")
-          .select("name, pay_frequency")
-          .eq("id", data.pay_group_id)
-          .single();
-
-        if (payGroup) {
-          // Deactivate current active pay group assignment
-          await supabase
-            .from("employee_pay_groups")
-            .update({ 
-              end_date: data.effective_date 
-            })
-            .eq("employee_id", data.employee_id)
-            .is("end_date", null);
-
-          // Create new pay group assignment
-          const payGroupAssignment = {
-            employee_id: data.employee_id,
-            pay_group_id: data.pay_group_id,
-            pay_group_name: payGroup.name,
-            pay_frequency: payGroup.pay_frequency,
-            payment_method: "bank_transfer",
-            start_date: data.effective_date,
-            end_date: null,
-            notes: `Assigned via ${data.to_position_id ? "promotion" : "transfer"} transaction`,
-          };
-
-          const { error: payGroupError } = await supabase
-            .from("employee_pay_groups")
-            .insert(payGroupAssignment as any);
-
-          if (payGroupError) {
-            console.error("Failed to create employee pay group assignment:", payGroupError);
-          }
-        }
-      }
 
       await logAction({
         action: "CREATE",
