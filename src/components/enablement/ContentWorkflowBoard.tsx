@@ -87,7 +87,9 @@ export function ContentWorkflowBoard({ releaseId }: ContentWorkflowBoardProps) {
         item.feature_code.toLowerCase().includes(searchQuery.toLowerCase()) ||
         item.module_code.toLowerCase().includes(searchQuery.toLowerCase());
       const matchesPriority = priorityFilter === "all" || item.priority === priorityFilter;
-      const matchesModule = moduleFilter === "all" || item.module_code === moduleFilter;
+      // Case-insensitive module matching
+      const matchesModule = moduleFilter === "all" || 
+        item.module_code.toLowerCase() === moduleFilter.toLowerCase();
       return matchesSearch && matchesPriority && matchesModule;
     });
   }, [contentItems, searchQuery, priorityFilter, moduleFilter]);
@@ -114,7 +116,10 @@ export function ContentWorkflowBoard({ releaseId }: ContentWorkflowBoardProps) {
   }, [filteredItems]);
 
   const modules = useMemo(() => {
-    const uniqueModules = new Set(contentItems.map((item) => item.module_code));
+    // Normalize to uppercase for display and deduplicate case variations
+    const uniqueModules = new Set(
+      contentItems.map((item) => item.module_code.toUpperCase())
+    );
     return Array.from(uniqueModules).sort();
   }, [contentItems]);
 
