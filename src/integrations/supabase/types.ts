@@ -15832,6 +15832,62 @@ export type Database = {
           },
         ]
       }
+      goal_locking_rules: {
+        Row: {
+          allow_adjustment_request: boolean | null
+          allow_admin_override: boolean | null
+          company_id: string
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean | null
+          lock_fields: string[] | null
+          name: string
+          priority: number | null
+          rule_type: string
+          trigger_status: string[] | null
+          updated_at: string
+        }
+        Insert: {
+          allow_adjustment_request?: boolean | null
+          allow_admin_override?: boolean | null
+          company_id: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          lock_fields?: string[] | null
+          name: string
+          priority?: number | null
+          rule_type: string
+          trigger_status?: string[] | null
+          updated_at?: string
+        }
+        Update: {
+          allow_adjustment_request?: boolean | null
+          allow_admin_override?: boolean | null
+          company_id?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          lock_fields?: string[] | null
+          name?: string
+          priority?: number | null
+          rule_type?: string
+          trigger_status?: string[] | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "goal_locking_rules_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       goal_owners: {
         Row: {
           assigned_at: string
@@ -38004,6 +38060,7 @@ export type Database = {
         Args: { p_channel_id: string; p_user_id: string }
         Returns: boolean
       }
+      lock_goals_on_cycle_freeze: { Args: never; Returns: undefined }
       log_ai_security_violation: {
         Args: {
           p_ai_response?: string
@@ -38155,6 +38212,10 @@ export type Database = {
         | "completed"
         | "cancelled"
         | "overdue"
+        | "submitted"
+        | "approved"
+        | "adjusted"
+        | "archived"
       goal_type: "okr_objective" | "okr_key_result" | "smart_goal"
       lookup_category:
         | "employee_status"
@@ -38367,6 +38428,10 @@ export const Constants = {
         "completed",
         "cancelled",
         "overdue",
+        "submitted",
+        "approved",
+        "adjusted",
+        "archived",
       ],
       goal_type: ["okr_objective", "okr_key_result", "smart_goal"],
       lookup_category: [
