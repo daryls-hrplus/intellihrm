@@ -36,6 +36,8 @@ interface CompensationItem {
   pay_element_code: string;
   start_date: string | null;
   end_date: string | null;
+  position_title: string | null;
+  assignment_type: string | null;
 }
 
 export function SalarySummarySection({ companyId, employeeId, payGroupId, payPeriodId }: SalarySummarySectionProps) {
@@ -127,7 +129,7 @@ export function SalarySummarySection({ companyId, employeeId, payGroupId, payPer
         setEmployeeName(empData.full_name || 'N/A');
       }
 
-      // Load additional compensation items
+      // Load additional compensation items with position details
       const { data: compData, error: compError } = await supabase
         .from('employee_compensation')
         .select(`
@@ -137,7 +139,9 @@ export function SalarySummarySection({ companyId, employeeId, payGroupId, payPer
           frequency,
           start_date,
           end_date,
-          pay_elements (name, code)
+          position_id,
+          pay_elements (name, code),
+          positions (title)
         `)
         .eq('employee_id', employeeId)
         .eq('is_active', true);
@@ -151,6 +155,25 @@ export function SalarySummarySection({ companyId, employeeId, payGroupId, payPer
           return item.end_date >= periodStart;
         });
         
+        // Get assignment types from employee_positions for each compensation item
+        const positionIds = [...new Set(filteredCompData.map(item => item.position_id).filter(Boolean))];
+        let assignmentTypeMap: Record<string, string> = {};
+        
+        if (positionIds.length > 0) {
+          const { data: empPosData } = await supabase
+            .from('employee_positions')
+            .select('position_id, assignment_type')
+            .eq('employee_id', employeeId)
+            .in('position_id', positionIds);
+          
+          if (empPosData) {
+            assignmentTypeMap = empPosData.reduce((acc, ep) => {
+              acc[ep.position_id] = ep.assignment_type || 'primary';
+              return acc;
+            }, {} as Record<string, string>);
+          }
+        }
+        
         setCompensationItems(filteredCompData.map(item => ({
           id: item.id,
           amount: item.amount || 0,
@@ -159,7 +182,9 @@ export function SalarySummarySection({ companyId, employeeId, payGroupId, payPer
           pay_element_name: (item.pay_elements as any)?.name || 'N/A',
           pay_element_code: (item.pay_elements as any)?.code || '',
           start_date: item.start_date,
-          end_date: item.end_date
+          end_date: item.end_date,
+          position_title: (item.positions as any)?.title || null,
+          assignment_type: item.position_id ? assignmentTypeMap[item.position_id] || 'primary' : null
         })));
       }
     } catch (error) {
@@ -319,9 +344,19 @@ export function SalarySummarySection({ companyId, employeeId, payGroupId, payPer
                     className="flex items-center justify-between p-3 rounded-lg border bg-card"
                   >
                     <div>
-                      <p className="font-medium">{item.pay_element_name}</p>
+                      <div className="flex items-center gap-2">
+                        <p className="font-medium">{item.pay_element_name}</p>
+                        {item.assignment_type && item.assignment_type !== 'primary' && (
+                          <Badge variant="outline" className="text-xs capitalize">
+                            {item.assignment_type}
+                          </Badge>
+                        )}
+                      </div>
                       <p className="text-sm text-muted-foreground">
                         {item.pay_element_code} • {formatFrequency(item.frequency)}
+                        {item.position_title && (
+                          <span className="ml-1">• <Briefcase className="h-3 w-3 inline" /> {item.position_title}</span>
+                        )}
                       </p>
                       {formatDateRange(item.start_date, item.end_date) && (
                         <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
