@@ -1146,14 +1146,21 @@ export type Database = {
           created_at: string
           description: string | null
           display_order: number | null
+          feature_category: string | null
           feature_code: string
           feature_name: string
+          group_code: string | null
+          group_name: string | null
           i18n_key: string | null
+          icon_name: string | null
           id: string
           is_active: boolean | null
+          last_synced_at: string | null
+          module_code: string | null
           module_id: string
           role_requirements: string[] | null
           route_path: string | null
+          source: string | null
           ui_elements: Json | null
           updated_at: string
           workflow_steps: Json | null
@@ -1162,14 +1169,21 @@ export type Database = {
           created_at?: string
           description?: string | null
           display_order?: number | null
+          feature_category?: string | null
           feature_code: string
           feature_name: string
+          group_code?: string | null
+          group_name?: string | null
           i18n_key?: string | null
+          icon_name?: string | null
           id?: string
           is_active?: boolean | null
+          last_synced_at?: string | null
+          module_code?: string | null
           module_id: string
           role_requirements?: string[] | null
           route_path?: string | null
+          source?: string | null
           ui_elements?: Json | null
           updated_at?: string
           workflow_steps?: Json | null
@@ -1178,14 +1192,21 @@ export type Database = {
           created_at?: string
           description?: string | null
           display_order?: number | null
+          feature_category?: string | null
           feature_code?: string
           feature_name?: string
+          group_code?: string | null
+          group_name?: string | null
           i18n_key?: string | null
+          icon_name?: string | null
           id?: string
           is_active?: boolean | null
+          last_synced_at?: string | null
+          module_code?: string | null
           module_id?: string
           role_requirements?: string[] | null
           route_path?: string | null
+          source?: string | null
           ui_elements?: Json | null
           updated_at?: string
           workflow_steps?: Json | null
