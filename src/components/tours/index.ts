@@ -6,3 +6,4 @@ export * from './FloatingHelpButton';
 export * from './HelpPanel';
 export * from './FirstTimeUserDetector';
 export * from './TourFeedbackDialog';
+export * from './PageTourPrompt';

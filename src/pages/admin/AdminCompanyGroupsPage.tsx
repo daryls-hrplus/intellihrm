@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
+import { PageTourPrompt } from "@/components/tours/PageTourPrompt";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuditLog } from "@/hooks/useAuditLog";
 import { useToast } from "@/hooks/use-toast";
@@ -512,6 +513,9 @@ export default function AdminCompanyGroupsPage() {
             Add Group
           </button>
         </div>
+
+        {/* Tour Prompt */}
+        <PageTourPrompt />
 
         {/* Stats */}
         <div className="grid gap-4 sm:grid-cols-3 animate-slide-up">
