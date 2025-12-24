@@ -380,6 +380,10 @@
       "qualifications": {
         "title": "Cualificaciones",
         "description": "Gestionar cualificaciones académicas y certificaciones profesionales"
+      },
+      "forecasting": {
+        "title": "Previsión de Personal",
+        "subtitle": "Planificar y analizar tendencias del personal con herramientas avanzadas de previsión"
       }
     },
     "profile": {

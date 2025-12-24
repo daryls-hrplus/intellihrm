@@ -380,6 +380,10 @@
       "qualifications": {
         "title": "Qualifications",
         "description": "Gérer les qualifications académiques et les certifications professionnelles"
+      },
+      "forecasting": {
+        "title": "Prévision des Effectifs",
+        "subtitle": "Planifier et analyser les tendances des effectifs avec des outils de prévision avancés"
       }
     },
     "profile": {
