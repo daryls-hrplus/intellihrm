@@ -105,7 +105,7 @@ export function TourTooltip(props: TooltipRenderProps) {
           onClick={() => skipTour()}
         >
           <SkipForward className="h-4 w-4 mr-1" />
-          Skip
+          Skip Tour
         </Button>
         
         <div className="flex items-center gap-2">
