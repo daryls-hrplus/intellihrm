@@ -77,6 +77,8 @@ export interface EmployeeTransaction {
   last_working_date: string | null;
   termination_type: string | null;
   exit_interview_completed: boolean;
+  terminate_all_positions: boolean;
+  terminated_position_ids: string[] | null;
   
   // Workflow
   workflow_instance_id: string | null;
