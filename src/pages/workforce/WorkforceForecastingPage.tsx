@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, TrendingUp, Target, Activity, Zap, FlaskConical, Lightbulb, AlertCircle } from "lucide-react";
-import { Link } from "react-router-dom";
+import { TrendingUp, Target, Activity, Zap, FlaskConical, Lightbulb, AlertCircle } from "lucide-react";
 import { HeadcountForecast } from "@/components/admin/HeadcountForecast";
 import { ScenarioPlanning, ScenarioParameters } from "@/components/admin/ScenarioPlanning";
 import { WhatIfAnalysis } from "@/components/admin/WhatIfAnalysis";
@@ -79,20 +79,18 @@ export default function WorkforceForecastingPage() {
   return (
     <AppLayout>
       <div className="space-y-6">
+        <Breadcrumbs
+          items={[
+            { label: t("navigation.workforce"), href: "/workforce" },
+            { label: t("workforce.modules.forecasting.title") },
+          ]}
+        />
         {/* Header */}
-        <div className="flex items-center gap-4">
-          <Link to="/workforce">
-            <Button variant="ghost" size="sm">
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              {t("navigation.workforce")}
-            </Button>
-          </Link>
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight">{t("workforce.forecasting.title")}</h1>
-            <p className="text-muted-foreground">
-              {t("workforce.forecasting.subtitle")}
-            </p>
-          </div>
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">{t("workforce.modules.forecasting.title")}</h1>
+          <p className="text-muted-foreground">
+            {t("workforce.modules.forecasting.subtitle")}
+          </p>
         </div>
 
         {/* Tabs */}
