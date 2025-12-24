@@ -15345,6 +15345,261 @@ export type Database = {
           },
         ]
       }
+      goal_approval_chain: {
+        Row: {
+          approver_type: string
+          approver_user_id: string | null
+          can_delegate: boolean | null
+          created_at: string
+          id: string
+          is_optional: boolean | null
+          rule_id: string
+          sla_hours: number | null
+          step_order: number
+          updated_at: string
+        }
+        Insert: {
+          approver_type: string
+          approver_user_id?: string | null
+          can_delegate?: boolean | null
+          created_at?: string
+          id?: string
+          is_optional?: boolean | null
+          rule_id: string
+          sla_hours?: number | null
+          step_order: number
+          updated_at?: string
+        }
+        Update: {
+          approver_type?: string
+          approver_user_id?: string | null
+          can_delegate?: boolean | null
+          created_at?: string
+          id?: string
+          is_optional?: boolean | null
+          rule_id?: string
+          sla_hours?: number | null
+          step_order?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "goal_approval_chain_approver_user_id_fkey"
+            columns: ["approver_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "goal_approval_chain_rule_id_fkey"
+            columns: ["rule_id"]
+            isOneToOne: false
+            referencedRelation: "goal_approval_rules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      goal_approval_history: {
+        Row: {
+          action: string
+          actor_id: string | null
+          approval_id: string | null
+          comments: string | null
+          created_at: string
+          goal_id: string
+          id: string
+          metadata: Json | null
+          new_status: string | null
+          previous_status: string | null
+        }
+        Insert: {
+          action: string
+          actor_id?: string | null
+          approval_id?: string | null
+          comments?: string | null
+          created_at?: string
+          goal_id: string
+          id?: string
+          metadata?: Json | null
+          new_status?: string | null
+          previous_status?: string | null
+        }
+        Update: {
+          action?: string
+          actor_id?: string | null
+          approval_id?: string | null
+          comments?: string | null
+          created_at?: string
+          goal_id?: string
+          id?: string
+          metadata?: Json | null
+          new_status?: string | null
+          previous_status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "goal_approval_history_actor_id_fkey"
+            columns: ["actor_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "goal_approval_history_approval_id_fkey"
+            columns: ["approval_id"]
+            isOneToOne: false
+            referencedRelation: "goal_approvals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "goal_approval_history_goal_id_fkey"
+            columns: ["goal_id"]
+            isOneToOne: false
+            referencedRelation: "performance_goals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      goal_approval_rules: {
+        Row: {
+          approval_type: string
+          auto_approve_if_manager: boolean | null
+          company_id: string
+          created_at: string
+          created_by: string | null
+          description: string | null
+          goal_level: string
+          id: string
+          is_active: boolean
+          max_approval_days: number | null
+          name: string
+          requires_hr_approval: boolean | null
+          updated_at: string
+        }
+        Insert: {
+          approval_type?: string
+          auto_approve_if_manager?: boolean | null
+          company_id: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          goal_level: string
+          id?: string
+          is_active?: boolean
+          max_approval_days?: number | null
+          name: string
+          requires_hr_approval?: boolean | null
+          updated_at?: string
+        }
+        Update: {
+          approval_type?: string
+          auto_approve_if_manager?: boolean | null
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          goal_level?: string
+          id?: string
+          is_active?: boolean
+          max_approval_days?: number | null
+          name?: string
+          requires_hr_approval?: boolean | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "goal_approval_rules_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "goal_approval_rules_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      goal_approvals: {
+        Row: {
+          approver_id: string
+          comments: string | null
+          created_at: string
+          decided_at: string | null
+          delegated_from: string | null
+          due_date: string | null
+          goal_id: string
+          id: string
+          reminder_sent: boolean | null
+          rule_id: string | null
+          status: string
+          step_order: number
+          updated_at: string
+        }
+        Insert: {
+          approver_id: string
+          comments?: string | null
+          created_at?: string
+          decided_at?: string | null
+          delegated_from?: string | null
+          due_date?: string | null
+          goal_id: string
+          id?: string
+          reminder_sent?: boolean | null
+          rule_id?: string | null
+          status?: string
+          step_order: number
+          updated_at?: string
+        }
+        Update: {
+          approver_id?: string
+          comments?: string | null
+          created_at?: string
+          decided_at?: string | null
+          delegated_from?: string | null
+          due_date?: string | null
+          goal_id?: string
+          id?: string
+          reminder_sent?: boolean | null
+          rule_id?: string | null
+          status?: string
+          step_order?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "goal_approvals_approver_id_fkey"
+            columns: ["approver_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "goal_approvals_delegated_from_fkey"
+            columns: ["delegated_from"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "goal_approvals_goal_id_fkey"
+            columns: ["goal_id"]
+            isOneToOne: false
+            referencedRelation: "performance_goals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "goal_approvals_rule_id_fkey"
+            columns: ["rule_id"]
+            isOneToOne: false
+            referencedRelation: "goal_approval_rules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       goal_comments: {
         Row: {
           comment: string
@@ -37809,6 +38064,10 @@ export type Database = {
           steps: Json
         }[]
       }
+      process_goal_approval: {
+        Args: { p_approval_id: string; p_comments?: string; p_decision: string }
+        Returns: Json
+      }
       recalculate_comp_time_balance: {
         Args: { p_company_id: string; p_employee_id: string }
         Returns: undefined
@@ -37838,6 +38097,7 @@ export type Database = {
           }
       seed_role_container_access: { Args: never; Returns: undefined }
       seed_role_pii_access: { Args: never; Returns: undefined }
+      submit_goal_for_approval: { Args: { p_goal_id: string }; Returns: Json }
       user_has_company_access: {
         Args: { p_company_id: string; p_user_id: string }
         Returns: boolean
