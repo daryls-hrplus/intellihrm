@@ -825,44 +825,6 @@ export function TransactionFormDialog({
           <>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label>{t("workforce.modules.transactions.form.transfer.fromDepartment")}</Label>
-                <Select
-                  value={formData.from_department_id || ""}
-                  onValueChange={(v) => setFormData({ ...formData, from_department_id: v })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder={t("workforce.modules.transactions.form.selectDepartment")} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {departments.map((d) => (
-                      <SelectItem key={d.id} value={d.id}>
-                        {d.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label>{t("workforce.modules.transactions.form.transfer.toDepartment")}</Label>
-                <Select
-                  value={formData.to_department_id || ""}
-                  onValueChange={(v) => setFormData({ ...formData, to_department_id: v })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder={t("workforce.modules.transactions.form.selectDepartment")} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {departments.map((d) => (
-                      <SelectItem key={d.id} value={d.id}>
-                        {d.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
                 <Label>{t("workforce.modules.transactions.form.transfer.fromCompany")}</Label>
                 <Select
                   value={formData.from_company_id || ""}
@@ -893,6 +855,44 @@ export function TransactionFormDialog({
                     {companies.map((c) => (
                       <SelectItem key={c.id} value={c.id}>
                         {c.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>{t("workforce.modules.transactions.form.transfer.fromDepartment")}</Label>
+                <Select
+                  value={formData.from_department_id || ""}
+                  onValueChange={(v) => setFormData({ ...formData, from_department_id: v })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder={t("workforce.modules.transactions.form.selectDepartment")} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {departments.map((d) => (
+                      <SelectItem key={d.id} value={d.id}>
+                        {d.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>{t("workforce.modules.transactions.form.transfer.toDepartment")}</Label>
+                <Select
+                  value={formData.to_department_id || ""}
+                  onValueChange={(v) => setFormData({ ...formData, to_department_id: v })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder={t("workforce.modules.transactions.form.selectDepartment")} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {departments.map((d) => (
+                      <SelectItem key={d.id} value={d.id}>
+                        {d.name}
                       </SelectItem>
                     ))}
                   </SelectContent>
