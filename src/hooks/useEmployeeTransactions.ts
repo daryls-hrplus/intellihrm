@@ -230,6 +230,19 @@ export function useEmployeeTransactions() {
         normalizedData.position_id = data.to_position_id;
       }
 
+      // Always populate company_id from employee's profile if not already set
+      if (data.employee_id && !normalizedData.company_id) {
+        const { data: employeeProfile } = await supabase
+          .from("profiles")
+          .select("company_id")
+          .eq("id", data.employee_id)
+          .maybeSingle();
+        
+        if (employeeProfile?.company_id) {
+          normalizedData.company_id = employeeProfile.company_id;
+        }
+      }
+
       const { data: newTransaction, error: createError } = await supabase
         .from("employee_transactions")
         .insert({
@@ -310,6 +323,19 @@ export function useEmployeeTransactions() {
       // For PROMOTION transactions, set position_id to to_position_id
       if (data.to_position_id && !data.position_id) {
         normalizedData.position_id = data.to_position_id;
+      }
+
+      // Always populate company_id from employee's profile if not already set
+      if (data.employee_id && !normalizedData.company_id) {
+        const { data: employeeProfile } = await supabase
+          .from("profiles")
+          .select("company_id")
+          .eq("id", data.employee_id)
+          .maybeSingle();
+        
+        if (employeeProfile?.company_id) {
+          normalizedData.company_id = employeeProfile.company_id;
+        }
       }
 
       const { data: updatedTransaction, error: updateError } = await supabase
