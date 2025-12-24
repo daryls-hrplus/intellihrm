@@ -159,8 +159,9 @@ export default function EmployeeTransactionsPage() {
           </CardHeader>
           <CardContent>
             <EmployeeTransactionsList
-              key={`${refreshKey}-${selectedCompanyId}`}
+              key={`${refreshKey}-${selectedCompanyId}-${selectedDepartmentId}`}
               companyId={selectedCompanyId !== "all" ? selectedCompanyId : undefined}
+              departmentId={selectedDepartmentId !== "all" ? selectedDepartmentId : undefined}
               onCreateNew={handleCreateNew}
               onView={handleView}
               onEdit={handleEdit}

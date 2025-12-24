@@ -129,6 +129,7 @@ export function useEmployeeTransactions() {
     transactionType?: string;
     employeeId?: string;
     companyId?: string;
+    departmentId?: string;
     fromDate?: string;
     toDate?: string;
   }) => {
@@ -177,6 +178,11 @@ export function useEmployeeTransactions() {
           t.company_id === filters.companyId || 
           (t.employee as any)?.company_id === filters.companyId
         );
+      }
+      
+      // Filter by department
+      if (filters?.departmentId) {
+        filteredData = filteredData.filter(t => t.department_id === filters.departmentId);
       }
       
       return filteredData;
