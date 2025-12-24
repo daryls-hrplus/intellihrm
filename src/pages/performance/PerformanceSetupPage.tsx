@@ -11,8 +11,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/hooks/useLanguage";
 import { toast } from "sonner";
@@ -35,9 +34,7 @@ import {
   GitBranch,
   Layers,
   MessageSquare,
-  ChevronRight,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
 
 // Interfaces
 interface Company { id: string; name: string; }
@@ -47,74 +44,12 @@ interface GoalTemplate { id: string; company_id: string | null; name: string; de
 interface RecognitionCategory { id: string; company_id: string; name: string; code: string; description: string | null; icon: string | null; color: string | null; points_value: number; requires_approval: boolean; is_active: boolean; }
 interface AppraisalCycle { id: string; company_id: string; name: string; description: string | null; start_date: string; end_date: string; status: string; goal_weight: number; competency_weight: number; responsibility_weight: number; min_rating: number; max_rating: number; }
 
-// Section configuration
-const setupSections = [
-  {
-    id: "foundation",
-    title: "Foundation Settings",
-    description: "Cross-module settings that apply to Goals, Appraisals, 360 Feedback, and other talent processes",
-    icon: Layers,
-    color: "text-primary",
-    bgColor: "bg-primary/10",
-    items: [
-      { id: "rating-scales", label: "Component Rating Scales", icon: Star },
-      { id: "overall-scales", label: "Overall Rating Scales", icon: Layers },
-      { id: "competencies", label: "Competency Framework", icon: BookOpen },
-      { id: "approval-workflows", label: "Approval Workflows", icon: GitBranch },
-    ],
-  },
-  {
-    id: "goals",
-    title: "Goals Configuration",
-    description: "Goal-specific settings and templates",
-    icon: Target,
-    color: "text-success",
-    bgColor: "bg-success/10",
-    items: [
-      { id: "goal-templates", label: "Goal Templates", icon: Target },
-    ],
-  },
-  {
-    id: "appraisals",
-    title: "Appraisals Configuration",
-    description: "Performance appraisal cycle settings",
-    icon: Calendar,
-    color: "text-info",
-    bgColor: "bg-info/10",
-    items: [
-      { id: "appraisal-cycles", label: "Appraisal Cycles", icon: Calendar },
-    ],
-  },
-  {
-    id: "360-feedback",
-    title: "360° Feedback Configuration",
-    description: "Multi-rater feedback settings",
-    icon: MessageSquare,
-    color: "text-warning",
-    bgColor: "bg-warning/10",
-    items: [
-      { id: "feedback-360", label: "360° Feedback Settings", icon: MessageSquare },
-    ],
-  },
-  {
-    id: "recognition",
-    title: "Recognition Configuration",
-    description: "Employee recognition and rewards settings",
-    icon: Award,
-    color: "text-secondary-foreground",
-    bgColor: "bg-secondary/50",
-    items: [
-      { id: "recognition-categories", label: "Recognition Categories", icon: Award },
-    ],
-  },
-];
-
 export default function PerformanceSetupPage() {
   const { t } = useLanguage();
   const [companies, setCompanies] = useState<Company[]>([]);
   const [selectedCompany, setSelectedCompany] = useState<string>("");
-  const [activeSection, setActiveSection] = useState("rating-scales");
-  const [expandedGroups, setExpandedGroups] = useState<string[]>(["foundation"]);
+  const [primaryTab, setPrimaryTab] = useState("foundation");
+  const [secondaryTab, setSecondaryTab] = useState("rating-scales");
   const [isLoading, setIsLoading] = useState(true);
 
   // Data states
@@ -145,6 +80,18 @@ export default function PerformanceSetupPage() {
 
   useEffect(() => { fetchCompanies(); }, []);
   useEffect(() => { if (selectedCompany) fetchAllData(); }, [selectedCompany]);
+
+  // Set appropriate secondary tab when primary tab changes
+  useEffect(() => {
+    const defaultSecondaryTabs: Record<string, string> = {
+      foundation: "rating-scales",
+      goals: "goal-templates",
+      appraisals: "appraisal-cycles",
+      "360-feedback": "feedback-360",
+      recognition: "recognition-categories",
+    };
+    setSecondaryTab(defaultSecondaryTabs[primaryTab] || "rating-scales");
+  }, [primaryTab]);
 
   const fetchCompanies = async () => {
     try {
@@ -232,36 +179,6 @@ export default function PerformanceSetupPage() {
     fetchRecognitionCategories();
   };
 
-  const handleNavClick = (sectionId: string, groupId: string) => {
-    setActiveSection(sectionId);
-    if (!expandedGroups.includes(groupId)) {
-      setExpandedGroups([...expandedGroups, groupId]);
-    }
-  };
-
-  const renderContent = () => {
-    switch (activeSection) {
-      case "rating-scales":
-        return <RatingScalesContent scales={ratingScales} isLoading={isLoading} onAdd={() => { setEditingRatingScale(null); setRatingScaleDialogOpen(true); }} onEdit={(s) => { setEditingRatingScale(s); setRatingScaleDialogOpen(true); }} onDelete={handleDeleteRatingScale} t={t} />;
-      case "overall-scales":
-        return <OverallScalesContent scales={overallScales} isLoading={overallScalesLoading} onAdd={() => { setEditingOverallScale(null); setOverallScaleDialogOpen(true); }} onEdit={(s) => { setEditingOverallScale(s); setOverallScaleDialogOpen(true); }} onDelete={handleDeleteOverallScale} t={t} />;
-      case "competencies":
-        return <CompetenciesContent competencies={competencies} isLoading={isLoading} onAdd={() => { setEditingCompetency(null); setCompetencyDialogOpen(true); }} onEdit={(c) => { setEditingCompetency(c); setCompetencyDialogOpen(true); }} onDelete={handleDeleteCompetency} t={t} />;
-      case "approval-workflows":
-        return <TalentApprovalWorkflowManager companyId={selectedCompany} />;
-      case "goal-templates":
-        return <GoalTemplatesContent templates={goalTemplates} isLoading={isLoading} onAdd={() => { setEditingGoalTemplate(null); setGoalTemplateDialogOpen(true); }} onEdit={(t) => { setEditingGoalTemplate(t); setGoalTemplateDialogOpen(true); }} onDelete={handleDeleteGoalTemplate} t={t} />;
-      case "appraisal-cycles":
-        return <AppraisalCyclesContent cycles={appraisalCycles} isLoading={isLoading} t={t} />;
-      case "feedback-360":
-        return <Feedback360ConfigSection companyId={selectedCompany} />;
-      case "recognition-categories":
-        return <RecognitionCategoriesContent categories={recognitionCategories} isLoading={isLoading} onAdd={() => { setEditingRecognitionCategory(null); setRecognitionCategoryDialogOpen(true); }} onEdit={(c) => { setEditingRecognitionCategory(c); setRecognitionCategoryDialogOpen(true); }} onDelete={handleDeleteRecognitionCategory} t={t} />;
-      default:
-        return <div className="text-muted-foreground text-center py-8">Select a configuration option</div>;
-    }
-  };
-
   return (
     <AppLayout>
       <div className="space-y-6">
@@ -300,73 +217,132 @@ export default function PerformanceSetupPage() {
         </Card>
 
         {selectedCompany && (
-          <div className="grid grid-cols-12 gap-6">
-            {/* Sidebar Navigation */}
-            <div className="col-span-12 lg:col-span-3">
-              <Card className="sticky top-4">
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-sm font-medium">Configuration</CardTitle>
-                </CardHeader>
-                <CardContent className="p-0">
-                  <ScrollArea className="h-[calc(100vh-320px)]">
-                    <Accordion 
-                      type="multiple" 
-                      value={expandedGroups} 
-                      onValueChange={setExpandedGroups}
-                      className="w-full"
-                    >
-                      {setupSections.map((section) => {
-                        const SectionIcon = section.icon;
-                        return (
-                          <AccordionItem key={section.id} value={section.id} className="border-b-0">
-                            <AccordionTrigger className="px-4 py-3 hover:no-underline hover:bg-muted/50">
-                              <div className="flex items-center gap-3">
-                                <div className={cn("p-1.5 rounded-md", section.bgColor)}>
-                                  <SectionIcon className={cn("h-4 w-4", section.color)} />
-                                </div>
-                                <div className="text-left">
-                                  <div className="font-medium text-sm">{section.title}</div>
-                                </div>
-                              </div>
-                            </AccordionTrigger>
-                            <AccordionContent className="pb-2">
-                              <div className="ml-4 space-y-1">
-                                {section.items.map((item) => {
-                                  const ItemIcon = item.icon;
-                                  const isActive = activeSection === item.id;
-                                  return (
-                                    <button
-                                      key={item.id}
-                                      onClick={() => handleNavClick(item.id, section.id)}
-                                      className={cn(
-                                        "w-full flex items-center gap-2 px-3 py-2 rounded-md text-sm transition-colors",
-                                        isActive 
-                                          ? "bg-primary text-primary-foreground" 
-                                          : "text-muted-foreground hover:bg-muted hover:text-foreground"
-                                      )}
-                                    >
-                                      <ItemIcon className="h-4 w-4" />
-                                      <span>{item.label}</span>
-                                      {isActive && <ChevronRight className="h-4 w-4 ml-auto" />}
-                                    </button>
-                                  );
-                                })}
-                              </div>
-                            </AccordionContent>
-                          </AccordionItem>
-                        );
-                      })}
-                    </Accordion>
-                  </ScrollArea>
-                </CardContent>
-              </Card>
-            </div>
+          <Tabs value={primaryTab} onValueChange={setPrimaryTab} className="space-y-6">
+            {/* Primary Tabs - Main Sections */}
+            <TabsList className="grid w-full grid-cols-5 h-auto p-1">
+              <TabsTrigger value="foundation" className="flex items-center gap-2 py-3">
+                <Layers className="h-4 w-4" />
+                <span className="hidden sm:inline">Foundation</span>
+              </TabsTrigger>
+              <TabsTrigger value="goals" className="flex items-center gap-2 py-3">
+                <Target className="h-4 w-4" />
+                <span className="hidden sm:inline">Goals</span>
+              </TabsTrigger>
+              <TabsTrigger value="appraisals" className="flex items-center gap-2 py-3">
+                <Calendar className="h-4 w-4" />
+                <span className="hidden sm:inline">Appraisals</span>
+              </TabsTrigger>
+              <TabsTrigger value="360-feedback" className="flex items-center gap-2 py-3">
+                <MessageSquare className="h-4 w-4" />
+                <span className="hidden sm:inline">360° Feedback</span>
+              </TabsTrigger>
+              <TabsTrigger value="recognition" className="flex items-center gap-2 py-3">
+                <Award className="h-4 w-4" />
+                <span className="hidden sm:inline">Recognition</span>
+              </TabsTrigger>
+            </TabsList>
 
-            {/* Main Content Area */}
-            <div className="col-span-12 lg:col-span-9">
-              {renderContent()}
-            </div>
-          </div>
+            {/* Foundation Settings */}
+            <TabsContent value="foundation" className="space-y-4">
+              <div className="text-sm text-muted-foreground mb-4">
+                Cross-module settings that apply to Goals, Appraisals, 360 Feedback, and other talent processes
+              </div>
+              <Tabs value={secondaryTab} onValueChange={setSecondaryTab}>
+                <TabsList>
+                  <TabsTrigger value="rating-scales" className="flex items-center gap-2">
+                    <Star className="h-4 w-4" />
+                    Rating Scales
+                  </TabsTrigger>
+                  <TabsTrigger value="overall-scales" className="flex items-center gap-2">
+                    <Layers className="h-4 w-4" />
+                    Overall Scales
+                  </TabsTrigger>
+                  <TabsTrigger value="competencies" className="flex items-center gap-2">
+                    <BookOpen className="h-4 w-4" />
+                    Competencies
+                  </TabsTrigger>
+                  <TabsTrigger value="approval-workflows" className="flex items-center gap-2">
+                    <GitBranch className="h-4 w-4" />
+                    Workflows
+                  </TabsTrigger>
+                </TabsList>
+                <TabsContent value="rating-scales" className="mt-4">
+                  <RatingScalesContent scales={ratingScales} isLoading={isLoading} onAdd={() => { setEditingRatingScale(null); setRatingScaleDialogOpen(true); }} onEdit={(s: RatingScale) => { setEditingRatingScale(s); setRatingScaleDialogOpen(true); }} onDelete={handleDeleteRatingScale} t={t} />
+                </TabsContent>
+                <TabsContent value="overall-scales" className="mt-4">
+                  <OverallScalesContent scales={overallScales} isLoading={overallScalesLoading} onAdd={() => { setEditingOverallScale(null); setOverallScaleDialogOpen(true); }} onEdit={(s: OverallRatingScale) => { setEditingOverallScale(s); setOverallScaleDialogOpen(true); }} onDelete={handleDeleteOverallScale} t={t} />
+                </TabsContent>
+                <TabsContent value="competencies" className="mt-4">
+                  <CompetenciesContent competencies={competencies} isLoading={isLoading} onAdd={() => { setEditingCompetency(null); setCompetencyDialogOpen(true); }} onEdit={(c: Competency) => { setEditingCompetency(c); setCompetencyDialogOpen(true); }} onDelete={handleDeleteCompetency} t={t} />
+                </TabsContent>
+                <TabsContent value="approval-workflows" className="mt-4">
+                  <TalentApprovalWorkflowManager companyId={selectedCompany} />
+                </TabsContent>
+              </Tabs>
+            </TabsContent>
+
+            {/* Goals Configuration */}
+            <TabsContent value="goals" className="space-y-4">
+              <div className="text-sm text-muted-foreground mb-4">
+                Goal-specific settings and templates
+              </div>
+              <Tabs value={secondaryTab} onValueChange={setSecondaryTab}>
+                <TabsList>
+                  <TabsTrigger value="goal-templates" className="flex items-center gap-2">
+                    <Target className="h-4 w-4" />
+                    Goal Templates
+                  </TabsTrigger>
+                </TabsList>
+                <TabsContent value="goal-templates" className="mt-4">
+                  <GoalTemplatesContent templates={goalTemplates} isLoading={isLoading} onAdd={() => { setEditingGoalTemplate(null); setGoalTemplateDialogOpen(true); }} onEdit={(t: GoalTemplate) => { setEditingGoalTemplate(t); setGoalTemplateDialogOpen(true); }} onDelete={handleDeleteGoalTemplate} t={t} />
+                </TabsContent>
+              </Tabs>
+            </TabsContent>
+
+            {/* Appraisals Configuration */}
+            <TabsContent value="appraisals" className="space-y-4">
+              <div className="text-sm text-muted-foreground mb-4">
+                Performance appraisal cycle settings
+              </div>
+              <Tabs value={secondaryTab} onValueChange={setSecondaryTab}>
+                <TabsList>
+                  <TabsTrigger value="appraisal-cycles" className="flex items-center gap-2">
+                    <Calendar className="h-4 w-4" />
+                    Appraisal Cycles
+                  </TabsTrigger>
+                </TabsList>
+                <TabsContent value="appraisal-cycles" className="mt-4">
+                  <AppraisalCyclesContent cycles={appraisalCycles} isLoading={isLoading} t={t} />
+                </TabsContent>
+              </Tabs>
+            </TabsContent>
+
+            {/* 360 Feedback Configuration */}
+            <TabsContent value="360-feedback" className="space-y-4">
+              <div className="text-sm text-muted-foreground mb-4">
+                Multi-rater feedback settings
+              </div>
+              <Feedback360ConfigSection companyId={selectedCompany} />
+            </TabsContent>
+
+            {/* Recognition Configuration */}
+            <TabsContent value="recognition" className="space-y-4">
+              <div className="text-sm text-muted-foreground mb-4">
+                Employee recognition and rewards settings
+              </div>
+              <Tabs value={secondaryTab} onValueChange={setSecondaryTab}>
+                <TabsList>
+                  <TabsTrigger value="recognition-categories" className="flex items-center gap-2">
+                    <Award className="h-4 w-4" />
+                    Recognition Categories
+                  </TabsTrigger>
+                </TabsList>
+                <TabsContent value="recognition-categories" className="mt-4">
+                  <RecognitionCategoriesContent categories={recognitionCategories} isLoading={isLoading} onAdd={() => { setEditingRecognitionCategory(null); setRecognitionCategoryDialogOpen(true); }} onEdit={(c: RecognitionCategory) => { setEditingRecognitionCategory(c); setRecognitionCategoryDialogOpen(true); }} onDelete={handleDeleteRecognitionCategory} t={t} />
+                </TabsContent>
+              </Tabs>
+            </TabsContent>
+          </Tabs>
         )}
 
         {/* Dialogs */}
