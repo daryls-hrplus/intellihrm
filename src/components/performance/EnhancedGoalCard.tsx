@@ -51,8 +51,8 @@ import { GoalApprovalStatus } from "./GoalApprovalStatus";
 
 type GoalStatus = 'draft' | 'active' | 'in_progress' | 'completed' | 'cancelled' | 'overdue';
 type GoalType = 'okr_objective' | 'okr_key_result' | 'smart_goal';
-type GoalLevel = 'company' | 'department' | 'team' | 'individual';
-
+type GoalLevel = 'company' | 'department' | 'team' | 'individual' | 'project';
+type ExtendedGoalLevel = GoalLevel;
 interface Goal {
   id: string;
   title: string;
@@ -95,11 +95,12 @@ const statusColors: Record<GoalStatus, string> = {
   overdue: "bg-warning/10 text-warning",
 };
 
-const levelIcons: Record<GoalLevel, typeof Target> = {
+const levelIcons: Record<ExtendedGoalLevel, typeof Target> = {
   company: Building2,
   department: Users,
   team: Users,
   individual: User,
+  project: Folder,
 };
 
 const typeLabels: Record<GoalType, string> = {
@@ -130,6 +131,9 @@ export function EnhancedGoalCard({
   const isInverse = extAttrs?.isInverse || false;
   const complianceCategory = extAttrs?.complianceCategory;
   
+  // Get actual goal level (may differ from DB if stored as 'project')
+  const actualGoalLevel: ExtendedGoalLevel = extAttrs?.actualGoalLevel || goal.goal_level;
+  
   // Calculate achievement if we have target value
   const achievement = goal.target_value && goal.current_value !== null
     ? calculateGoalAchievement(
@@ -143,7 +147,7 @@ export function EnhancedGoalCard({
   const isAtRisk = daysUntilDue !== null && daysUntilDue > 0 && daysUntilDue <= 7 && goal.progress_percentage < 80;
 
   const effectiveStatus: GoalStatus = isOverdue ? "overdue" : goal.status;
-  const LevelIcon = levelIcons[goal.goal_level];
+  const LevelIcon = levelIcons[actualGoalLevel] || Folder;
 
   const handleDelete = async () => {
     if (!confirm("Are you sure you want to delete this goal?")) return;
