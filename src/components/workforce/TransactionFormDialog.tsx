@@ -576,35 +576,23 @@ export function TransactionFormDialog({
                 </Popover>
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>{t("workforce.modules.transactions.form.acting.actingReason")}</Label>
-                <Select
-                  value={formData.acting_reason_id || ""}
-                  onValueChange={(v) => setFormData({ ...formData, acting_reason_id: v })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder={t("workforce.modules.transactions.form.selectReason")} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {actingReasons.map((r) => (
-                      <SelectItem key={r.id} value={r.id}>
-                        {r.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label>{t("workforce.modules.transactions.form.acting.actingAllowance")}</Label>
-                <Input
-                  type="number"
-                  value={formData.acting_allowance || ""}
-                  onChange={(e) =>
-                    setFormData({ ...formData, acting_allowance: parseFloat(e.target.value) || null })
-                  }
-                />
-              </div>
+            <div className="space-y-2">
+              <Label>{t("workforce.modules.transactions.form.acting.actingReason")}</Label>
+              <Select
+                value={formData.acting_reason_id || ""}
+                onValueChange={(v) => setFormData({ ...formData, acting_reason_id: v })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder={t("workforce.modules.transactions.form.selectReason")} />
+                </SelectTrigger>
+                <SelectContent>
+                  {actingReasons.map((r) => (
+                    <SelectItem key={r.id} value={r.id}>
+                      {r.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </>
         );
