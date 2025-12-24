@@ -72,12 +72,16 @@ export function TourEngine() {
       return;
     }
 
-    if (type === EVENTS.STEP_AFTER) {
-      if (action === ACTIONS.NEXT) {
-        nextStep();
-      } else if (action === ACTIONS.PREV) {
-        prevStep();
-      }
+    // Handle NEXT on STEP_AFTER (works correctly in controlled mode)
+    if (type === EVENTS.STEP_AFTER && action === ACTIONS.NEXT) {
+      nextStep();
+      return;
+    }
+
+    // Handle PREV on TOOLTIP event - in controlled mode, STEP_AFTER doesn't fire for PREV
+    if (type === EVENTS.TOOLTIP && action === ACTIONS.PREV) {
+      prevStep();
+      return;
     }
 
     if (type === EVENTS.TARGET_NOT_FOUND) {
