@@ -9310,6 +9310,7 @@ export type Database = {
       }
       employee_positions: {
         Row: {
+          assignment_type: string
           benefits_profile: Json | null
           compensation_amount: number | null
           compensation_currency: string | null
@@ -9329,6 +9330,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          assignment_type?: string
           benefits_profile?: Json | null
           compensation_amount?: number | null
           compensation_currency?: string | null
@@ -9348,6 +9350,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          assignment_type?: string
           benefits_profile?: Json | null
           compensation_amount?: number | null
           compensation_currency?: string | null
