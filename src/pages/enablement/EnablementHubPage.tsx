@@ -34,6 +34,7 @@ import {
   HelpCircle,
   FolderTree,
   ClipboardCheck,
+  RefreshCw,
 } from "lucide-react";
 import { ContentWorkflowBoard } from "@/components/enablement/ContentWorkflowBoard";
 import { ReleaseManager } from "@/components/enablement/ReleaseManager";
@@ -43,6 +44,8 @@ import { VideoLibraryManager } from "@/components/enablement/VideoLibraryManager
 import { DAPGuidesManager } from "@/components/enablement/DAPGuidesManager";
 import { RiseTemplateManager } from "@/components/enablement/RiseTemplateManager";
 import { ImplementationTracker } from "@/components/enablement/implementation";
+import { FeatureRegistrySyncDialog } from "@/components/enablement/FeatureRegistrySyncDialog";
+import { NewFeaturesIndicator } from "@/components/enablement/NewFeaturesIndicator";
 import { useEnablementContentStatus, useEnablementReleases } from "@/hooks/useEnablementData";
 import { FEATURE_REGISTRY } from "@/lib/featureRegistry";
 
@@ -52,6 +55,7 @@ export default function EnablementHubPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const tabParam = searchParams.get("tab");
   const [activeTab, setActiveTab] = useState(tabParam || "dashboard");
+  const [syncDialogOpen, setSyncDialogOpen] = useState(false);
   const { contentItems } = useEnablementContentStatus();
   const { releases } = useEnablementReleases();
 
@@ -277,6 +281,11 @@ export default function EnablementHubPage() {
             </p>
           </div>
           <div className="flex gap-2">
+            <NewFeaturesIndicator onSyncClick={() => setSyncDialogOpen(true)} />
+            <Button variant="outline" onClick={() => setSyncDialogOpen(true)}>
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Sync Registry
+            </Button>
             <Button variant="outline" onClick={() => navigate("/enablement/docs-generator")}>
               <FileText className="h-4 w-4 mr-2" />
               Generate Docs
@@ -453,6 +462,12 @@ export default function EnablementHubPage() {
             <RiseTemplateManager />
           </TabsContent>
         </Tabs>
+
+        {/* Feature Registry Sync Dialog */}
+        <FeatureRegistrySyncDialog
+          open={syncDialogOpen}
+          onOpenChange={setSyncDialogOpen}
+        />
       </div>
     </AppLayout>
   );
