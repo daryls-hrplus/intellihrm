@@ -649,51 +649,28 @@ export function GoalDialog({
             </TabsContent>
 
             <TabsContent value="metrics" className="space-y-4 mt-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="weighting">Weight (%)</Label>
-                  <Input
-                    id="weighting"
-                    type="number"
-                    min="0"
-                    max="100"
-                    value={formData.weighting}
-                    onChange={(e) => setFormData({ ...formData, weighting: e.target.value })}
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="unit_of_measure">Unit of Measure</Label>
-                  <Input
-                    id="unit_of_measure"
-                    value={formData.unit_of_measure}
-                    onChange={(e) => setFormData({ ...formData, unit_of_measure: e.target.value })}
-                    placeholder="e.g., %, $, units"
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="target_value">Target Value</Label>
-                  <Input
-                    id="target_value"
-                    type="number"
-                    value={formData.target_value}
-                    onChange={(e) => setFormData({ ...formData, target_value: e.target.value })}
-                    placeholder="Target to achieve"
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="current_value">Current Value</Label>
-                  <Input
-                    id="current_value"
-                    type="number"
-                    value={formData.current_value}
-                    onChange={(e) => setFormData({ ...formData, current_value: e.target.value })}
-                    placeholder="Current progress"
-                  />
-                </div>
-              </div>
+              <GoalEnhancedMetricsTab
+                formData={{
+                  weighting: formData.weighting,
+                  unit_of_measure: formData.unit_of_measure,
+                  target_value: formData.target_value,
+                  current_value: formData.current_value,
+                  measurement_type: formData.measurement_type,
+                  threshold_value: formData.threshold_value,
+                  stretch_value: formData.stretch_value,
+                  threshold_percentage: formData.threshold_percentage,
+                  stretch_percentage: formData.stretch_percentage,
+                  is_inverse: formData.is_inverse,
+                  is_mandatory: formData.is_mandatory,
+                  compliance_category: formData.compliance_category,
+                  is_weight_required: formData.is_weight_required,
+                  inherited_weight_portion: formData.inherited_weight_portion,
+                  metric_template_id: formData.metric_template_id,
+                }}
+                onChange={(updates) => setFormData({ ...formData, ...updates })}
+                parentGoalWeight={parentGoalWeight}
+                companyId={companyId}
+              />
             </TabsContent>
 
             <TabsContent value="smart" className="space-y-4 mt-4">
