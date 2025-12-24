@@ -280,6 +280,45 @@ export function useEmployeeTransactions() {
         }
       }
 
+      // For PROMOTION transactions, also create an employee_positions record for the new position
+      if (data.to_position_id && data.employee_id) {
+        // First, deactivate the current primary position assignment
+        if (data.from_position_id) {
+          await supabase
+            .from("employee_positions")
+            .update({ 
+              is_active: false, 
+              end_date: data.effective_date 
+            })
+            .eq("employee_id", data.employee_id)
+            .eq("position_id", data.from_position_id)
+            .eq("is_primary", true);
+        }
+
+        const employeePositionData = {
+          employee_id: data.employee_id,
+          position_id: data.to_position_id,
+          start_date: data.effective_date,
+          end_date: null,
+          is_primary: true,
+          assignment_type: "permanent",
+          compensation_amount: null,
+          compensation_currency: "USD",
+          compensation_frequency: "monthly",
+          benefits_profile: {},
+          is_active: true,
+        };
+
+        const { error: positionError } = await supabase
+          .from("employee_positions")
+          .insert(employeePositionData as any);
+
+        if (positionError) {
+          console.error("Failed to create employee position for promotion:", positionError);
+          // Don't fail the transaction, just log the error
+        }
+      }
+
       await logAction({
         action: "CREATE",
         entityType: "employee_transaction",
@@ -377,6 +416,61 @@ export function useEmployeeTransactions() {
             end_date: data.acting_end_date || null,
             is_primary: false,
             assignment_type: "acting",
+            compensation_amount: null,
+            compensation_currency: "USD",
+            compensation_frequency: "monthly",
+            benefits_profile: {},
+            is_active: true,
+          };
+
+          await supabase
+            .from("employee_positions")
+            .insert(employeePositionData as any);
+        }
+      }
+
+      // For PROMOTION transactions, also update employee_positions record
+      if (data.to_position_id && data.employee_id) {
+        // First, try to find existing position assignment for the new position
+        const { data: existingPosition } = await supabase
+          .from("employee_positions")
+          .select("id")
+          .eq("employee_id", data.employee_id)
+          .eq("position_id", data.to_position_id)
+          .eq("assignment_type", "permanent")
+          .single();
+
+        if (existingPosition) {
+          // Update existing record
+          await supabase
+            .from("employee_positions")
+            .update({
+              start_date: data.effective_date,
+              is_active: true,
+            })
+            .eq("id", existingPosition.id);
+        } else {
+          // Deactivate the old position assignment
+          if (data.from_position_id) {
+            await supabase
+              .from("employee_positions")
+              .update({ 
+                is_active: false, 
+                end_date: data.effective_date 
+              })
+              .eq("employee_id", data.employee_id)
+              .eq("position_id", data.from_position_id)
+              .eq("is_primary", true);
+          }
+
+          // Create new record
+          const employeePositionData = {
+            employee_id: data.employee_id,
+            position_id: data.to_position_id,
+            start_date: data.effective_date,
+            end_date: null,
+            is_primary: true,
+            assignment_type: "permanent",
             compensation_amount: null,
             compensation_currency: "USD",
             compensation_frequency: "monthly",
