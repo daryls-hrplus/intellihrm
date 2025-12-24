@@ -13,6 +13,8 @@ interface ClientSelectorProps {
   onValueChange: (value: string | undefined) => void;
 }
 
+const PLACEHOLDER_VALUE = "__none__";
+
 export function ClientSelector({ value, onValueChange }: ClientSelectorProps) {
   const [companies, setCompanies] = useState<Company[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -21,7 +23,6 @@ export function ClientSelector({ value, onValueChange }: ClientSelectorProps) {
     const fetchCompanies = async () => {
       setIsLoading(true);
       try {
-        // Fetch all client companies
         const { data, error } = await supabase
           .from("companies")
           .select("id, name")
@@ -39,15 +40,27 @@ export function ClientSelector({ value, onValueChange }: ClientSelectorProps) {
     fetchCompanies();
   }, []);
 
+  // Always use a string value for the Select (never undefined)
+  const selectValue = value || PLACEHOLDER_VALUE;
+  const selectedCompany = value ? companies.find(c => c.id === value) : null;
+
+  const handleValueChange = (newValue: string) => {
+    if (newValue === PLACEHOLDER_VALUE) {
+      onValueChange(undefined);
+    } else {
+      onValueChange(newValue);
+    }
+  };
+
   return (
-    <Select value={value} onValueChange={(v) => onValueChange(v === "none" ? undefined : v)}>
+    <Select value={selectValue} onValueChange={handleValueChange}>
       <SelectTrigger className="w-full">
         <SelectValue placeholder={isLoading ? "Loading clients..." : "Select a client"}>
-          {value && companies.find(c => c.id === value)?.name}
+          {selectedCompany ? selectedCompany.name : (isLoading ? "Loading clients..." : "Select a client")}
         </SelectValue>
       </SelectTrigger>
-      <SelectContent>
-        <SelectItem value="none">
+      <SelectContent className="bg-popover z-50">
+        <SelectItem value={PLACEHOLDER_VALUE}>
           <div className="flex items-center gap-2 text-muted-foreground">
             <Building2 className="h-4 w-4" />
             Select a client...
