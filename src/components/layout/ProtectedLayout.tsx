@@ -5,6 +5,13 @@ import { Loader2 } from "lucide-react";
 import { DraggableSidebar } from "./DraggableSidebar";
 import { AppHeader } from "./AppHeader";
 import { RealtimeNotifications } from "./RealtimeNotifications";
+import {
+  TourProvider,
+  TourEngine,
+  FloatingHelpButton,
+  HelpPanel,
+  FirstTimeUserDetector,
+} from "@/components/tours";
 
 export function ProtectedLayout() {
   const { user, isLoading } = useAuth();
@@ -27,15 +34,23 @@ export function ProtectedLayout() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <RealtimeNotifications />
-      <DraggableSidebar />
-      <main className="lg:pl-64 transition-all duration-300">
-        <div className="min-h-screen p-4 lg:p-8">
-          <AppHeader />
-          <Outlet />
-        </div>
-      </main>
-    </div>
+    <TourProvider>
+      <div className="min-h-screen bg-background">
+        <RealtimeNotifications />
+        <DraggableSidebar />
+        <main className="lg:pl-64 transition-all duration-300">
+          <div className="min-h-screen p-4 lg:p-8">
+            <AppHeader />
+            <Outlet />
+          </div>
+        </main>
+        
+        {/* Tour System Components */}
+        <TourEngine />
+        <FloatingHelpButton />
+        <HelpPanel />
+        <FirstTimeUserDetector />
+      </div>
+    </TourProvider>
   );
 }
