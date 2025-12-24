@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,13 +11,16 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/hooks/useLanguage";
 import { toast } from "sonner";
 import { EnhancedRatingScaleDialog } from "@/components/performance/EnhancedRatingScaleDialog";
 import { OverallRatingScaleDialog } from "@/components/performance/OverallRatingScaleDialog";
 import { useOverallRatingScales, OverallRatingScale } from "@/hooks/useRatingScales";
-import { Layers } from "lucide-react";
+import { TalentApprovalWorkflowManager } from "@/components/performance/setup/TalentApprovalWorkflowManager";
+import { Feedback360ConfigSection } from "@/components/performance/setup/Feedback360ConfigSection";
 import { 
   Settings, 
   Star, 
@@ -30,84 +32,89 @@ import {
   Edit, 
   Trash2,
   Building,
-  GitBranch
+  GitBranch,
+  Layers,
+  MessageSquare,
+  ChevronRight,
 } from "lucide-react";
-import { GoalApprovalRulesManager } from "@/components/performance/GoalApprovalRulesManager";
+import { cn } from "@/lib/utils";
 
-interface Company {
-  id: string;
-  name: string;
-}
+// Interfaces
+interface Company { id: string; name: string; }
+interface RatingScale { id: string; company_id: string; name: string; code: string; description: string | null; min_rating: number; max_rating: number; rating_labels: any; scale_purpose: string[] | null; is_default: boolean; is_active: boolean; }
+interface Competency { id: string; company_id: string; name: string; code: string; category: string; description: string | null; proficiency_levels: any; is_active: boolean; }
+interface GoalTemplate { id: string; company_id: string | null; name: string; description: string | null; goal_type: string; category: string | null; default_weighting: number | null; is_active: boolean; }
+interface RecognitionCategory { id: string; company_id: string; name: string; code: string; description: string | null; icon: string | null; color: string | null; points_value: number; requires_approval: boolean; is_active: boolean; }
+interface AppraisalCycle { id: string; company_id: string; name: string; description: string | null; start_date: string; end_date: string; status: string; goal_weight: number; competency_weight: number; responsibility_weight: number; min_rating: number; max_rating: number; }
 
-interface RatingScale {
-  id: string;
-  company_id: string;
-  name: string;
-  code: string;
-  description: string | null;
-  min_rating: number;
-  max_rating: number;
-  rating_labels: any;
-  scale_purpose: string[] | null;
-  is_default: boolean;
-  is_active: boolean;
-}
-
-interface Competency {
-  id: string;
-  company_id: string;
-  name: string;
-  code: string;
-  category: string;
-  description: string | null;
-  proficiency_levels: any;
-  is_active: boolean;
-}
-
-interface GoalTemplate {
-  id: string;
-  company_id: string | null;
-  name: string;
-  description: string | null;
-  goal_type: string;
-  category: string | null;
-  default_weighting: number | null;
-  is_active: boolean;
-}
-
-interface RecognitionCategory {
-  id: string;
-  company_id: string;
-  name: string;
-  code: string;
-  description: string | null;
-  icon: string | null;
-  color: string | null;
-  points_value: number;
-  requires_approval: boolean;
-  is_active: boolean;
-}
-
-interface AppraisalCycle {
-  id: string;
-  company_id: string;
-  name: string;
-  description: string | null;
-  start_date: string;
-  end_date: string;
-  status: string;
-  goal_weight: number;
-  competency_weight: number;
-  responsibility_weight: number;
-  min_rating: number;
-  max_rating: number;
-}
+// Section configuration
+const setupSections = [
+  {
+    id: "foundation",
+    title: "Foundation Settings",
+    description: "Cross-module settings that apply to Goals, Appraisals, 360 Feedback, and other talent processes",
+    icon: Layers,
+    color: "text-primary",
+    bgColor: "bg-primary/10",
+    items: [
+      { id: "rating-scales", label: "Component Rating Scales", icon: Star },
+      { id: "overall-scales", label: "Overall Rating Scales", icon: Layers },
+      { id: "competencies", label: "Competency Framework", icon: BookOpen },
+      { id: "approval-workflows", label: "Approval Workflows", icon: GitBranch },
+    ],
+  },
+  {
+    id: "goals",
+    title: "Goals Configuration",
+    description: "Goal-specific settings and templates",
+    icon: Target,
+    color: "text-success",
+    bgColor: "bg-success/10",
+    items: [
+      { id: "goal-templates", label: "Goal Templates", icon: Target },
+    ],
+  },
+  {
+    id: "appraisals",
+    title: "Appraisals Configuration",
+    description: "Performance appraisal cycle settings",
+    icon: Calendar,
+    color: "text-info",
+    bgColor: "bg-info/10",
+    items: [
+      { id: "appraisal-cycles", label: "Appraisal Cycles", icon: Calendar },
+    ],
+  },
+  {
+    id: "360-feedback",
+    title: "360° Feedback Configuration",
+    description: "Multi-rater feedback settings",
+    icon: MessageSquare,
+    color: "text-warning",
+    bgColor: "bg-warning/10",
+    items: [
+      { id: "feedback-360", label: "360° Feedback Settings", icon: MessageSquare },
+    ],
+  },
+  {
+    id: "recognition",
+    title: "Recognition Configuration",
+    description: "Employee recognition and rewards settings",
+    icon: Award,
+    color: "text-secondary-foreground",
+    bgColor: "bg-secondary/50",
+    items: [
+      { id: "recognition-categories", label: "Recognition Categories", icon: Award },
+    ],
+  },
+];
 
 export default function PerformanceSetupPage() {
   const { t } = useLanguage();
   const [companies, setCompanies] = useState<Company[]>([]);
   const [selectedCompany, setSelectedCompany] = useState<string>("");
-  const [activeTab, setActiveTab] = useState("rating-scales");
+  const [activeSection, setActiveSection] = useState("rating-scales");
+  const [expandedGroups, setExpandedGroups] = useState<string[]>(["foundation"]);
   const [isLoading, setIsLoading] = useState(true);
 
   // Data states
@@ -131,35 +138,20 @@ export default function PerformanceSetupPage() {
   const [editingGoalTemplate, setEditingGoalTemplate] = useState<GoalTemplate | null>(null);
   const [editingRecognitionCategory, setEditingRecognitionCategory] = useState<RecognitionCategory | null>(null);
 
-  // Overall rating scales hook
   const { scales: overallScales, isLoading: overallScalesLoading, refetch: refetchOverallScales } = useOverallRatingScales({ 
     companyId: selectedCompany, 
     activeOnly: false 
   });
 
-  useEffect(() => {
-    fetchCompanies();
-  }, []);
-
-  useEffect(() => {
-    if (selectedCompany) {
-      fetchAllData();
-    }
-  }, [selectedCompany]);
+  useEffect(() => { fetchCompanies(); }, []);
+  useEffect(() => { if (selectedCompany) fetchAllData(); }, [selectedCompany]);
 
   const fetchCompanies = async () => {
     try {
-      const { data, error } = await supabase
-        .from("companies")
-        .select("id, name")
-        .eq("is_active", true)
-        .order("name");
-
+      const { data, error } = await supabase.from("companies").select("id, name").eq("is_active", true).order("name");
       if (error) throw error;
       setCompanies(data || []);
-      if (data && data.length > 0) {
-        setSelectedCompany(data[0].id);
-      }
+      if (data && data.length > 0) setSelectedCompany(data[0].id);
     } catch (error) {
       console.error("Error fetching companies:", error);
       toast.error("Failed to load companies");
@@ -169,177 +161,106 @@ export default function PerformanceSetupPage() {
   const fetchAllData = async () => {
     setIsLoading(true);
     try {
-      await Promise.all([
-        fetchRatingScales(),
-        fetchCompetencies(),
-        fetchGoalTemplates(),
-        fetchRecognitionCategories(),
-        fetchAppraisalCycles(),
-      ]);
+      await Promise.all([fetchRatingScales(), fetchCompetencies(), fetchGoalTemplates(), fetchRecognitionCategories(), fetchAppraisalCycles()]);
     } finally {
       setIsLoading(false);
     }
   };
 
   const fetchRatingScales = async () => {
-    const { data, error } = await supabase
-      .from("performance_rating_scales")
-      .select("*")
-      .eq("company_id", selectedCompany)
-      .order("name");
-
-    if (error) {
-      console.error("Error fetching rating scales:", error);
-      return;
-    }
-    setRatingScales(data || []);
+    const { data, error } = await supabase.from("performance_rating_scales").select("*").eq("company_id", selectedCompany).order("name");
+    if (!error) setRatingScales(data || []);
   };
 
   const fetchCompetencies = async () => {
-    const { data, error } = await supabase
-      .from("competencies")
-      .select("*")
-      .eq("company_id", selectedCompany)
-      .order("category, name");
-
-    if (error) {
-      console.error("Error fetching competencies:", error);
-      return;
-    }
-    setCompetencies(data || []);
+    const { data, error } = await supabase.from("competencies").select("*").eq("company_id", selectedCompany).order("category, name");
+    if (!error) setCompetencies(data || []);
   };
 
   const fetchGoalTemplates = async () => {
-    const { data, error } = await supabase
-      .from("goal_templates")
-      .select("*")
-      .or(`company_id.eq.${selectedCompany},company_id.is.null`)
-      .order("name");
-
-    if (error) {
-      console.error("Error fetching goal templates:", error);
-      return;
-    }
-    setGoalTemplates(data || []);
+    const { data, error } = await supabase.from("goal_templates").select("*").or(`company_id.eq.${selectedCompany},company_id.is.null`).order("name");
+    if (!error) setGoalTemplates(data || []);
   };
 
   const fetchRecognitionCategories = async () => {
-    const { data, error } = await supabase
-      .from("recognition_categories")
-      .select("*")
-      .eq("company_id", selectedCompany)
-      .order("name");
-
-    if (error) {
-      console.error("Error fetching recognition categories:", error);
-      return;
-    }
-    setRecognitionCategories(data || []);
+    const { data, error } = await supabase.from("recognition_categories").select("*").eq("company_id", selectedCompany).order("name");
+    if (!error) setRecognitionCategories(data || []);
   };
 
   const fetchAppraisalCycles = async () => {
-    const { data, error } = await supabase
-      .from("appraisal_cycles")
-      .select("*")
-      .eq("company_id", selectedCompany)
-      .order("start_date", { ascending: false });
-
-    if (error) {
-      console.error("Error fetching appraisal cycles:", error);
-      return;
-    }
-    setAppraisalCycles(data || []);
+    const { data, error } = await supabase.from("appraisal_cycles").select("*").eq("company_id", selectedCompany).order("start_date", { ascending: false });
+    if (!error) setAppraisalCycles(data || []);
   };
 
   const handleDeleteRatingScale = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this rating scale?")) return;
-    
-    const { error } = await supabase
-      .from("performance_rating_scales")
-      .delete()
-      .eq("id", id);
-
-    if (error) {
-      toast.error("Failed to delete rating scale");
-      return;
-    }
+    if (!confirm("Delete this rating scale?")) return;
+    const { error } = await supabase.from("performance_rating_scales").delete().eq("id", id);
+    if (error) { toast.error("Failed to delete"); return; }
     toast.success("Rating scale deleted");
     fetchRatingScales();
   };
 
   const handleDeleteOverallScale = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this overall rating scale?")) return;
-    
-    const { error } = await supabase
-      .from("overall_rating_scales")
-      .delete()
-      .eq("id", id);
-
-    if (error) {
-      toast.error("Failed to delete overall rating scale");
-      return;
-    }
+    if (!confirm("Delete this overall rating scale?")) return;
+    const { error } = await supabase.from("overall_rating_scales").delete().eq("id", id);
+    if (error) { toast.error("Failed to delete"); return; }
     toast.success("Overall rating scale deleted");
     refetchOverallScales();
   };
 
   const handleDeleteCompetency = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this competency?")) return;
-    
-    const { error } = await supabase
-      .from("competencies")
-      .delete()
-      .eq("id", id);
-
-    if (error) {
-      toast.error("Failed to delete competency");
-      return;
-    }
+    if (!confirm("Delete this competency?")) return;
+    const { error } = await supabase.from("competencies").delete().eq("id", id);
+    if (error) { toast.error("Failed to delete"); return; }
     toast.success("Competency deleted");
     fetchCompetencies();
   };
 
   const handleDeleteGoalTemplate = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this goal template?")) return;
-    
-    const { error } = await supabase
-      .from("goal_templates")
-      .delete()
-      .eq("id", id);
-
-    if (error) {
-      toast.error("Failed to delete goal template");
-      return;
-    }
+    if (!confirm("Delete this template?")) return;
+    const { error } = await supabase.from("goal_templates").delete().eq("id", id);
+    if (error) { toast.error("Failed to delete"); return; }
     toast.success("Goal template deleted");
     fetchGoalTemplates();
   };
 
   const handleDeleteRecognitionCategory = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this recognition category?")) return;
-    
-    const { error } = await supabase
-      .from("recognition_categories")
-      .delete()
-      .eq("id", id);
-
-    if (error) {
-      toast.error("Failed to delete recognition category");
-      return;
-    }
+    if (!confirm("Delete this category?")) return;
+    const { error } = await supabase.from("recognition_categories").delete().eq("id", id);
+    if (error) { toast.error("Failed to delete"); return; }
     toast.success("Recognition category deleted");
     fetchRecognitionCategories();
   };
 
-  const tabs = [
-    { id: "rating-scales", label: t("performance.setup.ratingScales", "Rating Scales"), icon: Star },
-    { id: "overall-scales", label: t("performance.setup.overallScales", "Overall Scales"), icon: Layers },
-    { id: "competencies", label: t("performance.setup.competencies", "Competencies"), icon: BookOpen },
-    { id: "goal-templates", label: t("performance.setup.goalTemplates", "Goal Templates"), icon: Target },
-    { id: "approval-workflows", label: t("performance.setup.approvalWorkflows", "Approval Workflows"), icon: GitBranch },
-    { id: "recognition", label: t("performance.setup.recognition", "Recognition Categories"), icon: Award },
-    { id: "appraisal-cycles", label: t("performance.setup.appraisalCycles", "Appraisal Cycles"), icon: Calendar },
-  ];
+  const handleNavClick = (sectionId: string, groupId: string) => {
+    setActiveSection(sectionId);
+    if (!expandedGroups.includes(groupId)) {
+      setExpandedGroups([...expandedGroups, groupId]);
+    }
+  };
+
+  const renderContent = () => {
+    switch (activeSection) {
+      case "rating-scales":
+        return <RatingScalesContent scales={ratingScales} isLoading={isLoading} onAdd={() => { setEditingRatingScale(null); setRatingScaleDialogOpen(true); }} onEdit={(s) => { setEditingRatingScale(s); setRatingScaleDialogOpen(true); }} onDelete={handleDeleteRatingScale} t={t} />;
+      case "overall-scales":
+        return <OverallScalesContent scales={overallScales} isLoading={overallScalesLoading} onAdd={() => { setEditingOverallScale(null); setOverallScaleDialogOpen(true); }} onEdit={(s) => { setEditingOverallScale(s); setOverallScaleDialogOpen(true); }} onDelete={handleDeleteOverallScale} t={t} />;
+      case "competencies":
+        return <CompetenciesContent competencies={competencies} isLoading={isLoading} onAdd={() => { setEditingCompetency(null); setCompetencyDialogOpen(true); }} onEdit={(c) => { setEditingCompetency(c); setCompetencyDialogOpen(true); }} onDelete={handleDeleteCompetency} t={t} />;
+      case "approval-workflows":
+        return <TalentApprovalWorkflowManager companyId={selectedCompany} />;
+      case "goal-templates":
+        return <GoalTemplatesContent templates={goalTemplates} isLoading={isLoading} onAdd={() => { setEditingGoalTemplate(null); setGoalTemplateDialogOpen(true); }} onEdit={(t) => { setEditingGoalTemplate(t); setGoalTemplateDialogOpen(true); }} onDelete={handleDeleteGoalTemplate} t={t} />;
+      case "appraisal-cycles":
+        return <AppraisalCyclesContent cycles={appraisalCycles} isLoading={isLoading} t={t} />;
+      case "feedback-360":
+        return <Feedback360ConfigSection companyId={selectedCompany} />;
+      case "recognition-categories":
+        return <RecognitionCategoriesContent categories={recognitionCategories} isLoading={isLoading} onAdd={() => { setEditingRecognitionCategory(null); setRecognitionCategoryDialogOpen(true); }} onEdit={(c) => { setEditingRecognitionCategory(c); setRecognitionCategoryDialogOpen(true); }} onDelete={handleDeleteRecognitionCategory} t={t} />;
+      default:
+        return <div className="text-muted-foreground text-center py-8">Select a configuration option</div>;
+    }
+  };
 
   return (
     <AppLayout>
@@ -351,12 +272,8 @@ export default function PerformanceSetupPage() {
               <Settings className="h-5 w-5 text-primary" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold tracking-tight text-foreground">
-                {t("performance.setup.title", "Performance Setup")}
-              </h1>
-              <p className="text-muted-foreground">
-                {t("performance.setup.subtitle", "Configure company-wide performance management settings")}
-              </p>
+              <h1 className="text-2xl font-bold tracking-tight text-foreground">Performance Setup</h1>
+              <p className="text-muted-foreground">Configure company-wide performance management settings</p>
             </div>
           </div>
         </div>
@@ -373,9 +290,7 @@ export default function PerformanceSetupPage() {
                   </SelectTrigger>
                   <SelectContent>
                     {companies.map((company) => (
-                      <SelectItem key={company.id} value={company.id}>
-                        {company.name}
-                      </SelectItem>
+                      <SelectItem key={company.id} value={company.id}>{company.name}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -385,666 +300,410 @@ export default function PerformanceSetupPage() {
         </Card>
 
         {selectedCompany && (
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-            <TabsList className="grid w-full grid-cols-7">
-              {tabs.map((tab) => {
-                const Icon = tab.icon;
-                return (
-                  <TabsTrigger key={tab.id} value={tab.id} className="flex items-center gap-2">
-                    <Icon className="h-4 w-4" />
-                    <span className="hidden sm:inline">{tab.label}</span>
-                  </TabsTrigger>
-                );
-              })}
-            </TabsList>
-
-            {/* Rating Scales Tab */}
-            <TabsContent value="rating-scales" className="space-y-4">
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between">
-                  <div>
-                    <CardTitle>{t("performance.setup.ratingScales", "Rating Scales")}</CardTitle>
-                    <CardDescription>
-                      {t("performance.setup.ratingScalesDesc", "Define rating scales used in performance evaluations")}
-                    </CardDescription>
-                  </div>
-                  <Button onClick={() => { setEditingRatingScale(null); setRatingScaleDialogOpen(true); }}>
-                    <Plus className="h-4 w-4 mr-2" />
-                    {t("common.add", "Add")}
-                  </Button>
+          <div className="grid grid-cols-12 gap-6">
+            {/* Sidebar Navigation */}
+            <div className="col-span-12 lg:col-span-3">
+              <Card className="sticky top-4">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm font-medium">Configuration</CardTitle>
                 </CardHeader>
-                <CardContent>
-                  {isLoading ? (
-                    <div className="space-y-2">
-                      {[1, 2, 3].map((i) => (
-                        <Skeleton key={i} className="h-12 w-full" />
-                      ))}
-                    </div>
-                  ) : ratingScales.length === 0 ? (
-                    <div className="text-center py-8 text-muted-foreground">
-                      {t("performance.setup.noRatingScales", "No rating scales configured. Add one to get started.")}
-                    </div>
-                  ) : (
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>{t("common.name", "Name")}</TableHead>
-                          <TableHead>{t("common.code", "Code")}</TableHead>
-                          <TableHead>{t("performance.setup.purpose", "Purpose")}</TableHead>
-                          <TableHead>{t("performance.setup.range", "Range")}</TableHead>
-                          <TableHead>{t("common.status", "Status")}</TableHead>
-                          <TableHead className="text-right">{t("common.actions", "Actions")}</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {ratingScales.map((scale) => (
-                          <TableRow key={scale.id}>
-                            <TableCell className="font-medium">{scale.name}</TableCell>
-                            <TableCell>{scale.code}</TableCell>
-                            <TableCell>
-                              <div className="flex flex-wrap gap-1">
-                                {scale.scale_purpose?.map((purpose) => (
-                                  <Badge key={purpose} variant="outline" className="text-xs">
-                                    {purpose === "appraisal" ? t("performance.setup.purposeAppraisal", "Appraisal") :
-                                     purpose === "goals" ? t("performance.setup.purposeGoals", "Goals") :
-                                     purpose === "360_feedback" ? t("performance.setup.purpose360", "360") : purpose}
-                                  </Badge>
-                                )) || <span className="text-muted-foreground text-xs">—</span>}
+                <CardContent className="p-0">
+                  <ScrollArea className="h-[calc(100vh-320px)]">
+                    <Accordion 
+                      type="multiple" 
+                      value={expandedGroups} 
+                      onValueChange={setExpandedGroups}
+                      className="w-full"
+                    >
+                      {setupSections.map((section) => {
+                        const SectionIcon = section.icon;
+                        return (
+                          <AccordionItem key={section.id} value={section.id} className="border-b-0">
+                            <AccordionTrigger className="px-4 py-3 hover:no-underline hover:bg-muted/50">
+                              <div className="flex items-center gap-3">
+                                <div className={cn("p-1.5 rounded-md", section.bgColor)}>
+                                  <SectionIcon className={cn("h-4 w-4", section.color)} />
+                                </div>
+                                <div className="text-left">
+                                  <div className="font-medium text-sm">{section.title}</div>
+                                </div>
                               </div>
-                            </TableCell>
-                            <TableCell>{scale.min_rating} - {scale.max_rating}</TableCell>
-                            <TableCell>
-                              <Badge variant={scale.is_active ? "default" : "secondary"}>
-                                {scale.is_active ? t("common.active", "Active") : t("common.inactive", "Inactive")}
-                              </Badge>
-                              {scale.is_default && (
-                                <Badge variant="outline" className="ml-2">
-                                  {t("common.default", "Default")}
-                                </Badge>
-                              )}
-                            </TableCell>
-                            <TableCell className="text-right">
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                onClick={() => { setEditingRatingScale(scale); setRatingScaleDialogOpen(true); }}
-                              >
-                                <Edit className="h-4 w-4" />
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                onClick={() => handleDeleteRatingScale(scale.id)}
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  )}
+                            </AccordionTrigger>
+                            <AccordionContent className="pb-2">
+                              <div className="ml-4 space-y-1">
+                                {section.items.map((item) => {
+                                  const ItemIcon = item.icon;
+                                  const isActive = activeSection === item.id;
+                                  return (
+                                    <button
+                                      key={item.id}
+                                      onClick={() => handleNavClick(item.id, section.id)}
+                                      className={cn(
+                                        "w-full flex items-center gap-2 px-3 py-2 rounded-md text-sm transition-colors",
+                                        isActive 
+                                          ? "bg-primary text-primary-foreground" 
+                                          : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                                      )}
+                                    >
+                                      <ItemIcon className="h-4 w-4" />
+                                      <span>{item.label}</span>
+                                      {isActive && <ChevronRight className="h-4 w-4 ml-auto" />}
+                                    </button>
+                                  );
+                                })}
+                              </div>
+                            </AccordionContent>
+                          </AccordionItem>
+                        );
+                      })}
+                    </Accordion>
+                  </ScrollArea>
                 </CardContent>
               </Card>
-            </TabsContent>
+            </div>
 
-            {/* Overall Rating Scales Tab */}
-            <TabsContent value="overall-scales" className="space-y-4">
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between">
-                  <div>
-                    <CardTitle>{t("performance.setup.overallScales", "Overall Rating Scales")}</CardTitle>
-                    <CardDescription>
-                      {t("performance.setup.overallScalesDesc", "Define final talent categorization scales for performance outcomes")}
-                    </CardDescription>
-                  </div>
-                  <Button onClick={() => { setEditingOverallScale(null); setOverallScaleDialogOpen(true); }}>
-                    <Plus className="h-4 w-4 mr-2" />
-                    {t("common.add", "Add")}
-                  </Button>
-                </CardHeader>
-                <CardContent>
-                  {overallScalesLoading ? (
-                    <div className="space-y-2">
-                      {[1, 2, 3].map((i) => (
-                        <Skeleton key={i} className="h-12 w-full" />
-                      ))}
-                    </div>
-                  ) : overallScales.length === 0 ? (
-                    <div className="text-center py-8 text-muted-foreground">
-                      {t("performance.setup.noOverallScales", "No overall rating scales configured. Add one to get started.")}
-                    </div>
-                  ) : (
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>{t("common.name", "Name")}</TableHead>
-                          <TableHead>{t("common.code", "Code")}</TableHead>
-                          <TableHead>{t("performance.setup.levels", "Levels")}</TableHead>
-                          <TableHead>{t("performance.setup.calibration", "Calibration")}</TableHead>
-                          <TableHead>{t("common.status", "Status")}</TableHead>
-                          <TableHead className="text-right">{t("common.actions", "Actions")}</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {overallScales.map((scale) => (
-                          <TableRow key={scale.id}>
-                            <TableCell className="font-medium">{scale.name}</TableCell>
-                            <TableCell>{scale.code}</TableCell>
-                            <TableCell>{scale.levels.length} levels</TableCell>
-                            <TableCell>
-                              {scale.requires_calibration ? (
-                                <Badge variant="outline">{t("common.required", "Required")}</Badge>
-                              ) : (
-                                <span className="text-muted-foreground text-sm">{t("common.optional", "Optional")}</span>
-                              )}
-                            </TableCell>
-                            <TableCell>
-                              <Badge variant={scale.is_active ? "default" : "secondary"}>
-                                {scale.is_active ? t("common.active", "Active") : t("common.inactive", "Inactive")}
-                              </Badge>
-                              {scale.is_default && (
-                                <Badge variant="outline" className="ml-2">
-                                  {t("common.default", "Default")}
-                                </Badge>
-                              )}
-                            </TableCell>
-                            <TableCell className="text-right">
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                onClick={() => { setEditingOverallScale(scale); setOverallScaleDialogOpen(true); }}
-                              >
-                                <Edit className="h-4 w-4" />
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                onClick={() => handleDeleteOverallScale(scale.id)}
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  )}
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            {/* Competencies Tab */}
-            <TabsContent value="competencies" className="space-y-4">
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between">
-                  <div>
-                    <CardTitle>{t("performance.setup.competencies", "Competencies")}</CardTitle>
-                    <CardDescription>
-                      {t("performance.setup.competenciesDesc", "Define competency frameworks for performance evaluations")}
-                    </CardDescription>
-                  </div>
-                  <Button onClick={() => { setEditingCompetency(null); setCompetencyDialogOpen(true); }}>
-                    <Plus className="h-4 w-4 mr-2" />
-                    {t("common.add", "Add")}
-                  </Button>
-                </CardHeader>
-                <CardContent>
-                  {isLoading ? (
-                    <div className="space-y-2">
-                      {[1, 2, 3].map((i) => (
-                        <Skeleton key={i} className="h-12 w-full" />
-                      ))}
-                    </div>
-                  ) : competencies.length === 0 ? (
-                    <div className="text-center py-8 text-muted-foreground">
-                      {t("performance.setup.noCompetencies", "No competencies configured. Add one to get started.")}
-                    </div>
-                  ) : (
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>{t("common.name", "Name")}</TableHead>
-                          <TableHead>{t("common.code", "Code")}</TableHead>
-                          <TableHead>{t("common.category", "Category")}</TableHead>
-                          <TableHead>{t("common.status", "Status")}</TableHead>
-                          <TableHead className="text-right">{t("common.actions", "Actions")}</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {competencies.map((comp) => (
-                          <TableRow key={comp.id}>
-                            <TableCell className="font-medium">{comp.name}</TableCell>
-                            <TableCell>{comp.code}</TableCell>
-                            <TableCell>{comp.category}</TableCell>
-                            <TableCell>
-                              <Badge variant={comp.is_active ? "default" : "secondary"}>
-                                {comp.is_active ? t("common.active", "Active") : t("common.inactive", "Inactive")}
-                              </Badge>
-                            </TableCell>
-                            <TableCell className="text-right">
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                onClick={() => { setEditingCompetency(comp); setCompetencyDialogOpen(true); }}
-                              >
-                                <Edit className="h-4 w-4" />
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                onClick={() => handleDeleteCompetency(comp.id)}
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  )}
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            {/* Goal Templates Tab */}
-            <TabsContent value="goal-templates" className="space-y-4">
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between">
-                  <div>
-                    <CardTitle>{t("performance.setup.goalTemplates", "Goal Templates")}</CardTitle>
-                    <CardDescription>
-                      {t("performance.setup.goalTemplatesDesc", "Create reusable goal templates for employees")}
-                    </CardDescription>
-                  </div>
-                  <Button onClick={() => { setEditingGoalTemplate(null); setGoalTemplateDialogOpen(true); }}>
-                    <Plus className="h-4 w-4 mr-2" />
-                    {t("common.add", "Add")}
-                  </Button>
-                </CardHeader>
-                <CardContent>
-                  {isLoading ? (
-                    <div className="space-y-2">
-                      {[1, 2, 3].map((i) => (
-                        <Skeleton key={i} className="h-12 w-full" />
-                      ))}
-                    </div>
-                  ) : goalTemplates.length === 0 ? (
-                    <div className="text-center py-8 text-muted-foreground">
-                      {t("performance.setup.noGoalTemplates", "No goal templates configured. Add one to get started.")}
-                    </div>
-                  ) : (
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>{t("common.name", "Name")}</TableHead>
-                          <TableHead>{t("common.type", "Type")}</TableHead>
-                          <TableHead>{t("common.category", "Category")}</TableHead>
-                          <TableHead>{t("performance.setup.weighting", "Weighting")}</TableHead>
-                          <TableHead>{t("common.status", "Status")}</TableHead>
-                          <TableHead className="text-right">{t("common.actions", "Actions")}</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {goalTemplates.map((template) => (
-                          <TableRow key={template.id}>
-                            <TableCell className="font-medium">{template.name}</TableCell>
-                            <TableCell>{template.goal_type.replace(/_/g, " ")}</TableCell>
-                            <TableCell>{template.category || "-"}</TableCell>
-                            <TableCell>{template.default_weighting ? `${template.default_weighting}%` : "-"}</TableCell>
-                            <TableCell>
-                              <Badge variant={template.is_active ? "default" : "secondary"}>
-                                {template.is_active ? t("common.active", "Active") : t("common.inactive", "Inactive")}
-                              </Badge>
-                            </TableCell>
-                            <TableCell className="text-right">
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                onClick={() => { setEditingGoalTemplate(template); setGoalTemplateDialogOpen(true); }}
-                              >
-                                <Edit className="h-4 w-4" />
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                onClick={() => handleDeleteGoalTemplate(template.id)}
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  )}
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            {/* Approval Workflows Tab */}
-            <TabsContent value="approval-workflows" className="space-y-4">
-              <GoalApprovalRulesManager companyId={selectedCompany} />
-            </TabsContent>
-
-            {/* Recognition Categories Tab */}
-            <TabsContent value="recognition" className="space-y-4">
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between">
-                  <div>
-                    <CardTitle>{t("performance.setup.recognition", "Recognition Categories")}</CardTitle>
-                    <CardDescription>
-                      {t("performance.setup.recognitionDesc", "Define award types and recognition categories")}
-                    </CardDescription>
-                  </div>
-                  <Button onClick={() => { setEditingRecognitionCategory(null); setRecognitionCategoryDialogOpen(true); }}>
-                    <Plus className="h-4 w-4 mr-2" />
-                    {t("common.add", "Add")}
-                  </Button>
-                </CardHeader>
-                <CardContent>
-                  {isLoading ? (
-                    <div className="space-y-2">
-                      {[1, 2, 3].map((i) => (
-                        <Skeleton key={i} className="h-12 w-full" />
-                      ))}
-                    </div>
-                  ) : recognitionCategories.length === 0 ? (
-                    <div className="text-center py-8 text-muted-foreground">
-                      {t("performance.setup.noRecognitionCategories", "No recognition categories configured. Add one to get started.")}
-                    </div>
-                  ) : (
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>{t("common.name", "Name")}</TableHead>
-                          <TableHead>{t("common.code", "Code")}</TableHead>
-                          <TableHead>{t("performance.setup.points", "Points")}</TableHead>
-                          <TableHead>{t("performance.setup.approval", "Approval Required")}</TableHead>
-                          <TableHead>{t("common.status", "Status")}</TableHead>
-                          <TableHead className="text-right">{t("common.actions", "Actions")}</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {recognitionCategories.map((category) => (
-                          <TableRow key={category.id}>
-                            <TableCell className="font-medium">{category.name}</TableCell>
-                            <TableCell>{category.code}</TableCell>
-                            <TableCell>{category.points_value}</TableCell>
-                            <TableCell>
-                              <Badge variant={category.requires_approval ? "outline" : "secondary"}>
-                                {category.requires_approval ? t("common.yes", "Yes") : t("common.no", "No")}
-                              </Badge>
-                            </TableCell>
-                            <TableCell>
-                              <Badge variant={category.is_active ? "default" : "secondary"}>
-                                {category.is_active ? t("common.active", "Active") : t("common.inactive", "Inactive")}
-                              </Badge>
-                            </TableCell>
-                            <TableCell className="text-right">
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                onClick={() => { setEditingRecognitionCategory(category); setRecognitionCategoryDialogOpen(true); }}
-                              >
-                                <Edit className="h-4 w-4" />
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                onClick={() => handleDeleteRecognitionCategory(category.id)}
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  )}
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            {/* Appraisal Cycles Tab */}
-            <TabsContent value="appraisal-cycles" className="space-y-4">
-              <Card>
-                <CardHeader>
-                  <CardTitle>{t("performance.setup.appraisalCycles", "Appraisal Cycles")}</CardTitle>
-                  <CardDescription>
-                    {t("performance.setup.appraisalCyclesDesc", "View and manage performance appraisal cycles")}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  {isLoading ? (
-                    <div className="space-y-2">
-                      {[1, 2, 3].map((i) => (
-                        <Skeleton key={i} className="h-12 w-full" />
-                      ))}
-                    </div>
-                  ) : appraisalCycles.length === 0 ? (
-                    <div className="text-center py-8 text-muted-foreground">
-                      {t("performance.setup.noAppraisalCycles", "No appraisal cycles found. Create cycles from the Appraisals page.")}
-                    </div>
-                  ) : (
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>{t("common.name", "Name")}</TableHead>
-                          <TableHead>{t("common.period", "Period")}</TableHead>
-                          <TableHead>{t("performance.setup.weights", "Weights (G/C/R)")}</TableHead>
-                          <TableHead>{t("performance.setup.ratingRange", "Rating Range")}</TableHead>
-                          <TableHead>{t("common.status", "Status")}</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {appraisalCycles.map((cycle) => (
-                          <TableRow key={cycle.id}>
-                            <TableCell className="font-medium">{cycle.name}</TableCell>
-                            <TableCell>
-                              {new Date(cycle.start_date).toLocaleDateString()} - {new Date(cycle.end_date).toLocaleDateString()}
-                            </TableCell>
-                            <TableCell>
-                              {cycle.goal_weight}% / {cycle.competency_weight}% / {cycle.responsibility_weight}%
-                            </TableCell>
-                            <TableCell>{cycle.min_rating} - {cycle.max_rating}</TableCell>
-                            <TableCell>
-                              <Badge 
-                                variant={
-                                  cycle.status === "active" ? "default" : 
-                                  cycle.status === "completed" ? "secondary" : "outline"
-                                }
-                              >
-                                {cycle.status}
-                              </Badge>
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  )}
-                </CardContent>
-              </Card>
-            </TabsContent>
-          </Tabs>
+            {/* Main Content Area */}
+            <div className="col-span-12 lg:col-span-9">
+              {renderContent()}
+            </div>
+          </div>
         )}
 
-        {/* Rating Scale Dialog */}
-        <EnhancedRatingScaleDialog
-          open={ratingScaleDialogOpen}
-          onOpenChange={setRatingScaleDialogOpen}
-          companyId={selectedCompany}
-          editingScale={editingRatingScale}
-          onSuccess={() => {
-            setRatingScaleDialogOpen(false);
-            fetchRatingScales();
-          }}
-        />
-
-        {/* Overall Rating Scale Dialog */}
-        <OverallRatingScaleDialog
-          open={overallScaleDialogOpen}
-          onOpenChange={setOverallScaleDialogOpen}
-          companyId={selectedCompany}
-          editingScale={editingOverallScale}
-          onSuccess={() => {
-            setOverallScaleDialogOpen(false);
-            refetchOverallScales();
-          }}
-        />
-
-        {/* Competency Dialog */}
-        <CompetencyDialog
-          open={competencyDialogOpen}
-          onOpenChange={setCompetencyDialogOpen}
-          companyId={selectedCompany}
-          editingCompetency={editingCompetency}
-          onSuccess={() => {
-            setCompetencyDialogOpen(false);
-            fetchCompetencies();
-          }}
-        />
-
-        {/* Goal Template Dialog */}
-        <GoalTemplateDialog
-          open={goalTemplateDialogOpen}
-          onOpenChange={setGoalTemplateDialogOpen}
-          companyId={selectedCompany}
-          editingTemplate={editingGoalTemplate}
-          onSuccess={() => {
-            setGoalTemplateDialogOpen(false);
-            fetchGoalTemplates();
-          }}
-        />
-
-        {/* Recognition Category Dialog */}
-        <RecognitionCategoryDialog
-          open={recognitionCategoryDialogOpen}
-          onOpenChange={setRecognitionCategoryDialogOpen}
-          companyId={selectedCompany}
-          editingCategory={editingRecognitionCategory}
-          onSuccess={() => {
-            setRecognitionCategoryDialogOpen(false);
-            fetchRecognitionCategories();
-          }}
-        />
+        {/* Dialogs */}
+        <EnhancedRatingScaleDialog open={ratingScaleDialogOpen} onOpenChange={setRatingScaleDialogOpen} companyId={selectedCompany} editingScale={editingRatingScale} onSuccess={() => { setRatingScaleDialogOpen(false); fetchRatingScales(); }} />
+        <OverallRatingScaleDialog open={overallScaleDialogOpen} onOpenChange={setOverallScaleDialogOpen} companyId={selectedCompany} editingScale={editingOverallScale} onSuccess={() => { setOverallScaleDialogOpen(false); refetchOverallScales(); }} />
+        <CompetencyDialog open={competencyDialogOpen} onOpenChange={setCompetencyDialogOpen} companyId={selectedCompany} editingCompetency={editingCompetency} onSuccess={() => { setCompetencyDialogOpen(false); fetchCompetencies(); }} />
+        <GoalTemplateDialog open={goalTemplateDialogOpen} onOpenChange={setGoalTemplateDialogOpen} companyId={selectedCompany} editingTemplate={editingGoalTemplate} onSuccess={() => { setGoalTemplateDialogOpen(false); fetchGoalTemplates(); }} />
+        <RecognitionCategoryDialog open={recognitionCategoryDialogOpen} onOpenChange={setRecognitionCategoryDialogOpen} companyId={selectedCompany} editingCategory={editingRecognitionCategory} onSuccess={() => { setRecognitionCategoryDialogOpen(false); fetchRecognitionCategories(); }} />
       </div>
     </AppLayout>
   );
 }
 
-// Competency Dialog Component
-function CompetencyDialog({
-  open,
-  onOpenChange,
-  companyId,
-  editingCompetency,
-  onSuccess,
-}: {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  companyId: string;
-  editingCompetency: Competency | null;
-  onSuccess: () => void;
-}) {
-  const { t } = useLanguage();
-  const [formData, setFormData] = useState({
-    name: "",
-    code: "",
-    category: "Core",
-    description: "",
-    is_active: true,
-  });
+// Content Components
+function RatingScalesContent({ scales, isLoading, onAdd, onEdit, onDelete, t }: any) {
+  return (
+    <Card>
+      <CardHeader className="flex flex-row items-center justify-between">
+        <div>
+          <CardTitle>Component Rating Scales</CardTitle>
+          <CardDescription>Define rating scales used for goals, competencies, and feedback</CardDescription>
+        </div>
+        <Button onClick={onAdd}><Plus className="h-4 w-4 mr-2" />Add Scale</Button>
+      </CardHeader>
+      <CardContent>
+        {isLoading ? <LoadingSkeleton /> : scales.length === 0 ? <EmptyState message="No rating scales configured" /> : (
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Name</TableHead>
+                <TableHead>Code</TableHead>
+                <TableHead>Purpose</TableHead>
+                <TableHead>Range</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {scales.map((scale: RatingScale) => (
+                <TableRow key={scale.id}>
+                  <TableCell className="font-medium">{scale.name}</TableCell>
+                  <TableCell>{scale.code}</TableCell>
+                  <TableCell>
+                    <div className="flex flex-wrap gap-1">
+                      {scale.scale_purpose?.map((p: string) => <Badge key={p} variant="outline" className="text-xs">{p}</Badge>) || "—"}
+                    </div>
+                  </TableCell>
+                  <TableCell>{scale.min_rating} - {scale.max_rating}</TableCell>
+                  <TableCell>
+                    <Badge variant={scale.is_active ? "default" : "secondary"}>{scale.is_active ? "Active" : "Inactive"}</Badge>
+                    {scale.is_default && <Badge variant="outline" className="ml-2">Default</Badge>}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <Button variant="ghost" size="icon" onClick={() => onEdit(scale)}><Edit className="h-4 w-4" /></Button>
+                    <Button variant="ghost" size="icon" onClick={() => onDelete(scale.id)}><Trash2 className="h-4 w-4" /></Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
+function OverallScalesContent({ scales, isLoading, onAdd, onEdit, onDelete, t }: any) {
+  return (
+    <Card>
+      <CardHeader className="flex flex-row items-center justify-between">
+        <div>
+          <CardTitle>Overall Rating Scales</CardTitle>
+          <CardDescription>Define final talent categorization scales for performance outcomes</CardDescription>
+        </div>
+        <Button onClick={onAdd}><Plus className="h-4 w-4 mr-2" />Add Scale</Button>
+      </CardHeader>
+      <CardContent>
+        {isLoading ? <LoadingSkeleton /> : scales.length === 0 ? <EmptyState message="No overall rating scales configured" /> : (
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Name</TableHead>
+                <TableHead>Code</TableHead>
+                <TableHead>Levels</TableHead>
+                <TableHead>Calibration</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {scales.map((scale: OverallRatingScale) => (
+                <TableRow key={scale.id}>
+                  <TableCell className="font-medium">{scale.name}</TableCell>
+                  <TableCell>{scale.code}</TableCell>
+                  <TableCell>{scale.levels.length} levels</TableCell>
+                  <TableCell>{scale.requires_calibration ? <Badge variant="outline">Required</Badge> : <span className="text-muted-foreground text-sm">Optional</span>}</TableCell>
+                  <TableCell>
+                    <Badge variant={scale.is_active ? "default" : "secondary"}>{scale.is_active ? "Active" : "Inactive"}</Badge>
+                    {scale.is_default && <Badge variant="outline" className="ml-2">Default</Badge>}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <Button variant="ghost" size="icon" onClick={() => onEdit(scale)}><Edit className="h-4 w-4" /></Button>
+                    <Button variant="ghost" size="icon" onClick={() => onDelete(scale.id)}><Trash2 className="h-4 w-4" /></Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
+function CompetenciesContent({ competencies, isLoading, onAdd, onEdit, onDelete, t }: any) {
+  return (
+    <Card>
+      <CardHeader className="flex flex-row items-center justify-between">
+        <div>
+          <CardTitle>Competency Framework</CardTitle>
+          <CardDescription>Define competencies used across performance evaluations</CardDescription>
+        </div>
+        <Button onClick={onAdd}><Plus className="h-4 w-4 mr-2" />Add Competency</Button>
+      </CardHeader>
+      <CardContent>
+        {isLoading ? <LoadingSkeleton /> : competencies.length === 0 ? <EmptyState message="No competencies configured" /> : (
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Name</TableHead>
+                <TableHead>Code</TableHead>
+                <TableHead>Category</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {competencies.map((comp: Competency) => (
+                <TableRow key={comp.id}>
+                  <TableCell className="font-medium">{comp.name}</TableCell>
+                  <TableCell>{comp.code}</TableCell>
+                  <TableCell>{comp.category}</TableCell>
+                  <TableCell><Badge variant={comp.is_active ? "default" : "secondary"}>{comp.is_active ? "Active" : "Inactive"}</Badge></TableCell>
+                  <TableCell className="text-right">
+                    <Button variant="ghost" size="icon" onClick={() => onEdit(comp)}><Edit className="h-4 w-4" /></Button>
+                    <Button variant="ghost" size="icon" onClick={() => onDelete(comp.id)}><Trash2 className="h-4 w-4" /></Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
+function GoalTemplatesContent({ templates, isLoading, onAdd, onEdit, onDelete, t }: any) {
+  return (
+    <Card>
+      <CardHeader className="flex flex-row items-center justify-between">
+        <div>
+          <CardTitle>Goal Templates</CardTitle>
+          <CardDescription>Create reusable goal templates for employees</CardDescription>
+        </div>
+        <Button onClick={onAdd}><Plus className="h-4 w-4 mr-2" />Add Template</Button>
+      </CardHeader>
+      <CardContent>
+        {isLoading ? <LoadingSkeleton /> : templates.length === 0 ? <EmptyState message="No goal templates configured" /> : (
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Name</TableHead>
+                <TableHead>Type</TableHead>
+                <TableHead>Category</TableHead>
+                <TableHead>Weighting</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {templates.map((template: GoalTemplate) => (
+                <TableRow key={template.id}>
+                  <TableCell className="font-medium">{template.name}</TableCell>
+                  <TableCell>{template.goal_type.replace(/_/g, " ")}</TableCell>
+                  <TableCell>{template.category || "—"}</TableCell>
+                  <TableCell>{template.default_weighting ? `${template.default_weighting}%` : "—"}</TableCell>
+                  <TableCell><Badge variant={template.is_active ? "default" : "secondary"}>{template.is_active ? "Active" : "Inactive"}</Badge></TableCell>
+                  <TableCell className="text-right">
+                    <Button variant="ghost" size="icon" onClick={() => onEdit(template)}><Edit className="h-4 w-4" /></Button>
+                    <Button variant="ghost" size="icon" onClick={() => onDelete(template.id)}><Trash2 className="h-4 w-4" /></Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
+function AppraisalCyclesContent({ cycles, isLoading, t }: any) {
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Appraisal Cycles</CardTitle>
+        <CardDescription>View and manage performance appraisal cycles</CardDescription>
+      </CardHeader>
+      <CardContent>
+        {isLoading ? <LoadingSkeleton /> : cycles.length === 0 ? <EmptyState message="No appraisal cycles found. Create cycles from the Appraisals page." /> : (
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Name</TableHead>
+                <TableHead>Period</TableHead>
+                <TableHead>Weights (G/C/R)</TableHead>
+                <TableHead>Rating Range</TableHead>
+                <TableHead>Status</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {cycles.map((cycle: AppraisalCycle) => (
+                <TableRow key={cycle.id}>
+                  <TableCell className="font-medium">{cycle.name}</TableCell>
+                  <TableCell>{new Date(cycle.start_date).toLocaleDateString()} - {new Date(cycle.end_date).toLocaleDateString()}</TableCell>
+                  <TableCell>{cycle.goal_weight}% / {cycle.competency_weight}% / {cycle.responsibility_weight}%</TableCell>
+                  <TableCell>{cycle.min_rating} - {cycle.max_rating}</TableCell>
+                  <TableCell><Badge variant={cycle.status === "active" ? "default" : cycle.status === "completed" ? "secondary" : "outline"}>{cycle.status}</Badge></TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
+function RecognitionCategoriesContent({ categories, isLoading, onAdd, onEdit, onDelete, t }: any) {
+  return (
+    <Card>
+      <CardHeader className="flex flex-row items-center justify-between">
+        <div>
+          <CardTitle>Recognition Categories</CardTitle>
+          <CardDescription>Define award types and recognition categories</CardDescription>
+        </div>
+        <Button onClick={onAdd}><Plus className="h-4 w-4 mr-2" />Add Category</Button>
+      </CardHeader>
+      <CardContent>
+        {isLoading ? <LoadingSkeleton /> : categories.length === 0 ? <EmptyState message="No recognition categories configured" /> : (
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Name</TableHead>
+                <TableHead>Code</TableHead>
+                <TableHead>Points</TableHead>
+                <TableHead>Approval Required</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {categories.map((category: RecognitionCategory) => (
+                <TableRow key={category.id}>
+                  <TableCell className="font-medium">{category.name}</TableCell>
+                  <TableCell>{category.code}</TableCell>
+                  <TableCell>{category.points_value}</TableCell>
+                  <TableCell><Badge variant={category.requires_approval ? "outline" : "secondary"}>{category.requires_approval ? "Yes" : "No"}</Badge></TableCell>
+                  <TableCell><Badge variant={category.is_active ? "default" : "secondary"}>{category.is_active ? "Active" : "Inactive"}</Badge></TableCell>
+                  <TableCell className="text-right">
+                    <Button variant="ghost" size="icon" onClick={() => onEdit(category)}><Edit className="h-4 w-4" /></Button>
+                    <Button variant="ghost" size="icon" onClick={() => onDelete(category.id)}><Trash2 className="h-4 w-4" /></Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
+function LoadingSkeleton() {
+  return <div className="space-y-2">{[1, 2, 3].map(i => <Skeleton key={i} className="h-12 w-full" />)}</div>;
+}
+
+function EmptyState({ message }: { message: string }) {
+  return <div className="text-center py-8 text-muted-foreground">{message}</div>;
+}
+
+// Dialog Components
+function CompetencyDialog({ open, onOpenChange, companyId, editingCompetency, onSuccess }: { open: boolean; onOpenChange: (open: boolean) => void; companyId: string; editingCompetency: Competency | null; onSuccess: () => void; }) {
+  const [formData, setFormData] = useState({ name: "", code: "", category: "Core", description: "", is_active: true });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     if (editingCompetency) {
-      setFormData({
-        name: editingCompetency.name,
-        code: editingCompetency.code,
-        category: editingCompetency.category,
-        description: editingCompetency.description || "",
-        is_active: editingCompetency.is_active,
-      });
+      setFormData({ name: editingCompetency.name, code: editingCompetency.code, category: editingCompetency.category, description: editingCompetency.description || "", is_active: editingCompetency.is_active });
     } else {
-      setFormData({
-        name: "",
-        code: "",
-        category: "Core",
-        description: "",
-        is_active: true,
-      });
+      setFormData({ name: "", code: "", category: "Core", description: "", is_active: true });
     }
   }, [editingCompetency, open]);
 
   const handleSubmit = async () => {
-    if (!formData.name || !formData.code) {
-      toast.error("Name and code are required");
-      return;
-    }
-
+    if (!formData.name || !formData.code) { toast.error("Name and code are required"); return; }
     setIsSubmitting(true);
     try {
       if (editingCompetency) {
-        const { error } = await supabase
-          .from("competencies")
-          .update(formData)
-          .eq("id", editingCompetency.id);
-
+        const { error } = await supabase.from("competencies").update(formData).eq("id", editingCompetency.id);
         if (error) throw error;
         toast.success("Competency updated");
       } else {
-        const { error } = await supabase
-          .from("competencies")
-          .insert({ ...formData, company_id: companyId });
-
+        const { error } = await supabase.from("competencies").insert({ ...formData, company_id: companyId });
         if (error) throw error;
         toast.success("Competency created");
       }
       onSuccess();
-    } catch (error: any) {
-      toast.error(error.message || "Failed to save competency");
-    } finally {
-      setIsSubmitting(false);
-    }
+    } catch (error: any) { toast.error(error.message || "Failed to save"); } finally { setIsSubmitting(false); }
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>
-            {editingCompetency ? t("performance.setup.editCompetency", "Edit Competency") : t("performance.setup.addCompetency", "Add Competency")}
-          </DialogTitle>
-          <DialogDescription>
-            {t("performance.setup.competencyDialogDesc", "Configure competency settings")}
-          </DialogDescription>
+          <DialogTitle>{editingCompetency ? "Edit Competency" : "Add Competency"}</DialogTitle>
+          <DialogDescription>Configure competency settings</DialogDescription>
         </DialogHeader>
         <div className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label>{t("common.name", "Name")}</Label>
-              <Input
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                placeholder="e.g., Communication"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label>{t("common.code", "Code")}</Label>
-              <Input
-                value={formData.code}
-                onChange={(e) => setFormData({ ...formData, code: e.target.value })}
-                placeholder="e.g., COMM"
-              />
-            </div>
+            <div><Label>Name</Label><Input value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} placeholder="e.g., Communication" /></div>
+            <div><Label>Code</Label><Input value={formData.code} onChange={e => setFormData({ ...formData, code: e.target.value })} placeholder="e.g., COMM" /></div>
           </div>
-          <div className="space-y-2">
-            <Label>{t("common.category", "Category")}</Label>
-            <Select value={formData.category} onValueChange={(value) => setFormData({ ...formData, category: value })}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
+          <div><Label>Category</Label>
+            <Select value={formData.category} onValueChange={v => setFormData({ ...formData, category: v })}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="Core">Core</SelectItem>
                 <SelectItem value="Leadership">Leadership</SelectItem>
@@ -1053,148 +712,60 @@ function CompetencyDialog({
               </SelectContent>
             </Select>
           </div>
-          <div className="space-y-2">
-            <Label>{t("common.description", "Description")}</Label>
-            <Textarea
-              value={formData.description}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              placeholder="Optional description"
-            />
-          </div>
-          <div className="flex items-center gap-2">
-            <Switch
-              checked={formData.is_active}
-              onCheckedChange={(checked) => setFormData({ ...formData, is_active: checked })}
-            />
-            <Label>{t("common.active", "Active")}</Label>
-          </div>
+          <div><Label>Description</Label><Textarea value={formData.description} onChange={e => setFormData({ ...formData, description: e.target.value })} placeholder="Optional description" /></div>
+          <div className="flex items-center gap-2"><Switch checked={formData.is_active} onCheckedChange={c => setFormData({ ...formData, is_active: c })} /><Label>Active</Label></div>
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
-            {t("common.cancel", "Cancel")}
-          </Button>
-          <Button onClick={handleSubmit} disabled={isSubmitting}>
-            {isSubmitting ? t("common.saving", "Saving...") : t("common.save", "Save")}
-          </Button>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
+          <Button onClick={handleSubmit} disabled={isSubmitting}>{isSubmitting ? "Saving..." : "Save"}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
   );
 }
 
-// Goal Template Dialog Component
-function GoalTemplateDialog({
-  open,
-  onOpenChange,
-  companyId,
-  editingTemplate,
-  onSuccess,
-}: {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  companyId: string;
-  editingTemplate: GoalTemplate | null;
-  onSuccess: () => void;
-}) {
-  const { t } = useLanguage();
-  const [formData, setFormData] = useState<{
-    name: string;
-    description: string;
-    goal_type: "smart_goal" | "okr_objective" | "okr_key_result";
-    category: string;
-    default_weighting: number;
-    is_active: boolean;
-  }>({
-    name: "",
-    description: "",
-    goal_type: "smart_goal",
-    category: "",
-    default_weighting: 0,
-    is_active: true,
-  });
+function GoalTemplateDialog({ open, onOpenChange, companyId, editingTemplate, onSuccess }: { open: boolean; onOpenChange: (open: boolean) => void; companyId: string; editingTemplate: GoalTemplate | null; onSuccess: () => void; }) {
+  const [formData, setFormData] = useState<{ name: string; description: string; goal_type: "smart_goal" | "okr_objective" | "okr_key_result"; category: string; default_weighting: number; is_active: boolean }>({ name: "", description: "", goal_type: "smart_goal", category: "", default_weighting: 0, is_active: true });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     if (editingTemplate) {
-      setFormData({
-        name: editingTemplate.name,
-        description: editingTemplate.description || "",
-        goal_type: editingTemplate.goal_type as "smart_goal" | "okr_objective" | "okr_key_result",
-        category: editingTemplate.category || "",
-        default_weighting: editingTemplate.default_weighting || 0,
-        is_active: editingTemplate.is_active,
-      });
+      setFormData({ name: editingTemplate.name, description: editingTemplate.description || "", goal_type: editingTemplate.goal_type as any, category: editingTemplate.category || "", default_weighting: editingTemplate.default_weighting || 0, is_active: editingTemplate.is_active });
     } else {
-      setFormData({
-        name: "",
-        description: "",
-        goal_type: "smart_goal",
-        category: "",
-        default_weighting: 0,
-        is_active: true,
-      });
+      setFormData({ name: "", description: "", goal_type: "smart_goal", category: "", default_weighting: 0, is_active: true });
     }
   }, [editingTemplate, open]);
 
   const handleSubmit = async () => {
-    if (!formData.name) {
-      toast.error("Name is required");
-      return;
-    }
-
+    if (!formData.name) { toast.error("Name is required"); return; }
     setIsSubmitting(true);
     try {
       if (editingTemplate) {
-        const { error } = await supabase
-          .from("goal_templates")
-          .update(formData)
-          .eq("id", editingTemplate.id);
-
+        const { error } = await supabase.from("goal_templates").update(formData).eq("id", editingTemplate.id);
         if (error) throw error;
         toast.success("Goal template updated");
       } else {
-        const { error } = await supabase
-          .from("goal_templates")
-          .insert({ ...formData, company_id: companyId });
-
+        const { error } = await supabase.from("goal_templates").insert({ ...formData, company_id: companyId });
         if (error) throw error;
         toast.success("Goal template created");
       }
       onSuccess();
-    } catch (error: any) {
-      toast.error(error.message || "Failed to save goal template");
-    } finally {
-      setIsSubmitting(false);
-    }
+    } catch (error: any) { toast.error(error.message || "Failed to save"); } finally { setIsSubmitting(false); }
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>
-            {editingTemplate ? t("performance.setup.editGoalTemplate", "Edit Goal Template") : t("performance.setup.addGoalTemplate", "Add Goal Template")}
-          </DialogTitle>
-          <DialogDescription>
-            {t("performance.setup.goalTemplateDialogDesc", "Configure goal template settings")}
-          </DialogDescription>
+          <DialogTitle>{editingTemplate ? "Edit Goal Template" : "Add Goal Template"}</DialogTitle>
+          <DialogDescription>Configure goal template settings</DialogDescription>
         </DialogHeader>
         <div className="space-y-4">
-          <div className="space-y-2">
-            <Label>{t("common.name", "Name")}</Label>
-            <Input
-              value={formData.name}
-              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              placeholder="e.g., Quarterly Sales Target"
-            />
-          </div>
+          <div><Label>Name</Label><Input value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} placeholder="e.g., Quarterly Sales Target" /></div>
           <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label>{t("common.type", "Type")}</Label>
-              <Select value={formData.goal_type} onValueChange={(value: any) => setFormData({ ...formData, goal_type: value })}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
+            <div><Label>Type</Label>
+              <Select value={formData.goal_type} onValueChange={(v: any) => setFormData({ ...formData, goal_type: v })}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="smart_goal">SMART Goal</SelectItem>
                   <SelectItem value="okr_objective">OKR Objective</SelectItem>
@@ -1202,227 +773,78 @@ function GoalTemplateDialog({
                 </SelectContent>
               </Select>
             </div>
-            <div className="space-y-2">
-              <Label>{t("common.category", "Category")}</Label>
-              <Input
-                value={formData.category}
-                onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                placeholder="e.g., Sales, Operations"
-              />
-            </div>
+            <div><Label>Category</Label><Input value={formData.category} onChange={e => setFormData({ ...formData, category: e.target.value })} placeholder="e.g., Sales" /></div>
           </div>
-          <div className="space-y-2">
-            <Label>{t("common.description", "Description")}</Label>
-            <Textarea
-              value={formData.description}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              placeholder="Optional description"
-            />
-          </div>
+          <div><Label>Description</Label><Textarea value={formData.description} onChange={e => setFormData({ ...formData, description: e.target.value })} placeholder="Optional" /></div>
           <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label>{t("performance.setup.defaultWeighting", "Default Weighting (%)")}</Label>
-              <Input
-                type="number"
-                value={formData.default_weighting}
-                onChange={(e) => setFormData({ ...formData, default_weighting: parseInt(e.target.value) || 0 })}
-              />
-            </div>
-            <div className="flex items-center gap-2 pt-8">
-              <Switch
-                checked={formData.is_active}
-                onCheckedChange={(checked) => setFormData({ ...formData, is_active: checked })}
-              />
-              <Label>{t("common.active", "Active")}</Label>
-            </div>
+            <div><Label>Default Weighting (%)</Label><Input type="number" value={formData.default_weighting} onChange={e => setFormData({ ...formData, default_weighting: parseInt(e.target.value) || 0 })} /></div>
+            <div className="flex items-center gap-2 pt-8"><Switch checked={formData.is_active} onCheckedChange={c => setFormData({ ...formData, is_active: c })} /><Label>Active</Label></div>
           </div>
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
-            {t("common.cancel", "Cancel")}
-          </Button>
-          <Button onClick={handleSubmit} disabled={isSubmitting}>
-            {isSubmitting ? t("common.saving", "Saving...") : t("common.save", "Save")}
-          </Button>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
+          <Button onClick={handleSubmit} disabled={isSubmitting}>{isSubmitting ? "Saving..." : "Save"}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
   );
 }
 
-// Recognition Category Dialog Component
-function RecognitionCategoryDialog({
-  open,
-  onOpenChange,
-  companyId,
-  editingCategory,
-  onSuccess,
-}: {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  companyId: string;
-  editingCategory: RecognitionCategory | null;
-  onSuccess: () => void;
-}) {
-  const { t } = useLanguage();
-  const [formData, setFormData] = useState({
-    name: "",
-    code: "",
-    description: "",
-    icon: "",
-    color: "",
-    points_value: 0,
-    requires_approval: true,
-    is_active: true,
-  });
+function RecognitionCategoryDialog({ open, onOpenChange, companyId, editingCategory, onSuccess }: { open: boolean; onOpenChange: (open: boolean) => void; companyId: string; editingCategory: RecognitionCategory | null; onSuccess: () => void; }) {
+  const [formData, setFormData] = useState({ name: "", code: "", description: "", icon: "", color: "", points_value: 0, requires_approval: true, is_active: true });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     if (editingCategory) {
-      setFormData({
-        name: editingCategory.name,
-        code: editingCategory.code,
-        description: editingCategory.description || "",
-        icon: editingCategory.icon || "",
-        color: editingCategory.color || "",
-        points_value: editingCategory.points_value,
-        requires_approval: editingCategory.requires_approval,
-        is_active: editingCategory.is_active,
-      });
+      setFormData({ name: editingCategory.name, code: editingCategory.code, description: editingCategory.description || "", icon: editingCategory.icon || "", color: editingCategory.color || "", points_value: editingCategory.points_value, requires_approval: editingCategory.requires_approval, is_active: editingCategory.is_active });
     } else {
-      setFormData({
-        name: "",
-        code: "",
-        description: "",
-        icon: "",
-        color: "",
-        points_value: 0,
-        requires_approval: true,
-        is_active: true,
-      });
+      setFormData({ name: "", code: "", description: "", icon: "", color: "", points_value: 0, requires_approval: true, is_active: true });
     }
   }, [editingCategory, open]);
 
   const handleSubmit = async () => {
-    if (!formData.name || !formData.code) {
-      toast.error("Name and code are required");
-      return;
-    }
-
+    if (!formData.name || !formData.code) { toast.error("Name and code are required"); return; }
     setIsSubmitting(true);
     try {
       if (editingCategory) {
-        const { error } = await supabase
-          .from("recognition_categories")
-          .update(formData)
-          .eq("id", editingCategory.id);
-
+        const { error } = await supabase.from("recognition_categories").update(formData).eq("id", editingCategory.id);
         if (error) throw error;
         toast.success("Recognition category updated");
       } else {
-        const { error } = await supabase
-          .from("recognition_categories")
-          .insert({ ...formData, company_id: companyId });
-
+        const { error } = await supabase.from("recognition_categories").insert({ ...formData, company_id: companyId });
         if (error) throw error;
         toast.success("Recognition category created");
       }
       onSuccess();
-    } catch (error: any) {
-      toast.error(error.message || "Failed to save recognition category");
-    } finally {
-      setIsSubmitting(false);
-    }
+    } catch (error: any) { toast.error(error.message || "Failed to save"); } finally { setIsSubmitting(false); }
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>
-            {editingCategory ? t("performance.setup.editCategory", "Edit Category") : t("performance.setup.addCategory", "Add Category")}
-          </DialogTitle>
-          <DialogDescription>
-            {t("performance.setup.categoryDialogDesc", "Configure recognition category settings")}
-          </DialogDescription>
+          <DialogTitle>{editingCategory ? "Edit Category" : "Add Category"}</DialogTitle>
+          <DialogDescription>Configure recognition category settings</DialogDescription>
         </DialogHeader>
         <div className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label>{t("common.name", "Name")}</Label>
-              <Input
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                placeholder="e.g., Employee of the Month"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label>{t("common.code", "Code")}</Label>
-              <Input
-                value={formData.code}
-                onChange={(e) => setFormData({ ...formData, code: e.target.value })}
-                placeholder="e.g., EOM"
-              />
-            </div>
+            <div><Label>Name</Label><Input value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} placeholder="e.g., Employee of the Month" /></div>
+            <div><Label>Code</Label><Input value={formData.code} onChange={e => setFormData({ ...formData, code: e.target.value })} placeholder="e.g., EOM" /></div>
           </div>
-          <div className="space-y-2">
-            <Label>{t("common.description", "Description")}</Label>
-            <Textarea
-              value={formData.description}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              placeholder="Optional description"
-            />
-          </div>
+          <div><Label>Description</Label><Textarea value={formData.description} onChange={e => setFormData({ ...formData, description: e.target.value })} placeholder="Optional" /></div>
           <div className="grid grid-cols-3 gap-4">
-            <div className="space-y-2">
-              <Label>{t("performance.setup.points", "Points Value")}</Label>
-              <Input
-                type="number"
-                value={formData.points_value}
-                onChange={(e) => setFormData({ ...formData, points_value: parseInt(e.target.value) || 0 })}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label>{t("common.icon", "Icon")}</Label>
-              <Input
-                value={formData.icon}
-                onChange={(e) => setFormData({ ...formData, icon: e.target.value })}
-                placeholder="e.g., trophy"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label>{t("common.color", "Color")}</Label>
-              <Input
-                value={formData.color}
-                onChange={(e) => setFormData({ ...formData, color: e.target.value })}
-                placeholder="e.g., #FFD700"
-              />
-            </div>
+            <div><Label>Points</Label><Input type="number" value={formData.points_value} onChange={e => setFormData({ ...formData, points_value: parseInt(e.target.value) || 0 })} /></div>
+            <div><Label>Icon</Label><Input value={formData.icon} onChange={e => setFormData({ ...formData, icon: e.target.value })} placeholder="e.g., trophy" /></div>
+            <div><Label>Color</Label><Input value={formData.color} onChange={e => setFormData({ ...formData, color: e.target.value })} placeholder="#FFD700" /></div>
           </div>
           <div className="flex items-center gap-6">
-            <div className="flex items-center gap-2">
-              <Switch
-                checked={formData.requires_approval}
-                onCheckedChange={(checked) => setFormData({ ...formData, requires_approval: checked })}
-              />
-              <Label>{t("performance.setup.requiresApproval", "Requires Approval")}</Label>
-            </div>
-            <div className="flex items-center gap-2">
-              <Switch
-                checked={formData.is_active}
-                onCheckedChange={(checked) => setFormData({ ...formData, is_active: checked })}
-              />
-              <Label>{t("common.active", "Active")}</Label>
-            </div>
+            <div className="flex items-center gap-2"><Switch checked={formData.requires_approval} onCheckedChange={c => setFormData({ ...formData, requires_approval: c })} /><Label>Requires Approval</Label></div>
+            <div className="flex items-center gap-2"><Switch checked={formData.is_active} onCheckedChange={c => setFormData({ ...formData, is_active: c })} /><Label>Active</Label></div>
           </div>
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
-            {t("common.cancel", "Cancel")}
-          </Button>
-          <Button onClick={handleSubmit} disabled={isSubmitting}>
-            {isSubmitting ? t("common.saving", "Saving...") : t("common.save", "Save")}
-          </Button>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
+          <Button onClick={handleSubmit} disabled={isSubmitting}>{isSubmitting ? "Saving..." : "Save"}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
