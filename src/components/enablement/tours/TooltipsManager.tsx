@@ -23,13 +23,6 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import {
@@ -44,32 +37,30 @@ import {
 } from "lucide-react";
 import type { HelpTooltip } from "@/types/tours";
 
-const TOOLTIP_PLACEMENTS = [
-  { value: "top", label: "Top" },
-  { value: "bottom", label: "Bottom" },
-  { value: "left", label: "Left" },
-  { value: "right", label: "Right" },
-];
-
-const TOOLTIP_TRIGGERS = [
-  { value: "hover", label: "On Hover" },
-  { value: "click", label: "On Click" },
-  { value: "focus", label: "On Focus" },
-];
+type TooltipFormData = {
+  tooltip_code: string;
+  module_code: string;
+  feature_code: string;
+  element_selector: string;
+  title: string;
+  content: string;
+  learn_more_url: string;
+  is_active: boolean;
+};
 
 export function TooltipsManager() {
   const queryClient = useQueryClient();
   const [searchQuery, setSearchQuery] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingTooltip, setEditingTooltip] = useState<HelpTooltip | null>(null);
-  const [formData, setFormData] = useState({
-    tooltip_key: "",
-    target_selector: "",
+  const [formData, setFormData] = useState<TooltipFormData>({
+    tooltip_code: "",
+    module_code: "",
+    feature_code: "",
+    element_selector: "",
     title: "",
     content: "",
-    placement: "top",
-    trigger_type: "hover",
-    route_pattern: "",
+    learn_more_url: "",
     is_active: true,
   });
 
@@ -87,7 +78,7 @@ export function TooltipsManager() {
   });
 
   const createMutation = useMutation({
-    mutationFn: async (data: typeof formData) => {
+    mutationFn: async (data: TooltipFormData) => {
       const { data: result, error } = await supabase
         .from("enablement_help_tooltips")
         .insert([data])
@@ -109,7 +100,7 @@ export function TooltipsManager() {
   });
 
   const updateMutation = useMutation({
-    mutationFn: async ({ id, ...data }: Partial<HelpTooltip> & { id: string }) => {
+    mutationFn: async ({ id, ...data }: Partial<TooltipFormData> & { id: string }) => {
       const { data: result, error } = await supabase
         .from("enablement_help_tooltips")
         .update(data)
@@ -170,13 +161,13 @@ export function TooltipsManager() {
 
   const resetForm = () => {
     setFormData({
-      tooltip_key: "",
-      target_selector: "",
+      tooltip_code: "",
+      module_code: "",
+      feature_code: "",
+      element_selector: "",
       title: "",
       content: "",
-      placement: "top",
-      trigger_type: "hover",
-      route_pattern: "",
+      learn_more_url: "",
       is_active: true,
     });
   };
@@ -184,21 +175,21 @@ export function TooltipsManager() {
   const handleEdit = (tooltip: HelpTooltip) => {
     setEditingTooltip(tooltip);
     setFormData({
-      tooltip_key: tooltip.tooltip_key,
-      target_selector: tooltip.target_selector,
+      tooltip_code: tooltip.tooltip_code,
+      module_code: tooltip.module_code,
+      feature_code: tooltip.feature_code || "",
+      element_selector: tooltip.element_selector,
       title: tooltip.title || "",
       content: tooltip.content,
-      placement: tooltip.placement || "top",
-      trigger_type: tooltip.trigger_type || "hover",
-      route_pattern: tooltip.route_pattern || "",
+      learn_more_url: tooltip.learn_more_url || "",
       is_active: tooltip.is_active,
     });
     setIsDialogOpen(true);
   };
 
   const handleSubmit = () => {
-    if (!formData.tooltip_key || !formData.target_selector || !formData.content) {
-      toast.error("Key, selector, and content are required");
+    if (!formData.tooltip_code || !formData.element_selector || !formData.content || !formData.module_code) {
+      toast.error("Code, module, selector, and content are required");
       return;
     }
 
@@ -211,9 +202,9 @@ export function TooltipsManager() {
 
   const filteredTooltips = tooltips?.filter(
     (tooltip) =>
-      tooltip.tooltip_key.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      tooltip.tooltip_code.toLowerCase().includes(searchQuery.toLowerCase()) ||
       tooltip.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      tooltip.target_selector.toLowerCase().includes(searchQuery.toLowerCase())
+      tooltip.element_selector.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
@@ -258,10 +249,10 @@ export function TooltipsManager() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Key</TableHead>
+                  <TableHead>Code</TableHead>
+                  <TableHead>Module</TableHead>
                   <TableHead>Target</TableHead>
                   <TableHead>Content</TableHead>
-                  <TableHead>Placement</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
@@ -273,26 +264,28 @@ export function TooltipsManager() {
                       <div className="flex items-center gap-2">
                         <MessageCircle className="h-4 w-4 text-muted-foreground" />
                         <code className="text-xs bg-muted px-1 py-0.5 rounded">
-                          {tooltip.tooltip_key}
+                          {tooltip.tooltip_code}
                         </code>
                       </div>
                     </TableCell>
                     <TableCell>
                       <code className="text-xs bg-muted px-1 py-0.5 rounded">
+                        {tooltip.module_code}
+                      </code>
+                    </TableCell>
+                    <TableCell>
+                      <code className="text-xs bg-muted px-1 py-0.5 rounded">
                         <Target className="h-3 w-3 inline mr-1" />
-                        {tooltip.target_selector.substring(0, 30)}
-                        {tooltip.target_selector.length > 30 ? "..." : ""}
+                        {tooltip.element_selector.substring(0, 25)}
+                        {tooltip.element_selector.length > 25 ? "..." : ""}
                       </code>
                     </TableCell>
                     <TableCell className="max-w-xs truncate">
                       {tooltip.title && (
                         <span className="font-medium mr-2">{tooltip.title}:</span>
                       )}
-                      {tooltip.content.substring(0, 50)}
-                      {tooltip.content.length > 50 ? "..." : ""}
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant="outline">{tooltip.placement}</Badge>
+                      {tooltip.content.substring(0, 40)}
+                      {tooltip.content.length > 40 ? "..." : ""}
                     </TableCell>
                     <TableCell>
                       {tooltip.is_active ? (
@@ -377,15 +370,40 @@ export function TooltipsManager() {
           <div className="grid gap-4 py-4">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="tooltip_key">Tooltip Key *</Label>
+                <Label htmlFor="tooltip_code">Tooltip Code *</Label>
                 <Input
-                  id="tooltip_key"
+                  id="tooltip_code"
                   placeholder="e.g., dashboard_metrics_help"
-                  value={formData.tooltip_key}
+                  value={formData.tooltip_code}
                   onChange={(e) =>
-                    setFormData({ ...formData, tooltip_key: e.target.value })
+                    setFormData({ ...formData, tooltip_code: e.target.value })
                   }
                   disabled={!!editingTooltip}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="module_code">Module Code *</Label>
+                <Input
+                  id="module_code"
+                  placeholder="e.g., dashboard"
+                  value={formData.module_code}
+                  onChange={(e) =>
+                    setFormData({ ...formData, module_code: e.target.value })
+                  }
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="feature_code">Feature Code</Label>
+                <Input
+                  id="feature_code"
+                  placeholder="e.g., analytics"
+                  value={formData.feature_code}
+                  onChange={(e) =>
+                    setFormData({ ...formData, feature_code: e.target.value })
+                  }
                 />
               </div>
               <div className="space-y-2">
@@ -402,13 +420,13 @@ export function TooltipsManager() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="target_selector">Target Selector *</Label>
+              <Label htmlFor="element_selector">Element Selector *</Label>
               <Input
-                id="target_selector"
+                id="element_selector"
                 placeholder="e.g., [data-help='metrics-card']"
-                value={formData.target_selector}
+                value={formData.element_selector}
                 onChange={(e) =>
-                  setFormData({ ...formData, target_selector: e.target.value })
+                  setFormData({ ...formData, element_selector: e.target.value })
                 }
               />
             </div>
@@ -426,57 +444,14 @@ export function TooltipsManager() {
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="placement">Placement</Label>
-                <Select
-                  value={formData.placement}
-                  onValueChange={(value) =>
-                    setFormData({ ...formData, placement: value })
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {TOOLTIP_PLACEMENTS.map((p) => (
-                      <SelectItem key={p.value} value={p.value}>
-                        {p.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="trigger_type">Trigger</Label>
-                <Select
-                  value={formData.trigger_type}
-                  onValueChange={(value) =>
-                    setFormData({ ...formData, trigger_type: value })
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {TOOLTIP_TRIGGERS.map((t) => (
-                      <SelectItem key={t.value} value={t.value}>
-                        {t.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
             <div className="space-y-2">
-              <Label htmlFor="route_pattern">Route Pattern (optional)</Label>
+              <Label htmlFor="learn_more_url">Learn More URL (optional)</Label>
               <Input
-                id="route_pattern"
-                placeholder="e.g., /dashboard/*"
-                value={formData.route_pattern}
+                id="learn_more_url"
+                placeholder="https://docs.example.com/help"
+                value={formData.learn_more_url}
                 onChange={(e) =>
-                  setFormData({ ...formData, route_pattern: e.target.value })
+                  setFormData({ ...formData, learn_more_url: e.target.value })
                 }
               />
             </div>
