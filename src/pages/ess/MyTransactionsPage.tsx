@@ -117,17 +117,21 @@ export default function MyTransactionsPage() {
     enabled: !!profile?.id,
   });
 
-  const { data: transactionTypes = [] } = useQuery({
+  const { data: transactionTypes = [] } = useQuery<LookupValue[]>({
     queryKey: ["transaction-types"],
     queryFn: async (): Promise<LookupValue[]> => {
-      const result: any = await supabase
-        .from("lookup_values")
-        .select("id, code, name")
-        .eq("lookup_type", "transaction_type")
-        .eq("is_active", true)
-        .order("display_order");
-      if (result.error) throw result.error;
-      return result.data || [];
+      // Using direct fetch to avoid Supabase type recursion issues
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/rest/v1/lookup_values?lookup_type=eq.transaction_type&is_active=eq.true&order=display_order&select=id,code,name`,
+        {
+          headers: {
+            apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          },
+        }
+      );
+      if (!response.ok) throw new Error("Failed to fetch transaction types");
+      return response.json();
     },
   });
 
