@@ -57,9 +57,9 @@ export function NewFeaturesIndicator({
           </p>
         </div>
 
-        <ScrollArea className="max-h-[250px]">
+        <ScrollArea className="max-h-[400px]">
           <div className="p-2 space-y-1">
-            {unsyncedFeatures.slice(0, 10).map((feature) => (
+            {unsyncedFeatures.map((feature) => (
               <div
                 key={feature.code}
                 className="flex items-start gap-2 p-2 rounded-lg hover:bg-muted/50 text-sm"
@@ -73,11 +73,6 @@ export function NewFeaturesIndicator({
                 </div>
               </div>
             ))}
-            {unsyncedCount > 10 && (
-              <p className="text-xs text-muted-foreground text-center py-2">
-                +{unsyncedCount - 10} more features
-              </p>
-            )}
           </div>
         </ScrollArea>
 
