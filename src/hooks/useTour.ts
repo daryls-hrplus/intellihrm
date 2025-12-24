@@ -86,12 +86,12 @@ export function useTour() {
         return null;
       }
 
-      // Fetch steps with videos
+      // Fetch steps with videos - explicitly specify foreign key to avoid ambiguous relationship error
       const { data: stepsData, error: stepsError } = await supabase
         .from('enablement_tour_steps')
         .select(`
           *,
-          video:enablement_video_library(id, title, video_url, video_provider, duration_seconds, thumbnail_url)
+          video:enablement_video_library!enablement_tour_steps_video_id_fkey(id, title, video_url, video_provider, duration_seconds, thumbnail_url)
         `)
         .eq('tour_id', tourData.id)
         .order('step_order', { ascending: true });
