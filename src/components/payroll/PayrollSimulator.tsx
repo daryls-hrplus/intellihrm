@@ -116,6 +116,8 @@ interface StatutoryRateBand {
   calculation_method: string;
   per_monday_amount: number;
   employer_per_monday_amount: number | null;
+  fixed_amount: number | null;
+  employer_fixed_amount: number | null;
   min_age: number | null;
   max_age: number | null;
   pay_frequency: string;
@@ -145,9 +147,9 @@ export function PayrollSimulator({ companyId, employeeId, payPeriodId }: Payroll
     const deductions: StatutoryDeduction[] = [];
 
     for (const statType of statutoryTypes) {
-      // Get rate bands for this statutory type
+      // Get rate bands for this statutory type, filtered by pay frequency
       const bands = rateBands
-        .filter(b => b.statutory_type_id === statType.id)
+        .filter(b => b.statutory_type_id === statType.id && b.pay_frequency === payFrequency)
         .sort((a, b) => (a.min_amount || 0) - (b.min_amount || 0));
 
       if (bands.length === 0) continue;
@@ -199,9 +201,9 @@ export function PayrollSimulator({ companyId, employeeId, payPeriodId }: Payroll
             employeeAmount = (band.per_monday_amount || 0) * mondayCount;
             employerAmount = (band.employer_per_monday_amount || 0) * mondayCount;
           } else if (method === 'fixed') {
-            // Fixed amount
-            employeeAmount = band.per_monday_amount || 0;
-            employerAmount = band.employer_per_monday_amount || 0;
+            // Fixed amount (use fixed_amount fields, fallback to per_monday for backwards compatibility)
+            employeeAmount = band.fixed_amount || band.per_monday_amount || 0;
+            employerAmount = band.employer_fixed_amount || band.employer_per_monday_amount || 0;
           } else {
             // Percentage-based calculation
             const rate = band.employee_rate || 0;
