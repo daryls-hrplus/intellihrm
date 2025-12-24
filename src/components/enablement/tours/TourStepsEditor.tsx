@@ -49,8 +49,12 @@ import {
   Trash2,
   Target,
   Video,
+  Sparkles,
+  Loader2,
+  AlertTriangle,
 } from "lucide-react";
 import type { TourStep, Tour } from "@/types/tours";
+import { FEATURE_REGISTRY, getModuleFeaturesFlat } from "@/lib/featureRegistry";
 
 interface TourStepsEditorProps {
   tourId: string;
@@ -71,6 +75,14 @@ const HIGHLIGHT_TYPES = [
   { value: "tooltip", label: "Tooltip" },
   { value: "modal", label: "Modal" },
   { value: "beacon", label: "Beacon" },
+];
+
+const QUICK_INSTRUCTIONS = [
+  { label: "More Detail", value: "Provide more detailed explanations for each step. Include context about why each action is important." },
+  { label: "Add Tooltips", value: "Include helpful tooltips and hints for each UI element. Add tips for common mistakes to avoid." },
+  { label: "Best Practices", value: "Emphasize best practices and recommended workflows. Include tips from experienced HR professionals." },
+  { label: "Compliance Focus", value: "Focus on compliance requirements and regulatory considerations. Highlight mandatory fields and legal requirements." },
+  { label: "Quick Start", value: "Keep explanations brief and action-oriented. Focus on getting users productive as quickly as possible." },
 ];
 
 type StepFormData = {
@@ -166,6 +178,8 @@ type TourWithDbSteps = Tour & { enablement_tour_steps: TourStep[] };
 export function TourStepsEditor({ tourId, onBack }: TourStepsEditorProps) {
   const queryClient = useQueryClient();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isAIRegenerateOpen, setIsAIRegenerateOpen] = useState(false);
+  const [contextInstructions, setContextInstructions] = useState("");
   const [editingStep, setEditingStep] = useState<TourStep | null>(null);
   const [formData, setFormData] = useState<StepFormData>({
     title: "",
@@ -205,6 +219,11 @@ export function TourStepsEditor({ tourId, onBack }: TourStepsEditorProps) {
       return data as TourWithDbSteps;
     },
   });
+
+  // Get module/feature info for AI regeneration
+  const registryModule = tour?.module_code ? FEATURE_REGISTRY.find(m => m.code === tour.module_code) : null;
+  const registryFeatures = tour?.module_code ? getModuleFeaturesFlat(tour.module_code) : [];
+  const registryFeature = tour?.feature_code ? registryFeatures.find(f => f.code === tour.feature_code) : null;
 
   const createStepMutation = useMutation({
     mutationFn: async (data: StepFormData) => {
@@ -294,6 +313,73 @@ export function TourStepsEditor({ tourId, onBack }: TourStepsEditorProps) {
     },
   });
 
+  const regenerateStepsMutation = useMutation({
+    mutationFn: async () => {
+      if (!tour) throw new Error("Tour not found");
+
+      // Call AI to generate new steps
+      const response = await supabase.functions.invoke("generate-tour-ai", {
+        body: {
+          module_code: tour.module_code,
+          module_name: registryModule?.name || tour.module_code,
+          feature_code: tour.feature_code || undefined,
+          feature_name: registryFeature?.name,
+          feature_description: registryFeature?.description,
+          route_path: tour.trigger_route || registryFeature?.routePath || registryModule?.routePath || `/${tour.module_code}`,
+          tour_type: tour.tour_type,
+          target_audience: "all",
+          ui_elements: registryFeature?.uiElements,
+          workflow_steps: registryFeature?.workflowSteps,
+          context_instructions: contextInstructions || undefined,
+        },
+      });
+
+      if (response.error) throw new Error(response.error.message);
+      if (!response.data.success || !response.data.tour) {
+        throw new Error(response.data.error || "Failed to generate tour");
+      }
+
+      return response.data.tour;
+    },
+    onSuccess: async (generatedTour) => {
+      // Delete existing steps
+      const existingSteps = tour?.enablement_tour_steps || [];
+      for (const step of existingSteps) {
+        await supabase
+          .from("enablement_tour_steps")
+          .delete()
+          .eq("id", step.id);
+      }
+
+      // Insert new steps
+      const steps = generatedTour.steps.map((step: any) => ({
+        tour_id: tourId,
+        step_order: step.step_order,
+        target_selector: step.target_selector,
+        title: step.title,
+        content: step.content,
+        placement: step.placement,
+        highlight_type: step.highlight_type,
+        action_type: step.action_type,
+      }));
+
+      const { error: stepsError } = await supabase
+        .from("enablement_tour_steps")
+        .insert(steps);
+
+      if (stepsError) throw stepsError;
+
+      queryClient.invalidateQueries({ queryKey: ["enablement-tour", tourId] });
+      toast.success(`Regenerated ${steps.length} steps successfully`);
+      setIsAIRegenerateOpen(false);
+      setContextInstructions("");
+    },
+    onError: (error) => {
+      console.error("Regeneration error:", error);
+      toast.error("Failed to regenerate steps: " + error.message);
+    },
+  });
+
   const resetForm = () => {
     setFormData({
       title: "",
@@ -360,6 +446,13 @@ export function TourStepsEditor({ tourId, onBack }: TourStepsEditorProps) {
     reorderMutation.mutate(updates);
   };
 
+  const handleAddQuickInstruction = (instruction: string) => {
+    setContextInstructions(prev => {
+      if (prev.includes(instruction)) return prev;
+      return prev ? `${prev}\n\n${instruction}` : instruction;
+    });
+  };
+
   if (isLoading) {
     return (
       <Card>
@@ -392,21 +485,38 @@ export function TourStepsEditor({ tourId, onBack }: TourStepsEditorProps) {
               <div>
                 <CardTitle>{tour.tour_name}</CardTitle>
                 <CardDescription>
-                  {tour.enablement_tour_steps?.length || 0} steps • Drag to
-                  reorder
+                  {tour.enablement_tour_steps?.length || 0} steps • Drag to reorder
                 </CardDescription>
               </div>
             </div>
-            <Button onClick={() => setIsDialogOpen(true)}>
-              <Plus className="h-4 w-4 mr-2" />
-              Add Step
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button 
+                variant="outline" 
+                onClick={() => setIsAIRegenerateOpen(true)}
+                className="gap-2"
+              >
+                <Sparkles className="h-4 w-4" />
+                AI Regenerate
+              </Button>
+              <Button onClick={() => setIsDialogOpen(true)}>
+                <Plus className="h-4 w-4 mr-2" />
+                Add Step
+              </Button>
+            </div>
           </div>
         </CardHeader>
         <CardContent>
           {!tour.enablement_tour_steps?.length ? (
             <div className="text-center py-8 text-muted-foreground">
-              No steps yet. Add your first step to get started.
+              <p className="mb-4">No steps yet. Add your first step or use AI to generate them.</p>
+              <Button 
+                variant="outline" 
+                onClick={() => setIsAIRegenerateOpen(true)}
+                className="gap-2"
+              >
+                <Sparkles className="h-4 w-4" />
+                Generate Steps with AI
+              </Button>
             </div>
           ) : (
             <DndContext
@@ -437,6 +547,112 @@ export function TourStepsEditor({ tourId, onBack }: TourStepsEditorProps) {
           )}
         </CardContent>
       </Card>
+
+      {/* AI Regenerate Dialog */}
+      <Dialog open={isAIRegenerateOpen} onOpenChange={setIsAIRegenerateOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Sparkles className="h-5 w-5 text-primary" />
+              AI Regenerate Steps
+            </DialogTitle>
+            <DialogDescription>
+              Use AI to regenerate all steps for this tour with optional context instructions
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-4">
+            {/* Tour Info */}
+            <div className="bg-muted/50 p-4 rounded-lg space-y-2">
+              <div className="text-sm">
+                <span className="text-muted-foreground">Tour:</span>{" "}
+                <span className="font-medium">{tour.tour_name}</span>
+              </div>
+              <div className="text-sm">
+                <span className="text-muted-foreground">Module:</span>{" "}
+                <code className="bg-muted px-1 py-0.5 rounded text-xs">{tour.module_code}</code>
+              </div>
+              {tour.feature_code && (
+                <div className="text-sm">
+                  <span className="text-muted-foreground">Feature:</span>{" "}
+                  <code className="bg-muted px-1 py-0.5 rounded text-xs">{tour.feature_code}</code>
+                </div>
+              )}
+            </div>
+
+            {/* Warning */}
+            {tour.enablement_tour_steps && tour.enablement_tour_steps.length > 0 && (
+              <div className="flex items-start gap-3 p-3 bg-amber-500/10 border border-amber-200 rounded-lg">
+                <AlertTriangle className="h-5 w-5 text-amber-500 shrink-0 mt-0.5" />
+                <div className="text-sm">
+                  <div className="font-medium text-amber-700">This will replace existing steps</div>
+                  <div className="text-amber-600">
+                    All {tour.enablement_tour_steps.length} current steps will be deleted and replaced with AI-generated ones.
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Context Instructions */}
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <Label>AI Context Instructions (Optional)</Label>
+                <span className="text-xs text-muted-foreground">
+                  {contextInstructions.length} / 1000 characters
+                </span>
+              </div>
+              <Textarea
+                placeholder="Add additional context to guide the AI generation...&#10;&#10;Examples:&#10;• Be more detailed with explanations&#10;• Add helpful tooltips for each field&#10;• Include compliance considerations"
+                value={contextInstructions}
+                onChange={(e) => setContextInstructions(e.target.value.slice(0, 1000))}
+                className="min-h-[100px] resize-none"
+              />
+              
+              {/* Quick Instruction Templates */}
+              <div className="space-y-2">
+                <Label className="text-xs text-muted-foreground">Quick Instructions</Label>
+                <div className="flex flex-wrap gap-2">
+                  {QUICK_INSTRUCTIONS.map((qi) => (
+                    <Button
+                      key={qi.label}
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="h-7 text-xs"
+                      onClick={() => handleAddQuickInstruction(qi.value)}
+                    >
+                      <Plus className="h-3 w-3 mr-1" />
+                      {qi.label}
+                    </Button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsAIRegenerateOpen(false)}>
+              Cancel
+            </Button>
+            <Button 
+              onClick={() => regenerateStepsMutation.mutate()} 
+              disabled={regenerateStepsMutation.isPending}
+            >
+              {regenerateStepsMutation.isPending ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Regenerating...
+                </>
+              ) : (
+                <>
+                  <Sparkles className="h-4 w-4 mr-2" />
+                  Regenerate Steps
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Step Dialog */}
       <Dialog

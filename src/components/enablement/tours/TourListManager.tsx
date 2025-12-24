@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -52,6 +52,7 @@ import {
 import type { Tour } from "@/types/tours";
 import { AITourGenerator } from "./AITourGenerator";
 import { TourReviewPanel } from "./TourReviewPanel";
+import { FEATURE_REGISTRY, getModuleFeaturesFlat } from "@/lib/featureRegistry";
 
 interface TourListManagerProps {
   onSelectTour: (tourId: string) => void;
@@ -78,11 +79,34 @@ const REVIEW_STATUS_OPTIONS = [
   { value: "published", label: "Published" },
 ];
 
+interface ModuleCategory {
+  code: string;
+  name: string;
+  display_order: number;
+}
+
+interface ModuleItem {
+  code: string;
+  name: string;
+  parent_module_code: string | null;
+  route_path: string;
+  display_order: number;
+}
+
+interface FeatureItem {
+  id: string;
+  feature_code: string;
+  feature_name: string;
+  description: string | null;
+  route_path: string | null;
+}
+
 type TourFormData = {
   tour_code: string;
   tour_name: string;
   description: string;
   tour_type: "walkthrough" | "spotlight" | "announcement";
+  category_code: string;
   module_code: string;
   feature_code: string;
   trigger_route: string;
@@ -112,6 +136,7 @@ export function TourListManager({ onSelectTour }: TourListManagerProps) {
     tour_name: "",
     description: "",
     tour_type: "walkthrough",
+    category_code: "",
     module_code: "",
     feature_code: "",
     trigger_route: "",
@@ -119,6 +144,131 @@ export function TourListManager({ onSelectTour }: TourListManagerProps) {
     priority: 100,
     is_active: true,
   });
+
+  // Fetch categories
+  const { data: categories = [] } = useQuery({
+    queryKey: ["module-categories"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("application_modules")
+        .select("module_code, module_name, display_order")
+        .is("parent_module_code", null)
+        .eq("is_active", true)
+        .ilike("module_code", "cat_%")
+        .order("display_order");
+      
+      if (error) throw error;
+      return (data || []).map(m => ({
+        code: m.module_code,
+        name: m.module_name,
+        display_order: m.display_order || 0,
+      })) as ModuleCategory[];
+    },
+  });
+
+  // Fetch modules for selected category
+  const { data: modules = [] } = useQuery({
+    queryKey: ["category-modules", formData.category_code],
+    queryFn: async () => {
+      if (!formData.category_code) return [];
+      
+      const { data, error } = await supabase
+        .from("application_modules")
+        .select("module_code, module_name, parent_module_code, route_path, display_order")
+        .eq("parent_module_code", formData.category_code)
+        .eq("is_active", true)
+        .order("display_order");
+      
+      if (error) throw error;
+      return (data || []).map(m => ({
+        code: m.module_code,
+        name: m.module_name,
+        parent_module_code: m.parent_module_code,
+        route_path: m.route_path,
+        display_order: m.display_order || 0,
+      })) as ModuleItem[];
+    },
+    enabled: !!formData.category_code,
+  });
+
+  // Fetch features for selected module
+  const { data: features = [] } = useQuery({
+    queryKey: ["module-features-db", formData.module_code],
+    queryFn: async () => {
+      if (!formData.module_code) return [];
+      
+      // First try to get from database
+      const { data: dbModule } = await supabase
+        .from("application_modules")
+        .select("id")
+        .eq("module_code", formData.module_code)
+        .single();
+      
+      if (dbModule) {
+        const { data, error } = await supabase
+          .from("application_features")
+          .select("id, feature_code, feature_name, description, route_path")
+          .eq("module_id", dbModule.id)
+          .eq("is_active", true)
+          .order("display_order");
+        
+        if (!error && data && data.length > 0) {
+          return data as FeatureItem[];
+        }
+      }
+      
+      // Fallback to feature registry
+      const registryFeatures = getModuleFeaturesFlat(formData.module_code);
+      return registryFeatures.map(f => ({
+        id: f.code,
+        feature_code: f.code,
+        feature_name: f.name,
+        description: f.description,
+        route_path: f.routePath,
+      })) as FeatureItem[];
+    },
+    enabled: !!formData.module_code,
+  });
+
+  // Get selected items
+  const selectedModule = modules.find(m => m.code === formData.module_code);
+  const selectedFeature = features.find(f => f.feature_code === formData.feature_code);
+  const registryModule = FEATURE_REGISTRY.find(m => m.code === formData.module_code);
+  const registryFeatures = formData.module_code ? getModuleFeaturesFlat(formData.module_code) : [];
+  const registryFeature = registryFeatures.find(f => f.code === formData.feature_code);
+
+  // Reset dependent selections when parent changes - only for user actions, not on initial load
+  const handleCategoryChange = (value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      category_code: value,
+      module_code: "",
+      feature_code: "",
+      trigger_route: "",
+    }));
+  };
+
+  const handleModuleChange = (value: string) => {
+    const mod = modules.find(m => m.code === value);
+    const regMod = FEATURE_REGISTRY.find(m => m.code === value);
+    setFormData(prev => ({
+      ...prev,
+      module_code: value,
+      feature_code: "",
+      trigger_route: mod?.route_path || regMod?.routePath || "",
+    }));
+  };
+
+  const handleFeatureChange = (value: string) => {
+    const actualValue = value === "_none" ? "" : value;
+    const feat = features.find(f => f.feature_code === actualValue);
+    const regFeat = registryFeatures.find(f => f.code === actualValue);
+    setFormData(prev => ({
+      ...prev,
+      feature_code: actualValue,
+      trigger_route: feat?.route_path || regFeat?.routePath || prev.trigger_route,
+    }));
+  };
 
   const { data: tours, isLoading } = useQuery({
     queryKey: ["enablement-tours"],
@@ -135,9 +285,11 @@ export function TourListManager({ onSelectTour }: TourListManagerProps) {
 
   const createMutation = useMutation({
     mutationFn: async (data: TourFormData) => {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { category_code, ...insertData } = data;
       const { data: result, error } = await supabase
         .from("enablement_tours")
-        .insert([data])
+        .insert([insertData])
         .select()
         .single();
 
@@ -157,9 +309,11 @@ export function TourListManager({ onSelectTour }: TourListManagerProps) {
 
   const updateMutation = useMutation({
     mutationFn: async ({ id, ...data }: Partial<TourFormData> & { id: string }) => {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { category_code, ...updateData } = data;
       const { data: result, error } = await supabase
         .from("enablement_tours")
-        .update(data)
+        .update(updateData)
         .eq("id", id)
         .select()
         .single();
@@ -220,6 +374,7 @@ export function TourListManager({ onSelectTour }: TourListManagerProps) {
       tour_name: "",
       description: "",
       tour_type: "walkthrough",
+      category_code: "",
       module_code: "",
       feature_code: "",
       trigger_route: "",
@@ -229,13 +384,50 @@ export function TourListManager({ onSelectTour }: TourListManagerProps) {
     });
   };
 
-  const handleEdit = (tour: Tour) => {
+  // Find category for a module code
+  const findCategoryForModule = async (moduleCode: string): Promise<string> => {
+    // First check the database
+    const { data } = await supabase
+      .from("application_modules")
+      .select("parent_module_code")
+      .eq("module_code", moduleCode)
+      .single();
+    
+    if (data?.parent_module_code) {
+      return data.parent_module_code;
+    }
+    
+    // Fallback - try to find in already loaded categories/modules
+    for (const cat of categories) {
+      const mods = await supabase
+        .from("application_modules")
+        .select("module_code")
+        .eq("parent_module_code", cat.code)
+        .eq("module_code", moduleCode);
+      
+      if (mods.data && mods.data.length > 0) {
+        return cat.code;
+      }
+    }
+    
+    return "";
+  };
+
+  const handleEdit = async (tour: Tour) => {
     setEditingTour(tour);
+    
+    // Find the category for this module
+    let categoryCode = "";
+    if (tour.module_code) {
+      categoryCode = await findCategoryForModule(tour.module_code);
+    }
+    
     setFormData({
       tour_code: tour.tour_code,
       tour_name: tour.tour_name,
       description: tour.description || "",
       tour_type: tour.tour_type,
+      category_code: categoryCode,
       module_code: tour.module_code || "",
       feature_code: tour.feature_code || "",
       trigger_route: tour.trigger_route || "",
@@ -247,7 +439,7 @@ export function TourListManager({ onSelectTour }: TourListManagerProps) {
 
   const handleSubmit = () => {
     if (!formData.tour_code || !formData.tour_name || !formData.module_code) {
-      toast.error("Tour code, name, and module code are required");
+      toast.error("Tour code, name, and module are required");
       return;
     }
 
@@ -525,6 +717,7 @@ export function TourListManager({ onSelectTour }: TourListManagerProps) {
                           variant="ghost"
                           size="icon"
                           onClick={() => setReviewingTour(tour)}
+                          title="Review"
                         >
                           <FileCheck className="h-4 w-4" />
                         </Button>
@@ -532,6 +725,7 @@ export function TourListManager({ onSelectTour }: TourListManagerProps) {
                           variant="ghost"
                           size="icon"
                           onClick={() => onSelectTour(tour.id)}
+                          title="Manage Steps"
                         >
                           <Settings2 className="h-4 w-4" />
                         </Button>
@@ -631,7 +825,7 @@ export function TourListManager({ onSelectTour }: TourListManagerProps) {
           }
         }}
       >
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
               {editingTour ? "Edit Tour" : "Create New Tour"}
@@ -723,28 +917,61 @@ export function TourListManager({ onSelectTour }: TourListManagerProps) {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            {/* Hierarchical Module Selection */}
+            <div className="grid grid-cols-3 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="module_code">Module Code *</Label>
-                <Input
-                  id="module_code"
-                  placeholder="e.g., dashboard"
-                  value={formData.module_code}
-                  onChange={(e) =>
-                    setFormData({ ...formData, module_code: e.target.value })
-                  }
-                />
+                <Label>Module Category *</Label>
+                <Select value={formData.category_code} onValueChange={handleCategoryChange}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {categories.map((cat) => (
+                      <SelectItem key={cat.code} value={cat.code}>
+                        {cat.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="feature_code">Feature Code</Label>
-                <Input
-                  id="feature_code"
-                  placeholder="e.g., analytics_overview"
-                  value={formData.feature_code}
-                  onChange={(e) =>
-                    setFormData({ ...formData, feature_code: e.target.value })
-                  }
-                />
+                <Label>Module *</Label>
+                <Select 
+                  value={formData.module_code} 
+                  onValueChange={handleModuleChange}
+                  disabled={!formData.category_code}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder={formData.category_code ? "Select module" : "Select category first"} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {modules.map((mod) => (
+                      <SelectItem key={mod.code} value={mod.code}>
+                        {mod.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Feature (Optional)</Label>
+                <Select 
+                  value={formData.feature_code || "_none"} 
+                  onValueChange={handleFeatureChange}
+                  disabled={!formData.module_code}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder={formData.module_code ? "Module Overview" : "Select module first"} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="_none">Module Overview</SelectItem>
+                    {features.map((f) => (
+                      <SelectItem key={f.feature_code} value={f.feature_code}>
+                        {f.feature_name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             </div>
 
