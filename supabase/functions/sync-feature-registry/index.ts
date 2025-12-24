@@ -243,7 +243,20 @@ serve(async (req) => {
     // Perform upserts if not dry run
     if (!dryRun && featuresToUpsert.length > 0) {
       // Ensure we never send an id for inserts/updates; feature_code is the conflict target.
-      const upsertPayload = featuresToUpsert.map(({ id: _id, ...rest }) => rest);
+      const upsertPayloadRaw = featuresToUpsert.map(({ id: _id, ...rest }) => rest);
+
+      // Deduplicate by feature_code to avoid: "ON CONFLICT DO UPDATE command cannot affect row a second time"
+      // which happens when the same feature_code appears multiple times in a single upsert command.
+      const deduped = new Map<string, any>();
+      for (const row of upsertPayloadRaw) {
+        if (row?.feature_code) deduped.set(row.feature_code, row);
+      }
+      const upsertPayload = Array.from(deduped.values());
+      if (upsertPayload.length !== upsertPayloadRaw.length) {
+        console.warn(
+          `[sync-feature-registry] Deduped upsert payload from ${upsertPayloadRaw.length} to ${upsertPayload.length} by feature_code`
+        );
+      }
 
       const { error: upsertError } = await supabase
         .from('application_features')
@@ -263,12 +276,12 @@ serve(async (req) => {
     // Auto-create enablement_content_status records for new features
     if (!dryRun && result.newFeatures.length > 0) {
       console.log(`[sync-feature-registry] Creating enablement_content_status for ${result.newFeatures.length} new features`);
-      
+
       const statusRecords = newFeatureDetails.map(f => ({
         feature_code: f.code,
         module_code: f.moduleCode,
         release_id: addToRelease || null,
-        workflow_status: 'development_backlog',
+        workflow_status: 'in_development',
         priority: 'medium',
         documentation_status: 'not_started',
         scorm_lite_status: 'not_started',
@@ -280,9 +293,9 @@ serve(async (req) => {
       // Use insert with onConflict on (feature_code, release_id) composite key
       const { error: statusError } = await supabase
         .from('enablement_content_status')
-        .upsert(statusRecords, { 
+        .upsert(statusRecords, {
           onConflict: 'feature_code,release_id',
-          ignoreDuplicates: true 
+          ignoreDuplicates: true
         });
 
       if (statusError) {
