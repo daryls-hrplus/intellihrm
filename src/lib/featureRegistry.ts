@@ -1,5 +1,6 @@
 // Comprehensive Feature Registry for HRplus Cerebra
 // Single source of truth for all module features, organized by business groupings
+// Canonical 25-module taxonomy with proper sub-module hierarchy
 
 import { LucideIcon } from "lucide-react";
 import * as Icons from "lucide-react";
@@ -30,10 +31,41 @@ export interface ModuleDefinition {
   icon: string;
   routePath: string;
   roleRequirements: string[];
+  parentModuleCode?: string; // For sub-modules (e.g., onboarding -> workforce)
   groups: FeatureGroup[];
 }
 
-// ===== WORKFORCE MODULE =====
+// ===== CANONICAL MODULE LIST (25 Total) =====
+// Top-level modules (20):
+// - workforce (parent of: onboarding, offboarding)
+// - dashboard
+// - ess
+// - mss
+// - time_attendance
+// - leave
+// - payroll
+// - compensation
+// - benefits
+// - performance (parent of: goals, appraisals, 360_feedback)
+// - training
+// - succession
+// - recruitment
+// - hse
+// - employee_relations
+// - company_property
+// - help
+// - enablement
+// - admin
+// - hr_hub
+//
+// Sub-modules (5):
+// - onboarding (child of workforce)
+// - offboarding (child of workforce)
+// - goals (child of performance)
+// - appraisals (child of performance)
+// - 360_feedback (child of performance)
+
+// ===== WORKFORCE MODULE (Parent) =====
 const workforceModule: ModuleDefinition = {
   code: "workforce",
   name: "Workforce Management",
@@ -76,14 +108,6 @@ const workforceModule: ModuleDefinition = {
       ]
     },
     {
-      groupCode: "employee_lifecycle",
-      groupName: "Employee Lifecycle",
-      features: [
-        { code: "onboarding", name: "Onboarding", description: "Manage new hire onboarding with templates and tasks", routePath: "/workforce/onboarding", icon: "Rocket", tabCode: "onboarding", roleRequirements: ["admin", "hr_manager"], workflowSteps: ["Create template", "Assign to new hire", "Track completion"], uiElements: ["Template editor", "Task checklist", "Progress tracker"] },
-        { code: "offboarding", name: "Offboarding", description: "Manage employee exit process", routePath: "/workforce/offboarding", icon: "UserMinus", tabCode: "offboarding", roleRequirements: ["admin", "hr_manager"], workflowSteps: ["Initiate offboarding", "Conduct exit interview", "Collect assets"], uiElements: ["Offboarding checklist", "Exit interview form", "Asset tracker"] },
-      ]
-    },
-    {
       groupCode: "headcount",
       groupName: "Headcount Planning",
       features: [
@@ -97,7 +121,6 @@ const workforceModule: ModuleDefinition = {
       groupCode: "employee_profile",
       groupName: "Employee Profile",
       features: [
-        // Core Profile Tabs
         { code: "emp_overview", name: "Profile Overview", description: "Employee summary with position and employment history", routePath: "/workforce/employees/:id/overview", icon: "User", tabCode: "emp_overview", roleRequirements: ["admin", "hr_manager"], workflowSteps: ["View summary", "Access history", "Navigate tabs"], uiElements: ["Profile card", "Position history", "Quick stats"] },
         { code: "emp_benefits", name: "Benefits", description: "Employee benefit plans, dependents and beneficiaries", routePath: "/workforce/employees/:id/benefits", icon: "Heart", tabCode: "emp_benefits", roleRequirements: ["admin", "hr_manager"], workflowSteps: ["View plans", "Manage dependents", "Update beneficiaries"], uiElements: ["Plan list", "Dependent table", "Beneficiary form"] },
         { code: "emp_branch_locations", name: "Branch Locations", description: "Assigned work locations and branches", routePath: "/workforce/employees/:id/branch-locations", icon: "MapPin", tabCode: "emp_branch_locations", roleRequirements: ["admin", "hr_manager"], workflowSteps: ["View locations", "Assign branch", "Track history"], uiElements: ["Location list", "Branch selector", "Assignment history"] },
@@ -111,13 +134,11 @@ const workforceModule: ModuleDefinition = {
         { code: "emp_pay_info", name: "Pay Information", description: "Bank accounts and tax details", routePath: "/workforce/employees/:id/pay-info", icon: "Wallet", tabCode: "emp_pay_info", roleRequirements: ["admin", "hr_manager"], workflowSteps: ["View accounts", "Update tax info", "Manage deductions"], uiElements: ["Bank accounts", "Tax details", "Deduction list"] },
         { code: "emp_professional_info", name: "Professional Information", description: "Credentials, compliance and professional history", routePath: "/workforce/employees/:id/professional-info", icon: "Briefcase", tabCode: "emp_professional_info", roleRequirements: ["admin", "hr_manager"], workflowSteps: ["View credentials", "Track compliance", "Update history"], uiElements: ["Credential list", "Compliance status", "History timeline"] },
         { code: "emp_qualifications", name: "Qualifications", description: "Academic qualifications and certifications", routePath: "/workforce/employees/:id/qualifications", icon: "GraduationCap", tabCode: "emp_qualifications", roleRequirements: ["admin", "hr_manager"], workflowSteps: ["View qualifications", "Add credential", "Track expiry"], uiElements: ["Qualification grid", "Add form", "Expiry alerts"] },
-        // Professional Info Sub-Features
         { code: "emp_compliance_legal", name: "Compliance & Legal", description: "Legal document tracking and compliance status", routePath: "/workforce/employees/:id/professional-info/compliance", icon: "Scale", tabCode: "emp_compliance_legal", roleRequirements: ["admin", "hr_manager"], workflowSteps: ["View compliance", "Update documents", "Track deadlines"], uiElements: ["Compliance grid", "Document list", "Deadline tracker"] },
         { code: "emp_credentials_memberships", name: "Credentials & Memberships", description: "Professional credentials and association memberships", routePath: "/workforce/employees/:id/professional-info/credentials", icon: "Award", tabCode: "emp_credentials_memberships", roleRequirements: ["admin", "hr_manager"], workflowSteps: ["View credentials", "Add membership", "Track renewals"], uiElements: ["Credential cards", "Membership list", "Renewal alerts"] },
         { code: "emp_references_verifications", name: "References & Verifications", description: "Employment references and background verifications", routePath: "/workforce/employees/:id/professional-info/references", icon: "CheckCircle", tabCode: "emp_references_verifications", roleRequirements: ["admin", "hr_manager"], workflowSteps: ["View references", "Request verification", "Track status"], uiElements: ["Reference list", "Verification status", "Request form"] },
         { code: "emp_agreements_signatures", name: "Agreements & Signatures", description: "Signed documents and agreement history", routePath: "/workforce/employees/:id/professional-info/agreements", icon: "FileSignature", tabCode: "emp_agreements_signatures", roleRequirements: ["admin", "hr_manager"], workflowSteps: ["View agreements", "Request signature", "Track completion"], uiElements: ["Agreement list", "Signature status", "Request workflow"] },
         { code: "emp_professional_history", name: "Professional History", description: "Prior employment and work experience", routePath: "/workforce/employees/:id/professional-info/history", icon: "History", tabCode: "emp_professional_history", roleRequirements: ["admin", "hr_manager"], workflowSteps: ["View history", "Add experience", "Verify details"], uiElements: ["History timeline", "Add form", "Verification status"] },
-        // Extended Profile Features
         { code: "emp_addresses", name: "Addresses", description: "Home and mailing addresses", routePath: "/workforce/employees/:id/addresses", icon: "Home", tabCode: "emp_addresses", roleRequirements: ["admin", "hr_manager"], workflowSteps: ["View addresses", "Add address", "Set primary"], uiElements: ["Address cards", "Add form", "Primary selector"] },
         { code: "emp_bank_accounts", name: "Bank Accounts", description: "Employee payment account details", routePath: "/workforce/employees/:id/bank-accounts", icon: "Building2", tabCode: "emp_bank_accounts", roleRequirements: ["admin", "hr_manager"], workflowSteps: ["View accounts", "Add account", "Set primary"], uiElements: ["Account list", "Add form", "Primary selector"] },
         { code: "emp_beneficiaries", name: "Beneficiaries", description: "Insurance and pension beneficiaries", routePath: "/workforce/employees/:id/beneficiaries", icon: "Users", tabCode: "emp_beneficiaries", roleRequirements: ["admin", "hr_manager"], workflowSteps: ["View beneficiaries", "Add beneficiary", "Set allocation"], uiElements: ["Beneficiary list", "Add form", "Allocation editor"] },
@@ -136,6 +157,54 @@ const workforceModule: ModuleDefinition = {
         { code: "org_changes", name: "Organization Changes", description: "Track and analyze organizational changes over time", routePath: "/workforce/org-changes", icon: "TrendingUp", tabCode: "org_changes", roleRequirements: ["admin", "hr_manager"], workflowSteps: ["Select date range", "Compare periods", "View changes"], uiElements: ["Change timeline", "Comparison view", "Change details"] },
         { code: "forecasting", name: "Workforce Forecasting", description: "Predict and plan workforce needs", routePath: "/workforce/forecasting", icon: "LineChart", tabCode: "forecasting", roleRequirements: ["admin", "hr_manager"], workflowSteps: ["Create scenario", "Set parameters", "Run simulation"], uiElements: ["Scenario builder", "Forecast charts", "What-if analysis"] },
         { code: "analytics", name: "Workforce Analytics", description: "Comprehensive workforce analytics dashboard", routePath: "/workforce/analytics", icon: "BarChart3", tabCode: "analytics", roleRequirements: ["admin", "hr_manager"], workflowSteps: ["Select metrics", "Apply filters", "Export reports"], uiElements: ["KPI cards", "Charts", "Export options"] },
+      ]
+    }
+  ]
+};
+
+// ===== ONBOARDING SUB-MODULE (Child of Workforce) =====
+const onboardingModule: ModuleDefinition = {
+  code: "onboarding",
+  name: "Onboarding",
+  description: "Manage new hire onboarding processes and tasks",
+  icon: "Rocket",
+  routePath: "/workforce/onboarding",
+  roleRequirements: ["admin", "hr_manager"],
+  parentModuleCode: "workforce",
+  groups: [
+    {
+      groupCode: "onboarding_management",
+      groupName: "Onboarding Management",
+      features: [
+        { code: "onboarding_dashboard", name: "Onboarding Dashboard", description: "Overview of all onboarding activities", routePath: "/workforce/onboarding", icon: "LayoutDashboard", tabCode: "onboarding_dashboard", roleRequirements: ["admin", "hr_manager"], workflowSteps: ["View active", "Track progress", "Identify issues"], uiElements: ["KPI cards", "Progress tracker", "Alert panel"] },
+        { code: "onboarding_templates", name: "Onboarding Templates", description: "Create and manage onboarding templates", routePath: "/workforce/onboarding/templates", icon: "FileText", tabCode: "onboarding_templates", roleRequirements: ["admin", "hr_manager"], workflowSteps: ["Create template", "Add tasks", "Set timeline"], uiElements: ["Template editor", "Task list", "Timeline builder"] },
+        { code: "new_hire_tracking", name: "New Hire Tracking", description: "Track new hire onboarding progress", routePath: "/workforce/onboarding/tracking", icon: "Users", tabCode: "new_hire_tracking", roleRequirements: ["admin", "hr_manager"], workflowSteps: ["Select employee", "View tasks", "Track completion"], uiElements: ["Employee list", "Task checklist", "Progress bar"] },
+        { code: "onboarding_tasks", name: "Task Management", description: "Manage onboarding task assignments", routePath: "/workforce/onboarding/tasks", icon: "CheckSquare", tabCode: "onboarding_tasks", roleRequirements: ["admin", "hr_manager"], workflowSteps: ["Create task", "Assign to roles", "Set deadlines"], uiElements: ["Task list", "Assignment panel", "Deadline tracker"] },
+      ]
+    }
+  ]
+};
+
+// ===== OFFBOARDING SUB-MODULE (Child of Workforce) =====
+const offboardingModule: ModuleDefinition = {
+  code: "offboarding",
+  name: "Offboarding",
+  description: "Manage employee exit processes and transitions",
+  icon: "UserMinus",
+  routePath: "/workforce/offboarding",
+  roleRequirements: ["admin", "hr_manager"],
+  parentModuleCode: "workforce",
+  groups: [
+    {
+      groupCode: "offboarding_management",
+      groupName: "Offboarding Management",
+      features: [
+        { code: "offboarding_dashboard", name: "Offboarding Dashboard", description: "Overview of all offboarding activities", routePath: "/workforce/offboarding", icon: "LayoutDashboard", tabCode: "offboarding_dashboard", roleRequirements: ["admin", "hr_manager"], workflowSteps: ["View active", "Track progress", "Identify issues"], uiElements: ["KPI cards", "Progress tracker", "Alert panel"] },
+        { code: "offboarding_templates", name: "Offboarding Templates", description: "Create and manage offboarding templates", routePath: "/workforce/offboarding/templates", icon: "FileText", tabCode: "offboarding_templates", roleRequirements: ["admin", "hr_manager"], workflowSteps: ["Create template", "Add tasks", "Set timeline"], uiElements: ["Template editor", "Task list", "Timeline builder"] },
+        { code: "exit_tracking", name: "Exit Tracking", description: "Track employee exit progress", routePath: "/workforce/offboarding/tracking", icon: "Users", tabCode: "exit_tracking", roleRequirements: ["admin", "hr_manager"], workflowSteps: ["Select employee", "View tasks", "Track completion"], uiElements: ["Employee list", "Task checklist", "Progress bar"] },
+        { code: "asset_collection", name: "Asset Collection", description: "Manage collection of company assets", routePath: "/workforce/offboarding/assets", icon: "Package", tabCode: "asset_collection", roleRequirements: ["admin", "hr_manager"], workflowSteps: ["List assets", "Track returns", "Document handover"], uiElements: ["Asset list", "Return tracker", "Handover form"] },
+        { code: "exit_interviews", name: "Exit Interviews", description: "Conduct and document exit interviews", routePath: "/workforce/offboarding/interviews", icon: "MessageSquare", tabCode: "exit_interviews", roleRequirements: ["admin", "hr_manager"], workflowSteps: ["Schedule interview", "Conduct interview", "Document feedback"], uiElements: ["Interview scheduler", "Questionnaire", "Feedback form"] },
+        { code: "knowledge_transfer", name: "Knowledge Transfer", description: "Manage knowledge transfer processes", routePath: "/workforce/offboarding/knowledge", icon: "BookOpen", tabCode: "knowledge_transfer", roleRequirements: ["admin", "hr_manager"], workflowSteps: ["Identify knowledge", "Assign recipient", "Track transfer"], uiElements: ["Knowledge list", "Transfer plan", "Progress tracker"] },
       ]
     }
   ]
@@ -370,31 +439,21 @@ const trainingModule: ModuleDefinition = {
   ]
 };
 
-// ===== PERFORMANCE MODULE =====
+// ===== PERFORMANCE MODULE (Parent) =====
 const performanceModule: ModuleDefinition = {
   code: "performance",
   name: "Performance Management",
-  description: "Employee performance appraisals, goals, and feedback",
+  description: "Employee performance management framework",
   icon: "Target",
   routePath: "/performance",
   roleRequirements: ["admin", "hr_manager"],
   groups: [
     {
-      groupCode: "appraisals",
-      groupName: "Appraisals",
+      groupCode: "configuration",
+      groupName: "Configuration",
       features: [
-        { code: "cycles", name: "Appraisal Cycles", description: "Manage performance appraisal cycles", routePath: "/performance/cycles", icon: "Calendar", tabCode: "cycles", roleRequirements: ["admin", "hr_manager"], workflowSteps: ["Create cycle", "Set dates", "Assign participants"], uiElements: ["Cycle list", "Date picker", "Participant assignment"] },
-        { code: "evaluations", name: "Performance Evaluations", description: "Conduct employee performance evaluations", routePath: "/performance/evaluations", icon: "ClipboardCheck", tabCode: "evaluations", roleRequirements: ["admin", "hr_manager"], workflowSteps: ["Select employee", "Rate performance", "Submit evaluation"], uiElements: ["Employee selector", "Rating form", "Submit button"] },
-        { code: "calibration", name: "Calibration Sessions", description: "Calibrate performance ratings across teams", routePath: "/performance/calibration", icon: "Scale", tabCode: "calibration", roleRequirements: ["admin", "hr_manager"], workflowSteps: ["Schedule session", "Review ratings", "Adjust scores"], uiElements: ["Session scheduler", "Rating comparison", "Adjustment panel"] },
-      ]
-    },
-    {
-      groupCode: "goals_feedback",
-      groupName: "Goals & Feedback",
-      features: [
-        { code: "goals", name: "Goal Management", description: "Set and track employee goals", routePath: "/performance/goals", icon: "Target", tabCode: "goals", roleRequirements: ["admin", "hr_manager", "employee"], workflowSteps: ["Create goal", "Set targets", "Track progress"], uiElements: ["Goal list", "Target editor", "Progress tracker"] },
-        { code: "360_feedback", name: "360-Degree Feedback", description: "Collect multi-rater feedback", routePath: "/performance/360-feedback", icon: "Users", tabCode: "360-feedback", roleRequirements: ["admin", "hr_manager"], workflowSteps: ["Create cycle", "Select reviewers", "Collect feedback"], uiElements: ["Cycle manager", "Reviewer selector", "Feedback form"] },
-        { code: "continuous_feedback", name: "Continuous Feedback", description: "Real-time feedback and recognition", routePath: "/performance/continuous-feedback", icon: "MessageCircle", tabCode: "continuous-feedback", roleRequirements: ["admin", "hr_manager", "employee"], workflowSteps: ["Give feedback", "Request feedback", "View history"], uiElements: ["Feedback form", "Request button", "History list"] },
+        { code: "rating_scales", name: "Rating Scales", description: "Configure performance rating scales", routePath: "/performance/rating-scales", icon: "Settings", tabCode: "rating_scales", roleRequirements: ["admin"], workflowSteps: ["Create scale", "Define levels", "Set descriptions"], uiElements: ["Scale list", "Level editor", "Description form"] },
+        { code: "competency_frameworks", name: "Competency Frameworks", description: "Define competency frameworks for evaluation", routePath: "/performance/competency-frameworks", icon: "Layers", tabCode: "competency_frameworks", roleRequirements: ["admin"], workflowSteps: ["Create framework", "Add competencies", "Set levels"], uiElements: ["Framework editor", "Competency list", "Level matrix"] },
       ]
     },
     {
@@ -402,7 +461,76 @@ const performanceModule: ModuleDefinition = {
       groupName: "Analytics",
       features: [
         { code: "analytics", name: "Performance Analytics", description: "Analyze performance trends", routePath: "/performance/analytics", icon: "BarChart3", tabCode: "analytics", roleRequirements: ["admin", "hr_manager"], workflowSteps: ["Select metrics", "Apply filters", "View trends"], uiElements: ["KPI cards", "Trend charts", "Distribution graphs"] },
-        { code: "nine_box", name: "9-Box Grid", description: "Talent assessment using 9-box grid", routePath: "/performance/nine-box", icon: "LayoutGrid", tabCode: "nine-box", roleRequirements: ["admin", "hr_manager"], workflowSteps: ["Plot employees", "Review positions", "Plan development"], uiElements: ["9-box grid", "Employee cards", "Action panel"] },
+        { code: "nine_box", name: "9-Box Grid", description: "Talent assessment using 9-box grid", routePath: "/performance/nine-box", icon: "LayoutGrid", tabCode: "nine_box", roleRequirements: ["admin", "hr_manager"], workflowSteps: ["Plot employees", "Review positions", "Plan development"], uiElements: ["9-box grid", "Employee cards", "Action panel"] },
+      ]
+    }
+  ]
+};
+
+// ===== GOALS SUB-MODULE (Child of Performance) =====
+const goalsModule: ModuleDefinition = {
+  code: "goals",
+  name: "Goals",
+  description: "Set and track employee and organizational goals",
+  icon: "Target",
+  routePath: "/performance/goals",
+  roleRequirements: ["admin", "hr_manager", "employee"],
+  parentModuleCode: "performance",
+  groups: [
+    {
+      groupCode: "goal_management",
+      groupName: "Goal Management",
+      features: [
+        { code: "goal_setting", name: "Goal Setting", description: "Create and assign employee goals", routePath: "/performance/goals", icon: "Target", tabCode: "goal_setting", roleRequirements: ["admin", "hr_manager", "employee"], workflowSteps: ["Create goal", "Set targets", "Assign owner"], uiElements: ["Goal form", "Target editor", "Owner selector"] },
+        { code: "goal_tracking", name: "Goal Tracking", description: "Track progress on goals", routePath: "/performance/goals/tracking", icon: "TrendingUp", tabCode: "goal_tracking", roleRequirements: ["admin", "hr_manager", "employee"], workflowSteps: ["Update progress", "Add notes", "Request review"], uiElements: ["Progress bar", "Notes field", "Review request"] },
+        { code: "goal_alignment", name: "Goal Alignment", description: "Align individual goals with organizational objectives", routePath: "/performance/goals/alignment", icon: "Link", tabCode: "goal_alignment", roleRequirements: ["admin", "hr_manager"], workflowSteps: ["View hierarchy", "Link goals", "Track cascade"], uiElements: ["Goal tree", "Alignment matrix", "Cascade tracker"] },
+        { code: "okrs", name: "OKRs", description: "Objectives and Key Results management", routePath: "/performance/goals/okrs", icon: "Crosshair", tabCode: "okrs", roleRequirements: ["admin", "hr_manager"], workflowSteps: ["Create objective", "Add key results", "Track progress"], uiElements: ["OKR editor", "Key results list", "Progress tracker"] },
+      ]
+    }
+  ]
+};
+
+// ===== APPRAISALS SUB-MODULE (Child of Performance) =====
+const appraisalsModule: ModuleDefinition = {
+  code: "appraisals",
+  name: "Appraisals",
+  description: "Conduct employee performance appraisals and evaluations",
+  icon: "ClipboardCheck",
+  routePath: "/performance/appraisals",
+  roleRequirements: ["admin", "hr_manager"],
+  parentModuleCode: "performance",
+  groups: [
+    {
+      groupCode: "appraisal_management",
+      groupName: "Appraisal Management",
+      features: [
+        { code: "cycles", name: "Appraisal Cycles", description: "Manage performance appraisal cycles", routePath: "/performance/cycles", icon: "Calendar", tabCode: "cycles", roleRequirements: ["admin", "hr_manager"], workflowSteps: ["Create cycle", "Set dates", "Assign participants"], uiElements: ["Cycle list", "Date picker", "Participant assignment"] },
+        { code: "evaluations", name: "Performance Evaluations", description: "Conduct employee performance evaluations", routePath: "/performance/evaluations", icon: "ClipboardCheck", tabCode: "evaluations", roleRequirements: ["admin", "hr_manager"], workflowSteps: ["Select employee", "Rate performance", "Submit evaluation"], uiElements: ["Employee selector", "Rating form", "Submit button"] },
+        { code: "calibration", name: "Calibration Sessions", description: "Calibrate performance ratings across teams", routePath: "/performance/calibration", icon: "Scale", tabCode: "calibration", roleRequirements: ["admin", "hr_manager"], workflowSteps: ["Schedule session", "Review ratings", "Adjust scores"], uiElements: ["Session scheduler", "Rating comparison", "Adjustment panel"] },
+        { code: "appraisal_forms", name: "Appraisal Forms", description: "Configure appraisal form templates", routePath: "/performance/appraisals/forms", icon: "FileText", tabCode: "appraisal_forms", roleRequirements: ["admin"], workflowSteps: ["Create form", "Add sections", "Configure scoring"], uiElements: ["Form builder", "Section editor", "Scoring rules"] },
+      ]
+    }
+  ]
+};
+
+// ===== 360 FEEDBACK SUB-MODULE (Child of Performance) =====
+const feedback360Module: ModuleDefinition = {
+  code: "360_feedback",
+  name: "360 Feedback",
+  description: "Collect multi-rater feedback for comprehensive performance insights",
+  icon: "Users",
+  routePath: "/performance/360-feedback",
+  roleRequirements: ["admin", "hr_manager"],
+  parentModuleCode: "performance",
+  groups: [
+    {
+      groupCode: "feedback_management",
+      groupName: "Feedback Management",
+      features: [
+        { code: "feedback_cycles", name: "Feedback Cycles", description: "Manage 360 feedback cycles", routePath: "/performance/360-feedback", icon: "Calendar", tabCode: "feedback_cycles", roleRequirements: ["admin", "hr_manager"], workflowSteps: ["Create cycle", "Select reviewers", "Collect feedback"], uiElements: ["Cycle manager", "Reviewer selector", "Feedback form"] },
+        { code: "reviewer_selection", name: "Reviewer Selection", description: "Select and manage feedback reviewers", routePath: "/performance/360-feedback/reviewers", icon: "Users", tabCode: "reviewer_selection", roleRequirements: ["admin", "hr_manager"], workflowSteps: ["Identify reviewers", "Send invitations", "Track responses"], uiElements: ["Reviewer list", "Invitation panel", "Response tracker"] },
+        { code: "feedback_reports", name: "Feedback Reports", description: "Generate and view feedback reports", routePath: "/performance/360-feedback/reports", icon: "FileBarChart", tabCode: "feedback_reports", roleRequirements: ["admin", "hr_manager"], workflowSteps: ["Select employee", "Generate report", "Share with stakeholders"], uiElements: ["Report generator", "Visualization charts", "Share controls"] },
+        { code: "continuous_feedback", name: "Continuous Feedback", description: "Real-time feedback and recognition", routePath: "/performance/continuous-feedback", icon: "MessageCircle", tabCode: "continuous_feedback", roleRequirements: ["admin", "hr_manager", "employee"], workflowSteps: ["Give feedback", "Request feedback", "View history"], uiElements: ["Feedback form", "Request button", "History list"] },
       ]
     }
   ]
@@ -463,28 +591,35 @@ const mssModule: ModuleDefinition = {
   roleRequirements: ["admin", "hr_manager"],
   groups: [
     {
-      groupCode: "team_management",
-      groupName: "Team Management",
+      groupCode: "team_overview",
+      groupName: "Team Overview",
       features: [
-        { code: "team", name: "My Team", description: "View and manage direct reports", routePath: "/mss/team", icon: "Users", tabCode: "team", roleRequirements: ["admin", "hr_manager"], workflowSteps: ["View team", "Check status", "Take action"], uiElements: ["Team grid", "Status cards", "Action menu"] },
-        { code: "direct_reports_goals", name: "Team Goals", description: "View and manage team goals", routePath: "/mss/direct-reports-goals", icon: "Target", tabCode: "direct-reports-goals", roleRequirements: ["admin", "hr_manager"], workflowSteps: ["View goals", "Track progress", "Provide feedback"], uiElements: ["Goal list", "Progress tracker", "Feedback form"] },
+        { code: "my_team", name: "My Team", description: "View and manage direct reports", routePath: "/mss/my-team", icon: "Users", tabCode: "my_team", roleRequirements: ["admin", "hr_manager"], workflowSteps: ["View team", "Access profiles", "Take actions"], uiElements: ["Team list", "Profile cards", "Action menu"] },
+        { code: "org_chart", name: "Team Org Chart", description: "View team organizational structure", routePath: "/mss/org-chart", icon: "Network", tabCode: "org_chart", roleRequirements: ["admin", "hr_manager"], workflowSteps: ["View structure", "Navigate hierarchy", "View details"], uiElements: ["Org chart", "Node details", "Navigation controls"] },
       ]
     },
     {
       groupCode: "approvals",
       groupName: "Approvals",
       features: [
-        { code: "leave_approvals", name: "Leave Approvals", description: "Approve team leave requests", routePath: "/mss/leave-approvals", icon: "CalendarCheck", tabCode: "leave-approvals", roleRequirements: ["admin", "hr_manager"], workflowSteps: ["View requests", "Review details", "Approve/reject"], uiElements: ["Request list", "Detail panel", "Action buttons"] },
-        { code: "timesheet_approvals", name: "Timesheet Approvals", description: "Approve team timesheets", routePath: "/mss/timesheet-approvals", icon: "Clock", tabCode: "timesheet-approvals", roleRequirements: ["admin", "hr_manager"], workflowSteps: ["View timesheets", "Review entries", "Approve/reject"], uiElements: ["Timesheet list", "Entry review", "Action buttons"] },
-        { code: "expense_approvals", name: "Expense Approvals", description: "Approve team expense claims", routePath: "/mss/expense-approvals", icon: "Receipt", tabCode: "expense-approvals", roleRequirements: ["admin", "hr_manager"], workflowSteps: ["View claims", "Review receipts", "Approve/reject"], uiElements: ["Claims list", "Receipt viewer", "Action buttons"] },
+        { code: "leave_approvals", name: "Leave Approvals", description: "Approve team leave requests", routePath: "/mss/leave-approvals", icon: "Calendar", tabCode: "leave_approvals", roleRequirements: ["admin", "hr_manager"], workflowSteps: ["View requests", "Review details", "Approve/reject"], uiElements: ["Request list", "Detail panel", "Action buttons"] },
+        { code: "timesheet_approvals", name: "Timesheet Approvals", description: "Approve team timesheets", routePath: "/mss/timesheet-approvals", icon: "Clock", tabCode: "timesheet_approvals", roleRequirements: ["admin", "hr_manager"], workflowSteps: ["View pending", "Review entries", "Approve/reject"], uiElements: ["Pending list", "Entry details", "Action buttons"] },
+        { code: "expense_approvals", name: "Expense Approvals", description: "Approve team expense claims", routePath: "/mss/expense-approvals", icon: "Receipt", tabCode: "expense_approvals", roleRequirements: ["admin", "hr_manager"], workflowSteps: ["View claims", "Review details", "Approve/reject"], uiElements: ["Claims list", "Detail panel", "Action buttons"] },
       ]
     },
     {
-      groupCode: "team_lifecycle",
-      groupName: "Team Lifecycle",
+      groupCode: "performance",
+      groupName: "Performance",
       features: [
-        { code: "onboarding_tracking", name: "Onboarding Tracking", description: "Track new hire onboarding", routePath: "/mss/onboarding", icon: "Rocket", tabCode: "onboarding", roleRequirements: ["admin", "hr_manager"], workflowSteps: ["View progress", "Assign tasks", "Complete onboarding"], uiElements: ["Progress tracker", "Task list", "Completion form"] },
-        { code: "offboarding_tracking", name: "Offboarding Tracking", description: "Track employee offboarding", routePath: "/mss/offboarding", icon: "UserMinus", tabCode: "offboarding", roleRequirements: ["admin", "hr_manager"], workflowSteps: ["View tasks", "Complete items", "Finalize exit"], uiElements: ["Task list", "Completion form", "Exit summary"] },
+        { code: "team_goals", name: "Team Goals", description: "Manage team goals", routePath: "/mss/team-goals", icon: "Target", tabCode: "team_goals", roleRequirements: ["admin", "hr_manager"], workflowSteps: ["View goals", "Track progress", "Provide feedback"], uiElements: ["Goal list", "Progress tracker", "Feedback form"] },
+        { code: "team_performance", name: "Team Performance", description: "Review team performance", routePath: "/mss/team-performance", icon: "TrendingUp", tabCode: "team_performance", roleRequirements: ["admin", "hr_manager"], workflowSteps: ["View ratings", "Conduct reviews", "Submit evaluations"], uiElements: ["Rating overview", "Review form", "Submit button"] },
+      ]
+    },
+    {
+      groupCode: "analytics",
+      groupName: "Analytics",
+      features: [
+        { code: "team_analytics", name: "Team Analytics", description: "View team metrics and insights", routePath: "/mss/analytics", icon: "BarChart3", tabCode: "team_analytics", roleRequirements: ["admin", "hr_manager"], workflowSteps: ["Select metrics", "View dashboard", "Export reports"], uiElements: ["KPI cards", "Charts", "Export button"] },
       ]
     }
   ]
@@ -494,8 +629,8 @@ const mssModule: ModuleDefinition = {
 const adminModule: ModuleDefinition = {
   code: "admin",
   name: "Admin & Security",
-  description: "System administration and security settings",
-  icon: "Settings",
+  description: "System administration and security configuration",
+  icon: "Shield",
   routePath: "/admin",
   roleRequirements: ["admin"],
   groups: [
@@ -647,13 +782,6 @@ const employeeRelationsModule: ModuleDefinition = {
       ]
     },
     {
-      groupCode: "exit",
-      groupName: "Exit Management",
-      features: [
-        { code: "exit_interviews", name: "Exit Interviews", description: "Conduct exit interviews", routePath: "/employee-relations/exit-interviews", icon: "LogOut", tabCode: "exit_interviews", roleRequirements: ["admin", "hr_manager"], workflowSteps: ["Schedule interview", "Conduct interview", "Document feedback"], uiElements: ["Interview scheduler", "Questionnaire", "Feedback form"] },
-      ]
-    },
-    {
       groupCode: "analytics",
       groupName: "Analytics",
       features: [
@@ -716,37 +844,28 @@ const successionModule: ModuleDefinition = {
   roleRequirements: ["admin", "hr_manager"],
   groups: [
     {
-      groupCode: "talent_assessment",
-      groupName: "Talent Assessment",
+      groupCode: "succession_management",
+      groupName: "Succession Management",
       features: [
-        { code: "nine_box", name: "Nine Box Grid", description: "Assess talent using 9-box matrix", routePath: "/succession/nine-box", icon: "Grid3x3", tabCode: "nine_box", roleRequirements: ["admin", "hr_manager"], workflowSteps: ["Rate performance", "Assess potential", "Place in grid"], uiElements: ["9-box grid", "Employee placement", "Notes panel"] },
-        { code: "talent_pools", name: "Talent Pools", description: "Manage high-potential talent pools", routePath: "/succession/talent-pools", icon: "Users", tabCode: "talent_pools", roleRequirements: ["admin", "hr_manager"], workflowSteps: ["Create pool", "Add talent", "Track development"], uiElements: ["Pool list", "Talent cards", "Development tracker"] },
-        { code: "flight_risk", name: "Flight Risk Tracking", description: "Identify and mitigate flight risks", routePath: "/succession/flight-risk", icon: "AlertTriangle", tabCode: "flight_risk", roleRequirements: ["admin", "hr_manager"], workflowSteps: ["Assess risk factors", "Score employees", "Plan retention"], uiElements: ["Risk dashboard", "Factor scores", "Retention plans"] },
-      ]
-    },
-    {
-      groupCode: "succession_plans",
-      groupName: "Succession Plans",
-      features: [
-        { code: "plans", name: "Succession Plans", description: "Create and manage succession plans", routePath: "/succession/plans", icon: "GitBranch", tabCode: "plans", roleRequirements: ["admin", "hr_manager"], workflowSteps: ["Identify key positions", "Nominate successors", "Track readiness"], uiElements: ["Position list", "Successor cards", "Readiness tracker"] },
-        { code: "key_positions", name: "Key Position Risk", description: "Assess key position risk", routePath: "/succession/key-positions", icon: "Star", tabCode: "key_positions", roleRequirements: ["admin", "hr_manager"], workflowSteps: ["Identify critical roles", "Assess risk", "Prioritize planning"], uiElements: ["Position matrix", "Risk scores", "Action items"] },
-        { code: "bench_strength", name: "Bench Strength", description: "Analyze organizational bench strength", routePath: "/succession/bench-strength", icon: "BarChart3", tabCode: "bench_strength", roleRequirements: ["admin", "hr_manager"], workflowSteps: ["Analyze coverage", "Identify gaps", "Plan development"], uiElements: ["Coverage charts", "Gap analysis", "Action plans"] },
+        { code: "critical_positions", name: "Critical Positions", description: "Identify and manage critical positions", routePath: "/succession/critical-positions", icon: "Star", tabCode: "critical_positions", roleRequirements: ["admin", "hr_manager"], workflowSteps: ["Identify position", "Assess criticality", "Assign successors"], uiElements: ["Position list", "Criticality rating", "Successor assignment"] },
+        { code: "succession_plans", name: "Succession Plans", description: "Create and manage succession plans", routePath: "/succession/plans", icon: "FileText", tabCode: "succession_plans", roleRequirements: ["admin", "hr_manager"], workflowSteps: ["Create plan", "Add candidates", "Track readiness"], uiElements: ["Plan builder", "Candidate list", "Readiness tracker"] },
+        { code: "talent_pools", name: "Talent Pools", description: "Manage high-potential talent pools", routePath: "/succession/talent-pools", icon: "Users", tabCode: "talent_pools", roleRequirements: ["admin", "hr_manager"], workflowSteps: ["Create pool", "Add members", "Track development"], uiElements: ["Pool list", "Member management", "Development tracker"] },
       ]
     },
     {
       groupCode: "development",
       groupName: "Development",
       features: [
-        { code: "career_paths", name: "Career Paths", description: "Define career progression paths", routePath: "/succession/career-paths", icon: "Route", tabCode: "career_paths", roleRequirements: ["admin", "hr_manager"], workflowSteps: ["Create path", "Define milestones", "Link to jobs"], uiElements: ["Path builder", "Milestone editor", "Job linker"] },
-        { code: "idps", name: "Individual Development Plans", description: "Create employee development plans", routePath: "/succession/idps", icon: "Target", tabCode: "idps", roleRequirements: ["admin", "hr_manager"], workflowSteps: ["Create IDP", "Set goals", "Track progress"], uiElements: ["IDP form", "Goal tracker", "Progress charts"] },
-        { code: "mentorship", name: "Mentorship Programs", description: "Manage mentorship programs", routePath: "/succession/mentorship", icon: "Users", tabCode: "mentorship", roleRequirements: ["admin", "hr_manager"], workflowSteps: ["Create program", "Match pairs", "Track sessions"], uiElements: ["Program list", "Matching tool", "Session tracker"] },
+        { code: "readiness_assessment", name: "Readiness Assessment", description: "Assess successor readiness", routePath: "/succession/readiness", icon: "ClipboardCheck", tabCode: "readiness_assessment", roleRequirements: ["admin", "hr_manager"], workflowSteps: ["Select candidate", "Assess gaps", "Create plan"], uiElements: ["Assessment form", "Gap analysis", "Development plan"] },
+        { code: "development_plans", name: "Development Plans", description: "Create successor development plans", routePath: "/succession/development", icon: "Route", tabCode: "development_plans", roleRequirements: ["admin", "hr_manager"], workflowSteps: ["Create plan", "Add activities", "Track progress"], uiElements: ["Plan builder", "Activity list", "Progress tracker"] },
       ]
     },
     {
       groupCode: "analytics",
       groupName: "Analytics",
       features: [
-        { code: "analytics", name: "Succession Analytics", description: "Succession planning analytics", routePath: "/succession/analytics", icon: "BarChart3", tabCode: "analytics", roleRequirements: ["admin", "hr_manager"], workflowSteps: ["View metrics", "Analyze pipeline", "Generate reports"], uiElements: ["KPI cards", "Pipeline charts", "Report export"] },
+        { code: "analytics", name: "Succession Analytics", description: "Analyze succession planning metrics", routePath: "/succession/analytics", icon: "BarChart3", tabCode: "analytics", roleRequirements: ["admin", "hr_manager"], workflowSteps: ["View metrics", "Analyze coverage", "Identify gaps"], uiElements: ["KPI cards", "Coverage charts", "Gap analysis"] },
+        { code: "bench_strength", name: "Bench Strength", description: "Measure organizational bench strength", routePath: "/succession/bench-strength", icon: "Activity", tabCode: "bench_strength", roleRequirements: ["admin", "hr_manager"], workflowSteps: ["View strength", "Identify weak areas", "Plan actions"], uiElements: ["Strength dashboard", "Area breakdown", "Action planner"] },
       ]
     }
   ]
@@ -909,27 +1028,149 @@ const dashboardModule: ModuleDefinition = {
   ]
 };
 
-// ===== COMPLETE REGISTRY =====
+// ===== HELP CENTER MODULE =====
+const helpModule: ModuleDefinition = {
+  code: "help",
+  name: "Help Center",
+  description: "Access documentation, FAQs, and support resources",
+  icon: "HelpCircle",
+  routePath: "/help",
+  roleRequirements: ["admin", "hr_manager", "employee"],
+  groups: [
+    {
+      groupCode: "support",
+      groupName: "Support",
+      features: [
+        { code: "knowledge_base", name: "Knowledge Base", description: "Browse help articles and documentation", routePath: "/help/knowledge-base", icon: "BookOpen", tabCode: "knowledge_base", roleRequirements: ["admin", "hr_manager", "employee"], workflowSteps: ["Search topics", "Read articles", "Rate helpfulness"], uiElements: ["Search bar", "Article list", "Rating buttons"] },
+        { code: "faqs", name: "FAQs", description: "Frequently asked questions", routePath: "/help/faqs", icon: "HelpCircle", tabCode: "faqs", roleRequirements: ["admin", "hr_manager", "employee"], workflowSteps: ["Browse categories", "View answers", "Submit question"], uiElements: ["Category list", "FAQ accordion", "Question form"] },
+        { code: "contact_support", name: "Contact Support", description: "Submit support tickets", routePath: "/help/contact", icon: "MessageCircle", tabCode: "contact_support", roleRequirements: ["admin", "hr_manager", "employee"], workflowSteps: ["Describe issue", "Attach files", "Submit ticket"], uiElements: ["Ticket form", "File uploader", "Submit button"] },
+        { code: "video_tutorials", name: "Video Tutorials", description: "Watch training videos", routePath: "/help/videos", icon: "Video", tabCode: "video_tutorials", roleRequirements: ["admin", "hr_manager", "employee"], workflowSteps: ["Browse videos", "Watch tutorial", "Track progress"], uiElements: ["Video grid", "Player", "Progress tracker"] },
+      ]
+    },
+    {
+      groupCode: "resources",
+      groupName: "Resources",
+      features: [
+        { code: "release_notes", name: "Release Notes", description: "View system updates and changes", routePath: "/help/release-notes", icon: "FileText", tabCode: "release_notes", roleRequirements: ["admin", "hr_manager", "employee"], workflowSteps: ["Browse versions", "View changes", "Learn features"], uiElements: ["Version list", "Change log", "Feature highlights"] },
+        { code: "system_status", name: "System Status", description: "Check system health and status", routePath: "/help/status", icon: "Activity", tabCode: "system_status", roleRequirements: ["admin", "hr_manager", "employee"], workflowSteps: ["View status", "Check incidents", "Subscribe alerts"], uiElements: ["Status dashboard", "Incident log", "Alert settings"] },
+      ]
+    }
+  ]
+};
+
+// ===== ENABLEMENT CENTER MODULE (Internal Use) =====
+const enablementModule: ModuleDefinition = {
+  code: "enablement",
+  name: "Enablement Center",
+  description: "Internal enablement content management and delivery",
+  icon: "GraduationCap",
+  routePath: "/enablement",
+  roleRequirements: ["admin"],
+  groups: [
+    {
+      groupCode: "content_management",
+      groupName: "Content Management",
+      features: [
+        { code: "content_status", name: "Content Status", description: "Track enablement content development", routePath: "/enablement/content-status", icon: "ClipboardList", tabCode: "content_status", roleRequirements: ["admin"], workflowSteps: ["View status", "Update progress", "Assign tasks"], uiElements: ["Status board", "Progress tracker", "Task assignment"] },
+        { code: "workflow_board", name: "Workflow Board", description: "Manage content development workflow", routePath: "/enablement/workflow", icon: "Columns", tabCode: "workflow_board", roleRequirements: ["admin"], workflowSteps: ["View board", "Move items", "Track progress"], uiElements: ["Kanban board", "Drag-drop cards", "Status columns"] },
+        { code: "feature_catalog", name: "Feature Catalog", description: "Browse application feature documentation", routePath: "/enablement/features", icon: "BookOpen", tabCode: "feature_catalog", roleRequirements: ["admin"], workflowSteps: ["Browse modules", "View features", "Access documentation"], uiElements: ["Module list", "Feature grid", "Documentation viewer"] },
+      ]
+    },
+    {
+      groupCode: "releases",
+      groupName: "Releases",
+      features: [
+        { code: "release_management", name: "Release Management", description: "Manage product releases", routePath: "/enablement/releases", icon: "Package", tabCode: "release_management", roleRequirements: ["admin"], workflowSteps: ["Create release", "Add features", "Publish notes"], uiElements: ["Release list", "Feature assignment", "Notes editor"] },
+        { code: "change_tracking", name: "Change Tracking", description: "Track feature changes across releases", routePath: "/enablement/changes", icon: "GitBranch", tabCode: "change_tracking", roleRequirements: ["admin"], workflowSteps: ["View changes", "Categorize impact", "Plan content"], uiElements: ["Change log", "Impact matrix", "Content planner"] },
+      ]
+    },
+    {
+      groupCode: "templates",
+      groupName: "Templates",
+      features: [
+        { code: "rise_templates", name: "Rise Templates", description: "Manage Rise course templates", routePath: "/enablement/rise-templates", icon: "FileText", tabCode: "rise_templates", roleRequirements: ["admin"], workflowSteps: ["Create template", "Configure structure", "Apply to courses"], uiElements: ["Template list", "Structure editor", "Application panel"] },
+        { code: "scorm_packages", name: "SCORM Packages", description: "Manage SCORM learning packages", routePath: "/enablement/scorm", icon: "Package", tabCode: "scorm_packages", roleRequirements: ["admin"], workflowSteps: ["Upload package", "Configure settings", "Deploy to LMS"], uiElements: ["Package list", "Settings form", "Deployment panel"] },
+      ]
+    },
+    {
+      groupCode: "analytics",
+      groupName: "Analytics",
+      features: [
+        { code: "coverage_analytics", name: "Coverage Analytics", description: "Analyze content coverage metrics", routePath: "/enablement/analytics", icon: "BarChart3", tabCode: "coverage_analytics", roleRequirements: ["admin"], workflowSteps: ["View coverage", "Identify gaps", "Plan content"], uiElements: ["Coverage charts", "Gap analysis", "Planning tools"] },
+      ]
+    }
+  ]
+};
+
+// ===== COMPLETE REGISTRY (25 MODULES) =====
 export const FEATURE_REGISTRY: ModuleDefinition[] = [
+  // Top-level modules (20)
   dashboardModule,
   workforceModule,
-  leaveModule,
-  compensationModule,
-  payrollModule,
+  essModule,
+  mssModule,
   timeAttendanceModule,
+  leaveModule,
+  payrollModule,
+  compensationModule,
   benefitsModule,
-  trainingModule,
   performanceModule,
+  trainingModule,
   successionModule,
   recruitmentModule,
   hseModule,
   employeeRelationsModule,
   companyPropertyModule,
-  hrHubModule,
-  essModule,
-  mssModule,
+  helpModule,
+  enablementModule,
   adminModule,
+  hrHubModule,
+  // Sub-modules (5)
+  onboardingModule,
+  offboardingModule,
+  goalsModule,
+  appraisalsModule,
+  feedback360Module,
 ];
+
+// ===== CANONICAL MODULE CODES (for validation) =====
+export const CANONICAL_MODULE_CODES = [
+  // Top-level modules (20)
+  'dashboard',
+  'workforce',
+  'ess',
+  'mss',
+  'time_attendance',
+  'leave',
+  'payroll',
+  'compensation',
+  'benefits',
+  'performance',
+  'training',
+  'succession',
+  'recruitment',
+  'hse',
+  'employee_relations',
+  'company_property',
+  'help',
+  'enablement',
+  'admin',
+  'hr_hub',
+  // Sub-modules (5)
+  'onboarding',
+  'offboarding',
+  'goals',
+  'appraisals',
+  '360_feedback',
+] as const;
+
+export type CanonicalModuleCode = typeof CANONICAL_MODULE_CODES[number];
+
+// ===== PARENT-CHILD RELATIONSHIPS =====
+export const MODULE_HIERARCHY: Record<string, string[]> = {
+  workforce: ['onboarding', 'offboarding'],
+  performance: ['goals', 'appraisals', '360_feedback'],
+};
 
 // ===== UTILITY FUNCTIONS =====
 
@@ -987,4 +1228,26 @@ export function searchFeatures(query: string): { module: ModuleDefinition; group
     feature.description.toLowerCase().includes(lowerQuery) ||
     feature.code.toLowerCase().includes(lowerQuery)
   );
+}
+
+export function isCanonicalModule(code: string): boolean {
+  return CANONICAL_MODULE_CODES.includes(code as CanonicalModuleCode);
+}
+
+export function getTopLevelModules(): ModuleDefinition[] {
+  return FEATURE_REGISTRY.filter(m => !m.parentModuleCode);
+}
+
+export function getSubModules(parentCode: string): ModuleDefinition[] {
+  return FEATURE_REGISTRY.filter(m => m.parentModuleCode === parentCode);
+}
+
+export function getModuleWithSubModules(parentCode: string): { parent: ModuleDefinition; subModules: ModuleDefinition[] } | undefined {
+  const parent = getModuleByCode(parentCode);
+  if (!parent) return undefined;
+  
+  return {
+    parent,
+    subModules: getSubModules(parentCode),
+  };
 }
