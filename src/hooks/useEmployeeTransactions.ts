@@ -319,6 +319,52 @@ export function useEmployeeTransactions() {
         }
       }
 
+      // For TRANSFER transactions, also create an employee_positions record if position changes
+      if (data.transfer_reason_id && data.position_id && data.employee_id) {
+        // Get current primary position to deactivate it
+        const { data: currentPosition } = await supabase
+          .from("employee_positions")
+          .select("id, position_id")
+          .eq("employee_id", data.employee_id)
+          .eq("is_primary", true)
+          .eq("is_active", true)
+          .single();
+
+        if (currentPosition && currentPosition.position_id !== data.position_id) {
+          // Deactivate the current primary position assignment
+          await supabase
+            .from("employee_positions")
+            .update({ 
+              is_active: false, 
+              end_date: data.effective_date 
+            })
+            .eq("id", currentPosition.id);
+
+          // Create new position assignment
+          const employeePositionData = {
+            employee_id: data.employee_id,
+            position_id: data.position_id,
+            start_date: data.effective_date,
+            end_date: null,
+            is_primary: true,
+            assignment_type: "permanent",
+            compensation_amount: null,
+            compensation_currency: "USD",
+            compensation_frequency: "monthly",
+            benefits_profile: {},
+            is_active: true,
+          };
+
+          const { error: positionError } = await supabase
+            .from("employee_positions")
+            .insert(employeePositionData as any);
+
+          if (positionError) {
+            console.error("Failed to create employee position for transfer:", positionError);
+          }
+        }
+      }
+
       await logAction({
         action: "CREATE",
         entityType: "employee_transaction",
@@ -481,6 +527,68 @@ export function useEmployeeTransactions() {
           await supabase
             .from("employee_positions")
             .insert(employeePositionData as any);
+        }
+      }
+
+      // For TRANSFER transactions, also update employee_positions record if position changes
+      if (data.transfer_reason_id && data.position_id && data.employee_id) {
+        // Check if there's already a position assignment for this position
+        const { data: existingPosition } = await supabase
+          .from("employee_positions")
+          .select("id")
+          .eq("employee_id", data.employee_id)
+          .eq("position_id", data.position_id)
+          .eq("assignment_type", "permanent")
+          .single();
+
+        if (existingPosition) {
+          // Update existing record
+          await supabase
+            .from("employee_positions")
+            .update({
+              start_date: data.effective_date,
+              is_active: true,
+            })
+            .eq("id", existingPosition.id);
+        } else {
+          // Get current primary position to deactivate it
+          const { data: currentPosition } = await supabase
+            .from("employee_positions")
+            .select("id, position_id")
+            .eq("employee_id", data.employee_id)
+            .eq("is_primary", true)
+            .eq("is_active", true)
+            .single();
+
+          if (currentPosition && currentPosition.position_id !== data.position_id) {
+            // Deactivate the current primary position assignment
+            await supabase
+              .from("employee_positions")
+              .update({ 
+                is_active: false, 
+                end_date: data.effective_date 
+              })
+              .eq("id", currentPosition.id);
+
+            // Create new position assignment
+            const employeePositionData = {
+              employee_id: data.employee_id,
+              position_id: data.position_id,
+              start_date: data.effective_date,
+              end_date: null,
+              is_primary: true,
+              assignment_type: "permanent",
+              compensation_amount: null,
+              compensation_currency: "USD",
+              compensation_frequency: "monthly",
+              benefits_profile: {},
+              is_active: true,
+            };
+
+            await supabase
+              .from("employee_positions")
+              .insert(employeePositionData as any);
+          }
         }
       }
 
