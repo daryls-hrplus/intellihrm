@@ -72,6 +72,12 @@ export function TourEngine() {
       return;
     }
 
+    // Handle CLOSE action - when user clicks X button
+    if (action === ACTIONS.CLOSE) {
+      skipTour();
+      return;
+    }
+
     // Handle NEXT on STEP_AFTER (works correctly in controlled mode)
     if (type === EVENTS.STEP_AFTER && action === ACTIONS.NEXT) {
       nextStep();
