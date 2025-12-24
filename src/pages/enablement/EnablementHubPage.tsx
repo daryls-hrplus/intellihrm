@@ -47,7 +47,8 @@ import { ImplementationTracker } from "@/components/enablement/implementation";
 import { FeatureRegistrySyncDialog } from "@/components/enablement/FeatureRegistrySyncDialog";
 import { NewFeaturesIndicator } from "@/components/enablement/NewFeaturesIndicator";
 import { useEnablementContentStatus, useEnablementReleases } from "@/hooks/useEnablementData";
-import { FEATURE_REGISTRY } from "@/lib/featureRegistry";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 export default function EnablementHubPage() {
   const { t } = useTranslation();
@@ -59,11 +60,19 @@ export default function EnablementHubPage() {
   const { contentItems } = useEnablementContentStatus();
   const { releases } = useEnablementReleases();
 
-  // Calculate stats
-  const totalFeatures = FEATURE_REGISTRY.reduce(
-    (acc, module) => acc + module.groups.reduce((gAcc, group) => gAcc + group.features.length, 0),
-    0
-  );
+  // Fetch total features count from database
+  const { data: dbFeatureCount = 0 } = useQuery({
+    queryKey: ["application-features-count"],
+    queryFn: async () => {
+      const { count, error } = await supabase
+        .from("application_features")
+        .select("*", { count: "exact", head: true });
+      if (error) throw error;
+      return count || 0;
+    },
+  });
+
+  const totalFeatures = dbFeatureCount;
 
   const activeRelease = releases.find(
     (r) => r.status === "preview" || r.status === "planning"
