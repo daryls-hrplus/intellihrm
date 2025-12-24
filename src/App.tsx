@@ -73,6 +73,7 @@ import EnablementArtifactsPage from "./pages/enablement/EnablementArtifactsPage"
 import ArtifactEditorPage from "./pages/enablement/ArtifactEditorPage";
 import ArtifactDetailPage from "./pages/enablement/ArtifactDetailPage";
 import ToursManagementPage from "./pages/enablement/ToursManagementPage";
+import FeatureAuditDashboard from "./pages/enablement/FeatureAuditDashboard";
 import ImplementationDetailPage from "./pages/enablement/ImplementationDetailPage";
 
 // Subscription pages
@@ -3382,6 +3383,16 @@ const App = () => (
                 <ProtectedRoute requiredRoles={["admin"]}>
                   <EnablementAccessGuard>
                     <FeatureDatabasePage />
+                  </EnablementAccessGuard>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/enablement/audit"
+              element={
+                <ProtectedRoute requiredRoles={["admin"]}>
+                  <EnablementAccessGuard>
+                    <FeatureAuditDashboard />
                   </EnablementAccessGuard>
                 </ProtectedRoute>
               }
