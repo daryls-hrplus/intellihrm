@@ -86,6 +86,15 @@ interface Position {
   } | null;
 }
 
+// Assignment type options
+const ASSIGNMENT_TYPES = [
+  { value: "primary", label: "Primary Position" },
+  { value: "acting", label: "Acting Position" },
+  { value: "interim", label: "Interim Position" },
+  { value: "secondary", label: "Secondary Position" },
+  { value: "secondment", label: "Secondment" },
+] as const;
+
 interface EmployeePosition {
   id: string;
   employee_id: string;
@@ -93,6 +102,7 @@ interface EmployeePosition {
   start_date: string;
   end_date: string | null;
   is_primary: boolean;
+  assignment_type: string;
   compensation_amount: number | null;
   compensation_currency: string;
   compensation_frequency: string;
@@ -224,6 +234,7 @@ export function PositionsManagement({ companyId }: PositionsManagementProps) {
   const [assignStartDate, setAssignStartDate] = useState("");
   const [assignEndDate, setAssignEndDate] = useState("");
   const [assignIsPrimary, setAssignIsPrimary] = useState(false);
+  const [assignAssignmentType, setAssignAssignmentType] = useState("primary");
   const [assignCompAmount, setAssignCompAmount] = useState("");
   const [assignCompCurrency, setAssignCompCurrency] = useState("USD");
   const [assignCompFrequency, setAssignCompFrequency] = useState("monthly");
@@ -517,7 +528,8 @@ export function PositionsManagement({ companyId }: PositionsManagementProps) {
     setAssignEmployeeId("");
     setAssignStartDate(getTodayString());
     setAssignEndDate("");
-    setAssignIsPrimary(false);
+    setAssignIsPrimary(true);
+    setAssignAssignmentType("primary");
     setAssignCompAmount("");
     setAssignCompCurrency("USD");
     setAssignCompFrequency("monthly");
@@ -536,6 +548,7 @@ export function PositionsManagement({ companyId }: PositionsManagementProps) {
     setAssignStartDate(assignment.start_date);
     setAssignEndDate(assignment.end_date || "");
     setAssignIsPrimary(assignment.is_primary);
+    setAssignAssignmentType(assignment.assignment_type || "primary");
     setAssignCompAmount(assignment.compensation_amount?.toString() || "");
     setAssignCompCurrency(assignment.compensation_currency);
     setAssignCompFrequency(assignment.compensation_frequency);
@@ -577,7 +590,8 @@ export function PositionsManagement({ companyId }: PositionsManagementProps) {
         position_id: assignPositionId,
         start_date: assignStartDate,
         end_date: assignEndDate || null,
-        is_primary: assignIsPrimary,
+        is_primary: assignAssignmentType === "primary",
+        assignment_type: assignAssignmentType,
         compensation_amount: assignCompAmount ? parseFloat(assignCompAmount) : null,
         compensation_currency: assignCompCurrency,
         compensation_frequency: assignCompFrequency,
@@ -1253,15 +1267,25 @@ export function PositionsManagement({ companyId }: PositionsManagementProps) {
               </div>
             </div>
 
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Switch checked={assignIsPrimary} onCheckedChange={setAssignIsPrimary} />
-                <Label>Primary Position</Label>
-              </div>
-              <div className="flex items-center gap-2">
-                <Switch checked={assignIsActive} onCheckedChange={setAssignIsActive} />
-                <Label>Active</Label>
-              </div>
+            <div className="space-y-2">
+              <Label>Assignment Type *</Label>
+              <Select value={assignAssignmentType} onValueChange={setAssignAssignmentType}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select assignment type" />
+                </SelectTrigger>
+                <SelectContent>
+                  {ASSIGNMENT_TYPES.map((type) => (
+                    <SelectItem key={type.value} value={type.value}>
+                      {type.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <Switch checked={assignIsActive} onCheckedChange={setAssignIsActive} />
+              <Label>Active</Label>
             </div>
           </div>
           <DialogFooter>
