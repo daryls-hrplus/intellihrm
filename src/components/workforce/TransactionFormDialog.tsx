@@ -123,10 +123,10 @@ export function TransactionFormDialog({
     }
   }, [open, transactionType]);
 
-  // Load employee positions when employee is selected (for CONFIRMATION transaction type)
+  // Load employee positions when employee is selected (for CONFIRMATION and PROBATION_EXT transaction types)
   useEffect(() => {
     const loadEmployeePositions = async () => {
-      if (formData.employee_id && transactionType === "CONFIRMATION") {
+      if (formData.employee_id && (transactionType === "CONFIRMATION" || transactionType === "PROBATION_EXT")) {
         const { data } = await supabase
           .from("employee_positions")
           .select(`
@@ -514,6 +514,40 @@ export function TransactionFormDialog({
       case "PROBATION_EXT":
         return (
           <>
+            {/* Position Selection - shown when employee has positions */}
+            {employeePositions.length > 0 && (
+              <div className="space-y-2">
+                <Label>{t("common.position")} *</Label>
+                <Select
+                  value={formData.position_id || ""}
+                  onValueChange={(v) => setFormData({ ...formData, position_id: v })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder={t("workforce.modules.transactions.form.selectPosition")} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {employeePositions.map((ep) => (
+                      <SelectItem key={ep.position_id} value={ep.position_id}>
+                        {ep.position.title} ({ep.position.code})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {employeePositions.length > 1 && (
+                  <p className="text-xs text-muted-foreground">
+                    {t("workforce.modules.transactions.form.probationExt.multiplePositionsNote", "Employee has multiple positions. Please select the position for probation extension.")}
+                  </p>
+                )}
+              </div>
+            )}
+            
+            {/* Show message if employee selected but no positions */}
+            {formData.employee_id && employeePositions.length === 0 && (
+              <div className="text-sm text-muted-foreground bg-muted p-3 rounded-md">
+                {t("workforce.modules.transactions.form.probationExt.noPositions", "No active positions found for this employee.")}
+              </div>
+            )}
+
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>{t("workforce.modules.transactions.form.probationExt.originalEndDate")}</Label>
