@@ -15393,6 +15393,81 @@ export type Database = {
           },
         ]
       }
+      goal_cycles: {
+        Row: {
+          company_id: string
+          created_at: string
+          created_by: string | null
+          cycle_type: string
+          description: string | null
+          end_date: string
+          freeze_date: string | null
+          goal_setting_end: string | null
+          goal_setting_start: string | null
+          id: string
+          is_active: boolean
+          name: string
+          review_end: string | null
+          review_start: string | null
+          start_date: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          created_by?: string | null
+          cycle_type: string
+          description?: string | null
+          end_date: string
+          freeze_date?: string | null
+          goal_setting_end?: string | null
+          goal_setting_start?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          review_end?: string | null
+          review_start?: string | null
+          start_date: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          cycle_type?: string
+          description?: string | null
+          end_date?: string
+          freeze_date?: string | null
+          goal_setting_end?: string | null
+          goal_setting_start?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          review_end?: string | null
+          review_start?: string | null
+          start_date?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "goal_cycles_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "goal_cycles_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       goal_interviews: {
         Row: {
           agenda: string | null
@@ -15498,6 +15573,61 @@ export type Database = {
             columns: ["scheduled_by"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      goal_owners: {
+        Row: {
+          assigned_at: string
+          assigned_by: string | null
+          created_at: string
+          employee_id: string
+          goal_id: string
+          id: string
+          ownership_type: string
+          updated_at: string
+        }
+        Insert: {
+          assigned_at?: string
+          assigned_by?: string | null
+          created_at?: string
+          employee_id: string
+          goal_id: string
+          id?: string
+          ownership_type?: string
+          updated_at?: string
+        }
+        Update: {
+          assigned_at?: string
+          assigned_by?: string | null
+          created_at?: string
+          employee_id?: string
+          goal_id?: string
+          id?: string
+          ownership_type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "goal_owners_assigned_by_fkey"
+            columns: ["assigned_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "goal_owners_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "goal_owners_goal_id_fkey"
+            columns: ["goal_id"]
+            isOneToOne: false
+            referencedRelation: "performance_goals"
             referencedColumns: ["id"]
           },
         ]
@@ -28054,6 +28184,9 @@ export type Database = {
       performance_goals: {
         Row: {
           achievable: string | null
+          adjustment_count: number | null
+          approved_at: string | null
+          approved_by: string | null
           assigned_by: string | null
           category: string | null
           company_id: string
@@ -28065,11 +28198,16 @@ export type Database = {
           due_date: string | null
           employee_id: string | null
           final_score: number | null
+          goal_cycle_id: string | null
           goal_level: Database["public"]["Enums"]["goal_level"]
           goal_source: Database["public"]["Enums"]["goal_source"]
           goal_type: Database["public"]["Enums"]["goal_type"]
           id: string
+          is_locked: boolean | null
           is_objective: boolean | null
+          lock_reason: string | null
+          locked_at: string | null
+          locked_by: string | null
           manager_rating: number | null
           measurable: string | null
           objective_id: string | null
@@ -28080,6 +28218,7 @@ export type Database = {
           specific: string | null
           start_date: string
           status: Database["public"]["Enums"]["goal_status"]
+          submitted_at: string | null
           target_value: number | null
           template_id: string | null
           time_bound: string | null
@@ -28090,6 +28229,9 @@ export type Database = {
         }
         Insert: {
           achievable?: string | null
+          adjustment_count?: number | null
+          approved_at?: string | null
+          approved_by?: string | null
           assigned_by?: string | null
           category?: string | null
           company_id: string
@@ -28101,11 +28243,16 @@ export type Database = {
           due_date?: string | null
           employee_id?: string | null
           final_score?: number | null
+          goal_cycle_id?: string | null
           goal_level?: Database["public"]["Enums"]["goal_level"]
           goal_source?: Database["public"]["Enums"]["goal_source"]
           goal_type?: Database["public"]["Enums"]["goal_type"]
           id?: string
+          is_locked?: boolean | null
           is_objective?: boolean | null
+          lock_reason?: string | null
+          locked_at?: string | null
+          locked_by?: string | null
           manager_rating?: number | null
           measurable?: string | null
           objective_id?: string | null
@@ -28116,6 +28263,7 @@ export type Database = {
           specific?: string | null
           start_date?: string
           status?: Database["public"]["Enums"]["goal_status"]
+          submitted_at?: string | null
           target_value?: number | null
           template_id?: string | null
           time_bound?: string | null
@@ -28126,6 +28274,9 @@ export type Database = {
         }
         Update: {
           achievable?: string | null
+          adjustment_count?: number | null
+          approved_at?: string | null
+          approved_by?: string | null
           assigned_by?: string | null
           category?: string | null
           company_id?: string
@@ -28137,11 +28288,16 @@ export type Database = {
           due_date?: string | null
           employee_id?: string | null
           final_score?: number | null
+          goal_cycle_id?: string | null
           goal_level?: Database["public"]["Enums"]["goal_level"]
           goal_source?: Database["public"]["Enums"]["goal_source"]
           goal_type?: Database["public"]["Enums"]["goal_type"]
           id?: string
+          is_locked?: boolean | null
           is_objective?: boolean | null
+          lock_reason?: string | null
+          locked_at?: string | null
+          locked_by?: string | null
           manager_rating?: number | null
           measurable?: string | null
           objective_id?: string | null
@@ -28152,6 +28308,7 @@ export type Database = {
           specific?: string | null
           start_date?: string
           status?: Database["public"]["Enums"]["goal_status"]
+          submitted_at?: string | null
           target_value?: number | null
           template_id?: string | null
           time_bound?: string | null
@@ -28161,6 +28318,13 @@ export type Database = {
           weighting?: number | null
         }
         Relationships: [
+          {
+            foreignKeyName: "performance_goals_approved_by_fkey"
+            columns: ["approved_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "performance_goals_assigned_by_fkey"
             columns: ["assigned_by"]
@@ -28185,6 +28349,20 @@ export type Database = {
           {
             foreignKeyName: "performance_goals_employee_id_fkey"
             columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "performance_goals_goal_cycle_id_fkey"
+            columns: ["goal_cycle_id"]
+            isOneToOne: false
+            referencedRelation: "goal_cycles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "performance_goals_locked_by_fkey"
+            columns: ["locked_by"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
@@ -37561,6 +37739,7 @@ export type Database = {
         Args: { p_employee_id: string }
         Returns: boolean
       }
+      is_goal_editable: { Args: { p_goal_id: string }; Returns: boolean }
       is_hrplus_internal_user: { Args: never; Returns: boolean }
       is_messaging_channel_admin: {
         Args: { p_channel_id: string; p_user_id: string }
