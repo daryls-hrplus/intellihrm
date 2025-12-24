@@ -28,8 +28,8 @@ import {
   XCircle,
   Clock,
   TrendingUp,
-  Users,
 } from "lucide-react";
+import type { TourAnalyticsSummary } from "@/types/tours";
 
 const COLORS = ["hsl(var(--primary))", "hsl(var(--chart-2))", "hsl(var(--chart-3))", "hsl(var(--chart-4))"];
 
@@ -42,7 +42,7 @@ export function TourAnalyticsDashboard() {
         .select("*");
 
       if (error) throw error;
-      return data;
+      return data as TourAnalyticsSummary[];
     },
   });
 
@@ -51,7 +51,7 @@ export function TourAnalyticsDashboard() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("enablement_tour_analytics")
-        .select("*, enablement_tours(name)")
+        .select("*, enablement_tours(tour_name)")
         .order("created_at", { ascending: false })
         .limit(50);
 
@@ -256,7 +256,6 @@ export function TourAnalyticsDashboard() {
                   <TableHead className="text-right">Completions</TableHead>
                   <TableHead className="text-right">Skips</TableHead>
                   <TableHead className="text-right">Completion Rate</TableHead>
-                  <TableHead className="text-right">Unique Users</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -286,12 +285,6 @@ export function TourAnalyticsDashboard() {
                       >
                         {(tour.completion_rate || 0).toFixed(0)}%
                       </Badge>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex items-center justify-end gap-1">
-                        <Users className="h-3 w-3 text-muted-foreground" />
-                        {tour.unique_users || 0}
-                      </div>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -339,9 +332,9 @@ export function TourAnalyticsDashboard() {
                       </Badge>
                     </TableCell>
                     <TableCell>
-                      {(event.enablement_tours as { name: string } | null)?.name || "-"}
+                      {(event.enablement_tours as { tour_name: string } | null)?.tour_name || "-"}
                     </TableCell>
-                    <TableCell>{event.step_index ?? "-"}</TableCell>
+                    <TableCell>{event.step_id ? "Yes" : "-"}</TableCell>
                     <TableCell className="text-muted-foreground">
                       <div className="flex items-center gap-1">
                         <Clock className="h-3 w-3" />

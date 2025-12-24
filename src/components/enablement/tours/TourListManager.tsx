@@ -41,7 +41,6 @@ import {
   Eye,
   EyeOff,
   Play,
-  MapPin,
 } from "lucide-react";
 import type { Tour } from "@/types/tours";
 
@@ -50,29 +49,46 @@ interface TourListManagerProps {
 }
 
 const TOUR_TYPES = [
-  { value: "onboarding", label: "Onboarding" },
-  { value: "feature_intro", label: "Feature Introduction" },
-  { value: "workflow_guide", label: "Workflow Guide" },
-  { value: "help", label: "Help" },
+  { value: "walkthrough", label: "Walkthrough" },
+  { value: "spotlight", label: "Spotlight" },
+  { value: "announcement", label: "Announcement" },
 ];
+
+const AUTO_TRIGGER_OPTIONS = [
+  { value: "first_visit", label: "First Visit" },
+  { value: "first_action", label: "First Action" },
+  { value: "manual", label: "Manual" },
+];
+
+type TourFormData = {
+  tour_code: string;
+  tour_name: string;
+  description: string;
+  tour_type: "walkthrough" | "spotlight" | "announcement";
+  module_code: string;
+  feature_code: string;
+  trigger_route: string;
+  auto_trigger_on: "first_visit" | "first_action" | "manual" | null;
+  priority: number;
+  is_active: boolean;
+};
 
 export function TourListManager({ onSelectTour }: TourListManagerProps) {
   const queryClient = useQueryClient();
   const [searchQuery, setSearchQuery] = useState("");
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [editingTour, setEditingTour] = useState<Tour | null>(null);
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<TourFormData>({
     tour_code: "",
-    name: "",
+    tour_name: "",
     description: "",
-    tour_type: "feature_intro",
+    tour_type: "walkthrough",
     module_code: "",
     feature_code: "",
     trigger_route: "",
-    trigger_mode: "manual" as const,
+    auto_trigger_on: "manual",
     priority: 100,
     is_active: true,
-    auto_trigger_for_new_users: false,
   });
 
   const { data: tours, isLoading } = useQuery({
@@ -89,7 +105,7 @@ export function TourListManager({ onSelectTour }: TourListManagerProps) {
   });
 
   const createMutation = useMutation({
-    mutationFn: async (data: typeof formData) => {
+    mutationFn: async (data: TourFormData) => {
       const { data: result, error } = await supabase
         .from("enablement_tours")
         .insert([data])
@@ -111,7 +127,7 @@ export function TourListManager({ onSelectTour }: TourListManagerProps) {
   });
 
   const updateMutation = useMutation({
-    mutationFn: async ({ id, ...data }: Partial<Tour> & { id: string }) => {
+    mutationFn: async ({ id, ...data }: Partial<TourFormData> & { id: string }) => {
       const { data: result, error } = await supabase
         .from("enablement_tours")
         .update(data)
@@ -172,16 +188,15 @@ export function TourListManager({ onSelectTour }: TourListManagerProps) {
   const resetForm = () => {
     setFormData({
       tour_code: "",
-      name: "",
+      tour_name: "",
       description: "",
-      tour_type: "feature_intro",
+      tour_type: "walkthrough",
       module_code: "",
       feature_code: "",
       trigger_route: "",
-      trigger_mode: "manual",
+      auto_trigger_on: "manual",
       priority: 100,
       is_active: true,
-      auto_trigger_for_new_users: false,
     });
   };
 
@@ -189,22 +204,21 @@ export function TourListManager({ onSelectTour }: TourListManagerProps) {
     setEditingTour(tour);
     setFormData({
       tour_code: tour.tour_code,
-      name: tour.name,
+      tour_name: tour.tour_name,
       description: tour.description || "",
       tour_type: tour.tour_type,
       module_code: tour.module_code || "",
       feature_code: tour.feature_code || "",
       trigger_route: tour.trigger_route || "",
-      trigger_mode: tour.trigger_mode,
+      auto_trigger_on: (tour.auto_trigger_on as TourFormData["auto_trigger_on"]) || "manual",
       priority: tour.priority,
       is_active: tour.is_active,
-      auto_trigger_for_new_users: tour.auto_trigger_for_new_users,
     });
   };
 
   const handleSubmit = () => {
-    if (!formData.tour_code || !formData.name) {
-      toast.error("Tour code and name are required");
+    if (!formData.tour_code || !formData.tour_name || !formData.module_code) {
+      toast.error("Tour code, name, and module code are required");
       return;
     }
 
@@ -217,7 +231,7 @@ export function TourListManager({ onSelectTour }: TourListManagerProps) {
 
   const filteredTours = tours?.filter(
     (tour) =>
-      tour.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      tour.tour_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       tour.tour_code.toLowerCase().includes(searchQuery.toLowerCase()) ||
       tour.module_code?.toLowerCase().includes(searchQuery.toLowerCase())
   );
@@ -282,7 +296,7 @@ export function TourListManager({ onSelectTour }: TourListManagerProps) {
                   <TableRow key={tour.id}>
                     <TableCell>
                       <div>
-                        <div className="font-medium">{tour.name}</div>
+                        <div className="font-medium">{tour.tour_name}</div>
                         <div className="text-xs text-muted-foreground">
                           {tour.tour_code}
                         </div>
@@ -321,7 +335,7 @@ export function TourListManager({ onSelectTour }: TourListManagerProps) {
                             Inactive
                           </Badge>
                         )}
-                        {tour.auto_trigger_for_new_users && (
+                        {tour.auto_trigger_on && tour.auto_trigger_on !== "manual" && (
                           <Badge variant="outline" className="text-xs">
                             <Play className="h-3 w-3 mr-1" />
                             Auto
@@ -426,13 +440,13 @@ export function TourListManager({ onSelectTour }: TourListManagerProps) {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="name">Name *</Label>
+                <Label htmlFor="tour_name">Name *</Label>
                 <Input
-                  id="name"
+                  id="tour_name"
                   placeholder="e.g., Dashboard Introduction"
-                  value={formData.name}
+                  value={formData.tour_name}
                   onChange={(e) =>
-                    setFormData({ ...formData, name: e.target.value })
+                    setFormData({ ...formData, tour_name: e.target.value })
                   }
                 />
               </div>
@@ -455,7 +469,7 @@ export function TourListManager({ onSelectTour }: TourListManagerProps) {
                 <Label htmlFor="tour_type">Tour Type</Label>
                 <Select
                   value={formData.tour_type}
-                  onValueChange={(value) =>
+                  onValueChange={(value: "walkthrough" | "spotlight" | "announcement") =>
                     setFormData({ ...formData, tour_type: value })
                   }
                 >
@@ -472,20 +486,22 @@ export function TourListManager({ onSelectTour }: TourListManagerProps) {
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="trigger_mode">Trigger Mode</Label>
+                <Label htmlFor="auto_trigger_on">Auto Trigger</Label>
                 <Select
-                  value={formData.trigger_mode}
-                  onValueChange={(value: "manual" | "auto" | "contextual") =>
-                    setFormData({ ...formData, trigger_mode: value })
+                  value={formData.auto_trigger_on || "manual"}
+                  onValueChange={(value: "first_visit" | "first_action" | "manual") =>
+                    setFormData({ ...formData, auto_trigger_on: value })
                   }
                 >
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="manual">Manual</SelectItem>
-                    <SelectItem value="auto">Automatic</SelectItem>
-                    <SelectItem value="contextual">Contextual</SelectItem>
+                    {AUTO_TRIGGER_OPTIONS.map((opt) => (
+                      <SelectItem key={opt.value} value={opt.value}>
+                        {opt.label}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
@@ -493,7 +509,7 @@ export function TourListManager({ onSelectTour }: TourListManagerProps) {
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="module_code">Module Code</Label>
+                <Label htmlFor="module_code">Module Code *</Label>
                 <Input
                   id="module_code"
                   placeholder="e.g., dashboard"
@@ -544,30 +560,15 @@ export function TourListManager({ onSelectTour }: TourListManagerProps) {
               </div>
             </div>
 
-            <div className="flex items-center justify-between gap-4 pt-2">
-              <div className="flex items-center space-x-2">
-                <Switch
-                  id="is_active"
-                  checked={formData.is_active}
-                  onCheckedChange={(checked) =>
-                    setFormData({ ...formData, is_active: checked })
-                  }
-                />
-                <Label htmlFor="is_active">Active</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Switch
-                  id="auto_trigger"
-                  checked={formData.auto_trigger_for_new_users}
-                  onCheckedChange={(checked) =>
-                    setFormData({
-                      ...formData,
-                      auto_trigger_for_new_users: checked,
-                    })
-                  }
-                />
-                <Label htmlFor="auto_trigger">Auto-trigger for new users</Label>
-              </div>
+            <div className="flex items-center space-x-2 pt-2">
+              <Switch
+                id="is_active"
+                checked={formData.is_active}
+                onCheckedChange={(checked) =>
+                  setFormData({ ...formData, is_active: checked })
+                }
+              />
+              <Label htmlFor="is_active">Active</Label>
             </div>
           </div>
 

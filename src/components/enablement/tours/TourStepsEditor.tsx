@@ -50,7 +50,7 @@ import {
   Target,
   Video,
 } from "lucide-react";
-import type { TourStep, TourWithSteps } from "@/types/tours";
+import type { TourStep, Tour } from "@/types/tours";
 
 interface TourStepsEditorProps {
   tourId: string;
@@ -59,19 +59,31 @@ interface TourStepsEditorProps {
 
 const STEP_PLACEMENTS = [
   { value: "top", label: "Top" },
-  { value: "top-start", label: "Top Start" },
-  { value: "top-end", label: "Top End" },
   { value: "bottom", label: "Bottom" },
-  { value: "bottom-start", label: "Bottom Start" },
-  { value: "bottom-end", label: "Bottom End" },
   { value: "left", label: "Left" },
-  { value: "left-start", label: "Left Start" },
-  { value: "left-end", label: "Left End" },
   { value: "right", label: "Right" },
-  { value: "right-start", label: "Right Start" },
-  { value: "right-end", label: "Right End" },
+  { value: "auto", label: "Auto" },
   { value: "center", label: "Center (Modal)" },
 ];
+
+const HIGHLIGHT_TYPES = [
+  { value: "spotlight", label: "Spotlight" },
+  { value: "tooltip", label: "Tooltip" },
+  { value: "modal", label: "Modal" },
+  { value: "beacon", label: "Beacon" },
+];
+
+type StepFormData = {
+  title: string;
+  content: string;
+  target_selector: string;
+  placement: "top" | "bottom" | "left" | "right" | "auto" | "center";
+  highlight_type: "spotlight" | "tooltip" | "modal" | "beacon";
+  skip_if_missing: boolean;
+  disable_overlay: boolean;
+  disable_scroll: boolean;
+  spot_light_padding: number;
+};
 
 interface SortableStepItemProps {
   step: TourStep;
@@ -121,7 +133,7 @@ function SortableStepItem({ step, onEdit, onDelete }: SortableStepItemProps) {
             <Target className="h-3 w-3 inline mr-1" />
             {step.target_selector}
           </code>
-          {step.video_url && (
+          {step.video_id && (
             <Badge variant="secondary" className="text-xs">
               <Video className="h-3 w-3 mr-1" />
               Video
@@ -149,21 +161,22 @@ function SortableStepItem({ step, onEdit, onDelete }: SortableStepItemProps) {
   );
 }
 
+type TourWithDbSteps = Tour & { enablement_tour_steps: TourStep[] };
+
 export function TourStepsEditor({ tourId, onBack }: TourStepsEditorProps) {
   const queryClient = useQueryClient();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingStep, setEditingStep] = useState<TourStep | null>(null);
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<StepFormData>({
     title: "",
     content: "",
     target_selector: "",
     placement: "bottom",
-    highlight_target: true,
-    allow_interaction: false,
-    wait_for_element: true,
-    video_url: "",
-    action_button_text: "",
-    action_button_url: "",
+    highlight_type: "spotlight",
+    skip_if_missing: true,
+    disable_overlay: false,
+    disable_scroll: false,
+    spot_light_padding: 10,
   });
 
   const sensors = useSensors(
@@ -189,12 +202,12 @@ export function TourStepsEditor({ tourId, onBack }: TourStepsEditorProps) {
         data.enablement_tour_steps.sort((a: TourStep, b: TourStep) => a.step_order - b.step_order);
       }
       
-      return data as TourWithSteps;
+      return data as TourWithDbSteps;
     },
   });
 
   const createStepMutation = useMutation({
-    mutationFn: async (data: typeof formData) => {
+    mutationFn: async (data: StepFormData) => {
       const newOrder = (tour?.enablement_tour_steps?.length || 0) + 1;
       const { data: result, error } = await supabase
         .from("enablement_tour_steps")
@@ -221,7 +234,7 @@ export function TourStepsEditor({ tourId, onBack }: TourStepsEditorProps) {
   });
 
   const updateStepMutation = useMutation({
-    mutationFn: async ({ id, ...data }: Partial<TourStep> & { id: string }) => {
+    mutationFn: async ({ id, ...data }: Partial<StepFormData> & { id: string }) => {
       const { data: result, error } = await supabase
         .from("enablement_tour_steps")
         .update(data)
@@ -264,18 +277,13 @@ export function TourStepsEditor({ tourId, onBack }: TourStepsEditorProps) {
 
   const reorderMutation = useMutation({
     mutationFn: async (steps: { id: string; step_order: number }[]) => {
-      const { error } = await supabase.rpc("update_tour_step_orders", {
-        step_updates: steps,
-      });
-
-      if (error) {
-        // Fallback to individual updates if RPC doesn't exist
-        for (const step of steps) {
-          await supabase
-            .from("enablement_tour_steps")
-            .update({ step_order: step.step_order })
-            .eq("id", step.id);
-        }
+      // Update each step individually
+      for (const step of steps) {
+        const { error } = await supabase
+          .from("enablement_tour_steps")
+          .update({ step_order: step.step_order })
+          .eq("id", step.id);
+        if (error) throw error;
       }
     },
     onSuccess: () => {
@@ -292,12 +300,11 @@ export function TourStepsEditor({ tourId, onBack }: TourStepsEditorProps) {
       content: "",
       target_selector: "",
       placement: "bottom",
-      highlight_target: true,
-      allow_interaction: false,
-      wait_for_element: true,
-      video_url: "",
-      action_button_text: "",
-      action_button_url: "",
+      highlight_type: "spotlight",
+      skip_if_missing: true,
+      disable_overlay: false,
+      disable_scroll: false,
+      spot_light_padding: 10,
     });
   };
 
@@ -308,12 +315,11 @@ export function TourStepsEditor({ tourId, onBack }: TourStepsEditorProps) {
       content: step.content || "",
       target_selector: step.target_selector,
       placement: step.placement || "bottom",
-      highlight_target: step.highlight_target ?? true,
-      allow_interaction: step.allow_interaction ?? false,
-      wait_for_element: step.wait_for_element ?? true,
-      video_url: step.video_url || "",
-      action_button_text: step.action_button_text || "",
-      action_button_url: step.action_button_url || "",
+      highlight_type: step.highlight_type || "spotlight",
+      skip_if_missing: step.skip_if_missing ?? true,
+      disable_overlay: step.disable_overlay ?? false,
+      disable_scroll: step.disable_scroll ?? false,
+      spot_light_padding: step.spot_light_padding ?? 10,
     });
     setIsDialogOpen(true);
   };
@@ -384,7 +390,7 @@ export function TourStepsEditor({ tourId, onBack }: TourStepsEditorProps) {
                 <ArrowLeft className="h-4 w-4" />
               </Button>
               <div>
-                <CardTitle>{tour.name}</CardTitle>
+                <CardTitle>{tour.tour_name}</CardTitle>
                 <CardDescription>
                   {tour.enablement_tour_steps?.length || 0} steps • Drag to
                   reorder
@@ -497,7 +503,7 @@ export function TourStepsEditor({ tourId, onBack }: TourStepsEditorProps) {
                 <Label htmlFor="placement">Placement</Label>
                 <Select
                   value={formData.placement}
-                  onValueChange={(value) =>
+                  onValueChange={(value: StepFormData["placement"]) =>
                     setFormData({ ...formData, placement: value })
                   }
                 >
@@ -514,79 +520,72 @@ export function TourStepsEditor({ tourId, onBack }: TourStepsEditorProps) {
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="video_url">Video URL (optional)</Label>
-                <Input
-                  id="video_url"
-                  placeholder="https://..."
-                  value={formData.video_url}
-                  onChange={(e) =>
-                    setFormData({ ...formData, video_url: e.target.value })
+                <Label htmlFor="highlight_type">Highlight Type</Label>
+                <Select
+                  value={formData.highlight_type}
+                  onValueChange={(value: StepFormData["highlight_type"]) =>
+                    setFormData({ ...formData, highlight_type: value })
                   }
-                />
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {HIGHLIGHT_TYPES.map((h) => (
+                      <SelectItem key={h.value} value={h.value}>
+                        {h.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="action_button_text">Action Button Text</Label>
-                <Input
-                  id="action_button_text"
-                  placeholder="e.g., Learn More"
-                  value={formData.action_button_text}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      action_button_text: e.target.value,
-                    })
-                  }
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="action_button_url">Action Button URL</Label>
-                <Input
-                  id="action_button_url"
-                  placeholder="/help/feature"
-                  value={formData.action_button_url}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      action_button_url: e.target.value,
-                    })
-                  }
-                />
-              </div>
+            <div className="space-y-2">
+              <Label htmlFor="spot_light_padding">Spotlight Padding (px)</Label>
+              <Input
+                id="spot_light_padding"
+                type="number"
+                value={formData.spot_light_padding}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    spot_light_padding: parseInt(e.target.value) || 10,
+                  })
+                }
+              />
             </div>
 
             <div className="flex flex-wrap gap-6 pt-2">
               <div className="flex items-center space-x-2">
                 <Switch
-                  id="highlight_target"
-                  checked={formData.highlight_target}
+                  id="skip_if_missing"
+                  checked={formData.skip_if_missing}
                   onCheckedChange={(checked) =>
-                    setFormData({ ...formData, highlight_target: checked })
+                    setFormData({ ...formData, skip_if_missing: checked })
                   }
                 />
-                <Label htmlFor="highlight_target">Highlight target</Label>
+                <Label htmlFor="skip_if_missing">Skip if element missing</Label>
               </div>
               <div className="flex items-center space-x-2">
                 <Switch
-                  id="allow_interaction"
-                  checked={formData.allow_interaction}
+                  id="disable_overlay"
+                  checked={formData.disable_overlay}
                   onCheckedChange={(checked) =>
-                    setFormData({ ...formData, allow_interaction: checked })
+                    setFormData({ ...formData, disable_overlay: checked })
                   }
                 />
-                <Label htmlFor="allow_interaction">Allow interaction</Label>
+                <Label htmlFor="disable_overlay">Disable overlay</Label>
               </div>
               <div className="flex items-center space-x-2">
                 <Switch
-                  id="wait_for_element"
-                  checked={formData.wait_for_element}
+                  id="disable_scroll"
+                  checked={formData.disable_scroll}
                   onCheckedChange={(checked) =>
-                    setFormData({ ...formData, wait_for_element: checked })
+                    setFormData({ ...formData, disable_scroll: checked })
                   }
                 />
-                <Label htmlFor="wait_for_element">Wait for element</Label>
+                <Label htmlFor="disable_scroll">Disable scroll</Label>
               </div>
             </div>
           </div>
