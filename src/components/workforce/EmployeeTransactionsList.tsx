@@ -298,6 +298,7 @@ export function EmployeeTransactionsList({
               <TableHead>{t("workforce.modules.transactions.transactionNumber")}</TableHead>
               <TableHead>{t("workforce.modules.transactions.transactionType")}</TableHead>
               <TableHead>{t("common.employee")}</TableHead>
+              <TableHead>{t("common.position")}</TableHead>
               <TableHead>{t("workforce.modules.transactions.effectiveDate")}</TableHead>
               <TableHead>{t("common.status")}</TableHead>
               <TableHead>{t("workforce.modules.transactions.created")}</TableHead>
@@ -307,14 +308,14 @@ export function EmployeeTransactionsList({
           <TableBody>
             {isLoading ? (
               <TableRow>
-                <TableCell colSpan={8} className="text-center py-8">
+                <TableCell colSpan={9} className="text-center py-8">
                   <Loader2 className="h-6 w-6 animate-spin mx-auto" />
                 </TableCell>
               </TableRow>
             ) : filteredTransactions.length === 0 ? (
               <TableRow>
                 <TableCell
-                  colSpan={8}
+                  colSpan={9}
                   className="text-center py-8 text-muted-foreground"
                 >
                   {t("workforce.modules.transactions.noTransactionsFound")}
@@ -364,6 +365,9 @@ export function EmployeeTransactionsList({
                       {transaction.employee?.full_name ||
                         transaction.employee?.email ||
                         "N/A"}
+                    </TableCell>
+                    <TableCell>
+                      {transaction.position?.title || "—"}
                     </TableCell>
                     <TableCell>
                       {formatDateForDisplay(transaction.effective_date, "MMM d, yyyy")}
