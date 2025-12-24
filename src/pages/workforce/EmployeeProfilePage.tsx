@@ -84,6 +84,8 @@ interface EmployeeProfile {
     start_date: string;
     is_primary: boolean;
     is_active: boolean;
+    assignment_type: string | null;
+    pay_group_name: string | null;
   }[];
 }
 
@@ -150,6 +152,7 @@ export default function EmployeeProfilePage() {
           start_date,
           is_primary,
           is_active,
+          assignment_type,
           positions:position_id (
             title,
             departments:department_id (
@@ -158,6 +161,9 @@ export default function EmployeeProfilePage() {
                 name
               )
             )
+          ),
+          pay_groups:pay_group_id (
+            name
           )
         `)
         .eq('employee_id', employeeId);
@@ -172,6 +178,8 @@ export default function EmployeeProfilePage() {
         start_date: ep.start_date,
         is_primary: ep.is_primary,
         is_active: ep.is_active,
+        assignment_type: ep.assignment_type,
+        pay_group_name: ep.pay_groups?.name || null,
       }));
 
       setEmployee({
@@ -393,18 +401,39 @@ export default function EmployeeProfilePage() {
                               <p className="text-sm text-muted-foreground">{position.department_name}</p>
                               <p className="text-sm text-muted-foreground">{position.company_name}</p>
                             </div>
-                            <div className="flex gap-2">
+                            <div className="flex flex-wrap gap-2 justify-end">
                               {position.is_primary && (
                                 <Badge variant="outline" className="text-xs">{t("workforce.profile.primary")}</Badge>
+                              )}
+                              {position.assignment_type && (
+                                <Badge 
+                                  variant="outline" 
+                                  className={cn(
+                                    "text-xs capitalize",
+                                    position.assignment_type === 'permanent' && "border-green-500/50 text-green-600",
+                                    position.assignment_type === 'acting' && "border-amber-500/50 text-amber-600",
+                                    position.assignment_type === 'temporary' && "border-blue-500/50 text-blue-600"
+                                  )}
+                                >
+                                  {position.assignment_type}
+                                </Badge>
                               )}
                               <Badge variant={position.is_active ? "default" : "secondary"} className="text-xs">
                                 {position.is_active ? t("common.active") : t("workforce.profile.ended")}
                               </Badge>
                             </div>
                           </div>
-                          <div className="mt-2 flex items-center gap-1 text-xs text-muted-foreground">
-                            <Calendar className="h-3 w-3" />
-                            <span>{t("workforce.profile.started")} {format(new Date(position.start_date), 'MMM d, yyyy')}</span>
+                          <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
+                            <div className="flex items-center gap-1">
+                              <Calendar className="h-3 w-3" />
+                              <span>{t("workforce.profile.started")} {format(new Date(position.start_date), 'MMM d, yyyy')}</span>
+                            </div>
+                            {position.pay_group_name && (
+                              <div className="flex items-center gap-1">
+                                <Wallet className="h-3 w-3" />
+                                <span>{position.pay_group_name}</span>
+                              </div>
+                            )}
                           </div>
                         </div>
                       ))}
