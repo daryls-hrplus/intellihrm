@@ -50,13 +50,14 @@ import { WorkflowColumnComponent } from "./WorkflowColumn";
 import { ContentItemCard } from "./ContentItemCard";
 import { AddContentItemDialog } from "./AddContentItemDialog";
 
-const WORKFLOW_COLUMNS: { id: WorkflowColumn; label: string; color: string }[] = [
-  { id: "backlog", label: "Backlog", color: "bg-muted" },
-  { id: "planning", label: "Planning", color: "bg-purple-500/10" },
-  { id: "development", label: "Development", color: "bg-blue-500/10" },
-  { id: "review", label: "Review", color: "bg-amber-500/10" },
-  { id: "published", label: "Published", color: "bg-green-500/10" },
-  { id: "maintenance", label: "Maintenance", color: "bg-orange-500/10" },
+const WORKFLOW_COLUMNS: { id: WorkflowColumn; label: string; color: string; description?: string }[] = [
+  { id: "development_backlog", label: "Dev Backlog", color: "bg-slate-500/10", description: "New features awaiting development" },
+  { id: "in_development", label: "In Development", color: "bg-blue-500/10", description: "Active development work" },
+  { id: "testing_review", label: "Testing/Review", color: "bg-amber-500/10", description: "QA and stakeholder review" },
+  { id: "documentation", label: "Documentation", color: "bg-purple-500/10", description: "Technical docs & user guides" },
+  { id: "ready_for_enablement", label: "Ready for Enablement", color: "bg-cyan-500/10", description: "Approved for enablement artifacts" },
+  { id: "published", label: "Published", color: "bg-green-500/10", description: "Live and available" },
+  { id: "maintenance", label: "Maintenance", color: "bg-orange-500/10", description: "Updates and revisions" },
 ];
 
 interface ContentWorkflowBoardProps {
@@ -93,22 +94,19 @@ export function ContentWorkflowBoard({ releaseId }: ContentWorkflowBoardProps) {
 
   const itemsByColumn = useMemo(() => {
     const grouped: Record<WorkflowColumn, EnablementContentStatus[]> = {
-      backlog: [],
-      planning: [],
-      development: [],
-      review: [],
+      development_backlog: [],
+      in_development: [],
+      testing_review: [],
+      documentation: [],
+      ready_for_enablement: [],
       published: [],
       maintenance: [],
       archived: [],
     };
 
-    // Merge planning items into backlog for display
-
     filteredItems.forEach((item) => {
-      // Merge planning into backlog
-      const targetStatus = item.workflow_status === "planning" ? "backlog" : item.workflow_status;
-      if (grouped[targetStatus]) {
-        grouped[targetStatus].push(item);
+      if (grouped[item.workflow_status]) {
+        grouped[item.workflow_status].push(item);
       }
     });
 
