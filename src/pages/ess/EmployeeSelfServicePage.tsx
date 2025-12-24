@@ -28,6 +28,7 @@ import {
   DollarSign,
   Receipt,
   Building2,
+  ArrowRightLeft,
 } from "lucide-react";
 
 export default function EmployeeSelfServicePage() {
@@ -56,6 +57,7 @@ export default function EmployeeSelfServicePage() {
     jobs: { title: t("ess.modules.jobs.title"), description: t("ess.modules.jobs.description"), href: "/ess/jobs", icon: Briefcase, color: "bg-blue-500/10 text-blue-600", tabCode: "ess-jobs" },
     compensation: { title: t("ess.modules.compensation.title"), description: t("ess.modules.compensation.description"), href: "/ess/compensation", icon: DollarSign, color: "bg-emerald-500/10 text-emerald-600", tabCode: "ess-compensation" },
     banking: { title: t("ess.modules.banking.title", "Banking"), description: t("ess.modules.banking.description", "Manage your bank accounts"), href: "/ess/banking", icon: Building2, color: "bg-sky-500/10 text-sky-600", tabCode: "ess-banking" },
+    transactions: { title: t("ess.modules.transactions.title", "My Transactions"), description: t("ess.modules.transactions.description", "View your employment transaction history"), href: "/ess/transactions", icon: ArrowRightLeft, color: "bg-indigo-500/10 text-indigo-600", tabCode: "ess-transactions" },
     feedback: { title: t("ess.modules.feedback.title"), description: t("ess.modules.feedback.description"), href: "/ess/feedback", icon: MessageCircle, color: "bg-violet-500/10 text-violet-600", tabCode: "ess-feedback" },
     recognition: { title: t("ess.modules.recognition.title"), description: t("ess.modules.recognition.description"), href: "/ess/recognition", icon: Award, color: "bg-amber-500/10 text-amber-600", tabCode: "ess-recognition" },
     reminders: { title: t("ess.modules.reminders.title"), description: t("ess.modules.reminders.description"), href: "/ess/reminders", icon: Bell, color: "bg-rose-500/10 text-rose-600", tabCode: "ess-reminders" },
@@ -68,7 +70,7 @@ export default function EmployeeSelfServicePage() {
   const sections: ModuleSection[] = [
     {
       titleKey: "Personal",
-      items: filterByAccess([allModules.profile, allModules.documents, allModules.letters, allModules.jobs]),
+      items: filterByAccess([allModules.profile, allModules.documents, allModules.letters, allModules.jobs, allModules.transactions]),
     },
     {
       titleKey: "Time & Leave",

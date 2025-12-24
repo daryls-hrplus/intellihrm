@@ -174,6 +174,7 @@ import BenefitCalculatorPage from "./pages/benefits/BenefitCalculatorPage";
 import BenefitProvidersPage from "./pages/benefits/BenefitProvidersPage";
 import MyBenefitsPage from "./pages/ess/MyBenefitsPage";
 import MyBankingPage from "./pages/ess/MyBankingPage";
+import MyTransactionsPage from "./pages/ess/MyTransactionsPage";
 
 // Training pages
 import TrainingDashboardPage from "./pages/training/TrainingDashboardPage";
@@ -669,6 +670,14 @@ const App = () => (
               element={
                 <ProtectedRoute moduleCode="ess">
                   <MyBankingPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/ess/transactions"
+              element={
+                <ProtectedRoute moduleCode="ess">
+                  <MyTransactionsPage />
                 </ProtectedRoute>
               }
             />
