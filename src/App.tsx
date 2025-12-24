@@ -61,6 +61,7 @@ import AIGovernancePage from "./pages/admin/AIGovernancePage";
 import EnablementHubPage from "./pages/enablement/EnablementHubPage";
 import ApplicationDocsGeneratorPage from "./pages/enablement/ApplicationDocsGeneratorPage";
 import FeatureCatalogPage from "./pages/enablement/FeatureCatalogPage";
+import FeatureDatabasePage from "./pages/enablement/FeatureDatabasePage";
 import TemplateLibraryPage from "./pages/enablement/TemplateLibraryPage";
 import EnablementAnalyticsPage from "./pages/enablement/EnablementAnalyticsPage";
 import SCORMGeneratorPage from "./pages/enablement/SCORMGeneratorPage";
@@ -3371,6 +3372,16 @@ const App = () => (
                 <ProtectedRoute requiredRoles={["admin"]}>
                   <EnablementAccessGuard>
                     <FeatureCatalogPage />
+                  </EnablementAccessGuard>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/enablement/feature-database"
+              element={
+                <ProtectedRoute requiredRoles={["admin"]}>
+                  <EnablementAccessGuard>
+                    <FeatureDatabasePage />
                   </EnablementAccessGuard>
                 </ProtectedRoute>
               }
