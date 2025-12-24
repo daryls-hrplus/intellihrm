@@ -376,6 +376,10 @@
       "assignments": {
         "title": "Asignaciones de Empleados",
         "description": "Gestionar asignaciones de posiciones"
+      },
+      "qualifications": {
+        "title": "Cualificaciones",
+        "description": "Gestionar cualificaciones académicas y certificaciones profesionales"
       }
     },
     "profile": {

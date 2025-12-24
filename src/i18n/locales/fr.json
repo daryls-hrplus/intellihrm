@@ -376,6 +376,10 @@
       "assignments": {
         "title": "Affectations des Employés",
         "description": "Gérer les affectations de postes"
+      },
+      "qualifications": {
+        "title": "Qualifications",
+        "description": "Gérer les qualifications académiques et les certifications professionnelles"
       }
     },
     "profile": {

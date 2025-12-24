@@ -270,7 +270,7 @@ export default function QualificationsPage() {
         <Breadcrumbs
           items={[
             { label: t("nav.workforce"), href: "/workforce" },
-            { label: t("workforce.qualifications.title", "Qualifications") },
+            { label: t("workforce.modules.qualifications.title", "Qualifications") },
           ]}
         />
         {/* Header */}
