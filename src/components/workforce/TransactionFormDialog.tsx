@@ -78,6 +78,13 @@ interface Company {
   name: string;
 }
 
+interface PayGroup {
+  id: string;
+  name: string;
+  code: string;
+  company_id: string;
+}
+
 export function TransactionFormDialog({
   open,
   onOpenChange,
@@ -93,6 +100,7 @@ export function TransactionFormDialog({
   const [positions, setPositions] = useState<Position[]>([]);
   const [departments, setDepartments] = useState<Department[]>([]);
   const [companies, setCompanies] = useState<Company[]>([]);
+  const [payGroups, setPayGroups] = useState<PayGroup[]>([]);
   const [transactionTypeId, setTransactionTypeId] = useState<string>("");
   const [employeePositions, setEmployeePositions] = useState<EmployeePosition[]>([]);
 
@@ -175,17 +183,20 @@ export function TransactionFormDialog({
       positionsRes,
       departmentsRes,
       companiesRes,
+      payGroupsRes,
     ] = await Promise.all([
       supabase.from("profiles").select("id, full_name, email").order("full_name"),
       supabase.from("positions").select("id, title, code, department_id").eq("is_active", true).order("title"),
       supabase.from("departments").select("id, name").eq("is_active", true).order("name"),
       supabase.from("companies").select("id, name").eq("is_active", true).order("name"),
+      supabase.from("pay_groups").select("id, name, code, company_id").eq("is_active", true).order("name"),
     ]);
 
     setEmployees(employeesRes.data || []);
     setPositions(positionsRes.data || []);
     setDepartments(departmentsRes.data || []);
     setCompanies(companiesRes.data || []);
+    setPayGroups(payGroupsRes.data || []);
 
     // Load lookup values based on transaction type
     if (transactionType) {
@@ -817,6 +828,27 @@ export function TransactionFormDialog({
                 </SelectContent>
               </Select>
             </div>
+            <div className="space-y-2">
+              <Label>{t("workforce.modules.transactions.form.payGroup", "Pay Group Assignment")}</Label>
+              <Select
+                value={formData.pay_group_id || ""}
+                onValueChange={(v) => setFormData({ ...formData, pay_group_id: v || null })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder={t("workforce.modules.transactions.form.selectPayGroup", "Select pay group (optional)")} />
+                </SelectTrigger>
+                <SelectContent>
+                  {payGroups.map((pg) => (
+                    <SelectItem key={pg.id} value={pg.id}>
+                      {pg.name} ({pg.code})
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground">
+                {t("workforce.modules.transactions.form.payGroupHint", "Leave empty to keep current pay group assignment")}
+              </p>
+            </div>
           </>
         );
 
@@ -916,6 +948,27 @@ export function TransactionFormDialog({
                   ))}
                 </SelectContent>
               </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>{t("workforce.modules.transactions.form.payGroup", "Pay Group Assignment")}</Label>
+              <Select
+                value={formData.pay_group_id || ""}
+                onValueChange={(v) => setFormData({ ...formData, pay_group_id: v || null })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder={t("workforce.modules.transactions.form.selectPayGroup", "Select pay group (optional)")} />
+                </SelectTrigger>
+                <SelectContent>
+                  {payGroups.map((pg) => (
+                    <SelectItem key={pg.id} value={pg.id}>
+                      {pg.name} ({pg.code})
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground">
+                {t("workforce.modules.transactions.form.payGroupHint", "Leave empty to keep current pay group assignment")}
+              </p>
             </div>
           </>
         );

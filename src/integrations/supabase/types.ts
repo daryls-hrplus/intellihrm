@@ -10810,6 +10810,7 @@ export type Database = {
           new_probation_end_date: string | null
           notes: string | null
           original_probation_end_date: string | null
+          pay_group_id: string | null
           position_id: string | null
           probation_end_date: string | null
           promotion_reason_id: string | null
@@ -10855,6 +10856,7 @@ export type Database = {
           new_probation_end_date?: string | null
           notes?: string | null
           original_probation_end_date?: string | null
+          pay_group_id?: string | null
           position_id?: string | null
           probation_end_date?: string | null
           promotion_reason_id?: string | null
@@ -10900,6 +10902,7 @@ export type Database = {
           new_probation_end_date?: string | null
           notes?: string | null
           original_probation_end_date?: string | null
+          pay_group_id?: string | null
           position_id?: string | null
           probation_end_date?: string | null
           promotion_reason_id?: string | null
@@ -11001,6 +11004,13 @@ export type Database = {
             columns: ["hire_type_id"]
             isOneToOne: false
             referencedRelation: "lookup_values"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_transactions_pay_group_id_fkey"
+            columns: ["pay_group_id"]
+            isOneToOne: false
+            referencedRelation: "pay_groups"
             referencedColumns: ["id"]
           },
           {
