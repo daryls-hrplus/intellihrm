@@ -68,12 +68,12 @@ export default function WorkforceForecastingPage() {
   };
 
   const tabs = [
-    { id: "headcount", label: t("workforce.forecasting.headcountForecast"), icon: TrendingUp },
-    { id: "scenario", label: t("workforce.forecasting.scenarioPlanning"), icon: Target },
-    { id: "whatif", label: t("workforce.forecasting.whatIfAnalysis"), icon: Zap },
-    { id: "montecarlo", label: t("workforce.forecasting.monteCarlo"), icon: Activity },
-    { id: "sensitivity", label: t("workforce.forecasting.sensitivityAnalysis"), icon: FlaskConical },
-    { id: "stress", label: t("workforce.forecasting.stressTesting"), icon: Lightbulb },
+    { id: "headcount", label: t("workforce.modules.forecasting.headcountForecast"), icon: TrendingUp },
+    { id: "scenario", label: t("workforce.modules.forecasting.scenarioPlanning"), icon: Target },
+    { id: "whatif", label: t("workforce.modules.forecasting.whatIfAnalysis"), icon: Zap },
+    { id: "montecarlo", label: t("workforce.modules.forecasting.monteCarlo"), icon: Activity },
+    { id: "sensitivity", label: t("workforce.modules.forecasting.sensitivityAnalysis"), icon: FlaskConical },
+    { id: "stress", label: t("workforce.modules.forecasting.stressTesting"), icon: Lightbulb },
   ];
 
   return (
@@ -126,7 +126,7 @@ export default function WorkforceForecastingPage() {
                   <div className="flex items-center gap-2 text-muted-foreground">
                     <AlertCircle className="h-4 w-4" />
                     <CardDescription>
-                      {t("workforce.forecasting.defaultScenariosNote")}
+                      {t("workforce.modules.forecasting.defaultScenariosNote")}
                     </CardDescription>
                   </div>
                 </CardHeader>
@@ -143,7 +143,7 @@ export default function WorkforceForecastingPage() {
                   <div className="flex items-center gap-2 text-muted-foreground">
                     <AlertCircle className="h-4 w-4" />
                     <CardDescription>
-                      {t("workforce.forecasting.defaultScenariosNote")}
+                      {t("workforce.modules.forecasting.defaultScenariosNote")}
                     </CardDescription>
                   </div>
                 </CardHeader>
@@ -160,7 +160,7 @@ export default function WorkforceForecastingPage() {
                   <div className="flex items-center gap-2 text-muted-foreground">
                     <AlertCircle className="h-4 w-4" />
                     <CardDescription>
-                      {t("workforce.forecasting.defaultScenariosNote")}
+                      {t("workforce.modules.forecasting.defaultScenariosNote")}
                     </CardDescription>
                   </div>
                 </CardHeader>
@@ -177,7 +177,7 @@ export default function WorkforceForecastingPage() {
                   <div className="flex items-center gap-2 text-muted-foreground">
                     <AlertCircle className="h-4 w-4" />
                     <CardDescription>
-                      {t("workforce.forecasting.defaultScenariosNote")}
+                      {t("workforce.modules.forecasting.defaultScenariosNote")}
                     </CardDescription>
                   </div>
                 </CardHeader>

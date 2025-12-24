@@ -383,7 +383,14 @@
       },
       "forecasting": {
         "title": "Previsión de Personal",
-        "subtitle": "Planificar y analizar tendencias del personal con herramientas avanzadas de previsión"
+        "subtitle": "Planificar y analizar tendencias del personal con herramientas avanzadas de previsión",
+        "headcountForecast": "Previsión de Plantilla",
+        "scenarioPlanning": "Planificación de Escenarios",
+        "whatIfAnalysis": "Análisis Hipotético",
+        "monteCarlo": "Monte Carlo",
+        "sensitivityAnalysis": "Análisis de Sensibilidad",
+        "stressTesting": "Pruebas de Estrés",
+        "defaultScenariosNote": "Usando escenarios predeterminados. Cree escenarios personalizados en la pestaña de Planificación de Escenarios para un análisis personalizado."
       }
     },
     "profile": {

@@ -383,7 +383,14 @@
       },
       "forecasting": {
         "title": "Prévision des Effectifs",
-        "subtitle": "Planifier et analyser les tendances des effectifs avec des outils de prévision avancés"
+        "subtitle": "Planifier et analyser les tendances des effectifs avec des outils de prévision avancés",
+        "headcountForecast": "Prévision des Effectifs",
+        "scenarioPlanning": "Planification de Scénarios",
+        "whatIfAnalysis": "Analyse Hypothétique",
+        "monteCarlo": "Monte Carlo",
+        "sensitivityAnalysis": "Analyse de Sensibilité",
+        "stressTesting": "Tests de Résistance",
+        "defaultScenariosNote": "Utilisation de scénarios par défaut. Créez des scénarios personnalisés dans l'onglet Planification de Scénarios pour une analyse personnalisée."
       }
     },
     "profile": {
