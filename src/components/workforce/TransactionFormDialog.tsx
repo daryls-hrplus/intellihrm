@@ -817,33 +817,6 @@ export function TransactionFormDialog({
                 </SelectContent>
               </Select>
             </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>{t("workforce.modules.transactions.form.promotion.salaryAdjustment")}</Label>
-                <Input
-                  type="number"
-                  value={formData.salary_adjustment || ""}
-                  onChange={(e) =>
-                    setFormData({ ...formData, salary_adjustment: parseFloat(e.target.value) || null })
-                  }
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>{t("workforce.modules.transactions.form.promotion.adjustmentType")}</Label>
-                <Select
-                  value={formData.salary_adjustment_type || ""}
-                  onValueChange={(v) => setFormData({ ...formData, salary_adjustment_type: v })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder={t("workforce.modules.transactions.form.selectType")} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="percentage">{t("workforce.modules.transactions.form.promotion.percentage")}</SelectItem>
-                    <SelectItem value="fixed">{t("workforce.modules.transactions.form.promotion.fixedAmount")}</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
           </>
         );
 
