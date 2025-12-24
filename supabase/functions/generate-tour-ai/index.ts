@@ -16,6 +16,7 @@ interface TourGenerationRequest {
   target_audience: "new_users" | "managers" | "admins" | "all";
   ui_elements?: string[];
   workflow_steps?: string[];
+  context_instructions?: string;
 }
 
 interface GeneratedTourStep {
@@ -49,6 +50,7 @@ serve(async (req) => {
 
     const request: TourGenerationRequest = await req.json();
     console.log("Generating tour for:", request.module_code, request.feature_code || "module overview");
+    console.log("Context instructions:", request.context_instructions ? "provided" : "none");
 
     const systemPrompt = `You are an expert UX designer and user onboarding specialist for HRplus Cerebra, an enterprise HRMS platform.
 
@@ -59,15 +61,22 @@ Your task is to generate guided tour content that:
 4. Creates meaningful step-by-step guidance
 
 Guidelines:
-- Keep step content under 150 characters
+- Keep step content under 150 characters unless specifically asked for more detail
 - Use action-oriented titles (e.g., "Explore Your Dashboard", "Create Your First Report")
 - Target specific UI elements using data-tour attributes or semantic selectors
 - Suggest appropriate placements based on typical UI layouts
 - For walkthroughs, include 4-8 steps
 - For spotlights, include 2-4 key highlights
-- For announcements, include 1-3 announcement points`;
+- For announcements, include 1-3 announcement points
 
-    const userPrompt = `Generate a ${request.tour_type} tour for the HRplus ${request.module_name} module.
+When creating tours, consider:
+- The user's experience level based on target audience
+- Common workflows and pain points in HR systems
+- Progressive disclosure of information
+- Clear next steps and calls to action`;
+
+    // Build the user prompt with context instructions
+    let userPrompt = `Generate a ${request.tour_type} tour for the HRplus ${request.module_name} module.
 
 Module: ${request.module_name} (${request.module_code})
 ${request.feature_name ? `Feature: ${request.feature_name} (${request.feature_code})` : ""}
@@ -84,7 +93,20 @@ Use these CSS selector patterns for targeting:
 - .card-header, .card-content for card sections
 - button[type="submit"] for submit buttons
 - [role="navigation"] for navigation areas
-- h1, h2 for headings`;
+- h1, h2 for headings
+- [data-tab="tab-name"] for tab elements
+- .table-row, table tbody tr for table rows
+- [data-action="action-name"] for action buttons`;
+
+    // Append context instructions if provided
+    if (request.context_instructions && request.context_instructions.trim()) {
+      userPrompt += `
+
+ADDITIONAL CONTEXT AND INSTRUCTIONS FROM USER:
+${request.context_instructions}
+
+Please incorporate these instructions into the tour generation. Adjust the content, detail level, and focus areas based on these requirements.`;
+    }
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -131,7 +153,7 @@ Use these CSS selector patterns for targeting:
                         step_order: { type: "number", description: "Step sequence number starting from 1" },
                         target_selector: { type: "string", description: "CSS selector for the target element" },
                         title: { type: "string", description: "Step title, max 50 characters" },
-                        content: { type: "string", description: "Step content/description, max 150 characters" },
+                        content: { type: "string", description: "Step content/description, max 150 characters (or more if user requested detailed explanations)" },
                         placement: {
                           type: "string",
                           enum: ["top", "bottom", "left", "right", "auto", "center"],
@@ -205,6 +227,7 @@ Use these CSS selector patterns for targeting:
           route_path: request.route_path,
           tour_type: request.tour_type,
           target_audience: request.target_audience,
+          context_instructions_provided: !!request.context_instructions,
         },
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
