@@ -52,12 +52,7 @@ export function TransactionEmployeeCompensationDialog({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [payElements, setPayElements] = useState<PayElement[]>([]);
   const [positionPayElementIds, setPositionPayElementIds] = useState<string[]>([]);
-
-  // Form state
-  const [formPayElementId, setFormPayElementId] = useState("");
-  const [formAmount, setFormAmount] = useState("");
-  const [formCurrency, setFormCurrency] = useState("USD");
-  const [formFrequency, setFormFrequency] = useState("monthly");
+  const [resolvedCompanyId, setResolvedCompanyId] = useState(companyId);
   const [formIsOverride, setFormIsOverride] = useState(false);
   const [formOverrideReason, setFormOverrideReason] = useState("");
   const [formNotes, setFormNotes] = useState("");
@@ -73,10 +68,17 @@ export function TransactionEmployeeCompensationDialog({
     { value: "one-time", label: t("compensation.employeeCompensation.frequency.oneTime", "One-Time") },
   ];
 
+  // Form state
+  const [formPayElementId, setFormPayElementId] = useState("");
+  const [formAmount, setFormAmount] = useState("");
+  const [formCurrency, setFormCurrency] = useState("USD");
+  const [formFrequency, setFormFrequency] = useState("monthly");
+
   useEffect(() => {
     if (open) {
       loadPayElements();
       loadPositionPayElements();
+      loadPositionCompanyId();
       // Reset form with defaults
       setFormPayElementId("");
       setFormAmount("");
@@ -88,8 +90,9 @@ export function TransactionEmployeeCompensationDialog({
       setFormStartDate(defaultStartDate || "");
       setFormEndDate(defaultEndDate || "");
       setFormIsActive(true);
+      setResolvedCompanyId(companyId);
     }
-  }, [open, defaultStartDate, defaultEndDate]);
+  }, [open, defaultStartDate, defaultEndDate, companyId]);
 
   const loadPayElements = async () => {
     const { data } = await supabase
@@ -120,16 +123,42 @@ export function TransactionEmployeeCompensationDialog({
     }
   };
 
+  const loadPositionCompanyId = async () => {
+    // If companyId is already provided, use it
+    if (companyId) {
+      setResolvedCompanyId(companyId);
+      return;
+    }
+
+    // Otherwise, fetch from the position
+    if (!positionId) return;
+
+    const { data } = await supabase
+      .from("positions")
+      .select("company_id")
+      .eq("id", positionId)
+      .single();
+
+    if (data?.company_id) {
+      setResolvedCompanyId(data.company_id);
+    }
+  };
+
   const handleSubmit = async () => {
     if (!formPayElementId || !formAmount || !formStartDate) {
       toast.error(t("compensation.employeeCompensation.validation.required", "Please fill in all required fields"));
       return;
     }
 
+    if (!resolvedCompanyId) {
+      toast.error(t("compensation.employeeCompensation.validation.companyRequired", "Company information is required"));
+      return;
+    }
+
     setIsSubmitting(true);
     try {
       const { error } = await supabase.from("employee_compensation").insert({
-        company_id: companyId || null,
+        company_id: resolvedCompanyId,
         employee_id: employeeId,
         position_id: positionId,
         pay_element_id: formPayElementId,
