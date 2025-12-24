@@ -810,7 +810,7 @@ export function PositionsManagement({ companyId }: PositionsManagementProps) {
                                           <TableHead className="w-[40px]"></TableHead>
                                           <TableHead>Employee</TableHead>
                                           <TableHead>Start Date</TableHead>
-                                          <TableHead>Primary</TableHead>
+                                          <TableHead>Assignment Type</TableHead>
                                           <TableHead>Status</TableHead>
                                           <TableHead className="w-[80px]">Actions</TableHead>
                                         </TableRow>
