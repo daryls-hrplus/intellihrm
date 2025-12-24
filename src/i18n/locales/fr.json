@@ -151,6 +151,7 @@
     "name": "Nom",
     "description": "Description",
     "date": "Date",
+    "dateRange": "Plage de Dates",
     "time": "Heure",
     "from": "De",
     "to": "À",

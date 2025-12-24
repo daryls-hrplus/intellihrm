@@ -151,6 +151,7 @@
     "name": "Nombre",
     "description": "Descripción",
     "date": "Fecha",
+    "dateRange": "Rango de Fechas",
     "time": "Hora",
     "from": "Desde",
     "to": "Hasta",

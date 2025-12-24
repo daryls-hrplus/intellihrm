@@ -119,6 +119,7 @@
     "name": "Name",
     "description": "Description",
     "date": "Date",
+    "dateRange": "Date Range",
     "time": "Time",
     "from": "From",
     "to": "To",
