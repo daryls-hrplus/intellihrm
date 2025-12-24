@@ -71,8 +71,8 @@ export function TransactionEmployeeCompensationDialog({
   const [formIsOverride, setFormIsOverride] = useState(false);
   const [formOverrideReason, setFormOverrideReason] = useState("");
   const [formNotes, setFormNotes] = useState("");
-  const [formStartDate, setFormStartDate] = useState(defaultStartDate || "");
-  const [formEndDate, setFormEndDate] = useState(defaultEndDate || "");
+  const [formStartDate, setFormStartDate] = useState("");
+  const [formEndDate, setFormEndDate] = useState("");
   const [formIsActive, setFormIsActive] = useState(true);
 
   const isEditing = !!editingRecord;
