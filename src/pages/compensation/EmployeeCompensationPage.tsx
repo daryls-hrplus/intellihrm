@@ -147,7 +147,7 @@ export default function EmployeeCompensationPage() {
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [payElements, setPayElements] = useState<PayElement[]>([]);
   const [positions, setPositions] = useState<Position[]>([]);
-  const [employeePositions, setEmployeePositions] = useState<{position_id: string; is_primary: boolean; position: PositionWithCompensation}[]>([]);
+  const [employeePositions, setEmployeePositions] = useState<{position_id: string; is_primary: boolean; assignment_type: string; position: PositionWithCompensation}[]>([]);
   const [compensationItems, setCompensationItems] = useState<EmployeeCompensation[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
@@ -340,6 +340,7 @@ export default function EmployeeCompensationPage() {
       .select(`
         position_id,
         is_primary,
+        assignment_type,
         position:positions!employee_positions_position_id_fkey(
           id, title, code, compensation_model, salary_grade_id, pay_spine_id,
           salary_grade:salary_grades!positions_salary_grade_id_fkey(id, name, code, min_salary, mid_salary, max_salary, currency)
@@ -353,6 +354,7 @@ export default function EmployeeCompensationPage() {
       const positions = positionsData.map(pd => ({
         position_id: pd.position_id,
         is_primary: pd.is_primary,
+        assignment_type: pd.assignment_type || 'primary',
         position: pd.position as unknown as PositionWithCompensation
       }));
       setEmployeePositions(positions);
@@ -417,6 +419,7 @@ export default function EmployeeCompensationPage() {
       .select(`
         position_id,
         is_primary,
+        assignment_type,
         position:positions!employee_positions_position_id_fkey(
           id, title, code, compensation_model, salary_grade_id, pay_spine_id,
           salary_grade:salary_grades!positions_salary_grade_id_fkey(id, name, code, min_salary, mid_salary, max_salary, currency)
@@ -429,6 +432,7 @@ export default function EmployeeCompensationPage() {
       const positions = data.map(d => ({
         position_id: d.position_id,
         is_primary: d.is_primary,
+        assignment_type: d.assignment_type || 'primary',
         position: d.position as unknown as PositionWithCompensation
       }));
       setEmployeePositions(positions);
@@ -1067,11 +1071,12 @@ export default function EmployeeCompensationPage() {
                           <div className="flex items-center gap-2">
                             <h3 className="font-semibold text-lg">{ep.position.title}</h3>
                             <Badge variant="outline" className="text-xs">{ep.position.code}</Badge>
-                            {ep.is_primary && (
-                              <Badge variant="secondary" className="text-xs">
-                                ★ {t("common.primary", "Primary")}
-                              </Badge>
-                            )}
+                            <Badge variant={ep.assignment_type === 'primary' ? 'secondary' : 'outline'} className="text-xs">
+                              {ep.assignment_type === 'primary' ? '★ Primary' : 
+                               ep.assignment_type === 'acting' ? 'Acting' :
+                               ep.assignment_type === 'secondment' ? 'Secondment' :
+                               ep.assignment_type === 'concurrent' ? 'Concurrent' : ep.assignment_type}
+                            </Badge>
                           </div>
                           <div className="flex items-center gap-2 mt-1">
                             {ep.position.salary_grade && (
