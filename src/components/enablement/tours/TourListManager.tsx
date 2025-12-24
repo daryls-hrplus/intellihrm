@@ -53,6 +53,8 @@ import type { Tour } from "@/types/tours";
 import { AITourGenerator } from "./AITourGenerator";
 import { TourReviewPanel } from "./TourReviewPanel";
 import { FEATURE_REGISTRY, getModuleFeaturesFlat } from "@/lib/featureRegistry";
+import { useSeededRoles } from "@/hooks/useSeededRoles";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface TourListManagerProps {
   onSelectTour: (tourId: string) => void;
@@ -113,6 +115,7 @@ type TourFormData = {
   auto_trigger_on: "first_visit" | "first_action" | "manual" | null;
   priority: number;
   is_active: boolean;
+  target_roles: string[];
 };
 
 type ExtendedTour = Tour & { 
@@ -143,7 +146,10 @@ export function TourListManager({ onSelectTour }: TourListManagerProps) {
     auto_trigger_on: "manual",
     priority: 100,
     is_active: true,
+    target_roles: [],
   });
+  
+  const { roles: seededRoles } = useSeededRoles();
 
   // Fetch categories
   const { data: categories = [] } = useQuery({
@@ -381,6 +387,7 @@ export function TourListManager({ onSelectTour }: TourListManagerProps) {
       auto_trigger_on: "manual",
       priority: 100,
       is_active: true,
+      target_roles: [],
     });
   };
 
@@ -434,6 +441,7 @@ export function TourListManager({ onSelectTour }: TourListManagerProps) {
       auto_trigger_on: (tour.auto_trigger_on as TourFormData["auto_trigger_on"]) || "manual",
       priority: tour.priority,
       is_active: tour.is_active,
+      target_roles: tour.target_roles || [],
     });
   };
 
@@ -1001,6 +1009,55 @@ export function TourListManager({ onSelectTour }: TourListManagerProps) {
                   }
                 />
               </div>
+            </div>
+
+            {/* Target Roles Selection */}
+            <div className="space-y-3">
+              <Label>Target Roles</Label>
+              <p className="text-xs text-muted-foreground">
+                Select which roles can see this tour. Leave empty to show to everyone.
+              </p>
+              <div className="grid grid-cols-2 gap-2 max-h-40 overflow-y-auto border rounded-md p-3">
+                {seededRoles.map((role) => (
+                  <div key={role.code} className="flex items-center space-x-2">
+                    <Checkbox
+                      id={`role-${role.code}`}
+                      checked={formData.target_roles.includes(role.code)}
+                      onCheckedChange={(checked) => {
+                        if (checked) {
+                          setFormData({
+                            ...formData,
+                            target_roles: [...formData.target_roles, role.code],
+                          });
+                        } else {
+                          setFormData({
+                            ...formData,
+                            target_roles: formData.target_roles.filter((r) => r !== role.code),
+                          });
+                        }
+                      }}
+                    />
+                    <label
+                      htmlFor={`role-${role.code}`}
+                      className="text-sm cursor-pointer"
+                    >
+                      {role.name}
+                    </label>
+                  </div>
+                ))}
+              </div>
+              {formData.target_roles.length > 0 && (
+                <div className="flex flex-wrap gap-1 pt-1">
+                  {formData.target_roles.map((roleCode) => {
+                    const role = seededRoles.find((r) => r.code === roleCode);
+                    return (
+                      <Badge key={roleCode} variant="secondary" className="text-xs">
+                        {role?.name || roleCode}
+                      </Badge>
+                    );
+                  })}
+                </div>
+              )}
             </div>
 
             <div className="flex items-center space-x-2 pt-2">
