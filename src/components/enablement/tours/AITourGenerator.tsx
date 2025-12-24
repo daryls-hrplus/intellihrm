@@ -236,14 +236,14 @@ export function AITourGenerator({ open, onOpenChange, onTourCreated }: AITourGen
                 </div>
                 <div className="space-y-2">
                   <Label>Feature (Optional)</Label>
-                  <Select value={featureCode} onValueChange={setFeatureCode} disabled={!moduleCode}>
+                  <Select value={featureCode || "_none"} onValueChange={(v) => setFeatureCode(v === "_none" ? "" : v)} disabled={!moduleCode}>
                     <SelectTrigger>
                       <SelectValue placeholder="All features" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">Module Overview</SelectItem>
+                      <SelectItem value="_none">Module Overview</SelectItem>
                       {moduleFeatures.map((f) => (
-                        <SelectItem key={f.code} value={f.code}>
+                        <SelectItem key={f.code} value={f.code || `feature_${f.name}`}>
                           {f.name}
                         </SelectItem>
                       ))}
