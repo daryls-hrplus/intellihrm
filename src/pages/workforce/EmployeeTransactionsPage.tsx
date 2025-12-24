@@ -158,8 +158,8 @@ export default function EmployeeTransactionsPage() {
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="text-sm text-muted-foreground">{t("common.dateRange")}:</span>
+          <div className="flex flex-wrap items-center gap-2 sm:ml-auto">
+            <span className="text-sm font-medium text-foreground">{t("common.dateRange")}:</span>
             <Popover>
               <PopoverTrigger asChild>
                 <Button
