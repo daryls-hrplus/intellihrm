@@ -36,7 +36,7 @@ import {
   LookupValue,
   TransactionType,
 } from "@/hooks/useEmployeeTransactions";
-import { TransactionCompensationDialog } from "@/components/compensation/TransactionCompensationDialog";
+import { TransactionEmployeeCompensationDialog } from "@/components/compensation/TransactionEmployeeCompensationDialog";
 
 interface TransactionFormDialogProps {
   open: boolean;
@@ -988,7 +988,7 @@ export function TransactionFormDialog({
 
       {/* Compensation Dialog */}
       {formData.employee_id && formData.position_id && transactionType && (
-        <TransactionCompensationDialog
+        <TransactionEmployeeCompensationDialog
           open={compensationDialogOpen}
           onOpenChange={setCompensationDialogOpen}
           employeeId={formData.employee_id}
@@ -996,8 +996,13 @@ export function TransactionFormDialog({
           positionId={formData.position_id}
           positionTitle={positions.find(p => p.id === formData.position_id)?.title || ""}
           companyId={formData.company_id || ""}
-          effectiveDate={formData.effective_date || ""}
           transactionType={transactionType}
+          defaultStartDate={
+            transactionType === "ACTING" 
+              ? formData.acting_start_date || formData.effective_date || "" 
+              : formData.effective_date || ""
+          }
+          defaultEndDate={transactionType === "ACTING" ? formData.acting_end_date : undefined}
           onSuccess={() => {}}
         />
       )}
