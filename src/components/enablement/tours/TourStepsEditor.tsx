@@ -52,6 +52,8 @@ import {
   Sparkles,
   Loader2,
   AlertTriangle,
+  CheckCircle2,
+  XCircle,
 } from "lucide-react";
 import type { TourStep, Tour } from "@/types/tours";
 import { FEATURE_REGISTRY, getModuleFeaturesFlat } from "@/lib/featureRegistry";
@@ -96,6 +98,26 @@ type StepFormData = {
   disable_scroll: boolean;
   spot_light_padding: number;
 };
+
+// Validate CSS selector syntax
+function validateCssSelector(selector: string): { valid: boolean; error?: string } {
+  if (!selector || !selector.trim()) {
+    return { valid: false, error: "Selector is required" };
+  }
+  
+  // Check for common invalid patterns
+  if (selector.includes(":contains(")) {
+    return { valid: false, error: "':contains()' is not a valid CSS selector. Use a data-tour attribute instead." };
+  }
+  
+  try {
+    // Try to use the selector - this will throw if invalid
+    document.querySelector(selector);
+    return { valid: true };
+  } catch (e) {
+    return { valid: false, error: `Invalid CSS selector syntax: ${(e as Error).message}` };
+  }
+}
 
 interface SortableStepItemProps {
   step: TourStep;
@@ -411,8 +433,15 @@ export function TourStepsEditor({ tourId, onBack }: TourStepsEditorProps) {
   };
 
   const handleSubmit = () => {
-    if (!formData.title || !formData.target_selector) {
-      toast.error("Title and target selector are required");
+    if (!formData.title) {
+      toast.error("Title is required");
+      return;
+    }
+    
+    // Validate CSS selector
+    const selectorValidation = validateCssSelector(formData.target_selector);
+    if (!selectorValidation.valid) {
+      toast.error(selectorValidation.error || "Invalid selector");
       return;
     }
 
@@ -690,14 +719,35 @@ export function TourStepsEditor({ tourId, onBack }: TourStepsEditorProps) {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="target_selector">Target Selector *</Label>
-                <Input
-                  id="target_selector"
-                  placeholder="e.g., [data-tour='dashboard-header']"
-                  value={formData.target_selector}
-                  onChange={(e) =>
-                    setFormData({ ...formData, target_selector: e.target.value })
-                  }
-                />
+                <div className="relative">
+                  <Input
+                    id="target_selector"
+                    placeholder="e.g., [data-tour='dashboard-header']"
+                    value={formData.target_selector}
+                    onChange={(e) =>
+                      setFormData({ ...formData, target_selector: e.target.value })
+                    }
+                    className={formData.target_selector ? (
+                      validateCssSelector(formData.target_selector).valid 
+                        ? "pr-10 border-success focus:ring-success/20" 
+                        : "pr-10 border-destructive focus:ring-destructive/20"
+                    ) : ""}
+                  />
+                  {formData.target_selector && (
+                    <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                      {validateCssSelector(formData.target_selector).valid ? (
+                        <CheckCircle2 className="h-4 w-4 text-success" />
+                      ) : (
+                        <XCircle className="h-4 w-4 text-destructive" />
+                      )}
+                    </div>
+                  )}
+                </div>
+                {formData.target_selector && !validateCssSelector(formData.target_selector).valid && (
+                  <p className="text-xs text-destructive">
+                    {validateCssSelector(formData.target_selector).error}
+                  </p>
+                )}
               </div>
             </div>
 

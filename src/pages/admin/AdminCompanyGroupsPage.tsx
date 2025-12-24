@@ -502,10 +502,11 @@ export default function AdminCompanyGroupsPage() {
         {/* Header */}
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between animate-fade-in">
           <div>
-            <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">Company Groups</h1>
+            <h1 data-tour="company-groups-title" className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">Company Groups</h1>
             <p className="mt-1 text-muted-foreground">Manage company groups and divisions</p>
           </div>
           <button
+            data-tour="create-group-button"
             onClick={() => handleOpenGroupModal()}
             className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground shadow-sm transition-all hover:bg-primary/90"
           >
@@ -579,7 +580,7 @@ export default function AdminCompanyGroupsPage() {
             </p>
           </div>
         ) : (
-          <div className="space-y-3">
+          <div data-tour="groups-list" className="space-y-3">
             {filteredGroups.map((group, index) => (
               <div
                 key={group.id}
@@ -613,6 +614,7 @@ export default function AdminCompanyGroupsPage() {
                   </div>
                   <div className="flex items-center gap-2">
                     <button
+                      data-tour="add-division-button"
                       onClick={() => handleOpenDivisionModal(group.id)}
                       className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-sm font-medium text-card-foreground transition-colors hover:bg-muted"
                     >
@@ -662,7 +664,7 @@ export default function AdminCompanyGroupsPage() {
 
                 {/* Divisions */}
                 {expandedGroups.has(group.id) && (
-                  <div className="border-t border-border bg-muted/30 px-4 py-3">
+                  <div data-tour="division-tree" className="border-t border-border bg-muted/30 px-4 py-3">
                     {group.divisions.length === 0 ? (
                       <p className="py-4 text-center text-sm text-muted-foreground">No divisions yet</p>
                     ) : (
@@ -792,6 +794,7 @@ export default function AdminCompanyGroupsPage() {
                 <div>
                   <label className="block text-sm font-medium text-card-foreground mb-1.5">Name *</label>
                   <input
+                    data-tour="group-name-input"
                     type="text"
                     name="name"
                     value={groupFormData.name}
