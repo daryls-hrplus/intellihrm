@@ -149,10 +149,19 @@ export function useEnablementContentStatus(releaseId?: string) {
       return { success: false, error: "Content item not found" };
     }
 
-    // Check if checklist is complete for the current stage before moving forward
-    const stageOrder = ['backlog', 'planning', 'development', 'review', 'published', 'maintenance'];
-    const currentStageIndex = stageOrder.indexOf(item.workflow_status);
-    const targetStageIndex = stageOrder.indexOf(column);
+    // Define stage order for the new workflow
+    const stageOrder = [
+      'development_backlog', 
+      'in_development', 
+      'testing_review', 
+      'documentation', 
+      'ready_for_enablement', 
+      'published', 
+      'maintenance',
+      'archived'
+    ] as const;
+    const currentStageIndex = stageOrder.indexOf(item.workflow_status as typeof stageOrder[number]);
+    const targetStageIndex = stageOrder.indexOf(column as typeof stageOrder[number]);
     
     // Only validate checklist when moving forward (not backward)
     if (targetStageIndex > currentStageIndex) {
@@ -186,10 +195,10 @@ export function useEnablementContentStatus(releaseId?: string) {
     }
 
     const updates: Partial<EnablementContentStatus> = {
-      workflow_status: column,
+      workflow_status: column as any,
     };
 
-    if (column === "development" && !item.started_at) {
+    if (column === "in_development" && !item.started_at) {
       updates.started_at = new Date().toISOString();
     }
     if (column === "published") {

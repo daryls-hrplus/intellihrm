@@ -53,7 +53,11 @@ serve(async (req) => {
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     const { registry, options = {} } = await req.json();
-    const { dryRun = false, addToRelease = null } = options;
+    const { 
+      dryRun = false, 
+      addToRelease = null,
+      excludeFeatureCodes = []
+    } = options;
 
     if (!registry || !Array.isArray(registry)) {
       return new Response(
@@ -62,7 +66,8 @@ serve(async (req) => {
       );
     }
 
-    console.log(`[sync-feature-registry] Starting sync for ${registry.length} modules, dryRun: ${dryRun}`);
+    const excludeSet = new Set(excludeFeatureCodes as string[]);
+    console.log(`[sync-feature-registry] Starting sync for ${registry.length} modules, dryRun: ${dryRun}, excluding: ${excludeFeatureCodes.length} features`);
 
     // Get existing module mapping
     const { data: existingModules, error: moduleError } = await supabase
@@ -130,6 +135,12 @@ serve(async (req) => {
       // Process each group and feature
       for (const group of module.groups) {
         for (const feature of group.features) {
+          // Skip excluded features
+          if (excludeSet.has(feature.code)) {
+            console.log(`[sync-feature-registry] Skipping excluded feature: ${feature.code}`);
+            continue;
+          }
+
           const existing = existingFeatureMap.get(feature.code);
           
           const featureData = {
@@ -158,6 +169,7 @@ serve(async (req) => {
               name: feature.name,
               description: feature.description,
               moduleName: module.name,
+              moduleCode: module.code,
               groupName: group.groupName,
               icon: feature.icon,
               routePath: feature.routePath
@@ -215,6 +227,38 @@ serve(async (req) => {
         result.errors.push(`Error upserting features: ${upsertError.message}`);
       } else {
         console.log(`[sync-feature-registry] Upserted ${featuresToUpsert.length} features`);
+      }
+    }
+
+    // Auto-create enablement_content_status records for new features
+    if (!dryRun && result.newFeatures.length > 0) {
+      console.log(`[sync-feature-registry] Creating enablement_content_status for ${result.newFeatures.length} new features`);
+      
+      const statusRecords = newFeatureDetails.map(f => ({
+        feature_code: f.code,
+        module_code: f.moduleCode,
+        release_id: addToRelease || null,
+        workflow_status: 'development_backlog',
+        priority: 'medium',
+        documentation_status: 'not_started',
+        scorm_lite_status: 'not_started',
+        rise_course_status: 'not_started',
+        video_status: 'not_started',
+        dap_guide_status: 'na'
+      }));
+
+      const { error: statusError } = await supabase
+        .from('enablement_content_status')
+        .upsert(statusRecords, { 
+          onConflict: 'feature_code',
+          ignoreDuplicates: true 
+        });
+
+      if (statusError) {
+        console.error('[sync-feature-registry] Error creating content status:', statusError);
+        result.errors.push(`Error creating enablement status: ${statusError.message}`);
+      } else {
+        console.log(`[sync-feature-registry] Created ${statusRecords.length} enablement_content_status records`);
       }
     }
 

@@ -120,7 +120,20 @@ export interface EnablementSCORMPackage {
   created_at: string;
 }
 
-export type WorkflowColumn = 'backlog' | 'planning' | 'development' | 'review' | 'published' | 'maintenance' | 'archived';
+export type WorkflowColumn = 
+  | 'development_backlog' 
+  | 'in_development' 
+  | 'testing_review' 
+  | 'documentation' 
+  | 'ready_for_enablement' 
+  | 'published' 
+  | 'maintenance' 
+  | 'archived';
+
+// Helper to check if a feature is ready for enablement artifacts
+export const isReadyForEnablement = (status: WorkflowColumn): boolean => {
+  return status === 'documentation' || status === 'ready_for_enablement' || status === 'published';
+};
 
 export interface ContentCoverageStats {
   total_features: number;

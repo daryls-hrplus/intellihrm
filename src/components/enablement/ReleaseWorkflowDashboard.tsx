@@ -65,36 +65,54 @@ interface WorkflowStage {
 
 const WORKFLOW_STAGES: WorkflowStage[] = [
   {
-    id: "backlog",
-    label: "Backlog",
+    id: "development_backlog",
+    label: "Dev Backlog",
     icon: ClipboardList,
     color: "text-slate-600",
     bgColor: "bg-slate-100 dark:bg-slate-800",
-    description: "Features identified and prioritized",
+    description: "Features awaiting development",
     navLink: "/enablement?tab=workflow",
   },
   {
-    id: "development",
-    label: "Development",
+    id: "in_development",
+    label: "In Development",
     icon: Code,
     color: "text-blue-600",
     bgColor: "bg-blue-100 dark:bg-blue-900/30",
-    description: "Content creation in progress",
+    description: "Active development work",
     navLink: "/enablement?tab=workflow",
   },
   {
-    id: "review",
-    label: "Review",
+    id: "testing_review",
+    label: "Testing/Review",
     icon: FileCheck,
     color: "text-amber-600",
     bgColor: "bg-amber-100 dark:bg-amber-900/30",
-    description: "Quality review & approval",
+    description: "QA and stakeholder review",
+    navLink: "/enablement?tab=workflow",
+  },
+  {
+    id: "documentation",
+    label: "Documentation",
+    icon: FileText,
+    color: "text-purple-600",
+    bgColor: "bg-purple-100 dark:bg-purple-900/30",
+    description: "Technical docs & guides",
+    navLink: "/enablement?tab=workflow",
+  },
+  {
+    id: "ready_for_enablement",
+    label: "Ready for Enablement",
+    icon: Rocket,
+    color: "text-cyan-600",
+    bgColor: "bg-cyan-100 dark:bg-cyan-900/30",
+    description: "Approved for artifacts",
     navLink: "/enablement?tab=workflow",
   },
   {
     id: "published",
     label: "Published",
-    icon: Rocket,
+    icon: CheckCircle2,
     color: "text-green-600",
     bgColor: "bg-green-100 dark:bg-green-900/30",
     description: "Live and available",
@@ -144,23 +162,22 @@ export function ReleaseWorkflowDashboard() {
 
   const stageStats = useMemo(() => {
     const stats: Record<WorkflowColumn, { count: number; hours: number; items: EnablementContentStatus[] }> = {
-      backlog: { count: 0, hours: 0, items: [] },
-      planning: { count: 0, hours: 0, items: [] }, // Legacy - merged into backlog
-      development: { count: 0, hours: 0, items: [] },
-      review: { count: 0, hours: 0, items: [] },
+      development_backlog: { count: 0, hours: 0, items: [] },
+      in_development: { count: 0, hours: 0, items: [] },
+      testing_review: { count: 0, hours: 0, items: [] },
+      documentation: { count: 0, hours: 0, items: [] },
+      ready_for_enablement: { count: 0, hours: 0, items: [] },
       published: { count: 0, hours: 0, items: [] },
       maintenance: { count: 0, hours: 0, items: [] },
       archived: { count: 0, hours: 0, items: [] },
     };
 
     contentItems.forEach(item => {
-      // Merge planning into backlog
-      const targetStage = item.workflow_status === "planning" ? "backlog" : item.workflow_status;
-      if (stats[targetStage]) {
-        stats[targetStage].count++;
+      if (stats[item.workflow_status]) {
+        stats[item.workflow_status].count++;
         const hours = calculateItemHours(item);
-        stats[targetStage].hours += hours;
-        stats[targetStage].items.push(item);
+        stats[item.workflow_status].hours += hours;
+        stats[item.workflow_status].items.push(item);
       }
     });
 
@@ -170,8 +187,8 @@ export function ReleaseWorkflowDashboard() {
   const totalStats = useMemo(() => {
     const total = contentItems.length;
     const completed = stageStats.published.count + stageStats.maintenance.count;
-    const inProgress = stageStats.development.count + stageStats.review.count;
-    const pending = stageStats.backlog.count;
+    const inProgress = stageStats.in_development.count + stageStats.testing_review.count + stageStats.documentation.count;
+    const pending = stageStats.development_backlog.count;
     const totalHours = Object.values(stageStats).reduce((sum, s) => sum + s.hours, 0);
     const completedHours = stageStats.published.hours;
     const remainingHours = totalHours - completedHours;

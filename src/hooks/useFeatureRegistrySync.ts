@@ -89,6 +89,7 @@ export function useFeatureRegistrySync() {
   const syncRegistry = useCallback(async (options: { 
     dryRun?: boolean; 
     addToRelease?: string | null;
+    excludeFeatureCodes?: string[];
   } = {}) => {
     setIsSyncing(true);
     try {
@@ -97,7 +98,8 @@ export function useFeatureRegistrySync() {
           registry: FEATURE_REGISTRY,
           options: {
             dryRun: options.dryRun ?? false,
-            addToRelease: options.addToRelease ?? null
+            addToRelease: options.addToRelease ?? null,
+            excludeFeatureCodes: options.excludeFeatureCodes ?? []
           }
         }
       });
