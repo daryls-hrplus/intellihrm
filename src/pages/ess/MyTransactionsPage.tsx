@@ -32,7 +32,7 @@ import { Loader2, Eye, DollarSign, ChevronRight, ChevronDown } from "lucide-reac
 import { formatDateForDisplay } from "@/utils/dateUtils";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import { EmployeePositionCompensationDrilldown } from "@/components/workforce/EmployeePositionCompensationDrilldown";
+import { TransactionCompensationDrilldown } from "@/components/workforce/TransactionCompensationDrilldown";
 import {
   Tooltip,
   TooltipContent,
@@ -345,9 +345,10 @@ export default function MyTransactionsPage() {
                             <TableRow className="bg-muted/30">
                               <TableCell colSpan={8} className="py-3 px-4">
                                 <div className="ml-8">
-                                  <EmployeePositionCompensationDrilldown
+                                  <TransactionCompensationDrilldown
                                     employeeId={profile.id}
                                     positionId={positionId}
+                                    effectiveDate={transaction.effective_date}
                                   />
                                 </div>
                               </TableCell>
@@ -411,9 +412,10 @@ export default function MyTransactionsPage() {
                 {/* Compensation Drilldown in Dialog */}
                 {profile?.id && getRelevantPositionId(selectedTransaction) && (
                   <div className="pt-4 border-t">
-                    <EmployeePositionCompensationDrilldown
+                    <TransactionCompensationDrilldown
                       employeeId={profile.id}
                       positionId={getRelevantPositionId(selectedTransaction)!}
+                      effectiveDate={selectedTransaction.effective_date}
                     />
                   </div>
                 )}
