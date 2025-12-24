@@ -12974,6 +12974,7 @@ export type Database = {
       }
       enablement_tours: {
         Row: {
+          ai_generation_prompt: string | null
           auto_trigger_on: string | null
           company_id: string | null
           created_at: string | null
@@ -12981,10 +12982,17 @@ export type Database = {
           description: string | null
           estimated_duration_seconds: number | null
           feature_code: string | null
+          generated_by: string | null
           id: string
           is_active: boolean | null
           module_code: string
           priority: number | null
+          rejected_reason: string | null
+          release_id: string | null
+          review_notes: string | null
+          review_status: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
           target_roles: string[] | null
           tour_code: string
           tour_name: string
@@ -12993,6 +13001,7 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          ai_generation_prompt?: string | null
           auto_trigger_on?: string | null
           company_id?: string | null
           created_at?: string | null
@@ -13000,10 +13009,17 @@ export type Database = {
           description?: string | null
           estimated_duration_seconds?: number | null
           feature_code?: string | null
+          generated_by?: string | null
           id?: string
           is_active?: boolean | null
           module_code: string
           priority?: number | null
+          rejected_reason?: string | null
+          release_id?: string | null
+          review_notes?: string | null
+          review_status?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
           target_roles?: string[] | null
           tour_code: string
           tour_name: string
@@ -13012,6 +13028,7 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          ai_generation_prompt?: string | null
           auto_trigger_on?: string | null
           company_id?: string | null
           created_at?: string | null
@@ -13019,10 +13036,17 @@ export type Database = {
           description?: string | null
           estimated_duration_seconds?: number | null
           feature_code?: string | null
+          generated_by?: string | null
           id?: string
           is_active?: boolean | null
           module_code?: string
           priority?: number | null
+          rejected_reason?: string | null
+          release_id?: string | null
+          review_notes?: string | null
+          review_status?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
           target_roles?: string[] | null
           tour_code?: string
           tour_name?: string
@@ -13036,6 +13060,13 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "enablement_tours_release_id_fkey"
+            columns: ["release_id"]
+            isOneToOne: false
+            referencedRelation: "enablement_releases"
             referencedColumns: ["id"]
           },
         ]
