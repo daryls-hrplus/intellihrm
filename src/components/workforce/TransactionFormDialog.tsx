@@ -479,6 +479,26 @@ export function TransactionFormDialog({
                 </p>
               )}
             </div>
+            <div className="space-y-2">
+              <Label>{t("workforce.modules.transactions.form.payGroup", "Pay Group")}</Label>
+              <Select
+                value={formData.pay_group_id || ""}
+                onValueChange={(v) => setFormData({ ...formData, pay_group_id: v })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder={t("workforce.modules.transactions.form.selectPayGroup", "Select pay group")} />
+                </SelectTrigger>
+                <SelectContent>
+                  {payGroups
+                    .filter(pg => !formData.company_id || pg.company_id === formData.company_id)
+                    .map((pg) => (
+                      <SelectItem key={pg.id} value={pg.id}>
+                        {pg.name} ({pg.code})
+                      </SelectItem>
+                    ))}
+                </SelectContent>
+              </Select>
+            </div>
           </>
         );
 

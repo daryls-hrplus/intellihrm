@@ -283,6 +283,35 @@ export function useEmployeeTransactions() {
         }
       }
 
+      // For HIRE transactions, create an employee_positions record
+      if (data.hire_type_id && data.position_id && data.employee_id) {
+        const employeePositionData = {
+          employee_id: data.employee_id,
+          position_id: data.position_id,
+          start_date: data.effective_date,
+          end_date: null,
+          is_primary: true,
+          assignment_type: "permanent",
+          compensation_amount: null,
+          compensation_currency: "USD",
+          compensation_frequency: "monthly",
+          benefits_profile: {},
+          is_active: true,
+          pay_group_id: data.pay_group_id || null,
+          pay_group_start_date: data.pay_group_id ? data.effective_date : null,
+          pay_group_end_date: null,
+        };
+
+        const { error: positionError } = await supabase
+          .from("employee_positions")
+          .insert(employeePositionData as any);
+
+        if (positionError) {
+          console.error("Failed to create employee position for hire:", positionError);
+          // Don't fail the transaction, just log the error
+        }
+      }
+
       // For PROMOTION transactions, also create an employee_positions record for the new position
       if (data.to_position_id && data.employee_id) {
         // First, deactivate the current primary position assignment
