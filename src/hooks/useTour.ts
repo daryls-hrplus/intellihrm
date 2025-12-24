@@ -1,15 +1,27 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { Tour, TourStep, TourWithSteps, TourCompletion, TourAnalyticsEvent } from '@/types/tours';
 import { useToast } from '@/hooks/use-toast';
 
 export function useTour() {
-  const { user, profile } = useAuth();
+  const { user, profile, roles } = useAuth();
   const { toast } = useToast();
-  const [tours, setTours] = useState<Tour[]>([]);
+  const [allTours, setAllTours] = useState<Tour[]>([]);
   const [completions, setCompletions] = useState<TourCompletion[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+
+  // Filter tours by user's roles - tours with empty target_roles are available to all
+  const tours = useMemo(() => {
+    return allTours.filter(tour => {
+      // If no target roles specified, show to everyone
+      if (!tour.target_roles || tour.target_roles.length === 0) {
+        return true;
+      }
+      // Check if user has any of the target roles
+      return roles.some(userRole => tour.target_roles.includes(userRole));
+    });
+  }, [allTours, roles]);
 
   // Fetch all available tours
   const fetchTours = useCallback(async () => {
@@ -24,7 +36,7 @@ export function useTour() {
         .order('priority', { ascending: true });
       
       if (error) throw error;
-      setTours((data as Tour[]) || []);
+      setAllTours((data as Tour[]) || []);
     } catch (error) {
       console.error('Error fetching tours:', error);
     } finally {
@@ -49,7 +61,7 @@ export function useTour() {
     }
   }, [user]);
 
-  // Fetch a specific tour with its steps
+  // Fetch a specific tour with its steps (with role-based access check)
   const fetchTourWithSteps = useCallback(async (tourCode: string): Promise<TourWithSteps | null> => {
     try {
       // Fetch tour
@@ -62,6 +74,17 @@ export function useTour() {
       
       if (tourError) throw tourError;
       if (!tourData) return null;
+
+      const tour = tourData as Tour;
+      
+      // Check if user has access based on target_roles
+      const hasAccess = !tour.target_roles || tour.target_roles.length === 0 ||
+        roles.some(userRole => tour.target_roles.includes(userRole));
+      
+      if (!hasAccess) {
+        console.warn(`User does not have role access to tour "${tourCode}"`);
+        return null;
+      }
 
       // Fetch steps with videos
       const { data: stepsData, error: stepsError } = await supabase
@@ -76,14 +99,14 @@ export function useTour() {
       if (stepsError) throw stepsError;
 
       return {
-        ...(tourData as Tour),
+        ...tour,
         steps: (stepsData as TourStep[]) || [],
       };
     } catch (error) {
       console.error('Error fetching tour with steps:', error);
       return null;
     }
-  }, []);
+  }, [roles]);
 
   // Check if a tour has been completed
   const hasCompletedTour = useCallback((tourCode: string): boolean => {
