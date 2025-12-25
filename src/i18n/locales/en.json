@@ -449,7 +449,9 @@
             "ACTING": "Acting Assignment",
             "PROMOTION": "Promotion",
             "TRANSFER": "Transfer",
-            "TERMINATION": "Termination"
+            "TERMINATION": "Termination",
+            "SALARY_CHANGE": "Salary Change",
+            "RATE_CHANGE": "Hourly/Daily Rate Change"
           },
           "hire": {
             "hireType": "Hire Type",
