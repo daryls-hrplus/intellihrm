@@ -138,10 +138,10 @@ export function TransactionFormDialog({
     }
   }, [open, transactionType]);
 
-  // Load employee positions when employee is selected (for CONFIRMATION, PROBATION_EXT, SECONDMENT, TERMINATION, and SALARY_RATE_CHANGE transaction types)
+  // Load employee positions when employee is selected (for CONFIRMATION, PROBATION_EXT, SECONDMENT, TERMINATION, SALARY_CHANGE, and RATE_CHANGE transaction types)
   useEffect(() => {
     const loadEmployeePositions = async () => {
-      if (formData.employee_id && (transactionType === "CONFIRMATION" || transactionType === "PROBATION_EXT" || transactionType === "SECONDMENT" || transactionType === "TERMINATION" || transactionType === "SALARY_RATE_CHANGE")) {
+      if (formData.employee_id && (transactionType === "CONFIRMATION" || transactionType === "PROBATION_EXT" || transactionType === "SECONDMENT" || transactionType === "TERMINATION" || transactionType === "SALARY_CHANGE" || transactionType === "RATE_CHANGE")) {
         const { data } = await supabase
           .from("employee_positions")
           .select(`
@@ -1287,30 +1287,10 @@ export function TransactionFormDialog({
           </>
         );
 
-      case "SALARY_RATE_CHANGE": {
-        const selectedPosition = employeePositions.find(ep => ep.position_id === formData.position_id);
-        const rateType = selectedPosition?.rate_type || 'salaried';
-        const currentRate = rateType === 'hourly' || rateType === 'daily' 
-          ? selectedPosition?.hourly_rate 
-          : selectedPosition?.compensation_amount;
-        const currency = selectedPosition?.compensation_currency || 'USD';
+      case "SALARY_CHANGE": {
+        // Filter to only show salaried positions
+        const salariedPositions = employeePositions.filter(ep => !ep.rate_type || ep.rate_type === 'salaried');
         
-        const getRateTypeLabel = (type: string) => {
-          switch (type) {
-            case 'hourly': return t("workforce.modules.transactions.form.salaryChange.hourlyRate", "Hourly Rate Change");
-            case 'daily': return t("workforce.modules.transactions.form.salaryChange.dailyRate", "Daily Rate Change");
-            default: return t("workforce.modules.transactions.form.salaryChange.salaryChange", "Salary Change");
-          }
-        };
-        
-        const getRateUnit = (type: string) => {
-          switch (type) {
-            case 'hourly': return t("workforce.modules.transactions.form.salaryChange.perHour", "/hour");
-            case 'daily': return t("workforce.modules.transactions.form.salaryChange.perDay", "/day");
-            default: return t("workforce.modules.transactions.form.salaryChange.perPeriod", "/period");
-          }
-        };
-
         return (
           <>
             <div className="space-y-2">
@@ -1323,19 +1303,10 @@ export function TransactionFormDialog({
                   <SelectValue placeholder={t("workforce.modules.transactions.form.selectPosition")} />
                 </SelectTrigger>
                 <SelectContent>
-                  {employeePositions.length > 0 
-                    ? employeePositions.map((ep) => (
+                  {salariedPositions.length > 0 
+                    ? salariedPositions.map((ep) => (
                         <SelectItem key={ep.position_id} value={ep.position_id}>
-                          <div className="flex items-center gap-2">
-                            <span>{ep.position?.title} ({ep.position?.code})</span>
-                            <span className={`text-xs px-1.5 py-0.5 rounded ${
-                              ep.rate_type === 'hourly' ? 'bg-blue-500/20 text-blue-600' :
-                              ep.rate_type === 'daily' ? 'bg-orange-500/20 text-orange-600' :
-                              'bg-green-500/20 text-green-600'
-                            }`}>
-                              {ep.rate_type === 'hourly' ? 'Hourly' : ep.rate_type === 'daily' ? 'Daily' : 'Salaried'}
-                            </span>
-                          </div>
+                          {ep.position?.title} ({ep.position?.code})
                         </SelectItem>
                       ))
                     : positions.map((p) => (
@@ -1347,49 +1318,6 @@ export function TransactionFormDialog({
                 </SelectContent>
               </Select>
             </div>
-
-            {/* Rate Type Indicator - shows after position selection */}
-            {formData.position_id && selectedPosition && (
-              <div className={`p-4 rounded-lg border ${
-                rateType === 'hourly' ? 'bg-blue-500/10 border-blue-500/30' :
-                rateType === 'daily' ? 'bg-orange-500/10 border-orange-500/30' :
-                'bg-green-500/10 border-green-500/30'
-              }`}>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className={`text-sm font-medium ${
-                      rateType === 'hourly' ? 'text-blue-600 dark:text-blue-400' :
-                      rateType === 'daily' ? 'text-orange-600 dark:text-orange-400' :
-                      'text-green-600 dark:text-green-400'
-                    }`}>
-                      {getRateTypeLabel(rateType)}
-                    </p>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      {t("workforce.modules.transactions.form.salaryChange.currentRateInfo", "Current rate information")}
-                    </p>
-                  </div>
-                  {currentRate ? (
-                    <div className="text-right">
-                      <p className="text-lg font-semibold text-foreground">
-                        {currency} {currentRate.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                      </p>
-                      <p className="text-xs text-muted-foreground">{getRateUnit(rateType)}</p>
-                    </div>
-                  ) : (
-                    <div className="text-right">
-                      <p className="text-sm text-muted-foreground">
-                        {t("workforce.modules.transactions.form.salaryChange.noCurrentRate", "No rate set")}
-                      </p>
-                    </div>
-                  )}
-                </div>
-                {rateType === 'hourly' && selectedPosition.standard_hours_per_week && (
-                  <p className="text-xs text-muted-foreground mt-2">
-                    {t("workforce.modules.transactions.form.salaryChange.standardHours", "Standard hours")}: {selectedPosition.standard_hours_per_week} {t("workforce.modules.transactions.form.salaryChange.hoursPerWeek", "hrs/week")}
-                  </p>
-                )}
-              </div>
-            )}
             
             <div className="space-y-2">
               <Label>{t("workforce.modules.transactions.form.salaryChange.reason", "Reason for Change")}</Label>
@@ -1412,6 +1340,126 @@ export function TransactionFormDialog({
             <div className="p-4 border border-border rounded-lg bg-muted/50">
               <p className="text-sm text-muted-foreground">
                 {t("workforce.modules.transactions.form.salaryChange.compensationNote", "After saving, use the 'Manage Compensation' button to add or modify pay elements for this change.")}
+              </p>
+            </div>
+          </>
+        );
+      }
+
+      case "RATE_CHANGE": {
+        // Filter to only show hourly/daily positions
+        const ratePositions = employeePositions.filter(ep => ep.rate_type === 'hourly' || ep.rate_type === 'daily');
+        const selectedPosition = ratePositions.find(ep => ep.position_id === formData.position_id);
+        const rateType = selectedPosition?.rate_type || 'hourly';
+        const currentRate = selectedPosition?.hourly_rate;
+        const currency = selectedPosition?.compensation_currency || 'USD';
+        
+        const getRateTypeLabel = (type: string) => {
+          return type === 'daily' 
+            ? t("workforce.modules.transactions.form.rateChange.dailyRate", "Daily Rate Change")
+            : t("workforce.modules.transactions.form.rateChange.hourlyRate", "Hourly Rate Change");
+        };
+        
+        const getRateUnit = (type: string) => {
+          return type === 'daily'
+            ? t("workforce.modules.transactions.form.rateChange.perDay", "/day")
+            : t("workforce.modules.transactions.form.rateChange.perHour", "/hour");
+        };
+        
+        return (
+          <>
+            <div className="space-y-2">
+              <Label>{t("workforce.modules.transactions.form.rateChange.position", "Position")}</Label>
+              <Select
+                value={formData.position_id || ""}
+                onValueChange={(v) => setFormData({ ...formData, position_id: v })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder={t("workforce.modules.transactions.form.selectPosition")} />
+                </SelectTrigger>
+                <SelectContent>
+                  {ratePositions.length > 0 
+                    ? ratePositions.map((ep) => (
+                        <SelectItem key={ep.position_id} value={ep.position_id}>
+                          <div className="flex items-center gap-2">
+                            <span>{ep.position?.title} ({ep.position?.code})</span>
+                            <span className={`text-xs px-1.5 py-0.5 rounded ${
+                              ep.rate_type === 'hourly' ? 'bg-blue-500/20 text-blue-600' :
+                              'bg-orange-500/20 text-orange-600'
+                            }`}>
+                              {ep.rate_type === 'hourly' ? 'Hourly' : 'Daily'}
+                            </span>
+                          </div>
+                        </SelectItem>
+                      ))
+                    : <SelectItem value="" disabled>No hourly/daily positions found</SelectItem>
+                  }
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Rate Type Indicator - shows after position selection */}
+            {formData.position_id && selectedPosition && (
+              <div className={`p-4 rounded-lg border ${
+                rateType === 'hourly' ? 'bg-blue-500/10 border-blue-500/30' :
+                'bg-orange-500/10 border-orange-500/30'
+              }`}>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className={`text-sm font-medium ${
+                      rateType === 'hourly' ? 'text-blue-600 dark:text-blue-400' :
+                      'text-orange-600 dark:text-orange-400'
+                    }`}>
+                      {getRateTypeLabel(rateType)}
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {t("workforce.modules.transactions.form.rateChange.currentRateInfo", "Current rate information")}
+                    </p>
+                  </div>
+                  {currentRate ? (
+                    <div className="text-right">
+                      <p className="text-lg font-semibold text-foreground">
+                        {currency} {currentRate.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      </p>
+                      <p className="text-xs text-muted-foreground">{getRateUnit(rateType)}</p>
+                    </div>
+                  ) : (
+                    <div className="text-right">
+                      <p className="text-sm text-muted-foreground">
+                        {t("workforce.modules.transactions.form.rateChange.noCurrentRate", "No rate set")}
+                      </p>
+                    </div>
+                  )}
+                </div>
+                {rateType === 'hourly' && selectedPosition.standard_hours_per_week && (
+                  <p className="text-xs text-muted-foreground mt-2">
+                    {t("workforce.modules.transactions.form.rateChange.standardHours", "Standard hours")}: {selectedPosition.standard_hours_per_week} {t("workforce.modules.transactions.form.rateChange.hoursPerWeek", "hrs/week")}
+                  </p>
+                )}
+              </div>
+            )}
+            
+            <div className="space-y-2">
+              <Label>{t("workforce.modules.transactions.form.rateChange.reason", "Reason for Change")}</Label>
+              <Select
+                value={formData.promotion_reason_id || ""}
+                onValueChange={(v) => setFormData({ ...formData, promotion_reason_id: v })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder={t("workforce.modules.transactions.form.selectReason")} />
+                </SelectTrigger>
+                <SelectContent>
+                  {promotionReasons.map((r) => (
+                    <SelectItem key={r.id} value={r.id}>
+                      {r.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="p-4 border border-border rounded-lg bg-muted/50">
+              <p className="text-sm text-muted-foreground">
+                {t("workforce.modules.transactions.form.rateChange.compensationNote", "After saving, use the 'Manage Compensation' button to add or modify pay elements for this change.")}
               </p>
             </div>
           </>

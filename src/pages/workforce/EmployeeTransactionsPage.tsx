@@ -38,7 +38,8 @@ const workflowCodeMap: Record<TransactionType, string> = {
   TRANSFER: "transfer",
   SECONDMENT: "secondment",
   TERMINATION: "termination",
-  SALARY_RATE_CHANGE: "salary_rate_change",
+  SALARY_CHANGE: "salary_change",
+  RATE_CHANGE: "rate_change",
 };
 
 export default function EmployeeTransactionsPage() {
