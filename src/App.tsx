@@ -363,6 +363,7 @@ import MssReview360Page from "./pages/mss/MssReview360Page";
 import MssGoalsPage from "./pages/mss/MssGoalsPage";
 import MssOnboardingPage from "./pages/mss/MssOnboardingPage";
 import MssOffboardingPage from "./pages/mss/MssOffboardingPage";
+import MssTeamPage from "./pages/mss/MssTeamPage";
 import MssPropertyPage from "./pages/mss/MssPropertyPage";
 import MssEmployeeRelationsPage from "./pages/mss/MssEmployeeRelationsPage";
 import MssLeavePage from "./pages/mss/MssLeavePage";
@@ -707,6 +708,14 @@ const App = () => (
               element={
                 <ProtectedRoute moduleCode="mss" requiredRoles={["admin", "hr_manager"]}>
                   <ManagerSelfServicePage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/mss/team"
+              element={
+                <ProtectedRoute moduleCode="mss">
+                  <MssTeamPage />
                 </ProtectedRoute>
               }
             />
