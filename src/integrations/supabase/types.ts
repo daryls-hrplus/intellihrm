@@ -16632,6 +16632,189 @@ export type Database = {
           },
         ]
       }
+      goal_check_in_schedules: {
+        Row: {
+          auto_create_check_in: boolean | null
+          cadence: string
+          company_id: string
+          created_at: string
+          day_of_month: number | null
+          day_of_week: number | null
+          employee_id: string | null
+          goal_cycle_id: string | null
+          goal_id: string | null
+          id: string
+          is_active: boolean | null
+          last_check_in_date: string | null
+          next_check_in_date: string | null
+          reminder_days_before: number | null
+          require_manager_review: boolean | null
+          updated_at: string
+        }
+        Insert: {
+          auto_create_check_in?: boolean | null
+          cadence?: string
+          company_id: string
+          created_at?: string
+          day_of_month?: number | null
+          day_of_week?: number | null
+          employee_id?: string | null
+          goal_cycle_id?: string | null
+          goal_id?: string | null
+          id?: string
+          is_active?: boolean | null
+          last_check_in_date?: string | null
+          next_check_in_date?: string | null
+          reminder_days_before?: number | null
+          require_manager_review?: boolean | null
+          updated_at?: string
+        }
+        Update: {
+          auto_create_check_in?: boolean | null
+          cadence?: string
+          company_id?: string
+          created_at?: string
+          day_of_month?: number | null
+          day_of_week?: number | null
+          employee_id?: string | null
+          goal_cycle_id?: string | null
+          goal_id?: string | null
+          id?: string
+          is_active?: boolean | null
+          last_check_in_date?: string | null
+          next_check_in_date?: string | null
+          reminder_days_before?: number | null
+          require_manager_review?: boolean | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "goal_check_in_schedules_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "goal_check_in_schedules_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "goal_check_in_schedules_goal_cycle_id_fkey"
+            columns: ["goal_cycle_id"]
+            isOneToOne: false
+            referencedRelation: "goal_cycles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "goal_check_in_schedules_goal_id_fkey"
+            columns: ["goal_id"]
+            isOneToOne: true
+            referencedRelation: "performance_goals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      goal_check_ins: {
+        Row: {
+          achievements: string | null
+          action_items: string | null
+          blockers: string | null
+          check_in_date: string
+          check_in_type: string
+          coaching_notes: string | null
+          created_at: string
+          employee_commentary: string | null
+          employee_id: string
+          employee_status: string | null
+          employee_submitted_at: string | null
+          evidence_urls: string[] | null
+          goal_id: string
+          id: string
+          manager_assessment: string | null
+          manager_commentary: string | null
+          manager_id: string | null
+          manager_reviewed_at: string | null
+          next_steps: string | null
+          progress_at_check_in: number | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          achievements?: string | null
+          action_items?: string | null
+          blockers?: string | null
+          check_in_date?: string
+          check_in_type?: string
+          coaching_notes?: string | null
+          created_at?: string
+          employee_commentary?: string | null
+          employee_id: string
+          employee_status?: string | null
+          employee_submitted_at?: string | null
+          evidence_urls?: string[] | null
+          goal_id: string
+          id?: string
+          manager_assessment?: string | null
+          manager_commentary?: string | null
+          manager_id?: string | null
+          manager_reviewed_at?: string | null
+          next_steps?: string | null
+          progress_at_check_in?: number | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          achievements?: string | null
+          action_items?: string | null
+          blockers?: string | null
+          check_in_date?: string
+          check_in_type?: string
+          coaching_notes?: string | null
+          created_at?: string
+          employee_commentary?: string | null
+          employee_id?: string
+          employee_status?: string | null
+          employee_submitted_at?: string | null
+          evidence_urls?: string[] | null
+          goal_id?: string
+          id?: string
+          manager_assessment?: string | null
+          manager_commentary?: string | null
+          manager_id?: string | null
+          manager_reviewed_at?: string | null
+          next_steps?: string | null
+          progress_at_check_in?: number | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "goal_check_ins_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "goal_check_ins_goal_id_fkey"
+            columns: ["goal_id"]
+            isOneToOne: false
+            referencedRelation: "performance_goals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "goal_check_ins_manager_id_fkey"
+            columns: ["manager_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       goal_comments: {
         Row: {
           comment: string
@@ -17003,6 +17186,82 @@ export type Database = {
           },
         ]
       }
+      goal_milestones: {
+        Row: {
+          completed_by: string | null
+          completed_date: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          due_date: string
+          evidence_notes: string | null
+          evidence_url: string | null
+          goal_id: string
+          id: string
+          sequence_order: number | null
+          status: string
+          title: string
+          updated_at: string
+          weight: number | null
+        }
+        Insert: {
+          completed_by?: string | null
+          completed_date?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          due_date: string
+          evidence_notes?: string | null
+          evidence_url?: string | null
+          goal_id: string
+          id?: string
+          sequence_order?: number | null
+          status?: string
+          title: string
+          updated_at?: string
+          weight?: number | null
+        }
+        Update: {
+          completed_by?: string | null
+          completed_date?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          due_date?: string
+          evidence_notes?: string | null
+          evidence_url?: string | null
+          goal_id?: string
+          id?: string
+          sequence_order?: number | null
+          status?: string
+          title?: string
+          updated_at?: string
+          weight?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "goal_milestones_completed_by_fkey"
+            columns: ["completed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "goal_milestones_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "goal_milestones_goal_id_fkey"
+            columns: ["goal_id"]
+            isOneToOne: false
+            referencedRelation: "performance_goals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       goal_owners: {
         Row: {
           assigned_at: string
@@ -17054,6 +17313,63 @@ export type Database = {
             columns: ["goal_id"]
             isOneToOne: false
             referencedRelation: "performance_goals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      goal_progress_history: {
+        Row: {
+          current_value: number | null
+          goal_id: string
+          id: string
+          notes: string | null
+          previous_percentage: number | null
+          previous_value: number | null
+          progress_percentage: number
+          recorded_at: string
+          recorded_by: string | null
+          source: string
+          source_id: string | null
+        }
+        Insert: {
+          current_value?: number | null
+          goal_id: string
+          id?: string
+          notes?: string | null
+          previous_percentage?: number | null
+          previous_value?: number | null
+          progress_percentage: number
+          recorded_at?: string
+          recorded_by?: string | null
+          source: string
+          source_id?: string | null
+        }
+        Update: {
+          current_value?: number | null
+          goal_id?: string
+          id?: string
+          notes?: string | null
+          previous_percentage?: number | null
+          previous_value?: number | null
+          progress_percentage?: number
+          recorded_at?: string
+          recorded_by?: string | null
+          source?: string
+          source_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "goal_progress_history_goal_id_fkey"
+            columns: ["goal_id"]
+            isOneToOne: false
+            referencedRelation: "performance_goals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "goal_progress_history_recorded_by_fkey"
+            columns: ["recorded_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -30006,6 +30322,7 @@ export type Database = {
           approved_by: string | null
           assigned_by: string | null
           category: string | null
+          check_in_cadence: string | null
           company_id: string
           completed_date: string | null
           created_at: string
@@ -30022,14 +30339,19 @@ export type Database = {
           id: string
           is_locked: boolean | null
           is_objective: boolean | null
+          last_check_in_date: string | null
           lock_reason: string | null
           locked_at: string | null
           locked_by: string | null
           manager_rating: number | null
           measurable: string | null
           metric_template_id: string | null
+          milestone_count: number | null
+          milestones_completed: number | null
+          next_check_in_due: string | null
           objective_id: string | null
           parent_goal_id: string | null
+          progress_method: string | null
           progress_percentage: number | null
           relevant: string | null
           self_rating: number | null
@@ -30053,6 +30375,7 @@ export type Database = {
           approved_by?: string | null
           assigned_by?: string | null
           category?: string | null
+          check_in_cadence?: string | null
           company_id: string
           completed_date?: string | null
           created_at?: string
@@ -30069,14 +30392,19 @@ export type Database = {
           id?: string
           is_locked?: boolean | null
           is_objective?: boolean | null
+          last_check_in_date?: string | null
           lock_reason?: string | null
           locked_at?: string | null
           locked_by?: string | null
           manager_rating?: number | null
           measurable?: string | null
           metric_template_id?: string | null
+          milestone_count?: number | null
+          milestones_completed?: number | null
+          next_check_in_due?: string | null
           objective_id?: string | null
           parent_goal_id?: string | null
+          progress_method?: string | null
           progress_percentage?: number | null
           relevant?: string | null
           self_rating?: number | null
@@ -30100,6 +30428,7 @@ export type Database = {
           approved_by?: string | null
           assigned_by?: string | null
           category?: string | null
+          check_in_cadence?: string | null
           company_id?: string
           completed_date?: string | null
           created_at?: string
@@ -30116,14 +30445,19 @@ export type Database = {
           id?: string
           is_locked?: boolean | null
           is_objective?: boolean | null
+          last_check_in_date?: string | null
           lock_reason?: string | null
           locked_at?: string | null
           locked_by?: string | null
           manager_rating?: number | null
           measurable?: string | null
           metric_template_id?: string | null
+          milestone_count?: number | null
+          milestones_completed?: number | null
+          next_check_in_due?: string | null
           objective_id?: string | null
           parent_goal_id?: string | null
+          progress_method?: string | null
           progress_percentage?: number | null
           relevant?: string | null
           self_rating?: number | null
