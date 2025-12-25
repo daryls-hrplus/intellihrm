@@ -31,6 +31,8 @@ import {
   GoalType,
 } from "./goal-wizard";
 import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
+import { useGoalWeights } from "@/hooks/useGoalWeights";
+import { GoalWeightWarning } from "./GoalWeightSummary";
 
 type GoalStatus = 'draft' | 'active' | 'in_progress' | 'completed' | 'cancelled' | 'overdue';
 type DbGoalLevel = 'company' | 'department' | 'team' | 'individual';
@@ -168,6 +170,10 @@ export function GoalDialog({
   const [jobGoals, setJobGoals] = useState<JobGoal[]>([]);
   const [parentGoalWeight, setParentGoalWeight] = useState<number | null>(null);
   const [formData, setFormData] = useState<FormData>(getInitialFormData(user?.id));
+  const [showWeightWarning, setShowWeightWarning] = useState(false);
+  const [currentEmployeeWeight, setCurrentEmployeeWeight] = useState(0);
+  
+  const { validateEmployeeWeights, refetch: refetchWeights } = useGoalWeights(companyId);
 
   // Fetch job goals for selected employee
   const fetchJobGoalsForEmployee = async (employeeId: string) => {
@@ -390,11 +396,49 @@ export function GoalDialog({
 
       onOpenChange(false);
       onSuccess();
+      refetchWeights();
     } catch (error) {
       console.error("Error saving goal:", error);
       toast.error("Failed to save goal");
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Check weight validation before final submit
+  const checkWeightValidation = async (): Promise<boolean> => {
+    if (formData.goal_level !== "individual") return true;
+    
+    const employeeId = formData.employee_id || user?.id;
+    if (!employeeId) return true;
+
+    try {
+      const { data: existingGoals } = await supabase
+        .from("performance_goals")
+        .select("id, weighting")
+        .eq("company_id", companyId)
+        .eq("goal_level", "individual")
+        .eq("employee_id", employeeId)
+        .in("status", ["draft", "active", "in_progress"]);
+
+      const currentTotal = (existingGoals || [])
+        .filter(g => g.id !== goal?.id) // Exclude current goal if editing
+        .reduce((sum, g) => sum + (g.weighting || 0), 0);
+
+      const proposedWeight = parseFloat(formData.weighting) || 0;
+      const newTotal = currentTotal + proposedWeight;
+
+      setCurrentEmployeeWeight(currentTotal);
+
+      if (newTotal !== 100) {
+        setShowWeightWarning(true);
+        return false;
+      }
+
+      return true;
+    } catch (error) {
+      console.error("Error checking weights:", error);
+      return true; // Allow save on error
     }
   };
 
@@ -413,12 +457,21 @@ export function GoalDialog({
     }
   };
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (currentStep < WIZARD_STEPS.length - 1) {
       setCurrentStep(currentStep + 1);
     } else {
-      handleSubmit();
+      // On final step, check weight validation first
+      const canProceedWithWeight = await checkWeightValidation();
+      if (canProceedWithWeight) {
+        handleSubmit();
+      }
     }
+  };
+
+  const handleProceedWithWarning = () => {
+    setShowWeightWarning(false);
+    handleSubmit();
   };
 
   const handleBack = () => {
@@ -451,6 +504,22 @@ export function GoalDialog({
             onStepClick={(step) => step <= currentStep && setCurrentStep(step)}
           />
         </div>
+
+        {/* Weight Warning */}
+        {showWeightWarning && (
+          <div className="mb-4">
+            <GoalWeightWarning
+              currentTotal={currentEmployeeWeight}
+              proposedWeight={parseFloat(formData.weighting) || 0}
+              existingWeight={goal?.weighting || 0}
+              onProceed={handleProceedWithWarning}
+              onCancel={() => {
+                setShowWeightWarning(false);
+                setCurrentStep(2); // Go back to metrics step
+              }}
+            />
+          </div>
+        )}
 
         {/* Step Content */}
         <div className="flex-1 overflow-y-auto py-4 px-1">
@@ -508,6 +577,8 @@ export function GoalDialog({
               onChange={(updates) => setFormData({ ...formData, ...updates })}
               parentGoalWeight={parentGoalWeight}
               companyId={companyId}
+              employeeId={formData.goal_level === "individual" ? (formData.employee_id || user?.id) : undefined}
+              existingGoalId={goal?.id}
             />
           )}
 

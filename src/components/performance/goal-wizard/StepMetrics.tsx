@@ -1,7 +1,11 @@
+import { useEffect, useState } from "react";
 import { GoalEnhancedMetricsTab } from "../GoalEnhancedMetricsTab";
+import { GoalWeightSummary } from "../GoalWeightSummary";
 import { TYPE_FIELD_CONFIG, GoalType } from "./LevelFieldConfig";
 import { MeasurementType, ComplianceCategory } from "@/types/goalEnhancements";
 import { Info } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { WeightSummary } from "@/hooks/useGoalWeights";
 
 interface MetricsFormData {
   weighting: string;
@@ -27,6 +31,8 @@ interface StepMetricsProps {
   onChange: (updates: Partial<MetricsFormData>) => void;
   parentGoalWeight: number | null;
   companyId: string | undefined;
+  employeeId?: string;
+  existingGoalId?: string;
 }
 
 export function StepMetrics({
@@ -35,11 +41,62 @@ export function StepMetrics({
   onChange,
   parentGoalWeight,
   companyId,
+  employeeId,
+  existingGoalId,
 }: StepMetricsProps) {
   const typeConfig = TYPE_FIELD_CONFIG[goalType];
+  const [weightSummary, setWeightSummary] = useState<WeightSummary | null>(null);
+
+  // Fetch current weight allocation for the employee
+  useEffect(() => {
+    if (!employeeId || !companyId) {
+      setWeightSummary(null);
+      return;
+    }
+
+    const fetchWeights = async () => {
+      try {
+        const { data: goals } = await supabase
+          .from("performance_goals")
+          .select("id, weighting")
+          .eq("company_id", companyId)
+          .eq("goal_level", "individual")
+          .eq("employee_id", employeeId)
+          .in("status", ["draft", "active", "in_progress"]);
+
+        const existingTotal = (goals || [])
+          .filter(g => g.id !== existingGoalId)
+          .reduce((sum, g) => sum + (g.weighting || 0), 0);
+
+        const proposedWeight = parseFloat(formData.weighting) || 0;
+        const projectedTotal = existingTotal + proposedWeight;
+
+        setWeightSummary({
+          totalWeight: projectedTotal,
+          remainingWeight: 100 - projectedTotal,
+          status: projectedTotal === 100 ? "complete" : projectedTotal < 100 ? "under" : "over",
+          goalCount: (goals || []).length + (existingGoalId ? 0 : 1),
+          requiredGoalCount: 0,
+        });
+      } catch (error) {
+        console.error("Error fetching weights:", error);
+      }
+    };
+
+    fetchWeights();
+  }, [employeeId, companyId, formData.weighting, existingGoalId]);
 
   return (
     <div className="space-y-4">
+      {/* Weight Summary for Individual Goals */}
+      {employeeId && weightSummary && (
+        <GoalWeightSummary
+          summary={weightSummary}
+          showDetails={true}
+          compact={false}
+        />
+      )}
+
       {/* Context-aware header based on goal type */}
       <div className="p-3 rounded-lg bg-muted/50 border border-border flex items-start gap-2">
         <Info className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
