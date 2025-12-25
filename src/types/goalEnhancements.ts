@@ -9,6 +9,22 @@ export type GoalLevel = 'company' | 'department' | 'team' | 'individual' | 'proj
 
 export type AchievementLevel = 'not_started' | 'not_met' | 'below' | 'meets' | 'exceeds';
 
+// Enterprise Template Types
+export type TemplateType = 'simple' | 'composite' | 'okr' | 'delta';
+
+export type RollupMethod = 'average' | 'weighted' | 'min' | 'max';
+
+export type EvidenceType = 'file' | 'link' | 'note' | 'approval';
+
+export type BaselinePeriod = 'week' | 'month' | 'quarter';
+
+export interface SubMetricDefinition {
+  name: string;
+  weight: number;  // 0-100, must sum to 100
+  unitOfMeasure?: string;
+  isRequired: boolean;
+}
+
 export interface GoalExtendedAttributes {
   // Measurement Type
   measurementType: MeasurementType;
@@ -58,6 +74,14 @@ export interface MetricTemplate {
   category?: string;
   isActive: boolean;
   isGlobal?: boolean;
+  // Enterprise template fields
+  templateType?: TemplateType;
+  subMetrics?: SubMetricDefinition[];
+  rollupMethod?: RollupMethod;
+  captureBaseline?: boolean;
+  baselinePeriod?: BaselinePeriod;
+  evidenceRequired?: boolean;
+  evidenceTypes?: EvidenceType[];
 }
 
 // Default Metric Templates
@@ -182,6 +206,66 @@ export const DEFAULT_METRIC_TEMPLATES: Omit<MetricTemplate, 'id'>[] = [
     isActive: true,
     isGlobal: true,
   },
+  // Enterprise Templates
+  {
+    name: 'Outcome Scorecard',
+    description: 'Multi-metric weighted scorecard with evidence requirements',
+    templateType: 'composite',
+    measurementType: 'quantitative',
+    category: 'Strategic',
+    rollupMethod: 'weighted',
+    subMetrics: [
+      { name: 'Business Impact', weight: 40, isRequired: true },
+      { name: 'Quality Metrics', weight: 30, isRequired: true },
+      { name: 'Stakeholder Satisfaction', weight: 30, isRequired: true },
+    ],
+    evidenceRequired: true,
+    evidenceTypes: ['file', 'link', 'approval'],
+    thresholdPercentage: 70,
+    stretchPercentage: 110,
+    isGlobal: true,
+    isActive: true,
+    isInverse: false,
+  },
+  {
+    name: 'OKR Framework',
+    description: 'Objective with Key Results roll-up and alignment tracking',
+    templateType: 'okr',
+    measurementType: 'quantitative',
+    category: 'OKR',
+    rollupMethod: 'average',
+    subMetrics: [
+      { name: 'Key Result 1', weight: 33, isRequired: false },
+      { name: 'Key Result 2', weight: 33, isRequired: false },
+      { name: 'Key Result 3', weight: 34, isRequired: false },
+    ],
+    thresholdPercentage: 60,
+    stretchPercentage: 100,
+    isGlobal: true,
+    isActive: true,
+    isInverse: false,
+  },
+  {
+    name: 'Adoption & Impact',
+    description: 'Track adoption %, usage %, and outcome delta (before/after)',
+    templateType: 'delta',
+    measurementType: 'quantitative',
+    category: 'Enablement',
+    captureBaseline: true,
+    baselinePeriod: 'month',
+    subMetrics: [
+      { name: 'Adoption %', weight: 35, unitOfMeasure: '%', isRequired: true },
+      { name: 'Usage %', weight: 35, unitOfMeasure: '%', isRequired: true },
+      { name: 'Outcome Delta', weight: 30, isRequired: true },
+    ],
+    evidenceRequired: true,
+    evidenceTypes: ['file', 'link'],
+    thresholdPercentage: 75,
+    stretchPercentage: 120,
+    isGlobal: true,
+    isActive: true,
+    isInverse: false,
+  },
 ];
 
 // Configuration constants
@@ -222,4 +306,39 @@ export const ACHIEVEMENT_LEVEL_COLORS: Record<AchievementLevel, string> = {
   below: 'bg-warning/10 text-warning',
   meets: 'bg-success/10 text-success',
   exceeds: 'bg-primary/10 text-primary',
+};
+
+// Template Type Labels and Colors
+export const TEMPLATE_TYPE_LABELS: Record<TemplateType, string> = {
+  simple: 'Simple',
+  composite: 'Composite',
+  okr: 'OKR',
+  delta: 'Delta/Impact',
+};
+
+export const TEMPLATE_TYPE_COLORS: Record<TemplateType, string> = {
+  simple: 'bg-muted text-muted-foreground',
+  composite: 'bg-primary/10 text-primary',
+  okr: 'bg-accent/10 text-accent-foreground',
+  delta: 'bg-success/10 text-success',
+};
+
+export const ROLLUP_METHOD_LABELS: Record<RollupMethod, string> = {
+  average: 'Average',
+  weighted: 'Weighted',
+  min: 'Minimum',
+  max: 'Maximum',
+};
+
+export const EVIDENCE_TYPE_LABELS: Record<EvidenceType, string> = {
+  file: 'File Upload',
+  link: 'URL Link',
+  note: 'Text Note',
+  approval: 'Approval Sign-off',
+};
+
+export const BASELINE_PERIOD_LABELS: Record<BaselinePeriod, string> = {
+  week: 'Weekly',
+  month: 'Monthly',
+  quarter: 'Quarterly',
 };

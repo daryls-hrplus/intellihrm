@@ -32,13 +32,16 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
-import { Plus, MoreVertical, Edit, Copy, Trash, TrendingDown, TrendingUp } from "lucide-react";
+import { Plus, MoreVertical, Edit, Copy, Trash, TrendingDown, TrendingUp, Layers, BarChart3 } from "lucide-react";
 import { toast } from "sonner";
 import { useMetricTemplates } from "@/hooks/useMetricTemplates";
 import {
   MetricTemplate,
   MeasurementType,
   MEASUREMENT_TYPE_LABELS,
+  TemplateType,
+  TEMPLATE_TYPE_LABELS,
+  TEMPLATE_TYPE_COLORS,
 } from "@/types/goalEnhancements";
 
 interface MetricTemplatesManagerProps {
@@ -172,7 +175,8 @@ export function MetricTemplatesManager({ companyId }: MetricTemplatesManagerProp
           <TableHeader>
             <TableRow>
               <TableHead>Name</TableHead>
-              <TableHead>Type</TableHead>
+              <TableHead>Template Type</TableHead>
+              <TableHead>Measurement</TableHead>
               <TableHead>Category</TableHead>
               <TableHead>Threshold</TableHead>
               <TableHead>Stretch</TableHead>
@@ -183,7 +187,7 @@ export function MetricTemplatesManager({ companyId }: MetricTemplatesManagerProp
           <TableBody>
             {templates.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={7} className="text-center text-muted-foreground py-8">
+                <TableCell colSpan={8} className="text-center text-muted-foreground py-8">
                   No templates configured. Add your first template to get started.
                 </TableCell>
               </TableRow>
@@ -206,6 +210,19 @@ export function MetricTemplatesManager({ companyId }: MetricTemplatesManagerProp
                         )}
                       </div>
                     </div>
+                  </TableCell>
+                  <TableCell>
+                    {template.templateType ? (
+                      <Badge className={`text-xs ${TEMPLATE_TYPE_COLORS[template.templateType]}`}>
+                        <span className="flex items-center gap-1">
+                          {template.templateType === 'composite' && <Layers className="h-3 w-3" />}
+                          {template.templateType === 'okr' && <BarChart3 className="h-3 w-3" />}
+                          {TEMPLATE_TYPE_LABELS[template.templateType]}
+                        </span>
+                      </Badge>
+                    ) : (
+                      <Badge variant="outline" className="text-xs">Simple</Badge>
+                    )}
                   </TableCell>
                   <TableCell>
                     <Badge variant="outline" className="text-xs">

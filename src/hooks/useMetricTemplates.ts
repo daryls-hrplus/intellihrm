@@ -1,8 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
-import { DEFAULT_METRIC_TEMPLATES, MetricTemplate } from '@/types/goalEnhancements';
+import { DEFAULT_METRIC_TEMPLATES, MetricTemplate, TemplateType } from '@/types/goalEnhancements';
 
 const STORAGE_KEY = 'hrplus_metric_templates';
-
+const TEMPLATE_VERSION = 2; // Increment when adding new templates to force refresh
 /**
  * Hook to manage metric templates (stored in localStorage)
  * In a production environment, these would be stored in the database
@@ -12,7 +12,7 @@ export function useMetricTemplates(companyId?: string) {
   const [loading, setLoading] = useState(true);
 
   const getStorageKey = useCallback(() => {
-    return companyId ? `${STORAGE_KEY}_${companyId}` : STORAGE_KEY;
+    return companyId ? `${STORAGE_KEY}_${companyId}_v${TEMPLATE_VERSION}` : `${STORAGE_KEY}_v${TEMPLATE_VERSION}`;
   }, [companyId]);
 
   const loadTemplates = useCallback(() => {
@@ -114,6 +114,16 @@ export function useMetricTemplates(companyId?: string) {
     return templates.filter(t => t.category === category && t.isActive);
   }, [templates]);
 
+  const getTemplatesByType = useCallback((type: TemplateType) => {
+    return templates.filter(t => t.templateType === type && t.isActive);
+  }, [templates]);
+
+  const validateSubMetricWeights = useCallback((template: MetricTemplate): boolean => {
+    if (!template.subMetrics || template.subMetrics.length === 0) return true;
+    const totalWeight = template.subMetrics.reduce((sum, m) => sum + m.weight, 0);
+    return totalWeight === 100;
+  }, []);
+
   return {
     templates,
     loading,
@@ -125,6 +135,8 @@ export function useMetricTemplates(companyId?: string) {
     getTemplateById,
     getActiveTemplates,
     getTemplatesByCategory,
+    getTemplatesByType,
+    validateSubMetricWeights,
     refresh: loadTemplates,
   };
 }
