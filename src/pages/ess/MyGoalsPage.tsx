@@ -356,6 +356,117 @@ export default function MyGoalsPage() {
           <GoalsAnalyticsDashboard goals={goals} compact />
         )}
         
+        {/* Action Required Section - Manager-Requested Check-ins */}
+        {requestedCheckIns.length > 0 && (
+          <Card className="border-warning/50 bg-warning/5">
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="p-2 rounded-full bg-warning/10">
+                    <ClipboardCheck className="h-5 w-5 text-warning" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      Action Required
+                      <Badge variant="outline" className="border-warning text-warning">
+                        {requestedCheckIns.length}
+                      </Badge>
+                    </CardTitle>
+                    <p className="text-sm text-muted-foreground">
+                      Your manager has requested the following check-ins
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <div className="space-y-3">
+                {[...requestedCheckIns]
+                  .sort((a, b) => {
+                    const dateA = a.check_in_date ? new Date(a.check_in_date).getTime() : Infinity;
+                    const dateB = b.check_in_date ? new Date(b.check_in_date).getTime() : Infinity;
+                    return dateA - dateB;
+                  })
+                  .map((checkIn) => {
+                    const goal = goals.find(g => g.id === checkIn.goal_id);
+                    const daysLeft = checkIn.check_in_date 
+                      ? differenceInDays(new Date(checkIn.check_in_date), new Date()) 
+                      : null;
+                    const isOverdueCheckIn = daysLeft !== null && daysLeft < 0;
+                    const isDueToday = daysLeft === 0;
+                    const isDueSoon = daysLeft !== null && daysLeft > 0 && daysLeft <= 3;
+                    const message = checkIn.coaching_notes?.startsWith("[CHECK-IN REQUEST]") 
+                      ? checkIn.coaching_notes.replace("[CHECK-IN REQUEST] ", "") 
+                      : null;
+
+                    return (
+                      <div 
+                        key={checkIn.id}
+                        className={`flex items-start gap-4 p-4 rounded-lg border ${
+                          isOverdueCheckIn 
+                            ? "border-destructive/50 bg-destructive/5" 
+                            : isDueToday 
+                              ? "border-warning/50 bg-warning/10" 
+                              : "border-border bg-background"
+                        }`}
+                      >
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <h4 className="font-medium">
+                              {goal?.title || "Goal"}
+                            </h4>
+                            {isOverdueCheckIn && (
+                              <Badge variant="destructive">
+                                <AlertCircle className="h-3 w-3 mr-1" />
+                                Overdue by {Math.abs(daysLeft!)} {Math.abs(daysLeft!) === 1 ? "day" : "days"}
+                              </Badge>
+                            )}
+                            {isDueToday && (
+                              <Badge variant="outline" className="border-warning bg-warning text-warning-foreground">
+                                <Clock className="h-3 w-3 mr-1" />
+                                Due Today
+                              </Badge>
+                            )}
+                            {isDueSoon && (
+                              <Badge variant="outline" className="border-warning text-warning">
+                                <Clock className="h-3 w-3 mr-1" />
+                                Due in {daysLeft} {daysLeft === 1 ? "day" : "days"}
+                              </Badge>
+                            )}
+                            {daysLeft !== null && daysLeft > 3 && (
+                              <Badge variant="secondary">
+                                Due {formatDateForDisplay(checkIn.check_in_date!, "MMM d")}
+                              </Badge>
+                            )}
+                          </div>
+                          {message && (
+                            <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
+                              <span className="font-medium">Manager's note:</span> "{message}"
+                            </p>
+                          )}
+                        </div>
+                        <Button 
+                          size="sm" 
+                          onClick={() => {
+                            if (goal) {
+                              setSelectedGoal(goal);
+                              setCheckInDialogOpen(true);
+                            }
+                          }}
+                          className={isOverdueCheckIn || isDueToday ? "" : ""}
+                          variant={isOverdueCheckIn || isDueToday ? "default" : "outline"}
+                        >
+                          <ClipboardCheck className="h-4 w-4 mr-1" />
+                          Submit Check-in
+                        </Button>
+                      </div>
+                    );
+                  })}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Progress ≠ Rating Guidance */}
         {goals.length > 0 && (
           <Alert>
