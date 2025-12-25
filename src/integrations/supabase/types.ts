@@ -16717,6 +16717,89 @@ export type Database = {
           },
         ]
       }
+      goal_dependencies: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          dependency_type: Database["public"]["Enums"]["goal_dependency_type"]
+          depends_on_goal_id: string | null
+          description: string | null
+          expected_resolution_date: string | null
+          external_dependency_contact: string | null
+          external_dependency_name: string | null
+          goal_id: string
+          id: string
+          impact_if_blocked: Database["public"]["Enums"]["goal_impact_level"]
+          is_resolved: boolean
+          resolved_at: string | null
+          resolved_by: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          dependency_type: Database["public"]["Enums"]["goal_dependency_type"]
+          depends_on_goal_id?: string | null
+          description?: string | null
+          expected_resolution_date?: string | null
+          external_dependency_contact?: string | null
+          external_dependency_name?: string | null
+          goal_id: string
+          id?: string
+          impact_if_blocked?: Database["public"]["Enums"]["goal_impact_level"]
+          is_resolved?: boolean
+          resolved_at?: string | null
+          resolved_by?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          dependency_type?: Database["public"]["Enums"]["goal_dependency_type"]
+          depends_on_goal_id?: string | null
+          description?: string | null
+          expected_resolution_date?: string | null
+          external_dependency_contact?: string | null
+          external_dependency_name?: string | null
+          goal_id?: string
+          id?: string
+          impact_if_blocked?: Database["public"]["Enums"]["goal_impact_level"]
+          is_resolved?: boolean
+          resolved_at?: string | null
+          resolved_by?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "goal_dependencies_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "goal_dependencies_depends_on_goal_id_fkey"
+            columns: ["depends_on_goal_id"]
+            isOneToOne: false
+            referencedRelation: "performance_goals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "goal_dependencies_goal_id_fkey"
+            columns: ["goal_id"]
+            isOneToOne: false
+            referencedRelation: "performance_goals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "goal_dependencies_resolved_by_fkey"
+            columns: ["resolved_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       goal_interviews: {
         Row: {
           agenda: string | null
@@ -17085,6 +17168,126 @@ export type Database = {
             columns: ["reviewer_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      goal_risk_alerts: {
+        Row: {
+          ai_explanation: string | null
+          alert_type: string
+          created_at: string
+          dismissed_at: string | null
+          dismissed_by: string | null
+          goal_id: string
+          id: string
+          is_dismissed: boolean
+          message: string
+          recommended_actions: Json | null
+          severity: string
+        }
+        Insert: {
+          ai_explanation?: string | null
+          alert_type: string
+          created_at?: string
+          dismissed_at?: string | null
+          dismissed_by?: string | null
+          goal_id: string
+          id?: string
+          is_dismissed?: boolean
+          message: string
+          recommended_actions?: Json | null
+          severity?: string
+        }
+        Update: {
+          ai_explanation?: string | null
+          alert_type?: string
+          created_at?: string
+          dismissed_at?: string | null
+          dismissed_by?: string | null
+          goal_id?: string
+          id?: string
+          is_dismissed?: boolean
+          message?: string
+          recommended_actions?: Json | null
+          severity?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "goal_risk_alerts_dismissed_by_fkey"
+            columns: ["dismissed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "goal_risk_alerts_goal_id_fkey"
+            columns: ["goal_id"]
+            isOneToOne: false
+            referencedRelation: "performance_goals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      goal_risk_assessments: {
+        Row: {
+          assessed_by: string | null
+          assessment_type: string
+          blocking_dependencies: string[] | null
+          confidence_score: number | null
+          created_at: string
+          goal_id: string
+          id: string
+          mitigation_actions: string | null
+          risk_factors: Json | null
+          risk_indicator: Database["public"]["Enums"]["goal_risk_indicator"]
+          risk_score: number | null
+          updated_at: string
+          valid_until: string | null
+        }
+        Insert: {
+          assessed_by?: string | null
+          assessment_type?: string
+          blocking_dependencies?: string[] | null
+          confidence_score?: number | null
+          created_at?: string
+          goal_id: string
+          id?: string
+          mitigation_actions?: string | null
+          risk_factors?: Json | null
+          risk_indicator?: Database["public"]["Enums"]["goal_risk_indicator"]
+          risk_score?: number | null
+          updated_at?: string
+          valid_until?: string | null
+        }
+        Update: {
+          assessed_by?: string | null
+          assessment_type?: string
+          blocking_dependencies?: string[] | null
+          confidence_score?: number | null
+          created_at?: string
+          goal_id?: string
+          id?: string
+          mitigation_actions?: string | null
+          risk_factors?: Json | null
+          risk_indicator?: Database["public"]["Enums"]["goal_risk_indicator"]
+          risk_score?: number | null
+          updated_at?: string
+          valid_until?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "goal_risk_assessments_assessed_by_fkey"
+            columns: ["assessed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "goal_risk_assessments_goal_id_fkey"
+            columns: ["goal_id"]
+            isOneToOne: false
+            referencedRelation: "performance_goals"
             referencedColumns: ["id"]
           },
         ]
@@ -39118,6 +39321,7 @@ export type Database = {
         Args: { p_goal_id: string }
         Returns: number
       }
+      calculate_goal_risk_score: { Args: { p_goal_id: string }; Returns: Json }
       calculate_shift_differential: {
         Args: {
           p_clock_in: string
@@ -39151,6 +39355,15 @@ export type Database = {
           approved_modules: Json
           is_auto_approved: boolean
           rule_name: string
+        }[]
+      }
+      check_dependency_cascade: {
+        Args: { p_dependency_id: string }
+        Returns: {
+          affected_goal_id: string
+          affected_goal_title: string
+          cascade_level: number
+          impact_path: string[]
         }[]
       }
       check_geofence: {
@@ -39517,7 +39730,16 @@ export type Database = {
         | "currency"
       gl_account_type: "asset" | "liability" | "equity" | "revenue" | "expense"
       gl_posting_status: "draft" | "pending" | "posted" | "reversed" | "failed"
+      goal_dependency_type:
+        | "sequential"
+        | "resource"
+        | "skill"
+        | "external"
+        | "cross_team"
+        | "regulatory"
+      goal_impact_level: "low" | "medium" | "high" | "critical"
       goal_level: "company" | "department" | "team" | "individual"
+      goal_risk_indicator: "blocked" | "at_risk" | "on_track" | "accelerated"
       goal_source: "cascaded" | "manager_assigned" | "self_created"
       goal_status:
         | "draft"
@@ -39767,7 +39989,17 @@ export const Constants = {
       ],
       gl_account_type: ["asset", "liability", "equity", "revenue", "expense"],
       gl_posting_status: ["draft", "pending", "posted", "reversed", "failed"],
+      goal_dependency_type: [
+        "sequential",
+        "resource",
+        "skill",
+        "external",
+        "cross_team",
+        "regulatory",
+      ],
+      goal_impact_level: ["low", "medium", "high", "critical"],
       goal_level: ["company", "department", "team", "individual"],
+      goal_risk_indicator: ["blocked", "at_risk", "on_track", "accelerated"],
       goal_source: ["cascaded", "manager_assigned", "self_created"],
       goal_status: [
         "draft",
