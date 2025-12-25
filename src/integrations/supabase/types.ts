@@ -39262,6 +39262,21 @@ export type Database = {
             }
             Returns: Json
           }
+        | {
+            Args: { p_employee_id: string; p_leave_type_id: string }
+            Returns: {
+              accrued_balance: number
+              available_balance: number
+              carried_over: number
+              date_source: string
+              leave_type_id: string
+              leave_type_name: string
+              pending_balance: number
+              service_start_date: string
+              service_years: number
+              used_balance: number
+            }[]
+          }
       seed_role_container_access: { Args: never; Returns: undefined }
       seed_role_pii_access: { Args: never; Returns: undefined }
       submit_goal_for_approval: { Args: { p_goal_id: string }; Returns: Json }

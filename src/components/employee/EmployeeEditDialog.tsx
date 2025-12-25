@@ -17,10 +17,16 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuditLog } from "@/hooks/useAuditLog";
 import { toast } from "sonner";
-import { Loader2 } from "lucide-react";
+import { Loader2, HelpCircle } from "lucide-react";
 import { CustomFieldsRenderer } from "@/components/custom-fields/CustomFieldsRenderer";
 import { useCustomFields } from "@/hooks/useCustomFields";
 
@@ -319,69 +325,134 @@ export function EmployeeEditDialog({
 
           <Separator className="my-2" />
           <h4 className="text-sm font-medium">Employment Dates</h4>
+          <p className="text-xs text-muted-foreground mb-2">
+            These dates are used for leave balance calculations. Priority: Adjusted Service → Continuous Service → Seniority → Start Date → First Hire.
+          </p>
           
-          <div className="grid grid-cols-2 gap-4">
-            <div className="grid gap-2">
-              <Label htmlFor="firstHireDate">First Hire Date</Label>
-              <Input
-                id="firstHireDate"
-                type="date"
-                value={firstHireDate}
-                onChange={(e) => setFirstHireDate(e.target.value)}
-              />
+          <TooltipProvider>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="grid gap-2">
+                <div className="flex items-center gap-1">
+                  <Label htmlFor="firstHireDate">First Hire Date</Label>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <HelpCircle className="h-3.5 w-3.5 text-muted-foreground cursor-help" />
+                    </TooltipTrigger>
+                    <TooltipContent className="max-w-xs">
+                      <p>The original date the employee was first hired by the organization. Used as fallback for leave calculations if no other service dates are set.</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </div>
+                <Input
+                  id="firstHireDate"
+                  type="date"
+                  value={firstHireDate}
+                  onChange={(e) => setFirstHireDate(e.target.value)}
+                />
+              </div>
+              <div className="grid gap-2">
+                <div className="flex items-center gap-1">
+                  <Label htmlFor="lastHireDate">Last Hire Date</Label>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <HelpCircle className="h-3.5 w-3.5 text-muted-foreground cursor-help" />
+                    </TooltipTrigger>
+                    <TooltipContent className="max-w-xs">
+                      <p>The most recent hire date if the employee was rehired. Useful for tracking employment gaps.</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </div>
+                <Input
+                  id="lastHireDate"
+                  type="date"
+                  value={lastHireDate}
+                  onChange={(e) => setLastHireDate(e.target.value)}
+                />
+              </div>
             </div>
-            <div className="grid gap-2">
-              <Label htmlFor="lastHireDate">Last Hire Date</Label>
-              <Input
-                id="lastHireDate"
-                type="date"
-                value={lastHireDate}
-                onChange={(e) => setLastHireDate(e.target.value)}
-              />
+            
+            <div className="grid grid-cols-2 gap-4">
+              <div className="grid gap-2">
+                <div className="flex items-center gap-1">
+                  <Label htmlFor="startDate">Start Date (First Day)</Label>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <HelpCircle className="h-3.5 w-3.5 text-muted-foreground cursor-help" />
+                    </TooltipTrigger>
+                    <TooltipContent className="max-w-xs">
+                      <p>The employee's first day on the job. Use when there is no waiting period before leave accrual begins.</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </div>
+                <Input
+                  id="startDate"
+                  type="date"
+                  value={startDate}
+                  onChange={(e) => setStartDate(e.target.value)}
+                />
+              </div>
+              <div className="grid gap-2">
+                <div className="flex items-center gap-1">
+                  <Label htmlFor="continuousServiceDate">Continuous Service Date</Label>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <HelpCircle className="h-3.5 w-3.5 text-muted-foreground cursor-help" />
+                    </TooltipTrigger>
+                    <TooltipContent className="max-w-xs">
+                      <p>Used to grant prior service credit, typically for rehires. Leave calculations will use this date to include previous tenure with the organization.</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </div>
+                <Input
+                  id="continuousServiceDate"
+                  type="date"
+                  value={continuousServiceDate}
+                  onChange={(e) => setContinuousServiceDate(e.target.value)}
+                />
+              </div>
             </div>
-          </div>
-          
-          <div className="grid grid-cols-2 gap-4">
-            <div className="grid gap-2">
-              <Label htmlFor="startDate">Start Date (First Day)</Label>
-              <Input
-                id="startDate"
-                type="date"
-                value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
-              />
+            
+            <div className="grid grid-cols-2 gap-4">
+              <div className="grid gap-2">
+                <div className="flex items-center gap-1">
+                  <Label htmlFor="seniorityDate">Seniority Date</Label>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <HelpCircle className="h-3.5 w-3.5 text-muted-foreground cursor-help" />
+                    </TooltipTrigger>
+                    <TooltipContent className="max-w-xs">
+                      <p>Date from which leave is calculated after probation ends. Use when employees must complete a probationary period before accruing leave.</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </div>
+                <Input
+                  id="seniorityDate"
+                  type="date"
+                  value={seniorityDate}
+                  onChange={(e) => setSeniorityDate(e.target.value)}
+                />
+              </div>
+              <div className="grid gap-2">
+                <div className="flex items-center gap-1">
+                  <Label htmlFor="adjustedServiceDate">Adjusted Service Date</Label>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <HelpCircle className="h-3.5 w-3.5 text-muted-foreground cursor-help" />
+                    </TooltipTrigger>
+                    <TooltipContent className="max-w-xs">
+                      <p>Used to credit work from a previous tenure or external organization. Takes highest priority in leave calculations when set.</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </div>
+                <Input
+                  id="adjustedServiceDate"
+                  type="date"
+                  value={adjustedServiceDate}
+                  onChange={(e) => setAdjustedServiceDate(e.target.value)}
+                />
+              </div>
             </div>
-            <div className="grid gap-2">
-              <Label htmlFor="continuousServiceDate">Continuous Service Date</Label>
-              <Input
-                id="continuousServiceDate"
-                type="date"
-                value={continuousServiceDate}
-                onChange={(e) => setContinuousServiceDate(e.target.value)}
-              />
-            </div>
-          </div>
-          
-          <div className="grid grid-cols-2 gap-4">
-            <div className="grid gap-2">
-              <Label htmlFor="seniorityDate">Seniority Date</Label>
-              <Input
-                id="seniorityDate"
-                type="date"
-                value={seniorityDate}
-                onChange={(e) => setSeniorityDate(e.target.value)}
-              />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="adjustedServiceDate">Adjusted Service Date</Label>
-              <Input
-                id="adjustedServiceDate"
-                type="date"
-                value={adjustedServiceDate}
-                onChange={(e) => setAdjustedServiceDate(e.target.value)}
-              />
-            </div>
-          </div>
+          </TooltipProvider>
 
           {/* Custom Fields Section */}
           {fields.length > 0 && (
