@@ -25,7 +25,7 @@ import { DepartmentFilter, useDepartmentFilter } from "@/components/filters/Depa
 import { useLanguage } from "@/hooks/useLanguage";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { format } from "date-fns";
+import { formatDateForDisplay } from "@/utils/dateUtils";
 import { Skeleton } from "@/components/ui/skeleton";
 import { 
   ClipboardCheck, 
@@ -263,7 +263,7 @@ export default function HSEInspectionsPage() {
                       filteredFindings?.map((finding) => (
                         <TableRow key={finding.id}>
                           <TableCell className="font-medium">{finding.finding_type}</TableCell>
-                          <TableCell>{finding.due_date ? format(new Date(finding.due_date), "MMM d, yyyy") : "-"}</TableCell>
+                          <TableCell>{finding.due_date ? formatDateForDisplay(finding.due_date) : "-"}</TableCell>
                           <TableCell>{finding.location || "-"}</TableCell>
                           <TableCell className="max-w-xs truncate">{finding.description || "-"}</TableCell>
                           <TableCell>{getSeverityBadge(finding.severity)}</TableCell>

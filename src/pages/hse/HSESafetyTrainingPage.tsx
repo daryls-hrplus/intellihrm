@@ -43,8 +43,8 @@ import {
   Users,
   AlertTriangle,
 } from "lucide-react";
-import { format, addMonths, isPast } from "date-fns";
-import { getTodayString, toDateString } from "@/utils/dateUtils";
+import { addMonths, isPast } from "date-fns";
+import { getTodayString, toDateString, formatDateForDisplay } from "@/utils/dateUtils";
 import { NavLink } from "react-router-dom";
 import { toast } from "sonner";
 
@@ -412,7 +412,7 @@ export default function HSESafetyTrainingPage() {
                           </TableCell>
                           <TableCell>{record.training?.title}</TableCell>
                           <TableCell>
-                            {format(new Date(record.training_date), "MMM d, yyyy")}
+                            {formatDateForDisplay(record.training_date)}
                           </TableCell>
                           <TableCell>
                             {record.expiry_date ? (
@@ -421,7 +421,7 @@ export default function HSESafetyTrainingPage() {
                                   isPast(new Date(record.expiry_date)) ? "text-destructive" : ""
                                 }
                               >
-                                {format(new Date(record.expiry_date), "MMM d, yyyy")}
+                                {formatDateForDisplay(record.expiry_date)}
                               </span>
                             ) : (
                               "-"
@@ -579,7 +579,7 @@ export default function HSESafetyTrainingPage() {
                       ...recordFormData,
                       training_id: v,
                       expiry_date: training?.frequency_months
-                        ? format(addMonths(new Date(), training.frequency_months), "yyyy-MM-dd")
+                        ? toDateString(addMonths(new Date(), training.frequency_months))
                         : undefined,
                     });
                   }}

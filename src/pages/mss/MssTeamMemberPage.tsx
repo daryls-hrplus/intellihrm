@@ -23,7 +23,6 @@ import {
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
-import { format } from 'date-fns';
 import { formatDateForDisplay } from "@/utils/dateUtils";
 
 interface TeamMemberDetails {
@@ -290,7 +289,7 @@ export default function MssTeamMemberPage() {
                   {member.hire_date && (
                     <div className="flex items-center gap-1">
                       <Calendar className="h-4 w-4" />
-                      Since {format(new Date(member.hire_date), 'MMM yyyy')}
+                      Since {formatDateForDisplay(member.hire_date, 'MMM yyyy')}
                     </div>
                   )}
                 </div>
@@ -402,7 +401,7 @@ export default function MssTeamMemberPage() {
                         </div>
                         {goal.due_date && (
                           <p className="text-xs text-muted-foreground mt-2">
-                            Due: {format(new Date(goal.due_date), 'MMM d, yyyy')}
+                            Due: {formatDateForDisplay(goal.due_date)}
                           </p>
                         )}
                       </div>

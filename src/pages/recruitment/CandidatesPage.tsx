@@ -11,7 +11,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Users, Plus, Search } from "lucide-react";
 import { useRecruitment } from "@/hooks/useRecruitment";
-import { format } from "date-fns";
+import { formatDateForDisplay } from "@/utils/dateUtils";
 import { LeaveCompanyFilter, useLeaveCompanyFilter } from "@/components/leave/LeaveCompanyFilter";
 
 export default function CandidatesPage() {
@@ -242,7 +242,7 @@ export default function CandidatesPage() {
                       </TableCell>
                       <TableCell>{candidate.years_experience ? `${candidate.years_experience} yrs` : "-"}</TableCell>
                       <TableCell><Badge variant="outline">{candidate.source || "direct"}</Badge></TableCell>
-                      <TableCell>{format(new Date(candidate.created_at), "MMM d, yyyy")}</TableCell>
+                      <TableCell>{formatDateForDisplay(candidate.created_at)}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>

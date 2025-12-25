@@ -12,6 +12,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Plus, Mail, Phone, MessageSquare, Calendar, FileText, User } from 'lucide-react';
 import { format } from 'date-fns';
+import { formatDateForDisplay } from "@/utils/dateUtils";
 
 interface CandidatePipelineTabProps {
   companyId: string;
@@ -208,7 +209,7 @@ export function CandidatePipelineTab({ companyId }: CandidatePipelineTabProps) {
                         )}
                         {activity.follow_up_date && (
                           <div className="text-sm text-primary mt-1">
-                            Follow-up: {format(new Date(activity.follow_up_date), 'MMM d, yyyy')}
+                            Follow-up: {formatDateForDisplay(activity.follow_up_date)}
                           </div>
                         )}
                         {activity.profiles?.full_name && (

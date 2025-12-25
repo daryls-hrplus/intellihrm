@@ -404,7 +404,7 @@ export default function MssTimeAttendancePage() {
                         <TableRow key={sheet.id}>
                           <TableCell className="font-medium">{sheet.employee?.full_name}</TableCell>
                           <TableCell>
-                            {format(new Date(sheet.period_start), "MMM d")} - {format(new Date(sheet.period_end), "MMM d, yyyy")}
+                            {formatDateForDisplay(sheet.period_start, "MMM d")} - {formatDateForDisplay(sheet.period_end)}
                           </TableCell>
                           <TableCell>{sheet.total_hours.toFixed(2)}</TableCell>
                           <TableCell>{format(new Date(sheet.submitted_at), "MMM d, h:mm a")}</TableCell>
@@ -456,7 +456,7 @@ export default function MssTimeAttendancePage() {
                       {exceptions.map((exc) => (
                         <TableRow key={exc.id}>
                           <TableCell className="font-medium">{exc.employee?.full_name}</TableCell>
-                          <TableCell>{format(new Date(exc.exception_date), "MMM d, yyyy")}</TableCell>
+                          <TableCell>{formatDateForDisplay(exc.exception_date)}</TableCell>
                           <TableCell>
                             <Badge variant="outline">{exc.exception_type.replace("_", " ")}</Badge>
                           </TableCell>
@@ -511,7 +511,7 @@ export default function MssTimeAttendancePage() {
                   <div className="col-span-2">
                     <span className="text-muted-foreground">Period:</span>
                     <p className="font-medium">
-                      {format(new Date(selectedTimesheet.period_start), "MMM d")} - {format(new Date(selectedTimesheet.period_end), "MMM d, yyyy")}
+                      {formatDateForDisplay(selectedTimesheet.period_start, "MMM d")} - {formatDateForDisplay(selectedTimesheet.period_end)}
                     </p>
                   </div>
                 </div>

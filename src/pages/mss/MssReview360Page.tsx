@@ -30,7 +30,6 @@ import { CycleQuestionsManager } from "@/components/performance/CycleQuestionsMa
 import { PeerNominationManager } from "@/components/performance/PeerNominationManager";
 import { FeedbackFormDialog } from "@/components/performance/FeedbackFormDialog";
 import { Review360AnalyticsDashboard } from "@/components/performance/Review360AnalyticsDashboard";
-import { format } from "date-fns";
 import { formatDateForDisplay } from "@/utils/dateUtils";
 import { useLanguage } from "@/hooks/useLanguage";
 
@@ -527,7 +526,7 @@ const reviewerTypeLabels: Record<string, string> = {
                         {feedback.deadline && (
                           <div className="flex items-center gap-2 text-sm text-muted-foreground">
                             <Calendar className="h-4 w-4" />
-                            Deadline: {format(new Date(feedback.deadline), "MMM d, yyyy")}
+                            Deadline: {formatDateForDisplay(feedback.deadline)}
                           </div>
                         )}
                         <Button onClick={() => handleStartFeedback(feedback)}>
@@ -578,7 +577,7 @@ const reviewerTypeLabels: Record<string, string> = {
                           {feedback.submitted_at && (
                             <div className="flex items-center gap-2">
                               <Calendar className="h-4 w-4" />
-                              Submitted: {format(new Date(feedback.submitted_at), "MMM d, yyyy")}
+                              Submitted: {formatDateForDisplay(feedback.submitted_at)}
                             </div>
                           )}
                         </div>

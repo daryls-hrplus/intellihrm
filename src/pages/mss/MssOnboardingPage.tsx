@@ -31,7 +31,7 @@ import {
 import { useOnboarding, OnboardingInstance } from '@/hooks/useOnboarding';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
-import { format, differenceInDays } from 'date-fns';
+import { differenceInDays } from 'date-fns';
 import { formatDateForDisplay } from "@/utils/dateUtils";
 
 export default function MssOnboardingPage() {
@@ -256,7 +256,7 @@ export default function MssOnboardingPage() {
                           {instance.target_completion_date ? (
                             <div className={`flex items-center gap-1 text-sm ${isOverdue ? 'text-red-500' : ''}`}>
                               <Calendar className="h-3 w-3" />
-                              {format(new Date(instance.target_completion_date), 'MMM d, yyyy')}
+                              {formatDateForDisplay(instance.target_completion_date)}
                               {isOverdue && <AlertCircle className="h-3 w-3" />}
                             </div>
                           ) : '-'}
