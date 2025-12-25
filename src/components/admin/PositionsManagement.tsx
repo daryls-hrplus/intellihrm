@@ -1092,6 +1092,9 @@ export function PositionsManagement({ companyId }: PositionsManagementProps) {
                       <SelectItem value="FULL_TIME">Full-Time</SelectItem>
                       <SelectItem value="PART_TIME">Part-Time</SelectItem>
                       <SelectItem value="CASUAL">Casual</SelectItem>
+                      <SelectItem value="SEASONAL">Seasonal</SelectItem>
+                      <SelectItem value="TEMPORARY">Temporary</SelectItem>
+                      <SelectItem value="FIXED_TERM">Fixed-Term</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
