@@ -18,6 +18,7 @@ import {
   Eye,
   BarChart3,
   Lightbulb,
+  MessageSquare,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -29,6 +30,10 @@ import { TeamGoalsFilters } from "@/components/mss/TeamGoalsFilters";
 import { TeamGoalCard } from "@/components/mss/TeamGoalCard";
 import { SendReminderDialog } from "@/components/mss/SendReminderDialog";
 import { ManagerCoachingPrompts } from "@/components/mss/ManagerCoachingPrompts";
+import { ManagerCheckInPrompt } from "@/components/performance/ManagerCheckInPrompt";
+import { ProgressVisualizationDashboard } from "@/components/performance/ProgressVisualizationDashboard";
+import { ManagerCheckInReviewDialog } from "@/components/performance/ManagerCheckInReviewDialog";
+import { GoalCheckIn } from "@/hooks/useGoalCheckIns";
 import { format, isPast } from "date-fns";
 import { formatDateForDisplay, getTodayString } from "@/utils/dateUtils";
 import { toast } from "sonner";
@@ -106,6 +111,10 @@ const statusColors: Record<GoalStatus, string> = {
   // Reminder dialog
   const [reminderDialogOpen, setReminderDialogOpen] = useState(false);
   const [reminderType, setReminderType] = useState<"reminder" | "update_request">("reminder");
+
+  // Check-in review dialog
+  const [reviewDialogOpen, setReviewDialogOpen] = useState(false);
+  const [selectedCheckIn, setSelectedCheckIn] = useState<GoalCheckIn | null>(null);
 
   useEffect(() => {
     if (user?.id) {
@@ -321,6 +330,11 @@ const statusColors: Record<GoalStatus, string> = {
     setReminderDialogOpen(true);
   };
 
+  const handleReviewCheckIn = (checkIn: GoalCheckIn) => {
+    setSelectedCheckIn(checkIn);
+    setReviewDialogOpen(true);
+  };
+
   const activeGoals = teamGoals.filter(g => g.status === "active" || g.status === "in_progress");
   const overdueGoals = teamGoals.filter(g => g.status === "overdue" || (g.due_date && new Date(g.due_date) < new Date() && g.status !== "completed"));
 
@@ -412,13 +426,22 @@ const statusColors: Record<GoalStatus, string> = {
           </Card>
         </div>
 
+        {/* Manager Check-in Prompt */}
+        <ManagerCheckInPrompt onReviewClick={handleReviewCheckIn} />
+
         {/* Analytics Section */}
         {showAnalytics && (
-          <TeamGoalsAnalytics
-            teamGoals={teamGoals}
-            completedGoals={completedGoals}
-            directReports={directReports}
-          />
+          <>
+            <TeamGoalsAnalytics
+              teamGoals={teamGoals}
+              completedGoals={completedGoals}
+              directReports={directReports}
+            />
+            <ProgressVisualizationDashboard
+              teamGoals={teamGoals}
+              directReports={directReports}
+            />
+          </>
         )}
 
         <Tabs value={activeTab} onValueChange={setActiveTab}>
@@ -431,6 +454,10 @@ const statusColors: Record<GoalStatus, string> = {
                   {filteredGoals.length}
                 </Badge>
               )}
+            </TabsTrigger>
+            <TabsTrigger value="check-ins" className="gap-2">
+              <MessageSquare className="h-4 w-4" />
+              Check-ins
             </TabsTrigger>
             <TabsTrigger value="by-employee" className="gap-2">
               <Users className="h-4 w-4" />
@@ -498,6 +525,18 @@ const statusColors: Record<GoalStatus, string> = {
                 ))
               )}
             </div>
+          </TabsContent>
+
+          <TabsContent value="check-ins" className="mt-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Team Check-ins Overview</CardTitle>
+                <CardDescription>Review and respond to employee goal check-ins</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ManagerCheckInPrompt onReviewClick={handleReviewCheckIn} />
+              </CardContent>
+            </Card>
           </TabsContent>
 
           <TabsContent value="by-employee" className="mt-6">
@@ -662,6 +701,13 @@ const statusColors: Record<GoalStatus, string> = {
             />
           </>
         )}
+
+        <ManagerCheckInReviewDialog
+          open={reviewDialogOpen}
+          onOpenChange={setReviewDialogOpen}
+          checkIn={selectedCheckIn}
+          onSuccess={fetchData}
+        />
       </div>
     </AppLayout>
   );
