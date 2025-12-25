@@ -96,6 +96,7 @@ export interface EmployeeTransaction {
   
   // Rehire fields
   adjust_continuous_service: boolean;
+  continuous_service_date: string | null;
   
   // Workflow
   workflow_instance_id: string | null;
@@ -400,9 +401,9 @@ export function useEmployeeTransactions() {
             last_hire_date: data.effective_date || null,
           };
 
-          // Only reset continuous_service_date if adjust_continuous_service is true
-          if (data.adjust_continuous_service) {
-            profileUpdate.continuous_service_date = data.effective_date || null;
+          // Set continuous_service_date if adjust_continuous_service is true
+          if (data.adjust_continuous_service && data.continuous_service_date) {
+            profileUpdate.continuous_service_date = data.continuous_service_date;
           }
 
           const { error: profileError } = await supabase
