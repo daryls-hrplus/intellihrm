@@ -90,6 +90,7 @@ export function EmployeeEditDialog({
   open,
   onOpenChange,
   employee,
+  onSuccess,
 }: EmployeeEditDialogProps) {
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
@@ -216,6 +217,7 @@ export function EmployeeEditDialog({
 
       toast.success("Employee updated successfully");
       onOpenChange(false);
+      onSuccess?.();
     } catch (error) {
       console.error("Error updating employee:", error);
       toast.error("Failed to update employee");
