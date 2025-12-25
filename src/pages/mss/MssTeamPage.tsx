@@ -42,7 +42,7 @@ export default function MssTeamPage() {
   const [searchQuery, setSearchQuery] = useState('');
 
   const breadcrumbItems = [
-    { label: t('mss.title'), path: '/mss' },
+    { label: t('mss.title'), href: '/mss' },
     { label: t('mss.dashboard.myTeam') },
   ];
 
