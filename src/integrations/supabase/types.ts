@@ -30391,10 +30391,14 @@ export type Database = {
           company_id: string | null
           compensation_model: string
           created_at: string
+          default_scheduled_hours: number | null
           department_id: string
           description: string | null
+          employment_status: string
+          employment_type: string
           end_date: string | null
           entry_spinal_point: number | null
+          flsa_status: string
           headcount_notes: string | null
           id: string
           is_active: boolean
@@ -30402,6 +30406,7 @@ export type Database = {
           max_spinal_point: number | null
           min_spinal_point: number | null
           pay_spine_id: string | null
+          pay_type: string
           position_type_id: string | null
           reports_to_position_id: string | null
           salary_grade_id: string | null
@@ -30415,10 +30420,14 @@ export type Database = {
           company_id?: string | null
           compensation_model?: string
           created_at?: string
+          default_scheduled_hours?: number | null
           department_id: string
           description?: string | null
+          employment_status?: string
+          employment_type?: string
           end_date?: string | null
           entry_spinal_point?: number | null
+          flsa_status?: string
           headcount_notes?: string | null
           id?: string
           is_active?: boolean
@@ -30426,6 +30435,7 @@ export type Database = {
           max_spinal_point?: number | null
           min_spinal_point?: number | null
           pay_spine_id?: string | null
+          pay_type?: string
           position_type_id?: string | null
           reports_to_position_id?: string | null
           salary_grade_id?: string | null
@@ -30439,10 +30449,14 @@ export type Database = {
           company_id?: string | null
           compensation_model?: string
           created_at?: string
+          default_scheduled_hours?: number | null
           department_id?: string
           description?: string | null
+          employment_status?: string
+          employment_type?: string
           end_date?: string | null
           entry_spinal_point?: number | null
+          flsa_status?: string
           headcount_notes?: string | null
           id?: string
           is_active?: boolean
@@ -30450,6 +30464,7 @@ export type Database = {
           max_spinal_point?: number | null
           min_spinal_point?: number | null
           pay_spine_id?: string | null
+          pay_type?: string
           position_type_id?: string | null
           reports_to_position_id?: string | null
           salary_grade_id?: string | null
@@ -39345,6 +39360,10 @@ export type Database = {
         | "accrediting_body"
         | "payroll_run_type"
         | "secondment_reason"
+        | "pay_type"
+        | "position_employment_status"
+        | "position_employment_type"
+        | "flsa_status"
       message_status: "sent" | "delivered" | "read"
       workflow_action:
         | "approve"
@@ -39591,6 +39610,10 @@ export const Constants = {
         "accrediting_body",
         "payroll_run_type",
         "secondment_reason",
+        "pay_type",
+        "position_employment_status",
+        "position_employment_type",
+        "flsa_status",
       ],
       message_status: ["sent", "delivered", "read"],
       workflow_action: [

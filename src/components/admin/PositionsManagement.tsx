@@ -68,6 +68,11 @@ interface Position {
   min_spinal_point: number | null;
   max_spinal_point: number | null;
   entry_spinal_point: number | null;
+  pay_type: string;
+  employment_status: string;
+  employment_type: string;
+  flsa_status: string;
+  default_scheduled_hours: number | null;
   department?: {
     name: string;
     code: string;
@@ -223,6 +228,11 @@ export function PositionsManagement({ companyId }: PositionsManagementProps) {
   const [formMinSpinalPoint, setFormMinSpinalPoint] = useState("");
   const [formMaxSpinalPoint, setFormMaxSpinalPoint] = useState("");
   const [formEntrySpinalPoint, setFormEntrySpinalPoint] = useState("");
+  const [formPayType, setFormPayType] = useState("SALARIED");
+  const [formEmploymentStatus, setFormEmploymentStatus] = useState("ACTIVE");
+  const [formEmploymentType, setFormEmploymentType] = useState("FULL_TIME");
+  const [formFlsaStatus, setFormFlsaStatus] = useState("EXEMPT");
+  const [formDefaultScheduledHours, setFormDefaultScheduledHours] = useState("");
 
   // Assignment dialog state
   const [assignDialogOpen, setAssignDialogOpen] = useState(false);
@@ -423,6 +433,11 @@ export function PositionsManagement({ companyId }: PositionsManagementProps) {
     setFormMinSpinalPoint("");
     setFormMaxSpinalPoint("");
     setFormEntrySpinalPoint("");
+    setFormPayType("SALARIED");
+    setFormEmploymentStatus("ACTIVE");
+    setFormEmploymentType("FULL_TIME");
+    setFormFlsaStatus("EXEMPT");
+    setFormDefaultScheduledHours("");
     setPositionDialogOpen(true);
   };
 
@@ -443,6 +458,11 @@ export function PositionsManagement({ companyId }: PositionsManagementProps) {
     setFormMinSpinalPoint(position.min_spinal_point?.toString() || "");
     setFormMaxSpinalPoint(position.max_spinal_point?.toString() || "");
     setFormEntrySpinalPoint(position.entry_spinal_point?.toString() || "");
+    setFormPayType(position.pay_type || "SALARIED");
+    setFormEmploymentStatus(position.employment_status || "ACTIVE");
+    setFormEmploymentType(position.employment_type || "FULL_TIME");
+    setFormFlsaStatus(position.flsa_status || "EXEMPT");
+    setFormDefaultScheduledHours(position.default_scheduled_hours?.toString() || "");
     setPositionDialogOpen(true);
   };
 
@@ -480,6 +500,11 @@ export function PositionsManagement({ companyId }: PositionsManagementProps) {
         min_spinal_point: (formCompensationModel === 'spinal_point' || formCompensationModel === 'hybrid') && formMinSpinalPoint ? parseInt(formMinSpinalPoint) : null,
         max_spinal_point: (formCompensationModel === 'spinal_point' || formCompensationModel === 'hybrid') && formMaxSpinalPoint ? parseInt(formMaxSpinalPoint) : null,
         entry_spinal_point: (formCompensationModel === 'spinal_point' || formCompensationModel === 'hybrid') && formEntrySpinalPoint ? parseInt(formEntrySpinalPoint) : null,
+        pay_type: formPayType,
+        employment_status: formEmploymentStatus,
+        employment_type: formEmploymentType,
+        flsa_status: formFlsaStatus,
+        default_scheduled_hours: formDefaultScheduledHours ? parseFloat(formDefaultScheduledHours) : null,
       };
 
       if (editingPosition) {
@@ -1023,7 +1048,80 @@ export function PositionsManagement({ companyId }: PositionsManagementProps) {
 
             {/* Right Column - Compensation & Dates */}
             <div className="space-y-4">
-              <h4 className="font-medium text-sm text-muted-foreground border-b pb-2">Compensation & Dates</h4>
+              <h4 className="font-medium text-sm text-muted-foreground border-b pb-2">Position Classification</h4>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Pay Type *</Label>
+                  <Select value={formPayType} onValueChange={setFormPayType}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="SALARIED">Salaried</SelectItem>
+                      <SelectItem value="HOURLY">Hourly Rate</SelectItem>
+                      <SelectItem value="DAILY">Daily Rate</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label>Employment Status</Label>
+                  <Select value={formEmploymentStatus} onValueChange={setFormEmploymentStatus}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="ACTIVE">Active</SelectItem>
+                      <SelectItem value="FROZEN">Frozen</SelectItem>
+                      <SelectItem value="PENDING">Pending Approval</SelectItem>
+                      <SelectItem value="ABOLISHED">Abolished</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Employment Type</Label>
+                  <Select value={formEmploymentType} onValueChange={setFormEmploymentType}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="FULL_TIME">Full-Time</SelectItem>
+                      <SelectItem value="PART_TIME">Part-Time</SelectItem>
+                      <SelectItem value="CASUAL">Casual</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label>FLSA Status</Label>
+                  <Select value={formFlsaStatus} onValueChange={setFormFlsaStatus}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="EXEMPT">Exempt</SelectItem>
+                      <SelectItem value="NON_EXEMPT">Non-Exempt</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Default Scheduled Hours (per week)</Label>
+                <Input
+                  type="number"
+                  step="0.5"
+                  min="0"
+                  max="168"
+                  value={formDefaultScheduledHours}
+                  onChange={(e) => setFormDefaultScheduledHours(e.target.value)}
+                  placeholder="e.g., 40"
+                />
+              </div>
+
+              <h4 className="font-medium text-sm text-muted-foreground border-b pb-2 pt-2">Compensation Structure</h4>
               
               <div className="space-y-2">
                 <Label>Compensation Model</Label>
