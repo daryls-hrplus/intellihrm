@@ -100,6 +100,9 @@ interface EmployeeAssignment {
   compensation_amount: number | null;
   compensation_currency: string | null;
   compensation_frequency: string | null;
+  rate_type: string | null;
+  hourly_rate: number | null;
+  standard_hours_per_week: number | null;
   is_active: boolean;
   employee: {
     full_name: string | null;
@@ -153,6 +156,9 @@ export default function EmployeeAssignmentsPage() {
   const [formCompAmount, setFormCompAmount] = useState("");
   const [formCompCurrency, setFormCompCurrency] = useState("USD");
   const [formCompFrequency, setFormCompFrequency] = useState("monthly");
+  const [formRateType, setFormRateType] = useState<string>("salaried");
+  const [formHourlyRate, setFormHourlyRate] = useState("");
+  const [formStandardHours, setFormStandardHours] = useState("40");
   const [formIsActive, setFormIsActive] = useState(true);
 
   useEffect(() => {
@@ -247,6 +253,9 @@ export default function EmployeeAssignmentsPage() {
     setFormCompAmount("");
     setFormCompCurrency("USD");
     setFormCompFrequency("monthly");
+    setFormRateType("salaried");
+    setFormHourlyRate("");
+    setFormStandardHours("40");
     setFormIsActive(true);
   };
 
@@ -265,6 +274,9 @@ export default function EmployeeAssignmentsPage() {
     setFormCompAmount(assignment.compensation_amount?.toString() || "");
     setFormCompCurrency(assignment.compensation_currency || "USD");
     setFormCompFrequency(assignment.compensation_frequency || "monthly");
+    setFormRateType(assignment.rate_type || "salaried");
+    setFormHourlyRate(assignment.hourly_rate?.toString() || "");
+    setFormStandardHours(assignment.standard_hours_per_week?.toString() || "40");
     setFormIsActive(assignment.is_active);
     setDialogOpen(true);
   };
@@ -286,6 +298,9 @@ export default function EmployeeAssignmentsPage() {
         compensation_amount: formCompAmount ? parseFloat(formCompAmount) : null,
         compensation_currency: formCompCurrency,
         compensation_frequency: formCompFrequency,
+        rate_type: formRateType,
+        hourly_rate: formHourlyRate ? parseFloat(formHourlyRate) : null,
+        standard_hours_per_week: formStandardHours ? parseFloat(formStandardHours) : 40,
         is_active: formIsActive,
       };
 
@@ -516,7 +531,7 @@ export default function EmployeeAssignmentsPage() {
                       <TableHead>{t("workforce.employee")}</TableHead>
                       <TableHead>{t("workforce.position")}</TableHead>
                       <TableHead>{t("workforce.department")}</TableHead>
-                      <TableHead>{t("workforce.company")}</TableHead>
+                      <TableHead>{t("workforce.rateType", "Rate Type")}</TableHead>
                       <TableHead>{t("common.startDate")}</TableHead>
                       <TableHead>{t("common.endDate")}</TableHead>
                       <TableHead>{t("common.status")}</TableHead>
@@ -540,7 +555,32 @@ export default function EmployeeAssignmentsPage() {
                           </div>
                         </TableCell>
                         <TableCell>{assignment.position?.department?.name}</TableCell>
-                        <TableCell>{assignment.position?.department?.company?.name}</TableCell>
+                        <TableCell>
+                          <div className="flex flex-col gap-0.5">
+                            <Badge 
+                              variant="outline" 
+                              className={
+                                assignment.rate_type === "hourly" ? "bg-blue-500/10 text-blue-700 border-blue-200" :
+                                assignment.rate_type === "daily" ? "bg-amber-500/10 text-amber-700 border-amber-200" :
+                                "bg-green-500/10 text-green-700 border-green-200"
+                              }
+                            >
+                              {assignment.rate_type === "hourly" ? t("workforce.hourlyRate", "Hourly") :
+                               assignment.rate_type === "daily" ? t("workforce.dailyRate", "Daily") :
+                               t("workforce.salaried", "Salaried")}
+                            </Badge>
+                            {assignment.rate_type === "hourly" && assignment.hourly_rate && (
+                              <span className="text-xs text-muted-foreground">
+                                {new Intl.NumberFormat("en-US", { style: "currency", currency: assignment.compensation_currency || "USD" }).format(assignment.hourly_rate)}/hr
+                              </span>
+                            )}
+                            {assignment.rate_type === "daily" && assignment.hourly_rate && (
+                              <span className="text-xs text-muted-foreground">
+                                {new Intl.NumberFormat("en-US", { style: "currency", currency: assignment.compensation_currency || "USD" }).format(assignment.hourly_rate)}/day
+                              </span>
+                            )}
+                          </div>
+                        </TableCell>
                         <TableCell>{formatDateForDisplay(assignment.start_date, "MMM d, yyyy")}</TableCell>
                         <TableCell>
                           {assignment.end_date ? formatDateForDisplay(assignment.end_date, "MMM d, yyyy") : "-"}
@@ -665,48 +705,117 @@ export default function EmployeeAssignmentsPage() {
                 </div>
               </div>
 
-              <div className="grid gap-4 grid-cols-3">
-                <div className="space-y-2">
-                  <Label htmlFor="compAmount">{t("workforce.compensationAmount")}</Label>
-                  <Input
-                    id="compAmount"
-                    type="number"
-                    placeholder={t("common.amount")}
-                    value={formCompAmount}
-                    onChange={(e) => setFormCompAmount(e.target.value)}
-                  />
+              {/* Rate Type Section */}
+              <div className="space-y-4 p-4 border rounded-lg bg-muted/30">
+                <div className="flex items-center gap-2">
+                  <Label className="text-sm font-medium">{t("workforce.rateType", "Rate Type")}</Label>
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="compCurrency">{t("workforce.currency")}</Label>
-                  <Select value={formCompCurrency} onValueChange={setFormCompCurrency}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="USD">USD</SelectItem>
-                      <SelectItem value="EUR">EUR</SelectItem>
-                      <SelectItem value="GBP">GBP</SelectItem>
-                      <SelectItem value="SAR">SAR</SelectItem>
-                      <SelectItem value="AED">AED</SelectItem>
-                    </SelectContent>
-                  </Select>
+                <div className="grid gap-4 grid-cols-3">
+                  <div className="space-y-2">
+                    <Label htmlFor="rateType">{t("workforce.paymentType", "Payment Type")}</Label>
+                    <Select value={formRateType} onValueChange={setFormRateType}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="salaried">{t("workforce.salaried", "Salaried")}</SelectItem>
+                        <SelectItem value="hourly">{t("workforce.hourlyRate", "Hourly")}</SelectItem>
+                        <SelectItem value="daily">{t("workforce.dailyRate", "Daily")}</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  {formRateType === "hourly" && (
+                    <>
+                      <div className="space-y-2">
+                        <Label htmlFor="hourlyRate">{t("workforce.hourlyRate", "Hourly Rate")} *</Label>
+                        <Input
+                          id="hourlyRate"
+                          type="number"
+                          step="0.01"
+                          placeholder="0.00"
+                          value={formHourlyRate}
+                          onChange={(e) => setFormHourlyRate(e.target.value)}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="standardHours">{t("workforce.standardHoursPerWeek", "Std Hours/Week")}</Label>
+                        <Input
+                          id="standardHours"
+                          type="number"
+                          step="0.5"
+                          placeholder="40"
+                          value={formStandardHours}
+                          onChange={(e) => setFormStandardHours(e.target.value)}
+                        />
+                      </div>
+                    </>
+                  )}
+                  {formRateType === "daily" && (
+                    <div className="space-y-2">
+                      <Label htmlFor="hourlyRate">{t("workforce.dailyRate", "Daily Rate")} *</Label>
+                      <Input
+                        id="hourlyRate"
+                        type="number"
+                        step="0.01"
+                        placeholder="0.00"
+                        value={formHourlyRate}
+                        onChange={(e) => setFormHourlyRate(e.target.value)}
+                      />
+                    </div>
+                  )}
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="compFrequency">{t("workforce.frequency")}</Label>
-                  <Select value={formCompFrequency} onValueChange={setFormCompFrequency}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="hourly">{t("workforce.hourly")}</SelectItem>
-                      <SelectItem value="daily">{t("workforce.daily")}</SelectItem>
-                      <SelectItem value="weekly">{t("workforce.weekly")}</SelectItem>
-                      <SelectItem value="monthly">{t("workforce.monthly")}</SelectItem>
-                      <SelectItem value="yearly">{t("workforce.yearly")}</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+                {formRateType !== "salaried" && (
+                  <p className="text-xs text-muted-foreground">
+                    {t("workforce.rateTypeNote", "For hourly/daily employees, this rate will be used to calculate pay based on time worked.")}
+                  </p>
+                )}
               </div>
+
+              {/* Compensation Override (for salaried) */}
+              {formRateType === "salaried" && (
+                <div className="grid gap-4 grid-cols-3">
+                  <div className="space-y-2">
+                    <Label htmlFor="compAmount">{t("workforce.compensationAmount")}</Label>
+                    <Input
+                      id="compAmount"
+                      type="number"
+                      placeholder={t("common.amount")}
+                      value={formCompAmount}
+                      onChange={(e) => setFormCompAmount(e.target.value)}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="compCurrency">{t("workforce.currency")}</Label>
+                    <Select value={formCompCurrency} onValueChange={setFormCompCurrency}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="USD">USD</SelectItem>
+                        <SelectItem value="EUR">EUR</SelectItem>
+                        <SelectItem value="GBP">GBP</SelectItem>
+                        <SelectItem value="SAR">SAR</SelectItem>
+                        <SelectItem value="AED">AED</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="compFrequency">{t("workforce.frequency")}</Label>
+                    <Select value={formCompFrequency} onValueChange={setFormCompFrequency}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="hourly">{t("workforce.hourly")}</SelectItem>
+                        <SelectItem value="daily">{t("workforce.daily")}</SelectItem>
+                        <SelectItem value="weekly">{t("workforce.weekly")}</SelectItem>
+                        <SelectItem value="monthly">{t("workforce.monthly")}</SelectItem>
+                        <SelectItem value="yearly">{t("workforce.yearly")}</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              )}
 
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">

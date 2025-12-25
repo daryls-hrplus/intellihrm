@@ -7451,6 +7451,7 @@ export type Database = {
           override_reason: string | null
           pay_element_id: string
           position_id: string | null
+          rate_type: string | null
           start_date: string
           updated_at: string
           updated_by: string | null
@@ -7471,6 +7472,7 @@ export type Database = {
           override_reason?: string | null
           pay_element_id: string
           position_id?: string | null
+          rate_type?: string | null
           start_date?: string
           updated_at?: string
           updated_by?: string | null
@@ -7491,6 +7493,7 @@ export type Database = {
           override_reason?: string | null
           pay_element_id?: string
           position_id?: string | null
+          rate_type?: string | null
           start_date?: string
           updated_at?: string
           updated_by?: string | null
@@ -9521,6 +9524,7 @@ export type Database = {
           created_at: string
           employee_id: string
           end_date: string | null
+          hourly_rate: number | null
           id: string
           is_active: boolean
           is_primary: boolean
@@ -9528,7 +9532,9 @@ export type Database = {
           pay_group_id: string | null
           pay_group_start_date: string | null
           position_id: string
+          rate_type: string | null
           spinal_point_id: string | null
+          standard_hours_per_week: number | null
           start_date: string
           updated_at: string
         }
@@ -9541,6 +9547,7 @@ export type Database = {
           created_at?: string
           employee_id: string
           end_date?: string | null
+          hourly_rate?: number | null
           id?: string
           is_active?: boolean
           is_primary?: boolean
@@ -9548,7 +9555,9 @@ export type Database = {
           pay_group_id?: string | null
           pay_group_start_date?: string | null
           position_id: string
+          rate_type?: string | null
           spinal_point_id?: string | null
+          standard_hours_per_week?: number | null
           start_date?: string
           updated_at?: string
         }
@@ -9561,6 +9570,7 @@ export type Database = {
           created_at?: string
           employee_id?: string
           end_date?: string | null
+          hourly_rate?: number | null
           id?: string
           is_active?: boolean
           is_primary?: boolean
@@ -9568,7 +9578,9 @@ export type Database = {
           pay_group_id?: string | null
           pay_group_start_date?: string | null
           position_id?: string
+          rate_type?: string | null
           spinal_point_id?: string | null
+          standard_hours_per_week?: number | null
           start_date?: string
           updated_at?: string
         }
@@ -27704,8 +27716,11 @@ export type Database = {
           id: string
           is_active: boolean
           name: string
+          overtime_multiplier: number | null
+          overtime_threshold_hours: number | null
           pay_calculation_method: string | null
           pay_frequency: string
+          standard_hours_per_period: number | null
           start_date: string
           updated_at: string
           uses_national_insurance: boolean | null
@@ -27720,8 +27735,11 @@ export type Database = {
           id?: string
           is_active?: boolean
           name: string
+          overtime_multiplier?: number | null
+          overtime_threshold_hours?: number | null
           pay_calculation_method?: string | null
           pay_frequency: string
+          standard_hours_per_period?: number | null
           start_date?: string
           updated_at?: string
           uses_national_insurance?: boolean | null
@@ -27736,8 +27754,11 @@ export type Database = {
           id?: string
           is_active?: boolean
           name?: string
+          overtime_multiplier?: number | null
+          overtime_threshold_hours?: number | null
           pay_calculation_method?: string | null
           pay_frequency?: string
+          standard_hours_per_period?: number | null
           start_date?: string
           updated_at?: string
           uses_national_insurance?: boolean | null
