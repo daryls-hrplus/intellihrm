@@ -83,6 +83,7 @@ interface EmployeeProfile {
   continuous_service_date: string | null;
   seniority_date: string | null;
   adjusted_service_date: string | null;
+  employment_status: string | null;
   positions: {
     id: string;
     title: string;
@@ -141,7 +142,7 @@ export default function EmployeeProfilePage() {
       // Fetch profile
       const { data: profile, error: profileError } = await supabase
         .from('profiles')
-        .select('id, full_name, email, avatar_url, timezone, preferred_language, date_format, time_format, created_at, first_hire_date, last_hire_date, start_date, continuous_service_date, seniority_date, adjusted_service_date')
+        .select('id, full_name, email, avatar_url, timezone, preferred_language, date_format, time_format, created_at, first_hire_date, last_hire_date, start_date, continuous_service_date, seniority_date, adjusted_service_date, employment_status')
         .eq('id', employeeId)
         .maybeSingle();
 
@@ -205,6 +206,7 @@ export default function EmployeeProfilePage() {
         continuous_service_date: profile.continuous_service_date,
         seniority_date: profile.seniority_date,
         adjusted_service_date: profile.adjusted_service_date,
+        employment_status: profile.employment_status,
         positions: employeePositions,
       });
 
@@ -529,6 +531,17 @@ export default function EmployeeProfilePage() {
                       <p className="text-sm font-medium text-foreground">Employee Record Created</p>
                       <p className="text-sm text-muted-foreground">
                         {format(new Date(employee.created_at), 'MMMM d, yyyy')}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <Briefcase className="h-4 w-4 text-muted-foreground" />
+                    <div>
+                      <p className="text-sm font-medium text-foreground">Employment Status</p>
+                      <p className="text-sm text-muted-foreground">
+                        {employee.employment_status 
+                          ? employee.employment_status.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
+                          : 'Not Set'}
                       </p>
                     </div>
                   </div>
