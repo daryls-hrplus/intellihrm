@@ -1,4 +1,88 @@
-import type { GoalAchievement, GoalExtendedAttributes, AchievementLevel } from '@/types/goalEnhancements';
+import type { GoalAchievement, GoalExtendedAttributes, AchievementLevel, RollupMethod } from '@/types/goalEnhancements';
+
+// Sub-metric value interface for composite progress calculation
+export interface SubMetricValue {
+  name: string;
+  targetValue: number;
+  currentValue: number;
+  weight: number;
+  baselineValue?: number;
+}
+
+/**
+ * Calculate composite/weighted progress from sub-metrics
+ */
+export function calculateCompositeProgress(
+  subMetrics: SubMetricValue[],
+  rollupMethod: RollupMethod = 'weighted'
+): { overallProgress: number; subMetricProgress: { name: string; progress: number; weight: number }[] } {
+  if (subMetrics.length === 0) {
+    return { overallProgress: 0, subMetricProgress: [] };
+  }
+
+  const subMetricProgress = subMetrics.map((sm) => {
+    const progress = sm.targetValue > 0 
+      ? Math.min(100, Math.max(0, (sm.currentValue / sm.targetValue) * 100))
+      : 0;
+    return { name: sm.name, progress, weight: sm.weight };
+  });
+
+  let overallProgress: number;
+
+  switch (rollupMethod) {
+    case 'weighted': {
+      const totalWeight = subMetricProgress.reduce((acc, p) => acc + p.weight, 0);
+      overallProgress = totalWeight > 0
+        ? subMetricProgress.reduce((acc, p) => acc + (p.progress * p.weight), 0) / totalWeight
+        : 0;
+      break;
+    }
+    case 'average':
+      overallProgress = subMetricProgress.reduce((acc, p) => acc + p.progress, 0) / subMetricProgress.length;
+      break;
+    case 'min':
+      overallProgress = Math.min(...subMetricProgress.map((p) => p.progress));
+      break;
+    case 'max':
+      overallProgress = Math.max(...subMetricProgress.map((p) => p.progress));
+      break;
+    default:
+      overallProgress = subMetricProgress.reduce((acc, p) => acc + p.progress, 0) / subMetricProgress.length;
+  }
+
+  return {
+    overallProgress: Math.round(overallProgress * 100) / 100,
+    subMetricProgress,
+  };
+}
+
+/**
+ * Calculate delta/impact progress (before vs after comparison)
+ */
+export function calculateDeltaProgress(
+  baselineValue: number,
+  currentValue: number,
+  targetDelta: number,
+  isInverse: boolean = false
+): { deltaValue: number; deltaPercentage: number; progress: number } {
+  const deltaValue = isInverse 
+    ? baselineValue - currentValue 
+    : currentValue - baselineValue;
+  
+  const deltaPercentage = baselineValue > 0 
+    ? (deltaValue / baselineValue) * 100 
+    : 0;
+  
+  const progress = targetDelta > 0 
+    ? Math.min(100, Math.max(0, (Math.abs(deltaValue) / targetDelta) * 100))
+    : 0;
+
+  return {
+    deltaValue,
+    deltaPercentage: Math.round(deltaPercentage * 100) / 100,
+    progress: Math.round(progress * 100) / 100,
+  };
+}
 
 /**
  * Calculate goal achievement percentage with threshold/target/stretch logic

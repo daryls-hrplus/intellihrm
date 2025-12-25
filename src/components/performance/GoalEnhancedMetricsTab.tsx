@@ -40,6 +40,9 @@ import {
   BaselinePeriod,
 } from "@/types/goalEnhancements";
 import { useMetricTemplates } from "@/hooks/useMetricTemplates";
+import { useEffect } from "react";
+import { SubMetricInputFields } from "./SubMetricInputFields";
+import type { GoalSubMetricValue } from "@/hooks/useGoalSubMetrics";
 
 interface EnhancedMetricsFormData {
   weighting: string;
@@ -64,6 +67,12 @@ interface GoalEnhancedMetricsTabProps {
   onChange: (updates: Partial<EnhancedMetricsFormData>) => void;
   parentGoalWeight?: number | null;
   companyId?: string;
+  // Sub-metrics support
+  subMetrics?: GoalSubMetricValue[];
+  onSubMetricUpdate?: (index: number, updates: Partial<GoalSubMetricValue>) => void;
+  compositeProgress?: number;
+  subMetricProgress?: { name: string; progress: number; weight: number }[];
+  onInitializeSubMetrics?: (templateSubMetrics: { name: string; weight: number; unitOfMeasure?: string; isRequired: boolean }[]) => void;
 }
 
 export function GoalEnhancedMetricsTab({
@@ -71,6 +80,11 @@ export function GoalEnhancedMetricsTab({
   onChange,
   parentGoalWeight,
   companyId,
+  subMetrics,
+  onSubMetricUpdate,
+  compositeProgress = 0,
+  subMetricProgress = [],
+  onInitializeSubMetrics,
 }: GoalEnhancedMetricsTabProps) {
   const { templates, getActiveTemplates, getTemplateById } = useMetricTemplates(companyId);
   const activeTemplates = getActiveTemplates();
@@ -92,6 +106,11 @@ export function GoalEnhancedMetricsTab({
         is_inverse: template.isInverse,
         target_value: template.defaultTarget ? String(template.defaultTarget) : formData.target_value,
       });
+
+      // Initialize sub-metrics if template has them
+      if (template.subMetrics && template.subMetrics.length > 0 && onInitializeSubMetrics) {
+        onInitializeSubMetrics(template.subMetrics);
+      }
     }
   };
 
@@ -109,6 +128,11 @@ export function GoalEnhancedMetricsTab({
   const selectedTemplate = formData.metric_template_id 
     ? getTemplateById(formData.metric_template_id) 
     : null;
+
+  // Check if current template is a composite/okr/delta type
+  const isCompositeTemplate = selectedTemplate?.templateType && 
+    ['composite', 'okr', 'delta'].includes(selectedTemplate.templateType);
+  const showSubMetricInputs = isCompositeTemplate && subMetrics && subMetrics.length > 0 && onSubMetricUpdate;
 
   // Template type icon helper
   const getTemplateTypeIcon = (type?: TemplateType) => {
@@ -188,10 +212,19 @@ export function GoalEnhancedMetricsTab({
               <p className="text-sm text-muted-foreground mb-4">{selectedTemplate.description}</p>
             )}
 
-            {/* Sub-metrics display */}
-            {selectedTemplate.subMetrics && selectedTemplate.subMetrics.length > 0 && (
+            {/* Sub-metrics display - show input fields if available, otherwise show labels */}
+            {showSubMetricInputs ? (
+              <SubMetricInputFields
+                subMetrics={subMetrics!}
+                onUpdate={onSubMetricUpdate!}
+                compositeProgress={compositeProgress}
+                subMetricProgress={subMetricProgress}
+                showEvidence={selectedTemplate.evidenceRequired}
+                showBaseline={selectedTemplate.templateType === 'delta' && selectedTemplate.captureBaseline}
+              />
+            ) : selectedTemplate.subMetrics && selectedTemplate.subMetrics.length > 0 && (
               <div className="space-y-2 mb-4">
-                <Label className="text-xs text-muted-foreground">Sub-Metrics</Label>
+                <Label className="text-xs text-muted-foreground">Sub-Metrics (will be editable after saving)</Label>
                 <div className="grid gap-2">
                   {selectedTemplate.subMetrics.map((sub, idx) => (
                     <div key={idx} className="flex items-center justify-between p-2 bg-background rounded border">
