@@ -51,6 +51,8 @@ import {
   Network,
   Layers,
   ChevronDown,
+  Flag,
+  History,
 } from "lucide-react";
 import {
   parseExtendedAttributes,
@@ -75,6 +77,9 @@ import { GoalAlignmentManager } from "./GoalAlignmentManager";
 import { GoalVisibilitySettings } from "./GoalVisibilitySettings";
 import { ProgressRollupConfig } from "./ProgressRollupConfig";
 import { GoalDependencyManager } from "./GoalDependencyManager";
+import { GoalCheckInDialog } from "./GoalCheckInDialog";
+import { GoalMilestonesManager } from "./GoalMilestonesManager";
+import { CheckInHistoryTimeline } from "./CheckInHistoryTimeline";
 
 type GoalStatus = 'draft' | 'active' | 'in_progress' | 'completed' | 'cancelled' | 'overdue';
 type GoalType = 'okr_objective' | 'okr_key_result' | 'smart_goal';
@@ -152,6 +157,9 @@ export function EnhancedGoalCard({
   const [visibilityDialogOpen, setVisibilityDialogOpen] = useState(false);
   const [rollupDialogOpen, setRollupDialogOpen] = useState(false);
   const [dependencyDialogOpen, setDependencyDialogOpen] = useState(false);
+  const [checkInDialogOpen, setCheckInDialogOpen] = useState(false);
+  const [milestonesDialogOpen, setMilestonesDialogOpen] = useState(false);
+  const [historyDialogOpen, setHistoryDialogOpen] = useState(false);
   const [subMetricsExpanded, setSubMetricsExpanded] = useState(false);
   const [subMetricProgress, setSubMetricProgress] = useState<{ name: string; progress: number; weight: number }[]>([]);
   const [hasSubMetrics, setHasSubMetrics] = useState(false);
@@ -378,6 +386,19 @@ export function EnhancedGoalCard({
                       <Network className="mr-2 h-4 w-4" />
                       Dependencies
                     </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={() => setCheckInDialogOpen(true)}>
+                      <MessageSquare className="mr-2 h-4 w-4" />
+                      Check-in
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setMilestonesDialogOpen(true)}>
+                      <Flag className="mr-2 h-4 w-4" />
+                      Milestones
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setHistoryDialogOpen(true)}>
+                      <History className="mr-2 h-4 w-4" />
+                      Progress History
+                    </DropdownMenuItem>
                   </>
                 )}
                 {(goal.status === "completed" || goal.progress_percentage >= 80) && (
@@ -575,6 +596,40 @@ export function EnhancedGoalCard({
         open={dependencyDialogOpen}
         onOpenChange={setDependencyDialogOpen}
       />
+
+      {/* Check-in Dialog */}
+      <GoalCheckInDialog
+        open={checkInDialogOpen}
+        onOpenChange={setCheckInDialogOpen}
+        goal={{
+          id: goal.id,
+          title: goal.title,
+          progress_percentage: goal.progress_percentage,
+          employee_id: goal.employee_id || "",
+          assigned_by: undefined, // Will be fetched in dialog
+        }}
+        onSuccess={onRefresh}
+      />
+
+      {/* Milestones Dialog */}
+      <Dialog open={milestonesDialogOpen} onOpenChange={setMilestonesDialogOpen}>
+        <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Milestones - {goal.title}</DialogTitle>
+          </DialogHeader>
+          <GoalMilestonesManager goalId={goal.id} readonly={goal.status === "completed"} />
+        </DialogContent>
+      </Dialog>
+
+      {/* Progress History Dialog */}
+      <Dialog open={historyDialogOpen} onOpenChange={setHistoryDialogOpen}>
+        <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Progress History - {goal.title}</DialogTitle>
+          </DialogHeader>
+          <CheckInHistoryTimeline goalId={goal.id} showChart={true} />
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 }
