@@ -14,7 +14,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { Plus, Search, Stethoscope, AlertTriangle, CheckCircle, Package } from "lucide-react";
 import { useState } from "react";
-import { format } from "date-fns";
+import { formatDateForDisplay } from "@/utils/dateUtils";
 
 export default function HSEFirstAidPage() {
   const { t } = useLanguage();
@@ -148,7 +148,7 @@ export default function HSEFirstAidPage() {
                       filteredTreatments?.map((treatment) => (
                         <TableRow key={treatment.id}>
                           <TableCell className="font-medium">{treatment.id.slice(0, 8)}</TableCell>
-                          <TableCell>{treatment.treatment_date ? format(new Date(treatment.treatment_date), "MMM dd, yyyy") : "-"}</TableCell>
+                          <TableCell>{treatment.treatment_date ? formatDateForDisplay(treatment.treatment_date, "MMM dd, yyyy") : "-"}</TableCell>
                           <TableCell>{treatment.treatment_type || "-"}</TableCell>
                           <TableCell>{treatment.injury_description || "-"}</TableCell>
                           <TableCell><Button variant="ghost" size="sm">{t("common.view")}</Button></TableCell>
@@ -192,7 +192,7 @@ export default function HSEFirstAidPage() {
                           <TableCell className="font-medium">{kit.kit_number}</TableCell>
                           <TableCell>{kit.kit_type || "-"}</TableCell>
                           <TableCell>{kit.location || "-"}</TableCell>
-                          <TableCell>{kit.last_inspection_date ? format(new Date(kit.last_inspection_date), "MMM dd, yyyy") : "-"}</TableCell>
+                          <TableCell>{kit.last_inspection_date ? formatDateForDisplay(kit.last_inspection_date, "MMM dd, yyyy") : "-"}</TableCell>
                           <TableCell>
                             {kit.status === "needs_restocking" ? (
                               <Badge variant="destructive">{t("common.yes")}</Badge>

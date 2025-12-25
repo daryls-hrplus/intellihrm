@@ -18,7 +18,7 @@ import { DepartmentFilter, useDepartmentFilter } from "@/components/filters/Depa
 import { useLanguage } from "@/hooks/useLanguage";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { format } from "date-fns";
+import { formatDateForDisplay } from "@/utils/dateUtils";
 import { Skeleton } from "@/components/ui/skeleton";
 import { 
   HardHat, 
@@ -339,9 +339,9 @@ export default function HSEPPEManagementPage() {
                             {(issuance as any).hse_ppe_inventory?.hse_ppe_types?.name || "-"}
                           </TableCell>
                           <TableCell>{issuance.employee_id || "-"}</TableCell>
-                          <TableCell>{issuance.issued_date ? format(new Date(issuance.issued_date), "MMM d, yyyy") : "-"}</TableCell>
+                          <TableCell>{issuance.issued_date ? formatDateForDisplay(issuance.issued_date, "MMM d, yyyy") : "-"}</TableCell>
                           <TableCell>{issuance.quantity || "-"}</TableCell>
-                          <TableCell>{issuance.returned_date ? format(new Date(issuance.returned_date), "MMM d, yyyy") : "-"}</TableCell>
+                          <TableCell>{issuance.returned_date ? formatDateForDisplay(issuance.returned_date, "MMM d, yyyy") : "-"}</TableCell>
                           <TableCell>
                             <Button variant="ghost" size="sm">
                               {issuance.returned_date ? t("common.view") : t("hseModule.ppeManagement.return")}

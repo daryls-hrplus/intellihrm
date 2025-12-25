@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2, Clock, CheckCircle, XCircle, FileText } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns";
 
 interface HistoryEntry {
   id: string;
@@ -131,7 +131,7 @@ export function RequestHistoryTimeline({ requestId }: RequestHistoryTimelineProp
             </div>
             
             <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground">
-              <span>{format(new Date(entry.created_at), "MMM d, yyyy 'at' h:mm a")}</span>
+              <span>{format(parseISO(entry.created_at), "MMM d, yyyy 'at' h:mm a")}</span>
               {entry.changer_email && (
                 <>
                   <span>•</span>

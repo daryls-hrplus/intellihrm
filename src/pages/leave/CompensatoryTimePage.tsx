@@ -268,7 +268,7 @@ export default function CompensatoryTimePage() {
                               {request.employee?.full_name || 'Unknown'}
                             </TableCell>
                           )}
-                          <TableCell>{format(new Date(request.use_date), 'MMM d, yyyy')}</TableCell>
+                          <TableCell>{formatDateForDisplay(request.use_date)}</TableCell>
                           <TableCell className="font-semibold">{request.hours_used} hrs</TableCell>
                           <TableCell className="max-w-[200px] truncate">{request.reason || '-'}</TableCell>
                           <TableCell>{getStatusBadge(request.status)}</TableCell>

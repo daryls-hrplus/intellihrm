@@ -33,7 +33,8 @@ import { AppraisalCycleDialog } from "@/components/performance/AppraisalCycleDia
 import { AppraisalParticipantsManager } from "@/components/performance/AppraisalParticipantsManager";
 import { AppraisalEvaluationDialog } from "@/components/performance/AppraisalEvaluationDialog";
 import { useLanguage } from "@/hooks/useLanguage";
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns";
+import { formatDateForDisplay } from "@/utils/dateUtils";
 
 interface AppraisalCycle {
   id: string;
@@ -573,7 +574,7 @@ export default function AppraisalsPage() {
                       {appraisal.evaluation_deadline && (
                         <div className="mt-4 flex items-center gap-2 text-sm text-muted-foreground">
                           <Calendar className="h-4 w-4" />
-                          Deadline: {format(new Date(appraisal.evaluation_deadline), "MMM d, yyyy")}
+                          Deadline: {formatDateForDisplay(appraisal.evaluation_deadline, "MMM d, yyyy")}
                         </div>
                       )}
                     </CardContent>
@@ -611,7 +612,7 @@ export default function AppraisalsPage() {
                         {evaluation.evaluation_deadline && (
                           <div className="flex items-center gap-2 text-sm text-muted-foreground">
                             <Calendar className="h-4 w-4" />
-                            Deadline: {format(new Date(evaluation.evaluation_deadline), "MMM d, yyyy")}
+                            Deadline: {formatDateForDisplay(evaluation.evaluation_deadline, "MMM d, yyyy")}
                           </div>
                         )}
                         <Button onClick={() => handleStartEvaluation(evaluation)}>
@@ -648,8 +649,8 @@ export default function AppraisalsPage() {
                           <div>
                             <CardTitle className="text-lg">{cycle.name}</CardTitle>
                             <CardDescription>
-                              {format(new Date(cycle.start_date), "MMM d, yyyy")} -{" "}
-                              {format(new Date(cycle.end_date), "MMM d, yyyy")}
+                              {formatDateForDisplay(cycle.start_date, "MMM d, yyyy")} -{" "}
+                              {formatDateForDisplay(cycle.end_date, "MMM d, yyyy")}
                             </CardDescription>
                           </div>
                           <Badge className={statusColors[cycle.status]}>{cycle.status}</Badge>
@@ -727,8 +728,8 @@ export default function AppraisalsPage() {
                           <div>
                             <CardTitle className="text-lg">{cycle.name}</CardTitle>
                             <CardDescription>
-                              {format(new Date(cycle.start_date), "MMM d, yyyy")} -{" "}
-                              {format(new Date(cycle.end_date), "MMM d, yyyy")}
+                              {formatDateForDisplay(cycle.start_date, "MMM d, yyyy")} -{" "}
+                              {formatDateForDisplay(cycle.end_date, "MMM d, yyyy")}
                             </CardDescription>
                           </div>
                           <div className="flex gap-2">
@@ -794,8 +795,8 @@ export default function AppraisalsPage() {
                           <div>
                             <CardTitle className="text-lg">{cycle.name}</CardTitle>
                             <CardDescription>
-                              {format(new Date(cycle.start_date), "MMM d, yyyy")} -{" "}
-                              {format(new Date(cycle.end_date), "MMM d, yyyy")}
+                              {formatDateForDisplay(cycle.start_date, "MMM d, yyyy")} -{" "}
+                              {formatDateForDisplay(cycle.end_date, "MMM d, yyyy")}
                             </CardDescription>
                           </div>
                           <div className="flex gap-2">
