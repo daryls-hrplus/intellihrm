@@ -39364,6 +39364,7 @@ export type Database = {
         | "position_employment_status"
         | "position_employment_type"
         | "flsa_status"
+        | "overtime_status"
       message_status: "sent" | "delivered" | "read"
       workflow_action:
         | "approve"
@@ -39614,6 +39615,7 @@ export const Constants = {
         "position_employment_status",
         "position_employment_type",
         "flsa_status",
+        "overtime_status",
       ],
       message_status: ["sent", "delivered", "read"],
       workflow_action: [
