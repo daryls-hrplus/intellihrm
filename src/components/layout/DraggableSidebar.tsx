@@ -133,6 +133,14 @@ export function DraggableSidebar() {
   };
 
   const isActiveRoute = (href: string) => {
+    const from = new URLSearchParams(location.search).get("from");
+    const isEmployeeDirectory = location.pathname === "/ess/directory";
+
+    // If Employee Directory was opened from HR Hub, keep HR Hub highlighted (not ESS)
+    if (from === "hr-hub" && isEmployeeDirectory) {
+      return href === "/hr-hub";
+    }
+
     if (href === "/") return location.pathname === "/";
     return location.pathname.startsWith(href);
   };
