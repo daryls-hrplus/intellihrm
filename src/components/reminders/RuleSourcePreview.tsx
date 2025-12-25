@@ -13,7 +13,8 @@ import {
   ChevronRight,
   Database
 } from 'lucide-react';
-import { format, differenceInDays } from 'date-fns';
+import { differenceInDays } from 'date-fns';
+import { formatDateForDisplay } from "@/utils/dateUtils";
 import type { ReminderEventType } from '@/types/reminders';
 import { useReminderSourcePreview, type SourcePreviewData } from '@/hooks/useReminderSourcePreview';
 
@@ -148,7 +149,7 @@ export function RuleSourcePreview({ eventType, companyId, daysBeforeArray }: Rul
           </div>
           <p className="text-sm font-medium">
             {previewData.nextTriggerDate 
-              ? format(new Date(previewData.nextTriggerDate), 'MMM d, yyyy')
+              ? formatDateForDisplay(previewData.nextTriggerDate)
               : '-'
             }
           </p>
@@ -187,7 +188,7 @@ export function RuleSourcePreview({ eventType, companyId, daysBeforeArray }: Rul
                       >
                         {daysUntil !== null && daysUntil >= 0 
                           ? `${daysUntil}d left`
-                          : format(new Date(item.event_date), 'MMM d')
+                          : formatDateForDisplay(item.event_date, 'MMM d')
                         }
                       </Badge>
                     )}

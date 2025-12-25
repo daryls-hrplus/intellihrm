@@ -12,7 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Plus, Edit, Trash2, ClipboardCheck, Clock, CheckCircle, XCircle } from 'lucide-react';
-import { format } from 'date-fns';
+import { formatDateForDisplay } from '@/utils/dateUtils';
 
 interface AssessmentsTabProps {
   companyId: string;
@@ -325,7 +325,7 @@ export function AssessmentsTab({ companyId }: AssessmentsTabProps) {
                         )}
                       </TableCell>
                       <TableCell>
-                        {result.completed_at ? format(new Date(result.completed_at), 'MMM d, yyyy') : 'In Progress'}
+                        {result.completed_at ? formatDateForDisplay(result.completed_at) : 'In Progress'}
                       </TableCell>
                     </TableRow>
                   ))}

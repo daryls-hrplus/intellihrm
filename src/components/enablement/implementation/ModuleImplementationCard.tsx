@@ -31,7 +31,7 @@ import {
   ChevronRight,
   Settings2,
 } from "lucide-react";
-import { format } from "date-fns";
+import { formatDateForDisplay } from "@/utils/dateUtils";
 import { useNavigate } from "react-router-dom";
 import type { ModuleImplementation, ImplementationStatus } from "@/types/implementation";
 import * as LucideIcons from "lucide-react";
@@ -129,7 +129,7 @@ export function ModuleImplementationCard({
                 {implementation.target_go_live && (
                   <div className="hidden lg:flex items-center gap-1 text-sm text-muted-foreground">
                     <Calendar className="h-4 w-4" />
-                    {format(new Date(implementation.target_go_live), "MMM d, yyyy")}
+                    {formatDateForDisplay(implementation.target_go_live)}
                   </div>
                 )}
                 <Button variant="ghost" size="sm" onClick={handleViewDetails}>
@@ -273,7 +273,7 @@ export function ModuleImplementationCard({
             {implementation.target_go_live && (
               <div className="flex items-center gap-1 text-xs text-muted-foreground">
                 <Calendar className="h-3 w-3" />
-                {format(new Date(implementation.target_go_live), "MMM d")}
+                {formatDateForDisplay(implementation.target_go_live, "MMM d")}
               </div>
             )}
           </div>

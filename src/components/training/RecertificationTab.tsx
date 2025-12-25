@@ -11,7 +11,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Plus, Pencil, Award, AlertTriangle, Clock } from "lucide-react";
 import { toast } from "sonner";
-import { format, differenceInDays, addMonths } from "date-fns";
+import { differenceInDays, addMonths } from "date-fns";
+import { formatDateForDisplay } from "@/utils/dateUtils";
 
 interface RecertificationTabProps {
   companyId: string;
@@ -277,8 +278,8 @@ export function RecertificationTab({ companyId }: RecertificationTabProps) {
                     <TableCell>{c.employee?.full_name}</TableCell>
                     <TableCell>{c.requirement?.certification_name}</TableCell>
                     <TableCell>{c.certificate_number || "-"}</TableCell>
-                    <TableCell>{format(new Date(c.certification_date), "MMM d, yyyy")}</TableCell>
-                    <TableCell>{format(new Date(c.expiry_date), "MMM d, yyyy")}</TableCell>
+                    <TableCell>{formatDateForDisplay(c.certification_date)}</TableCell>
+                    <TableCell>{formatDateForDisplay(c.expiry_date)}</TableCell>
                     <TableCell>{getStatusBadge(c.status, c.expiry_date)}</TableCell>
                   </TableRow>
                 ))}

@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Clock, RefreshCw, Search, Filter, User, Settings, Eye, Shield } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
+import { formatDateForDisplay } from "@/utils/dateUtils";
 
 interface AuditEntry {
   id: string;
@@ -193,7 +194,7 @@ export function RoleAuditLog({ roleId }: RoleAuditLogProps) {
                     </span>
                   </div>
                   <div className="text-xs text-muted-foreground mt-1">
-                    {format(new Date(entry.created_at), "MMM d, yyyy")}
+                    {formatDateForDisplay(entry.created_at)}
                   </div>
                   <div className="text-xs text-muted-foreground">
                     {format(new Date(entry.created_at), "h:mm a")}

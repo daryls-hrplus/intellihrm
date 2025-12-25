@@ -20,6 +20,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { Json } from "@/integrations/supabase/types";
 import { format } from "date-fns";
+import { formatDateForDisplay } from "@/utils/dateUtils";
 import { 
   Brain, 
   TrendingUp, 

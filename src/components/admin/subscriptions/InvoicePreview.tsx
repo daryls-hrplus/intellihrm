@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import { Download, Printer } from 'lucide-react';
-import { format } from 'date-fns';
+import { formatDateForDisplay } from "@/utils/dateUtils";
 
 interface InvoicePreviewProps {
   invoice: {
@@ -143,10 +143,10 @@ export function InvoicePreview({ invoice }: InvoicePreviewProps) {
           </div>
           <div className="text-right">
             <div className="space-y-1">
-              <p><span className="text-muted-foreground">Issue Date:</span> {format(new Date(invoice.issue_date), 'MMMM d, yyyy')}</p>
-              <p><span className="text-muted-foreground">Due Date:</span> {format(new Date(invoice.due_date), 'MMMM d, yyyy')}</p>
+              <p><span className="text-muted-foreground">Issue Date:</span> {formatDateForDisplay(invoice.issue_date, 'MMMM d, yyyy')}</p>
+              <p><span className="text-muted-foreground">Due Date:</span> {formatDateForDisplay(invoice.due_date, 'MMMM d, yyyy')}</p>
               <p><span className="text-muted-foreground">Billing Period:</span></p>
-              <p className="text-sm">{format(new Date(invoice.billing_period_start), 'MMM d, yyyy')} - {format(new Date(invoice.billing_period_end), 'MMM d, yyyy')}</p>
+              <p className="text-sm">{formatDateForDisplay(invoice.billing_period_start)} - {formatDateForDisplay(invoice.billing_period_end)}</p>
             </div>
           </div>
         </div>

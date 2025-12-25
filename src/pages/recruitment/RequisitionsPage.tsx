@@ -15,7 +15,7 @@ import { Briefcase, Plus, Search, Send, ExternalLink } from "lucide-react";
 import { useRecruitment } from "@/hooks/useRecruitment";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { format } from "date-fns";
+import { formatDateForDisplay } from "@/utils/dateUtils";
 import { LeaveCompanyFilter, useLeaveCompanyFilter } from "@/components/leave/LeaveCompanyFilter";
 
 export default function RequisitionsPage() {
@@ -332,7 +332,7 @@ export default function RequisitionsPage() {
                       <TableCell>{req.location || "-"}</TableCell>
                       <TableCell><Badge variant="outline">{req.employment_type}</Badge></TableCell>
                       <TableCell>{getStatusBadge(req.status)}</TableCell>
-                      <TableCell>{format(new Date(req.created_at), "MMM d, yyyy")}</TableCell>
+                      <TableCell>{formatDateForDisplay(req.created_at)}</TableCell>
                       <TableCell>
                         <div className="flex gap-2">
                           <Button

@@ -13,7 +13,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Plus, Edit, Trash2, Calendar, Lock, CalendarClock } from "lucide-react";
-import { format } from "date-fns";
+import { formatDateForDisplay } from "@/utils/dateUtils";
 
 interface GoalCycle {
   id: string;
@@ -266,13 +266,13 @@ export function GoalCyclesManager({ companyId }: GoalCyclesManagerProps) {
                       {cycleTypes.find(t => t.value === cycle.cycle_type)?.label || cycle.cycle_type}
                     </TableCell>
                     <TableCell>
-                      {format(new Date(cycle.start_date), "MMM d, yyyy")} - {format(new Date(cycle.end_date), "MMM d, yyyy")}
+                      {formatDateForDisplay(cycle.start_date)} - {formatDateForDisplay(cycle.end_date)}
                     </TableCell>
                     <TableCell>
                       {cycle.freeze_date ? (
                         <span className="flex items-center gap-1 text-amber-600">
                           <Lock className="h-3 w-3" />
-                          {format(new Date(cycle.freeze_date), "MMM d, yyyy")}
+                          {formatDateForDisplay(cycle.freeze_date)}
                         </span>
                       ) : (
                         <span className="text-muted-foreground">Not set</span>

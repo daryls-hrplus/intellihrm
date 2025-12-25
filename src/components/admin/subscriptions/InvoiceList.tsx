@@ -9,7 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { FileText, Send, Download, Eye, RefreshCw, Plus } from 'lucide-react';
 import { toast } from 'sonner';
-import { format } from 'date-fns';
+import { formatDateForDisplay } from "@/utils/dateUtils";
 import { InvoicePreview } from './InvoicePreview';
 
 interface Invoice {
@@ -182,8 +182,8 @@ export function InvoiceList() {
                   <TableCell className="font-medium">{invoice.invoice_number}</TableCell>
                   <TableCell>{invoice.company?.name || '-'}</TableCell>
                   <TableCell className="capitalize">{invoice.invoice_type}</TableCell>
-                  <TableCell>{format(new Date(invoice.issue_date), 'MMM d, yyyy')}</TableCell>
-                  <TableCell>{format(new Date(invoice.due_date), 'MMM d, yyyy')}</TableCell>
+                  <TableCell>{formatDateForDisplay(invoice.issue_date)}</TableCell>
+                  <TableCell>{formatDateForDisplay(invoice.due_date)}</TableCell>
                   <TableCell className="font-medium">
                     {formatCurrency(invoice.total_amount, invoice.currency)}
                   </TableCell>

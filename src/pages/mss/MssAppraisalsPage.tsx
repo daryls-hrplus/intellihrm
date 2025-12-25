@@ -23,7 +23,6 @@ import { toast } from "sonner";
 import { AppraisalCycleDialog } from "@/components/performance/AppraisalCycleDialog";
 import { AppraisalParticipantsManager } from "@/components/performance/AppraisalParticipantsManager";
 import { AppraisalEvaluationDialog } from "@/components/performance/AppraisalEvaluationDialog";
-import { format } from "date-fns";
 import { formatDateForDisplay } from "@/utils/dateUtils";
 
 interface AppraisalCycle {
@@ -454,7 +453,7 @@ export default function MssAppraisalsPage() {
                         {evaluation.evaluation_deadline && (
                           <div className="flex items-center gap-2 text-sm text-muted-foreground">
                             <Calendar className="h-4 w-4" />
-                            Deadline: {format(new Date(evaluation.evaluation_deadline), "MMM d, yyyy")}
+                            Deadline: {formatDateForDisplay(evaluation.evaluation_deadline)}
                           </div>
                         )}
                         <Button onClick={() => handleStartEvaluation(evaluation)}>
@@ -509,7 +508,7 @@ export default function MssAppraisalsPage() {
                           {evaluation.submitted_at && (
                             <div className="flex items-center gap-2">
                               <Calendar className="h-4 w-4" />
-                              Submitted: {format(new Date(evaluation.submitted_at), "MMM d, yyyy")}
+                              Submitted: {formatDateForDisplay(evaluation.submitted_at)}
                             </div>
                           )}
                         </div>
