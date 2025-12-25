@@ -184,7 +184,7 @@ export default function MssTeamPage() {
                         <Button 
                           variant="ghost" 
                           size="sm"
-                          onClick={() => navigate(`/workforce/employees/${report.employee_id}`)}
+                          onClick={() => navigate(`/mss/team/${report.employee_id}`)}
                         >
                           <ChevronRight className="h-4 w-4" />
                         </Button>
