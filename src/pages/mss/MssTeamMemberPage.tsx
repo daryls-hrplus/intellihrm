@@ -71,8 +71,8 @@ export default function MssTeamMemberPage() {
   const [isLoading, setIsLoading] = useState(true);
 
   const breadcrumbItems = [
-    { label: t('mss.title'), path: '/mss' },
-    { label: t('mss.dashboard.myTeam'), path: '/mss/team' },
+    { label: t('mss.title'), href: '/mss' },
+    { label: t('mss.dashboard.myTeam'), href: '/mss/team' },
     { label: member?.full_name || 'Team Member' },
   ];
 
