@@ -299,7 +299,7 @@ export function useEmployeeTransactions() {
         }
       }
 
-      // For HIRE transactions, create an employee_positions record
+      // For HIRE transactions, create an employee_positions record and update employee profile dates
       if (data.hire_type_id && data.position_id && data.employee_id) {
         const employeePositionData = {
           employee_id: data.employee_id,
@@ -324,6 +324,33 @@ export function useEmployeeTransactions() {
 
         if (positionError) {
           console.error("Failed to create employee position for hire:", positionError);
+          // Don't fail the transaction, just log the error
+        }
+
+        // Update employee profile with start_date and first_hire_date
+        const { data: existingProfile } = await supabase
+          .from("profiles")
+          .select("first_hire_date")
+          .eq("id", data.employee_id)
+          .single();
+
+        const profileUpdate: Record<string, string | null> = {
+          start_date: data.effective_date || null,
+          last_hire_date: data.effective_date || null,
+        };
+
+        // Only set first_hire_date if not already set
+        if (!existingProfile?.first_hire_date) {
+          profileUpdate.first_hire_date = data.effective_date || null;
+        }
+
+        const { error: profileError } = await supabase
+          .from("profiles")
+          .update(profileUpdate)
+          .eq("id", data.employee_id);
+
+        if (profileError) {
+          console.error("Failed to update employee profile dates for hire:", profileError);
           // Don't fail the transaction, just log the error
         }
       }
