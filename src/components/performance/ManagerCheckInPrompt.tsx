@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, forwardRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -26,7 +26,7 @@ interface EnrichedCheckIn extends GoalCheckIn {
   goal_title?: string;
 }
 
-export function ManagerCheckInPrompt({ onReviewClick }: ManagerCheckInPromptProps) {
+export const ManagerCheckInPrompt = forwardRef<HTMLDivElement, ManagerCheckInPromptProps>(function ManagerCheckInPrompt({ onReviewClick }, ref) {
   const { user } = useAuth();
   const { getPendingManagerReviews } = useGoalCheckIns();
   const [pendingReviews, setPendingReviews] = useState<EnrichedCheckIn[]>([]);
@@ -129,7 +129,7 @@ export function ManagerCheckInPrompt({ onReviewClick }: ManagerCheckInPromptProp
   }
 
   return (
-    <Card className="border-primary/20">
+    <Card ref={ref} className="border-primary/20">
       <CardHeader className="flex flex-row items-center justify-between pb-2">
         <div className="flex items-center gap-2">
           <div className="relative">
@@ -217,4 +217,4 @@ export function ManagerCheckInPrompt({ onReviewClick }: ManagerCheckInPromptProp
       </CardContent>
     </Card>
   );
-}
+});
