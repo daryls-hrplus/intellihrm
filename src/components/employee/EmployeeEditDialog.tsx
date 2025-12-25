@@ -64,6 +64,14 @@ const TIME_FORMATS = [
   { value: "24h", label: "24-hour" },
 ];
 
+const EMPLOYMENT_STATUSES = [
+  { value: "on_probation", label: "On Probation" },
+  { value: "temporary", label: "Temporary" },
+  { value: "permanent", label: "Permanent" },
+  { value: "contract", label: "Contract" },
+  { value: "part_time", label: "Part Time" },
+];
+
 interface EmployeeEditDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -83,6 +91,7 @@ interface EmployeeEditDialogProps {
     continuous_service_date?: string | null;
     seniority_date?: string | null;
     adjusted_service_date?: string | null;
+    employment_status?: string | null;
   } | null;
   onSuccess?: () => void;
 }
@@ -106,6 +115,7 @@ export function EmployeeEditDialog({
   const [continuousServiceDate, setContinuousServiceDate] = useState("");
   const [seniorityDate, setSeniorityDate] = useState("");
   const [adjustedServiceDate, setAdjustedServiceDate] = useState("");
+  const [employmentStatus, setEmploymentStatus] = useState("");
   const [saving, setSaving] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [customFieldValues, setCustomFieldValues] = useState<Record<string, string | number | boolean | string[] | null>>({});
@@ -134,6 +144,7 @@ export function EmployeeEditDialog({
       setContinuousServiceDate(employee.continuous_service_date || "");
       setSeniorityDate(employee.seniority_date || "");
       setAdjustedServiceDate(employee.adjusted_service_date || "");
+      setEmploymentStatus(employee.employment_status || "permanent");
     }
   }, [employee]);
 
@@ -227,6 +238,7 @@ export function EmployeeEditDialog({
           continuous_service_date: continuousServiceDate || null,
           seniority_date: seniorityDate || null,
           adjusted_service_date: adjustedServiceDate || null,
+          employment_status: employmentStatus || 'permanent',
         })
         .eq("id", employee.id);
 
@@ -255,6 +267,7 @@ export function EmployeeEditDialog({
           continuous_service_date: employee.continuous_service_date,
           seniority_date: employee.seniority_date,
           adjusted_service_date: employee.adjusted_service_date,
+          employment_status: employee.employment_status,
         },
         newValues: {
           full_name: fullName,
@@ -269,6 +282,7 @@ export function EmployeeEditDialog({
           continuous_service_date: continuousServiceDate || null,
           seniority_date: seniorityDate || null,
           adjusted_service_date: adjustedServiceDate || null,
+          employment_status: employmentStatus || 'permanent',
         },
       });
 
@@ -427,6 +441,21 @@ export function EmployeeEditDialog({
                     {TIME_FORMATS.map((format) => (
                       <SelectItem key={format.value} value={format.value}>
                         {format.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="employmentStatus">Employment Status</Label>
+                <Select value={employmentStatus} onValueChange={setEmploymentStatus}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select employment status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {EMPLOYMENT_STATUSES.map((status) => (
+                      <SelectItem key={status.value} value={status.value}>
+                        {status.label}
                       </SelectItem>
                     ))}
                   </SelectContent>
