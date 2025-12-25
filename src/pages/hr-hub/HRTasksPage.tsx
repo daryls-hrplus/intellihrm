@@ -15,7 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { format } from "date-fns";
+import { formatDateForDisplay } from "@/utils/dateUtils";
 import { Plus, CheckSquare, Clock, AlertCircle, User } from "lucide-react";
 
 interface HRTask {
@@ -256,7 +256,7 @@ export default function HRTasksPage() {
                       {task.due_date && (
                         <div className="flex items-center gap-1 text-sm text-muted-foreground mt-2">
                           <Clock className="h-3 w-3" />
-                          {t("hrHub.due")}: {format(new Date(task.due_date), "MMM d, yyyy")}
+                          {t("hrHub.due")}: {formatDateForDisplay(task.due_date)}
                         </div>
                       )}
                     </div>

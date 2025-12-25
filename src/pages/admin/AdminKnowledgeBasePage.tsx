@@ -18,7 +18,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
 import { Plus, Pencil, Trash2, FolderOpen, FileText, Eye } from "lucide-react";
-import { format } from "date-fns";
+import { formatDateForDisplay } from "@/utils/dateUtils";
 
 const categorySchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -460,7 +460,7 @@ export default function AdminKnowledgeBasePage() {
                             {article.view_count}
                           </span>
                         </TableCell>
-                        <TableCell>{format(new Date(article.created_at), "MMM d, yyyy")}</TableCell>
+                        <TableCell>{formatDateForDisplay(article.created_at)}</TableCell>
                         <TableCell>
                           <div className="flex gap-1">
                             <Button size="icon" variant="ghost" onClick={() => openEditArticle(article)}>

@@ -51,7 +51,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import { useWorkflow } from "@/hooks/useWorkflow";
-import { format } from "date-fns";
+import { formatDateForDisplay } from "@/utils/dateUtils";
 
 interface Position {
   id: string;
@@ -442,7 +442,7 @@ export default function MssRecruitmentPage() {
                             </TableCell>
                             <TableCell>{getStatusBadge(request)}</TableCell>
                             <TableCell>
-                              {format(new Date(request.created_at), "MMM d, yyyy")}
+                              {formatDateForDisplay(request.created_at)}
                             </TableCell>
                           </TableRow>
                         );
@@ -499,7 +499,7 @@ export default function MssRecruitmentPage() {
                             <TableCell>{getStatusBadge(request)}</TableCell>
                             <TableCell>
                               {request.reviewed_at 
-                                ? format(new Date(request.reviewed_at), "MMM d, yyyy")
+                                ? formatDateForDisplay(request.reviewed_at)
                                 : "-"
                               }
                             </TableCell>
@@ -563,7 +563,7 @@ export default function MssRecruitmentPage() {
                             <Badge variant="outline">{req.status}</Badge>
                           </TableCell>
                           <TableCell>
-                            {format(new Date(req.created_at), "MMM d, yyyy")}
+                            {formatDateForDisplay(req.created_at)}
                           </TableCell>
                         </TableRow>
                       ))}

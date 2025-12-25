@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Plus, Pencil, Target, TrendingUp } from "lucide-react";
 import { toast } from "sonner";
-import { format } from "date-fns";
+import { formatDateForDisplay } from "@/utils/dateUtils";
 
 interface TrainingNeedsTabProps {
   companyId: string;
@@ -344,7 +344,7 @@ export function TrainingNeedsTab({ companyId }: TrainingNeedsTabProps) {
                     <TableCell>{n.competency?.name || "-"}</TableCell>
                     <TableCell>{getPriorityBadge(n.priority)}</TableCell>
                     <TableCell>{getStatusBadge(n.status)}</TableCell>
-                    <TableCell>{n.target_date ? format(new Date(n.target_date), "MMM d, yyyy") : "-"}</TableCell>
+                    <TableCell>{n.target_date ? formatDateForDisplay(n.target_date) : "-"}</TableCell>
                     <TableCell>
                       <Select value={n.status} onValueChange={(v) => updateNeedStatus(n.id, v)}>
                         <SelectTrigger className="w-28 h-8"><SelectValue /></SelectTrigger>
@@ -431,7 +431,7 @@ export function TrainingNeedsTab({ companyId }: TrainingNeedsTabProps) {
                     <TableCell className="font-medium">{a.name}</TableCell>
                     <TableCell className="capitalize">{a.analysis_type}</TableCell>
                     <TableCell>{a.department?.name || "-"}</TableCell>
-                    <TableCell>{format(new Date(a.analysis_date), "MMM d, yyyy")}</TableCell>
+                    <TableCell>{formatDateForDisplay(a.analysis_date)}</TableCell>
                     <TableCell><Badge variant="secondary" className="capitalize">{a.status}</Badge></TableCell>
                   </TableRow>
                 ))}

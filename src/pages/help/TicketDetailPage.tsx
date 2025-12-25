@@ -30,6 +30,7 @@ import {
   X,
 } from "lucide-react";
 import { format, formatDistanceToNow, addHours, isPast } from "date-fns";
+import { formatDateForDisplay } from "@/utils/dateUtils";
 
 const statusColors: Record<string, string> = {
   open: "bg-blue-500/10 text-blue-600 border-blue-200",
@@ -477,14 +478,14 @@ export default function TicketDetailPage() {
                 <Separator />
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Created</span>
-                  <span>{format(new Date(ticket.created_at), "PP")}</span>
+                  <span>{formatDateForDisplay(ticket.created_at, "PP")}</span>
                 </div>
                 {ticket.resolved_at && (
                   <>
                     <Separator />
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Resolved</span>
-                      <span>{format(new Date(ticket.resolved_at), "PP")}</span>
+                      <span>{formatDateForDisplay(ticket.resolved_at, "PP")}</span>
                     </div>
                   </>
                 )}

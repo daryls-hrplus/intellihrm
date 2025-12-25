@@ -14,8 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Plus, Gavel, Search, Loader2, ExternalLink, FileText } from 'lucide-react';
 import { toast } from 'sonner';
-import { format } from 'date-fns';
-import { getTodayString } from '@/utils/dateUtils';
+import { getTodayString, formatDateForDisplay } from '@/utils/dateUtils';
 
 interface ERCourtJudgementsTabProps {
   companyId: string;
@@ -439,7 +438,7 @@ export function ERCourtJudgementsTab({ companyId }: ERCourtJudgementsTabProps) {
                       </Badge>
                     </TableCell>
                     <TableCell className="text-muted-foreground">
-                      {format(new Date(judgement.judgement_date), 'PP')}
+                      {formatDateForDisplay(judgement.judgement_date, 'PP')}
                     </TableCell>
                     <TableCell>
                       <div className="flex gap-2">
@@ -495,7 +494,7 @@ export function ERCourtJudgementsTab({ companyId }: ERCourtJudgementsTabProps) {
                   </div>
                   <div>
                     <Label className="text-muted-foreground">{t('employeeRelationsModule.courtJudgements.judgementDate')}</Label>
-                    <p>{format(new Date(selectedJudgement.judgement_date), 'PPP')}</p>
+                    <p>{formatDateForDisplay(selectedJudgement.judgement_date, 'PPP')}</p>
                   </div>
                   <div>
                     <Label className="text-muted-foreground">{t('employeeRelationsModule.courtJudgements.judgeName')}</Label>

@@ -12,8 +12,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Plus, Search, Loader2, Scale, CheckCircle } from 'lucide-react';
 import { useEmployeeRelations } from '@/hooks/useEmployeeRelations';
 import { useAuth } from '@/contexts/AuthContext';
-import { format } from 'date-fns';
-import { getTodayString } from '@/utils/dateUtils';
+import { getTodayString, formatDateForDisplay } from '@/utils/dateUtils';
 
 const ACTION_TYPES = ['verbal_warning', 'written_warning', 'final_warning', 'suspension', 'demotion', 'termination'];
 const SEVERITIES = ['minor', 'moderate', 'major', 'severe'];
@@ -256,12 +255,12 @@ export function ERDisciplinaryTab({ companyId }: ERDisciplinaryTabProps) {
                     </Badge>
                   </TableCell>
                   <TableCell className="max-w-[200px] truncate">{action.reason}</TableCell>
-                  <TableCell>{format(new Date(action.effective_date), 'PP')}</TableCell>
+                  <TableCell>{formatDateForDisplay(action.effective_date, 'PP')}</TableCell>
                   <TableCell>
                     {action.acknowledged_by_employee ? (
                       <div className="flex items-center gap-1 text-success">
                         <CheckCircle className="h-4 w-4" />
-                        <span className="text-xs">{action.acknowledged_at ? format(new Date(action.acknowledged_at), 'PP') : t('common.yes')}</span>
+                        <span className="text-xs">{action.acknowledged_at ? formatDateForDisplay(action.acknowledged_at, 'PP') : t('common.yes')}</span>
                       </div>
                     ) : (
                       <Button variant="outline" size="sm" onClick={() => handleAcknowledge(action.id)}>

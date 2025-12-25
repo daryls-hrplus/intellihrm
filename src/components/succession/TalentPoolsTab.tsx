@@ -12,7 +12,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Plus, Users, Edit, Trash2, UserPlus, Loader2 } from 'lucide-react';
 import { TalentPool, TalentPoolMember, useSuccession } from '@/hooks/useSuccession';
 import { supabase } from '@/integrations/supabase/client';
-import { format } from 'date-fns';
+import { formatDateForDisplay } from '@/utils/dateUtils';
 
 interface TalentPoolsTabProps {
   companyId: string;
@@ -286,11 +286,11 @@ export function TalentPoolsTab({ companyId }: TalentPoolsTabProps) {
                             )}
                           </TableCell>
                           <TableCell>
-                            {hireDate ? format(new Date(hireDate), 'MMM d, yyyy') : (
+                            {hireDate ? formatDateForDisplay(hireDate) : (
                               <span className="text-muted-foreground italic">-</span>
                             )}
                           </TableCell>
-                          <TableCell>{format(new Date(member.start_date), 'MMM d, yyyy')}</TableCell>
+                          <TableCell>{formatDateForDisplay(member.start_date)}</TableCell>
                           <TableCell>{member.reason || '-'}</TableCell>
                           <TableCell>
                             <Badge variant={member.status === 'active' ? 'default' : 'secondary'}>

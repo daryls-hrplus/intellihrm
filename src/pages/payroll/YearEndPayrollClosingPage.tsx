@@ -30,6 +30,7 @@ import {
   RefreshCw
 } from "lucide-react";
 import { format } from "date-fns";
+import { formatDateForDisplay } from "@/utils/dateUtils";
 
 interface PayGroup {
   id: string;
@@ -463,7 +464,7 @@ export default function YearEndPayrollClosingPage() {
                           <p className="font-medium text-success">{closing.new_periods_count} periods</p>
                           {closing.first_new_period_start && (
                             <p className="text-xs text-muted-foreground">
-                              Starting {format(new Date(closing.first_new_period_start), "MMM d, yyyy")}
+                              Starting {formatDateForDisplay(closing.first_new_period_start)}
                             </p>
                           )}
                         </div>

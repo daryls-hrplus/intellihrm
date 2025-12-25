@@ -12,8 +12,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Plus, Pencil, Archive, CheckCircle, AlertTriangle, XCircle, Clock, Users, Upload, Download, X, FileText } from "lucide-react";
 import { toast } from "sonner";
-import { format, differenceInDays } from "date-fns";
-import { getTodayString } from "@/utils/dateUtils";
+import { differenceInDays } from "date-fns";
+import { getTodayString, formatDateForDisplay, parseLocalDate } from "@/utils/dateUtils";
 import { useAuditLog } from "@/hooks/useAuditLog";
 interface EmployeeMembershipsTabProps {
   employeeId: string;
@@ -360,8 +360,8 @@ export function EmployeeMembershipsTab({ employeeId, viewType = "hr" }: Employee
                   <TableCell className="font-medium">{item.organization_name}</TableCell>
                   <TableCell>{getMembershipTypeLabel(item.membership_type)}</TableCell>
                   <TableCell>{item.membership_number || "-"}</TableCell>
-                  <TableCell>{format(new Date(item.start_date), "PP")}</TableCell>
-                  <TableCell>{item.end_date ? format(new Date(item.end_date), "PP") : "-"}</TableCell>
+                  <TableCell>{formatDateForDisplay(item.start_date, "PP")}</TableCell>
+                  <TableCell>{item.end_date ? formatDateForDisplay(item.end_date, "PP") : "-"}</TableCell>
                   <TableCell>{getStatusBadge(item.computedStatus)}</TableCell>
                   <TableCell>
                     <Badge variant="outline" className="capitalize">

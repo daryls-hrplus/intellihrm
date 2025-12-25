@@ -44,7 +44,7 @@ import {
 } from "lucide-react";
 import { useEnablementRiseTemplates } from "@/hooks/useEnablementData";
 import { useToast } from "@/hooks/use-toast";
-import { format } from "date-fns";
+import { formatDateForDisplay } from "@/utils/dateUtils";
 
 export function RiseTemplateManager() {
   const { t } = useTranslation();
@@ -342,7 +342,7 @@ export function RiseTemplateManager() {
                     </span>
                   </TableCell>
                   <TableCell className="text-sm text-muted-foreground">
-                    {format(new Date(template.created_at), "MMM d, yyyy")}
+                    {formatDateForDisplay(template.created_at)}
                   </TableCell>
                   <TableCell>
                     <DropdownMenu>

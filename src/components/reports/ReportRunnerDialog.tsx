@@ -15,6 +15,7 @@ import {
   FileType, Presentation, Loader2, CheckCircle, Eye
 } from 'lucide-react';
 import { format } from 'date-fns';
+import { formatDateForDisplay } from "@/utils/dateUtils";
 import { cn } from '@/lib/utils';
 import { 
   useReportWriter, 
@@ -154,7 +155,7 @@ export function ReportRunnerDialog({
                   )}
                 >
                   <CalendarIcon className="mr-2 h-4 w-4" />
-                  {range.from ? format(new Date(range.from), 'PP') : 'From'}
+                  {range.from ? formatDateForDisplay(String(range.from), 'PP') : 'From'}
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0" align="start">
@@ -176,7 +177,7 @@ export function ReportRunnerDialog({
                   )}
                 >
                   <CalendarIcon className="mr-2 h-4 w-4" />
-                  {range.to ? format(new Date(range.to), 'PP') : 'To'}
+                  {range.to ? formatDateForDisplay(String(range.to), 'PP') : 'To'}
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0" align="start">
