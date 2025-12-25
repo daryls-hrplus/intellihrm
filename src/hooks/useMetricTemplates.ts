@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { DEFAULT_METRIC_TEMPLATES, MetricTemplate, TemplateType } from '@/types/goalEnhancements';
 
 const STORAGE_KEY = 'hrplus_metric_templates';
-const TEMPLATE_VERSION = 2; // Increment when adding new templates to force refresh
+const TEMPLATE_VERSION = 3; // Increment when adding new templates to force refresh
 /**
  * Hook to manage metric templates (stored in localStorage)
  * In a production environment, these would be stored in the database
