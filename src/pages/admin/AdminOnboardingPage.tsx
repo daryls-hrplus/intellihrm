@@ -200,11 +200,11 @@ export default function AdminOnboardingPage() {
   const loadJobs = async (companyId: string) => {
     const { data } = await supabase
       .from('jobs')
-      .select('id, job_grade')
+      .select('id, name, code')
       .eq('company_id', companyId)
       .eq('is_active', true)
-      .order('job_grade');
-    setJobs((data || []).map(j => ({ id: j.id, title: j.job_grade || 'Untitled' })));
+      .order('name');
+    setJobs((data || []).map(j => ({ id: j.id, title: j.name || j.code || 'Untitled' })));
   };
 
   const handleTemplateSubmit = async () => {
