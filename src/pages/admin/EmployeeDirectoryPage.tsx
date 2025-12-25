@@ -96,21 +96,25 @@ export default function EmployeeDirectoryPage() {
           .limit(1);
 
         let positionTitle: string | undefined;
+        let departmentIdFromPosition: string | null | undefined;
         if (posRes.data?.[0]?.position_id) {
           const positionRes: any = await query("positions")
-            .select("title")
+            .select("title, department_id")
             .eq("id", posRes.data[0].position_id)
             .single();
           positionTitle = positionRes.data?.title || undefined;
+          departmentIdFromPosition = positionRes.data?.department_id || undefined;
         }
+
+        const effectiveDepartmentId = emp.department_id ?? departmentIdFromPosition ?? null;
 
         employeesWithDetails.push({
           id: emp.id,
           full_name: emp.full_name || "",
           email: emp.email || "",
           avatar_url: emp.avatar_url,
-          department_id: emp.department_id,
-          department: emp.department_id ? { name: String(deptMap.get(emp.department_id) || "") } : null,
+          department_id: effectiveDepartmentId,
+          department: effectiveDepartmentId ? { name: String(deptMap.get(effectiveDepartmentId) || "") } : null,
           company: emp.company_id ? { name: String(companyMap.get(emp.company_id) || "") } : null,
           position_title: positionTitle,
         });
