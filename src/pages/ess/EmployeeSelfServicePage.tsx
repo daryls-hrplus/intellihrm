@@ -29,6 +29,8 @@ import {
   Receipt,
   Building2,
   ArrowRightLeft,
+  MapPin,
+  Users,
 } from "lucide-react";
 
 export default function EmployeeSelfServicePage() {
@@ -37,6 +39,8 @@ export default function EmployeeSelfServicePage() {
 
   const allModules = {
     profile: { title: t("ess.modules.profile.title"), description: t("ess.modules.profile.description"), href: "/profile", icon: User, color: "bg-blue-500/10 text-blue-600", tabCode: "ess-profile" },
+    personalInfo: { title: t("ess.modules.personalInfo.title", "Personal Information"), description: t("ess.modules.personalInfo.description", "Update addresses and emergency contacts"), href: "/ess/personal-info", icon: MapPin, color: "bg-teal-500/10 text-teal-600", tabCode: "ess-personal-info" },
+    dependents: { title: t("ess.modules.dependents.title", "Dependents"), description: t("ess.modules.dependents.description", "Manage your dependents and beneficiaries"), href: "/ess/dependents", icon: Users, color: "bg-pink-500/10 text-pink-600", tabCode: "ess-dependents" },
     approvals: { title: t("ess.modules.approvals.title"), description: t("ess.modules.approvals.description"), href: "/workflow/approvals", icon: CheckSquare, color: "bg-violet-500/10 text-violet-600", tabCode: "ess-approvals" },
     delegates: { title: t("ess.modules.delegates.title"), description: t("ess.modules.delegates.description"), href: "/workflow/delegates", icon: UserCheck, color: "bg-fuchsia-500/10 text-fuchsia-600", tabCode: "ess-delegates" },
     leave: { title: t("ess.modules.leave.title"), description: t("ess.modules.leave.description"), href: "/ess/leave", icon: Calendar, color: "bg-green-500/10 text-green-600", tabCode: "ess-leave" },
@@ -70,7 +74,7 @@ export default function EmployeeSelfServicePage() {
   const sections: ModuleSection[] = [
     {
       titleKey: "Personal",
-      items: filterByAccess([allModules.profile, allModules.documents, allModules.letters, allModules.jobs, allModules.transactions]),
+      items: filterByAccess([allModules.profile, allModules.personalInfo, allModules.dependents, allModules.documents, allModules.letters, allModules.jobs, allModules.transactions]),
     },
     {
       titleKey: "Time & Leave",
