@@ -43,6 +43,7 @@ import {
   Folder,
   Link2,
   Calculator,
+  Network,
 } from "lucide-react";
 import {
   parseExtendedAttributes,
@@ -65,6 +66,7 @@ import { GoalApprovalStatus } from "./GoalApprovalStatus";
 import { GoalAlignmentManager } from "./GoalAlignmentManager";
 import { GoalVisibilitySettings } from "./GoalVisibilitySettings";
 import { ProgressRollupConfig } from "./ProgressRollupConfig";
+import { GoalDependencyManager } from "./GoalDependencyManager";
 
 type GoalStatus = 'draft' | 'active' | 'in_progress' | 'completed' | 'cancelled' | 'overdue';
 type GoalType = 'okr_objective' | 'okr_key_result' | 'smart_goal';
@@ -141,6 +143,7 @@ export function EnhancedGoalCard({
   const [alignmentDialogOpen, setAlignmentDialogOpen] = useState(false);
   const [visibilityDialogOpen, setVisibilityDialogOpen] = useState(false);
   const [rollupDialogOpen, setRollupDialogOpen] = useState(false);
+  const [dependencyDialogOpen, setDependencyDialogOpen] = useState(false);
   const isOverdue = goal.due_date && isPast(new Date(goal.due_date)) && goal.status !== "completed";
   const daysUntilDue = goal.due_date ? differenceInDays(new Date(goal.due_date), new Date()) : null;
   
@@ -334,6 +337,10 @@ export function EnhancedGoalCard({
                       <Calculator className="mr-2 h-4 w-4" />
                       Rollup Config
                     </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setDependencyDialogOpen(true)}>
+                      <Network className="mr-2 h-4 w-4" />
+                      Dependencies
+                    </DropdownMenuItem>
                   </>
                 )}
                 {(goal.status === "completed" || goal.progress_percentage >= 80) && (
@@ -496,6 +503,14 @@ export function EnhancedGoalCard({
           />
         </DialogContent>
       </Dialog>
+
+      {/* Dependency Manager Dialog */}
+      <GoalDependencyManager
+        goalId={goal.id}
+        goalTitle={goal.title}
+        open={dependencyDialogOpen}
+        onOpenChange={setDependencyDialogOpen}
+      />
     </Card>
   );
 }

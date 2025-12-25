@@ -31,6 +31,8 @@ import {
   AlertCircle,
   CalendarClock,
   Inbox,
+  Network,
+  AlertTriangle,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -48,6 +50,8 @@ import { GoalProgressDialog } from "@/components/performance/GoalProgressDialog"
 import { GoalCommentsDialog } from "@/components/performance/GoalCommentsDialog";
 import { GoalInterviewsList } from "@/components/goals/GoalInterviewsList";
 import { GoalApprovalInbox } from "@/components/performance/GoalApprovalInbox";
+import { GoalDependencyGraph } from "@/components/performance/GoalDependencyGraph";
+import { GoalRiskDashboard } from "@/components/performance/GoalRiskDashboard";
 import { useGoalApprovals } from "@/hooks/useGoalApprovals";
 import { useAuditLog } from "@/hooks/useAuditLog";
 import { useLanguage } from "@/hooks/useLanguage";
@@ -518,6 +522,14 @@ export default function GoalsPage() {
                 <CalendarClock className="h-4 w-4" />
                 {t('performance.goals.interviews')}
               </TabsTrigger>
+              <TabsTrigger value="dependencies" className="gap-2">
+                <Network className="h-4 w-4" />
+                Dependencies
+              </TabsTrigger>
+              <TabsTrigger value="risks" className="gap-2">
+                <AlertTriangle className="h-4 w-4" />
+                Risk Dashboard
+              </TabsTrigger>
               {pendingApprovals.length > 0 && (
                 <TabsTrigger value="approvals" className="gap-2">
                   <Inbox className="h-4 w-4" />
@@ -656,6 +668,14 @@ export default function GoalsPage() {
             {user?.id && (
               <GoalInterviewsList userId={user.id} userRole="manager" />
             )}
+          </TabsContent>
+
+          <TabsContent value="dependencies" className="mt-6">
+            <GoalDependencyGraph companyId={selectedCompanyId || company?.id} />
+          </TabsContent>
+
+          <TabsContent value="risks" className="mt-6">
+            <GoalRiskDashboard companyId={selectedCompanyId || company?.id} />
           </TabsContent>
 
           <TabsContent value="direct-reports" className="mt-6">
