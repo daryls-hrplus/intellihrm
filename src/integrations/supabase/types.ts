@@ -39131,6 +39131,10 @@ export type Database = {
           approver_name: string
         }[]
       }
+      has_any_role: {
+        Args: { _roles: string[]; _user_id: string }
+        Returns: boolean
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
