@@ -43,7 +43,8 @@ const ALL_MODULES = [
   { code: 'employee_relations', name: 'Employee Relations' },
   { code: 'property', name: 'Company Property' },
 ];
-import { format } from 'date-fns';
+import { format, parseISO } from 'date-fns';
+import { formatDateForDisplay } from "@/utils/dateUtils";
 
 interface CompanyGroup {
   id: string;
@@ -425,7 +426,7 @@ export default function SubscriptionManagementPage() {
                         {sub.monthly_amount ? `$${sub.monthly_amount.toFixed(2)}` : '-'}
                       </TableCell>
                       <TableCell>
-                        {format(new Date(sub.trial_ends_at), 'MMM dd, yyyy')}
+                        {formatDateForDisplay(sub.trial_ends_at, 'MMM dd, yyyy')}
                       </TableCell>
                       <TableCell>
                         <div className="text-sm">
@@ -475,10 +476,10 @@ export default function SubscriptionManagementPage() {
                         {inv.currency} {inv.amount.toFixed(2)}
                       </TableCell>
                       <TableCell className="text-sm">
-                        {format(new Date(inv.billing_period_start), 'MMM dd')} - {format(new Date(inv.billing_period_end), 'MMM dd, yyyy')}
+                        {formatDateForDisplay(inv.billing_period_start, 'MMM dd')} - {formatDateForDisplay(inv.billing_period_end, 'MMM dd, yyyy')}
                       </TableCell>
                       <TableCell>
-                        {format(new Date(inv.due_date), 'MMM dd, yyyy')}
+                        {formatDateForDisplay(inv.due_date, 'MMM dd, yyyy')}
                       </TableCell>
                       <TableCell>{getStatusBadge(inv.status)}</TableCell>
                       <TableCell className="capitalize">

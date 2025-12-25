@@ -371,7 +371,7 @@ export default function AdminLetterTemplatesPage() {
                           <div>
                             <h3 className="font-medium">{letter.letter_templates?.name}</h3>
                             <p className="text-sm text-muted-foreground">
-                              {letter.employee?.full_name} • {letter.letter_number} • {format(new Date(letter.created_at), "PPP")}
+                              {letter.employee?.full_name} • {letter.letter_number} • {formatDateForDisplay(letter.created_at, "PPP")}
                             </p>
                           </div>
                         </div>

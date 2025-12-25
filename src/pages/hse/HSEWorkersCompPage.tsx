@@ -24,7 +24,7 @@ import { DepartmentFilter, useDepartmentFilter } from "@/components/filters/Depa
 import { useLanguage } from "@/hooks/useLanguage";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { format } from "date-fns";
+import { formatDateForDisplay } from "@/utils/dateUtils";
 import { Skeleton } from "@/components/ui/skeleton";
 import { 
   Briefcase, 
@@ -235,7 +235,7 @@ export default function HSEWorkersCompPage() {
                   filteredClaims?.map((claim) => (
                     <TableRow key={claim.id}>
                       <TableCell className="font-medium">{claim.claim_number}</TableCell>
-                      <TableCell>{claim.injury_date ? format(new Date(claim.injury_date), "MMM d, yyyy") : "-"}</TableCell>
+                      <TableCell>{claim.injury_date ? formatDateForDisplay(claim.injury_date, "MMM d, yyyy") : "-"}</TableCell>
                       <TableCell className="max-w-xs truncate">{claim.injury_description || "-"}</TableCell>
                       <TableCell>{claim.body_parts_affected?.join(", ") || "-"}</TableCell>
                       <TableCell>${((claim.total_medical_costs || 0) + (claim.total_wage_replacement || 0)).toLocaleString()}</TableCell>

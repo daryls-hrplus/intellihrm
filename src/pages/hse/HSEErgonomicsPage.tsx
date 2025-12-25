@@ -13,7 +13,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { Plus, Search, Monitor, AlertTriangle, CheckCircle, Clock } from "lucide-react";
 import { useState } from "react";
-import { format } from "date-fns";
+import { formatDateForDisplay } from "@/utils/dateUtils";
 
 export default function HSEErgonomicsPage() {
   const { t } = useLanguage();
@@ -138,7 +138,7 @@ export default function HSEErgonomicsPage() {
                   filteredAssessments?.map((assessment) => (
                     <TableRow key={assessment.id}>
                       <TableCell className="font-medium">{assessment.assessment_number}</TableCell>
-                      <TableCell>{assessment.assessment_date ? format(new Date(assessment.assessment_date), "MMM dd, yyyy") : "-"}</TableCell>
+                      <TableCell>{assessment.assessment_date ? formatDateForDisplay(assessment.assessment_date, "MMM dd, yyyy") : "-"}</TableCell>
                       <TableCell>{assessment.workstation_type || "-"}</TableCell>
                       <TableCell>{getRiskBadge(assessment.overall_risk_level)}</TableCell>
                       <TableCell>{getStatusBadge(assessment.status)}</TableCell>
