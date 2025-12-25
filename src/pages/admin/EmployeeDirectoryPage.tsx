@@ -15,15 +15,21 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Search, Mail, Phone, Building, MapPin, Users } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
+interface EmployeePosition {
+  title: string;
+  department_id: string | null;
+  department_name: string | null;
+  assignment_type: string;
+  is_primary: boolean;
+}
+
 interface Employee {
   id: string;
   full_name: string;
   email: string;
   avatar_url: string | null;
-  department_id?: string | null;
-  department?: { name: string } | null;
+  positions: EmployeePosition[];
   company?: { name: string } | null;
-  position_title?: string;
 }
 
 interface Department {
@@ -85,38 +91,43 @@ export default function EmployeeDirectoryPage() {
       const deptMap = new Map(deptData.map((d: any) => [d.id, d.name]));
       const companyMap = new Map(companyData.map((c: any) => [c.id, c.name]));
 
-      // Get position titles for employees
+      // Get all active positions for employees
       const employeesWithDetails: Employee[] = [];
       for (const emp of empData) {
+        // Fetch all active positions for this employee
         const posRes: any = await query("employee_positions")
-          .select("position_id")
+          .select("position_id, assignment_type, is_primary")
           .eq("employee_id", emp.id)
           .eq("is_active", true)
-          .eq("is_primary", true)
-          .limit(1);
+          .order("is_primary", { ascending: false });
 
-        let positionTitle: string | undefined;
-        let departmentIdFromPosition: string | null | undefined;
-        if (posRes.data?.[0]?.position_id) {
+        const positions: EmployeePosition[] = [];
+        for (const epRow of posRes.data || []) {
           const positionRes: any = await query("positions")
             .select("title, department_id")
-            .eq("id", posRes.data[0].position_id)
+            .eq("id", epRow.position_id)
             .single();
-          positionTitle = positionRes.data?.title || undefined;
-          departmentIdFromPosition = positionRes.data?.department_id || undefined;
+          
+          if (positionRes.data) {
+            positions.push({
+              title: positionRes.data.title || "",
+              department_id: positionRes.data.department_id || null,
+              department_name: positionRes.data.department_id 
+                ? String(deptMap.get(positionRes.data.department_id) || "") 
+                : null,
+              assignment_type: epRow.assignment_type || "primary",
+              is_primary: epRow.is_primary,
+            });
+          }
         }
-
-        const effectiveDepartmentId = emp.department_id ?? departmentIdFromPosition ?? null;
 
         employeesWithDetails.push({
           id: emp.id,
           full_name: emp.full_name || "",
           email: emp.email || "",
           avatar_url: emp.avatar_url,
-          department_id: effectiveDepartmentId,
-          department: effectiveDepartmentId ? { name: String(deptMap.get(effectiveDepartmentId) || "") } : null,
+          positions,
           company: emp.company_id ? { name: String(companyMap.get(emp.company_id) || "") } : null,
-          position_title: positionTitle,
         });
       }
 
@@ -130,13 +141,15 @@ export default function EmployeeDirectoryPage() {
   };
 
   const filteredEmployees = employees.filter((emp) => {
+    const positionTitles = emp.positions.map(p => p.title.toLowerCase()).join(" ");
     const matchesSearch =
       emp.full_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       emp.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (emp.position_title?.toLowerCase().includes(searchTerm.toLowerCase()) ?? false);
+      positionTitles.includes(searchTerm.toLowerCase());
 
     const matchesDepartment =
-      selectedDepartment === "all" || emp.department_id === selectedDepartment;
+      selectedDepartment === "all" || 
+      emp.positions.some(p => p.department_id === selectedDepartment);
 
     return matchesSearch && matchesDepartment;
   });
@@ -218,11 +231,32 @@ export default function EmployeeDirectoryPage() {
                     </Avatar>
                     <div className="flex-1 min-w-0">
                       <h3 className="font-semibold truncate">{emp.full_name}</h3>
-                      {emp.position_title && (
-                        <p className="text-sm text-muted-foreground truncate">{emp.position_title}</p>
+                      {emp.positions.length > 0 && (
+                        <p className="text-sm text-muted-foreground truncate">
+                          {emp.positions[0].title}
+                          {!emp.positions[0].is_primary && (
+                            <Badge variant="outline" className="ml-1 text-xs capitalize">
+                              {emp.positions[0].assignment_type}
+                            </Badge>
+                          )}
+                        </p>
                       )}
                     </div>
                   </div>
+
+                  {/* Show additional positions if any */}
+                  {emp.positions.length > 1 && (
+                    <div className="mt-2 space-y-1">
+                      {emp.positions.slice(1).map((pos, idx) => (
+                        <div key={idx} className="text-xs text-muted-foreground flex items-center gap-1">
+                          <span className="truncate">{pos.title}</span>
+                          <Badge variant="outline" className="text-xs capitalize">
+                            {pos.assignment_type}
+                          </Badge>
+                        </div>
+                      ))}
+                    </div>
+                  )}
 
                   <div className="mt-4 space-y-2 text-sm">
                     <div className="flex items-center gap-2 text-muted-foreground">
@@ -231,10 +265,10 @@ export default function EmployeeDirectoryPage() {
                         {emp.email}
                       </a>
                     </div>
-                    {emp.department && (
+                    {emp.positions.length > 0 && emp.positions[0].department_name && (
                       <div className="flex items-center gap-2 text-muted-foreground">
                         <Building className="h-4 w-4 flex-shrink-0" />
-                        <span className="truncate">{emp.department.name}</span>
+                        <span className="truncate">{emp.positions[0].department_name}</span>
                       </div>
                     )}
                     {emp.company && (
