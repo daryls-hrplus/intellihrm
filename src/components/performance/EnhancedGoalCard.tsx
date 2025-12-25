@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -23,6 +23,11 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
+import {
   Eye,
   Calendar,
   TrendingUp,
@@ -44,11 +49,14 @@ import {
   Link2,
   Calculator,
   Network,
+  Layers,
+  ChevronDown,
 } from "lucide-react";
 import {
   parseExtendedAttributes,
   getDisplayCategory,
   calculateGoalAchievement,
+  calculateCompositeProgress,
 } from "@/utils/goalCalculations";
 import {
   COMPLIANCE_CATEGORY_LABELS,
@@ -144,9 +152,38 @@ export function EnhancedGoalCard({
   const [visibilityDialogOpen, setVisibilityDialogOpen] = useState(false);
   const [rollupDialogOpen, setRollupDialogOpen] = useState(false);
   const [dependencyDialogOpen, setDependencyDialogOpen] = useState(false);
+  const [subMetricsExpanded, setSubMetricsExpanded] = useState(false);
+  const [subMetricProgress, setSubMetricProgress] = useState<{ name: string; progress: number; weight: number }[]>([]);
+  const [hasSubMetrics, setHasSubMetrics] = useState(false);
+
   const isOverdue = goal.due_date && isPast(new Date(goal.due_date)) && goal.status !== "completed";
   const daysUntilDue = goal.due_date ? differenceInDays(new Date(goal.due_date), new Date()) : null;
   
+  // Fetch sub-metrics for composite progress display
+  useEffect(() => {
+    const fetchSubMetrics = async () => {
+      const { data } = await supabase
+        .from('goal_sub_metric_values')
+        .select('sub_metric_name, target_value, current_value, weight')
+        .eq('goal_id', goal.id);
+      
+      if (data && data.length > 0) {
+        setHasSubMetrics(true);
+        const values = data.filter(sm => sm.target_value && sm.target_value > 0).map(sm => ({
+          name: sm.sub_metric_name,
+          targetValue: sm.target_value || 0,
+          currentValue: sm.current_value || 0,
+          weight: sm.weight,
+        }));
+        if (values.length > 0) {
+          const result = calculateCompositeProgress(values, 'weighted');
+          setSubMetricProgress(result.subMetricProgress);
+        }
+      }
+    };
+    fetchSubMetrics();
+  }, [goal.id]);
+
   // Parse extended attributes for enhanced display
   const extAttrs = parseExtendedAttributes(goal.category);
   const displayCategory = getDisplayCategory(goal.category);
@@ -385,7 +422,10 @@ export function EnhancedGoalCard({
           {/* Progress Bar */}
           <div>
             <div className="flex items-center justify-between text-sm mb-1">
-              <span className="text-muted-foreground">Progress</span>
+              <span className="text-muted-foreground flex items-center gap-1">
+                Progress
+                {hasSubMetrics && <Layers className="h-3 w-3 text-primary" />}
+              </span>
               <span className={`font-medium ${goal.progress_percentage >= 100 ? "text-success" : ""}`}>
                 {goal.progress_percentage}%
               </span>
@@ -395,6 +435,30 @@ export function EnhancedGoalCard({
               className={`h-2 ${isOverdue ? "[&>div]:bg-warning" : ""}`}
             />
           </div>
+
+          {/* Sub-Metric Breakdown */}
+          {hasSubMetrics && subMetricProgress.length > 0 && (
+            <Collapsible open={subMetricsExpanded} onOpenChange={setSubMetricsExpanded}>
+              <CollapsibleTrigger asChild>
+                <Button variant="ghost" size="sm" className="w-full justify-between h-7 text-xs px-2">
+                  <span className="flex items-center gap-1">
+                    <Layers className="h-3 w-3" />
+                    Sub-Metrics ({subMetricProgress.length})
+                  </span>
+                  <ChevronDown className={`h-3 w-3 transition-transform ${subMetricsExpanded ? 'rotate-180' : ''}`} />
+                </Button>
+              </CollapsibleTrigger>
+              <CollapsibleContent className="pt-2 space-y-1.5">
+                {subMetricProgress.map((sm, idx) => (
+                  <div key={idx} className="flex items-center gap-2 text-xs">
+                    <span className="flex-1 truncate text-muted-foreground">{sm.name}</span>
+                    <Progress value={sm.progress} className="h-1 w-16" />
+                    <span className="w-10 text-right font-medium">{sm.progress.toFixed(0)}%</span>
+                  </div>
+                ))}
+              </CollapsibleContent>
+            </Collapsible>
+          )
 
           {/* Target Value */}
           {goal.target_value && (

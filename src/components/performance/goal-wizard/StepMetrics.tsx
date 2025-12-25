@@ -1,11 +1,12 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { GoalEnhancedMetricsTab } from "../GoalEnhancedMetricsTab";
 import { GoalWeightSummary } from "../GoalWeightSummary";
 import { TYPE_FIELD_CONFIG, GoalType } from "./LevelFieldConfig";
-import { MeasurementType, ComplianceCategory } from "@/types/goalEnhancements";
+import { MeasurementType, ComplianceCategory, SubMetricDefinition } from "@/types/goalEnhancements";
 import { Info } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { WeightSummary } from "@/hooks/useGoalWeights";
+import { useGoalSubMetrics, GoalSubMetricValue } from "@/hooks/useGoalSubMetrics";
 
 interface MetricsFormData {
   weighting: string;
@@ -33,6 +34,12 @@ interface StepMetricsProps {
   companyId: string | undefined;
   employeeId?: string;
   existingGoalId?: string;
+  // Sub-metrics support
+  subMetrics?: GoalSubMetricValue[];
+  onSubMetricUpdate?: (index: number, updates: Partial<GoalSubMetricValue>) => void;
+  onInitializeSubMetrics?: (templateSubMetrics: SubMetricDefinition[]) => void;
+  compositeProgress?: number;
+  subMetricProgress?: { name: string; progress: number; weight: number }[];
 }
 
 export function StepMetrics({
@@ -43,6 +50,11 @@ export function StepMetrics({
   companyId,
   employeeId,
   existingGoalId,
+  subMetrics,
+  onSubMetricUpdate,
+  onInitializeSubMetrics,
+  compositeProgress = 0,
+  subMetricProgress = [],
 }: StepMetricsProps) {
   const typeConfig = TYPE_FIELD_CONFIG[goalType];
   const [weightSummary, setWeightSummary] = useState<WeightSummary | null>(null);
@@ -122,12 +134,17 @@ export function StepMetrics({
         </div>
       </div>
 
-      {/* Metrics Tab - Always show but context varies by type */}
+      {/* Metrics Tab - Pass sub-metrics props */}
       <GoalEnhancedMetricsTab
         formData={formData}
         onChange={onChange}
         parentGoalWeight={parentGoalWeight}
         companyId={companyId}
+        subMetrics={subMetrics}
+        onSubMetricUpdate={onSubMetricUpdate}
+        onInitializeSubMetrics={onInitializeSubMetrics}
+        compositeProgress={compositeProgress}
+        subMetricProgress={subMetricProgress}
       />
 
       {/* Additional context for OKR objectives */}
