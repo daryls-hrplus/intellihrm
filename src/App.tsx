@@ -364,6 +364,7 @@ import MssGoalsPage from "./pages/mss/MssGoalsPage";
 import MssOnboardingPage from "./pages/mss/MssOnboardingPage";
 import MssOffboardingPage from "./pages/mss/MssOffboardingPage";
 import MssTeamPage from "./pages/mss/MssTeamPage";
+import MssTeamMemberPage from "./pages/mss/MssTeamMemberPage";
 import MssPropertyPage from "./pages/mss/MssPropertyPage";
 import MssEmployeeRelationsPage from "./pages/mss/MssEmployeeRelationsPage";
 import MssLeavePage from "./pages/mss/MssLeavePage";
@@ -716,6 +717,14 @@ const App = () => (
               element={
                 <ProtectedRoute moduleCode="mss">
                   <MssTeamPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/mss/team/:id"
+              element={
+                <ProtectedRoute moduleCode="mss">
+                  <MssTeamMemberPage />
                 </ProtectedRoute>
               }
             />
