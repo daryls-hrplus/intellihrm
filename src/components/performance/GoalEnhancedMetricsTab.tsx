@@ -11,13 +11,33 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { TrendingDown, TrendingUp, AlertTriangle, Target, CheckCircle } from "lucide-react";
+import { 
+  TrendingDown, 
+  TrendingUp, 
+  AlertTriangle, 
+  Target, 
+  CheckCircle,
+  Layers,
+  BarChart3,
+  TrendingUp as Delta,
+  FileText,
+  Link as LinkIcon,
+  MessageSquare,
+  CheckSquare,
+} from "lucide-react";
 import {
   MeasurementType,
   ComplianceCategory,
   MEASUREMENT_TYPE_LABELS,
   COMPLIANCE_CATEGORY_LABELS,
   MetricTemplate,
+  TemplateType,
+  TEMPLATE_TYPE_LABELS,
+  TEMPLATE_TYPE_COLORS,
+  EVIDENCE_TYPE_LABELS,
+  EvidenceType,
+  BASELINE_PERIOD_LABELS,
+  BaselinePeriod,
 } from "@/types/goalEnhancements";
 import { useMetricTemplates } from "@/hooks/useMetricTemplates";
 
@@ -85,6 +105,31 @@ export function GoalEnhancedMetricsTab({
   const thresholdFromPct = targetNum * (parseFloat(formData.threshold_percentage) || 80) / 100;
   const stretchFromPct = targetNum * (parseFloat(formData.stretch_percentage) || 120) / 100;
 
+  // Get selected template details
+  const selectedTemplate = formData.metric_template_id 
+    ? getTemplateById(formData.metric_template_id) 
+    : null;
+
+  // Template type icon helper
+  const getTemplateTypeIcon = (type?: TemplateType) => {
+    switch (type) {
+      case 'composite': return <Layers className="h-3 w-3" />;
+      case 'okr': return <BarChart3 className="h-3 w-3" />;
+      case 'delta': return <Delta className="h-3 w-3" />;
+      default: return null;
+    }
+  };
+
+  // Evidence type icon helper
+  const getEvidenceIcon = (type: EvidenceType) => {
+    switch (type) {
+      case 'file': return <FileText className="h-3 w-3" />;
+      case 'link': return <LinkIcon className="h-3 w-3" />;
+      case 'note': return <MessageSquare className="h-3 w-3" />;
+      case 'approval': return <CheckSquare className="h-3 w-3" />;
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* Metric Template Selector */}
@@ -103,9 +148,15 @@ export function GoalEnhancedMetricsTab({
               {activeTemplates.map((template) => (
                 <SelectItem key={template.id} value={template.id}>
                   <div className="flex items-center gap-2">
+                    {template.templateType && getTemplateTypeIcon(template.templateType)}
                     <span>{template.name}</span>
                     {template.isInverse && <TrendingDown className="h-3 w-3 text-muted-foreground" />}
-                    {template.category && (
+                    {template.templateType && (
+                      <Badge variant="outline" className={`text-xs ${TEMPLATE_TYPE_COLORS[template.templateType]}`}>
+                        {TEMPLATE_TYPE_LABELS[template.templateType]}
+                      </Badge>
+                    )}
+                    {template.category && !template.templateType && (
                       <Badge variant="outline" className="text-xs">
                         {template.category}
                       </Badge>
@@ -120,6 +171,73 @@ export function GoalEnhancedMetricsTab({
           </p>
         </CardContent>
       </Card>
+
+      {/* Selected Template Details */}
+      {selectedTemplate && selectedTemplate.templateType && selectedTemplate.templateType !== 'simple' && (
+        <Card className="border-primary/30 bg-primary/5">
+          <CardContent className="pt-4">
+            <div className="flex items-center gap-2 mb-3">
+              {getTemplateTypeIcon(selectedTemplate.templateType)}
+              <span className="font-medium">{selectedTemplate.name}</span>
+              <Badge className={TEMPLATE_TYPE_COLORS[selectedTemplate.templateType]}>
+                {TEMPLATE_TYPE_LABELS[selectedTemplate.templateType]}
+              </Badge>
+            </div>
+            
+            {selectedTemplate.description && (
+              <p className="text-sm text-muted-foreground mb-4">{selectedTemplate.description}</p>
+            )}
+
+            {/* Sub-metrics display */}
+            {selectedTemplate.subMetrics && selectedTemplate.subMetrics.length > 0 && (
+              <div className="space-y-2 mb-4">
+                <Label className="text-xs text-muted-foreground">Sub-Metrics</Label>
+                <div className="grid gap-2">
+                  {selectedTemplate.subMetrics.map((sub, idx) => (
+                    <div key={idx} className="flex items-center justify-between p-2 bg-background rounded border">
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-medium">{sub.name}</span>
+                        {sub.isRequired && (
+                          <Badge variant="destructive" className="text-xs">Required</Badge>
+                        )}
+                        {sub.unitOfMeasure && (
+                          <span className="text-xs text-muted-foreground">({sub.unitOfMeasure})</span>
+                        )}
+                      </div>
+                      <Badge variant="outline" className="text-xs">{sub.weight}%</Badge>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Baseline capture for delta templates */}
+            {selectedTemplate.templateType === 'delta' && selectedTemplate.captureBaseline && (
+              <Alert className="mb-4">
+                <Delta className="h-4 w-4" />
+                <AlertDescription>
+                  This template tracks before/after impact. Baseline period: {BASELINE_PERIOD_LABELS[selectedTemplate.baselinePeriod || 'month']}
+                </AlertDescription>
+              </Alert>
+            )}
+
+            {/* Evidence requirements */}
+            {selectedTemplate.evidenceRequired && selectedTemplate.evidenceTypes && (
+              <div className="space-y-2">
+                <Label className="text-xs text-muted-foreground">Evidence Required</Label>
+                <div className="flex flex-wrap gap-2">
+                  {selectedTemplate.evidenceTypes.map((type) => (
+                    <Badge key={type} variant="secondary" className="flex items-center gap-1">
+                      {getEvidenceIcon(type)}
+                      {EVIDENCE_TYPE_LABELS[type]}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       {/* Measurement Type */}
       <div className="grid grid-cols-2 gap-4">
