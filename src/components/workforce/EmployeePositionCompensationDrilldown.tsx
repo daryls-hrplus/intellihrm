@@ -22,6 +22,14 @@ interface CompensationItem {
   position_amount: number | null;
   variance: number | null;
   is_active: boolean;
+  rate_type?: string | null;
+}
+
+interface PositionRateInfo {
+  rate_type: string | null;
+  hourly_rate: number | null;
+  standard_hours_per_week: number | null;
+  compensation_currency: string | null;
 }
 
 interface EmployeePositionCompensationDrilldownProps {
@@ -34,6 +42,7 @@ export function EmployeePositionCompensationDrilldown({
   positionId,
 }: EmployeePositionCompensationDrilldownProps) {
   const [compensationItems, setCompensationItems] = useState<CompensationItem[]>([]);
+  const [positionRateInfo, setPositionRateInfo] = useState<PositionRateInfo | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -43,6 +52,19 @@ export function EmployeePositionCompensationDrilldown({
   const fetchCompensationData = async () => {
     setIsLoading(true);
     try {
+      // Fetch employee position details for rate type info
+      const { data: positionData } = await supabase
+        .from("employee_positions")
+        .select("rate_type, hourly_rate, standard_hours_per_week, compensation_currency")
+        .eq("employee_id", employeeId)
+        .eq("position_id", positionId)
+        .eq("is_active", true)
+        .single();
+      
+      if (positionData) {
+        setPositionRateInfo(positionData as PositionRateInfo);
+      }
+
       // Fetch employee compensation for this employee
       const { data: employeeComp, error: empError } = await supabase
         .from("employee_compensation")
@@ -53,6 +75,7 @@ export function EmployeePositionCompensationDrilldown({
           currency,
           frequency,
           is_active,
+          rate_type,
           pay_element:pay_elements!employee_compensation_pay_element_id_fkey(id, code, name)
         `)
         .eq("employee_id", employeeId)
@@ -171,9 +194,27 @@ export function EmployeePositionCompensationDrilldown({
 
   return (
     <div className="bg-muted/30 rounded-md p-3">
-      <h5 className="text-sm font-medium mb-2 text-muted-foreground">
-        Compensation Comparison (Employee vs Position)
-      </h5>
+      <div className="flex items-center justify-between mb-3">
+        <h5 className="text-sm font-medium text-muted-foreground">
+          Compensation Comparison (Employee vs Position)
+        </h5>
+        {positionRateInfo && (
+          <Badge 
+            variant="outline" 
+            className={
+              positionRateInfo.rate_type === "hourly" ? "bg-blue-500/10 text-blue-700 border-blue-200" :
+              positionRateInfo.rate_type === "daily" ? "bg-amber-500/10 text-amber-700 border-amber-200" :
+              "bg-green-500/10 text-green-700 border-green-200"
+            }
+          >
+            {positionRateInfo.rate_type === "hourly" && positionRateInfo.hourly_rate 
+              ? `Hourly: ${new Intl.NumberFormat("en-US", { style: "currency", currency: positionRateInfo.compensation_currency || "USD" }).format(positionRateInfo.hourly_rate)}/hr` 
+              : positionRateInfo.rate_type === "daily" && positionRateInfo.hourly_rate
+              ? `Daily: ${new Intl.NumberFormat("en-US", { style: "currency", currency: positionRateInfo.compensation_currency || "USD" }).format(positionRateInfo.hourly_rate)}/day`
+              : "Salaried"}
+          </Badge>
+        )}
+      </div>
       <Table>
         <TableHeader>
           <TableRow>
