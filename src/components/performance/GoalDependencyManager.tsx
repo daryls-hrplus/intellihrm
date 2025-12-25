@@ -11,7 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Trash2, CheckCircle, Link2, ExternalLink, Users, FileText, Shield, ArrowRight } from "lucide-react";
+import { Plus, Trash2, CheckCircle, Link2, ExternalLink, Users, FileText, Shield, ArrowRight, ArrowDown } from "lucide-react";
 import type { GoalDependency, DependencyType, ImpactLevel } from "@/types/goalDependencies";
 import { 
   DEPENDENCY_TYPE_LABELS, 
@@ -40,6 +40,7 @@ const dependencyTypeIcons: Record<DependencyType, React.ReactNode> = {
 export function GoalDependencyManager({ goalId, goalTitle, open, onOpenChange }: GoalDependencyManagerProps) {
   const { toast } = useToast();
   const [dependencies, setDependencies] = useState<GoalDependency[]>([]);
+  const [reverseDependencies, setReverseDependencies] = useState<GoalDependency[]>([]);
   const [availableGoals, setAvailableGoals] = useState<{ id: string; title: string; status: string }[]>([]);
   const [loading, setLoading] = useState(false);
   const [showAddForm, setShowAddForm] = useState(false);
@@ -56,6 +57,7 @@ export function GoalDependencyManager({ goalId, goalTitle, open, onOpenChange }:
   useEffect(() => {
     if (open) {
       loadDependencies();
+      loadReverseDependencies();
       loadAvailableGoals();
     }
   }, [open, goalId]);
@@ -85,6 +87,27 @@ export function GoalDependencyManager({ goalId, goalTitle, open, onOpenChange }:
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadReverseDependencies = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('goal_dependencies')
+        .select(`
+          *,
+          goal:performance_goals!goal_dependencies_goal_id_fkey(
+            id, title, status, progress_percentage
+          )
+        `)
+        .eq('depends_on_goal_id', goalId)
+        .eq('is_resolved', false)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setReverseDependencies((data || []) as any[]);
+    } catch (error) {
+      console.error('Error loading reverse dependencies:', error);
     }
   };
 
@@ -239,9 +262,12 @@ export function GoalDependencyManager({ goalId, goalTitle, open, onOpenChange }:
         </DialogHeader>
 
         <Tabs defaultValue="active" className="mt-4">
-          <TabsList className="grid w-full grid-cols-2">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="active">
-              Active ({unresolvedDeps.length})
+              Depends On ({unresolvedDeps.length})
+            </TabsTrigger>
+            <TabsTrigger value="blocking">
+              Blocking ({reverseDependencies.length})
             </TabsTrigger>
             <TabsTrigger value="resolved">
               Resolved ({resolvedDeps.length})
@@ -422,6 +448,48 @@ export function GoalDependencyManager({ goalId, goalTitle, open, onOpenChange }:
                       </CardContent>
                     </Card>
                   ))
+                )}
+              </div>
+            </ScrollArea>
+          </TabsContent>
+
+          <TabsContent value="blocking" className="mt-4">
+            <ScrollArea className="h-[400px] pr-4">
+              <div className="space-y-4">
+                {reverseDependencies.length === 0 ? (
+                  <div className="text-center py-8">
+                    <ArrowDown className="h-10 w-10 text-muted-foreground/50 mx-auto mb-3" />
+                    <p className="text-muted-foreground">No goals are waiting on this goal</p>
+                  </div>
+                ) : (
+                  <>
+                    <p className="text-sm text-muted-foreground">
+                      These goals are waiting for "{goalTitle}" to complete:
+                    </p>
+                    {reverseDependencies.map((dep: any) => (
+                      <Card key={dep.id}>
+                        <CardContent className="pt-4">
+                          <div className="flex items-start gap-3">
+                            {dependencyTypeIcons[dep.dependency_type as DependencyType]}
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2">
+                                <span className="font-medium">{dep.goal?.title}</span>
+                                <Badge variant="outline" className="text-xs">
+                                  {DEPENDENCY_TYPE_LABELS[dep.dependency_type as DependencyType]}
+                                </Badge>
+                                <Badge className={cn("text-xs", IMPACT_LEVEL_COLORS[dep.impact_if_blocked as ImpactLevel])}>
+                                  {IMPACT_LEVEL_LABELS[dep.impact_if_blocked as ImpactLevel]}
+                                </Badge>
+                              </div>
+                              {dep.description && (
+                                <p className="text-sm text-muted-foreground mt-1">{dep.description}</p>
+                              )}
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </>
                 )}
               </div>
             </ScrollArea>

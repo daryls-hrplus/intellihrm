@@ -17,10 +17,12 @@ import {
   MessageSquare,
   Bell,
   RefreshCw,
-  AlertTriangle,
+  Link2,
 } from "lucide-react";
 import { differenceInDays, isPast } from "date-fns";
 import { formatDateForDisplay } from "@/utils/dateUtils";
+import { GoalRiskIndicator } from "@/components/performance/GoalRiskIndicator";
+import type { RiskIndicator, RiskFactor } from "@/types/goalDependencies";
 
 type GoalStatus = 'draft' | 'active' | 'in_progress' | 'completed' | 'cancelled' | 'overdue';
 
@@ -35,6 +37,11 @@ interface Goal {
   due_date: string | null;
   employee_name?: string;
   category: string | null;
+  // Risk assessment fields
+  risk_indicator?: RiskIndicator | null;
+  risk_score?: number | null;
+  risk_factors?: RiskFactor[];
+  dependency_count?: number;
 }
 
 interface TeamGoalCardProps {
@@ -44,6 +51,7 @@ interface TeamGoalCardProps {
   onViewComments: (goal: Goal) => void;
   onSendReminder: (goal: Goal) => void;
   onRequestUpdate: (goal: Goal) => void;
+  onManageDependencies?: (goal: Goal) => void;
 }
 
 const statusColors: Record<GoalStatus, string> = {
@@ -62,6 +70,7 @@ export function TeamGoalCard({
   onViewComments,
   onSendReminder,
   onRequestUpdate,
+  onManageDependencies,
 }: TeamGoalCardProps) {
   const isOverdue = goal.due_date && isPast(new Date(goal.due_date)) && goal.status !== "completed";
   const daysUntilDue = goal.due_date ? differenceInDays(new Date(goal.due_date), new Date()) : null;
@@ -79,8 +88,14 @@ export function TeamGoalCard({
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
               <CardTitle className="text-lg truncate">{goal.title}</CardTitle>
-              {isAtRisk && !isOverdue && (
-                <AlertTriangle className="h-4 w-4 text-warning flex-shrink-0" />
+              {goal.risk_indicator && (
+                <GoalRiskIndicator
+                  riskIndicator={goal.risk_indicator}
+                  riskScore={goal.risk_score}
+                  riskFactors={goal.risk_factors}
+                  size="sm"
+                  showLabel={false}
+                />
               )}
             </div>
             <CardDescription className="flex items-center gap-2 mt-1">
@@ -127,6 +142,12 @@ export function TeamGoalCard({
                   <RefreshCw className="mr-2 h-4 w-4" />
                   Request Update
                 </DropdownMenuItem>
+                {onManageDependencies && (
+                  <DropdownMenuItem onClick={() => onManageDependencies(goal)}>
+                    <Link2 className="mr-2 h-4 w-4" />
+                    Manage Dependencies
+                  </DropdownMenuItem>
+                )}
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
@@ -167,6 +188,12 @@ export function TeamGoalCard({
                 <div className="flex items-center gap-2">
                   <TrendingUp className="h-4 w-4" />
                   Weight: {goal.weighting}%
+                </div>
+              )}
+              {goal.dependency_count !== undefined && goal.dependency_count > 0 && (
+                <div className="flex items-center gap-1">
+                  <Link2 className="h-4 w-4" />
+                  <span>{goal.dependency_count} deps</span>
                 </div>
               )}
             </div>
