@@ -1387,8 +1387,11 @@ export type Database = {
           evaluation_deadline: string | null
           goal_weight: number
           id: string
+          is_locked: boolean | null
           is_manager_cycle: boolean
           is_probation_review: boolean
+          locked_at: string | null
+          locked_by: string | null
           max_rating: number
           min_rating: number
           name: string
@@ -1409,8 +1412,11 @@ export type Database = {
           evaluation_deadline?: string | null
           goal_weight?: number
           id?: string
+          is_locked?: boolean | null
           is_manager_cycle?: boolean
           is_probation_review?: boolean
+          locked_at?: string | null
+          locked_by?: string | null
           max_rating?: number
           min_rating?: number
           name: string
@@ -1431,8 +1437,11 @@ export type Database = {
           evaluation_deadline?: string | null
           goal_weight?: number
           id?: string
+          is_locked?: boolean | null
           is_manager_cycle?: boolean
           is_probation_review?: boolean
+          locked_at?: string | null
+          locked_by?: string | null
           max_rating?: number
           min_rating?: number
           name?: string
@@ -1460,6 +1469,13 @@ export type Database = {
           {
             foreignKeyName: "appraisal_cycles_created_by_fkey"
             columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appraisal_cycles_locked_by_fkey"
+            columns: ["locked_by"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
@@ -1647,8 +1663,13 @@ export type Database = {
           created_at: string
           evaluation_type: string
           id: string
+          is_overridden: boolean | null
           item_id: string
           item_name: string
+          original_rating: number | null
+          overridden_at: string | null
+          overridden_by: string | null
+          override_justification: string | null
           participant_id: string
           rating: number | null
           updated_at: string
@@ -1660,8 +1681,13 @@ export type Database = {
           created_at?: string
           evaluation_type: string
           id?: string
+          is_overridden?: boolean | null
           item_id: string
           item_name: string
+          original_rating?: number | null
+          overridden_at?: string | null
+          overridden_by?: string | null
+          override_justification?: string | null
           participant_id: string
           rating?: number | null
           updated_at?: string
@@ -1673,8 +1699,13 @@ export type Database = {
           created_at?: string
           evaluation_type?: string
           id?: string
+          is_overridden?: boolean | null
           item_id?: string
           item_name?: string
+          original_rating?: number | null
+          overridden_at?: string | null
+          overridden_by?: string | null
+          override_justification?: string | null
           participant_id?: string
           rating?: number | null
           updated_at?: string
@@ -1682,6 +1713,13 @@ export type Database = {
           weighted_score?: number | null
         }
         Relationships: [
+          {
+            foreignKeyName: "appraisal_scores_overridden_by_fkey"
+            columns: ["overridden_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "appraisal_scores_participant_id_fkey"
             columns: ["participant_id"]
