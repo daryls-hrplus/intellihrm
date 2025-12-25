@@ -458,7 +458,7 @@ export function EnhancedGoalCard({
                 ))}
               </CollapsibleContent>
             </Collapsible>
-          )
+          )}
 
           {/* Target Value */}
           {goal.target_value && (
