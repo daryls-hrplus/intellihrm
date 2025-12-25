@@ -343,11 +343,27 @@ export function useEmployeeTransactions() {
           .eq("id", data.employee_id)
           .single();
 
+        // Determine employment_status: if probation_end_date is set, use "on_probation"
+        // Otherwise, look up the employment_type_id to get the code
+        let employmentStatus = 'permanent';
+        if (data.probation_end_date) {
+          employmentStatus = 'on_probation';
+        } else if (data.employment_type_id) {
+          const { data: empType } = await supabase
+            .from("lookup_values")
+            .select("code")
+            .eq("id", data.employment_type_id)
+            .single();
+          if (empType?.code) {
+            // Map lookup code to employment_status (convert to lowercase with underscores)
+            employmentStatus = empType.code.toLowerCase().replace(/-/g, '_');
+          }
+        }
+
         const profileUpdate: Record<string, string | null> = {
           start_date: data.effective_date || null,
           last_hire_date: data.effective_date || null,
-          // Set employment_status to "on_probation" if probation_end_date is set, otherwise "permanent"
-          employment_status: data.probation_end_date ? 'on_probation' : 'permanent',
+          employment_status: employmentStatus,
         };
 
         // Only set first_hire_date if not already set
@@ -406,12 +422,28 @@ export function useEmployeeTransactions() {
             console.error("Failed to create employee position for rehire:", positionError);
           }
 
+          // Determine employment_status: if probation_end_date is set, use "on_probation"
+          // Otherwise, look up the employment_type_id to get the code
+          let rehireEmploymentStatus = 'permanent';
+          if (data.probation_end_date) {
+            rehireEmploymentStatus = 'on_probation';
+          } else if (data.employment_type_id) {
+            const { data: empType } = await supabase
+              .from("lookup_values")
+              .select("code")
+              .eq("id", data.employment_type_id)
+              .single();
+            if (empType?.code) {
+              // Map lookup code to employment_status (convert to lowercase with underscores)
+              rehireEmploymentStatus = empType.code.toLowerCase().replace(/-/g, '_');
+            }
+          }
+
           // Update employee profile dates for rehire
           const profileUpdate: Record<string, string | null> = {
             start_date: data.effective_date || null,
             last_hire_date: data.effective_date || null,
-            // Set employment_status to "on_probation" if probation_end_date is set, otherwise "permanent"
-            employment_status: data.probation_end_date ? 'on_probation' : 'permanent',
+            employment_status: rehireEmploymentStatus,
           };
 
           // Set continuous_service_date if adjust_continuous_service is true
