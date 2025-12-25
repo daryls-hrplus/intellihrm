@@ -133,10 +133,10 @@ export function TransactionFormDialog({
     }
   }, [open, transactionType]);
 
-  // Load employee positions when employee is selected (for CONFIRMATION, PROBATION_EXT, SECONDMENT and TERMINATION transaction types)
+  // Load employee positions when employee is selected (for CONFIRMATION, PROBATION_EXT, SECONDMENT, TERMINATION, and SALARY_RATE_CHANGE transaction types)
   useEffect(() => {
     const loadEmployeePositions = async () => {
-      if (formData.employee_id && (transactionType === "CONFIRMATION" || transactionType === "PROBATION_EXT" || transactionType === "SECONDMENT" || transactionType === "TERMINATION")) {
+      if (formData.employee_id && (transactionType === "CONFIRMATION" || transactionType === "PROBATION_EXT" || transactionType === "SECONDMENT" || transactionType === "TERMINATION" || transactionType === "SALARY_RATE_CHANGE")) {
         const { data } = await supabase
           .from("employee_positions")
           .select(`
@@ -1273,6 +1273,63 @@ export function TransactionFormDialog({
                 />
                 <Label>{t("workforce.modules.transactions.form.termination.exitInterviewCompleted")}</Label>
               </div>
+            </div>
+          </>
+        );
+
+      case "SALARY_RATE_CHANGE":
+        return (
+          <>
+            <div className="space-y-2">
+              <Label>{t("workforce.modules.transactions.form.salaryChange.position", "Position")}</Label>
+              <Select
+                value={formData.position_id || ""}
+                onValueChange={(v) => setFormData({ ...formData, position_id: v })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder={t("workforce.modules.transactions.form.selectPosition")} />
+                </SelectTrigger>
+                <SelectContent>
+                  {employeePositions.length > 0 
+                    ? employeePositions.map((ep) => (
+                        <SelectItem key={ep.position_id} value={ep.position_id}>
+                          {ep.position?.title} ({ep.position?.code})
+                        </SelectItem>
+                      ))
+                    : positions.map((p) => (
+                        <SelectItem key={p.id} value={p.id}>
+                          {p.title} ({p.code})
+                        </SelectItem>
+                      ))
+                  }
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground">
+                {t("workforce.modules.transactions.form.salaryChange.positionHint", "Select the position for which the salary/rate is being changed")}
+              </p>
+            </div>
+            <div className="space-y-2">
+              <Label>{t("workforce.modules.transactions.form.salaryChange.reason", "Reason for Change")}</Label>
+              <Select
+                value={formData.promotion_reason_id || ""}
+                onValueChange={(v) => setFormData({ ...formData, promotion_reason_id: v })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder={t("workforce.modules.transactions.form.selectReason")} />
+                </SelectTrigger>
+                <SelectContent>
+                  {promotionReasons.map((r) => (
+                    <SelectItem key={r.id} value={r.id}>
+                      {r.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="p-4 border border-border rounded-lg bg-muted/50">
+              <p className="text-sm text-muted-foreground">
+                {t("workforce.modules.transactions.form.salaryChange.compensationNote", "After saving, use the 'Manage Compensation' button to add or modify pay elements for this change.")}
+              </p>
             </div>
           </>
         );
