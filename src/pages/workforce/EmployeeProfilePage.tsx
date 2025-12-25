@@ -76,6 +76,12 @@ interface EmployeeProfile {
   date_format: string | null;
   time_format: string | null;
   created_at: string;
+  first_hire_date: string | null;
+  last_hire_date: string | null;
+  start_date: string | null;
+  continuous_service_date: string | null;
+  seniority_date: string | null;
+  adjusted_service_date: string | null;
   positions: {
     id: string;
     title: string;
@@ -134,7 +140,7 @@ export default function EmployeeProfilePage() {
       // Fetch profile
       const { data: profile, error: profileError } = await supabase
         .from('profiles')
-        .select('id, full_name, email, avatar_url, timezone, preferred_language, date_format, time_format, created_at')
+        .select('id, full_name, email, avatar_url, timezone, preferred_language, date_format, time_format, created_at, first_hire_date, last_hire_date, start_date, continuous_service_date, seniority_date, adjusted_service_date')
         .eq('id', employeeId)
         .maybeSingle();
 
@@ -192,6 +198,12 @@ export default function EmployeeProfilePage() {
         date_format: profile.date_format,
         time_format: profile.time_format,
         created_at: profile.created_at,
+        first_hire_date: profile.first_hire_date,
+        last_hire_date: profile.last_hire_date,
+        start_date: profile.start_date,
+        continuous_service_date: profile.continuous_service_date,
+        seniority_date: profile.seniority_date,
+        adjusted_service_date: profile.adjusted_service_date,
         positions: employeePositions,
       });
 
@@ -297,6 +309,47 @@ export default function EmployeeProfilePage() {
                     </>
                   )}
                 </div>
+                {/* Employment Dates */}
+                {(employee.first_hire_date || employee.last_hire_date || employee.start_date || employee.continuous_service_date || employee.seniority_date || employee.adjusted_service_date) && (
+                  <div className="mt-3 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 sm:justify-start border-t pt-3">
+                    {employee.start_date && (
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <Calendar className="h-4 w-4" />
+                        <span>Start: {format(new Date(employee.start_date), 'MMM d, yyyy')}</span>
+                      </div>
+                    )}
+                    {employee.first_hire_date && (
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <Calendar className="h-4 w-4" />
+                        <span>First Hire: {format(new Date(employee.first_hire_date), 'MMM d, yyyy')}</span>
+                      </div>
+                    )}
+                    {employee.last_hire_date && (
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <Calendar className="h-4 w-4" />
+                        <span>Last Hire: {format(new Date(employee.last_hire_date), 'MMM d, yyyy')}</span>
+                      </div>
+                    )}
+                    {employee.continuous_service_date && (
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <Clock className="h-4 w-4" />
+                        <span>Continuous Service: {format(new Date(employee.continuous_service_date), 'MMM d, yyyy')}</span>
+                      </div>
+                    )}
+                    {employee.seniority_date && (
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <Clock className="h-4 w-4" />
+                        <span>Seniority: {format(new Date(employee.seniority_date), 'MMM d, yyyy')}</span>
+                      </div>
+                    )}
+                    {employee.adjusted_service_date && (
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <Clock className="h-4 w-4" />
+                        <span>Adjusted Service: {format(new Date(employee.adjusted_service_date), 'MMM d, yyyy')}</span>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
               <div className="flex flex-col items-end gap-2">
                 <Badge variant={activePosition ? "default" : "secondary"} className="shrink-0">
