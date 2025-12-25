@@ -16291,25 +16291,34 @@ export type Database = {
       goal_alignments: {
         Row: {
           alignment_percentage: number | null
+          alignment_type: string | null
           child_goal_id: string
+          contribution_weight: number | null
           created_at: string
           id: string
+          is_active: boolean | null
           notes: string | null
           parent_goal_id: string
         }
         Insert: {
           alignment_percentage?: number | null
+          alignment_type?: string | null
           child_goal_id: string
+          contribution_weight?: number | null
           created_at?: string
           id?: string
+          is_active?: boolean | null
           notes?: string | null
           parent_goal_id: string
         }
         Update: {
           alignment_percentage?: number | null
+          alignment_type?: string | null
           child_goal_id?: string
+          contribution_weight?: number | null
           created_at?: string
           id?: string
+          is_active?: boolean | null
           notes?: string | null
           parent_goal_id?: string
         }
@@ -16928,6 +16937,98 @@ export type Database = {
           },
         ]
       }
+      goal_progress_overrides: {
+        Row: {
+          calculated_value: number | null
+          created_at: string | null
+          goal_id: string
+          id: string
+          justification: string
+          overridden_by: string
+          override_value: number
+          previous_value: number
+        }
+        Insert: {
+          calculated_value?: number | null
+          created_at?: string | null
+          goal_id: string
+          id?: string
+          justification: string
+          overridden_by: string
+          override_value: number
+          previous_value: number
+        }
+        Update: {
+          calculated_value?: number | null
+          created_at?: string | null
+          goal_id?: string
+          id?: string
+          justification?: string
+          overridden_by?: string
+          override_value?: number
+          previous_value?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "goal_progress_overrides_goal_id_fkey"
+            columns: ["goal_id"]
+            isOneToOne: false
+            referencedRelation: "performance_goals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "goal_progress_overrides_overridden_by_fkey"
+            columns: ["overridden_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      goal_progress_rollup_config: {
+        Row: {
+          auto_calculate: boolean | null
+          created_at: string | null
+          id: string
+          include_aligned_goals: boolean | null
+          include_child_goals: boolean | null
+          parent_goal_id: string
+          rollup_method: string
+          threshold_percentage: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          auto_calculate?: boolean | null
+          created_at?: string | null
+          id?: string
+          include_aligned_goals?: boolean | null
+          include_child_goals?: boolean | null
+          parent_goal_id: string
+          rollup_method?: string
+          threshold_percentage?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          auto_calculate?: boolean | null
+          created_at?: string | null
+          id?: string
+          include_aligned_goals?: boolean | null
+          include_child_goals?: boolean | null
+          parent_goal_id?: string
+          rollup_method?: string
+          threshold_percentage?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "goal_progress_rollup_config_parent_goal_id_fkey"
+            columns: ["parent_goal_id"]
+            isOneToOne: true
+            referencedRelation: "performance_goals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       goal_reviews: {
         Row: {
           created_at: string
@@ -17034,6 +17135,53 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      goal_visibility_rules: {
+        Row: {
+          can_edit_roles: string[] | null
+          can_view_roles: string[] | null
+          created_at: string | null
+          custom_editor_ids: string[] | null
+          custom_viewer_ids: string[] | null
+          goal_id: string
+          id: string
+          inherit_from_parent: boolean | null
+          updated_at: string | null
+          visibility_scope: string
+        }
+        Insert: {
+          can_edit_roles?: string[] | null
+          can_view_roles?: string[] | null
+          created_at?: string | null
+          custom_editor_ids?: string[] | null
+          custom_viewer_ids?: string[] | null
+          goal_id: string
+          id?: string
+          inherit_from_parent?: boolean | null
+          updated_at?: string | null
+          visibility_scope?: string
+        }
+        Update: {
+          can_edit_roles?: string[] | null
+          can_view_roles?: string[] | null
+          created_at?: string | null
+          custom_editor_ids?: string[] | null
+          custom_viewer_ids?: string[] | null
+          goal_id?: string
+          id?: string
+          inherit_from_parent?: boolean | null
+          updated_at?: string | null
+          visibility_scope?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "goal_visibility_rules_goal_id_fkey"
+            columns: ["goal_id"]
+            isOneToOne: true
+            referencedRelation: "performance_goals"
             referencedColumns: ["id"]
           },
         ]
@@ -38966,6 +39114,10 @@ export type Database = {
           fiscal_year: number
         }[]
       }
+      calculate_goal_progress_rollup: {
+        Args: { p_goal_id: string }
+        Returns: number
+      }
       calculate_shift_differential: {
         Args: {
           p_clock_in: string
@@ -39008,6 +39160,13 @@ export type Database = {
           geofence_id: string
           geofence_name: string
           within_geofence: boolean
+        }[]
+      }
+      check_goal_visibility: {
+        Args: { p_goal_id: string; p_user_id: string }
+        Returns: {
+          can_edit: boolean
+          can_view: boolean
         }[]
       }
       check_year_end_reports_complete: {
