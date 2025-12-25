@@ -11043,6 +11043,7 @@ export type Database = {
           acting_reason_id: string | null
           acting_start_date: string | null
           adjust_continuous_service: boolean | null
+          adjusted_service_date: string | null
           company_id: string | null
           confirmation_date: string | null
           continuous_service_date: string | null
@@ -11059,6 +11060,7 @@ export type Database = {
           from_company_id: string | null
           from_department_id: string | null
           from_position_id: string | null
+          has_adjusted_service: boolean | null
           hire_type_id: string | null
           id: string
           last_working_date: string | null
@@ -11096,6 +11098,7 @@ export type Database = {
           acting_reason_id?: string | null
           acting_start_date?: string | null
           adjust_continuous_service?: boolean | null
+          adjusted_service_date?: string | null
           company_id?: string | null
           confirmation_date?: string | null
           continuous_service_date?: string | null
@@ -11112,6 +11115,7 @@ export type Database = {
           from_company_id?: string | null
           from_department_id?: string | null
           from_position_id?: string | null
+          has_adjusted_service?: boolean | null
           hire_type_id?: string | null
           id?: string
           last_working_date?: string | null
@@ -11149,6 +11153,7 @@ export type Database = {
           acting_reason_id?: string | null
           acting_start_date?: string | null
           adjust_continuous_service?: boolean | null
+          adjusted_service_date?: string | null
           company_id?: string | null
           confirmation_date?: string | null
           continuous_service_date?: string | null
@@ -11165,6 +11170,7 @@ export type Database = {
           from_company_id?: string | null
           from_department_id?: string | null
           from_position_id?: string | null
+          has_adjusted_service?: boolean | null
           hire_type_id?: string | null
           id?: string
           last_working_date?: string | null

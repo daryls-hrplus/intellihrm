@@ -98,6 +98,10 @@ export interface EmployeeTransaction {
   adjust_continuous_service: boolean;
   continuous_service_date: string | null;
   
+  // Hire adjusted service fields
+  has_adjusted_service: boolean;
+  adjusted_service_date: string | null;
+  
   // Workflow
   workflow_instance_id: string | null;
   requires_workflow: boolean;
@@ -347,6 +351,11 @@ export function useEmployeeTransactions() {
         // Only set first_hire_date if not already set
         if (!existingProfile?.first_hire_date) {
           profileUpdate.first_hire_date = data.effective_date || null;
+        }
+
+        // Set adjusted_service_date if has_adjusted_service is true
+        if (data.has_adjusted_service && data.adjusted_service_date) {
+          profileUpdate.adjusted_service_date = data.adjusted_service_date;
         }
 
         const { error: profileError } = await supabase

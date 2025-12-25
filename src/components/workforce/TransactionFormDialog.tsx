@@ -513,6 +513,65 @@ export function TransactionFormDialog({
                 </SelectContent>
               </Select>
             </div>
+            <div className="flex items-center space-x-2 pt-2">
+              <Switch
+                checked={formData.has_adjusted_service || false}
+                onCheckedChange={(checked) =>
+                  setFormData({ 
+                    ...formData, 
+                    has_adjusted_service: checked,
+                    adjusted_service_date: checked ? formData.adjusted_service_date : undefined
+                  })
+                }
+              />
+              <div>
+                <Label>{t("workforce.modules.transactions.form.hire.adjustedService", "Adjusted Service Date")}</Label>
+                <p className="text-xs text-muted-foreground">
+                  {t("workforce.modules.transactions.form.hire.adjustedServiceDescription", "Enable if the new hire has negotiated credit for previous experience")}
+                </p>
+              </div>
+            </div>
+            {formData.has_adjusted_service && (
+              <div className="space-y-2 ml-6 pl-4 border-l-2 border-primary/30">
+                <Label>{t("workforce.modules.transactions.form.hire.adjustedServiceDate", "Adjusted Service Date")}</Label>
+                <p className="text-xs text-muted-foreground mb-2">
+                  {t("workforce.modules.transactions.form.hire.adjustedServiceDateDescription", "Set an earlier date to credit previous experience towards service calculations")}
+                </p>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "w-full justify-start text-left font-normal",
+                        !formData.adjusted_service_date && "text-muted-foreground"
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {formData.adjusted_service_date
+                        ? formatDateForDisplay(formData.adjusted_service_date, "PPP")
+                        : t("workforce.modules.transactions.form.selectDate")}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0 pointer-events-auto">
+                    <Calendar
+                      mode="single"
+                      selected={formData.adjusted_service_date ? new Date(formData.adjusted_service_date) : undefined}
+                      onSelect={(date) =>
+                        setFormData({
+                          ...formData,
+                          adjusted_service_date: date ? toDateString(date) : undefined,
+                        })
+                      }
+                      disabled={(date) => {
+                        const effectiveDate = formData.effective_date ? new Date(formData.effective_date) : new Date();
+                        return date >= effectiveDate;
+                      }}
+                      className="pointer-events-auto"
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+            )}
           </>
         );
 
