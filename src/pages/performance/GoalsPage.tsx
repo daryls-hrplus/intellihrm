@@ -52,6 +52,8 @@ import { GoalInterviewsList } from "@/components/goals/GoalInterviewsList";
 import { GoalApprovalInbox } from "@/components/performance/GoalApprovalInbox";
 import { GoalDependencyGraph } from "@/components/performance/GoalDependencyGraph";
 import { GoalRiskDashboard } from "@/components/performance/GoalRiskDashboard";
+import { ManagerCheckInPrompt } from "@/components/performance/ManagerCheckInPrompt";
+import { GoalCheckInDialog } from "@/components/performance/GoalCheckInDialog";
 import { useGoalApprovals } from "@/hooks/useGoalApprovals";
 import { useAuditLog } from "@/hooks/useAuditLog";
 import { useLanguage } from "@/hooks/useLanguage";
@@ -122,6 +124,8 @@ export default function GoalsPage() {
   const [showAnalytics, setShowAnalytics] = useState(true);
   const [progressDialogOpen, setProgressDialogOpen] = useState(false);
   const [commentsDialogOpen, setCommentsDialogOpen] = useState(false);
+  const [checkInDialogOpen, setCheckInDialogOpen] = useState(false);
+  const [checkInGoal, setCheckInGoal] = useState<Goal | null>(null);
 
   // Goal approvals hook
   const { pendingApprovals } = useGoalApprovals(selectedCompanyId || company?.id);
@@ -486,6 +490,19 @@ export default function GoalsPage() {
           <GoalsAnalyticsDashboard goals={filteredGoals} />
         )}
 
+        {/* Manager Check-in Prompts */}
+        {directReports.length > 0 && (
+          <ManagerCheckInPrompt
+            onReviewClick={(checkIn) => {
+              const goal = goals.find(g => g.id === checkIn.goal_id);
+              if (goal) {
+                setCheckInGoal(goal);
+                setCheckInDialogOpen(true);
+              }
+            }}
+          />
+        )}
+
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <TabsList className="flex-wrap">
@@ -796,6 +813,20 @@ export default function GoalsPage() {
             goalTitle={selectedGoal.title}
           />
         </>
+      )}
+
+      {checkInGoal && (
+        <GoalCheckInDialog
+          open={checkInDialogOpen}
+          onOpenChange={setCheckInDialogOpen}
+          goal={{
+            id: checkInGoal.id,
+            title: checkInGoal.title,
+            progress_percentage: checkInGoal.progress_percentage,
+            employee_id: checkInGoal.employee_id || "",
+          }}
+          onSuccess={fetchGoals}
+        />
       )}
     </AppLayout>
   );

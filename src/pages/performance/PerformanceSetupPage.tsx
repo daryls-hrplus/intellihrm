@@ -36,7 +36,9 @@ import {
   GitBranch,
   Layers,
   MessageSquare,
+  Clock,
 } from "lucide-react";
+import { CheckInCadenceConfig } from "@/components/performance/setup/CheckInCadenceConfig";
 
 // Interfaces
 interface Company { id: string; name: string; }
@@ -302,6 +304,10 @@ export default function PerformanceSetupPage() {
                     <GitBranch className="h-4 w-4" />
                     Locking Rules
                   </TabsTrigger>
+                  <TabsTrigger value="check-in-cadence" className="flex items-center gap-2">
+                    <Clock className="h-4 w-4" />
+                    Check-in Cadence
+                  </TabsTrigger>
                 </TabsList>
                 <TabsContent value="goal-cycles" className="mt-4">
                   <GoalCyclesManager companyId={selectedCompany} />
@@ -311,6 +317,9 @@ export default function PerformanceSetupPage() {
                 </TabsContent>
                 <TabsContent value="goal-locking" className="mt-4">
                   <GoalLockingRulesManager companyId={selectedCompany} />
+                </TabsContent>
+                <TabsContent value="check-in-cadence" className="mt-4">
+                  <CheckInCadenceConfig companyId={selectedCompany} />
                 </TabsContent>
               </Tabs>
             </TabsContent>
