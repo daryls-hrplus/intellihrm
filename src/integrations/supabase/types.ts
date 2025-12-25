@@ -6385,6 +6385,188 @@ export type Database = {
         }
         Relationships: []
       }
+      custom_field_definitions: {
+        Row: {
+          company_id: string | null
+          created_at: string
+          created_by: string | null
+          default_value: string | null
+          display_order: number
+          end_date: string | null
+          field_code: string
+          field_label: string
+          field_type: Database["public"]["Enums"]["custom_field_type"]
+          form_context: Database["public"]["Enums"]["custom_field_form_context"]
+          help_text: string | null
+          id: string
+          is_active: boolean
+          is_required: boolean
+          placeholder: string | null
+          section_name: string | null
+          start_date: string | null
+          updated_at: string
+          validation_rules: Json | null
+        }
+        Insert: {
+          company_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          default_value?: string | null
+          display_order?: number
+          end_date?: string | null
+          field_code: string
+          field_label: string
+          field_type?: Database["public"]["Enums"]["custom_field_type"]
+          form_context: Database["public"]["Enums"]["custom_field_form_context"]
+          help_text?: string | null
+          id?: string
+          is_active?: boolean
+          is_required?: boolean
+          placeholder?: string | null
+          section_name?: string | null
+          start_date?: string | null
+          updated_at?: string
+          validation_rules?: Json | null
+        }
+        Update: {
+          company_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          default_value?: string | null
+          display_order?: number
+          end_date?: string | null
+          field_code?: string
+          field_label?: string
+          field_type?: Database["public"]["Enums"]["custom_field_type"]
+          form_context?: Database["public"]["Enums"]["custom_field_form_context"]
+          help_text?: string | null
+          id?: string
+          is_active?: boolean
+          is_required?: boolean
+          placeholder?: string | null
+          section_name?: string | null
+          start_date?: string | null
+          updated_at?: string
+          validation_rules?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "custom_field_definitions_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "custom_field_definitions_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      custom_field_options: {
+        Row: {
+          created_at: string
+          display_order: number
+          field_definition_id: string
+          id: string
+          is_active: boolean
+          option_label: string
+          option_value: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          display_order?: number
+          field_definition_id: string
+          id?: string
+          is_active?: boolean
+          option_label: string
+          option_value: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          display_order?: number
+          field_definition_id?: string
+          id?: string
+          is_active?: boolean
+          option_label?: string
+          option_value?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "custom_field_options_field_definition_id_fkey"
+            columns: ["field_definition_id"]
+            isOneToOne: false
+            referencedRelation: "custom_field_definitions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      custom_field_values: {
+        Row: {
+          boolean_value: boolean | null
+          created_at: string
+          date_value: string | null
+          entity_id: string
+          entity_type: string
+          field_definition_id: string
+          id: string
+          json_value: Json | null
+          number_value: number | null
+          text_value: string | null
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          boolean_value?: boolean | null
+          created_at?: string
+          date_value?: string | null
+          entity_id: string
+          entity_type: string
+          field_definition_id: string
+          id?: string
+          json_value?: Json | null
+          number_value?: number | null
+          text_value?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          boolean_value?: boolean | null
+          created_at?: string
+          date_value?: string | null
+          entity_id?: string
+          entity_type?: string
+          field_definition_id?: string
+          id?: string
+          json_value?: Json | null
+          number_value?: number | null
+          text_value?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "custom_field_values_field_definition_id_fkey"
+            columns: ["field_definition_id"]
+            isOneToOne: false
+            referencedRelation: "custom_field_definitions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "custom_field_values_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       departments: {
         Row: {
           code: string
@@ -39075,6 +39257,32 @@ export type Database = {
         | "LOGIN"
         | "LOGOUT"
       channel_type: "direct" | "group" | "channel"
+      custom_field_form_context:
+        | "employee_profile"
+        | "employee_create"
+        | "leave_request"
+        | "job_requisition"
+        | "job_application"
+        | "performance_review"
+        | "training_request"
+        | "expense_claim"
+        | "grievance"
+        | "onboarding_task"
+        | "position"
+        | "department"
+        | "company"
+      custom_field_type:
+        | "text"
+        | "number"
+        | "date"
+        | "boolean"
+        | "select"
+        | "multi_select"
+        | "textarea"
+        | "email"
+        | "phone"
+        | "url"
+        | "currency"
       gl_account_type: "asset" | "liability" | "equity" | "revenue" | "expense"
       gl_posting_status: "draft" | "pending" | "posted" | "reversed" | "failed"
       goal_level: "company" | "department" | "team" | "individual"
@@ -39292,6 +39500,34 @@ export const Constants = {
         "LOGOUT",
       ],
       channel_type: ["direct", "group", "channel"],
+      custom_field_form_context: [
+        "employee_profile",
+        "employee_create",
+        "leave_request",
+        "job_requisition",
+        "job_application",
+        "performance_review",
+        "training_request",
+        "expense_claim",
+        "grievance",
+        "onboarding_task",
+        "position",
+        "department",
+        "company",
+      ],
+      custom_field_type: [
+        "text",
+        "number",
+        "date",
+        "boolean",
+        "select",
+        "multi_select",
+        "textarea",
+        "email",
+        "phone",
+        "url",
+        "currency",
+      ],
       gl_account_type: ["asset", "liability", "equity", "revenue", "expense"],
       gl_posting_status: ["draft", "pending", "posted", "reversed", "failed"],
       goal_level: ["company", "department", "team", "individual"],
