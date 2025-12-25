@@ -230,6 +230,24 @@ export function useGoalCheckIns(goalId?: string) {
     }
   }, []);
 
+  // Get pending/requested check-ins for employee
+  const getRequestedCheckIns = useCallback(async (employeeId: string): Promise<GoalCheckIn[]> => {
+    try {
+      const { data, error } = await supabase
+        .from("goal_check_ins")
+        .select("*")
+        .eq("employee_id", employeeId)
+        .eq("status", "pending")
+        .order("check_in_date", { ascending: true });
+
+      if (error) throw error;
+      return (data || []) as GoalCheckIn[];
+    } catch (error) {
+      console.error("Error fetching requested check-ins:", error);
+      return [];
+    }
+  }, []);
+
   return {
     checkIns,
     loading,
@@ -241,5 +259,6 @@ export function useGoalCheckIns(goalId?: string) {
     submitManagerReview,
     getOverdueCheckIns,
     getPendingManagerReviews,
+    getRequestedCheckIns,
   };
 }
