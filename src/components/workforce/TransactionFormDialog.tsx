@@ -710,16 +710,61 @@ export function TransactionFormDialog({
               <Switch
                 checked={formData.adjust_continuous_service || false}
                 onCheckedChange={(checked) =>
-                  setFormData({ ...formData, adjust_continuous_service: checked })
+                  setFormData({ 
+                    ...formData, 
+                    adjust_continuous_service: checked,
+                    continuous_service_date: checked ? formData.continuous_service_date : undefined
+                  })
                 }
               />
               <div>
                 <Label>{t("workforce.modules.transactions.form.rehire.adjustContinuousService", "Adjust Continuous Service Date")}</Label>
                 <p className="text-xs text-muted-foreground">
-                  {t("workforce.modules.transactions.form.rehire.adjustContinuousServiceDescription", "Enable to reset continuous service date to the rehire date")}
+                  {t("workforce.modules.transactions.form.rehire.adjustContinuousServiceDescription", "Enable to specify a continuous service date to recover previous service")}
                 </p>
               </div>
             </div>
+            {formData.adjust_continuous_service && (
+              <div className="space-y-2 ml-6 pl-4 border-l-2 border-primary/30">
+                <Label>{t("workforce.modules.transactions.form.rehire.continuousServiceDate", "Continuous Service Date")}</Label>
+                <p className="text-xs text-muted-foreground mb-2">
+                  {t("workforce.modules.transactions.form.rehire.continuousServiceDateDescription", "Set a date before the rehire date to recover previous service time")}
+                </p>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "w-full justify-start text-left font-normal",
+                        !formData.continuous_service_date && "text-muted-foreground"
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {formData.continuous_service_date
+                        ? formatDateForDisplay(formData.continuous_service_date, "PPP")
+                        : t("workforce.modules.transactions.form.selectDate")}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0 pointer-events-auto">
+                    <Calendar
+                      mode="single"
+                      selected={formData.continuous_service_date ? new Date(formData.continuous_service_date) : undefined}
+                      onSelect={(date) =>
+                        setFormData({
+                          ...formData,
+                          continuous_service_date: date ? toDateString(date) : undefined,
+                        })
+                      }
+                      disabled={(date) => {
+                        const effectiveDate = formData.effective_date ? new Date(formData.effective_date) : new Date();
+                        return date >= effectiveDate;
+                      }}
+                      className="pointer-events-auto"
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+            )}
           </>
         );
 

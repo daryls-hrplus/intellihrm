@@ -11045,6 +11045,7 @@ export type Database = {
           adjust_continuous_service: boolean | null
           company_id: string | null
           confirmation_date: string | null
+          continuous_service_date: string | null
           contract_type_id: string | null
           created_at: string
           created_by: string
@@ -11097,6 +11098,7 @@ export type Database = {
           adjust_continuous_service?: boolean | null
           company_id?: string | null
           confirmation_date?: string | null
+          continuous_service_date?: string | null
           contract_type_id?: string | null
           created_at?: string
           created_by: string
@@ -11149,6 +11151,7 @@ export type Database = {
           adjust_continuous_service?: boolean | null
           company_id?: string | null
           confirmation_date?: string | null
+          continuous_service_date?: string | null
           contract_type_id?: string | null
           created_at?: string
           created_by?: string
