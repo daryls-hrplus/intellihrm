@@ -18,6 +18,7 @@ import {
   Bell,
   RefreshCw,
   Link2,
+  ClipboardCheck,
 } from "lucide-react";
 import { differenceInDays, isPast } from "date-fns";
 import { formatDateForDisplay } from "@/utils/dateUtils";
@@ -52,6 +53,8 @@ interface TeamGoalCardProps {
   onSendReminder: (goal: Goal) => void;
   onRequestUpdate: (goal: Goal) => void;
   onManageDependencies?: (goal: Goal) => void;
+  onReviewCheckIn?: (goal: Goal) => void;
+  pendingCheckInCount?: number;
 }
 
 const statusColors: Record<GoalStatus, string> = {
@@ -71,6 +74,8 @@ export function TeamGoalCard({
   onSendReminder,
   onRequestUpdate,
   onManageDependencies,
+  onReviewCheckIn,
+  pendingCheckInCount = 0,
 }: TeamGoalCardProps) {
   const isOverdue = goal.due_date && isPast(new Date(goal.due_date)) && goal.status !== "completed";
   const daysUntilDue = goal.due_date ? differenceInDays(new Date(goal.due_date), new Date()) : null;
@@ -125,6 +130,17 @@ export function TeamGoalCard({
                   <Eye className="mr-2 h-4 w-4" />
                   View Details
                 </DropdownMenuItem>
+                {onReviewCheckIn && (
+                  <DropdownMenuItem onClick={() => onReviewCheckIn(goal)}>
+                    <ClipboardCheck className="mr-2 h-4 w-4" />
+                    Review Check-in
+                    {pendingCheckInCount > 0 && (
+                      <Badge variant="destructive" className="ml-auto text-xs h-5 w-5 p-0 flex items-center justify-center">
+                        {pendingCheckInCount}
+                      </Badge>
+                    )}
+                  </DropdownMenuItem>
+                )}
                 <DropdownMenuItem onClick={() => onUpdateProgress(goal)}>
                   <RefreshCw className="mr-2 h-4 w-4" />
                   Update Progress

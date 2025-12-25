@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   Select,
   SelectContent,
@@ -13,6 +14,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   Target,
   TrendingUp,
@@ -26,6 +34,12 @@ import {
   BarChart3,
   X,
   Download,
+  ClipboardCheck,
+  Flag,
+  History,
+  MoreVertical,
+  Info,
+  Clock,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -36,6 +50,10 @@ import { GoalCommentsDialog } from "@/components/performance/GoalCommentsDialog"
 import { ContactManagerDialog } from "@/components/performance/ContactManagerDialog";
 import { GoalDialog } from "@/components/performance/GoalDialog";
 import { GoalsAnalyticsDashboard } from "@/components/performance/GoalsAnalyticsDashboard";
+import { GoalCheckInDialog } from "@/components/performance/GoalCheckInDialog";
+import { GoalMilestonesManager } from "@/components/performance/GoalMilestonesManager";
+import { CheckInHistoryTimeline } from "@/components/performance/CheckInHistoryTimeline";
+import { useGoalCheckIns } from "@/hooks/useGoalCheckIns";
 import { toast } from "sonner";
 import { useLanguage } from "@/hooks/useLanguage";
 
@@ -80,6 +98,14 @@ export default function MyGoalsPage() {
   const [contactManagerOpen, setContactManagerOpen] = useState(false);
   const [createGoalOpen, setCreateGoalOpen] = useState(false);
   const [showAnalytics, setShowAnalytics] = useState(true);
+  
+  // Check-in, Milestones, History dialogs
+  const [checkInDialogOpen, setCheckInDialogOpen] = useState(false);
+  const [milestonesDialogOpen, setMilestonesDialogOpen] = useState(false);
+  const [historyDialogOpen, setHistoryDialogOpen] = useState(false);
+  
+  const { getOverdueCheckIns } = useGoalCheckIns();
+  const [pendingCheckIns, setPendingCheckIns] = useState<Record<string, { dueDate: string | null; daysToDue: number | null }>>({});
 
   const fetchGoals = async () => {
     if (!user?.id) return;
@@ -103,7 +129,36 @@ export default function MyGoalsPage() {
 
   useEffect(() => {
     fetchGoals();
+    fetchPendingCheckIns();
   }, [user?.id]);
+  
+  const fetchPendingCheckIns = async () => {
+    if (!user?.id) return;
+    
+    try {
+      // Get check-in schedules for user's goals
+      const { data: schedules } = await supabase
+        .from("goal_check_in_schedules")
+        .select("goal_id, next_check_in_date")
+        .eq("is_active", true);
+      
+      if (schedules) {
+        const checkInDates: Record<string, { dueDate: string | null; daysToDue: number | null }> = {};
+        schedules.forEach((s) => {
+          if (s.next_check_in_date) {
+            const daysToDue = differenceInDays(new Date(s.next_check_in_date), new Date());
+            checkInDates[s.goal_id] = { 
+              dueDate: s.next_check_in_date, 
+              daysToDue 
+            };
+          }
+        });
+        setPendingCheckIns(checkInDates);
+      }
+    } catch (error) {
+      console.error("Error fetching pending check-ins:", error);
+    }
+  };
 
   // Filtered goals with overdue detection
   const filteredGoals = useMemo(() => {
@@ -158,6 +213,21 @@ export default function MyGoalsPage() {
   const handleContactManager = (goal: Goal) => {
     setSelectedGoal(goal);
     setContactManagerOpen(true);
+  };
+  
+  const handleCheckIn = (goal: Goal) => {
+    setSelectedGoal(goal);
+    setCheckInDialogOpen(true);
+  };
+  
+  const handleViewMilestones = (goal: Goal) => {
+    setSelectedGoal(goal);
+    setMilestonesDialogOpen(true);
+  };
+  
+  const handleViewHistory = (goal: Goal) => {
+    setSelectedGoal(goal);
+    setHistoryDialogOpen(true);
   };
 
   const handleExport = () => {
@@ -258,6 +328,17 @@ export default function MyGoalsPage() {
         {/* Analytics Dashboard */}
         {showAnalytics && goals.length > 0 && (
           <GoalsAnalyticsDashboard goals={goals} compact />
+        )}
+        
+        {/* Progress ≠ Rating Guidance */}
+        {goals.length > 0 && (
+          <Alert>
+            <Info className="h-4 w-4" />
+            <AlertDescription>
+              <strong>Progress ≠ Rating:</strong> Goal progress tracks your journey toward targets. 
+              Final performance ratings are determined during formal reviews considering multiple factors.
+            </AlertDescription>
+          </Alert>
         )}
 
         {/* Filters */}
@@ -376,7 +457,7 @@ export default function MyGoalsPage() {
                             {goal.description}
                           </p>
                         )}
-                        <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                        <div className="flex items-center gap-4 text-sm text-muted-foreground flex-wrap">
                           {goal.due_date && (
                             <span className={`flex items-center gap-1 ${isOverdue ? "text-warning font-medium" : ""}`}>
                               <Calendar className="h-3.5 w-3.5" />
@@ -395,28 +476,35 @@ export default function MyGoalsPage() {
                               {goal.unit_of_measure}
                             </span>
                           )}
+                          {/* Check-in Due Date Indicator */}
+                          {pendingCheckIns[goal.id] && pendingCheckIns[goal.id].daysToDue !== null && (
+                            <Badge 
+                              variant={pendingCheckIns[goal.id].daysToDue! <= 0 ? "destructive" : pendingCheckIns[goal.id].daysToDue! <= 3 ? "outline" : "secondary"}
+                              className={`flex items-center gap-1 ${pendingCheckIns[goal.id].daysToDue! <= 3 ? "border-warning text-warning" : ""}`}
+                            >
+                              <Clock className="h-3 w-3" />
+                              {pendingCheckIns[goal.id].daysToDue! <= 0 
+                                ? "Check-in overdue" 
+                                : `Check-in in ${pendingCheckIns[goal.id].daysToDue} days`}
+                            </Badge>
+                          )}
                         </div>
                       </div>
 
                       <div className="flex items-center gap-2 flex-wrap">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleViewComments(goal)}
-                        >
-                          <MessageSquare className="h-4 w-4 mr-1" />
-                          Comments
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleContactManager(goal)}
-                        >
-                          <UserCircle className="h-4 w-4 mr-1" />
-                          Contact Manager
-                        </Button>
+                        {/* Primary Actions */}
                         {isEditable && (
                           <Button
+                            size="sm"
+                            onClick={() => handleCheckIn(goal)}
+                          >
+                            <ClipboardCheck className="h-4 w-4 mr-1" />
+                            Check-in
+                          </Button>
+                        )}
+                        {isEditable && (
+                          <Button
+                            variant="outline"
                             size="sm"
                             onClick={() => handleUpdateProgress(goal)}
                           >
@@ -424,6 +512,34 @@ export default function MyGoalsPage() {
                             Update Progress
                           </Button>
                         )}
+                        
+                        {/* More Actions Dropdown */}
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon" className="h-8 w-8">
+                              <MoreVertical className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={() => handleViewMilestones(goal)}>
+                              <Flag className="mr-2 h-4 w-4" />
+                              View Milestones
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleViewHistory(goal)}>
+                              <History className="mr-2 h-4 w-4" />
+                              Progress History
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem onClick={() => handleViewComments(goal)}>
+                              <MessageSquare className="mr-2 h-4 w-4" />
+                              Comments
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleContactManager(goal)}>
+                              <UserCircle className="mr-2 h-4 w-4" />
+                              Contact Manager
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </div>
                     </div>
 
@@ -466,7 +582,56 @@ export default function MyGoalsPage() {
               onOpenChange={setContactManagerOpen}
               goal={selectedGoal}
             />
+            <GoalCheckInDialog
+              open={checkInDialogOpen}
+              onOpenChange={setCheckInDialogOpen}
+              goal={selectedGoal as any}
+              onSuccess={() => {
+                fetchGoals();
+                fetchPendingCheckIns();
+              }}
+            />
           </>
+        )}
+        
+        {/* Milestones Dialog */}
+        {selectedGoal && milestonesDialogOpen && (
+          <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm flex items-center justify-center p-4">
+            <Card className="w-full max-w-3xl max-h-[80vh] overflow-hidden">
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="flex items-center gap-2">
+                  <Flag className="h-5 w-5" />
+                  Milestones: {selectedGoal.title}
+                </CardTitle>
+                <Button variant="ghost" size="icon" onClick={() => setMilestonesDialogOpen(false)}>
+                  <X className="h-4 w-4" />
+                </Button>
+              </CardHeader>
+              <CardContent className="overflow-auto max-h-[60vh]">
+                <GoalMilestonesManager goalId={selectedGoal.id} />
+              </CardContent>
+            </Card>
+          </div>
+        )}
+        
+        {/* History Dialog */}
+        {selectedGoal && historyDialogOpen && (
+          <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm flex items-center justify-center p-4">
+            <Card className="w-full max-w-2xl max-h-[80vh] overflow-hidden">
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="flex items-center gap-2">
+                  <History className="h-5 w-5" />
+                  Progress History: {selectedGoal.title}
+                </CardTitle>
+                <Button variant="ghost" size="icon" onClick={() => setHistoryDialogOpen(false)}>
+                  <X className="h-4 w-4" />
+                </Button>
+              </CardHeader>
+              <CardContent className="overflow-auto max-h-[60vh]">
+                <CheckInHistoryTimeline goalId={selectedGoal.id} showChart />
+              </CardContent>
+            </Card>
+          </div>
         )}
 
         <GoalDialog
