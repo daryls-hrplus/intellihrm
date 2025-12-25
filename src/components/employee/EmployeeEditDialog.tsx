@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import {
   Dialog,
   DialogContent,
@@ -23,10 +23,11 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuditLog } from "@/hooks/useAuditLog";
 import { toast } from "sonner";
-import { Loader2, HelpCircle } from "lucide-react";
+import { Loader2, HelpCircle, Upload, AlertTriangle } from "lucide-react";
 import { CustomFieldsRenderer } from "@/components/custom-fields/CustomFieldsRenderer";
 import { useCustomFields } from "@/hooks/useCustomFields";
 
@@ -106,7 +107,9 @@ export function EmployeeEditDialog({
   const [seniorityDate, setSeniorityDate] = useState("");
   const [adjustedServiceDate, setAdjustedServiceDate] = useState("");
   const [saving, setSaving] = useState(false);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [customFieldValues, setCustomFieldValues] = useState<Record<string, string | number | boolean | string[] | null>>({});
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const { logAction } = useAuditLog();
 
   const { fields, values, saveValues } = useCustomFields({
@@ -145,6 +148,60 @@ export function EmployeeEditDialog({
       [fieldId]: value,
     }));
   }, []);
+
+  const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file || !employee) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      toast.error("Please select an image file");
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("Image size must be less than 5MB");
+      return;
+    }
+
+    setUploadingAvatar(true);
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${employee.id}-${Date.now()}.${fileExt}`;
+      const filePath = `avatars/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(filePath, file, { upsert: true });
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(filePath);
+
+      setAvatarUrl(publicUrl);
+      toast.success("Avatar uploaded successfully");
+    } catch (error) {
+      console.error("Error uploading avatar:", error);
+      toast.error("Failed to upload avatar. Please ensure storage is configured.");
+    } finally {
+      setUploadingAvatar(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  };
+
+  const getInitials = (name: string) => {
+    return name
+      .split(' ')
+      .map(n => n[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
+  };
 
   const handleSave = async () => {
     if (!employee) return;
@@ -256,13 +313,56 @@ export function EmployeeEditDialog({
             </p>
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="avatarUrl">Avatar URL</Label>
-            <Input
-              id="avatarUrl"
-              value={avatarUrl}
-              onChange={(e) => setAvatarUrl(e.target.value)}
-              placeholder="https://example.com/avatar.jpg"
-            />
+            <Label>Employee Avatar</Label>
+            <div className="flex items-center gap-4">
+              <Avatar className="h-16 w-16">
+                <AvatarImage src={avatarUrl} alt={fullName} />
+                <AvatarFallback className="text-lg">
+                  {fullName ? getInitials(fullName) : '?'}
+                </AvatarFallback>
+              </Avatar>
+              <div className="flex flex-col gap-2">
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={handleAvatarUpload}
+                  accept="image/*"
+                  className="hidden"
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={uploadingAvatar}
+                >
+                  {uploadingAvatar ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Uploading...
+                    </>
+                  ) : (
+                    <>
+                      <Upload className="mr-2 h-4 w-4" />
+                      Upload Photo
+                    </>
+                  )}
+                </Button>
+                <p className="text-xs text-muted-foreground">
+                  JPG, PNG, or GIF. Max 5MB.
+                </p>
+              </div>
+            </div>
+            <div className="mt-2">
+              <Label htmlFor="avatarUrl" className="text-xs text-muted-foreground">Or enter URL directly</Label>
+              <Input
+                id="avatarUrl"
+                value={avatarUrl}
+                onChange={(e) => setAvatarUrl(e.target.value)}
+                placeholder="https://example.com/avatar.jpg"
+                className="mt-1"
+              />
+            </div>
           </div>
           <div className="grid gap-2">
             <Label htmlFor="timezone">Timezone</Label>
@@ -326,9 +426,22 @@ export function EmployeeEditDialog({
           </div>
 
           <Separator className="my-2" />
-          <h4 className="text-sm font-medium">Employment Dates</h4>
-          <p className="text-xs text-muted-foreground mb-2">
-            These dates are used for leave balance calculations. Priority: Adjusted Service → Continuous Service → Seniority → Start Date → First Hire.
+          <div className="flex items-center justify-between">
+            <h4 className="text-sm font-medium">Employment Dates</h4>
+          </div>
+          <div className="flex items-start gap-2 p-3 rounded-md bg-destructive/10 border border-destructive/20">
+            <AlertTriangle className="h-4 w-4 text-destructive mt-0.5 flex-shrink-0" />
+            <div>
+              <p className="text-xs text-destructive font-medium">
+                These dates should be updated via Employee Transactions
+              </p>
+              <p className="text-xs text-destructive/80 mt-1">
+                Use Hire, Rehire, or other transaction types to properly manage employment dates with full audit trail and workflow approval.
+              </p>
+            </div>
+          </div>
+          <p className="text-xs text-muted-foreground">
+            Priority for calculations: Adjusted Service → Continuous Service → Seniority → Start Date → First Hire.
           </p>
           
           <TooltipProvider>
