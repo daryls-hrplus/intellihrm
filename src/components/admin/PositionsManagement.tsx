@@ -1155,6 +1155,9 @@ export function PositionsManagement({ companyId }: PositionsManagementProps) {
                     <SelectItem value="salary_grade">Salary Grade (Min/Max Ranges)</SelectItem>
                     <SelectItem value="spinal_point">Spinal Point System</SelectItem>
                     <SelectItem value="hybrid">Hybrid (Both Systems)</SelectItem>
+                    <SelectItem value="commission_based">Commission Based</SelectItem>
+                    <SelectItem value="hourly_rate">Hourly Rate</SelectItem>
+                    <SelectItem value="direct_pay">Direct Pay</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
