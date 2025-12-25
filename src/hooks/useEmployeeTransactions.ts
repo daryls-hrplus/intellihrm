@@ -346,6 +346,8 @@ export function useEmployeeTransactions() {
         const profileUpdate: Record<string, string | null> = {
           start_date: data.effective_date || null,
           last_hire_date: data.effective_date || null,
+          // Set employment_status to "on_probation" if probation_end_date is set, otherwise "permanent"
+          employment_status: data.probation_end_date ? 'on_probation' : 'permanent',
         };
 
         // Only set first_hire_date if not already set
@@ -408,6 +410,8 @@ export function useEmployeeTransactions() {
           const profileUpdate: Record<string, string | null> = {
             start_date: data.effective_date || null,
             last_hire_date: data.effective_date || null,
+            // Set employment_status to "on_probation" if probation_end_date is set, otherwise "permanent"
+            employment_status: data.probation_end_date ? 'on_probation' : 'permanent',
           };
 
           // Set continuous_service_date if adjust_continuous_service is true
