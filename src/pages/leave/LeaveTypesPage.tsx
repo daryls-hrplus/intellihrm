@@ -33,13 +33,24 @@ import {
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
-import { Plus, Pencil, Calendar } from "lucide-react";
+import { Plus, Pencil, Calendar, Trash2 } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 export default function LeaveTypesPage() {
   const { t } = useLanguage();
   const { company } = useAuth();
   const { selectedCompanyId, setSelectedCompanyId } = useLeaveCompanyFilter();
-  const { leaveTypes, loadingTypes, createLeaveType, updateLeaveType } = useLeaveManagement(selectedCompanyId);
+  const { leaveTypes, loadingTypes, createLeaveType, updateLeaveType, deleteLeaveType } = useLeaveManagement(selectedCompanyId);
   const [isOpen, setIsOpen] = useState(false);
   const [editingType, setEditingType] = useState<LeaveType | null>(null);
   const [formData, setFormData] = useState({
@@ -414,9 +425,35 @@ export default function LeaveTypesPage() {
                       </Badge>
                     </TableCell>
                     <TableCell>
-                      <Button variant="ghost" size="icon" onClick={() => handleEdit(type)}>
-                        <Pencil className="h-4 w-4" />
-                      </Button>
+                      <div className="flex items-center gap-1">
+                        <Button variant="ghost" size="icon" onClick={() => handleEdit(type)}>
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive">
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>{t("leave.leaveTypes.deleteTitle")}</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                {t("leave.leaveTypes.deleteDescription", { name: type.name })}
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>{t("leave.common.cancel")}</AlertDialogCancel>
+                              <AlertDialogAction
+                                onClick={() => deleteLeaveType.mutateAsync(type.id)}
+                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                              >
+                                {t("leave.common.delete")}
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))
