@@ -71,7 +71,7 @@ interface Position {
   pay_type: string;
   employment_status: string;
   employment_type: string;
-  flsa_status: string;
+  overtime_status: string;
   default_scheduled_hours: number | null;
   department?: {
     name: string;
@@ -231,7 +231,7 @@ export function PositionsManagement({ companyId }: PositionsManagementProps) {
   const [formPayType, setFormPayType] = useState("SALARIED");
   const [formEmploymentStatus, setFormEmploymentStatus] = useState("ACTIVE");
   const [formEmploymentType, setFormEmploymentType] = useState("FULL_TIME");
-  const [formFlsaStatus, setFormFlsaStatus] = useState("EXEMPT");
+  const [formOvertimeStatus, setFormOvertimeStatus] = useState("EXEMPT");
   const [formDefaultScheduledHours, setFormDefaultScheduledHours] = useState("");
 
   // Assignment dialog state
@@ -297,8 +297,9 @@ export function PositionsManagement({ companyId }: PositionsManagementProps) {
           const reportsToPos = posData?.find(p => p.id === pos.reports_to_position_id);
           return {
             ...pos,
+            overtime_status: (pos as any).overtime_status || 'EXEMPT',
             reports_to: reportsToPos ? { title: reportsToPos.title, code: reportsToPos.code } : null
-          };
+          } as Position;
         });
         setPositions(positionsWithReportsTo);
 
@@ -436,7 +437,7 @@ export function PositionsManagement({ companyId }: PositionsManagementProps) {
     setFormPayType("SALARIED");
     setFormEmploymentStatus("ACTIVE");
     setFormEmploymentType("FULL_TIME");
-    setFormFlsaStatus("EXEMPT");
+    setFormOvertimeStatus("EXEMPT");
     setFormDefaultScheduledHours("");
     setPositionDialogOpen(true);
   };
@@ -461,7 +462,7 @@ export function PositionsManagement({ companyId }: PositionsManagementProps) {
     setFormPayType(position.pay_type || "SALARIED");
     setFormEmploymentStatus(position.employment_status || "ACTIVE");
     setFormEmploymentType(position.employment_type || "FULL_TIME");
-    setFormFlsaStatus(position.flsa_status || "EXEMPT");
+    setFormOvertimeStatus(position.overtime_status || "EXEMPT");
     setFormDefaultScheduledHours(position.default_scheduled_hours?.toString() || "");
     setPositionDialogOpen(true);
   };
@@ -503,7 +504,7 @@ export function PositionsManagement({ companyId }: PositionsManagementProps) {
         pay_type: formPayType,
         employment_status: formEmploymentStatus,
         employment_type: formEmploymentType,
-        flsa_status: formFlsaStatus,
+        overtime_status: formOvertimeStatus,
         default_scheduled_hours: formDefaultScheduledHours ? parseFloat(formDefaultScheduledHours) : null,
       };
 
@@ -1095,8 +1096,8 @@ export function PositionsManagement({ companyId }: PositionsManagementProps) {
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label>FLSA Status</Label>
-                  <Select value={formFlsaStatus} onValueChange={setFormFlsaStatus}>
+                  <Label>Overtime Status</Label>
+                  <Select value={formOvertimeStatus} onValueChange={setFormOvertimeStatus}>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
