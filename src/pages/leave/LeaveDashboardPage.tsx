@@ -70,11 +70,16 @@ export default function LeaveDashboardPage() {
 
   // Pass undefined for "all" to fetch all companies, otherwise pass the selected company ID
   const effectiveCompanyId = selectedCompanyId === "all" ? undefined : (selectedCompanyId || company?.id);
-  const { leaveBalances, allLeaveRequests, allLeaveBalances } = useLeaveManagement(effectiveCompanyId);
+  const {
+    leaveBalances = [],
+    allLeaveRequests = [],
+    allLeaveBalances = [],
+  } = useLeaveManagement(effectiveCompanyId);
   
-  const pendingCount = allLeaveRequests.filter(r => r.status === "pending").length;
-  const approvedThisYear = allLeaveRequests.filter(r => r.status === "approved").length;
-  const displayBalances = selectedCompanyId === "all" ? allLeaveBalances : leaveBalances;
+  const pendingCount = (allLeaveRequests ?? []).filter(r => r.status === "pending").length;
+  const approvedThisYear = (allLeaveRequests ?? []).filter(r => r.status === "approved").length;
+  const displayBalancesRaw = selectedCompanyId === "all" ? (allLeaveBalances ?? []) : (leaveBalances ?? []);
+  const displayBalances = Array.isArray(displayBalancesRaw) ? displayBalancesRaw : [];
   const totalBalance = displayBalances.reduce((sum, b) => sum + (b.current_balance || 0), 0);
 
   // Define all modules
