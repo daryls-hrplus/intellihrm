@@ -14,6 +14,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Plus, Search, AlertTriangle, Eye, CheckCircle, Clock } from "lucide-react";
 import { useState } from "react";
 import { format } from "date-fns";
+import { formatDateForDisplay } from "@/utils/dateUtils";
 
 export default function HSENearMissPage() {
   const { t } = useLanguage();
@@ -128,7 +129,7 @@ export default function HSENearMissPage() {
                   filteredNearMisses?.map((nm) => (
                     <TableRow key={nm.id}>
                       <TableCell className="font-medium">{nm.report_number}</TableCell>
-                      <TableCell>{nm.report_date ? format(new Date(nm.report_date), "MMM dd, yyyy") : "-"}</TableCell>
+                      <TableCell>{nm.report_date ? formatDateForDisplay(nm.report_date, "MMM dd, yyyy") : "-"}</TableCell>
                       <TableCell>{nm.hazard_type || "-"}</TableCell>
                       <TableCell className="max-w-xs truncate">{nm.description || "-"}</TableCell>
                       <TableCell>{getStatusBadge(nm.status)}</TableCell>

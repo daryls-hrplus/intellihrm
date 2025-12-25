@@ -32,6 +32,7 @@ import { useOnboarding, OnboardingInstance } from '@/hooks/useOnboarding';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { format, differenceInDays } from 'date-fns';
+import { formatDateForDisplay } from "@/utils/dateUtils";
 
 export default function MssOnboardingPage() {
   const { t } = useLanguage();
@@ -248,7 +249,7 @@ export default function MssOnboardingPage() {
                         <TableCell>
                           <div className="flex items-center gap-1 text-sm">
                             <Calendar className="h-3 w-3" />
-                            {format(new Date(instance.start_date), 'MMM d, yyyy')}
+                            {formatDateForDisplay(instance.start_date)}
                           </div>
                         </TableCell>
                         <TableCell>

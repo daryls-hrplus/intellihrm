@@ -26,6 +26,7 @@ import { useLanguage } from "@/hooks/useLanguage";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
+import { formatDateForDisplay } from "@/utils/dateUtils";
 import { Skeleton } from "@/components/ui/skeleton";
 import { 
   Siren, 
@@ -246,8 +247,8 @@ export default function HSEEmergencyResponsePage() {
                           <TableCell className="font-medium">{plan.name}</TableCell>
                           <TableCell>{plan.emergency_type || "-"}</TableCell>
                           <TableCell>{plan.assembly_points || "-"}</TableCell>
-                          <TableCell>{plan.effective_date ? format(new Date(plan.effective_date), "MMM d, yyyy") : "-"}</TableCell>
-                          <TableCell>{plan.review_date ? format(new Date(plan.review_date), "MMM d, yyyy") : "-"}</TableCell>
+                          <TableCell>{plan.effective_date ? formatDateForDisplay(plan.effective_date) : "-"}</TableCell>
+                          <TableCell>{plan.review_date ? formatDateForDisplay(plan.review_date) : "-"}</TableCell>
                           <TableCell>{getStatusBadge(plan.status)}</TableCell>
                           <TableCell>
                             <Button variant="ghost" size="sm">{t("common.view")}</Button>
@@ -299,8 +300,8 @@ export default function HSEEmergencyResponsePage() {
                         <TableRow key={drill.id}>
                           <TableCell className="font-medium">{drill.drill_type || "-"}</TableCell>
                           <TableCell>{(drill as any).hse_emergency_plans?.name || "-"}</TableCell>
-                          <TableCell>{drill.scheduled_date ? format(new Date(drill.scheduled_date), "MMM d, yyyy") : "-"}</TableCell>
-                          <TableCell>{drill.actual_date ? format(new Date(drill.actual_date), "MMM d, yyyy") : "-"}</TableCell>
+                          <TableCell>{drill.scheduled_date ? formatDateForDisplay(drill.scheduled_date) : "-"}</TableCell>
+                          <TableCell>{drill.actual_date ? formatDateForDisplay(drill.actual_date) : "-"}</TableCell>
                           <TableCell>{drill.evacuation_time_seconds ? `${Math.round(drill.evacuation_time_seconds / 60)} min` : "-"}</TableCell>
                           <TableCell>{drill.status ? getDrillResultBadge(drill.status) : "-"}</TableCell>
                           <TableCell>

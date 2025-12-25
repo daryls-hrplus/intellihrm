@@ -31,6 +31,7 @@ import {
 import { useOffboarding, OffboardingInstance } from '@/hooks/useOffboarding';
 import { useAuth } from '@/contexts/AuthContext';
 import { format, differenceInDays } from 'date-fns';
+import { formatDateForDisplay } from "@/utils/dateUtils";
 
 export default function MssOffboardingPage() {
   const { t } = useLanguage();
@@ -265,7 +266,7 @@ export default function MssOffboardingPage() {
                         <TableCell>
                           <div className="flex items-center gap-1 text-sm">
                             <Calendar className="h-3 w-3" />
-                            {format(new Date(instance.last_working_date), 'MMM d, yyyy')}
+                            {formatDateForDisplay(instance.last_working_date)}
                           </div>
                         </TableCell>
                         <TableCell>

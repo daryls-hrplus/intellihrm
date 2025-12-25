@@ -21,6 +21,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { format } from "date-fns";
+import { formatDateForDisplay } from "@/utils/dateUtils";
 
 interface LetterTemplate {
   id: string;

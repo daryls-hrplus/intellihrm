@@ -18,6 +18,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { format } from "date-fns";
+import { formatDateForDisplay } from "@/utils/dateUtils";
 import type { WorkflowTemplate, WorkflowStep, WorkflowCategory } from "@/hooks/useWorkflow";
 
 const WORKFLOW_CATEGORIES: { value: WorkflowCategory; label: string }[] = [
@@ -336,12 +337,12 @@ export default function AdminWorkflowTemplatesPage() {
                     <Badge variant="outline">Code: {selectedTemplate.code}</Badge>
                     {selectedTemplate.start_date && (
                       <Badge variant="outline">
-                        From: {format(new Date(selectedTemplate.start_date), "MMM d, yyyy")}
+                        From: {formatDateForDisplay(selectedTemplate.start_date)}
                       </Badge>
                     )}
                     {selectedTemplate.end_date && (
                       <Badge variant="outline">
-                        Until: {format(new Date(selectedTemplate.end_date), "MMM d, yyyy")}
+                        Until: {formatDateForDisplay(selectedTemplate.end_date)}
                       </Badge>
                     )}
                     {selectedTemplate.requires_signature && (

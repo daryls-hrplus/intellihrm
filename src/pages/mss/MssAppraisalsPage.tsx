@@ -24,6 +24,7 @@ import { AppraisalCycleDialog } from "@/components/performance/AppraisalCycleDia
 import { AppraisalParticipantsManager } from "@/components/performance/AppraisalParticipantsManager";
 import { AppraisalEvaluationDialog } from "@/components/performance/AppraisalEvaluationDialog";
 import { format } from "date-fns";
+import { formatDateForDisplay } from "@/utils/dateUtils";
 
 interface AppraisalCycle {
   id: string;
@@ -371,8 +372,8 @@ export default function MssAppraisalsPage() {
                         <div>
                           <CardTitle className="text-lg">{cycle.name}</CardTitle>
                           <CardDescription>
-                            {format(new Date(cycle.start_date), "MMM d, yyyy")} -{" "}
-                            {format(new Date(cycle.end_date), "MMM d, yyyy")}
+                            {formatDateForDisplay(cycle.start_date)} -{" "}
+                            {formatDateForDisplay(cycle.end_date)}
                           </CardDescription>
                         </div>
                         <div className="flex gap-2">

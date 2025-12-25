@@ -14,6 +14,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { PayslipDocument } from "@/components/payroll/PayslipDocument";
 import { FileText, Download, Eye, Search, DollarSign, Calendar, Loader2, Filter } from "lucide-react";
 import { format, getMonth } from "date-fns";
+import { formatDateForDisplay } from "@/utils/dateUtils";
 import { useTranslation } from "react-i18next";
 import { jsPDF } from "jspdf";
 import html2canvas from "html2canvas";
@@ -412,9 +413,9 @@ export default function PayslipsPage() {
                   <TableRow key={payslip.id}>
                     <TableCell className="font-medium">{payslip.payslip_number}</TableCell>
                     <TableCell>
-                      {format(new Date(payslip.pay_period_start), "MMM d")} - {format(new Date(payslip.pay_period_end), "MMM d, yyyy")}
+                      {formatDateForDisplay(payslip.pay_period_start, "MMM d")} - {formatDateForDisplay(payslip.pay_period_end)}
                     </TableCell>
-                    <TableCell>{format(new Date(payslip.pay_date), "MMM d, yyyy")}</TableCell>
+                    <TableCell>{formatDateForDisplay(payslip.pay_date)}</TableCell>
                     <TableCell>{formatCurrency(payslip.gross_pay, payslip.currency)}</TableCell>
                     <TableCell className="text-muted-foreground">
                       -{formatCurrency(payslip.total_deductions, payslip.currency)}
