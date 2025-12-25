@@ -45,7 +45,7 @@ export default function MssOffboardingPage() {
   const [statusFilter, setStatusFilter] = useState<string>('all');
 
   const breadcrumbItems = [
-    { label: t('mss.title'), path: '/mss' },
+    { label: t('mss.title'), href: '/mss' },
     { label: t('mss.modules.offboarding.title') },
   ];
 

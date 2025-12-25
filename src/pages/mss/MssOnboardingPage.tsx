@@ -46,7 +46,7 @@ export default function MssOnboardingPage() {
   const [statusFilter, setStatusFilter] = useState<string>('all');
 
   const breadcrumbItems = [
-    { label: t('mss.title'), path: '/mss' },
+    { label: t('mss.title'), href: '/mss' },
     { label: t('mss.modules.onboarding.title') },
   ];
 

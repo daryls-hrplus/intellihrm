@@ -56,8 +56,8 @@ export default function MssEmployeeRelationsPage() {
   } = useEmployeeRelations(company?.id);
 
   const breadcrumbItems = [
-    { label: t('common.home'), path: '/' },
-    { label: t('mss.title'), path: '/mss' },
+    { label: t('common.home'), href: '/' },
+    { label: t('mss.title'), href: '/mss' },
     { label: t('mss.teamRelations.title') },
   ];
 

@@ -59,7 +59,7 @@ export default function MssPropertyPage() {
   } = usePropertyManagement(company?.id);
 
   const breadcrumbItems = [
-    { label: t('navigation.mss'), path: '/mss' },
+    { label: t('navigation.mss'), href: '/mss' },
     { label: t('mss.teamProperty.title') },
   ];
 
