@@ -16,6 +16,7 @@ import { RichTextEditor } from "@/components/intranet/RichTextEditor";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { format } from "date-fns";
+import { formatDateForDisplay } from "@/utils/dateUtils";
 import { Plus, Megaphone, Pin, Edit, Trash2 } from "lucide-react";
 
 interface Announcement {

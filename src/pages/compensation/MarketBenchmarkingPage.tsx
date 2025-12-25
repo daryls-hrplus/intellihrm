@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
+import { formatDateForDisplay } from "@/utils/dateUtils";
 import { BarChart3, Plus, Database, TrendingUp, Globe, ChevronRight, Building2 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -185,7 +186,7 @@ export default function MarketBenchmarkingPage() {
                             <TableCell className="font-medium">{source.name}</TableCell>
                             <TableCell>{source.provider || "-"}</TableCell>
                             <TableCell>{source.survey_year}</TableCell>
-                            <TableCell>{format(new Date(source.effective_date), "MMM d, yyyy")}</TableCell>
+                            <TableCell>{formatDateForDisplay(source.effective_date)}</TableCell>
                             <TableCell>
                               <Badge className={source.is_active ? "bg-emerald-500/10 text-emerald-600" : "bg-muted"}>
                                 {source.is_active ? t("compensation.statuses.active") : t("compensation.statuses.inactive")}

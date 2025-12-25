@@ -9,6 +9,7 @@ import { Clock, Plus, CheckCircle, XCircle, History, Timer, TrendingUp } from "l
 import { useCompensatoryTime } from "@/hooks/useCompensatoryTime";
 import { useAuth } from "@/contexts/AuthContext";
 import { format } from "date-fns";
+import { formatDateForDisplay } from "@/utils/dateUtils";
 import { CompTimeEarnDialog } from "@/components/leave/CompTimeEarnDialog";
 import { CompTimeUseDialog } from "@/components/leave/CompTimeUseDialog";
 import { CompTimeApprovalDialog } from "@/components/leave/CompTimeApprovalDialog";
@@ -204,13 +205,13 @@ export default function CompensatoryTimePage() {
                               {request.employee?.full_name || 'Unknown'}
                             </TableCell>
                           )}
-                          <TableCell>{format(new Date(request.work_date), 'MMM d, yyyy')}</TableCell>
+                          <TableCell>{formatDateForDisplay(request.work_date)}</TableCell>
                           <TableCell>{getWorkTypeBadge(request.work_type)}</TableCell>
                           <TableCell className="font-semibold">{request.hours_earned} hrs</TableCell>
                           <TableCell className="max-w-[200px] truncate">{request.reason}</TableCell>
                           <TableCell>{getStatusBadge(request.status)}</TableCell>
                           <TableCell>
-                            {request.expires_at ? format(new Date(request.expires_at), 'MMM d, yyyy') : '-'}
+                            {request.expires_at ? formatDateForDisplay(request.expires_at) : '-'}
                           </TableCell>
                           {isAdminOrHR && (
                             <TableCell>

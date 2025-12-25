@@ -24,6 +24,7 @@ import {
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
+import { formatDateForDisplay } from "@/utils/dateUtils";
 
 interface TeamMemberDetails {
   id: string;
@@ -359,7 +360,7 @@ export default function MssTeamMemberPage() {
                           <div>
                             <span className="text-sm font-medium">{leave.leave_type}</span>
                             <p className="text-xs text-muted-foreground">
-                              {format(new Date(leave.start_date), 'MMM d')} - {format(new Date(leave.end_date), 'MMM d, yyyy')}
+                              {formatDateForDisplay(leave.start_date, 'MMM d')} - {formatDateForDisplay(leave.end_date)}
                             </p>
                           </div>
                           {getStatusBadge(leave.status)}

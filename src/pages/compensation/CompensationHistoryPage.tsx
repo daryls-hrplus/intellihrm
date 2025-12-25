@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
+import { formatDateForDisplay } from "@/utils/dateUtils";
 import { History, Search, Plus, TrendingUp, TrendingDown, Minus, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useTranslation } from "react-i18next";
@@ -266,7 +267,7 @@ export default function CompensationHistoryPage() {
                       <TableRow key={record.id}>
                         <TableCell className="font-medium">{record.employee?.full_name}</TableCell>
                         <TableCell>{record.position?.title || "-"}</TableCell>
-                        <TableCell>{format(new Date(record.effective_date), "MMM d, yyyy")}</TableCell>
+                        <TableCell>{formatDateForDisplay(record.effective_date)}</TableCell>
                         <TableCell>{getChangeTypeBadge(record.change_type)}</TableCell>
                         <TableCell className="text-right">
                           {record.previous_salary ? `$${record.previous_salary.toLocaleString()}` : "-"}

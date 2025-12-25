@@ -35,6 +35,7 @@ import { toast } from "sonner";
 import { Plus, Loader2, AlertTriangle, Eye, Users } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { format } from "date-fns";
+import { formatDateForDisplay } from "@/utils/dateUtils";
 import { useLanguage } from "@/hooks/useLanguage";
 
 interface PIP {
@@ -272,7 +273,7 @@ export default function MssPipsPage() {
                       </Badge>
                     </TableCell>
                     <TableCell className="text-sm text-muted-foreground">
-                      {format(new Date(pip.start_date), "MMM d")} - {format(new Date(pip.end_date), "MMM d, yyyy")}
+                      {formatDateForDisplay(pip.start_date, "MMM d")} - {formatDateForDisplay(pip.end_date)}
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2">
@@ -409,8 +410,8 @@ export default function MssPipsPage() {
                 <div>
                   <Label className="text-muted-foreground">{t('mss.teamPips.period')}</Label>
                   <p>
-                    {format(new Date(selectedPip.start_date), "MMM d, yyyy")} -{" "}
-                    {format(new Date(selectedPip.end_date), "MMM d, yyyy")}
+                    {formatDateForDisplay(selectedPip.start_date)} -{" "}
+                    {formatDateForDisplay(selectedPip.end_date)}
                   </p>
                 </div>
                 <div>

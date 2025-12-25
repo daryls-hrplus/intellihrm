@@ -31,6 +31,7 @@ import { PeerNominationManager } from "@/components/performance/PeerNominationMa
 import { FeedbackFormDialog } from "@/components/performance/FeedbackFormDialog";
 import { Review360AnalyticsDashboard } from "@/components/performance/Review360AnalyticsDashboard";
 import { format } from "date-fns";
+import { formatDateForDisplay } from "@/utils/dateUtils";
 import { useLanguage } from "@/hooks/useLanguage";
 
 interface ReviewCycle {
@@ -434,8 +435,8 @@ const reviewerTypeLabels: Record<string, string> = {
                         <div>
                           <CardTitle className="text-lg">{cycle.name}</CardTitle>
                           <CardDescription>
-                            {format(new Date(cycle.start_date), "MMM d, yyyy")} -{" "}
-                            {format(new Date(cycle.end_date), "MMM d, yyyy")}
+                            {formatDateForDisplay(cycle.start_date)} -{" "}
+                            {formatDateForDisplay(cycle.end_date)}
                           </CardDescription>
                         </div>
                         <div className="flex gap-2">
