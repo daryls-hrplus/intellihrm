@@ -520,7 +520,7 @@ export function AssignmentHistoryDialog({
                   {filteredHistory.map((entry) => (
                     <TableRow key={entry.id}>
                       <TableCell className="text-sm text-muted-foreground whitespace-nowrap">
-                        {format(new Date(entry.created_at), "MMM d, yyyy")}
+                        {formatDateForDisplay(entry.created_at, "MMM d, yyyy")}
                         <br />
                         <span className="text-xs">
                           {format(new Date(entry.created_at), "HH:mm")}

@@ -38,7 +38,7 @@ import {
   User,
   Calendar,
 } from "lucide-react";
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns";
 
 interface TourWithDetails {
   id: string;
@@ -221,7 +221,7 @@ export function TourReviewPanel({ tour, open, onOpenChange }: TourReviewPanelPro
                 <Card className="bg-muted/30">
                   <CardContent className="py-3 space-y-2">
                     <div className="text-xs text-muted-foreground">
-                      Last reviewed: {format(new Date(tour.reviewed_at), "PPp")}
+                      Last reviewed: {format(parseISO(tour.reviewed_at), "PPp")}
                     </div>
                     {tour.review_notes && (
                       <div>

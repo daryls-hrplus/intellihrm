@@ -4,7 +4,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Loader2, History, ArrowRight } from "lucide-react";
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns";
 import { NUMERIC_PROFICIENCY, CEFR_PROFICIENCY } from "@/constants/languageConstants";
 
 interface LanguageHistoryModalProps {
@@ -122,7 +122,7 @@ export function LanguageHistoryModal({
                     <div className="flex items-center justify-between">
                       {getChangeTypeBadge(record.change_type)}
                       <span className="text-xs text-muted-foreground">
-                        {format(new Date(record.changed_at), "PPp")}
+                        {format(parseISO(record.changed_at), "PPp")}
                       </span>
                     </div>
 

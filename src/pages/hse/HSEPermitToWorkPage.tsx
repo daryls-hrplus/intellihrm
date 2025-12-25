@@ -261,8 +261,8 @@ export default function HSEPermitToWorkPage() {
                           <TableCell>{(permit.hse_permit_types as any)?.name || "-"}</TableCell>
                           <TableCell className="max-w-xs truncate">{permit.work_description || "-"}</TableCell>
                           <TableCell>{permit.location || "-"}</TableCell>
-                          <TableCell>{permit.start_datetime ? format(new Date(permit.start_datetime), "MMM d, yyyy") : "-"}</TableCell>
-                          <TableCell>{permit.end_datetime ? format(new Date(permit.end_datetime), "MMM d, yyyy") : "-"}</TableCell>
+                          <TableCell>{permit.start_datetime ? formatDateForDisplay(permit.start_datetime, "MMM d, yyyy") : "-"}</TableCell>
+                          <TableCell>{permit.end_datetime ? formatDateForDisplay(permit.end_datetime, "MMM d, yyyy") : "-"}</TableCell>
                           <TableCell>{getStatusBadge(permit.status)}</TableCell>
                           <TableCell>
                             <Button variant="ghost" size="sm">{t("common.view")}</Button>

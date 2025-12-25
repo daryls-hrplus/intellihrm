@@ -14,7 +14,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
-import { format } from "date-fns";
+import { formatDateForDisplay } from "@/utils/dateUtils";
 
 interface Dependent {
   id: string;
@@ -234,7 +234,7 @@ export default function MyDependentsPage() {
                           {dep.date_of_birth && (
                             <span className="flex items-center gap-1">
                               <Calendar className="h-3 w-3" />
-                              DOB: {format(new Date(dep.date_of_birth), "MMM d, yyyy")}
+                              DOB: {formatDateForDisplay(dep.date_of_birth, "MMM d, yyyy")}
                             </span>
                           )}
                           {dep.gender && <span>Gender: {dep.gender}</span>}

@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { FileText, Search, ChevronRight } from "lucide-react";
 import { useRecruitment } from "@/hooks/useRecruitment";
-import { format } from "date-fns";
+import { formatDateForDisplay } from "@/utils/dateUtils";
 import { LeaveCompanyFilter, useLeaveCompanyFilter } from "@/components/leave/LeaveCompanyFilter";
 
 export default function ApplicationsPage() {
@@ -138,7 +138,7 @@ export default function ApplicationsPage() {
                       </TableCell>
                       <TableCell>{(app as any).requisition?.title}</TableCell>
                       <TableCell>{getApplicationStageBadge(app.stage)}</TableCell>
-                      <TableCell>{format(new Date(app.applied_at), "MMM d, yyyy")}</TableCell>
+                      <TableCell>{formatDateForDisplay(app.applied_at, "MMM d, yyyy")}</TableCell>
                       <TableCell>{app.rating ? `${app.rating}/5` : "-"}</TableCell>
                       <TableCell>
                         <Select

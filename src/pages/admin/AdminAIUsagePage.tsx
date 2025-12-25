@@ -15,7 +15,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Bot, Users, TrendingUp, Activity, Settings, Search, Edit2, DollarSign, Calendar, Volume2, VolumeX, Key } from "lucide-react";
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns";
 
 interface AIBudgetTier {
   id: string;
@@ -688,7 +688,7 @@ export default function AdminAIUsagePage() {
                         <TableCell>{log.feature || "-"}</TableCell>
                         <TableCell className="text-right">{log.total_tokens.toLocaleString()}</TableCell>
                         <TableCell className="text-right">${(log.estimated_cost_usd || 0).toFixed(4)}</TableCell>
-                        <TableCell>{format(new Date(log.created_at), "PPp")}</TableCell>
+                        <TableCell>{format(parseISO(log.created_at), "PPp")}</TableCell>
                       </TableRow>
                     ))}
                     {usageLogs.length === 0 && (

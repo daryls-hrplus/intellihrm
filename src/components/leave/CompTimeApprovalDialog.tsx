@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { format } from "date-fns";
+import { formatDateForDisplay } from "@/utils/dateUtils";
 import { useCompensatoryTime, CompTimeEarned, CompTimeUsed } from "@/hooks/useCompensatoryTime";
 import { CheckCircle, XCircle, Clock, User, Calendar } from "lucide-react";
 
@@ -96,8 +96,8 @@ export function CompTimeApprovalDialog({
               <Calendar className="h-4 w-4 text-muted-foreground" />
               <span>
                 {isEarned 
-                  ? `Work Date: ${format(new Date(earnedRequest!.work_date), 'PPP')}`
-                  : `Use Date: ${format(new Date(usedRequest!.use_date), 'PPP')}`
+                  ? `Work Date: ${formatDateForDisplay(earnedRequest!.work_date, 'PPP')}`
+                  : `Use Date: ${formatDateForDisplay(usedRequest!.use_date, 'PPP')}`
                 }
               </span>
             </div>

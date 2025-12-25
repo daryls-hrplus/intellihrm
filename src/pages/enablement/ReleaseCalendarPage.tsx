@@ -5,7 +5,7 @@ import { ArrowLeft, Calendar, Plus } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useEnablementReleases } from "@/hooks/useEnablementData";
-import { format } from "date-fns";
+import { formatDateForDisplay } from "@/utils/dateUtils";
 
 export default function ReleaseCalendarPage() {
   const { releases } = useEnablementReleases();
@@ -74,7 +74,7 @@ export default function ReleaseCalendarPage() {
                       </div>
                       <p className="text-sm text-muted-foreground">
                         {release.release_date 
-                          ? format(new Date(release.release_date), 'PPP')
+                          ? formatDateForDisplay(release.release_date, 'PPP')
                           : 'No date set'}
                         {release.feature_count && ` • ${release.feature_count} features`}
                       </p>

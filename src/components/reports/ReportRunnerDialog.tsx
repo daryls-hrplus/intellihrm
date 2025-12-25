@@ -125,7 +125,7 @@ export function ReportRunnerDialog({
               >
                 <CalendarIcon className="mr-2 h-4 w-4" />
                 {parameters[param.name] 
-                  ? format(new Date(parameters[param.name] as string), 'PPP')
+                  ? formatDateForDisplay(parameters[param.name] as string, 'PPP')
                   : 'Select date'
                 }
               </Button>

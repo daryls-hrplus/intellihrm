@@ -241,7 +241,7 @@ export default function MyHSEPage() {
                         <div>
                           <CardTitle className="text-lg">{incident.title}</CardTitle>
                           <CardDescription>
-                            {incident.incident_number} • {format(new Date(incident.incident_date), "PPP")}
+                            {incident.incident_number} • {formatDateForDisplay(incident.incident_date, "PPP")}
                           </CardDescription>
                         </div>
                         <div className="flex gap-2">
@@ -324,7 +324,7 @@ export default function MyHSEPage() {
                               {(record.training as any)?.title || "Training"}
                             </CardTitle>
                             <CardDescription>
-                              Completed: {format(new Date(record.training_date), "PPP")}
+                              Completed: {formatDateForDisplay(record.training_date, "PPP")}
                             </CardDescription>
                           </div>
                           <div className="flex items-center gap-2">
@@ -345,7 +345,7 @@ export default function MyHSEPage() {
                           {record.expiry_date && (
                             <span className="flex items-center gap-1">
                               <Clock className="h-3 w-3" />
-                              Expires: {format(new Date(record.expiry_date), "PPP")}
+                              Expires: {formatDateForDisplay(record.expiry_date, "PPP")}
                             </span>
                           )}
                         </div>
