@@ -11,6 +11,18 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import {
   Eye,
   Calendar,
   TrendingUp,
@@ -29,6 +41,8 @@ import {
   Send,
   ShieldAlert,
   Folder,
+  Link2,
+  Calculator,
 } from "lucide-react";
 import {
   parseExtendedAttributes,
@@ -48,6 +62,9 @@ import { formatDateForDisplay } from "@/utils/dateUtils";
 import { GoalRatingDialog } from "./GoalRatingDialog";
 import { GoalSubmitDialog } from "./GoalSubmitDialog";
 import { GoalApprovalStatus } from "./GoalApprovalStatus";
+import { GoalAlignmentManager } from "./GoalAlignmentManager";
+import { GoalVisibilitySettings } from "./GoalVisibilitySettings";
+import { ProgressRollupConfig } from "./ProgressRollupConfig";
 
 type GoalStatus = 'draft' | 'active' | 'in_progress' | 'completed' | 'cancelled' | 'overdue';
 type GoalType = 'okr_objective' | 'okr_key_result' | 'smart_goal';
@@ -121,6 +138,9 @@ export function EnhancedGoalCard({
 }: EnhancedGoalCardProps) {
   const [ratingDialogOpen, setRatingDialogOpen] = useState(false);
   const [submitDialogOpen, setSubmitDialogOpen] = useState(false);
+  const [alignmentDialogOpen, setAlignmentDialogOpen] = useState(false);
+  const [visibilityDialogOpen, setVisibilityDialogOpen] = useState(false);
+  const [rollupDialogOpen, setRollupDialogOpen] = useState(false);
   const isOverdue = goal.due_date && isPast(new Date(goal.due_date)) && goal.status !== "completed";
   const daysUntilDue = goal.due_date ? differenceInDays(new Date(goal.due_date), new Date()) : null;
   
@@ -232,9 +252,50 @@ export function EnhancedGoalCard({
             <Badge className={statusColors[effectiveStatus]}>
               {effectiveStatus.replace("_", " ")}
             </Badge>
-            <Badge className={statusColors[effectiveStatus]}>
-              {effectiveStatus.replace("_", " ")}
-            </Badge>
+            {/* Quick-access buttons for alignment features */}
+            {companyId && (
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-7 w-7"
+                      onClick={() => setAlignmentDialogOpen(true)}
+                    >
+                      <Link2 className="h-3.5 w-3.5" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Alignments</TooltipContent>
+                </Tooltip>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-7 w-7"
+                      onClick={() => setVisibilityDialogOpen(true)}
+                    >
+                      <Eye className="h-3.5 w-3.5" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Visibility</TooltipContent>
+                </Tooltip>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-7 w-7"
+                      onClick={() => setRollupDialogOpen(true)}
+                    >
+                      <Calculator className="h-3.5 w-3.5" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Rollup Config</TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            )}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon" className="h-8 w-8">
@@ -258,11 +319,31 @@ export function EnhancedGoalCard({
                     Comments
                   </DropdownMenuItem>
                 )}
+                {companyId && (
+                  <>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={() => setAlignmentDialogOpen(true)}>
+                      <Link2 className="mr-2 h-4 w-4" />
+                      Alignments
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setVisibilityDialogOpen(true)}>
+                      <Eye className="mr-2 h-4 w-4" />
+                      Visibility
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setRollupDialogOpen(true)}>
+                      <Calculator className="mr-2 h-4 w-4" />
+                      Rollup Config
+                    </DropdownMenuItem>
+                  </>
+                )}
                 {(goal.status === "completed" || goal.progress_percentage >= 80) && (
-                  <DropdownMenuItem onClick={() => setRatingDialogOpen(true)}>
-                    <Star className="mr-2 h-4 w-4" />
-                    {userRole === "employee" ? "Rate Goal" : "Rate / Review"}
-                  </DropdownMenuItem>
+                  <>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={() => setRatingDialogOpen(true)}>
+                      <Star className="mr-2 h-4 w-4" />
+                      {userRole === "employee" ? "Rate Goal" : "Rate / Review"}
+                    </DropdownMenuItem>
+                  </>
                 )}
                 {goal.status === "draft" && (
                   <DropdownMenuItem onClick={() => setSubmitDialogOpen(true)}>
@@ -375,6 +456,46 @@ export function EnhancedGoalCard({
         companyId={companyId}
         onSuccess={onRefresh}
       />
+
+      {/* Alignment Dialog */}
+      {companyId && (
+        <Dialog open={alignmentDialogOpen} onOpenChange={setAlignmentDialogOpen}>
+          <DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Goal Alignments</DialogTitle>
+            </DialogHeader>
+            <GoalAlignmentManager
+              goalId={goal.id}
+              companyId={companyId}
+              goalTitle={goal.title}
+            />
+          </DialogContent>
+        </Dialog>
+      )}
+
+      {/* Visibility Dialog */}
+      <Dialog open={visibilityDialogOpen} onOpenChange={setVisibilityDialogOpen}>
+        <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Visibility Settings</DialogTitle>
+          </DialogHeader>
+          <GoalVisibilitySettings goalId={goal.id} />
+        </DialogContent>
+      </Dialog>
+
+      {/* Rollup Dialog */}
+      <Dialog open={rollupDialogOpen} onOpenChange={setRollupDialogOpen}>
+        <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Progress Rollup Configuration</DialogTitle>
+          </DialogHeader>
+          <ProgressRollupConfig
+            goalId={goal.id}
+            currentProgress={goal.progress_percentage}
+            onProgressUpdate={onRefresh}
+          />
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 }

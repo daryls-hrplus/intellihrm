@@ -7,6 +7,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Stepper } from "@/components/ui/stepper";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
@@ -30,9 +31,12 @@ import {
   GoalLevel,
   GoalType,
 } from "./goal-wizard";
-import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, Loader2, Link2, Eye, Calculator } from "lucide-react";
 import { useGoalWeights } from "@/hooks/useGoalWeights";
 import { GoalWeightWarning } from "./GoalWeightSummary";
+import { GoalAlignmentManager } from "./GoalAlignmentManager";
+import { GoalVisibilitySettings } from "./GoalVisibilitySettings";
+import { ProgressRollupConfig } from "./ProgressRollupConfig";
 
 type GoalStatus = 'draft' | 'active' | 'in_progress' | 'completed' | 'cancelled' | 'overdue';
 type DbGoalLevel = 'company' | 'department' | 'team' | 'individual';
@@ -489,154 +493,356 @@ export function GoalDialog({
     });
   };
 
+  const [activeTab, setActiveTab] = useState<string>("details");
+
+  // Reset tab when dialog opens/closes or goal changes
+  useEffect(() => {
+    if (open) {
+      setActiveTab("details");
+    }
+  }, [open, goal?.id]);
+
+  const isEditMode = !!goal;
+  const showAlignmentTabs = isEditMode && companyId;
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
+      <DialogContent className={`${showAlignmentTabs ? 'max-w-4xl' : 'max-w-2xl'} max-h-[90vh] overflow-hidden flex flex-col`}>
         <DialogHeader className="pb-4 border-b">
           <DialogTitle>{goal ? "Edit Goal" : "Create New Goal"}</DialogTitle>
         </DialogHeader>
 
-        {/* Stepper */}
-        <div className="py-4 px-2">
-          <Stepper
-            steps={WIZARD_STEPS}
-            currentStep={currentStep}
-            onStepClick={(step) => step <= currentStep && setCurrentStep(step)}
-          />
-        </div>
+        {showAlignmentTabs ? (
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col overflow-hidden">
+            <TabsList className="grid w-full grid-cols-4 mb-4">
+              <TabsTrigger value="details" className="text-sm">
+                Details
+              </TabsTrigger>
+              <TabsTrigger value="alignments" className="text-sm">
+                <Link2 className="h-4 w-4 mr-1.5" />
+                Alignments
+              </TabsTrigger>
+              <TabsTrigger value="visibility" className="text-sm">
+                <Eye className="h-4 w-4 mr-1.5" />
+                Visibility
+              </TabsTrigger>
+              <TabsTrigger value="rollup" className="text-sm">
+                <Calculator className="h-4 w-4 mr-1.5" />
+                Rollup
+              </TabsTrigger>
+            </TabsList>
 
-        {/* Weight Warning */}
-        {showWeightWarning && (
-          <div className="mb-4">
-            <GoalWeightWarning
-              currentTotal={currentEmployeeWeight}
-              proposedWeight={parseFloat(formData.weighting) || 0}
-              existingWeight={goal?.weighting || 0}
-              onProceed={handleProceedWithWarning}
-              onCancel={() => {
-                setShowWeightWarning(false);
-                setCurrentStep(2); // Go back to metrics step
-              }}
-            />
-          </div>
-        )}
+            <TabsContent value="details" className="flex-1 overflow-hidden flex flex-col mt-0">
+              {/* Stepper for details tab */}
+              <div className="py-4 px-2">
+                <Stepper
+                  steps={WIZARD_STEPS}
+                  currentStep={currentStep}
+                  onStepClick={(step) => step <= currentStep && setCurrentStep(step)}
+                />
+              </div>
 
-        {/* Step Content */}
-        <div className="flex-1 overflow-y-auto py-4 px-1">
-          {currentStep === 0 && (
-            <StepClassification
-              goalLevel={formData.goal_level}
-              goalType={formData.goal_type}
-              onLevelChange={(level) => setFormData({ ...formData, goal_level: level })}
-              onTypeChange={(type) => setFormData({ ...formData, goal_type: type })}
-            />
-          )}
-
-          {currentStep === 1 && (
-            <StepDefinition
-              goalLevel={formData.goal_level}
-              formData={{
-                title: formData.title,
-                description: formData.description,
-                category: formData.category,
-                start_date: formData.start_date,
-                due_date: formData.due_date,
-                status: formData.status,
-                employee_id: formData.employee_id,
-                parent_goal_id: formData.parent_goal_id,
-                goal_source: formData.goal_source,
-              }}
-              onChange={(updates) => setFormData((prev) => ({ ...prev, ...updates } as FormData))}
-              employees={employees}
-              parentGoals={parentGoals}
-              jobGoals={jobGoals}
-              onSelectJobGoal={handleSelectJobGoal}
-            />
-          )}
-
-          {currentStep === 2 && (
-            <StepMetrics
-              goalType={formData.goal_type}
-              formData={{
-                weighting: formData.weighting,
-                unit_of_measure: formData.unit_of_measure,
-                target_value: formData.target_value,
-                current_value: formData.current_value,
-                measurement_type: formData.measurement_type,
-                threshold_value: formData.threshold_value,
-                stretch_value: formData.stretch_value,
-                threshold_percentage: formData.threshold_percentage,
-                stretch_percentage: formData.stretch_percentage,
-                is_inverse: formData.is_inverse,
-                is_mandatory: formData.is_mandatory,
-                compliance_category: formData.compliance_category,
-                is_weight_required: formData.is_weight_required,
-                inherited_weight_portion: formData.inherited_weight_portion,
-                metric_template_id: formData.metric_template_id,
-              }}
-              onChange={(updates) => setFormData({ ...formData, ...updates })}
-              parentGoalWeight={parentGoalWeight}
-              companyId={companyId}
-              employeeId={formData.goal_level === "individual" ? (formData.employee_id || user?.id) : undefined}
-              existingGoalId={goal?.id}
-            />
-          )}
-
-          {currentStep === 3 && (
-            <StepAlignment
-              goalType={formData.goal_type}
-              smartCriteria={{
-                specific: formData.specific,
-                measurable: formData.measurable,
-                achievable: formData.achievable,
-                relevant: formData.relevant,
-                time_bound: formData.time_bound,
-              }}
-              onSmartChange={(updates) => setFormData({ ...formData, ...updates })}
-            />
-          )}
-        </div>
-
-        {/* Footer Navigation */}
-        <div className="flex items-center justify-between pt-4 border-t">
-          <Button
-            type="button"
-            variant="ghost"
-            onClick={handleBack}
-            disabled={currentStep === 0}
-          >
-            <ChevronLeft className="h-4 w-4 mr-1" />
-            Back
-          </Button>
-
-          <div className="flex gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-            >
-              Cancel
-            </Button>
-            <Button
-              onClick={handleNext}
-              disabled={loading || !canProceed()}
-            >
-              {loading ? (
-                <>
-                  <Loader2 className="h-4 w-4 mr-1 animate-spin" />
-                  Saving...
-                </>
-              ) : currentStep === WIZARD_STEPS.length - 1 ? (
-                goal ? "Update Goal" : "Create Goal"
-              ) : (
-                <>
-                  Next
-                  <ChevronRight className="h-4 w-4 ml-1" />
-                </>
+              {/* Weight Warning */}
+              {showWeightWarning && (
+                <div className="mb-4">
+                  <GoalWeightWarning
+                    currentTotal={currentEmployeeWeight}
+                    proposedWeight={parseFloat(formData.weighting) || 0}
+                    existingWeight={goal?.weighting || 0}
+                    onProceed={handleProceedWithWarning}
+                    onCancel={() => {
+                      setShowWeightWarning(false);
+                      setCurrentStep(2);
+                    }}
+                  />
+                </div>
               )}
-            </Button>
-          </div>
-        </div>
+
+              {/* Step Content */}
+              <div className="flex-1 overflow-y-auto py-4 px-1">
+                {currentStep === 0 && (
+                  <StepClassification
+                    goalLevel={formData.goal_level}
+                    goalType={formData.goal_type}
+                    onLevelChange={(level) => setFormData({ ...formData, goal_level: level })}
+                    onTypeChange={(type) => setFormData({ ...formData, goal_type: type })}
+                  />
+                )}
+
+                {currentStep === 1 && (
+                  <StepDefinition
+                    goalLevel={formData.goal_level}
+                    formData={{
+                      title: formData.title,
+                      description: formData.description,
+                      category: formData.category,
+                      start_date: formData.start_date,
+                      due_date: formData.due_date,
+                      status: formData.status,
+                      employee_id: formData.employee_id,
+                      parent_goal_id: formData.parent_goal_id,
+                      goal_source: formData.goal_source,
+                    }}
+                    onChange={(updates) => setFormData((prev) => ({ ...prev, ...updates } as FormData))}
+                    employees={employees}
+                    parentGoals={parentGoals}
+                    jobGoals={jobGoals}
+                    onSelectJobGoal={handleSelectJobGoal}
+                  />
+                )}
+
+                {currentStep === 2 && (
+                  <StepMetrics
+                    goalType={formData.goal_type}
+                    formData={{
+                      weighting: formData.weighting,
+                      unit_of_measure: formData.unit_of_measure,
+                      target_value: formData.target_value,
+                      current_value: formData.current_value,
+                      measurement_type: formData.measurement_type,
+                      threshold_value: formData.threshold_value,
+                      stretch_value: formData.stretch_value,
+                      threshold_percentage: formData.threshold_percentage,
+                      stretch_percentage: formData.stretch_percentage,
+                      is_inverse: formData.is_inverse,
+                      is_mandatory: formData.is_mandatory,
+                      compliance_category: formData.compliance_category,
+                      is_weight_required: formData.is_weight_required,
+                      inherited_weight_portion: formData.inherited_weight_portion,
+                      metric_template_id: formData.metric_template_id,
+                    }}
+                    onChange={(updates) => setFormData({ ...formData, ...updates })}
+                    parentGoalWeight={parentGoalWeight}
+                    companyId={companyId}
+                    employeeId={formData.goal_level === "individual" ? (formData.employee_id || user?.id) : undefined}
+                    existingGoalId={goal?.id}
+                  />
+                )}
+
+                {currentStep === 3 && (
+                  <StepAlignment
+                    goalType={formData.goal_type}
+                    smartCriteria={{
+                      specific: formData.specific,
+                      measurable: formData.measurable,
+                      achievable: formData.achievable,
+                      relevant: formData.relevant,
+                      time_bound: formData.time_bound,
+                    }}
+                    onSmartChange={(updates) => setFormData({ ...formData, ...updates })}
+                  />
+                )}
+              </div>
+
+              {/* Footer Navigation */}
+              <div className="flex items-center justify-between pt-4 border-t">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={handleBack}
+                  disabled={currentStep === 0}
+                >
+                  <ChevronLeft className="h-4 w-4 mr-1" />
+                  Back
+                </Button>
+
+                <div className="flex gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => onOpenChange(false)}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={handleNext}
+                    disabled={loading || !canProceed()}
+                  >
+                    {loading ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                        Saving...
+                      </>
+                    ) : currentStep === WIZARD_STEPS.length - 1 ? (
+                      "Update Goal"
+                    ) : (
+                      <>
+                        Next
+                        <ChevronRight className="h-4 w-4 ml-1" />
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="alignments" className="flex-1 overflow-y-auto mt-0">
+              <GoalAlignmentManager
+                goalId={goal.id}
+                companyId={companyId!}
+                goalTitle={goal.title}
+              />
+            </TabsContent>
+
+            <TabsContent value="visibility" className="flex-1 overflow-y-auto mt-0">
+              <GoalVisibilitySettings goalId={goal.id} />
+            </TabsContent>
+
+            <TabsContent value="rollup" className="flex-1 overflow-y-auto mt-0">
+              <ProgressRollupConfig
+                goalId={goal.id}
+                currentProgress={goal.progress_percentage}
+                onProgressUpdate={() => {
+                  onSuccess();
+                }}
+              />
+            </TabsContent>
+          </Tabs>
+        ) : (
+          <>
+            {/* Stepper for create mode */}
+            <div className="py-4 px-2">
+              <Stepper
+                steps={WIZARD_STEPS}
+                currentStep={currentStep}
+                onStepClick={(step) => step <= currentStep && setCurrentStep(step)}
+              />
+            </div>
+
+            {/* Weight Warning */}
+            {showWeightWarning && (
+              <div className="mb-4">
+                <GoalWeightWarning
+                  currentTotal={currentEmployeeWeight}
+                  proposedWeight={parseFloat(formData.weighting) || 0}
+                  existingWeight={goal?.weighting || 0}
+                  onProceed={handleProceedWithWarning}
+                  onCancel={() => {
+                    setShowWeightWarning(false);
+                    setCurrentStep(2);
+                  }}
+                />
+              </div>
+            )}
+
+            {/* Step Content */}
+            <div className="flex-1 overflow-y-auto py-4 px-1">
+              {currentStep === 0 && (
+                <StepClassification
+                  goalLevel={formData.goal_level}
+                  goalType={formData.goal_type}
+                  onLevelChange={(level) => setFormData({ ...formData, goal_level: level })}
+                  onTypeChange={(type) => setFormData({ ...formData, goal_type: type })}
+                />
+              )}
+
+              {currentStep === 1 && (
+                <StepDefinition
+                  goalLevel={formData.goal_level}
+                  formData={{
+                    title: formData.title,
+                    description: formData.description,
+                    category: formData.category,
+                    start_date: formData.start_date,
+                    due_date: formData.due_date,
+                    status: formData.status,
+                    employee_id: formData.employee_id,
+                    parent_goal_id: formData.parent_goal_id,
+                    goal_source: formData.goal_source,
+                  }}
+                  onChange={(updates) => setFormData((prev) => ({ ...prev, ...updates } as FormData))}
+                  employees={employees}
+                  parentGoals={parentGoals}
+                  jobGoals={jobGoals}
+                  onSelectJobGoal={handleSelectJobGoal}
+                />
+              )}
+
+              {currentStep === 2 && (
+                <StepMetrics
+                  goalType={formData.goal_type}
+                  formData={{
+                    weighting: formData.weighting,
+                    unit_of_measure: formData.unit_of_measure,
+                    target_value: formData.target_value,
+                    current_value: formData.current_value,
+                    measurement_type: formData.measurement_type,
+                    threshold_value: formData.threshold_value,
+                    stretch_value: formData.stretch_value,
+                    threshold_percentage: formData.threshold_percentage,
+                    stretch_percentage: formData.stretch_percentage,
+                    is_inverse: formData.is_inverse,
+                    is_mandatory: formData.is_mandatory,
+                    compliance_category: formData.compliance_category,
+                    is_weight_required: formData.is_weight_required,
+                    inherited_weight_portion: formData.inherited_weight_portion,
+                    metric_template_id: formData.metric_template_id,
+                  }}
+                  onChange={(updates) => setFormData({ ...formData, ...updates })}
+                  parentGoalWeight={parentGoalWeight}
+                  companyId={companyId}
+                  employeeId={formData.goal_level === "individual" ? (formData.employee_id || user?.id) : undefined}
+                  existingGoalId={goal?.id}
+                />
+              )}
+
+              {currentStep === 3 && (
+                <StepAlignment
+                  goalType={formData.goal_type}
+                  smartCriteria={{
+                    specific: formData.specific,
+                    measurable: formData.measurable,
+                    achievable: formData.achievable,
+                    relevant: formData.relevant,
+                    time_bound: formData.time_bound,
+                  }}
+                  onSmartChange={(updates) => setFormData({ ...formData, ...updates })}
+                />
+              )}
+            </div>
+
+            {/* Footer Navigation */}
+            <div className="flex items-center justify-between pt-4 border-t">
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={handleBack}
+                disabled={currentStep === 0}
+              >
+                <ChevronLeft className="h-4 w-4 mr-1" />
+                Back
+              </Button>
+
+              <div className="flex gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => onOpenChange(false)}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={handleNext}
+                  disabled={loading || !canProceed()}
+                >
+                  {loading ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                      Saving...
+                    </>
+                  ) : currentStep === WIZARD_STEPS.length - 1 ? (
+                    "Create Goal"
+                  ) : (
+                    <>
+                      Next
+                      <ChevronRight className="h-4 w-4 ml-1" />
+                    </>
+                  )}
+                </Button>
+              </div>
+            </div>
+          </>
+        )}
       </DialogContent>
     </Dialog>
   );
