@@ -31191,6 +31191,7 @@ export type Database = {
           default_scheduled_hours: number | null
           department_id: string
           description: string | null
+          employment_relation: string | null
           employment_status: string
           employment_type: string
           end_date: string | null
@@ -31220,6 +31221,7 @@ export type Database = {
           default_scheduled_hours?: number | null
           department_id: string
           description?: string | null
+          employment_relation?: string | null
           employment_status?: string
           employment_type?: string
           end_date?: string | null
@@ -31249,6 +31251,7 @@ export type Database = {
           default_scheduled_hours?: number | null
           department_id?: string
           description?: string | null
+          employment_relation?: string | null
           employment_status?: string
           employment_type?: string
           end_date?: string | null

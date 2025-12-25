@@ -232,6 +232,7 @@ export function PositionsManagement({ companyId }: PositionsManagementProps) {
   const [formEmploymentStatus, setFormEmploymentStatus] = useState("ACTIVE");
   const [formEmploymentType, setFormEmploymentType] = useState("FULL_TIME");
   const [formOvertimeStatus, setFormOvertimeStatus] = useState("EXEMPT");
+  const [formEmploymentRelation, setFormEmploymentRelation] = useState("EMPLOYEE");
   const [formDefaultScheduledHours, setFormDefaultScheduledHours] = useState("");
 
   // Assignment dialog state
@@ -438,6 +439,7 @@ export function PositionsManagement({ companyId }: PositionsManagementProps) {
     setFormEmploymentStatus("ACTIVE");
     setFormEmploymentType("FULL_TIME");
     setFormOvertimeStatus("EXEMPT");
+    setFormEmploymentRelation("EMPLOYEE");
     setFormDefaultScheduledHours("");
     setPositionDialogOpen(true);
   };
@@ -463,6 +465,7 @@ export function PositionsManagement({ companyId }: PositionsManagementProps) {
     setFormEmploymentStatus(position.employment_status || "ACTIVE");
     setFormEmploymentType(position.employment_type || "FULL_TIME");
     setFormOvertimeStatus(position.overtime_status || "EXEMPT");
+    setFormEmploymentRelation((position as any).employment_relation || "EMPLOYEE");
     setFormDefaultScheduledHours(position.default_scheduled_hours?.toString() || "");
     setPositionDialogOpen(true);
   };
@@ -505,6 +508,7 @@ export function PositionsManagement({ companyId }: PositionsManagementProps) {
         employment_status: formEmploymentStatus,
         employment_type: formEmploymentType,
         overtime_status: formOvertimeStatus,
+        employment_relation: formEmploymentRelation,
         default_scheduled_hours: formDefaultScheduledHours ? parseFloat(formDefaultScheduledHours) : null,
       };
 
@@ -1099,17 +1103,31 @@ export function PositionsManagement({ companyId }: PositionsManagementProps) {
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label>Overtime Status</Label>
-                  <Select value={formOvertimeStatus} onValueChange={setFormOvertimeStatus}>
+                  <Label>Employment Relation</Label>
+                  <Select value={formEmploymentRelation} onValueChange={setFormEmploymentRelation}>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="EXEMPT">Exempt</SelectItem>
-                      <SelectItem value="NON_EXEMPT">Non-Exempt</SelectItem>
+                      <SelectItem value="EMPLOYEE">Employee</SelectItem>
+                      <SelectItem value="CONTRACTOR">Contractor</SelectItem>
+                      <SelectItem value="INTERN_TRAINEE">Intern/Trainee/Apprentice</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Overtime Status</Label>
+                <Select value={formOvertimeStatus} onValueChange={setFormOvertimeStatus}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="EXEMPT">Exempt</SelectItem>
+                    <SelectItem value="NON_EXEMPT">Non-Exempt</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
 
               <div className="space-y-2">
