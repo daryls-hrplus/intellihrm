@@ -159,7 +159,7 @@ export function CustomFieldsManager({ companyId }: CustomFieldsManagerProps) {
             placeholder: data.placeholder,
             help_text: data.help_text,
             default_value: data.default_value,
-            validation_rules: data.validation_rules as unknown,
+            validation_rules: JSON.parse(JSON.stringify(data.validation_rules || {})),
           })
           .eq('id', editingField.id);
 
@@ -199,7 +199,7 @@ export function CustomFieldsManager({ companyId }: CustomFieldsManagerProps) {
         // Create new field
         const { data: newField, error } = await supabase
           .from('custom_field_definitions')
-          .insert({
+          .insert([{
             field_code: data.field_code!,
             field_label: data.field_label!,
             field_type: data.field_type,
@@ -210,11 +210,11 @@ export function CustomFieldsManager({ companyId }: CustomFieldsManagerProps) {
             placeholder: data.placeholder,
             help_text: data.help_text,
             default_value: data.default_value,
-            validation_rules: data.validation_rules as unknown,
+            validation_rules: JSON.parse(JSON.stringify(data.validation_rules || {})),
             company_id: companyId || null,
             display_order: fields.length,
             created_by: user?.id,
-          })
+          }])
           .select()
           .single();
 

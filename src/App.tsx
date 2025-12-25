@@ -48,6 +48,7 @@ import CompanyTagsPage from "./pages/admin/CompanyTagsPage";
 import GranularPermissionsPage from "./pages/admin/GranularPermissionsPage";
 import ImplementationHandbookPage from "./pages/admin/ImplementationHandbookPage";
 import FeaturesBrochurePage from "./pages/admin/FeaturesBrochurePage";
+import AdminCustomFieldsPage from "./pages/admin/AdminCustomFieldsPage";
 import ModulesBrochurePage from "./pages/admin/ModulesBrochurePage";
 import CurrencyManagementPage from "./pages/admin/CurrencyManagementPage";
 import SubscriptionManagementPage from "./pages/admin/SubscriptionManagementPage";
@@ -908,6 +909,14 @@ const App = () => (
               element={
                 <ProtectedRoute requiredRoles={["admin"]}>
                   <AdminDashboardPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/custom-fields"
+              element={
+                <ProtectedRoute requiredRoles={["admin"]}>
+                  <AdminCustomFieldsPage />
                 </ProtectedRoute>
               }
             />

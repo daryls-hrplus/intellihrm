@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   Dialog,
   DialogContent,
@@ -16,10 +16,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Separator } from "@/components/ui/separator";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuditLog } from "@/hooks/useAuditLog";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
+import { CustomFieldsRenderer } from "@/components/custom-fields/CustomFieldsRenderer";
+import { useCustomFields } from "@/hooks/useCustomFields";
 
 const TIMEZONES = [
   "UTC",
@@ -66,6 +69,7 @@ interface EmployeeEditDialogProps {
     preferred_language?: string | null;
     date_format?: string | null;
     time_format?: string | null;
+    company_id?: string | null;
   } | null;
   onSuccess?: () => void;
 }
@@ -74,7 +78,6 @@ export function EmployeeEditDialog({
   open,
   onOpenChange,
   employee,
-  onSuccess,
 }: EmployeeEditDialogProps) {
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
@@ -84,7 +87,15 @@ export function EmployeeEditDialog({
   const [dateFormat, setDateFormat] = useState("");
   const [timeFormat, setTimeFormat] = useState("");
   const [saving, setSaving] = useState(false);
+  const [customFieldValues, setCustomFieldValues] = useState<Record<string, string | number | boolean | string[] | null>>({});
   const { logAction } = useAuditLog();
+
+  const { fields, values, saveValues } = useCustomFields({
+    formContext: 'employee_profile',
+    entityId: employee?.id,
+    entityType: 'profiles',
+    companyId: employee?.company_id,
+  });
 
   useEffect(() => {
     if (employee) {
@@ -97,6 +108,18 @@ export function EmployeeEditDialog({
       setTimeFormat(employee.time_format || "");
     }
   }, [employee]);
+
+  // Sync custom field values from hook
+  useEffect(() => {
+    setCustomFieldValues(values);
+  }, [values]);
+
+  const handleCustomFieldChange = useCallback((fieldId: string, value: string | number | boolean | string[] | null) => {
+    setCustomFieldValues(prev => ({
+      ...prev,
+      [fieldId]: value,
+    }));
+  }, []);
 
   const handleSave = async () => {
     if (!employee) return;
@@ -120,6 +143,11 @@ export function EmployeeEditDialog({
         .eq("id", employee.id);
 
       if (error) throw error;
+
+      // Save custom field values
+      if (Object.keys(customFieldValues).length > 0) {
+        await saveValues(employee.id, 'profiles');
+      }
 
       await logAction({
         action: "UPDATE",
@@ -145,7 +173,6 @@ export function EmployeeEditDialog({
       });
 
       toast.success("Employee updated successfully");
-      onSuccess?.();
       onOpenChange(false);
     } catch (error) {
       console.error("Error updating employee:", error);
@@ -157,7 +184,7 @@ export function EmployeeEditDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-[550px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Edit Employee</DialogTitle>
         </DialogHeader>
@@ -253,6 +280,21 @@ export function EmployeeEditDialog({
               </SelectContent>
             </Select>
           </div>
+
+          {/* Custom Fields Section */}
+          {fields.length > 0 && (
+            <>
+              <Separator className="my-2" />
+              <CustomFieldsRenderer
+                formContext="employee_profile"
+                entityId={employee?.id}
+                entityType="profiles"
+                companyId={employee?.company_id}
+                values={customFieldValues}
+                onChange={handleCustomFieldChange}
+              />
+            </>
+          )}
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
