@@ -17,6 +17,7 @@ import {
   Calendar,
   Eye,
   BarChart3,
+  Lightbulb,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -27,6 +28,7 @@ import { TeamGoalsAnalytics } from "@/components/mss/TeamGoalsAnalytics";
 import { TeamGoalsFilters } from "@/components/mss/TeamGoalsFilters";
 import { TeamGoalCard } from "@/components/mss/TeamGoalCard";
 import { SendReminderDialog } from "@/components/mss/SendReminderDialog";
+import { ManagerCoachingPrompts } from "@/components/mss/ManagerCoachingPrompts";
 import { format, isPast } from "date-fns";
 import { formatDateForDisplay, getTodayString } from "@/utils/dateUtils";
 import { toast } from "sonner";
@@ -438,6 +440,10 @@ const statusColors: Record<GoalStatus, string> = {
               <CheckCircle className="h-4 w-4" />
               Completed
             </TabsTrigger>
+            <TabsTrigger value="coaching" className="gap-2">
+              <Lightbulb className="h-4 w-4" />
+              Coaching Insights
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="team-goals" className="mt-6 space-y-4">
@@ -618,6 +624,10 @@ const statusColors: Record<GoalStatus, string> = {
                 ))
               )}
             </div>
+          </TabsContent>
+
+          <TabsContent value="coaching" className="mt-6">
+            <ManagerCoachingPrompts managerId={user?.id} />
           </TabsContent>
         </Tabs>
 

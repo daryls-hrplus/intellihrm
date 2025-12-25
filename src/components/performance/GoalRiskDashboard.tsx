@@ -28,8 +28,11 @@ interface GoalWithRisk {
   } | null;
   risk_assessment: GoalRiskAssessment | null;
 }
+interface GoalRiskDashboardProps {
+  companyId?: string;
+}
 
-export function GoalRiskDashboard() {
+export function GoalRiskDashboard({ companyId }: GoalRiskDashboardProps) {
   const { user } = useAuth();
   const { toast } = useToast();
   const [goalsWithRisk, setGoalsWithRisk] = useState<GoalWithRisk[]>([]);
