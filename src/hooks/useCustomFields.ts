@@ -5,7 +5,8 @@ import type {
   CustomFieldDefinition, 
   CustomFieldValue, 
   CustomFieldFormContext,
-  CustomFieldType 
+  CustomFieldType,
+  ValidationRules 
 } from '@/types/customFields';
 
 interface UseCustomFieldsProps {
@@ -129,20 +130,32 @@ export function useCustomFields({ formContext, entityId, entityType, companyId }
     try {
       const { data: { user } } = await supabase.auth.getUser();
       
-      const upserts = Object.entries(values).map(([fieldId, value]) => {
+      const upserts: {
+        field_definition_id: string;
+        entity_id: string;
+        entity_type: string;
+        updated_by: string | null;
+        text_value: string | null;
+        number_value: number | null;
+        date_value: string | null;
+        boolean_value: boolean | null;
+        json_value: string[] | null;
+      }[] = [];
+      
+      Object.entries(values).forEach(([fieldId, value]) => {
         const field = fields.find(f => f.id === fieldId);
-        if (!field) return null;
+        if (!field) return;
 
-        const record: Partial<CustomFieldValue> = {
+        const record = {
           field_definition_id: fieldId,
           entity_id: targetEntityId,
           entity_type: targetEntityType,
           updated_by: user?.id || null,
-          text_value: null,
-          number_value: null,
-          date_value: null,
-          boolean_value: null,
-          json_value: null,
+          text_value: null as string | null,
+          number_value: null as number | null,
+          date_value: null as string | null,
+          boolean_value: null as boolean | null,
+          json_value: null as string[] | null,
         };
 
         // Set the appropriate value column based on field type
@@ -164,14 +177,14 @@ export function useCustomFields({ formContext, entityId, entityType, companyId }
             record.text_value = typeof value === 'string' ? value : null;
         }
 
-        return record;
-      }).filter(Boolean);
+        upserts.push(record);
+      });
 
       if (upserts.length === 0) return;
 
       const { error } = await supabase
         .from('custom_field_values')
-        .upsert(upserts as unknown[], {
+        .upsert(upserts, {
           onConflict: 'field_definition_id,entity_id,entity_type',
         });
 

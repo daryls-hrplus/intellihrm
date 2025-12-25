@@ -70,6 +70,8 @@ export interface CustomFieldOption {
   updated_at: string;
 }
 
+type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
+
 export interface CustomFieldValue {
   id: string;
   field_definition_id: string;
@@ -81,8 +83,6 @@ export interface CustomFieldValue {
   boolean_value: boolean | null;
   json_value: Json | null;
   created_at: string;
-
-type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
   updated_at: string;
   updated_by: string | null;
 }

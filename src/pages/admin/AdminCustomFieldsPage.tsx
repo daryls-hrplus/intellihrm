@@ -1,7 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Settings5 } from 'lucide-react';
-import { AdminLayout } from '@/components/admin/layout/AdminLayout';
+import { Settings } from 'lucide-react';
+import { AppLayout } from '@/components/layout/AppLayout';
 import { CustomFieldsManager } from '@/components/admin/custom-fields/CustomFieldsManager';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -23,18 +23,28 @@ export default function AdminCustomFieldsPage() {
     },
   });
 
+  const breadcrumbItems = [
+    { label: t('navigation.admin'), href: '/admin' },
+    { label: 'Custom Fields' },
+  ];
+
   return (
-    <AdminLayout>
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Custom Fields</h1>
-          <p className="text-muted-foreground">
-            Define and manage custom fields that can be added to forms throughout the application
-          </p>
+    <AppLayout>
+      <div className="container mx-auto p-6 space-y-6">
+        <div className="flex items-center gap-3 mb-6">
+          <div className="p-2 rounded-lg bg-primary/10">
+            <Settings className="h-6 w-6 text-primary" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight">Custom Fields</h1>
+            <p className="text-muted-foreground">
+              Define and manage custom fields for forms throughout the application
+            </p>
+          </div>
         </div>
 
         <CustomFieldsManager companyId={profile?.company_id} />
       </div>
-    </AdminLayout>
+    </AppLayout>
   );
 }
