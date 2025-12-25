@@ -74,7 +74,7 @@ const getAdminModuleSections = (
     // Section 2: Users, Roles & Access
     usersAccess: [
       { title: t("admin.modules.users.title"), description: t("admin.modules.users.description"), href: "/admin/users", icon: Users, color: "bg-success/10 text-success", tabCode: "users" },
-      { title: t("admin.modules.employeeDirectory.title"), description: t("admin.modules.employeeDirectory.description"), href: "/ess/directory", icon: Users, color: "bg-cyan-500/10 text-cyan-600", tabCode: "employee-directory" },
+      { title: t("admin.modules.employeeDirectory.title"), description: t("admin.modules.employeeDirectory.description"), href: "/ess/directory?from=admin", icon: Users, color: "bg-cyan-500/10 text-cyan-600", tabCode: "employee-directory" },
       { title: t("admin.modules.roles.title"), description: t("admin.modules.roles.description"), href: "/admin/roles", icon: Shield, color: "bg-warning/10 text-warning", tabCode: "roles" },
       { title: t("admin.modules.permissions.title"), description: t("admin.modules.permissions.description"), href: "/admin/permissions", icon: Grid3X3, color: "bg-violet-500/10 text-violet-600", tabCode: "permissions" },
       { title: "Granular Permissions", description: "Configure module, tab, and action-level permissions", href: "/admin/granular-permissions", icon: Lock, color: "bg-indigo-500/10 text-indigo-600", tabCode: "granular-permissions" },

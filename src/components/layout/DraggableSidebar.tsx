@@ -141,6 +141,11 @@ export function DraggableSidebar() {
       return href === "/hr-hub";
     }
 
+    // If Employee Directory was opened from Admin, keep Admin highlighted (not ESS)
+    if (from === "admin" && isEmployeeDirectory) {
+      return href === "/admin";
+    }
+
     if (href === "/") return location.pathname === "/";
     return location.pathname.startsWith(href);
   };
