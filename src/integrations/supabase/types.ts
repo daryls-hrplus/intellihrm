@@ -17292,6 +17292,62 @@ export type Database = {
           },
         ]
       }
+      goal_sub_metric_values: {
+        Row: {
+          baseline_value: number | null
+          created_at: string
+          current_value: number | null
+          evidence_notes: string | null
+          evidence_type: string | null
+          evidence_url: string | null
+          goal_id: string
+          id: string
+          sub_metric_name: string
+          target_value: number | null
+          unit_of_measure: string | null
+          updated_at: string
+          weight: number
+        }
+        Insert: {
+          baseline_value?: number | null
+          created_at?: string
+          current_value?: number | null
+          evidence_notes?: string | null
+          evidence_type?: string | null
+          evidence_url?: string | null
+          goal_id: string
+          id?: string
+          sub_metric_name: string
+          target_value?: number | null
+          unit_of_measure?: string | null
+          updated_at?: string
+          weight?: number
+        }
+        Update: {
+          baseline_value?: number | null
+          created_at?: string
+          current_value?: number | null
+          evidence_notes?: string | null
+          evidence_type?: string | null
+          evidence_url?: string | null
+          goal_id?: string
+          id?: string
+          sub_metric_name?: string
+          target_value?: number | null
+          unit_of_measure?: string | null
+          updated_at?: string
+          weight?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "goal_sub_metric_values_goal_id_fkey"
+            columns: ["goal_id"]
+            isOneToOne: false
+            referencedRelation: "performance_goals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       goal_templates: {
         Row: {
           category: string | null
@@ -29933,6 +29989,7 @@ export type Database = {
           locked_by: string | null
           manager_rating: number | null
           measurable: string | null
+          metric_template_id: string | null
           objective_id: string | null
           parent_goal_id: string | null
           progress_percentage: number | null
@@ -29944,6 +30001,7 @@ export type Database = {
           submitted_at: string | null
           target_value: number | null
           template_id: string | null
+          template_type: string | null
           time_bound: string | null
           title: string
           unit_of_measure: string | null
@@ -29978,6 +30036,7 @@ export type Database = {
           locked_by?: string | null
           manager_rating?: number | null
           measurable?: string | null
+          metric_template_id?: string | null
           objective_id?: string | null
           parent_goal_id?: string | null
           progress_percentage?: number | null
@@ -29989,6 +30048,7 @@ export type Database = {
           submitted_at?: string | null
           target_value?: number | null
           template_id?: string | null
+          template_type?: string | null
           time_bound?: string | null
           title: string
           unit_of_measure?: string | null
@@ -30023,6 +30083,7 @@ export type Database = {
           locked_by?: string | null
           manager_rating?: number | null
           measurable?: string | null
+          metric_template_id?: string | null
           objective_id?: string | null
           parent_goal_id?: string | null
           progress_percentage?: number | null
@@ -30034,6 +30095,7 @@ export type Database = {
           submitted_at?: string | null
           target_value?: number | null
           template_id?: string | null
+          template_type?: string | null
           time_bound?: string | null
           title?: string
           unit_of_measure?: string | null
