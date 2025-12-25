@@ -20,7 +20,8 @@ import {
   ShieldAlert,
   ShieldCheck
 } from "lucide-react";
-import { differenceInDays, format } from "date-fns";
+import { differenceInDays } from "date-fns";
+import { formatDateForDisplay } from "@/utils/dateUtils";
 import { Link } from "react-router-dom";
 
 interface QualificationComplianceViewProps {
@@ -645,7 +646,7 @@ export function QualificationComplianceView({ employeeId, viewType = "hr" }: Qua
                       <TableCell>{qual.accrediting_body_name || qual.institution_name || "-"}</TableCell>
                       <TableCell>{qual.license_number || "-"}</TableCell>
                       <TableCell>
-                        {qual.issued_date ? format(new Date(qual.issued_date), "PP") : "-"}
+                        {qual.issued_date ? formatDateForDisplay(qual.issued_date, "PP") : "-"}
                       </TableCell>
                       <TableCell>{getExpiryBadge(qual.expiry_date)}</TableCell>
                       <TableCell>{getVerificationBadge(qual.verification_status)}</TableCell>

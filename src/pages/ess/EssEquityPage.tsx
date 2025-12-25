@@ -7,8 +7,8 @@ import { Progress } from "@/components/ui/progress";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { format } from "date-fns";
 import { Gem, ChevronRight, TrendingUp, DollarSign } from "lucide-react";
+import { formatDateForDisplay } from "@/utils/dateUtils";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export default function EssEquityPage() {
@@ -162,7 +162,7 @@ export default function EssEquityPage() {
                   {grants.map((grant: any) => (
                     <TableRow key={grant.id}>
                       <TableCell className="font-medium">{grant.plan?.name || "-"}</TableCell>
-                      <TableCell>{format(new Date(grant.grant_date), "MMM d, yyyy")}</TableCell>
+                      <TableCell>{formatDateForDisplay(grant.grant_date)}</TableCell>
                       <TableCell className="text-right">{grant.shares_granted?.toLocaleString()}</TableCell>
                       <TableCell className="text-right">{(grant.shares_vested || 0).toLocaleString()}</TableCell>
                       <TableCell>

@@ -15,7 +15,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Plus, Scale, FileText, Search, Loader2, ClipboardList } from 'lucide-react';
 import { toast } from 'sonner';
-import { format } from 'date-fns';
+import { formatDateForDisplay } from '@/utils/dateUtils';
 
 interface ERGrievancesTabProps {
   companyId: string;
@@ -551,7 +551,7 @@ export function ERGrievancesTab({ companyId, departmentId }: ERGrievancesTabProp
                           </Badge>
                         </TableCell>
                         <TableCell className="text-muted-foreground">
-                          {format(new Date(grievance.filed_date), 'PP')}
+                          {formatDateForDisplay(grievance.filed_date, 'PP')}
                         </TableCell>
                       </TableRow>
                     ))}

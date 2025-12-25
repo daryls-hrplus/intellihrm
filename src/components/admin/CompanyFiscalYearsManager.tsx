@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
+import { formatDateForDisplay } from "@/utils/dateUtils";
 import { Calendar, Plus, Pencil, Trash2, Loader2, X, Check } from "lucide-react";
 
 interface CompanyFiscalYear {
@@ -339,9 +340,9 @@ export function CompanyFiscalYearsManager({ companyId, companyName, isOpen, onCl
                       )}
                     </div>
                     <p className="text-sm text-muted-foreground">
-                      {format(new Date(fy.effective_start_date), "MMM d, yyyy")}
+                      {formatDateForDisplay(fy.effective_start_date)}
                       {fy.effective_end_date
-                        ? ` → ${format(new Date(fy.effective_end_date), "MMM d, yyyy")}`
+                        ? ` → ${formatDateForDisplay(fy.effective_end_date)}`
                         : " → Ongoing"}
                     </p>
                     {fy.notes && (

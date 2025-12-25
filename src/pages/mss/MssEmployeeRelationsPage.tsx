@@ -24,9 +24,8 @@ import {
 import { useEmployeeRelations } from '@/hooks/useEmployeeRelations';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
-import { format } from 'date-fns';
 import { toast } from 'sonner';
-import { getTodayString } from '@/utils/dateUtils';
+import { getTodayString, formatDateForDisplay } from '@/utils/dateUtils';
 
 const RECOGNITION_TYPES = ['spot_award', 'peer_recognition', 'team_achievement', 'service_milestone', 'innovation', 'customer_service', 'leadership', 'other'];
 const RECOGNITION_CATEGORIES = ['excellence', 'teamwork', 'innovation', 'customer_focus', 'leadership', 'integrity', 'other'];
@@ -353,7 +352,7 @@ export default function MssEmployeeRelationsPage() {
                                 <p className="mt-2 text-sm">{rec.description}</p>
                               )}
                               <div className="mt-3 text-xs text-muted-foreground">
-                                {format(new Date(rec.award_date), 'PP')}
+                                {formatDateForDisplay(rec.award_date, 'PP')}
                               </div>
                             </div>
                           </div>
@@ -403,7 +402,7 @@ export default function MssEmployeeRelationsPage() {
                             </Badge>
                           </TableCell>
                           <TableCell className="text-muted-foreground">
-                            {format(new Date(c.reported_date), 'PP')}
+                            {formatDateForDisplay(c.reported_date, 'PP')}
                           </TableCell>
                         </TableRow>
                       ))}

@@ -10,7 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { format } from "date-fns";
+import { formatDateForDisplay } from "@/utils/dateUtils";
 import { Gem, Plus, TrendingUp, Users, DollarSign, FileText, ChevronRight, Building2 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -275,7 +275,7 @@ export default function EquityManagementPage() {
                           <TableRow key={grant.id}>
                             <TableCell className="font-medium">{grant.employee?.full_name}</TableCell>
                             <TableCell>{grant.plan?.name}</TableCell>
-                            <TableCell>{format(new Date(grant.grant_date), "MMM d, yyyy")}</TableCell>
+                            <TableCell>{formatDateForDisplay(grant.grant_date)}</TableCell>
                             <TableCell className="text-right">{grant.shares_granted?.toLocaleString()}</TableCell>
                             <TableCell className="text-right">{grant.shares_vested?.toLocaleString() || 0}</TableCell>
                             <TableCell>{getGrantStatusBadge(grant.status)}</TableCell>

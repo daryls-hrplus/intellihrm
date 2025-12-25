@@ -10,8 +10,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { usePropertyManagement } from "@/hooks/usePropertyManagement";
 import { Plus, Wrench, Loader2, Check } from "lucide-react";
-import { format } from "date-fns";
-import { getTodayString } from "@/utils/dateUtils";
+import { getTodayString, formatDateForDisplay } from "@/utils/dateUtils";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/hooks/useLanguage";
 
@@ -120,12 +119,12 @@ const PropertyMaintenanceTab = ({ companyId }: Props) => {
                     <TableCell><div><p className="font-medium">{record.title}</p>{record.description && <p className="text-xs text-muted-foreground line-clamp-1">{record.description}</p>}</div></TableCell>
                     <TableCell>{t(`companyProperty.maintenance.types.${record.maintenance_type}`)}</TableCell>
                     <TableCell>{record.vendor || "-"}</TableCell>
-                    <TableCell>{record.scheduled_date ? format(new Date(record.scheduled_date), "PP") : "-"}</TableCell>
+                    <TableCell>{record.scheduled_date ? formatDateForDisplay(record.scheduled_date, "PP") : "-"}</TableCell>
                     <TableCell>{record.cost ? `${record.currency} ${record.cost.toLocaleString()}` : "-"}</TableCell>
                     <TableCell><Badge variant="outline" className={getStatusColor(record.status)}>{t(`companyProperty.maintenance.statuses.${record.status}`)}</Badge></TableCell>
                     <TableCell>
                       {(record.status === "scheduled" || record.status === "in_progress") && (<Button variant="outline" size="sm" className="gap-1" onClick={() => handleComplete(record.id)}><Check className="h-3 w-3" />{t("companyProperty.maintenance.complete")}</Button>)}
-                      {record.status === "completed" && record.completed_date && <span className="text-xs text-muted-foreground">{format(new Date(record.completed_date), "PP")}</span>}
+                      {record.status === "completed" && record.completed_date && <span className="text-xs text-muted-foreground">{formatDateForDisplay(record.completed_date, "PP")}</span>}
                     </TableCell>
                   </TableRow>
                 ))}

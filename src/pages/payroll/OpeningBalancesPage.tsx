@@ -18,6 +18,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Plus, Upload, Pencil, Trash2, FileSpreadsheet, AlertCircle, Building2, History, Globe, Users } from "lucide-react";
 import { format } from "date-fns";
+import { formatDateForDisplay } from "@/utils/dateUtils";
 import { useNavigate } from "react-router-dom";
 import { useCountryStatutories, usePayGroups } from "@/hooks/useCountryStatutories";
 import { DynamicStatutoryFields } from "@/components/payroll/DynamicStatutoryFields";
@@ -857,7 +858,7 @@ const OpeningBalancesPage: React.FC = () => {
                               </div>
                             </div>
                           </TableCell>
-                          <TableCell>{format(new Date(balance.effective_date), "MMM d, yyyy")}</TableCell>
+                          <TableCell>{formatDateForDisplay(balance.effective_date)}</TableCell>
                           <TableCell>
                             {balance.previous_employer_name ? (
                               <div>
