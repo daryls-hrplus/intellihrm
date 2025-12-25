@@ -14,7 +14,8 @@ export type TransactionType =
   | "TRANSFER" 
   | "SECONDMENT"
   | "TERMINATION"
-  | "SALARY_RATE_CHANGE";
+  | "SALARY_CHANGE"
+  | "RATE_CHANGE";
 
 export type TransactionStatus = 
   | "draft" 
