@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 
 // Helper to avoid deep type instantiation
@@ -12,6 +13,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Search, Mail, Phone, Building, MapPin, Users } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 interface Employee {
   id: string;
@@ -30,6 +32,9 @@ interface Department {
 
 export default function EmployeeDirectoryPage() {
   const { profile } = useAuth();
+  const { t } = useTranslation();
+  const [searchParams] = useSearchParams();
+  const fromHrHub = searchParams.get("from") === "hr-hub";
   
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [departments, setDepartments] = useState<Department[]>([]);
@@ -122,10 +127,15 @@ export default function EmployeeDirectoryPage() {
       .toUpperCase()
       .slice(0, 2);
 
-  const breadcrumbItems = [
-    { label: "Employee Self-Service", href: "/ess" },
-    { label: "Employee Directory" },
-  ];
+  const breadcrumbItems = fromHrHub
+    ? [
+        { label: t("navigation.hrHub"), href: "/hr-hub" },
+        { label: t("hrHub.employeeDirectory") },
+      ]
+    : [
+        { label: t("navigation.ess"), href: "/ess" },
+        { label: t("hrHub.employeeDirectory") },
+      ];
 
   return (
     <AppLayout>
