@@ -343,6 +343,24 @@ export function useLeaveManagement(companyId?: string) {
     },
   });
 
+  // Delete leave type (soft delete by setting is_active to false)
+  const deleteLeaveType = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase
+        .from("leave_types")
+        .update({ is_active: false, updated_at: new Date().toISOString() })
+        .eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["leave-types"] });
+      toast.success("Leave type deleted successfully");
+    },
+    onError: (error: Error) => {
+      toast.error(`Failed to delete leave type: ${error.message}`);
+    },
+  });
+
   // Create accrual rule
   const createAccrualRule = useMutation({
     mutationFn: async (rule: Partial<LeaveAccrualRule>) => {
@@ -542,6 +560,7 @@ export function useLeaveManagement(companyId?: string) {
     // Mutations
     createLeaveType,
     updateLeaveType,
+    deleteLeaveType,
     createAccrualRule,
     createRolloverRule,
     createLeaveRequest,
