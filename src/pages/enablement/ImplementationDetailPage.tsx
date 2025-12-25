@@ -21,7 +21,7 @@ import {
   TrendingUp,
   AlertCircle,
 } from "lucide-react";
-import { format } from "date-fns";
+import { formatDateForDisplay } from "@/utils/dateUtils";
 import { supabase } from "@/integrations/supabase/client";
 import type { ModuleImplementation, ImplementationStatus } from "@/types/implementation";
 import { toast } from "sonner";
@@ -245,7 +245,7 @@ export default function ImplementationDetailPage() {
                 <div>
                   <p className="text-2xl font-bold">
                     {implementation.started_at 
-                      ? format(new Date(implementation.started_at), "MMM d") 
+                      ? formatDateForDisplay(implementation.started_at, "MMM d") 
                       : "—"}
                   </p>
                   <p className="text-xs text-muted-foreground">Started</p>
@@ -262,7 +262,7 @@ export default function ImplementationDetailPage() {
                 <div>
                   <p className="text-2xl font-bold">
                     {implementation.target_go_live 
-                      ? format(new Date(implementation.target_go_live), "MMM d") 
+                      ? formatDateForDisplay(implementation.target_go_live, "MMM d") 
                       : "—"}
                   </p>
                   <p className="text-xs text-muted-foreground">Target Go-Live</p>
@@ -321,13 +321,13 @@ export default function ImplementationDetailPage() {
                   <div>
                     <p className="text-sm text-muted-foreground">Created At</p>
                     <p className="font-medium">
-                      {format(new Date(implementation.created_at), "PPP")}
+                      {formatDateForDisplay(implementation.created_at, "PPP")}
                     </p>
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">Last Updated</p>
                     <p className="font-medium">
-                      {format(new Date(implementation.updated_at), "PPP")}
+                      {formatDateForDisplay(implementation.updated_at, "PPP")}
                     </p>
                   </div>
                 </div>

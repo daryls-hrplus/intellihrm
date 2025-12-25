@@ -11,7 +11,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { Plus, Trash2, FileText, Download, Upload, AlertCircle, Filter, ExternalLink, Eye, Pencil, Archive, Clock, CheckCircle, XCircle } from "lucide-react";
-import { format, isBefore, addDays, differenceInDays } from "date-fns";
+import { format, isBefore, addDays, differenceInDays, parseISO } from "date-fns";
+import { formatDateForDisplay } from "@/utils/dateUtils";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useAuth } from "@/contexts/AuthContext";
@@ -720,8 +721,8 @@ export function EmployeeDocumentsTab({ employeeId }: EmployeeDocumentsTabProps) 
                       {doc.document_name}
                     </div>
                   </TableCell>
-                  <TableCell>{doc.issue_date ? format(new Date(doc.issue_date), "MMM d, yyyy") : "-"}</TableCell>
-                  <TableCell>{doc.expiry_date ? format(new Date(doc.expiry_date), "MMM d, yyyy") : "-"}</TableCell>
+                  <TableCell>{doc.issue_date ? formatDateForDisplay(doc.issue_date, "MMM d, yyyy") : "-"}</TableCell>
+                  <TableCell>{doc.expiry_date ? formatDateForDisplay(doc.expiry_date, "MMM d, yyyy") : "-"}</TableCell>
                   <TableCell>{doc.issuing_authority || "-"}</TableCell>
                   <TableCell>{getStatusBadge(doc)}</TableCell>
                   <TableCell>{getVerificationBadge(doc) || "-"}</TableCell>

@@ -7,7 +7,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Loader2, CheckCircle, XCircle, GraduationCap, Award, FileText, Calendar, Building, MapPin } from "lucide-react";
-import { format } from "date-fns";
+import { formatDateForDisplay } from "@/utils/dateUtils";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -139,7 +139,7 @@ export function VerificationDialog({
                     {qualification.date_awarded && (
                       <div className="flex items-center gap-2">
                         <Calendar className="h-4 w-4 text-muted-foreground" />
-                        <span>Awarded: {format(new Date(qualification.date_awarded), "PPP")}</span>
+                        <span>Awarded: {formatDateForDisplay(qualification.date_awarded, "PPP")}</span>
                       </div>
                     )}
                   </>
@@ -160,13 +160,13 @@ export function VerificationDialog({
                     {qualification.issued_date && (
                       <div className="flex items-center gap-2">
                         <Calendar className="h-4 w-4 text-muted-foreground" />
-                        <span>Issued: {format(new Date(qualification.issued_date), "PPP")}</span>
+                        <span>Issued: {formatDateForDisplay(qualification.issued_date, "PPP")}</span>
                       </div>
                     )}
                     {qualification.expiry_date && (
                       <div className="flex items-center gap-2">
                         <Calendar className="h-4 w-4 text-muted-foreground" />
-                        <span>Expires: {format(new Date(qualification.expiry_date), "PPP")}</span>
+                        <span>Expires: {formatDateForDisplay(qualification.expiry_date, "PPP")}</span>
                       </div>
                     )}
                   </>

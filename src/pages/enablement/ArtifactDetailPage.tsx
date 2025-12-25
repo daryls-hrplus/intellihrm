@@ -13,7 +13,7 @@ import {
 } from 'lucide-react';
 import { useEnablementArtifacts, useArtifact } from '@/hooks/useEnablementArtifacts';
 import { ArtifactStatusBadge } from '@/components/enablement/artifacts/ArtifactStatusBadge';
-import { format } from 'date-fns';
+import { formatDateForDisplay } from "@/utils/dateUtils";
 import type { ArtifactStatus } from '@/types/artifact';
 
 export default function ArtifactDetailPage() {
@@ -279,32 +279,32 @@ export default function ArtifactDetailPage() {
                   <div className="flex items-center gap-2">
                     <Clock className="h-4 w-4 text-muted-foreground" />
                     <span className="text-muted-foreground">Created</span>
-                    <span className="ml-auto">{format(new Date(artifact.created_at), 'PPP')}</span>
+                    <span className="ml-auto">{formatDateForDisplay(artifact.created_at, 'PPP')}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <Clock className="h-4 w-4 text-muted-foreground" />
                     <span className="text-muted-foreground">Updated</span>
-                    <span className="ml-auto">{format(new Date(artifact.updated_at), 'PPP')}</span>
+                    <span className="ml-auto">{formatDateForDisplay(artifact.updated_at, 'PPP')}</span>
                   </div>
                   {artifact.submitted_at && (
                     <div className="flex items-center gap-2">
                       <Send className="h-4 w-4 text-muted-foreground" />
                       <span className="text-muted-foreground">Submitted</span>
-                      <span className="ml-auto">{format(new Date(artifact.submitted_at), 'PPP')}</span>
+                      <span className="ml-auto">{formatDateForDisplay(artifact.submitted_at, 'PPP')}</span>
                     </div>
                   )}
                   {artifact.approved_at && (
                     <div className="flex items-center gap-2">
                       <CheckCircle className="h-4 w-4 text-muted-foreground" />
                       <span className="text-muted-foreground">Approved</span>
-                      <span className="ml-auto">{format(new Date(artifact.approved_at), 'PPP')}</span>
+                      <span className="ml-auto">{formatDateForDisplay(artifact.approved_at, 'PPP')}</span>
                     </div>
                   )}
                   {artifact.published_at && (
                     <div className="flex items-center gap-2">
                       <Globe className="h-4 w-4 text-muted-foreground" />
                       <span className="text-muted-foreground">Published</span>
-                      <span className="ml-auto">{format(new Date(artifact.published_at), 'PPP')}</span>
+                      <span className="ml-auto">{formatDateForDisplay(artifact.published_at, 'PPP')}</span>
                     </div>
                   )}
                 </CardContent>
@@ -402,7 +402,7 @@ export default function ArtifactDetailPage() {
                           <p className="text-sm text-muted-foreground mt-1">{entry.comments}</p>
                         )}
                         <p className="text-xs text-muted-foreground mt-1">
-                          {format(new Date(entry.created_at), 'PPP p')}
+                          {formatDateForDisplay(entry.created_at, 'PPP p')}
                         </p>
                       </div>
                     </div>

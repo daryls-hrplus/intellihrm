@@ -6,7 +6,8 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Bell, Calendar, Clock, CheckCircle2, Loader2, AlertTriangle, Info, Award, FileCheck, Plane, FileText, GraduationCap, User, ExternalLink } from 'lucide-react';
-import { format, isToday, isTomorrow, isPast, differenceInDays } from 'date-fns';
+import { format, isToday, isTomorrow, isPast, differenceInDays, parseISO } from 'date-fns';
+import { formatDateForDisplay } from "@/utils/dateUtils";
 import type { EmployeeReminder } from '@/types/reminders';
 import { REMINDER_STATUS } from '@/types/reminders';
 
@@ -170,7 +171,7 @@ export function MyRemindersList({ showCreateButton = false }: MyRemindersListPro
                     <div className="flex items-center gap-4 mt-3 text-sm flex-wrap">
                       <div className="flex items-center gap-1.5">
                         <Calendar className="h-4 w-4 text-muted-foreground" />
-                        <span>Event: {format(new Date(reminder.event_date), 'MMM dd, yyyy')}</span>
+                        <span>Event: {formatDateForDisplay(reminder.event_date, 'MMM dd, yyyy')}</span>
                       </div>
                       <div className={`flex items-center gap-1.5 ${getDateColor(reminder.reminder_date)}`}>
                         <Clock className="h-4 w-4" />

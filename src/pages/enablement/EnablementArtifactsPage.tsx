@@ -9,7 +9,7 @@ import { Plus, Search, FileText, Filter } from 'lucide-react';
 import { useEnablementArtifacts } from '@/hooks/useEnablementArtifacts';
 import { useApplicationModules } from '@/hooks/useApplicationFeatures';
 import { ArtifactStatusBadge } from '@/components/enablement/artifacts/ArtifactStatusBadge';
-import { format } from 'date-fns';
+import { formatDateForDisplay } from "@/utils/dateUtils";
 import type { ArtifactStatus } from '@/types/artifact';
 
 export default function EnablementArtifactsPage() {
@@ -159,7 +159,7 @@ export default function EnablementArtifactsPage() {
                       <span>{artifact.artifact_id}</span>
                       {artifact.module && <span>{artifact.module.module_name}</span>}
                       <span>{artifact.steps?.length || 0} steps</span>
-                      <span>Updated {format(new Date(artifact.updated_at), 'MMM d, yyyy')}</span>
+                      <span>Updated {formatDateForDisplay(artifact.updated_at, 'MMM d, yyyy')}</span>
                     </div>
                   </div>
                   <div className="flex flex-wrap gap-1">

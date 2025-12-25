@@ -618,7 +618,7 @@ export function OrgChartVisualization({ companyId }: OrgChartVisualizationProps)
             <div className="mt-8 pt-6 border-t">
               <h3 className="text-lg font-semibold mb-4 flex items-center gap-2 text-destructive">
                 <Minus className="h-5 w-5" />
-                Removed Positions (were active on {format(new Date(compareDate), "MMM d, yyyy")})
+                Removed Positions (were active on {formatDateForDisplay(compareDate, "MMM d, yyyy")})
               </h3>
               <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
                 {removedPositions.map((pos) => {

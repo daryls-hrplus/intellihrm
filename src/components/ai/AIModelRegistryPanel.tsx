@@ -3,7 +3,8 @@ import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useAIGovernance } from "@/hooks/useAIGovernance";
 import { Bot, CheckCircle, AlertTriangle, Clock, Shield } from "lucide-react";
-import { format, formatDistanceToNow } from "date-fns";
+import { format, formatDistanceToNow, parseISO } from "date-fns";
+import { formatDateForDisplay } from "@/utils/dateUtils";
 
 const complianceColors: Record<string, string> = {
   compliant: "default",
@@ -133,7 +134,7 @@ export function AIModelRegistryPanel() {
                     <div className="text-right text-xs text-muted-foreground">
                       {model.last_audit_date && (
                         <p>
-                          Last audit: {format(new Date(model.last_audit_date), "MMM d, yyyy")}
+                          Last audit: {formatDateForDisplay(model.last_audit_date, "MMM d, yyyy")}
                         </p>
                       )}
                       {model.next_audit_due && (

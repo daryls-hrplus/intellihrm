@@ -217,7 +217,7 @@ export default function CompanyAnnouncementsPage() {
                           {ann.is_active ? "Active" : "Inactive"}
                         </Badge>
                       </TableCell>
-                      <TableCell>{format(new Date(ann.created_at), "MMM d, yyyy")}</TableCell>
+                      <TableCell>{formatDateForDisplay(ann.created_at, "MMM d, yyyy")}</TableCell>
                       <TableCell>
                         <div className="flex gap-2">
                           <Button size="sm" variant="ghost" onClick={() => handleEdit(ann)}>
