@@ -43,9 +43,9 @@ export default function LeaveDashboardPage() {
   const { hasTabAccess } = useGranularPermissions();
   const isAdminOrHR = isAdmin || hasRole("hr_manager");
   
-  // Company filter state
+  // Company filter state - "all" means all companies
   const [companies, setCompanies] = useState<Company[]>([]);
-  const [selectedCompanyId, setSelectedCompanyId] = useState<string>(company?.id || "");
+  const [selectedCompanyId, setSelectedCompanyId] = useState<string>(isAdminOrHR ? "all" : (company?.id || ""));
   
   // Fetch companies for filter
   useEffect(() => {
@@ -61,18 +61,21 @@ export default function LeaveDashboardPage() {
     }
   }, [isAdminOrHR]);
 
-  // Set default company when loaded
+  // Set default for non-admin users
   useEffect(() => {
-    if (company?.id && !selectedCompanyId) {
+    if (!isAdminOrHR && company?.id && !selectedCompanyId) {
       setSelectedCompanyId(company.id);
     }
-  }, [company?.id, selectedCompanyId]);
+  }, [company?.id, selectedCompanyId, isAdminOrHR]);
 
-  const { leaveBalances, allLeaveRequests } = useLeaveManagement(selectedCompanyId || company?.id);
+  // Pass undefined for "all" to fetch all companies, otherwise pass the selected company ID
+  const effectiveCompanyId = selectedCompanyId === "all" ? undefined : (selectedCompanyId || company?.id);
+  const { leaveBalances, allLeaveRequests, allLeaveBalances } = useLeaveManagement(effectiveCompanyId);
   
   const pendingCount = allLeaveRequests.filter(r => r.status === "pending").length;
   const approvedThisYear = allLeaveRequests.filter(r => r.status === "approved").length;
-  const totalBalance = leaveBalances.reduce((sum, b) => sum + (b.current_balance || 0), 0);
+  const displayBalances = selectedCompanyId === "all" ? allLeaveBalances : leaveBalances;
+  const totalBalance = displayBalances.reduce((sum, b) => sum + (b.current_balance || 0), 0);
 
   // Define all modules
   const allModules = {
@@ -238,7 +241,7 @@ export default function LeaveDashboardPage() {
     { label: t("leave.stats.availableDays"), value: totalBalance.toFixed(1), icon: Calendar, color: "bg-primary/10 text-primary" },
     { label: t("leave.stats.pendingRequests"), value: pendingCount, icon: Clock, color: "bg-warning/10 text-warning" },
     { label: t("leave.stats.approvedThisYear"), value: approvedThisYear, icon: CheckCircle, color: "bg-success/10 text-success" },
-    { label: t("leave.stats.leaveTypes"), value: leaveBalances.length, icon: CalendarCheck, color: "bg-info/10 text-info" },
+    { label: t("leave.stats.leaveTypes"), value: displayBalances.length, icon: CalendarCheck, color: "bg-info/10 text-info" },
   ];
 
   return (
@@ -260,13 +263,16 @@ export default function LeaveDashboardPage() {
               </div>
             </div>
             <div className="flex items-center gap-2">
-              {isAdminOrHR && companies.length > 1 && (
+              {isAdminOrHR && companies.length > 0 && (
                 <Select value={selectedCompanyId} onValueChange={setSelectedCompanyId}>
-                  <SelectTrigger className="w-[200px]">
+                  <SelectTrigger className="w-[220px]">
                     <Building2 className="mr-2 h-4 w-4" />
                     <SelectValue placeholder={t("leave.selectCompany")} />
                   </SelectTrigger>
                   <SelectContent>
+                    <SelectItem value="all">
+                      <span className="font-medium">All Companies</span>
+                    </SelectItem>
                     {companies.map((c) => (
                       <SelectItem key={c.id} value={c.id}>
                         {c.name}

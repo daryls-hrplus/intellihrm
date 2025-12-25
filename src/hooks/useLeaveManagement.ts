@@ -211,7 +211,7 @@ export function useLeaveManagement(companyId?: string) {
     },
   });
 
-  // Fetch employee leave balances
+  // Fetch employee leave balances (for current user)
   const { data: leaveBalances = [], isLoading: loadingBalances, refetch: refetchBalances } = useQuery({
     queryKey: ["leave-balances", user?.id, currentYear],
     queryFn: async () => {
@@ -227,6 +227,46 @@ export function useLeaveManagement(companyId?: string) {
       return data as LeaveBalance[];
     },
     enabled: !!user?.id,
+  });
+
+  // Fetch all leave balances across all employees (for admin view)
+  const { data: allLeaveBalances = [], isLoading: loadingAllBalances, refetch: refetchAllBalances } = useQuery({
+    queryKey: ["all-leave-balances", companyId, currentYear],
+    queryFn: async () => {
+      // First get all leave balances
+      const { data: balances, error: balancesError } = await supabase
+        .from("leave_balances")
+        .select("*, leave_type:leave_types(*)")
+        .eq("year", currentYear);
+
+      if (balancesError) throw balancesError;
+
+      // Then get all profiles to join
+      let profilesQuery = supabase
+        .from("profiles")
+        .select("id, full_name, email, company_id")
+        .eq("is_active", true);
+
+      if (companyId) {
+        profilesQuery = profilesQuery.eq("company_id", companyId);
+      }
+
+      const { data: profiles, error: profilesError } = await profilesQuery;
+      if (profilesError) throw profilesError;
+
+      // Create a map of profiles for quick lookup
+      const profileMap = new Map(profiles?.map(p => [p.id, p]) || []);
+
+      // Join balances with employee profiles
+      const result = (balances || [])
+        .filter(balance => profileMap.has(balance.employee_id))
+        .map(balance => ({
+          ...balance,
+          employee: profileMap.get(balance.employee_id),
+        }));
+
+      return result as (LeaveBalance & { employee: { id: string; full_name: string; email: string; company_id: string } })[];
+    },
   });
 
   // Fetch employee leave requests
@@ -543,16 +583,18 @@ export function useLeaveManagement(companyId?: string) {
     accrualRules,
     rolloverRules,
     leaveBalances,
+    allLeaveBalances,
     leaveRequests,
     allLeaveRequests,
     holidays,
     countryHolidays,
     // Loading states
-    isLoading: loadingTypes || loadingAccrualRules || loadingRolloverRules || loadingBalances || loadingRequests || loadingHolidays || loadingAllRequests || loadingCountryHolidays,
+    isLoading: loadingTypes || loadingAccrualRules || loadingRolloverRules || loadingBalances || loadingRequests || loadingHolidays || loadingAllRequests || loadingCountryHolidays || loadingAllBalances,
     loadingTypes,
     loadingAccrualRules,
     loadingRolloverRules,
     loadingBalances,
+    loadingAllBalances,
     loadingRequests,
     loadingAllRequests,
     loadingHolidays,
@@ -570,6 +612,7 @@ export function useLeaveManagement(companyId?: string) {
     recalculateLeaveBalance,
     // Refetch
     refetchBalances,
+    refetchAllBalances,
     refetchRequests,
     refetchAllRequests,
   };
