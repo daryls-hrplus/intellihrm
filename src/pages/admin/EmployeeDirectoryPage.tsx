@@ -20,6 +20,7 @@ interface Employee {
   full_name: string;
   email: string;
   avatar_url: string | null;
+  department_id?: string | null;
   department?: { name: string } | null;
   company?: { name: string } | null;
   position_title?: string;
@@ -43,20 +44,36 @@ export default function EmployeeDirectoryPage() {
   const [selectedDepartment, setSelectedDepartment] = useState<string>("all");
 
   useEffect(() => {
-    loadData();
-  }, []);
+    if (profile?.company_id) {
+      loadData();
+    }
+  }, [profile?.company_id, fromHrHub]);
 
   const loadData = async () => {
     setIsLoading(true);
     try {
-      const empRes: any = await query("profiles")
+      // For ESS, filter by user's company; for HR Hub, show all
+      let empQuery = query("profiles")
         .select("id, full_name, email, avatar_url, department_id, company_id")
         .eq("is_active", true)
         .order("full_name");
 
-      const deptRes: any = await query("departments")
+      if (!fromHrHub && profile?.company_id) {
+        empQuery = empQuery.eq("company_id", profile.company_id);
+      }
+
+      const empRes: any = await empQuery;
+
+      // For departments, filter by company for ESS
+      let deptQuery = query("departments")
         .select("id, name")
         .order("name");
+
+      if (!fromHrHub && profile?.company_id) {
+        deptQuery = deptQuery.eq("company_id", profile.company_id);
+      }
+
+      const deptRes: any = await deptQuery;
 
       const companyRes: any = await query("companies")
         .select("id, name");
@@ -92,6 +109,7 @@ export default function EmployeeDirectoryPage() {
           full_name: emp.full_name || "",
           email: emp.email || "",
           avatar_url: emp.avatar_url,
+          department_id: emp.department_id,
           department: emp.department_id ? { name: String(deptMap.get(emp.department_id) || "") } : null,
           company: emp.company_id ? { name: String(companyMap.get(emp.company_id) || "") } : null,
           position_title: positionTitle,
@@ -114,7 +132,7 @@ export default function EmployeeDirectoryPage() {
       (emp.position_title?.toLowerCase().includes(searchTerm.toLowerCase()) ?? false);
 
     const matchesDepartment =
-      selectedDepartment === "all" || emp.department?.name === selectedDepartment;
+      selectedDepartment === "all" || emp.department_id === selectedDepartment;
 
     return matchesSearch && matchesDepartment;
   });
@@ -170,7 +188,7 @@ export default function EmployeeDirectoryPage() {
             <SelectContent>
               <SelectItem value="all">All Departments</SelectItem>
               {departments.map((dept) => (
-                <SelectItem key={dept.id} value={dept.name}>
+                <SelectItem key={dept.id} value={dept.id}>
                   {dept.name}
                 </SelectItem>
               ))}
