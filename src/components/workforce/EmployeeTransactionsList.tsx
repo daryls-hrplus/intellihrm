@@ -284,6 +284,8 @@ export function EmployeeTransactionsList({
         return transaction.to_position_id || transaction.from_position_id;
       case "TRANSFER":
         return transaction.position_id;
+      case "SALARY_RATE_CHANGE":
+        return transaction.position_id;
       default:
         return transaction.position_id;
     }
