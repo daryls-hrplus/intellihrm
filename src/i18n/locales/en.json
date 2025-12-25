@@ -1976,6 +1976,10 @@
         "title": "Users",
         "description": "Manage user accounts and access"
       },
+      "employeeDirectory": {
+        "title": "Employee Directory",
+        "description": "Find and connect with colleagues"
+      },
       "roles": {
         "title": "Roles & Permissions",
         "description": "Configure role-based access control"
@@ -4763,6 +4767,9 @@
     "tasksEvents": "Tasks & Events",
     "complianceWorkflows": "Compliance & Workflows",
     "organizationConfiguration": "Organization & Configuration",
+    "employeeServices": "Employee Services",
+    "employeeDirectory": "Employee Directory",
+    "employeeDirectoryDesc": "Find and connect with colleagues across the organization",
     "helpDesk": "Help Desk",
     "helpDeskDesc": "Manage employee tickets and support requests",
     "announcements": "Announcements",

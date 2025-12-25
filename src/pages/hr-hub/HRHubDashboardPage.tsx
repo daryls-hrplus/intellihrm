@@ -23,6 +23,7 @@ import {
   List,
   GitBranch,
   Bot,
+  Users,
 } from "lucide-react";
 
 // Hub sections and quick actions are now defined inside the component for i18n
@@ -32,6 +33,12 @@ export default function HRHubDashboardPage() {
   const { t } = useLanguage();
 
   const hubSections = [
+    {
+      titleKey: "hrHub.employeeServices",
+      items: [
+        { titleKey: "hrHub.employeeDirectory", descKey: "hrHub.employeeDirectoryDesc", icon: Users, href: "/ess/directory", badge: null },
+      ],
+    },
     {
       titleKey: "hrHub.communicationSupport",
       items: [
