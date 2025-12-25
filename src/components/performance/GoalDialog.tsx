@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   Dialog,
   DialogContent,
@@ -17,6 +17,7 @@ import {
   MeasurementType,
   ComplianceCategory,
   GoalExtendedAttributes,
+  SubMetricDefinition,
 } from "@/types/goalEnhancements";
 import {
   parseExtendedAttributes,
@@ -37,6 +38,7 @@ import { GoalWeightWarning } from "./GoalWeightSummary";
 import { GoalAlignmentManager } from "./GoalAlignmentManager";
 import { GoalVisibilitySettings } from "./GoalVisibilitySettings";
 import { ProgressRollupConfig } from "./ProgressRollupConfig";
+import { useGoalSubMetrics, GoalSubMetricValue } from "@/hooks/useGoalSubMetrics";
 
 type GoalStatus = 'draft' | 'active' | 'in_progress' | 'completed' | 'cancelled' | 'overdue';
 type DbGoalLevel = 'company' | 'department' | 'team' | 'individual';
@@ -178,6 +180,33 @@ export function GoalDialog({
   const [currentEmployeeWeight, setCurrentEmployeeWeight] = useState(0);
   
   const { validateEmployeeWeights, refetch: refetchWeights } = useGoalWeights(companyId);
+
+  // Sub-metrics hook for composite/OKR/delta templates
+  const {
+    subMetrics,
+    loading: subMetricsLoading,
+    saving: subMetricsSaving,
+    compositeProgress,
+    subMetricProgress,
+    initializeFromTemplate,
+    updateSubMetric,
+    saveSubMetrics,
+    loadSubMetrics,
+  } = useGoalSubMetrics();
+
+  // Handler for initializing sub-metrics from template
+  const handleInitializeSubMetrics = useCallback((templateSubMetrics: SubMetricDefinition[]) => {
+    // Use a temporary ID for new goals, will be updated after save
+    const tempGoalId = goal?.id || 'temp-goal';
+    initializeFromTemplate(tempGoalId, templateSubMetrics);
+  }, [goal?.id, initializeFromTemplate]);
+
+  // Load sub-metrics when editing an existing goal
+  useEffect(() => {
+    if (goal?.id && open) {
+      loadSubMetrics(goal.id);
+    }
+  }, [goal?.id, open, loadSubMetrics]);
 
   // Fetch job goals for selected employee
   const fetchJobGoalsForEmployee = async (employeeId: string) => {
@@ -360,6 +389,8 @@ export function GoalDialog({
         assigned_by: formData.goal_source === "manager_assigned" ? user.id : null,
       };
 
+      let savedGoalId: string;
+
       if (goal) {
         const { error } = await supabase
           .from("performance_goals")
@@ -367,6 +398,7 @@ export function GoalDialog({
           .eq("id", goal.id);
 
         if (error) throw error;
+        savedGoalId = goal.id;
 
         await logAction({
           action: "UPDATE",
@@ -386,6 +418,7 @@ export function GoalDialog({
           .single();
 
         if (error) throw error;
+        savedGoalId = data.id;
 
         await logAction({
           action: "CREATE",
@@ -396,6 +429,11 @@ export function GoalDialog({
         });
 
         toast.success("Goal created successfully");
+      }
+
+      // Save sub-metrics if any exist
+      if (subMetrics.length > 0) {
+        await saveSubMetrics(savedGoalId);
       }
 
       onOpenChange(false);
@@ -616,6 +654,11 @@ export function GoalDialog({
                     companyId={companyId}
                     employeeId={formData.goal_level === "individual" ? (formData.employee_id || user?.id) : undefined}
                     existingGoalId={goal?.id}
+                    subMetrics={subMetrics}
+                    onSubMetricUpdate={updateSubMetric}
+                    onInitializeSubMetrics={handleInitializeSubMetrics}
+                    compositeProgress={compositeProgress}
+                    subMetricProgress={subMetricProgress}
                   />
                 )}
 
@@ -783,6 +826,11 @@ export function GoalDialog({
                   companyId={companyId}
                   employeeId={formData.goal_level === "individual" ? (formData.employee_id || user?.id) : undefined}
                   existingGoalId={goal?.id}
+                  subMetrics={subMetrics}
+                  onSubMetricUpdate={updateSubMetric}
+                  onInitializeSubMetrics={handleInitializeSubMetrics}
+                  compositeProgress={compositeProgress}
+                  subMetricProgress={subMetricProgress}
                 />
               )}
 
