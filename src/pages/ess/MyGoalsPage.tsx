@@ -53,7 +53,7 @@ import { GoalsAnalyticsDashboard } from "@/components/performance/GoalsAnalytics
 import { GoalCheckInDialog } from "@/components/performance/GoalCheckInDialog";
 import { GoalMilestonesManager } from "@/components/performance/GoalMilestonesManager";
 import { CheckInHistoryTimeline } from "@/components/performance/CheckInHistoryTimeline";
-import { useGoalCheckIns } from "@/hooks/useGoalCheckIns";
+import { useGoalCheckIns, GoalCheckIn } from "@/hooks/useGoalCheckIns";
 import { toast } from "sonner";
 import { useLanguage } from "@/hooks/useLanguage";
 
@@ -104,8 +104,9 @@ export default function MyGoalsPage() {
   const [milestonesDialogOpen, setMilestonesDialogOpen] = useState(false);
   const [historyDialogOpen, setHistoryDialogOpen] = useState(false);
   
-  const { getOverdueCheckIns } = useGoalCheckIns();
+  const { getOverdueCheckIns, getRequestedCheckIns } = useGoalCheckIns();
   const [pendingCheckIns, setPendingCheckIns] = useState<Record<string, { dueDate: string | null; daysToDue: number | null }>>({});
+  const [requestedCheckIns, setRequestedCheckIns] = useState<GoalCheckIn[]>([]);
 
   const fetchGoals = async () => {
     if (!user?.id) return;
@@ -130,6 +131,7 @@ export default function MyGoalsPage() {
   useEffect(() => {
     fetchGoals();
     fetchPendingCheckIns();
+    fetchRequestedCheckIns();
   }, [user?.id]);
   
   const fetchPendingCheckIns = async () => {
@@ -153,11 +155,35 @@ export default function MyGoalsPage() {
             };
           }
         });
-        setPendingCheckIns(checkInDates);
+      setPendingCheckIns(checkInDates);
       }
     } catch (error) {
       console.error("Error fetching pending check-ins:", error);
     }
+  };
+  
+  const fetchRequestedCheckIns = async () => {
+    if (!user?.id) return;
+    
+    try {
+      const data = await getRequestedCheckIns(user.id);
+      setRequestedCheckIns(data);
+    } catch (error) {
+      console.error("Error fetching requested check-ins:", error);
+    }
+  };
+
+  // Helper to get requested check-in for a goal
+  const getRequestedCheckIn = (goalId: string) => {
+    return requestedCheckIns.find(c => c.goal_id === goalId);
+  };
+  
+  // Helper to extract manager request message
+  const getRequestMessage = (checkIn: GoalCheckIn) => {
+    if (checkIn.coaching_notes?.startsWith("[CHECK-IN REQUEST]")) {
+      return checkIn.coaching_notes.replace("[CHECK-IN REQUEST] ", "");
+    }
+    return null;
   };
 
   // Filtered goals with overdue detection
@@ -430,12 +456,52 @@ export default function MyGoalsPage() {
               const effectiveStatus = isOverdue ? "overdue" : goal.status;
               const status = statusConfig[effectiveStatus] || statusConfig.active;
               const isEditable = goal.status === "active" || goal.status === "in_progress";
+              
+              // Check for manager-requested check-in
+              const requestedCheckIn = getRequestedCheckIn(goal.id);
+              const requestMessage = requestedCheckIn ? getRequestMessage(requestedCheckIn) : null;
+              const checkInDueDate = requestedCheckIn?.check_in_date;
+              const checkInDaysLeft = checkInDueDate ? differenceInDays(new Date(checkInDueDate), new Date()) : null;
 
               return (
                 <Card 
                   key={goal.id} 
-                  className={`overflow-hidden transition-all ${isOverdue ? "border-warning/50" : ""} ${isAtRisk && !isOverdue ? "border-warning/30" : ""}`}
+                  className={`overflow-hidden transition-all ${isOverdue ? "border-warning/50" : ""} ${isAtRisk && !isOverdue ? "border-warning/30" : ""} ${requestedCheckIn ? "border-primary/50" : ""}`}
                 >
+                  {/* Manager-requested check-in alert */}
+                  {requestedCheckIn && (
+                    <div className="bg-primary/10 border-b border-primary/20 px-6 py-3">
+                      <div className="flex items-start gap-3">
+                        <ClipboardCheck className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="font-medium text-primary">Check-in Requested by Manager</span>
+                            {checkInDaysLeft !== null && (
+                              <Badge 
+                                variant={checkInDaysLeft <= 0 ? "destructive" : checkInDaysLeft <= 2 ? "outline" : "secondary"}
+                                className={checkInDaysLeft <= 2 && checkInDaysLeft > 0 ? "border-warning text-warning" : ""}
+                              >
+                                {checkInDaysLeft <= 0 
+                                  ? "Due today!" 
+                                  : checkInDaysLeft === 1 
+                                    ? "Due tomorrow" 
+                                    : `Due in ${checkInDaysLeft} days`}
+                              </Badge>
+                            )}
+                          </div>
+                          {requestMessage && (
+                            <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
+                              "{requestMessage}"
+                            </p>
+                          )}
+                        </div>
+                        <Button size="sm" onClick={() => handleCheckIn(goal)}>
+                          <ClipboardCheck className="h-4 w-4 mr-1" />
+                          Submit Check-in
+                        </Button>
+                      </div>
+                    </div>
+                  )}
                   <CardContent className="p-6">
                     <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
                       <div className="flex-1 space-y-2">

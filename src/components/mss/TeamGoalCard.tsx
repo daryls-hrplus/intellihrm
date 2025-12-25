@@ -54,6 +54,7 @@ interface TeamGoalCardProps {
   onRequestUpdate: (goal: Goal) => void;
   onManageDependencies?: (goal: Goal) => void;
   onReviewCheckIn?: (goal: Goal) => void;
+  onRequestCheckIn?: (goal: Goal) => void;
   pendingCheckInCount?: number;
 }
 
@@ -75,6 +76,7 @@ export function TeamGoalCard({
   onRequestUpdate,
   onManageDependencies,
   onReviewCheckIn,
+  onRequestCheckIn,
   pendingCheckInCount = 0,
 }: TeamGoalCardProps) {
   const isOverdue = goal.due_date && isPast(new Date(goal.due_date)) && goal.status !== "completed";
@@ -158,6 +160,12 @@ export function TeamGoalCard({
                   <RefreshCw className="mr-2 h-4 w-4" />
                   Request Update
                 </DropdownMenuItem>
+                {onRequestCheckIn && (
+                  <DropdownMenuItem onClick={() => onRequestCheckIn(goal)}>
+                    <ClipboardCheck className="mr-2 h-4 w-4" />
+                    Request Check-in
+                  </DropdownMenuItem>
+                )}
                 {onManageDependencies && (
                   <DropdownMenuItem onClick={() => onManageDependencies(goal)}>
                     <Link2 className="mr-2 h-4 w-4" />

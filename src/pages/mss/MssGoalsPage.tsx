@@ -19,6 +19,7 @@ import {
   BarChart3,
   Lightbulb,
   MessageSquare,
+  MessageSquarePlus,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -33,6 +34,7 @@ import { ManagerCoachingPrompts } from "@/components/mss/ManagerCoachingPrompts"
 import { ManagerCheckInPrompt } from "@/components/performance/ManagerCheckInPrompt";
 import { ProgressVisualizationDashboard } from "@/components/performance/ProgressVisualizationDashboard";
 import { ManagerCheckInReviewDialog } from "@/components/performance/ManagerCheckInReviewDialog";
+import { RequestCheckInDialog } from "@/components/performance/RequestCheckInDialog";
 import { GoalCheckIn } from "@/hooks/useGoalCheckIns";
 import { format, isPast } from "date-fns";
 import { formatDateForDisplay, getTodayString } from "@/utils/dateUtils";
@@ -115,6 +117,11 @@ const statusColors: Record<GoalStatus, string> = {
   // Check-in review dialog
   const [reviewDialogOpen, setReviewDialogOpen] = useState(false);
   const [selectedCheckIn, setSelectedCheckIn] = useState<GoalCheckIn | null>(null);
+
+  // Request check-in dialog
+  const [requestCheckInDialogOpen, setRequestCheckInDialogOpen] = useState(false);
+  const [preSelectedEmployeeId, setPreSelectedEmployeeId] = useState<string | undefined>();
+  const [preSelectedGoalId, setPreSelectedGoalId] = useState<string | undefined>();
 
   useEffect(() => {
     if (user?.id) {
@@ -335,6 +342,17 @@ const statusColors: Record<GoalStatus, string> = {
     setReviewDialogOpen(true);
   };
 
+  const handleRequestCheckIn = (goal?: Goal) => {
+    if (goal) {
+      setPreSelectedEmployeeId(goal.employee_id || undefined);
+      setPreSelectedGoalId(goal.id);
+    } else {
+      setPreSelectedEmployeeId(undefined);
+      setPreSelectedGoalId(undefined);
+    }
+    setRequestCheckInDialogOpen(true);
+  };
+
   const activeGoals = teamGoals.filter(g => g.status === "active" || g.status === "in_progress");
   const overdueGoals = teamGoals.filter(g => g.status === "overdue" || (g.due_date && new Date(g.due_date) < new Date() && g.status !== "completed"));
 
@@ -521,6 +539,7 @@ const statusColors: Record<GoalStatus, string> = {
                     onViewComments={handleViewComments}
                     onSendReminder={handleSendReminder}
                     onRequestUpdate={handleRequestUpdate}
+                    onRequestCheckIn={handleRequestCheckIn}
                   />
                 ))
               )}
@@ -529,9 +548,15 @@ const statusColors: Record<GoalStatus, string> = {
 
           <TabsContent value="check-ins" className="mt-6">
             <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Team Check-ins Overview</CardTitle>
-                <CardDescription>Review and respond to employee goal check-ins</CardDescription>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <div>
+                  <CardTitle className="text-lg">Team Check-ins Overview</CardTitle>
+                  <CardDescription>Review and respond to employee goal check-ins</CardDescription>
+                </div>
+                <Button onClick={() => handleRequestCheckIn()}>
+                  <MessageSquarePlus className="mr-2 h-4 w-4" />
+                  Request Check-in
+                </Button>
               </CardHeader>
               <CardContent>
                 <ManagerCheckInPrompt onReviewClick={handleReviewCheckIn} />
@@ -707,6 +732,15 @@ const statusColors: Record<GoalStatus, string> = {
           onOpenChange={setReviewDialogOpen}
           checkIn={selectedCheckIn}
           onSuccess={fetchData}
+        />
+
+        <RequestCheckInDialog
+          open={requestCheckInDialogOpen}
+          onOpenChange={setRequestCheckInDialogOpen}
+          directReports={directReports}
+          onSuccess={fetchData}
+          preSelectedEmployeeId={preSelectedEmployeeId}
+          preSelectedGoalId={preSelectedGoalId}
         />
       </div>
     </AppLayout>
