@@ -16,7 +16,7 @@ import {
 import { Ticket, Send, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 
 interface TicketCategory {
@@ -45,6 +45,8 @@ interface Agent {
 export default function NewTicketPage() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const fromSource = searchParams.get('from');
   const [categories, setCategories] = useState<TicketCategory[]>([]);
   const [priorities, setPriorities] = useState<TicketPriority[]>([]);
   const [agents, setAgents] = useState<Agent[]>([]);
@@ -163,7 +165,13 @@ export default function NewTicketPage() {
     <AppLayout>
       <div className="max-w-2xl mx-auto space-y-6">
         <Breadcrumbs
-          items={[
+          items={fromSource === 'mss' ? [
+            { label: "Manager Self-Service", href: "/mss" },
+            { label: "Submit Ticket" },
+          ] : fromSource === 'ess' ? [
+            { label: "Employee Self-Service", href: "/ess" },
+            { label: "Submit Ticket" },
+          ] : [
             { label: "Help Center", href: "/help" },
             { label: "Tickets", href: "/help/tickets" },
             { label: "New Ticket" },
