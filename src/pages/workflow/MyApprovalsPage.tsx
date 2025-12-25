@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -13,6 +14,8 @@ import type { WorkflowInstance, WorkflowStep, WorkflowStepAction } from "@/hooks
 
 export default function MyApprovalsPage() {
   const { user } = useAuth();
+  const [searchParams] = useSearchParams();
+  const isFromMss = searchParams.get('from') === 'mss';
   const [pendingWorkflows, setPendingWorkflows] = useState<WorkflowInstance[]>([]);
   const [completedWorkflows, setCompletedWorkflows] = useState<WorkflowInstance[]>([]);
   const [allSteps, setAllSteps] = useState<Record<string, WorkflowStep[]>>({});
@@ -113,7 +116,10 @@ export default function MyApprovalsPage() {
     <AppLayout>
       <div className="container mx-auto py-6 space-y-6">
         <Breadcrumbs
-          items={[
+          items={isFromMss ? [
+            { label: "Manager Self-Service", href: "/mss" },
+            { label: "My Approvals" },
+          ] : [
             { label: "Home", href: "/" },
             { label: "My Approvals" },
           ]}
