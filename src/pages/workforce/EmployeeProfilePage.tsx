@@ -64,7 +64,7 @@ import {
   Plane,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns";
 
 interface EmployeeProfile {
   id: string;
@@ -315,37 +315,37 @@ export default function EmployeeProfilePage() {
                     {employee.start_date && (
                       <div className="flex items-center gap-2 text-sm text-muted-foreground">
                         <Calendar className="h-4 w-4" />
-                        <span>Start: {format(new Date(employee.start_date), 'MMM d, yyyy')}</span>
+                        <span>Start: {format(parseISO(employee.start_date), 'MMM d, yyyy')}</span>
                       </div>
                     )}
                     {employee.first_hire_date && (
                       <div className="flex items-center gap-2 text-sm text-muted-foreground">
                         <Calendar className="h-4 w-4" />
-                        <span>First Hire: {format(new Date(employee.first_hire_date), 'MMM d, yyyy')}</span>
+                        <span>First Hire: {format(parseISO(employee.first_hire_date), 'MMM d, yyyy')}</span>
                       </div>
                     )}
                     {employee.last_hire_date && (
                       <div className="flex items-center gap-2 text-sm text-muted-foreground">
                         <Calendar className="h-4 w-4" />
-                        <span>Last Hire: {format(new Date(employee.last_hire_date), 'MMM d, yyyy')}</span>
+                        <span>Last Hire: {format(parseISO(employee.last_hire_date), 'MMM d, yyyy')}</span>
                       </div>
                     )}
                     {employee.continuous_service_date && (
                       <div className="flex items-center gap-2 text-sm text-muted-foreground">
                         <Clock className="h-4 w-4" />
-                        <span>Continuous Service: {format(new Date(employee.continuous_service_date), 'MMM d, yyyy')}</span>
+                        <span>Continuous Service: {format(parseISO(employee.continuous_service_date), 'MMM d, yyyy')}</span>
                       </div>
                     )}
                     {employee.seniority_date && (
                       <div className="flex items-center gap-2 text-sm text-muted-foreground">
                         <Clock className="h-4 w-4" />
-                        <span>Seniority: {format(new Date(employee.seniority_date), 'MMM d, yyyy')}</span>
+                        <span>Seniority: {format(parseISO(employee.seniority_date), 'MMM d, yyyy')}</span>
                       </div>
                     )}
                     {employee.adjusted_service_date && (
                       <div className="flex items-center gap-2 text-sm text-muted-foreground">
                         <Clock className="h-4 w-4" />
-                        <span>Adjusted Service: {format(new Date(employee.adjusted_service_date), 'MMM d, yyyy')}</span>
+                        <span>Adjusted Service: {format(parseISO(employee.adjusted_service_date), 'MMM d, yyyy')}</span>
                       </div>
                     )}
                   </div>
@@ -479,7 +479,7 @@ export default function EmployeeProfilePage() {
                           <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
                             <div className="flex items-center gap-1">
                               <Calendar className="h-3 w-3" />
-                              <span>{t("workforce.profile.started")} {format(new Date(position.start_date), 'MMM d, yyyy')}</span>
+                              <span>{t("workforce.profile.started")} {format(parseISO(position.start_date), 'MMM d, yyyy')}</span>
                             </div>
                             {position.pay_group_name && (
                               <div className="flex items-center gap-1">
