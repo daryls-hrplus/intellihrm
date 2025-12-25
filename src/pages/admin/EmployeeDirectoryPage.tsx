@@ -42,6 +42,7 @@ export default function EmployeeDirectoryPage() {
   const { t } = useTranslation();
   const [searchParams] = useSearchParams();
   const fromHrHub = searchParams.get("from") === "hr-hub";
+  const fromAdmin = searchParams.get("from") === "admin";
   
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [departments, setDepartments] = useState<Department[]>([]);
@@ -165,6 +166,11 @@ export default function EmployeeDirectoryPage() {
   const breadcrumbItems = fromHrHub
     ? [
         { label: t("navigation.hrHub"), href: "/hr-hub" },
+        { label: t("hrHub.employeeDirectory") },
+      ]
+    : fromAdmin
+    ? [
+        { label: t("navigation.admin"), href: "/admin" },
         { label: t("hrHub.employeeDirectory") },
       ]
     : [
