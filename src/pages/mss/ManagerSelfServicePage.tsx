@@ -34,8 +34,8 @@ export default function ManagerSelfServicePage() {
 
   const allModules = {
     team: { title: t("mss.dashboard.myTeam"), description: t("mss.dashboard.myTeamDesc"), href: "/mss/team", icon: Users, color: "bg-blue-500/10 text-blue-600", tabCode: "mss-team" },
-    approvals: { title: t("mss.dashboard.teamApprovals"), description: t("mss.dashboard.teamApprovalsDesc"), href: "/workflow/approvals", icon: CheckSquare, color: "bg-violet-500/10 text-violet-600", tabCode: "mss-approvals" },
-    delegates: { title: t("mss.modules.delegates.title"), description: t("mss.modules.delegates.description"), href: "/workflow/delegates", icon: UserCheck, color: "bg-fuchsia-500/10 text-fuchsia-600", tabCode: "mss-delegates" },
+    approvals: { title: t("mss.dashboard.teamApprovals"), description: t("mss.dashboard.teamApprovalsDesc"), href: "/workflow/approvals?from=mss", icon: CheckSquare, color: "bg-violet-500/10 text-violet-600", tabCode: "mss-approvals" },
+    delegates: { title: t("mss.modules.delegates.title"), description: t("mss.modules.delegates.description"), href: "/workflow/delegates?from=mss", icon: UserCheck, color: "bg-fuchsia-500/10 text-fuchsia-600", tabCode: "mss-delegates" },
     onboarding: { title: t("mss.dashboard.teamOnboarding"), description: t("mss.dashboard.teamOnboardingDesc"), href: "/mss/onboarding", icon: Rocket, color: "bg-teal-500/10 text-teal-600", tabCode: "mss-onboarding" },
     offboarding: { title: t("mss.dashboard.teamDepartures"), description: t("mss.dashboard.teamDeparturesDesc"), href: "/mss/offboarding", icon: UserMinus, color: "bg-red-500/10 text-red-600", tabCode: "mss-offboarding" },
     property: { title: t("mss.modules.property.title"), description: t("mss.modules.property.description"), href: "/mss/property", icon: Package, color: "bg-slate-500/10 text-slate-600", tabCode: "mss-property" },

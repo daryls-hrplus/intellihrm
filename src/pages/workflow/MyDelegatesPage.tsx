@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -49,6 +50,8 @@ const WORKFLOW_CATEGORIES: { value: WorkflowCategory; label: string }[] = [
 
 export default function MyDelegatesPage() {
   const { user } = useAuth();
+  const [searchParams] = useSearchParams();
+  const isFromMss = searchParams.get('from') === 'mss';
   const [myDelegates, setMyDelegates] = useState<WorkflowDelegate[]>([]);
   const [delegatedToMe, setDelegatedToMe] = useState<WorkflowDelegate[]>([]);
   const [users, setUsers] = useState<{ id: string; full_name: string; email: string }[]>([]);
@@ -177,7 +180,10 @@ export default function MyDelegatesPage() {
     <AppLayout>
       <div className="container mx-auto py-6 space-y-6">
         <Breadcrumbs
-          items={[
+          items={isFromMss ? [
+            { label: "Manager Self-Service", href: "/mss" },
+            { label: "My Delegates" },
+          ] : [
             { label: "Home", href: "/" },
             { label: "My Delegates" },
           ]}
