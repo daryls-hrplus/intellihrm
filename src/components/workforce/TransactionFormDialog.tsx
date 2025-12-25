@@ -1392,7 +1392,7 @@ export function TransactionFormDialog({
                           </div>
                         </SelectItem>
                       ))
-                    : <SelectItem value="" disabled>No hourly/daily positions found</SelectItem>
+                    : <div className="px-2 py-1.5 text-sm text-muted-foreground">No hourly/daily positions found</div>
                   }
                 </SelectContent>
               </Select>
