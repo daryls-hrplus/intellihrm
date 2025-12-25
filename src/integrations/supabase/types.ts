@@ -31334,6 +31334,7 @@ export type Database = {
           date_format: string | null
           department_id: string | null
           email: string
+          employment_status: string | null
           failed_login_attempts: number | null
           first_hire_date: string | null
           force_password_change: boolean | null
@@ -31362,6 +31363,7 @@ export type Database = {
           date_format?: string | null
           department_id?: string | null
           email: string
+          employment_status?: string | null
           failed_login_attempts?: number | null
           first_hire_date?: string | null
           force_password_change?: boolean | null
@@ -31390,6 +31392,7 @@ export type Database = {
           date_format?: string | null
           department_id?: string | null
           email?: string
+          employment_status?: string | null
           failed_login_attempts?: number | null
           first_hire_date?: string | null
           force_password_change?: boolean | null
