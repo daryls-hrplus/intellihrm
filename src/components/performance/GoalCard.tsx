@@ -11,6 +11,18 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import {
   MoreVertical,
   Edit,
   Trash2,
@@ -23,6 +35,9 @@ import {
   User,
   Building2,
   Users,
+  Link2,
+  Eye,
+  Calculator,
 } from "lucide-react";
 import { getTodayString, formatDateForDisplay } from "@/utils/dateUtils";
 import { supabase } from "@/integrations/supabase/client";
@@ -30,6 +45,9 @@ import { toast } from "sonner";
 import { useAuditLog } from "@/hooks/useAuditLog";
 import { GoalProgressDialog } from "./GoalProgressDialog";
 import { GoalCommentsDialog } from "./GoalCommentsDialog";
+import { GoalAlignmentManager } from "./GoalAlignmentManager";
+import { GoalVisibilitySettings } from "./GoalVisibilitySettings";
+import { ProgressRollupConfig } from "./ProgressRollupConfig";
 
 type GoalStatus = 'draft' | 'active' | 'in_progress' | 'completed' | 'cancelled' | 'overdue';
 type GoalType = 'okr_objective' | 'okr_key_result' | 'smart_goal';
@@ -59,6 +77,7 @@ interface Goal {
 
 interface GoalCardProps {
   goal: Goal;
+  companyId?: string;
   onEdit: (goal: Goal) => void;
   onRefresh: () => void;
 }
@@ -85,10 +104,13 @@ const levelIcons: Record<GoalLevel, typeof User> = {
   individual: User,
 };
 
-export function GoalCard({ goal, onEdit, onRefresh }: GoalCardProps) {
+export function GoalCard({ goal, companyId, onEdit, onRefresh }: GoalCardProps) {
   const { logAction } = useAuditLog();
   const [progressDialogOpen, setProgressDialogOpen] = useState(false);
   const [commentsDialogOpen, setCommentsDialogOpen] = useState(false);
+  const [alignmentDialogOpen, setAlignmentDialogOpen] = useState(false);
+  const [visibilityDialogOpen, setVisibilityDialogOpen] = useState(false);
+  const [rollupDialogOpen, setRollupDialogOpen] = useState(false);
 
   const TypeIcon = typeConfig[goal.goal_type]?.icon || Flag;
   const LevelIcon = levelIcons[goal.goal_level];
@@ -167,38 +189,104 @@ export function GoalCard({ goal, onEdit, onRefresh }: GoalCardProps) {
                 </Badge>
               </div>
             </div>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-8 w-8">
-                  <MoreVertical className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => onEdit(goal)}>
-                  <Edit className="mr-2 h-4 w-4" />
-                  Edit
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setProgressDialogOpen(true)}>
-                  <TrendingUp className="mr-2 h-4 w-4" />
-                  Update Progress
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setCommentsDialogOpen(true)}>
-                  <MessageSquare className="mr-2 h-4 w-4" />
-                  Comments
-                </DropdownMenuItem>
-                {goal.status !== "completed" && (
-                  <DropdownMenuItem onClick={handleMarkComplete}>
-                    <CheckCircle className="mr-2 h-4 w-4" />
-                    Mark Complete
+            <div className="flex items-center gap-1">
+              {/* Quick-access buttons */}
+              {companyId && (
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity"
+                        onClick={() => setAlignmentDialogOpen(true)}
+                      >
+                        <Link2 className="h-3.5 w-3.5" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>Alignments</TooltipContent>
+                  </Tooltip>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity"
+                        onClick={() => setVisibilityDialogOpen(true)}
+                      >
+                        <Eye className="h-3.5 w-3.5" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>Visibility</TooltipContent>
+                  </Tooltip>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity"
+                        onClick={() => setRollupDialogOpen(true)}
+                      >
+                        <Calculator className="h-3.5 w-3.5" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>Rollup Config</TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              )}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon" className="h-8 w-8">
+                    <MoreVertical className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={() => onEdit(goal)}>
+                    <Edit className="mr-2 h-4 w-4" />
+                    Edit
                   </DropdownMenuItem>
-                )}
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={handleDelete} className="text-destructive">
-                  <Trash2 className="mr-2 h-4 w-4" />
-                  Delete
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+                  <DropdownMenuItem onClick={() => setProgressDialogOpen(true)}>
+                    <TrendingUp className="mr-2 h-4 w-4" />
+                    Update Progress
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setCommentsDialogOpen(true)}>
+                    <MessageSquare className="mr-2 h-4 w-4" />
+                    Comments
+                  </DropdownMenuItem>
+                  {companyId && (
+                    <>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem onClick={() => setAlignmentDialogOpen(true)}>
+                        <Link2 className="mr-2 h-4 w-4" />
+                        Alignments
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => setVisibilityDialogOpen(true)}>
+                        <Eye className="mr-2 h-4 w-4" />
+                        Visibility
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => setRollupDialogOpen(true)}>
+                        <Calculator className="mr-2 h-4 w-4" />
+                        Rollup Config
+                      </DropdownMenuItem>
+                    </>
+                  )}
+                  {goal.status !== "completed" && (
+                    <>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem onClick={handleMarkComplete}>
+                        <CheckCircle className="mr-2 h-4 w-4" />
+                        Mark Complete
+                      </DropdownMenuItem>
+                    </>
+                  )}
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={handleDelete} className="text-destructive">
+                    <Trash2 className="mr-2 h-4 w-4" />
+                    Delete
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
           </div>
         </CardHeader>
         <CardContent>
@@ -265,6 +353,46 @@ export function GoalCard({ goal, onEdit, onRefresh }: GoalCardProps) {
         goalId={goal.id}
         goalTitle={goal.title}
       />
+
+      {/* Alignment Dialog */}
+      {companyId && (
+        <Dialog open={alignmentDialogOpen} onOpenChange={setAlignmentDialogOpen}>
+          <DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Goal Alignments</DialogTitle>
+            </DialogHeader>
+            <GoalAlignmentManager
+              goalId={goal.id}
+              companyId={companyId}
+              goalTitle={goal.title}
+            />
+          </DialogContent>
+        </Dialog>
+      )}
+
+      {/* Visibility Dialog */}
+      <Dialog open={visibilityDialogOpen} onOpenChange={setVisibilityDialogOpen}>
+        <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Visibility Settings</DialogTitle>
+          </DialogHeader>
+          <GoalVisibilitySettings goalId={goal.id} />
+        </DialogContent>
+      </Dialog>
+
+      {/* Rollup Dialog */}
+      <Dialog open={rollupDialogOpen} onOpenChange={setRollupDialogOpen}>
+        <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Progress Rollup Configuration</DialogTitle>
+          </DialogHeader>
+          <ProgressRollupConfig
+            goalId={goal.id}
+            currentProgress={goal.progress_percentage}
+            onProgressUpdate={onRefresh}
+          />
+        </DialogContent>
+      </Dialog>
     </>
   );
 }
