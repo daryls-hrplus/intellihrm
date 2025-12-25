@@ -277,6 +277,7 @@ export function EmployeeTransactionsList({
     const typeCode = transaction.transaction_type?.code;
     switch (typeCode) {
       case "HIRE":
+      case "REHIRE":
         return transaction.position_id;
       case "ACTING":
         return transaction.acting_position_id;

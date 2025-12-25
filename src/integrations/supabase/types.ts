@@ -11042,6 +11042,7 @@ export type Database = {
           acting_position_id: string | null
           acting_reason_id: string | null
           acting_start_date: string | null
+          adjust_continuous_service: boolean | null
           company_id: string | null
           confirmation_date: string | null
           contract_type_id: string | null
@@ -11093,6 +11094,7 @@ export type Database = {
           acting_position_id?: string | null
           acting_reason_id?: string | null
           acting_start_date?: string | null
+          adjust_continuous_service?: boolean | null
           company_id?: string | null
           confirmation_date?: string | null
           contract_type_id?: string | null
@@ -11144,6 +11146,7 @@ export type Database = {
           acting_position_id?: string | null
           acting_reason_id?: string | null
           acting_start_date?: string | null
+          adjust_continuous_service?: boolean | null
           company_id?: string | null
           confirmation_date?: string | null
           contract_type_id?: string | null

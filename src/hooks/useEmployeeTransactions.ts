@@ -7,6 +7,7 @@ import { Database } from "@/integrations/supabase/types";
 
 export type TransactionType = 
   | "HIRE" 
+  | "REHIRE"
   | "CONFIRMATION" 
   | "PROBATION_EXT" 
   | "ACTING" 
@@ -92,6 +93,9 @@ export interface EmployeeTransaction {
   exit_interview_completed: boolean;
   terminate_all_positions: boolean;
   terminated_position_ids: string[] | null;
+  
+  // Rehire fields
+  adjust_continuous_service: boolean;
   
   // Workflow
   workflow_instance_id: string | null;
@@ -352,6 +356,63 @@ export function useEmployeeTransactions() {
         if (profileError) {
           console.error("Failed to update employee profile dates for hire:", profileError);
           // Don't fail the transaction, just log the error
+        }
+      }
+
+      // For REHIRE transactions, create employee_positions record and update profile dates
+      if (data.position_id && data.employee_id && !data.hire_type_id && data.employment_type_id) {
+        // Check if this is a REHIRE by looking up transaction type
+        const { data: txnType } = await supabase
+          .from("lookup_values")
+          .select("code")
+          .eq("id", data.transaction_type_id)
+          .single();
+
+        if (txnType?.code === "REHIRE") {
+          const employeePositionData = {
+            employee_id: data.employee_id,
+            position_id: data.position_id,
+            start_date: data.effective_date,
+            end_date: null,
+            is_primary: true,
+            assignment_type: "permanent",
+            compensation_amount: null,
+            compensation_currency: "USD",
+            compensation_frequency: "monthly",
+            benefits_profile: {},
+            is_active: true,
+            pay_group_id: data.pay_group_id || null,
+            pay_group_start_date: data.pay_group_id ? data.effective_date : null,
+            pay_group_end_date: null,
+          };
+
+          const { error: positionError } = await supabase
+            .from("employee_positions")
+            .insert(employeePositionData as any);
+
+          if (positionError) {
+            console.error("Failed to create employee position for rehire:", positionError);
+          }
+
+          // Update employee profile dates for rehire
+          const profileUpdate: Record<string, string | null> = {
+            start_date: data.effective_date || null,
+            last_hire_date: data.effective_date || null,
+          };
+
+          // Only reset continuous_service_date if adjust_continuous_service is true
+          if (data.adjust_continuous_service) {
+            profileUpdate.continuous_service_date = data.effective_date || null;
+          }
+
+          const { error: profileError } = await supabase
+            .from("profiles")
+            .update(profileUpdate)
+            .eq("id", data.employee_id);
+
+          if (profileError) {
+            console.error("Failed to update employee profile dates for rehire:", profileError);
+          }
         }
       }
 
