@@ -1287,7 +1287,7 @@ export function TransactionFormDialog({
           </>
         );
 
-      case "SALARY_RATE_CHANGE":
+      case "SALARY_RATE_CHANGE": {
         const selectedPosition = employeePositions.find(ep => ep.position_id === formData.position_id);
         const rateType = selectedPosition?.rate_type || 'salaried';
         const currentRate = rateType === 'hourly' || rateType === 'daily' 
@@ -1313,43 +1313,6 @@ export function TransactionFormDialog({
 
         return (
           <>
-            {/* Rate Type Indicator */}
-            {formData.position_id && selectedPosition && (
-              <div className={`p-4 rounded-lg border ${
-                rateType === 'hourly' ? 'bg-blue-500/10 border-blue-500/30' :
-                rateType === 'daily' ? 'bg-orange-500/10 border-orange-500/30' :
-                'bg-green-500/10 border-green-500/30'
-              }`}>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className={`text-sm font-medium ${
-                      rateType === 'hourly' ? 'text-blue-600 dark:text-blue-400' :
-                      rateType === 'daily' ? 'text-orange-600 dark:text-orange-400' :
-                      'text-green-600 dark:text-green-400'
-                    }`}>
-                      {getRateTypeLabel(rateType)}
-                    </p>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      {selectedPosition.position?.title}
-                    </p>
-                  </div>
-                  {currentRate && (
-                    <div className="text-right">
-                      <p className="text-lg font-semibold text-foreground">
-                        {currency} {currentRate.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                      </p>
-                      <p className="text-xs text-muted-foreground">{getRateUnit(rateType)}</p>
-                    </div>
-                  )}
-                </div>
-                {rateType === 'hourly' && selectedPosition.standard_hours_per_week && (
-                  <p className="text-xs text-muted-foreground mt-2">
-                    {t("workforce.modules.transactions.form.salaryChange.standardHours", "Standard hours")}: {selectedPosition.standard_hours_per_week} {t("workforce.modules.transactions.form.salaryChange.hoursPerWeek", "hrs/week")}
-                  </p>
-                )}
-              </div>
-            )}
-            
             <div className="space-y-2">
               <Label>{t("workforce.modules.transactions.form.salaryChange.position", "Position")}</Label>
               <Select
@@ -1384,6 +1347,50 @@ export function TransactionFormDialog({
                 </SelectContent>
               </Select>
             </div>
+
+            {/* Rate Type Indicator - shows after position selection */}
+            {formData.position_id && selectedPosition && (
+              <div className={`p-4 rounded-lg border ${
+                rateType === 'hourly' ? 'bg-blue-500/10 border-blue-500/30' :
+                rateType === 'daily' ? 'bg-orange-500/10 border-orange-500/30' :
+                'bg-green-500/10 border-green-500/30'
+              }`}>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className={`text-sm font-medium ${
+                      rateType === 'hourly' ? 'text-blue-600 dark:text-blue-400' :
+                      rateType === 'daily' ? 'text-orange-600 dark:text-orange-400' :
+                      'text-green-600 dark:text-green-400'
+                    }`}>
+                      {getRateTypeLabel(rateType)}
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {t("workforce.modules.transactions.form.salaryChange.currentRateInfo", "Current rate information")}
+                    </p>
+                  </div>
+                  {currentRate ? (
+                    <div className="text-right">
+                      <p className="text-lg font-semibold text-foreground">
+                        {currency} {currentRate.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      </p>
+                      <p className="text-xs text-muted-foreground">{getRateUnit(rateType)}</p>
+                    </div>
+                  ) : (
+                    <div className="text-right">
+                      <p className="text-sm text-muted-foreground">
+                        {t("workforce.modules.transactions.form.salaryChange.noCurrentRate", "No rate set")}
+                      </p>
+                    </div>
+                  )}
+                </div>
+                {rateType === 'hourly' && selectedPosition.standard_hours_per_week && (
+                  <p className="text-xs text-muted-foreground mt-2">
+                    {t("workforce.modules.transactions.form.salaryChange.standardHours", "Standard hours")}: {selectedPosition.standard_hours_per_week} {t("workforce.modules.transactions.form.salaryChange.hoursPerWeek", "hrs/week")}
+                  </p>
+                )}
+              </div>
+            )}
+            
             <div className="space-y-2">
               <Label>{t("workforce.modules.transactions.form.salaryChange.reason", "Reason for Change")}</Label>
               <Select
@@ -1409,6 +1416,7 @@ export function TransactionFormDialog({
             </div>
           </>
         );
+      }
 
       default:
         return null;
