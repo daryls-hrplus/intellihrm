@@ -70,6 +70,12 @@ interface EmployeeEditDialogProps {
     date_format?: string | null;
     time_format?: string | null;
     company_id?: string | null;
+    first_hire_date?: string | null;
+    last_hire_date?: string | null;
+    start_date?: string | null;
+    continuous_service_date?: string | null;
+    seniority_date?: string | null;
+    adjusted_service_date?: string | null;
   } | null;
   onSuccess?: () => void;
 }
@@ -86,6 +92,12 @@ export function EmployeeEditDialog({
   const [preferredLanguage, setPreferredLanguage] = useState("");
   const [dateFormat, setDateFormat] = useState("");
   const [timeFormat, setTimeFormat] = useState("");
+  const [firstHireDate, setFirstHireDate] = useState("");
+  const [lastHireDate, setLastHireDate] = useState("");
+  const [startDate, setStartDate] = useState("");
+  const [continuousServiceDate, setContinuousServiceDate] = useState("");
+  const [seniorityDate, setSeniorityDate] = useState("");
+  const [adjustedServiceDate, setAdjustedServiceDate] = useState("");
   const [saving, setSaving] = useState(false);
   const [customFieldValues, setCustomFieldValues] = useState<Record<string, string | number | boolean | string[] | null>>({});
   const { logAction } = useAuditLog();
@@ -106,6 +118,12 @@ export function EmployeeEditDialog({
       setPreferredLanguage(employee.preferred_language || "");
       setDateFormat(employee.date_format || "");
       setTimeFormat(employee.time_format || "");
+      setFirstHireDate(employee.first_hire_date || "");
+      setLastHireDate(employee.last_hire_date || "");
+      setStartDate(employee.start_date || "");
+      setContinuousServiceDate(employee.continuous_service_date || "");
+      setSeniorityDate(employee.seniority_date || "");
+      setAdjustedServiceDate(employee.adjusted_service_date || "");
     }
   }, [employee]);
 
@@ -139,6 +157,12 @@ export function EmployeeEditDialog({
           preferred_language: preferredLanguage || null,
           date_format: dateFormat || null,
           time_format: timeFormat || null,
+          first_hire_date: firstHireDate || null,
+          last_hire_date: lastHireDate || null,
+          start_date: startDate || null,
+          continuous_service_date: continuousServiceDate || null,
+          seniority_date: seniorityDate || null,
+          adjusted_service_date: adjustedServiceDate || null,
         })
         .eq("id", employee.id);
 
@@ -161,6 +185,12 @@ export function EmployeeEditDialog({
           preferred_language: employee.preferred_language,
           date_format: employee.date_format,
           time_format: employee.time_format,
+          first_hire_date: employee.first_hire_date,
+          last_hire_date: employee.last_hire_date,
+          start_date: employee.start_date,
+          continuous_service_date: employee.continuous_service_date,
+          seniority_date: employee.seniority_date,
+          adjusted_service_date: employee.adjusted_service_date,
         },
         newValues: {
           full_name: fullName,
@@ -169,6 +199,12 @@ export function EmployeeEditDialog({
           preferred_language: preferredLanguage || null,
           date_format: dateFormat || null,
           time_format: timeFormat || null,
+          first_hire_date: firstHireDate || null,
+          last_hire_date: lastHireDate || null,
+          start_date: startDate || null,
+          continuous_service_date: continuousServiceDate || null,
+          seniority_date: seniorityDate || null,
+          adjusted_service_date: adjustedServiceDate || null,
         },
       });
 
@@ -279,6 +315,72 @@ export function EmployeeEditDialog({
                 ))}
               </SelectContent>
             </Select>
+          </div>
+
+          <Separator className="my-2" />
+          <h4 className="text-sm font-medium">Employment Dates</h4>
+          
+          <div className="grid grid-cols-2 gap-4">
+            <div className="grid gap-2">
+              <Label htmlFor="firstHireDate">First Hire Date</Label>
+              <Input
+                id="firstHireDate"
+                type="date"
+                value={firstHireDate}
+                onChange={(e) => setFirstHireDate(e.target.value)}
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="lastHireDate">Last Hire Date</Label>
+              <Input
+                id="lastHireDate"
+                type="date"
+                value={lastHireDate}
+                onChange={(e) => setLastHireDate(e.target.value)}
+              />
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-2 gap-4">
+            <div className="grid gap-2">
+              <Label htmlFor="startDate">Start Date (First Day)</Label>
+              <Input
+                id="startDate"
+                type="date"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="continuousServiceDate">Continuous Service Date</Label>
+              <Input
+                id="continuousServiceDate"
+                type="date"
+                value={continuousServiceDate}
+                onChange={(e) => setContinuousServiceDate(e.target.value)}
+              />
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-2 gap-4">
+            <div className="grid gap-2">
+              <Label htmlFor="seniorityDate">Seniority Date</Label>
+              <Input
+                id="seniorityDate"
+                type="date"
+                value={seniorityDate}
+                onChange={(e) => setSeniorityDate(e.target.value)}
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="adjustedServiceDate">Adjusted Service Date</Label>
+              <Input
+                id="adjustedServiceDate"
+                type="date"
+                value={adjustedServiceDate}
+                onChange={(e) => setAdjustedServiceDate(e.target.value)}
+              />
+            </div>
           </div>
 
           {/* Custom Fields Section */}

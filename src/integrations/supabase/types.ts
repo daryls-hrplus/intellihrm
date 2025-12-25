@@ -30526,67 +30526,85 @@ export type Database = {
       }
       profiles: {
         Row: {
+          adjusted_service_date: string | null
           avatar_url: string | null
           company_id: string | null
+          continuous_service_date: string | null
           created_at: string
           date_format: string | null
           department_id: string | null
           email: string
           failed_login_attempts: number | null
+          first_hire_date: string | null
           force_password_change: boolean | null
           full_name: string | null
           id: string
           invitation_status: string | null
           invited_at: string | null
           is_active: boolean | null
+          last_hire_date: string | null
           last_login_at: string | null
           locked_until: string | null
           preferred_language: string | null
           section_id: string | null
+          seniority_date: string | null
+          start_date: string | null
           time_format: string | null
           timezone: string | null
           updated_at: string
         }
         Insert: {
+          adjusted_service_date?: string | null
           avatar_url?: string | null
           company_id?: string | null
+          continuous_service_date?: string | null
           created_at?: string
           date_format?: string | null
           department_id?: string | null
           email: string
           failed_login_attempts?: number | null
+          first_hire_date?: string | null
           force_password_change?: boolean | null
           full_name?: string | null
           id: string
           invitation_status?: string | null
           invited_at?: string | null
           is_active?: boolean | null
+          last_hire_date?: string | null
           last_login_at?: string | null
           locked_until?: string | null
           preferred_language?: string | null
           section_id?: string | null
+          seniority_date?: string | null
+          start_date?: string | null
           time_format?: string | null
           timezone?: string | null
           updated_at?: string
         }
         Update: {
+          adjusted_service_date?: string | null
           avatar_url?: string | null
           company_id?: string | null
+          continuous_service_date?: string | null
           created_at?: string
           date_format?: string | null
           department_id?: string | null
           email?: string
           failed_login_attempts?: number | null
+          first_hire_date?: string | null
           force_password_change?: boolean | null
           full_name?: string | null
           id?: string
           invitation_status?: string | null
           invited_at?: string | null
           is_active?: boolean | null
+          last_hire_date?: string | null
           last_login_at?: string | null
           locked_until?: string | null
           preferred_language?: string | null
           section_id?: string | null
+          seniority_date?: string | null
+          start_date?: string | null
           time_format?: string | null
           timezone?: string | null
           updated_at?: string
