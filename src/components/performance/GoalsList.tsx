@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import {
   Table,
   TableBody,
@@ -17,13 +17,15 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { MoreVertical, Edit, Trash2, TrendingUp, CheckCircle, MessageSquare } from "lucide-react";
+import { MoreVertical, Edit, Trash2, TrendingUp, CheckCircle, MessageSquare, Scale } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { getTodayString, formatDateForDisplay } from "@/utils/dateUtils";
 import { toast } from "sonner";
 import { useAuditLog } from "@/hooks/useAuditLog";
 import { GoalProgressDialog } from "./GoalProgressDialog";
 import { GoalCommentsDialog } from "./GoalCommentsDialog";
+import { GoalWeightBadge } from "./GoalWeightSummary";
+import { WeightSummary, WeightStatus } from "@/hooks/useGoalWeights";
 
 type GoalStatus = 'draft' | 'active' | 'in_progress' | 'completed' | 'cancelled' | 'overdue';
 type GoalType = 'okr_objective' | 'okr_key_result' | 'smart_goal';
@@ -77,6 +79,40 @@ export function GoalsList({ goals, onEdit, onRefresh }: GoalsListProps) {
   const [progressDialogOpen, setProgressDialogOpen] = useState(false);
   const [commentsDialogOpen, setCommentsDialogOpen] = useState(false);
   const [selectedGoal, setSelectedGoal] = useState<Goal | null>(null);
+
+  // Calculate weight summaries per employee
+  const employeeWeightMap = useMemo(() => {
+    const map = new Map<string, { totalWeight: number; goalCount: number }>();
+    
+    goals.forEach(goal => {
+      if (goal.goal_level === "individual" && goal.employee_id) {
+        const current = map.get(goal.employee_id) || { totalWeight: 0, goalCount: 0 };
+        map.set(goal.employee_id, {
+          totalWeight: current.totalWeight + (goal.weighting || 0),
+          goalCount: current.goalCount + 1,
+        });
+      }
+    });
+    
+    return map;
+  }, [goals]);
+
+  const getEmployeeWeightSummary = (employeeId: string | null): WeightSummary | null => {
+    if (!employeeId) return null;
+    const data = employeeWeightMap.get(employeeId);
+    if (!data) return null;
+    
+    const status: WeightStatus = data.totalWeight === 100 ? "complete" : 
+                                  data.totalWeight < 100 ? "under" : "over";
+    
+    return {
+      totalWeight: data.totalWeight,
+      remainingWeight: 100 - data.totalWeight,
+      status,
+      goalCount: data.goalCount,
+      requiredGoalCount: 0,
+    };
+  };
 
   const handleDelete = async (goal: Goal) => {
     if (!confirm("Are you sure you want to delete this goal?")) return;
@@ -195,7 +231,19 @@ export function GoalsList({ goals, onEdit, onRefresh }: GoalsListProps) {
                       </span>
                     </div>
                   </TableCell>
-                  <TableCell>{goal.weighting}%</TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-2">
+                      <span>{goal.weighting}%</span>
+                      {goal.goal_level === "individual" && goal.employee_id && (
+                        (() => {
+                          const summary = getEmployeeWeightSummary(goal.employee_id);
+                          return summary && summary.status !== "complete" ? (
+                            <GoalWeightBadge summary={summary} />
+                          ) : null;
+                        })()
+                      )}
+                    </div>
+                  </TableCell>
                   <TableCell>
                     {goal.due_date
                       ? formatDateForDisplay(goal.due_date, "MMM d, yyyy")
