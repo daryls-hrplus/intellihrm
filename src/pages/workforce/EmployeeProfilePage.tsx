@@ -525,7 +525,7 @@ export default function EmployeeProfilePage() {
                   <div className="flex items-center gap-3">
                     <Calendar className="h-4 w-4 text-muted-foreground" />
                     <div>
-                      <p className="text-sm font-medium text-foreground">{t("common.joined")}</p>
+                      <p className="text-sm font-medium text-foreground">Employee Record Created</p>
                       <p className="text-sm text-muted-foreground">
                         {format(new Date(employee.created_at), 'MMMM d, yyyy')}
                       </p>
