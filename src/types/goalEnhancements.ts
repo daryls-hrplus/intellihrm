@@ -250,7 +250,7 @@ export const DEFAULT_METRIC_TEMPLATES: Omit<MetricTemplate, 'id'>[] = [
     description: 'Track adoption %, usage %, and outcome delta (before/after)',
     templateType: 'delta',
     measurementType: 'quantitative',
-    category: 'Enablement',
+    category: 'Improvement',
     captureBaseline: true,
     baselinePeriod: 'month',
     subMetrics: [
