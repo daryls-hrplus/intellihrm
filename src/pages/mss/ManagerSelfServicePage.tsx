@@ -56,7 +56,7 @@ export default function ManagerSelfServicePage() {
     reminders: { title: t("mss.modules.reminders.title"), description: t("mss.modules.reminders.description"), href: "/mss/reminders", icon: Clock, color: "bg-rose-500/10 text-rose-600", tabCode: "mss-reminders" },
     pips: { title: t("mss.modules.pips.title"), description: t("mss.modules.pips.description"), href: "/mss/pips", icon: AlertTriangle, color: "bg-orange-500/10 text-orange-600", tabCode: "mss-pips" },
     compensation: { title: t("mss.modules.compensation.title"), description: t("mss.modules.compensation.description"), href: "/mss/compensation", icon: DollarSign, color: "bg-emerald-500/10 text-emerald-600", tabCode: "mss-compensation" },
-    tickets: { title: t("mss.dashboard.submitTicket"), description: t("mss.dashboard.submitTicketDesc"), href: "/help/tickets/new", icon: TicketPlus, color: "bg-red-500/10 text-red-600", tabCode: "mss-tickets" },
+    tickets: { title: t("mss.dashboard.submitTicket"), description: t("mss.dashboard.submitTicketDesc"), href: "/help/tickets/new?from=mss", icon: TicketPlus, color: "bg-red-500/10 text-red-600", tabCode: "mss-tickets" },
   };
 
   const filterByAccess = (modules: GroupedModuleItem[]) =>
