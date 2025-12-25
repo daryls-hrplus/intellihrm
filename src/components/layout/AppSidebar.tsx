@@ -136,6 +136,14 @@ export function AppSidebar() {
   };
 
   const isActiveRoute = (href: string) => {
+    // Check if we're coming from HR Hub via query parameter
+    const searchParams = new URLSearchParams(location.search);
+    const fromHrHub = searchParams.get("from") === "hr-hub";
+    
+    // If coming from HR Hub, keep HR Hub highlighted regardless of actual route
+    if (fromHrHub && href === "/hr-hub") return true;
+    if (fromHrHub && location.pathname.startsWith("/ess")) return false;
+    
     if (href === "/") return location.pathname === "/";
     return location.pathname.startsWith(href);
   };
