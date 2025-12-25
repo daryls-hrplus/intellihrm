@@ -27,10 +27,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { format } from "date-fns";
 
+type RollupMethod = 'weighted_average' | 'simple_average' | 'minimum' | 'maximum' | 'manual';
+
 interface RollupConfig {
   id?: string;
   parent_goal_id: string;
-  rollup_method: 'weighted_average' | 'simple_average' | 'minimum' | 'maximum' | 'manual';
+  rollup_method: RollupMethod;
   auto_calculate: boolean;
   include_aligned_goals: boolean;
   include_child_goals: boolean;
@@ -79,7 +81,7 @@ const ROLLUP_METHODS = [
     label: 'Manual', 
     description: 'Progress is set manually and not calculated from children' 
   },
-];
+] as const;
 
 export function ProgressRollupConfig({ goalId, currentProgress, onProgressUpdate }: ProgressRollupConfigProps) {
   const [config, setConfig] = useState<RollupConfig>({
@@ -117,7 +119,15 @@ export function ProgressRollupConfig({ goalId, currentProgress, onProgressUpdate
       if (error) throw error;
 
       if (data) {
-        setConfig(data);
+        setConfig({
+          id: data.id,
+          parent_goal_id: data.parent_goal_id,
+          rollup_method: data.rollup_method as RollupMethod,
+          auto_calculate: data.auto_calculate ?? true,
+          include_aligned_goals: data.include_aligned_goals ?? true,
+          include_child_goals: data.include_child_goals ?? true,
+          threshold_percentage: data.threshold_percentage ?? 100,
+        });
       }
     } catch (error) {
       console.error('Error fetching rollup config:', error);
@@ -183,7 +193,6 @@ export function ProgressRollupConfig({ goalId, currentProgress, onProgressUpdate
       toast.success('Rollup configuration saved');
       setHasChanges(false);
       
-      // Recalculate after config change
       calculateRollup();
     } catch (error) {
       console.error('Error saving rollup config:', error);
@@ -203,7 +212,6 @@ export function ProgressRollupConfig({ goalId, currentProgress, onProgressUpdate
       const { data: userData } = await supabase.auth.getUser();
       if (!userData.user) throw new Error('Not authenticated');
 
-      // Insert override record
       const { error: overrideError } = await supabase
         .from('goal_progress_overrides')
         .insert({
@@ -217,7 +225,6 @@ export function ProgressRollupConfig({ goalId, currentProgress, onProgressUpdate
 
       if (overrideError) throw overrideError;
 
-      // Update goal progress
       const { error: goalError } = await supabase
         .from('performance_goals')
         .update({ progress_percentage: overrideValue })
@@ -409,7 +416,7 @@ export function ProgressRollupConfig({ goalId, currentProgress, onProgressUpdate
           <Label>Rollup Method</Label>
           <Select 
             value={config.rollup_method} 
-            onValueChange={(v) => handleConfigChange('rollup_method', v as RollupConfig['rollup_method'])}
+            onValueChange={(v) => handleConfigChange('rollup_method', v as RollupMethod)}
           >
             <SelectTrigger>
               <SelectValue />

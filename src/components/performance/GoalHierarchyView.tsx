@@ -3,13 +3,22 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
-import { ChevronDown, ChevronRight, Target, Building2, Users, User, Flag } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { ChevronDown, ChevronRight, Target, Building2, Users, User, Link2, GitBranch } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 type GoalStatus = 'draft' | 'active' | 'in_progress' | 'completed' | 'cancelled' | 'overdue';
 type GoalType = 'okr_objective' | 'okr_key_result' | 'smart_goal';
 type GoalLevel = 'company' | 'department' | 'team' | 'individual';
+
+interface Alignment {
+  id: string;
+  child_goal_id: string;
+  parent_goal_id: string;
+  contribution_weight: number | null;
+  alignment_type: string | null;
+}
 
 interface Goal {
   id: string;
@@ -21,10 +30,13 @@ interface Goal {
   progress_percentage: number;
   parent_goal_id: string | null;
   children?: Goal[];
+  alignedTo?: { goalId: string; goalTitle: string; weight: number }[];
+  alignedFrom?: { goalId: string; goalTitle: string; weight: number }[];
 }
 
 interface GoalHierarchyViewProps {
   companyId: string | undefined;
+  showAlignments?: boolean;
 }
 
 const levelIcons: Record<GoalLevel, typeof Building2> = {
@@ -50,9 +62,10 @@ const statusConfig: Record<GoalStatus, { label: string; className: string }> = {
   overdue: { label: "Overdue", className: "bg-warning/10 text-warning" },
 };
 
-function GoalNode({ goal, level = 0 }: { goal: Goal; level?: number }) {
+function GoalNode({ goal, level = 0, showAlignments = true }: { goal: Goal; level?: number; showAlignments?: boolean }) {
   const [expanded, setExpanded] = useState(true);
   const hasChildren = goal.children && goal.children.length > 0;
+  const hasAlignments = (goal.alignedTo && goal.alignedTo.length > 0) || (goal.alignedFrom && goal.alignedFrom.length > 0);
   const Icon = levelIcons[goal.goal_level];
   const colorClass = levelColors[goal.goal_level];
   const statusStyle = statusConfig[goal.status];
@@ -95,6 +108,47 @@ function GoalNode({ goal, level = 0 }: { goal: Goal; level?: number }) {
             <Badge className={`text-xs ${statusStyle.className}`}>
               {statusStyle.label}
             </Badge>
+            {/* Alignment indicators */}
+            {showAlignments && hasAlignments && (
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Badge variant="secondary" className="text-xs gap-1">
+                      <Link2 className="h-3 w-3" />
+                      {(goal.alignedTo?.length || 0) + (goal.alignedFrom?.length || 0)}
+                    </Badge>
+                  </TooltipTrigger>
+                  <TooltipContent className="max-w-xs">
+                    <div className="space-y-2 text-xs">
+                      {goal.alignedTo && goal.alignedTo.length > 0 && (
+                        <div>
+                          <p className="font-medium">Contributes to:</p>
+                          <ul className="list-disc list-inside">
+                            {goal.alignedTo.map(a => (
+                              <li key={a.goalId} className="truncate">
+                                {a.goalTitle} ({a.weight}%)
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                      {goal.alignedFrom && goal.alignedFrom.length > 0 && (
+                        <div>
+                          <p className="font-medium">Receives from:</p>
+                          <ul className="list-disc list-inside">
+                            {goal.alignedFrom.map(a => (
+                              <li key={a.goalId} className="truncate">
+                                {a.goalTitle} ({a.weight}%)
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                    </div>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            )}
           </div>
           {goal.description && (
             <p className="text-sm text-muted-foreground mt-1 line-clamp-1">
@@ -111,7 +165,7 @@ function GoalNode({ goal, level = 0 }: { goal: Goal; level?: number }) {
       {hasChildren && expanded && (
         <div className="space-y-2">
           {goal.children!.map((child) => (
-            <GoalNode key={child.id} goal={child} level={level + 1} />
+            <GoalNode key={child.id} goal={child} level={level + 1} showAlignments={showAlignments} />
           ))}
         </div>
       )}
@@ -119,7 +173,7 @@ function GoalNode({ goal, level = 0 }: { goal: Goal; level?: number }) {
   );
 }
 
-export function GoalHierarchyView({ companyId }: GoalHierarchyViewProps) {
+export function GoalHierarchyView({ companyId, showAlignments = true }: GoalHierarchyViewProps) {
   const [goals, setGoals] = useState<Goal[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -134,24 +188,55 @@ export function GoalHierarchyView({ companyId }: GoalHierarchyViewProps) {
 
     setLoading(true);
     try {
-      const { data, error } = await supabase
+      // Fetch goals
+      const { data: goalsData, error: goalsError } = await supabase
         .from("performance_goals")
         .select("id, title, description, goal_type, goal_level, status, progress_percentage, parent_goal_id")
         .eq("company_id", companyId)
         .order("goal_level");
 
-      if (error) throw error;
+      if (goalsError) throw goalsError;
 
-      // Build hierarchy
+      // Fetch alignments
+      const { data: alignmentsData, error: alignmentsError } = await supabase
+        .from("goal_alignments")
+        .select("id, child_goal_id, parent_goal_id, contribution_weight, alignment_type")
+        .eq("is_active", true);
+
+      if (alignmentsError) throw alignmentsError;
+
+      // Build goals map with alignment info
       const goalsMap = new Map<string, Goal>();
       const rootGoals: Goal[] = [];
 
       // First pass: create all goal objects
-      (data as Goal[]).forEach((goal) => {
-        goalsMap.set(goal.id, { ...goal, children: [] });
+      (goalsData as Goal[]).forEach((goal) => {
+        goalsMap.set(goal.id, { ...goal, children: [], alignedTo: [], alignedFrom: [] });
       });
 
-      // Second pass: build parent-child relationships
+      // Add alignment information
+      (alignmentsData || []).forEach((alignment: Alignment) => {
+        const childGoal = goalsMap.get(alignment.child_goal_id);
+        const parentGoal = goalsMap.get(alignment.parent_goal_id);
+
+        if (childGoal && parentGoal) {
+          childGoal.alignedTo = childGoal.alignedTo || [];
+          childGoal.alignedTo.push({
+            goalId: parentGoal.id,
+            goalTitle: parentGoal.title,
+            weight: alignment.contribution_weight || 10,
+          });
+
+          parentGoal.alignedFrom = parentGoal.alignedFrom || [];
+          parentGoal.alignedFrom.push({
+            goalId: childGoal.id,
+            goalTitle: childGoal.title,
+            weight: alignment.contribution_weight || 10,
+          });
+        }
+      });
+
+      // Second pass: build parent-child relationships (hierarchy)
       goalsMap.forEach((goal) => {
         if (goal.parent_goal_id && goalsMap.has(goal.parent_goal_id)) {
           const parent = goalsMap.get(goal.parent_goal_id)!;
@@ -216,26 +301,44 @@ export function GoalHierarchyView({ companyId }: GoalHierarchyViewProps) {
       <CardContent>
         <div className="space-y-3">
           {goals.map((goal) => (
-            <GoalNode key={goal.id} goal={goal} />
+            <GoalNode key={goal.id} goal={goal} showAlignments={showAlignments} />
           ))}
         </div>
 
         {/* Legend */}
         <div className="mt-6 pt-4 border-t">
-          <p className="text-sm font-medium mb-2">Goal Levels</p>
-          <div className="flex flex-wrap gap-2">
-            {(Object.keys(levelColors) as GoalLevel[]).map((level) => {
-              const Icon = levelIcons[level];
-              return (
-                <div
-                  key={level}
-                  className={`flex items-center gap-1.5 px-2 py-1 rounded text-xs ${levelColors[level]}`}
-                >
-                  <Icon className="h-3 w-3" />
-                  <span className="capitalize">{level}</span>
+          <p className="text-sm font-medium mb-2">Legend</p>
+          <div className="flex flex-wrap gap-4">
+            <div className="space-y-2">
+              <p className="text-xs text-muted-foreground font-medium">Goal Levels</p>
+              <div className="flex flex-wrap gap-2">
+                {(Object.keys(levelColors) as GoalLevel[]).map((level) => {
+                  const LevelIcon = levelIcons[level];
+                  return (
+                    <div
+                      key={level}
+                      className={`flex items-center gap-1.5 px-2 py-1 rounded text-xs ${levelColors[level]}`}
+                    >
+                      <LevelIcon className="h-3 w-3" />
+                      <span className="capitalize">{level}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+            <div className="space-y-2">
+              <p className="text-xs text-muted-foreground font-medium">Relationships</p>
+              <div className="flex flex-wrap gap-2">
+                <div className="flex items-center gap-1.5 px-2 py-1 rounded text-xs bg-muted">
+                  <GitBranch className="h-3 w-3" />
+                  <span>Hierarchy (Parent-Child)</span>
                 </div>
-              );
-            })}
+                <div className="flex items-center gap-1.5 px-2 py-1 rounded text-xs bg-muted">
+                  <Link2 className="h-3 w-3" />
+                  <span>Alignment (Contributes To)</span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </CardContent>

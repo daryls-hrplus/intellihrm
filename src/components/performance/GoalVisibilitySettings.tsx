@@ -5,21 +5,16 @@ import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Checkbox } from "@/components/ui/checkbox";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Eye, EyeOff, Users, Building2, Globe, Lock, UserPlus, Pencil, Save } from "lucide-react";
+import { Eye, Users, Building2, Globe, Lock, UserPlus, Pencil, Save } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+
+type VisibilityScope = 'owner_only' | 'team' | 'department' | 'company' | 'custom';
 
 interface VisibilitySettings {
   id?: string;
   goal_id: string;
-  visibility_scope: 'owner_only' | 'team' | 'department' | 'company' | 'custom';
+  visibility_scope: VisibilityScope;
   can_view_roles: string[];
   can_edit_roles: string[];
   custom_viewer_ids: string[];
@@ -38,7 +33,7 @@ const VISIBILITY_SCOPES = [
   { value: 'department', label: 'Department', icon: Building2, description: 'All department members can view' },
   { value: 'company', label: 'Company-Wide', icon: Globe, description: 'Everyone in the company can view' },
   { value: 'custom', label: 'Custom', icon: UserPlus, description: 'Specific roles and users' },
-];
+] as const;
 
 const AVAILABLE_ROLES = [
   { value: 'admin', label: 'Admin' },
@@ -77,11 +72,14 @@ export function GoalVisibilitySettings({ goalId, onSave }: GoalVisibilitySetting
 
       if (data) {
         setSettings({
-          ...data,
+          id: data.id,
+          goal_id: data.goal_id,
+          visibility_scope: data.visibility_scope as VisibilityScope,
           can_view_roles: data.can_view_roles || [],
           can_edit_roles: data.can_edit_roles || [],
           custom_viewer_ids: data.custom_viewer_ids || [],
           custom_editor_ids: data.custom_editor_ids || [],
+          inherit_from_parent: data.inherit_from_parent ?? true,
         });
       }
     } catch (error) {
@@ -91,7 +89,7 @@ export function GoalVisibilitySettings({ goalId, onSave }: GoalVisibilitySetting
     }
   };
 
-  const handleScopeChange = (scope: VisibilitySettings['visibility_scope']) => {
+  const handleScopeChange = (scope: VisibilityScope) => {
     setSettings(prev => ({ ...prev, visibility_scope: scope }));
     setHasChanges(true);
   };
@@ -119,7 +117,6 @@ export function GoalVisibilitySettings({ goalId, onSave }: GoalVisibilitySetting
       const { id, ...settingsData } = settings;
 
       if (id) {
-        // Update existing
         const { error } = await supabase
           .from('goal_visibility_rules')
           .update(settingsData)
@@ -127,7 +124,6 @@ export function GoalVisibilitySettings({ goalId, onSave }: GoalVisibilitySetting
 
         if (error) throw error;
       } else {
-        // Insert new
         const { error } = await supabase
           .from('goal_visibility_rules')
           .insert(settingsData);
@@ -186,7 +182,7 @@ export function GoalVisibilitySettings({ goalId, onSave }: GoalVisibilitySetting
               return (
                 <button
                   key={scope.value}
-                  onClick={() => handleScopeChange(scope.value as VisibilitySettings['visibility_scope'])}
+                  onClick={() => handleScopeChange(scope.value)}
                   className={`flex items-start gap-3 p-3 rounded-lg border text-left transition-colors ${
                     isSelected 
                       ? 'border-primary bg-primary/5 ring-1 ring-primary' 

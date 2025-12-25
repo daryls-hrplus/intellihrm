@@ -29,7 +29,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Link2, Plus, Trash2, ArrowUp, ArrowDown, Target, Unlink } from "lucide-react";
+import { Link2, Plus, ArrowUp, ArrowDown, Unlink } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -43,20 +43,20 @@ interface Goal {
 
 interface Alignment {
   id: string;
-  source_goal_id: string;
-  target_goal_id: string;
-  alignment_type: string;
-  contribution_weight: number;
-  is_active: boolean;
-  source_goal?: Goal;
-  target_goal?: Goal;
+  child_goal_id: string;
+  parent_goal_id: string;
+  alignment_type: string | null;
+  contribution_weight: number | null;
+  is_active: boolean | null;
+  child_goal?: Goal;
+  parent_goal?: Goal;
 }
 
 interface GoalAlignmentManagerProps {
   goalId: string;
   companyId: string;
   goalTitle: string;
-  direction: 'upstream' | 'downstream' | 'both';
+  direction?: 'upstream' | 'downstream' | 'both';
 }
 
 const ALIGNMENT_TYPES = [
@@ -82,37 +82,46 @@ export function GoalAlignmentManager({ goalId, companyId, goalTitle, direction =
 
   const fetchAlignments = async () => {
     try {
-      // Fetch upstream alignments (goals this goal contributes to)
+      // Fetch upstream alignments (goals this goal contributes to - this is child)
       const { data: upstreamData, error: upstreamError } = await supabase
         .from('goal_alignments')
-        .select(`
-          id, source_goal_id, target_goal_id, alignment_type, contribution_weight, is_active,
-          target_goal:performance_goals!goal_alignments_target_goal_id_fkey(id, title, goal_level, progress_percentage, status)
-        `)
-        .eq('source_goal_id', goalId)
+        .select('id, child_goal_id, parent_goal_id, alignment_type, contribution_weight, is_active')
+        .eq('child_goal_id', goalId)
         .eq('is_active', true);
 
-      // Fetch downstream alignments (goals that contribute to this goal)
+      // Fetch downstream alignments (goals that contribute to this goal - this is parent)
       const { data: downstreamData, error: downstreamError } = await supabase
         .from('goal_alignments')
-        .select(`
-          id, source_goal_id, target_goal_id, alignment_type, contribution_weight, is_active,
-          source_goal:performance_goals!goal_alignments_source_goal_id_fkey(id, title, goal_level, progress_percentage, status)
-        `)
-        .eq('target_goal_id', goalId)
+        .select('id, child_goal_id, parent_goal_id, alignment_type, contribution_weight, is_active')
+        .eq('parent_goal_id', goalId)
         .eq('is_active', true);
 
       if (upstreamError) throw upstreamError;
       if (downstreamError) throw downstreamError;
 
-      const formattedUpstream = (upstreamData || []).map(a => ({
+      // Fetch parent goals for upstream alignments
+      const parentIds = (upstreamData || []).map(a => a.parent_goal_id);
+      const childIds = (downstreamData || []).map(a => a.child_goal_id);
+      const allGoalIds = [...new Set([...parentIds, ...childIds])];
+
+      let goalsMap: Record<string, Goal> = {};
+      if (allGoalIds.length > 0) {
+        const { data: goalsData } = await supabase
+          .from('performance_goals')
+          .select('id, title, goal_level, progress_percentage, status')
+          .in('id', allGoalIds);
+        
+        goalsData?.forEach(g => { goalsMap[g.id] = g; });
+      }
+
+      const formattedUpstream: Alignment[] = (upstreamData || []).map(a => ({
         ...a,
-        target_goal: Array.isArray(a.target_goal) ? a.target_goal[0] : a.target_goal
+        parent_goal: goalsMap[a.parent_goal_id]
       }));
 
-      const formattedDownstream = (downstreamData || []).map(a => ({
+      const formattedDownstream: Alignment[] = (downstreamData || []).map(a => ({
         ...a,
-        source_goal: Array.isArray(a.source_goal) ? a.source_goal[0] : a.source_goal
+        child_goal: goalsMap[a.child_goal_id]
       }));
 
       setAlignments([...formattedUpstream, ...formattedDownstream]);
@@ -150,8 +159,8 @@ export function GoalAlignmentManager({ goalId, companyId, goalTitle, direction =
 
     try {
       const alignmentData = alignDirection === 'upstream'
-        ? { source_goal_id: goalId, target_goal_id: selectedGoalId }
-        : { source_goal_id: selectedGoalId, target_goal_id: goalId };
+        ? { child_goal_id: goalId, parent_goal_id: selectedGoalId }
+        : { child_goal_id: selectedGoalId, parent_goal_id: goalId };
 
       const { error } = await supabase
         .from('goal_alignments')
@@ -211,8 +220,8 @@ export function GoalAlignmentManager({ goalId, companyId, goalTitle, direction =
     }
   };
 
-  const upstreamAlignments = alignments.filter(a => a.source_goal_id === goalId);
-  const downstreamAlignments = alignments.filter(a => a.target_goal_id === goalId);
+  const upstreamAlignments = alignments.filter(a => a.child_goal_id === goalId);
+  const downstreamAlignments = alignments.filter(a => a.parent_goal_id === goalId);
 
   const getLevelBadgeColor = (level: string) => {
     const colors: Record<string, string> = {
@@ -376,11 +385,11 @@ export function GoalAlignmentManager({ goalId, companyId, goalTitle, direction =
                   {upstreamAlignments.map(alignment => (
                     <TableRow key={alignment.id}>
                       <TableCell className="font-medium">
-                        {alignment.target_goal?.title || 'Unknown Goal'}
+                        {alignment.parent_goal?.title || 'Unknown Goal'}
                       </TableCell>
                       <TableCell>
-                        <Badge className={getLevelBadgeColor(alignment.target_goal?.goal_level || '')}>
-                          {alignment.target_goal?.goal_level}
+                        <Badge className={getLevelBadgeColor(alignment.parent_goal?.goal_level || '')}>
+                          {alignment.parent_goal?.goal_level}
                         </Badge>
                       </TableCell>
                       <TableCell className="text-sm text-muted-foreground capitalize">
@@ -390,7 +399,7 @@ export function GoalAlignmentManager({ goalId, companyId, goalTitle, direction =
                         <div className="flex items-center gap-2">
                           <Input
                             type="number"
-                            value={alignment.contribution_weight}
+                            value={alignment.contribution_weight || 10}
                             onChange={(e) => handleUpdateWeight(alignment.id, parseInt(e.target.value) || 0)}
                             className="w-16 h-8"
                             min={0}
@@ -443,18 +452,18 @@ export function GoalAlignmentManager({ goalId, companyId, goalTitle, direction =
                   {downstreamAlignments.map(alignment => (
                     <TableRow key={alignment.id}>
                       <TableCell className="font-medium">
-                        {alignment.source_goal?.title || 'Unknown Goal'}
+                        {alignment.child_goal?.title || 'Unknown Goal'}
                       </TableCell>
                       <TableCell>
-                        <Badge className={getLevelBadgeColor(alignment.source_goal?.goal_level || '')}>
-                          {alignment.source_goal?.goal_level}
+                        <Badge className={getLevelBadgeColor(alignment.child_goal?.goal_level || '')}>
+                          {alignment.child_goal?.goal_level}
                         </Badge>
                       </TableCell>
                       <TableCell>
-                        <span className="text-sm">{alignment.source_goal?.progress_percentage || 0}%</span>
+                        <span className="text-sm">{alignment.child_goal?.progress_percentage || 0}%</span>
                       </TableCell>
                       <TableCell>
-                        <span className="text-sm font-medium">{alignment.contribution_weight}%</span>
+                        <span className="text-sm font-medium">{alignment.contribution_weight || 10}%</span>
                       </TableCell>
                       <TableCell>
                         <Button
