@@ -38,6 +38,7 @@ interface TransactionCompensationDialogProps {
 
 const transactionTypeToChangeType: Record<TransactionType, string> = {
   HIRE: "hire",
+  REHIRE: "hire",
   CONFIRMATION: "adjustment",
   PROBATION_EXT: "adjustment",
   ACTING: "acting",

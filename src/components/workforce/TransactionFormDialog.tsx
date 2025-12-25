@@ -516,7 +516,213 @@ export function TransactionFormDialog({
           </>
         );
 
-      case "CONFIRMATION":
+      case "REHIRE":
+        return (
+          <>
+            <div className="space-y-2">
+              <Label>{t("common.employee")}</Label>
+              <Select
+                value={formData.employee_id || ""}
+                onValueChange={(v) => setFormData({ ...formData, employee_id: v })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder={t("workforce.modules.transactions.form.selectEmployee")} />
+                </SelectTrigger>
+                <SelectContent>
+                  {employees.map((e) => (
+                    <SelectItem key={e.id} value={e.id}>
+                      {e.full_name || e.email}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>{t("workforce.modules.transactions.form.hire.employeeType")}</Label>
+                <Select
+                  value={formData.employment_type_id || ""}
+                  onValueChange={(v) => setFormData({ ...formData, employment_type_id: v })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder={t("workforce.modules.transactions.form.hire.selectEmployeeType")} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {employeeTypes.map((t) => (
+                      <SelectItem key={t.id} value={t.id}>
+                        {t.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>{t("workforce.modules.transactions.form.hire.contractType")}</Label>
+                <Select
+                  value={formData.contract_type_id || ""}
+                  onValueChange={(v) => setFormData({ ...formData, contract_type_id: v })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder={t("workforce.modules.transactions.form.hire.selectContractType")} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {contractTypes.map((t) => (
+                      <SelectItem key={t.id} value={t.id}>
+                        {t.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>{t("common.company")}</Label>
+                <Select
+                  value={formData.company_id || ""}
+                  onValueChange={(v) => setFormData({ ...formData, company_id: v })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder={t("workforce.modules.transactions.form.selectCompany")} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {companies.map((c) => (
+                      <SelectItem key={c.id} value={c.id}>
+                        {c.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>{t("common.department")}</Label>
+                <Select
+                  value={formData.department_id || ""}
+                  onValueChange={(v) => {
+                    const currentPosition = positions.find(p => p.id === formData.position_id);
+                    const shouldClearPosition = currentPosition && currentPosition.department_id !== v;
+                    setFormData({ 
+                      ...formData, 
+                      department_id: v,
+                      position_id: shouldClearPosition ? undefined : formData.position_id
+                    });
+                  }}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder={t("workforce.modules.transactions.form.selectDepartment")} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {departments.map((d) => (
+                      <SelectItem key={d.id} value={d.id}>
+                        {d.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label>{t("common.position")}</Label>
+              <Select
+                value={formData.position_id || ""}
+                onValueChange={(v) => {
+                  const selectedPosition = positions.find(p => p.id === v);
+                  if (selectedPosition?.department_id && !formData.department_id) {
+                    setFormData({ 
+                      ...formData, 
+                      position_id: v,
+                      department_id: selectedPosition.department_id
+                    });
+                  } else {
+                    setFormData({ ...formData, position_id: v });
+                  }
+                }}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder={t("workforce.modules.transactions.form.selectPosition")} />
+                </SelectTrigger>
+                <SelectContent>
+                  {(formData.department_id 
+                    ? positions.filter(p => p.department_id === formData.department_id || !p.department_id)
+                    : positions
+                  ).map((p) => (
+                    <SelectItem key={p.id} value={p.id}>
+                      {p.title} ({p.code})
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>{t("workforce.modules.transactions.form.payGroup", "Pay Group")}</Label>
+                <Select
+                  value={formData.pay_group_id || ""}
+                  onValueChange={(v) => setFormData({ ...formData, pay_group_id: v })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder={t("workforce.modules.transactions.form.selectPayGroup", "Select pay group")} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {payGroups
+                      .filter(pg => !formData.company_id || pg.company_id === formData.company_id)
+                      .map((pg) => (
+                        <SelectItem key={pg.id} value={pg.id}>
+                          {pg.name} ({pg.code})
+                        </SelectItem>
+                      ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>{t("workforce.modules.transactions.form.hire.probationEndDate")}</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "w-full justify-start text-left font-normal",
+                        !formData.probation_end_date && "text-muted-foreground"
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {formData.probation_end_date
+                        ? formatDateForDisplay(formData.probation_end_date, "PPP")
+                        : t("workforce.modules.transactions.form.selectDate")}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0">
+                    <Calendar
+                      mode="single"
+                      selected={formData.probation_end_date ? new Date(formData.probation_end_date) : undefined}
+                      onSelect={(date) =>
+                        setFormData({
+                          ...formData,
+                          probation_end_date: date ? toDateString(date) : undefined,
+                        })
+                      }
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+            </div>
+            <div className="flex items-center space-x-2 pt-2">
+              <Switch
+                checked={formData.adjust_continuous_service || false}
+                onCheckedChange={(checked) =>
+                  setFormData({ ...formData, adjust_continuous_service: checked })
+                }
+              />
+              <div>
+                <Label>{t("workforce.modules.transactions.form.rehire.adjustContinuousService", "Adjust Continuous Service Date")}</Label>
+                <p className="text-xs text-muted-foreground">
+                  {t("workforce.modules.transactions.form.rehire.adjustContinuousServiceDescription", "Enable to reset continuous service date to the rehire date")}
+                </p>
+              </div>
+            </div>
+          </>
+        );
+
         return (
           <div className="space-y-4">
             {/* Position Selection - shown when employee has positions */}

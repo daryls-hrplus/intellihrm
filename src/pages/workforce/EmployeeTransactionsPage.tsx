@@ -31,6 +31,7 @@ interface Company {
 
 const workflowCodeMap: Record<TransactionType, string> = {
   HIRE: "employee_hire",
+  REHIRE: "employee_rehire",
   CONFIRMATION: "probation_confirmation",
   PROBATION_EXT: "probation_extension",
   ACTING: "acting_assignment",
