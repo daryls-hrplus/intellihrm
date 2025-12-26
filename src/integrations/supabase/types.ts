@@ -7005,6 +7005,7 @@ export type Database = {
           company_id: string
           created_at: string
           description: string | null
+          description_en: string | null
           end_date: string | null
           id: string
           is_active: boolean
@@ -7018,6 +7019,7 @@ export type Database = {
           company_id: string
           created_at?: string
           description?: string | null
+          description_en?: string | null
           end_date?: string | null
           id?: string
           is_active?: boolean
@@ -7031,6 +7033,7 @@ export type Database = {
           company_id?: string
           created_at?: string
           description?: string | null
+          description_en?: string | null
           end_date?: string | null
           id?: string
           is_active?: boolean
@@ -19159,6 +19162,7 @@ export type Database = {
           created_at: string
           current_step_id: string | null
           description: string
+          description_en: string | null
           employee_id: string
           filed_date: string
           grievance_number: string | null
@@ -19167,6 +19171,7 @@ export type Database = {
           is_union_represented: boolean | null
           outcome: string | null
           procedure_id: string | null
+          resolution_notes_en: string | null
           resolution_summary: string | null
           resolved_date: string | null
           severity: string | null
@@ -19184,6 +19189,7 @@ export type Database = {
           created_at?: string
           current_step_id?: string | null
           description: string
+          description_en?: string | null
           employee_id: string
           filed_date?: string
           grievance_number?: string | null
@@ -19192,6 +19198,7 @@ export type Database = {
           is_union_represented?: boolean | null
           outcome?: string | null
           procedure_id?: string | null
+          resolution_notes_en?: string | null
           resolution_summary?: string | null
           resolved_date?: string | null
           severity?: string | null
@@ -19209,6 +19216,7 @@ export type Database = {
           created_at?: string
           current_step_id?: string | null
           description?: string
+          description_en?: string | null
           employee_id?: string
           filed_date?: string
           grievance_number?: string | null
@@ -19217,6 +19225,7 @@ export type Database = {
           is_union_represented?: boolean | null
           outcome?: string | null
           procedure_id?: string | null
+          resolution_notes_en?: string | null
           resolution_summary?: string | null
           resolved_date?: string | null
           severity?: string | null
@@ -24055,12 +24064,14 @@ export type Database = {
       job_requisitions: {
         Row: {
           benefits: string | null
+          benefits_en: string | null
           closed_date: string | null
           company_id: string
           created_at: string
           created_by: string | null
           department_id: string | null
           description: string | null
+          description_en: string | null
           employment_type: string
           experience_level: string | null
           filled_count: number | null
@@ -24076,8 +24087,10 @@ export type Database = {
           priority: string | null
           recruiter_id: string | null
           requirements: string | null
+          requirements_en: string | null
           requisition_number: string | null
           responsibilities: string | null
+          responsibilities_en: string | null
           salary_currency: string | null
           salary_max: number | null
           salary_min: number | null
@@ -24089,12 +24102,14 @@ export type Database = {
         }
         Insert: {
           benefits?: string | null
+          benefits_en?: string | null
           closed_date?: string | null
           company_id: string
           created_at?: string
           created_by?: string | null
           department_id?: string | null
           description?: string | null
+          description_en?: string | null
           employment_type?: string
           experience_level?: string | null
           filled_count?: number | null
@@ -24110,8 +24125,10 @@ export type Database = {
           priority?: string | null
           recruiter_id?: string | null
           requirements?: string | null
+          requirements_en?: string | null
           requisition_number?: string | null
           responsibilities?: string | null
+          responsibilities_en?: string | null
           salary_currency?: string | null
           salary_max?: number | null
           salary_min?: number | null
@@ -24123,12 +24140,14 @@ export type Database = {
         }
         Update: {
           benefits?: string | null
+          benefits_en?: string | null
           closed_date?: string | null
           company_id?: string
           created_at?: string
           created_by?: string | null
           department_id?: string | null
           description?: string | null
+          description_en?: string | null
           employment_type?: string
           experience_level?: string | null
           filled_count?: number | null
@@ -24144,8 +24163,10 @@ export type Database = {
           priority?: string | null
           recruiter_id?: string | null
           requirements?: string | null
+          requirements_en?: string | null
           requisition_number?: string | null
           responsibilities?: string | null
+          responsibilities_en?: string | null
           salary_currency?: string | null
           salary_max?: number | null
           salary_min?: number | null
@@ -31529,6 +31550,7 @@ export type Database = {
           current_value: number | null
           department_id: string | null
           description: string | null
+          description_en: string | null
           due_date: string | null
           employee_id: string | null
           final_score: number | null
@@ -31559,6 +31581,7 @@ export type Database = {
           start_date: string
           status: Database["public"]["Enums"]["goal_status"]
           submitted_at: string | null
+          success_criteria_en: string | null
           target_value: number | null
           template_id: string | null
           template_type: string | null
@@ -31582,6 +31605,7 @@ export type Database = {
           current_value?: number | null
           department_id?: string | null
           description?: string | null
+          description_en?: string | null
           due_date?: string | null
           employee_id?: string | null
           final_score?: number | null
@@ -31612,6 +31636,7 @@ export type Database = {
           start_date?: string
           status?: Database["public"]["Enums"]["goal_status"]
           submitted_at?: string | null
+          success_criteria_en?: string | null
           target_value?: number | null
           template_id?: string | null
           template_type?: string | null
@@ -31635,6 +31660,7 @@ export type Database = {
           current_value?: number | null
           department_id?: string | null
           description?: string | null
+          description_en?: string | null
           due_date?: string | null
           employee_id?: string | null
           final_score?: number | null
@@ -31665,6 +31691,7 @@ export type Database = {
           start_date?: string
           status?: Database["public"]["Enums"]["goal_status"]
           submitted_at?: string | null
+          success_criteria_en?: string | null
           target_value?: number | null
           template_id?: string | null
           template_type?: string | null
@@ -32085,6 +32112,7 @@ export type Database = {
           category_id: string | null
           chunk_count: number | null
           company_id: string | null
+          content_en: string | null
           created_at: string
           description: string | null
           effective_date: string | null
@@ -32100,6 +32128,7 @@ export type Database = {
           processing_error: string | null
           processing_status: string | null
           title: string
+          title_en: string | null
           updated_at: string
           uploaded_by: string
           version: string | null
@@ -32108,6 +32137,7 @@ export type Database = {
           category_id?: string | null
           chunk_count?: number | null
           company_id?: string | null
+          content_en?: string | null
           created_at?: string
           description?: string | null
           effective_date?: string | null
@@ -32123,6 +32153,7 @@ export type Database = {
           processing_error?: string | null
           processing_status?: string | null
           title: string
+          title_en?: string | null
           updated_at?: string
           uploaded_by: string
           version?: string | null
@@ -32131,6 +32162,7 @@ export type Database = {
           category_id?: string | null
           chunk_count?: number | null
           company_id?: string | null
+          content_en?: string | null
           created_at?: string
           description?: string | null
           effective_date?: string | null
@@ -32146,6 +32178,7 @@ export type Database = {
           processing_error?: string | null
           processing_status?: string | null
           title?: string
+          title_en?: string | null
           updated_at?: string
           uploaded_by?: string
           version?: string | null
@@ -39732,6 +39765,51 @@ export type Database = {
           },
         ]
       }
+      translation_queue: {
+        Row: {
+          attempts: number
+          created_at: string
+          detected_language: string | null
+          error_message: string | null
+          field_name: string
+          id: string
+          processed_at: string | null
+          record_id: string
+          source_text: string
+          status: string
+          table_name: string
+          translated_text: string | null
+        }
+        Insert: {
+          attempts?: number
+          created_at?: string
+          detected_language?: string | null
+          error_message?: string | null
+          field_name: string
+          id?: string
+          processed_at?: string | null
+          record_id: string
+          source_text: string
+          status?: string
+          table_name: string
+          translated_text?: string | null
+        }
+        Update: {
+          attempts?: number
+          created_at?: string
+          detected_language?: string | null
+          error_message?: string | null
+          field_name?: string
+          id?: string
+          processed_at?: string | null
+          record_id?: string
+          source_text?: string
+          status?: string
+          table_name?: string
+          translated_text?: string | null
+        }
+        Relationships: []
+      }
       translations: {
         Row: {
           ar: string | null
@@ -41307,6 +41385,15 @@ export type Database = {
       process_goal_approval: {
         Args: { p_approval_id: string; p_comments?: string; p_decision: string }
         Returns: Json
+      }
+      queue_translation: {
+        Args: {
+          p_field_name: string
+          p_record_id: string
+          p_source_text: string
+          p_table_name: string
+        }
+        Returns: undefined
       }
       recalculate_comp_time_balance: {
         Args: { p_company_id: string; p_employee_id: string }
