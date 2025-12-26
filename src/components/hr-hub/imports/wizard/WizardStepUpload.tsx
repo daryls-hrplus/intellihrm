@@ -46,11 +46,23 @@ export function WizardStepUpload({
   const [prerequisitesMet, setPrerequisitesMet] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
 
+  // Normalize CSV header to snake_case for consistent field matching
+  const normalizeHeader = (header: string): string => {
+    return header
+      .trim()
+      .replace(/^"|"$/g, "")           // Remove surrounding quotes
+      .toLowerCase()                    // Convert to lowercase
+      .replace(/\s+/g, "_")            // Spaces to underscores
+      .replace(/-+/g, "_")             // Dashes to underscores
+      .replace(/[^a-z0-9_]/g, "");     // Remove special chars
+  };
+
   const parseCSV = (text: string): any[] => {
     const lines = text.split("\n").filter((line) => line.trim());
     if (lines.length < 2) return [];
 
-    const headers = lines[0].split(",").map((h) => h.trim().replace(/^"|"$/g, ""));
+    // Normalize headers to snake_case for consistent field matching
+    const headers = lines[0].split(",").map(normalizeHeader);
     
     return lines.slice(1).map((line) => {
       const values: string[] = [];

@@ -89,7 +89,23 @@ export function WizardStepCommit({
   const issues = validationResult?.issues ?? validationResult?.basicIssues ?? [];
 
   const downloadFailureReport = () => {
-    const report = generateFailureReport(importFailures, importWarnings);
+    let report: string;
+    
+    // Use correct report generator based on import type
+    if (importType === "positions") {
+      report = generateFailureReport(importFailures, importWarnings);
+    } else if (importType === "salary_grades") {
+      report = generateSalaryGradesFailureReport(importFailures, importWarnings);
+    } else if (importType === "pay_spines") {
+      report = generatePaySpinesFailureReport(importFailures, importWarnings);
+    } else if (importType === "spinal_points") {
+      report = generateSpinalPointsFailureReport(importFailures, importWarnings);
+    } else if (importType === "employee_assignments") {
+      report = generateEmployeeAssignmentsFailureReport(importFailures, importWarnings);
+    } else {
+      report = generateFailureReport(importFailures, importWarnings); // fallback
+    }
+    
     const blob = new Blob([report], { type: "text/plain" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
