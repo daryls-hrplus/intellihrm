@@ -1443,6 +1443,7 @@ export type Database = {
           created_at: string
           created_by: string | null
           description: string | null
+          description_en: string | null
           end_date: string
           evaluation_deadline: string | null
           goal_weight: number
@@ -1455,6 +1456,7 @@ export type Database = {
           max_rating: number
           min_rating: number
           name: string
+          name_en: string | null
           overall_scale_id: string | null
           responsibility_weight: number
           start_date: string
@@ -1468,6 +1470,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           description?: string | null
+          description_en?: string | null
           end_date: string
           evaluation_deadline?: string | null
           goal_weight?: number
@@ -1480,6 +1483,7 @@ export type Database = {
           max_rating?: number
           min_rating?: number
           name: string
+          name_en?: string | null
           overall_scale_id?: string | null
           responsibility_weight?: number
           start_date: string
@@ -1493,6 +1497,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           description?: string | null
+          description_en?: string | null
           end_date?: string
           evaluation_deadline?: string | null
           goal_weight?: number
@@ -1505,6 +1510,7 @@ export type Database = {
           max_rating?: number
           min_rating?: number
           name?: string
+          name_en?: string | null
           overall_scale_id?: string | null
           responsibility_weight?: number
           start_date?: string
@@ -2511,10 +2517,12 @@ export type Database = {
           company_id: string
           created_at: string
           description: string | null
+          description_en: string | null
           end_date: string | null
           id: string
           is_active: boolean
           name: string
+          name_en: string | null
           start_date: string
           updated_at: string
         }
@@ -2524,10 +2532,12 @@ export type Database = {
           company_id: string
           created_at?: string
           description?: string | null
+          description_en?: string | null
           end_date?: string | null
           id?: string
           is_active?: boolean
           name: string
+          name_en?: string | null
           start_date?: string
           updated_at?: string
         }
@@ -2537,10 +2547,12 @@ export type Database = {
           company_id?: string
           created_at?: string
           description?: string | null
+          description_en?: string | null
           end_date?: string | null
           id?: string
           is_active?: boolean
           name?: string
+          name_en?: string | null
           start_date?: string
           updated_at?: string
         }
@@ -3072,6 +3084,7 @@ export type Database = {
           created_at: string
           currency: string | null
           description: string | null
+          description_en: string | null
           employee_contribution: number | null
           employee_contribution_type: string
           employer_contribution: number | null
@@ -3081,6 +3094,7 @@ export type Database = {
           id: string
           is_active: boolean
           name: string
+          name_en: string | null
           plan_type: string
           provider_contact: string | null
           provider_id: string | null
@@ -3099,6 +3113,7 @@ export type Database = {
           created_at?: string
           currency?: string | null
           description?: string | null
+          description_en?: string | null
           employee_contribution?: number | null
           employee_contribution_type?: string
           employer_contribution?: number | null
@@ -3108,6 +3123,7 @@ export type Database = {
           id?: string
           is_active?: boolean
           name: string
+          name_en?: string | null
           plan_type: string
           provider_contact?: string | null
           provider_id?: string | null
@@ -3126,6 +3142,7 @@ export type Database = {
           created_at?: string
           currency?: string | null
           description?: string | null
+          description_en?: string | null
           employee_contribution?: number | null
           employee_contribution_type?: string
           employer_contribution?: number | null
@@ -3135,6 +3152,7 @@ export type Database = {
           id?: string
           is_active?: boolean
           name?: string
+          name_en?: string | null
           plan_type?: string
           provider_contact?: string | null
           provider_id?: string | null
@@ -6042,10 +6060,12 @@ export type Database = {
           company_id: string
           created_at: string
           description: string | null
+          description_en: string | null
           end_date: string | null
           id: string
           is_active: boolean
           name: string
+          name_en: string | null
           proficiency_levels: Json | null
           start_date: string
           updated_at: string
@@ -6056,10 +6076,12 @@ export type Database = {
           company_id: string
           created_at?: string
           description?: string | null
+          description_en?: string | null
           end_date?: string | null
           id?: string
           is_active?: boolean
           name: string
+          name_en?: string | null
           proficiency_levels?: Json | null
           start_date?: string
           updated_at?: string
@@ -6070,10 +6092,12 @@ export type Database = {
           company_id?: string
           created_at?: string
           description?: string | null
+          description_en?: string | null
           end_date?: string | null
           id?: string
           is_active?: boolean
           name?: string
+          name_en?: string | null
           proficiency_levels?: Json | null
           start_date?: string
           updated_at?: string
@@ -25692,6 +25716,7 @@ export type Database = {
           created_at: string
           default_annual_entitlement: number | null
           description: string | null
+          description_en: string | null
           encashment_rate: number | null
           end_date: string | null
           gender_applicability: string | null
@@ -25703,6 +25728,7 @@ export type Database = {
           max_negative_balance: number | null
           min_request_amount: number | null
           name: string
+          name_en: string | null
           requires_approval: boolean
           start_date: string
           updated_at: string
@@ -25719,6 +25745,7 @@ export type Database = {
           created_at?: string
           default_annual_entitlement?: number | null
           description?: string | null
+          description_en?: string | null
           encashment_rate?: number | null
           end_date?: string | null
           gender_applicability?: string | null
@@ -25730,6 +25757,7 @@ export type Database = {
           max_negative_balance?: number | null
           min_request_amount?: number | null
           name: string
+          name_en?: string | null
           requires_approval?: boolean
           start_date?: string
           updated_at?: string
@@ -25746,6 +25774,7 @@ export type Database = {
           created_at?: string
           default_annual_entitlement?: number | null
           description?: string | null
+          description_en?: string | null
           encashment_rate?: number | null
           end_date?: string | null
           gender_applicability?: string | null
@@ -25757,6 +25786,7 @@ export type Database = {
           max_negative_balance?: number | null
           min_request_amount?: number | null
           name?: string
+          name_en?: string | null
           requires_approval?: boolean
           start_date?: string
           updated_at?: string
@@ -29485,6 +29515,7 @@ export type Database = {
           company_id: string | null
           created_at: string
           description: string | null
+          description_en: string | null
           display_order: number
           element_type_id: string | null
           end_date: string | null
@@ -29493,6 +29524,7 @@ export type Database = {
           is_pensionable: boolean
           is_taxable: boolean
           name: string
+          name_en: string | null
           proration_method_id: string | null
           show_on_payslip: boolean
           start_date: string
@@ -29503,6 +29535,7 @@ export type Database = {
           company_id?: string | null
           created_at?: string
           description?: string | null
+          description_en?: string | null
           display_order?: number
           element_type_id?: string | null
           end_date?: string | null
@@ -29511,6 +29544,7 @@ export type Database = {
           is_pensionable?: boolean
           is_taxable?: boolean
           name: string
+          name_en?: string | null
           proration_method_id?: string | null
           show_on_payslip?: boolean
           start_date?: string
@@ -29521,6 +29555,7 @@ export type Database = {
           company_id?: string | null
           created_at?: string
           description?: string | null
+          description_en?: string | null
           display_order?: number
           element_type_id?: string | null
           end_date?: string | null
@@ -29529,6 +29564,7 @@ export type Database = {
           is_pensionable?: boolean
           is_taxable?: boolean
           name?: string
+          name_en?: string | null
           proration_method_id?: string | null
           show_on_payslip?: boolean
           start_date?: string
@@ -32412,6 +32448,7 @@ export type Database = {
           default_scheduled_hours: number | null
           department_id: string
           description: string | null
+          description_en: string | null
           employment_relation: string | null
           employment_status: string
           employment_type: string
@@ -32431,6 +32468,7 @@ export type Database = {
           salary_grade_id: string | null
           start_date: string
           title: string
+          title_en: string | null
           updated_at: string
         }
         Insert: {
@@ -32442,6 +32480,7 @@ export type Database = {
           default_scheduled_hours?: number | null
           department_id: string
           description?: string | null
+          description_en?: string | null
           employment_relation?: string | null
           employment_status?: string
           employment_type?: string
@@ -32461,6 +32500,7 @@ export type Database = {
           salary_grade_id?: string | null
           start_date?: string
           title: string
+          title_en?: string | null
           updated_at?: string
         }
         Update: {
@@ -32472,6 +32512,7 @@ export type Database = {
           default_scheduled_hours?: number | null
           department_id?: string
           description?: string | null
+          description_en?: string | null
           employment_relation?: string | null
           employment_status?: string
           employment_type?: string
@@ -32491,6 +32532,7 @@ export type Database = {
           salary_grade_id?: string | null
           start_date?: string
           title?: string
+          title_en?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -35370,12 +35412,14 @@ export type Database = {
           code: string
           created_at: string | null
           description: string | null
+          description_en: string | null
           id: string
           is_active: boolean | null
           is_seeded: boolean | null
           is_system: boolean | null
           menu_permissions: Json | null
           name: string
+          name_en: string | null
           role_type: string | null
           seeded_role_code: string | null
           tenant_visibility: string | null
@@ -35387,12 +35431,14 @@ export type Database = {
           code: string
           created_at?: string | null
           description?: string | null
+          description_en?: string | null
           id?: string
           is_active?: boolean | null
           is_seeded?: boolean | null
           is_system?: boolean | null
           menu_permissions?: Json | null
           name: string
+          name_en?: string | null
           role_type?: string | null
           seeded_role_code?: string | null
           tenant_visibility?: string | null
@@ -35404,12 +35450,14 @@ export type Database = {
           code?: string
           created_at?: string | null
           description?: string | null
+          description_en?: string | null
           id?: string
           is_active?: boolean | null
           is_seeded?: boolean | null
           is_system?: boolean | null
           menu_permissions?: Json | null
           name?: string
+          name_en?: string | null
           role_type?: string | null
           seeded_role_code?: string | null
           tenant_visibility?: string | null
@@ -36639,9 +36687,11 @@ export type Database = {
           country: string
           created_at: string
           description: string | null
+          description_en: string | null
           end_date: string | null
           id: string
           is_active: boolean
+          name_en: string | null
           reference_document_url: string | null
           start_date: string
           statutory_code: string
@@ -36658,9 +36708,11 @@ export type Database = {
           country: string
           created_at?: string
           description?: string | null
+          description_en?: string | null
           end_date?: string | null
           id?: string
           is_active?: boolean
+          name_en?: string | null
           reference_document_url?: string | null
           start_date?: string
           statutory_code: string
@@ -36677,9 +36729,11 @@ export type Database = {
           country?: string
           created_at?: string
           description?: string | null
+          description_en?: string | null
           end_date?: string | null
           id?: string
           is_active?: boolean
+          name_en?: string | null
           reference_document_url?: string | null
           start_date?: string
           statutory_code?: string
