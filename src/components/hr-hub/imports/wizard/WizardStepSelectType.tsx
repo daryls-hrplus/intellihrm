@@ -94,6 +94,14 @@ const BASE_IMPORT_TYPES: ImportTypeOption[] = [
     category: "people",
   },
   {
+    id: "employee_assignments",
+    label: "Employee Assignments",
+    description: "Assign employees to positions with compensation",
+    icon: UserPlus,
+    prerequisites: ["companies", "departments", "positions"],
+    category: "people",
+  },
+  {
     id: "new_hires",
     label: "New Hires",
     description: "Onboard new employees with accounts",
@@ -183,7 +191,7 @@ export function WizardStepSelectType({
 
     const tables = [
       "companies", "divisions", "departments", "sections", 
-      "jobs", "job_families", "positions", "salary_grades", "pay_spines"
+      "jobs", "job_families", "positions", "salary_grades", "pay_spines", "employee_assignments"
     ];
 
     // Map table names to actual DB tables
@@ -197,6 +205,7 @@ export function WizardStepSelectType({
       positions: "positions",
       salary_grades: "salary_grades",
       pay_spines: "pay_spines",
+      employee_assignments: "employee_positions",
     };
     for (const table of tables) {
       try {
