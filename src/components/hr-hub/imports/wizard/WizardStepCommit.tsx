@@ -5,7 +5,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import { 
@@ -16,8 +15,11 @@ import {
   Loader2,
   Database,
   Shield,
-  Clock
+  Clock,
+  Download,
+  FileWarning
 } from "lucide-react";
+import { transformPositionsData, generateFailureReport } from "./positionsTransformer";
 
 interface WizardStepCommitProps {
   importType: string;
@@ -44,6 +46,12 @@ const IMPORT_TYPE_LABELS: Record<string, string> = {
   new_hires: "New Hires",
 };
 
+interface ImportFailure {
+  rowIndex: number;
+  row: any;
+  error: string;
+}
+
 export function WizardStepCommit({
   importType,
   companyId,
@@ -60,10 +68,26 @@ export function WizardStepCommit({
   const [confirmed, setConfirmed] = useState(false);
   const [progress, setProgress] = useState(0);
   const [importError, setImportError] = useState<string | null>(null);
+  const [importFailures, setImportFailures] = useState<ImportFailure[]>([]);
+  const [importWarnings, setImportWarnings] = useState<Array<{ rowIndex: number; field: string; message: string }>>([]);
 
   const data = parsedData || [];
-  const validRowCount = validationResult?.validRowCount || data.length;
-  const errorCount = validationResult?.basicErrorCount || 0;
+  // Fix: Use correct property names from validation result
+  const validRowCount = validationResult?.validRows ?? validationResult?.validRowCount ?? data.length;
+  const errorCount = validationResult?.errorCount ?? validationResult?.basicErrorCount ?? 0;
+  const issues = validationResult?.issues ?? validationResult?.basicIssues ?? [];
+
+  const downloadFailureReport = () => {
+    const report = generateFailureReport(importFailures, importWarnings);
+    const blob = new Blob([report], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${importType}_import_failures_${new Date().toISOString().slice(0, 10)}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast.success("Failure report downloaded");
+  };
 
   const handleCommit = async () => {
     if (!confirmed) {
@@ -73,6 +97,8 @@ export function WizardStepCommit({
 
     onCommitStart();
     setImportError(null);
+    setImportFailures([]);
+    setImportWarnings([]);
     setProgress(0);
 
     try {
@@ -89,7 +115,7 @@ export function WizardStepCommit({
           validation_result: validationResult,
           imported_by: user?.id,
           validated_at: new Date().toISOString(),
-          rollback_eligible_until: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 days
+          rollback_eligible_until: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
         })
         .select()
         .single();
@@ -99,54 +125,103 @@ export function WizardStepCommit({
       onBatchCreated(batchData.id);
       setProgress(20);
 
-      // Import data based on type
-      const importedIds: string[] = [];
-      let successCount = 0;
-      let failedCount = 0;
-      const errors: any[] = [];
-
-      // Get valid rows only (those without errors)
+      // Get valid rows only (those without errors from validation)
       const errorRows = new Set(
-        (validationResult?.basicIssues || [])
+        (issues)
           .filter((i: any) => i.severity === "error")
-          .map((i: any) => i.row - 2) // Convert to 0-indexed
+          .map((i: any) => i.row - 2)
       );
 
       const validData = data.filter((_, index) => !errorRows.has(index));
+      
+      let successCount = 0;
+      let failedCount = 0;
+      const allErrors: ImportFailure[] = [];
+      const allWarnings: Array<{ rowIndex: number; field: string; message: string }> = [];
+      const importedIds: string[] = [];
 
-      // Import in batches
-      const batchSize = 50;
-      for (let i = 0; i < validData.length; i += batchSize) {
-        const batch = validData.slice(i, i + batchSize);
+      // Use specialized transformer for positions
+      if (importType === "positions") {
+        setProgress(30);
+        const transformResult = await transformPositionsData(validData, companyId);
         
-        try {
-          const result = await importBatch(importType, batch, companyId);
-          
-          if (result.success) {
-            importedIds.push(...(result.ids || []));
-            successCount += result.count || batch.length;
-          } else {
-            failedCount += batch.length;
-            errors.push({ batch: i / batchSize, error: result.error });
-          }
-        } catch (e: any) {
-          failedCount += batch.length;
-          errors.push({ batch: i / batchSize, error: e.message });
-        }
+        allErrors.push(...transformResult.errors);
+        allWarnings.push(...transformResult.warnings);
+        failedCount = transformResult.errors.length;
+        
+        setProgress(50);
 
-        setProgress(20 + Math.round((i / validData.length) * 70));
+        // Insert transformed data in batches
+        if (transformResult.transformed.length > 0) {
+          const batchSize = 50;
+          for (let i = 0; i < transformResult.transformed.length; i += batchSize) {
+            const batch = transformResult.transformed.slice(i, i + batchSize);
+            
+            const { data: insertData, error: insertError } = await supabase
+              .from("positions")
+              .insert(batch)
+              .select("id");
+
+            if (insertError) {
+              // All rows in this batch failed
+              batch.forEach((_, idx) => {
+                allErrors.push({
+                  rowIndex: i + idx,
+                  row: validData[i + idx],
+                  error: insertError.message,
+                });
+              });
+              failedCount += batch.length;
+            } else {
+              successCount += batch.length;
+              importedIds.push(...(insertData?.map((d) => d.id) || []));
+            }
+
+            setProgress(50 + Math.round((i / transformResult.transformed.length) * 40));
+          }
+        }
+      } else {
+        // Original logic for other import types
+        const batchSize = 50;
+        for (let i = 0; i < validData.length; i += batchSize) {
+          const batch = validData.slice(i, i + batchSize);
+          
+          try {
+            const result = await importBatch(importType, batch, companyId);
+            
+            if (result.success) {
+              importedIds.push(...(result.ids || []));
+              successCount += result.count || batch.length;
+            } else {
+              failedCount += batch.length;
+              batch.forEach((row, idx) => {
+                allErrors.push({ rowIndex: i + idx, row, error: result.error || "Unknown error" });
+              });
+            }
+          } catch (e: any) {
+            failedCount += batch.length;
+            batch.forEach((row, idx) => {
+              allErrors.push({ rowIndex: i + idx, row, error: e.message });
+            });
+          }
+
+          setProgress(20 + Math.round((i / validData.length) * 70));
+        }
       }
+
+      setImportFailures(allErrors);
+      setImportWarnings(allWarnings);
 
       // Update batch record with results
       await supabase
         .from("import_batches")
         .update({
-          status: failedCount === 0 ? "committed" : "failed",
+          status: failedCount === 0 && successCount > 0 ? "committed" : failedCount > 0 && successCount === 0 ? "failed" : "partial",
           successful_records: successCount,
           failed_records: failedCount,
           skipped_records: errorRows.size,
           imported_record_ids: importedIds,
-          errors: errors.length > 0 ? errors : null,
+          errors: allErrors.length > 0 ? JSON.parse(JSON.stringify(allErrors)) : null,
           committed_at: new Date().toISOString(),
         })
         .eq("id", batchData.id);
@@ -154,10 +229,13 @@ export function WizardStepCommit({
       setProgress(100);
       onCommitComplete(successCount);
 
-      if (failedCount === 0) {
+      if (failedCount === 0 && successCount > 0) {
         toast.success(`Successfully imported ${successCount} records`);
-      } else {
+      } else if (successCount > 0 && failedCount > 0) {
         toast.warning(`Imported ${successCount} records, ${failedCount} failed`);
+      } else if (successCount === 0) {
+        setImportError(`All ${failedCount} records failed to import. See details below.`);
+        toast.error("Import failed - no records were imported");
       }
     } catch (error: any) {
       console.error("Import error:", error);
@@ -172,7 +250,6 @@ export function WizardStepCommit({
     batch: any[],
     companyIdParam?: string | null
   ): Promise<{ success: boolean; ids?: string[]; count?: number; error?: string }> => {
-    // Map import type to table and transform data
     const tableMap: Record<string, string> = {
       companies: "companies",
       divisions: "divisions",
@@ -180,36 +257,30 @@ export function WizardStepCommit({
       sections: "sections",
       jobs: "jobs",
       job_families: "job_families",
-      positions: "positions",
     };
 
     const tableName = tableMap[type];
     
     if (!tableName) {
-      // Handle special cases like employees/new_hires
       if (type === "employees" || type === "new_hires") {
-        // For now, just return success - actual implementation would call edge function
         return { success: true, ids: [], count: batch.length };
       }
       return { success: false, error: `Unknown import type: ${type}` };
     }
 
-    // Transform data based on type
     const transformedBatch = batch.map((row) => {
       const transformed: any = { ...row };
       
-      // Add company_id if needed
       if (companyIdParam && type !== "companies") {
         transformed.company_id = companyIdParam;
       }
       
-      // Remove any _rowIndex or metadata fields
       delete transformed._rowIndex;
+      delete transformed._id;
       
       return transformed;
     });
 
-    // Use type assertion to bypass deep type instantiation
     const { data: insertData, error } = await (supabase
       .from(tableName as any)
       .insert(transformedBatch)
@@ -222,7 +293,7 @@ export function WizardStepCommit({
     return {
       success: true,
       ids: insertData?.map((d: any) => d.id) || [],
-      count: data?.length || batch.length,
+      count: batch.length,
     };
   };
 
@@ -335,6 +406,58 @@ export function WizardStepCommit({
           <XCircle className="h-4 w-4" />
           <AlertTitle>Import Failed</AlertTitle>
           <AlertDescription>{importError}</AlertDescription>
+        </Alert>
+      )}
+
+      {/* Detailed Failure Report */}
+      {importFailures.length > 0 && !isCommitting && (
+        <Card className="border-destructive/50">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-semibold flex items-center gap-2 text-destructive">
+                <FileWarning className="h-5 w-5" />
+                Import Failures ({importFailures.length} rows)
+              </h3>
+              <Button variant="outline" size="sm" onClick={downloadFailureReport}>
+                <Download className="h-4 w-4 mr-2" />
+                Download Report
+              </Button>
+            </div>
+            
+            <div className="space-y-2 max-h-60 overflow-y-auto">
+              {importFailures.slice(0, 10).map((failure, idx) => (
+                <div key={idx} className="p-3 bg-destructive/10 rounded-lg text-sm">
+                  <div className="font-medium">
+                    Row {failure.rowIndex + 2}: {failure.row?.position_code || failure.row?.code || "Unknown"}
+                  </div>
+                  <div className="text-destructive mt-1">{failure.error}</div>
+                </div>
+              ))}
+              {importFailures.length > 10 && (
+                <p className="text-sm text-muted-foreground text-center py-2">
+                  ... and {importFailures.length - 10} more failures. Download the report for full details.
+                </p>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Warnings */}
+      {importWarnings.length > 0 && !isCommitting && (
+        <Alert className="bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800">
+          <AlertTriangle className="h-4 w-4 text-yellow-600" />
+          <AlertTitle className="text-yellow-800 dark:text-yellow-200">Warnings ({importWarnings.length})</AlertTitle>
+          <AlertDescription className="text-yellow-700 dark:text-yellow-300">
+            <ul className="list-disc list-inside mt-2 space-y-1">
+              {importWarnings.slice(0, 5).map((w, idx) => (
+                <li key={idx}>Row {w.rowIndex + 2}: {w.message}</li>
+              ))}
+              {importWarnings.length > 5 && (
+                <li>... and {importWarnings.length - 5} more warnings</li>
+              )}
+            </ul>
+          </AlertDescription>
         </Alert>
       )}
     </div>
