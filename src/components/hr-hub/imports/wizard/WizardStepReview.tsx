@@ -387,7 +387,7 @@ export function WizardStepReview({
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="w-[60px] min-w-[60px] bg-muted/50 font-semibold">Row</TableHead>
+                    <TableHead className="w-[70px] min-w-[70px] bg-muted/50 font-semibold text-center">Row</TableHead>
                     {headers.map((header) => (
                       <TableHead 
                         key={header} 
