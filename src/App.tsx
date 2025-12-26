@@ -57,6 +57,7 @@ import SSOSettingsPage from "./pages/admin/SSOSettingsPage";
 import PasswordPoliciesPage from "./pages/admin/PasswordPoliciesPage";
 import StaffLoanDesignDocumentPage from "./pages/documents/StaffLoanDesignDocumentPage";
 import AIGovernancePage from "./pages/admin/AIGovernancePage";
+import TranslationsPage from "./pages/admin/TranslationsPage";
 
 // Enablement pages
 import EnablementHubPage from "./pages/enablement/EnablementHubPage";
@@ -1137,6 +1138,14 @@ const App = () => (
               element={
                 <ProtectedRoute requiredRoles={["admin"]}>
                   <AdminBulkImportPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/translations"
+              element={
+                <ProtectedRoute requiredRoles={["admin"]}>
+                  <TranslationsPage />
                 </ProtectedRoute>
               }
             />

@@ -39729,6 +39729,60 @@ export type Database = {
           },
         ]
       }
+      translations: {
+        Row: {
+          ar: string | null
+          category: string
+          created_at: string
+          de: string | null
+          description: string | null
+          en: string
+          es: string | null
+          fr: string | null
+          id: string
+          nl: string | null
+          pt: string | null
+          ru: string | null
+          translation_key: string
+          updated_at: string
+          zh: string | null
+        }
+        Insert: {
+          ar?: string | null
+          category?: string
+          created_at?: string
+          de?: string | null
+          description?: string | null
+          en: string
+          es?: string | null
+          fr?: string | null
+          id?: string
+          nl?: string | null
+          pt?: string | null
+          ru?: string | null
+          translation_key: string
+          updated_at?: string
+          zh?: string | null
+        }
+        Update: {
+          ar?: string | null
+          category?: string
+          created_at?: string
+          de?: string | null
+          description?: string | null
+          en?: string
+          es?: string | null
+          fr?: string | null
+          id?: string
+          nl?: string | null
+          pt?: string | null
+          ru?: string | null
+          translation_key?: string
+          updated_at?: string
+          zh?: string | null
+        }
+        Relationships: []
+      }
       travel_document_types: {
         Row: {
           code: string
