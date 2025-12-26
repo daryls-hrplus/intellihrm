@@ -167,6 +167,14 @@ export default function LeaveDashboardPage() {
       color: "bg-muted text-muted-foreground",
       tabCode: "comp_time_policies",
     },
+    leaveYears: {
+      title: t("leave.modules.leaveYears", "Leave Years"),
+      description: t("leave.modules.leaveYearsDesc", "Configure leave periods and fiscal years"),
+      href: "/leave/years",
+      icon: Calendar,
+      color: "bg-emerald-500/10 text-emerald-600",
+      tabCode: "leave_years",
+    },
     // Time Banking
     compensatoryTime: {
       title: t("leave.modules.compensatoryTime"),
@@ -221,6 +229,7 @@ export default function LeaveDashboardPage() {
       titleKey: "Leave Configuration",
       items: filterByAccess([
         allModules.types,
+        allModules.leaveYears,
         allModules.accrualRules,
         allModules.rolloverRules,
         allModules.holidays,

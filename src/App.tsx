@@ -1638,6 +1638,14 @@ const App = () => (
               }
             />
             <Route
+              path="/leave/years"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
+                  <LeaveYearsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
               path="/leave/my-leave"
               element={
                 <ProtectedRoute>
