@@ -1150,6 +1150,14 @@ const App = () => (
               }
             />
             <Route
+              path="/admin/languages"
+              element={
+                <ProtectedRoute requiredRoles={["admin"]}>
+                  <TranslationsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
               path="/workforce/org-structure"
               element={
                 <ProtectedRoute requiredRoles={["admin"]}>
