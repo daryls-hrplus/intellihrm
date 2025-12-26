@@ -117,6 +117,31 @@ export default function LeaveAccrualRulesPage() {
     setIsOpen(true);
   };
 
+  // Check for overlapping ranges with existing rules
+  const checkOverlappingRanges = () => {
+    if (!formData.leave_type_id) return null;
+    
+    const newMin = formData.years_of_service_min;
+    const newMax = formData.years_of_service_max ?? Infinity;
+    
+    const overlappingRule = accrualRules.find(rule => {
+      // Skip the rule being edited
+      if (editingRule && rule.id === editingRule.id) return false;
+      // Only check rules for the same leave type
+      if (rule.leave_type_id !== formData.leave_type_id) return false;
+      
+      const existingMin = rule.years_of_service_min;
+      const existingMax = rule.years_of_service_max ?? Infinity;
+      
+      // Check if ranges overlap
+      return newMin < existingMax && newMax > existingMin;
+    });
+    
+    return overlappingRule;
+  };
+
+  const overlappingRule = checkOverlappingRanges();
+
   const handleSubmit = async () => {
     if (!selectedCompanyId || !formData.leave_type_id) return;
 
@@ -397,10 +422,25 @@ export default function LeaveAccrualRulesPage() {
                   <Input
                     id="priority"
                     type="number"
-                    value={formData.priority}
-                    onChange={(e) => setFormData({ ...formData, priority: parseInt(e.target.value) || 0 })}
+                    min="1"
+                    value={formData.priority === 0 ? "" : formData.priority}
+                    onChange={(e) => setFormData({ ...formData, priority: e.target.value === "" ? 0 : parseInt(e.target.value) })}
+                    placeholder="1"
                   />
+                  <p className="text-xs text-muted-foreground">{t("leave.accrualRules.priorityHint")}</p>
                 </div>
+
+                {overlappingRule && (
+                  <div className="rounded-md border border-amber-500/50 bg-amber-500/10 p-3">
+                    <p className="text-sm text-amber-600 dark:text-amber-400">
+                      {t("leave.accrualRules.overlappingRangeWarning", {
+                        ruleName: overlappingRule.name,
+                        min: overlappingRule.years_of_service_min,
+                        max: overlappingRule.years_of_service_max ?? "∞"
+                      })}
+                    </p>
+                  </div>
+                )}
 
                 <div className="flex justify-end gap-2 pt-4">
                   <Button variant="outline" onClick={() => handleDialogClose(false)}>
