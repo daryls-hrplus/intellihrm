@@ -17,6 +17,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { ImportValidationReport } from "./ImportValidationReport";
 import { useImportValidation } from "./useImportValidation";
+import { ImportDependencyChecker } from "./ImportDependencyChecker";
 
 const STRUCTURE_TYPES = [
   { id: "companies", label: "Companies", icon: Building2 },
@@ -88,6 +89,7 @@ export function CompanyStructureImport() {
   const [selectedType, setSelectedType] = useState<keyof typeof TEMPLATES>("companies");
   const [file, setFile] = useState<File | null>(null);
   const [isImporting, setIsImporting] = useState(false);
+  const [prerequisitesMet, setPrerequisitesMet] = useState(true); // Companies have no prerequisites
 
   const {
     isValidating,
@@ -336,6 +338,8 @@ export function CompanyStructureImport() {
                 setSelectedType(type.id as keyof typeof TEMPLATES);
                 reset();
                 setFile(null);
+                // Companies have no prerequisites
+                setPrerequisitesMet(type.id === "companies");
               }}
             >
               <type.icon className="h-4 w-4" />
@@ -344,6 +348,15 @@ export function CompanyStructureImport() {
           ))}
         </div>
       </div>
+
+      {/* Prerequisites Check - Only show for non-companies */}
+      {selectedType !== "companies" && (
+        <ImportDependencyChecker
+          importType={`company_structure_${selectedType}`}
+          companyId={profile?.company_id}
+          onPrerequisitesChecked={setPrerequisitesMet}
+        />
+      )}
 
       {/* Template Download */}
       <div className="flex items-center justify-between p-4 rounded-lg border bg-muted/30">
@@ -366,8 +379,13 @@ export function CompanyStructureImport() {
           type="file"
           accept=".csv"
           onChange={handleFileChange}
-          disabled={isValidating || isImporting}
+          disabled={isValidating || isImporting || !prerequisitesMet}
         />
+        {!prerequisitesMet && (
+          <p className="text-xs text-muted-foreground">
+            Complete the prerequisites above before uploading
+          </p>
+        )}
       </div>
 
       {/* Validation Report */}

@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { ImportValidationReport } from "./ImportValidationReport";
 import { useImportValidation } from "./useImportValidation";
+import { ImportDependencyChecker } from "./ImportDependencyChecker";
 
 const TEMPLATE = {
   headers: [
@@ -53,6 +54,7 @@ export function PositionsImport() {
   const { profile } = useAuth();
   const [file, setFile] = useState<File | null>(null);
   const [isImporting, setIsImporting] = useState(false);
+  const [prerequisitesMet, setPrerequisitesMet] = useState(false);
 
   const {
     isValidating,
@@ -236,6 +238,13 @@ export function PositionsImport() {
         </AlertDescription>
       </Alert>
 
+      {/* Prerequisites Check */}
+      <ImportDependencyChecker
+        importType="positions"
+        companyId={profile?.company_id}
+        onPrerequisitesChecked={setPrerequisitesMet}
+      />
+
       {/* Template Download */}
       <div className="flex items-center justify-between p-4 rounded-lg border bg-muted/30">
         <div>
@@ -257,8 +266,13 @@ export function PositionsImport() {
           type="file"
           accept=".csv"
           onChange={handleFileChange}
-          disabled={isValidating || isImporting}
+          disabled={isValidating || isImporting || !prerequisitesMet}
         />
+        {!prerequisitesMet && (
+          <p className="text-xs text-muted-foreground">
+            Complete the prerequisites above before uploading
+          </p>
+        )}
       </div>
 
       {/* Validation Report */}

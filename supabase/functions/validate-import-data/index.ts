@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -56,6 +57,11 @@ serve(async (req) => {
     }
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+    
+    // Initialize Supabase client for database lookups
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const supabase = createClient(supabaseUrl, supabaseKey);
     
     // Perform basic validation first
     const basicIssues: ValidationIssue[] = [];
@@ -145,6 +151,13 @@ serve(async (req) => {
         });
       }
     });
+
+    // ============ DATABASE REFERENCE VALIDATION ============
+    // Check if referenced entities exist in the database
+    
+    const referenceErrors = await validateDatabaseReferences(supabase, importType, data, companyId);
+    basicIssues.push(...referenceErrors.issues);
+    basicErrorCount += referenceErrors.errorCount;
 
     // If no Lovable API key, return basic validation only
     if (!LOVABLE_API_KEY) {
@@ -310,3 +323,202 @@ Only return warnings or info, not errors (basic validation handles errors). Be c
     );
   }
 });
+
+// Database reference validation function
+async function validateDatabaseReferences(
+  supabase: any,
+  importType: string,
+  data: Record<string, string>[],
+  companyId?: string
+): Promise<{ issues: ValidationIssue[]; errorCount: number }> {
+  const issues: ValidationIssue[] = [];
+  let errorCount = 0;
+
+  // Determine which references to check based on import type
+  const needsCompanyCheck = ["positions", "new_hires", "company_structure_departments", "company_structure_divisions", "company_structure_sections", "company_structure_jobs"].some(t => importType.includes(t));
+  const needsDepartmentCheck = ["positions", "new_hires", "company_structure_sections"].some(t => importType.includes(t));
+  const needsJobCheck = importType === "positions";
+  const needsPositionCheck = importType === "new_hires";
+  const needsJobFamilyCheck = importType === "company_structure_jobs";
+
+  if (!needsCompanyCheck && !needsDepartmentCheck && !needsJobCheck && !needsPositionCheck && !needsJobFamilyCheck) {
+    return { issues, errorCount };
+  }
+
+  console.log(`Performing database reference validation for ${importType}`);
+
+  try {
+    // Fetch all companies
+    const { data: companies, error: companyError } = await supabase
+      .from("companies")
+      .select("id, code");
+    
+    if (companyError) {
+      console.error("Error fetching companies:", companyError);
+      return { issues, errorCount };
+    }
+
+    const companyLookup = new Map<string, string>();
+    (companies || []).forEach((c: { id: string; code: string | null }) => {
+      if (c.code) {
+        companyLookup.set(c.code.toUpperCase(), c.id);
+      }
+    });
+
+    console.log(`Found ${companyLookup.size} companies for validation`);
+
+    // Fetch departments if needed
+    let departmentLookup = new Map<string, string>();
+    if (needsDepartmentCheck) {
+      const { data: departments } = await supabase
+        .from("departments")
+        .select("id, code, company_id");
+      
+      (departments || []).forEach((d: { id: string; code: string | null; company_id: string }) => {
+        if (d.code) {
+          // Key: companyId_departmentCode
+          departmentLookup.set(`${d.company_id}_${d.code.toUpperCase()}`, d.id);
+        }
+      });
+      console.log(`Found ${departmentLookup.size} departments for validation`);
+    }
+
+    // Fetch jobs if needed
+    let jobLookup = new Map<string, string>();
+    if (needsJobCheck) {
+      const { data: jobs } = await supabase
+        .from("jobs")
+        .select("id, code, company_id");
+      
+      (jobs || []).forEach((j: { id: string; code: string | null; company_id: string }) => {
+        if (j.code) {
+          jobLookup.set(`${j.company_id}_${j.code.toUpperCase()}`, j.id);
+        }
+      });
+      console.log(`Found ${jobLookup.size} jobs for validation`);
+    }
+
+    // Fetch positions if needed
+    let positionLookup = new Map<string, string>();
+    if (needsPositionCheck) {
+      const { data: positions } = await supabase
+        .from("positions")
+        .select("id, code, company_id");
+      
+      (positions || []).forEach((p: { id: string; code: string | null; company_id: string }) => {
+        if (p.code) {
+          positionLookup.set(`${p.company_id}_${p.code.toUpperCase()}`, p.id);
+        }
+      });
+      console.log(`Found ${positionLookup.size} positions for validation`);
+    }
+
+    // Fetch job families if needed
+    let jobFamilyLookup = new Map<string, string>();
+    if (needsJobFamilyCheck) {
+      const { data: jobFamilies } = await supabase
+        .from("job_families")
+        .select("id, code, company_id");
+      
+      (jobFamilies || []).forEach((jf: { id: string; code: string | null; company_id: string }) => {
+        if (jf.code) {
+          jobFamilyLookup.set(`${jf.company_id}_${jf.code.toUpperCase()}`, jf.id);
+        }
+      });
+      console.log(`Found ${jobFamilyLookup.size} job families for validation`);
+    }
+
+    // Validate each row
+    data.forEach((row, index) => {
+      const rowNum = index + 2;
+      const companyCode = row.company_code?.toUpperCase();
+      
+      // Check company reference
+      if (needsCompanyCheck && companyCode) {
+        if (!companyLookup.has(companyCode)) {
+          issues.push({
+            row: rowNum,
+            field: "company_code",
+            value: row.company_code || "",
+            issue: `Company '${row.company_code}' not found in database`,
+            severity: "error",
+            suggestion: "Import companies first using the Company Structure tab",
+          });
+          errorCount++;
+          return; // Skip further checks for this row
+        }
+      }
+
+      const resolvedCompanyId = companyCode ? companyLookup.get(companyCode) : companyId;
+
+      // Check department reference
+      if (needsDepartmentCheck && row.department_code && resolvedCompanyId) {
+        const deptKey = `${resolvedCompanyId}_${row.department_code.toUpperCase()}`;
+        if (!departmentLookup.has(deptKey)) {
+          issues.push({
+            row: rowNum,
+            field: "department_code",
+            value: row.department_code,
+            issue: `Department '${row.department_code}' not found in company '${row.company_code}'`,
+            severity: "error",
+            suggestion: "Import departments first using the Company Structure tab",
+          });
+          errorCount++;
+        }
+      }
+
+      // Check job reference
+      if (needsJobCheck && row.job_code && resolvedCompanyId) {
+        const jobKey = `${resolvedCompanyId}_${row.job_code.toUpperCase()}`;
+        if (!jobLookup.has(jobKey)) {
+          issues.push({
+            row: rowNum,
+            field: "job_code",
+            value: row.job_code,
+            issue: `Job '${row.job_code}' not found in company '${row.company_code}'`,
+            severity: "error",
+            suggestion: "Import jobs first using the Company Structure tab",
+          });
+          errorCount++;
+        }
+      }
+
+      // Check position reference
+      if (needsPositionCheck && row.position_code && resolvedCompanyId) {
+        const posKey = `${resolvedCompanyId}_${row.position_code.toUpperCase()}`;
+        if (!positionLookup.has(posKey)) {
+          issues.push({
+            row: rowNum,
+            field: "position_code",
+            value: row.position_code,
+            issue: `Position '${row.position_code}' not found in company '${row.company_code}'`,
+            severity: "error",
+            suggestion: "Import positions first using the Positions tab",
+          });
+          errorCount++;
+        }
+      }
+
+      // Check job family reference
+      if (needsJobFamilyCheck && row.job_family_code && resolvedCompanyId) {
+        const jfKey = `${resolvedCompanyId}_${row.job_family_code.toUpperCase()}`;
+        if (!jobFamilyLookup.has(jfKey)) {
+          issues.push({
+            row: rowNum,
+            field: "job_family_code",
+            value: row.job_family_code,
+            issue: `Job family '${row.job_family_code}' not found in company '${row.company_code}'`,
+            severity: "error",
+            suggestion: "Create job families first before importing jobs",
+          });
+          errorCount++;
+        }
+      }
+    });
+
+  } catch (err) {
+    console.error("Database reference validation error:", err);
+  }
+
+  return { issues, errorCount };
+}
