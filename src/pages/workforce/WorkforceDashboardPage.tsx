@@ -252,16 +252,12 @@ export default function WorkforceDashboardPage() {
   // Build grouped sections
   const sections: ModuleSection[] = [
     {
-      titleKey: "Organization Setup",
+      titleKey: "Employee Management",
       items: filterByAccess([
-        allModules.companyGroups,
-        allModules.companies,
-        allModules.divisions,
-        allModules.departments,
-        allModules.governance,
-        allModules.headcountRequests,
-        allModules.headcountAnalytics,
-        allModules.headcountForecast,
+        allModules.employees,
+        allModules.assignments,
+        allModules.transactions,
+        allModules.qualifications,
       ]),
     },
     {
@@ -277,12 +273,16 @@ export default function WorkforceDashboardPage() {
       ]),
     },
     {
-      titleKey: "Employee Management",
+      titleKey: "Organization Setup",
       items: filterByAccess([
-        allModules.employees,
-        allModules.assignments,
-        allModules.transactions,
-        allModules.qualifications,
+        allModules.companyGroups,
+        allModules.companies,
+        allModules.divisions,
+        allModules.departments,
+        allModules.governance,
+        allModules.headcountRequests,
+        allModules.headcountAnalytics,
+        allModules.headcountForecast,
       ]),
     },
     {
@@ -385,7 +385,7 @@ export default function WorkforceDashboardPage() {
           })}
         </div>
 
-        <GroupedModuleCards sections={sections} defaultOpen={false} />
+        <GroupedModuleCards sections={sections} defaultOpen={true} />
       </div>
     </AppLayout>
   );
