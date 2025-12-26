@@ -21,6 +21,7 @@ import {
   BarChart3,
   FolderTree,
   List,
+  IdCard,
   GitBranch,
   Bot,
   Users,
@@ -76,6 +77,7 @@ export default function HRHubDashboardPage() {
       items: [
         { titleKey: "hrHub.orgStructure", descKey: "hrHub.orgStructureDesc", icon: FolderTree, href: "/workforce/org-structure", badge: null },
         { titleKey: "hrHub.lookupValues", descKey: "hrHub.lookupValuesDesc", icon: List, href: "/admin/lookup-values", badge: null },
+        { titleKey: "hrHub.governmentIdTypes", descKey: "hrHub.governmentIdTypesDesc", icon: IdCard, href: "/hr-hub/government-id-types", badge: null },
       ],
     },
   ];
