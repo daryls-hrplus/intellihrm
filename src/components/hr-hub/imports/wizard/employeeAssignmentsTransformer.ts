@@ -13,10 +13,6 @@ interface EmployeeAssignmentRow {
   start_date?: string;
   end_date?: string;
   rate_type?: string;
-  compensation_amount?: string;
-  compensation_currency?: string;
-  compensation_frequency?: string;
-  hourly_rate?: string;
   standard_hours_per_week?: string;
   pay_group_code?: string;
   spinal_point_number?: string;
@@ -185,10 +181,6 @@ export async function transformEmployeeAssignmentsData(
         start_date: row.start_date,
         end_date: row.end_date || null,
         rate_type: rateType,
-        compensation_amount: parseNumber(row.compensation_amount),
-        compensation_currency: row.compensation_currency || "USD",
-        compensation_frequency: row.compensation_frequency || "monthly",
-        hourly_rate: parseNumber(row.hourly_rate),
         standard_hours_per_week: parseNumber(row.standard_hours_per_week) || 40,
         pay_group_id: payGroupId,
         spinal_point_id: spinalPointId,
