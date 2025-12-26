@@ -3,10 +3,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
-  Table,
   TableBody,
   TableCell,
   TableHead,
@@ -370,20 +368,21 @@ export function WizardStepReview({
       {/* Data Table */}
       <Card>
         <CardContent className="p-0 overflow-hidden">
-          <div className="overflow-auto max-h-[400px]">
-            <Table>
-              <TableHeader className="sticky top-0 bg-muted z-10">
+          <div className="relative max-h-[400px] overflow-auto">
+            <table className="w-full min-w-max caption-bottom text-sm">
+              <TableHeader className="sticky top-0 z-20 bg-muted">
                 <TableRow>
-                  <TableHead className="w-[60px] min-w-[60px] font-semibold text-center bg-muted">Row</TableHead>
+                  <TableHead className="w-[60px] min-w-[60px] font-semibold text-center bg-muted sticky left-0 z-30 border-r">
+                    Row
+                  </TableHead>
                   {headers.map((header) => (
-                    <TableHead 
-                      key={header} 
-                      className="min-w-[120px] whitespace-nowrap font-semibold bg-muted"
-                    >
+                    <TableHead key={header} className="min-w-[120px] whitespace-nowrap font-semibold bg-muted">
                       {header}
                     </TableHead>
                   ))}
-                  <TableHead className="w-[100px] min-w-[100px] font-semibold bg-muted text-center">Actions</TableHead>
+                  <TableHead className="w-[120px] min-w-[120px] font-semibold bg-muted text-center sticky right-0 z-30 border-l">
+                    Actions
+                  </TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -397,7 +396,7 @@ export function WizardStepReview({
                       key={row._id}
                       className={`${hasRowIssue ? "bg-destructive/5" : ""} ${displayIndex % 2 === 0 && !hasRowIssue ? "bg-muted/20" : ""}`}
                     >
-                      <TableCell className="w-[60px] min-w-[60px] font-mono text-xs text-muted-foreground text-center border-r">
+                      <TableCell className="w-[60px] min-w-[60px] font-mono text-xs text-muted-foreground text-center border-r sticky left-0 z-10 bg-inherit">
                         {rowNum}
                       </TableCell>
                       {headers.map((header) => {
@@ -417,9 +416,7 @@ export function WizardStepReview({
                                   onChange={(e) => handleFieldChange(header, e.target.value)}
                                   className={`h-8 text-sm min-w-[100px] ${editError ? "border-destructive" : ""}`}
                                 />
-                                {editError && (
-                                  <p className="text-xs text-destructive">{editError}</p>
-                                )}
+                                {editError && <p className="text-xs text-destructive">{editError}</p>}
                               </div>
                             ) : (
                               <div className="relative group">
@@ -437,7 +434,7 @@ export function WizardStepReview({
                           </TableCell>
                         );
                       })}
-                      <TableCell className="w-[100px] min-w-[100px] text-center">
+                      <TableCell className="w-[120px] min-w-[120px] sticky right-0 z-10 bg-inherit border-l">
                         {isEditing ? (
                           <div className="flex items-center justify-center gap-1">
                             <Button
@@ -449,12 +446,7 @@ export function WizardStepReview({
                             >
                               <Save className="h-4 w-4" />
                             </Button>
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              onClick={handleCancel}
-                              className="h-8 w-8 p-0"
-                            >
+                            <Button size="sm" variant="ghost" onClick={handleCancel} className="h-8 w-8 p-0">
                               <X className="h-4 w-4" />
                             </Button>
                           </div>
@@ -474,7 +466,7 @@ export function WizardStepReview({
                   );
                 })}
               </TableBody>
-            </Table>
+            </table>
           </div>
         </CardContent>
       </Card>
