@@ -1082,7 +1082,8 @@
       "employeeTypePlaceholder": "e.g., Permanent",
       "startDate": "Start Date",
       "endDate": "End Date (Optional)",
-      "priority": "Priority (Higher = Applied First)",
+      "priority": "Priority (Lower = Applied First)",
+      "priorityHint": "Priority 1 is applied first",
       "yearsOfService": "Years of Service",
       "validityPeriod": "Validity Period",
       "noEnd": "No end",
@@ -1090,7 +1091,8 @@
       "noRules": "No accrual rules configured. Add rules to define how leave is earned.",
       "editRule": "Edit Accrual Rule",
       "deleteConfirmTitle": "Delete Accrual Rule",
-      "deleteConfirmDescription": "Are you sure you want to delete this accrual rule? This action cannot be undone."
+      "deleteConfirmDescription": "Are you sure you want to delete this accrual rule? This action cannot be undone.",
+      "overlappingRangeWarning": "Warning: This range overlaps with existing rule \"{{ruleName}}\" ({{min}}-{{max}} years) for the same leave type."
     },
     "rolloverRules": {
       "title": "Leave Rollover Rules",
