@@ -100,10 +100,10 @@ export function useAlignmentAnalytics(companyId: string | undefined) {
         alignmentPercentage: data.total > 0 ? Math.round((data.aligned / data.total) * 100) : 0,
       })).sort((a, b) => b.alignmentPercentage - a.alignmentPercentage);
 
-      // Calculate cascade levels
+      // Calculate cascade levels based on goal_type
       const levelCounts: Record<string, number> = {};
       goals?.forEach(g => {
-        const level = g.level || 'individual';
+        const level = g.goal_type || 'individual';
         levelCounts[level] = (levelCounts[level] || 0) + 1;
       });
 
