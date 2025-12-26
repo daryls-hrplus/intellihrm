@@ -80,7 +80,32 @@ interface Position {
   code: string;
   department_id: string;
   is_active: boolean;
+  compensation_model: string | null;
+  pay_spine_id: string | null;
 }
+
+interface PayGroup {
+  id: string;
+  name: string;
+  code: string;
+  pay_frequency: string;
+  company_id: string;
+}
+
+interface SpinalPoint {
+  id: string;
+  point_number: number;
+  annual_salary: number;
+  pay_spine_id: string;
+}
+
+const ASSIGNMENT_TYPES = [
+  { value: 'primary', label: 'Primary' },
+  { value: 'secondary', label: 'Secondary' },
+  { value: 'acting', label: 'Acting' },
+  { value: 'temporary', label: 'Temporary' },
+  { value: 'concurrent', label: 'Concurrent' },
+];
 
 interface Employee {
   id: string;
@@ -104,6 +129,8 @@ interface EmployeeAssignment {
   hourly_rate: number | null;
   standard_hours_per_week: number | null;
   is_active: boolean;
+  pay_group_id: string | null;
+  spinal_point_id: string | null;
   employee: {
     full_name: string | null;
     email: string;
@@ -111,6 +138,8 @@ interface EmployeeAssignment {
   position: {
     title: string;
     code: string;
+    compensation_model: string | null;
+    pay_spine_id: string | null;
     department: {
       name: string;
       code: string;
@@ -130,6 +159,8 @@ export default function EmployeeAssignmentsPage() {
   const [positions, setPositions] = useState<Position[]>([]);
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [assignments, setAssignments] = useState<EmployeeAssignment[]>([]);
+  const [payGroups, setPayGroups] = useState<PayGroup[]>([]);
+  const [spinalPoints, setSpinalPoints] = useState<SpinalPoint[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   // Filters
@@ -152,13 +183,16 @@ export default function EmployeeAssignmentsPage() {
   const [formPositionId, setFormPositionId] = useState("");
   const [formStartDate, setFormStartDate] = useState(getTodayString());
   const [formEndDate, setFormEndDate] = useState("");
-  const [formIsPrimary, setFormIsPrimary] = useState(false);
+  const [formAssignmentType, setFormAssignmentType] = useState("primary");
   const [formCompAmount, setFormCompAmount] = useState("");
   const [formCompCurrency, setFormCompCurrency] = useState("USD");
   const [formCompFrequency, setFormCompFrequency] = useState("monthly");
   const [formRateType, setFormRateType] = useState<string>("salaried");
   const [formHourlyRate, setFormHourlyRate] = useState("");
   const [formStandardHours, setFormStandardHours] = useState("40");
+  const [formPayGroupId, setFormPayGroupId] = useState("");
+  const [formSpinalPointId, setFormSpinalPointId] = useState("");
+  const [selectedPositionData, setSelectedPositionData] = useState<Position | null>(null);
   const [formIsActive, setFormIsActive] = useState(true);
 
   useEffect(() => {
@@ -171,17 +205,19 @@ export default function EmployeeAssignmentsPage() {
 
   const fetchInitialData = async () => {
     try {
-      const [companiesRes, deptsRes, positionsRes, employeesRes] = await Promise.all([
+      const [companiesRes, deptsRes, positionsRes, employeesRes, payGroupsRes] = await Promise.all([
         supabase.from("companies").select("id, name, code").eq("is_active", true).order("name"),
         supabase.from("departments").select("id, name, code, company_id").eq("is_active", true).order("name"),
-        supabase.from("positions").select("id, title, code, department_id, is_active").eq("is_active", true).order("title"),
+        supabase.from("positions").select("id, title, code, department_id, is_active, compensation_model, pay_spine_id").eq("is_active", true).order("title"),
         supabase.from("profiles").select("id, full_name, email, company_id").order("full_name"),
+        supabase.from("pay_groups").select("id, name, code, pay_frequency, company_id").eq("is_active", true).order("name"),
       ]);
 
       setCompanies(companiesRes.data || []);
       setDepartments(deptsRes.data || []);
       setPositions(positionsRes.data || []);
       setEmployees(employeesRes.data || []);
+      setPayGroups(payGroupsRes.data || []);
     } catch (error) {
       console.error("Error fetching initial data:", error);
       toast.error("Failed to load data");
@@ -199,6 +235,8 @@ export default function EmployeeAssignmentsPage() {
           position:positions(
             title, 
             code,
+            compensation_model,
+            pay_spine_id,
             department:departments(
               name, 
               code,
@@ -249,7 +287,7 @@ export default function EmployeeAssignmentsPage() {
     setFormPositionId("");
     setFormStartDate(getTodayString());
     setFormEndDate("");
-    setFormIsPrimary(false);
+    setFormAssignmentType("primary");
     setFormCompAmount("");
     setFormCompCurrency("USD");
     setFormCompFrequency("monthly");
@@ -257,6 +295,10 @@ export default function EmployeeAssignmentsPage() {
     setFormHourlyRate("");
     setFormStandardHours("40");
     setFormIsActive(true);
+    setFormPayGroupId("");
+    setFormSpinalPointId("");
+    setSelectedPositionData(null);
+    setSpinalPoints([]);
   };
 
   const openCreateDialog = () => {
@@ -264,13 +306,13 @@ export default function EmployeeAssignmentsPage() {
     setDialogOpen(true);
   };
 
-  const openEditDialog = (assignment: EmployeeAssignment) => {
+  const openEditDialog = async (assignment: EmployeeAssignment) => {
     setEditingAssignment(assignment);
     setFormEmployeeId(assignment.employee_id);
     setFormPositionId(assignment.position_id);
     setFormStartDate(assignment.start_date);
     setFormEndDate(assignment.end_date || "");
-    setFormIsPrimary(assignment.is_primary);
+    setFormAssignmentType(assignment.assignment_type || "primary");
     setFormCompAmount(assignment.compensation_amount?.toString() || "");
     setFormCompCurrency(assignment.compensation_currency || "USD");
     setFormCompFrequency(assignment.compensation_frequency || "monthly");
@@ -278,7 +320,47 @@ export default function EmployeeAssignmentsPage() {
     setFormHourlyRate(assignment.hourly_rate?.toString() || "");
     setFormStandardHours(assignment.standard_hours_per_week?.toString() || "40");
     setFormIsActive(assignment.is_active);
+    setFormPayGroupId(assignment.pay_group_id || "");
+    setFormSpinalPointId(assignment.spinal_point_id || "");
+    
+    // Set position data and fetch spinal points if needed
+    const pos = positions.find(p => p.id === assignment.position_id);
+    setSelectedPositionData(pos || null);
+    if (pos?.pay_spine_id) {
+      await fetchSpinalPoints(pos.pay_spine_id);
+    }
+    
     setDialogOpen(true);
+  };
+
+  const fetchSpinalPoints = async (paySpineId: string) => {
+    try {
+      const { data, error } = await (supabase as any)
+        .from("spinal_points")
+        .select("id, point_number, annual_salary, pay_spine_id")
+        .eq("pay_spine_id", paySpineId)
+        .eq("is_active", true)
+        .order("point_number");
+      
+      if (error) throw error;
+      setSpinalPoints((data as SpinalPoint[]) || []);
+    } catch (error) {
+      console.error("Error fetching spinal points:", error);
+      setSpinalPoints([]);
+    }
+  };
+
+  const handlePositionChange = async (positionId: string) => {
+    setFormPositionId(positionId);
+    setFormSpinalPointId("");
+    setSpinalPoints([]);
+    
+    const pos = positions.find(p => p.id === positionId);
+    setSelectedPositionData(pos || null);
+    
+    if (pos?.pay_spine_id) {
+      await fetchSpinalPoints(pos.pay_spine_id);
+    }
   };
 
   const handleSave = async () => {
@@ -294,7 +376,8 @@ export default function EmployeeAssignmentsPage() {
         position_id: formPositionId,
         start_date: formStartDate,
         end_date: formEndDate || null,
-        is_primary: formIsPrimary,
+        assignment_type: formAssignmentType,
+        is_primary: formAssignmentType === "primary",
         compensation_amount: formCompAmount ? parseFloat(formCompAmount) : null,
         compensation_currency: formCompCurrency,
         compensation_frequency: formCompFrequency,
@@ -302,6 +385,8 @@ export default function EmployeeAssignmentsPage() {
         hourly_rate: formHourlyRate ? parseFloat(formHourlyRate) : null,
         standard_hours_per_week: formStandardHours ? parseFloat(formStandardHours) : 40,
         is_active: formIsActive,
+        pay_group_id: formPayGroupId || null,
+        spinal_point_id: formSpinalPointId || null,
       };
 
       if (editingAssignment) {
@@ -670,7 +755,7 @@ export default function EmployeeAssignmentsPage() {
 
               <div className="space-y-2">
                 <Label htmlFor="position">{t("workforce.position")} *</Label>
-                <Select value={formPositionId} onValueChange={setFormPositionId}>
+                <Select value={formPositionId} onValueChange={handlePositionChange}>
                   <SelectTrigger>
                     <SelectValue placeholder={t("workforce.selectPosition")} />
                   </SelectTrigger>
@@ -678,6 +763,23 @@ export default function EmployeeAssignmentsPage() {
                     {filteredPositionsForForm.map((pos) => (
                       <SelectItem key={pos.id} value={pos.id}>
                         {pos.title} ({pos.code})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Assignment Type */}
+              <div className="space-y-2">
+                <Label htmlFor="assignmentType">{t("workforce.assignmentType", "Assignment Type")}</Label>
+                <Select value={formAssignmentType} onValueChange={setFormAssignmentType}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {ASSIGNMENT_TYPES.map((type) => (
+                      <SelectItem key={type.value} value={type.value}>
+                        {t(`workforce.assignmentTypes.${type.value}`, type.label)}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -817,23 +919,69 @@ export default function EmployeeAssignmentsPage() {
                 </div>
               )}
 
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Switch
-                    id="isPrimary"
-                    checked={formIsPrimary}
-                    onCheckedChange={setFormIsPrimary}
-                  />
-                  <Label htmlFor="isPrimary">{t("workforce.primaryPosition")}</Label>
+              {/* Pay Group Selection */}
+              <div className="space-y-2">
+                <Label htmlFor="payGroup">{t("workforce.payGroup", "Pay Group")}</Label>
+                <Select value={formPayGroupId} onValueChange={setFormPayGroupId}>
+                  <SelectTrigger>
+                    <SelectValue placeholder={t("workforce.selectPayGroup", "Select pay group")} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">{t("common.none", "None")}</SelectItem>
+                    {payGroups.map((pg) => (
+                      <SelectItem key={pg.id} value={pg.id}>
+                        {pg.name} ({pg.pay_frequency})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Spinal Point Selection (position-aware) */}
+              {selectedPositionData?.compensation_model && 
+               (selectedPositionData.compensation_model === 'spinal_point' || selectedPositionData.compensation_model === 'hybrid') && 
+               spinalPoints.length > 0 && (
+                <div className="space-y-2">
+                  <Label htmlFor="spinalPoint">{t("workforce.spinalPoint", "Spinal Point")}</Label>
+                  <Select value={formSpinalPointId} onValueChange={setFormSpinalPointId}>
+                    <SelectTrigger>
+                      <SelectValue placeholder={t("workforce.selectSpinalPoint", "Select spinal point")} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="">{t("common.none", "None")}</SelectItem>
+                      {spinalPoints.map((sp) => (
+                        <SelectItem key={sp.id} value={sp.id}>
+                          Point {sp.point_number} - {new Intl.NumberFormat("en-US", { style: "currency", currency: formCompCurrency || "USD" }).format(sp.annual_salary)}/yr
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
-                <div className="flex items-center gap-2">
-                  <Switch
-                    id="isActive"
-                    checked={formIsActive}
-                    onCheckedChange={setFormIsActive}
-                  />
-                  <Label htmlFor="isActive">{t("common.active")}</Label>
-                </div>
+              )}
+
+              {/* Standard Hours (always shown) */}
+              <div className="space-y-2">
+                <Label htmlFor="standardHoursAll">{t("workforce.standardHoursPerWeek", "Standard Hours/Week")}</Label>
+                <Input
+                  id="standardHoursAll"
+                  type="number"
+                  step="0.5"
+                  placeholder="40"
+                  value={formStandardHours}
+                  onChange={(e) => setFormStandardHours(e.target.value)}
+                />
+                <p className="text-xs text-muted-foreground">
+                  {t("workforce.standardHoursNote", "Used for FTE calculation and workforce planning")}
+                </p>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <Switch
+                  id="isActive"
+                  checked={formIsActive}
+                  onCheckedChange={setFormIsActive}
+                />
+                <Label htmlFor="isActive">{t("common.active")}</Label>
               </div>
             </div>
 
