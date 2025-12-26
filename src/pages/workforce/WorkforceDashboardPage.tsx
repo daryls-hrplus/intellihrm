@@ -262,7 +262,7 @@ export default function WorkforceDashboardPage() {
       ]),
     },
     {
-      titleKey: "Job Architecture and Reporting Relationships",
+      titleKey: "Position Management",
       items: filterByAccess([
         allModules.jobFamilies,
         allModules.jobs,
