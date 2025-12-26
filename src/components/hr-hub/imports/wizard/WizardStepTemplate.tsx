@@ -116,7 +116,7 @@ const TEMPLATE_CONFIGS: Record<string, {
   // Positions template is now dynamically generated based on compensation model
   // See getPositionsTemplate() function below
   employee_assignments: {
-    headers: ["employee_email", "position_code", "assignment_type", "start_date", "end_date", "rate_type", "compensation_amount", "compensation_currency", "compensation_frequency", "hourly_rate", "standard_hours_per_week", "pay_group_code", "spinal_point_number", "is_active"],
+    headers: ["employee_email", "position_code", "assignment_type", "start_date", "end_date", "rate_type", "standard_hours_per_week", "pay_group_code", "spinal_point_number", "is_active"],
     fields: [
       { name: "employee_email", required: true, description: "Employee's email address", example: "john@company.com" },
       { name: "position_code", required: true, description: "Position code to assign to", example: "DEV001" },
@@ -124,18 +124,14 @@ const TEMPLATE_CONFIGS: Record<string, {
       { name: "start_date", required: true, description: "Assignment start date (YYYY-MM-DD)", example: "2024-01-15" },
       { name: "end_date", required: false, description: "Assignment end date (optional)", example: "" },
       { name: "rate_type", required: false, description: "Payment rate type", example: "salaried", systemDefined: true, allowedValues: ["salaried", "hourly", "daily"] },
-      { name: "compensation_amount", required: false, description: "Compensation amount", example: "65000" },
-      { name: "compensation_currency", required: false, description: "Currency code (ISO)", example: "USD" },
-      { name: "compensation_frequency", required: false, description: "Payment frequency", example: "monthly", systemDefined: true, allowedValues: ["hourly", "daily", "weekly", "monthly", "yearly"] },
-      { name: "hourly_rate", required: false, description: "Hourly rate (for hourly workers)", example: "" },
       { name: "standard_hours_per_week", required: false, description: "Standard weekly hours", example: "40" },
       { name: "pay_group_code", required: false, description: "Pay group code", example: "MONTHLY" },
       { name: "spinal_point_number", required: false, description: "Spinal point number (if applicable)", example: "5" },
       { name: "is_active", required: false, description: "Active status", example: "true" },
     ],
     examples: [
-      ["john@company.com", "DEV001", "primary", "2024-01-15", "", "salaried", "65000", "USD", "monthly", "", "40", "MONTHLY", "", "true"],
-      ["jane@company.com", "MGR001", "acting", "2024-02-01", "2024-06-30", "salaried", "75000", "USD", "monthly", "", "40", "MONTHLY", "", "true"],
+      ["john@company.com", "DEV001", "primary", "2024-01-15", "", "salaried", "40", "MONTHLY", "", "true"],
+      ["jane@company.com", "MGR001", "acting", "2024-02-01", "2024-06-30", "salaried", "40", "MONTHLY", "5", "true"],
     ],
     tips: [
       "Employee must already exist in the system",
@@ -143,6 +139,7 @@ const TEMPLATE_CONFIGS: Record<string, {
       "For primary assignments, use assignment_type = 'primary'",
       "Spinal point number only applies if position uses spinal point compensation",
       "Pay group code links to payroll cycles",
+      "Compensation is managed separately via Employee Compensation import",
     ],
   },
   new_hires: {
