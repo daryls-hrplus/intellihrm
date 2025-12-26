@@ -259,6 +259,7 @@ export default function WorkforceDashboardPage() {
         allModules.transactions,
         allModules.onboarding,
         allModules.offboarding,
+        allModules.headcountRequests,
       ]),
     },
     {
@@ -281,7 +282,6 @@ export default function WorkforceDashboardPage() {
         allModules.divisions,
         allModules.departments,
         allModules.governance,
-        allModules.headcountRequests,
         allModules.headcountAnalytics,
         allModules.headcountForecast,
       ]),
