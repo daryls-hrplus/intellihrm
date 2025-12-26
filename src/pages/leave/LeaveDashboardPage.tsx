@@ -84,22 +84,22 @@ export default function LeaveDashboardPage() {
 
   // Define all modules
   const allModules = {
-    // Self-Service
-    myLeave: {
-      title: t("leave.modules.myLeave"),
-      description: t("leave.modules.myLeaveDesc"),
-      href: "/leave/my-leave",
+    // Leave Records Management
+    employeeRecords: {
+      title: t("leave.modules.employeeRecords", "Employee Leave Records"),
+      description: t("leave.modules.employeeRecordsDesc", "View and manage all employee leave transactions"),
+      href: "/leave/employee-records",
       icon: Calendar,
       color: "bg-primary/10 text-primary",
-      tabCode: "my_leave",
+      tabCode: "employee_records",
     },
-    applyLeave: {
-      title: t("leave.modules.applyLeave"),
-      description: t("leave.modules.applyLeaveDesc"),
-      href: "/leave/apply",
+    employeeBalances: {
+      title: t("leave.modules.employeeBalances", "Employee Balances"),
+      description: t("leave.modules.employeeBalancesDesc", "View and manage leave balances for all employees"),
+      href: "/leave/employee-balances",
       icon: CalendarPlus,
       color: "bg-success/10 text-success",
-      tabCode: "apply",
+      tabCode: "employee_balances",
     },
     teamCalendar: {
       title: t("leave.modules.teamCalendar"),
@@ -203,10 +203,10 @@ export default function LeaveDashboardPage() {
   // Build grouped sections
   const sections: ModuleSection[] = [
     {
-      titleKey: "Self-Service",
+      titleKey: "Leave Records Management",
       items: filterByAccess([
-        allModules.myLeave,
-        allModules.applyLeave,
+        allModules.employeeRecords,
+        allModules.employeeBalances,
         allModules.teamCalendar,
       ]),
     },
