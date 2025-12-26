@@ -26,6 +26,7 @@ import {
   Award,
   AlertTriangle,
   DollarSign,
+  Scale,
 } from "lucide-react";
 
 export default function ManagerSelfServicePage() {
@@ -56,6 +57,7 @@ export default function ManagerSelfServicePage() {
     reminders: { title: t("mss.modules.reminders.title"), description: t("mss.modules.reminders.description"), href: "/mss/reminders", icon: Clock, color: "bg-rose-500/10 text-rose-600", tabCode: "mss-reminders" },
     pips: { title: t("mss.modules.pips.title"), description: t("mss.modules.pips.description"), href: "/mss/pips", icon: AlertTriangle, color: "bg-orange-500/10 text-orange-600", tabCode: "mss-pips" },
     compensation: { title: t("mss.modules.compensation.title"), description: t("mss.modules.compensation.description"), href: "/mss/compensation", icon: DollarSign, color: "bg-emerald-500/10 text-emerald-600", tabCode: "mss-compensation" },
+    calibration: { title: t("mss.modules.calibration.title", "Calibration"), description: t("mss.modules.calibration.description", "Participate in rating calibration sessions"), href: "/mss/calibration", icon: Scale, color: "bg-indigo-500/10 text-indigo-600", tabCode: "mss-calibration" },
     tickets: { title: t("mss.dashboard.submitTicket"), description: t("mss.dashboard.submitTicketDesc"), href: "/help/tickets/new?from=mss", icon: TicketPlus, color: "bg-red-500/10 text-red-600", tabCode: "mss-tickets" },
   };
 
@@ -73,7 +75,7 @@ export default function ManagerSelfServicePage() {
     },
     {
       titleKey: "Performance & Development",
-      items: filterByAccess([allModules.appraisals, allModules.goals, allModules.feedback360, allModules.pips, allModules.feedback, allModules.recognition, allModules.training, allModules.succession]),
+      items: filterByAccess([allModules.appraisals, allModules.goals, allModules.feedback360, allModules.calibration, allModules.pips, allModules.feedback, allModules.recognition, allModules.training, allModules.succession]),
     },
     {
       titleKey: "Team Resources",
