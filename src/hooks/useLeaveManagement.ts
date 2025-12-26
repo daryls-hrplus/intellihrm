@@ -471,6 +471,45 @@ export function useLeaveManagement(companyId?: string, leaveYearId?: string) {
     },
   });
 
+  // Update accrual rule
+  const updateAccrualRule = useMutation({
+    mutationFn: async ({ id, ...updates }: Partial<LeaveAccrualRule> & { id: string }) => {
+      const { data, error } = await supabase
+        .from("leave_accrual_rules")
+        .update(updates as any)
+        .eq("id", id)
+        .select()
+        .single();
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["leave-accrual-rules"] });
+      toast.success("Accrual rule updated successfully");
+    },
+    onError: (error: Error) => {
+      toast.error(`Failed to update accrual rule: ${error.message}`);
+    },
+  });
+
+  // Delete accrual rule
+  const deleteAccrualRule = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase
+        .from("leave_accrual_rules")
+        .delete()
+        .eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["leave-accrual-rules"] });
+      toast.success("Accrual rule deleted successfully");
+    },
+    onError: (error: Error) => {
+      toast.error(`Failed to delete accrual rule: ${error.message}`);
+    },
+  });
+
   // Create rollover rule
   const createRolloverRule = useMutation({
     mutationFn: async (rule: Partial<LeaveRolloverRule>) => {
@@ -656,6 +695,8 @@ export function useLeaveManagement(companyId?: string, leaveYearId?: string) {
     updateLeaveType,
     deleteLeaveType,
     createAccrualRule,
+    updateAccrualRule,
+    deleteAccrualRule,
     createRolloverRule,
     createLeaveRequest,
     updateLeaveRequestStatus,
