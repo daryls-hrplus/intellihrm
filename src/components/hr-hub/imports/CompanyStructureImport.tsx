@@ -104,8 +104,16 @@ export function CompanyStructureImport() {
 
   const downloadTemplate = (type: keyof typeof TEMPLATES) => {
     const template = TEMPLATES[type];
+    
+    // Create required indicators row
+    const requiredRow = template.headers.map(header => {
+      const fieldSchema = template.schema[header as keyof typeof template.schema];
+      return fieldSchema?.required ? "REQUIRED" : "optional";
+    });
+    
     const csv = [
       template.headers.join(","),
+      requiredRow.join(","),
       template.example.join(","),
     ].join("\n");
 
