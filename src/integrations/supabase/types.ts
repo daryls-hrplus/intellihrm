@@ -22865,7 +22865,7 @@ export type Database = {
           company_division_id: string | null
           company_id: string
           created_at: string
-          department_id: string
+          department_id: string | null
           description: string | null
           end_date: string | null
           id: string
@@ -22879,7 +22879,7 @@ export type Database = {
           company_division_id?: string | null
           company_id: string
           created_at?: string
-          department_id: string
+          department_id?: string | null
           description?: string | null
           end_date?: string | null
           id?: string
@@ -22893,7 +22893,7 @@ export type Database = {
           company_division_id?: string | null
           company_id?: string
           created_at?: string
-          department_id?: string
+          department_id?: string | null
           description?: string | null
           end_date?: string | null
           id?: string
