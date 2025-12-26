@@ -184,14 +184,14 @@ export function CalibrationSessionDialog({
             <div className="space-y-2">
               <Label>Appraisal Cycle</Label>
               <Select
-                value={formData.appraisal_cycle_id}
-                onValueChange={(v) => setFormData({ ...formData, appraisal_cycle_id: v })}
+                value={formData.appraisal_cycle_id || "none"}
+                onValueChange={(v) => setFormData({ ...formData, appraisal_cycle_id: v === "none" ? "" : v })}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Select appraisal cycle" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">None</SelectItem>
+                  <SelectItem value="none">None</SelectItem>
                   {appraisalCycles.map((cycle) => (
                     <SelectItem key={cycle.id} value={cycle.id}>
                       {cycle.name}
@@ -205,14 +205,14 @@ export function CalibrationSessionDialog({
             <div className="space-y-2">
               <Label>Overall Rating Scale</Label>
               <Select
-                value={formData.overall_scale_id}
-                onValueChange={(v) => setFormData({ ...formData, overall_scale_id: v })}
+                value={formData.overall_scale_id || "none"}
+                onValueChange={(v) => setFormData({ ...formData, overall_scale_id: v === "none" ? "" : v })}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Select rating scale" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">None</SelectItem>
+                  <SelectItem value="none">None</SelectItem>
                   {overallScales.map((scale) => (
                     <SelectItem key={scale.id} value={scale.id}>
                       {scale.name}
