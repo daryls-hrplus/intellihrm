@@ -188,3 +188,12 @@ verify_jwt = false
 
 [functions.validate-import-data]
 verify_jwt = false
+
+[functions.calibration-ai-analyzer]
+verify_jwt = false
+
+[functions.calibration-ai-suggester]
+verify_jwt = false
+
+[functions.calibration-ai-summarizer]
+verify_jwt = false

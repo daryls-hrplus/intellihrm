@@ -122,6 +122,8 @@ import PerformanceImprovementPlansPage from "./pages/performance/PerformanceImpr
 import ContinuousFeedbackPage from "./pages/performance/ContinuousFeedbackPage";
 import RecognitionAwardsPage from "./pages/performance/RecognitionAwardsPage";
 import PerformanceAnalyticsPage from "./pages/performance/PerformanceAnalyticsPage";
+import CalibrationSessionsPage from "./pages/performance/CalibrationSessionsPage";
+import CalibrationWorkspacePage from "./pages/performance/CalibrationWorkspacePage";
 import PerformanceSetupPage from "./pages/performance/PerformanceSetupPage";
 
 // Leave pages
@@ -2441,6 +2443,22 @@ const App = () => (
               element={
                 <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
                   <PerformanceAnalyticsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/performance/calibration"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
+                  <CalibrationSessionsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/performance/calibration/:sessionId"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
+                  <CalibrationWorkspacePage />
                 </ProtectedRoute>
               }
             />
