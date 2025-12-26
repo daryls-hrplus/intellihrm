@@ -1,14 +1,12 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { 
   Download, 
   FileSpreadsheet, 
   Info,
   CheckCircle2,
-  AlertTriangle
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -21,6 +19,8 @@ interface TemplateField {
   required: boolean;
   description: string;
   example: string;
+  systemDefined?: boolean;
+  allowedValues?: string[];
 }
 
 const TEMPLATE_CONFIGS: Record<string, { 
@@ -71,13 +71,32 @@ const TEMPLATE_CONFIGS: Record<string, {
       "Division code is optional but helps with org structure",
     ],
   },
+  job_families: {
+    headers: ["code", "name", "company_code", "description", "is_active"],
+    fields: [
+      { name: "code", required: true, description: "Unique job family code", example: "TECH" },
+      { name: "name", required: true, description: "Job family name", example: "Technology" },
+      { name: "company_code", required: true, description: "Parent company code", example: "COMP001" },
+      { name: "description", required: false, description: "Job family description", example: "All technology roles" },
+      { name: "is_active", required: false, description: "Active status", example: "true" },
+    ],
+    examples: [
+      ["TECH", "Technology", "COMP001", "All technology and IT roles", "true"],
+      ["FIN", "Finance", "COMP001", "All finance and accounting roles", "true"],
+    ],
+    tips: [
+      "Job families group related jobs together",
+      "Import job families BEFORE importing jobs",
+      "Use clear, descriptive codes like TECH, HR, FIN",
+    ],
+  },
   jobs: {
     headers: ["code", "title", "company_code", "job_family_code", "grade", "description", "is_active"],
     fields: [
       { name: "code", required: true, description: "Unique job code", example: "DEV001" },
       { name: "title", required: true, description: "Job title", example: "Software Developer" },
       { name: "company_code", required: true, description: "Parent company code", example: "COMP001" },
-      { name: "job_family_code", required: true, description: "Job family code", example: "TECH" },
+      { name: "job_family_code", required: true, description: "Job family code (must exist)", example: "TECH" },
       { name: "grade", required: false, description: "Job grade/level", example: "L3" },
       { name: "description", required: false, description: "Job description", example: "Develops software" },
       { name: "is_active", required: false, description: "Active status", example: "true" },
@@ -93,7 +112,7 @@ const TEMPLATE_CONFIGS: Record<string, {
     ],
   },
   positions: {
-    headers: ["position_number", "title", "company_code", "department_code", "job_code", "reports_to_position", "headcount", "is_active"],
+    headers: ["position_number", "title", "company_code", "department_code", "job_code", "reports_to_position", "headcount", "salary_grade_code", "employment_status", "employment_type", "pay_type", "flsa_status", "is_active"],
     fields: [
       { name: "position_number", required: true, description: "Unique position ID", example: "POS-001" },
       { name: "title", required: true, description: "Position title", example: "Senior Developer" },
@@ -102,37 +121,46 @@ const TEMPLATE_CONFIGS: Record<string, {
       { name: "job_code", required: true, description: "Job code", example: "DEV002" },
       { name: "reports_to_position", required: false, description: "Manager position number", example: "POS-000" },
       { name: "headcount", required: false, description: "Number of positions", example: "1" },
+      { name: "salary_grade_code", required: false, description: "Salary grade code (if configured)", example: "G5" },
+      { name: "employment_status", required: false, description: "Status (ACTIVE, INACTIVE, ON_HOLD)", example: "ACTIVE", systemDefined: true, allowedValues: ["ACTIVE", "INACTIVE", "ON_HOLD", "TERMINATED"] },
+      { name: "employment_type", required: false, description: "Type (FULL_TIME, PART_TIME, etc.)", example: "FULL_TIME", systemDefined: true, allowedValues: ["FULL_TIME", "PART_TIME", "CONTRACT", "TEMPORARY", "INTERN"] },
+      { name: "pay_type", required: false, description: "Pay type (SALARIED, HOURLY, etc.)", example: "SALARIED", systemDefined: true, allowedValues: ["SALARIED", "HOURLY", "COMMISSION", "PIECE_RATE"] },
+      { name: "flsa_status", required: false, description: "FLSA status (EXEMPT, NON_EXEMPT)", example: "EXEMPT", systemDefined: true, allowedValues: ["EXEMPT", "NON_EXEMPT"] },
       { name: "is_active", required: false, description: "Active status", example: "true" },
     ],
     examples: [
-      ["POS-001", "Senior Developer", "COMP001", "IT001", "DEV002", "POS-000", "1", "true"],
-      ["POS-002", "Junior Developer", "COMP001", "IT001", "DEV001", "POS-001", "2", "true"],
+      ["POS-001", "Senior Developer", "COMP001", "IT001", "DEV002", "POS-000", "1", "G5", "ACTIVE", "FULL_TIME", "SALARIED", "EXEMPT", "true"],
+      ["POS-002", "Junior Developer", "COMP001", "IT001", "DEV001", "POS-001", "2", "G3", "ACTIVE", "FULL_TIME", "SALARIED", "NON_EXEMPT", "true"],
     ],
     tips: [
-      "Company, department, and job must all exist",
+      "Company, department, and job must all exist before importing positions",
       "Use reports_to_position to build org hierarchy",
       "Headcount defaults to 1 if not specified",
+      "Employment status, type, pay type, and FLSA status use predefined values",
+      "Salary grade is optional and must match existing salary grades",
     ],
   },
   new_hires: {
-    headers: ["email", "first_name", "last_name", "position_number", "department_code", "hire_date", "employee_id"],
+    headers: ["email", "first_name", "last_name", "position_number", "department_code", "company_code", "hire_date", "employee_id"],
     fields: [
       { name: "email", required: true, description: "Employee email (becomes login)", example: "john@company.com" },
       { name: "first_name", required: true, description: "First name", example: "John" },
       { name: "last_name", required: true, description: "Last name", example: "Smith" },
       { name: "position_number", required: true, description: "Position to assign", example: "POS-001" },
       { name: "department_code", required: true, description: "Department code", example: "IT001" },
+      { name: "company_code", required: true, description: "Company code", example: "COMP001" },
       { name: "hire_date", required: false, description: "Start date (YYYY-MM-DD)", example: "2024-01-15" },
       { name: "employee_id", required: false, description: "Employee number", example: "EMP001" },
     ],
     examples: [
-      ["john.smith@company.com", "John", "Smith", "POS-001", "IT001", "2024-01-15", "EMP001"],
-      ["jane.doe@company.com", "Jane", "Doe", "POS-002", "HR001", "2024-02-01", "EMP002"],
+      ["john.smith@company.com", "John", "Smith", "POS-001", "IT001", "COMP001", "2024-01-15", "EMP001"],
+      ["jane.doe@company.com", "Jane", "Doe", "POS-002", "HR001", "COMP001", "2024-02-01", "EMP002"],
     ],
     tips: [
       "Email must be unique and valid",
       "Position must exist and be available",
       "User accounts will be created automatically",
+      "Department and company must match the position's assignment",
     ],
   },
 };
@@ -151,7 +179,9 @@ const DEFAULT_TEMPLATE = {
 };
 
 export function WizardStepTemplate({ importType }: WizardStepTemplateProps) {
-  const config = TEMPLATE_CONFIGS[importType] || DEFAULT_TEMPLATE;
+  // Handle prefixed import types
+  const baseType = importType.replace("company_structure_", "");
+  const config = TEMPLATE_CONFIGS[baseType] || DEFAULT_TEMPLATE;
 
   const downloadTemplate = () => {
     const csvContent = [
@@ -169,6 +199,10 @@ export function WizardStepTemplate({ importType }: WizardStepTemplateProps) {
     toast.success("Template downloaded successfully");
   };
 
+  // Separate system-defined fields
+  const systemDefinedFields = config.fields.filter(f => (f as TemplateField).systemDefined);
+  const regularFields = config.fields.filter(f => !(f as TemplateField).systemDefined);
+
   return (
     <div className="space-y-6">
       <div className="text-center mb-6">
@@ -182,7 +216,7 @@ export function WizardStepTemplate({ importType }: WizardStepTemplateProps) {
       <div className="flex justify-center">
         <Button size="lg" onClick={downloadTemplate} className="gap-2">
           <Download className="h-5 w-5" />
-          Download {importType.replace(/_/g, " ")} Template
+          Download {baseType.replace(/_/g, " ")} Template
         </Button>
       </div>
 
@@ -194,7 +228,7 @@ export function WizardStepTemplate({ importType }: WizardStepTemplateProps) {
             Field Specifications
           </h3>
           <div className="space-y-3">
-            {config.fields.map((field) => (
+            {regularFields.map((field) => (
               <div
                 key={field.name}
                 className="flex items-start gap-4 p-3 rounded-lg bg-muted/50"
@@ -220,6 +254,53 @@ export function WizardStepTemplate({ importType }: WizardStepTemplateProps) {
         </CardContent>
       </Card>
 
+      {/* System-Defined Fields */}
+      {systemDefinedFields.length > 0 && (
+        <Card className="border-blue-500/30">
+          <CardContent className="p-6">
+            <h3 className="font-semibold mb-4 flex items-center gap-2">
+              <Info className="h-5 w-5 text-blue-500" />
+              System-Defined Fields
+              <Badge variant="outline" className="text-xs ml-2">Predefined Values</Badge>
+            </h3>
+            <p className="text-sm text-muted-foreground mb-4">
+              These fields use predefined system values. Use exact values from the allowed list.
+            </p>
+            <div className="space-y-3">
+              {systemDefinedFields.map((field) => (
+                <div
+                  key={field.name}
+                  className="flex items-start gap-4 p-3 rounded-lg bg-blue-500/10"
+                >
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                      <code className="text-sm font-mono bg-background px-2 py-0.5 rounded">
+                        {field.name}
+                      </code>
+                      <Badge variant="secondary" className="text-xs">Optional</Badge>
+                    </div>
+                    <p className="text-sm text-muted-foreground mt-1">{field.description}</p>
+                    {(field as TemplateField).allowedValues && (
+                      <div className="flex flex-wrap gap-1 mt-2">
+                        {(field as TemplateField).allowedValues!.map(val => (
+                          <Badge key={val} variant="outline" className="text-xs font-mono">
+                            {val}
+                          </Badge>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                  <div className="text-right">
+                    <p className="text-xs text-muted-foreground">Default:</p>
+                    <code className="text-sm font-mono">{field.example}</code>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Sample Data Preview */}
       <Card>
         <CardContent className="p-6">
@@ -229,7 +310,7 @@ export function WizardStepTemplate({ importType }: WizardStepTemplateProps) {
               <thead>
                 <tr className="border-b">
                   {config.headers.map((header) => (
-                    <th key={header} className="text-left p-2 font-medium">
+                    <th key={header} className="text-left p-2 font-medium whitespace-nowrap">
                       {header}
                     </th>
                   ))}
@@ -239,7 +320,7 @@ export function WizardStepTemplate({ importType }: WizardStepTemplateProps) {
                 {config.examples.map((row, i) => (
                   <tr key={i} className="border-b last:border-0">
                     {row.map((cell, j) => (
-                      <td key={j} className="p-2 font-mono text-xs">
+                      <td key={j} className="p-2 font-mono text-xs whitespace-nowrap">
                         {cell}
                       </td>
                     ))}
