@@ -6507,7 +6507,9 @@
       "completionRates": "Completion Rates",
       "goalQuality": "Goal Quality",
       "alignment": "Alignment",
-      "workload": "Workload"
+      "workload": "Workload",
+      "personalSummary": "Your Performance Insights",
+      "teamInsights": "Team Insights"
     },
     "stats": {
       "activeGoals": "Active Goals",

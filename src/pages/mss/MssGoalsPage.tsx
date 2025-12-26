@@ -48,6 +48,9 @@ import { GoalAuditTrail } from "@/components/performance/goals/GoalAuditTrail";
 import { GoalLockDialog } from "@/components/performance/goals/GoalLockDialog";
 import { EnhancedGoalRatingDialog } from "@/components/performance/EnhancedGoalRatingDialog";
 import { DisputeResolutionPanel } from "@/components/performance/DisputeResolutionPanel";
+import { TeamInsightsPanel } from "@/components/performance/insights/TeamInsightsPanel";
+import { EmployeeWorkloadHeatmap } from "@/components/performance/insights/EmployeeWorkloadHeatmap";
+import { GoalQualityReport } from "@/components/performance/insights/GoalQualityReport";
 import { usePendingAdjustments } from "@/hooks/usePendingAdjustments";
 import { useGoalAdjustments } from "@/hooks/useGoalAdjustments";
 import { useGoalRatingSubmissions } from "@/hooks/useGoalRatingSubmissions";
@@ -607,6 +610,10 @@ const statusColors: Record<GoalStatus, string> = {
               <Lightbulb className="h-4 w-4" />
               Coaching Insights
             </TabsTrigger>
+            <TabsTrigger value="team-insights" className="gap-2">
+              <TrendingUp className="h-4 w-4" />
+              Team Insights
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="team-goals" className="mt-6 space-y-4">
@@ -972,6 +979,25 @@ const statusColors: Record<GoalStatus, string> = {
 
           <TabsContent value="coaching" className="mt-6">
             <ManagerCoachingPrompts managerId={user?.id} />
+          </TabsContent>
+
+          {/* Team Insights Tab */}
+          <TabsContent value="team-insights" className="mt-6 space-y-6">
+            <TeamInsightsPanel 
+              companyId={company?.id}
+              directReportIds={directReports.map(r => r.employee_id)}
+              onViewOverloaded={() => setActiveTab("by-employee")}
+              onViewQualityIssues={() => setActiveTab("team-goals")}
+            />
+            
+            <div className="grid gap-6 lg:grid-cols-2">
+              <EmployeeWorkloadHeatmap 
+                companyId={company?.id}
+              />
+              <GoalQualityReport 
+                companyId={company?.id}
+              />
+            </div>
           </TabsContent>
         </Tabs>
 
