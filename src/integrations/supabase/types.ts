@@ -4849,6 +4849,7 @@ export type Database = {
           created_at: string
           division_id: string | null
           email: string | null
+          first_language: string | null
           group_id: string | null
           id: string
           industry: string | null
@@ -4858,6 +4859,7 @@ export type Database = {
           name: string
           phone: string | null
           postal_code: string | null
+          second_language: string | null
           state: string | null
           territory_id: string | null
           updated_at: string
@@ -4873,6 +4875,7 @@ export type Database = {
           created_at?: string
           division_id?: string | null
           email?: string | null
+          first_language?: string | null
           group_id?: string | null
           id?: string
           industry?: string | null
@@ -4882,6 +4885,7 @@ export type Database = {
           name: string
           phone?: string | null
           postal_code?: string | null
+          second_language?: string | null
           state?: string | null
           territory_id?: string | null
           updated_at?: string
@@ -4897,6 +4901,7 @@ export type Database = {
           created_at?: string
           division_id?: string | null
           email?: string | null
+          first_language?: string | null
           group_id?: string | null
           id?: string
           industry?: string | null
@@ -4906,6 +4911,7 @@ export type Database = {
           name?: string
           phone?: string | null
           postal_code?: string | null
+          second_language?: string | null
           state?: string | null
           territory_id?: string | null
           updated_at?: string

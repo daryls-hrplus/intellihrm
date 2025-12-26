@@ -27,12 +27,15 @@ import {
   Building,
   Calendar,
   Network,
+  Languages,
 } from "lucide-react";
 import { CompanyBranchLocations } from "@/components/admin/CompanyBranchLocations";
 import { CompanyFiscalYearsManager } from "@/components/admin/CompanyFiscalYearsManager";
 import { CompanyGovernmentIds } from "@/components/admin/CompanyGovernmentIds";
 import { CountrySelect } from "@/components/ui/country-select";
 import { IdCard } from "lucide-react";
+import { supportedLanguages } from "@/i18n";
+import { getLanguagesForCountry } from "@/lib/countryLanguageMapping";
 
 interface Company {
   id: string;
@@ -89,6 +92,8 @@ const companySchema = z.object({
   website: z.string().url("Invalid URL").optional().or(z.literal("")),
   group_id: z.string().optional().or(z.literal("")),
   division_id: z.string().optional().or(z.literal("")),
+  first_language: z.string().max(10).optional().or(z.literal("")),
+  second_language: z.string().max(10).optional().or(z.literal("")),
 });
 
 type CompanyFormData = z.infer<typeof companySchema>;
@@ -107,6 +112,8 @@ const emptyFormData: CompanyFormData = {
   website: "",
   group_id: "",
   division_id: "",
+  first_language: "en",
+  second_language: "",
 };
 
 const industries = [
@@ -258,6 +265,8 @@ export default function AdminCompaniesPage() {
         website: company.website || "",
         group_id: company.group_id || "",
         division_id: company.division_id || "",
+        first_language: (company as any).first_language || "en",
+        second_language: (company as any).second_language || "",
       });
       setLogoPreview(company.logo_url);
     } else {
@@ -389,6 +398,8 @@ export default function AdminCompaniesPage() {
           group_id: formData.group_id || null,
           division_id: formData.division_id || null,
           logo_url: logoUrl,
+          first_language: formData.first_language || "en",
+          second_language: formData.second_language || null,
         };
 
         const { error } = await supabase
@@ -415,6 +426,8 @@ export default function AdminCompaniesPage() {
           website: formData.website || null,
           group_id: formData.group_id || null,
           division_id: formData.division_id || null,
+          first_language: formData.first_language || "en",
+          second_language: formData.second_language || null,
         };
 
         const { data: newCompany, error } = await supabase
@@ -1017,7 +1030,16 @@ export default function AdminCompaniesPage() {
                   <label className="text-sm font-medium text-foreground">Country</label>
                   <CountrySelect
                     value={formData.country}
-                    onChange={(value) => setFormData({ ...formData, country: value })}
+                    onChange={(value) => {
+                      // Auto-select languages based on country
+                      const languages = getLanguagesForCountry(value);
+                      setFormData({ 
+                        ...formData, 
+                        country: value,
+                        first_language: languages.first,
+                        second_language: languages.second || "",
+                      });
+                    }}
                     valueType="name"
                     placeholder="Select country"
                   />
@@ -1033,6 +1055,52 @@ export default function AdminCompaniesPage() {
                     placeholder="10001"
                     className="h-10 w-full rounded-lg border border-input bg-background px-3 text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
                   />
+                </div>
+              </div>
+
+              {/* Language Settings */}
+              <div className="space-y-2 border-t border-border pt-4">
+                <div className="flex items-center gap-2">
+                  <Languages className="h-4 w-4 text-muted-foreground" />
+                  <h3 className="text-sm font-semibold text-foreground">Language Settings</h3>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Languages are auto-selected based on country. These determine which languages appear in the app's language switcher.
+                </p>
+                <div className="grid gap-4 sm:grid-cols-2 pt-2">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-foreground">Primary Language *</label>
+                    <select
+                      name="first_language"
+                      value={formData.first_language}
+                      onChange={handleChange}
+                      className="h-10 w-full rounded-lg border border-input bg-background px-3 text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                    >
+                      {supportedLanguages.map((lang) => (
+                        <option key={lang.code} value={lang.code}>
+                          {lang.nativeName} ({lang.name})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-foreground">Secondary Language</label>
+                    <select
+                      name="second_language"
+                      value={formData.second_language}
+                      onChange={handleChange}
+                      className="h-10 w-full rounded-lg border border-input bg-background px-3 text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                    >
+                      <option value="">None</option>
+                      {supportedLanguages
+                        .filter((lang) => lang.code !== formData.first_language)
+                        .map((lang) => (
+                          <option key={lang.code} value={lang.code}>
+                            {lang.nativeName} ({lang.name})
+                          </option>
+                        ))}
+                    </select>
+                  </div>
                 </div>
               </div>
 

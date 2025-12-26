@@ -7,10 +7,17 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { useLanguage } from '@/hooks/useLanguage';
+import { useCompanyLanguages } from '@/hooks/useCompanyLanguages';
 import { cn } from '@/lib/utils';
 
 export function LanguageSwitcher() {
-  const { currentLanguage, supportedLanguages, changeLanguage, t } = useLanguage();
+  const { currentLanguage, changeLanguage, t } = useLanguage();
+  const { availableLanguages, isLoading } = useCompanyLanguages();
+
+  // Don't show switcher if loading or only one language available
+  if (isLoading || availableLanguages.length <= 1) {
+    return null;
+  }
 
   return (
     <DropdownMenu>
@@ -21,7 +28,7 @@ export function LanguageSwitcher() {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-40">
-        {supportedLanguages.map((language) => (
+        {availableLanguages.map((language) => (
           <DropdownMenuItem
             key={language.code}
             onClick={() => changeLanguage(language.code)}
