@@ -14,11 +14,14 @@ import {
   AlertCircle,
   Pencil,
   Trash2,
-  Filter,
-  ChevronDown,
-  ChevronUp,
+  X,
+  Save,
   Upload,
   FileJson,
+  ChevronLeft,
+  ChevronRight,
+  Globe,
+  Filter,
 } from "lucide-react";
 import { generateTranslationRecords, getTranslationStats } from "@/lib/translationImporter";
 import { Button } from "@/components/ui/button";
@@ -39,16 +42,12 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Progress } from "@/components/ui/progress";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+
+const ITEMS_PER_PAGE = 20;
 
 const emptyTranslation: TranslationInput = {
   translation_key: "",
@@ -82,14 +81,34 @@ export default function TranslationsPage() {
   const [isImporting, setIsImporting] = useState(false);
   const [showImportDialog, setShowImportDialog] = useState(false);
   const [filterCategory, setFilterCategory] = useState<string>("__all__");
-  const [filterMissing, setFilterMissing] = useState<SupportedLanguage | "__all__">("__all__");
+  const [filterStatus, setFilterStatus] = useState<"all" | "complete" | "incomplete">("all");
+  const [selectedLanguage, setSelectedLanguage] = useState<SupportedLanguage>("en");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingTranslation, setEditingTranslation] = useState<Translation | null>(null);
   const [formData, setFormData] = useState<TranslationInput>(emptyTranslation);
   const [isSaving, setIsSaving] = useState(false);
-  const [expandedRow, setExpandedRow] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  
+  // Inline editing state
+  const [editingInlineId, setEditingInlineId] = useState<string | null>(null);
+  const [inlineValue, setInlineValue] = useState("");
 
   const missingCounts = useMemo(() => getMissingCounts(), [getMissingCounts]);
+
+  // Calculate completion percentage for each language
+  const languageProgress = useMemo(() => {
+    const total = translations.length;
+    if (total === 0) return {};
+    
+    return supportedLanguages.reduce((acc, lang) => {
+      const completed = translations.filter(t => {
+        const value = t[lang.code as keyof Translation];
+        return value && value !== "";
+      }).length;
+      acc[lang.code] = Math.round((completed / total) * 100);
+      return acc;
+    }, {} as Record<string, number>);
+  }, [translations]);
 
   const filteredTranslations = useMemo(() => {
     return translations.filter((t) => {
@@ -97,10 +116,9 @@ export default function TranslationsPage() {
       if (searchQuery) {
         const query = searchQuery.toLowerCase();
         const matchesKey = t.translation_key.toLowerCase().includes(query);
-        const matchesValue = Object.values(t).some(
-          (v) => typeof v === "string" && v.toLowerCase().includes(query)
-        );
-        if (!matchesKey && !matchesValue) return false;
+        const matchesEn = t.en.toLowerCase().includes(query);
+        const matchesSelected = (t[selectedLanguage as keyof Translation] as string || "").toLowerCase().includes(query);
+        if (!matchesKey && !matchesEn && !matchesSelected) return false;
       }
 
       // Category filter
@@ -108,15 +126,29 @@ export default function TranslationsPage() {
         return false;
       }
 
-      // Missing translation filter
-      if (filterMissing !== "__all__") {
-        const value = t[filterMissing as keyof Translation];
-        if (value && value !== "") return false;
+      // Status filter
+      if (filterStatus !== "all") {
+        const value = t[selectedLanguage as keyof Translation];
+        const isComplete = value && value !== "";
+        if (filterStatus === "complete" && !isComplete) return false;
+        if (filterStatus === "incomplete" && isComplete) return false;
       }
 
       return true;
     });
-  }, [translations, searchQuery, filterCategory, filterMissing]);
+  }, [translations, searchQuery, filterCategory, filterStatus, selectedLanguage]);
+
+  // Pagination
+  const totalPages = Math.ceil(filteredTranslations.length / ITEMS_PER_PAGE);
+  const paginatedTranslations = useMemo(() => {
+    const start = (currentPage - 1) * ITEMS_PER_PAGE;
+    return filteredTranslations.slice(start, start + ITEMS_PER_PAGE);
+  }, [filteredTranslations, currentPage]);
+
+  // Reset page when filters change
+  useMemo(() => {
+    setCurrentPage(1);
+  }, [searchQuery, filterCategory, filterStatus, selectedLanguage]);
 
   const handleOpenDialog = (translation?: Translation) => {
     if (translation) {
@@ -193,14 +225,30 @@ export default function TranslationsPage() {
     }
   };
 
-  const getMissingLanguages = (translation: Translation): string[] => {
-    return supportedLanguages
-      .filter((lang) => {
-        if (lang.code === "en") return false; // English is required
-        const value = translation[lang.code as keyof Translation];
-        return !value || value === "";
-      })
-      .map((lang) => lang.code);
+  // Inline editing handlers
+  const startInlineEdit = (translation: Translation) => {
+    setEditingInlineId(translation.id);
+    setInlineValue((translation[selectedLanguage as keyof Translation] as string) || "");
+  };
+
+  const cancelInlineEdit = () => {
+    setEditingInlineId(null);
+    setInlineValue("");
+  };
+
+  const saveInlineEdit = async (id: string) => {
+    try {
+      await updateTranslation(id, { [selectedLanguage]: inlineValue || null });
+      toast({ title: "Translation saved" });
+      setEditingInlineId(null);
+      setInlineValue("");
+    } catch (err: any) {
+      toast({
+        title: "Error",
+        description: err.message || "Failed to save",
+        variant: "destructive",
+      });
+    }
   };
 
   const importStats = useMemo(() => getTranslationStats(), []);
@@ -226,6 +274,8 @@ export default function TranslationsPage() {
     }
   };
 
+  const currentLang = supportedLanguages.find(l => l.code === selectedLanguage);
+
   return (
     <AppLayout>
       <div className="space-y-6">
@@ -243,80 +293,86 @@ export default function TranslationsPage() {
               Translations
             </h1>
             <p className="mt-1 text-muted-foreground">
-              Manage i18n translations across all languages
+              Manage i18n translations • {translations.length} keys across {supportedLanguages.length} languages
             </p>
           </div>
           <div className="flex gap-2">
             <Button variant="outline" onClick={() => setShowImportDialog(true)}>
               <FileJson className="h-4 w-4 mr-2" />
-              Import from Files
+              Import
             </Button>
             <Button onClick={() => handleOpenDialog()}>
               <Plus className="h-4 w-4 mr-2" />
-              Add Translation
+              Add Key
             </Button>
           </div>
         </div>
 
-        {/* Stats */}
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
-          <div className="rounded-xl border border-border bg-card p-4 shadow-card">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Total Keys</p>
-                <p className="mt-1 text-2xl font-bold text-card-foreground">
-                  {translations.length}
-                </p>
-              </div>
-              <Languages className="h-8 w-8 text-primary/50" />
-            </div>
-          </div>
-          {supportedLanguages.slice(1, 5).map((lang) => (
-            <div
-              key={lang.code}
-              className="rounded-xl border border-border bg-card p-4 shadow-card"
-            >
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">
-                    {lang.nativeName} Missing
-                  </p>
-                  <p
-                    className={cn(
-                      "mt-1 text-2xl font-bold",
-                      missingCounts[lang.code as SupportedLanguage] > 0
-                        ? "text-warning"
-                        : "text-success"
-                    )}
-                  >
-                    {missingCounts[lang.code as SupportedLanguage]}
-                  </p>
-                </div>
-                {missingCounts[lang.code as SupportedLanguage] > 0 ? (
-                  <AlertCircle className="h-8 w-8 text-warning/50" />
-                ) : (
-                  <Check className="h-8 w-8 text-success/50" />
-                )}
-              </div>
-            </div>
-          ))}
-        </div>
+        {/* Language Tabs with Progress */}
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base font-medium flex items-center gap-2">
+              <Globe className="h-4 w-4" />
+              Select Language to Edit
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Tabs value={selectedLanguage} onValueChange={(v) => setSelectedLanguage(v as SupportedLanguage)}>
+              <TabsList className="flex flex-wrap h-auto gap-1 bg-transparent p-0">
+                {supportedLanguages.map((lang) => {
+                  const progress = languageProgress[lang.code] || 0;
+                  const isComplete = progress === 100;
+                  
+                  return (
+                    <TabsTrigger
+                      key={lang.code}
+                      value={lang.code}
+                      className={cn(
+                        "relative flex flex-col items-start gap-1 px-4 py-3 h-auto rounded-lg border",
+                        "data-[state=active]:bg-primary/10 data-[state=active]:border-primary",
+                        "data-[state=inactive]:bg-card data-[state=inactive]:border-border",
+                        "min-w-[120px]"
+                      )}
+                    >
+                      <div className="flex items-center justify-between w-full">
+                        <span className="font-medium text-sm">{lang.nativeName}</span>
+                        {isComplete ? (
+                          <Check className="h-3.5 w-3.5 text-success" />
+                        ) : (
+                          <span className="text-xs text-muted-foreground">{progress}%</span>
+                        )}
+                      </div>
+                      <Progress 
+                        value={progress} 
+                        className={cn(
+                          "h-1.5 w-full",
+                          isComplete ? "[&>div]:bg-success" : "[&>div]:bg-primary"
+                        )} 
+                      />
+                      <span className="text-xs text-muted-foreground">{lang.code.toUpperCase()}</span>
+                    </TabsTrigger>
+                  );
+                })}
+              </TabsList>
+            </Tabs>
+          </CardContent>
+        </Card>
 
         {/* Filters */}
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
-              placeholder="Search translations..."
+              placeholder="Search by key or text..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-10"
             />
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-2 flex-wrap">
             <Select value={filterCategory} onValueChange={setFilterCategory}>
-              <SelectTrigger className="w-[150px]">
-                <Filter className="h-4 w-4 mr-2" />
+              <SelectTrigger className="w-[140px]">
+                <Filter className="h-4 w-4 mr-2 shrink-0" />
                 <SelectValue placeholder="Category" />
               </SelectTrigger>
               <SelectContent>
@@ -328,185 +384,238 @@ export default function TranslationsPage() {
                 ))}
               </SelectContent>
             </Select>
-            <Select
-              value={filterMissing}
-              onValueChange={(v) => setFilterMissing(v as SupportedLanguage | "__all__")}
-            >
-              <SelectTrigger className="w-[180px]">
-                <AlertCircle className="h-4 w-4 mr-2" />
-                <SelectValue placeholder="Missing" />
+            <Select value={filterStatus} onValueChange={(v) => setFilterStatus(v as "all" | "complete" | "incomplete")}>
+              <SelectTrigger className="w-[140px]">
+                <SelectValue placeholder="Status" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="__all__">All Translations</SelectItem>
-                {supportedLanguages.slice(1).map((lang) => (
-                  <SelectItem key={lang.code} value={lang.code}>
-                    Missing {lang.nativeName}
-                  </SelectItem>
-                ))}
+                <SelectItem value="all">All Status</SelectItem>
+                <SelectItem value="complete">
+                  <span className="flex items-center gap-2">
+                    <Check className="h-3 w-3 text-success" /> Translated
+                  </span>
+                </SelectItem>
+                <SelectItem value="incomplete">
+                  <span className="flex items-center gap-2">
+                    <AlertCircle className="h-3 w-3 text-warning" /> Missing
+                  </span>
+                </SelectItem>
               </SelectContent>
             </Select>
           </div>
         </div>
 
-        {/* Table */}
+        {/* Results Count */}
+        <div className="flex items-center justify-between text-sm text-muted-foreground">
+          <span>
+            Showing {paginatedTranslations.length} of {filteredTranslations.length} translations
+            {selectedLanguage !== "en" && (
+              <span className="ml-2">
+                • {missingCounts[selectedLanguage]} missing in {currentLang?.nativeName}
+              </span>
+            )}
+          </span>
+        </div>
+
+        {/* Translation List */}
         {isLoading ? (
           <div className="flex items-center justify-center py-12">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
           </div>
         ) : filteredTranslations.length === 0 ? (
-          <div className="rounded-xl border border-border bg-card p-12 text-center shadow-card">
+          <Card className="p-12 text-center">
             <Languages className="mx-auto h-12 w-12 text-muted-foreground/50" />
             <p className="mt-4 text-muted-foreground">
-              {searchQuery || filterCategory !== "__all__" || filterMissing !== "__all__"
+              {searchQuery || filterCategory !== "__all__" || filterStatus !== "all"
                 ? "No translations match your filters."
                 : "No translations yet. Add your first translation."}
             </p>
-          </div>
+          </Card>
         ) : (
-          <div className="rounded-xl border border-border bg-card shadow-card overflow-hidden">
-            <ScrollArea className="h-[600px]">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-[250px]">Key</TableHead>
-                    <TableHead className="w-[100px]">Category</TableHead>
-                    <TableHead>English</TableHead>
-                    <TableHead className="w-[150px]">Status</TableHead>
-                    <TableHead className="w-[100px] text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredTranslations.map((translation) => {
-                    const missing = getMissingLanguages(translation);
-                    const isExpanded = expandedRow === translation.id;
+          <div className="space-y-2">
+            {paginatedTranslations.map((translation) => {
+              const selectedValue = translation[selectedLanguage as keyof Translation] as string;
+              const isTranslated = selectedValue && selectedValue !== "";
+              const isEditing = editingInlineId === translation.id;
 
-                    return (
-                      <>
-                        <TableRow
-                          key={translation.id}
-                          className="cursor-pointer hover:bg-muted/50"
-                          onClick={() =>
-                            setExpandedRow(isExpanded ? null : translation.id)
-                          }
-                        >
-                          <TableCell className="font-mono text-sm">
-                            <div className="flex items-center gap-2">
-                              {isExpanded ? (
-                                <ChevronUp className="h-4 w-4 text-muted-foreground" />
-                              ) : (
-                                <ChevronDown className="h-4 w-4 text-muted-foreground" />
-                              )}
+              return (
+                <Card 
+                  key={translation.id}
+                  className={cn(
+                    "transition-all",
+                    !isTranslated && selectedLanguage !== "en" && "border-warning/30 bg-warning/5"
+                  )}
+                >
+                  <CardContent className="p-4">
+                    <div className="flex flex-col gap-3">
+                      {/* Header Row */}
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <code className="text-xs font-mono bg-muted px-2 py-0.5 rounded text-foreground">
                               {translation.translation_key}
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <Badge variant="outline">{translation.category}</Badge>
-                          </TableCell>
-                          <TableCell className="max-w-[300px] truncate">
-                            {translation.en}
-                          </TableCell>
-                          <TableCell>
-                            {missing.length === 0 ? (
-                              <Badge className="bg-success/10 text-success border-success/20">
-                                Complete
-                              </Badge>
-                            ) : (
-                              <Badge className="bg-warning/10 text-warning border-warning/20">
-                                {missing.length} missing
+                            </code>
+                            <Badge variant="outline" className="text-xs">
+                              {translation.category}
+                            </Badge>
+                            {!isTranslated && selectedLanguage !== "en" && (
+                              <Badge className="bg-warning/10 text-warning border-warning/20 text-xs">
+                                Missing
                               </Badge>
                             )}
-                          </TableCell>
-                          <TableCell className="text-right">
-                            <div className="flex items-center justify-end gap-1">
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleOpenDialog(translation);
-                                }}
-                              >
-                                <Pencil className="h-4 w-4" />
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleDelete(translation.id);
-                                }}
-                              >
-                                <Trash2 className="h-4 w-4 text-destructive" />
-                              </Button>
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                        {isExpanded && (
-                          <TableRow className="bg-muted/30">
-                            <TableCell colSpan={5} className="p-4">
-                              <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-4">
-                                {supportedLanguages.map((lang) => {
-                                  const value =
-                                    translation[lang.code as keyof Translation] as string;
-                                  const isMissing = lang.code !== "en" && (!value || value === "");
+                          </div>
+                          {translation.description && (
+                            <p className="text-xs text-muted-foreground mt-1">
+                              {translation.description}
+                            </p>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-1 shrink-0">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleOpenDialog(translation)}
+                            className="h-8 w-8 p-0"
+                            title="Edit all languages"
+                          >
+                            <Pencil className="h-3.5 w-3.5" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleDelete(translation.id)}
+                            className="h-8 w-8 p-0 text-destructive hover:text-destructive"
+                            title="Delete"
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </Button>
+                        </div>
+                      </div>
 
-                                  return (
-                                    <div
-                                      key={lang.code}
-                                      className={cn(
-                                        "rounded-lg border p-3",
-                                        isMissing
-                                          ? "border-warning/50 bg-warning/5"
-                                          : "border-border bg-background"
-                                      )}
-                                    >
-                                      <div className="flex items-center justify-between mb-1">
-                                        <span className="text-xs font-medium text-muted-foreground">
-                                          {lang.nativeName}
-                                        </span>
-                                        {isMissing && (
-                                          <AlertCircle className="h-3 w-3 text-warning" />
-                                        )}
-                                      </div>
-                                      <p className="text-sm">
-                                        {value || (
-                                          <span className="italic text-muted-foreground">
-                                            Not translated
-                                          </span>
-                                        )}
-                                      </p>
-                                    </div>
-                                  );
-                                })}
+                      {/* English Source */}
+                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+                        <div className="space-y-1">
+                          <Label className="text-xs text-muted-foreground flex items-center gap-1">
+                            <span className="font-semibold">EN</span> English (Source)
+                          </Label>
+                          <div className="bg-muted/50 rounded-md p-2.5 text-sm min-h-[40px]">
+                            {translation.en}
+                          </div>
+                        </div>
+
+                        {/* Selected Language */}
+                        <div className="space-y-1">
+                          <Label className="text-xs text-muted-foreground flex items-center gap-1">
+                            <span className="font-semibold">{selectedLanguage.toUpperCase()}</span> 
+                            {currentLang?.nativeName}
+                            {selectedLanguage === "en" && " (Source)"}
+                          </Label>
+                          
+                          {selectedLanguage === "en" ? (
+                            <div className="bg-muted/50 rounded-md p-2.5 text-sm min-h-[40px]">
+                              {translation.en}
+                            </div>
+                          ) : isEditing ? (
+                            <div className="space-y-2">
+                              <Textarea
+                                value={inlineValue}
+                                onChange={(e) => setInlineValue(e.target.value)}
+                                dir={currentLang?.dir}
+                                className="min-h-[40px] text-sm"
+                                placeholder={`Enter ${currentLang?.name} translation...`}
+                                autoFocus
+                              />
+                              <div className="flex gap-2 justify-end">
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={cancelInlineEdit}
+                                  className="h-7"
+                                >
+                                  <X className="h-3.5 w-3.5 mr-1" />
+                                  Cancel
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  onClick={() => saveInlineEdit(translation.id)}
+                                  className="h-7"
+                                >
+                                  <Save className="h-3.5 w-3.5 mr-1" />
+                                  Save
+                                </Button>
                               </div>
-                              {translation.description && (
-                                <p className="mt-3 text-xs text-muted-foreground">
-                                  <strong>Note:</strong> {translation.description}
-                                </p>
+                            </div>
+                          ) : (
+                            <div 
+                              className={cn(
+                                "rounded-md p-2.5 text-sm min-h-[40px] cursor-pointer transition-colors",
+                                "hover:bg-primary/5 border border-transparent hover:border-primary/20",
+                                isTranslated ? "bg-background" : "bg-warning/10 border-warning/20"
                               )}
-                            </TableCell>
-                          </TableRow>
-                        )}
-                      </>
-                    );
-                  })}
-                </TableBody>
-              </Table>
-            </ScrollArea>
+                              onClick={() => startInlineEdit(translation)}
+                              dir={currentLang?.dir}
+                            >
+                              {isTranslated ? (
+                                selectedValue
+                              ) : (
+                                <span className="text-muted-foreground italic flex items-center gap-2">
+                                  <Plus className="h-3.5 w-3.5" />
+                                  Click to add translation
+                                </span>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+        )}
+
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="flex items-center justify-between">
+            <p className="text-sm text-muted-foreground">
+              Page {currentPage} of {totalPages}
+            </p>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                disabled={currentPage === 1}
+              >
+                <ChevronLeft className="h-4 w-4 mr-1" />
+                Previous
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                disabled={currentPage === totalPages}
+              >
+                Next
+                <ChevronRight className="h-4 w-4 ml-1" />
+              </Button>
+            </div>
           </div>
         )}
       </div>
 
       {/* Add/Edit Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
           <DialogHeader>
             <DialogTitle>
               {editingTranslation ? "Edit Translation" : "Add Translation"}
             </DialogTitle>
           </DialogHeader>
 
-          <div className="space-y-4 py-4">
+          <div className="flex-1 overflow-y-auto py-4 space-y-6">
+            {/* Key and Category */}
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
                 <Label>Translation Key *</Label>
@@ -542,19 +651,39 @@ export default function TranslationsPage() {
               />
             </div>
 
-            <div className="border-t pt-4">
-              <h4 className="text-sm font-semibold mb-3">Translations</h4>
-              <div className="grid gap-4 sm:grid-cols-2">
-                {supportedLanguages.map((lang) => (
-                  <div key={lang.code} className="space-y-2">
+            {/* Language Tabs for translations */}
+            <Tabs defaultValue="en" className="space-y-4">
+              <TabsList className="flex flex-wrap h-auto gap-1">
+                {supportedLanguages.map((lang) => {
+                  const value = formData[lang.code as keyof TranslationInput] as string;
+                  const hasValue = value && value !== "";
+                  
+                  return (
+                    <TabsTrigger
+                      key={lang.code}
+                      value={lang.code}
+                      className="relative"
+                    >
+                      {lang.code.toUpperCase()}
+                      {!hasValue && lang.code !== "en" && (
+                        <span className="absolute -top-1 -right-1 h-2 w-2 rounded-full bg-warning" />
+                      )}
+                    </TabsTrigger>
+                  );
+                })}
+              </TabsList>
+              
+              {supportedLanguages.map((lang) => (
+                <TabsContent key={lang.code} value={lang.code} className="mt-4">
+                  <div className="space-y-2">
                     <Label className="flex items-center gap-2">
-                      {lang.nativeName}
+                      {lang.nativeName} ({lang.name})
                       {lang.code === "en" && (
-                        <span className="text-xs text-destructive">*</span>
+                        <span className="text-xs text-destructive">* Required</span>
                       )}
                     </Label>
                     <Textarea
-                      placeholder={`Translation in ${lang.name}`}
+                      placeholder={`Enter ${lang.name} translation...`}
                       value={(formData[lang.code as keyof TranslationInput] as string) || ""}
                       onChange={(e) =>
                         setFormData({
@@ -562,16 +691,23 @@ export default function TranslationsPage() {
                           [lang.code]: e.target.value || null,
                         })
                       }
-                      rows={2}
+                      rows={4}
                       dir={lang.dir}
+                      className="resize-none"
                     />
+                    {lang.code !== "en" && formData.en && (
+                      <div className="bg-muted/50 rounded-md p-3 text-sm">
+                        <p className="text-xs text-muted-foreground mb-1">English source:</p>
+                        <p>{formData.en}</p>
+                      </div>
+                    )}
                   </div>
-                ))}
-              </div>
-            </div>
+                </TabsContent>
+              ))}
+            </Tabs>
           </div>
 
-          <DialogFooter>
+          <DialogFooter className="border-t pt-4">
             <Button variant="outline" onClick={handleCloseDialog}>
               Cancel
             </Button>
