@@ -25391,6 +25391,7 @@ export type Database = {
           review_notes: string | null
           reviewed_at: string | null
           reviewed_by: string | null
+          source: string | null
           start_date: string
           start_half: string | null
           status: string
@@ -25413,6 +25414,7 @@ export type Database = {
           review_notes?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
+          source?: string | null
           start_date: string
           start_half?: string | null
           status?: string
@@ -25435,6 +25437,7 @@ export type Database = {
           review_notes?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
+          source?: string | null
           start_date?: string
           start_half?: string | null
           status?: string
