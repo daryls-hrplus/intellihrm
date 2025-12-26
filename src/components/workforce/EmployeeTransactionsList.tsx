@@ -334,16 +334,16 @@ export function EmployeeTransactionsList({
           </Select>
         </div>
         <Select onValueChange={onCreateNew}>
-          <SelectTrigger className="w-48 bg-primary/10 border-primary/20 text-primary hover:bg-primary/20">
-            <Plus className="mr-2 h-4 w-4" />
+          <SelectTrigger className="w-48 bg-emerald-100 border-emerald-300 text-foreground hover:bg-emerald-200">
+            <Plus className="mr-2 h-4 w-4 text-emerald-700" />
             <SelectValue placeholder={t("workforce.modules.transactions.newTransaction")} />
           </SelectTrigger>
-          <SelectContent className="bg-primary/10 border-primary/20">
+          <SelectContent className="bg-emerald-100 border-emerald-300">
             {transactionTypes.map((type) => (
               <SelectItem 
                 key={type.id} 
                 value={type.code}
-                className="text-primary focus:bg-primary/20 focus:text-primary"
+                className="text-foreground focus:bg-emerald-200 focus:text-foreground"
               >
                 {type.name}
               </SelectItem>
