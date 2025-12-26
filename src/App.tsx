@@ -403,6 +403,7 @@ import MyTimesheetsPage from "./pages/ess/MyTimesheetsPage";
 import MyExpenseClaimsPage from "./pages/ess/MyExpenseClaimsPage";
 import AnnouncementsPage from "./pages/ess/AnnouncementsPage";
 import TeamCalendarPage from "./pages/ess/TeamCalendarPage";
+import MyCalendarPage from "./pages/ess/MyCalendarPage";
 import MilestonesPage from "./pages/ess/MilestonesPage";
 import EmployeeDirectoryPage from "./pages/admin/EmployeeDirectoryPage";
 import CompanyAnnouncementsPage from "./pages/admin/CompanyAnnouncementsPage";
@@ -3205,6 +3206,14 @@ const App = () => (
               element={
                 <ProtectedRoute moduleCode="ess">
                   <TeamCalendarPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/ess/my-calendar"
+              element={
+                <ProtectedRoute moduleCode="ess">
+                  <MyCalendarPage />
                 </ProtectedRoute>
               }
             />
