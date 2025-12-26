@@ -46,9 +46,11 @@ export function GroupedModuleCards({ sections, defaultOpen = true }: GroupedModu
   const nonEmptySections = sections.filter(section => section.items.length > 0);
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
       {nonEmptySections.map((section) => (
-        <Card key={section.titleKey} className="overflow-hidden">
+        <Card key={section.titleKey} className={`overflow-hidden transition-all duration-200 ${
+          !openSections[section.titleKey] ? 'h-auto' : ''
+        }`}>
           <Collapsible 
             open={openSections[section.titleKey]} 
             onOpenChange={() => toggleSection(section.titleKey)}
@@ -65,7 +67,7 @@ export function GroupedModuleCards({ sections, defaultOpen = true }: GroupedModu
                 </div>
               </CardHeader>
             </CollapsibleTrigger>
-            <CollapsibleContent>
+            <CollapsibleContent className="data-[state=closed]:animate-collapse-up data-[state=open]:animate-collapse-down">
               <CardContent className="space-y-2 pt-4">
                 {section.items.map((item) => (
                   <div
