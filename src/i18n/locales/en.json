@@ -1087,7 +1087,10 @@
       "validityPeriod": "Validity Period",
       "noEnd": "No end",
       "loading": "Loading...",
-      "noRules": "No accrual rules configured. Add rules to define how leave is earned."
+      "noRules": "No accrual rules configured. Add rules to define how leave is earned.",
+      "editRule": "Edit Accrual Rule",
+      "deleteConfirmTitle": "Delete Accrual Rule",
+      "deleteConfirmDescription": "Are you sure you want to delete this accrual rule? This action cannot be undone."
     },
     "rolloverRules": {
       "title": "Leave Rollover Rules",
@@ -1114,6 +1117,10 @@
       "cancel": "Cancel",
       "create": "Create",
       "update": "Update",
+      "save": "Save",
+      "edit": "Edit",
+      "delete": "Delete",
+      "actions": "Actions",
       "status": "Status",
       "active": "Active",
       "inactive": "Inactive"
