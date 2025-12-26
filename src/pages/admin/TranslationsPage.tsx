@@ -10,7 +10,6 @@ import {
   Plus,
   Search,
   Loader2,
-  X,
   Check,
   AlertCircle,
   Pencil,
@@ -18,7 +17,10 @@ import {
   Filter,
   ChevronDown,
   ChevronUp,
+  Upload,
+  FileJson,
 } from "lucide-react";
+import { generateTranslationRecords, getTranslationStats } from "@/lib/translationImporter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -72,10 +74,13 @@ export default function TranslationsPage() {
     addTranslation,
     updateTranslation,
     deleteTranslation,
+    bulkImport,
     getMissingCounts,
   } = useDatabaseTranslations();
 
   const [searchQuery, setSearchQuery] = useState("");
+  const [isImporting, setIsImporting] = useState(false);
+  const [showImportDialog, setShowImportDialog] = useState(false);
   const [filterCategory, setFilterCategory] = useState<string>("__all__");
   const [filterMissing, setFilterMissing] = useState<SupportedLanguage | "__all__">("__all__");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -198,6 +203,29 @@ export default function TranslationsPage() {
       .map((lang) => lang.code);
   };
 
+  const importStats = useMemo(() => getTranslationStats(), []);
+
+  const handleImportFromFiles = async () => {
+    setIsImporting(true);
+    try {
+      const records = generateTranslationRecords();
+      await bulkImport(records);
+      toast({
+        title: "Import successful",
+        description: `Imported ${records.length} translations from JSON files`,
+      });
+      setShowImportDialog(false);
+    } catch (err: any) {
+      toast({
+        title: "Import failed",
+        description: err.message || "Failed to import translations",
+        variant: "destructive",
+      });
+    } finally {
+      setIsImporting(false);
+    }
+  };
+
   return (
     <AppLayout>
       <div className="space-y-6">
@@ -218,10 +246,16 @@ export default function TranslationsPage() {
               Manage i18n translations across all languages
             </p>
           </div>
-          <Button onClick={() => handleOpenDialog()}>
-            <Plus className="h-4 w-4 mr-2" />
-            Add Translation
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={() => setShowImportDialog(true)}>
+              <FileJson className="h-4 w-4 mr-2" />
+              Import from Files
+            </Button>
+            <Button onClick={() => handleOpenDialog()}>
+              <Plus className="h-4 w-4 mr-2" />
+              Add Translation
+            </Button>
+          </div>
         </div>
 
         {/* Stats */}
@@ -544,6 +578,80 @@ export default function TranslationsPage() {
             <Button onClick={handleSubmit} disabled={isSaving}>
               {isSaving && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
               {editingTranslation ? "Save Changes" : "Add Translation"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Import Dialog */}
+      <Dialog open={showImportDialog} onOpenChange={setShowImportDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Import Translations from JSON Files</DialogTitle>
+          </DialogHeader>
+          
+          <div className="py-4 space-y-4">
+            <p className="text-sm text-muted-foreground">
+              This will import all translations from the existing i18n JSON files into the database.
+              Existing translations with the same key will be updated.
+            </p>
+            
+            <div className="rounded-lg border border-border bg-muted/50 p-4 space-y-3">
+              <h4 className="font-medium text-sm">Import Summary</h4>
+              <div className="grid grid-cols-2 gap-2 text-sm">
+                <span className="text-muted-foreground">Total keys:</span>
+                <span className="font-medium">{importStats.total}</span>
+                
+                <span className="text-muted-foreground">Categories:</span>
+                <span className="font-medium">{importStats.categories.length}</span>
+              </div>
+              
+              <div className="pt-2 border-t">
+                <h5 className="text-xs font-medium text-muted-foreground mb-2">Translations per language:</h5>
+                <div className="grid grid-cols-3 gap-1 text-xs">
+                  {Object.entries(importStats.languageCounts).map(([lang, count]) => (
+                    <div key={lang} className="flex justify-between">
+                      <span className="text-muted-foreground uppercase">{lang}:</span>
+                      <span className={cn(
+                        "font-medium",
+                        count === importStats.total ? "text-success" : "text-warning"
+                      )}>
+                        {count}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+            
+            {translations.length > 0 && (
+              <div className="rounded-lg border border-warning/50 bg-warning/10 p-3">
+                <div className="flex items-start gap-2">
+                  <AlertCircle className="h-4 w-4 text-warning mt-0.5" />
+                  <p className="text-sm text-warning">
+                    You have {translations.length} existing translations. Import will update matching keys and add new ones.
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowImportDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleImportFromFiles} disabled={isImporting}>
+              {isImporting ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  Importing...
+                </>
+              ) : (
+                <>
+                  <Upload className="h-4 w-4 mr-2" />
+                  Import {importStats.total} Translations
+                </>
+              )}
             </Button>
           </DialogFooter>
         </DialogContent>
