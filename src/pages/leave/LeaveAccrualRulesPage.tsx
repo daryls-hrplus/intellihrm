@@ -331,8 +331,10 @@ export default function LeaveAccrualRulesPage() {
                     <Input
                       id="yos_min"
                       type="number"
-                      value={formData.years_of_service_min}
-                      onChange={(e) => setFormData({ ...formData, years_of_service_min: parseInt(e.target.value) || 0 })}
+                      min="0"
+                      value={formData.years_of_service_min === 0 ? "" : formData.years_of_service_min}
+                      onChange={(e) => setFormData({ ...formData, years_of_service_min: e.target.value === "" ? 0 : parseInt(e.target.value) })}
+                      placeholder="0"
                     />
                   </div>
                   <div className="space-y-2">
