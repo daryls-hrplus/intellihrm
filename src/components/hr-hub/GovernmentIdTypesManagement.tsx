@@ -70,7 +70,7 @@ export function GovernmentIdTypesManagement() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [formData, setFormData] = useState(emptyFormData);
   const [saving, setSaving] = useState(false);
-  const [countryFilter, setCountryFilter] = useState<string>("");
+  const [countryFilter, setCountryFilter] = useState<string>("all");
   const [typeFilter, setTypeFilter] = useState<string>("all");
 
   useEffect(() => {
@@ -189,7 +189,7 @@ export function GovernmentIdTypesManagement() {
   };
 
   const filteredIdTypes = idTypes.filter((idType) => {
-    if (countryFilter && idType.country_code !== countryFilter) return false;
+    if (countryFilter && countryFilter !== "all" && idType.country_code !== countryFilter) return false;
     if (typeFilter === "employee" && !idType.is_employee_type) return false;
     if (typeFilter === "employer" && !idType.is_employer_type) return false;
     return true;
@@ -208,7 +208,7 @@ export function GovernmentIdTypesManagement() {
                 <SelectValue placeholder="All Countries" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Countries</SelectItem>
+                <SelectItem value="all">All Countries</SelectItem>
                 {uniqueCountries.map((code) => (
                   <SelectItem key={code} value={code}>
                     {getCountryName(code)}
