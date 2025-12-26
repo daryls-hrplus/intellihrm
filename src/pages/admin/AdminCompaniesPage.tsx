@@ -709,13 +709,6 @@ export default function AdminCompaniesPage() {
                             <Trash2 className="h-4 w-4" />
                             Delete
                           </button>
-                          <button
-                            onClick={() => handleDelete(company)}
-                            className="flex w-full items-center gap-2 px-3 py-2 text-sm text-destructive hover:bg-muted"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                            Delete
-                          </button>
                         </div>
                       </>
                     )}
