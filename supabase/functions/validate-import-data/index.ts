@@ -23,6 +23,7 @@ interface ValidationResult {
   warningCount: number;
   issues: ValidationIssue[];
   aiInsights?: string[];
+  duplicates?: { inFile: number; inDatabase: number };
 }
 
 serve(async (req) => {
@@ -152,9 +153,13 @@ serve(async (req) => {
       }
     });
 
+    // ============ DUPLICATE DETECTION ============
+    const duplicateResult = await detectDuplicates(supabase, importType, data, companyId);
+    basicIssues.push(...duplicateResult.issues);
+    basicErrorCount += duplicateResult.errorCount;
+    basicWarningCount += duplicateResult.warningCount;
+
     // ============ DATABASE REFERENCE VALIDATION ============
-    // Check if referenced entities exist in the database
-    
     const referenceErrors = await validateDatabaseReferences(supabase, importType, data, companyId);
     basicIssues.push(...referenceErrors.issues);
     basicErrorCount += referenceErrors.errorCount;
@@ -172,13 +177,14 @@ serve(async (req) => {
           errorCount: basicErrorCount,
           warningCount: basicWarningCount,
           issues: basicIssues,
+          duplicates: { inFile: duplicateResult.inFileDuplicates, inDatabase: duplicateResult.inDatabaseDuplicates },
         }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
     // Use AI for enhanced validation
-    const sampleData = data.slice(0, 10); // Only send first 10 rows for AI analysis
+    const sampleData = data.slice(0, 10);
     const prompt = `You are an HR data validation expert. Analyze this ${importType} import data for potential issues.
 
 Data sample (first ${sampleData.length} of ${data.length} rows):
@@ -189,10 +195,9 @@ ${JSON.stringify(schema, null, 2)}
 
 Check for:
 1. Semantic issues (e.g., job titles that don't match job levels)
-2. Duplicate codes or names
-3. Inconsistent formatting or casing
-4. Missing relationships (if company_code, job_family_code, etc. are referenced)
-5. Data quality issues (e.g., placeholder text, test data)
+2. Inconsistent formatting or casing
+3. Data quality issues (e.g., placeholder text, test data)
+4. Patterns that suggest copy-paste errors
 
 Return a JSON object with this exact structure:
 {
@@ -229,7 +234,6 @@ Only return warnings or info, not errors (basic validation handles errors). Be c
 
       if (!response.ok) {
         console.error("AI gateway error:", response.status);
-        // Return basic validation if AI fails
         const validRows = data.length - new Set(basicIssues.filter(i => i.severity === "error").map(i => i.row)).size;
         return new Response(
           JSON.stringify({
@@ -239,6 +243,7 @@ Only return warnings or info, not errors (basic validation handles errors). Be c
             errorCount: basicErrorCount,
             warningCount: basicWarningCount,
             issues: basicIssues,
+            duplicates: { inFile: duplicateResult.inFileDuplicates, inDatabase: duplicateResult.inDatabaseDuplicates },
           }),
           { headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
@@ -249,10 +254,8 @@ Only return warnings or info, not errors (basic validation handles errors). Be c
       
       console.log("AI response received:", aiContent.substring(0, 200));
 
-      // Parse AI response
       let aiResult: { additionalIssues?: ValidationIssue[]; insights?: string[] } = {};
       try {
-        // Extract JSON from response (handle markdown code blocks)
         const jsonMatch = aiContent.match(/```(?:json)?\s*([\s\S]*?)```/) || [null, aiContent];
         const jsonStr = jsonMatch[1]?.trim() || aiContent.trim();
         aiResult = JSON.parse(jsonStr);
@@ -261,7 +264,6 @@ Only return warnings or info, not errors (basic validation handles errors). Be c
         aiResult = { additionalIssues: [], insights: [] };
       }
 
-      // Combine basic issues with AI issues
       const allIssues = [...basicIssues, ...(aiResult.additionalIssues || [])];
       const totalWarnings = basicWarningCount + (aiResult.additionalIssues?.filter(i => i.severity === "warning").length || 0);
       const validRows = data.length - new Set(allIssues.filter(i => i.severity === "error").map(i => i.row)).size;
@@ -274,6 +276,7 @@ Only return warnings or info, not errors (basic validation handles errors). Be c
         warningCount: totalWarnings,
         issues: allIssues,
         aiInsights: aiResult.insights,
+        duplicates: { inFile: duplicateResult.inFileDuplicates, inDatabase: duplicateResult.inDatabaseDuplicates },
       };
 
       console.log(`Validation complete: ${result.validRows}/${result.totalRows} valid, ${result.errorCount} errors, ${result.warningCount} warnings`);
@@ -285,7 +288,6 @@ Only return warnings or info, not errors (basic validation handles errors). Be c
 
     } catch (aiErr) {
       console.error("AI validation error:", aiErr);
-      // Return basic validation if AI fails
       const validRows = data.length - new Set(basicIssues.filter(i => i.severity === "error").map(i => i.row)).size;
       return new Response(
         JSON.stringify({
@@ -295,6 +297,7 @@ Only return warnings or info, not errors (basic validation handles errors). Be c
           errorCount: basicErrorCount,
           warningCount: basicWarningCount,
           issues: basicIssues,
+          duplicates: { inFile: duplicateResult.inFileDuplicates, inDatabase: duplicateResult.inDatabaseDuplicates },
         }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
@@ -324,6 +327,182 @@ Only return warnings or info, not errors (basic validation handles errors). Be c
   }
 });
 
+// Duplicate detection function
+async function detectDuplicates(
+  supabase: any,
+  importType: string,
+  data: Record<string, string>[],
+  companyId?: string
+): Promise<{ issues: ValidationIssue[]; errorCount: number; warningCount: number; inFileDuplicates: number; inDatabaseDuplicates: number }> {
+  const issues: ValidationIssue[] = [];
+  let errorCount = 0;
+  let warningCount = 0;
+  let inFileDuplicates = 0;
+  let inDatabaseDuplicates = 0;
+
+  // Determine which field(s) to check for duplicates based on import type
+  let duplicateKey: string | string[] = "code";
+  let tableName = "";
+  let companyScoped = false;
+
+  if (importType === "companies" || importType === "company_structure_companies") {
+    duplicateKey = "code";
+    tableName = "companies";
+    companyScoped = false;
+  } else if (importType === "departments" || importType === "company_structure_departments") {
+    duplicateKey = "code";
+    tableName = "departments";
+    companyScoped = true;
+  } else if (importType === "divisions" || importType === "company_structure_divisions") {
+    duplicateKey = "code";
+    tableName = "divisions";
+    companyScoped = true;
+  } else if (importType === "jobs" || importType === "company_structure_jobs") {
+    duplicateKey = "code";
+    tableName = "jobs";
+    companyScoped = true;
+  } else if (importType === "positions") {
+    duplicateKey = "position_number";
+    tableName = "positions";
+    companyScoped = true;
+  } else if (importType === "new_hires") {
+    duplicateKey = "email";
+    tableName = "profiles";
+    companyScoped = false;
+  } else if (importType === "job_families" || importType === "company_structure_job_families") {
+    duplicateKey = "code";
+    tableName = "job_families";
+    companyScoped = true;
+  } else {
+    return { issues, errorCount, warningCount, inFileDuplicates, inDatabaseDuplicates };
+  }
+
+  console.log(`Checking duplicates for ${importType} using key: ${duplicateKey}`);
+
+  // 1. Check for duplicates within the file
+  const seenValues = new Map<string, number>();
+  
+  data.forEach((row, index) => {
+    const rowNum = index + 2;
+    const keyField = Array.isArray(duplicateKey) ? duplicateKey[0] : duplicateKey;
+    const value = row[keyField]?.trim().toUpperCase();
+    
+    if (!value) return;
+
+    // For company-scoped, include company_code in the key
+    const fullKey = companyScoped && row.company_code 
+      ? `${row.company_code.toUpperCase()}_${value}`
+      : value;
+
+    if (seenValues.has(fullKey)) {
+      const firstRow = seenValues.get(fullKey)!;
+      issues.push({
+        row: rowNum,
+        field: keyField,
+        value: row[keyField],
+        issue: `Duplicate ${keyField} found in file (first occurrence in row ${firstRow})`,
+        severity: "error",
+        suggestion: `Remove duplicate or use a unique ${keyField}`,
+      });
+      errorCount++;
+      inFileDuplicates++;
+    } else {
+      seenValues.set(fullKey, rowNum);
+    }
+  });
+
+  // 2. Check for duplicates against the database
+  if (tableName) {
+    try {
+      const keyField = Array.isArray(duplicateKey) ? duplicateKey[0] : duplicateKey;
+      const valuesToCheck = [...new Set(data.map(row => row[keyField]?.trim()).filter(Boolean))];
+      
+      if (valuesToCheck.length === 0) {
+        return { issues, errorCount, warningCount, inFileDuplicates, inDatabaseDuplicates };
+      }
+
+      // Determine the correct column name in the database
+      const dbColumn = keyField === "position_number" ? "code" : keyField;
+
+      let query = supabase.from(tableName).select("id, " + dbColumn + (companyScoped ? ", company_id" : ""));
+      
+      // For new_hires checking profiles, we check email
+      if (tableName === "profiles") {
+        query = supabase.from("profiles").select("id, email");
+      }
+
+      const { data: existingRecords, error } = await query;
+      
+      if (error) {
+        console.error(`Error fetching existing ${tableName}:`, error);
+        return { issues, errorCount, warningCount, inFileDuplicates, inDatabaseDuplicates };
+      }
+
+      // Build lookup map
+      const existingLookup = new Set<string>();
+      const companyLookup = new Map<string, string>();
+
+      // If company-scoped, fetch company codes
+      if (companyScoped) {
+        const { data: companies } = await supabase.from("companies").select("id, code");
+        (companies || []).forEach((c: { id: string; code: string | null }) => {
+          if (c.code) {
+            companyLookup.set(c.code.toUpperCase(), c.id);
+          }
+        });
+      }
+
+      (existingRecords || []).forEach((record: any) => {
+        const recordValue = record[dbColumn] || record.email;
+        if (!recordValue) return;
+        
+        if (companyScoped && record.company_id) {
+          existingLookup.add(`${record.company_id}_${recordValue.toUpperCase()}`);
+        } else {
+          existingLookup.add(recordValue.toUpperCase());
+        }
+      });
+
+      console.log(`Found ${existingLookup.size} existing records in ${tableName}`);
+
+      // Check each row against database
+      data.forEach((row, index) => {
+        const rowNum = index + 2;
+        const value = row[keyField]?.trim();
+        
+        if (!value) return;
+
+        let lookupKey = value.toUpperCase();
+        
+        if (companyScoped && row.company_code) {
+          const resolvedCompanyId = companyLookup.get(row.company_code.toUpperCase()) || companyId;
+          if (resolvedCompanyId) {
+            lookupKey = `${resolvedCompanyId}_${value.toUpperCase()}`;
+          }
+        }
+
+        if (existingLookup.has(lookupKey)) {
+          issues.push({
+            row: rowNum,
+            field: keyField,
+            value,
+            issue: `${keyField} '${value}' already exists in the database`,
+            severity: "error",
+            suggestion: `Use a different ${keyField} or update the existing record instead`,
+          });
+          errorCount++;
+          inDatabaseDuplicates++;
+        }
+      });
+
+    } catch (err) {
+      console.error("Database duplicate check error:", err);
+    }
+  }
+
+  return { issues, errorCount, warningCount, inFileDuplicates, inDatabaseDuplicates };
+}
+
 // Database reference validation function
 async function validateDatabaseReferences(
   supabase: any,
@@ -335,13 +514,14 @@ async function validateDatabaseReferences(
   let errorCount = 0;
 
   // Determine which references to check based on import type
-  const needsCompanyCheck = ["positions", "new_hires", "company_structure_departments", "company_structure_divisions", "company_structure_sections", "company_structure_jobs"].some(t => importType.includes(t));
+  const needsCompanyCheck = ["positions", "new_hires", "company_structure_departments", "company_structure_divisions", "company_structure_sections", "company_structure_jobs", "company_structure_job_families"].some(t => importType.includes(t));
   const needsDepartmentCheck = ["positions", "new_hires", "company_structure_sections"].some(t => importType.includes(t));
   const needsJobCheck = importType === "positions";
   const needsPositionCheck = importType === "new_hires";
-  const needsJobFamilyCheck = importType === "company_structure_jobs";
+  const needsJobFamilyCheck = importType === "company_structure_jobs" || importType === "jobs";
+  const needsSalaryGradeCheck = importType === "positions" && data.some(row => row.salary_grade_code);
 
-  if (!needsCompanyCheck && !needsDepartmentCheck && !needsJobCheck && !needsPositionCheck && !needsJobFamilyCheck) {
+  if (!needsCompanyCheck && !needsDepartmentCheck && !needsJobCheck && !needsPositionCheck && !needsJobFamilyCheck && !needsSalaryGradeCheck) {
     return { issues, errorCount };
   }
 
@@ -376,7 +556,6 @@ async function validateDatabaseReferences(
       
       (departments || []).forEach((d: { id: string; code: string | null; company_id: string }) => {
         if (d.code) {
-          // Key: companyId_departmentCode
           departmentLookup.set(`${d.company_id}_${d.code.toUpperCase()}`, d.id);
         }
       });
@@ -428,6 +607,21 @@ async function validateDatabaseReferences(
       console.log(`Found ${jobFamilyLookup.size} job families for validation`);
     }
 
+    // Fetch salary grades if needed
+    let salaryGradeLookup = new Map<string, string>();
+    if (needsSalaryGradeCheck) {
+      const { data: salaryGrades } = await supabase
+        .from("salary_grades")
+        .select("id, code, company_id");
+      
+      (salaryGrades || []).forEach((sg: { id: string; code: string | null; company_id: string }) => {
+        if (sg.code) {
+          salaryGradeLookup.set(`${sg.company_id}_${sg.code.toUpperCase()}`, sg.id);
+        }
+      });
+      console.log(`Found ${salaryGradeLookup.size} salary grades for validation`);
+    }
+
     // Validate each row
     data.forEach((row, index) => {
       const rowNum = index + 2;
@@ -445,7 +639,7 @@ async function validateDatabaseReferences(
             suggestion: "Import companies first using the Company Structure tab",
           });
           errorCount++;
-          return; // Skip further checks for this row
+          return;
         }
       }
 
@@ -512,6 +706,74 @@ async function validateDatabaseReferences(
             suggestion: "Create job families first before importing jobs",
           });
           errorCount++;
+        }
+      }
+
+      // Check salary grade reference (optional field)
+      if (needsSalaryGradeCheck && row.salary_grade_code && resolvedCompanyId) {
+        const sgKey = `${resolvedCompanyId}_${row.salary_grade_code.toUpperCase()}`;
+        if (!salaryGradeLookup.has(sgKey)) {
+          issues.push({
+            row: rowNum,
+            field: "salary_grade_code",
+            value: row.salary_grade_code,
+            issue: `Salary grade '${row.salary_grade_code}' not found in company '${row.company_code}'`,
+            severity: "warning",
+            suggestion: "Create salary grades first or leave this field empty",
+          });
+          // This is a warning, not an error, since it's optional
+        }
+      }
+
+      // Validate allowed values for status fields
+      if (importType === "positions") {
+        const allowedEmploymentStatus = ["ACTIVE", "INACTIVE", "ON_HOLD", "TERMINATED"];
+        const allowedEmploymentType = ["FULL_TIME", "PART_TIME", "CONTRACT", "TEMPORARY", "INTERN"];
+        const allowedPayType = ["SALARIED", "HOURLY", "COMMISSION", "PIECE_RATE"];
+        const allowedFlsaStatus = ["EXEMPT", "NON_EXEMPT"];
+
+        if (row.employment_status && !allowedEmploymentStatus.includes(row.employment_status.toUpperCase())) {
+          issues.push({
+            row: rowNum,
+            field: "employment_status",
+            value: row.employment_status,
+            issue: `Invalid employment status '${row.employment_status}'`,
+            severity: "warning",
+            suggestion: `Use one of: ${allowedEmploymentStatus.join(", ")}`,
+          });
+        }
+
+        if (row.employment_type && !allowedEmploymentType.includes(row.employment_type.toUpperCase())) {
+          issues.push({
+            row: rowNum,
+            field: "employment_type",
+            value: row.employment_type,
+            issue: `Invalid employment type '${row.employment_type}'`,
+            severity: "warning",
+            suggestion: `Use one of: ${allowedEmploymentType.join(", ")}`,
+          });
+        }
+
+        if (row.pay_type && !allowedPayType.includes(row.pay_type.toUpperCase())) {
+          issues.push({
+            row: rowNum,
+            field: "pay_type",
+            value: row.pay_type,
+            issue: `Invalid pay type '${row.pay_type}'`,
+            severity: "warning",
+            suggestion: `Use one of: ${allowedPayType.join(", ")}`,
+          });
+        }
+
+        if (row.flsa_status && !allowedFlsaStatus.includes(row.flsa_status.toUpperCase())) {
+          issues.push({
+            row: rowNum,
+            field: "flsa_status",
+            value: row.flsa_status,
+            issue: `Invalid FLSA status '${row.flsa_status}'`,
+            severity: "warning",
+            suggestion: `Use one of: ${allowedFlsaStatus.join(", ")}`,
+          });
         }
       }
     });
