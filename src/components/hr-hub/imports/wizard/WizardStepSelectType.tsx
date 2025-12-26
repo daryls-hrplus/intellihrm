@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -12,9 +12,12 @@ import {
   CheckCircle2,
   XCircle,
   Lock,
-  Info
+  Info,
+  Layers,
+  GitBranch
 } from "lucide-react";
 import { IMPORT_DEPENDENCIES } from "../importDependencies";
+import { CompensationModel, getRequiredImportsForModel } from "./WizardStepCompensationModel";
 
 interface ImportTypeOption {
   id: string;
@@ -22,10 +25,10 @@ interface ImportTypeOption {
   description: string;
   icon: React.ElementType;
   prerequisites: string[];
-  category: "structure" | "jobs" | "people";
+  category: "structure" | "jobs" | "people" | "compensation";
 }
 
-const IMPORT_TYPES: ImportTypeOption[] = [
+const BASE_IMPORT_TYPES: ImportTypeOption[] = [
   {
     id: "companies",
     label: "Companies",
@@ -79,7 +82,7 @@ const IMPORT_TYPES: ImportTypeOption[] = [
     label: "Positions",
     description: "Specific job instances in departments",
     icon: Briefcase,
-    prerequisites: ["companies", "departments", "jobs"],
+    prerequisites: ["companies", "departments", "jobs"], // Base prerequisites, compensation added dynamically
     category: "jobs",
   },
   {
@@ -100,34 +103,105 @@ const IMPORT_TYPES: ImportTypeOption[] = [
   },
 ];
 
+// Compensation import types - shown based on selected model
+const COMPENSATION_IMPORT_TYPES: ImportTypeOption[] = [
+  {
+    id: "salary_grades",
+    label: "Salary Grades",
+    description: "Compensation grade structures with min/max ranges",
+    icon: Layers,
+    prerequisites: ["companies"],
+    category: "compensation",
+  },
+  {
+    id: "pay_spines",
+    label: "Pay Spines",
+    description: "Pay scale structures (e.g., Admin Scale, Technical Scale)",
+    icon: GitBranch,
+    prerequisites: ["companies"],
+    category: "compensation",
+  },
+  {
+    id: "spinal_points",
+    label: "Spinal Points",
+    description: "Individual points on pay spines with salary values",
+    icon: GitBranch,
+    prerequisites: ["companies", "pay_spines"],
+    category: "compensation",
+  },
+];
+
 interface WizardStepSelectTypeProps {
   selectedType: string | null;
   onSelectType: (type: string) => void;
   companyId?: string | null;
+  compensationModel?: CompensationModel | null;
 }
 
 interface PrerequisiteStatus {
   [key: string]: { count: number; met: boolean };
 }
 
-export function WizardStepSelectType({ selectedType, onSelectType, companyId }: WizardStepSelectTypeProps) {
+export function WizardStepSelectType({ 
+  selectedType, 
+  onSelectType, 
+  companyId,
+  compensationModel 
+}: WizardStepSelectTypeProps) {
   const [prerequisiteStatus, setPrerequisiteStatus] = useState<PrerequisiteStatus>({});
   const [loading, setLoading] = useState(true);
 
+  // Build import types dynamically based on compensation model
+  const IMPORT_TYPES = useMemo(() => {
+    const types = [...BASE_IMPORT_TYPES];
+    const requiredCompensation = getRequiredImportsForModel(compensationModel);
+    
+    // Add compensation types that are required by the selected model
+    COMPENSATION_IMPORT_TYPES.forEach((compType) => {
+      if (requiredCompensation.includes(compType.id)) {
+        types.push(compType);
+      }
+    });
+
+    // Update positions prerequisites based on compensation model
+    const positionsType = types.find((t) => t.id === "positions");
+    if (positionsType && compensationModel) {
+      const additionalPrereqs = requiredCompensation.filter((r) => r !== "spinal_points"); // spinal_points is optional for positions
+      positionsType.prerequisites = ["companies", "departments", "jobs", ...additionalPrereqs];
+    }
+
+    return types;
+  }, [compensationModel]);
+
   useEffect(() => {
     checkPrerequisites();
-  }, [companyId]);
+  }, [companyId, IMPORT_TYPES]);
 
   const checkPrerequisites = async () => {
     setLoading(true);
     const status: PrerequisiteStatus = {};
 
-    const tables = ["companies", "divisions", "departments", "sections", "jobs", "job_families", "positions"];
+    const tables = [
+      "companies", "divisions", "departments", "sections", 
+      "jobs", "job_families", "positions", "salary_grades", "pay_spines"
+    ];
 
+    // Map table names to actual DB tables
+    const tableDbMap: Record<string, string> = {
+      companies: "companies",
+      divisions: "company_divisions",
+      departments: "departments",
+      sections: "sections",
+      jobs: "jobs",
+      job_families: "job_families",
+      positions: "positions",
+      salary_grades: "salary_grades",
+      pay_spines: "pay_spines",
+    };
     for (const table of tables) {
       try {
-        // Use type assertion to bypass deep type instantiation
-        let query = (supabase.from(table as any) as any).select("id", { count: "exact", head: true });
+        const dbTable = tableDbMap[table] || table;
+        let query = (supabase.from(dbTable as any) as any).select("id", { count: "exact", head: true });
         if (companyId && table !== "companies") {
           query = query.eq("company_id", companyId);
         }
@@ -252,6 +326,8 @@ export function WizardStepSelectType({ selectedType, onSelectType, companyId }: 
       ) : (
         <div className="space-y-8">
           {renderCategory("structure", "Organization Structure")}
+          {IMPORT_TYPES.some((t) => t.category === "compensation") && 
+            renderCategory("compensation", "Compensation")}
           {renderCategory("jobs", "Jobs & Positions")}
           {renderCategory("people", "People")}
         </div>
