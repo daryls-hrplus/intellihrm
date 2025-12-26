@@ -21,6 +21,7 @@ import {
   BarChart3,
   Award,
   Settings,
+  Scale,
 } from "lucide-react";
 
 export default function PerformanceDashboardPage() {
@@ -31,6 +32,7 @@ export default function PerformanceDashboardPage() {
   const allModules = {
     appraisals: { title: t('performance.modules.appraisals'), description: t('performance.modules.appraisalsDesc'), href: "/performance/appraisals", icon: ClipboardCheck, color: "bg-primary/10 text-primary", tabCode: "appraisals" },
     feedback360: { title: t('performance.modules.feedback360'), description: t('performance.modules.feedback360Desc'), href: "/performance/360", icon: MessageSquare, color: "bg-sky-500/10 text-sky-600", tabCode: "360" },
+    calibration: { title: t('performance.modules.calibration', 'Calibration'), description: t('performance.modules.calibrationDesc', 'Rating calibration sessions'), href: "/performance/calibration", icon: Scale, color: "bg-indigo-500/10 text-indigo-600", tabCode: "calibration" },
     goals: { title: t('performance.modules.goals'), description: t('performance.modules.goalsDesc'), href: "/performance/goals", icon: Flag, color: "bg-emerald-500/10 text-emerald-600", tabCode: "goals" },
     pips: { title: t('performance.modules.improvementPlans'), description: t('performance.modules.improvementPlansDesc'), href: "/performance/pips", icon: AlertTriangle, color: "bg-amber-500/10 text-amber-600", tabCode: "pips" },
     feedback: { title: t('performance.modules.continuousFeedback'), description: t('performance.modules.continuousFeedbackDesc'), href: "/performance/feedback", icon: MessageCircle, color: "bg-violet-500/10 text-violet-600", tabCode: "feedback" },
@@ -45,7 +47,7 @@ export default function PerformanceDashboardPage() {
   const sections: ModuleSection[] = [
     {
       titleKey: "Evaluations",
-      items: filterByAccess([allModules.appraisals, allModules.feedback360]),
+      items: filterByAccess([allModules.appraisals, allModules.feedback360, allModules.calibration]),
     },
     {
       titleKey: "Goal Management",

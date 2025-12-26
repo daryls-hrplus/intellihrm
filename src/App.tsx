@@ -386,6 +386,7 @@ import MyRecognitionPage from "./pages/ess/MyRecognitionPage";
 import MssFeedbackPage from "./pages/mss/MssFeedbackPage";
 import MssRecognitionPage from "./pages/mss/MssRecognitionPage";
 import MssPipsPage from "./pages/mss/MssPipsPage";
+import MssCalibrationPage from "./pages/mss/MssCalibrationPage";
 import EssCompensationPage from "./pages/ess/EssCompensationPage";
 import EssCompensationHistoryPage from "./pages/ess/EssCompensationHistoryPage";
 import EssTotalRewardsPage from "./pages/ess/EssTotalRewardsPage";
@@ -790,6 +791,14 @@ const App = () => (
               element={
                 <ProtectedRoute moduleCode="mss">
                   <MssGoalInterviewsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/mss/calibration"
+              element={
+                <ProtectedRoute moduleCode="mss">
+                  <MssCalibrationPage />
                 </ProtectedRoute>
               }
             />
