@@ -16474,6 +16474,107 @@ export type Database = {
           },
         ]
       }
+      goal_adjustments: {
+        Row: {
+          adjusted_at: string
+          adjusted_by: string
+          adjustment_reason: string
+          approval_notes: string | null
+          approval_status: string
+          approved_at: string | null
+          approved_by: string | null
+          business_justification: string | null
+          change_type: string
+          company_id: string | null
+          created_at: string
+          goal_id: string
+          id: string
+          impact_assessment: string | null
+          is_material_change: boolean
+          new_value: Json | null
+          previous_value: Json | null
+          reason_details: string | null
+          requires_recalibration: boolean
+          supporting_evidence: string | null
+          updated_at: string
+        }
+        Insert: {
+          adjusted_at?: string
+          adjusted_by: string
+          adjustment_reason: string
+          approval_notes?: string | null
+          approval_status?: string
+          approved_at?: string | null
+          approved_by?: string | null
+          business_justification?: string | null
+          change_type: string
+          company_id?: string | null
+          created_at?: string
+          goal_id: string
+          id?: string
+          impact_assessment?: string | null
+          is_material_change?: boolean
+          new_value?: Json | null
+          previous_value?: Json | null
+          reason_details?: string | null
+          requires_recalibration?: boolean
+          supporting_evidence?: string | null
+          updated_at?: string
+        }
+        Update: {
+          adjusted_at?: string
+          adjusted_by?: string
+          adjustment_reason?: string
+          approval_notes?: string | null
+          approval_status?: string
+          approved_at?: string | null
+          approved_by?: string | null
+          business_justification?: string | null
+          change_type?: string
+          company_id?: string | null
+          created_at?: string
+          goal_id?: string
+          id?: string
+          impact_assessment?: string | null
+          is_material_change?: boolean
+          new_value?: Json | null
+          previous_value?: Json | null
+          reason_details?: string | null
+          requires_recalibration?: boolean
+          supporting_evidence?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "goal_adjustments_adjusted_by_fkey"
+            columns: ["adjusted_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "goal_adjustments_approved_by_fkey"
+            columns: ["approved_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "goal_adjustments_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "goal_adjustments_goal_id_fkey"
+            columns: ["goal_id"]
+            isOneToOne: false
+            referencedRelation: "performance_goals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       goal_alignments: {
         Row: {
           alignment_percentage: number | null
