@@ -44,6 +44,7 @@ export default function EmployeeSelfServicePage() {
     approvals: { title: t("ess.modules.approvals.title"), description: t("ess.modules.approvals.description"), href: "/workflow/approvals", icon: CheckSquare, color: "bg-violet-500/10 text-violet-600", tabCode: "ess-approvals" },
     delegates: { title: t("ess.modules.delegates.title"), description: t("ess.modules.delegates.description"), href: "/workflow/delegates", icon: UserCheck, color: "bg-fuchsia-500/10 text-fuchsia-600", tabCode: "ess-delegates" },
     leave: { title: t("ess.modules.leave.title"), description: t("ess.modules.leave.description"), href: "/ess/leave", icon: Calendar, color: "bg-green-500/10 text-green-600", tabCode: "ess-leave" },
+    myCalendar: { title: t("ess.modules.myCalendar.title", "My Calendar"), description: t("ess.modules.myCalendar.description", "View your leave and key dates"), href: "/ess/my-calendar", icon: Calendar, color: "bg-sky-500/10 text-sky-600", tabCode: "ess-my-calendar" },
     documents: { title: t("ess.modules.documents.title"), description: t("ess.modules.documents.description"), href: "/ess/documents", icon: FileText, color: "bg-purple-500/10 text-purple-600", tabCode: "ess-documents" },
     timeAttendance: { title: t("ess.modules.timeAttendance.title"), description: t("ess.modules.timeAttendance.description"), href: "/ess/time-attendance", icon: Clock, color: "bg-orange-500/10 text-orange-600", tabCode: "ess-time-attendance" },
     payslips: { title: t("ess.modules.payslips.title"), description: t("ess.modules.payslips.description"), href: "/ess/payslips", icon: CreditCard, color: "bg-emerald-500/10 text-emerald-600", tabCode: "ess-payslips" },
@@ -78,7 +79,7 @@ export default function EmployeeSelfServicePage() {
     },
     {
       titleKey: "Time & Leave",
-      items: filterByAccess([allModules.leave, allModules.timeAttendance]),
+      items: filterByAccess([allModules.leave, allModules.myCalendar, allModules.timeAttendance]),
     },
     {
       titleKey: "Pay & Benefits",
