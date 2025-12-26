@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { CompensationModel } from "./WizardStepCompensationModel";
 
 export interface PositionTransformResult {
   success: boolean;
@@ -25,12 +26,15 @@ function normalizeEnum(value: string | undefined, field: string): string | null 
       salaried: "salary",
       hourly: "hourly",
       salary: "salary",
+      commission: "commission",
+      piece_rate: "piece_rate",
     },
     employment_status: {
       active: "active",
       inactive: "inactive",
       on_hold: "on_hold",
       onhold: "on_hold",
+      terminated: "terminated",
     },
     employment_type: {
       full_time: "full_time",
@@ -39,6 +43,7 @@ function normalizeEnum(value: string | undefined, field: string): string | null 
       parttime: "part_time",
       contract: "contract",
       temporary: "temporary",
+      intern: "intern",
     },
     employment_relation: {
       employee: "employee",
@@ -49,6 +54,19 @@ function normalizeEnum(value: string | undefined, field: string): string | null 
       exempt: "exempt",
       non_exempt: "non_exempt",
       nonexempt: "non_exempt",
+    },
+    compensation_model: {
+      salary_grade: "salary_grade",
+      salarygrade: "salary_grade",
+      spinal_point: "spinal_point",
+      spinalpoint: "spinal_point",
+      hybrid: "hybrid",
+      commission_based: "commission_based",
+      commissionbased: "commission_based",
+      hourly_rate: "hourly_rate",
+      hourlyrate: "hourly_rate",
+      direct_pay: "direct_pay",
+      directpay: "direct_pay",
     },
   };
   
@@ -71,15 +89,25 @@ function parseBoolean(value: string | undefined): boolean {
 }
 
 // Parse number with fallback
-function parseNumber(value: string | undefined, defaultValue: number): number {
+function parseNumber(value: string | undefined, defaultValue: number | null = null): number | null {
   if (!value || value.trim() === "") return defaultValue;
   const parsed = Number(value);
   return isNaN(parsed) ? defaultValue : parsed;
 }
 
+// Parse date value
+function parseDate(value: string | undefined): string | null {
+  if (!value || value.trim() === "") return null;
+  // Try to parse the date
+  const date = new Date(value);
+  if (isNaN(date.getTime())) return null;
+  return date.toISOString().slice(0, 10);
+}
+
 export async function transformPositionsData(
   rows: any[],
-  companyId?: string | null
+  companyId?: string | null,
+  compensationModel?: CompensationModel | null
 ): Promise<PositionTransformBatchResult> {
   const transformed: any[] = [];
   const errors: Array<{ rowIndex: number; row: any; error: string }> = [];
@@ -112,6 +140,15 @@ export async function transformPositionsData(
   (salaryGrades || []).forEach((g) => {
     gradeLookup.set(`${g.company_id}|${g.code?.toUpperCase()}`, g.id);
   });
+
+  const { data: paySpines } = await supabase.from("pay_spines").select("id, code, company_id");
+  const spineLookup = new Map<string, string>();
+  (paySpines || []).forEach((s) => {
+    spineLookup.set(`${s.company_id}|${s.code?.toUpperCase()}`, s.id);
+  });
+
+  // Default compensation model from wizard selection
+  const defaultCompensationModel = compensationModel || "salary_grade";
 
   for (let i = 0; i < rows.length; i++) {
     const row = rows[i];
@@ -160,13 +197,13 @@ export async function transformPositionsData(
 
       // Resolve reports_to_position_id (optional)
       let reportsToPositionId: string | null = null;
-      if (row.reports_to_position_code && resolvedCompanyId) {
-        const key = `${resolvedCompanyId}|${row.reports_to_position_code.toUpperCase()}`;
+      if (row.reports_to_position && resolvedCompanyId) {
+        const key = `${resolvedCompanyId}|${row.reports_to_position.toUpperCase()}`;
         reportsToPositionId = positionLookup.get(key) || null;
         if (!reportsToPositionId) {
           rowWarnings.push({ 
-            field: "reports_to_position_code", 
-            message: `Position not found: ${row.reports_to_position_code}. Field will be left empty.` 
+            field: "reports_to_position", 
+            message: `Position not found: ${row.reports_to_position}. Field will be left empty.` 
           });
         }
       }
@@ -184,12 +221,25 @@ export async function transformPositionsData(
         }
       }
 
-      // Validate required fields
-      if (!row.position_code) {
-        rowErrors.push("position_code is required");
+      // Resolve pay_spine_id (optional)
+      let paySpineId: string | null = null;
+      if (row.pay_spine_code && resolvedCompanyId) {
+        const key = `${resolvedCompanyId}|${row.pay_spine_code.toUpperCase()}`;
+        paySpineId = spineLookup.get(key) || null;
+        if (!paySpineId) {
+          rowWarnings.push({ 
+            field: "pay_spine_code", 
+            message: `Pay spine not found: ${row.pay_spine_code}. Field will be left empty.` 
+          });
+        }
       }
-      if (!row.position_title) {
-        rowErrors.push("position_title is required");
+
+      // Validate required fields
+      if (!row.position_number) {
+        rowErrors.push("position_number is required");
+      }
+      if (!row.title) {
+        rowErrors.push("title is required");
       }
 
       // If there are critical errors, skip this row
@@ -198,27 +248,35 @@ export async function transformPositionsData(
         continue;
       }
 
+      // Determine compensation model - use row value if provided, else wizard default
+      const rowCompensationModel = normalizeEnum(row.compensation_model, "compensation_model") 
+        || defaultCompensationModel;
+
       // Build transformed record
       const transformedRow: any = {
         company_id: resolvedCompanyId,
         department_id: departmentId,
         job_id: jobId,
-        code: row.position_code,
-        title: row.position_title,
+        code: row.position_number,
+        title: row.title,
+        description: row.description || null,
         reports_to_position_id: reportsToPositionId,
         salary_grade_id: salaryGradeId,
-        authorized_headcount: parseNumber(row.headcount, 1),
-        start_date: row.start_date || new Date().toISOString().slice(0, 10),
-        end_date: row.end_date || null,
+        pay_spine_id: paySpineId,
+        min_spinal_point: parseNumber(row.min_spinal_point),
+        max_spinal_point: parseNumber(row.max_spinal_point),
+        entry_spinal_point: parseNumber(row.entry_spinal_point),
+        authorized_headcount: parseNumber(row.headcount, 1) || 1,
+        start_date: parseDate(row.start_date) || new Date().toISOString().slice(0, 10),
+        end_date: parseDate(row.end_date),
         is_active: parseBoolean(row.is_active),
         pay_type: normalizeEnum(row.pay_type, "pay_type") || "salary",
         employment_status: normalizeEnum(row.employment_status, "employment_status") || "active",
         employment_type: normalizeEnum(row.employment_type, "employment_type") || "full_time",
         employment_relation: normalizeEnum(row.employment_relation, "employment_relation") || "employee",
         flsa_status: normalizeEnum(row.flsa_status, "flsa_status") || "exempt",
-        default_scheduled_hours: row.default_scheduled_hours ? parseNumber(row.default_scheduled_hours, 40) : null,
-        description: row.description || null,
-        compensation_model: "salary_grade",
+        default_scheduled_hours: parseNumber(row.default_scheduled_hours),
+        compensation_model: rowCompensationModel,
       };
 
       transformed.push(transformedRow);
@@ -254,7 +312,7 @@ export function generateFailureReport(
     errors.forEach((e) => {
       const csvRow = e.rowIndex + 2; // +2 for header + 0-indexed
       lines.push(`Row ${csvRow}: ${e.error}`);
-      lines.push(`  Data: position_code=${e.row.position_code || "N/A"}, company_code=${e.row.company_code || "N/A"}`);
+      lines.push(`  Data: position_number=${e.row.position_number || "N/A"}, company_code=${e.row.company_code || "N/A"}`);
       lines.push("");
     });
   }

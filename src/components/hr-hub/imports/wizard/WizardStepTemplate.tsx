@@ -113,35 +113,8 @@ const TEMPLATE_CONFIGS: Record<string, {
       "Job codes should reflect the job type",
     ],
   },
-  positions: {
-    headers: ["position_number", "title", "company_code", "department_code", "job_code", "reports_to_position", "headcount", "salary_grade_code", "employment_status", "employment_type", "pay_type", "flsa_status", "is_active"],
-    fields: [
-      { name: "position_number", required: true, description: "Unique position ID", example: "POS-001" },
-      { name: "title", required: true, description: "Position title", example: "Senior Developer" },
-      { name: "company_code", required: true, description: "Company code", example: "COMP001" },
-      { name: "department_code", required: true, description: "Department code", example: "IT001" },
-      { name: "job_code", required: true, description: "Job code", example: "DEV002" },
-      { name: "reports_to_position", required: false, description: "Manager position number", example: "POS-000" },
-      { name: "headcount", required: false, description: "Number of positions", example: "1" },
-      { name: "salary_grade_code", required: false, description: "Salary grade code (if configured)", example: "G5" },
-      { name: "employment_status", required: false, description: "Status (ACTIVE, INACTIVE, ON_HOLD)", example: "ACTIVE", systemDefined: true, allowedValues: ["ACTIVE", "INACTIVE", "ON_HOLD", "TERMINATED"] },
-      { name: "employment_type", required: false, description: "Type (FULL_TIME, PART_TIME, etc.)", example: "FULL_TIME", systemDefined: true, allowedValues: ["FULL_TIME", "PART_TIME", "CONTRACT", "TEMPORARY", "INTERN"] },
-      { name: "pay_type", required: false, description: "Pay type (SALARIED, HOURLY, etc.)", example: "SALARIED", systemDefined: true, allowedValues: ["SALARIED", "HOURLY", "COMMISSION", "PIECE_RATE"] },
-      { name: "flsa_status", required: false, description: "FLSA status (EXEMPT, NON_EXEMPT)", example: "EXEMPT", systemDefined: true, allowedValues: ["EXEMPT", "NON_EXEMPT"] },
-      { name: "is_active", required: false, description: "Active status", example: "true" },
-    ],
-    examples: [
-      ["POS-001", "Senior Developer", "COMP001", "IT001", "DEV002", "POS-000", "1", "G5", "ACTIVE", "FULL_TIME", "SALARIED", "EXEMPT", "true"],
-      ["POS-002", "Junior Developer", "COMP001", "IT001", "DEV001", "POS-001", "2", "G3", "ACTIVE", "FULL_TIME", "SALARIED", "NON_EXEMPT", "true"],
-    ],
-    tips: [
-      "Company, department, and job must all exist before importing positions",
-      "Use reports_to_position to build org hierarchy",
-      "Headcount defaults to 1 if not specified",
-      "Employment status, type, pay type, and FLSA status use predefined values",
-      "Salary grade is optional and must match existing salary grades",
-    ],
-  },
+  // Positions template is now dynamically generated based on compensation model
+  // See getPositionsTemplate() function below
   new_hires: {
     headers: ["email", "first_name", "last_name", "position_number", "department_code", "company_code", "hire_date", "employee_id"],
     fields: [
@@ -246,6 +219,151 @@ const COMPENSATION_TEMPLATE_CONFIGS: Record<string, {
   },
 };
 
+// Dynamic positions template based on compensation model
+function getPositionsTemplate(compensationModel: CompensationModel | null | undefined): {
+  headers: string[];
+  fields: TemplateField[];
+  examples: string[][];
+  tips: string[];
+} {
+  // Base fields that are always included
+  const baseHeaders = [
+    "position_number", "title", "description", "company_code", "department_code", 
+    "job_code", "reports_to_position", "headcount", "pay_type", "employment_status", 
+    "employment_type", "employment_relation", "flsa_status", "default_scheduled_hours",
+    "start_date", "end_date", "is_active"
+  ];
+
+  const baseFields: TemplateField[] = [
+    { name: "position_number", required: true, description: "Unique position ID", example: "POS-001" },
+    { name: "title", required: true, description: "Position title", example: "Senior Developer" },
+    { name: "description", required: false, description: "Position description", example: "Lead development projects" },
+    { name: "company_code", required: true, description: "Company code", example: "COMP001" },
+    { name: "department_code", required: true, description: "Department code", example: "IT001" },
+    { name: "job_code", required: true, description: "Job code", example: "DEV002" },
+    { name: "reports_to_position", required: false, description: "Manager position number", example: "POS-000" },
+    { name: "headcount", required: false, description: "Number of positions", example: "1" },
+    { name: "pay_type", required: false, description: "Pay type (SALARIED, HOURLY, etc.)", example: "SALARIED", systemDefined: true, allowedValues: ["SALARIED", "HOURLY", "COMMISSION", "PIECE_RATE"] },
+    { name: "employment_status", required: false, description: "Status (ACTIVE, INACTIVE, ON_HOLD)", example: "ACTIVE", systemDefined: true, allowedValues: ["ACTIVE", "INACTIVE", "ON_HOLD", "TERMINATED"] },
+    { name: "employment_type", required: false, description: "Type (FULL_TIME, PART_TIME, etc.)", example: "FULL_TIME", systemDefined: true, allowedValues: ["FULL_TIME", "PART_TIME", "CONTRACT", "TEMPORARY", "INTERN"] },
+    { name: "employment_relation", required: false, description: "Relation type", example: "EMPLOYEE", systemDefined: true, allowedValues: ["EMPLOYEE", "CONTRACTOR", "CONSULTANT"] },
+    { name: "flsa_status", required: false, description: "Overtime status (EXEMPT, NON_EXEMPT)", example: "EXEMPT", systemDefined: true, allowedValues: ["EXEMPT", "NON_EXEMPT"] },
+    { name: "default_scheduled_hours", required: false, description: "Weekly hours (e.g., 40)", example: "40" },
+    { name: "start_date", required: false, description: "Position start date (YYYY-MM-DD)", example: "2024-01-01" },
+    { name: "end_date", required: false, description: "Position end date (optional)", example: "" },
+    { name: "is_active", required: false, description: "Active status", example: "true" },
+  ];
+
+  let compensationHeaders: string[] = [];
+  let compensationFields: TemplateField[] = [];
+  let compensationTips: string[] = [];
+
+  // Add compensation-specific fields based on model
+  switch (compensationModel) {
+    case "salary_grade":
+      compensationHeaders = ["salary_grade_code"];
+      compensationFields = [
+        { name: "salary_grade_code", required: false, description: "Salary grade code", example: "G5" },
+      ];
+      compensationTips = ["Salary grade must exist before importing positions"];
+      break;
+
+    case "spinal_point":
+      compensationHeaders = ["pay_spine_code", "min_spinal_point", "max_spinal_point", "entry_spinal_point"];
+      compensationFields = [
+        { name: "pay_spine_code", required: false, description: "Pay spine code", example: "ADMIN" },
+        { name: "min_spinal_point", required: false, description: "Minimum point on spine", example: "1" },
+        { name: "max_spinal_point", required: false, description: "Maximum point on spine", example: "6" },
+        { name: "entry_spinal_point", required: false, description: "Entry point for new hires", example: "1" },
+      ];
+      compensationTips = [
+        "Pay spine must exist before importing positions",
+        "Spinal points define the salary progression range for the position",
+      ];
+      break;
+
+    case "hybrid":
+      compensationHeaders = ["salary_grade_code", "pay_spine_code", "min_spinal_point", "max_spinal_point", "entry_spinal_point"];
+      compensationFields = [
+        { name: "salary_grade_code", required: false, description: "Salary grade code (if applicable)", example: "G5" },
+        { name: "pay_spine_code", required: false, description: "Pay spine code (if applicable)", example: "ADMIN" },
+        { name: "min_spinal_point", required: false, description: "Minimum point on spine", example: "1" },
+        { name: "max_spinal_point", required: false, description: "Maximum point on spine", example: "6" },
+        { name: "entry_spinal_point", required: false, description: "Entry point for new hires", example: "1" },
+      ];
+      compensationTips = [
+        "Hybrid model supports both salary grades and spinal points",
+        "Use either salary grade OR pay spine fields per position",
+      ];
+      break;
+
+    case "commission_based":
+    case "hourly_rate":
+    case "direct_pay":
+    default:
+      // No additional compensation fields needed
+      compensationTips = ["Compensation is managed directly without grade/spine structures"];
+      break;
+  }
+
+  // Insert compensation headers after headcount (index 7)
+  const headers = [...baseHeaders];
+  const insertIndex = headers.indexOf("pay_type");
+  headers.splice(insertIndex, 0, ...compensationHeaders);
+
+  // Build combined fields - insert compensation fields after headcount
+  const fields = [...baseFields];
+  const headcountIndex = fields.findIndex(f => f.name === "headcount");
+  fields.splice(headcountIndex + 1, 0, ...compensationFields);
+
+  // Build example rows
+  const baseExample1 = ["POS-001", "Senior Developer", "Lead development", "COMP001", "IT001", "DEV002", "POS-000", "1"];
+  const baseExample2 = ["POS-002", "Junior Developer", "Support development", "COMP001", "IT001", "DEV001", "POS-001", "2"];
+  
+  let compExample1: string[] = [];
+  let compExample2: string[] = [];
+
+  switch (compensationModel) {
+    case "salary_grade":
+      compExample1 = ["G5"];
+      compExample2 = ["G3"];
+      break;
+    case "spinal_point":
+      compExample1 = ["ADMIN", "4", "8", "4"];
+      compExample2 = ["ADMIN", "1", "5", "1"];
+      break;
+    case "hybrid":
+      compExample1 = ["G5", "", "", "", ""];
+      compExample2 = ["", "ADMIN", "1", "5", "1"];
+      break;
+    default:
+      break;
+  }
+
+  const suffixExample = ["SALARIED", "ACTIVE", "FULL_TIME", "EMPLOYEE", "EXEMPT", "40", "2024-01-01", "", "true"];
+
+  const examples = [
+    [...baseExample1, ...compExample1, ...suffixExample],
+    [...baseExample2, ...compExample2, ...suffixExample],
+  ];
+
+  const baseTips = [
+    "Company, department, and job must all exist before importing positions",
+    "Use reports_to_position to build org hierarchy",
+    "Headcount defaults to 1 if not specified",
+    "Employment fields use predefined system values",
+    "Default scheduled hours is typically 40 for full-time positions",
+    "Start date defaults to today if not specified",
+  ];
+
+  return {
+    headers,
+    fields,
+    examples,
+    tips: [...baseTips, ...compensationTips],
+  };
+}
+
 // Default template for types not explicitly configured
 const DEFAULT_TEMPLATE = {
   headers: ["code", "name", "description", "is_active"],
@@ -262,7 +380,11 @@ const DEFAULT_TEMPLATE = {
 export function WizardStepTemplate({ importType, compensationModel }: WizardStepTemplateProps) {
   // Handle prefixed import types
   const baseType = importType.replace("company_structure_", "");
-  const config = TEMPLATE_CONFIGS[baseType] || COMPENSATION_TEMPLATE_CONFIGS[baseType] || DEFAULT_TEMPLATE;
+  
+  // Get config - use dynamic template for positions
+  const config = baseType === "positions" 
+    ? getPositionsTemplate(compensationModel)
+    : TEMPLATE_CONFIGS[baseType] || COMPENSATION_TEMPLATE_CONFIGS[baseType] || DEFAULT_TEMPLATE;
 
   const downloadTemplate = () => {
     const csvContent = [
