@@ -18050,12 +18050,14 @@ export type Database = {
           created_by: string | null
           description: string | null
           display_order: number | null
+          end_date: string | null
           id: string
           is_active: boolean
           is_employee_type: boolean
           is_employer_type: boolean
           is_mandatory: boolean
           name: string
+          start_date: string | null
           updated_at: string
           validation_message: string | null
           validation_pattern: string | null
@@ -18067,12 +18069,14 @@ export type Database = {
           created_by?: string | null
           description?: string | null
           display_order?: number | null
+          end_date?: string | null
           id?: string
           is_active?: boolean
           is_employee_type?: boolean
           is_employer_type?: boolean
           is_mandatory?: boolean
           name: string
+          start_date?: string | null
           updated_at?: string
           validation_message?: string | null
           validation_pattern?: string | null
@@ -18084,12 +18088,14 @@ export type Database = {
           created_by?: string | null
           description?: string | null
           display_order?: number | null
+          end_date?: string | null
           id?: string
           is_active?: boolean
           is_employee_type?: boolean
           is_employer_type?: boolean
           is_mandatory?: boolean
           name?: string
+          start_date?: string | null
           updated_at?: string
           validation_message?: string | null
           validation_pattern?: string | null
