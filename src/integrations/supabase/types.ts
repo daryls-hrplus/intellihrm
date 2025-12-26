@@ -1141,6 +1141,66 @@ export type Database = {
           },
         ]
       }
+      alignment_cascade_metrics: {
+        Row: {
+          aligned_goals: number | null
+          alignment_percentage: number | null
+          avg_cascade_depth: number | null
+          broken_chains_count: number | null
+          company_id: string
+          created_at: string
+          department_id: string | null
+          id: string
+          orphan_goals: number | null
+          snapshot_date: string
+          total_goals: number | null
+          updated_at: string
+        }
+        Insert: {
+          aligned_goals?: number | null
+          alignment_percentage?: number | null
+          avg_cascade_depth?: number | null
+          broken_chains_count?: number | null
+          company_id: string
+          created_at?: string
+          department_id?: string | null
+          id?: string
+          orphan_goals?: number | null
+          snapshot_date?: string
+          total_goals?: number | null
+          updated_at?: string
+        }
+        Update: {
+          aligned_goals?: number | null
+          alignment_percentage?: number | null
+          avg_cascade_depth?: number | null
+          broken_chains_count?: number | null
+          company_id?: string
+          created_at?: string
+          department_id?: string | null
+          id?: string
+          orphan_goals?: number | null
+          snapshot_date?: string
+          total_goals?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "alignment_cascade_metrics_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "alignment_cascade_metrics_department_id_fkey"
+            columns: ["department_id"]
+            isOneToOne: false
+            referencedRelation: "departments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       application_features: {
         Row: {
           created_at: string
@@ -12325,6 +12385,66 @@ export type Database = {
           },
         ]
       }
+      employee_workload_snapshots: {
+        Row: {
+          active_goal_count: number | null
+          at_risk_count: number | null
+          company_id: string
+          created_at: string
+          employee_id: string
+          id: string
+          is_overloaded: boolean | null
+          overdue_count: number | null
+          snapshot_date: string
+          total_weighting: number | null
+          updated_at: string
+          workload_score: number | null
+        }
+        Insert: {
+          active_goal_count?: number | null
+          at_risk_count?: number | null
+          company_id: string
+          created_at?: string
+          employee_id: string
+          id?: string
+          is_overloaded?: boolean | null
+          overdue_count?: number | null
+          snapshot_date?: string
+          total_weighting?: number | null
+          updated_at?: string
+          workload_score?: number | null
+        }
+        Update: {
+          active_goal_count?: number | null
+          at_risk_count?: number | null
+          company_id?: string
+          created_at?: string
+          employee_id?: string
+          id?: string
+          is_overloaded?: boolean | null
+          overdue_count?: number | null
+          snapshot_date?: string
+          total_weighting?: number | null
+          updated_at?: string
+          workload_score?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "employee_workload_snapshots_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_workload_snapshots_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       enablement_artifact_approvals: {
         Row: {
           action: string
@@ -17967,6 +18087,76 @@ export type Database = {
             foreignKeyName: "goal_progress_rollup_config_parent_goal_id_fkey"
             columns: ["parent_goal_id"]
             isOneToOne: true
+            referencedRelation: "performance_goals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      goal_quality_assessments: {
+        Row: {
+          alignment_score: number | null
+          assessed_at: string | null
+          assessed_by: string | null
+          company_id: string
+          created_at: string
+          goal_id: string
+          has_alignment: boolean | null
+          has_metrics: boolean | null
+          has_smart_criteria: boolean | null
+          id: string
+          quality_flags: Json | null
+          quality_score: number | null
+          updated_at: string
+        }
+        Insert: {
+          alignment_score?: number | null
+          assessed_at?: string | null
+          assessed_by?: string | null
+          company_id: string
+          created_at?: string
+          goal_id: string
+          has_alignment?: boolean | null
+          has_metrics?: boolean | null
+          has_smart_criteria?: boolean | null
+          id?: string
+          quality_flags?: Json | null
+          quality_score?: number | null
+          updated_at?: string
+        }
+        Update: {
+          alignment_score?: number | null
+          assessed_at?: string | null
+          assessed_by?: string | null
+          company_id?: string
+          created_at?: string
+          goal_id?: string
+          has_alignment?: boolean | null
+          has_metrics?: boolean | null
+          has_smart_criteria?: boolean | null
+          id?: string
+          quality_flags?: Json | null
+          quality_score?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "goal_quality_assessments_assessed_by_fkey"
+            columns: ["assessed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "goal_quality_assessments_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "goal_quality_assessments_goal_id_fkey"
+            columns: ["goal_id"]
+            isOneToOne: false
             referencedRelation: "performance_goals"
             referencedColumns: ["id"]
           },
