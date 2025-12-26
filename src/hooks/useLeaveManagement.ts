@@ -132,7 +132,7 @@ export interface LeaveRequest {
   reviewed_at: string | null;
   review_notes: string | null;
   workflow_instance_id: string | null;
-  source: "ess" | "hr_admin";
+  source: "ess" | "hr_admin" | "t_and_a";
   created_at: string;
   updated_at: string;
   leave_type?: LeaveType;

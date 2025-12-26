@@ -289,6 +289,14 @@ export default function EmployeeLeaveRecordsPage() {
         </Badge>
       );
     }
+    if (source === "t_and_a") {
+      return (
+        <Badge variant="default" className="flex items-center gap-1 w-fit">
+          <Clock className="h-3 w-3" />
+          T&A
+        </Badge>
+      );
+    }
     return (
       <Badge variant="outline" className="flex items-center gap-1 w-fit">
         <User className="h-3 w-3" />
@@ -417,6 +425,7 @@ export default function EmployeeLeaveRecordsPage() {
               <SelectItem value="all">{t("common.all", "All")}</SelectItem>
               <SelectItem value="ess">ESS</SelectItem>
               <SelectItem value="hr_admin">HR Admin</SelectItem>
+              <SelectItem value="t_and_a">T&A</SelectItem>
             </SelectContent>
           </Select>
         </div>
