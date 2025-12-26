@@ -55,6 +55,18 @@ export const PREREQUISITE_ENTITIES = {
     table: "salary_grades",
     description: "Salary grade definitions",
   },
+  pay_spines: {
+    key: "pay_spines",
+    label: "Pay Spines",
+    table: "pay_spines",
+    description: "Pay spine structures",
+  },
+  spinal_points: {
+    key: "spinal_points",
+    label: "Spinal Points",
+    table: "spinal_points",
+    description: "Points on pay spines",
+  },
 } as const;
 
 export const IMPORT_DEPENDENCIES: Record<string, ImportConfig> = {
@@ -83,13 +95,25 @@ export const IMPORT_DEPENDENCIES: Record<string, ImportConfig> = {
     prerequisites: [PREREQUISITE_ENTITIES.companies, PREREQUISITE_ENTITIES.job_families],
     description: "Jobs belong to job families within companies",
   },
+  salary_grades: {
+    prerequisites: [PREREQUISITE_ENTITIES.companies],
+    description: "Salary grades define compensation ranges for positions",
+  },
+  pay_spines: {
+    prerequisites: [PREREQUISITE_ENTITIES.companies],
+    description: "Pay spines define incremental pay scales",
+  },
+  spinal_points: {
+    prerequisites: [PREREQUISITE_ENTITIES.companies, PREREQUISITE_ENTITIES.pay_spines],
+    description: "Spinal points are salary levels on pay spines",
+  },
   positions: {
     prerequisites: [
       PREREQUISITE_ENTITIES.companies,
       PREREQUISITE_ENTITIES.departments,
       PREREQUISITE_ENTITIES.jobs,
     ],
-    optionalPrerequisites: [PREREQUISITE_ENTITIES.salary_grades],
+    optionalPrerequisites: [PREREQUISITE_ENTITIES.salary_grades, PREREQUISITE_ENTITIES.pay_spines],
     description: "Positions link jobs to departments and define the org hierarchy",
   },
   employees: {
