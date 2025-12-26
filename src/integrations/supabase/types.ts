@@ -21639,6 +21639,98 @@ export type Database = {
           },
         ]
       }
+      import_batches: {
+        Row: {
+          committed_at: string | null
+          company_id: string | null
+          created_at: string | null
+          errors: Json | null
+          failed_records: number | null
+          field_mapping: Json | null
+          file_name: string
+          id: string
+          import_options: Json | null
+          import_type: string
+          imported_by: string | null
+          imported_record_ids: Json | null
+          rollback_eligible_until: string | null
+          rollback_reason: string | null
+          rolled_back_at: string | null
+          rolled_back_by: string | null
+          skipped_records: number | null
+          staging_data: Json | null
+          status: string | null
+          successful_records: number | null
+          total_records: number | null
+          updated_at: string | null
+          validated_at: string | null
+          validation_result: Json | null
+          warnings: Json | null
+        }
+        Insert: {
+          committed_at?: string | null
+          company_id?: string | null
+          created_at?: string | null
+          errors?: Json | null
+          failed_records?: number | null
+          field_mapping?: Json | null
+          file_name: string
+          id?: string
+          import_options?: Json | null
+          import_type: string
+          imported_by?: string | null
+          imported_record_ids?: Json | null
+          rollback_eligible_until?: string | null
+          rollback_reason?: string | null
+          rolled_back_at?: string | null
+          rolled_back_by?: string | null
+          skipped_records?: number | null
+          staging_data?: Json | null
+          status?: string | null
+          successful_records?: number | null
+          total_records?: number | null
+          updated_at?: string | null
+          validated_at?: string | null
+          validation_result?: Json | null
+          warnings?: Json | null
+        }
+        Update: {
+          committed_at?: string | null
+          company_id?: string | null
+          created_at?: string | null
+          errors?: Json | null
+          failed_records?: number | null
+          field_mapping?: Json | null
+          file_name?: string
+          id?: string
+          import_options?: Json | null
+          import_type?: string
+          imported_by?: string | null
+          imported_record_ids?: Json | null
+          rollback_eligible_until?: string | null
+          rollback_reason?: string | null
+          rolled_back_at?: string | null
+          rolled_back_by?: string | null
+          skipped_records?: number | null
+          staging_data?: Json | null
+          status?: string | null
+          successful_records?: number | null
+          total_records?: number | null
+          updated_at?: string | null
+          validated_at?: string | null
+          validation_result?: Json | null
+          warnings?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "import_batches_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       individual_development_plans: {
         Row: {
           actual_completion_date: string | null
