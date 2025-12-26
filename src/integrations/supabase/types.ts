@@ -24761,6 +24761,7 @@ export type Database = {
           id: string
           is_accrual_based: boolean
           is_active: boolean
+          leave_year_basis: string | null
           max_consecutive_days: number | null
           max_negative_balance: number | null
           min_request_amount: number | null
@@ -24787,6 +24788,7 @@ export type Database = {
           id?: string
           is_accrual_based?: boolean
           is_active?: boolean
+          leave_year_basis?: string | null
           max_consecutive_days?: number | null
           max_negative_balance?: number | null
           min_request_amount?: number | null
@@ -24813,6 +24815,7 @@ export type Database = {
           id?: string
           is_accrual_based?: boolean
           is_active?: boolean
+          leave_year_basis?: string | null
           max_consecutive_days?: number | null
           max_negative_balance?: number | null
           min_request_amount?: number | null

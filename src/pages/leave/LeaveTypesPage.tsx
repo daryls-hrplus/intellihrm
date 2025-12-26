@@ -71,6 +71,7 @@ export default function LeaveTypesPage() {
     color: "#3B82F6",
     accrues_leave_while_on: true,
     gender_applicability: "all" as "all" | "male" | "female",
+    leave_year_basis: "calendar" as "calendar" | "anniversary" | null,
   });
 
   const resetForm = () => {
@@ -92,6 +93,7 @@ export default function LeaveTypesPage() {
       color: "#3B82F6",
       accrues_leave_while_on: true,
       gender_applicability: "all",
+      leave_year_basis: "calendar",
     });
     setEditingType(null);
   };
@@ -116,6 +118,7 @@ export default function LeaveTypesPage() {
       color: type.color,
       accrues_leave_while_on: type.accrues_leave_while_on,
       gender_applicability: type.gender_applicability || "all",
+      leave_year_basis: type.leave_year_basis || "calendar",
     });
     setIsOpen(true);
   };
@@ -298,7 +301,11 @@ export default function LeaveTypesPage() {
                     <Switch
                       id="is_accrual_based"
                       checked={formData.is_accrual_based}
-                      onCheckedChange={(checked) => setFormData({ ...formData, is_accrual_based: checked })}
+                      onCheckedChange={(checked) => setFormData({ 
+                        ...formData, 
+                        is_accrual_based: checked,
+                        leave_year_basis: checked ? (formData.leave_year_basis || "calendar") : null 
+                      })}
                     />
                   </div>
                   <div className="flex items-center justify-between rounded-lg border p-3">
@@ -310,6 +317,38 @@ export default function LeaveTypesPage() {
                     />
                   </div>
                 </div>
+
+                {/* Leave Year Basis - only shown for accumulative leave types */}
+                {formData.is_accrual_based && (
+                  <div className="space-y-2 rounded-lg border p-4 bg-primary/5">
+                    <Label htmlFor="leave_year_basis">{t("leave.leaveTypes.leaveYearBasis", "Leave Year Basis")}</Label>
+                    <p className="text-xs text-muted-foreground mb-2">
+                      {t("leave.leaveTypes.leaveYearBasisDesc", "Determines how entitlement periods are calculated for this leave type")}
+                    </p>
+                    <Select
+                      value={formData.leave_year_basis || "calendar"}
+                      onValueChange={(value: "calendar" | "anniversary") => setFormData({ ...formData, leave_year_basis: value })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="calendar">
+                          <div className="flex flex-col">
+                            <span>{t("leave.leaveTypes.calendarYear", "Calendar Year")}</span>
+                            <span className="text-xs text-muted-foreground">{t("leave.leaveTypes.calendarYearDesc", "Fixed company-wide leave year periods")}</span>
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="anniversary">
+                          <div className="flex flex-col">
+                            <span>{t("leave.leaveTypes.anniversaryYear", "Anniversary Year")}</span>
+                            <span className="text-xs text-muted-foreground">{t("leave.leaveTypes.anniversaryYearDesc", "Based on each employee's hire date")}</span>
+                          </div>
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="flex items-center justify-between rounded-lg border p-3">
@@ -368,7 +407,7 @@ export default function LeaveTypesPage() {
                 <TableHead>{t("leave.leaveTypes.accrualUnit")}</TableHead>
                 <TableHead>{t("leave.leaveTypes.entitlement")}</TableHead>
                 <TableHead>{t("leave.leaveTypes.accrualBased")}</TableHead>
-                <TableHead>{t("leave.leaveTypes.accruesLeave")}</TableHead>
+                <TableHead>{t("leave.leaveTypes.leaveYearBasis", "Year Basis")}</TableHead>
                 <TableHead>{t("leave.leaveTypes.approvalRequired")}</TableHead>
                 <TableHead>{t("leave.leaveTypes.status")}</TableHead>
                 <TableHead className="w-[80px]">{t("leave.leaveTypes.actions")}</TableHead>
@@ -410,9 +449,16 @@ export default function LeaveTypesPage() {
                       </Badge>
                     </TableCell>
                     <TableCell>
-                      <Badge variant={type.accrues_leave_while_on ? "default" : "destructive"}>
-                        {type.accrues_leave_while_on ? t("leave.leaveTypes.yes") : t("leave.leaveTypes.no")}
-                      </Badge>
+                      {type.is_accrual_based ? (
+                        <Badge variant="outline" className="capitalize">
+                          {type.leave_year_basis === "anniversary" 
+                            ? t("leave.leaveTypes.anniversary", "Anniversary")
+                            : t("leave.leaveTypes.calendar", "Calendar")
+                          }
+                        </Badge>
+                      ) : (
+                        <span className="text-muted-foreground text-sm">—</span>
+                      )}
                     </TableCell>
                     <TableCell>
                       <Badge variant={type.requires_approval ? "default" : "secondary"}>
