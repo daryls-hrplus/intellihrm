@@ -190,11 +190,15 @@ export function PositionsImport() {
             title: row.position_title,
             reports_to_position_id: reportsToId,
             salary_grade_id: salaryGradeId,
-            location: row.location || null,
-            headcount: row.headcount ? Number(row.headcount) : 1,
+            authorized_headcount: row.headcount ? Number(row.headcount) : 1,
             start_date: row.start_date,
             end_date: row.end_date || null,
             is_active: true,
+            compensation_model: row.compensation_model || 'salary_grade',
+            pay_type: row.pay_type || 'salary',
+            employment_status: row.employment_status || 'active',
+            employment_type: row.employment_type || 'full_time',
+            flsa_status: row.flsa_status || 'exempt',
           });
 
           if (error) throw error;
