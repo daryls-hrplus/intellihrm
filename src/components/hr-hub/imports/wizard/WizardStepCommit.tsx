@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -170,7 +170,7 @@ export function WizardStepCommit({
   const importBatch = async (
     type: string,
     batch: any[],
-    companyId?: string | null
+    companyIdParam?: string | null
   ): Promise<{ success: boolean; ids?: string[]; count?: number; error?: string }> => {
     // Map import type to table and transform data
     const tableMap: Record<string, string> = {
@@ -199,8 +199,8 @@ export function WizardStepCommit({
       const transformed: any = { ...row };
       
       // Add company_id if needed
-      if (companyId && type !== "companies") {
-        transformed.company_id = companyId;
+      if (companyIdParam && type !== "companies") {
+        transformed.company_id = companyIdParam;
       }
       
       // Remove any _rowIndex or metadata fields
@@ -209,10 +209,11 @@ export function WizardStepCommit({
       return transformed;
     });
 
-    const { data, error } = await supabase
-      .from(tableName)
+    // Use type assertion to bypass deep type instantiation
+    const { data: insertData, error } = await (supabase
+      .from(tableName as any)
       .insert(transformedBatch)
-      .select("id");
+      .select("id") as any);
 
     if (error) {
       return { success: false, error: error.message };
@@ -220,7 +221,7 @@ export function WizardStepCommit({
 
     return {
       success: true,
-      ids: data?.map((d) => d.id) || [],
+      ids: insertData?.map((d: any) => d.id) || [],
       count: data?.length || batch.length,
     };
   };

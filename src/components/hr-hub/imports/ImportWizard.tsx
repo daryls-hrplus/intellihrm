@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { useLanguage } from "@/hooks/useLanguage";
-import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -51,7 +50,6 @@ const WIZARD_STEPS = [
 
 export function ImportWizard({ companyId, onComplete, onCancel }: ImportWizardProps) {
   const { t } = useLanguage();
-  const { user } = useAuth();
   const [currentStep, setCurrentStep] = useState(0);
   const [state, setState] = useState<WizardState>({
     importType: null,
