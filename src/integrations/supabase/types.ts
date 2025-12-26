@@ -17715,6 +17715,263 @@ export type Database = {
           },
         ]
       }
+      goal_rating_configurations: {
+        Row: {
+          acknowledgment_deadline_days: number | null
+          allow_dispute: boolean | null
+          auto_calc_rules: Json | null
+          calculation_method: string
+          company_id: string
+          created_at: string | null
+          created_by: string | null
+          cycle_id: string | null
+          dispute_window_days: number | null
+          hide_ratings_until: string | null
+          id: string
+          is_active: boolean | null
+          manager_rating_weight: number | null
+          progress_weight: number | null
+          rating_scale_id: string | null
+          requires_employee_acknowledgment: boolean | null
+          self_rating_weight: number | null
+          show_final_score_to_employee: boolean | null
+          show_manager_rating_to_employee: boolean | null
+          updated_at: string | null
+        }
+        Insert: {
+          acknowledgment_deadline_days?: number | null
+          allow_dispute?: boolean | null
+          auto_calc_rules?: Json | null
+          calculation_method?: string
+          company_id: string
+          created_at?: string | null
+          created_by?: string | null
+          cycle_id?: string | null
+          dispute_window_days?: number | null
+          hide_ratings_until?: string | null
+          id?: string
+          is_active?: boolean | null
+          manager_rating_weight?: number | null
+          progress_weight?: number | null
+          rating_scale_id?: string | null
+          requires_employee_acknowledgment?: boolean | null
+          self_rating_weight?: number | null
+          show_final_score_to_employee?: boolean | null
+          show_manager_rating_to_employee?: boolean | null
+          updated_at?: string | null
+        }
+        Update: {
+          acknowledgment_deadline_days?: number | null
+          allow_dispute?: boolean | null
+          auto_calc_rules?: Json | null
+          calculation_method?: string
+          company_id?: string
+          created_at?: string | null
+          created_by?: string | null
+          cycle_id?: string | null
+          dispute_window_days?: number | null
+          hide_ratings_until?: string | null
+          id?: string
+          is_active?: boolean | null
+          manager_rating_weight?: number | null
+          progress_weight?: number | null
+          rating_scale_id?: string | null
+          requires_employee_acknowledgment?: boolean | null
+          self_rating_weight?: number | null
+          show_final_score_to_employee?: boolean | null
+          show_manager_rating_to_employee?: boolean | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "goal_rating_configurations_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "goal_rating_configurations_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "goal_rating_configurations_cycle_id_fkey"
+            columns: ["cycle_id"]
+            isOneToOne: false
+            referencedRelation: "appraisal_cycles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "goal_rating_configurations_rating_scale_id_fkey"
+            columns: ["rating_scale_id"]
+            isOneToOne: false
+            referencedRelation: "performance_rating_scales"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      goal_rating_submissions: {
+        Row: {
+          acknowledged_at: string | null
+          acknowledged_by: string | null
+          acknowledgment_comments: string | null
+          calculated_score: number | null
+          company_id: string
+          created_at: string | null
+          dispute_category: string | null
+          dispute_reason: string | null
+          dispute_resolution: string | null
+          dispute_resolved_at: string | null
+          dispute_resolved_by: string | null
+          dispute_status: string | null
+          disputed_at: string | null
+          employee_id: string
+          final_score: number | null
+          goal_id: string
+          id: string
+          is_disputed: boolean | null
+          manager_comments: string | null
+          manager_id: string | null
+          manager_rating: number | null
+          manager_rating_at: string | null
+          rating_config_id: string | null
+          released_at: string | null
+          released_by: string | null
+          self_comments: string | null
+          self_rating: number | null
+          self_rating_at: string | null
+          status: string | null
+          updated_at: string | null
+          weight_adjusted_score: number | null
+        }
+        Insert: {
+          acknowledged_at?: string | null
+          acknowledged_by?: string | null
+          acknowledgment_comments?: string | null
+          calculated_score?: number | null
+          company_id: string
+          created_at?: string | null
+          dispute_category?: string | null
+          dispute_reason?: string | null
+          dispute_resolution?: string | null
+          dispute_resolved_at?: string | null
+          dispute_resolved_by?: string | null
+          dispute_status?: string | null
+          disputed_at?: string | null
+          employee_id: string
+          final_score?: number | null
+          goal_id: string
+          id?: string
+          is_disputed?: boolean | null
+          manager_comments?: string | null
+          manager_id?: string | null
+          manager_rating?: number | null
+          manager_rating_at?: string | null
+          rating_config_id?: string | null
+          released_at?: string | null
+          released_by?: string | null
+          self_comments?: string | null
+          self_rating?: number | null
+          self_rating_at?: string | null
+          status?: string | null
+          updated_at?: string | null
+          weight_adjusted_score?: number | null
+        }
+        Update: {
+          acknowledged_at?: string | null
+          acknowledged_by?: string | null
+          acknowledgment_comments?: string | null
+          calculated_score?: number | null
+          company_id?: string
+          created_at?: string | null
+          dispute_category?: string | null
+          dispute_reason?: string | null
+          dispute_resolution?: string | null
+          dispute_resolved_at?: string | null
+          dispute_resolved_by?: string | null
+          dispute_status?: string | null
+          disputed_at?: string | null
+          employee_id?: string
+          final_score?: number | null
+          goal_id?: string
+          id?: string
+          is_disputed?: boolean | null
+          manager_comments?: string | null
+          manager_id?: string | null
+          manager_rating?: number | null
+          manager_rating_at?: string | null
+          rating_config_id?: string | null
+          released_at?: string | null
+          released_by?: string | null
+          self_comments?: string | null
+          self_rating?: number | null
+          self_rating_at?: string | null
+          status?: string | null
+          updated_at?: string | null
+          weight_adjusted_score?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "goal_rating_submissions_acknowledged_by_fkey"
+            columns: ["acknowledged_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "goal_rating_submissions_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "goal_rating_submissions_dispute_resolved_by_fkey"
+            columns: ["dispute_resolved_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "goal_rating_submissions_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "goal_rating_submissions_goal_id_fkey"
+            columns: ["goal_id"]
+            isOneToOne: false
+            referencedRelation: "performance_goals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "goal_rating_submissions_manager_id_fkey"
+            columns: ["manager_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "goal_rating_submissions_rating_config_id_fkey"
+            columns: ["rating_config_id"]
+            isOneToOne: false
+            referencedRelation: "goal_rating_configurations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "goal_rating_submissions_released_by_fkey"
+            columns: ["released_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       goal_reviews: {
         Row: {
           created_at: string
