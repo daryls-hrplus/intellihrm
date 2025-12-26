@@ -40,6 +40,8 @@ import {
   MoreVertical,
   Info,
   Clock,
+  FileEdit,
+  ScrollText,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -53,7 +55,10 @@ import { GoalsAnalyticsDashboard } from "@/components/performance/GoalsAnalytics
 import { GoalCheckInDialog } from "@/components/performance/GoalCheckInDialog";
 import { GoalMilestonesManager } from "@/components/performance/GoalMilestonesManager";
 import { CheckInHistoryTimeline } from "@/components/performance/CheckInHistoryTimeline";
+import { GoalAdjustmentDialog } from "@/components/performance/goals/GoalAdjustmentDialog";
+import { GoalAuditTrail } from "@/components/performance/goals/GoalAuditTrail";
 import { useGoalCheckIns, GoalCheckIn } from "@/hooks/useGoalCheckIns";
+import { usePendingAdjustments } from "@/hooks/usePendingAdjustments";
 import { toast } from "sonner";
 import { useLanguage } from "@/hooks/useLanguage";
 
@@ -103,6 +108,10 @@ export default function MyGoalsPage() {
   const [checkInDialogOpen, setCheckInDialogOpen] = useState(false);
   const [milestonesDialogOpen, setMilestonesDialogOpen] = useState(false);
   const [historyDialogOpen, setHistoryDialogOpen] = useState(false);
+  
+  // Goal Adjustment dialogs (ESS - employee can record adjustments with approval routing)
+  const [adjustmentDialogOpen, setAdjustmentDialogOpen] = useState(false);
+  const [auditTrailDialogOpen, setAuditTrailDialogOpen] = useState(false);
   
   const { getOverdueCheckIns, getRequestedCheckIns } = useGoalCheckIns();
   const [pendingCheckIns, setPendingCheckIns] = useState<Record<string, { dueDate: string | null; daysToDue: number | null }>>({});
@@ -254,6 +263,16 @@ export default function MyGoalsPage() {
   const handleViewHistory = (goal: Goal) => {
     setSelectedGoal(goal);
     setHistoryDialogOpen(true);
+  };
+  
+  const handleRecordAdjustment = (goal: Goal) => {
+    setSelectedGoal(goal);
+    setAdjustmentDialogOpen(true);
+  };
+  
+  const handleViewAuditTrail = (goal: Goal) => {
+    setSelectedGoal(goal);
+    setAuditTrailDialogOpen(true);
   };
 
   const handleExport = () => {
@@ -707,6 +726,18 @@ export default function MyGoalsPage() {
                               Progress History
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
+                            {/* Goal Adjustment Features (ESS - employee can propose adjustments) */}
+                            {isEditable && (
+                              <DropdownMenuItem onClick={() => handleRecordAdjustment(goal)}>
+                                <FileEdit className="mr-2 h-4 w-4" />
+                                Record Adjustment
+                              </DropdownMenuItem>
+                            )}
+                            <DropdownMenuItem onClick={() => handleViewAuditTrail(goal)}>
+                              <ScrollText className="mr-2 h-4 w-4" />
+                              View Audit Trail
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
                             <DropdownMenuItem onClick={() => handleViewComments(goal)}>
                               <MessageSquare className="mr-2 h-4 w-4" />
                               Comments
@@ -806,6 +837,36 @@ export default function MyGoalsPage() {
               </CardHeader>
               <CardContent className="overflow-auto max-h-[60vh]">
                 <CheckInHistoryTimeline goalId={selectedGoal.id} showChart />
+              </CardContent>
+            </Card>
+          </div>
+        )}
+        
+        {/* Goal Adjustment Dialog (ESS - employee can propose adjustments with approval routing) */}
+        {selectedGoal && (
+          <GoalAdjustmentDialog
+            goalId={selectedGoal.id}
+            goalTitle={selectedGoal.title}
+            open={adjustmentDialogOpen}
+            onOpenChange={setAdjustmentDialogOpen}
+          />
+        )}
+        
+        {/* Audit Trail Dialog */}
+        {selectedGoal && auditTrailDialogOpen && (
+          <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm flex items-center justify-center p-4">
+            <Card className="w-full max-w-3xl max-h-[80vh] overflow-hidden">
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="flex items-center gap-2">
+                  <ScrollText className="h-5 w-5" />
+                  Audit Trail: {selectedGoal.title}
+                </CardTitle>
+                <Button variant="ghost" size="icon" onClick={() => setAuditTrailDialogOpen(false)}>
+                  <X className="h-4 w-4" />
+                </Button>
+              </CardHeader>
+              <CardContent className="overflow-auto max-h-[60vh]">
+                <GoalAuditTrail goalId={selectedGoal.id} />
               </CardContent>
             </Card>
           </div>

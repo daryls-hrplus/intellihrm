@@ -19,6 +19,10 @@ import {
   RefreshCw,
   Link2,
   ClipboardCheck,
+  FileEdit,
+  ScrollText,
+  Lock,
+  Unlock,
 } from "lucide-react";
 import { differenceInDays, isPast } from "date-fns";
 import { formatDateForDisplay } from "@/utils/dateUtils";
@@ -43,6 +47,8 @@ interface Goal {
   risk_score?: number | null;
   risk_factors?: RiskFactor[];
   dependency_count?: number;
+  // Lock status
+  is_locked?: boolean;
 }
 
 interface TeamGoalCardProps {
@@ -55,7 +61,13 @@ interface TeamGoalCardProps {
   onManageDependencies?: (goal: Goal) => void;
   onReviewCheckIn?: (goal: Goal) => void;
   onRequestCheckIn?: (goal: Goal) => void;
+  // Goal Adjustment Features (MSS - full manager access)
+  onRecordAdjustment?: (goal: Goal) => void;
+  onViewAuditTrail?: (goal: Goal) => void;
+  onLockGoal?: (goal: Goal) => void;
+  onUnlockGoal?: (goal: Goal) => void;
   pendingCheckInCount?: number;
+  pendingAdjustmentCount?: number;
 }
 
 const statusColors: Record<GoalStatus, string> = {
@@ -77,7 +89,12 @@ export function TeamGoalCard({
   onManageDependencies,
   onReviewCheckIn,
   onRequestCheckIn,
+  onRecordAdjustment,
+  onViewAuditTrail,
+  onLockGoal,
+  onUnlockGoal,
   pendingCheckInCount = 0,
+  pendingAdjustmentCount = 0,
 }: TeamGoalCardProps) {
   const isOverdue = goal.due_date && isPast(new Date(goal.due_date)) && goal.status !== "completed";
   const daysUntilDue = goal.due_date ? differenceInDays(new Date(goal.due_date), new Date()) : null;
@@ -121,6 +138,18 @@ export function TeamGoalCard({
             <Badge className={statusColors[effectiveStatus]}>
               {effectiveStatus.replace("_", " ")}
             </Badge>
+            {goal.is_locked && (
+              <Badge variant="outline" className="border-warning text-warning">
+                <Lock className="mr-1 h-3 w-3" />
+                Locked
+              </Badge>
+            )}
+            {pendingAdjustmentCount > 0 && (
+              <Badge variant="secondary" className="bg-primary/10 text-primary">
+                <FileEdit className="mr-1 h-3 w-3" />
+                {pendingAdjustmentCount} pending
+              </Badge>
+            )}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon" className="h-8 w-8">
@@ -152,6 +181,39 @@ export function TeamGoalCard({
                   Comments
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
+                
+                {/* Goal Adjustment Features (MSS - Manager full access) */}
+                {onRecordAdjustment && (
+                  <DropdownMenuItem onClick={() => onRecordAdjustment(goal)}>
+                    <FileEdit className="mr-2 h-4 w-4" />
+                    Record Adjustment
+                  </DropdownMenuItem>
+                )}
+                {onViewAuditTrail && (
+                  <DropdownMenuItem onClick={() => onViewAuditTrail(goal)}>
+                    <ScrollText className="mr-2 h-4 w-4" />
+                    View Audit Trail
+                    {pendingAdjustmentCount > 0 && (
+                      <Badge variant="secondary" className="ml-auto text-xs">
+                        {pendingAdjustmentCount}
+                      </Badge>
+                    )}
+                  </DropdownMenuItem>
+                )}
+                {onLockGoal && !goal.is_locked && (
+                  <DropdownMenuItem onClick={() => onLockGoal(goal)}>
+                    <Lock className="mr-2 h-4 w-4" />
+                    Lock Goal
+                  </DropdownMenuItem>
+                )}
+                {onUnlockGoal && goal.is_locked && (
+                  <DropdownMenuItem onClick={() => onUnlockGoal(goal)}>
+                    <Unlock className="mr-2 h-4 w-4" />
+                    Unlock Goal
+                  </DropdownMenuItem>
+                )}
+                <DropdownMenuSeparator />
+                
                 <DropdownMenuItem onClick={() => onSendReminder(goal)}>
                   <Bell className="mr-2 h-4 w-4" />
                   Send Reminder

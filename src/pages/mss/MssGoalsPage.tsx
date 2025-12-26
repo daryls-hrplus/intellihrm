@@ -20,6 +20,11 @@ import {
   Lightbulb,
   MessageSquare,
   MessageSquarePlus,
+  FileEdit,
+  ScrollText,
+  Lock,
+  Unlock,
+  X,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -35,6 +40,11 @@ import { ManagerCheckInPrompt } from "@/components/performance/ManagerCheckInPro
 import { ProgressVisualizationDashboard } from "@/components/performance/ProgressVisualizationDashboard";
 import { ManagerCheckInReviewDialog } from "@/components/performance/ManagerCheckInReviewDialog";
 import { RequestCheckInDialog } from "@/components/performance/RequestCheckInDialog";
+import { GoalAdjustmentDialog } from "@/components/performance/goals/GoalAdjustmentDialog";
+import { GoalAuditTrail } from "@/components/performance/goals/GoalAuditTrail";
+import { GoalLockDialog } from "@/components/performance/goals/GoalLockDialog";
+import { usePendingAdjustments } from "@/hooks/usePendingAdjustments";
+import { useGoalAdjustments } from "@/hooks/useGoalAdjustments";
 import { GoalCheckIn } from "@/hooks/useGoalCheckIns";
 import { format, isPast } from "date-fns";
 import { formatDateForDisplay, getTodayString } from "@/utils/dateUtils";
@@ -122,6 +132,14 @@ const statusColors: Record<GoalStatus, string> = {
   const [requestCheckInDialogOpen, setRequestCheckInDialogOpen] = useState(false);
   const [preSelectedEmployeeId, setPreSelectedEmployeeId] = useState<string | undefined>();
   const [preSelectedGoalId, setPreSelectedGoalId] = useState<string | undefined>();
+  
+  // Goal Adjustment dialogs (MSS - manager full access)
+  const [adjustmentDialogOpen, setAdjustmentDialogOpen] = useState(false);
+  const [auditTrailDialogOpen, setAuditTrailDialogOpen] = useState(false);
+  const [lockDialogOpen, setLockDialogOpen] = useState(false);
+  
+  // Pending adjustments for manager approval
+  const { pendingAdjustments, pendingCount, approveAdjustment, rejectAdjustment } = usePendingAdjustments(company?.id);
 
   useEffect(() => {
     if (user?.id) {
@@ -352,6 +370,43 @@ const statusColors: Record<GoalStatus, string> = {
     }
     setRequestCheckInDialogOpen(true);
   };
+  
+  // Goal Adjustment Handlers (MSS - manager full access)
+  const handleRecordAdjustment = (goal: Goal) => {
+    setSelectedGoal(goal);
+    setAdjustmentDialogOpen(true);
+  };
+  
+  const handleViewAuditTrail = (goal: Goal) => {
+    setSelectedGoal(goal);
+    setAuditTrailDialogOpen(true);
+  };
+  
+  const handleLockGoal = (goal: Goal) => {
+    setSelectedGoal(goal);
+    setLockDialogOpen(true);
+  };
+  
+  const handleUnlockGoal = async (goal: Goal) => {
+    try {
+      const { error } = await supabase
+        .from("performance_goals")
+        .update({ 
+          is_locked: false, 
+          locked_at: null, 
+          locked_by: null, 
+          lock_reason: null 
+        })
+        .eq("id", goal.id);
+      
+      if (error) throw error;
+      toast.success("Goal unlocked successfully");
+      fetchData();
+    } catch (error) {
+      console.error("Error unlocking goal:", error);
+      toast.error("Failed to unlock goal");
+    }
+  };
 
   const activeGoals = teamGoals.filter(g => g.status === "active" || g.status === "in_progress");
   const overdueGoals = teamGoals.filter(g => g.status === "overdue" || (g.due_date && new Date(g.due_date) < new Date() && g.status !== "completed"));
@@ -473,6 +528,15 @@ const statusColors: Record<GoalStatus, string> = {
                 </Badge>
               )}
             </TabsTrigger>
+            <TabsTrigger value="pending-adjustments" className="gap-2">
+              <FileEdit className="h-4 w-4" />
+              Pending Adjustments
+              {pendingCount > 0 && (
+                <Badge variant="destructive" className="ml-1">
+                  {pendingCount}
+                </Badge>
+              )}
+            </TabsTrigger>
             <TabsTrigger value="check-ins" className="gap-2">
               <MessageSquare className="h-4 w-4" />
               Check-ins
@@ -540,10 +604,75 @@ const statusColors: Record<GoalStatus, string> = {
                     onSendReminder={handleSendReminder}
                     onRequestUpdate={handleRequestUpdate}
                     onRequestCheckIn={handleRequestCheckIn}
+                    onRecordAdjustment={handleRecordAdjustment}
+                    onViewAuditTrail={handleViewAuditTrail}
+                    onLockGoal={handleLockGoal}
+                    onUnlockGoal={handleUnlockGoal}
                   />
                 ))
               )}
             </div>
+          </TabsContent>
+
+          {/* Pending Adjustments Tab (Manager approval workflow) */}
+          <TabsContent value="pending-adjustments" className="mt-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <FileEdit className="h-5 w-5" />
+                  Pending Goal Adjustments
+                  {pendingCount > 0 && (
+                    <Badge variant="destructive">{pendingCount}</Badge>
+                  )}
+                </CardTitle>
+                <CardDescription>
+                  Review and approve goal adjustments submitted by your team members
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {pendingAdjustments && pendingAdjustments.length > 0 ? (
+                  <div className="space-y-4">
+                    {pendingAdjustments.map((adjustment: any) => (
+                      <Card key={adjustment.id} className="border-primary/20">
+                        <CardContent className="p-4">
+                          <div className="flex items-start justify-between gap-4">
+                            <div className="flex-1">
+                              <h4 className="font-medium">{adjustment.goal?.title || "Goal"}</h4>
+                              <p className="text-sm text-muted-foreground mt-1">
+                                {adjustment.change_type?.replace(/_/g, " ")} • {adjustment.adjustment_reason?.replace(/_/g, " ")}
+                              </p>
+                              {adjustment.reason_details && (
+                                <p className="text-sm mt-2">{adjustment.reason_details}</p>
+                              )}
+                            </div>
+                            <div className="flex gap-2">
+                              <Button 
+                                size="sm" 
+                                variant="outline"
+                                onClick={() => rejectAdjustment.mutate(adjustment.id)}
+                              >
+                                Reject
+                              </Button>
+                              <Button 
+                                size="sm"
+                                onClick={() => approveAdjustment.mutate(adjustment.id)}
+                              >
+                                Approve
+                              </Button>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <FileEdit className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                    <p>No pending adjustments to review</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
           </TabsContent>
 
           <TabsContent value="check-ins" className="mt-6">
@@ -742,6 +871,47 @@ const statusColors: Record<GoalStatus, string> = {
           preSelectedEmployeeId={preSelectedEmployeeId}
           preSelectedGoalId={preSelectedGoalId}
         />
+        
+        {/* Goal Adjustment Dialogs (MSS - manager full access) */}
+        {selectedGoal && (
+          <>
+            <GoalAdjustmentDialog
+              goalId={selectedGoal.id}
+              goalTitle={selectedGoal.title}
+              open={adjustmentDialogOpen}
+              onOpenChange={setAdjustmentDialogOpen}
+            />
+            <GoalLockDialog
+              goalId={selectedGoal.id}
+              goalTitle={selectedGoal.title}
+              open={lockDialogOpen}
+              onOpenChange={(open) => {
+                setLockDialogOpen(open);
+                if (!open) fetchData();
+              }}
+            />
+          </>
+        )}
+        
+        {/* Audit Trail Dialog */}
+        {selectedGoal && auditTrailDialogOpen && (
+          <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm flex items-center justify-center p-4">
+            <Card className="w-full max-w-3xl max-h-[80vh] overflow-hidden">
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="flex items-center gap-2">
+                  <ScrollText className="h-5 w-5" />
+                  Audit Trail: {selectedGoal.title}
+                </CardTitle>
+                <Button variant="ghost" size="icon" onClick={() => setAuditTrailDialogOpen(false)}>
+                  <X className="h-4 w-4" />
+                </Button>
+              </CardHeader>
+              <CardContent className="overflow-auto max-h-[60vh]">
+                <GoalAuditTrail goalId={selectedGoal.id} />
+              </CardContent>
+            </Card>
+          </div>
+        )}
       </div>
     </AppLayout>
   );
