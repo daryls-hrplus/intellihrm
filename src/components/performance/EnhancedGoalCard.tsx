@@ -74,6 +74,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { formatDateForDisplay } from "@/utils/dateUtils";
 import { GoalRatingDialog } from "./GoalRatingDialog";
+import { EnhancedGoalRatingDialog } from "./EnhancedGoalRatingDialog";
 import { GoalSubmitDialog } from "./GoalSubmitDialog";
 import { GoalApprovalStatus } from "./GoalApprovalStatus";
 import { GoalAlignmentManager } from "./GoalAlignmentManager";
@@ -87,6 +88,7 @@ import { GoalLockDialog } from "./goals/GoalLockDialog";
 import { GoalAdjustmentDialog } from "./goals/GoalAdjustmentDialog";
 import { GoalAuditTrail } from "./goals/GoalAuditTrail";
 import { useGoalAdjustments } from "@/hooks/useGoalAdjustments";
+import { useGoalRatingSubmissions } from "@/hooks/useGoalRatingSubmissions";
 
 type GoalStatus = 'draft' | 'active' | 'in_progress' | 'completed' | 'cancelled' | 'overdue';
 type GoalType = 'okr_objective' | 'okr_key_result' | 'smart_goal';
@@ -170,9 +172,18 @@ export function EnhancedGoalCard({
   const [lockDialogOpen, setLockDialogOpen] = useState(false);
   const [adjustmentDialogOpen, setAdjustmentDialogOpen] = useState(false);
   const [auditTrailDialogOpen, setAuditTrailDialogOpen] = useState(false);
+  const [enhancedRatingDialogOpen, setEnhancedRatingDialogOpen] = useState(false);
   const [subMetricsExpanded, setSubMetricsExpanded] = useState(false);
   const [subMetricProgress, setSubMetricProgress] = useState<{ name: string; progress: number; weight: number }[]>([]);
   const [hasSubMetrics, setHasSubMetrics] = useState(false);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+
+  // Fetch current user
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (user) setCurrentUserId(user.id);
+    });
+  }, []);
 
   // Fetch lock info for the goal
   const { lockInfo } = useGoalAdjustments(goal.id);
@@ -440,7 +451,16 @@ export function EnhancedGoalCard({
                     </DropdownMenuItem>
                   </>
                 )}
-                {(goal.status === "completed" || goal.progress_percentage >= 80) && (
+                {(goal.status === "completed" || goal.progress_percentage >= 80) && companyId && (
+                  <>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={() => setEnhancedRatingDialogOpen(true)}>
+                      <Star className="mr-2 h-4 w-4" />
+                      {userRole === "employee" ? "Rate Goal" : "Rate / Review"}
+                    </DropdownMenuItem>
+                  </>
+                )}
+                {(goal.status === "completed" || goal.progress_percentage >= 80) && !companyId && (
                   <>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={() => setRatingDialogOpen(true)}>
@@ -695,6 +715,25 @@ export function EnhancedGoalCard({
           <GoalAuditTrail goalId={goal.id} />
         </DialogContent>
       </Dialog>
+
+      {/* Enhanced Rating Dialog */}
+      {companyId && currentUserId && (
+        <EnhancedGoalRatingDialog
+          open={enhancedRatingDialogOpen}
+          onOpenChange={setEnhancedRatingDialogOpen}
+          goal={{
+            id: goal.id,
+            title: goal.title,
+            progress_percentage: goal.progress_percentage,
+            weighting: goal.weighting,
+            employee_id: goal.employee_id,
+          }}
+          companyId={companyId}
+          userRole={userRole}
+          currentUserId={currentUserId}
+          onSuccess={onRefresh}
+        />
+      )}
     </Card>
   );
 }
